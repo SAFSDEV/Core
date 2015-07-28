@@ -1,0 +1,168 @@
+<job id="SetupSAFSClasspath">
+<script language="VBScript" src="_SharedFunctions.vbs"/>
+<script language="VBScript">
+
+'******************************************************************************
+'* 
+'* SetupSAFSClasspath.WSF  --  
+'*
+'* Setup System PATH and CLASSPATH for SAFS tools.
+'* This script only ensures System PATH and CLASSPATH settings are made as 
+'* necessary to include SAFS JAR files and SAFS PATH info.
+'* 
+'* Required assets for this install:
+'* 
+'*   The target SAFS tools must already be installed.
+'*   _SharedFunctions.VBS must exist in the same directory as this script.
+'*     
+'* Environment variables may be modified by these Setup scripts.  Prior to making 
+'* any modification, the current value of the environment variables are saved in 
+'* "PATH_SAFSBAK" and "CLASSPATH_SAFSBAK" environment variables.  Note, this 
+'* backup only occurs once--the first time we detect that no backup has been done 
+'* previously.
+'* 
+'* The affected environment variables and their backups are listed below:
+'* 
+'*     VARIABLE     BACKUP VARIABLE              PURPOSE
+'*     =========    =================    ============================
+'*     CLASSPATH    CLASSPATH_SAFSBAK    Search path for Java classes
+'*     PATH         PATH_SAFSBAK         Path to SAFS\bin added
+'* 
+'* JAR files added to CLASSPATH as appropriate:
+'*
+'*     \lib\safs.jar 
+'*     \lib\jakarta-regexp-1.3.jar 
+'*     \lib\jaccess.jar"
+'*     \lib\jai_core.jar"
+'*     \lib\jai_codec.jar"
+'*     \lib\jna.zip"
+'*     \lib\win32-x86.zip"
+'*     \lib\safsjvmagent.jar"
+'*     \lib\safscust.jar"
+'*     \lib\jai_imageio.jar          -- JAI Imageio
+'*     \lib\clibwrapper_jiio.jar     -- JAI Imageio
+'*     \lib\safsselenium.jar"
+'*     \lib\selenium-server-standalone-2.25.0.jar"
+'*     \lib\dom4j-2.0.0-ALPHA-2.jar"
+'*     \lib\jaxen-1.1.1.jar"
+'*     \lib\nekohtml.jar"
+'*     \lib\ddmlib.jar"
+'*     \lib\juniversalchardet-1.0.3.jar"
+'*
+'* Author: Carl Nagle
+'* Original Release: JAN 05, 2006
+'*
+'*     2009.02.03 Carl Nagle Updated to include JNA resources and 
+'*                       set everything in CLASSPATH
+'*     2010.01.21 Junwu  Updated to include JAI Imageio resources
+'*     2011.04.01 LEI    Updated to include SELENIUM jar and its dependings
+'*     2012.08.08 LEI    Updated to use SELENIUM 2.25.0 instead of 2.0b1
+'*
+'* Copyright (C) SAS Institute
+'* General Public License: http://www.opensource.org/licenses/gpl-license.php
+'******************************************************************************
+
+Dim shell, env, fso, response, message, cr, q, safsdir
+Dim safsjar, jaccess, jakarta, jrex, jna, win32x86, safsjvmagent, safscust 
+Dim jaicore, jaicodec, safsjrex, safsdebug, safslibdir
+
+Const good_wsh_version  = 5.6
+
+cr = chr(13)  'carriage return
+q  = chr(34)  'double quote
+
+'WScript.Interactive = false
+
+Set shell = WScript.CreateObject("WScript.Shell")
+Set env   = shell.Environment("SYSTEM")
+Set fso   = WScript.CreateObject("Scripting.FileSystemObject")
+
+'Check version of WSH prior to proceeding
+'=========================================
+response = checkWSHVersion(good_wsh_version)
+if response = -1 then WScript.Quit
+
+'Old SAFS Jars
+'-------------
+Dim SAFSClassPathArray
+SAFSClassPathArray = getSAFSClasspathArray()
+
+backupEnv "CLASSPATH", "CLASSPATH_SAFSBAK"
+backupEnv "PATH", "PATH_SAFSBAK"
+
+ON Error Resume Next
+
+'first clean the CLASSPATH of all olde SAFS jars
+'-----------------------------------------------
+CleanEnvironment "CLASSPATH", SAFSClassPathArray
+
+safsdir      = ""
+safsdir      = env("SAFSDIR")
+jaccess      = safsdir & SAFSClassPathArray(0)
+jakarta      = safsdir & SAFSClassPathArray(1)
+jrex         = safsdir & SAFSClassPathArray(2)
+jna          = safsdir & SAFSClassPathArray(3)
+win32x86     = safsdir & SAFSClassPathArray(4)
+jaicore      = safsdir & SAFSClassPathArray(5)
+jaicodec     = safsdir & SAFSClassPathArray(6)
+safsjvmagent = safsdir & SAFSClassPathArray(7)
+safscust     = safsdir & SAFSClassPathArray(8)
+safsjrex     = safsdir & SAFSClassPathArray(9)
+safsjar      = safsdir & SAFSClassPathArray(10)
+safsdebug    = safsdir & SAFSClassPathArray(11)
+safslibdir   = safsdir & SAFSClassPathArray(12)
+jaiimageio   = safsdir & SAFSClassPathArray(13)
+jaiclibwrap  = safsdir & SAFSClassPathArray(14)
+safsselenium     = safsdir & SAFSClassPathArray(15)
+seleniumserver   = safsdir & SAFSClassPathArray(16)
+dom4j            = safsdir & SAFSClassPathArray(17)
+jaxen            = safsdir & SAFSClassPathArray(18)
+nekohtml         = safsdir & SAFSClassPathArray(19)
+
+robotiumrc       = safsdir & SAFSClassPathArray(20)
+safsdroid        = safsdir & SAFSClassPathArray(21)
+ddmlib           = safsdir & SAFSClassPathArray(22)
+juniversalchardet  = safsdir & SAFSClassPathArray(23)
+
+'update CLASSPATH & PATH
+appendEnvironment "CLASSPATH", safslibdir
+appendEnvironment "PATH", safsdir &"\bin"
+if (fso.FileExists(jaccess)) then appendEnvironment "CLASSPATH", jaccess
+if (fso.FileExists(jakarta)) then appendEnvironment "CLASSPATH", jakarta
+if (fso.FileExists(jrex)) then appendEnvironment "CLASSPATH", jrex
+if (fso.FileExists(jna)) then appendEnvironment "CLASSPATH", jna
+if (fso.FileExists(win32x86)) then appendEnvironment "CLASSPATH", win32x86
+if (fso.FileExists(safsjvmagent)) then appendEnvironment "CLASSPATH", safsjvmagent
+if (fso.FileExists(safscust)) then appendEnvironment "CLASSPATH", safscust
+if (fso.FileExists(safsjrex)) then appendEnvironment "CLASSPATH", safsjrex
+if (fso.FileExists(safsdebug)) then appendEnvironment "CLASSPATH", safsdebug
+if (fso.FileExists(safsjar)) then appendEnvironment "CLASSPATH", safsjar
+if (fso.FileExists(jaiimageio)) then appendEnvironment "CLASSPATH", jaiimageio
+if (fso.FileExists(jaiclibwrap)) then appendEnvironment "CLASSPATH", jaiclibwrap
+if (fso.FileExists(safsselenium)) then appendEnvironment "CLASSPATH", safsselenium
+if (fso.FileExists(seleniumserver)) then appendEnvironment "CLASSPATH", seleniumserver
+if (fso.FileExists(dom4j)) then appendEnvironment "CLASSPATH", dom4j
+if (fso.FileExists(jaxen)) then appendEnvironment "CLASSPATH", jaxen
+if (fso.FileExists(nekohtml)) then appendEnvironment "CLASSPATH", nekohtml
+if (fso.FileExists(robotiumrc)) then appendEnvironment "CLASSPATH", robotiumrc
+if (fso.FileExists(safsdroid)) then appendEnvironment "CLASSPATH", safsdroid
+if (fso.FileExists(ddmlib)) then appendEnvironment "CLASSPATH", ddmlib
+if (fso.FileExists(juniversalchardet)) then appendEnvironment "CLASSPATH", juniversalchardet
+
+if NOT(fso.FileExists(safsjar)) then
+    message = "SAFS.JAR file cannot be found."& cr & cr
+    message = message & "CLASSPATH cannot be updated."
+    message = message & "Seeking: "& safsjar
+    shell.LogEvent 4, message
+    'WScript.Echo message
+    shell.Popup message, 4, "SAFS.JAR Not Detected", 64
+end if
+
+On Error Goto 0
+
+Set shell = nothing
+Set fso   = nothing
+Set exec  = nothing
+
+</script>
+</job>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>DatastoreJ</name>
+	<comment></comment>
+	<projects>
+		<project>DatastoreJ_logs</project>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.jdt.core.javabuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>com.rational.test.ft.wswplugin.testnature</nature>
+		<nature>org.eclipse.jdt.core.javanature</nature>
+		<nature>com.rational.test.ft.wswplugin.tmnature</nature>
+	</natures>
+</projectDescription>

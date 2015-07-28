@@ -1,0 +1,20 @@
+#
+# WindowsClassMap.dat
+#
+# The items in here represent RegularExpressions used to match against 
+# classnames found in the running processes on the machine.  Some items 
+# are shown as simple text and this requires an exact match of the classname.
+# Consult doc on Regular Expressions or the Java API for String.matches() to learn the 
+# allowed syntax for these entries.
+#
+
+VBWindows	:ThunderRT.*
+CMDWindows	:ConsoleWindowClass
+Notepad		:Notepad
+TextPad		:TextPad.*
+Explorer	:ExploreWClass
+TaskBar		:Shell_TrayWnd
+DialogWin	:#32770
+Excel		:XLMAIN
+ExcelDlgs   :bosa_solm_XL9
+PopupWindow	:#32768

@@ -1,0 +1,57 @@
+Notes for RFT 7.0--which has significant bugs and is not well supported.
+We highly recommend the user minimally upgrade to RFT V8.0.0.2.
+
+
+I believe I have confirmed some steps I have taken to make this work from 
+the IDE.   There may be other options, but this is what I did to duplicate 
+certain errors and then fix them.
+
+I determined that I had the same errors when nothing was part of the
+datastore except the TestScript.
+
+To make this work I did the following:
+
+1) Right-click the connected Datastore folder and select "Properties".
+2) Expand "Java Compiler" then select "Building".
+3) Ensure "Enable Project-specific settings" is ENABLED\CHECKED.
+4) In "Output Folder" ensure the following two items are NOT CHECKED:
+   a) "Scrub output folders when cleaning projects"
+   b) "Rebuild class files modified by others"
+5) Click APPLY and\or OK to close the dialog.
+   DO NOT REBUILD THE PROJECT IF PROMPTED.
+
+***********************************************************************
+*                                                                     *
+* The following Step #6 may be able to be replaced by copying the JAR *
+* files into the RFT customization directory instead of extracting    *
+* the .class files into the project datastore.  This has not yet been *
+* (re)confirmed.                                                      *
+*                                                                     *
+***********************************************************************
+
+6) Extract the following JAR files into the RFT project root directory.
+   Ensure you extract "All Files" and ensure you "Use folder names" 
+   when extracting the following three zip files:
+   a) SAFS.JAR
+   b) SAFSRATIONAL_FT.JAR
+   c) SAFSRATIONAL_FT_ENABLER.JAR
+7) Again, right-click the datastore and select the project "Properties".
+8) Edit the "Java Build Path" to include two JAR file libraries:
+   a) STAF_LIB - c:\staf\bin\JSTAF.JAR
+   b) SAFS_RESOURCES - c:\safs\lib\SAFSDEBUG.JAR
+9) Java Build Path references to other SAFS libraries SHOULD NOT be
+   necessary.
+
+Remember, you cannot successfully run TestScript from the RFT IDE unless
+STAF is running.
+
+You should now be able to run TestScript from within the RFT IDE with STAF
+already running.  Building is NOT necessary before running from the IDE.  
+
+Remember, if CLEAN was not properly disabled, then all the CLASS files
+extracted will be deleted and they will need to be extracted again.
+
+I do not yet have a means to consistently run RFT 7 from the command-line.
+ So RRAFS or TID tests cannot AUTOLAUNCH this engine yet.  With STAF
+running, the RFT engine must be manually launched from the RFT IDE before
+RRAFS tests or TID tests are launched.

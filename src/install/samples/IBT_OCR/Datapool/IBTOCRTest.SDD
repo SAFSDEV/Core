@@ -1,0 +1,51 @@
+;==============   Test Driver command ( GetTextFromImage and SaveTextFromImage )  related to OCR
+;==== You can verify the staf variable ImageText contains text "JPan"
+C, GetTextFromImage, JpanButton.bmp, ImageText, TOCR, en, 2.0
+C, LogMessage, "staf variable ImageText contains text " & ^ImageText
+;==== You can verify test\ocr.image.txt contains text "JPan"
+C, SaveTextFromImage, JpanButton.bmp, ocr.image.txt, TOCR, en, 2.0
+
+;====================   RFT (RJ) mode  ============================
+;==== GetTextFromGUI and SaveTextFromGUI can only work in RFT mode.
+;==== You can verify the staf variable ObjectText contains text "JPan"
+T, RJSwingWindow, JPanButton, GetTextFromGUI, ObjectText, , TOCR, en, 2.0
+C, LogMessage, "staf variable ObjectText contains text " & ^ObjectText
+;==== You can verify test\ocr.object.txt contains text "JPan"
+T, RJSwingWindow, JTreeButton, SaveTextFromGUI, ocr.object.txt, , TOCR, en, 2.0
+
+T, RJSwingWindow, MortCalcButton, Click
+T, RJSwingWindow, SubmitButton, Click
+T, RJSwingWindow, JPanButton, Click
+T, RJSwingWindow, JTreeButton, Click
+T, RJSwingWindow, JTreeButton, LocateScreenImage, combLocation
+
+;====================	Pure IBT  ============================
+T, RJSwingWindow, MortCalcButton, Click
+T, IBTSwingWindow, SubmitButton, Click
+T, IBTSwingWindow, JPanButton, Click
+T, IBTSwingWindow, JTreeButton, Click
+T, IBTSwingWindow, JTreeButton, LocateScreenImage, combLocation
+
+;====================  RFT IBT_OCR mixed mode ======================
+T, RJSwingWindow, MortCalcButton, Click
+T, MIXSwingWindow, SubmitButton, Click
+T, MIXSwingWindow, JPanButton, Click
+T, MIXSwingWindow, JTreeButton, Click
+T, MIXSwingWindow, JTreeButton, LocateScreenImage, combLocation
+
+;ImageText= can work with Index|Ind,  Hotspot|HS, PointRelative|PR, SearchRect|SR
+;ImageText= working with Hotspot=
+T, RJSwingWindow, MortCalcButton, Click
+T, MIXSwingWindow, MonthPayEdit, Click
+T, MIXSwingWindow, MonthPayEdit, inputkeys, "Hi there!"
+
+;ImageText= working with Index=
+T, MIXSwingWindow, JTree4th, Click
+
+;===Suppose RFT can recognize a GUI (the first ListBox on page JDrag) but cannot see its details. 
+;ImageText= working with SearchRect=
+T, MIXSwingWindow, JDragTab, Click
+T, RJSwingWindow, JDragListBox1, LocateScreenImage, SearchArea
+C, SetVariableValues, ^SRVar="SR=" & ^SearchArea.x & " " & ^SearchArea.y & " " & ^SearchArea.w & " " & ^SearchArea.h
+T, MIXSwingWindow, JDragListBoxItem, Click
+

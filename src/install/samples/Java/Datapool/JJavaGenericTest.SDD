@@ -1,0 +1,3 @@
+;####################	CFComponent  ############################
+;====   resize the application window
+T, SwingWindow, SwingWindow, SetPosition , preset

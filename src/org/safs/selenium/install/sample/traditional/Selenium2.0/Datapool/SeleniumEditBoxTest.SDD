@@ -1,0 +1,9 @@
+;C, StartWebBrowser, "https://www.google.com.hk/", "", "GooglePage", "firefox", 20, "false"
+C, StartWebBrowser, ^URL_Google, "", "GooglePage", "firefox", 20, "false"
+
+T, Google, EditBox, SetTextValue, "SAFS"
+C, Pause, 1
+T, Google, PushButtonK, Click
+C, Pause, 5
+
+C, StopWebBrowser, "GooglePage"

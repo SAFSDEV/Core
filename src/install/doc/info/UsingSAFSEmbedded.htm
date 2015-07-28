@@ -1,0 +1,106 @@
+<html>
+<head>
+<title>Using SAFS Embedded</title>
+</head>
+<body>
+<h1>Using SAFS Embedded</h1>
+<p>
+<h3>a.k.a. 'Single-Process SAFS'</h3>
+<p>
+<h3>a.k.a. 'SAFS Without STAF'</h3>
+<p>
+<small>Updated: 2014.07.25 by Carl Nagle</small>
+<hr>
+<b>2008 Graph Image of Traditional Multi-Process SAFS:</b><br>
+<div style="width: 840px; height: 309px;
+     background-image: url(http://safsdev.sourceforge.net/sqabasic2000/SAFSFramework.gif);
+     background-repeat: no-repeat;
+     background-position: -322px 0px;" ></div>
+<p>
+While not indicated in the image, the above graphic shows the traditional multi-process nature of SAFS:
+<p><ul>
+<li>1 process for SAFS Services
+<li>1 process for SAFS Driver
+<li>1 process for SAFS Engines (separate process for each automation tool)
+</ul>
+<p>
+This multi-process nature is <b>*required*</b> when:
+<p><ul>
+<li>The automation tool scripting is NOT Java
+<li>More than one automation tool will be used
+<li>External monitoring or control is desired
+</ul>
+<hr>
+Recent requests from development teams wishing to use SAFS with Selenium WebDriver have included the following needs:
+<p><ul>
+<li>Use with Continuous Integration (Jenkins)
+<li>Ability to launch multiple tests to run simultaneously on the same machine
+<li>Reduced installation and runtime footprint
+</ul>
+<p>
+In order to satisfy these needs, we have engineered the ability for all SAFS features to run in a single process without STAF for Java-based automation tools--like Selenium WebDriver.  Currently, only the SAFS/Selenium WebDriver engine has been properly prepared to run "Embedded" in this manner. Other engines--like the SAFS/RobotJ (IBM Rational Functional Tester) engine--may get this update if and when demand dictates.
+<p>
+Test Configuration Files (INI Files) control if, when, and to what degree SAFS runs "embedded".<br>
+Consult <a href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#configfile" alt="SAFS Config File Options Listing" alt="SAFS Config File Options Listing">SAFS Config File Options</a> for all the different options used to configure various runtime features of SAFS.
+<p>
+<h3>To simply run everything embedded with no STAF in a single process (99% most common):</h3>
+<p>
+<ul><pre><b>
+[STAF]
+NOSTAF=True
+</b></pre></ul>
+With the SAFS Debug Log running (also embedded):
+<p>
+<ul><pre><b>
+[STAF]
+NOSTAF=True
+EmbedDebug="\fullpath\To\Desired\DebugLogFile.txt"
+</b></pre></ul>
+<p>
+That's it.  You're done.  Enjoy.
+<p>
+Everything will run "embedded" in a single process using the single automation tool and no access to STAF or anything outside the process.
+<hr>
+<b>BUT...for the curious</b><br>
+and other possible usage scenarios, we can enable individual embedded features. This will mean that STAF will be running and we can still have external access and some monitoring and control over a running test.
+<h3>To embed individual SAFS Services while still using STAF services:</h3>
+<p><ul><pre><b>
+[SAFS_INPUT]
+ServiceClass=org.safs.staf.service.input.EmbeddedInputService
+
+[SAFS_LOGS]
+ServiceClass=org.safs.staf.service.logging.EmbeddedLogService
+
+[SAFS_MAPS]
+ServiceClass=org.safs.staf.service.map.EmbeddedMapService
+
+[SAFS_VARS]
+ServiceClass=org.safs.staf.service.var.EmbeddedVariableService
+
+</b></pre></ul>
+<p>
+It should be noted that if either SAFSMAPS or SAFSVARS is embedded than BOTH must be embedded.
+<p>
+If STAF is running, SAFSVARS will still store variables in the STAF VAR service even if SAFSVARS is running embedded.  This makes the values of variables and state information available to external processes.
+<p>
+To completely embed the SAFSVARS service--including the variables themselves:
+<p><ul><pre><b>
+[SAFS_VARS]
+ServiceClass=org.safs.staf.service.var.EmbeddedVariableService
+EmbedVars=True
+</b></pre></ul>
+<p>
+There are also 2 native STAF services (SEM and QUEUE) heavily used by SAFS that can be "embedded" in scenarios in which SAFS is partially embedded but STAF is still in-use:
+<p>
+<ul><pre><b>
+[STAF]
+EmbedSEM=True
+EmbedQUEUE=True
+</b></pre></ul>
+<p>
+The "embedded" versions of these services are only implemented to satisfy the internal needs of SAFS.  Having STAF running but embedding these services does little more than prove to us during development that we can run without touching STAF.  Of course, without STAF running, these services are required to be embedded. This is automatic with the <b>NOSTAF=True</b> option.
+<p>
+Thanks for playing!
+<hr>
+</body>
+</html>

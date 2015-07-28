@@ -1,0 +1,318 @@
+<HTML>
+<HEAD><TITLE>Setup RRAFS Runtime</TITLE></HEAD>
+<BODY>
+<h1>Setup RRAFS Runtime</h1>
+<p>
+==========================================================================<br>
+Author: Carl Nagle<br>
+UPDATE: Sep 16, 2010<br>
+<p>
+Copyright (C) SAS Institute<br>
+<a href="http://www.opensource.org/licenses/gpl-license.php" target="reference">General Public License</a>: http://www.opensource.org/licenses/gpl-license.php<br>
+==========================================================================<br>
+<a name="definitions" />
+<big><b>Definitions:</b></big>
+<table border=0 cellspacing=7 >
+<tr><td><b>
+SAFS</b><td><b><a href="http://safsdev.sourceforge.net" target=_blank alt="SAFSDEV Home Page" >
+Software Automation Framework Support</a></b>
+<tr><td><b>
+SAFS Driver</b><td>
+The tool that initializes, opens, parses, and routes SAFS test records to available SAFS Engines.
+<tr><td><b>
+SAFS Engine</b><td>
+A keyword-driven automation tool capable of interpreting and executing SAFS test records.
+<tr><td><b>
+SAFS/DriverCommands</b><td>
+A SAFS Engine for tool-independent
+<a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverCommands"
+   target=_blank alt="SAFS Driver Commands Reference" >Driver Commands</a>
+<tr><td><b>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/tools/engines/SAFSROBOTJ.html"
+   target=_blank alt="SAFS Rational Functional Tester Doc" >SAFS/RobotJ</a></b> (RFT)<td>
+A SAFS Engine for testing using <a href="http://www-01.ibm.com/software/awdtools/tester/functional/"
+   target=_blank alt="Rational Functional Tester Site" >Functional Tester</a> by IBM Rational.</td>
+<tr><td><b>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/tools/engines/SAFSTC.html"
+   target=_blank alt="SAFS AutomatedQA TestComplete Doc" >SAFS/TC</a></b> (TCAFS)<td>
+A SAFS Engine for testing using <a href="http://www.automatedqa.com/products/testcomplete/"
+   target=_blank alt="AutomatedQA TestComplete Site" >TestComplete</a> by AutomatedQA.</td>
+<tr><td><b>
+SAFS IBT</b> (Pat.Pend.)<td>
+An embedded SAFS Engine for <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSImageBasedRecognition.htm"
+   target=_blank alt="Image-Based Testing Doc" >Image-Based Testing</a>. (Patent Pending)</td>
+<tr><td><b>
+<a href="http://safsdev.sourceforge.net/sqabasic2000/UsingJSAFS.htm" target="JSAFS" alt="Using JSAFS Doc">JSAFS</a></b> (New!)<td>
+The Java API for embedding SAFS in custom frameworks and <a href="http://safsdev.sourceforge.net/sqabasic2000/UsingJSAFS.htm#advancedruntime" target="JSAFS" alt="Using JSAFS Doc">SAFS Advanced Runtime Development</a>.
+</td>
+</table>
+<hr>
+<p>
+<center><b>*** &nbsp;If you are NOT using RRAFS then you do not need to reference this document. &nbsp;***</b></center>
+<p>
+This document instructs the user how to ensure SAFS framework services are
+invoked at, or prior to runtime when using SAFS RRAFS for Rational Robot.
+<p>
+<hr>
+<h3>SetupSAFS Must Be Done Separately</h3>
+<p>
+This doc assumes the user has already installed the latest SAFS Framework via these instructions:
+<p>
+<ul><a href="SetupSAFS.README.htm">SetupSAFS.README</a></ul>
+<p>
+<ul><b>*** Important ***</b><br>
+If you are using RRAFS you must continue to use\install STAF V2 unless you have applied RRAFSPatch2010.01.14. &nbsp;That patch provides STAF V3 support to RRAFS.
+</ul><p>
+<h3>SetupRFT Must Be Done Separately, if applicable</h3>
+<p>
+*If* the IBM Rational Functional Tester (RFT) Engine is expected to be part of the RRAFS runtime, then the user is expected to have already prepared the desired RFT Project per these instructions:
+<p>
+<ul><a href="SetupRobotJ.README.htm">SetupRFT.README</a></ul>
+<p>
+Once completed, the following items are all installed and available for use:
+<p><ul>
+    <li>STAF
+    <li>SAFS
+    <li>Configured RFT Project (for SAFS/RobotJ Engine use only)
+</ul>
+<p>
+<h3>Enabling RRAFS AutoLaunch for SAFS Tools and Engines</h3>
+<p>
+With everything installed correctly, the RRAFS engine has
+the ability to automatically launch STAF, the various SAFS services, the
+SAFS/DriverCommands Engine, and the SAFS/RobotJ Engine (for RFT). &nbsp;Review the information in
+the installed <b>RRAFS.INI</b> file found in the
+"C:\Program&nbsp;Files\Rational\Rational&nbsp;Test\sqabas32" install directory (a.k.a. DDE_RUNTIME).
+<p>
+With the exception of the SAFS/RobotJ Engine, all the other tools can be automatically
+launched by setting their RRAFS.INI AutoLaunch settings to "TRUE" (AUTOLAUNCH=TRUE).
+<p>
+The SAFS/RobotJ Engine requires project-specific information in RRAFS.INI before we can
+automatically launch the SAFS/RobotJ Engine with AUTOLAUNCH.
+<p>
+Consult <a href="http://safsdev.sf.net/sqabasic2000/SAFSUtilities.htm#declarations" target="runtimeref">SAFSUtilities</a>
+for more information on available APIs and the RRAFS.INI settings.
+<p>
+<h3>IBM Rational Robot Script APIs for Shutdown</h3>
+<p>
+The following API calls can be appended to the SQABasic Script that launches the RRAFS
+Engine.&nbsp;  These APIs can be found in the SQABasic <a href="http://safsdev.sf.net/sqabasic2000/SAFSUtilities.htm" target="runtimeref">SAFSUtilities</a> library mentioned
+above.  Often these are unnecessary because the AUTOLAUNCH feature will shutdown these items
+when the script is completed or aborted.
+<p><pre>
+    SAFSShutdownRobotJ
+    SAFSShutdownDriverCommands
+    SAFSShutdownSTAF
+</pre>
+<p>
+<i>Note: You may <em>not</em> wish to shutdown STAF following a run if you want to review
+variable settings and other items that persist.&nbsp;  If that is the case, you should
+launch STAF and the services by some means other than AUTOLAUNCH because this mechanism
+will also automatically shutdown any tool it launches when the test script is completed or
+aborted.</i>
+<p>
+<b>The remainder of this document details manual methods for launching and shutting down
+the SAFS framework.</b>
+<p>
+<hr>
+<h3>Test Runtime in a Nutshell</h3>
+<p><pre>
+    1) STAF (STAFProc) must be running to enable the use of SAFS Framework tools.
+    2) SAFS Services for STAF must be running.
+    3) (Optional) SAFS/DriverCommands Engine launched, waiting for commands.
+    4) (Optional) SAFS/RobotJ Engine launched, waiting for commands.
+</pre>
+<p>
+<h3>Launching STAF</h3>
+<p>
+The STAF install will have placed two important programs in your Start Menu.  Use these to
+start and stop STAF as desired.
+<p><pre>
+   1) "Start STAF"
+   2) "Shutdown STAF"
+</pre>
+<p>
+STAF can also be setup to be launched as an OS service during system startup.  Consult the
+STAF User's Guide and other STAF references for more information on the many varied and fun
+ways to use STAF.  You can find some of these references in your STAF installation
+directory.  Other references and online support can be found via the STAF website:
+<p><pre>
+    <a href="http://staf.sourceforge.net" target="_blank">STAF on SourceForge</a>
+</pre>
+<p>
+STAF can also be launched or shutdown via the
+<a href="http://safsdev.sf.net/sqabasic2000/SAFSUtilities.htm" target="_blank">SAFSUtilities</a> library.
+<p>
+<h3>Launching SAFS Services for STAF</h3>
+<p>
+Currently, we have 3 primary services we rely on in RRAFS:
+<p><pre>
+    <a href="http://safsdev.sf.net/doc/org/safs/staf/service/map/AbstractSAFSAppMapService.html" target="_blank">SAFSMAPS</a>  -  handles and processes our Application Maps and variable
+                 Application Constants for any/all tools.
+
+    <a href="http://safsdev.sf.net/doc/org/safs/staf/service/var/AbstractSAFSVariableService.html" target="_blank">SAFSVARS</a>  -  handles global storage and processing of DDVariables for
+                 any/all tools.
+
+    <a href="http://safsdev.sf.net/doc/org/safs/staf/service/logging/AbstractSAFSLoggingService.html" target="_blank">SAFSLOGS</a>  -  handles logging for any/all tools.  All tools thus can
+                 write to the same log(s).
+</pre>
+<p>
+A 4th service, <a href="http://safsdev.sf.net/doc/org/safs/staf/service/input/AbstractSAFSInputService.html" target="_blank">SAFSINPUT</a>, is primarily only used by SAFSDRIVER (TID) when running tests
+independent of IBM Rational Robot or other test drivers. &nbsp;SAFSDRIVER and RRAFS cannot effectively run simultaneously as only one SAFS Driver should be running during test execution.
+<p>
+There are various .BAT or .VBS files for launching or shutting down various pieces of the
+framework in the "SAFS\BIN" and "SAFS\Samples\Batch" subdirectories of your SAFS
+installation.
+<p>
+<b>On 64-bit systems</b>, remember to use the 32-bit version of Windows Scripting Host when necessary:
+<p><b><ul>%SYSTEMROOT%\SysWOW64\cscript.exe</ul></b>
+<p>
+One method for launching the SAFS services for any active project is the VBS script:
+<p><pre>
+    %SAFSDIR%\bin\SAFSToolsStartup.VBS
+
+  From the HELP info embedded in the script:
+  ------------------------------------------
+
+  ARGUMENTS:
+  ==========
+
+    ARG(0): App Maps Directory (Ex: "C:\Project\Datapool")
+            Full path to the location where App Maps will be found for the
+            locally running project.
+
+    ARG(1): Logs Directory (Ex: "C:\Project\Datapool\Logs")
+            Full path to the location where logs will be written for the
+            locally running project.
+
+    Both of these arguments are required.
+
+
+  Example Invocations:
+  ====================
+
+  Command Line CScript.EXE:
+  -------------------------
+  cscript "C:\safs\bin\SAFSToolsStartup.vbs" "C:\Project\Datapool" "C:\Project\Datapool\Logs"
+
+
+  Windows Script WScript.EXE:
+  ---------------------------
+  wscript "C:\safs\bin\SAFSToolsStartup.vbs" "C:\Project\Datapool" "C:\Project\Datapool\Logs"
+
+</pre>
+<p>
+Of course, a .BAT file or even the above script can be hardcoded to always point to one
+specific project eliminating the need to pass parameters.
+<p>
+These tools can also be launched or shutdown via
+<a href="http://safsdev.sf.net/sqabasic2000/SAFSUtilities.htm" target="runtimeref">SAFSUtilities</a>.
+<p>
+Assuming STAF was setup and configured properly, you can verify the listed SAFS Services
+are running by typing the following command at any command prompt.  The services will
+appear among a list of other built-in services provided by STAF.
+<p><pre>
+    STAF Verification:
+    -----------------------
+    staf local service list
+</pre>
+<p>
+<h3>Launching the SAFS/DriverCommands Engine</h3>
+<p>
+There is also a "SAFSDriverCommandsStartup.BAT" file in the %SAFSDIR%\BIN directory that
+can issue the default startup command.  Assuming the %SAFSDIR%\BIN directory was correctly
+added to the system PATH, the user should be able to invoke the command from any command
+prompt (or other mechanism).
+<p><pre>
+    Command Prompt DriverCommands Startup:
+    --------------------------------------
+    SAFSDriverCommandsStartup                  or
+    %SAFSDIR%\bin\SAFSDriverCommandsStartup.bat
+</pre>
+<p>
+SAFS/DriverCommands can also be launched or shutdown via
+<a href="http://safsdev.sf.net/sqabasic2000/SAFSUtilities.htm#declarations" target="runtimeref">SAFSUtilities</a>.
+<p>
+<h3>Launching Rational Functional Tester Engine (SAFS/RobotJ)</h3>
+<p>
+During your RFT Project setup you should have seen a "TestScript" that does nothing
+more than execute the RFT engine.&nbsp; To launch the SAFS/RobotJ Engine from within the
+Eclipse IDE all you do is run "TestScript".&nbsp; In the RFT console window you may see
+a 'resetting events' message, but little beyond that.  RFT will appear to be dead, but
+it should actually be sitting there waiting for someone to send it test records to execute.
+<p>
+SAFS/RobotJ Engine can also be launched or shutdown via
+<a href="http://safsdev.sf.net/sqabasic2000/SAFSUtilities.htm#declarations" target="runtimeref">SAFSUtilities</a>.
+<p>You can verify the running status by looking at a list of active STAF process\handles.
+"SAFS/RobotJ" should appear among this list, which represents SAFS/RobotJ Engine.
+<p><pre>
+    STAF Verification:
+    ---------------------------
+    staf local handle query all  (With STAF 2.6.11)
+    staf local handle list       (With STAF 3.3.3)
+
+</pre>
+<p>
+<h3>Shutdown the SAFS/DriverCommands Engine</h3>
+<p>
+There is also a "SAFSDriverCommandsShutdown.BAT" file in the %SAFSDIR%\BIN directory that
+can issue the shutdown command.  Assuming the %SAFSDIR%\BIN directory was correctly added
+to the system PATH, the user should be able to invoke the command from any command prompt
+(<i>or just double-click it in Windows Explorer</i>).
+<p><pre>
+    Command Prompt DriverCommands Shutdown:
+    ---------------------------------------
+    SAFSDriverCommandsShutdown                  or
+    %SAFSDIR%\bin\SAFSDriverCommandsShutdown.bat
+</pre>
+<p>
+SAFS/DriverCommands can also be launched or shutdown via
+<a href="http://safsdev.sf.net/sqabasic2000/SAFSUtilities.htm#declarations" target="runtimeref">SAFSUtilities</a>.
+<p>
+<h3>Shutdown SAFS/RobotJ Engine</h3>
+<p>
+Once the SAFS/RobotJ Engine is started, it will not normally shutdown until given the
+appropriate SAFS test record instruction to do so.&nbsp; This can be done via any client
+capable of talking to SAFS/RobotJ Engine through our STAF interface.
+<p>
+There is also a "SAFSRobotJShutdown.BAT" file in the %SAFSDIR%\BIN directory that can issue
+this shutdown command.  Assuming the %SAFSDIR%\BIN directory was correctly added to the
+system PATH, the user should be able to invoke the command from any command prompt (<i>or
+just double-click it in Windows Explorer</i>).
+<p><pre>
+    Command Prompt SAFS/RobotJ Engine Shutdown:
+    --------------------------------------
+    SAFSRobotJShutdown                  or
+    %SAFSDIR%\bin\SAFSRobotJShutdown.bat
+</pre>
+<p>
+SAFS/RobotJ Engine can also be launched or shutdown via
+<a href="http://safsdev.sf.net/sqabasic2000/SAFSUtilities.htm#declarations" target="runtimeref">SAFSUtilities</a>.
+<p>
+<h3>Shutdown SAFS Services for STAF</h3>
+<p>
+The normal STAF commands to remove each running service is all we use to shutdown our SAFS
+services.
+<p>
+There is a "SAFSToolsShutdown.BAT" file in the %SAFSDIR%\BIN directory that can issue these
+commands.  Assuming the %SAFSDIR%\BIN directory was correctly added to the system PATH, the
+user should be able to invoke the command from any command prompt (<i>or just double-click
+it in Windows Explorer</i>).<br>
+You can also just shutdown STAF and the services will be shutdown automatically.
+<p><pre>
+    Command Prompt SAFS Tools Shutdown:
+    -----------------------------------
+    SAFSToolsShutdown                  or
+    %SAFSDIR%\bin\SAFSToolsShutdown.bat
+</pre>
+<p>
+<h3>Shutdown STAF</h3>
+<p>
+As mentioned previously, there is a "Shutdown STAF" item in your Start Menu to completely
+shutdown the STAF system.  This will also remove any SAFS services that may still be
+running.  It is not always necessary to shutdown STAF to reset the test environment.
+Often, simply shutting down and restarting the SAFS Services is sufficient.
+<p>
+STAF can also be launched or shutdown via
+<a href="http://safsdev.sf.net/sqabasic2000/SAFSUtilities.htm#declarations" target="runtimeref">SAFSUtilities</a>.
+</BODY></HTML>

@@ -1,0 +1,52 @@
+<job id="SetupRationalClasspath">
+<script language="VBScript" src="_SharedFunctions.vbs"/>
+<script language="VBScript" src="_SharedRationalFunctions.vbs"/>
+<script language="VBScript">
+
+'******************************************************************************
+'* 
+'* RemoveRationalClasspath.WSF  --  
+'*
+'* Remove CLASSPATH for info IBM Rational tools.
+'*
+'* This script can run from any location.
+'* 
+'* Author: Carl Nagle
+'* Original Release: JAN 03, 2006
+'*
+'* Copyright (C) SAS Institute
+'* General Public License: http://www.opensource.org/licenses/gpl-license.php
+'******************************************************************************
+
+Dim shell, env
+Dim response
+
+Const good_wsh_version = 5.6
+
+Dim cr
+Dim q
+cr        = chr(13)  'carriage return
+q         = chr(34)  'double quote
+
+'WScript.Interactive = false
+
+Set shell = WScript.CreateObject("WScript.Shell")
+Set env   = shell.Environment("SYSTEM")
+
+'Check version of WSH prior to proceeding
+'=========================================
+response = checkWSHVersion(good_wsh_version)
+if response = -1 then WScript.Quit
+
+'Rational Required Jars
+'----------------------
+Dim RatClassPathArray
+
+RatClassPathArray = getRationalClasspathArray()
+CleanEnvironment "CLASSPATH", RatClassPathArray
+
+Set shell = nothing
+Set env   = nothing
+
+</script>
+</job>

@@ -1,0 +1,233 @@
+<pre>
+SAFSKeywordsReleaseNotes2006.02.10
+
+This note is primarily for users having an installed image that is older
+than Feb, 2006.  All other users can ignore this file.
+
+An extensive keyword cleanup effort was completed in 2006.
+In addition to the information below, there is more
+info on this cleanup in the mail archives for safs-rrafs:
+
+
+Sept 29, 2005 Keyword Cleanup posting:
+http://sourceforge.net/mailarchive/message.php?msg_id=13137417
+
+As mentioned in the posting, out of the hundreds of supported keywords, only
+about 9 of these were modified causing a maintenance impact on existing tests.
+
+   HTMLImageFunctions  Click
+   JavaTableFunctions  Click, DoubleClick, RightClick
+   TabControlFunctions Click
+   TreeViewFunctions   Click, DoubleClick, RightClick
+   VSFlexGridFunctions Click
+
+Note: It is important to check the new keywords reference as some of the
+new keywords may differ from those proposed in the original Keyword Cleanup
+proposal.  All changes are reflected in the online keywords documentation at:
+
+SAFS Keyword Reference:
+http://safsdev.sourceforge.net/sqabasic2000/RRAFSReference.htm
+
+
+Keyword changes, additions, deprecations are below:
+
+
+ComboBoxFunctions
+===============================================
+	Removed CLICK command. Still supported via generic objects support.
+	Added RobotJ Support for SetUnverifiedTextValue.
+	Added SetTextValue support for RobotJ.
+
+
+ComboEditBoxFunctions
+===============================================
+	Removed CLICK command.Still supported via generic objects support.
+
+
+DDDriverCommands
+===============================================
+	Added doc for new DisableDomain and EnableDomain keywords.
+	Added GetCompScreenResolution and many String processing commands for RC.
+	Added GetDeltaDate
+	Added RJ support to SetContext Driver Command.
+	Added CallRemote
+	Added CaptureMousePositionOnScreen
+
+
+DDDriverFileCommands
+===============================================
+	Properly documented the original intention of ReadFileString to read comma-separated values from files.
+	    (SDC, TID, and RJ do NOT support this command properly at this time.)
+	Added Documentation for GetINIFileValue.
+	Show support for optional FileAttribute parameter in GetFiles
+	Enhanced FilterTextFile doc to be more understandable.
+
+
+DDDriverFlowCommands
+===============================================
+	Added RJ tag now that OnGUI* driver commands are supported in RobotJ
+	Removed listed support of OnFileEOF for SDC and TID as it was never actually supported there.
+	Added OnMenuItemContainsStateGotoBlockID and OnPartialMenuItemContainsStateGotoBlockID
+
+
+DDDriverStringCommands
+===============================================
+	Corrections to parameter names and associated doc to support the new Java API.
+	Added GetCompScreenResolution and many String processing commands for RC.
+	Added GetField Function
+
+
+DDDriverTimerCommands * NEW *
+===============================================
+	Keywords for new Timer Driver
+
+
+DatabaseFunctions
+===============================================
+	Added documentation for ExecSQLCommit.
+
+
+FPSpreadFunctions  * NEW *
+===============================================
+	Initial import.Documentation for keywords for use with FarPoint Spread
+	controls.A proxy is required for these to work as Robot does not provide
+	support for these controls out-of-the-box.
+	Added RightClickCellShiftClickCell and CtrlClickCell variants.
+	Added FindRowNumber.
+	Added the startingRow parameter to FindRowNumber.
+
+
+GenericMasterFunctions
+===============================================
+	Corrections to parameter names and associated doc to support the new Java API.
+	Click variations and InputKeys and InputChars deprecated in favor of GenericMasterFunctions.
+	Added Robot Specific Note for the new HoverMouse component function. (Bob Lawler)
+	Updated GetGUIImage doc to now include RJ engine.Also added some user specific notes on using this command with RC and RJ. <Bob Lawler>
+	Documenting Click, InputCharacters, and InputKeys for the Abbot engine.
+	Added HoverMouse command
+
+
+GenericObjectFunctions
+===============================================
+	Click variants and CompareStored variants modified for keyword cleanup.
+	A note added that AppMapSubkey parameter is not supported yet by Abbot engine.
+	Generic DoubleClick support added for RJ and JavaTableFunctions Click, DoubleClick, and RightClick changed to ...ClickCell variants.
+	Documenting Click, InputCharacters, and InputKeys for the Abbot engine.
+	Abbot engine for ControlClick, DoubleClick, RightClick, and ShiftClick.
+
+
+GraphicControlFunctions
+===============================================
+	Added new chainToattribute to libraryInfo as appropriate.
+	Removed CLICK command.Still supported via generic objects support.
+
+
+HTMLDocumentFunctions
+===============================================
+	Corrections to parameter names and associated doc to support the new Java API.
+	Removed CLICK, CompareStoredData and CompareStoredProperties commands as necessary.Still supported via generic objects support.
+
+
+HTMLFunctions
+===============================================
+	Removed CLICK, CompareStoredData and CompareStoredProperties commands as necessary.Still supported via generic objects support.
+
+
+HTMLImageFunctions
+===============================================
+	Doc presentation fix for ClickArea.
+	Deprecated HTMLImage.CLICK command to ClickArea command and deprecated HTMLImage.CompareStoredData and CompareStoredProperties in favor of generic versions of these in GenericObjectFunctions.
+
+
+HTMLLinkFunctions
+===============================================
+	Modified to reflect ongoing keyword cleanup.Mostly Click variants and CompareStored variants.
+
+
+HTMLTableFunctions
+===============================================
+	Updated to reflect that RJ CFHTMLTable is a subclass of RJ CFTable and supports many of the keywords provided by RJ CFTable.
+	Modified to reflect ongoing keyword cleanup.Mostly Click variants and CompareStored variants.
+
+
+JavaTableFunctions
+===============================================
+	Corrections to parameter names and associated doc to support the new Java API.
+	Generic DoubleClick support added for RJ and JavaTableFunctions Click, DoubleClick, and RightClick changed to ...ClickCell variants.
+	Document more keywords that were not previously documented.
+
+
+JavaTreeFunctions
+===============================================
+	Adding RJ engine to Set/VerifyTreeContainsNode/PartialMatch commands.
+	Added VerifyTreeContainsNode/PartialMatch commands.
+	Documented new optional indentMark parameter in CaptureTreeDataToFile and PartialMatchTreeDataToFile.
+	Changed Click variants to ClickTextNode variants.Added support for Click variants where they did not exist before.
+	Added RJ engine to CaptureTreeDataToFile and PartialMatchTreeDataToFile.
+	Updated short description for Click variants to include:
+	    "Currently, this component function is for JavaTrees and works differently than documented in TreeViewFunctions (though that functionality may be added in the near future)."
+	Updated SelectAnother... support info.
+
+
+LabelFunctions
+===============================================
+	Keyword Cleanup. Deprecating Click in favor of GenericObject Click.
+
+
+ListBoxFunctions
+===============================================
+	Keyword Cleanup. Deprecating Click in favor of GenericObject Click.
+	Added ExtendSelectionToTextItem function for Shift+Click selections.
+	Added RightClickTextItem.
+
+
+PopupMenuFunctions
+===============================================
+	Provide some clarification between Win32 Popup menu support and Java popup menu support.
+	Added SelectUnverifiedPopupMenuItem
+
+
+PushButtonFunctions
+===============================================
+	Keyword Cleanup. Deprecating Click in favor of GenericObject Click.
+
+
+RadioButtonFunctions
+===============================================
+	Keyword Cleanup. Deprecating Click in favor of GenericObject Click.
+
+
+TabControlFunctions
+===============================================
+	Deprecated Click and UnverifiedClick comands. Use ClickTab and UnverifiedClickTab instead.
+
+
+ToolBarFunctions
+===============================================
+	Added new chainToattribute to libraryInfo as appropriate.
+	Added documentation for ToolBar Functions that have existed for a long time...
+	without documentation.These particular functions are for Robot "Classic" only
+	and were written by Nat.
+	Fixed many problems with the library, added some new features, and tried to
+	synchronize the functionality with the XML.
+
+
+TreeViewFunctions
+===============================================
+	Added VerifyTreeContainsNode/PartialMatch commands.
+	Documented new optional indentMark parameter in CaptureTreeDataToFile and PartialMatchTreeDataToFile.
+	Removed RJ support for TreeDataToFile. This is shown in JavaTreeFunctions.
+	Changed Click variants to ClickTextNode variants. Added support for Click variants where they did not exist before.
+	Added RJ engine to CaptureTreeDataToFile and PartialMatchTreeDataToFile.
+	Updates for new .NET support in NETTreeViewFunctions
+
+
+VSFlexGridFunctions
+===============================================
+	Changed Click to ClickCell as part of keyword cleanup.
+
+
+WindowFunctions
+===============================================
+	Keword Cleanup. Click variations and InputKeys and InputChars deprecated in favor of GenericMasterFunctions.
+</pre>

@@ -1,0 +1,67 @@
+<HTML>
+<HEAD>
+<TITLE>Using Counters and Custom Reports</TITLE>
+</HEAD>
+<BODY>
+<H1><CENTER>Using Counters and Custom Reports</CENTER></H1>
+<CENTER><small>Last Updated: Feb 20, 2013</small></CENTER>
+<p>
+<a name="top"/>
+RE:
+<a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverCounterCommands" target="_blank" alt="SAFS Reference for DriverCounterCommands" title="SAFS Reference for DriverCounterCommands">Driver Counter Commands</a>
+, <a href="ApplicationUtilities.htm#declarations" target="counters" alt="RRAFS Script ApplicationUtilities Functions" title="RRAFS Script ApplicationUtilities Functions">Counter Functions (RRAFS Only)</a>
+, <a href="LogUtilities.htm#lulogstatusinfo" target="counters" alt="RRAFS Script LogUtilities Functions" title="RRAFS Script LogUtlities Functions">Logging Function (RRAFS Only)</a><br/>
+<small>(SAFS Counter Functions and Logging Functions are exposed via the 'Counter Commands').</small>
+<hr>
+The availability of Counters is intended to support the need for evaluating the success or failure of user-defined features, requirements, specification, or any kind of "thing" the user wants to identify.  Counters are not restricted to table boundaries.  A Counter can be started, stopped, and suspended at any time, in any table, and different Counters can overlap.
+<p>
+This enables us to capture information identified by application feature, requirement, or specification.
+<p>
+Currently, SAFS provides many <a href="DDDriverCounterCommandsIndex.htm" target="counters"  alt="SAFS Reference for DriverCounterCommands INdex" title="SAFS Reference for DriverCounterCommands Index">Counter Driver Commands</a> in support of user-defined Counters.<br/>
+<small>(RRAFS Robot scripts also have access to the same capabilities through functions in <a href="ApplicationUtilities.htm#declarations" target="counters" alt="RRAFS Script ApplicationUtilities Functions" title="RRAFS Script ApplicationUtilities Functions">ApplicationUtilities</a> and <a href="LogUtilities.htm#lulogstatusinfo" target="counters" alt="RRAFS Script LogUtilities Functions" title="RRAFS Script LogUtilities Functions">LogUtilities</a>.)</small>
+<p>
+In general, you provide a unique ID or name for each Counter to get it started when appropriate for your needs.  For example, starting a Counter named "EaseOfUse" to keep track of only those tests or records satisfying a specific Requirement of the same name :)
+<p>
+You can subsequently suspend, resume, and stop that Counter and capture the accumulated information into DDVariables, act on those values, or simply log it directly to the log with <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverCounterCommands&cmd=LogCounterInfo" target="counters" alt="SAFS Reference for LogCounterInfo Driver Command" title="SAFS Reference for LogCounterInfo Driver Command">LogCounterInfo</a>.
+<p><hr>
+<a name="transforms"/>
+<h2>Post-processing XML Logs for Custom Reports</h2>
+<p>
+SAFS supports output of an XML log when the <b>XMLLOG</b> flag is present in the LogMode setting of the test configuration INI file, as shown in the example setting below:
+<p><ul>
+...<br>
+<b>CycleLogMode="TEXTLOG XMLLOG"</b><br>
+...<br>
+</ul><p>
+When Counters are combined with the XML logging capabilities, it is easy to generate custom reports or data based on the results accumulated in the Counters.&nbsp; These reports can be targetted for each Feature, Requirement, or Specifications for which you implemented a special Counter.&nbsp;
+<p>
+A *very* simple example:
+<p>
+<img align="right" hspace="15" vspace="15" src="UsingCountersSample.png"/>
+<p>
+See the complete <a href="ClassicsOnline.htm" target="counters" alt="Simple HTML Summary Report" title="Simple HTML Summary Report">simple HTML summary report</a> transformed from an XML log that tracked a few odd items.&nbsp; As a side note, the same log, and the information for these items, can also be transformed into custom database formats used for Defects, 3rd party reporting, or whatever is needed.
+<p>
+If you have installed the SAFS Framework, then you will find some sample Log Transforms in:
+<p><pre>
+    <b>\SAFS\Samples\Log Transforms</b> directory.
+</pre><p>
+For example, there should be sample transforms for:
+<p><pre>
+    <b>Simple Summary</b> &nbsp;(simplesummary.xsl)
+    <b>Failure Summary</b> (failuresummary.xsl)
+    <b>SAFS 2 JUnit</b> &nbsp;&nbsp;&nbsp;(tc2junit.xsl)
+</pre><p>
+After the test is completed, you apply the desired transform(s) to the XML log.&nbsp; SAFS provides MSXSL.EXE in the SAFS\bin directory as one possible means to perform XML transforms.
+<p>
+An example of performing such a transform using MSXSL from the command-line would be something like below:<br>
+<small>(Of course, you would have to use the full paths to the XML and/or XSL files if they are not in the current working directory.)</small>
+<p>
+<ul>
+<b>msxsl&nbsp;&nbsp;TIDTest.SAFS.xml&nbsp;&nbsp;simplesummary.xsl&nbsp;&nbsp;-o&nbsp;&nbsp;TIDTestSummary.htm</b>
+</ul>
+<p>
+The above example assumes that both the TIDTest.SAFS.xml XML test log and the simplesummary.xsl XSL transform file are in the same current working directory.
+<p>
+Hopefully, this is enough to get you to explore the possibilities of user-defined Counters and XML Log transformations for Custom Reports.
+<hr>
+</BODY></HTML>

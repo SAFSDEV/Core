@@ -1,0 +1,299 @@
+# 07/02/2003
+# ObjectTypesMap.DAT
+# 07/08/2003 Carl Nagle Corrected for use of # as comment
+# 08/04/2003 Carl Nagle Adding some doc to the file.
+#                   Moved some customizations to CustomObjectTypesMap
+# 11/01/2005 Carl Nagle Added SplitPane support
+# 06/05/2008 Carl Nagle Added Html.Dialog and Html.DialogButton support
+# 06/06/2008 Carl Nagle Added Html.LI and Html.UL support
+# 07/23/2008 JunwuMa Added DotnetTable support
+# 10/10/2008 JunwuMa Adding Flex support
+# 05/11/2009 Carl Nagle Adding JavaPopupContainer support for JFrame
+#
+#============  DO NOT MODIFY THE CONTENTS OF THIS FILE =============
+#
+# This file is used by algorithms searching an Application's GUI 
+# hierarchy for components that match a given recognition string.
+# The recognition strings provide a generic means for us to identify 
+# a component by its class, type, and other characteristics.
+# Modification to this file will alter the way we recognize 
+# and locate components and likely result in unsuccessful automation.
+#
+# This file is used in conjuntion with JavaObjectsMap.dat
+# 
+# The entries here map our class type information to a more generic 
+# component type.  While a specific object instance may be a 
+# JButton that we treat as a "PushButton" object type; we will treat 
+# any class that maps to a "PushButton" as a generic "Button" as 
+# shown in the mapping below.  Thus, we can attempt to handle 
+# different categories of Buttons (Java, Web, Push, Toggle, etc.) by 
+# a common library whenever possible--which should be the norm.
+# 
+# The entries here directly correlate to which Component Function (CF) 
+# libraries will be invoked to process a particular action on a 
+# particular object instance.  
+#
+# For example, when we intend to perform an action on a Java menu 
+# item, we may find the recognition string "Type=JavaMenu" is used 
+# to help identify the menu item.  We will locate the appropriate 
+# object instance based on the recognition string mapping to acceptable 
+# menu classes defined in JavaObjectsMap.dat
+# 
+# Once successful there, we will then come to this file and see that 
+# JMenuBars, JMenus, and JMenuItems all are handled by the "MenuBar" 
+# component functions class.  The class implementing "MenuBar" 
+# support (CFMenuBar) will be instanced and invoked for processing 
+# as a result of this search.
+#===================================================================
+
+PopupWindow			:Component
+WPFPopupWindow		:Component
+JavaPopupWindow		:Component
+JavaPopupContainer	:Component
+SWTWindow		:Component
+SWTTitleBar		:Component
+SWTPanel		:Component
+SWTIndicator		:Component
+SWTGrip			:Component
+SWTProgressBar		:Component
+JavaWindow		:Component
+AppletFrame		:Component
+AppletViewer		:Component
+JWindow			:Component
+Window			:Component
+DotNetWindow	:Component
+JavaPanel		:Component
+JavaSplitPane		:Component
+NETSplitPane	:Component
+SplitPane		:Component
+JPanel			:Component
+Panel			:Component
+JavaComponent		:Component
+JComponent		:Component
+Calendar		:Component
+Component		:Component
+DateTime		:Component
+Generic			:Component
+GenericObject		:Component
+GroupBox		:Component
+PictureBox		:Component
+SpinControl		:Component
+StatusBar		:Component
+TrackBar		:Component
+
+HTML			:Component
+Html.HtmlBrowser	:Component
+Html.HtmlDocument	:Component
+Html.Dialog		:Component
+
+Html.B			:Component
+Html.BODY		:Component
+Html.BR			:Component
+Html.CENTER		:Component
+Html.DIV		:Component
+Html.FONT		:Component
+Html.FORM		:Component
+Html.HEAD		:Component
+Html.HTML		:Component
+Html.LI			:Component
+Html.META		:Component
+Html.P			:Component
+Html.SCRIPT		:Component
+Html.SPAN		:Component
+Html.STYLE		:Component
+Html.TBODY		:Component
+Html.TD			:Component
+Html.TITLE		:Component
+Html.TR			:Component
+Html.UL			:Component
+
+HTMLTitle               :Component
+HTMLFrame               :Component
+HTMLTableCell           :Component
+
+FlexComponent 		:Component
+FlexPanel			:Component
+FlexSplitPane		:Component
+FlexListItemRender	:Component
+Color				:Component
+FlexNumericStepper 	:FlexNumericStepper
+FlexColor			:FlexColor
+FlexDate			:FlexDate
+
+FlexSlider 			:FlexSlider
+WPFSlider			:WPFSlider
+
+Html.IMG		:HtmlImage
+HTMLImage               :HtmlImage
+Html.INPUT.image	:HtmlImage
+
+WPFWindow			:Component
+WPFSplitPane		:Component
+WPFPanel			:Component
+
+FlexWindow		:Component
+
+
+#
+# HTMLMap and HTMLMapArea will need an HtmlImage library when support is completed
+#
+HTMLMap                 :HtmlImage
+HTMLMapArea             :HtmlImage
+
+HTMLDocument            :HtmlDocument
+HTMLTable               :HtmlTable
+Html.TABLE		:HtmlTable
+
+HTMLLink		:HtmlLink
+Html.A			:HtmlLink
+
+SWTButton		:Button
+JavaButton		:Button
+PushButton		:Button
+NETButton		:Button
+Button			:Button
+Html.BUTTON		:Button
+Html.INPUT.button	:Button
+Html.INPUT.submit	:Button
+Html.HtmlBrowser.ToolbarButton :Button
+Html.DialogButton	:Button
+WPFButton			:Button
+
+JavaCheckBox		:CheckBox
+CheckBox		:CheckBox
+Html.CHECKBOX		:CheckBox
+Html.INPUT.checkbox	:CheckBox
+SWTCheckBox         :CheckBox
+WPFCheckBox			:CheckBox
+
+JavaCheckBoxMenuItem	:MenuBar
+CheckBoxMenuItem	:MenuBar
+
+JavaComboBox		:ComboBox
+ComboBox		:ComboBox
+SWTComboBox     :ComboBox
+FlexComboBox	:FlexComboBox
+WPFComboBox		:WPFComboBox
+
+JavaLabel		:Label
+JLabel			:Label
+Label			:Label
+SWTLabel		:Label
+WPFLabel		:WPFLabel
+
+JavaList		:List
+JList			:List
+List			:List
+ListBox			:List
+ListView		:List
+Html.SELECT		:List
+SWTListBox      :List
+FlexListBox		:FlexList
+WPFListBox		:WPFList
+
+SWTMenu			:MenuBar
+JavaMenu		:MenuBar
+JMenu			:MenuBar
+Menu			:MenuBar
+
+JavaMenuBar		:MenuBar
+JMenuBar		:MenuBar
+MenuBar			:MenuBar
+DotNetMenuBar	:DotNetMenuBar
+WinMenuBar		:WinMenuBar
+WPFMenuBar		:WPFMenuBar
+
+JavaMenuItem	:MenuBar
+JMenuItem		:MenuBar
+MenuItem		:MenuBar
+DotNetMenuItem	:DotNetMenuBar
+WinMenuItem		:WinMenuBar
+WPFMenuItem		:WPFMenuBar
+
+FlexMenuBar		:FlexMenuBar
+FlexMenuBarItem	:FlexMenuBar
+FlexMenu		:FlexMenuBar
+FlexMenuItem	:FlexMenuBar
+
+JavaPopupMenu	:PopupMenu
+JPopupMenu		:PopupMenu
+PopupMenu		:PopupMenu
+DotNetPopupMenu :DotNetPopupMenu
+WinPopupMenu	:WinPopupMenu
+WPFPopupMenu	:WPFPopupMenu
+
+JavaRadioButton		:RadioButton
+JRadioButton		:RadioButton
+RadioButton		:RadioButton
+Html.RADIO		:RadioButton
+
+JavaRadioButtonMenuItem	:MenuBar
+RadioButtonMenuItem	:MenuBar
+
+
+JavaScrollBar		:ScrollBar
+JScrollBar		:ScrollBar
+ScrollBar		:ScrollBar
+SWTScrollBar		:ScrollBar
+
+JavaTabbedPane		:PageTabList
+JTabbedPane		:PageTabList
+TabControl		:PageTabList
+WinTabControl   :WinPageTabList
+FlexTabControl	:FlexPageTabList
+TabPage			:Component
+WPFTabControl	:WPFPageTabList
+
+JavaTable		:Table
+JTable			:Table
+Table			:Table
+TableView		:Table
+SWTTable        :Table
+DotnetTable     :DotnetTable
+FlexTable		:FlexTable
+WPFTable		:WPFTable
+
+JCTable                 :JCTable
+
+JavaTableHeader         :Component
+
+JavaTextComponent	:Text
+JTextComponent		:Text
+TextComponent		:Text
+JTextArea		:Text
+TextArea		:Text
+JTextField		:Text
+TextField		:Text
+EditBox			:Text
+Html.TEXT		:Text
+Html.TEXTAREA		:Text
+Html.INPUT.password	:Text
+Html.INPUT.text		:Text
+Html.INPUT.hidden	:Text
+SWTEditBox          :Text
+WPFEditBox			:WPFText
+
+JavaToolBar		:ToolBar
+JToolBar		:ToolBar
+ToolBar			:ToolBar
+SWTToolBar		:ToolBar
+FlexButtonBar   :ToolBar
+NETToolBar		:ToolBar
+WPFToolBar		:WPFToolBar
+
+JavaTree		:Tree
+JTree			:Tree
+Tree			:Tree
+TreeView		:Tree
+SWTTree         :Tree 
+DotNetTreeView	:DotNetTree
+FlexTreeView	:FlexTree
+WPFTreeView		:WPFTree
+
+BasicInternalFrameTitlePane	:Component
+Viewport		:Component
+ScrollPane		:Component
+RootPane		:Component
+JToolBarSeparator	:Component
+CellRendererPane	:Component
+Separator			:Component

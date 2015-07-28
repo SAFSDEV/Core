@@ -1,0 +1,10 @@
+C, Version, 1.0
+C, SetApplicationMap, swing.map
+
+;####################	Use RobotJ if available #####################
+C, UseRobotJFunctions, ON
+;####################	Begin the main test #########################
+T, IBTOCRTest
+;####################	stop using RobotJ if available  #############
+C, UseRobotJFunctions, OFF
+;####################################################################

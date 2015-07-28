@@ -1,0 +1,148 @@
+<job id="UninstallSAFS" >
+<script language="VBScript" >
+
+'******************************************************************************
+'* 
+'* UninstallSAFS.WSF  --  *** MUST BE RUN WITH 32-BIT WSH on 64-BIT SYSTEMS ***
+'*
+'* Copyright (C) SAS Institute
+'* General Public License: http://www.opensource.org/licenses/gpl-license.php
+'******************************************************************************
+
+Dim arg, shell, env, fso, cmd, winfolder, existdir
+Dim exec, stafenv, safsenv, safstitle, returncode
+Dim stafdir, safsdir, installstaf, msg, args, OutStream
+Dim cr
+Dim q
+Dim nl
+Dim newline
+
+CONST OK_BUTTON_CLICKED=1
+CONST CANCEL_BUTTON_CLICKED=2
+CONST ABORT_BUTTON_CLICKED=3
+CONST RETRY_BUTTON_CLICKED=4
+CONST IGNORE_BUTTON_CLICKED=5
+CONST YES_BUTTON_CLICKED=6
+CONST NO_BUTTON_CLICKED=7
+
+cr        = chr(13)   'carriage return
+q         = chr(34)   'double quote
+nl		  = chr(10)		'next line
+newline   = cr & nl		'use "carriage return" and "next line" to form a newline
+stafenv   = "STAFDIR" 'Environment Variable for STAF root directory.
+safsenv   = "SAFSDIR" 'Environment Variable for root install directory.
+
+stafdir = "C:\STAF"
+installstaf = false
+
+WScript.Interactive = True
+
+Set shell = WScript.CreateObject("WScript.Shell")
+Set env   = shell.Environment("SYSTEM")
+Set fso   = WScript.CreateObject("Scripting.FileSystemObject")
+Set args  = WScript.Arguments
+
+safstitle = "SAFS Windows Uninstall"
+
+On error resume next
+
+safsdir = args(0)
+if Len(safsdir) = 0 then
+   safsdir = env(safsenv)
+end if
+
+if Len(safsdir) = 0 then
+   msg = "Required path to SAFS installation directory was not provided."& cr & cr
+   shell.Popup msg,0,safstitle,64
+   WScript.Quit
+end if
+
+If NOT fso.FileExists(safsdir & "\lib\safsinstall.jar") Then 
+   msg = "SAFS path provided appears to be invalid."& cr & cr
+   shell.Popup msg,0,safstitle,64
+   WScript.Quit
+End If
+
+cmd = q & safsdir &"\jre\bin\java.exe"& q & " -cp "& q & safsdir &"\lib\safsinstall.jar" & q &" org.safs.install.SilentInstaller "& "-removesafs "& q & safsdir & q 
+
+'use previous install SAFS and STAF directories if existing
+'==========================================================
+arg = ""
+msg = "Preparing to remove SAFS." & cr & cr
+msg = msg & "Continue with the uninstall?"& cr & cr
+msg = msg &"Click YES to proceed; NO to cancel."
+returncode = shell.Popup(msg, 0, safstitle, 36) 
+If ((returncode = 2) Or (returncode = 7)) Then
+    shell.Popup "Uninstall cancelled.",0,safstitle,64
+    WScript.Quit
+End If
+
+arg = ""
+arg = env(stafenv)
+if Len(arg)> 0 then stafdir = arg
+arg = ""
+If fso.FileExists(stafdir & "\bin\JSTAF.jar") Then 
+    msg = "The STAF Automation Framework is associated with SAFS." & cr
+    msg = msg & "However STAF may be used by other frameworks, "& cr 
+    msg = msg & "such as SeleniumPlus."& cr & cr
+    msg = msg & "If you have installed other frameworks that might be"& cr 
+    msg = msg & "using STAF, then you should not uninstall STAF "& cr
+    msg = msg & "at this time."& cr & cr
+    msg = msg & "Shall we uninstall STAF?"& cr & cr
+    msg = msg &"Click YES to remove STAF; NO to keep it."
+    returncode = shell.Popup(msg, 0, safstitle, 35) 
+    If (returncode = 2) Then
+        shell.Popup "Uninstall cancelled.",0,safstitle,64
+        WScript.Quit
+    End If
+    If (returncode = 7) Then
+        arg = "STAF will NOT be uninstalled."
+        shell.Popup arg,2,safstitle,64        
+    End If
+    If (returncode = 6) Then
+        arg = "STAF will be uninstalled."
+        cmd = cmd &" -removestaf "& q & stafdir & q
+    End If
+else
+    arg = "STAF support was not found."
+End If
+
+arg = arg & newline
+
+On Error Resume Next
+Set exec = shell.Exec(cmd)
+
+If Err.Number <> 0 then
+    WScript.Interactive = True
+    shell.Popup "Error <"& CStr(Err.Number) &":"& Err.Description &"> occurred while performing uninstall.",0, "Uninstall Aborted.",16
+    Wscript.Quit    
+End if
+
+On Error Goto 0
+
+Do While exec.Status = 0
+    if not exec.StdOut.AtEndOfStream then
+        arg = arg & exec.StdOut.ReadAll & newline
+    end if
+
+    if not exec.StdErr.AtEndOfStream then
+        arg = arg & exec.StdErr.ReadAll & newline
+    end if
+    WScript.Sleep(2000)
+Loop
+
+On Error Resume Next
+Set OutStream = fso.OpenTextFile(safsdir &"\\uninstall.log", 2, True)
+OutStream.Write arg
+On Error Goto 0
+
+shell.Popup "Uninstall Complete.",0,safstitle,64
+
+Set shell = nothing
+Set env   = nothing
+Set exec  = nothing
+Set fso   = nothing
+Set OutStream = Nothing
+
+</script>
+</job>

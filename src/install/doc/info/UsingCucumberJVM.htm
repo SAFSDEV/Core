@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Using SAFS with Cucumber-JVM</title>
+<link rel="stylesheet" type="text/css" href="safsdev.css">
+</head>
+<body>
+<header class=banner>
+   <div class=doctitle>Using SAFS with Cucumber<a href="http://github.com/cucumber/cucumber/wiki" alt="Cukes/Cucumber Homepage" title="Cukes/Cucumber Homepage"><image src="http://cukes.info/images/cucumber64x64.png" alt="Goto Cukes/Cucumber Homepage" title="Goto Cukes/Cucumber Homepage"/></a></div>
+       <div class=docmodified >Updated: 2013.09.20</div>
+</header>
+
+<section class=intro>
+Beginning Sept 20, 2013 SAFS was enhanced to support <a href="https://github.com/cucumber/cucumber/wiki" alt="Cukes/Cucumber Homepage" title="Cukes/Cucumber Homepage">Cucumber</a> integration using <a href="http://github.com/cucumber/cucumber-jvm" alt="Cucumber-JVM Homepage on GITHub" title="Cucumber-JVM Homepage on GITHub">Cucumber-JVM</a>
+<p>
+SAFS users can now use Cucumber to define behavior-driven tests using standard Cucumber <a href="https://github.com/cucumber/cucumber/wiki/Gherkin" alt="Cucumber Feature File Syntax" title="Cucumber Feature File Syntax">Feature files</a>.  When executing those tests via Cucumber-JVM there are <a href="http://safsdev.sourceforge.net/doc/org/safs/cukes/StepDriver.html" alt="SAFS Cukes JavaDoc" title="SAFS Cukes JavaDoc">SAFS Cukes classes</a> that can automatically invoke and initialize the SAFS framework and execute commands and actions as directed by the Scenario Steps, or as called explicitly by the tester's own Java Step Definition implementations.
+</section>
+
+<section class=requirements>
+<div class=requirementstitle>Requirements:</div>
+In order to use SAFS with Cucumber-JVM your environment must meet the following requirements:
+<p>
+<ol>
+	<li>Minimum <a href="http://cukes.info/install-cucumber-jvm.html" alt="Cucumber-JVM Install Site" title="Cucumber-JVM Install Site">Cucumber-JVM installed</a> with:
+		<ul>
+			<li>cucumber-core
+			<li>cucumber-java
+		</ul>
+	<p>
+	<li><a href="http://sourceforge.net/projects/safsdev/files/" alt="SAFS Files Download Site" title="SAFS Files Download Site">SAFS Installed</a>
+	    <ul>
+	    	<li>SAFS Win only one tested with Cucumber-JVM at this time.
+	    	<li>SAFS JAR libraries (up)dated to Sep 20, 2013 or later.
+	    	<li>SAFS test project configured to run any SAFS Engines used for testing.
+	    	<div class="itemnote">(SAFS for RFT , SAFS for TestComplete, SAFS for Android, SAFS for iOS, SAFS IBT, etc..)</div>
+	    </ul>
+</ol>
+</section>
+
+<section class=usage>
+<div class=usagetitle>Usage:</div>
+
+    <article class=subsection><div class=subsectiontitle>Cucumber Feature Files:</div>
+    Develop tests using standard Cucumber/Gherkin <a href="https://github.com/cucumber/cucumber/wiki/Gherkin" alt="Cucumber Feature File Syntax" title="Cucumber Feature File Syntax">Feature file</a> syntax.  Scenario steps that don't map to SAFS StepDefinitions will map to your Java Step Definition files.  When necessary, your Step Definition implementation can invoke SAFS Step Definition implementations allowing you to execute SAFS commands or actions when needed.
+
+    <article class=subsection><div class=subsectiontitle>SAFS Scenario Steps:</div>
+    You can cause Cucumber to invoke SAFS commands or actions directly by using the appropriate SAFS Step syntax in your Scenario Steps (Given, When, Then, etc..)
+
+        <article class=subsection><div class=subsectiontitle>SAFS Commands (Driver Commands):</div>
+		To cause the execution of a SAFS Command--also known as a Driver Command--the following Scenario step syntax is supported:
+		<ul>
+		<li>For a command taking no parameters:
+		<p><code>
+		Then do safs command &lt;command>
+		</code><p>
+		Example:
+		<p><code>
+		    Then do safs command ClearAppMapCache
+		</code></p>
+		<p>
+		<li>For a command taking one or more parameters use a standard syntax that Cucumber will parse into a List of values passed to running step definition.  Generally, that means one or more values separated by commas with the entire set of values enclosed in double-quotes:
+		<p><code>
+		Then do safs command &lt;command> using "param 1, param 2, param 3"
+		</code><p>
+		Examples:
+		<p><code>
+		    Then do safs command <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverCommands&cmd=SetApplicationMap" alt="SAFS Reference Doc" title="SAFS Reference Doc" target="_safs_reference">SetApplicationMap</a> using "MyAppMap.map"<br>
+		    Then do safs command <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverCommands&cmd=GetAppMapValue" alt="SAFS Reference Doc" title="SAFS Reference Doc" target="_safs_reference">GetAppMapValue</a> using " , , theItem, theVar"<br>
+		</code>
+		<div class=itemnote>(Note how a command's unused optional params must still be provided as empty values.)</div>
+		<p>
+		</ul>
+        </article>
+
+        <article class=subsection><div class=subsectiontitle>SAFS Actions (Component Functions):</div>
+		To cause the execution of a SAFS Action--also known as a Component Function--the following Scenario step syntax is supported:
+		<ul>
+		<li>For an action on a component taking no parameters:
+		<p><code>
+		Then do safs action &lt;action> on &lt;windowname><br>
+		Or<br>
+		Then do safs action &lt;action> on &lt;childname> in &lt;windowname>
+		</code><p>
+		Examples:
+		<p><code>
+		Then do safs action <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericObjectFunctions&cmd=Click" alt="SAFS Reference Doc" title="SAFS Reference Doc" target="_safs_reference">Click</a> on LoginWindow<br>
+		Or<br>
+		Then do safs action <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericObjectFunctions&cmd=Click" alt="SAFS Reference Doc" title="SAFS Reference Doc" target="_safs_reference">Click</a> on Submit in LoginWindow
+		</code></p>
+		<p>
+		<li>For an action on a component taking one or more parameters use a standard syntax that Cucumber will parse into a List of values passed to running step definition.  Generally, that means one or more values separated by commas with the entire set of values enclosed in double-quotes:
+		<p><code>
+		Then do safs &lt;action> on &lt;windowname> using "param 1, param 2, param 3"<br>
+		Or<br>
+		Then do safs &lt;action> on &lt;childname> in &lt;windowname> using "param 1, param 2, param 3"
+		</code><p>
+		Examples:
+		<p><code>
+		    Then do safs action <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericObjectFunctions&cmd=Click" alt="SAFS Reference Doc" title="SAFS Reference Doc" target="_safs_reference">Click</a> on LoginWindow using "TopLeft"<br>
+		    Or<br>
+		    Then do safs action <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericMasterFunctions&cmd=VerifyProperty" alt="SAFS Reference Doc" title="SAFS Reference Doc" target="_safs_reference">VerifyProperty</a> on Submit in LoginWindow using "Enabled, True, CaseInsensitive"<br>
+		</code>
+		<p>
+		</ul>
+        </article>
+
+        <article class=subsection><div class=subsectiontitle>SAFS Expressions and Variables:</div>
+		If the Scenario Step is going to contain a SAFS expression then it must be entered as a double-quoted value since the Cucumber parser will want to strip the outer quotes off any value it sees:
+		<p>
+		<code>
+		""The variable value is: "& ^varValue"
+		</code>
+		<p>
+		Example:
+		<p>
+		<code>
+        Then do safs command <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverLogCommands&cmd=LogMessage" alt="SAFS Reference Doc" title="SAFS Reference Doc" target="_safs_reference">LogMessage</a> using ""The stored property value is: "& ^varValue"
+		</code>
+        </article>
+    </article>
+
+    <article class=subsection><div class=subsectiontitle>Cucumber-JVM Step Definition Files:</div>
+    To implement the Cucumber-JVM Step Definitions to access the SAFS Framework and available SAFS Step Definition methods at runtime, please consult the following:
+    <ol>
+    <li>SAFS Cukes <a href="http://safsdev.sourceforge.net/doc/org/safs/cukes/StepDriver.html" alt="SAFS Cukes JavaDoc" title="SAFS Cukes JavaDoc" target="_safs_reference">StepDriver class</a> -- provides access to the SAFS Framework.
+    <li>SAFS Cukes <a href="http://safsdev.sourceforge.net/doc/org/safs/cukes/steps/SAFSSteps.html" alt="SAFS Cukes JavaDoc" title="SAFS Cukes JavaDoc" target="_safs_reference">SAFSSteps class</a> -- step definitions superclass to extend.
+    <li>SAFS Cukes <a href="http://safsdev.sourceforge.net/doc/org/safs/cukes/steps/StepDefinitions.html" alt="SAFS Cukes JavaDoc" title="SAFS Cukes JavaDoc" target="_safs_reference">StepDefinitions class</a> -- runtime access to SAFS Commands and Actions.
+    </ol>
+    <p>
+    Primarily, any and all Cucumber-JVM step definition class files that intend to use SAFS *MUST* insure SAFS is running and initialized by implementing an <b>@Before</b> Cucumber hook, like below:
+    <p>
+    <code><pre>
+    @Before(order=10)
+    public void beforeAll(){
+        safsstep.beforeAll();
+    }
+    </pre></code>
+    <p>
+    The easiest way to do this is to have affected step definition classes extend the <a href="http://safsdev.sourceforge.net/doc/org/safs/cukes/steps/SAFSSteps.html" alt="SAFS Cukes JavaDoc" title="SAFS Cukes JavaDoc" target="_safs_reference">SAFSSteps class</a>.  Though, this is not required.
+    <p>
+    The SAFSSteps class provides all subclasses with ready access to the initialized SAFS JSAFSDriver and SAFS StepDefinition methods for running SAFS DriverCommands and ComponentFunctions.
+    <p>
+    You can invoke a SAFS DriverCommand or ComponentFunction from within your own step definition implementations like below:
+    <p>
+    <code><pre>
+    public void yourImplementedMethod(){
+        helper = safsstep.runDriverCommand("SetApplicationMap", Arrays.asList("MyAppMap.map"));
+        helper = safsstep.runComponentFunction("Click", "Submit", "LoginWindow", Arrays.asList("TopLeft"));
+    }
+    </pre></code>
+    <p>
+    Of course, you would want to use static String constants or other lookups rather than hardcoded literal Strings wherever possible.
+    </article>
+</section>
+<footer>
+Copyright &copy; <a href="http://www.sas.com" alt="SAS Corporate Homepage" title="SAS Corporate Homepage">SAS Institute Inc.</a> for the Open Source <a href="http://sourceforge.net/projects/safsdev/" alt="SAFSDEV Project Page" title="SAFSDEV Project Page">SAFSDEV Project</a> on <a href="http://sourceforge.net" alt="SourceForge Home Page" title="SourceForge Home Page">SourceForge</a>.
+</footer>
+</body></html>

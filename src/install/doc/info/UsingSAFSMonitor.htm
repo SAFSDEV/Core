@@ -1,0 +1,281 @@
+<html>
+<head>
+<title>Using SAFS Monitor</title>
+</head>
+<body bgcolor="#FFFFFF" color="#000000">
+<a name="top"/>
+<center><big><big><big>Using SAFS Monitor</big><br/>
+Debugging with SAFS Services
+</big></big><br/>
+<small>Updated 2013.06.10</small></center>
+<p>
+<center><a href="http://safsdev.sourceforge.net/doc/org/safs/tools/consoles/SAFSMonitorFrame.html" alt="SAFS Monitor JavaDoc" target="ref"><img src="http://safsdev.sourceforge.net/sqabasic2000/SAFSMonitor.jpg"/></a></center>
+<p>
+<small>Go to:
+<a href="#safs_driver_control">SAFS DRIVER CONTROL</a>,
+<a href="#safs_driver_control_pof">SAFS DRIVER CONTROL POF</a>,
+<a href="#using_variables">Using Variables</a>,
+<a href="#using_pof">Using POF</a>,
+<a href="#using_retry">Using Step/Retry</a>,
+<a href="#jsafsusage">JSAFS Usage</a>,
+<a href="#references">Service References</a>
+</small>
+<hr>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/tools/consoles/SAFSMonitorFrame.html" target="ref">SAFS Monitor</a> is an independent and convenient mechanism for controlling the execution and debugging of running SAFS tests.
+<p>
+Our standard <a href="http://safsdev.sourceforge.net/doc/org/safs/tools/drivers/SAFSDRIVER.html" alt="SAFS Driver JavaDoc" target="ref">SAFS Driver</a> monitors the value of two predefined SAFSVARS variables:
+<p>
+<ul>
+<li>'<b><a href="#safs_driver_control">SAFS_DRIVER_CONTROL</a></b>'
+<li>'<b><a href="#safs_driver_control_pof">SAFS_DRIVER_CONTROL_POF</a></b>'</ul>
+<p>
+Custom SAFS Drivers--like those available via <a href="UsingJSAFS.htm" target="ref">Java API for SAFS (JSAFS)</a>--can also take advantage of these SAFS Monitor features.<br>
+See the <a href="#jsafsusage" alt="JSAFS Usage" title="JSAFS Usage">JSAFS Usage</a> section in this document for more details!
+<p>
+<hr>
+<a name="safs_driver_control"/>
+<small>Go to:
+<a href="#top">TOP</a>,
+<a href="#safs_driver_control_pof">SAFS DRIVER CONTROL POF</a>,
+<a href="#using_variables">Using Variables</a>,
+<a href="#using_pof">Using POF</a>,
+<a href="#using_retry">Using Step/Retry</a>,
+<a href="#jsafsusage">JSAFS Usage</a>,
+<a href="#references">Service References</a>
+</small>
+<p>
+<h2>'<b>SAFS_DRIVER_CONTROL</b>'</h2>
+<p>
+The values currently supported for this variable:
+<p>
+<ul><table>
+<tr><td><b>SHUTDOWN_HOOK</b><td>&nbsp;Immediately stop runnings tests and shutdown.
+<tr><td><b>PAUSE</b><td>&nbsp;Pause execution indefinitely; it will be set automatically when failure occurs if SAFS_DRIVER_CONTROL_POF is ON.
+<tr><td><b>RUNNING</b><td>&nbsp;Continue or Resume running tests.
+<tr><td><b>STEP</b><td>&nbsp;While PAUSED, execute one record (STEPPING) then re-enter PAUSE mode.
+<tr><td><b>STEPPING</b><td>&nbsp;Enter PAUSE mode at the end of the current record.
+<tr><td><b>STEP_RETRY</b><td>&nbsp;While PAUSED, execute current record again (STEPPING_RETRY) then re-enter PAUSE mode.
+<tr><td><b>STEPPING_RETRY</b><td>&nbsp;Enter PAUSE at the end of the re-tried record.
+</table></ul>
+<p>
+<hr>
+<a name="safs_driver_control_pof"/>
+<small>Go to:
+<a href="#top">TOP</a>,
+<a href="#safs_driver_control">SAFS DRIVER CONTROL</a>,
+<a href="#using_variables">Using Variables</a>,
+<a href="#using_pof">Using POF</a>,
+<a href="#using_retry">Using Step/Retry</a>,
+<a href="#jsafsusage">JSAFS Usage</a>,
+<a href="#references">Service References</a>
+</small>
+<p>
+<h2>'<b>SAFS_DRIVER_CONTROL_POF</b>'</h2>
+<p>
+The values currently supported for this variable:
+<p>
+<ul><table>
+<tr><td><b>ON</b><td>&nbsp;Turn on the switch of automatically pausing the test when a failure occurs.
+<tr><td><b>OFF</b><td>&nbsp;Turn off the switch of automatically pausing the test when failure occurs.
+</table></ul>
+<p>
+<hr>
+<a name="using_variables"/>
+<small>Go to:
+<a href="#top">TOP</a>,
+<a href="#safs_driver_control">SAFS DRIVER CONTROL</a>,
+<a href="#safs_driver_control_pof">SAFS DRIVER CONTROL POF</a>,
+<a href="#using_pof">Using POF</a>,
+<a href="#using_retry">Using Step/Retry</a>,
+<a href="#jsafsusage">JSAFS Usage</a>,
+<a href="#references">Service References</a>
+</small>
+<p>
+<h2>Using SAFS Monitor Variables</h2>
+<p>
+The SAFS Monitor UI provides easy access for changing the value of SAFS_DRIVER_CONTROL and SAFS_DRIVER_CONTROL_POF, but the variables can also be changed from any process having access to STAF on the target machine. &nbsp;That means a tester can change these from the command-line, a program, a running SAFS test, or even a remote machine properly configured with STAF and granted appropriate STAF Trust levels.
+<p>
+This provides an array of opportunities when needing to debug running SAFS tests.
+<p>
+For example, a tester can PAUSE the running test and:
+<ul>
+Investigate the current value of all variables<br/>
+Change the value of variables<br/>
+Review the entries in loaded App Maps<br/>
+ALL STAF and SAFS services can be evaluated<br/>
+</ul>
+<p>
+The tester can essentially query the state of the entire SAFS framework.
+<p>
+The test can be paused via the PAUSE button on the SAFS Monitor.  A running SAFS test can also initiate a PAUSE by setting the appropriate SAFS_DRIVER_CONTROL value:
+<p>
+<ul>
+<h3><b>C, &nbsp;SetVariableValues, &nbsp;^SAFS_DRIVER_CONTROL="PAUSE"</b></h3>
+</ul>
+<p>
+Having PAUSED the test via the SAFS Monitor, via the running test, or any other mechanism; the user can now evaluate the state of the test.  Typically this is done by reviewing the SAFSVARS variables thru a DOS Command window.<br>
+(SAFS Monitor will likely offer this feature automatically in a future upgrade.)
+<p>
+To get an idea on accessing SAFSVARS from the command-line, type the following and press ENTER:
+<p><ul>
+<h3><b>staf local safsvars help</b></h3>
+</ul>
+<p>
+<center><img src="http://safsdev.sourceforge.net/sqabasic2000/SAFSVARSHelpOutput.jpg"/></center>
+<p>
+The key SAFSVARS command we would most likely use for debugging as we step through a test would be SAFSVARS LIST.  This will give us a snapshot of the value of every variable currently known to SAFS:
+<p><ul>
+<h3><b>staf local safsvars list</b></h3>
+</ul>
+<p>
+<center><img src="http://safsdev.sourceforge.net/sqabasic2000/SAFSVARSListOutput.jpg"/></center>
+<p>
+The information shown is the state of all variables and status for the test record that just finished executing.
+<p>
+If desired, with SAFSVARS SET we can create new variables or change the value of existing variables.  Notice when referencing variable names directly with the SAFSVARS service we do not use the caret (^) symbol used in SAFS test tables.
+<p><ul>
+<h3><b>staf local safsvars SET MyNewVariable VALUE "My Variable Value"</b></h3>
+</ul>
+<p>
+<center><img src="http://safsdev.sourceforge.net/sqabasic2000/SAFSVARSSetOutput.jpg"/></center>
+<p>
+A common practice at this point is to use SAFS Monitor to STEP through the test one record at a time monitoring the variable values with SAFSVARS LIST to make sure they are what we expect them to be.
+<p>
+<hr>
+<a name="using_pof"/>
+<small>Go to:
+<a href="#top">TOP</a>,
+<a href="#safs_driver_control">SAFS DRIVER CONTROL</a>,
+<a href="#safs_driver_control_pof">SAFS DRIVER CONTROL POF</a>,
+<a href="#using_variables">Using Variables</a>,
+<a href="#using_retry">Using Step/Retry</a>,
+<a href="#jsafsusage">JSAFS Usage</a>,
+<a href="#references">Service References</a>
+</small>
+<p>
+<h2>Using POF (PAUSE ON FAILURE)</h2>
+<p>
+In the SAFS Monitor UI, this is a checkbox representing whether the test will PAUSE when a failure occurs.
+<p>
+<ul>
+<li>
+<b>Checked</b><br/>
+Sets SAFS_DRIVER_CONTROL_POF variable to '<b>ON</b>'.<br/>
+SAFSDRIVER tests will automatically PAUSE at the next failed step.<br/>
+SAFSDRIVER will set variable SAFS_DRIVER_CONTROL to 'PAUSE'.
+<p><li>
+<b>Not Checked</b><br/>
+Sets SAFS_DRIVER_CONTROL_POF variable to '<b>OFF</b>'.<br/>
+SAFSDRIVER tests will NOT automatically pause on failure.<br/>
+SAFSDRIVER will not change the value of variable SAFS_DRIVER_CONTROL on failure.
+</ul>
+<p>
+<hr>
+<a name="using_retry"/>
+<small>Go to:
+<a href="#top">TOP</a>,
+<a href="#safs_driver_control">SAFS DRIVER CONTROL</a>,
+<a href="#safs_driver_control_pof">SAFS DRIVER CONTROL POF</a>,
+<a href="#using_variables">Using Variables</a>,
+<a href="#using_pof">Using POF</a>,
+<a href="#jsafsusage">JSAFS Usage</a>,
+<a href="#references">Service References</a>
+</small>
+<p>
+<h2>Using Step/Retry</h2>
+<p>
+<center><img src="http://safsdev.sourceforge.net/sqabasic2000/SAFSMonitor_WatchEdit.jpg"/></center>
+<p>
+When PAUSED, each token of the current test command, no matter whether failed or not, is loaded in the Watch table as shown above.  The Watch table can be hidden or shown by the '<b>Watch/Edit</b>' toggle button. &nbsp;The tokens in white are editable.  &nbsp;The remaining tokens in grey are not editable.
+<p><ul>
+Double click an editable token to modify it.<br/>
+Click '<b>Step Retry</b>' to execute the same (or modified) command again.
+</ul>
+<p>
+This allows the tester to debug a failing test step by (re)trying it with different values until the desired results are achieved.
+<p>
+<hr>
+<a name="jsafsusage"/>
+<small>Go to:
+<a href="#top">TOP</a>,
+<a href="#safs_driver_control">SAFS DRIVER CONTROL</a>,
+<a href="#safs_driver_control_pof">SAFS DRIVER CONTROL POF</a>,
+<a href="#using_variables">Using Variables</a>,
+<a href="#using_pof">Using POF</a>,
+<a href="#using_retry">Using Step/Retry</a>,
+<a href="#references">Service References</a>
+</small>
+<p>
+<h2>JSAFS Usage:</h2>
+<p>
+Custom SAFS Drivers--like those available via <a href="UsingJSAFS.htm" target="ref">Java API for SAFS (JSAFS)</a>--can also take advantage of these SAFS Monitor features, if they choose to set/get the values of these same predefined variables.
+<p>
+<ul><code><pre>
+JSAFSDriver jsafs = new <a href="http://safsdev.sourceforge.net/doc/org/safs/tools/drivers/JSAFSDriver.html" alt="JSAFSDriver Class" title="JSAFSDriver Class" target="jsafs">JSAFSDriver</a>("JSAFS");
+...
+// find out the current SAFS Monitor state:
+String monitor_state = jsafs.getVariable(<a href="http://safsdev.sourceforge.net/doc/org/safs/tools/drivers/DriverInterface.html#DRIVER_CONTROL_VAR" alt="JSAFSDriver Constant" title="JSAFSDriver Constant" target="jsafs">DRIVER_CONTROL_VAR</a>);
+...
+// force a PAUSE that the tester can interactively change to RUN when ready
+setVariable(DRIVER_CONTROL_VAR, <a href="http://safsdev.sourceforge.net/doc/org/safs/JavaHook.html#PAUSE_EXECUTION" alt="JavaHook Constant" title="JavaHook Constant" target="jsafs">JavaHook.PAUSE_EXECUTION</a>);
+...
+// programmatically enable PAUSE ON FAILURE that the tester can later disable
+setVariable(<a href="http://safsdev.sourceforge.net/doc/org/safs/tools/drivers/DriverInterface.html#DRIVER_CONTROL_POF_VAR" alt="JSAFSDriver Constant" title="JSAFSDriver Constant" target="jsafs">DRIVER_CONTROL_POF_VAR</a>, <a href="http://safsdev.sourceforge.net/doc/org/safs/JavaHook.html#POF_SWITCH_ON" alt="JavaHook Constant" title="JavaHook Constant" target="jsafs">JavaHook.POF_SWITCH_ON</a>);
+</pre></code></ul>
+<p>
+Valid values for '<b>SAFS_DRIVER_CONTROL</b>' are shown at top and can be referenced via JavaHook constants.<br>
+The same is true for '<b>SAFS_DRIVER_CONTROL_POF</b>' values.
+<p>
+By default, a <a href="http://safsdev.sourceforge.net/doc/org/safs/tools/drivers/JSAFSDriver.html" alt="JSAFSDriver instance" title="JSAFSDriver instance" target="jsafs">JSAFSDriver instance</a> automatically supports and performs these SAFS Monitor functions whenever a DriverCommand or ComponentFunction is executed. A developer can disable these features by setting the <a href="http://safsdev.sourceforge.net/doc/org/safs/tools/drivers/JSAFSDriver.html#useSAFSMonitor" alt="jsafs.useSAFSMonitor field" title="jsafs.useSAFSMonitor field" target="jsafs">jsafs.useSAFSMonitor</a> field to 'false'.
+<p>
+By default, a JSAFSDriver instance that detects a SHUTDOWN request when running a DriverCommand or ComponentFunction--whether it was user-initiated through the SAFS Monitor interface or code-initiated by the developer--automatically attempts to close all SAFS Engines and services. It also attempts to run the JVM finalization routines and force a System.exit(0) -- a complete JVM shutdown. A developer can disable the JVM finalization and shutdown feature by setting the <a href="http://safsdev.sourceforge.net/doc/org/safs/tools/drivers/JSAFSDriver.html#systemExitOnShutdown" alt="jsafs.systemExitOnShutdown field" title="jsafs.systemExitOnShutdown field" target="jsafs">jsafs.systemExitOnShutdown</a> field to 'false'.
+<p>
+The developer can also insert a call to the <a href="http://safsdev.sourceforge.net/doc/org/safs/tools/drivers/JSAFSDriver.html#checkSAFSMonitorStatus()" alt="jsafs.checkSAFSMonitorStatus() function" title="jsafs.checkSAFSMonitorStatus() function" target="jsafs">JSAFSDriver.checkSAFSMonitorStatus</a> function at arbitrary points in the code to take advantage of these SAFS Monitor features.
+<p>
+<hr>
+<a name="references"/>
+<small>Go to:
+<a href="#top">TOP</a>,
+<a href="#safs_driver_control">SAFS DRIVER CONTROL</a>,
+<a href="#safs_driver_control_pof">SAFS DRIVER CONTROL POF</a>,
+<a href="#using_variables">Using Variables</a>,
+<a href="#using_pof">Using POF</a>,
+<a href="#jsafsusage">JSAFS Usage</a>,
+<a href="#using_retry">Using Step/Retry</a>
+</small>
+<p>
+<h2>References to key SAFS services:</h2>
+<p>
+<ul>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/staf/service/SAFSVariableService.html" target="ref">SAFSVARS</a>
+service for getting and setting SAFS DDVariable values.<br>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/staf/service/SAFSAppMapService.html" target="ref">SAFSMAPS</a>
+service for retrieving Application Map entries (and INI files).<br>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/staf/service/SAFSInputService.html" target="ref">SAFSINPUT</a>
+service used to open and read SAFS test table files by Drivers.<br>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/staf/service/logging/SAFSLoggingService.html" target="ref">SAFSLOGS</a>
+service used for centralized logging for all tools and services.<br>
+</ul>
+<p>
+Remember, you can always refer to the available commands for each service at the command-line by using HELP, as shown for SAFSVARS below:
+<ul><p>
+<h3><b>staf local safsvars help</b></h3></ul>
+<p>
+To get a list of all available STAF services you can always ask for the SERVICE LIST:
+<ul><p>
+<h3><b>staf local service list</b></h3></ul>
+<p>
+Documentation for the core STAF services can be found locally in the <b>C:\STAF\docs</b> installation directory, or you can look in the STAF archives for older <a href="http://staf.sourceforge.net/docs2x.php" target="ref">STAF V2.6.11 documentation</a>. &nbsp;Testers can also refer to the STAF website for the <a href="http://staf.sourceforge.net/docs.php" target="ref">latest STAF documentation</a> if using later versions of STAF.
+<p>
+<small>Go to:
+<a href="#top">TOP</a>,
+<a href="#safs_driver_control">SAFS DRIVER CONTROL</a>,
+<a href="#safs_driver_control_pof">SAFS DRIVER CONTROL POF</a>,
+<a href="#using_variables">Using Variables</a>,
+<a href="#using_pof">Using POF</a>,
+<a href="#using_retry">Using Step/Retry</a>,
+<a href="#jsafsusage">JSAFS Usage</a>,
+<a href="#references">Service References</a>
+</small>
+<hr>
+</body></html>

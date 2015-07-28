@@ -1,0 +1,5 @@
+#This map contain only the .NET class to be enabled dynamically
+
+NETWindows	:WindowsForms.*
+NETUIToolWin	:NET UI Tool Window
+NETHWnd		:NetUIHWND

@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="UTF-8"?><ScriptDefinition L=".ScriptDefinition"><ScriptName>RunProcessContainer</ScriptName><Language>java</Language><Map>resources/RunProcessContainer.rftmap</Map><HelperSuper>RationalTestScript</HelperSuper><ScriptNameMap L=".ScriptDefinitionNameMap"></ScriptNameMap><Properties L=".PropSet"></Properties></ScriptDefinition>

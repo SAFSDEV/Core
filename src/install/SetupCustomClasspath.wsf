@@ -1,0 +1,54 @@
+<job id="SetupCustomClasspath" >
+<script language="VBScript" src="_SharedFunctions.vbs"/>
+<script language="VBScript" >
+'************************************************************************************************************
+'* This script is responsible for adding custom jars into CLASSPATH. It stays in c:\safs, with same folder 
+'* as _SharedFunctions.vbs.  Custom jars are defined in customJarPathArray.
+'* E.g. c:\safs\lib\safsrational_ft_custom.jar contains SAS Flex classes org.safs.rational.flex.custom   
+'*
+'* JunwuMa Jun 7, 2011 
+'************************************************************************************************************
+
+Dim message, response, cr, q, nl, newline
+Dim customJarPathArray(0)
+
+cr        = chr(13)   'carriage return
+q         = chr(34)   'double quote
+nl		  = chr(10)		'next line
+newline   = cr & nl		'use "carriage return" and "next line" to form a newline
+
+safsenv   = "SAFSDIR" 'Environment Variable for SAFS root directory.
+
+'define custom jars to be added to CLASSPATH
+customJarPathArray(0) = "\lib\safsrational_ft_custom.jar"
+
+Set shell = WScript.CreateObject("WScript.Shell")
+Set env   = shell.Environment("SYSTEM")
+Set fso   = WScript.CreateObject("Scripting.FileSystemObject")
+
+'toDebug = true
+'first clean the CLASSPATH of all old custom jars
+'-----------------------------------------------
+CleanEnvironment "CLASSPATH", customJarPathArray
+
+safsdir       = ""
+safsdir       = env("SAFSDIR")
+safsrftcustom = safsdir & customJarPathArray(0)
+
+if NOT(fso.FileExists(safsrftcustom)) then
+    message = safsrftcustom & " doesn't exist."& cr & cr
+    message = message & "CLASSPATH cannot be updated."
+    shell.LogEvent 4, message
+    'WScript.Echo message
+    shell.Popup message, 4, "File Not Detected", 64
+else
+	appendEnvironment "CLASSPATH", safsrftcustom	
+	shell.Popup "Setup Complete.",0,"Custom Classpath",64
+end if
+
+Set fso   = nothing
+Set env   = nothing
+Set shell = nothing
+
+</script>
+</job>

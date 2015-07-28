@@ -1,0 +1,12 @@
+
+T, UICatalog, Table, FlickUp
+T, UICatalog, Table, FlickDown
+
+T, UICatalog, ControlsButton, Click
+
+T, UIControls, PageControl, FlickRight
+T, UIControls, PageControl, FlickRight, 3
+T, UIControls, PageControl, FlickLeft, 4
+
+T, UIControls, BackButton, Click
+

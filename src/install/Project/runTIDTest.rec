@@ -1,0 +1,50 @@
+OPTION EXPLICIT
+
+'$INCLUDE: "DDEngine.sbh"
+
+Sub Main
+
+    Dim status As Integer
+    Dim logfile As String
+    Dim summary as String
+    Dim logsdir as String
+    Dim datadir as String
+
+    SetDDEDatapoolDirectory(Environ("SAFSDIR") &"\project\datapool")
+    DDGClearAppMapCache    
+    logsdir = GetDDELogsDirectory()
+    datadir = GetDDEDatapoolDirectory()
+    
+    On Error Resume Next
+
+        MainLog.logid = "TIDTest.Robot"
+        logfile = logsdir & MainLog.logid
+        summary = logfile &".htm"
+        
+        kill logfile & ".txt"
+        DoEvents
+
+        InitLogFacility TEXTLOG_ENABLED OR CONSOLE_ENABLED, MainLog
+        DoEvents
+
+    On Error Goto 0
+    
+    CDCycleDriver "TIDTest.cdd", ",", MainLog, MainLog, MainLog, CDCycleDrivenMode
+    
+    LogMessage " ", MainLog
+    
+    'close the text log
+    CloseAllLogs MainLog, 1
+    Reset
+    
+    DoEvents
+    
+    SAFSShutdownDriverCommands
+    SAFSShutdownRobotJ
+    DelayFor 2000
+    SAFSShutdownSTAF
+    
+    StartApplication "notepad.exe "& MainLog.textlog    
+    
+End Sub
+    

@@ -1,0 +1,13 @@
+
+T, UICatalog, WebButton, Click
+C, Pause, 2
+
+T, UIWebView, Content, FlickDown
+
+T, UIWebView, UIWebView, PinchClose, "30;100;80;80", "0;-40"
+T, UIWebView, UIWebView, PinchOpen, "30;100;40;40", "0;40"
+T, UIWebView, UIWebView, PinchOpen, "100;100;40;40", "70;0", 2
+T, UIWebView, UIWebView, PinchClose, "130;130;110;110", "0;-70", 2
+
+T, UIWebView, BackButton, Click
+

@@ -1,0 +1,19 @@
+
+[ApplicationConstants]
+URL="http://safsdev.sourceforge.net"
+User="bob"
+Password="AccountTemps"
+
+[MainWin]
+MainWin="window recognition string"
+TabPanel="tabcontrol recognition string"
+Signoff="signoff recognition string"
+Exit="exit recognition string"
+
+[ReportsWin]
+ReportsWin="window recognition string"
+Add="button recognition string"
+Update="button recognition string"
+Delete="button recognition string"
+Close="button recognition string"
+

@@ -1,0 +1,14 @@
+C, Version, 1.0
+C, SetApplicationMap, google.map
+
+;####################	Use RobotJ if available #####################
+C, UseSeleniumFunctions, ON
+;####################	Begin the main test #########################
+;URL_Google is a variable defined in file google.map
+C, StartWebBrowser, ^URL_Google, WebBrowser
+;T, SeleniumDriverCommandTest
+T, SeleniumEditBoxTest
+
+;####################	stop using RobotJ if available  #############
+C, UseSeleniumFunctions, OFF
+;####################################################################

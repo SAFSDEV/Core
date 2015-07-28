@@ -1,0 +1,374 @@
+<html>
+<head>
+<title>
+Using Selenium ProcessContainer
+</title>
+<style>
+.spc_screen       { display:block;background-image:url(./images/WebDriverProcessContainer.png); }
+.url_field        { width:438px; height:26px; background-position:-185px   -33px; }
+.browser_type     { width:75px;  height:26px; background-position:-626px  -33px; }
+.start_button     { width:64px;  height:28px; background-position:-705px  -33px; }
+.stop_button      { width:62px;  height:28px; background-position:-772px  -33px; }
+
+.find_windows     { width:114px; height:26px; background-position:-55px  -71px; }
+.current_windows  { width:413px; height:26px; background-position:-183px   -71px; }
+.frames           { width:361px; height:26px; background-position:-609px   -71px; }
+
+.short_strings    { width:96px; height:20px; background-position:-206px  -110px; }
+.visible_only     { width:90px; height:20px; background-position:-310px  -110px; }
+.clickmode_props  { width:145px; height:20px; background-position:-404px  -110px; }
+.search_button    { width:76px;  height:26px; background-position:-558px  -107px; }
+.cancel_button    { width:74px;  height:26px; background-position:-637px  -107px; }
+.save_button      { width:106px; height:26px; background-position:-716px  -107px; }
+
+.clickmode_button { width:139px; height:27px; background-position:-13px  -142px; }
+.recognition_field{ width:470px; height:24px; background-position:-154px -144px; }
+.find_element     { width:106px; height:27px; background-position:-628px -142px; }
+.set_button       { width:54px;  height:27px; background-position:-738px -142px; }
+.seek_button      { width:114px;  height:27px; background-position:-796px -142px; }
+.properties_button{ width:94px;  height:27px; background-position:-915px -142px; }
+
+.preview_pane     { width:390px;  height:165px; background-position:-10px -175px; }
+.element_tree     { width:600px; height:165px; background-position:-410px -175px; }
+
+.status_bar       { width:360px; height:27px; background-position:-5px -338px; }
+</style>
+<script>
+function hideAllContentPanels(){
+    document.getElementById("url_field_panel").style.display="none";
+    document.getElementById("browser_type_panel").style.display="none";
+    document.getElementById("start_button_panel").style.display="none";
+    document.getElementById("stop_button_panel").style.display="none";
+    document.getElementById("current_windows_panel").style.display="none";
+    document.getElementById("find_windows_panel").style.display="none";
+    document.getElementById("search_button_panel").style.display="none";
+    document.getElementById("cancel_button_panel").style.display="none";
+    document.getElementById("save_button_panel").style.display="none";
+    document.getElementById("visible_only_panel").style.display="none";
+    document.getElementById("short_strings_panel").style.display="none";
+    document.getElementById("clickmode_button_panel").style.display="none";
+    document.getElementById("recognition_field_panel").style.display="none";
+    document.getElementById("find_element_panel").style.display="none";
+    document.getElementById("set_button_panel").style.display="none";
+    document.getElementById("seek_button_panel").style.display="none";
+    document.getElementById("properties_button_panel").style.display="none";
+    document.getElementById("preview_pane_panel").style.display="none";
+    document.getElementById("element_tree_panel").style.display="none";
+    document.getElementById("status_bar_panel").style.display="none";
+    document.getElementById("frames_panel").style.display="none";
+    document.getElementById("clickmode_props_panel").style.display="none";
+}
+function showAllContentPanels(){
+    document.getElementById("url_field_panel").style.display="block";
+    document.getElementById("browser_type_panel").style.display="block";
+    document.getElementById("start_button_panel").style.display="block";
+    document.getElementById("stop_button_panel").style.display="block";
+    document.getElementById("current_windows_panel").style.display="block";
+    document.getElementById("find_windows_panel").style.display="block";
+    document.getElementById("search_button_panel").style.display="block";
+    document.getElementById("cancel_button_panel").style.display="block";
+    document.getElementById("save_button_panel").style.display="block";
+    document.getElementById("short_strings_panel").style.display="block";
+    document.getElementById("visible_only_panel").style.display="block";
+    document.getElementById("clickmode_button_panel").style.display="block";
+    document.getElementById("recognition_field_panel").style.display="block";
+    document.getElementById("find_element_panel").style.display="block";
+    document.getElementById("set_button_panel").style.display="block";
+    document.getElementById("seek_button_panel").style.display="block";
+    document.getElementById("properties_button_panel").style.display="block";
+    document.getElementById("preview_pane_panel").style.display="block";
+    document.getElementById("element_tree_panel").style.display="block";
+    document.getElementById("status_bar_panel").style.display="block";
+    document.getElementById("frames_panel").style.display="block";
+    document.getElementById("clickmode_props_panel").style.display="block";
+}
+function registerAreaListeners(){
+    document.getElementById("url_field").addEventListener("click", area_listener, false);
+    document.getElementById("browser_type").addEventListener("click", area_listener, false);
+    document.getElementById("start_button").addEventListener("click", area_listener, false);
+    document.getElementById("stop_button").addEventListener("click", area_listener, false);
+    document.getElementById("current_windows").addEventListener("click", area_listener, false);
+    document.getElementById("find_windows").addEventListener("click", area_listener, false);
+    document.getElementById("search_button").addEventListener("click", area_listener, false);
+    document.getElementById("cancel_button").addEventListener("click", area_listener, false);
+    document.getElementById("save_button").addEventListener("click", area_listener, false);
+    document.getElementById("short_strings").addEventListener("click", area_listener, false);
+    document.getElementById("visible_only").addEventListener("click", area_listener, false);
+    document.getElementById("clickmode_button").addEventListener("click", area_listener, false);
+    document.getElementById("recognition_field").addEventListener("click", area_listener, false);
+    document.getElementById("find_element").addEventListener("click", area_listener, false);
+    document.getElementById("set_button").addEventListener("click", area_listener, false);
+    document.getElementById("seek_button").addEventListener("click", area_listener, false);
+    document.getElementById("properties_button").addEventListener("click", area_listener, false);
+    document.getElementById("preview_pane").addEventListener("click", area_listener, false);
+    document.getElementById("element_tree").addEventListener("click", area_listener, false);
+    document.getElementById("status_bar").addEventListener("click", area_listener, false);
+    document.getElementById("frames").addEventListener("click", area_listener, false);
+    document.getElementById("clickmode_props").addEventListener("click", area_listener, false);
+}
+function showContentPanel(panel){
+    panel.style.display="block";
+}
+var area_listener={
+    handleEvent: function(evt){
+        var element=document.getElementById(evt.target.id+"_panel");
+        if(element!=undefined){
+           hideAllContentPanels();
+           showContentPanel(element);
+        }
+    }
+}
+</script>
+</head>
+<body onload="registerAreaListeners()" >
+<center><h1>Using Selenium ProcessContainer</h1>
+<small>Updated: 2015.07.21</small></center>
+<hr/>
+<center><h2><b>!!! Subject to changes as the Process Container Evolves !!!</b></h2></center>
+<h3>Launching from SeleniumPlus:</h3>
+<ol>
+    <li>Select the Project you are working on in the SeleniumPlus Package Explorer.
+    <li>Select "<b>Selenium+ -> Process Container -> Launch Process Container</b>" from the main menu.
+</ol>
+<p>
+<h3>Launching from Command-Line:</h3>
+Pseudo-Simple: &nbsp;
+<b>%JAVAEXE% -cp %CLASSPATH% org.safs.selenium.spc.WDSPC</b>
+<p>
+<ol>
+    <li>Minimally, set CLASSPATH to include:
+        <p><ul>
+           <li>seleniumplus.jar
+           <li>JSTAFEmbedded.jar (or STAF's JSTAF.JAR, if installed)
+           <li>selenium-server-standalone-????.jar (the latest)
+        </ul>
+    <p>
+    <li>Run 32-bit <b>Java</b> class <b>org.safs.selenium.spc.WDSPC</b><br>
+    (Project's root directory must be the Working Directory. This is where the '<b>test.ini</b>' file is located.)
+</ol>
+Note: The Eclipse Plug-In is scheduled to do this for you in the future.
+<h3>Sample BAT file (command-line execution) for Windows:</h3>
+The BAT file must be located in the desired Project's root directory--where the test.ini file resides:
+<ul>
+<pre>    SET CMDCLASSPATH="%SELENIUM_PLUS%/libs/seleniumplus.jar;%SELENIUM_PLUS%/libs/JSTAFEmbedded.JAR;%SELENIUM_PLUS%/libs/selenium-server-standalone-???.jar"
+    SET JAVAEXE="%SELENIUM_PLUS%/Java/bin/java.exe"
+    %JAVAEXE% -cp %CMDCLASSPATH% org.safs.selenium.spc.WDSPC
+</pre></ul>
+Note: The Eclipse Plug-In is scheduled to do this for you in the future.
+<p>
+<h3>Usage:</h3>
+Selenium Process Container is made to "reconnect" to existing WebDriver sessions.&nbsp;&nbsp;But it can also launch new sessions with the URL and Browser you specify.
+<p>
+<b>Click an item in the image map below to get specific information on it. &nbsp;Click the image background to see all info below.</b>
+<p>
+<center><img src="./images/WebDriverProcessContainer.png" usemap="#spcmap"/></center>
+<map id="spcmap" name="spcmap">
+    <area id="url_field"  coords="185,33,623,60" alt="Enter the Application URL here" title="Enter the Application URL here." href="#url_field" shape="rect" >
+    <area id="browser_type" coords="626,33,701,60" alt="Select the Browser to launch" title="Select the Browser to launch." href="#browser_type" shape="rect" >
+    <area id="start_button" coords="705,33,769,60" alt="Launch the Browser with the URL" title="Launch the Browser with the URL." href="#start_button" shape="rect" >
+    <area id="stop_button" coords="772,33,834,60" alt="Close the launched Browser session" title="Close the launched Browser session." href="#stop_button" shape="rect" >
+
+    <area id="find_windows" coords="55,71,169,97" alt="Click to Get Current Window Titles" title="Click to Get Current Window Titles." href="#find_windows" shape="rect" >
+    <area id="current_windows" coords="183,71,596,97" alt="List of Current Window Titles" title="List of Current Window Titles." href="#current_windows" shape="rect" >
+    <area id="frames" coords="609,71,970,97" alt="List of Known Frames in Browser" title="List of Known Frames in Browser" href="#frames" shape="rect" >
+
+    <area id="short_strings" coords="206,107,302,128" alt="Try SHORT Recognition Strings" title="Try SHORT Recognition Strings." href="#short_strings" shape="rect" >
+    <area id="visible_only" coords="310,107,400,128" alt="Process VISIBLE elements only." title="Process VISIBLE elements only." href="#visible_only" shape="rect" >
+    <area id="clickmode_props" coords="404,110,548,128" alt="Click Mode Clicks Also Show Properties" title="Click Mode Clicks Also Show Properties" href="#clickmode_props" shape="rect" >
+    <area id="search_button" coords="558,107,634,133" alt="!Click to eval ALL window elements!" title="!Click to eval ALL window elements!" href="#search_button" shape="rect" >
+    <area id="cancel_button" coords="637,107,711,133" alt="Cancel eval of ALL window elements" title="Cancel eval of ALL window elements." href="#cancel_button" shape="rect" >
+    <area id="save_button" coords="716,107,822,133" alt="Save recognition strings to App Map" title="Save recognition strings to App Map." href="#save_button" shape="rect" >
+
+    <area id="clickmode_button" coords="13,141,152,168" alt="Activate single-element Click Mode for 10 seconds" title="Activate single-element Click Mode for 10 seconds." href="#clickmode_button" shape="rect" >
+    <area id="recognition_field" coords="154,141,624,168" alt="Interactive Recognition Playground" title="Interactive Recognition Playground." href="#recognition_field" shape="rect" >
+    <area id="find_element" coords="628,141,734,168" alt="Try to find component using recognition string" title="Try to find component using recognition string." href="#find_element" shape="rect" >
+    <area id="set_button" coords="738,141,792,168" alt="Set/Accept Recognition for the Map." title="Set/Accept Recognition for the Map." href="#set_button" shape="rect" >
+    <area id="seek_button" coords="796,141,910,168" alt="Seek Children of Selected Element" title="Seek Children of selected Element" href="#seek_button" shape="rect" >
+    <area id="properties_button" coords="915,141,1009,168" alt="Show Properties Dialog for the selected Element" title="Show Properties Dialog for the selected Element" href="#properties_button" shape="rect" >
+
+    <area id="preview_pane" coords="10,175,400,336" alt="Interactive Preview Screenshot" title="Interactive Preview Screenshot." href="#preview_pane" shape="rect" >
+    <area id="element_tree" coords="410,175,1015,336" alt="Interactive Element Hierarchy" title="Interactive Element Hierarchy." href="#element_tree" shape="rect" >
+
+    <area id="status_bar" coords="5,338,1021,366" alt="Status Bar info" title="Status Bar info." href="#status_bar" shape="rect" >
+
+    <area id="container" coords="0,0,1024,370" onclick="showAllContentPanels()">
+</map>
+<p>
+<ol>
+<a name="url_field"/><p><div id="url_field_panel">
+<span class="spc_screen url_field"></span>
+Enter or select the full URL to the app to launch.<br>
+The list will remember previous launches allowing you to simply select from the list instead.<br>
+The list is maintained in history.dat in the project folder.
+</div>
+<a name="browser_type"/><p><div id="browser_type_panel">
+<span class="spc_screen browser_type"></span>
+Select which browser to use for the new browser session.
+</div>
+<a name="start_button"/><p><div id="start_button_panel">
+<span class="spc_screen start_button"></span>
+Click Start to launch the selected URL in the selected browser session.<br>
+Following a successful launch, the Current Windows list should automatically update
+with the current titles of all currently registered WebDriver browser sessions.
+</div>
+<a name="stop_button"/><p><div id="stop_button_panel">
+<span class="spc_screen stop_button"></span>
+Click Stop to close the session selected in the Current Windows list.<br>
+This will likely be disabled in the future to allow test reconnection to a running session.<br>
+In that case, closing the browser itself will be required to end the session.
+</div>
+<a name="find_windows"/><p><div id="find_windows_panel">
+<span class="spc_screen find_windows"></span>
+Updates the list of the currently available WebDriver window titles.<br>
+The user should use Find Windows to refresh the list any time they manually interact
+with a WebDriver browser which navigates the browser to a new page with a new title--
+such as the new page loaded AFTER logging in to an application via a Login page.
+</div>
+<a name="current_windows"/><p><div id="current_windows_panel">
+<span class="spc_screen current_windows"></span>
+Shows the currently available window titles.<br>
+This list is automatically refreshed anytime a new WebDriver browser session is started.<br>
+The user should also use Find Windows to refresh the list any time they manually interact
+with a WebDriver browser which navigates the browser to a new page with a different title--
+such as the new page loaded AFTER logging in to an application via a Login page.
+</div>
+<a name="frames"/><p><div id="frames_panel">
+<span class="spc_screen frames"></span>
+Shows the currently available browser frames.<br>
+This list is automatically refreshed anytime a browser Search locates frames or iframes in the browser.<br>
+Certain actions or interactions, like Click Mode clicks, only work in the currently selected Frame.
+</div>
+<a name="search_button"/><p><div id="search_button_panel">
+<span class="spc_screen search_button"></span>
+Click Search to process ALL objects on the selected Window.<br>
+This takes a new Preview screenshot of the application window as it begins processing.<br>
+On complex pages this Search can take a VERY long time since ALL elements on the page are processed.<br>
+"START Click Mode" processing for individual elements may be a better alternative on such complex pages.
+</div>
+<a name="cancel_button"/><p><div id="cancel_button_panel">
+<span class="spc_screen cancel_button"></span>
+Click Cancel to stop full page processing that is taking to long.<br>
+"START Click Mode" processing for individual elements may be a better alternative on such complex pages.
+</div>
+<a name="save_button"/><p><div id="save_button_panel">
+<span class="spc_screen save_button"></span>
+Used to save the stored recognition strings to an App Map.<br>
+This would normally be done once the user is satisfied with all the recognition strings stored
+for each element in the hierarchy Tree.
+</div>
+<a name="short_strings"/><p><div id="short_strings_panel">
+<span class="spc_screen short_strings"></span>
+Select/Check if you want Process Container to attempt to use the shortest recognition strings
+(last child only) when searching for an element in the browser.<br>
+Short strings are most desirable if they are unique across the application. &nbsp;
+If the short string is too generic, the user can edit it to add more of the hierarchy without
+requiring the entire full XPath.
+</div>
+<a name="visible_only"/><p><div id="visible_only_panel">
+<span class="spc_screen visible_only"></span>
+Select/Check if you want Process Container to only "see" and capture information on visible elements
+and to ignore elements that are hidden.<br>
+This does not mean only elements that are visible to you in the browser at this time. &nbsp;It includes
+all elements that are set to be visible (not hidden) even though they may be scrolled out of the bounds
+of the viewport. &nbsp;Ignoring hidden elements gives us a more accurate point-and-click interaction with
+the application in its current state.
+<p>
+However, there are times when you DO want to know about and gather information (properties?) on objects
+that are set to "hidden".  When that is the case, uncheck this box.  This is MOST effective AFTER having
+a hierarchy of "visible" components.  You can then uncheck this box, select an item in the tree hierarchy,
+and then use "Seek Children" to find hidden children of the selected component.
+</div>
+<a name="clickmode_props"/><p><div id="clickmode_props_panel">
+<span class="spc_screen clickmode_props"></span>
+Select/Check if you want Process Container to automatically retrieve and show a Properties panel for
+each item selected during Click Mode.
+</div>
+<a name="clickmode_button"/><p><div id="clickmode_button_panel">
+<span class="spc_screen clickmode_button"></span>
+"START Click Mode" used to select a specific individual element on the browser page.<br>
+This takes a new Preview snapshot of the application window as it begins processing.<br>
+Click Mode captures are active until a browser element is clicked or an internal 10 second
+timeout is reached. &nbsp;The button changes to "STOP Click Mode" allowing the user to abort the mode
+before the timeout is reached.<br>
+Clicking a browser element while active will capture relevant information for the element and attempt
+to extract/create a full path recognition string for the element. &nbsp;The tool will also then
+attempt to highlight the component in both the Preview pane and the browser window.<br>
+A successful highlight of the correct browser element AFTER the click suggests the recognition string
+used will work to find the correct element at runtime. &nbsp;If the wrong element (or no element) is
+highlighted in the browser window then the stored recognition string needs to be edited to find the
+correct element.
+</div>
+<a name="recognition_field"/><p><div id="recognition_field_panel">
+<span class="spc_screen recognition_field"></span>
+Will populate with the found recognition string for the selected browser element in Click Mode,
+or with the stored recognition string of the selected hierarchy Tree node if that was selected.<br>
+The user can experiment editing this recognition string and using the <b>Find Element</b> button to test
+if the edited recognition string finds the correct element (if any) in the browser window.<br>
+During certain Recognition modes of editing, the Recognition field will display the edited value
+of the recognition string while the Status Bar will display the unedited full xpath value of the
+recognition string.<br>
+Once we are certain the Recognition string is "good" use the <b>Set</b> button to store the Recognition
+string as the default recognition string to be saved in the Map.
+</div>
+<a name="find_element"/><p><div id="find_element_panel">
+<span class="spc_screen find_element"></span>
+Click Find Element to attempt to find and highlight the element in the browser using the current
+recognition string displayed in the Recognition editor.<br>
+The user can experiment editing the recognition string and using this button to test
+if the edited recognition string finds the correct element (if any) in the browser window.<br>
+Once we are certain the Recognition string is "good" use the <b>Set</b> button to store the Recognition
+string as the default recognition string to be saved in the Map.
+</div>
+<a name="set_button"/><p><div id="set_button_panel">
+<span class="spc_screen set_button"></span>
+Used to set the current Recognition string as the one to be used in the App Map.<br>
+Once the string in the <b>Recognition</b> field has been verified with <b>Find Element</b> to
+accurately find the right element, use <b>Set</b> to flag that string as the one to be saved
+in the App Map when <b>Save Map</b> is performed.
+</div>
+<a name="seek_button"/><p><div id="seek_button_panel">
+<span class="spc_screen seek_button"></span>
+Used after a node in the element hierarchy panel has been selected. Activates the seeking and processing
+of child components of the selected element in the hierarchy panel.  This is often used after a broad
+hierarchy of the visible components has been found. The user can then deselect the "Visible Only" checkbox
+and learn about hidden child components, if any.
+</div>
+<a name="properties_button"/><p><div id="properties_button_panel">
+<span class="spc_screen properties_button"></span>
+Used after a node in the element hierarchy panel has been selected. Activates the capturing and display of
+all known object properties (attributes and other attainable properties) in a Node Info dialog box.
+</div>
+<a name="preview_pane"/><p><div id="preview_pane_panel">
+<span class="spc_screen preview_pane"></span>
+Holds the last screenshot taken with the last Search or Click Mode capture.<br>
+The app will attempt to highlight items in the Preview pane when the element hierarchy Tree
+is populated with elements for the page.<br>
+If the element hierarchy Tree is populated, the user can also click items in the Preview pane
+to locate and select the corresponding item in the hierarchy Tree. &nbsp;The element matching the
+selected item will also be sought and highlighted in the browser window. &nbsp;
+A successful highlight of the correct browser element AFTER the Preview pane click suggests the
+recognition stored for the corresponding item in the hierarchy Tree will work to find
+the correct element at runtime. &nbsp;If the wrong element (or no element) is highlighted in the
+browser window then the stored recognition string needs to be edited to find the correct element.
+</div>
+<a name="element_tree"/><p><div id="element_tree_panel">
+<span class="spc_screen element_tree"></span>
+Stores information on each element in the page hierarchy known to the tool.<br>
+This is usually populated after the completion of a Search for all page elements.<br>
+In the future, this may also get populated with items found resulting from "START Click Mode".<br>
+The user can click items in the Tree and the corresponding item in the Preview pane and in the
+browser window should get highlighted. &nbsp;The Recognition editor should be populated with the
+stored recognition string for the selected Tree node.<br>
+A successful highlight of the correct browser element AFTER the Tree node click suggests the
+recognition stored for that node will work to find the correct element at runtime. &nbsp;
+If the wrong element (or no element) is highlighted in the browser window then the stored
+recognition string for that Tree node needs to be edited to find the correct element.
+</div>
+<a name="status_bar"/><p><div id="status_bar_panel">
+<span class="spc_screen status_bar"></span>
+Used to display status and other informatio--like recognition strings--during processing and
+interactive use of the Preview pane, hierarchy Tree, and other UI elements.
+</div>
+</ol>
+<p><hr>
+</body></html>

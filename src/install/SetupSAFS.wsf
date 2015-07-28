@@ -1,0 +1,496 @@
+<job id="SetupSAFS" >
+<script language="VBScript" src="_SharedFunctions.vbs"/>
+<script language="VBScript" >
+
+'******************************************************************************
+'* 
+'* SetupSAFS.WSF  --  *** MUST BE RUN WITH 32-BIT WSH on 64-BIT SYSTEMS ***
+'*
+'* Setup of tool-independent SAFS services and required STAF environment.
+'* SAFS now includes an embedded 32-bit Java JVM to be used with 32-bit STAF 3.x.
+'* 
+'* Required assets for this install:
+'* 
+'*     _SharedFunctions.VBS     - must exist in the same directory as this script
+'*     _SharedRationalFunctions.vbs
+'*     SetupRationalClasspath.wsf
+'*     SetupSAFSClasspath.wsf
+'*     SetupSTAFClasspath.wsf
+'*     SetupTCAFS.wsf
+'*     RemoveRationalClasspath.wsf
+'*     RemoveSTAFClasspath.wsf
+'*     RemoveSAFSClasspath.wsf
+'*     SAFSInstall.jar                - Java setup program for SAFS and STAF
+'*     SAFSInstall.zip                - SAFS files to be installed
+'*     STAF3411-setup-win32-NoJVM.exe - STAF 3 InstallShield Installer
+'*     
+'* The install can begin from any directory, but all the above assets must 
+'* exist in that same directory.
+'* 
+'* 
+'* Default Installation Destination Directories:
+'*     
+'*     SAFS  -  C:\SAFS
+'*     STAF  -  C:\STAF
+'*     
+'* Environment variables may be modified by this script.  Prior to making 
+'* any modification, the current value of the environment variable is saved in 
+'* a "*_SAFSBAK" backup environment variable.  Note, this backup only occurs 
+'* once--the first time we detect that no backup has been done previously.
+'* 
+'* The affected environment variables and their backups are listed below:
+'* 
+'*     VARIABLE          BACKUP VARIABLE     PURPOSE
+'*     ============      ===============     ==================================
+'*     PATH              PATH_SAFSBAK        Search path for executables
+'*     CLASSPATH         CLASSPATH_SAFSBAK   Search path for Java classes
+'*     SAFSDIR           <none>              Root install directory for SAFS
+'*     STAFDIR           <none>              Root install directory for STAF
+'*     TESSDATA_PREFIX   <none>              Root install directory for tesseract ocr
+'*     TESTCOMPLETE_HOME <none>              Root install directory for Test Complete
+'*     ROBOTIUMRC_HOME   <none>              Root install directory for SAFS Robotium Support
+'* 
+'* JAR files added to CLASSPATH as appropriate:
+'*
+'*     \lib\safs.jar 
+'*     \bin\JSTAF.jar 
+'* 
+'* Optional script parameters:
+'*     
+'*     -silent  (future) 
+'*     
+'*            All installs are "silent" (GUI-less) at this time.
+'*     
+'*     -safs <alternate path> 
+'*     
+'*           Allows the user to specify an alternate install destination.
+'*           Ex: -safs "d:\AltSAFSDir"
+'*     
+'*     -staf <alternate path>
+'*           
+'*           Allows the user to specify an alternate install destination.
+'*           Ex: -staf "d:\AltSTAFDir"
+'*     
+'*     -nostaf
+'*     
+'*           Do not install STAF at this time.
+'*           NOTE: SAFS STAF services and the RobotJ engine will not function 
+'*           without STAF.
+'*     
+'*     -nosafs
+'*     
+'*           Do not install SAFS at this time.
+'*           NOTE: SAFS STAF services and the RobotJ engine will not function 
+'*           without the SAFS install.
+'*     
+'*     -norational
+'*     
+'*           Do not process support for IBM Rational tools at this time.
+'*           NOTE: the RobotJ engine will not function without this install.
+'*     
+'*     -notcafs
+'*     
+'*           Do not process support for Automated QA Test Complete at this time.
+'*           NOTE: the TCAFS engine may not function without this install.
+'*     
+'*     -noocr
+'*     
+'*           Do not process support for Image-Based Testing OCR. [C:\SAFS\ocr]
+'*     
+'*     -noprompt
+'*     
+'*           Proceed with installation without prompting for approval.
+'*
+'*     -installstafversion installstafversion
+'*
+'*           If -nostaf is not present, this indicate the version of STAF to
+'*			 be installed.
+'*           Ex: -installstafversion 3  (STAF V2 is no longer supported for install)
+'*
+'*     -removestaf installedstafdir stafMajorVersionTobeRemoved
+'*
+'*           If you want to uninstall a previously installed STAF, you can use
+'*           this option.
+'*           installedstafdir indicate the installed directory like C:\STAF\
+'*           stafMajorVersionTobeRemoved indicate the major version of STAF, like 2 or 3
+'*           Ex: -removestaf "C:\STAF" 2
+'*
+'* These parameters are used both by this script and the Java installer the 
+'* script invokes.
+'* 
+'* Author: Carl Nagle
+'* Original Release: OCT 23, 2003
+'*         (Carl Nagle): DEC 19, 2003  Updated for Release2003.12.19
+'*         (Carl Nagle): AUG 03, 2004  Updated for Release2004.08.13
+'*         (Carl Nagle): AUG 11, 2004  Added the ability to bypass the user prompt
+'*                                 and the addition of safsrational.jar
+'*         (Carl Nagle): OCT 03, 2004  Fixed some bad prompts for SAFS-only installs.
+'*         (Carl Nagle): DEC 13, 2004  Eliminated most informational popup dialogs.
+'*         (DPERRY): DEC 13, 2004  Abort\Report Downrev Java version.
+'*         (Carl Nagle): AUG 15, 2005  Added call to SetupRationalClasspath.VBS
+'*         (Carl Nagle): JAN 04, 2006  Conversion to WSF script for new release mechanism.
+'*         (Carl Nagle): FEB 01, 2006  Adding install of DDVariableStore.DLL and STAFWrap.DLL
+'*         (Carl Nagle): APR 12, 2007  Adding install of ComponentFunctions.DLL
+'*         (LeiWang):JUL 10, 2009  Adding install of STAF3.3.3, two command options: -installstafversion and -removestaf.
+'*         (JunwuMa):JUL 21, 2009  Updates to modify hard-coded safs path in released files suffixed with '.ini' or '.bat'.
+'*         (Carl Nagle): OCT 06, 2009  Updates to use NoJVM version of STAF333 installer.
+'*         (Carl Nagle): JAN 15, 2010  Updates to invoke SAFS\ocr\setOCREnv.wsf as part of the install.
+'*         (Carl Nagle): JUL 13, 2010  Updates to invoke TCAFS support as part of the install.
+'*         (Carl Nagle): AUG 02, 2012  Updates to use NoJVM version of STAF3410 installer and Android Support.
+'*         (Carl Nagle): OCT 08, 2013  Updates supporting embedded 32-bit JVM and 32-bit STAF 3.4.11.
+'*     
+'* Copyright (C) SAS Institute
+'* General Public License: http://www.opensource.org/licenses/gpl-license.php
+'******************************************************************************
+
+Dim shell, env, fso
+Dim exec
+Dim args
+
+Dim numerrors, message, response
+
+Dim currentJavaVersion, currentJavaMinorVersion
+Dim currentstafversion, current_staf_major_version, stafversion_to_install
+Dim stafprocexe, stafexe, stafinstallexe
+Dim javaexe
+
+Dim stafdir, stafenv, staftitle, original_stafdir
+Dim safsdir, safsenv, safstitle, droidsdk, droidenv
+Dim installstaf, installsafs, removestaf
+Dim installocr, ocrtitle, ocrdir
+Dim installrational, rationaltitle
+Dim installtcafs, tcafstitle
+Dim ddvariable, stafwrap, cfdll
+Dim prompt, toDebug
+
+CONST good_java_major = "1"
+Const good_java_minor = "5"
+
+CONST OK_BUTTON_CLICKED=1
+CONST CANCEL_BUTTON_CLICKED=2
+CONST ABORT_BUTTON_CLICKED=3
+CONST RETRY_BUTTON_CLICKED=4
+CONST IGNORE_BUTTON_CLICKED=5
+CONST YES_BUTTON_CLICKED=6
+CONST NO_BUTTON_CLICKED=7
+
+Dim cr
+Dim q
+Dim nl
+Dim newline
+
+cr        = chr(13)   'carriage return
+q         = chr(34)   'double quote
+nl		  = chr(10)		'next line
+newline   = cr & nl		'use "carriage return" and "next line" to form a newline
+stafenv   = "STAFDIR" 'Environment Variable for STAF root directory.
+safsenv   = "SAFSDIR" 'Environment Variable for SAFS root directory.
+droidenv  = "ROBOTIUMRC_HOME"
+
+stafinstallexe = "STAF3411-setup-win32-NoJVM.exe"
+
+numerrors = 0
+'set prompt to false if you do not want see debug message
+prompt = true
+toDebug = false
+
+staftitle = "STAF Framework Install"
+stafdir = "C:\STAF"
+installstaf = true
+removestaf = false
+stafversion_to_install=3
+currentstafversion="0.0.0"
+
+safstitle = "SAFS Framework Install"
+safsdir = "C:\SAFS"
+installsafs = true
+
+rationaltitle = "IBM Rational Functional Tester Support"
+installrational = true
+
+tcafstitle = "SmartBear TestComplete Support"
+installtcafs = true
+
+ocrtitle = "SAFS Text OCR Support"
+installocr = true
+
+droidsdk = ""
+
+WScript.Interactive = True
+
+Set shell = WScript.CreateObject("WScript.Shell")
+Set env   = shell.Environment("SYSTEM")
+Set fso   = WScript.CreateObject("Scripting.FileSystemObject")
+Set args  = WScript.Arguments
+
+Dim arg
+Dim lcarg, cmdline, wshexe
+
+wshexe = getSystem32Dir() &"\cscript.exe"
+javaexe = getEmbeddedJavaPath()
+
+'=====================            CHECK JAVA VERSION        ===============================================
+currentJavaVersion = getJavaVersion()
+currentJavaMinorVersion = getMinorVersion(currentJavaVersion)
+debug("currentJavaVersion: " & currentJavaVersion & cr & "currentJavaMinorVersion: " & currentJavaMinorVersion)
+
+response = checkJavaVersion(good_java_major, good_java_minor)
+if response < 0 then WScript.Quit
+'==========================================================================================================
+
+droidsdk = env("ANDROID_HOME")
+if (Len(droidsdk) = 0) then droidsdk = "<path-to-android-sdk>"
+
+cmdline = javaexe &" -jar SAFSInstall.jar "
+
+'use previous install SAFS and STAF directories if existing
+'==========================================================
+arg = ""
+arg = env(stafenv)
+if Len(arg)> 0 then stafdir = arg
+
+arg = ""
+arg = env(safsenv)
+if Len(arg)> 0 then safsdir = arg
+
+'reset/clear variable
+arg=""
+
+' loop thru all args
+' change stafdir and safsdir as necessary
+' also make a single cmdline string
+'======================
+For i = 0 to args.Count -1
+    arg = args(i)
+        
+    'remove any trailing '\' or '/'
+    '====================================================
+    if ((Right(arg,1)="\")or(Right(arg,1)="/")) then
+        arg = Left(arg, Len(arg)-1)
+    end if
+    
+    lcarg = lcase(arg)
+    
+    'wrap cmdline args in quotes if embedded space exists
+    '====================================================
+    if InStr(1, arg, " ", 1) > 0 then
+        cmdline = cmdline &""""& arg &""" "
+    else
+        cmdline = cmdline & arg & " "
+    end if
+    
+    'check safsdir and stafdir alternate install locations
+    '====================================================
+    if (arg = "-staf") then
+        if ( i < args.Count -1) then
+            stafdir = args(i+1)
+            if ((Right(stafdir,1)="\")or(Right(stafdir,1)="/")) then
+                stafdir = Left(stafdir, Len(stafdir)-1)
+            end if
+        end if
+        
+    elseif (arg = "-safs") then
+        if ( i < args.Count -1) then
+            safsdir = args(i+1)
+            if ((Right(safsdir,1)="\")or(Right(safsdir,1)="/")) then
+                safsdir = Left(safsdir, Len(safsdir)-1)
+            end if
+        end if
+
+    elseif (arg = "-installstafversion") then
+        if ( i < args.Count -1) then
+        	'The default version is 3. If option -nostaf is present, this takes no effect.
+   			stafversion_to_install  = args(i+1)
+        end if
+
+    elseif (arg = "-removestaf") then
+        if ( i < args.Count -2) then
+        	removestaf = true
+            original_stafdir = args(i+1)
+            current_staf_major_version = args(i+2)
+            if ((Right(original_stafdir,1)="\")or(Right(original_stafdir,1)="/")) then
+                original_stafdir = Left(original_stafdir, Len(original_stafdir)-1)
+            end if
+        end if
+        
+    elseif (arg = "-nosafs") then 
+        installsafs = false
+        
+    elseif (arg = "-nostaf") then 
+        installstaf = false
+
+    elseif (arg = "-norational") then 
+        installrational = false
+
+    elseif (arg = "-notcafs") then 
+        installtcafs = false
+
+    elseif (arg = "-noocr") then 
+        installocr = false
+
+    elseif (arg = "-noprompt") then 
+        prompt = false
+        WScript.Interactive = false
+    end if    
+Next
+
+'=====================================
+'==   Allow User to Cancel Setup   === 
+'=====================================
+if ((prompt)AND(installsafs)) then
+		'Call safsSetupWizard to let user decide if install SAFS
+		'if command line's option -safs <altdirectory> is set, safsdir is changed with altdirectory""
+		'safsdir is target safs directory at any time for installation
+		response = safsSetupWizard(safsdir)
+
+    if (response = 0) then  ' User intends not to install SAFS
+        installsafs = false
+        cmdline = cmdline & " -nosafs"
+    end if
+
+end if
+
+if((prompt)AND(installstaf)) then 
+    '=====================            CHECK STAF VERSION        ==================================
+    'Check If STAF is installed, and check its version.
+    'Three variables will be set: removestaf, installstaf, stafversion_to_install
+    '
+    'If STAF is installed:
+    '		If version 2 is installed: Popup message "STAF 3 is available", Popup "Install STAF 3.4.11 
+    '		If version 3 is installed: installstaf=false
+
+    'First get the environment stafenv, if can not get it, which means STAF is not installed yet.
+    arg = ""
+    arg = env(stafenv)
+    if Len(arg)> 0 then
+	original_stafdir = arg
+	stafprocexe = original_stafdir & "\bin\STAFProc.exe"
+	stafexe = original_stafdir & "\bin\STAF.exe"
+	debug("stafprocexe: " & stafprocexe & cr & "stafexe: " & stafexe)
+	if (fso.FileExists(stafexe) AND fso.FileExists(stafprocexe)) then
+	    currentstafversion = getSTAFVersion(stafprocexe,stafexe)
+	end if
+    end if
+
+    debug("currentstafversion: " & currentstafversion)
+
+    current_staf_major_version = getMajorVersion(currentstafversion)
+
+    debug("current_staf_major_version: " & current_staf_major_version)
+
+    if (current_staf_major_version = "0") then
+	debug("No staf installed.")
+	installstaf=true
+        stafversion_to_install=3
+    elseif (current_staf_major_version = "2") then
+	debug("Current STAF Major version is 2.")
+	'4=Show Yes and No buttons. 32=Show "Question Mark" icon.
+	message = "Current STAF Major version is " & currentstafversion & "." & cr
+	message = message & "STAF 3 is available." & cr & " Install STAF 3.4.11 (STAF 2 will be removed)? "
+	response = shell.Popup (message, 0, staftitle, 4+32)
+
+	if(response=YES_BUTTON_CLICKED) then
+	    removestaf = true
+	    installstaf = true
+	    stafversion_to_install=3
+	else
+	    removestaf = false
+	    installstaf = false
+	end if	
+
+    elseif (current_staf_major_version = "3") then
+	debug("Current STAF Major version is 3.")
+	'WScript.Echo "STAF " & currentstafversion & " was found. STAF will not be installed again."
+	installstaf=false
+    end if
+
+    debug("currentstafversion: " & currentstafversion & cr & " removestaf:" & removestaf & cr & " installstaf:" & installstaf & cr & " stafversion_to_install:" & stafversion_to_install)
+
+end if
+
+
+'=========================================================
+'==   Here we will set removestaf, stafversion_to_install
+'==   If we set these in the prompt, it will add option "-installstafversion" or "-removestaf"
+'==   second time, it will override the first option.
+'=========================================================
+If(installstaf) Then	
+	cmdline = cmdline & " -installstafversion " & stafversion_to_install
+Else
+	cmdline = cmdline & " -nostaf"
+End If
+
+if(NOT installtcafs) then cmdline = cmdline &" -notcafs"
+
+If(removestaf) Then
+	cmdline = cmdline & " -removestaf " & original_stafdir & " " & current_staf_major_version
+End If
+
+
+' comment these 3 lines out for production distribution
+'========================================================
+'========================================================
+'========================================================
+'if(prompt) then shell.Popup "SAFS InstallDir: "& safsdir,3, safstitle, 0
+'if(prompt) then shell.Popup "Java Invocation: "& cmdline,4, safstitle, 0
+'WScript.Quit
+'========================================================
+'========================================================
+'========================================================
+
+
+' invoke java -jar SAFSInstall.jar command-line args
+'===================================================
+if ((installsafs) OR (installstaf) OR (removestaf) OR (installtcafs)) then
+
+    On Error Resume Next
+    Set exec = shell.Exec(cmdline)
+
+    If Err.Number <> 0 then
+        WScript.Interactive = True
+        shell.Popup "Error <"& CStr(Err.Number) &":"& Err.Description &"> occurred while trying to launch Java.",0, "Installation Aborted.",16
+        Wscript.Quit    
+    End if
+
+    On Error Goto 0
+
+    arg = ""
+    Do While Exec.Status = 0
+        arg = arg & readall(exec)
+        WScript.Sleep(3000)
+    Loop
+
+    WriteFileContent "SAFSInstallConsole.log", arg
+    
+    if Exec.ExitCode <> 0 then 
+        if (prompt) then 
+            message = "Installation did NOT complete successfully."& cr & cr
+            message = message &"Manual cleanup of "& safsdir &" may be necessary."& cr & cr
+            message = message &"Consult the SAFSInstallConsole.log in the zip extraction "& cr
+            message = message &"directory for more details about the error."
+            shell.Popup message,0,safstitle,64
+        end if
+        Wscript.Quit    
+    end if
+end if
+
+
+
+'Create program group for SAFS
+'=============================
+if (installsafs) then
+	createSAFSProgramGroup(safsdir)
+	shell.Popup "SAFS program group Created.",2,safstitle,64
+end if
+
+if((installsafs)OR(installstaf)OR(installrational)) then 
+    if (prompt) then 
+        message = "Installation Complete." & cr & cr
+        shell.Popup message,0,safstitle,64
+    end if
+else
+    if (prompt) then shell.Popup "Nothing Installed.",0,safstitle,64
+end if
+
+</script>
+</job>

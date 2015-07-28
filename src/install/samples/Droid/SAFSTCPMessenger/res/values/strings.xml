@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SAFS TCP Messenger</string>
+    <string name="service_startup">Starting SAFS TCP Messenger</string>    
+</resources>

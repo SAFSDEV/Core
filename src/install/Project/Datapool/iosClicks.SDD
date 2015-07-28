@@ -1,0 +1,16 @@
+
+C, OnGuiNotExistGotoBlockID, NotReady, UICatalog, Buttons, 10, ^detail="Main Window Buttons not present in timeout period."
+T, UICatalog, Buttons,    Click
+T, UICatalog, BackButton, Tap, "Coords=90 50"
+T, UICatalog, Buttons,    TwoFingerTap
+T, UICatalog, BackButton, DoubleTap, "0;0"
+T, UICatalog, Buttons,    DoubleClick, "100 100"
+T, UICatalog, BackButton, Press
+T, UICatalog, Buttons,    Press, 2
+T, UICatalog, BackButton, Press
+
+C, ExitTable
+;-----------
+
+B, NotReady
+C, LogTestFailure, "UICatalog UI state may not be as expected.", ^detail

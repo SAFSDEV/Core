@@ -1,0 +1,214 @@
+<HTML>
+<HEAD><TITLE>SetupSelenium.README</TITLE></HEAD>
+<BODY>
+<a name="top"/>
+<h1>SetupSelenium.README</h1>
+<p><pre>
+==========================================================================
+Author: Carl Nagle
+UPDATED: July 31, 2007
+
+Copyright (C) SAS Institute
+<a href="http://www.opensource.org/licenses/gpl-license.php" target="reference">General Public License</a>: http://www.opensource.org/licenses/gpl-license.php
+==========================================================================
+</pre>
+<p>
+<small>
+<a href="#safsexecution">Configure for Execution</a>&nbsp;,&nbsp;
+<a href="#safsdevelopment">Configure for Development</a>
+</small>
+<p>
+<ol>
+<li><h3>STAF and SAFS Required:</h3>
+<p>
+These instructions assume the tester has already installed STAF and SAFS services via the
+SetupSAFS script (or alternative methods).&nbsp; If this is not the case, please refer
+to the <a href="SetupSAFS.README.htm">SetupSAFS.README</a> file for information on the SAFS
+setup procedure.<br>
+Note: If you have installed RRAFS for Rational Robot, SetupSAFS is automatically invoked by
+the standard SetupRRAFS install script unless the user cancels the SAFS install when prompted.
+<p>
+<center><b>The SAFS/DriverCommands and SAFS/Selenium engines will not function <br>
+if STAF and associated services are not properly installed.</b></center>
+<p>
+SAFS uses Selenium Remote Control using Selenium's Java Client Driver.  The Selenium server is used in
+Proxy Injection Mode via <b>localhost:4444</b>.  No other proxy web server is necessary and Selenium does not have
+to be installed on your application's web server.
+<p><ul><i>A future release of SAFS/Selenium will allow the user to configure the Selenium Server to run on a port
+other than 4444 to minimize conflicts with other software wishing to use that port.</i></ul>
+<p>
+We will not attempt to duplicate information on setting up Selenium for general testing.&nbsp;
+Information for using Selenium outside the context of SAFS can be found on the
+<a href="http://www.openqa.org/selenium/" target="_blank">Selenium website</a> at OpenQA.org.
+<p>
+<a name="safsexecution"/>
+<small>
+<a href="#top">Back to Top</a>&nbsp;,&nbsp;
+<a href="#safsdevelopment">Configure for Development</a>
+</small><p>
+<li><h3>Configure Selenium for simple SAFS Execution:</h3>
+<p>
+If all you want to do is run the SAFS/Selenium engine then setup is
+fairly simple.  Briefly, it requires these steps which are discussed in more detail
+immediately following:
+<p>
+<UL>
+   <li type="disc"><a href="http://www.openqa.org/selenium-rc/download.action"
+   target="_blank">Download Selenium RC (Remote Control) ZIP file</a> (min. Version 0.9.0)
+   <li type="disc">Extract listed JARS to desired runtime location:
+   <ul><p>
+   selenium-server.jar<br/>
+   selenium-java-client-driver.jar<br/>
+   </ul><p>
+   <li type="disc">Add Selenium JAR files to the system CLASSPATH
+   <li type="disc">Add safsselenium.jar to the system CLASSPATH
+</UL>
+<p>
+<UL><b>Now the Details:</b>
+<p>
+  <li>Add Selenium JAR files to the system CLASSPATH:
+<p><ul>
+	  <li>&lt;path-to>\selenium-server.jar<br/>
+	  This is normally where you installed or extracted Selenium.
+<p>
+	  <li>&lt;path-to>\selenium-java-client-driver.jar<br/>
+	  This is normally where you installed or extracted Selenium.
+   </ul>
+<p>
+  <li>Add safsselenium.jar to the system CLASSPATH
+  <p>
+  <ul>
+<p>
+	  <li>&lt;path-to>\safsselenium.jar<br/>
+	  This is normally in the C:\SAFS\lib directory.
+  </ul>
+<p>
+  <li><b>To use with RRAFS:</b>
+  <p>
+  The Project <b>RRAFS.INI</b> file -- by default located in the
+  "C:\SAFS\Project\Datapool\Runtime" directory -- should be copied into your Robot project's
+  Datapool\Runtime directory.&nbsp;  Then you can proceed with providing the correct
+  settings consistent with your project.  Below we show only those settings that may need editing.  Any other settings as shown in the RRAFS.INI are still necessary.
+<p><pre>
+[SAFS_SELENIUM]
+AUTOLAUNCH=TRUE
+;========================================
+;= Java JVM must be 1.5 or greater
+;= not needed if "java" finds 1.5 in PATH
+;========================================
+JVM="C:\Java_15\bin\java.exe"
+
+;========================================================
+;= Uncomment the browser to use
+;= Selenium bug prevents *piiexplore and *pifirefox usage
+;========================================================
+;BROWSER="*custom C:\Program Files\Internet Explorer\IEXPLORE.EXE"
+;BROWSER="*custom C:\Program Files\&lt;path to>\FIREFOX.EXE"
+
+;=====================================================
+;= specify Selenium proxyInjectMode forwarding gateway
+;= the true gateway selenium needs to the internet\WAN
+;=====================================================
+PROXY=your.normal.gateway.com
+PORT=80
+</pre>
+<p>
+  <li><b>To use with SAFSDRIVER:</b>
+  <p>
+  Provide the settings consistent with your project's SAFSTID.INI or &lt;unique-test>.INI files.
+  Below we show only those settings that may need editing.
+<p><pre>
+[SAFS_ENGINES]
+First=org.safs.tools.engines.SAFSSELENIUM
+   or
+Second=org.safs.tools.engines.SAFSSELENIUM
+
+   etc..
+
+[SAFS_SELENIUM]
+AUTOLAUNCH=TRUE
+;========================================
+;= Java JVM must be 1.5 or greater
+;= not needed if "java" finds 1.5 in PATH
+;========================================
+JVM="C:\Java_15\bin\java.exe"
+
+;========================================================
+;= Uncomment the browser to use
+;= Selenium bug prevents *piiexplore and *pifirefox usage
+;========================================================
+;BROWSER="*custom C:\Program Files\Internet Explorer\IEXPLORE.EXE"
+;BROWSER="*custom C:\Program Files\&lt;path to>\FIREFOX.EXE"
+
+;=====================================================
+;= specify Selenium proxyInjectMode forwarding gateway
+;= the true gateway selenium needs to the internet\WAN
+;=====================================================
+PROXY=your.normal.gateway.com
+PORT=80
+</pre>
+</ul>
+<p>
+<a name="safsdevelopment"/>
+<small>
+<a href="#top">Back to Top</a>&nbsp;,&nbsp;
+<a href="#safsexecution">Configure for Execution</a>
+</small><p>
+<li><h3>Configure for SAFS Development:</h3>
+<p>
+To actually develop new code or keywords for Selenium or other
+Java-based engines, or to debug Selenium test execution the user would have to prepare their Java development environment.  Below are examples suitable for environments like Eclipse.
+<i>Note: Eclipse for Java development does not use the System \
+CLASSPATH to locate class files and other resources.</i>
+<p><UL>
+   <li>First, configure the system per Section 2 above. Then,
+   <p>
+   <li>Verify or Configure Java 'Classpath Variables' in your IDE.<br/
+   <p>
+   <ul>Some of these may not be necessary or available depending on your installation:
+      <p>
+      <li>&lt;Selenium install path to> selenium-server.jar
+      <li>&lt;Selenium install path to> selenium-java-client-driver.jar
+      <li>&lt;STAF install path to> STAF\bin\JSTAF.jar
+      <li>&lt;SAFS install path to> SAFS\lib\jakarta-regexp-1.3.jar
+      <li>&lt;SAFS install path to> SAFS\lib\safsdebug.jar
+      <li>&lt;SAFS install path to> SAFS\lib\safsselenium.jar
+      <li>Insure "Installed JREs" knows about all your used Java runtimes.
+   </ul>
+   <p>
+   <ul>These are only necessary for development or building of other Java-based engines like
+   Abbot:
+      <p>
+      <li>&lt;path to> SAFS\lib\jaccess.jar
+      <li>&lt;path to> SAFS\lib\jai_codec.jar
+      <li>&lt;path to> SAFS\lib\jai_core.jar
+      <li>&lt;path to> External JARS for other tools
+   </ul>
+   <p>
+   <li>Verify or Configure IDE Properties
+   <p>
+   <ul>
+      <li>Right-Click the root "Datastore" node in the Datastore Explorer.<br>
+       This is the topmost node with the name of the Datastore displayed.
+      <li>Select "Properties" from the popup menu.
+      <li>Select "Java Build Path" in the Properties dialog.
+      <li>Review the "Libraries" and "Order and Export" tabs to insure the "Classpath Variables"
+      entered above appear.  If necessary, add the libraries via "Add External JARS" or
+      "Add Variable" as necessary.
+   </ul>
+   <p>
+   <li>Checkout\Update the latest sourcecode from CVS or download the SAFSSource ZIP file and
+   extract it into the Datastore accordingly.  Be sure to "Use Folder Names" as you extract
+   into the root Datastore directory.  Information for downloading from SourceForge
+   CVS can be located via
+   <a href="http://sourceforge.net/cvs/?group_id=56751" target=_blank>CVS info on SourceForge</a>.
+</ul>
+<p>
+</ol>
+<p>
+<small>
+<a href="#top">Back to Top</a>&nbsp;,&nbsp;
+<a href="#safsexecution">Configure for Execution</a>&nbsp;,&nbsp;
+<a href="#safsdevelopment">Configure for Development</a>
+</small>
+</BODY></HTML>

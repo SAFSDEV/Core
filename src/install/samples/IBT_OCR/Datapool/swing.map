@@ -1,0 +1,59 @@
+[ApplicationConstants]
+
+
+[IBTSwingWindow]
+#IBT Mode: Both Top window and children use IBT RS
+#IBTSwingWindow="Image=image\Swingapp.bmp;ImageR=image\SwingappRight.bmp;ImageB=image\SwingappBottom.bmp"
+IBTSwingWindow="Image=image\Swingapp\;ImageR=image\SwingappRight\;SR=,,,60;ImageB=image\SwingappBottom\"
+SubmitButton="Image=image\Submitbutton.bmp"
+JPanButton="Image=image\JpanButton.bmp"
+JTreeButton="Image=image\Jtreebutton.bmp"
+SubmitText="ImageText=Submit"
+JPanText="ImageText=JPan"
+JTreeText="ImageText=JTree"
+MonthPayEdit="ImageText=Submit;Hotspot=0,75"
+JTree4th="ImageText=JTree;Index=4"
+
+[MIXSwingWindow]
+#Mixed Mode: Top window use the RFT RS, children use IBT RS
+MIXSwingWindow="Type=JavaWindow;Caption={Swing*}"
+SubmitButton="ImageText=Submit"
+JPanButton="ImageText=JPan"
+JTreeButton="ImageText=JTree"
+
+# ImageText= can work with Index|Ind,  Hotspot|HS, PointRelative|PR, SearchRect|SR
+MonthPayEdit="ImageText=Submit;Hotspot=0,75"
+JTree4th="ImageText=JTree;Index=4"
+
+#Suppose RFT can recognize a GUI (the first ListBox on page JDrag) but cannot see its details 
+#This ListBox as a black box to RFT, can be located and taken as the area for OCR to search in
+JDragTab="ImageText=JDrag"
+JDragListBoxItem="ImageText=tem3;{^SRVar}"
+SRVar=_DDV:
+
+[RJSwingWindow]
+#RJ Mode: Both top window and children use RFT RS
+RJSwingWindow="Type=JavaWindow;Caption={Swing*}"
+SubmitButton="Type=PushButton;Name=Submit"
+
+MortCalcButton="Type=PushButton;Name=Mort.Calc"
+BascCompButton="Type=PushButton;Name=Basc.Comp"
+JPanButton="Type=PushButton;Name=JPan"
+JTreeButton="Type=PushButton;Name=JTree"
+JTree2Button="Type=PushButton;Name=JTree2"
+JTableButton="Type=PushButton;Name=JTable"
+ThirdButton="Type=PushButton;Name=Third"
+
+TableTab="Type=TabControl;Name=Table"
+Table2Tab="Type=TabControl;Name=Table2"
+Table3Tab="Type=TabControl;Name=Table3"
+Table4Tab="Type=TabControl;Name=Table4"
+MortCalcTab="Type=TabControl;Name=Mort.Calc"
+BascCompTab="Type=TabControl;Name=Basc.Comp"
+JPanTab="Type=TabControl;Name=JPan"
+JTreeTab="Type=TabControl;Name=JTree"
+JTree2Tab="Type=TabControl;Name=JTree2"
+
+ComboBox="Type=ComboBox;Index=1"
+JTree2="Type=JavaTree;Index=1"
+JDragListBox1="Type=ListBox;Index=1"

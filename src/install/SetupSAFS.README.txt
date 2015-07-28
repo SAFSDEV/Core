@@ -1,0 +1,191 @@
+
+SetupSAFS.README.txt
+
+==========================================================================
+Author: Carl Nagle
+Original Release: OCT 23, 2003
+
+Copyright (C) SAS Institute
+General Public License: http://www.opensource.org/licenses/gpl-license.php
+==========================================================================
+
+This README attempts to detail your installation options for installing new tool-independent pieces.  These include STAF and STAF services we have developed for tool-independent automation.  It also includes the pieces necessary to use Rational RobotJ (XDE Tester) as an additional execution engine available to the SAFS Engine for Rational Robot (RRAFS).
+
+This information is separate from--and in addition to--the Setup info used to install the SAFS Engine for Rational Robot (RRAFS).  See the DDEngineSetup.htm doc for those separate installation instructions.  You can find the DDEngineSetup doc via the link below.  
+
+    http://safsdev.sf.net/sqabasic2000/DDEngineSetup.htm
+
+This file is also available in the directory to which the downloaded RRAFS ZIP file was extracted.
+
+Note: This separate install is not necessary if you only intend to use the basic RRAFS Engine for Rational Robot and have no desire to use RobotJ or the new STAF services with the RRAFS engine.  If that is your situation, then read no further.
+
+
+RobotJ Datastore Setup:
+=======================
+Once this SAFS setup has been completed, the tester must configure their RobotJ Datastore to take advantage of the new SAFS framework.  Refer to the instructions in "SetupRobotJ.README.txt" to configure the RobotJ Datastore.
+
+
+Java Runtime Necessary
+======================
+The additional SAFS installation requires that a Java runtime environment (JRE/JVM) is already installed on the target machine.  For best results and ease of installation, a JVM Version of 1.4 or higher is recommended.
+
+The JVM must be in the normal search path for the system.  The following command typed at any command prompt should successfully list the version of Java JVM installed:
+
+    java -version
+
+You can download and install a JVM if necessary from the following:
+
+    http://java.sun.com/j2se/
+
+You may also be able to use the JVM that is installed as part of the Rational TeamTest/XDE Tester Suite.
+
+
+Windows Scripting Host 5.6
+==========================
+Windows Scripting Host 5.6 must be installed and available via the normal system search path for the install script to run.  STAF and the SAFS pieces can be installed manually without the script, but the script can automatically error-correct important values and set environment variables that the separate Java installs  cannot.
+
+The following command typed at any command prompt should successfully list the version of Windows Scripting Host installed:
+
+    cscript
+
+You can download and install WSH 5.6 if necessary from the following:
+
+    http://www.microsoft.com/downloads/search.aspx?displaylang=en
+
+    Enter "Windows Script" as your Product Technology for the download.
+
+
+Assets for this install:
+========================
+
+    SetupSAFS.vbs           - Main Setup Script
+    SAFSInstall.jar         - Java setup program for SAFS and STAF
+    SAFSInstall.zip         - SAFS files to be installed
+    STAF251-setup-win32.jar - STAF InstallShield Installer
+    (various README files)  - Important Information and Instructions
+    
+The install can begin from any directory, but all the above assets must exist in that same directory.
+
+
+Default Installation Destination Directories:
+=============================================
+    
+    SAFS  -  C:\SAFS
+    STAF  -  C:\STAF
+
+    
+Environment Variables
+=====================
+Environment variables may be modified by this script.  Prior to making any modification, the current value of the environment variable is saved in a "*_SAFSBAK" backup environment variable.  Note, this backup only occurs once--the first time we detect that no backup has been done previously.
+
+The affected environment variables and their backups are listed below:
+
+    VARIABLE          BACKUP VARIABLE     PURPOSE
+    ============      ===============     ==================================
+    STAFDIR           <none>              Root install directory for STAF
+    SAFSDIR           <none>              Root install directory for SAFS
+    PATH              PATH_SAFSBAK        Search path for executables
+    CLASSPATH         CLASSPATH_SAFSBAK   Search path for Java classes
+
+
+Simple Install Accepting Default Install Directories:
+=====================================================
+
+    1) Double-Click the SetupSAFS.vbs script
+    2) Configure RobotJ Datastore per "SetupRobotJ.README.txt"
+
+You can also launch the script from a command prompt.  The command prompt must be pointing to the directory where the setup script and associated assets reside.
+
+    cscript SetupSAFS.vbs
+
+
+Custom Installation Options:
+============================
+Both the WSH script and the separate Java installer accept the same command line options in support of custom installations.  The script automatically invokes the Java installer with the provided options.
+
+Installer Command Line Options:
+    
+    -silent  (future) 
+    
+           All installs are "silent" (GUI-less) at this time.
+    
+    -safs <alternate path> 
+    
+          Allows the user to specify an alternate install destination.
+          Ex: -safs "d:\AltSAFSDir"
+    
+    -staf <alternate path>
+          
+          Allows the user to specify an alternate install destination.
+          Ex: -staf "d:\AltSTAFDir"
+    
+    -nostaf
+    
+          Do not install STAF at this time.
+          NOTE: SAFS STAF services and the RobotJ engine will not function 
+          without STAF.
+    
+    -nosafs
+    
+          Do not install SAFS at this time.
+          NOTE: SAFS STAF services and the RobotJ engine will not function 
+          without the SAFS install.
+    
+
+Sample Custom Script Installations:
+===================================
+
+  Install SAFS and STAF to alternate directories:
+  -----------------------------------------------
+
+    cscript SetupSAFS.vbs -safs "D:\AltSAFSDir" -staf "D:\AltSTAFDir"
+
+  Install SAFS, but do not install (re-install) STAF:  
+  ---------------------------------------------------
+
+    cscript SetupSAFS.vbs -safs "D:\AltSAFSDir" -nostaf
+
+
+Custom Java Installs:
+=====================
+It is possible to launch the Java installer directly and bypass the WSH script.  If you do this, you will need to manually modify 'PATH' and 'CLASSPATH' Environment variables which the script normally handles.
+
+
+Sample custom Java Installations:
+=================================
+
+  Install SAFS and STAF to alternate directories:
+  -----------------------------------------------
+
+    java -jar SAFSInstall.jar -safs "D:\AltSAFSDir" -staf "D:\AltSTAFDir"
+
+  Install SAFS, but do not install (re-install) STAF:  
+  ---------------------------------------------------
+
+    java -jar SAFSInstall.jar -safs "D:\AltSAFSDir" -nostaf
+
+
+Manual Environment Variable Modification:
+=========================================
+If you bypass the WSH script to perform the Java install or install STAF directly you will need to make the following changes to environment variables.  
+
+    STAFDIR     <staf root directory>
+    
+    SAFSDIR     <safs root directory>
+    
+    PATH:       append ;<staf root dir>\bin
+
+    PATH:       append ;<safs root dir>\bin
+
+    CLASSPATH:  append ;<staf root dir>\bin\JSTAF.jar
+
+    CLASSPATH:  append ;<safs root dir>\lib\SAFS.jar
+
+Note: The SAFS.JAR file is in the LIB directory, not the BIN directory.
+
+
+RobotJ Datastore Setup (Reminder):
+==================================
+Once this SAFS setup has been completed, the tester must configure their RobotJ Datastore to take advantage of the new SAFS framework.  Refer to the instructions in "SetupRobotJ.README.txt" to configure the RobotJ Datastore.
+
+===============================================================================

@@ -1,0 +1,206 @@
+<job id="SAFSConfig" >
+<script language="VBScript" src="_SharedFunctions.vbs"/>
+<script language="VBScript" >
+'************************************************************************************************************
+'* This script tells user the configuration of SAFS-required software.
+'* RFT or any other testing tool if SAFS supports, is required to get installed before starting SAFS installation.  
+'* If not, RFT's environment won't be configured by SAFS installation automatically except re-install SAFS again.  
+'* SAFSConfig.wsf allows user to prepare the environment that SAFS needs even after SAFS installation is finished.  
+'* It intends to give user the flexibility of configuring SAFS-required software. 
+'* 
+'* SAFS prerequisites
+'*      Core      : JRE and STAF 
+'*     [Optional] : Rational Functional Tester 8 
+'*                 (Todo: other testing tools SAFS supports)
+'* 
+'*     
+'* The location in SAFS:
+'*   c:\safs\
+'*      +--- bin
+'*           +--- SAFSConfig.wsf
+'*   This script requires _SharedFunctions.vbs, SetupSTAFClasspath.wsf, SetupRationalClasspath.wsf and _SharedRationalFunctions.vbs.   
+'*
+'* Optional script parameter:
+'*     -reset 
+'*          Re-configure the environment of STAF and RFT for SAFS running. 
+'*     
+'*     
+'*
+'* Author: Junwu Ma
+'* Original Release: Aug 25, 2010 
+'*
+'************************************************************************************************************
+Dim  args, arg
+Dim message, response, exec, cr, q, nl, newline
+Dim JRE_bin, JRE_version, STAF_path, STAF_version, RFT_path, RFT_version 
+
+cr        = chr(13)   'carriage return
+q         = chr(34)   'double quote
+nl		  = chr(10)		'next line
+newline   = cr & nl		'use "carriage return" and "next line" to form a newline
+
+pathenv   = "PATH"
+stafenv   = "STAFDIR" 'Environment Variable for STAF root directory.
+safsenv   = "SAFSDIR" 'Environment Variable for SAFS root directory.
+rftenv    = "IBM_RATIONAL_RFT_INSTALL_DIR"
+
+JRE_bin      = ""         'the bin directory of the default JRE detected on your machine (there may be more than one JRE) 
+JRE_version  = ""
+STAF_path    = ""
+STAF_version = ""
+RFT_path     = ""
+RFT_version  = ""
+
+Set shell = WScript.CreateObject("WScript.Shell")
+Set env   = shell.Environment("SYSTEM")
+Set fso   = WScript.CreateObject("Scripting.FileSystemObject")
+Set args  = WScript.Arguments
+
+'toDebug = true
+
+if args.Count > 0 then
+    arg = lcase(args(0))
+end if	
+
+if (arg = "-reset") then
+	'==== set STAF env for SAFS 
+    Set exec = shell.Exec("cscript SetupSTAFClasspath.wsf")
+    Do While exec.Status = 0
+        WScript.Sleep(3000)
+    Loop    
+	
+	'==== set RFT env for SAFS 
+    Set exec = shell.Exec("cscript SetupRationalClasspath.wsf")
+    Do While exec.Status = 0
+        WScript.Sleep(3000)
+    Loop  
+   
+	shell.Popup "Reset finished!", 0, "SAFS  Environment", 64
+	Wscript.Quit
+	
+	Set fso   = nothing
+	Set env   = nothing
+	Set shell = nothing
+	Set exec  = nothing
+end if
+
+'**************************************************************
+' Check JRE
+' 1) the path of the JRE you are using
+' 2) JRE's version
+'**************************************************************
+systempath = env(pathenv) 
+PathArray = Split(systempath, ";", -1, 1)
+
+    'search each directory in PathArray to detect java.exe in it
+	'If found, it is supposed to be the default JRE\bin folder
+    i = 0
+    While (i <= UBound(PathArray)) and (JRE_bin = "")
+		aPath = PathArray(i)
+		'find pairs like %JAVA_HOME% to replace with its real value
+		Do
+			m = 0
+			n = 0
+			m = InStr(1, aPath, "%")
+			n = InStr(m+1, aPath, "%")
+			if (n > m) and (m <> 0)then
+				tempVar = Mid(aPath, m+1, n-m-1)
+				'not all system variable can be returned by function env(tempVar)
+				realVar = shell.ExpandEnvironmentStrings("%" & tempVar & "%")
+				aPath = Replace(aPath, "%" & tempVar & "%", realVar) 
+				debug( "%" & tempVar & "%" & ": replace with :" & realVar & cr & aPath )
+			end if
+		Loop Until (m = 0) and (n=0)
+		
+    	'remove any trailing '\' or '/' from aPath
+		if ((Right(aPath,1)="\")or(Right(aPath,1)="/")) then
+			aPath = Left(aPath, Len(aPath)-1)
+		end if
+	
+		javaExe = aPath & "\java.exe"
+	    'find the JRE path you are using
+        if fso.FileExists(javaExe) Then    
+			debug("found JRE:" & aPath)
+			JRE_bin = aPath
+		End If	
+        i = i + 1 
+	Wend
+
+'Check Java Classpath
+'CHECK JAVA VERSION 
+if Len(JRE_bin) > 0 then
+	JRE_version = getJavaVersion()
+end if	
+
+'**************************************************************
+' Check STAF
+'**************************************************************
+STAF_path = env(stafenv) 
+	if Len(STAF_path)> 0 then
+		original_stafdir = STAF_path
+		stafprocexe = original_stafdir & "\bin\STAFProc.exe"
+		stafexe = original_stafdir & "\bin\STAF.exe"
+		debug("stafprocexe: " & stafprocexe & cr & "stafexe: " & stafexe)
+		if (fso.FileExists(stafexe) AND fso.FileExists(stafprocexe)) then
+			STAF_version = getSTAFVersion(stafprocexe,stafexe)
+			'shell.Popup "STAF: " & currentstafversion, 0,"Information",64
+		end if
+	end if
+
+
+'**************************************************************
+' Check RFT to see if RFT installed
+'**************************************************************
+RFT_path = env(rftenv)
+'not detect RFT's version
+
+
+'**************************************************************
+' Todo; check other testing tools that SAFS supports
+'**************************************************************
+
+' Give a report
+    'message = "SAFS  Environment" & cr
+    'message = message & "JRE  :" & JRE_version & JRE_bin & cr 
+    'message = message & "STAF :" & STAF_path  & cr
+    'message = message & "RFT  :" & RFT_path  & cr
+	if Len(JRE_bin)>0 then
+	    message = message & "JRE(Core) :"
+		message = message & " intalled" & cr
+		message = message & "     Version " & JRE_version & cr
+		message = message & "     " & JRE_bin & cr
+		message = message & "     " & "Note: Your JRE's lib, '<Java>\lib', should be in CLASSPATH!" & cr & cr
+	else
+		message = message & " not intalled" & cr & cr
+	end if
+	
+	if Len(STAF_path)>0 then
+	    message = message & "STAF(Core) :"
+		message = message & " intalled" & cr
+		message = message & "     Version " & STAF_version & cr
+		message = message & "     " & STAF_path & cr & cr
+	else
+		message = message & " not intalled" & cr & cr
+	end if
+	
+	if Len(RFT_path)>0 then
+	    message = message & "RFT(Optional)  :"
+		message = message & " intalled" & cr
+		message = message & "     Version " & RFT_version & cr
+		message = message & "     " & RFT_path & cr
+		message = message & "     " & "Note: Enable your JRE before using RFT against Java software. " & cr 
+		message = message & "     " & "      RFT->Configure->Enable Environment for Testing..." & cr & cr
+	else
+		message = message & " not intalled" & cr & cr
+	end if
+	
+	
+shell.Popup message, 0, "SAFS  Environment",64
+
+Set fso   = nothing
+Set env   = nothing
+Set shell = nothing
+Set exec  = nothing
+
+</script>
+</job>

@@ -1,0 +1,13 @@
+
+T, TestApp, ComboEditBox, CLICK
+
+S, ComboEditBox SELECT
+;T, TestApp, ComboEditBox, SELECT, "Item 2"
+
+S, ComboEditBox SELECTINDEX
+;T, TestApp, ComboEditBox, SELECTINDEX, "4" 
+
+S, ComboEditBox SELECTPARTIALMATCH
+;T, TestApp, ComboEditBox, SelectPartialMatch, "6"
+
+T, TestApp, ComboEditBox, SETTEXTVALUE, "MyPassword"
