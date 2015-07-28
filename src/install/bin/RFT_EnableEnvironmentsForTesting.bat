@@ -1,0 +1,1 @@
+"%IBM_RATIONAL_RFT_ECLIPSE_DIR%\jdk\jre\bin\java" -classpath "%IBM_RATIONAL_RFT_INSTALL_DIR%\rational_ft.jar" com.rational.test.ft.rational_ft -enable

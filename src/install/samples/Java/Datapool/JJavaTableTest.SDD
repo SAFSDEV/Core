@@ -1,0 +1,35 @@
+;####################	JavaTableFunctions (CFTable)  ###############################
+T, SwingWindow, JavaMenu, SelectMenuItem, "Tools->JTable4 Viewer"
+
+T, SwingWindow, JavaTable4, SelectCell
+T, SwingWindow, JavaTable4, SelectCell, 3, 2
+
+T, SwingWindow, JavaTable4, SelectCellContainsTextFind, rationalTableMatchingRowNumber, Column2, Column1, 3CellItem1, Column3, 3CellItem3
+;=============   Can use STAF service SAFSVARS to see the varible
+T, SwingWindow, JavaTable4, SelectCellText, 3, 2
+C, Pause, 1
+T, SwingWindow, JavaTable4, SelectCellText, 3, Column3
+
+T, SwingWindow, JavaTable4, SelectCellTextFind, rationalTableMatchingRowNumber, Column2, Column1, 3CellItem1, Column3, 3CellItem3
+
+T, SwingWindow, JavaTable4, SelectCellTextSpecial, Control, Left, 3, 2
+T, SwingWindow, JavaTable4, SelectCellTextSpecial, Control, Left, 5, 2
+C, Pause, 1
+T, SwingWindow, JavaTable4, SelectCell, 3, 2
+T, SwingWindow, JavaTable4, SelectCellTextSpecial, Shift, Left, 3, 2
+T, SwingWindow, JavaTable4, SelectCellTextSpecial, Shift, Left, 5, 2
+
+T, SwingWindow, JavaTable4, SelectFuzzyCellText, 3, Column3
+T, SwingWindow, JavaTable4, SelectFuzzyCellText, 3, 1
+
+T, SwingWindow, JavaTable4, SelectFuzzyCellTextFind, rationalTableMatchingRowNumber, Column2, Column1, 3CellItem1, Column3, 3CellItem3
+T, SwingWindow, JavaTable4, SelectFuzzyCellTextFind, rationalTableMatchingRowNumber, Column2, Column1, 3CellItem, Column3, 3CellItem3
+C, LOGFailureOK, "SelectCellTextFind command will fail because of no matching row found."
+T, SwingWindow, JavaTable4, SelectCellTextFind, rationalTableMatchingRowNumber, Column2, Column1, 3CellItem, Column3, 3CellItem3, 
+
+T, SwingWindow, JavaTable4, AssignCellTextRow, rationalTableMatchingRowNumber, Column2, Column1, 3CellItem1, Column3, 3CellItem3
+T, SwingWindow, JavaTable4, AssignCellTextRow, rationalTableMatchingRowNumber, 2, Column1, 3CellItem1, Column3, 3CellItem3
+T, SwingWindow, JavaTable4, AssignCellContainsTextRow, rationalTableMatchingRowNumber, Column2, Column1, 3CellIt, Column3, 3CellIte
+T, SwingWindow, JavaTable4, AssignCellContainsTextRow, rationalTableMatchingRowNumber, Column2, 1, CellIt, 3, 3CellIte
+
+T, SwingWindow, JavaTable4, CaptureRangeToFile, file.txt, 1, 1, 2, 2

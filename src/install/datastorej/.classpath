@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="var" path="RATIONAL_FT_JRE_LIB" sourcepath="JRE_SRC"/>
+	<classpathentry kind="var" path="JRE_LIB_CORE" sourcepath="JRE_LIB_CORE"/>
+	<classpathentry kind="var" path="JRE_LIB_SECURITY" sourcepath="JRE_LIB_SECURITY"/>
+	<classpathentry kind="var" path="JRE_LIB_RESOURCE" sourcepath="JRE_LIB_RESOURCE"/>
+	<classpathentry kind="var" path="JRE_LIB_GRAPHICS" sourcepath="JRE_LIB_GRAPHICS"/>
+	<classpathentry kind="var" path="JRE_LIB_SERVER" sourcepath="JRE_LIB_SERVER"/>
+	<classpathentry kind="var" path="JRE_LIB_XML" sourcepath="JRE_LIB_XML"/>
+	<classpathentry kind="var" path="RATIONAL_FT_LIB" sourcepath="RATIONAL_FT_SRC">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:\Program Files\IBM\IBMIMShared\plugins\com.rational.test.ft.api.help_7.0.2.v200810061447.jar!/ApiReference"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="var" path="RATIONAL_SAP_LIB" sourcepath="RATIONAL_SAP_SRC">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:\Program Files\IBM\IBMIMShared\plugins\com.rational.test.ft.api.help_7.0.2.v200810061447.jar!/ApiReference"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="var" path="RATIONAL_WPF_LIB" sourcepath="RATIONAL_WPF_SRC">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:\Program Files\IBM\IBMIMShared\plugins\com.rational.test.ft.api.help_7.0.2.v200810061447.jar!/ApiReference"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="var" path="RATIONAL_SIEBEL_LIB" sourcepath="RATIONAL_SIEBEL_SRC">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:\Program Files\IBM\IBMIMShared\plugins\com.rational.test.ft.api.help_7.0.2.v200810061447.jar!/ApiReference"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="var" path="RATIONAL_TSS_LIB" sourcepath="RATIONAL_TSS_LIB"/>
+	<classpathentry kind="src" path=""/>
+	<classpathentry kind="var" path="RATIONAL_FT_DATAPOOL_LIB" sourcepath="RATIONAL_FT_DATAPOOL_LIB"/>
+	<classpathentry kind="lib" path="C:/Documents and Settings/All Users/Application Data/IBM/RFT/customization/com.ibm.terminal.tester.ft.jar" sourcepath="C:/Documents and Settings/All Users/Application Data/IBM/RFT/customization/com.ibm.terminal.tester.ft.jar"/>
+	<classpathentry kind="var" path="RATIONAL_FT_JAR"/>
+	<classpathentry kind="lib" path="C:/STAF/bin/JSTAF.jar"/>
+	<classpathentry kind="lib" path="C:/SAFS/lib/safsjvmagent.jar"/>
+	<classpathentry kind="lib" path="C:/SAFS/lib/safsrational_ft.jar"/>
+	<classpathentry kind="lib" path="C:/SAFS/lib/safsrational_ft_enabler.jar"/>
+	<classpathentry kind="lib" path="C:/SAFS/lib/win32-x86.zip"/>
+	<classpathentry kind="lib" path="C:/SAFS/lib/jaccess.jar"/>
+	<classpathentry kind="lib" path="C:/SAFS/lib/jai_codec.jar"/>
+	<classpathentry kind="lib" path="C:/SAFS/lib/jai_core.jar"/>
+	<classpathentry kind="lib" path="C:/SAFS/lib/jakarta-regexp-1.3.jar"/>
+	<classpathentry kind="lib" path="C:/SAFS/lib/jna.zip"/>
+	<classpathentry kind="lib" path="C:/SAFS/lib/safs.jar"/>
+	<classpathentry kind="lib" path="C:/SAFS/lib/safscust.jar"/>
+	<classpathentry kind="output" path=""/>
+</classpath>

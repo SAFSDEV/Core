@@ -1,0 +1,101 @@
+SetupSAFS.WSF is the SAFS installer for 32-bit and 64-bit Windows systems.
+However, do not execute this script directly on 64-bit systems.
+Instead, on 64-bit systems execute SetupSAFS_WIN64.bat.  
+This will properly invoke the 32-bit version of Windows Scripting Host.
+
+SetupSAFS.wsf will then install the following:
+
+   1) SAFS, 
+   2) STAF (2.6.11 or 3.3.3), and 
+   3) Support for SAFS-driven engines like: 
+     
+      a) IBM Rational Functional Tester
+      b) AutomatedQA Test Complete
+      c) Image-Based Testing OCR
+   
+The three parts are required for SAFS working with Rational tools (RFT) based on STAF properly.
+
+Before starting install SAFS, it is better to ensure that your machine already has the IBM Rational 
+tool (For example: RFT), which you want SAFS to work with.
+ 
+User may simply run it with command line "SetupSAFS.wsf" to install SAFS in C:\SAFS and STAF V3.3.3 in C:\STAF as default, 
+during which the installer shall interact with user and finally get the installation completed. If you wish to install them 
+in different directories with more choices, following command options will help to do it.
+
+     -safs <alternate path> 
+     
+           Allows the user to specify an alternate install destination.
+           Ex: -safs "d:\AltSAFSDir"
+     
+     -staf <alternate path>
+           
+           Allows the user to specify an alternate install destination.
+           Ex: -staf "d:\AltSTAFDir"
+     
+     -nostaf
+     
+           Do not install STAF at this time.
+           NOTE: SAFS STAF services and the RobotJ engine will not function 
+           without STAF.
+     
+     -nosafs
+     
+           Do not install SAFS at this time.
+           NOTE: SAFS STAF services and the RobotJ engine will not function 
+           without the SAFS install.
+     
+     -norational
+     
+           Do not process support for IBM Rational tools at this time.
+           NOTE: the RobotJ engine will not function without this install.
+     
+     -notcafs
+     
+           Do not process support for Automated QA Test Complete at this time.
+           NOTE: the TCAFS engine may not function without this install.
+     
+     -noocr
+     
+           Do not process support for Image-Based Testing OCR. [C:\SAFS\ocr]
+     
+     -noprompt
+     
+           Proceed with installation without prompting for approval.
+
+     -installstafversion installstafversion
+
+           If -nostaf is not present, this indicate the version of STAF to
+			 be installed.
+           Ex: -installstafversion 3
+
+     -removestaf installedstafdir stafMajorVersionTobeRemoved
+
+           If you want to uninstall a previously installed STAF, you can use
+           this option.
+           installedstafdir indicate the installed directory like C:\STAF\
+           stafMajorVersionTobeRemoved indicate the major version of STAF, like 2 or 3
+           Ex: -removestaf "C:\STAF" 2
+           
+
+Examples command-line invocations:
+
+If you prefer STAF 3, modify 2/3 to 3; If STAF 2, modify 2/3 to 2.
+
+1. "SetupSAFS.WSF -installstafversion 2/3 -noprompt"
+   -- to install SAFS with RATIONAL and STAF 2 or 3							   	  
+
+2. "SetupSAFS.WSF -installstafversion 2/3 -noprompt -norational"
+   -- to install SAFS with STAF 2 or 3
+
+3. "SetupSAFS.WSF -nostaf -noprompt -norational"
+   -- to install only SAFS									      									   
+
+4. "SetupSAFS.WSF -installstafversion 2/3 -noprompt -nosafs -norational"
+	  -- to install only STAF 2 or 3
+
+5. "SetupSAFS.WSF -removestaf c:\staf 2/3 -noprompt -nostaf -nosafs -norational"
+   -- to uninstall only STAF 2 or 3     
+
+6. "SetupSAFS.WSF -safs d:\mysafs"   -- to install SAFS in d:\mysafs with STAF V3.3.3 (in C:\STAF as default).
+   
+SEP 14, 2010

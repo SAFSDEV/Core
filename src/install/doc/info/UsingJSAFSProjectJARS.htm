@@ -1,0 +1,116 @@
+<html>
+<head>
+<title>Using JSAFS Project JAR Files</title>
+<style>
+.appmap {
+    border:2px solid black;
+    background-color: #C0C0C0;
+    padding-left:6px;
+    color: black;
+    width: 500px;
+}
+.codeblock {
+    border:2px solid black;
+    background-color: #C0C0C0;
+    padding-left:6px;
+    color: black;
+}
+</style>
+</head>
+<body style="font-size: 18px">
+<h1>Using JSAFS Project JAR Files</h1>
+<small>Updated: 2014.08.12</small>
+<hr>
+Some of our most recent work for SeleniumPlus has provided the ability for ALL JSAFS users (tests written in Java) to create a JAR file containing all necessary assets for the JSAFS Project and then run a test from that JAR file.
+<p>
+The key detail being, the JSAFS Project space and assets do NOT have to already exist in the File System before the test can be run.
+<p>
+<center><b>The necessary assets will be extracted automatically from the JAR file at runtime.</b></center>
+<p>
+In order for this to work:
+<p>
+<ol>
+    <li>The JAR file must contain the Project assets in a root directory matching the Project name.<br>
+    So, for example, if the Project name and root directory is "SAMPLE", then there must be a root directory with that name in the JAR file and all subdirectories containing Project assets must exist in the JAR file.<p>
+    <li>The JAR file must contain the executable classes for the Project.<p>
+    <li>When running a test in a JAR file, you must:
+    <ul>
+        <li>specify on the command-line the project root.<br>
+        <b>Ex: -Dsafs.project.root=sample</b>
+        <li>optionally specify on the command-line where to extract and create the Project.<br>
+        If not specified, the Project will be extracted and created off a user-specific Temp directory using the project root name as the project subdirectory.<br>
+        <b>Ex: -Dsafs.project.extract=C:\Automation</b>
+    </ul>
+</ol>
+<hr>
+<div style="position: relative; right:-160px">
+SeleniumPlus SAMPLE Project JAR File Example:</div>
+<div style="position: relative; right:-100px">
+<p><ul class=appmap><pre>
+META-INF/
+META-INF/MANIFEST.MF
+sample/
+sample/test.ini
+sample/Map.class
+sample/Map$ApplicationConstants.class
+sample/Map$...(all remaining classes)
+sample/Actuals/
+sample/Actuals/signIn.png
+sample/Maps/
+sample/Maps/AppMap.order
+sample/Maps/SAMPLEApp.map
+sample/Maps/SAMPLEApp_en.map
+sample/testcases/
+sample/testcases/TestCase1.class
+sample/testruns/
+sample/testruns/TestRun1.class</ul></pre>
+</div>
+A sample Windows BAT file for creating the JAR file above from a SeleniumPlus SAMPLE Project.<br>
+The BAT file should be run from the root directory of the Project--the SAMPLE directory.
+<p>
+<div class=codeblock>
+<pre>
+set JARDIR=%CD%
+%SELENIUM_PLUS%/Java/bin/jar cf "%JARDIR%\sampleproject.jar" -C bin .
+
+cd ..
+
+%SELENIUM_PLUS%/Java/bin/jar uf "%JARDIR%\sampleproject.jar" SAMPLE\*.ini
+%SELENIUM_PLUS%/Java/bin/jar uf "%JARDIR%\sampleproject.jar" SAMPLE\Maps\*
+%SELENIUM_PLUS%/Java/bin/jar uf "%JARDIR%\sampleproject.jar" SAMPLE\Benchmarks\*</pre>
+</div><p>
+Note that only the Project directories that contain assets--the non-empty directories--are included in the JAR file. &nbsp;The remaining directories will automatically be provided at runtime.
+<p>
+To run the SeleniumPlus test from the JAR file requires:
+<p><ol>
+    <li>SeleniumPlus must be properly installed on the runtime machine.
+    <li>The JAR file must be present or available for execution.
+    <li>The user must have admin/write priviledges on the runtime machine.
+    <li>Proper command-line invocation to properly extract the Project at runtime.
+</ol>
+<p>
+So let's assume we want to run TestRun1 using the C:\Automation directory as the runtime extraction point. &nbsp;For optimum results and visibility, the following steps are recommended:
+<p><ol>
+    <li>Place the sampleproject.jar file in the C:\Automation directory.<br>
+    The desired directory must NOT already have a working Project with test.ini file in it.
+    <li>Launch the test from that directory using the following, or a BAT file with the same:
+</ol>
+<div class=codeblock><pre>
+set JARFILES=%SELENIUM_PLUS%/libs/selenium-plus-1.0.jar;%SELENIUM_PLUS%/libs/JSTAFEmbedded.jar
+set JAVAEXE=%SELENIUM_PLUS%/Java/bin/java
+
+%JAVAEXE% -cp %JARFILES%;sampleproject.jar /
+          -Dsafs.project.root=sample -Dsafs.project.extract=%CD% /
+          sample.testruns.TestRun1
+</pre></div>
+<p>
+Assuming everything went as expected, the c:\Automation directory should now contain these new runtime-created assets:
+<div class=codeblock><pre>
+debuglog.txt
+projectsetup.log
+sample/
+(all SAMPLE Project assets including Logs directory with test results.)
+</pre></div>
+<hr><p>
+</body>
+</html>

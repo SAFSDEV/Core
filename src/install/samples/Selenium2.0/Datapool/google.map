@@ -1,0 +1,17 @@
+[ApplicationConstants]
+presetPosition="Coords=200,400,640,480;Status=NORMAL"
+URL_Google="http://www.google.com"
+;For user in China, please use the following url
+;URL_Google=https://www.google.com.hk/
+
+[Google]
+Google="id=gsr"
+;EditBox="id=lst-ib"
+EditBox="name=q"
+PushButtonK="name=btnK"
+PushButtonI="name=btnI"
+QuerySearch="name=btnG"
+
+LinkSearch="id=gb_1"
+LinkYouTube="id=gb_36"
+LinkGmail="id=gb_23"

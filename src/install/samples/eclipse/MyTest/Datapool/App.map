@@ -1,0 +1,14 @@
+[ApplicationConstants]
+URL=http://...
+userid=myuserid
+
+[MainWin]
+MainWin=<recognition string>
+AnyComp1=<recognition string>
+AnotherComp2=<recognition string>
+
+[AnotherWin]
+AnotherWin=<recognition string>
+SomeComp1=<recognition string>
+AnotherComp2=<recognition string>
+   

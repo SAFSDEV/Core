@@ -1,0 +1,7 @@
+
+s, iosOnGuiExists
+S, iosClicks
+S, iosFlicks
+S, iosPinch
+S, iosKeyboard
+

@@ -1,0 +1,453 @@
+<HTML>
+<HEAD><TITLE>SetupSAFS.README</TITLE></HEAD>
+<BODY>
+<h1>SetupSAFS.README</h1>
+<p>
+==========================================================================<br>
+Author: Carl Nagle<br>
+Update: May 31, 2013<br>
+<br>
+Copyright (C) SAS Institute<br>
+<a href="http://www.opensource.org/licenses/gpl-license.php" target="reference">General Public License</a>: http://www.opensource.org/licenses/gpl-license.php<br>
+==========================================================================<br>
+<a name="top"/><small><a href="#simpleinstall">Simple Install</a>, <a href="#javarequirements">Java Requirements</a>, <a href="#wshrequirements">WSH Requirements</a>,
+<a href="#safsinstall">SAFS Install</a>, <a href="#verifyinstall">Verify Install</a>, <a href="#safsprojects">SAFS Projects</a>, <a href="#custominstalls">Custom Installs</a>, <a href="#manualsetups">Manual Setups</a></small>
+<a name="definitions" />
+<h3><b>Definitions:</b></h3>
+<table border=0 cellspacing=7 >
+<tr><td><b>
+SAFS</b><td><b><a href="http://safsdev.sourceforge.net" target=_blank alt="SAFSDEV Home Page" >
+Software Automation Framework Support</a></b>
+<tr><td><b>
+SAFS Driver</b><td>
+The tool that initializes, opens, parses, and routes SAFS test records to available SAFS Engines.
+<tr><td><b>
+SAFS Engine</b><td>
+A keyword-driven automation tool capable of interpreting and executing SAFS test records.
+<tr><td><b>
+SAFS/DriverCommands</b><td>
+A SAFS Engine for tool-independent
+<a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverCommands"
+   target=_blank alt="SAFS Driver Commands Reference" >Driver Commands</a>
+<tr><td><b>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/tools/engines/SAFSROBOTJ.html"
+   target=_blank alt="SAFS Rational Functional Tester Doc" >SAFS/RobotJ</a></b> (RFT)<td>
+A SAFS Engine for testing using <a href="http://www-01.ibm.com/software/awdtools/tester/functional/"
+   target=_blank alt="Rational Functional Tester Site" >Functional Tester</a> by IBM Rational.</td>
+<tr><td><b>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/tools/engines/SAFSTC.html"
+   target=_blank alt="SAFS SmartBear TestComplete Doc" >SAFS/TC</a></b> (TCAFS)<td>
+A SAFS Engine for testing using <a href="http://www.automatedqa.com/products/testcomplete/"
+   target=_blank alt="SmartBear TestComplete Site" >TestComplete</a> by AutomatedQA.</td>
+<tr><td><b>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/tools/engines/SAFSDROID.html"
+   target=_blank alt="SAFS Android Doc" >SAFS/DROID</a></b> (DRD)<td>
+A SAFS Engine for testing using <a href="http://code.google.com/p/robotium"
+   target=_blank alt="Android Robotium Site" >Robotium Remote Control</a> for Android.</td>
+<tr><td><b>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/tools/engines/SAFSIOS.html"
+   target=_blank alt="SAFS Apple iOS Doc" >SAFS/IOS</a></b> (IOS)<td>
+A SAFS Engine for testing using <a href="http://developer.apple.com/library/ios"
+   target=_blank alt="Apple IOS Developer Site" >Apple iOS UIAutomation</a>.</td>
+<tr><td><b>
+SAFS IBT</b><td>
+A SAFS Engine for <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSImageBasedRecognition.htm"
+   target=_blank alt="Image-Based Testing Doc" >Image-Based Testing</a>.</td>
+<tr><td><b>
+<a href="http://safsdev.sourceforge.net/sqabasic2000/UsingJSAFS.htm" target="JSAFS" alt="Using JSAFS Doc">JSAFS</a></b><td>
+The Java API for embedding SAFS in custom frameworks using the <a href="http://safsdev.sourceforge.net/sqabasic2000/UsingJSAFS.htm#advancedruntime" target="JSAFS" alt="Using JSAFS Doc">SAFS Advanced Runtime</a>.
+</td>
+</table>
+<hr>
+<a name="simpleinstall"/><small><a href="#top">Top</a>, <a href="#simpleinstall">Simple Install</a>, <a href="#rrafsrft">RRAFS & RFT</a>, <a href="#javarequirements">Java Requirements</a>, <a href="#wshrequirements">WSH Requirements</a>,
+<a href="#safsinstall">SAFS Install</a>, <a href="#verifyinstall">Verify Install</a>, <a href="#safsprojects">SAFS Projects</a>, <a href="#custominstalls">Custom Installs</a>, <a href="#manualsetups">Manual Setups</a></small>
+<h3>Simple Install Accepting All Defaults:</h3>
+<p><ol>
+    <li>Verify <b>32-bit Java</b> and any other prerequisites per the Release Notes for your platform (WIN/MAC) from the <a href="http://sourceforge.net/projects/safsdev/files" alt="SAFS Download Directories" title="SAFS Download Directories" target="_blank">SAFS download directories</a>.
+    <li>Download the appropriate SAFS Distributable (WIN/MAC) and extract to a known location.
+    <li>Perform the install according to the Release Notes.
+    <li>Optional: Configure JSAFS development environment, if applicable, per <a href="SetupJSAFS.README.htm">Setup JSAFS</a>.
+    <li>Optional: Configure IBM Rational Functional Tester per <a href="SetupRobotJ.README.htm">Setup Functional Tester</a>
+    <li>Optional: Configure SmartBear Test Complete per <a href="SetupTCAFS.README.htm">Setup Test Complete</a>
+    <li>Optional: Configure Android testing per <a href="SetupAndroid.README.htm">Setup Robotium Remote Control</a>
+    <li>Optional: Configure Apple iOS testing per the SAFS Mac Release Notes.</a>
+</ol>
+<p><i>Now, on to <b>"why you should read the rest of this first..."</b></i>
+<p>
+<hr>
+<a name="javarequirements"/><small><a href="#top">Top</a>, <a href="#simpleinstall">Simple Install</a>, <a href="#wshrequirements">WSH Requirements</a>, <a href="#safsinstall">SAFS Install</a>, <a href="#verifyinstall">Verify Install</a>, <a href="#safsprojects">SAFS Projects</a>, <a href="#custominstalls">Custom Installs</a>, <a href="#manualsetups">Manual Setups</a></small>
+<h3>Java Runtime Necessary</h3>
+<p>
+The SAFS installation requires that a Java runtime environment (JRE) is
+already installed on the target machine.&nbsp; For best results and ease of installation,
+a JRE version of 1.5 or higher is recommended.
+<p><ol><b>
+<li>It is important to note that 64-bit systems might have a 64-bit Java JVM installed.<br>
+Testing has shown that we can install 32-bit SAFS and STAF using the 64-bit JVM.
+<p>
+<li>HOWEVER: SAFS and STAF will require a 32-bit Java JVM to use at runtime.
+<p>
+<li>SAFS batch files in the SAFS install directories--including those in the SAFS\Project space--<br>
+may need to be edited to point to the desired 32-bit JRE installed on the 64-bit system.</b>
+</ol>
+<p>
+See cautions that follow...
+<p>
+We now release SAFS with STAF V3.4.x support.<br>
+Support for STAF V2.6.11 is still available for backward
+compatibility with existing STAF V2.X infrastructure.
+<p>
+Please refer to the following to choose the Java version for the STAF install you intend to perform:
+<p><ul>
+<table>
+<tr><td>STAF V2.6.11<td>&nbsp;<td>Java 1.5 (can NOT be Java 1.6 or higher)
+<tr><td>STAF V3.4.x<td>&nbsp;<td>Java 1.5 or higher
+</table></ul>
+<p>
+For installs, the JRE must be in the normal search path for the system.&nbsp; The following command
+typed at any command prompt should successfully list the version of Java JRE installed:
+<p><pre>
+    java -version
+</pre>
+<p>
+You can download and install the appropriate JRE, if necessary, from:
+<p>
+<ul>
+<table>
+<tr><td>Older Java: <td><a href="http://java.sun.com/products/archive/index.html" alt="Sun Java Archives" target="_blank">Sun Java Archives</a>
+<tr><td>Latest Java: <td><a href="http://java.sun.com/javase/downloads/index.jsp">Sun Java Downloads</a>
+</table>
+</ul>
+<p>
+<b>Don't forget, you may have to install a 32-bit JRE on 64-bit systems if one does not already exist.</b><br>
+You may also be able to use the JRE that is installed as part of Rational Functional Tester, if available.
+<p>
+<hr>
+<a name="wshrequirements"/><small><a href="#top">Top</a>, <a href="#simpleinstall">Simple Install</a>, <a href="#javarequirements">Java Requirements</a>, <a href="#safsinstall">SAFS Install</a>, <a href="#verifyinstall">Verify Install</a>, <a href="#safsprojects">SAFS Projects</a>, <a href="#custominstalls">Custom Installs</a>, <a href="#manualsetups">Manual Setups</a></small>
+<h3>Windows Scripting Host 5.6 or higher (Windows Platform Only)</h3>
+<p>
+For Windows: Windows Scripting Host 5.6 or higher must be installed and available via the normal system search
+path for the install script to run.&nbsp; STAF and the SAFS pieces can be installed
+manually without the script, but the script can automatically error-correct important
+values and set environment variables that the separate Java installs cannot.
+<p>
+The following command typed at any command prompt should successfully list the version of
+Windows Scripting Host installed:
+<p><pre>
+    cscript                        (default)
+    %SYSTEMROOT%\SysWOW64\cscript  (32-bit version on 64-bit systems)
+</pre>
+<p>
+While this should rarely be necessary, you can download and install WSH 5.6 or higher from:
+<p><ul>
+<a href="http://www.microsoft.com/downloads/">
+Microsoft Download Center</a>
+</ul>
+<p>
+<hr>
+<a name="safsinstall"/><small><a href="#top">Top</a>, <a href="#simpleinstall">Simple Install</a>, <a href="#javarequirements">Java Requirements</a>, <a href="#wshrequirements">WSH Requirements</a>,
+<a href="#safsinstall">SAFS Install</a>, <a href="#verifyinstall">Verify Install</a>, <a href="#safsprojects">SAFS Projects</a>, <a href="#custominstalls">Custom Installs</a>, <a href="#manualsetups">Manual Setups</a></small>
+<h3>Assets for SAFS Framework install on Windows:</h3>
+<p><pre>
+    SetupSAFS_WIN64.BAT           ------ Main Setup Script for 64-bit (and 32-bit) Windows
+    STAF3410-setup-win32-NoJVM.exe ----- STAF InstallShield Installer (STAF V3.3.3)
+</pre><p>
+The install can begin from any directory, but all the extracted assets must exist in that directory.
+<p>
+<h3>Default Installation Destination Directories on Windows:</h3>
+<p><pre>
+    SAFS  -  C:\SAFS
+    STAF  -  C:\STAF
+</pre>
+<p>
+<h3>Windows System Environment Variables</h3>
+<p>
+Environment variables may be modified by this script.&nbsp; Prior to making any
+modification, the current value of the environment variable is saved in a "*_SAFSBAK"
+backup environment variable.&nbsp; Note, this backup only occurs once--the first time we
+detect that no backup has been done previously.
+<p>
+The affected environment variables and their backups are listed below:
+<p><pre>
+    VARIABLE          BACKUP VARIABLE     PURPOSE
+    ============      ===============     ==================================
+    STAFDIR           &lt;none>              Root install directory for STAF
+    SAFSDIR           &lt;none>              Root install directory for SAFS
+    PATH              PATH_SAFSBAK        Search path for executables
+    CLASSPATH         CLASSPATH_SAFSBAK   Search path for Java classes
+    TESTCOMPLETE_HOME &lt;none>              TestComplete install directory
+    TESSDATA_PREFIX   &lt;none>              Tesseract OCR data directory
+</pre>
+<p>
+<h3>Windows Simple Install Accepting Default Install Directories:</h3>
+<p><ol>
+    <li>Double-Click the <b>SetupSAFS_WIN64.BAT</b> script (for 32-bit and 64-bit Windows)
+    <li>Optional: Configure IBM Rational Functional Tester per <a href="SetupRobotJ.README.htm">Setup Functional Tester</a>
+    <li>Optional: Configure SmartBear Test Complete per <a href="SetupTCAFS.README.htm">Setup Test Complete</a>
+    <li>Optional: Configure Android testing per <a href="SetupAndroid.README.htm">Setup Robotium Remote Control</a>
+</ol>
+<p>
+You can also launch the script from a command prompt.&nbsp; The command prompt must be
+pointing to the directory where the setup script and associated assets reside.
+<p>
+<h3>Assets for SAFS Framework install on Linux:</h3>
+<p><ul>
+Please consult the <a href="http://safsdev.sourceforge.net/sqabasic2000/Linux_Install_Readme.txt" target="_blank">Linux Install Readme</a> for Linux-specific information.<br>
+(This information is still in its early stages of development.)
+</ul>
+<p>
+<h3>Assets for SAFS Framework install on Mac (for Apple iOS):</h3>
+<p><ul>
+Please consult the SAFS Mac Release Notes for your specific SAFS Mac distributable.
+</ul>
+<p>
+<hr>
+<a name="verifyinstall"/><small><a href="#top">Top</a>, <a href="#simpleinstall">Simple Install</a>, <a href="#javarequirements">Java Requirements</a>, <a href="#wshrequirements">WSH Requirements</a>,
+<a href="#safsinstall">SAFS Install</a>, <a href="#safsprojects">SAFS Projects</a>, <a href="#custominstalls">Custom Installs</a>, <a href="#manualsetups">Manual Setups</a></small>
+<h3>Verifying a successful SAFS install on Windows:</h3>
+Following a successful standard install, you should be able to double-click or otherwise
+execute the program:
+<p><pre>
+    C:\SAFS\Project\<b>runTIDTest.BAT</b>
+</pre>
+<p>This should run a simple SAFS Test and generate logs in:
+<p><pre>
+    C:\SAFS\Project\Datapool\Logs
+</pre>
+<p>
+<h3>Verifying successful configuration of IBM Rational Functional Tester, if applicable:</h3>
+Following a successful configuration of RFT, you should be able to double-click or otherwise
+execute the program:
+<p><pre>
+    C:\SAFS\Project\<b>runRFTTest.BAT</b>
+</pre>
+<p>This should run a simple SAFS Test with RFT and generate logs in:
+<p><pre>
+    C:\SAFS\Project\Datapool\Logs
+</pre>
+<p>
+<h3>Verifying successful configuration of SmartBear Test Complete, if applicable:</h3>
+Following a successful configuration of Test Complete, you should be able to double-click or otherwise
+execute the program:
+<p><pre>
+    C:\SAFS\Project\<b>runTCAFSTest.BAT</b>
+</pre>
+<p>This should run a simple SAFS Test with Test Complete and generate logs in:
+<p><pre>
+    C:\SAFS\Project\Datapool\Logs
+</pre>
+<p>
+<h3>Verifying successful configuration of Android SDK and SAFS/Robotium Remote Control, if applicable:</h3>
+Following a successful configuration of the Android SDK and SAFS with Robotium Remote Control, you should be able to double-click or otherwise
+execute the program:
+<p><pre>
+    C:\SAFS\samples\Droid\<b>runDroidTest.BAT</b>
+</pre>
+<p>This should run a simple SAFS Test with RFT and generate logs in:
+<p><pre>
+    C:\SAFS\samples\Droid\Datapool\Logs
+</pre>
+<p>
+<hr>
+<a name="safsprojects"/><small><a href="#top">Top</a>, <a href="#simpleinstall">Simple Install</a>, <a href="#javarequirements">Java Requirements</a>, <a href="#wshrequirements">WSH Requirements</a>,
+<a href="#safsinstall">SAFS Install</a>, <a href="#verifyinstall">Verify Install</a>, <a href="#custominstalls">Custom Installs</a>, <a href="#manualsetups">Manual Setups</a></small>
+<h3>SAFS Project Directories:</h3>
+<p>
+<b>C:\SAFS\Project</b> contains a sample SAFS Project. &nbsp;Your own product SAFS test project location requires the same SAFS Project directory structure:
+<p><ul>
+<li>[ProjectRoot]<b>\Datapool\Bench</b>
+<li>[ProjectRoot]<b>\Datapool\Dif</b>
+<li>[ProjectRoot]<b>\Datapool\Logs</b>
+<li>[ProjectRoot]<b>\Datapool\Runtime</b> (* optionally needed for older RRAFS)
+<li>[ProjectRoot]<b>\Datapool\Test</b>
+</ul>
+<p>
+Following an install on Windows, there should be <b>SetupSAFSProject.VBS</b> script in the SAFS\bin directory. &nbsp;This script can be placed in any directory intended as a new SAFS project directory. &nbsp;Execute the script in the intended directory and it will create the default SAFS Project structure for you.
+<p>
+You can also just Drag-N-Drop the files and subdirectory structure from SAFS\Project\*.* to your desired project's root directory. &nbsp;(You don't copy the "SAFS\Project\" folder itself, just all the files and folders in it.) &nbsp;Remember, any BATch executables and INI configuration files copied may need to be edited to account for the new Project directory location.
+<p>
+<hr>
+<a name="custominstalls"/><small><a href="#top">Top</a>, <a href="#simpleinstall">Simple Install</a>, <a href="#javarequirements">Java Requirements</a>, <a href="#wshrequirements">WSH Requirements</a>, <a href="#safsinstall">SAFS Install</a>, <a href="#verifyinstall">Verify Install</a>, <a href="#safsprojects">SAFS Projects</a>, <a href="#manualsetups">Manual Setups</a></small>
+<h3>Custom Installation Options:</h3>
+<p>
+Both the WSH script and the separate Java installer accept command line options
+in support of custom installations.&nbsp; The script automatically invokes the Java
+installer with the provided options when applicable.
+<p><pre>
+Installer Command Line Options:
+
+    -silent  (future)
+
+           All installs are "silent" (GUI-less) at this time.
+
+    -safs <alternate path>
+
+          Allows the user to specify an alternate install destination.
+          Ex: -safs "d:\AltSAFSDir"
+
+    -staf <alternate path>
+
+          Allows the user to specify an alternate install destination.
+          Ex: -staf "d:\AltSTAFDir"
+
+    -nostaf
+
+          Do not install STAF at this time.
+          NOTE: SAFS STAF services and the SAFS/RobotJ engine will not function
+          without STAF.
+
+    -nosafs
+
+          Do not install SAFS at this time.
+          NOTE: SAFS STAF services and the SAFS/RobotJ engine will not function
+          without the SAFS install.
+
+    -norational
+
+          Do not process support for IBM Rational tools at this time.
+          This option is only for the WSH script, not the Java installer.
+          NOTE: the SAFS/RobotJ engine will not function without this install.
+
+
+    -notcafs
+
+          Do not process support for Automated QA Test Complete at this time.
+          NOTE: the TCAFS engine may not function without this install.
+
+    -noocr
+
+          Do not process support for Image-Based Testing OCR. [C:\SAFS\ocr]
+
+    -noprompt
+
+          Proceed with installation without prompting for approval?!
+          (Used by Setup.vbs, which already has prompted for approval.)
+
+    -installstafversion installstafversion
+
+          If -nostaf is not present, this indicate the version of STAF to
+          be installed. 2 for version 2.6.11 and 3 for version 3.3.3
+          Ex: -installstafversion 3
+
+    -removestaf installedstafdir stafMajorVersionTobeRemoved
+
+          If you want to uninstall a previously installed STAF, you can use
+          this option.
+          installedstafdir indicate the installed directory like C:\STAF\
+          stafMajorVersionTobeRemoved indicate the major version of STAF,
+          2 for version 2.6.11 and 3 for version 3.3.3
+          Ex: -removestaf "C:\STAF" 2
+</pre>
+<p>
+<h3>Sample Custom Script Installations:</h3>
+<p>Note: Any reference to "cscript" below must take into account that 64-bit Systems have two versions of
+cscript.exe.
+<p>On 64-bit systems, you must invoke the 32-bit version of "cscript" for most operations. &nbsp;
+The 32-bit version of cscript on 64-bit systems is found at:
+<p><pre>
+    %SYSTEMROOT%\SysWOW64\cscript.exe
+</pre>
+<p>
+<pre>
+  Install SAFS and STAF Version 3.4.x (default) to alternate directories:
+  -----------------------------------------------
+
+    cscript SetupSAFS.wsf -safs "D:\AltSAFSDir" -staf "D:\AltSTAFDir"
+    cscript SetupSAFS.wsf -safs "D:\AltSAFSDir" -staf "D:\AltSTAFDir" -installstafversion 3
+
+  Install SAFS, but do not install (re-install) STAF:
+  ---------------------------------------------------
+
+    cscript SetupSAFS.wsf -safs "D:\AltSAFSDir" -nostaf
+</pre>
+<p>
+<h3>Custom Java Installs:</h3>
+<p>
+It is possible to launch the Java installer directly and bypass the WSH script.&nbsp; If
+you do this, you will need to manually modify 'PATH' and 'CLASSPATH' Environment variables
+which the WSH script normally handles.
+<p>
+
+<h3>Sample custom Java Installations:</h3>
+<p><pre>
+  Install SAFS and STAF 3.4.x (default) to alternate directories:
+  -----------------------------------------------
+
+    java -jar SAFSInstall.jar -safs "D:\AltSAFSDir" -staf "D:\AltSTAFDir"
+    java -jar SAFSInstall.jar -safs "D:\AltSAFSDir" -staf "D:\AltSTAFDir" -installstafversion 3
+
+  Install SAFS, but do not install (re-install) STAF:
+  ---------------------------------------------------
+
+    java -jar SAFSInstall.jar -safs "D:\AltSAFSDir" -nostaf
+</pre>
+<p>
+<hr>
+<a name="manualsetups"/><small><a href="#top">Top</a>, <a href="#simpleinstall">Simple Install</a>, <a href="#javarequirements">Java Requirements</a>, <a href="#wshrequirements">WSH Requirements</a>,
+<a href="#safsinstall">SAFS Install</a>, <a href="#verifyinstall">Verify Install</a>, <a href="#safsprojects">SAFS Projects</a>, <a href="#custominstalls">Custom Installs</a>, </small>
+<h3>Manual Environment Variable Modification:</h3>
+<p>
+If you bypass the WSH script to perform the Java install or install STAF directly you will
+need to make the following changes to environment variables.  In some cases, a <b>Setup???Classpath.WSF</b>
+script may exist in the C:\SAFS directory to handle these for you.
+<p><pre>
+    STAFDIR     &lt;staf root directory>
+
+    SAFSDIR     &lt;safs root directory>
+
+    PATH:       append ;&lt;staf root dir>\bin
+
+    PATH:       append ;&lt;safs root dir>\bin
+
+    CLASSPATH:  append ;&lt;staf root dir>\bin\JSTAF.jar
+
+    CLASSPATH:  append ;&lt;safs root dir>\lib\SAFS.jar
+
+<i>Note: The SAFS JARs are in the SAFS\LIB directory, not the SAFS\BIN directory.</i>
+</pre>
+<p><hr/>
+<h3>Manual System DLL Placement\Registration:</h3>
+<p>
+If you bypass the SAFS automated install scripts you likely need to manually place and\or
+register certain DLLs.
+<ul>Copy the following DLLs to <b>&lt;Windows>\System32</b>--the "System" directory.<br/>
+On 64-bit systems the "System" directory is in <b>&lt;Windows>\SysWOW64</b> for our 32-bit DLLs.
+<p>
+<li>C:\SAFS\bin\<b>CWPHooker.DLL</b>
+<li>C:\SAFS\bin\<b>ComponentFunctions.DLL</b>
+<li>C:\SAFS\bin\<b>STAFWrap.DLL</b> (only copy to overwrite in the "System" directory)
+</ul>
+<p>
+<ul>Execute the following DLL registration script
+<p>
+<li>C:\SAFS\bin\<b>DDVariableStoreREGISTER.VBS</b>
+</ul>
+<p><hr/>
+<h3>Edit custom install paths as necessary</h3>
+<p>
+Following a successful custom install to non-default directories, you may need to edit the path information in the
+following files if you wish to run the simple install sanity test:
+<p><pre>
+    [safsroot]\Project\<b>runTIDTest.BAT</b>
+    [safsroot]\Project\<b>SAFSTID.INI</b>
+    [safsroot]\Project\<b>TIDTest.INI</b>
+    [safsroot]\Project\<b>runRFTTest.BAT</b>
+    [safsroot]\Project\<b>RFTTest.INI</b>
+    [safsroot]\Project\<b>runTCAFSTest.BAT</b>
+    [safsroot]\Project\<b>TCAFSTest.INI</b>
+    [safsroot]\samples\Droid\<b>runDroidTest.BAT</b>
+    [safsroot]\samples\Droid\<b>DroidTest.INI</b>
+</pre>
+<p>
+Once these are correct, you should be able to double-click or otherwise execute the program:
+<p><pre>
+    [safsroot]\Project\runTIDTest.BAT
+</pre>
+<p>This should run a simple SAFS Test and generate logs in:
+<p><pre>
+    [safsroot]\Project\Datapool\Logs
+</pre>
+<hr>
+<a name="simpleinstall"/><small><a href="#top">Top</a>, <a href="#simpleinstall">Simple Install</a>, <a href="#javarequirements">Java Requirements</a>, <a href="#wshrequirements">WSH Requirements</a>,
+<a href="#safsinstall">SAFS Install</a>, <a href="#verifyinstall">Verify Install</a>, <a href="#safsprojects">SAFS Projects</a>, <a href="#custominstalls">Custom Installs</a>, <a href="#manualsetups">Manual Setups</a></small>
+</BODY></HTML>

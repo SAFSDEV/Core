@@ -1,0 +1,28 @@
+<html>
+<head>
+<title>SeleniumPlus on a Remote Standalone Server</title>
+<style>
+
+.appmap {
+    border:2px solid black;
+    background-color: #C0C0C0;
+    padding-left:6px;
+    color: black;
+    width: 500px;
+}
+
+</style>
+
+</head>
+<body>
+<h1>SeleniumPlus on a Remote Standalone Server</h1>
+<small>Updated: 2015.03.04</small>
+<hr>
+SeleniumPlus provides several functional enhancements over pure Selenium when interacting with the System display. &nbsp;This can include things happening on the screen that are NOT handled by the Browser.
+<p>
+For this reason, when you are planning to use the Selenium Standalone Server (or Grid) on some other remote (non-localhost) System you should consider using our <A href="http://safsdev.sourceforge.net/doc/org/safs/selenium/util/SeleniumServerRunner.html" alt="SeleniumPlus Standalone Server Wrapper Class" title="SeleniumPlus Standalone Server Wrapper Class" target="_blank">SeleniumServerRunner</A> in order to convey the benefits of these non-Selenium interactions on the remote System(s).
+<p>
+The wrapper does NOT alter the Selenium Standalone Server code in any way.  However, we create a separate SAFS Selenium RMI Server inside the same JVM to handle SAFS Selenium requests outside the scope of the Selenium Server.
+<p>
+</body>
+</html>

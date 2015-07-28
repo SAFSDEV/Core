@@ -1,0 +1,175 @@
+
+SetupRuntime.README.txt
+
+==========================================================================
+Author: Carl Nagle
+Original Release: OCT 27, 2003
+
+Copyright (C) SAS Institute
+General Public License: http://www.opensource.org/licenses/gpl-license.php
+==========================================================================
+
+This document instructs the user how to ensure the various pre-installed pieces are invoked at, or prior to, runtime.
+
+
+SetupSAFS Must Be Done Separately
+=================================
+This doc assumes the user has already installed the new SAFS pieces via the instructions:
+
+    SetupSAFS.README.txt
+    
+
+SetupRobotJ Must Be Done Separately For Any RobotJ Project To Be Used
+=====================================================================
+*If* the new RobotJ engine is expected to be part of the runtime, then the user is expected to have already prepared the the desired RobotJ Project per instructions:
+
+    SetupRobotJ.README.txt
+    
+
+Thus, at this point, the following items are all installed and available for use:
+
+    STAF
+    SAFS
+    Configured RobotJ Project (optional - for RobotJ Engine use only)
+    
+
+Runtime in a Nutshell
+======================
+
+    1) STAF (STAFProc) must be running.
+    2) SAFS Services for STAF must be running.
+    3) (Optional) RobotJ Engine launched, waiting for commands.
+    
+
+
+Launching STAF
+===============
+
+The STAF install will have placed two important programs in your Start Menu.  Use these to start and stop STAF as desired.
+
+   1) "Start STAF"
+   2) "Shutdown STAF"
+
+STAF can also be setup to be launched as an OS service during system startup.  Consult the STAF User's Guide and other STAF references for more information on the many varied and fun ways to use STAF.  You can find some of these references in your STAF installation directory.  Other references and online support can be found via the STAF website:
+
+    http://staf.sourceforge.net
+    
+
+    
+Launching SAFS Services for STAF
+=================================
+
+Currently, we have 3 primary services we rely on.  We already have more on the way.  The primary services are:
+
+    SAFSMAPS  -  handles and processes our Application Maps and variable 
+                 Application Constants for any/all tools.
+                 
+    SAFSVARS  -  handles global storage and processing of DDVariables for 
+                 any/all tools.
+                 
+    SAFSLOGS  -  handles logging for any/all tools.  All tools thus can 
+                 write to the same log(s).
+                 
+Documentation for each of these services can be found online or in the "doc" subdirectory of your SAFS installation.  There are also various .BAT or .VBS files for launching or shutting down various pieces of the framework in the "bin" subdirectory of your SAFS installation.
+
+The default means for launching the SAFS services for any active project is the script:
+
+    %SAFSDIR%\bin\SAFSStartup.VBS
+    
+  From the HELP info embedded in the script:
+  ------------------------------------------
+
+  ARGUMENTS:
+  ==========
+
+    ARG(0): App Maps Directory (Ex: "C:\Project\Datapool")
+            Full path to the location where App Maps will be found for the 
+            locally running project.
+
+    ARG(1): Logs Directory (Ex: "C:\Project\Datapool\Logs")
+            Full path to the location where logs will be written for the 
+            locally running project.
+
+    Both of these arguments are required for SAFS to operate correctly.
+
+
+  Example Invocations:
+  ====================
+
+  Command Line CScript.EXE:
+  -------------------------
+  cscript "C:\safs\bin\SAFSStartup.vbs" "C:\Project\Datapool" "C:\Project\Datapool\Logs"
+
+
+  Windows Script WScript.EXE:
+  ---------------------------
+  wscript "C:\safs\bin\SAFSStartup.vbs" "C:\Project\Datapool" "C:\Project\Datapool\Logs"
+
+
+Of course, a .BAT file or even the above script can be hardcoded to always point to one specific project eliminating the need to pass parameters.
+
+Below is an example invoking the above script in the beginning of a Robot Classic SQABasic script just prior to launching the main framework tests:
+
+SQABasic Script fragment:
+    ...
+    logsdir = GetDDELogsDirectory()
+    datadir = GetDDEDatapoolDirectory()
+    status = ExecWshShellProgram("cscript ""c:\safs\bin\safsstartup.vbs"" """& datadir &"""  """& logsdir &"""", 10)
+    ....
+    
+NOTE: The string argument to ExecWshShellProgram contains embedded quotes around the paths to the logsdir and datadir subdirectories to retain any embedded spaces.  You can also see that the last parameter to ExecWshShellProgram gives the script up to 10 seconds to finish execution.  You can find more info on the ExecWshShellProgram in the documentation for NTCommandUtilities at:
+
+    http://safsdev.sourceforge.net/sqabasic2000/NTCommandUtilities.htm
+
+Assuming STAF was setup and configured properly, you can verify the listed SAFS Services are running by typing the following command at any command prompt.  The services will appear among a list of other built-in services provided by STAF.
+
+    STAF Verification:
+    -----------------------
+    staf local service list
+    
+
+
+Launching RobotJ Engine
+========================
+
+During your RobotJ Project setup you would have created a script that does nothing more than "callScript" to our existing RobotJ engine code.  To launch the RobotJ Engine all you do is run that new script.  In the RobotJ console window you may see a 'resetting events' message, but little beyond that.  RobotJ will appear to be dead, but it should actually be sitting there waiting for someone to send it test records.  You can verify this by looking at a list of active STAF process\handles.  "SAFS/RobotJ" should appear among this list.
+
+    STAF Verification:
+    ---------------------------
+    staf local handle query all
+
+
+
+Shutdown RobotJ Engine
+=======================
+
+Once the RobotJ Engine is started, it will not normally shutdown until given the appropriate SAFS test record instruction to do so.  This can be done via any client capable of talking to RobotJ through our STAF interface.
+
+There is also a "SAFSRobotJShutdown.BAT" file in the %SAFSDIR%\BIN directory that can issue this shutdown command.  Assuming the %SAFSDIR%\BIN directory was correctly added to the system PATH, the user should be able to invoke the command from any command prompt (or other mechanism).
+
+    Command Prompt RobotJ Shutdown:
+    --------------------------------------
+    SAFSRobotJShutdown                  or
+    %SAFSDIR%\bin\SAFSRobotJShutdown.bat
+
+
+
+Shutdown SAFS Services for STAF
+================================
+
+The normal STAF commands to remove each running service is all we use to shutdown our SAFS services.
+
+There is a "SAFSShutdown.BAT" file in the %SAFSDIR%\BIN directory that can issue these commands.  Assuming the %SAFSDIR%\BIN directory was correctly added to the system PATH, the user should be able to invoke the command from any command prompt (or other mechanism).
+
+    Command Prompt SAFS Shutdown:
+    --------------------------------
+    SAFSShutdown                  or
+    %SAFSDIR%\bin\SAFSShutdown.bat
+
+
+
+Shutdown STAF
+==============
+
+As mentioned previously, there is a "Shutdown STAF" item in your Start Menu to completely shutdown the STAF system.  This will also remove any SAFS services that may still be running.  It is not always necessary to shutdown STAF to reset the test environment.  Often, simply shutting down and restarting the SAFS Services is sufficient.
+

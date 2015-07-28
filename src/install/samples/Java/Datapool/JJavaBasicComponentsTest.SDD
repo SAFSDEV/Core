@@ -1,0 +1,47 @@
+;####################	CFComponent  ############################
+;==============         test scrollbar
+C, GetSecsSeekComponent, "secondsSeekComponent"
+C, SetSecsSeekComponent, 1
+T, SwingWindow, JavaMenu, SelectMenuItem, "Tools->Basic Components"
+T, SwingWindow, ListVScrollBar, OneDown
+
+T, SwingWindow, ListHScrollBar, ONELEFT
+T, SwingWindow, ListHScrollBar, OneRight
+T, SwingWindow, ListHScrollBar, PageLeft
+T, SwingWindow, ListHScrollBar, PageRight
+C, SetSecsSeekComponent, ^secondsSeekComponent
+
+;==============         Use Basic Components to test
+T, SwingWindow, JavaMenu, SelectMenuItem, "Tools->Basic Components"
+T, SwingWindow, EditBox2, GetGUIImage, "comp.jpg"
+C, LOGFailureOK, "If there is not file comp.jpg in bench folder, the following command will fail."
+T, SwingWindow, EditBox2, VerifyGUIImageToFile, "comp.jpg"
+
+;####################	CFText  #################################
+T, SwingWindow, EditBox2, SetUnverifiedTextValue, "+(unverifiedTextValue)"
+T, SwingWindow, EditBox2, SetUnverifiedTextValue, "chinese"
+C, Pause, 1
+T, SwingWindow, EditBox2, SetTextValue, "+(verifiedTextValue)"
+T, SwingWindow, EditBox2, SetTextValue, "verifiedTextValue"
+C, Pause, 1
+T, SwingWindow, EditBox2, SetUnverifiedTextCharacters, "+(unverifiedTextChar)"
+C, Pause, 1
+T, SwingWindow, EditBox2, SetTextCharacters, "+(verifiedTextChar)"
+
+;Test javax.swing.JList and java.awt.List
+T, SwingWindow, ListBox, ClickTextItem , "ListItem2"
+T, SwingWindow, ListBox, VerifyItem , 1, "ListItem1"
+T, SwingWindow, ListBox, VerifyItemUnselected , "ListItem2"
+T, SwingWindow, ListBox, VerifySelectedItem , "ListItem2"
+T, SwingWindow, ListBox, VerifyItemUnselected , "ListItem1"
+T, SwingWindow, ListBox, VerifySelectedPartialMatch , "ListItem2"
+
+;=====  Test ComboBox
+C, GetSecsSeekComponent, "secondsSeekComponent"
+C, SetSecsSeekComponent, 1
+T, SwingWindow, JavaMenu, SelectMenuItem, "Tools->Basic Components"
+T, SwingWindow, ComboBox, ShowList
+T, SwingWindow, ComboBox, Select, "Test8"
+C, pause, 1
+T, SwingWindow, ComboBox, HideList
+C, SetSecsSeekComponent, ^secondsSeekComponent

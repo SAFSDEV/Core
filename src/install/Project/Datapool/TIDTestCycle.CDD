@@ -1,0 +1,15 @@
+;	TestWRAFS.CDD						
+;	This is the Cycle Driver test for TEST Environment.						
+							
+;	Record Types (RT):			Description:			
+;	B = BLOCKID			Defines the start of a named block. (not really used at this time)			
+;	C = DRIVER COMMAND			Driver to perform some function other than a test step.			
+;	S = SKIPPED TEST			A record which is skipped but a user-defined comment is logged as to why.			
+;	T = TEST STEP			A test step to perform.			
+							
+;RT	COMMAND	ARG		Description:			
+;C,SetApplicationMap,C:\Datapool\TestApp.map,Set the GUI Map File			
+							
+;RT	SUITES	ARG1	ARG2	ARG3	Description:		
+;T,DriverCommands
+T, TestWebFunctions

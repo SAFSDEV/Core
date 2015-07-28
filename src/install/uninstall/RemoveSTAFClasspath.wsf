@@ -1,0 +1,78 @@
+<job id="SetupSAFSClasspath">
+<script language="VBScript" src="_SharedFunctions.vbs"/>
+<script language="VBScript">
+
+'******************************************************************************
+'* 
+'* RemoveSTAFClasspath.WSF  --  
+'*
+'* Remove System CLASSPATH for STAF tools.
+'* This script only ensures System CLASSPATH settings are removed as necessary.
+'* 
+'* Required assets for this install:
+'* 
+'*   _SharedFunctions.VBS must exist in the same directory as this script.
+'*     
+'* CLASSPATH may be modified by these Setup scripts.  Prior to making 
+'* any modification, the current value of CLASSPATH variable is saved in the 
+'* "CLASSPATH_SAFSBAK" environment variables.  Note, this 
+'* backup only occurs once--the first time we detect that no backup has been done 
+'* previously.
+'* 
+'* The affected environment variables and their backups are listed below:
+'* 
+'*     VARIABLE     BACKUP VARIABLE              PURPOSE
+'*     =========    =================    ============================
+'*     CLASSPATH    CLASSPATH_SAFSBAK    Search path for Java classes
+'* 
+'* JAR files potentially purged from CLASSPATH as appropriate:
+'*
+'*     \bin\JSTAF.jar 
+'*
+'* Author: Carl Nagle
+'* Original Release: JAN 05, 2006
+'*
+'* Copyright (C) SAS Institute
+'* General Public License: http://www.opensource.org/licenses/gpl-license.php
+'******************************************************************************
+
+Dim shell, env, fso, response, message, cr, q
+
+Const good_wsh_version  = 5.6
+
+cr = chr(13)  'carriage return
+q  = chr(34)  'double quote
+
+'WScript.Interactive = false
+
+Set shell = WScript.CreateObject("WScript.Shell")
+Set env   = shell.Environment("SYSTEM")
+Set fso   = WScript.CreateObject("Scripting.FileSystemObject")
+
+'Check version of WSH prior to proceeding
+'=========================================
+response = checkWSHVersion(good_wsh_version)
+if response = -1 then WScript.Quit
+
+'Old SAFS Jars
+'-------------
+Dim STAFClassPathArray(1)
+STAFClassPathArray(0) = "\bin\JSTAF.jar"
+STAFClassPathArray(1) = "\samples\demo\STAFDemo.jar"   ' STAF 3.X has this jar file
+
+backupEnv "CLASSPATH", "CLASSPATH_SAFSBAK"
+
+ON Error Resume Next
+
+'first clean the CLASSPATH of all olde SAFS jars
+'-----------------------------------------------
+CleanEnvironment "CLASSPATH", STAFClassPathArray
+
+On Error Goto 0
+
+Set shell = nothing
+Set fso   = nothing
+Set exec  = nothing
+
+</script>
+</job>

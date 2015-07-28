@@ -1,0 +1,275 @@
+<html>
+<head><title>SAFS Release Notes</title></head>
+<body>
+<a name="top" />
+<h1><center>
+SAFS Framework Release Notes<br/>
+2009.10.09</center></h1>
+<p>
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>,&#032;
+<a href="#newstuff">New Stuff</a>
+<hr/>
+<a name="definitions" />
+<p>
+<h3><b>Definitions:</b><br/></h3>
+<table border=0 cellspacing=7 >
+<tr><td><b>
+SAFS</b><td><b><a href="http://safsdev.sourceforge.net" target=_blank alt="SAFSDEV Home Page" >
+Software Automation Framework Support</a></b>
+<tr><td><b>
+SAFS Driver</b><td>
+The tool that initializes, opens, parses, and routes SAFS test records to available SAFS Engines.
+<tr><td><b>
+SAFS Engine</b><td>
+A keyword-driven automation tool capable of interpreting and executing SAFS test records.
+<tr><td><b>
+SAFS/DriverCommands</b><td>
+A SAFS Engine for tool-independent
+<a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverCommands"
+   target=_blank alt="SAFS Driver Commands Reference" >Driver Commands</a>
+<tr><td><b>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/tools/engines/SAFSROBOTJ.html"
+   target=_blank alt="SAFS Rational Functional Tester Doc" >SAFS/RobotJ</a></b><td>
+A SAFS Engine for testing using <a href="http://www-01.ibm.com/software/awdtools/tester/functional/"
+   target=_blank alt="Rational Functional Tester Site" >Functional Tester</a> by IBM Rational.</td>
+<tr><td><b>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/tools/engines/SAFSTC.html"
+   target=_blank alt="SAFS AutomatedQA TestComplete Doc" >SAFS/TC</a></b><td>
+A SAFS Engine for testing using <a href="http://www.automatedqa.com/products/testcomplete/"
+   target=_blank alt="AutomatedQA TestComplete Site" >TestComplete</a> by AutomatedQA.</td>
+<tr><td><b>
+SAFS IBT</b><td>
+An embedded SAFS Engine for <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSImageBasedRecognition.htm"
+   target=_blank alt="Image-Based Testing Doc" >Image-Based Testing</a>. (Patent Pending)</td>
+</table>
+<hr/>
+<a name="reminders" />
+<small>
+<a href="#top">Back2Top</a>,&#032;
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>,&#032;
+<a href="#newstuff">New Stuff</a>
+</small>
+<p>
+<h3>CRITICAL REMINDERS</h3>
+<p>
+This release of SAFS has been a long-time in the making.  The primary focus of this release is to provide a simplified install process that supports STAF 3.X installing with Java 1.6.  All the latest functionality of SAFS and supported tools like Rational Functional Tester and Image-Based Testing are included in this release.
+<p>
+<ul>
+<b>*** IMPORTANT NOTE ***</b><br/>
+<i>While the latest SAFS and RFT support both STAF V2 and V3, other associated tools like RRAFS using Rational Robot have not been refactored to support STAF V3. &nbsp;If you are using RRAFS you must continue to use and install STAF V2.
+<p>
+The AutomatedQA TestComplete tool has not been evaluated for its support of STAF V3 and may also need to continue using STAF V2.  However, the DDVariableStore.DLL presumably used by TestComplete has been refactored to support both STAF V2 and V3.</i>
+</ul>
+<p>
+Affected customizations from previous releases:<br/>
+<ul>
+<li>Custom modifications in your SAFS install directories &lt; C:\SAFS\bin >
+<li>Batch files (*.bat or *.vbs), or any SAFSTID.INI in the root SAFS install directory &lt; C:\SAFS >
+<li>Project config files (*.bat or *.ini) in the SAFS Project directory &lt; c:\SAFS\Project >
+<li>Project test tables (*.cdd, *.std, *.sdd) files in the SAFS Project Datapool directory &lt;C:\SAFS\Project\Datapool >
+<li>Object mapping files (*.dat) in your SAFS lib directory &lt; C:\SAFS\lib >
+</ul>
+<p>
+If you have taken advantage of any of the customization capabilities of this framework,
+then you must take some simple precautions prior to installing this new release.
+Installing a new version of the framework will install new, default versions of
+customizable files.
+<p>
+<b>SAFSTID.INI</b><br/>
+If you have a modified SAFSTID.INI in your install directory, you should make a back-up,
+then evaluate how and if you want to merge with the new file.
+<p>
+<b>SAFS Batch Files</b><br/>
+If you have previously installed the SAFS Framework then you may have manually
+modified batch files or VBS scripts to handle custom project paths.  You will need to
+backup modified files and evaluate how and if you want to merge such changes with the new
+files.
+<p>
+<b>SAFS Project Files</b><br/>
+If you have previously installed and edited any of the INI or BAT files in the SAFS\Project directory then you will need to backup these modified files and evaluate how and if you want to merge such changes with the new files.
+<p>
+<b>SAFS Object Mapping Files</b><br/>
+If you have previously installed and edited any of the following files then you will need to backup the modified files and evaluate how and if you want to merge your edits with the new (default) versions of these files:
+<ul>
+<li>JavaObjectsMap.dat
+<li>ObjectTypesMap.dat
+<li>CustomJavaObjectsMap.dat
+<li>CustomObjectTypesMap.dat
+</ul>
+<p>
+Failure to perform any of these prescribed backups may erase your prior customizations.
+Hopefully, you have backed them up somewhere already as part of your normal ongoing activities.
+Right?!
+<p>
+<H3>STAF 2.6.11 and STAF 3.3.X and JAVA 1.6</H3>
+SAFS can be installed to work with either STAF 2.6.11, or STAF 3.3.3 and above.  However, note the following installation limitations below:
+<p>
+<ul>
+<li>It is highly recommended to install and use STAF 3.3.X for new installations using RFT.<br>
+Support for STAF 2.X is only provided for scenarios requiring interaction with remote machines having STAF 2.X installed and for users still using IBM Rational Robot (RRAFS) which has not been refactored to support STAF V3.
+<p>
+<li>STAF 2.6.11 <i>requires</i> Java 1.4 or Java 1.5 to install. &nbsp;STAF 2.6.11 will NOT successfully install using Java 1.6 or later.<br>
+However, STAF 2.6.11 can use Java 1.6 AFTER it has been successfully installed with an older version of Java.<br>
+Most machines do NOT have earlier versions of Java installed. &nbsp;If you intend to install STAF 2.6.11 and do not have Java 1.5 on your machine then you will have to download and install Java 1.5 from the <a href="http://java.sun.com/products/archive/index.html" alt="Sun Java Archives" target="_blank">Sun Java Archives</a>.
+<p>
+<li>STAF 3.3.X can successfully install and run with Java 1.6 as well as earlier and later versions of Java.<br>
+It is highly recommended to install and use STAF 3.3.X for new installations not using Rational Robot.<br>
+Support for STAF 2.X is only provided for scenarios requiring interaction with remote machines having STAF 2.X installed and for users still using IBM Rational Robot (RRAFS) which has not been refactored to support STAF V3.
+</ul>
+<p>
+<hr/>
+<a name="safstools"/>
+<small>
+<a href="#top">Back2Top</a>,&#032;
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>,&#032;
+<a href="#newstuff">New Stuff</a>
+</small>
+<p>
+<b>Note: STAFWrap.DLL and DDVariableStore.DLL have been refactored in order to support both STAF V2.X and STAF V3.X</b>
+<p>
+STAFWrap.DLL, ComponentFunctions.DLL, DDVariableStore.DLL and associated scripts for registering DVariableStore.DLL
+are included in the SAFS\bin directory.  The SetupSAFS script does register and\or move
+files to system directories as necessary.
+<p>
+COM classes supporting COM access to STAF for use in VBScript and other COM-related
+features exist in the latest version of DDVariableStore.DLL.  Consult the sourcecode in CVS
+or any VBA or COM object browser until more proper documentation is made available.  A very
+rudimentary "RUTHere" test script for this COM STAF interface can be found in
+SAFS\bin\DDVariableStoreTest.VBS .
+<p>
+<hr/>
+<a name="instructions"/>
+<small>
+<a href="#top">Back2Top</a>,&#032;
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>,&#032;
+<a href="#newstuff">New Stuff</a>
+</small>
+<p>
+<h3>Installation Instructions</h3>
+If you have not done so, review the <a href="#reminders">Critical Reminders</a> concerning
+backups of locally modified or customized files from previous releases.<br>
+I'd hate to say, "I told ya so."
+<p>
+<dl>
+<dt><b>Short-N-Sweet install instructions:</b>
+<p>
+A Java Runtime Environment (JRE) and Windows Scripting Host V5.6 or later is required.  Refer
+to <a href="http://safsdev.sourceforge.net/sqabasic2000/SetupSAFS.README.htm" >SetupSAFS.README</a>
+in the Java Runtime and Windows Scripting Host sections for more details and install
+information for those tools.
+<p><dd>
+<ol>
+<li><b>Extract the SAFSFramework .ZIP into ANY directory.</b><br/>
+Extract all files of the ZIP file into ANY directory.&nbsp; A good choice might be something
+like C:\TEMP, or even C:\SAFS.
+<p>
+<i>RRAFS (Rational Robot) users might do best to extract into
+their ".\Rational\Rational Test\sqabas32" directory. (Although this should not be
+necessary with a RRAFS release since that includes the SAFS install files already. Only do
+this if you are upgrading SAFS without upgrading RRAFS.)</i>
+<p>
+Enable "OVERWRITE Existing Files" if you are overwriting a previous release of SAFS.
+<p>
+<li><b>Run the extracted <b>SetupSAFS.wsf</b> script.</b><br/>
+In Windows Explorer, locate "SetupSAFS.wsf" in that directory and double-click to execute
+it.<br/>
+(Note: previous releases used SetupSAFS.vbs.&nbsp; This file has now been overwritten to call
+SetupSAFS.wsf instead.)
+<p>
+<b>SetupSAFS.wsf</b> will prompt to confirm for the installation of the SAFS Framework and
+the version of STAF to install, if any.&nbsp; The user has the option to skip these installations by pressing "No" or "Cancel" when prompted.<br>
+You do not need to reinstall STAF if you already have STAF installed. &nbsp;However, you may wish to reinstall STAF to overwrite STAF 2.X with the new STAF V3.X version.
+<p>
+<li><b>Setup SAFS and (optionally) Rational Functional Tester per
+<a href="http://safsdev.sourceforge.net/sqabasic2000/SetupSAFS.README.htm">SetupSAFS.README</a></b><br/>
+Verify/Complete any setup per that doc.
+</ol>
+</dl>
+<p>
+<b>SetupSAFS.wsf</b> will not install any program that will appear in Control Panel's
+"Add/Remove Program" application.
+<p>
+<hr/>
+<a name="setupnotes"/>
+<small>
+<a href="#top">Back2Top</a>,&#032;
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#newstuff">New Stuff</a>
+</small>
+<p>
+<h3>Additional Setup Notes and Information</h3>
+
+Additional notes and instructions for this release can be found via the links below.
+These are generally reviewed in the listed order.  The files are contained in the
+downloaded installation ZIP file and available once all contents of the ZIP file are
+extracted into the install directory.
+(The links to these will work once unzipped locally.)
+<p>
+<table border=0 cellspacing=7 >
+<tr><td>
+<a href="SetupSAFS.README.htm"  >
+SetupSAFS.README</a><td>
+Install STAF and SAFS Services
+<tr><td>
+<a href="SetupRuntime.README.htm"  >
+SetupRuntime.README</a><td>
+Runtime Setup for Testing
+<tr><td>
+<a href="SetupRobotJ.README.htm"  >
+SetupRobotJ.README</a><td>
+Optionally, setup Rational Functional Tester to use STAF and SAFS Services.
+</table><p>
+
+<hr/>
+<a name="newstuff"/>
+<small>
+<a href="#top">Back2Top</a>,&#032;
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>,&#032;
+</small>
+<p>
+<h3>New, Fixed, or Enhanced Stuff</h3>
+This release of SAFS has been a long-time in the making. &nbsp;The primary focus of this release is to provide support for both STAF 2.X and STAF 3.X. &nbsp;SAFS installs with STAF V3.3 can now be properly installed with Java 1.6 and later. &nbsp;In addition, a huge number of enhancements to SAFS and Rational Functional Tester support has been piling up for 2.5 years. &nbsp;This release brings this all together in one easier installation:
+<p>
+<ul>
+<li>SAFS Support (Patent Pending) for <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSImageBasedRecognition.htm"
+   target=_blank alt="Image-Based Testing Doc" >Image-Based Testing</a>.
+<li>RFT V8 support for Web, Flex, Java, RCP, .NET, WPF, and many native Win32 applications
+<li>RFT V8 Enhanced :MCSM: (Mapped Child Search Mode) for component recognition
+<li>RFT V8 Enhanced :FPSM: (Full Path Search Mode) for faster searches in specific scenarios.
+<li>RFT V8 support for both <a href="http://safsdev.sourceforge.net/doc/org/safs/GuiObjectRecognition.html" alt="Object Recognition Strings" target="_blank">Object Recognition Strings</a> and <a href="http://safsdev.sourceforge.net/sqabasic2000/UsingRFTObjectMaps.htm" alt="Using RFT Object Maps" target="_blank">Using RFT Object Map objects</a> when building <a href="http://safsdev.sourceforge.net/sqabasic2000/CreateRFTAppMaps.htm" alt="RFT Application Maps" target="_blank">RFT Application Maps</a>.
+</ul>
+<p>
+<hr/>
+<small>
+<a href="#top">Back2Top</a>,&#032;
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>
+</small>
+<pre>
+Carl Nagle, <a href="http://www.sas.com"  >SAS</a>
+Project Manager, <a href="http://safsdev.sourceforge.net"  >SAFSDEV</a>
+Subscribe to appropriate <a href="http://sourceforge.net/mail/?group_id=56751" alt="Go to Support Forums">Support Forums</a> to review support archives and ask questons.
+</pre></body></html>

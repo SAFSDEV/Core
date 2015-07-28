@@ -1,0 +1,334 @@
+<!-- ************************************************************************** -->
+<!-- Keyword Driven Automation Documentation DTD Version 1.1			-->
+<!-- Keyword Driven Automation may also be known as Data Driven Automation or	-->
+<!-- Table Driven Automation.							-->
+<!-- Placed in Public Domain by Carl Nagle of SAS Institute, Inc., 2002		-->
+<!-- Additional information on Keyword Driven Automation available at		-->
+<!--   http://safsdev.sourceforge.net                                      	-->
+<!--   (Join and contribute!)		                                        -->
+<!--                                                                            -->
+<!-- DTD syntax reminders:                                                      -->
+<!--                                                                            -->
+<!-- The optional character following a ELEMENT name or list governs whether    -->
+<!-- the element or the content particles in the list may occur one or more (+),-->
+<!-- zero or more (*), or zero or one times (?). The absence of such an operator-->
+<!-- means that the element or content particle must appear exactly once.       -->
+<!--                                                                            -->
+<!-- In an ATTRIBUTE declaration, #REQUIRED means that the attribute must always-->
+<!-- be provided. #IMPLIED means it is optional and no default value is provided-->
+<!-- Otherwise, quoted text after type information indicates the default value. -->
+<!-- If a default value is declared, when an XML processor encounters an omitted-->
+<!-- attribute, it is to behave as though the attribute were present with the   -->
+<!-- declared default value.                                                    -->
+<!-- ************************************************************************** -->
+
+
+<!-- ************************************************************************** -->
+<!--Root element contains information on the libraryType, libraryInfo, runtime, -->
+<!--and one or more keywords supported by the library.				-->
+<!--                                                                            -->
+     <!ELEMENT keyword_library ( libraryType, libraryInfo, runtime?, keywords* ) >
+<!-- ************************************************************************** -->
+
+
+<!-- ************************************************************************** -->
+<!--libraryType element identifies the type of keyword library documented.	-->
+<!--Attribute values are typically 'DRIVER' or 'COMPONENT'.			-->
+<!--										-->
+<!--A DRIVER library defines keywords associated with the automation drivers.	-->
+<!--A COMPONENT library defines keywords for a component manipulated by the 	-->
+<!--automation drivers.								-->
+<!--A ENGINE library defines keywords for interacting with engines.             -->
+<!--                                                                            -->
+     <!ELEMENT libraryType EMPTY>
+
+     <!ATTLIST libraryType 
+   	       type        (ENGINE|DRIVER|COMPONENT)  #REQUIRED >
+<!-- ************************************************************************** -->
+
+
+<!-- ************************************************************************** -->
+<!--libraryInfo element provides information on the name of the keyword library,-->
+<!--an optional class, an optional subClass definition, a description, and the	-->
+<!--sourcecode filename, if any.						-->
+<!--                                                                            -->
+     <!ELEMENT libraryInfo (description?)>
+
+     <!ATTLIST libraryInfo 
+   	       name       CDATA  #REQUIRED
+   	       chainTo    CDATA  #IMPLIED 
+   	       class      CDATA  #IMPLIED 
+   	       subClass   CDATA  #IMPLIED
+   	       doc        CDATA  #IMPLIED
+   	       sourcecode CDATA  #IMPLIED >
+<!--                                                                            -->
+<!--name attribute provides a given name or common name for its parent element.	-->
+<!--For example, we may define a common driver library named 'Driver Commands'.	-->
+<!--A component library for EditBox components might be 'EditBox Functions'.	-->
+<!--                                                                            -->
+<!--chainTo attribute defines which other library of keywords are intended to	-->
+<!--be inherited or supported through subclassing.  The keywords defined in     -->
+<!--the chainTo library should be considered supported and available in this    -->
+<!--library, as would the keywords of all libraries further up the chain.       -->
+<!--                                                                            -->
+<!--class attribute defines a common class/type of a driver or component.	-->
+<!--Driver libraries will only provide a class if the keywords they provide are -->
+<!--not shared by all the drivers in the same runtime environment.  In that 	-->
+<!--case, the class will identify the name of the associated driver.  For 	-->
+<!--example, 'DriverX' or 'DriverY'.						-->
+<!--										-->
+<!--Component libraries will always provide a class and may also provide a 	-->
+<!--subClass.  Some examples of possible classes:				-->
+<!--	class='EditBox'								-->
+<!--	class='Printer'								-->
+<!--	class='Database'							-->
+<!--                                                                            -->
+<!--subClass attribute defines an optional subClass/subType of a common class.	-->
+<!--When a particular class or type of a common component requires a special	-->
+<!--handler you would define a 2nd library with a different component subClass.	-->
+<!--Keywords of the common class are not shared by the subClass and vice versa.	-->
+<!--										-->
+<!--For example, we may have a library of keywords that act on most 'Printer' 	-->
+<!--components.  However, we can choose to implement a 2nd library to provide	-->
+<!--more functionality for a specific Printer.					-->
+<!--										-->
+<!--	class='Printer' subClass='HPColor'					-->
+<!--										-->
+<!--doc attribute provides the filename/URL for the library documentation.	-->
+<!--(If there is any.)								-->
+<!--                                                                            -->
+<!--sourcecode attribute provides the filename/URL for the library sourcecode.	-->
+<!--(If there is any.)								-->
+<!-- ************************************************************************** -->
+		
+
+<!-- ************************************************************************** -->
+<!--description element provides a detailed description and/or a short          -->
+<!--description.  The short description should be suitable for storage in a     -->
+<!--database field.                                                             -->
+<!--                                                                            -->
+     <!ELEMENT description ((short_desc,detailed_desc)|(short_desc)|(detailed_desc)) >
+<!-- ************************************************************************** -->
+
+
+<!-- ************************************************************************** -->
+<!--detailed_desc element provides a detailed description of its parent element.-->
+<!--The parsed character data will generally conform to standards for simple    -->
+<!--content formatting.  This can include HTML tags like:                       -->
+<!--    br  p  code  ol(li)  ul(li)  dl(dt,dd)					-->
+<!--                                                                            -->
+     <!ELEMENT detailed_desc ANY >
+<!-- ************************************************************************** -->
+
+
+<!-- ************************************************************************** -->
+<!--short_desc element provides a short description of its parent element.      -->
+<!--This short description should be suitable for storage in a database field.  -->
+<!--The parsed character data will generally conform to standards for simple    -->
+<!--content formatting.  This can include HTML tags like:                       -->
+<!--    br  p  code  ol(li)  ul(li)  dl(dt,dd)					-->
+<!--Although the short description should be so short that content formatting   -->
+<!--may not be required.                                                        -->
+<!--                                                                            -->
+     <!ELEMENT short_desc ANY >
+<!-- ************************************************************************** -->
+
+
+<!-- ************************************************************************** -->
+<!--runtime element defines the platform and engine of this library.		-->
+<!--                                                                            -->
+     <!ELEMENT runtime EMPTY>
+
+     <!ATTLIST runtime 
+   	       platform  CDATA  #REQUIRED 
+   	       engine    CDATA  #REQUIRED
+   	       version   CDATA  #IMPLIED>
+<!--                                                                            -->
+<!--platform attribute defines the Operating System platform for the library.	-->
+<!--Values might be HPUX, Solaris, Windows, W98, WNT, W2K, MVS, JAVA etc.	-->
+<!--                                                                            -->
+<!--engine attribute defines the name of the runtime engine vendor or tool.	-->
+<!--Values might be Robot, WinRunner, VisualTest, LoadRunner, Silk etc.		-->
+<!--                                                                            -->
+<!--The optional version attribute of the engine needed for this library.	-->
+<!--The library may work in all versions, or at least the version currently 	-->
+<!--deployed.  We may want to use this to specify a MINIMUM engine version 	-->
+<!--required for the library.							-->
+<!-- ************************************************************************** -->
+
+
+<!-- ************************************************************************** -->
+<!--keywords element defines one or more keywords.				-->
+<!--                                                                            -->
+     <!ELEMENT keywords ( keyword+ )>
+<!-- ************************************************************************** -->
+
+ 
+<!-- ************************************************************************** -->
+<!--keyword element defines the name, displaytext, description, and the 	-->
+<!--list of parameters and/or examples for the keyword - if any.                -->
+<!--                                                                            -->
+     <!ELEMENT keyword ( description?, engines? , parameters?, examples?) >
+
+     <!ATTLIST keyword 
+   	       name        CDATA  #REQUIRED 
+   	       displayText CDATA  #IMPLIED 
+   	       deprecated (YES|Yes|yes|Y|y|NO|No|no|N|n)  "NO" 
+   	       deprecatedFor CDATA #IMPLIED
+   	       expectFailSupport (YES|Yes|yes|Y|y|NO|No|no|N|n)  "NO" 
+   	       expectWarnSupport (YES|Yes|yes|Y|y|NO|No|no|N|n)  "NO" >
+<!--                                                                            -->
+<!--name attribute provides a given name or common name for its parent element.	-->
+<!--                                                                            -->
+<!--displayText attribute defines the displayed text of the parent element.	-->
+<!--Normally only provided if different than the name.				-->
+<!--                                                                            -->
+<!--deprecated attribute specifies whether this keyword has been made obsolete.	-->
+<!--Keywords are often deprecated when a better keyword has been defined.       -->
+<!--Users should use the new keyword in all new development. Deprecated         -->
+<!--keywords are only retained for backwards compatibility with existing tests  -->
+<!--for an indefined period of time.  The deprecated keyword may not be         -->
+<!--supported in some future release.                                           -->
+<!--                                                                            -->
+<!--deprecatedFor attribute specifies the new keyword to use if deprecated.     -->
+<!--                                                                            -->
+<!--expectFailSupport attribute specifies whether the keyword has been coded to -->
+<!--support failure expected\failure allowed mode.                              -->
+<!--[This should now be overridden by the ENGINE attribute of the same name.]   -->
+<!--[This now allows each ENGINE to specify whether this is supported or not.]  -->
+<!--                                                                            -->
+<!--expectWarnSupport attribute specifies whether the keyword has been coded to -->
+<!--support warning expected\expected warning mode.                             -->
+<!--[This should now be overridden by the ENGINE attribute of the same name.]   -->
+<!--[This now allows each ENGINE to specify whether this is supported or not.]  -->
+<!-- ************************************************************************** -->
+
+
+<!-- ************************************************************************** -->
+<!--engines element defines one or more keyword execution engines.		-->
+<!--                                                                            -->
+     <!ELEMENT engines ( engine* ) >
+<!-- ************************************************************************** -->
+
+ 
+<!-- ************************************************************************** -->
+<!--engine elements express which engines have implemented a specific keyword.  -->
+<!--                                                                            -->
+     <!ELEMENT engine ( libraryInfo?) >
+
+     <!ATTLIST engine 
+               vendor      CDATA  #IMPLIED
+               tool        CDATA  #IMPLIED
+   	       name        CDATA  #REQUIRED
+   	       expectFailSupport (YES|Yes|yes|Y|y|NO|No|no|N|n)  "NO" 
+   	       expectWarnSupport (YES|Yes|yes|Y|y|NO|No|no|N|n)  "NO" 
+   	       since       CDATA  #IMPLIED >
+<!--                                                                            -->
+<!--vendor identifies the vendor or provider of the tool used to implement the  -->
+<!--engine or the source of the tool used to derive the engine.  For example,   -->
+<!--possible vendor values could be "Rational", "Mercury Interactive", or "IBM".-->
+<!--                                                                            -->
+<!--tool identifies the vendor-provided name of the specific tool used in the   -->
+<!--engine implementation.  This is considered to be the formal name of the     -->
+<!--tool, which may differ from the "common" name by which we often refer to a  -->
+<!--given tool.  Examples, "Robot Classic", "Robot XDE", and "SilkTest".        -->
+<!--                                                                            -->
+<!--name attribute provides the given name or common name for the engine tool.	-->
+<!--Examples, "Robot", "RobotJ", "Silk".                                        -->
+<!--                                                                            -->
+<!--since allows us to specify when a particular engine provided support for the-->
+<!--keyword.  For many keywords already supported, a default date of 20030827   -->
+<!--has been specified even if the support began long before that time.         -->
+<!--The format for this date is expected to be YYYYMMDD, although this is not   -->
+<!--strictly enforced.                                                          -->
+<!--                                                                            -->
+<!--expectFailSupport attribute specifies whether the keyword has been coded to -->
+<!--support failure expected\failure allowed mode in this engine.               -->
+<!--                                                                            -->
+<!--expectWarnSupport attribute specifies whether the keyword has been coded to -->
+<!--support warning expected\expected warning mode in this engine.              -->
+<!-- ************************************************************************** -->
+
+
+<!-- ************************************************************************** -->
+<!--examples element defines zero or more examples for the keyword usage.       -->
+<!--                                                                            -->
+     <!ELEMENT examples ( example* )>
+<!-- ************************************************************************** -->
+
+
+<!-- ************************************************************************** -->
+<!--example element defines the usage example and a description of the usage.	-->
+<!--                                                                            -->
+     <!ELEMENT example ( usage, description? ) >
+<!-- ************************************************************************** -->
+
+
+<!-- ************************************************************************** -->
+<!--usage element contains the text of the example keyword usage.               -->
+<!--                                                                            -->
+     <!ELEMENT usage ANY >
+<!-- ************************************************************************** -->
+
+
+<!-- ************************************************************************** -->
+<!--parameters element defines zero or more parameters for the keyword.		-->
+<!--                                                                            -->
+     <!ELEMENT parameters ( parameter* ) >
+<!-- ************************************************************************** -->
+
+
+<!-- ************************************************************************** -->
+<!--parameter element defines the name, displayText, and description for a 	-->
+<!--keyword parameter.								-->
+<!--                                                                            -->
+     <!ELEMENT parameter ( description )>
+
+     <!ATTLIST parameter 
+     	       name        CDATA  #REQUIRED 
+     	       displayText CDATA  #IMPLIED 
+     	       optional (YES|Yes|yes|Y|y|NO|No|no|N|n) "NO"
+     	       default     CDATA  #IMPLIED>
+<!--                                                                            -->
+<!--name attribute provides a given name or common name for its parent element.	-->
+<!--                                                                            -->
+<!--displayText attribute defines the displayed text of the parent element.	-->
+<!--Normally only provided if different than the name.				-->
+<!--                                                                            -->
+<!--optional parameter Attribute specifies if the parameter is optional.	-->
+<!--By default, all keyword parameters are required.				-->
+<!--                                                                            -->
+<!--default parameter Attribute provides a default value for the parameter.	-->
+<!--By default, keyword parameters do not have default values.			-->
+<!-- ************************************************************************** -->
+
+     <!ELEMENT p ANY >
+     <!ELEMENT P ANY >
+     
+     <!ELEMENT a ANY > 
+     <!ATTLIST a 
+     	       name   CDATA #IMPLIED
+     	       href   CDATA #IMPLIED
+     	       target CDATA #IMPLIED >
+     
+     <!ELEMENT A ANY > 
+     <!ATTLIST A 
+     	       name   CDATA #IMPLIED
+     	       href   CDATA #IMPLIED
+     	       target CDATA #IMPLIED >
+     
+     <!ELEMENT dd ANY >
+     <!ELEMENT dl ANY >
+     <!ELEMENT dt ANY >
+     <!ELEMENT ol ANY >
+     <!ELEMENT ul ANY >
+     <!ELEMENT UL ANY >
+     <!ELEMENT li ANY >
+     <!ELEMENT LI ANY >
+     <!ELEMENT img ANY >
+     <!ELEMENT br ANY >
+     <!ELEMENT BR ANY >
+     <!ELEMENT b ANY >
+     <!ELEMENT B ANY >
+     <!ELEMENT code ANY >
+     <!ELEMENT pre ANY >

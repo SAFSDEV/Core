@@ -1,0 +1,85 @@
+<job id="SetupSTAFClasspath">
+<script language="VBScript" src="_SharedFunctions.vbs"/>
+<script language="VBScript">
+
+'******************************************************************************
+'* 
+'* SetupSTAFClasspath.WSF  --  
+'*
+'* Setup System PATH and CLASSPATH for STAF.
+'* This script only ensures System PATH and CLASSPATH settings are made as 
+'* necessary to include STAF JAR files and STAF PATH info.
+'* 
+'* Required assets for this install:
+'* 
+'*   The target STAF tools must already be installed.
+'*   _SharedFunctions.VBS must exist in the same directory as this script.
+'*     
+'* Environment variables may be modified by these Setup scripts.  Prior to making 
+'* any modification, the current value of the environment variables are saved in 
+'* "PATH_SAFSBAK" and "CLASSPATH_SAFSBAK" environment variables.  Note, this 
+'* backup only occurs once--the first time we detect that no backup has been done 
+'* previously.
+'* 
+'* The affected environment variables and their backups are listed below:
+'* 
+'*     VARIABLE     BACKUP VARIABLE              PURPOSE
+'*     =========    =================    ============================
+'*     CLASSPATH    CLASSPATH_SAFSBAK    Search path for Java classes
+'*     PATH         PATH_SAFSBAK         Path to STAF\bin added
+'* 
+'* JAR files added to CLASSPATH as appropriate:
+'*
+'*     \bin\JSTAF.jar 
+'*
+'* Author: Carl Nagle
+'* Original Release: JAN 05, 2006
+'*
+'* Copyright (C) SAS Institute
+'* General Public License: http://www.opensource.org/licenses/gpl-license.php
+'******************************************************************************
+
+Dim shell, env, fso, response, message, cr, q, stafdir, stafjar
+
+Const good_wsh_version  = 5.6
+
+cr = chr(13)  'carriage return
+q  = chr(34)  'double quote
+
+'WScript.Interactive = false
+
+Set shell = WScript.CreateObject("WScript.Shell")
+Set env   = shell.Environment("SYSTEM")
+Set fso   = WScript.CreateObject("Scripting.FileSystemObject")
+
+'Check version of WSH prior to proceeding
+'=========================================
+response = checkWSHVersion(good_wsh_version)
+if response = -1 then WScript.Quit
+
+ON Error Resume Next
+
+stafdir = ""
+stafdir = env("STAFDIR")
+stafjar = stafdir &"\bin\JSTAF.jar"
+
+'update CLASSPATH & PATH
+if (fso.FileExists(stafjar)) then 
+    appendEnvironment "CLASSPATH", stafjar
+    appendEnvironment "PATH", stafdir &"\bin"
+else
+    message = "JSTAF.JAR file cannot be found."& cr & cr
+    message = message & "CLASSPATH cannot be updated."
+    message = message & "Seeking: "& stafjar
+    shell.LogEvent 4, message
+    'WScript.Echo message
+    shell.Popup message, 4, "JSTAF.JAR Not Detected", 64
+end if
+
+On Error Goto 0
+
+Set shell = nothing
+Set fso   = nothing
+
+</script>
+</job>

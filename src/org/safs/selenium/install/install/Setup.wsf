@@ -1,0 +1,164 @@
+<job id="Setup" >
+<script language="VBScript" src="_SharedFunctions.vbs"/>
+<script language="VBScript" >
+
+'******************************************************************************
+'* 
+'* Setup.WSF  --  *** MUST BE RUN WITH 32-BIT WSH on 64-BIT SYSTEMS ***
+'*
+'* arg(0) -- REQUIRED -- SeleniumPlus Install Directory.
+'* arg(1) -- OPTIONAL -- STAF Install Directory.
+'*
+'* Copyright (C) SAS Institute
+'* General Public License: http://www.opensource.org/licenses/gpl-license.php
+'******************************************************************************
+
+Dim arg, shell, env, fso, cmd, winfolder, existdir
+Dim exec, stafenv, safsenv, safstitle, returncode
+Dim stafdir, safsdir, installstaf, msg, args, OutStream
+Dim cr
+Dim q
+Dim nl
+Dim newline
+
+CONST OK_BUTTON_CLICKED=1
+CONST CANCEL_BUTTON_CLICKED=2
+CONST ABORT_BUTTON_CLICKED=3
+CONST RETRY_BUTTON_CLICKED=4
+CONST IGNORE_BUTTON_CLICKED=5
+CONST YES_BUTTON_CLICKED=6
+CONST NO_BUTTON_CLICKED=7
+
+cr        = chr(13)   'carriage return
+q         = chr(34)   'double quote
+nl		  = chr(10)		'next line
+newline   = cr & nl		'use "carriage return" and "next line" to form a newline
+stafenv   = "STAFDIR" 'Environment Variable for STAF root directory.
+safsenv   = "SELENIUM_PLUS" 'Environment Variable for root install directory.
+
+stafdir = ""
+installstaf = false 
+'SeleniumPlus does NOT bundle STAF after 2014.07.29
+
+WScript.Interactive = True
+
+Set shell = WScript.CreateObject("WScript.Shell")
+Set env   = shell.Environment("SYSTEM")
+Set fso   = WScript.CreateObject("Scripting.FileSystemObject")
+Set args  = WScript.Arguments
+
+'Test if user has the right to access registry
+if Not UserIsAdministrator then
+   msg = "Required administrator rights to install SeleniumPlus, please right-click the setup.bat and 'Run as administrator'."& cr & cr
+   shell.Popup msg,0,"SeleniumPlus Installation Abort",16
+   WScript.Quit
+end if
+
+safsdir = args(0)
+if Len(safsdir) = 0 then
+   msg = "Required path to SeleniumPlus root directory was not provided."& cr & cr
+   shell.Popup msg,0,"SeleniumPlus Installation Abort",16
+   WScript.Quit
+end if
+
+If NOT fso.FileExists(safsdir & "\libs\SPFilterImageGUI.jar") Then 
+   msg = "SeleniumPlus path provided appears to be invalid."& cr & cr
+   shell.Popup msg,0,"SeleniumPlus Installation Abort",16
+   WScript.Quit
+End If
+
+cmd = q & safsdir &"\Java\jre\bin\java.exe"& q & " -cp "& q & safsdir &"\libs\seleniumplus.jar" & q &" org.safs.install.SeleniumPlusInstaller "& q & safsdir & q 
+
+'only install STAF if explicitly passed to do so (no longer supported)
+'=====================================================================
+'if args.Count > 1 then 
+'    stafdir = args(1)
+'    '''installstaf = true (no longer supported)
+'end if
+
+'use previous install SAFS and STAF directories if existing
+'==========================================================
+'arg = ""
+'arg = env(stafenv)
+'if Len(arg) > 0 then 
+'    stafdir = arg
+'    If fso.FileExists(arg & "\bin\JSTAF.jar") Then 
+'        installstaf = false
+'    else
+'        installstaf = true
+'    End If    
+'end if
+
+'SeleniumPlus does NOT bundle STAF after 2014.07.29
+if installstaf = true then
+    cmd = cmd &" -staf "& q & stafdir & q
+else
+    cmd = cmd &" -nostaf"
+end if
+
+safstitle = "SeleniumPlus Install"
+arg = ""
+arg = env(safsenv)
+if Len(arg)> 0 then 
+   msg = "SeleniumPlus may already exists at "& arg & "." & cr
+   msg = msg & "It is recommended to UNINSTALL the old version before proceeding with this new install" & cr & cr
+   msg = msg & "Continue to install the new version anyway?"& cr & cr
+   msg = msg &"Click YES to proceed; NO to cancel the install."
+   returncode = shell.Popup(msg, 0, safstitle, 32+4) 
+   If ((returncode = 2) Or (returncode = 7)) Then
+      shell.Popup "Installation cancelled.",0,safstitle,64
+      WScript.Quit
+   End If
+ELSE
+   msg = "Preparing to install SeleniumPlus." & cr & cr
+   msg = msg & "Continue with the install?"& cr & cr
+   msg = msg &"Click YES to proceed; NO to cancel the install."
+   returncode = shell.Popup(msg, 0, safstitle, 36) 
+   If ((returncode = 2) Or (returncode = 7)) Then
+      shell.Popup "Installation cancelled.",0,safstitle,64
+      WScript.Quit
+   End If
+End if
+
+'reset/clear variable
+arg=""
+
+On Error Resume Next
+Set exec = shell.Exec(cmd)
+
+If Err.Number <> 0 then
+    WScript.Interactive = True
+    shell.Popup "Error <"& CStr(Err.Number) &":"& Err.Description &"> occurred while trying to install.",0, "Installation Aborted.",16
+    Wscript.Quit    
+End if
+
+On Error Goto 0
+
+arg = ""
+Do While exec.Status = 0
+    if not exec.StdOut.AtEndOfStream then
+        arg = arg & exec.StdOut.ReadAll        
+    end if
+
+    if not exec.StdErr.AtEndOfStream then
+        arg = arg & exec.StdErr.ReadAll        
+    end if
+    WScript.Sleep(2000)
+Loop
+
+On Error Resume Next
+Set OutStream = fso.OpenTextFile(safsdir &"\install\setup.log", 2, True)
+OutStream.Write arg
+On Error Goto 0
+
+msg = "SeleniumPlus installation is complete." & cr
+shell.Popup msg,0,safstitle,64
+
+Set shell = nothing
+Set env   = nothing
+Set exec  = nothing
+Set fso   = nothing
+Set OutStream = Nothing
+
+</script>
+</job>

@@ -1,0 +1,23 @@
+
+C, WaitForGUI, GoogleWindow, GoogleWindow
+
+C, SetContext, GoogleWindow, EditBox 
+C, Pause, 1
+C, WaitForGUI, GoogleWindow, EditBox
+
+C, OnGUIExistsGotoBlockID, "WindowExists", GoogleWindow, GoogleWindow 
+C, LogMessage, "Warning: GoogleWindow doesn't exist."
+C, GotoBlockID, End
+
+B, WindowExists
+C, LogMessage, "GoogleWindow exists."
+
+C, OnGUINotExistGotoBlockID, "WindowNotExist", GoogleWindow, LinkGmail
+C, LogMessage, "LinkGmail exists."
+C, GotoBlockID, End
+
+B, WindowNotExist
+C, LogMessage, "Warning: LinkGmail doesn't exist."
+
+B, End
+;T, GoogleWindow, GoogleWindow, CloseWindow

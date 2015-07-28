@@ -1,0 +1,16 @@
+
+[ApplicationConstants]
+TCAFSTestApp="C:\SAFS\TCAFS\TestApp.exe"
+Var1="abc"
+Var2="def"
+
+[TestApp]
+TestApp=Sys.Process("TestApp").VBObject("Form1")
+coords=2,4
+Label=Sys.Process("TestApp").VBObject("Form1").VBObject("Label1")
+TextBox=Sys.Process("TestApp").VBObject("Form1").VBObject("Text1")
+CommandButton=Sys.Process("TestApp").VBObject("Form1").VBObject("Command1")
+RadioButton=Sys.Process("TestApp").VBObject("Form1").VBObject("Option1")
+CheckBox=Sys.Process("TestApp").VBObject("Form1").VBObject("Check1")
+ComboBox=Sys.Process("TestApp").VBObject("Form1").VBObject("ComboBox")
+ComboEditBox=Sys.Process("TestApp").VBObject("Form1").VBObject("ComboEditBox")

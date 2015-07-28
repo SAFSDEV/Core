@@ -1,0 +1,87 @@
+;####################	JavaTreeFunctions (CFTree)  ###############################
+T, SwingWindow, JavaMenu, SelectMenuItem, "Tools->JTree2 Viewer"
+
+;===========================TEST FULL MATCHES
+T, SwingWindow, JavaTree2, SetTreeContainsNode, "Top Node", containsTopNodeVar
+T, SwingWindow, JavaTree2, CaptureTreeDataToFile, javaTree2.ext
+T, SwingWindow, JavaTree2, CaptureTreeDataToFile, javaTree2LastNode.ext, "Last Node"
+T, SwingWindow, JavaTree2, ExpandTextNode, "Top Node"
+T, SwingWindow, JavaTree2, SelectTextNode, "Top Node->ListItem2"
+T, SwingWindow, JavaTree2, CollapseTextNode, "Top Node"
+
+T, SwingWindow, JavaTree2, ExpandTextNode, "Last Node"
+T, SwingWindow, JavaTree2, SelectTextNode, "Last Node"
+T, SwingWindow, JavaTree2, SelectTextNode, "Last Node->3ListItem1", "Index=1"
+C, PAUSE, 1
+C, LOGFailureOK, "There is no second 3ListItem1 under 'Last Node'; SelectTextNode command will fail."
+T, SwingWindow, JavaTree2, SelectTextNode, "Last Node->3ListItem1", "Index=2"
+T, SwingWindow, JavaTree2, SelectTextNode, "Last Node->3ListItem5"
+C, LOGFailureOK, "Last Node->Branch Nodes has not been selected VerifySelectedNode command will fail."
+T, SwingWindow, JavaTree2, VerifySelectedNode, "Last Node->Branch Nodes"
+T, SwingWindow, JavaTree2, SelectTextNode, "Last Node->Branch Nodes"
+T, SwingWindow, JavaTree2, VerifySelectedNode, "Last Node->Branch Nodes"
+C, LOGFailureOK, "Last Node->Branch Nodes has been selected VerifyNodeUnselected command will fail."
+T, SwingWindow, JavaTree2, VerifyNodeUnselected, "Last Node->Branch Nodes"
+T, SwingWindow, JavaTree2, CollapseTextNode, "Last Node"
+
+T, SwingWindow, JavaTree2, ExpandTextNode, "Last Node", "index=2"
+C, PAUSE, 1
+T, SwingWindow, JavaTree2, CollapseTextNode, "Last Node", "index=2"
+
+;===========================without full path, not work================================
+C, LOGFailureOK, "Without full path the following two commands will fail."
+T, SwingWindow, JavaTree2, ExpandTextNode, "Branch Nodes"
+T, SwingWindow, JavaTree2, CollapseTextNode, "Branch Nodes"
+;=========================== with full path, work =====================================
+T, SwingWindow, JavaTree2, ExpandTextNode, "Last Node->Branch Nodes"
+T, SwingWindow, JavaTree2, CollapseTextNode, "Last Node->Branch Nodes"
+;================================================================
+
+;===========================TEST FULL_UNVERIFIED MATCHES
+C, GetSecsSeekComponent, "secondsSeekComponent"
+C, SetSecsSeekComponent, 2
+T, SwingWindow, JavaTree2, RightClickUnverifiedTextNode, "Last Node"
+C, PAUSE, 1
+T, SwingWindow, JavaTree2, InputKeys, "{ESC}"
+T, SwingWindow, JavaTree2, ClickUnverifiedTextNode, "Last Node"
+C, LOGFailureOK, "The following test is expected to fail; There is no second Last Node."
+T, SwingWindow, JavaTree2, ClickUnverifiedTextNode, "Last Node", "2"
+T, SwingWindow, JavaTree2, SelectUnverifiedTextNode, "Last Node"
+C, LOGFailureOK, "The following three tests are expected to fail; There is no second Last Node."
+T, SwingWindow, JavaTree2, SelectUnverifiedTextNode, "Last Node", "2"
+T, SwingWindow, JavaTree2, ActivateUnverifiedTextNode, "Last Node", "index=2"
+T, SwingWindow, JavaTree2, DoubleClickUnverifiedTextNode, "Last Node", "index=2"
+T, SwingWindow, JavaTree2, ActivateUnverifiedTextNode, "Last Node"
+T, SwingWindow, JavaTree2, SelectUnverifiedTextNode, "Last Node->Branch Nodes"
+T, SwingWindow, JavaTree2, CtrlClickUnverifiedTextNode, "Last Node->3ListItem2"
+T, SwingWindow, JavaTree2, SelectUnverifiedTextNode, "Last Node->3ListItem1"
+T, SwingWindow, JavaTree2, ShiftClickUnverifiedTextNode, "Last Node->3ListItem6"
+T, SwingWindow, JavaTree2, DoubleClickUnverifiedTextNode, "Last Node"
+C, SetSecsSeekComponent, ^secondsSeekComponent
+
+;==========================TEST PARTIAL MATCHES
+T, SwingWindow, JavaTree2, SetTreeContainsPartialMatch, "top no", containsTopNoVar
+T, SwingWindow, JavaTree2, PartialMatchTreeDataToFile, javaTree2LastNodePartialMatch.ext, "last nod"
+T, SwingWindow, JavaTree2, ExpandPartialTextNode  , "last"
+T, SwingWindow, JavaTree2, CollapsePartialTextNode, "last"
+
+T, SwingWindow, JavaTree2, DoubleClickPartial  , "last"
+T, SwingWindow, JavaTree2, ClickPartial, "last node->3listitem6"
+T, SwingWindow, JavaTree2, SelectPartial, "last node->nodes"
+C, PAUSE, 1
+T, SwingWindow, JavaTree2, ExpandPartialTextNode  , "last->ranch no"
+T, SwingWindow, JavaTree2, ExpandPartialTextNode  , "last->nodes->child"
+T, SwingWindow, JavaTree2, SelectPartialTextNode  , "last->nodes->child->item3"
+T, SwingWindow, JavaTree2, CollapsePartialTextNode  , "last no->branc->child"
+T, SwingWindow, JavaTree2, CollapsePartialTextNode, "last nod->nodes"
+T, SwingWindow, JavaTree2, RightClickPartial, "last node->nodes"
+T, SwingWindow, JavaTree2, InputKeys, "{ESC}"
+T, SwingWindow, JavaTree2, SelectPartial, "last node->nodes"
+T, SwingWindow, JavaTree2, CollapsePartial, "last node"
+
+T, SwingWindow, JavaTree2, ExpandPartialTextNode  , "p node"
+C, PAUSE, 1
+T, SwingWindow, JavaTree2, CollapsePartialTextNode, "top"
+
+C, LOGFailureOK, "The following test is expected to fail."
+T, SwingWindow, JavaTree2, SelectPartialTextNode, "first->nodes->child->item5"

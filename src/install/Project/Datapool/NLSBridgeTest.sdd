@@ -1,0 +1,15 @@
+
+C, Expressions, ON
+C, AppMapChaining, ON
+C, AppMapResolve, ON
+C, SetApplicationMap, "NLSBridgeTest_ja.MAP"
+C, SetApplicationMap, NLSBridgeTest.MAP
+;C, SetApplicationMap, ^nlsmap
+C, GetAppMapValue, "", "MainWin", "MainWin", "mainwindow", ^howDoIText
+C, GetAppMapValue, "", "MainWin", "Comp", "component", ^howDoIText
+C, GetAppMapValue, "", "MainWin", "File", "component", ^T.SASEnterpriseGuideExplorer.File
+C, SetVariableValues, ^T.SASEnterpriseGuideExplorer.File=^T.SASEnterpriseGuideExplorer.File
+C, GetAppMapValue, "", "MainWin", "File", "component", ^T.SASEnterpriseGuideExplorer.File
+C, GetAppMapValue, "", "MainWin", "File2", "component", ^T.xxx
+C, LogMessage, "MainWin:MainWin recognition string: "& ^mainwindow
+C, LogMessage, "MainWin:Comp recognition string: "& ^component

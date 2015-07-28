@@ -1,0 +1,510 @@
+<HTML>
+<HEAD><TITLE>Setup SmartBear TestComplete</TITLE></HEAD>
+<body>
+<a name="top"/>
+<center>
+<h1>Setup SmartBear TestComplete<br/>
+for SAFS on Windows<br/>
+</h1>
+Updated 2014.02.24
+</center>
+<hr>
+<b>Authors:</b>
+<ul>Carl Nagle<br>
+Eileen Taht<br>
+Cliff Bills<br>
+Xiaohui Zhang<br>
+Dharmesh Patel<br>
+Judy Rink
+</ul>
+<p>
+<b>Copyright (C) SAS Institute</b><br>
+<a href="http://www.opensource.org/licenses/gpl-license.php" target="reference">General Public License</a>: http://www.opensource.org/licenses/gpl-license.php
+<hr>
+<small>
+<a href="#top">Top</a>, <a href="#verify">Verify&nbsp;Install</a>, <a href="#updateold">Update&nbsp;Old&nbsp;SAFS</a>, <a href="#updates">Updates</a>, <a href="#usagetips">Configure</a>, <a href="#both">Both&nbsp;TestComplete/Execute</a>, <a href="#htmlflex">HTML&nbsp;&amp;&nbsp;Flex</a>, <a href="#recognition">Recognition&nbsp;Strings</a>, <a href="#tc9tc8">Both&nbsp;TC9&nbsp;&amp;&nbsp;TC10</a>,
+</small>
+<p>
+The TestComplete Project at <b>C:\SAFS\TCAFS</b> has been "upgraded" to TestComplete V9.
+<p>
+If you are running an earlier version of TestComplete you will need to upgrade to TestComplete 9 (v9.31 currently) or transfer the Script and UserForms to your pre-V9 TestComplete Project repository.  Alternatively, you <b>*might*</b> be able to overwrite this V9 repository with an appropriate earlier version.
+<p>
+After the SAFS install, if you are running a newer version of TestComplete (TC 10.0 or later) you will need to manually open and convert the existing TCAFS project at C:<b>\SAFS\TCAFS\TCAFS.PJS</b> for your newer version of TestComplete. &nbsp;Open that project and TestComplete will prompt for your approval to convert the project for you. &nbsp;Do so. <p>
+<center><b>Without proper conversion to match your version of TestComplete the test automation will not be allowed to run.</b></center>
+<p><a name="updates"/>
+<hr><small>
+<a href="#top">Top</a>, <a href="#verify">Verify Install</a>, <a href="#updateold">Update&nbsp;Old&nbsp;SAFS</a>, <a href="#usagetips">Configure</a>, <a href="#both">Both&nbsp;TestComplete/Execute</a>, <a href="#htmlflex">HTML&nbsp;&amp;&nbsp;Flex</a>, <a href="#recognition">Recognition&nbsp;Strings</a>, <a href="#tc9tc8">Both&nbsp;TC9&nbsp;&amp;&nbsp;TC10</a>
+</small>
+<h3>Script Updates and Overlays:</h3>
+<p>
+Released updates to SAFS and TCAFS can be found at the <a href="http://sourceforge.net/projects/safsdev/files/SAFS%20Updates/" alt="SAFS Updates Downloads website" title="SAFS Updates Downloads website" target="_blank">SAFS Updates Downloads</a> website. &nbsp;Users should always check for and install any updates that might be available after the installed release.
+<p>
+If there are no updates to be installed, proceed to <a href="#verify">Verify Install</a>.
+<p>
+TCAFS updates usually require you to add or replace scripts in your TCAFS project directories. &nbsp;If you add or replace any script files to the TCAFS project space you will need to verify your project has these scripts properly imported. &nbsp; To do this:
+<ol>
+<li>Open the TCAFS project in Test Complete.
+<p>
+<li>Expand the Project Explorer TCAFS project tree to show and select the TCAFS "<b>Script</b>" item:
+<p><center>
+<img align="top" border="1" src="http://safsdev.sourceforge.net/sqabasic2000/TCAFSScriptItem.GIF" alt="TCAFS\TCAFS\Script Item"/>&nbsp;&nbsp;
+<img align="top" border="1" src="http://safsdev.sourceforge.net/sqabasic2000/TCAFSCheckSyntax.GIF" alt="'Test->Check Syntax' MenuItem"/>
+</center><p>
+<li>With "<b>Script</b>" selected, select the main menu item "<b>Test->Check Syntax</b>":
+<p>
+<li>If there are "No Syntax Errors" then the project should be ready.
+<p>
+<li>Resolve reports of missing files thru the "<b>Add->Existing Item</b>" menuitem when right-clicking the "<b>Script</b>" node:
+<p><center>
+<img border="1" src="http://safsdev.sourceforge.net/sqabasic2000/TCAFSAddExisting.GIF" alt="'Add->Existing Item' MenuItem"/>
+</center><p>
+The new scripts are found in the <b>\SAFS\TCAFS\TCAFS\Script</b> directory.
+<p>
+<li>Repeat Steps 3-5 until all the missing file errors have been resolved.
+</ol>
+<p><a name="verify"/>
+<hr><small>
+<a href="#top">Top</a>, <a href="#updateold">Update&nbsp;Old&nbsp;SAFS</a>, <a href="#usagetips">Configure</a>, <a href="#both">Both&nbsp;TestComplete/Execute</a>, <a href="#htmlflex">HTML&nbsp;&amp;&nbsp;Flex</a>, <a href="#recognition">Recognition&nbsp;Strings</a>, <a href="#tc9tc8">Both&nbsp;TC9&nbsp;&amp;&nbsp;TC10</a>
+</small>
+<h3>Verify the SAFS/TCAFS Install:</h3>
+<p>
+SmartBear TestComplete 9.0 or higher must be installed and connecting properly to any local or remote License Server. &nbsp;You should also review and heed the TestComplete setup information that follows before attempting to verify the SAFS/TCAFS Engine.
+<p>
+<ol>
+	<li>If not done as part of the original SAFS install, or if TestComplete has been installed or upgraded AFTER the SAFS install:
+	<p>
+	<ul>Execute: <b>%SAFSDIR%\jre\bin\java org.safs.install.TCAFSInstaller</b>,  OR
+	    <p>
+	    Execute: <b>%SELENIUM_PLUS%\Java\bin\java org.safs.install.TCAFSInstaller</b>,
+	    <p>
+	    which will:
+		<p>
+		Set the <b>%TESTCOMPLETE_HOME%</b> System Evironment variable to the correct TestComplete install directory.
+	</ul>
+	<p>
+	<li>Open/Connect TestComplete to the project at C:\SAFS\TCAFS\TCAFS.PJS<br>
+	Allow TestComplete to convert the project repository if you are prompted to do so.<br>
+	Shutdown TestComplete once the conversion, if any, is completed.
+	<p>
+	<li>Verify SAFS/TCAFS runtime integration:
+	<p><ul>
+		<p>
+		<li>Execute C:\SAFS\Project\<b>runTCAFSTest.bat</b>
+		<p>
+		SAFS, SmartBear TestComplete, and a sample test should be seen.
+		<p>
+		<li>View the SAFS log output at:
+		<p>
+		C:\SAFS\Project\Datapool\Logs\<b>TCAFSCycle.txt</b>
+		<p>
+		<li>SAFS and TestComplete should shutdown upon test completion.
+	</ul>
+	<p>
+	<li>Problem launching SmartBear TestComplete?
+	<p>
+	<ul>Verify\Edit the contents of C:\TCAFS\<b>TCAFS.vbs</b>:
+		<p>
+		<li>'projectname' and 'suitename' point to existing SAFS assets.
+		<p>
+		<li>'command' points to correct and existing executable:
+		<p><ul>
+			...\bin\<b>TestComplete.exe</b>, or <br>
+			...\bin\<b>TestExecute.exe</b>
+		</ul><p>
+		<li>Try to execute the test again after all edits are complete.
+	</ul>
+</ol>
+<p><a name="updateold"/>
+<hr><small>
+<a href="#top">Top</a>, <a href="#verify">Verify&nbsp;Install</a>, <a href="#usagetips">Configure</a>, <a href="#both">Both&nbsp;TestComplete/Execute</a>, <a href="#htmlflex">HTML&nbsp;&amp;&nbsp;Flex</a>, <a href="#recognition">Recognition&nbsp;Strings</a>, <a href="#tc9tc8">Both&nbsp;TC9&nbsp;&amp;&nbsp;TC10</a>
+</small>
+<h3>Using TestExecute on older SAFS Installs</h3>
+<ol>
+	<p>
+	<li>THIS STEP is only applicable if you installed TestExecute AND your C:\SAFS\TCAFS\<b>TCAFS.vbs</b> file is dated BEFORE 4/13/2011.
+	<p>
+	SKIP this step if you installed TestComplete.<br>
+	SKIP this step if your <b>TCAFS.vbs</b> file is dated 4/13/2011 or LATER.
+	<p>
+	Prior to the 4/13/2011 file, the SetupTCAFS.wsf file did not run properly if TestExecute was installed on the machine instead of TestComplete. Either put a copy of the newer TCAFS.vbs on your machine and run the <b>SetupTCAFS.wsf</b> file, or do the following instead of running the SetupTCAFS.wsf file:
+	<p>
+	<ul>
+		<li>Manually set the following System Variable in System Properties > Environment Variables:
+		<p>Example path to AQA Install Directory:<br>
+		TESTCOMPLETE_HOME C:\Program Files\Automated QA\TestExecute 8<br>
+		(Or ...\Program Files (x86)\... if the test machine is 64 bit)
+		<p>
+		<li>In the C:\safs\TCAFS\<b>TCAFS.vbs</b> file:
+		<p>
+		change
+		<p>%TESTCOMPLETE_HOME%\bin\<b>TestComplete.exe</b>
+		<br>
+		to
+		<br>
+		%TESTCOMPLETE_HOME%\bin\<b>TestExecute.exe</b>
+	</ul>
+	<p>
+	<li><b>Before running the C:\SAFS\Project\runTCAFSTest.bat file:</b>
+	<p><ul>
+		<li>Make appropriate edits to the C:\SAFS\Project\<b>tcafs.ini</b> file.
+		<p>
+		<li>Manually open TestComplete or TestExecute and set the log option so the log does not open automatically after a test run and interfere with automated tests.
+		<p><ul>
+			<li>In <b>TestComplete</b>, select the TCAFS project. Then, select <b>Tools > Options > Engines > Log</b>
+			<p>
+			make sure the <b>‘Activate after test run’</b> option is not checked.
+			<p>
+			<li>In <b>TestExecute</b>, select <b>Options > Engines > Log</b>
+			<p>
+			make sure the <b>‘Activate after test run’</b> option is not checked.
+		</ul>
+		<p>
+		<li>If you plan to run the runTCAFSTest.bat file on a 64-bit machine, you do not need to follow the instructions in this file to point your tests to the 32-bit JVM.<br>
+		<b><i>It is better to update the PATH env to the 32-bit JRE path.</i></b>
+	</ul>
+	<p>
+	<li>The 1st time you run the runTCAFSTest.bat file, it may take a little time for TestComplete (or TestExecute) to become visible. Also, at the end of the test, it may take some time for TestComplete (TestExecute) to shut down. Please be patient.
+</ol>
+<p><a name="usagetips"/>
+<hr><small>
+<a href="#top">Top</a>, <a href="#verify">Verify&nbsp;Install</a>, <a href="#updateold">Update&nbsp;Old&nbsp;SAFS</a>, <a href="#both">Both&nbsp;TestComplete/Execute</a>, <a href="#htmlflex">HTML&nbsp;&amp;&nbsp;Flex</a>, <a href="#recognition">Recognition&nbsp;Strings</a>, <a href="#tc9tc8">Both&nbsp;TC9&nbsp;&amp;&nbsp;TC10</a>
+</small>
+<h3>TestComplete / TestExecute: Configuration and Usage Tips</h3>
+<p>
+<ol>
+    <li><b>Minimize TestComplete during playback:</b><br>
+    (Unfortunately, I think this has to be set for each of your TestComplete projects.)
+	<p>
+	<ul>
+		<li><b>For TestComplete:</b>
+		<p><ul>
+			<li>Open TestComplete
+			<li>Open your project (for our purposes, this is the TCAFS project)
+			<li>Open the properties dialog for your project
+			<ul>
+			· In the Project Explorer on the left of the IDE, select your project (for example, TCAFS)<br>
+			· RMB (right-mouse-button) > Edit > Properties
+			</ul>
+			<li>On the right side of the IDE, select Playback
+			<li>Under the Runtime category, check the box for Minimize TestComplete
+			<ul>
+			· For additional runtime options it is recommended you see Items 2 and 3 below.
+			</ul
+			<li>Save the project
+			<ul>
+			· In the Project Explorer on the left of the IDE, select your project (for example, TCAFS)
+			· RMB (right-mouse-button) > Save
+			</ul>
+			<li>Exit TestComplete
+			<li>Next time you run the test (in this case the sample test at C:\SAFS\Project\runTCAFSTest.bat), TestComplete will run minimized.
+		</ul><p>
+		<li><b>For TestExecute</b>
+		<p><ul>
+			<li>Open TestExecute. (Double-click the desktop icon)
+			<li>When TestExecute is opened there is no GUI displayed. An icon is placed onto the right-hand side of the desktop task bar.
+			<li>Hover over the TestExecute icon, click the RMB (right-mouse button), and select Options.
+			<li>In the Options dialog, select Engines.
+			<li>In the expanded Engines list, select Log
+			<li>On the right panel, uncheck <b>"Activate after test run"</b> and click the OK button.
+			<li>Exit TestExecute. (RMB the TestExecute icon on the right-hand side of the desktop task bar and select Exit.)
+		</ul>
+	</ul>
+	<p>
+	<li><b>Options to ensure quick playback:</b>
+	<p><ul>
+		<li><b>For TestComplete:</b>
+			<p>
+			<li>Open TestComplete
+			<li>Open your project (for our purposes, this is the TCAFS project)
+			<li>From the main menu, select Tools > Current Project Properties
+			<li>On the right side of the IDE, select Playback.
+			<li>Under the Runtime category, set the following options, as desired:
+			<ul>
+				· Auto-wait timeout, ms: 1000<br>
+				· Delay between events, ms: 0<br>
+				· Key pressing delay, ms: 0<br>
+				· Dragging delay, ms: 5<br>
+				· Mouse movement delay, ms: 0<br>
+				· Stop on Error: Uncheck this property<br>
+				· Minimize TestComplete Check this property<br>
+				· Leave all other settings at the default settings.
+			</ul>
+			<li>Save the project
+			<ul>
+				· In the Project Explorer on the left of the IDE, select your project (for example, TCAFS)<br>
+				· RMB (right-mouse-button) > Save
+			</ul>
+			<li>Exit TestComplete
+		<p>
+		<li><b>For TestExecute:</b>
+		<p><ul>
+			<li>As far as I can tell, there is no way from within TestExecute to set any of the playback properties other than ensuring the log is not displayed after a test run.
+			<p>
+			If TestExecute is running on a machine with TestComplete installed then the following steps should not be necessary.
+			<p>
+			<li>To ensure TestExecute honors the TCAFS project properties:
+			<ul>
+				· Go to a machine where you have TestComplete installed.<br>
+				· Modify and save your TCAFS project properties per steps above.<br>
+				· Copy the project file from the TestComplete machine to the TestExecute machine.<br>
+				(When the TCAFS project tests are run using TestExecute they should run using the desired properties.)
+				<ul>
+					- The project file to copy is found at C:\SAFS\TCAFS\TCAFS\<b>TCAFS.MDS</b>
+				</ul>
+		    </ul>
+	    </ul>
+	</ul>
+	<p>
+	<li><b>Other Options</b>
+	<p><ul>
+		<li>Purge old logs: <br>
+		Sometimes, the TestComplete default log collection can slow down your system over time. The user can purge unnecessary old logs by changing the:
+		<p>
+		<b>Tools > Options > Engines > Log</b>
+		<p>
+		setting for the "Number of recent logs to keep". If you set this value to 2, TestComplete will only keep the 2 most recent test run logs. Note that this setting can be set on machines with TestExecute as well.
+		<p>
+		<li>When testing .NET application (Outlook, etc.), you can enable the MSAA ‘*’ option: If you need TestComplete to see objects inside menus and trees of .NET applications, you may need to turn on the ‘*’ choice under the list of MSAA accepted windows. This is done as follows:
+		<p><ul>
+			<li>In TestComplete, with your project open, select:
+			<p>
+			<b>Tools > Default Project Properties > Project > Open Applications > MSAA</b>
+			<p>
+			<li>Make sure the ‘*’ item is checked.
+			<li>Click OK.
+			<li>Exit TestComplete and, if prompted to save changes, accept the changes.
+			<p>
+			<li>You may also need to make the change on your project options if you have an already established project. This is done in a similar manner as follows:
+			<p><ul>
+				<li>In TestComplete, with your project open, select:
+				<p>
+				<b>Tools > Current Project Properties > Open Applications > MSAA</b>
+				<p>
+				<li>Make sure the ‘*’ item is checked.
+				<li>RMB on your project name and select Save.
+			</ul>
+		</ul>
+		<p>
+		<b>NOTE: Although turning on MSAA seems to work for some testers doing certain .NET, WPF, or Outlook automation, it is not always working well for others doing Excel, Word, and PowerPoint automation. Here are some observations so far:
+		</b>
+		<p>
+		The recognition strings are different for many windows.<br>
+		In the <b>Tools > Current Project Properties > Open Applications</b>, if NativeClrObject precedes NativeMSAA in the ‘Priority of objects’ list, then a lot of the recognition strings remain unchanged.
+		<p>
+		However, there are still some Microsoft Message dialogs that do have different strings and there may be other windows with different strings as well.
+		<p>
+		Performance is greatly reduced.<br>
+		When we run certain tests with MSAA turned on it runs much slower than when MSAA is turned off.
+	</ul>
+	<li><b>TCAFS Timeout</b> so TestComplete has time to open during SAFS test:
+	<p><ul>
+		Like the tcafs.ini file in C:\SAFS\Projects, your tests must also have a test configuration file.&nbsp;In your INI  file, in the [SAFS_TC] section, you can set a Timeout value. &nbsp; Something like: ‘Timeout=120’. &nbsp;This example gives TestComplete 120 seconds to open before SAFS begins to process test commands.
+		<p>
+		An example mytest.ini file:
+	<p><pre>
+[SAFS_DRIVER]
+DriverRoot="C:\SAFS"
+
+[SAFS_PROJECT]
+ProjectRoot="C:\Automation\MyTest"
+
+[SAFS_TEST]
+TestName="Mytest"
+
+TestLevel="Cycle"
+CycleSeparator="	" &lt;======== NOTE: That is a TAB separator.
+CycleLogName="MyTestLog"
+CycleLogMode="TEXTLOG CONSOLELOG XMLLOG"
+
+[SAFS_ENGINES]
+First=org.safs.tools.engines.SAFSTC
+
+[SAFS_TC]
+AUTOLAUNCH=TRUE
+HOOK="C:\SAFS\TCAFS\TCAFS.vbs"
+Timeout=120
+
+ConvertSAFSInputKeysSyntax=TRUE
+
+;Note: best practice is to comment out or not include "depthLevel" and just use the default of 5.
+;depthLevel=25
+</pre></ul>
+<p>
+</ol>
+<p><a name="both"/>
+<hr><small>
+<a href="#top">Top</a>, <a href="#verify">Verify&nbsp;Install</a>, <a href="#updateold">Update&nbsp;Old&nbsp;SAFS</a>, <a href="#usagetips">Configure</a>, <a href="#htmlflex">HTML&nbsp;&amp;&nbsp;Flex</a>, <a href="#recognition">Recognition&nbsp;Strings</a>, <a href="#tc9tc8">Both&nbsp;TC9&nbsp;&amp;&nbsp;TC10</a>
+</small>
+<h3>Configuration for running either TestComplete or TestExecute on the same machine</h3>
+<p>
+Read this entire section before deciding which method to use to set your machine for either TestComplete or TestExecute.
+<p><ol>
+<li>When you are just running tests and not developing tests, you should use TestExecute instead of TestComplete.
+<li>TestExecute licenses are separate and cheaper than TestComplete licenses, so you can have more of them.
+<li>You can have both TestComplete and TestExecute installed on the same machine and you can execute either one.
+<li>You can modify the C:SAFS\TCAFS\<b>TCAFS.vbs</b> file to invoke TestExecute instead of TestComplete.
+<p>
+<li>You can also switch runtime execution between TestComplete and TestExecute by setting the system environment variable <b>TESTCOMPLETE_EXE</b> to the desired EXE--"TestComplete.exe" or "TestExecute.exe".
+<p>
+<li>You can also prepare separate TCAFS.vbs files--one for TestComplete and one for TestExecute.
+</ol>
+<p><a name="htmlflex"/>
+<hr><small>
+<a href="#top">Top</a>, <a href="#verify">Verify&nbsp;Install</a>, <a href="#updateold">Update&nbsp;Old&nbsp;SAFS</a>, <a href="#usagetips">Configure</a>, <a href="#both">Both&nbsp;TestComplete/Execute</a>, <a href="#recognition">Recognition&nbsp;Strings</a>, <a href="#tc9tc8">Both&nbsp;TC9&nbsp;&amp;&nbsp;TC10</a>
+</small>
+<h3>Configuration for HTML and Flex playback (IMPORTANT!):</h3>
+<p>
+NOTE: If you will be testing web and/or Flex applications you should make sure you have the latest patches for your version of TestComplete and TestExecute supporting the versions of the browsers you will be using for testing.
+<p>
+Go to <a href="http://support.smartbear.com/downloads/testcomplete/" target="_blank">TestComplete Download Center</a> and get any and all patches and instructions to apply the patches for BOTH TestComplete and TestExecute.
+<p>
+You will also need to follow the instructions in this <a href="http://smartbear.com/support/viewarticle/20003/" target="_blank">Smartbear Support Article</a> to install and configure the Adobe Debug Flash Player for Flex testing.
+<p>
+Additional information for configuring the debug player for Internet Explorer:
+<p><ol>
+	<li>Download <a href="http://www.adobe.com/support/flashplayer/downloads.html" target="_blank">Adobe Debug Flash Player</a>.
+	<li><a href="http://kb2.adobe.com/cps/155/tn_15507.html" target="_blank">See Version Information Here</a>
+	<li>Configure for HTML and Flex playback per the install document above.
+	<li>Configure the Flash Player for Flash injection:
+	<p><ul>
+		<p>
+		(Below is an overview of the steps, see the full details in this <a href="http://smartbear.com/support/viewarticle/20003/" target="_blank">Smartbear Article</a>.)
+		<p>
+		<li>Create\Configure the ..\<b>mm.cfg</b> file
+		<li>Add the fully-qualified name of the <b>\Open Apps\Flex</b> folder to the list of trusted locations in the Flash Player’s <a href="http://www.macromedia.com/support/documentation/en/flashplayer/help/settings_manager04.html" target="_blank">Flash Player Settings Manager</a>.
+	</ul>
+</ol><p>
+You also need to verify/edit your TestComplete Project Properties settings:
+<p>
+<ol>
+	<li>Open TestComplete
+	<li>Open your project (for our purposes, this is the TCAFS project)
+	<li>From the main menu, select <b>Tools > Current Project Properties</b>
+	<li>On the left side select <b>Open Applications > Web Testing</b>
+	<li>On the right side select <b>"Tree"</b> from the Tree model dropdown.
+	<li>Save the project
+	<li>Exit TestComplete
+</ol>
+<p>
+TestComplete / Execute Enablement:
+<p><ol>
+	<li>When you first move to Flex testing, you must make sure the your TestComplete Project directory (Ex: C:\SAFS\TCAFS\TCAFS\)
+	has an up-to-date <b>TCAFS.mds</b> file appropriate for your version of TestComplete.
+	<p>
+	<li>The System Environment <b>"PATH"</b> variable should have the STAF and SAFS "bin" directories at the beginning of the PATH:
+	<p>
+	<ul>c:\staf\bin;C:\SAFS\bin;...</ul>
+	<p>
+	<li>After making any System Environment variable changes, make sure you log out and back in so the Window's user session takes the changes.
+</ol>
+<p><a name="recognition"/>
+<hr><small>
+<a href="#top">Top</a>, <a href="#verify">Verify&nbsp;Install</a>, <a href="#updateold">Update&nbsp;Old&nbsp;SAFS</a>, <a href="#usagetips">Configure</a>, <a href="#both">Both&nbsp;TestComplete/Execute</a>, <a href="#htmlflex">HTML&nbsp;&amp;&nbsp;Flex</a>, <a href="#tc9tc8">Both&nbsp;TC9&nbsp;&amp;&nbsp;TC10</a>
+</small>
+<h3>Determine recognition strings:</h3>
+<p><ol>
+	<li>Open TestComplete
+
+	<li>Open your project or create a new project for determining your project strings. (Most testers use the C:\SAFS\TCAFS project.)
+
+	<li>In your application, open to the dialog of interest (the one you want to determine the recognition string).
+
+	<li>In TestComplete, in the toolbar, you can use the <b>'Map Object from Screen'</b> icon or the <b>'Object Spy'</b> icon.
+
+	<li>Use the <b>'Map Object from Screen'</b> tool if you just need the long string as this tool will not block your other windows.
+
+	<li>Use the <B>'Object Spy'</b> tool if you need information about object properties or if you need the short string for TFSM.
+
+	<li>In the tool, click the "drag" button to the desired screen or component and release the mouse button.
+	<p>
+	<li>Be patient....Really patient.
+	<p>
+	<li>Eventually, the recognition string will be appropriately displayed in the tool.
+	<p>
+	<li>HTML and Flex tip:<br>
+	For full strings, highlight the entire browser window to get the string for your Window component. The Window recognition string is not a prefix for the component strings in that window, so use the full string as given by TestComplete for each component as well.
+	<p>
+	<li>For TFSM strings see the <a href="http://safsdev.sourceforge.net/sqabasic2000/TFSMFAQ.htm" target="_blank">TFSM FAQ</a>.
+	<p>
+	If you are using TFSM strings:
+	<p><ul>
+		<li>If your test runs seem to be excessively slow in object find times, either use full strings, or reduce the depthLevel value in your TFSM strings to the very minimum (see the TFSM FAQ document referenced above).
+		<p>
+		For example, do not set the depthLevel in the .ini file. Instead the default depthLevel=5 value is used. Then if some individual components require a larger depthLevel, just add the depthLevel to the recognition string for that component.
+		<p>
+		<li>When creating TFSM component recognition strings, instead of using the generic Name property, it is best practice to use the FlexObject.name property. In this way, we will know immediately if development has provided the optional Name object property.
+		<p><ul>
+			<b>Notes about Names</b>:
+			<p>
+			TestComplete creates the generic Name property and it can be created from the FlexObject.name, FlexObject.label, or FlexObject.id properties.
+			<p>
+			If there is no FlexObject.name property, TestComplete will create the generic Name property from either the FlexObject.label or FlexObject.id properties.
+			<p>
+			As an example, a ButtonLineChart component found in some Main window does NOT have the proper name property available. Instead of using the recognition string of <b>Name=ButtonBarButton("line")</b>--which masks the missing name property--it is best practice to try the recognition string of <b>FlexObject.name=line</b>.
+			<p>
+			Note: If the FlexObject.name property is missing the object will not be found. This should prompt testers to inform development about the oversight as soon as possible.
+			<p>In the meantime, as a work around until development provides the name, testers can use the generic Name= property.
+		</ul>
+	</ul>
+</ol>
+<p><a name="tc9tc8"/>
+<hr><small>
+<a href="#top">Top</a>, <a href="#verify">Verify&nbsp;Install</a>, <a href="#updateold">Update&nbsp;Old&nbsp;SAFS</a>, <a href="#usagetips">Configure</a>, <a href="#both">Both&nbsp;TestComplete/Execute</a>, <a href="#htmlflex">HTML&nbsp;&amp;&nbsp;Flex</a>, <a href="#recognition">Recognition&nbsp;Strings</a>
+</small>
+
+<h3>TestComplete 9 and TestComplete 10 on the same machine:</h3>
+<p>
+When\If you upgrade to TestComplete 10 it will prompt you to convert your project files to the TestComplete 10 format. So, before trying TestComplete 10, be sure to back up your TCAFS directory <b>C:\SAFS\TCAFS</b>.
+<p>
+The V10 conversion does not change many files, but does modify the .pjs and .mds files. So for those who want to try TestComplete 10, do the following (Assuming you have TestComplete 9 on machine already)
+<p><ol>
+	<li>Make a copy of <b>C:\SAFS\TCAFS</b>
+	<li>Install TestComplete 10 (it goes to a unique directory)
+	<li>Make sure your License Manager is pointing to appropriate licenses, if applicable.
+	<li>Bring up TestComplete 10, open up your existing TCAFS project (File->Open)
+	<li>It will prompt to convert files (do so)
+	<li>Exit TestComplete
+</ol>
+<p>
+If you want/need to have both TestComplete 9 and 10 on the same machine, please be aware of the following:
+	<p><ol>
+	<li>Have separate TCAFS project directories for V9 and one for V10
+	<p>
+	Make sure you made a copy\backup of the V9 TCAFS Project before using V10 on it.<br>
+	TestComplete 10 will <i>CONVERT</i> the TCAFS project as mentioned above!<br>
+	This will allow you to use both V9 or V10, if you wish.
+	<p>
+	<li>Note that V9 and V10 are in different named default install directories
+	<p>
+	<li>Updating the applicable V9 or V10 TCAFS.VBS file to execute TestComplete or TestExecute
+	<p><ul>
+		o example paths:
+		<p>
+		"C:\Program Files (x86)\<b>SmartBear\TestComplete 9</b>\Bin\TestComplete.exe"<br>
+		"C:\Program Files (x86)\<b>SmartBear\TestComplete 10</b>\Bin\TestComplete.exe"
+	<p>
+	</ul>
+	<li>Updating the Adobe Debug Flash Player..\<b>mm.cfg</b> file to load the correct swf
+	<p><ul>
+		o example mm.cfg settings:
+		<p>
+		PreloadSwf=C:\Program Files (x86)\<b>SmartBear\TestComplete 9</b>\Open Apps\Flex\FlashInjector.swf<br>
+		PreloadSwf=C:\Program Files (x86)\<b>SmartBear\TestComplete 10</b>\Open Apps\Flex\FlashInjector.swf<br>
+	<p></ul>
+	</ol>
+	<p>
+	Making sure you have both V9 and V10 swf directories defined in the <a href="http://www.macromedia.com/support/documentation/en/flashplayer/help/settings_manager04.html" target="_blank">Flash Player Settings Manager</a>
+	<p>
+	If you want to run your tests with TestComplete 10, you will have to update your TCAFS.VBS script to point to TestComplete 10 instead of 9. Then let it rip.
+	<p>
+<p><hr>
+<small>
+<a href="#top">Top</a>, <a href="#verify">Verify&nbsp;Install</a>, <a href="#updateold">Update&nbsp;Old&nbsp;SAFS</a>, <a href="#usagetips">Configure</a>, <a href="#both">Both&nbsp;TestComplete/Execute</a>, <a href="#htmlflex">HTML&nbsp;&amp;&nbsp;Flex</a>, <a href="#recognition">Recognition&nbsp;Strings</a>, <a href="#tc9tc8">Both&nbsp;TC9&nbsp;&amp;&nbsp;TC10</a>,
+</small>
+<pre>
+Carl Nagle, <a href="http://www.sas.com"  >SAS</a>
+Project Manager, <a href="http://safsdev.sourceforge.net"  >SAFSDEV</a>
+Subscribe to appropriate <a href="http://sourceforge.net/mail/?group_id=56751" alt="Go to Support Forums">Support Forums</a> to review support archives and ask questons.
+</pre>
+<p>
+</BODY></HTML>

@@ -1,0 +1,104 @@
+<HTML>
+<HEAD>
+<TITLE>
+Using MultiLogResults
+</TITLE>
+</HEAD>
+<BODY>
+<H1>Using MultiLogResults for SAFS XML Logs</H1>
+<p>
+==============================================================================<br/>
+Author: Carl Nagle<br/>
+ Since: FEB 18, 2013<br/>
+Update: FEB 18, 2013
+<p>
+Copyright (2013) SAS Institute
+<a href="http://www.sas.com" target="altwin">http://www.sas.com</a><br/>
+<a href="http://www.opensource.org/licenses/gpl-license.php" target="altwin">General Public License (GPL)</a>:&nbsp;
+http://www.opensource.org/licenses/gpl-license.php<br/>
+==============================================================================<br/>
+<a name="top"/>
+Refer to the associated
+<a href="http://safsdev.sourceforge.net/doc/org/safs/tools/logs/MultiLogResults.html"
+alt="MultiLogResults JavaDoc"
+title="MultiLogResults JavaDoc"
+target="_blank">SAFS MultiLogResults API Reference</a> for additional detail.
+<p>
+<a name="intro"/>
+<img align="right" hspace="12" src="UsingMultiLogResultsProcess.png" alt="MultiLogResults Process Graphic"/>
+<h2>Introduction</h2>
+The purpose of this command-line capable Java API is to allow the post-processing of one or more SAFS XML logs into a single XML Summary.
+<p>
+The idea is that some complex integration and/or systems-level tests are sometimes split into multiple separate SAFS test runs--each producing a separate SAFS test log.
+<p>
+Yet, it is the summation of these separete test runs that makes up the whole of the complex test.
+<p>
+The MultiLogResults tool allows us to convert/transform all these separate logs into one summary log for simpler analysis and reporting.
+<p><hr>
+<a name="how"/>
+<h2>How it Works</h2>
+<p>
+There are many entry points into the overall process, but the most basic usage is as follows:
+<p>
+<ol>
+    <li>Create an XML List File of all XML Log Files in a target directory.
+    <li>Process each XML Log File in the XML List to cumulatively summarize the test logs.
+    <li>Create an XML Summary File containing the final cumulative summary of all test logs.
+</ol>
+<p>
+It should be noted that processing only attempts to summarize or count the last STATUS_REPORT in each SAFS log. &nbsp;That is because each log may have many status reports, but the last one should contain the summary of all tests for that log. &nbsp;If no status report exists in a particular log, then no status information for that log will be summarized nor added to the running total for all logs.
+<p><hr>
+<a name="install"/>
+<h2>Install dependencies</h2>
+<p>
+This new command-line tool is available via the SAFS JAR files built on or after Feb 18, 2013.
+<p>
+There is a 3rd party dependency for a non-default Java JAXP XSLT Processor. &nbsp;Any JAXP XSLT Processor conforming to XSLT 2.0 or higher should work. &nbsp;Unfortunately, the default XALAN JAXP XSLT Processor shipped with some versions of Java only supports XSLT 1.0.
+<p>
+The tools has only been tested with the common SAXON 9.4 implementation using the following JAR files:
+<p>
+<ul><b>
+    <li>saxon9he.jar
+    <li>saxon9-unpack.jar
+</ul></b>
+<p>
+These required SAXON JAR files might already be available to you via the SAFS lib directory.<br>Otherwise, the user can download <b>SaxonHE9-4...J.ZIP</b>
+from the <a href="http://sourceforge.net/projects/saxon/files/Saxon-HE/9.4/" target="_blank"
+alt="SAXON 9.4 Download Directory"
+title="SAXON 9.4 Download Directory">SAXON download website</a> to get these JARs.<br>
+(Note the <b>"J"</b> in the ZIP filename to signify the "Java JAR" version of SAXON assets.)
+<p>
+The relevant JAR files (SAFS + XSLT Processor) must be in the System CLASSPATH or otherwise be valid in the runtime CLASSPATH at the time of execution.
+<p>
+The default XSL file used for XSLT processing is <b>XSLMultiLogsListSummary.xsl</b>. &nbsp;This file should be provided by SAFS and will normally exist in the <b>/SAFS/samples/Log Transforms</b> directory.  &nbsp;By default, this file is expected to be placed in the same directory where the SAFS XML Logs to be processed are located. &nbsp;If you DO NOT place the XSL file in that Logs directory, then you must use the -xsl command-line option to point to the location of the XSL file.
+<p><hr>
+<a name="usage"/>
+<h2>Usage Notes</h2>
+<p>
+Assuming all setup is correct and no special or advanced usage is intended, the simplest example invocation would be something like:
+<p><ul><b>
+java&nbsp;&nbsp;org.safs.tools.logs.MultiLogResults&nbsp;&nbsp;-dir&nbsp;&nbsp;"C:\\SAFS\\Project\\Datapool\\Logs"
+</b></ul>
+<p>
+Of course, you would point to your actual target Logs directory. &nbsp;
+You can also prepare a Windows BAT file that already contains the desired Java invocation so that you only have to run the BAT file with no additional arguments.
+<p>
+Successful execution should result with the creation of 2 new files in the specified Logs directory:
+<p><ul>
+<li><b>MultiLogResultsList.xml</b><br>
+An intermediate file listing all the XML files--presumably SAFS Log files--that were found in the directory.
+<p>
+<li><b>MultiLogResultsSummary.xml</b><br>
+The final XML consolidating all SAFS XML Log summary information and the final tally of all testing associated with these logs.
+</ul>
+<p>
+For more advanced capabilities and processing options consult the <a href="http://safsdev.sourceforge.net/doc/org/safs/tools/logs/MultiLogResults.html"
+alt="MultiLogResults JavaDoc"
+title="MultiLogResults JavaDoc"
+target="_blank">MultiLogResults JavaDoc</a> for the full list of available command-line options.
+<p><hr>
+Copyright (2013) SAS Institute
+<a href="http://www.sas.com" target="altwin">http://www.sas.com</a><br/>
+<a href="http://www.opensource.org/licenses/gpl-license.php" target="altwin">General Public License (GPL)</a>:&nbsp;
+http://www.opensource.org/licenses/gpl-license.php
+</BODY></HTML>

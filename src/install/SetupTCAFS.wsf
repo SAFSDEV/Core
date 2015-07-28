@@ -1,0 +1,225 @@
+<job id="SetupTCAFS" >
+<script language="VBScript" src="_SharedFunctions.vbs"/>
+<script language="VBScript" >
+'******************************************************************************
+'* 
+'* SetupTCAFS.WSF  --  
+'*
+'* Setup of Automated QA TestComplete.
+'*
+'* Required assets for this install:
+'* 
+'*     _SharedFunctions.VBS     - must exist in the same directory as this script
+'*     
+'*
+'* Optional script parameters:
+'*     
+'*     -noprompt
+'*     
+'*           Proceed with installation without prompting for approval.
+'*
+'*
+'* The install can begin from any directory, but all the above assets must 
+'* exist in that same directory.
+'* 
+'* 
+'* Environment variables may be modified by this script.  The affected environment 
+'* variables are listed below:
+'* 
+'*     VARIABLE             BACKUP VARIABLE     PURPOSE
+'*     =================    ===============     ==================================
+'*     TESTCOMPLETE_HOME                        TestComplete install directory
+'*                                              Ex:"C:\Program Files\Automated QA\Test Complete 8"
+'*     TESTCOMPLETE_EXE                         Ex:"TestComplete.exe" or "TestExecute.exe"
+'* 
+'* Optional script parameters:
+'*     
+'*     (none)
+'*
+'*
+'* Author: Carl Nagle
+'* Original Release: JUL 13, 2010
+'*
+'*   APR 13, 2011  CANAGL   Added support for TESTCOMPLETE_EXE
+'*
+'*     
+'* Copyright (C) SAS Institute
+'* General Public License: http://www.opensource.org/licenses/gpl-license.php
+'******************************************************************************
+
+Dim shell, env, fso, args, arg, lcarg
+Dim message, response
+Dim prompt
+Dim tcafs_env, tcafs_dir, tcafs_exe
+Dim tcafs_reg, tcafs_reg_v8, tcafs_reg_path, tcafs_reg_w7, tcafs_reg_v8_w7, tcafs_reg_w7_v9
+Dim tcafs_reg_sb, tcafs_reg_v9, tcafs_reg_v9_w7
+Dim tcafs_te_reg, tcafs_te_reg_v8, tcafs_te_reg_w7, tcafs_te_reg_v8_w7, tcafs_te_reg_w7_v9
+Dim tcafs_te_reg_sb, tcafs_te_reg_v9, tcafs_te_reg_v9_w7
+Dim use_tcafs_reg, use_tcafs_reg_v8, use_tcafs_exe, wow6432node, normal32node
+
+Dim cr, q, nl, newline
+
+cr      = chr(13)   'carriage return
+q       = chr(34)   'double quote
+nl      = chr(10)   'next line
+newline = cr & nl   'use "carriage return" and "next line" to form a newline
+
+tcafs_env      = "TESTCOMPLETE_HOME"
+tcafs_exe_env  = "TESTCOMPLETE_EXE"
+use_tcafs_exe  = "TestComplete.exe"
+
+tcafs_reg_path = "\Product Path"
+
+normal32node   = "HKLM\Software\"
+tcafs_reg      = normal32node &"Automated QA\Test Complete"
+tcafs_reg_sb   = normal32node &"SmartBear\TestComplete"
+tcafs_reg_v8   = normal32node &"Automated QA\Test Complete\8.0\Setup"
+tcafs_reg_v9   = normal32node &"SmartBear\TestComplete\9.0\Setup"
+
+tcafs_te_reg     = normal32node &"Automated QA\Test Execute"
+tcafs_te_reg_sb  = normal32node &"SmartBear\TestExecute"
+tcafs_te_reg_v8  = normal32node &"Automated QA\Test Execute\8.0\Setup"
+tcafs_te_reg_v9  = normal32node &"SmartBear\TestExecute\9.0\Setup"
+
+wow6432node    = "HKLM\Software\Wow6432Node\"
+tcafs_reg_w7   = wow6432node &"Automated QA\Test Complete"
+tcafs_reg_w7_v9= wow6432node &"SmartBear\TestComplete"
+
+tcafs_reg_v8_w7= wow6432node &"Automated QA\Test Complete\8.0\Setup"
+tcafs_reg_v9_w7= wow6432node &"SmartBear\TestComplete\9.0\Setup"
+
+tcafs_te_reg_w7    = wow6432node &"Automated QA\Test Execute"
+tcafs_te_reg_w7_v9 = wow6432node &"SmartBear\TestExecute"
+
+tcafs_te_reg_v8_w7 = wow6432node &"Automated QA\Test Execute\8.0\Setup"
+tcafs_te_reg_v9_w7 = wow6432node &"SmartBear\TestExecute\9.0\Setup"
+
+Set shell = WScript.CreateObject("WScript.Shell")
+Set env   = shell.Environment("SYSTEM")
+Set fso   = WScript.CreateObject("Scripting.FileSystemObject")
+Set args  = WScript.Arguments
+
+'check for 64-bit OS 32-bit Registry
+if RegExistValue(tcafs_reg_w7 &"\") then
+    
+    use_tcafs_reg    = tcafs_reg_w7
+    use_tcafs_reg_v8 = tcafs_reg_v8_w7
+    
+elseif RegExistValue(tcafs_reg_w7_v9  &"\") then
+    
+    use_tcafs_reg    = tcafs_reg_w7_v9
+    use_tcafs_reg_v8 = tcafs_reg_v9
+    
+elseif RegExistValue(tcafs_te_reg_w7_v9 &"\") then
+
+    use_tcafs_reg    = tcafs_te_reg_w7_v9
+    use_tcafs_reg_v8 = tcafs_te_reg_v9_w7
+	use_tcafs_exe  = "TestExecute.exe"
+
+elseif RegExistValue(tcafs_te_reg_w7 &"\") then
+
+    use_tcafs_reg    = tcafs_te_reg_w7
+    use_tcafs_reg_v8 = tcafs_te_reg_v8_w7
+	use_tcafs_exe  = "TestExecute.exe"
+
+elseif RegExistValue(tcafs_reg_sb  &"\") then
+    use_tcafs_reg    = tcafs_reg_sb
+    use_tcafs_reg_v8 = tcafs_reg_v9
+
+elseif RegExistValue(tcafs_te_reg_sb  &"\") then
+    use_tcafs_reg    = tcafs_te_reg_sb
+    use_tcafs_reg_v8 = tcafs_te_reg_v9
+
+elseif RegExistValue(tcafs_reg  &"\") then
+    use_tcafs_reg    = tcafs_reg
+    use_tcafs_reg_v8 = tcafs_reg_v8
+else
+    use_tcafs_reg    = tcafs_te_reg
+    use_tcafs_reg_v8 = tcafs_te_reg_v8
+	use_tcafs_exe  = "TestExecute.exe"
+end if
+
+
+WScript.Interactive = true
+prompt = true
+
+' loop thru all args
+'======================
+For i = 0 to args.Count -1
+    arg = args(i)
+        
+    'remove any trailing '\' or '/'
+    '====================================================
+    if ((Right(arg,1)="\")or(Right(arg,1)="/")) then
+        arg = Left(arg, Len(arg)-1)
+    end if
+    
+    lcarg = lcase(arg)
+    
+    if (arg = "-noprompt") then 
+        prompt = false
+        WScript.Interactive = false
+    end if    
+Next
+
+tcafs_dir = ""
+tcafs_dir = env(tcafs_env)
+tcafs_exe = ""
+tcafs_exe = env(tcafs_exe_env)
+
+if (Len(tcafs_dir) > 0) AND (Len(tcafs_exe) > 0) then
+    if (fso.FolderExists(tcafs_dir)) AND (fso.FileExists(tcafs_dir &"\Bin\"& tcafs_exe)) then 
+        if prompt then
+            message = "System Environment TESTCOMPLETE_HOME set to:"& cr & cr & tcafs_dir & cr
+            shell.Popup message,4, "'TESTCOMPLETE_HOME' Environment",64
+        end if
+        WScript.Quit
+    end if
+    tcafs_dir = ""
+    env(tcafs_env) = tcafs_dir
+    tcafs_exe = ""
+    env(tcafs_exe_env) = tcafs_exe
+end if
+
+'look for generic registry "Automated QA\Test Complete"
+if NOT RegExistValue(use_tcafs_reg &"\") then 
+    if prompt then
+        message = use_tcafs_reg &"\ registry entries not found."& cr
+        shell.Popup message,3, "Test Complete may not be installed",64
+    end if
+    WScript.Quit
+end if
+
+if (NOT RegExistValue(use_tcafs_reg_v8 &"\")) then 
+    if prompt then
+                  message = "Cannot deduce Automated QA Test Complete installation directory "& cr
+        message = message & "for versions earlier than Test Complete 8."& cr & cr
+        message = message & "Please set System Environment variables:"& cr & cr 
+        message = message & qt & tcafs_env & qt & cr & qt & tcafs_exe_env & qt & cr & cr
+        message = message & "to appropriate values."& cr        
+        shell.Popup message,0, "'TESTCOMPLETE_HOME' Not Set",32
+    end if
+    WScript.Quit
+end if
+
+if (RegReadValue(use_tcafs_reg_v8 & tcafs_reg_path, tcafs_dir)) then
+    if Len(tcafs_dir) > 1 then
+        if ((Right(tcafs_dir,1)="\")or(Right(tcafs_dir,1)="/")) then
+            tcafs_dir = Left(tcafs_dir, Len(tcafs_dir)-1)
+        end if    
+        env(tcafs_env) = tcafs_dir
+        env(tcafs_exe_env) = use_tcafs_exe
+        if prompt then
+            message = "TESTCOMPLETE_HOME set to: "& cr & cr & tcafs_dir & cr
+            shell.Popup message,4, "'TESTCOMPLETE_HOME' Set",48
+        end if
+    else
+        if prompt then
+            message = "Invalid Test Complete path: "& cr & cr & tcafs_dir & cr
+            shell.Popup message,4, "'TESTCOMPLETE_HOME' Not Set",48
+        end if
+    end if
+end if
+
+</script>
+</job>

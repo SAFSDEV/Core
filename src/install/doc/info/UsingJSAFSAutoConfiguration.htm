@@ -1,0 +1,216 @@
+<html>
+<head><title>JSAFS AutoConfiguration and Execution</title>
+<body>
+<center><h2>***** This Doc Needs to be Enhanced with Screenshots *****<h2></center>
+<p>
+<h2>Install SAFS</h2>
+Then execute (double-click)<p>
+<ul><table border=1 cellpadding=5>
+<tr><td>\SAFS\Project\<b>runTIDTest.bat</b> <td>verify Core SAFS installation.
+<tr><td>\SAFS\Project\<b>runTCAFSTest.bat</b> <td>verify SmartBear Testcomplete integration, if installed.
+<tr><td>\SAFS|Project\<b>runRFTTest.bat</b> <td>verify IBM Rational Functional Tester integration, if installed.
+</table></ul>
+<p>
+<h2>Configure Eclipse</h2>
+<ol>
+   <li>Eclipse: Create New Java Project (Example: MyTest)
+   <li>Ensure it is a Java JDK (not a JRE) that is used for the Java project.
+   <li>Copy or recreate project structure and contents from SAFS\samples\eclipse:
+   <p><ul><pre>
+test.ini
+.\Datapool\
+          \Bench\
+          \Test\
+          \Logs\
+          \Dif\
+   </pre>
+   If copying files, make sure you RightClick Eclipse Project "MyTest" and select "Refresh"
+   <p>
+   In the <b>test.ini</b> file, copy appropriate config sections for the testing tool being used:
+   <table border=1 cellpadding=4>
+   <tr><td>All Tests<td>[SAFS_TEST]<br>(Edit TestName &amp; LogName, if needed)
+   <tr><td>TestComplete<td>tcafs.ini - [SAFS_TC]<br>
+   [SAFS_ENGINES]<br>
+   First=org.safs.tools.engines.SAFSTC
+   <tr><td>RFT<td>rfttest.ini - [SAFS_ROBOTJ]<br>
+   [SAFS_ENGINES]<br>
+   First=org.safs.tools.engines.SAFSROBOTJ
+   </table><p>
+   </ul><p>
+   <li>Add External JAR Files to the new Project's BuildPath:
+   <p><ul>
+       /STAF/bin/JSTAF.jar<br>
+       /SAFS/lib/SAFS.jar<br>
+       /SAFS/lib/safsmodel.jar<br>
+   </ul><p>
+   <li>If you wish to see JavaDoc for classes in the JAR files:
+   <p><ul><table border=1 cellpadding=4>
+       <tr><td> SAFS.JAR <td> http:/safsdev.sourceforge.net/doc
+       <tr><td> safsmodel.jar <td> http:/safsdev.sourceforge.net/doc
+   </table></ul><p>
+   <li>Eclipse Project: Create New Java Class  (Example: MyTest.class)
+   <p><ul><pre>
+package: com.company.test  (any package name)
+class name: MyTest         (any class name)
+include a public static main(String[] args) method, if desired.
+   </pre></ul>
+   <li>Add imports to the new class:
+   <p><ul><pre>
+import org.safs.model.annotations.*;
+import org.safs.model.tools.Runner;
+   </pre></ul>
+   <li>Annotate the class definition as shown below:
+   <p><ul><pre>
+<b>@AutoConfigureJSAFS</b>
+public class MyTest { ...
+   </pre></ul><p>
+   <li>You MUST provide a default, no-argument constructor for any class that will be auto-configured:
+   <p><ul><pre>
+<b>public MyTest()</b> {
+
+    super();
+}
+   </pre></ul>
+   Consult the Eclipse tool
+   <p>
+   <li>Setup a new Eclipse "Run Configuration" for the new MyTest Class:
+   <p>
+   <li>In the Run Menu->Run Configurations Dialog:
+   <p><ul><pre>
+New Java Application Launch Configuration:
+
+   Name: Run MyTest
+
+   Main Tab:
+   Project: MyTest
+   Main class: com.sas.test.MyTest
+
+   Arguments Tab:
+   VM Arguments:
+       -Dsafs.project.config="./test.ini"
+
+   Ensure "Working Directory" is set to ${workspace_loc:MyTest}
+
+   JRE Tab:
+   Execution environment: &lt;the SAFS\jre>
+   (If the SAFS\jre is NOT listed, you will need to add it via "Installed JREs".)
+
+Press "Apply" to save the new launch configuration.
+   </pre></ul>
+   <li>Annotate any class function/method you wish JSAFS to execute automatically as shown below:
+   <p><ul><pre>
+<b>@JSAFSTest(Order=1000)</b>
+public void TestMethodA() throws Throwable{
+
+}
+
+(this works for all Methods in the package and all sub-packages)
+   </pre></ul><p>
+   <li>Allow JSAFS AutoConfigure to occur in the Constructor or static main of your class.<br>
+   (You will need to add "throws Throwable" to the method signature, or you will need to add the appropriate try/catch block.)
+   <p><ul><pre>
+public static void main(String[] args) throws Throwable{
+
+    MyTest test = new MyTest();
+    new Runner().autorun(args);
+}
+
+OR
+
+public MyTest(String[] args){
+
+    super();
+    new Runner.autorun(args);
+}
+   </pre></ul><p>
+   <li>In the project Datapool directory create a SAFS App Map text file for editing
+   <p><ul><p>
+      Eclipse Project\Datapool: Create New File  (App.map)<br>
+      <p><pre>
+This is a SAFS App Map file.  Windows INI file format.
+Use the target automation tool's Object Spy or a supported
+ProcessContainer tool to acquire the tool's recognition strings for each desired component.
+
+[ApplicationConstants]
+URL=http://...
+userid=myuserid
+
+[MainWin]
+MainWin=&lt;recognition string>
+AnyComp1=&lt;recognition string>
+AnotherComp2=&lt;recognition string>
+
+[AnotherWin]
+AnotherWin=&lt;recognition string>
+SomeComp1=&lt;recognition string>
+AnotherComp2=&lt;recognition string>
+   </pre></ul>
+   <li>You can now add calls to your test methods to act on these components:
+   <p><ul><pre>
+@JSAFSTest(Order=1000)
+public void TestMethodA() throws Throwable{
+
+    <b>Runner.action("Click", "AnyComp1", "MainWin");
+    Runner.command("Pause", "10");</b>
+}
+
+<table border=1 cellpadding=5>
+<tr><td>An "action" is a ComponentFunction as described in<td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php" target="reference">SAFSReference Component Functions</a>
+<tr><td>A "command" is a DriverCommand--as described in <td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverCommands" target="reference">SAFSReference DriverCommands</a>
+<tr><td>Basic information on this reference can be found at <td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReferenceKey.htm" target="blank">SAFSReference Info</a>
+</table></pre></ul>
+Such hardcoded strings are prone to human error and won't be detected until runtime.
+These can be difficult to troubleshoot.
+To avoid some of these issues, we recommend an automatic build of a Java class mirror of the
+App Map to avoid such runtime errors.
+   <p>
+   <li>Setup a new Eclipse "Run Configuration" to use the <a href="http://safsdev.sourceforge.net/doc/org/safs/model/tools/ComponentGenerator.html">ComponentGenerator</a> tool to generate this class.
+   <p>
+   <li>In the Run Menu->Run Configurations Dialog:
+   <p><ul><pre>
+New Java Application Launch Configuration:
+
+   Main Tab:
+   Name: Generate MyTest AppMap
+   Project: MyTest
+   Main class: org.safs.model.tools.ComponentGenerator
+
+   Arguments Tab:
+   Program Arguments:
+       -in "./Datapool/App.map"
+       -package "com.company.test"
+       -out "./com/company/test"
+
+Ensure "Working Directory" is set to ${workspace_loc:MyTest}
+Press "Apply" to save the new launch configuration.
+Press "Run" to run it.
+<b>Make sure you RightClick Eclipse Project "MyTest" and select "Refresh" to see the new Class.</b>
+   </pre></ul>
+   <li>You can now add calls to your test methods using available wrapper functions:
+   <p><ul><pre>
+@JSAFSTest(Order=1000)
+public void TestMethodA(){
+
+    Runner.action("Click", "AnyComp1", "MainWin");
+    Runner.command("Pause", "10");
+    <b>Runner.Click(AppMap.MainWin.AnotherComp2);</b>
+}
+   </pre></ul>
+   <li>If a wrapper function does NOT yet exist, you can still use the Java App Map:
+   <p><ul><pre>
+@JSAFSTest(Order=1000)
+public void TestMethodA(){
+
+    Runner.action("Click", "AnyComp1", "MainWin");
+    Runner.command("Pause", "10");
+    Runner.Click(AppMap.MainWin.AnotherComp2);
+    <b>Runner.action(MyAppMap.MainWin.AnotherComp2, "GetGuiImage", "Comp2Snapshot.png");</b>
+}
+   </pre></ul>
+   <li>Run the MyTest app using the "Run MyTest" Run Configuration previously prepared.
+   <p>
+   There should be some console output followed by the JSAFS bootstrap process, the launching of
+   the testing engine, and finally, the shutdown of JSAFS, the testing engine, and the MyTest application.
+</ol>
+<hr>
+</body></html>

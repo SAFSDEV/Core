@@ -1,0 +1,19 @@
+
+
+[ApplicationConstants]
+
+nlsmap="NLSBridgeTest_ja.MAP"
+
+MainWin="Type=Window;Caption={SAS Web Report Studio*}"
+T.xxx="File"
+T.SASEnterpriseGuideExplorer.File="File"
+
+[MainWin]
+MainWin=_DDV:
+Comp="Type=Pushbutton;Text={^howDoIText}"
+howDoIButton="Type=HTMLTable;HTMLId=howDoIButton"
+File="Type=Pushbutton;Text={^T.SASEnterpriseGuideExplorer.File}"
+File2="Type=Pushbutton;Text={^T.xxx}"
+
+[Other.Window]
+Other.Window="Type=BogusWindow;NoCaption"

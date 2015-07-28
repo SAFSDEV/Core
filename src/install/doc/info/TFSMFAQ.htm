@@ -1,0 +1,281 @@
+<html>
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>TFSM FAQs</title>
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:10.0pt;
+	margin-left:0in;
+	line-height:115%;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";}
+p.MsoNoSpacing, li.MsoNoSpacing, div.MsoNoSpacing
+	{margin:0in;
+	margin-bottom:.0001pt;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:10.0pt;
+	margin-left:.5in;
+	line-height:115%;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";}
+p.msolistparagraphcxspfirst, li.msolistparagraphcxspfirst, div.msolistparagraphcxspfirst
+	{mso-style-name:msolistparagraphcxspfirst;
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:115%;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";}
+p.msolistparagraphcxspmiddle, li.msolistparagraphcxspmiddle, div.msolistparagraphcxspmiddle
+	{mso-style-name:msolistparagraphcxspmiddle;
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:115%;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";}
+p.msolistparagraphcxsplast, li.msolistparagraphcxsplast, div.msolistparagraphcxsplast
+	{mso-style-name:msolistparagraphcxsplast;
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:10.0pt;
+	margin-left:.5in;
+	line-height:115%;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";}
+p.msochpdefault, li.msochpdefault, div.msochpdefault
+	{mso-style-name:msochpdefault;
+	margin-right:0in;
+	margin-left:0in;
+	font-size:10.0pt;
+	font-family:"Calibri","sans-serif";}
+.MsoChpDefault
+	{font-size:10.0pt;
+	font-family:"Calibri","sans-serif";}
+@page WordSection1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.0in 1.0in 1.0in;}
+div.WordSection1
+	{page:WordSection1;}
+ /* List Definitions */
+ ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+-->
+</style>
+
+</head>
+
+<body lang=EN-US>
+
+<div class=WordSection1>
+
+<p class=MsoNoSpacing style='margin-left:20.25pt;text-indent:-20.25pt'><b>1.</b><b><span
+style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>What
+does TFSM mean?</b></p>
+
+<p class=MsoNoSpacing style='margin-left:20.25pt'>TFSM means TestComplete Find
+Search Mode. TFSM is a name of the search algorithm. It uses Test Complete API
+to find AUT’s objects.&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:20.25pt'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:20.25pt;text-indent:-20.25pt'><b>2.</b><b><span
+style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>How
+can I use TFSM algorithm?</b></p>
+
+<p class=MsoNoSpacing style='text-indent:.25in'>Just add&nbsp; :TFSM: prefix at
+beginning of the recognition string.&nbsp; </p>
+
+<p class=MsoNoSpacing style='margin-left:20.25pt'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'><span style='font-size:10.0pt;
+font-family:"Courier New"'>Example:&nbsp; </span></p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'><span style='font-size:10.0pt;
+font-family:"Courier New"'>MainWindow]</span></p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'><span style='font-size:10.0pt;
+font-family:"Courier New"'>MainWindow=“:TFSM:</span><b><span style='font-size:
+10.0pt;font-family:"Courier New";color:black'>processName=iexplore</span></b><span
+style='font-size:10.0pt;font-family:"Courier New";color:black'>;objecttype=Page;url=http://www.google.ca/”</span></p>
+
+<p class=MsoNoSpacing style='text-indent:.25in'><span style='font-size:10.0pt;
+font-family:"Courier New"'>HtmlLink=”TFSM:</span><span style='font-size:10.0pt;
+font-family:"Courier New";color:black'>tagName=A;namePropStr=advanced_search*</span><span
+style='font-size:10.0pt;font-family:"Courier New"'>”</span></p>
+
+<p class=MsoNoSpacing style='text-indent:.5in'><span style='font-size:10.0pt;
+font-family:"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNoSpacing style='text-indent:.25in'><b><span style='font-size:10.0pt;
+font-family:"Courier New"'>Note: </span></b><span style='font-size:10.0pt;
+font-family:"Courier New"'>processName if not a window property, but TFSM must require
+as part of the main window recognition string only. </span></p>
+
+<p class=MsoNoSpacing style='text-indent:.25in'><span style='font-size:10.0pt;
+font-family:"Courier New"'>Above example is for IE, so the processName is “</span><span
+style='font-size:10.0pt;font-family:"Courier New";color:black'>iexplore”. The processName
+is case insensitive and define anywhere into the string. </span></p>
+
+<p class=MsoNoSpacing style='text-indent:.25in'><span style='font-size:10.0pt;
+font-family:"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNoSpacing><b>3.</b><b><span style='font-size:7.0pt;font-family:
+"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>What are
+the benefits of TFSM recognition string?</b></p>
+
+<p class=MsoNoSpacing style='margin-left:20.25pt'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:38.25pt;text-indent:-.25in'>1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>The
+recognition string size is small and easy to maintain.</p>
+
+<p class=MsoNoSpacing style='margin-left:38.25pt;text-indent:-.25in'>2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>The
+recognition string is specific to the component only, so if the AUT design change,
+e.g add new panel or so, the TFSM string should be same.</p>
+
+<p class=MsoNoSpacing style='margin-left:38.25pt;text-indent:-.25in'>3.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>Easy
+maintenance.</p>
+
+<p class=MsoNoSpacing>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:20.25pt;text-indent:-20.25pt'><b>4.</b><b><span
+style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Can
+I use TFSM mode with others modes?</b></p>
+
+<p class=MsoNoSpacing style='margin-left:20.25pt'>Yes, add “:TFSM:”  prefix to
+the recognition string. SAFS engine will process
+prefix&nbsp;tag&nbsp;appropriately.</p>
+
+<p class=MsoNoSpacing style='margin-left:20.25pt'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='text-indent:.25in'>MainWindow may be regular TC
+recognition string and HtmlLink can be TFSM mode. Any combination works. </p>
+
+<p class=MsoNoSpacing style='text-indent:.5in'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='text-indent:.25in'>Example:&nbsp; User can define
+appmap following way</p>
+
+<p class=MsoNoSpacing style='text-indent:.5in'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'><span style='font-size:10.0pt;
+font-family:"Courier New"'>MainWindow]</span></p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'><span style='font-size:10.0pt;
+font-family:"Courier New"'>MainWinow=” Sys.Process(&quot;iexplore&quot;).IEFrame(0).Window(&quot;WorkerW&quot;,
+&quot;Navigation Bar&quot;, 1).Window(&quot;ReBarWindow32&quot;, &quot;&quot;,
+1).Window(&quot;Address Band Root&quot;, &quot;&quot;,
+1).Window(&quot;ToolbarWindow32&quot;, &quot;Address Combo Control&quot;, 1)”</span></p>
+
+<p class=MsoNoSpacing style='text-indent:.25in'><span style='font-size:10.0pt;
+font-family:"Courier New"'>HtmlLink =”TFSM:</span><span style='font-size:10.0pt;
+font-family:"Courier New";color:black'>tagName=A;namePropStr=advanced_search*</span><span
+style='font-size:10.0pt;font-family:"Courier New"'>”&nbsp;</span></p>
+
+<p class=MsoNoSpacing style='text-indent:.25in'>&nbsp;</p>
+
+<p class=MsoNoSpacing><b>5.</b><b><span style='font-size:7.0pt;font-family:
+"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>Does TFSM
+support regular expression to find dynamic object window?</b></p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>Yes, TFSM supports regular
+expression. It follows the Test Complete regular expression standards. </p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;Example:&nbsp; </p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'><span style='font-size:10.0pt;
+font-family:"Courier New"'>MainWindow]</span></p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'><span style='font-size:10.0pt;
+font-family:"Courier New"'>MainWindow=“:TFSM:</span><span style='font-size:
+10.0pt;font-family:"Courier New";color:black'>processName=iexplore;objecttype=Page;url=http://www.google.ca/”</span></p>
+
+<p class=MsoNoSpacing style='text-indent:.25in'><span style='font-size:10.0pt;
+font-family:"Courier New"'>HtmlLink =”TFSM:</span><span style='font-size:10.0pt;
+font-family:"Courier New";color:black'>tagName=A;namePropStr=advanced_search*</span><span
+style='font-size:10.0pt;font-family:"Courier New"'>”</span></p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;</p>
+
+<p class=MsoNoSpacing><b>6.</b><b><span style='font-size:7.0pt;font-family:
+"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>How many
+properties require for the TFSM string?</b></p>
+
+<p class=MsoNoSpacing>        There are no such any rules, but as long as the
+object has unique property then it should work. Normally, two property are
+enough for the best practices.</p>
+
+<p class=MsoNoSpacing>&nbsp;</p>
+
+<p class=MsoNoSpacing>        Example:</p>
+
+<p class=MsoNoSpacing style='text-indent:.25in'><span style='font-size:10.0pt;
+font-family:"Courier New"'>HtmlLink =”TFSM:</span><span style='font-size:10.0pt;
+font-family:"Courier New";color:black'>tagName=A;namePropStr=advanced_search*</span><span
+style='font-size:10.0pt;font-family:"Courier New"'>”</span></p>
+
+<p class=MsoNoSpacing>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>        </p>
+
+<p class=MsoNoSpacing><b>7.</b><b><span style='font-size:7.0pt;font-family:
+"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>What
+should I do if component objects can’t find by TFSM?</b></p>
+
+<p class=MsoNoSpacing>        There is possibility that the component objects
+are very deep into the AUT and TFSM can’t reach them. However, user can specify
+“depthLevel=&lt;some number&gt;” to increase the TFSM search area.    </p>
+
+<p class=MsoNoSpacing>        <span style='font-size:10.0pt;font-family:"Courier New"'>Example:&nbsp;
+</span></p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'><span style='font-size:10.0pt;
+font-family:"Courier New"'>MainWindow]</span></p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'><span style='font-size:10.0pt;
+font-family:"Courier New"'>MainWindow=“:TFSM:</span><b><span style='font-size:
+10.0pt;font-family:"Courier New";color:black'>processName=iexplore</span></b><span
+style='font-size:10.0pt;font-family:"Courier New";color:black'>;objecttype=Page;url=http://www.google.ca/”</span></p>
+
+<p class=MsoNoSpacing style='text-indent:.25in'><span style='font-size:10.0pt;
+font-family:"Courier New"'>HtmlLink=”TFSM:</span><span style='font-size:10.0pt;
+font-family:"Courier New";color:black'>tagName=A;namePropStr=advanced_search*</span><span
+style='font-size:10.0pt;font-family:"Courier New"'>;<b>depthLevel=200</b>”</span></p>
+
+<p class=MsoNoSpacing>&nbsp;</p>
+
+<p class=MsoNoSpacing><b>      Note:</b> depthLevel is case insensitive and
+default number is 5.</p>
+
+<p class=MsoNoSpacing>        </p>
+
+<p class=MsoNoSpacing>&nbsp;</p>
+
+</div>
+
+</body>
+
+</html>

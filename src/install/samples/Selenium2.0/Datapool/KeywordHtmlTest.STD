@@ -1,0 +1,11 @@
+C, Version, 1.0
+C, SetApplicationMap, google.map
+
+;####################	Use RobotJ if available #####################
+C, UseSeleniumFunctions, ON
+;####################	Begin the main test #########################
+T, SeleniumEditBoxTest
+
+;####################	stop using RobotJ if available  #############
+C, UseSeleniumFunctions, OFF
+;####################################################################

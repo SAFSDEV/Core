@@ -1,0 +1,1 @@
+java -Dsafs.config.paths=SafsDevTest.ini org.safs.selenium.SeleniumJavaHook SPC

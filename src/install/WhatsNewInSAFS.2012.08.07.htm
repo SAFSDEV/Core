@@ -1,0 +1,701 @@
+<html>
+<head>
+<title>What's New In SAFS</title>
+<style type="text/css">
+<!--
+  tr.b1{background-color:#D8D8D8;text-align:center;}
+  tr.b2{background-color:#F0F0F0;text-align:center;}
+  td.note{text-align:left;}
+  td.b1{background-color:#D8D8D8;}
+  div.b1{background-color:#D8D8D8;}
+-->
+</style>
+</head>
+<body>
+<div class=b1>
+<center>
+<h1>What's New in SAFS</h1>
+<h2>SAFSWINRelease2012.08.07<h2>
+<h2>Final Update: 2012.08.07</h2>
+<small>Since:<b> 2010.09.16 </b></small><p>
+</center>
+<hr>
+</div>
+<p>
+Here we provide info as to what has been added or fixed since the last Release (2010).
+<p>
+It should be noted that:
+<p><ul>
+<b>SAFS for Windows--including Android Support--was released on 2012.08.07!</b><br>
+<b>Robotium Remote Control for Android testing new release on 2012.07.31!</b><br>
+<b>SAFS for the Apple Mac and IOS testing was released on 2012.06.22!</b>
+</ul>
+<p>
+As you can see, SAFS is undergoing a very rapid pace of development in many areas expanding support in:
+<ul>
+	<li>Core SAFS Framework robustness and performance
+	<li>JSAFS Object Model (All Domains)
+	<li>AQA Test Complete (NET/WPF/Flex)
+	<li>Apple UIAutomation (Mac/IBT/IOS Apps)
+	<li>Robotium Remote Control (Android)
+	<li>Google Android SDK Automation (DRD Apps)
+	<li>Selenium (Web)
+	<li>IBM Rational Functional Tester (Flex/Web/Java/Net/WPF)
+</ul>
+<p>
+<a name="legend"/>
+<p>
+<table align=center rules=cols>
+<th bgcolor=#D8D8D8 colspan=2 border=1>Legend
+<tr>
+<td><table cellpadding=2>
+<tr><td class=b1>Core<td>The core SAFS Framework used by all SAFS clients/services.
+<tr><td class=b1>SPC<td>SAFS Process Container.
+<tr><td class=b1>IOSPC<td>Apple IOS Process Container.
+<tr><td class=b1>TID<td>The primary Tool-Independent Driver (SAFSDRIVER).
+<tr><td class=b1>JSAFS<td>The Java API for Advanced SAFS test development and execution.
+<tr><td class=b1>IBT<td>SAFS Image-Based Testing support.
+<tr><td class=b1>Web<td>Web client support (HTML support).
+<tr><td class=b1>RFT<td>IBM Rational Functional Tester support.
+<tr><td class=b1>RFSM<td>RFT Find Search Mode (higher-performance Flex recognition).
+<tr><td class=b1>Win<td>MS Windows client/domain support.
+<tr><td class=b1>Mac<td>Apple Mac client/domain support.
+</table>
+<td><table cellpadding=2>
+<tr><td class=b1>TCPM<td>SAFS TCP Messenger.
+<tr><td class=b1>RBTM<td>Robotium Remote Control.
+<tr><td class=b1>DRD<td>Google Android support.
+<tr><td class=b1>IOS<td>Apple IOS support.
+<tr><td class=b1>Se<td>Selenium support.
+<tr><td class=b1>QTP<td>HP QuickTest Pro support.
+<tr><td class=b1>TC<td>AQA TestComplete support.
+<tr><td class=b1>Flex<td>Flex/Flash client/domain support.
+<tr><td class=b1>Net<td>MS .NET client/domain support.
+<tr><td class=b1>WPF<td>MS WPF client/domain support.
+<tr><td class=b1>Java<td>Java client/domain support.
+</table>
+</table>
+<p>
+
+<div style="display:none">
+
+<!-- This is the piece below to copy and paste for new entries.
+     Don't forget to rename "b1" to "b2" and vice-versa.   -->
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> </b>
+<td rowspan=2><!--AFFECT-->
+<td><!--NEW----->
+<td><!--FIXED--->
+<td><!--DEPEND-->
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>
+</ul>
+
+</div>
+
+<table width="100%" align=center border=1 cellpadding=4 rules=rows>
+
+<th>DATE<th>AFFECTED<th>NEW STUFF<th>FIXES<th>DEPENDENCIES
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2012.08.07 </b>
+<td rowspan=2><!--AFFECT-->Core, DRD, Se, TC, RFT
+<td><!--NEW----->SAFS&nbsp;Win&nbsp;Released, DRD&nbsp;Sample, TC&nbsp;Select, Se&nbsp;Sample
+<td><!--FIXED--->Se&nbsp;Win
+<td><!--DEPEND-->TC&nbsp;SVBs, TC&nbsp;ClassObjectsMap.DAT<br>Core&nbsp;JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>SAFS for Windows Released with initial Android Support!
+<li>Initial Selenium Support on Windows.
+<li>AQA Test Complete Support update for Windows.
+<li>IBM Rational Functional Tester Support update for Windows.
+<li>Robotium Remote Control included for Windows.
+<li>SAFS extensions to Robotium Remote Control for Windows.
+<li>JSAFS Support API updated with new release.
+</ul>
+
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2012.07.31 </b>
+<td rowspan=2><!--AFFECT-->Core<br>RBTM<br>TC
+<td><!--NEW----->TC&nbsp;Toolbar&nbsp;SelectMenuItem<br>TC&nbsp;GetTextValue()
+<td><!--FIXED--->Core&nbsp;DDVariableStore.DLL<br>RBTM&nbsp;Unix/Mac&nbsp;Install
+<td><!--DEPEND-->Core&nbsp;DDVariableStore.DLL<br>TC&nbsp;SVBs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Core DDVariableStore.DLL fixed to handle STAF transmission of multi-byte characters.
+<li>Fixed Install scripts for Robotium Remote Control Release.
+<li>Fixed Test Complete menu selections in ToolBars, getting text from Tab objects, and
+generically getting the text from Labels and other TC objects.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2012.07.27 </b>
+<td rowspan=2><!--AFFECT--> Core<br>TC
+<td><!--NEW----->Core&nbsp;ResetTimer<br>
+<td><!--FIXED--->TC&nbsp;UTF-8&nbsp;Files<br>TC&nbsp;NetDataGrid<br>TC&nbsp;InputCharacters
+<td><!--DEPEND-->Core&nbsp;JARs<br>TC&nbsp;SVBs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Added ResetTimer to DDDriverTimerCommands in Core SAFS.
+<li>Fixed Test Complete component focus issue when typing keystrokes.
+<li>Fixed handling of UTF-8 characters in Test Complete with Unicode conversions.
+<li>Fixed certain Test Complete GetObjectData() calls with CaptureObjectDataToFile().
+<li>Fixed Test Complete handling of certain NetDataGrid row headers.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2012.07.23 </b>
+<td rowspan=2><!--AFFECT-->TC
+<td><!--NEW----->
+<td><!--FIXED--->TC&nbsp;DataGrid
+<td><!--DEPEND-->
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Test Complete DataGrid support enhanced for CaptureObjectDataToFile for more DataGrid classes.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2012.07.20 </b>
+<td rowspan=2><!--AFFECT-->TC
+<td><!--NEW----->TC&nbsp;InputCharacters
+<td><!--FIXED--->
+<td><!--DEPEND-->TC&nbsp;SVBs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Implemented InputCharacters keyword for Test Complete.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2012.07.19 </b>
+<td rowspan=2><!--AFFECT-->TC, RBTM/DRD
+<td><!--NEW----->TC&nbsp;TreeView&nbsp;Commands
+<td><!--FIXED--->TC&nbsp;PopupMenu&nbsp;Support<br>RBTM/DRD&nbsp;Install
+<td><!--DEPEND-->TC&nbsp;SVBs<br>RBTM/DRD&nbsp;safsautoandroid.jar
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Increased APK installation timeouts from 20 to 60 seconds for Android. &nbsp;
+Test Complete fix for PopupMenu support. &nbsp;Test Complete support for new TreeView commands. &nbsp;Fix for Test Complete support of certain Lists/ListViews.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2012.07.18 </b>
+<td rowspan=2><!--AFFECT-->TC<br>RFT
+<td><!--NEW----->
+<td><!--FIXED--->TC&nbsp;Lists/Tables<br>RFT&nbsp;Html.Select<br>RFT&nbsp;RFSM
+<td><!--DEPEND-->TC&nbsp;SVBs<br>safsrational_ft.jar
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Test Complete updates to fix .Net and WPF List and DataGrid listitem extraction. &nbsp;
+Functional Tester RFSM mode updates for debugging and supporting object hierarchy in RFSM. &nbsp;Also improved support of Html.SELECT objects in CFComboBox.java.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2012.07.16 </b>
+<td rowspan=2><!--AFFECT-->TC
+<td><!--NEW----->TC&nbsp;.NET&nbsp;Table&nbsp;Support
+<td><!--FIXED--->TC&nbsp;Reference
+<td><!--DEPEND-->TC&nbsp;SVBs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Adding more Test Complete .Net Table support. &nbsp;Refactoring code to share between Test Complete Flex and .Net support. &nbsp;Updated Test Complete keyword reference to show that VerifyCellEditable keyword is NOT yet implemented for TC.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2012.07.11 </b>
+<td rowspan=2><!--AFFECT-->RBTM, DRD
+<td><!--NEW----->
+<td><!--FIXED--->build.xml
+<td><!--DEPEND-->Android&nbsp;SDK<br>ANT
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>build.xml enhancements for Android SDK builds to Robotium Remote Control and the SAFS Droid Engine to support changing SDK build requirements.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2012.07.08 </b>
+<td rowspan=2><!--AFFECT--> TC
+<td><!--NEW----->
+<td><!--FIXED--->TC&nbsp;Coords
+<td><!--DEPEND-->TC&nbsp;SVBs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Test Complete support fixed for accepting comma delimiters in certain coordinate-based fields. &nbsp;Affecting GenericObjectFunctions.SVB and LabelFunctions.SVB for RightClick and DoubleClick support.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2012.07.06 </b>
+<td rowspan=2><!--AFFECT-->RBTM<br>TC
+<td><!--NEW----->TC&nbsp;NetDataGrid.SVB
+<td><!--FIXED--->RBTM&nbsp;Unix/Mac<br>RBTM&nbsp;getGuiImage
+<td><!--DEPEND-->SAFS&nbsp;AutoAndroid<br>RBTM&nbsp;Client<br>RBTM&nbsp;RemoteControl<br>TC&nbsp;SVBs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fixed RobotiumRC execution issues on Unix/Mac relating to Android SDK tool-finding.
+<li>Fixed RobotiumRC getGuiImage failures on certain types of controls.
+<li>Added more Test Complete .NET Data Grid support in a new NetDataGrid.SVB library.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2012.06.29 </b>
+<td rowspan=2><!--AFFECT-->RBTM
+<td><!--NEW----->Robotium Remote Control Released
+<td><!--FIXED--->
+<td><!--DEPEND-->Robotium<br>Android SDK<br>SAFS Subset
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Robotium Remote Control released!
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2012.06.26 </b>
+<td rowspan=2><!--AFFECT-->RBTM<br>TC
+<td><!--NEW----->RBTM&nbsp;GetGuiImage<br>TC&nbsp;CurrentWindow<br>TC&nbsp;UTF-8
+<td><!--FIXED--->TC&nbsp;CaptureObjectDataToFile<br>TC&nbsp;Flex/NET/WPF
+<td><!--DEPEND-->Robotium<br>DRD<br>TC&nbsp;SVBs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Added support for getting screenshots via Robotium Remote Control.
+<li>Added CaptureObjectDataToFile and UTF-8 support for Test Complete object data.
+<li>Added "CurrentWindow" recognition support for Test Complete.
+<li>Fixed some Test Complete Flex, .Net, and WPF support.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2012.06.22 </b>
+<td rowspan=2><!--AFFECT-->IOS
+<td><!--NEW----->SAFS Mac/IOS Released
+<td><!--FIXED--->
+<td><!--DEPEND-->
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>SAFS for Mac/IOS released!
+</ul>
+
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2012.06.12 </b>
+<td rowspan=2><!--AFFECT-->TCPM<br>RBTM<br>DRD<br>TC<br>IOS<br>Core<br>Docs
+<td><!--NEW----->TCP&nbsp;Messenger, Robotium&nbsp;RC, DRD&nbsp;Keywords, Online&nbsp;Docs, TC&nbsp;Flex/Net/WPF, IOS&nbsp;OS&nbsp;X&nbsp;Lion
+<td><!--FIXED--->TC&nbsp;Flex/Net/WPF
+<td><!--DEPEND-->DRD->Core->RBTM<br>TC&nbsp;DAT/SVBs<br>IOS&nbsp;Core->OS&nbsp;X&nbsp;Lion
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b><li>Six months of intense and non-stop updates and new development!
+<li>A new SAFS TCP Communications Protocol and app for Android.
+<li>SAFS/Robotium Remote Control for Android. &nbsp;Production-grade SAFS Android Engine in Beta.
+<li>Initial SAFS Android Keywords Reference published.
+<li>SAFS IOS 5 on OS X Lion support added.
+<li>Test Complete fixes and enhancements:<br>
+Added ListView item partial matching support,<br>
+Flex DataGrid updates and enhancements,<br>
+Added .Net MenuBar support,<br>
+Added .Net CaptureObjectDataToFile support,<br>
+Added Flex Toolbar and TabBar support,<br>
+Added better support overall for .Net and WPF domains.
+<li>Official downloadables/releases/patches for IOS, Robotium Remote Control, and TCAFS expected in June 2012.
+<li>Full-blown releases for SAFS Android support to follow.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2012.01.19 </b>
+<td rowspan=2><!--AFFECT-->TC<br>IOS<br>Core<br>Docs<br>DRD
+<td><!--NEW----->TC&nbsp;Keywords<br>IOS&nbsp;SetTextValue<br>Online&nbsp;Docs<br>DRD&nbsp;Rumblings
+<td><!--FIXED--->TC&nbsp;Console&nbsp;Logging
+<td><!--DEPEND-->TC&nbsp;SVBs<br>IOS&nbsp;JARs,&nbsp;JavaScript<br>Core&nbsp;JARs
+<tr class=b1>
+<td class=note colspan=4>
+Notes: Added a HUGE array of new TC support in FlexScrollBar, NetScrollBar, Logging, FlexMenuBar,
+MenuUtilities, DDGUIUtilities, FlexDataGrid, ProcessContainer, FlexTreeView, EditBox, TabControl,
+and Buttons. &nbsp;Added SetTextValue in IOS EditBox support. &nbsp;Modified XML and Web documents
+to begin to show Domain support(Java, NET, FLX, etc..) within specific engine keyword references. &nbsp;
+Some initial Android remote control sourcecode exists, but it is still in a (very) active R&D mode of
+development.
+
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2011.12.13</b>
+<td rowspan=2><!--AFFECT-->TC<br>IOS<br>Core<br>Docs
+<td><!--NEW----->TC&nbsp;Keywords<br>IOS&nbsp;Keywords<br>Online&nbsp;Docs
+<td><!--FIXED--->Core&nbsp;Date/Time&nbsp;Keywords<br>IOS&nbsp;Launch/Detect
+<td><!--DEPEND-->TC&nbsp;DAT/SVBs<br>IOS&nbsp;JARs,&nbsp;JavaScript<br>Core&nbsp;JARs
+<tr class=b2>
+<td class=note colspan=4>
+Notes: Added IEFrame mapping for TC support. &nbsp;Enhanced TC GetPropertyValue support. &nbsp;
+Added support for TC CaptureRangeToFile. &nbsp;Enhanced TC FlexDataGrid Support for SelectCellTextSpecial
+and VerifyCellEditable. &nbsp;Enhanced TC StepDriver for ListBox Support. &nbsp;Enhanced TC support
+for CheckBox, ComboBox, ListBox, ListView, and Window support .Net, WPF, and Flex. &nbsp;Enhanced TC support
+using Native API calls for some Window and Component objects.
+<p>
+Fixed some IOS Launch and Results detection issues. &nbsp;Added XML output support for IOS
+Process Container. &nbsp;Added IOS Get/Verify support for GUI Properties and Image snapshots.
+<p>
+Fixed Core support for more accurate Date/Time representation and support for military time format.
+<p>
+Added XML and XSL support for generating and publishing Reference HTML snippets suitable for
+dynamic HTML (AJAX) usage. &nbsp;Added Selenium-specific doc to the homepage.
+
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2011.11.04</b>
+<td rowspan=2><!--AFFECT-->IOS
+<td><!--NEW----->
+<td><!--FIXED--->On-Device&nbsp;Testing
+<td><!--DEPEND-->IOS&nbsp;JavaScript
+<tr class=b1>
+<td class=note colspan=4>
+Notes: Fixed synchronization issues found when testing on IOS iPads 4.3.3 and 5.x.
+
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2011.11.02 </b>
+<td rowspan=2><!--AFFECT-->TC<br>IOS<br>Docs
+<td><!--NEW----->TC&nbsp;FlexDataGrid&nbsp;&amp;&nbsp;ListView&nbsp;Keywords<br>
+                 IOS&nbsp;Keywords:
+                 <ul>CFComponent, CFWindow<br>DDDriverCommand<br>DDDriverFlowCommand</ul>
+                 Engine-Specific&nbsp;Reference&nbsp;Docs
+<td><!--FIXED--->IOS&nbsp;Device&nbsp;Support
+<td><!--DEPEND-->TC&nbsp;SVBs<br>IOS&nbsp;JARs,&nbsp;JavaScript<br>Doc&nbsp;XSL&nbsp;&amp;&nbsp;BAT
+<tr class=b2>
+<td class=note colspan=4>
+Notes: Several new TC keywords supported in FlexDataGrid and ListView. &nbsp;
+Several new IOS keywords supporting GuiExists, OnGuiExists, Pinch, and InputCharacters. &nbsp;
+Also added on-device testing supported for IOS.<br>New engine-specific keyword reference documentation
+is available via the <a href="http://safsdev.sourceforge.net" title="Link to SAFSDEV Homepage">SAFSDEV Homepage</a>.
+
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2011.10.17</b>
+<td rowspan=2><!--AFFECT-->TC<br>IOS
+<td><!--NEW----->TC&nbsp;FlexDataGrid<br>IOS&nbsp;Keywords
+<td><!--FIXED--->
+<td><!--DEPEND-->TCAFS/TCAFS/ClassObjectsMap.dat<br>TCAFS/TCAFS/Script/*.SVB<br>
+                 IOS/jscripts/GenericObject/*.js<br>SAFS/lib/*.JAR<br>SAFS/keywords/*.xml&nbsp;and&nbsp;xsl
+<tr class=b1>
+<td class=note colspan=4>
+Notes: Added FlexDataGrid support in TC. &nbsp;Added more IOS keywords for Click, Tap, Press, and Flick
+with several variations.
+
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2011.10.14 </b>
+<td rowspan=2><!--AFFECT-->TC
+<td><!--NEW----->
+<td><!--FIXED--->FlexTreeView, TabControl, ListView
+<td><!--DEPEND-->TCAFS/TCAFS/Script/*.SVBs
+<tr class=b2>
+<td class=note colspan=4>
+Notes: Fixed .Net TabControl ClickTab support.&nbsp; Fixed ListView support for both .Net and Flex.
+
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2011.10.11 </b>
+<td rowspan=2><!--AFFECT-->TC
+<td><!--NEW----->Flex&nbsp;List,&nbsp;Tree,&nbsp;&amp;&nbsp;Tab&nbsp;Support<br>Many&nbsp;New&nbsp;Keywords<br>
+<td><!--FIXED--->Some&nbsp;Keyword&nbsp;Issues, Window&nbsp;Functions
+<td><!--DEPEND-->TCAFS/TCAFS/Script/*.SVBs
+<tr class=b1>
+<td class=note colspan=4>
+Notes: TC Updates or Fixes for: VerifyClipboardToFile, VerifyProperty, VerifyPropertyContains,
+including CaseInsensitive Support, VerifyFileToFile, DragTo (DragFromTo), List items by Index,
+TabControl select Tab by Index; extensive additions for .Net, WPF, and Java Trees; Window
+Functions Minimize, Maximize, and Restore fixed, <b>MANY</b> new Tree/List commands.
+
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2011.09.30 </b>
+<td rowspan=2><!--AFFECT-->TC
+<td><!--NEW----->Many&nbsp;TC&nbsp;Keywords
+<td><!--FIXED--->Many&nbsp;TC&nbsp;Keywords
+<td><!--DEPEND-->TCAFS/TCAFS/Script/*.SVBs<br>TCAFS/TCAFS/ClassObjectsMap.dat
+<tr class=b2>
+<td class=note colspan=4>
+Notes: TC VerifyXXXFileToFile, other Generic TC commands, and Flex Tree and List support.
+&nbsp;Updated ClassObjectsMap.dat into TCAFS/TCAFS directory.
+
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2011.09.19 </b>
+<td rowspan=2><!--AFFECT-->Core, IOS, TC
+<td><!--NEW----->IOS&nbsp;SDK&nbsp;5<br>TC&nbsp;FlexTree
+<td><!--FIXED--->
+<td><!--DEPEND-->SAFS/lib/*.JARs<br>SAFS/IOS&nbsp;Assets<br>TCAFS/TCAFS/Script/*.SVBs
+<tr class=b1>
+<td class=note colspan=4>
+Notes: SAFS Mac/iOS now supports both IOS SDK 4 (Production) and IOS SDK 5 (Beta)! &nbsp;
+TC has added special support for Flex Trees via FlexUtils and FlexTreeFunctions and
+associated SVB library enhancements.
+
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2011.09.16</b>
+<td rowspan=2><!--AFFECT--> TC, RFT
+<td><!--NEW----->TC&nbsp;NTCommandUtilities<br>TC&nbsp;FileUtilities<br>TC&nbsp;Keywords
+<td><!--FIXED--->RFT&nbsp;Dynamic&nbsp;Enabler
+<td><!--DEPEND-->TC&nbsp;SVBs<br>TC&nbsp;ClassObjectsMap.dat<br>SAFSRATIONAL*.JARs
+<tr class=b2>
+<td class=note colspan=4>
+Notes: Added TC support for CapturePropertyToFile and VerifyPropertyToFile and associated
+general-purpose library functions.  Modified the RFT DynamicEnabler to NOT attempt to
+inject into the System Idle process when testing native WIN, .NET, or WPF domains.
+
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2011.09.06 </b>
+<td rowspan=2><!--AFFECT-->TC
+<td><!--NEW----->TC&nbsp;Flex:<br>EditBox, FileUtilities, FlexUtilities, ListBoxFunctions, ListViewFunctions,
+TabControlFunctions
+<td><!--FIXED--->
+<td><!--DEPEND-->TC&nbsp;SVBs, ClassObjectsMap.dat
+<tr class=b1>
+<td class=note colspan=4>
+Notes: Added support for several keywords in the Flex domain for TC. &nbsp;Also added 2 new "ShowAll..." scripts
+that allow users to configure TC to show full Flex hierarchies where they might otherwise be hidden.
+
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2011.08.30 </b>
+<td rowspan=2><!--AFFECT-->TC
+<td><!--NEW----->TC&nbsp;Flex&nbsp;Updates
+<td><!--FIXED--->
+<td><!--DEPEND-->TC&nbsp;SVBs
+<tr class=b2>
+<td class=note colspan=4>
+Notes: Extensive TC Flex updates supporting Flex TreeView, EditBox, ToolBar, TabControl, CheckBox,
+Label, and Generic (All) object support. ShowAllFlexComponents Utility script for Flex object detection.
+
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2011.08.26 </b>
+<td rowspan=2><!--AFFECT-->Core, TID<br>IOS
+<td><!--NEW----->IOS&nbsp;ProcessContainer<br>SAFS&nbsp;Monitor
+<td><!--FIXED--->
+<td><!--DEPEND-->SAFS.JAR, SAFSIOS.JAR, IOS&nbsp;JavaScript
+<tr class=b1>
+<td class=note colspan=4>
+Notes: New SAFS_DRIVER INI settings for SAFS Monitor to "BringMonitorToFrontOnPause" and "TurnOnPOF". &nbsp;
+SAFS Monitor Frame will come to front if BringMonitorToFrontOnPause is True when test is PAUSEd. &nbsp;
+IOS Process Container tool critical functionality fully present.
+
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2011.08.24 </b>
+<td rowspan=2><!--AFFECT-->Core<br>IOS<br>Se
+<td><!--NEW----->Selenium&nbsp;HTMLTables<br>IOS&nbsp;ProcessContainer&nbsp;UI
+<td><!--FIXED--->
+<td><!--DEPEND-->SAFS.JAR<br>SAFSSELENIUM.JAR<br>SAFSIOS.JAR
+<tr class=b2>
+<td class=note colspan=4>
+Notes: More HTMLTable support for SAFS/Selenium. &nbsp;
+SAFS/IOS Process Container now has a familiar Java UI, accepts and overwrites an
+iosProcessContainer.ini file, and produces familiar Object output files and App Map
+files. &nbsp;SAFS/IOS now has a workable (but not perfect) usage pattern of App Map
+development, test development, and test execution.
+
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2011.08.22 </b>
+<td rowspan=2><!--AFFECT-->Core<br>TC<br>IOS
+<td><!--NEW----->TC&nbsp;CurrentWindow<br>Mac&nbsp;Install
+<td><!--FIXED--->TC&nbsp;Startup
+<td><!--DEPEND-->SAFS.JAR<br>TC&nbsp;SVBs<br>Mac&nbsp;SHs
+<tr class=b1>
+<td class=note colspan=4>
+Notes: Fixed some cases where Test Complete or Test Execute would not always AutoLaunch. &nbsp;
+Added "CurrentWindow" support in TCAFS. &nbsp;New Shell scripts and Java Install for Mac&nbsp;OS&nbsp;X.
+
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2011.08.17 </b>
+<td rowspan=2><!--AFFECT-->TC
+<td><!--NEW----->TFSM&nbsp;DepthLevel
+<td><!--FIXED--->
+<td><!--DEPEND-->TC&nbsp;SVBs
+<tr class=b2>
+<td class=note colspan=4>
+Notes: Added "DepthLevel=N" support in [SAFS_TC] INI config. &nbsp;
+Added ";depthLevel=N" support in TFSM recognition strings. &nbsp;
+":TFSM:" prefix is now optional on TFSM recognition strings.
+
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2011.08.10 </b>
+<td rowspan=2><!--AFFECT-->Core<br>TC
+<td><!--NEW----->TC&nbsp;AutoLaunch
+<td><!--FIXED--->
+<td><!--DEPEND-->SAFS.JAR
+<tr class=b1>
+<td class=note colspan=4>
+Notes: Added 2nd attempt to AutoLaunch TCAFS since 1st attempt can intermittently fail for no reason.
+
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2011.08.09 </b>
+<td rowspan=2><!--AFFECT-->TC
+<td><!--NEW----->TFSM&nbsp;DriverCommands<br>TFSMOnly<br>
+<td><!--FIXED--->TFSM&nbsp;ComponentFunctions<br>Label.getGUIImage
+<td><!--DEPEND-->TC&nbsp;SVBs
+<tr class=b2>
+<td class=note colspan=4>
+Notes: Added "TFSMOnly=True|False" support in INI config files. &nbsp;Added TFSM support in several Driver Commands.
+&nbsp;Fixed some GUIUtilities logic affecting Component Functions and Driver Commands.
+&nbsp;Added 'className' as a valid property used to deduce object class and component types.
+
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2011.07.29 </b>
+<td rowspan=2><!--AFFECT-->TC
+<td><!--NEW----->TC&nbsp;Web
+<td><!--FIXED--->
+<td><!--DEPEND-->TC&nbsp;SVBs<br>TC&nbsp;DAT
+<tr class=b1>
+<td class=note colspan=4>
+Notes: Added support for PasswordBox*=EditBox to ClassObjectsMap.dat file. &nbsp;
+Added support for "className" as a valid property to deduce the class of an object.
+
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2011.07.26 </b>
+<td rowspan=2><!--AFFECT-->Core, TC, JSAFS
+<td><!--NEW----->TC Waits<br>JSAFS&nbsp;SAFSMonitor
+<td><!--FIXED--->TC&nbsp;WaitGUI<br>TC&nbsp;GUIExists<br>TC&nbsp;Web
+<td><!--DEPEND-->SAFS.JAR<br>TC&nbsp;SVBs<br>TC&nbsp;DAT
+<tr class=b2>
+<td class=note colspan=4>
+Notes: TCAFS updates fix delay and timeout issues with WaitForGui and WaitForGuiGone Driver Commands
+and GuiDoesExist and GuiDoesNotExist Component Functions. &nbsp;HTML EditBox (class textEntry) support
+was also added in the ClassObjectsMap.dat file for TCAFS. &nbsp;Added [SAFS_TC] INI file support for
+"secsWaitForWindow" and "secsWaitForComponent" settings.<br>
+JSAFSDriver was enhanced to provide SAFS Monitor support built-in, instead of requiring the JSAFS
+test developer to code unique support.
+
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2011.07.21 </b>
+<td rowspan=2><!--AFFECT-->Core, RFT, Se, JSAFS
+<td><!--NEW----->RFT TIMEOUT
+<td><!--FIXED--->Se HTMLTables<br>JSAFS Model
+<td><!--DEPEND-->SAFS.JAR, SAFSSELENIUM.JAR, SAFSMODEL.JAR
+<tr class=b1>
+<td class=note colspan=4>
+Notes: RFT AutoLaunch now accepts "TIMEOUT=N" setting in [SAFS_ROBOTJ]. &nbsp;
+Some HTMLTable keywords have been added for Selenium. &nbsp;
+JSAFS Object Model has been synced with the latest keywords XML.
+
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2011.07.15</b>
+<td rowspan=2><!--AFFECT-->Core, RFT, IOS
+<td><!--NEW----->IOS TestRecordData
+<td><!--FIXED--->RFT ProjectPath
+<td><!--DEPEND-->SAFS.JAR, SAFSIOS.JAR
+<tr class=b2>
+<td class=note colspan=4>
+Notes: RFT AutoLaunch now correctly attempts to add SAFSRATIONAL_FT_CUSTOM.JAR
+to the RFT PROJECTPATH. &nbsp;SAFSIOS now delivers TestRecordData in trd.js to
+running Instruments scripts (our keywords javascript).
+
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b>2011.07.12</b>
+<td rowspan=2><!--AFFECT-->Core, IOS
+<td><!--NEW----->IOS Debug Log Support<br>IOS Keywords:<br><b>LaunchApplication, CloseApplication</b>
+<td><!--FIXED--->N/A
+<td><!--DEPEND-->SAFS.JAR, SAFSIOS.JAR, SAFS\IOS&nbsp;scripts
+<tr class=b1>
+<td class=note colspan=4>
+Notes: Updated version of SAFSIOS engine supporting SAFS Debug Logging.
+The implementation of LaunchApplication and CloseApplication keywords for SAFSIOS.
+The SAFSIOS engine is still in development and is not ready for consumption.
+
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b>2011.07.08</b>
+<td rowspan=2><!--AFFECT-->Core, All&nbsp;Engines, JSAFS, RFT/WPF, Se
+<td><!--NEW----->IOS&nbsp;Engine, JSAFS&nbsp;Model<br>Se&nbsp;Keywords:<br><b>Maximize, Minimize, Restore</b>,
+PREFERRED_ENGINES_OVERRIDE, Driver&nbsp;Commands:<br><b>UseIOSFunctions, UseQTPFunctions, UseAbbotFunctions, UseTestCompleteFunctions</b>
+<td><!--FIXED--->"Bad&nbsp;Record&nbsp;Format", SAFS&nbsp;Sync&nbsp;Robustness, RFT&nbsp;WPF&nbsp;Lists
+<td><!--DEPEND-->SAFS.JAR, SAFSIOS.JAR, SAFSMODEL.JAR, SAFSSELENIUM.JAR
+<tr class=b2>
+<td class=note colspan=4>
+Notes: Continued development of the SAFSIOS engine. The JSAFS API model was updated
+to synchronize the API with the latest keywords provided by SAFS. Some erroneous "Bad Record Format"
+messages should now properly report "Unknown Command" instead. Extended item retrieval from more
+WPF Lists in RFT. PREFERRED_ENGINES_OVERRIDE allows "preferred" engines to override core SAFS commands.
+
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b>2011.07.05</b>
+<td rowspan=2><!--AFFECT-->Core, TID, IBT
+<td><!--NEW----->SAFS&nbsp;Robot&nbsp;Keys
+<td><!--FIXED--->N/A
+<td><!--DEPEND-->SAFS.JAR
+<tr class=b1>
+<td class=note colspan=4>
+Notes: Added Maximize, Minimize, and Restore via key mnemonics to the SAFS Robot.
+
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b>2011.07.01</b>
+<td rowspan=2><!--AFFECT-->Core, IOS
+<td><!--NEW----->IOS Support
+<td><!--FIXED--->RFT RFSM
+<td><!--DEPEND-->SAFS.JAR, SAFSIOS.JAR, SAFS\IOS&nbsp;Assets
+<tr class=b2>
+<td class=note colspan=4>
+Notes: Initial push of SAFSIOS engine support. The SAFSIOS engine is still in development
+and is not ready for consumption. Fixed some issues in RFT RFSM support.
+
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2011.06.30</b>
+<td rowspan=2><!--AFFECT-->Core, Se
+<td><!--NEW----->
+<td><!--FIXED--->12&nbsp;Se&nbsp;Keywords
+<td><!--DEPEND-->SAFS.JAR, SAFSSELENIUM.JAR
+<tr class=b1>
+<td class=note colspan=4>
+Notes: Updates/Fixes for several Selenium keywords.
+
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2011.06.27 </b>
+<td rowspan=2><!--AFFECT-->Core, RFT/Flex, Se
+<td><!--NEW----->Selenium&nbsp;1.0
+<td><!--FIXED--->ComboBox&nbsp;ListItems
+<td><!--DEPEND-->SAFS.JAR, SAFSRATIONAL_FT.JAR, SAFSSELENIUM.JAR
+<tr class=b2>
+<td class=note colspan=4>
+Notes: Fixed an RFT Flex ComboBox infinite loop error. Updated some Selenium support libraries
+for Selenium 1.0.  Other Selenium bug fixes.
+
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2011.06.02</b>
+<td rowspan=2><!--AFFECT-->Core, RFT/Flex, SPC
+<td><!--NEW----->RFT&nbsp;Keywords:<br><b>MouseClick</b><br>
+<td><!--FIXED--->RFT&nbsp;RFSM
+<td><!--DEPEND-->SAFS.JAR, SAFSRATIONAL_FT.JAR
+<tr class=b1>
+<td class=note colspan=4>
+Notes: Fixes for RFT's Flex RFSM search mode. New low-level MouseClick for RFT using discreet
+up/down mouse button events. Updates to SPC for RFSM search mode.
+</table>
+</body></html>

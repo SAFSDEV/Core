@@ -1,0 +1,142 @@
+<HTML>
+<HEAD>
+<TITLE>SAFS Reference Legend</TITLE>
+<LINK rel="stylesheet" href="rrafs.css" type="text/css"/>
+</HEAD>
+<BODY BGCOLOR="#CCCCCC" LINK="#008000" VLINK="#008000" ALINK="#000000">
+<CENTER>
+<FONT color=BLUE><H1>SAFS Reference Legend</H1>
+<H3>
+Or, How to Read the SAFS Keyword Reference!</H3>
+<SMALL>updated: 2014.03.25</SMALL>
+</CENTER></FONT>
+<p>
+Generally, keywords are listed in <FONT color=BLUE>BLUE</FONT>.<br>
+However, keywords that have been deprecated in favor of newer or better keywords should be listed in <FONT color=RED>RED</FONT>.<br>
+The reference does not seem to accurately reflect this for all cases just yet. &nbsp;This is not a high priority because 'deprecated' keywords will work indefinitely.&nbsp; However, maintenance or updates to the keyword implementation may not occur if a replacement keyword does exist.
+<p>
+The SAFS Keyword Reference shows which <SPAN CLASS='Support'>engines</SPAN> support which keywords through small colored icons.
+&nbsp;The text inside the icon is a key to the supporting engine. &nbsp;These are listed below:
+<p>
+<CENTER><TABLE cellspacing="1" cellpadding="2" border="1">
+<TR><TD><SPAN CLASS='Support' TITLE="Abbot">ABT</SPAN><TD>Abbot
+<TR><TD><SPAN CLASS='Support' TITLE="Android">DRD</SPAN><TD>Android
+<TR><TD><SPAN CLASS='Support' TITLE="Apple IOS">IOS</SPAN><TD>Apple IOS
+<TR><TD><SPAN CLASS='Support' TITLE="IBM Rational Robot">RC</SPAN><TD>IBM Rational Robot
+<TR><TD><SPAN CLASS='Support' TITLE="IBM Rational Functional Tester">RJ</SPAN><TD>IBM Rational Functional Tester
+<TR><TD><SPAN CLASS='Support' TITLE="Mercury WinRunner">WR</SPAN><TD>Mercury WinRunner
+<TR><TD><SPAN CLASS='Support' TITLE="SAFS/DriverCommands">SDC</SPAN><TD>SAFS/DriverCommands
+<TR><TD><SPAN CLASS='Support' TITLE="Selenium 1.0">SE</SPAN><TD>Selenium RC (1.0)
+<TR><TD><SPAN CLASS='Support' TITLE="Selenium 2.0">SE2</SPAN><TD>Selenium WebDriver (2.0)
+<TR><TD><SPAN CLASS='Support' TITLE="Test Complete">TC</SPAN><TD>SmartBear Test Complete
+<TR><TD><SPAN CLASS='Support' TITLE="SAFSDRIVER">TID</SPAN><TD>SAFSDRIVER (SAFS Tool-Independent Driver)
+</TABLE></CENTER>
+<p>
+Engine-specific Keyword References show keywords support for individual <SPAN CLASS='domainMarker'>domains</SPAN>
+in that engine through small colored icons. &nbsp;The text inside the icon is a key to the supporting domain.&nbsp;
+Each engine may support multiple domains for a given keyword. &nbsp;The domain icons are always adjacent to the engine icon.<br>
+<SPAN CLASS="noteLight">Note: Domain means a programming technology (programming language). Domain icon has been added recently,
+so it has <b>NOT</b> been used for previously supported engines like <SPAN CLASS='Support' TITLE="Abbot">ABT</SPAN>,
+<SPAN CLASS='Support' TITLE="IBM Rational Robot">RC</SPAN> or <SPAN CLASS='Support' TITLE="IBM Rational RobotJ">RJ</SPAN> etc.
+</SPAN>
+<p>
+Some known domains are listed below:
+<p>
+<CENTER><TABLE cellspacing="1" cellpadding="2" border="1">
+<TR><TD><SPAN CLASS='domainMarker' TITLE="Development domain">DEV</SPAN><TD>Development domain
+<TR><TD><SPAN CLASS='domainMarker' TITLE="DOJO HTML domain">DOJ</SPAN><TD>DOJO HTML domain
+<TR><TD><SPAN CLASS='domainMarker' TITLE="Android domain">DRD</SPAN><TD>Native Android domain
+<TR><TD><SPAN CLASS='domainMarker' TITLE="Flex domain">FLX</SPAN><TD>Flex domain
+<TR><TD><SPAN CLASS='domainMarker' TITLE="HTML domain">HTM</SPAN><TD>Generic HTML domain
+<TR><TD><SPAN CLASS='domainMarker' TITLE="IOS domain">IOS</SPAN><TD>Native IOS domain
+<TR><TD><SPAN CLASS='domainMarker' TITLE="Java domain">JAV</SPAN><TD>Java domain
+<TR><TD><SPAN CLASS='domainMarker' TITLE=".Net domain">NET</SPAN><TD>.Net domain
+<TR><TD><SPAN CLASS='domainMarker' TITLE="SAP HTML domain">SAP</SPAN><TD>SAP OpenUI5 HTML domain
+<TR><TD><SPAN CLASS='domainMarker' TITLE="VSTO domain">VSTO</SPAN><TD>VSTO domain
+<TR><TD><SPAN CLASS='domainMarker' TITLE="WIN domain">WIN</SPAN><TD>Native Windows domain
+<TR><TD><SPAN CLASS='domainMarker' TITLE="WPF domain">WPF</SPAN><TD>Windows Presentation Foundation domain
+</TABLE></CENTER>
+Domain icon example:
+<p>
+<ul>
+<b><a href="http://safsdev.sourceforge.net/sqabasic2000/TestCompleteCheckBoxFunctionsReference.htm#detail_Check" TITLE="TestComplete CheckBox Check Keyword Reference" target="_blank">TestComplete CheckBoxFunctions::Check</a></b><br><SPAN CLASS='Support'  TITLE='AutomatedQA Test Complete'>TC</SPAN><SPAN CLASS='domainMarker'  TITLE='NET Domain'>NET</SPAN><SPAN CLASS='domainMarker'  TITLE='FLEX Domain'>FLX</SPAN>
+<p>
+means keyword 'Check' is supported by 'Test Complete Engine' for both '.Net' and 'Flex' domains.
+</ul>
+As a reminder, this domain support is NOT shown in the main SAFS Keyword Reference for ALL engines.<br>
+It is only shown in the separate keyword reference built for each specific engine--as shown in the Test Complete Check command example shown above.
+<p>
+&nbsp;<br>
+SAFS also defines multiple record types as shown in <A href="http://sourceforge.net/apps/mediawiki/safsdev/index.php?title=SAFS_Record_Formats" target="_blank">SAFS Record Formats</A> standard.
+<p><ul>
+<li>Driver Commands (C)
+<li> Component Function Test Commands (T)
+<p>
+can be made to support different modes like:
+<p>
+<li>"Warning Expected" (W)
+<li>"Failure Expected" (F) modes.
+</ul>
+Thus: <B>CW, CF, TW, and TF</B> are valid record types for keywords that support those modes.
+<p>
+We have color coded the engine icons to indicate the support provided by each engine for every keyword.  The color legend for the engine icons is shown below:
+<p>
+<CENTER><TABLE cellspacing="1" cellpadding="2" border="1">
+<TR><TD>
+<SPAN CLASS='Support' TITLE="Normal support">ABT</SPAN>
+<SPAN CLASS='Support' TITLE="Normal support">DRD</SPAN>
+<SPAN CLASS='Support' TITLE="Normal support">IOS</SPAN>
+<SPAN CLASS='Support' TITLE="Normal support">RC</SPAN>
+<SPAN CLASS='Support' TITLE="Normal support">RJ</SPAN>
+<SPAN CLASS='Support' TITLE="Normal support">WR</SPAN>
+<SPAN CLASS='Support' TITLE="Normal support">SDC</SPAN>
+<SPAN CLASS='Support' TITLE="Normal support">SE</SPAN>
+<SPAN CLASS='Support' TITLE="Normal support">SE2</SPAN>
+<SPAN CLASS='Support' TITLE="Normal support">TC</SPAN>
+<SPAN CLASS='Support' TITLE="Normal support">TID</SPAN>
+<TD>Normal support. No support for Expected Warnings or Failures.
+<TR><TD>
+<SPAN CLASS='WSupport' TITLE="Normal and Warning support. No expected Failure support.">ABT</SPAN>
+<SPAN CLASS='WSupport' TITLE="Normal and Warning support. No expected Failure support.">DRD</SPAN>
+<SPAN CLASS='WSupport' TITLE="Normal and Warning support. No expected Failure support.">IOS</SPAN>
+<SPAN CLASS='WSupport' TITLE="Normal and Warning support. No expected Failure support.">RC</SPAN>
+<SPAN CLASS='WSupport' TITLE="Normal and Warning support. No expected Failure support.">RJ</SPAN>
+<SPAN CLASS='WSupport' TITLE="Normal and Warning support. No expected Failure support.">WR</SPAN>
+<SPAN CLASS='WSupport' TITLE="Normal and Warning support. No expected Failure support.">SDC</SPAN>
+<SPAN CLASS='WSupport' TITLE="Normal and Warning support. No expected Failure support.">SE</SPAN>
+<SPAN CLASS='WSupport' TITLE="Normal and Warning support. No expected Failure support.">SE2</SPAN>
+<SPAN CLASS='WSupport' TITLE="Normal and Warning support. No expected Failure support.">TC</SPAN>
+<SPAN CLASS='WSupport' TITLE="Normal and Warning support. No expected Failure support.">TID</SPAN>
+<TD>Normal and Expected Warning Support. No Expected Failure support.
+<TR><TD>
+<SPAN CLASS='FSupport' TITLE="Normal and Failure support. No expected Warning support.">ABT</SPAN>
+<SPAN CLASS='FSupport' TITLE="Normal and Warning support. No expected Failure support.">DRD</SPAN>
+<SPAN CLASS='FSupport' TITLE="Normal and Failure support. No expected Warning support.">IOS</SPAN>
+<SPAN CLASS='FSupport' TITLE="Normal and Failure support. No expected Warning support.">RC</SPAN>
+<SPAN CLASS='FSupport' TITLE="Normal and Failure support. No expected Warning support.">RJ</SPAN>
+<SPAN CLASS='FSupport' TITLE="Normal and Failure support. No expected Warning support.">WR</SPAN>
+<SPAN CLASS='FSupport' TITLE="Normal and Failure support. No expected Warning support.">SDC</SPAN>
+<SPAN CLASS='FSupport' TITLE="Normal and Failure support. No expected Warning support.">SE</SPAN>
+<SPAN CLASS='FSupport' TITLE="Normal and Failure support. No expected Warning support.">SE2</SPAN>
+<SPAN CLASS='FSupport' TITLE="Normal and Failure support. No expected Warning support.">TC</SPAN>
+<SPAN CLASS='FSupport' TITLE="Normal and Failure support. No expected Warning support.">TID</SPAN>
+<TD>Normal and Expected Failure Support. No Expected Warning support.
+<TR><TD>
+<SPAN CLASS='WFSupport' TITLE="Normal, Warning, and Failure support.">ABT</SPAN>
+<SPAN CLASS='WFSupport' TITLE="Normal, Warning, and Failure support.">DRD</SPAN>
+<SPAN CLASS='WFSupport' TITLE="Normal, Warning, and Failure support.">IOS</SPAN>
+<SPAN CLASS='WFSupport' TITLE="Normal, Warning, and Failure support.">RC</SPAN>
+<SPAN CLASS='WFSupport' TITLE="Normal, Warning, and Failure support.">RJ</SPAN>
+<SPAN CLASS='WFSupport' TITLE="Normal, Warning, and Failure support.">WR</SPAN>
+<SPAN CLASS='WFSupport' TITLE="Normal, Warning, and Failure support.">SDC</SPAN>
+<SPAN CLASS='WFSupport' TITLE="Normal, Warning, and Failure support.">SE</SPAN>
+<SPAN CLASS='WFSupport' TITLE="Normal, Warning, and Failure support.">SE2</SPAN>
+<SPAN CLASS='WFSupport' TITLE="Normal, Warning, and Failure support.">TC</SPAN>
+<SPAN CLASS='WFSupport' TITLE="Normal, Warning, and Failure support.">TID</SPAN>
+<TD>Normal, Expected Warning, and Expected Failure all supported.
+</TABLE></CENTER>
+<p>
+We will expand upon the information in this doc as time and resources permits.
+<hr>
+</BODY>
+</HTML>

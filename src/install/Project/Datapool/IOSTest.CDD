@@ -1,0 +1,16 @@
+
+C, Expressions, ON
+C, AppMapChaining, ON
+C, AppMapResolve, ON
+
+C, SetApplicationMap, "iosPOC.map"
+
+C, UseIOSFunctions, ON
+C, LaunchApplication, "UICatalog", Template, WorkDir, "-d:All Processes -app:UICatalog Ñ Debug-iphonesimulator"
+
+T, iosPOC.STD
+
+C, UseIOSFunctions, ON
+C, CloseApplication, Anything
+
+C, CallScript, AnyScript

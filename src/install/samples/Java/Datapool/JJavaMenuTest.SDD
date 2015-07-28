@@ -1,0 +1,44 @@
+;####################	JavaMenuFunctions  ################################
+;####################	Test For java popup menu  #########################
+T, SwingWindow, JavaMenu, RightClick
+C, LOGFailureOK, "SelectPopupMenuID command not supported yet so it fails."
+T, SwingWindow, PopupMenu, SelectPopupMenuID, "PTools->PTree Viewer"
+
+T, SwingWindow, JavaMenu, RightClick
+T, SwingWindow, PTools, SelectMenuItem,  
+T, SwingWindow, PopupMenu, SelectMenuItem, "PHelp->PAbout"
+T, SwingWindow, JavaMenu, RightClick
+T, SwingWindow, PopupMenu, SelectPopupMenuItem, "PHelp->PAbout"
+T, SwingWindow, JavaMenu, RightClick
+T, SwingWindow, PopupMenu, SelectUnverifiedPopupMenuItem, "PHelp->PAbout"
+T, SwingWindow, JavaMenu, RightClick
+T, SwingWindow, PopupMenu, VerifyPopupMenuItem, PTools, "Enabled Menu With 9 MenuItems"
+T, SwingWindow, PopupMenu, VerifyPopupMenuItem, "PHelp->PAbout", "Enabled unchecked"
+T, SwingWindow, PopupMenu, VerifyPopupMenuItem, PFile, "Enabled checked"
+C, LOGFailureOK, "PCheckBox is not enabled so verification will fail."
+T, SwingWindow, PopupMenu, VerifyPopupMenuItem, "PWeird->PCheckBox", "Enabled UnChecked"
+C, LOGFailureOK, "PRadioButton is not checked so verification will fail."
+T, SwingWindow, PopupMenu, VerifyMenuItemContains, "PWei->PRadioBut", "Enabled checked"
+C, LOGFailureOK, "PRadioButton is not checked so verification will fail."
+T, SwingWindow, PopupMenu, VerifyMenuItemContains, radioButtonPath, "Enabled checked"
+T, SwingWindow, PopupMenu, VerifyPopupMenuPartialMatch, "PWei->dioButton"
+T, SwingWindow, PToolsPTreeViewer, SelectMenuItem,
+T, SwingWindow, JavaMenu, RightClick
+C, LogMessage, "If JPopupMenu.txt does not exist in bench folder verification will fail."
+T, SwingWindow, PopupMenu, VerifyPopupMenu, "JPopupMenu.txt", "Normal JPopupMenu" , "JPopupMenu.txt", "JPopupMenuDiff.txt"
+C, LogMessage, "If PToolsmenu.txt does not exist in bench folder verification will fail."
+T, SwingWindow, PTools, VerifyPopupMenu, "PToolsmenu.txt", "PTools normal menu" , "PToolsmenu.txt", "PToolsmenuDiff.txt"
+T, SwingWindow, PopupMenu, InputKeys, "{ESC}"
+
+;####################	Test for java menu  #################################
+T, SwingWindow, Tools, SelectMenuItem, 
+T, SwingWindow, JavaMenu, SelectMenuItem, "Tools"
+T, SwingWindow, JavaMenu, SelectMenuItem, "Tools->Basic Components"
+T, SwingWindow, Tools, SelectMenuItem, "JTree Viewer"
+T, SwingWindow, JavaMenu, SelectMenuItem, "Help->About"
+C, pause, 1
+T, SwingWindow, JavaMenu, SelectMenuItemContains, "He->Abo"
+C, pause, 1
+T, SwingWindow, Help, SelectMenuItemContains, Abo
+T, SwingWindow, JavaMenu, VerifyMenuItem, Tools, "Enabled Menu With 9 MenuItems"
+T, SwingWindow, JavaMenu, VerifyPopupMenu, "JavaMenu.txt", "Normal JavaMenu" , "JavaMenu.txt", "JavaMenuDiff.txt"

@@ -1,0 +1,33 @@
+<HTML>
+<HEAD><TITLE>TEST IE APPLET</TITLE>
+<script>
+<!--
+    function onLoad(){
+    applet = document.createElement('OBJECT');
+    applet.setAttribute('classid','clsid:8AD9C840-044E-11D1-B3E9-00805F499D93');
+    applet.setAttribute('codebase','http://java.sun.com/products/plugin/1.5/plugin-install.html');
+    applet.setAttribute('width','0');
+    applet.setAttribute('height','0');
+
+    param1=document.createElement("<PARAM NAME='CODE' VALUE='java.applet.Applet.class' >");
+    param2=document.createElement("<PARAM NAME='type' VALUE='application/x-java-applet' >");
+    param3=document.createElement("<PARAM NAME='MAYSCRIPT' VALUE='true' >");
+    applet.appendChild(param1);
+    applet.appendChild(param2);
+    applet.appendChild(param3);
+
+    void(document.getElementsByTagName('body')[0].appendChild(applet));
+    }
+// -->
+</script></HEAD>
+<BODY>Thanks for playing!
+<!--
+<object classid='clsid:8AD9C840-044E-11D1-B3E9-00805F499D93'
+codebase='http://java.sun.com/products/plugin/1.5/plugin-install.html' width='0' height='0'>
+    <PARAM NAME=CODE VALUE=java.applet.Applet.class >
+    <PARAM NAME=MAYSCRIPT VALUE=true >
+    <PARAM NAME=TYPE VALUE=application/x-java-applet;version=1.5 >
+</object>
+// -->
+</BODY>
+</HTML>
