@@ -1,0 +1,11 @@
+
+C, SetApplicationMap, TCAFSApp.Map 
+
+C, LaunchApplication, TestApp, TCAFSTestApp, , , TCAFSApp.MAP
+
+T, EditBoxFunctions
+T, CheckBoxFunctions
+T, ComboBox
+T, ComboEditBox
+
+T, CloseTCAFSApp

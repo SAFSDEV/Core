@@ -1,0 +1,27 @@
+
+T, UICatalog, TextViewButton, Click
+C, Pause, 2
+
+T, UITextView, Text, Click
+C, Pause, 2
+
+C, OnGuiNotExistGotoBlockID, Failure, UIKeysView, UIKeysView
+
+T, UIKeysView, Enter, Click
+
+C, LogFailureOK, "Intentionally specified a non-keyboard component."
+T, UIKeysView, UIKeysView, InputCharacters, "safs inputcharacters test"
+
+T, UIKeysView, Keyboard, InputCharacters, "safs"
+T, UIKeysView, Enter, Click
+T, UIKeysView, Keyboard, InputCharacters, "INPUTCHARACTERS"
+T, UIKeysView, Enter, Click
+
+T, UIKeysView, Hide, Click
+T, UITextView, Done, Click
+T, UITextView, BackButton, Click
+C, ExitTable
+
+B, Failure
+C, LogTestFailure, "Keyboard was not found!"
+

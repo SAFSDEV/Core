@@ -1,0 +1,19 @@
+
+C	Expressions	ON
+C	LogMessage	"Current test is '" & ^safsActiveCycle & "'."
+C	AppMapChaining	ON
+C	AppMapResolve	ON
+
+C	SetApplicationMap	TIDTest.MAP
+C	UseRobotJFunctions	ON
+
+C	ClearAppMapCache
+C	SetVariableValues	^result=^customStatusCode
+
+C	OnEqualGotoBlockID	Passed	^result	"-1"
+C	LogTestFailure	"RFT ClearAppMapCache failed with error:"& ^result
+C	ExitTable
+
+B	Passed
+C	LogTestSuccess	"RFT ClearAppMapCache was successful."
+

@@ -1,0 +1,54 @@
+#
+# WindowsIgnoreClassMap.dat
+#
+# The items in here represent RegularExpressions used to match against 
+# classnames found in the running processes on the machine.  Often items 
+# are shown as simple text and this requires an exact match of the classname.
+# Consult doc on Regular Expressions or the Java API for String.matches() to learn the 
+# allowed syntax for these entries.
+#
+
+ToolTips	:tooltips_class32
+TPUtilWindow	:TPUtilWindow
+BaseBar		:BaseBar
+Progman		:Progman
+RunDLL		:RunDLL
+Static		:Static
+Toolbar		:ToolbarWindow32
+OLEWindows	:OleDdeWndClass
+RCTRLWindows	:rctrl_renwnd32
+RFTSpyWindows	:RftSpyWindow
+RScanLink	:RScanLink
+ACTIONDLL	:ACTIONDLL
+IPCLINK		:IPCLINK
+WorkerW		:WorkerW
+MnmWindows	:MnmSrvcHiddenWindow
+SysFader	:SysFader
+AutoSuggest	:Auto-Suggest Dropdown
+Class43		:#43
+CSChidden	:CSCHiddenWindow
+PowerMeter	:SystemTray_Main
+WebcheckMon	:MS_WebcheckMonitor
+DDEMLEvent	:DDEMLEvent
+DDEMLMom	:DDEMLMom
+OfficeTooltip	 :OfficeTooltip
+OfficeToastWnd	 :OfficeToastWndClass
+MsoCommandShadow :MsoCommandBarShadow
+IExplorerHidden  :Internet Explorer_Hidden
+OutlookFbThread	 :OutlookFbThreadWnd
+MsoStdCompMgr	 :MsoStdCompMgr
+ConnectTray	     :Connections Tray
+TNOTIFThis       :TNOTIFThisThreadSink
+RFTRecorder		 :com.rational.test.ft.recorder.jfc.RecordToolbar
+HotKeysCatcher	 :HotKeysCatcher
+IME		 :IME
+MSCTFIME	 :MSCTFIME.*
+
+JFrames         :javax.swing.JFrame
+JPopupFactories :javax.swing.DefaultPopupFactory$WindowPopup
+JPopups         :javax.swing.Popup$HeavyWeightWindow
+JWindows        :javax.swing.JWindow
+JDialogs        :javax.swing.JDialog
+AWTFrames       :java.awt.Frame
+AWTDialogs      :java.awt.Dialog
+AWTWindows      :java.awt.Window

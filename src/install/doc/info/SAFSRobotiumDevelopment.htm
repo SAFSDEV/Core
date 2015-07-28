@@ -1,0 +1,364 @@
+<HTML>
+<HEAD>
+<TITLE>
+SAFS Robotium Remote Control Development
+</TITLE>
+</HEAD>
+<BODY>
+<H1>SAFS Robotium Remote Control Development</H1>
+<p>
+<hr><pre>
+ Author: Carl Nagle
+  Since: FEB 12, 2012
+Updated: FEB 13, 2012 with recommended Robotium Package and Class names.
+Updated: FEB 13, 2012 new robotium-messages.jar for Robotium Test Runner Project.
+Updated: FEB 22, 2012 new safs-messages.jar for SAFS Test Runner Project.
+Updated: MAR 27, 2012 new safsautoandroid.jar for Robotium Remote Control standalone.
+Updated: DEC 13, 2012 new JAR dependencies for RobotiumTestRunner and SAFS Test Runner Projects.
+Updated: MAR 13, 2013 new JAR dependencies for SAFS Test Runner Projects.
+Updated: MAY 17, 2013 new JAR dependencies for both Controller and TestRunner Projects.
+
+Copyright SAS Institute, Inc.
+<a href="http://www.sas.com" target="altwin">http://www.sas.com</a>
+<a href="http://www.opensource.org/licenses/gpl-license.php" target="altwin">General Public License (GPL)</a>
+http://www.opensource.org/licenses/gpl-license.php
+<hr></pre>
+<p>
+<a name="top"/>
+This doc captures notes and setup information for developers providing SAFS/Robotium Remote Control features and functions.  Below are the 3 separate development projects required for SAFS and/or Robotium Remote Control:
+<p>
+<center><img src="./robotiumrc_projects.gif" title="SAFS Robotium Remote Control Projects" alt="SAFS Robotium Remote Control Projects"/></center>
+<p>
+<ol>
+<li><h3>Development Project 1: Remote Control</h3>
+<p>
+Fairly standard Java/Eclipse Project.<br>
+As of Robotium 4.1, there is a new dependency on the standard Robotium JAR file: robotium-solo-4.1.jar, or later.<br>
+That code is also referenced in Development Project 3.
+<p><ul>
+<li><b>For purely Robotium RC development</b>, there are dependencies on:
+<p><ul>
+<li><b>safssockets.jar</b>, or the sourcecode for:
+<p>
+    <ul>org.safs.sockets package<br>
+        org.safs.sockets.android package<br>
+    </ul>
+<p>
+<li><b>safsautoandroid.jar</b>, or the sourcecode for:
+<p>
+    <ul>org.safs.android.auto.lib package<br>
+        org.safs.android.auto.tools package<br>
+        <p>
+        org.safs.tools.CaseInsensitiveFile<br>
+        org.safs.tools.GenericProcessMonitor<br>
+        <p>
+        org.safs.tools.consoles.GenericProcessConsole<br>
+        org.safs.tools.consoles.GenericProcessCapture<br>
+    </ul>
+    <p>
+    <ul>
+        org.w3c.tools.codec.Base64Decoder<br>
+        org.w3c.tools.codec.Base64Encoder<br>
+        org.w3c.tools.codec.Base64FormatException<br>
+    </ul>
+<p>
+<li><b>robotium-serializable.jar</b>, or the sourcecode for:
+<p>
+	<ul>
+	com.jayway.android.robotium.remotecontrol package<br>
+	Developer custom serializable classes (By, Condition, etc..)<br>
+	</ul>
+<p>
+<li><b>robotium-remotecontrol.jar</b>, or the sourcecode for:
+<p>
+	<ul>com.jayway.android.robotium.remotecontrol.solo package<br>
+	</ul>
+<p>
+<li><b>robotium-solo.4.x.jar</b>, or the sourcecode for:
+<p>
+	<ul>
+	com.jayway.android.robotium.solo.By<br>
+	com.jayway.android.robotium.solo.Condition<br>
+	</ul>
+</ul>
+<p>
+<li><b>For SAFS Robotium RC development</b> you simply have the normal SAFS development dependencies plus:
+<p><ul>
+<li><b>robotium-remotecontrol.jar</b>, or the sourcecode for:
+<p>
+	<ul>com.jayway.android.robotium.remotecontrol.solo package<br>
+	</ul>
+<p>
+<li><b>robotium-solo.4.x.jar</b>, or the sourcecode for:
+<p>
+	<ul>
+	com.jayway.android.robotium.solo.By<br>
+	com.jayway.android.robotium.solo.Condition<br>
+	</ul>
+<p>
+<li><b>robotium-serializable.jar</b>, or the sourcecode for:
+<p>
+	<ul>
+	com.jayway.android.robotium.remotecontrol package<br>
+	Developer custom serializable classes (By, Condition, etc..)<br>
+	</ul>
+<p>
+<li><b>ddmlib.jar</b> from the Android SDK tools\lib directory
+</ul></ul>
+<p>
+The code must compile and build. &nbsp;Any changes to safssockets.jar must be exported to Development Projects 2 and 3 prior to their build operations. &nbsp;The safssockets.jar, safsautoandroid.jar, and robotium-remotecontrol.jar are used by testers or developers wishing to write tests using Robotium Remote Control standalone--that is, without a full SAFS install.
+<p>
+<pre>
+:SAFSSOCKETS_JAR -- used by Remote Control, TCP Messenger, and All TestRunner APKs
+%JRE%\jar cf safssockets.jar org\safs\sockets\*.*
+copy safssockets.jar %DEV_PROJECT_2%/libs
+copy safssockets.jar %DEV_PROJECT_3%/libs
+
+:SAFSAUTOANDROID_JAR -- used by Remote Control only
+%JRE%\jar cf safsautoandroid.jar org\safs\android\auto\*.*
+%JRE%\jar uf safsautoandroid.jar org\safs\tools\CaseInsensitiveFile.*
+%JRE%\jar uf safsautoandroid.jar org\safs\tools\GenericProcessMonitor.*
+%JRE%\jar uf safsautoandroid.jar org\safs\tools\consoles\GenericProcessConsole.*
+%JRE%\jar uf safsautoandroid.jar org\safs\tools\consoles\GenericProcessCapture.*
+%JRE%\jar uf safsautoandroid.jar org\w3c\tools\codec\*.*
+
+:ROBOTIUM_SERIALIZABLE_JAR
+%JRE%\jar cf robotium-serializable.jar com\jayway\android\robotium\remotecontrol\*.class
+copy robotium-serializable.jar %DEV_PROJECT_3%/libs
+
+
+:ROBOTIUM_REMOTECONTROL_JAR -- used by Remote Control only
+%JRE%\jar cf robotium-remotecontrol.jar com\jayway\android\robotium\remotecontrol\solo\*.*
+
+:ROBOTIUM_MESSAGES_JAR -- used by All TestRunner APKs
+%JRE%\jar cf robotium-messages.jar com\jayway\android\robotium\remotecontrol\solo\Message.*
+copy robotium-messages.jar %DEV_PROJECT_3%/libs
+
+:SAFS_MESSAGES_JAR -- used by SAFS TestRunner APK only
+%JRE%\jar cf safs-messages.jar org\safs\android\remotecontrol\SAFSMessage.*
+%JRE%\jar uf safs-messages.jar org\safs\text\FAILKEYS.* org\safs\text\GENKEYS.* org\safs\text\ResourceMessageInfo.*
+%JRE%\jar uf safs-messages.jar org\safs\text\CaseInsensitiveHashtable.* org\safs\text\FileLineReader.* org\safs\text\INIFileReader.* org\safs\text\INIFileReader$*.*
+copy safs-messages.jar %DEV_PROJECT_3%/libs
+
+:SAFS_GUICLASSDATA_JAR -- used by SAFS TestRunner APK only
+%JRE%\jar cf safs-guiclassdata.jar org\safs\GuiClassData.* org\safs\JavaConstant.* org\safs\IndependantLog.*
+%JRE%\jar uf safs-guiclassdata.jar org\safs\jvmagent\AgentClassLoader.* org\safs\logging\AbstractLogFacility.*
+%JRE%\jar uf safs-guiclassdata.jar org\safs\tools\drivers\DriverConstant.* org\safs\tools\CaseInsensitiveFile.*
+copy safs-guiclassdata.jar %DEV_PROJECT_3%/libs
+
+</pre>
+<p>
+<li><h3>Development Project 2: SAFS TCP Messenger</h3>
+<p>
+Standard Android "Service" Project. &nbsp;The app is a Service, not an application with Activities. &nbsp;It is a standalone application with no dependencies on Robotium or Robotium Remote Control. &nbsp;But it does have dependencies on the classes in safssockets.jar.  Additionally, the project builds a <b>safstcpmessenger.jar</b> file which becomes a dependency to Dev Project 3--or any Android application project wishing to use the TCP Messenger for remote/external TCP communication.
+<p>
+The SAFS TCP Messenger is production stable and requires little or no change over time regardless of changes to Robotium, SAFS, or any other application wishing to exploit its TCP services.
+<p>
+Development dependencies for the SAFS TCP Messenger in the project's /libs directory:
+<p>
+<ul>
+<li><b>safssockets.jar</b>, from Development Project 1.
+<li><b>org.safs.android.messenger</b>; sourcecode.
+</ul>
+<p>
+Important Android project setup notes:
+<p>
+<ul>
+<li><b>ant.properties</b> or <b>local.properties</b>: requires a single variable declaration added:
+<p>
+<ul>safs.droid.automation.libs=&lt;path.to.dev_project_3>/libs</ul>
+<p>
+<li><b>build.xml</b>: requires a post-compile operation creating a safstcpmessenger.jar file and copying to the /libs directory of Development Project 3:
+  <p>
+  <ul><pre>
+  &lt;target name="-post-compile">
+      &lt;jar destfile="${safs.droid.automation.libs}/safstcpmessenger.jar" >
+          &lt;fileset dir="${out.classes.absolute.dir}" includes="**/MessageUtil.class" />
+          &lt;fileset dir="${out.classes.absolute.dir}" includes="org/safs/android/messenger/client/*.*" />
+      &lt;/jar>
+  &lt;/target>
+  </pre></ul>
+<p>
+<li>and, the <b>AndroidManifest XML</b>:
+<p><ul><pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      <b>package="org.safs.android.messenger"</b>
+      android:versionCode="1"
+      android:versionName="1.0">
+    &lt;application android:label="@string/app_name"
+                 android:debuggable="true" >
+	    <b>&lt;service android:name="org.safs.android.messenger.MessengerService"</b>
+	             android:icon="@drawable/bidi_arrows"
+	             android:enabled="true"
+	             android:exported="true"
+	             android:label="@string/app_name">
+	        &lt;intent-filter>
+	        	<b>&lt;action android:name="org.safs.android.messenger.Connect" />
+	        	&lt;action android:name="org.safs.android.messenger.Shutdown" /></b>
+	        &lt;/intent-filter>
+	    &lt;/service>
+    &lt;/application>
+    <b>&lt;uses-permission android:name="android.permission.INTERNET"/>
+    &lt;uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+</b>&lt;/manifest>
+</pre>
+</ul>
+<p>
+Upon a successful build of the TCP Messenger APK it should be installed to replace any previous version of installed on the Android device or Emulator.
+<ul><p>
+ant debug<br>
+adb install -r bin/safstcpmessenger-debug.apk<br>
+</ul>
+</ul>
+<p>
+<li><h3>Development Project 3: SAFS/Robotium Test Runner APK</h3>
+<p>
+We are currently building a single APK that is either a Robotium Test Runner APK or a SAFS Test Runner.
+<p>
+While Robotium is historically packaged up and referenced as a JAR file dependency in a tester or developer test APK, there is now significantly more Android test dependency when using Robotium Remote Control. &nbsp;For example, now the test application must launch and use the SAFS TCP Messenger--usually through the InstrumentationTestRunner subclass RobotiumTestRunner, or its DSAFSTestRunner extension.
+<p>
+Development dependencies for the Robotium Test Runner APK in the project's /libs directory:
+<p>
+<ul>
+<li><b>android-support-v4.jar</b>, from Android SDK--<b>ONLY for pre-Android 4.0 APK development</b>.
+<li><b>safssockets.jar</b>, from Development Project 1.
+<li><b>safstcpmessenger.jar</b>, from Development Project 2.
+<li><b>robotium-messages.jar</b>, from Development Project 1.
+<li><b>robotium-solo-4.x.jar</b>, standard Robotium dependency.
+</ul>
+<p>
+Development package sourcecode for the Robotium Test Runner APK in the project's /src directory:
+<p>
+<ul>
+<li><b>com.jayway.android.robotium.remotecontrol.client</b>
+<li><b>com.jayway.android.robotium.remotecontrol.client.processor</b>
+</ul>
+<p>
+For the SAFS Test Runner APK, the dependencies in the project's /libs directory is the same, but has 2 additional JAR files:
+<p>
+<ul>
+<li><b>safs-messages.jar</b>, from Development Project 1.
+<li><b>safs-guiclassdata.jar</b>, from a SAFS/Robotium Distribution.
+</ul>
+<p>
+For the SAFS Test Runner APK, the package sourcecode in the project's /src directory is the same, but has these additional sourcecode packages specific to Android testing:
+<p>
+<ul>
+<li><b>org.safs.android.engine package</b>
+<li><b>org.safs.android.engine.processor package</b>
+<p>
+<li>Android: <b>org.safs.robot package</b>
+<p>
+<li>Android: <b>org.safs.tools package</b>
+<li>Android: <b>org.safs.tools.input package</b>
+<li>Android: <b>org.safs.tools.stringutils package</b>
+</ul>
+<p>
+For the SAFS Test Runner APK, the package resources in the project's /res/raw directory contains the following:
+<p>
+<ul>
+<li><b>java_objects_map.dat</b>
+<li><b>object_types_map.dat</b>
+<li><b>safs_keycode_map.dat</b>
+<p></ul>
+<p>
+There are no abnormal build XML or property file setups for this Android project. &nbsp;
+However, you do want to set the build.xml project name according to which APK we are building:
+<p>
+<ul><b>&lt;project name="RobotiumTestRunner" default="help"></b></ul>
+<p>
+or
+<p>
+<ul><b>&lt;project name="SAFSTestRunner" default="help"></b></ul>
+<p>
+Below is the typical Robotium Test Runner AndroidManifest XML:
+<p>
+<ul><pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          <b>package="com.jayway.android.robotium.remotecontrol.client"</b>
+          android:versionCode="1"
+          android:versionName="1.0">
+    &lt;!-- We add an application tag here just so that we can indicate that
+         this package needs to link against the android.test library,
+         which is needed when building test cases. -->
+    &lt;uses-sdk android<b>:minSdkVersion="10"</b> />
+    <b>&lt;application android:label="Robotium Test Runner"</b>
+                 android:debuggable="true" >
+        &lt;uses-library android:name="android.test.runner" />
+    &lt;/application>
+    &lt;!--
+    This declares that this application uses the instrumentation test runner targeting
+    the package of com.example.android.spinner.  To run the tests use the command:
+    "adb shell am instrument -w com.jayway.android.robotium.remotecontrol.client/com.jayway.android.robotium.remotecontrol.client.RobotiumTestRunner"
+    -->
+    <b>&lt;instrumentation android:name="com.jayway.android.robotium.remotecontrol.client.RobotiumTestRunner"
+                     android:targetPackage="com.android.example.spinner"</b>
+                     android:label="General-Purpose Robotium Test Runner"/>
+&lt;/manifest>
+</ul></pre>
+<p>
+Below is the typical SAFS Test Runner AndroidManifest XML:
+<p>
+<ul><pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          <b>package="org.safs.android.engine"</b>
+          android:versionCode="1"
+          android:versionName="1.0">
+    &lt;!-- We add an application tag here just so that we can indicate that
+         this package needs to link against the android.test library,
+         which is needed when building test cases. -->
+    &lt;uses-sdk android:<b>minSdkVersion="10"</b> />
+    <b>&lt;application android:label="SAFS Test Runner"</b>
+                 android:debuggable="true" >
+        &lt;uses-library android:name="android.test.runner" />
+    &lt;/application>
+    &lt;!--
+    This declares that this application uses the instrumentation test runner targeting
+    the package of com.example.android.spinner.  To run the tests use the command:
+    "adb shell am instrument -w org.safs.android.engine/org.safs.android.engine.DSAFSTestRunner"
+    -->
+    <b>&lt;instrumentation android:name="org.safs.android.engine.DSAFSTestRunner"
+                     android:targetPackage="com.android.example.spinner"</b>
+                     android:label="General-Purpose SAFS Test Runner"/>
+&lt;/manifest>
+</ul></pre>
+<p>
+The same Test APK can be used to test any android:targetPackage. &nbsp;Simply update the Test APK AndroidManifest XML to identify the desired android:targetPackage and make sure both the Test APK and the target application APK are signed with the same debug or developer certificates.
+<p>
+Upon a successful build of the Test APK it should be installed to replace any previous version of installed on the Android device or Emulator.
+<p>
+<b>For the Robotium Test Runner:</b>
+<ul><p>
+ant debug<br>
+adb install -r bin/RobotiumTestRunner-debug.apk<br>
+</ul>
+<p>
+<b>For the SAFS Test Runner:</b>
+<ul><p>
+ant debug<br>
+adb install -r bin/SAFSTestRunner-debug.apk<br>
+</ul>
+<p>
+<li>Once all 3 pieces  of SAFS TCP Messenger, the Test Runner, and the target AUT APK are installed on the Android device or Emulator, launching the Test Runner automatically launches the SAFS TCP Messenger. &nbsp;This is done via adb like below:
+<p>
+<b>For Robotium:</b>
+<ul>
+adb shell am instrument -w com.jayway.android.robotium.remotecontrol.client/com.jayway.android.robotium.remotecontrol.client.RobotiumTestRunner
+</ul>
+<p>
+<b>For SAFS:</b>
+<ul>
+adb shell am instrument -w org.safs.android.engine/org.safs.android.engine.DSAFSTestRunner
+</ul>
+<p>
+The Test Runner and SAFS TCP Messenger are then waiting for a TCP connection and Remote Control from ANY remote client using the Robotium Remote Control API from Development Project 1. &nbsp;There is a crude simple <a href="http://safsdev.sf.net/doc/com/jayway/android/robotium/remotecontrol/solo/RemoteControlUI.html" title="RemoteControlUI JavaDoc" alt="RemoteControlUI JavaDoc">RemoteControlUI</a> example provided in the org.safs.android source provided by SAFS.
+<p>
+The developer should monitor "adb logcat" to see any debug information sent out by the SAFS TCP Messenger and the Test Runner.
+</ol><hr>
+Copyright SAS Institute, Inc., <a href="http://www.sas.com" target="altwin">http://www.sas.com</a><br>
+<a href="http://www.opensource.org/licenses/gpl-license.php" target="altwin">General Public License (GPL)</a>
+http://www.opensource.org/licenses/gpl-license.php
+</BODY></HTML>

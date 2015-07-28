@@ -1,0 +1,14 @@
+;	SafsDevTest.CDD
+;	It is the test that will be processed by CycleDriver .			
+				
+;	Record Types (RT):			Description:
+;	B = BLOCKID					Defines the start of a named block. (not really used at this time)
+;	C = DRIVER COMMAND			Driver to perform some function other than a test step.
+;	S = SKIPPED TEST			A record which is skipped but a user-defined comment is logged as to why.
+;	T = TEST STEP				A test step to perform.
+				
+
+C, Expressions, ON
+
+;RT	SUITES	ARG		Description:
+T, KeywordHtmlTest

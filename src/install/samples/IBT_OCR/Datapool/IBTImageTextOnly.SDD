@@ -1,0 +1,11 @@
+
+C, Expressions, ON
+C, SetApplicationMap, swing.map
+C, LaunchApplication, SwingApp, "java -jar C:\safs\samples\javaapp\swingapp.jar"
+
+S, IBTSwingWindow, SubmitText, Click
+T, IBTSwingWindow, JPanText, Click
+T, IBTSwingWindow, JTreeText, Click
+T, IBTSwingWindow, JTree4th, LocateScreenImage, combLocation
+
+C, LogMessage    , "CombLocation.X variable itself has value: "& ^combLocation.x

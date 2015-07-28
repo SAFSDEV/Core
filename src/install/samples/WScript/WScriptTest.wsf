@@ -1,0 +1,64 @@
+
+<job id="WScriptTest" >
+<script language="VBScript" src="safscommon.vbs"/>
+<script language="VBScript" >
+
+Option Explicit
+
+Dim i, args, arg, safsclient, safsproject, safsmap, nlsmap
+
+safsclient = "WSCRIPT/CLIENT"		'default wscript client
+safsproject = "C:\SAFS\Project"		'default safs project
+safsmap = "NLSBridgeTest.MAP"		'default safsmap
+nlsmap = "NLSBridgeTest_en.MAP"		'default nlsmap
+
+Set args  = WScript.Arguments
+
+For i = 0 to args.Count -1
+    arg = args(i)        
+    if (arg = "-safsmap") then
+        if ( i < args.Count -1) then
+            safsmap = args(i+1)
+        end if        
+    elseif (arg = "-nlsmap") then
+        if ( i < args.Count -1) then
+            nlsmap = args(i+1)
+        end if
+    elseif (arg = "-safsproject") then
+        if ( i < args.Count -1) then
+            safsproject = args(i+1)
+        end if
+    elseif (arg = "-safsclient") then
+        if ( i < args.Count -1) then
+            safsclient = args(i+1)
+        end if
+    end if
+Next
+
+initSAFSClient safsclient
+initSAFSServices safsproject
+initSAFSAppMap safsmap
+initSAFSAppMap nlsmap
+
+arg = getSAFSMapItem("MainWin", "MainWin")
+WScript.Echo arg
+safs_debug "MainWin:MainWin string is: "& arg
+
+arg = getSAFSMapItem("MainWin", "Comp")
+WScript.Echo arg
+safs_debug "MainWin:Comp string is: "& arg
+
+arg = getSAFSVariable("VBTest")
+WScript.Echo ">"& arg &"< should be blank"
+safs_debug "VBTest variable should be empty "& arg
+
+setSAFSVariable "VBTest", "AValue"
+
+arg = getSAFSVariable("VBTest")
+WScript.Echo ">"& arg &"< should be >AValue<"
+safs_debug "VBTest >"& arg &"< should be >AValue<"
+
+if( safsvalid ) then shutdownSAFSClient
+
+</script>
+</job>

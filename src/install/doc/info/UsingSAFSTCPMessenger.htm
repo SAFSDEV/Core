@@ -1,0 +1,178 @@
+<HTML>
+<HEAD>
+<TITLE>
+SAFS TCP Messenger Service for Android
+</TITLE>
+</HEAD>
+<BODY>
+<H1>SAFS TCP Messenger Service for Android</H1>
+<p>
+<hr><pre>
+ Author: Carl Nagle
+  Since: FEB 24, 2012
+Updated: FEB 27, 2012 Carl Nagle, org.safs.android.messenger.client info
+
+Copyright SAS Institute, Inc.
+<a href="http://www.sas.com" target="altwin">http://www.sas.com</a>
+<a href="http://www.opensource.org/licenses/gpl-license.php" target="altwin">General Public License (GPL)</a>
+http://www.opensource.org/licenses/gpl-license.php
+<hr></pre>
+<p>
+<a name="top"/>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/android/messenger/MessengerService.html" target="_blank" title="SAFS TCP Messenger Service JavaDoc" alt="SAFS TCP Messenger Service JavaDoc">The SAFS TCP Messenger Service</a> for Android is an Android application that provides general-purpose TCP messaging services between remote clients and installed Android applications that DO NOT have Android INTERNET permissions.
+<p>
+<center><img src="./safstcpmessengerservice.gif"/></center>
+<p>
+For example, Android test applications testing Android application that do not have INTERNET permissions are themselves not allowed to have INTERNET permissions. &nbsp;By using the SAFS TCP Messenger Service the test application can communicate with a remote test controller, receive external commands via TCP sockets, and return test results or data to the remote controller.
+<p>
+The initial uses for this SAFS TCP Messenger Service are to provide for <a href="http://code.google.com/p/robotium/wiki/RemoteControl" target="robotium" title="Robotium Remote Control Info" alt="Robotium Remote Control Info">Robotium Remote Control</a> and SAFS Android Remote Control using the <a href="http://safsdev.sourceforge.net" target="safs" title="SAFS Test Automation Homepage" alt="SAFS Test Automation Homepage">SAFS Automation Framework</a>. &nbsp;However, the general-purpose nature of the SAFS TCP Messenger Service makes it suitable for other uses on Android independent of these test automation solutions.
+<p>
+Upon release, an independent SAFS TCP Messenger will be available from the <a href="https://sourceforge.net/projects/safsdev/files/" target="safs" title="SAFS Downloads Page" alt="SAFS Downloads Page">SAFS Downloads Page<a/>.
+<p>
+The SAFS TCP Messenger will also be bundled as part of a future <a href="http://code.google.com/p/robotium/downloads/list" target="robotium" title="Robotium Downloads Page" alt="Robotium Downloads Page">Robotium Remote Control download</a>, and/or a future <a href="https://sourceforge.net/projects/safsdev/files/" target="safs" title="SAFS Downloads Page" alt="SAFS Downloads Page">SAFS Android Support download</a>.
+
+<p>
+<h2><u>SAFS TCP Messenger Service Assets</u></h2>
+<p>
+<ul>Inside SAFSTCPMessenger.ZIP:
+<p><li>
+<b>SAFSTCPMessenger-debug.apk</b> -- The SAFS TCP Messenger Android Service
+<p>
+<ul>
+The general-purpose Android Application Service ready to be installed on the Android device or Emulator.<br>
+This application is signed with the Android SDK's default debug certificate.<br>
+If you need this APK to be signed with a different certificate, then you or another Android developer can explode the APK and resign with your desired certificate using the Android SDK tools.
+<p>
+Install the SAFS TCP Messenger application from the Android Market(future), or from your local Android development environment or network repository. &nbsp;
+A typical command-line install using the Android SDK tools would be:
+<p>
+<code>adb install &lt;pathTo>\SAFSTCPMessenger-debug.apk</code>
+</ul>
+
+<p><li>
+<b>safssockets.jar</b> -- SAFS TCP Sockets Protocol Support
+<p>
+<ul>
+This Java library provides the <a href="http://safsdev.sourceforge.net/doc/org/safs/sockets/package-frame.html" target="safs" title="SAFS TCP Sockets JavaDoc" alt="SAFS TCP Sockets JavaDoc">org.safs.sockets</a> Java classes used by both:
+<ul>
+<p><li>Android developers creating Android applications exploiting the SAFS TCP Messenger Service
+<p><li>Developers of remote TCP clients and controllers wishing to communicate with Android applications using the SAFS TCP Messenger Service.</li>
+</ul>
+<p>
+(Normally these two are coordinated efforts since both sides have to interpret the messaging.)
+<P>
+The JAR file must be in the Android project's <b>/libs</b> directory for the Ant build to see, and/or otherwise referenced as a developer's <b>Java Build Path</b> dependency for remote TCP client development.
+</ul>
+
+<p><li>
+<b>safstcpmessages.jar</b>
+<p>
+<ul>
+This Java library provides the <a href="http://safsdev.sourceforge.net/doc/org/safs/android/messenger/MessageUtil.html" target="safs" title="SAFS TCP MessageUtil JavaDoc" alt="SAFS TCP MessageUtil JavaDoc">MessageUtil</a> Java class used by:
+<ul>
+<p><li>Android developers creating Android applications exploiting the SAFS TCP Messenger Service
+</ul>
+<p>
+The JAR file must be in the Android project's <b>/libs</b> directory for the Ant build to see.
+</ul>
+
+</ul>
+<p>
+<h2><u>Remote TCP Client Development</u></h2>
+<p>
+Generally, developers wishing to create a remote TCP client simply have to implement a <a href="http://safsdev.sourceforge.net/doc/org/safs/android/messenger/client/CommandListener.html" target="remote" title="CommandListener JavaDoc" alt="CommandListener JavaDoc">CommandListener</a> interface listening to an instance of a <a href="http://safsdev.sourceforge.net/doc/org/safs/android/messenger/client/MessengerRunner.html" target="remote" title="MessengerRunner JavaDoc" alt="MessengerRunner JavaDoc">MessengerRunner</a>.
+<p>
+Developers provide their own message content and syntax to be transported over the predefined <a href="http://safsdev.sourceforge.net/doc/org/safs/sockets/SocketProtocol.html" target="remote" title="SocketProtocol JavaDoc" alt="SocketProtocol JavaDoc">SocketProtocol</a>. &nbsp;This content will ultimately be received by the SAFS TCP Messenger and forwarded to the Android application. &nbsp;So the Android application must be coded to understand the content, know how to parse it, and know what the remote client might be expecting in return.
+<p>
+The SAFS TCP Messenger doesn't care about the message syntax as long as the content conforms to being transported over the SocketProtocol.
+
+<p>
+<h2><u>Android Application Development</u></h2>
+<p>
+The Android application must will have the following Java library dependencies previously mentioned.  These will reside in the Android project's /libs directory:
+<p>
+<ul>
+<li><b>safssockets.jar</b><br>
+containing the <a href="http://safsdev.sourceforge.net/doc/org/safs/sockets/Message.html" target="safs" title="SAFS TCP Message JavaDoc" alt="SAFS TCP Message JavaDoc">SAFS Sockets Message Constants</a> shared by the remote TCP client and the Android application.
+<p><li><b>safstcpmessenger.jar</b><br>
+containing the <a href="http://safsdev.sourceforge.net/doc/org/safs/android/messenger/MessageUtil.html" target="safs" title="SAFS TCP MessageUtil JavaDoc" alt="SAFS TCP MessageUtil JavaDoc">SAFS TCP Messenger Utilities</a> and <a href="http://safsdev.sourceforge.net/doc/org/safs/android/messenger/client/package-summary.html" target="remote" title="SAFS Messenger Client JavaDoc" alt="SAFS Messenger Client JavaDoc">Messenger Client classes</a> shared by the SAFS TCP Messenger and the Android application.
+<p><li><b>&lt;your_library>.jar</b><br>
+containing whatever custom message classes might be shared by the remote TCP client and the Android application.
+</ul>
+<p>
+The Android application will generally launch the SAFS TCP Messenger during it's onCreate method to insure the Service is available when the application is launched. &nbsp;The application will bind with the Service--usually with an instance of a MessengerRunner as shown below.
+<ul><code><pre><b>
+import org.safs.android.messenger.MessageUtil;
+import org.safs.android.messenger.client.CommandListener;
+import org.safs.android.messenger.client.MessengerRunner;
+import org.safs.android.messenger.client.MessageResult;
+
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+</b>
+public class <b>YourAppClass</b> extends &lt;YourAppSuperclass> <b>implements <a href="http://safsdev.sourceforge.net/doc/org/safs/android/messenger/client/CommandListener.html" target="remote" title="CommandListener JavaDoc" alt="CommandListener JavaDoc">CommandListener</a></b>{
+
+    <b>public void onCreate</b>(Bundle savedInstanceState){
+        if(!doBindService()){
+	        return;
+	    }
+	    start();
+    }
+
+    <b>ServiceConnection mConnection = new ServiceConnection()</b>{
+
+	    <b>public void onServiceConnected</b>(ComponentName className, IBinder service){
+		    Messenger mService = new Messenger(service);
+		    if(messageRunner==null){
+		        messageRunner = <b>new MessengerRunner(mService, this)</b>;
+		        messageRunner.start();
+				messageRunner.sendRegisterEngine();
+		    }
+	    }
+
+	    <b>public void onServiceDisconnected</b>(ComponentName className){
+   		    if(messageRunner != null){
+   		        messageRunner.sendUnRegisterEngine();
+   		        messageRunner = null;
+   		    }
+	    }
+    };
+
+    boolean mIsBound = false;
+
+    <b>protected boolean doBindService()</b>{
+   	    try{
+   		    mIsBound = getContext().bindService(new Intent(MessageUtil.SERVICE_CONNECT_INTENT), mConnection, Context.BIND_AUTO_CREATE);
+   		    return mIsBound;
+   	    }catch(Exception x){
+	        return false;
+   	    }
+    }
+}
+
+<b>// implement your CommandListener interface below</b>
+
+
+</code></pre></ul>
+<p>
+Then, if your CommandListener needs to respond to any incoming message it can do so with the methods already available from the MessengerRunner:
+<p><pre>
+    <a href="http://safsdev.sourceforge.net/doc/org/safs/android/messenger/client/MessengerRunner.html#sendReady()" target="remote" title="MessengerRunner sendReady JavaDoc" alt="MessengerRunner sendReady JavaDoc">messageRunner.sendReady()</a>;
+    <a href="http://safsdev.sourceforge.net/doc/org/safs/android/messenger/client/MessengerRunner.html#sendRunning()" target="remote" title="MessengerRunner sendRunning JavaDoc" alt="MessengerRunner sendRunning JavaDoc">messageRunner.sendRunning()</a>;
+    <a href="http://safsdev.sourceforge.net/doc/org/safs/android/messenger/client/MessengerRunner.html#sendServiceResult(java.util.Properties)" target="remote" title="MessengerRunner sendResultProperties JavaDoc" alt="MessengerRunner sendResultProperties JavaDoc">messageRunner.sendServiceResult(java.util.Properties)</a>;
+    <a href="http://safsdev.sourceforge.net/doc/org/safs/android/messenger/client/MessengerRunner.html#sendServiceREsult(int,java.lang.String)" target="remote" title="MessengerRunner sendResultString JavaDoc" alt="MessengerRunner sendResultString JavaDoc">messageRunner.sendServiceResult(int,java.lang.String)</a>;
+    <a href="http://safsdev.sourceforge.net/doc/org/safs/android/messenger/client/MessengerRunner.html#sendMessage(java.lang.String)" target="remote" title="MessengerRunner sendMessage JavaDoc" alt="MessengerRunner sendMessage JavaDoc">messageRunner.sendMessage(java.lang.String)</a>;
+    <a href="http://safsdev.sourceforge.net/doc/org/safs/android/messenger/client/MessengerRunner.html#sendException()" target="remote" title="MessengerRunner sendException JavaDoc" alt="MessengerRunner sendException JavaDoc">messageRunner.sendException(java.lang.String)</a>;
+    <a href="http://safsdev.sourceforge.net/doc/org/safs/android/messenger/client/MessengerRunner.html#sendDebug()" target="remote" title="MessengerRunner sendDebug JavaDoc" alt="MessengerRunner sendDebug JavaDoc">messageRunner.sendDebug(java.lang.String)</a>;
+    <a href="http://safsdev.sourceforge.net/doc/org/safs/android/messenger/client/MessengerRunner.html#sendShutdown()" target="remote" title="MessengerRunner sendShutdown JavaDoc" alt="MessengerRunner sendShutdown JavaDoc">messageRunner.sendShutdown()</a>;
+</pre><p>
+The Android SDK provides examples of implementing Android Messaging with Android services. &nbsp;Our implementations for both Robotium Remote Control and SAFS Remote Control also serve as real-world examples of using the SAFS TCP Messenger Service specifically.
+<p>
+The Android application will ultimately be communicating with the SAFS TCP Messenger using the Inter-Process Communication (IPC) protocols provided by the Android OS.
+</BODY>
+</HTML>

@@ -1,0 +1,257 @@
+<html>
+<head><title>SAFS Mac/iOS Release Notes</title></head>
+<body>
+<a name="top" />
+<h1><center>
+SAFS Framework for Mac/iOS Release Notes<br/>
+2012.06.22<br></center></h1>
+<p>
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>,&#032;
+<a href="#newstuff">New Stuff</a>
+<hr/><! ======================================================================>
+<a name="definitions" />
+<p>
+<h3><b>Definitions:</b><br/></h3>
+<table border=0 cellspacing=7 >
+<tr><td><b>
+SAFS</b><td><b><a href="http://safsdev.sourceforge.net" target=_blank alt="SAFSDEV Home Page" >
+Software Automation Framework Support</a></b>
+<tr><td><b>
+SAFS Driver</b><td>
+The tool that initializes, opens, parses, and routes SAFS test records to available SAFS Engines.
+<tr><td><b>
+SAFS Engine</b><td>
+A keyword-driven automation tool capable of interpreting and executing SAFS test records.
+<tr><td><b>
+SAFS/DriverCommands</b><td>
+A SAFS Engine for tool-independent
+<a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverCommands"
+   target="ref" alt="SAFS Driver Commands Reference" >Driver Commands</a>
+<tr><td><b>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/tools/engines/SAFSIOS.html"
+   target=_blank alt="SAFS IOS Engine Doc" >SAFS/IOS</a></b> (IOS)<td>
+A SAFS Engine for <a href="http://developer.apple.com/library/ios/#documentation/DeveloperTools/Conceptual/InstrumentsUserGuide/Built-InInstruments/Built-InInstruments.html#//apple_ref/doc/uid/TP40004652-CH6-SW75"
+   target=_blank alt="Apple UIAutomation Instrument" >IOS UIAutomation Testing</a> with the <a href="http://developer.apple.com/library/ios/navigation/" target=_blank alt="Apple IOS Development and Testing Technologies" >Apple IOS Development SDK</a>.</td>
+<tr><td><b>
+SAFS IBT</b> (Pat.Pend.)<td>
+An embedded SAFS Engine for <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSImageBasedRecognition.htm"
+   target=_blank alt="Image-Based Testing Doc" >Image-Based Testing</a>. (Patent Pending)</td>
+<tr><td><b>
+<a href="http://safsdev.sourceforge.net/sqabasic2000/UsingJSAFS.htm" target="JSAFS" alt="Using JSAFS Doc">JSAFS</a></b> (New!)<td>
+The Java API for embedding SAFS in custom frameworks and <a href="http://safsdev.sourceforge.net/sqabasic2000/UsingJSAFS.htm#advancedruntime" target="JSAFS" alt="Using JSAFS Doc">SAFS Advanced Runtime Development</a>.
+</td>
+</table>
+
+<hr/><! ======================================================================>
+<a name="instructions" />
+<small><a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>,&#032;
+<a href="#newstuff">New Stuff</a>
+</small>
+<p>
+<h3><b>Install Instructions:</b><br/></h3>
+<p><ol>
+<li>After you login, go to directory where you put the SAFSIOSRelease ZIP file.
+<li>Double-Click it or otherwise extract the contents of the ZIP file into a directory.
+<li>In Terminal, navigate to the Setup-IOS-SAFS.sh installation script.
+<li>Run '<b>sudo ./Setup-IOS-SAFS.sh</b>' in Terminal. (OS X Lion requires 'sudo' for mkdir and chmod.)
+<p>
+If the script does not run at all:
+    <ul>
+    <li>make sure the scripts and installers are executable:
+    <p>
+    <ul>
+    chmod u+x *.sh<br>
+    chmod u+x *.bin<br>
+    </ul>
+    <p>
+    <li>prefix the shell: '/bin/sh Setup-IOS-SAFS.sh'<br>
+    (Don't forget to use <b>sudo</b>, if necessary.)
+    </ul>
+<p>
+<li>Follow the script's instructions which will prompt for things like:
+    <ul>
+    <li>Confirm to install STAF and where to install STAF.
+    <li>Confirm to install SAFS and where to install SAFS.
+    <li>Confirm to see verbose information during installation.
+    <li>Use {Enter} at each prompt to install SAFS and STAF to the default locations:
+        <ul>
+        <p >STAF  --> /Library/staf
+        <br>SAFS  --> /Library/safs
+        </ul>
+    </ul>
+<li>Run the <b>runTIDTest</b> (SAFS Tools below) to verify a successful SAFS install.
+<li>Run the <b>runIOSTest</b> (SAFS Tools below) to verify successful SAFS/IOS integration.
+<li>The log outputs for those tests can be found at:
+<p><ul>
+/Library/safs/Project/Datapool/Logs
+</ul>
+</ol>
+
+<hr/><! ======================================================================>
+<a name="safstools" />
+<small><a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>,&#032;
+<a href="#newstuff">New Stuff</a>
+</small>
+<p>
+<h3><b>SAFS Tools:</b><br/></h3>
+<p>
+After a successful install, these can be found in your SAFS Project directory which, by default,
+is located at:
+<p>
+<ul><b>/Library/safs/Project:</b>
+<p><li>
+<b>runTIDTest</b>
+<br>Used generally to verify the SAFS Install, or that SAFS is currently configured correctly for execution.
+<p><li>
+<b>runIOSTest</b>
+<br>Used to run a sample IOS test against our SAFS/samples/UICatalog application.
+<p><li>
+<b>runIOSProcessContainer</b>
+<br>Used to run the <a href="http://safsdev.sourceforge.net/doc/org/safs/ios/IOSProcessContainer.html" target=_blank alt="SAFS IOS Process Container JavaDoc">IOS Process Container</a> tool for app exploration and <a href="http://safsdev.sourceforge.net/sqabasic2000/CreateAppMap.htm" target=_blank alt="How To Create SAFS App Maps">SAFS App Map</a> creation.
+<p><li>
+<b>runImageManager</b>
+<br>A <a href="http://safsdev.sourceforge.net/doc/org/safs/image/ImageManager.html"
+ target=_blank alt="ImageManager JavaDoc" >Java-based Image Manager</a> option for capturing images to be used for <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSImageBasedRecognition.htm"
+ target=_blank alt="Image-Based Testing Doc" >SAFS Image-Based Testing</a>.
+<p><li>
+<b>SAFSTESTLOG_Startup</b>
+<br>Used to start a <a href="http://safsdev.sourceforge.net/doc/org/safs/Log.html" target="_blank" alt="SAFS Log JavaDoc" >SAFS Debug Log</a>.
+<br>There is also a (silent) <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSVideo.php?swf=Using_Debug_Log.swf&width=781&height=781" target="_blank" alt="Using Debug Video Tutorial" >Using Debug Video Tutorial</a> for Windows users that is just as valuable to Mac users.
+<br>(Though it does require a Flash Player.!)
+<p><li>
+<b>SAFSTESTLOGShutdown</b>
+<br>Used to stop a running SAFS Debug Log. &nbsp;See the same doc and video for SAFSTESTLOG_Startup.
+</ul>
+
+<hr/><! ======================================================================>
+<a name="setupnotes" />
+<small><a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#newstuff">New Stuff</a>
+</small>
+<p>
+<h3><b>Setup Notes:</b><br/></h3>
+<p>
+In order to process or test your own applications with SAFS/IOS, you must create one or more <a href="http://developer.apple.com/library/ios/#documentation/DeveloperTools/Conceptual/InstrumentsUserGuide/Built-InInstruments/Built-InInstruments.html#//apple_ref/doc/uid/TP40004652-CH6-SW75"
+ target=_blank alt="Apple UIAutomation Instrument" >UIAutomation Instrument</a> Trace Templates. &nbsp;It is beyond the scope of this document to go into any detail on using Instruments. &nbsp;Please consult the Apple Documentation for Instruments for more information.
+ <p>
+ Different versions of OS X and the IOS SDK have different variations of the supplied tools. &nbsp;The information below was originally captured using a version of IOS SDK 5 on OS X Snow Leopard (OSXSL). &nbsp;OS X Lion (OSXLN) support info is also provided.
+ <p>
+ To create a proper trace template, these basic steps need to be accomplished:
+ <p><ol>
+ <li>Launch a new blank Instruments app:
+ <p>
+ <ul>
+ Default OSXSL: <b>/Developer/Applications/Instruments.app</b><br>
+ Default OSXLN: <b>/Applications/Xcode.app/Contents/Applications/Instruments.app</b>
+ </ul>
+ <p>
+ <li>In Instruments, "Choose Target" and navigate to the Application and Device/Simulator to be tested.
+  <ul><img src="http://safsdev.sf.net/doc/org/safs/ios/ChooseTarget.GIF" alt="Snapshot of Choose Target Menu"/></ul>
+ <p>
+ <li>Specify the Options for this specific Application and Template:
+ <ul><img src="http://safsdev.sf.net/doc/org/safs/ios/InstrumentsOptions.GIF" alt="Snapshot of Instruments Options Menu"/></ul>
+ <li>Load the Built-In UIAutomation Library (Automation) as the default (only?) Instrument to record.
+<ul><img src="http://safsdev.sf.net/doc/org/safs/ios/InstrumentsLibrary.GIF" alt="Snapshot of Instruments Library Menu"/></ul>
+<p><center>
+<ul><img src="http://safsdev.sf.net/doc/org/safs/ios/InstrumentsAutomation.GIF" alt="Snapshot of Instruments Automation Library Selection"/></ul></center>
+<p>
+<li>Enable the Bottom Pane for Automation Options, if necessary
+<ul><img src="http://safsdev.sf.net/doc/org/safs/ios/AutomationToggle.GIF" alt="Snapshot of Instruments Panel View Options"/></ul>
+<p>
+<li>Specify to "Run on Record" and "Continuously Log Results".
+<ul><img src="http://safsdev.sf.net/doc/org/safs/ios/AutomationOptions.GIF" alt="Snapshot of Automation Options Selections"/></ul>
+<p>
+<li>"Choose Location" to specify the output directory for Automation Results.<br>
+This will be the location where the Instruments log will be generated and monitored by SAFS.
+<ul><img src="http://safsdev.sf.net/doc/org/safs/ios/ChooseLocation.GIF" alt="Snapshot of Choose Location Menu"/></ul>
+<p>
+Navigate to the location of your expected output. &nbsp;For our SAFS example:
+<p><ul><b>/Library/safs/samples/UICatalog</b></ul>
+<p>
+<li>Save this as a Trace Template.
+<ul><img src="http://safsdev.sf.net/doc/org/safs/ios/SaveTemplate.GIF" alt="Snapshot of Save Template Menu"/></ul>
+<p>
+Navigate to the location to store and name the Trace Template. &nbsp;For our SAFS example:
+<p>
+<ul><b>/Library/safs/samples/UICatalog/UICatalogInstruments.tracetemplate</b></ul>
+<p>
+NOTE: SAFS expects the ".tracetemplate" extension to be used for these templates.
+<p>
+<li>Currently, SAFS can only handle testing IOS applications through Instruments as long as it is SAFS that has prepped and launched the Instruments application with an appropriate UIAutomation Trace Template.
+<p>
+<li>The same Trace Template used for the SAFS runtime can be used by the IOS Process Container.
+<p>
+<li>To launch your application during SAFS testing, you must use the following Driver Commands:
+<ul><code><pre>
+C, <a href="http://safsdev.sf.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverCommands&cmd=UseIOSFunctions" target="ref" alt="SAFS Keyword Reference for UseIOSFunctions">UseIOSFunctions</a>  , ON
+C, <a href="http://safsdev.sf.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverCommands&cmd=LaunchApplication" target="ref" alt="SAFS Keyword Reference for LaunchApplication">LaunchApplication</a>, "AppName", TemplatePath, OutputDirectory
+</pre></code></ul>
+TemplatePath and OutputDirectory should be the full paths to the Instruments Trace Template and the Logging output directory specified in the Trace Template. &nbsp;
+You can review IOSTest.CDD and iosPOC.map in the /Library/SAFS/Project/Datapool directory for examples of using these commands and storing these settings in the Application Map ApplicationConstants.
+<p>
+<b>OS X Lion</b> introduces new defects in Xcode Instruments and AppleScript execution that prevent the previously simple use of Instruments Trace Templates. &nbsp;For this reason, IOS Process Container and the LaunchApplication Driver Command <b>REQUIRE</b> the specification of devicename and appname parameters when using OS X Lion.
+<p>
+<li>To close your application during SAFS testing, or when ending SAFS testing, you must use the
+following Driver Commands:
+<ul><code><pre>
+C, UseIOSFunctions , ON
+C, <a href="http://safsdev.sf.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverCommands&cmd=CloseApplication" target="ref" alt="SAFS Keyword Reference for CloseApplication">CloseApplication</a>, (Anything)
+</pre></code></ul>
+We can use "Anything" for the IOS CloseApplication implementation because it knows we are shutting down all running Instruments UIAutomation traces.
+</ol>
+<p>
+
+<hr/><! ======================================================================>
+<a name="reminders" />
+<small><a href="#definitions">Definitions</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>,&#032;
+<a href="#newstuff">New Stuff</a>
+</small>
+<p>
+<h3><b>Critical Reminders:</b><br/></h3>
+<p>
+<ol>
+<li>Run all SAFS Shell scripts using appropriate shell command-line syntax.
+<li>Most SAFS Shell scripts are currently expected to be run from their parent directory.
+<li>Examples of command-line invocation--all from a Terminal working directory of <b>/Library/safs/Project</b>:
+<ul><pre>
+. runTIDTest.sh  OR
+/bin/sh runTIDTest.sh
+
+. runIOSTest.sh  OR
+/bin/sh runIOSTest.sh
+</pre></ul>
+<li>Always make sure Shell scripts are "executable":
+<ul><pre>
+chmod u+x *.sh
+</pre></ul>
+</ol>
+<p>
+
+<hr/><! ======================================================================>
+<a name="newstuff" />
+<small><a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>,&#032;
+</small>
+<p>
+<h3><b>New Stuff:</b><br/></h3>
+
+</body></html>

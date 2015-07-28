@@ -1,0 +1,20 @@
+hidden1=false
+
+;constant below will be null unless SAFSVARS variable exists!
+constant={^constant}
+
+[ApplicationConstants]
+Var1="abc"
+does_not_contain="contains"
+contains={^contains}
+hiddenconst=_DDV:constant
+
+[Section1]
+EmbedVar="This string {^does_not_contain} an embedded string."
+
+[SAFSMon]
+SAFSMon="Type=Window;Caption=SAFS Monitor"
+
+[AnyWindow]
+AnyWindow="CurrentWindow"
+AnyComponent="CurrentWindow"

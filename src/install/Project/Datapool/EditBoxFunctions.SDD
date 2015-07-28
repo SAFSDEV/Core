@@ -1,0 +1,7 @@
+
+T, TestApp, TextBox, SetTextValue, "This is a Test" 
+T, TestApp, TextBox, SetTextCharacters, "This is another Test"
+T, TestApp, TextBox, SetUnverifiedTextCharacters, "My+Password"
+T, TestApp, TextBox, SetUnverifiedTextValue, "MyPassword" 
+
+T, TestApp, TextBox, InputKeys, "+(test) should be ALL CAPS." 

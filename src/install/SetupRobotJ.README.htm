@@ -1,0 +1,380 @@
+<HTML>
+<HEAD><TITLE>SetupRFT.README</TITLE></HEAD>
+<BODY>
+<a name="top"/>
+<h1>SetupRFT.README</h1>
+<p>
+==========================================================================<br>
+Author: Carl Nagle<br>
+UPDATED: Aug 03, 2012<br>
+<br>
+Copyright (C) SAS Institute<br>
+<a href="http://www.opensource.org/licenses/gpl-license.php" target="reference">General Public License</a>: http://www.opensource.org/licenses/gpl-license.php<br>
+==========================================================================<br>
+Remember: "RobotJ", "XDE Tester", and "Functional Tester" are names for the
+same IBM Rational Functional Tester tool.  We historically referred to all of these as "RobotJ", or simply "RJ" in much of our documentation and class names.
+<p>
+The tool is now most often referred to as, Functional Tester or simply "RFT".
+<p>
+<small>
+<a href="#safsexecution">Configure for Execution</a>&nbsp;,&nbsp;
+<a href="#usewithtid">Use with TID</a>&nbsp;,&nbsp;
+<a href="#safsdevelopment">Configure for Development</a>
+</small>
+<p>
+<ol>
+<li><h3>STAF and SAFS Required:</h3>
+<p>
+These instructions assume the tester has already installed STAF and SAFS services via the
+SetupSAFS script (or alternative methods).&nbsp; If this is not the case, please refer
+to the SAFS for Windows Release Notes for information on the SAFS setup procedure.
+<p>
+Users are encouraged to install the <b>*latest*</b> SAFS Snapshot or Overlay available.&nbsp; Read and follow any additional instructions provided with the Snapshot or Overlay.
+<p>
+<center><b>The SAFS/DriverCommands and SAFS/RobotJ engines will not function <br>
+if STAF and associated services are not properly installed.</b></center>
+<p>
+We will not attempt to duplicate information on setting up RFT for general testing.&nbsp;
+Information for creating a Project and other tool configuration information can
+be found in RFT's User's Guide and other references available from RFT's Help
+menu.
+<p>
+<b>The RFT project in the SAFS 'DatastoreJ' subfolder is just a bare bones project that will NOT work for developing your own custom RFT-based scripts. &nbsp;It will work for pure SAFS/RFT testing with no custom scripts, however.
+<p>
+If you intend to have your own RFT scripts, or if you intend to use RFT Object Maps with your SAFS tests, then you must create a valid RFT Project then configure it as descibed below for your production testing.
+<p>
+<i>With RFT V8 the project setup requirements are significantly simpler than previous versions of RFT.</i></b>
+<p><hr>
+<a name="safsexecution"/>
+<small>
+<a href="#top">Back to Top</a>&nbsp;,&nbsp;
+<a href="#usewithtid">Use with TID</a>&nbsp;,&nbsp;
+<a href="#safsdevelopment">Configure for Development</a>
+</small><p>
+<li><h3>Configure RFT Project for simple SAFS Execution:</h3>
+<p>
+If all you want to do is run the SAFS/RobotJ engine then preparing a RFT Project
+requires these steps which are discussed in more detail immediately following:
+<p>
+<UL>
+   <li type="disc">Use the C:\SAFS\DatastoreJ RFT datastore, &nbsp;OR
+   <li type="disc">Create/Enable your own Project datastore.
+   <li type="disc">Run the RFT Test Enabler (if needed)
+</UL>
+<p>
+<UL><h3>Now the Details:</h3>
+<p>
+Note different versions of RFT behave very differently and have different project repository setup requirements.&nbsp; Unfortunately, it is not within the scope of this document to hit them all.&nbsp; We will focus on what works for RFT V8 below.
+<p>
+Assets provided by SAFS for an RFT project should be located in <b>C:\SAFS\DatastoreJ</b> or, in extreme circumstances, may need to be extracted from <b>C:\SAFS\lib, SAFS.JAR, or SAFSRATIONAL_FT.JAR</b>.
+<p>
+  <li><b><i>Populate an existing RFT V8 Project / Create a RFT Datastore</i></b>:
+<p><ul>
+      <li>Copy the following files from the <b>C:\SAFS\DatastoreJ</b> directories:
+      <p><ul>
+	  <li>&lt;projectroot>\<b>TestScript.testsuite</b>
+	  <li>&lt;projectroot>\resources\<b>TestScript.rftdef</b>
+      </ul>
+      <p>
+      <li>Delete any other (outdated) references to TestScript and TestScriptHelper, if present.
+      <p><ul>
+      <li>There should be no TestScript.java, no TestScript.class
+      <li>There should be no ...\resources\TestScriptHelper.java, no TestScriptHelper.class
+      </ul>
+   </ul>
+   <p>Note: <b>TestScript.rftmap</b> should be ensured to stay in &lt;projectroot>\resources\ if SAFS-based scripts need to use RFT Object Map objects. &nbsp;
+Refer to <a href="http://safsdev.sourceforge.net/sqabasic2000/UsingRFTObjectMaps.htm" target=_blank>Using RFT Object Maps with SAFS</a>.
+
+<p>
+  <li><b>Enable a RFT datastore</b>
+  <p>
+	To execute your own SAFS tests, you run SAFSDRIVER with an argument, your
+	<a href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#configfile" target=_blank>SAFSDRIVER configuration file</a>, in which various options are defined.
+	Those information tells SAFS where and how to load the tests, launch SAFS/RobotJ engine and etc.
+<pre>
+One of the options indicates the RFT datastore you created:
+[SAFS_ROBOTJ]
+DATASTORE=&lt;projectroot>\DATASTOREJ     (Here it is!)
+</pre>
+
+<p>
+	<li><b>A simple SAFSDRIVER configuration file for executing SAFS tests using RFT:</b>
+		<ul>
+<pre>C:\mySAFSTest\helloSafs.ini
+-------------------------------------------------------------------------------------------
+[SAFS_DRIVER]
+DriverRoot="C:\safs"                        (SAFS's home)
+
+[SAFS_PROJECT]
+ProjectRoot="C:\mySAFSTest"                 (the root of your SAFS test project)
+
+[SAFS_TEST]
+TestName="helloSafs"                        (start from this SAFS script: helloSafs.CDD)
+TestLevel="Cycle"                           (Cycle file, suffixed with '.CDD')
+CycleSeparator=","                          (the delimiter to seperate different fields in a same line of SAFS script)
+CycleLogName="helloSafs"                    (the file name of the SAFS log produced by running this SAFS script, the log file shall be output to C:\mySAFSTest\Datapool\Logs)
+CycleLogMode="TEXTLOG"                      (the format of the SAFS log producted by running this SAFS script)
+
+[SAFS_ROBOTJ]
+AUTOLAUNCH=TRUE                             (autolaunch the hook of SAFS/RobotJ engine)
+DATASTORE=C:\mySAFSTest\DATASTOREJ          (the RFT Datastore your test script intends to use)
+TESTDOMAINS="Java, Html"                    (domains to search)
+
+
+[SAFS_ENGINES]
+First=org.safs.tools.engines.SAFSROBOTJ     (SAFS/RobotJ engine defined to be used)
+--------------------------------------------------------------------------------------------
+</pre>
+	  </ul>
+	  <ul>
+    <li> The command to execute SAFS tests with the SAFS Driver:
+    <p>java -Dsafs.project.config="C:\mySAFSTest\helloSafs.ini" org.safs.tools.drivers.SAFSDRIVER
+    <p>Via above command, SAFS takes 'C:\mySAFSTest\DATASTOREJ' as the RFT datastore, and runs the SAFS tests in 'C:\mySAFSTest\Datapool\helloSafs.CDD'.
+    </ul>
+<p>
+  <li><b>Associate or Disassociate RFT with Test Manager</b>
+  <p>
+  RFT may be configured to associate itself with Test Manager and a Test Manager
+  repository. &nbsp;If you are not associating with a Test Manager repository and not using
+  Test Manager logs then you <i>may</i> need to change Logging and Playback settings.
+  <p>
+  <b><i>SAFS can now change these automatically, so you can skip these steps unless you have already encountered certain TSS Services ClassNotFoundExceptions.</i></b>
+  <p>
+  <ul>
+     <li>Open Preferences via RFT's <b>Window->Preferences</b> menu.
+     <p>
+     <ul>
+        <li>Expand "Functional Test" to edit Logging and Playback options.<br/>
+        (Some of these options may not be available or shown.)
+        <li>Disable any Script Launch Wizards
+        <li>Disable Prompt before Overwriting Logs
+        <li>Disable Default Log Type to disassociate Test Manager.<br/>
+        Many users choose to set "text" logging instead of the default.
+     </ul>
+  </ul>
+<p>
+  <li><b>Make sure RFT has enabled your environments for testing.</b>
+  <p>
+  <ul>
+     <li>Select the <b>Configure->Enable Environments for Testing</b> menu.
+     <li>Enable all environments you will be using for testing.
+     <li>You may have to use the 'Search' capability to locate all possible environments.
+  </ul>
+<p>
+  <li>If needed, execute the C:\SAFS\<b>SetupRationalClasspath.WSF</b> script to locate and add IBM Rational JAR files to the CLASSPATH.
+  <br/>(The SAFS install does this for you. &nbsp;You only need to do this if you bypassed the Rational install during the SAFS install,
+  or if you recently upgraded RFT *after* the SAFS install.)
+<p>
+  <li><b>Verify SAFS RFT setup with SAFS Sample Project:</b>
+  <p>
+  <ul>
+  <li>Locate and Run <i><b>C:\SAFS\Project\runTIDTest.BAT</b></i>
+  <li>Log results in  C:\SAFS\Project\Datapool\Logs\TIDTest.SAFS.txt  should contain:
+  <p>
+  <pre>    OK    TIDTest Services all present and working.</pre>
+  <p>
+  <li>Locate and Run <i><b>C:\SAFS\Project\runRFTTest.BAT</b></i>
+  <li>Log results in  C:\SAFS\Project\Datapool\Logs\RFTTest.txt  should contain:
+  <p>
+  <pre>    OK    RFT ClearAppMapCache was successful.</pre>
+  <p>
+  </ul>
+</UL>
+<p><hr>
+<a name="usewithtid"/>
+<small>
+<a href="#top">Back to Top</a>&nbsp;,&nbsp;
+<a href="#safsexecution">Configure for Execution</a>&nbsp;,&nbsp;
+<a href="#safsdevelopment">Configure for Development</a>
+</small><p>
+<p>
+  <li><h3>To use with the Tool-Independent Driver (TID):</h3>
+  <p>
+  Consult the documentation for the
+  <a href="http://safsdev.sourceforge.net/doc/org/safs/tools/drivers/SAFSDRIVER.html"
+  target="SAFSDRIVER">TID SAFSDRIVER</a> for a more complete introduction to TID setup.
+  &nbsp; You can also review sample TID configuration (.INI) and batch (.BAT) files in the
+  <b>C:\SAFS\Project</b> directory.
+  <p>
+  The TID configuration file(s) would be a TIDTEST.INI and\or SAFSTID.INI file usually created
+  and located in the root project directory as you can see in the C:\SAFS\Project samples.
+  &nbsp; Below we show only those settings that may need editing relevant to the use of RFT.
+  &nbsp; Other settings as required by the TID are not shown but are still necessary.
+  <p>
+  The documentation specific to the RFT interface to the TID can be found in
+  <a href="http://safsdev.sourceforge.net/doc/org/safs/tools/engines/SAFSROBOTJ.html"
+     target="SAFSDRIVER">org.safs.tools.engines.SAFSROBOTJ</a>.
+<ul>
+<p>
+<b>Sample TID INI settings:</b>
+<p>
+<pre>
+[SAFS_ENGINES]
+First=org.safs.tools.engines.SAFSROBOTJ
+
+[SAFS_ROBOTJ]
+AUTOLAUNCH=TRUE
+DATASTORE=C:\SAFS\DatastoreJ  (fullpath to the RFT Project root directory)
+<b>TESTDOMAINS</b>=Java,Html,Win,Net,Swt,Flex -- Enable your specific test domains only
+</pre>
+<p>
+</ul>
+<b>There is also this
+<a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSQuickStart.htm"
+   alt="SAFS RFT Quick Start Guide" target="_blank">SAFS Quick Start Guide</a>
+   for using RFT with SAFS.</b>
+<p><hr>
+<a name="safsdevelopment"/>
+<small>
+<a href="#top">Back to Top</a>&nbsp;,&nbsp;
+<a href="#safsexecution">Configure for Execution</a>
+<a href="#usewithtid">Use with TID</a>
+</small><p>
+<li><h3>Configure RFT Project for SAFS Debugging and\or Development:</h3>
+<p>
+Any RFT Project can be configured to run the engine, but each Project must be
+configured separately.&nbsp; To actually develop new code or keywords for RFT or other
+Java-based engines, or to debug RFT test execution the user would have to prepare the RFT
+Project for development.
+<i>Note: The Eclipse and\or IBM Rational IDE for Java development does not use the System \
+CLASSPATH to locate class files and other resources.</i>
+<p><UL>
+   <li><u><b>Configure the system for debugging:</b></u>
+   <p>
+   <ul>
+   <li>Put\Extract <b><i>TestScript.java</i></b> into root project directory.<br>
+   <small>(You may have to extract it from SAFSRATIONAL_FT.JAR or another source.)</small>
+   <li>Configure Java Build Path to include references to JARS:
+   <p><ul>
+   <li>C:\Program Files\IBM\SDP\FunctionalTester\bin\rational_ft.jar
+   <li>C:\STAF\bin\jstaf.jar
+   <li>C:\SAFS\lib\safs.jar
+   <li>C:\SAFS\lib\safscust.jar
+   <li>C:\SAFS\lib\safsjvmagent.jar
+   <li>C:\SAFS\lib\jai_core.jar
+   <li>C:\SAFS\lib\jai_codec.jar
+   <li>C:\SAFS\lib\jaccess.jar
+   <li>C:\SAFS\lib\jakarta-regexp-1.3.jar
+   <li>C:\SAFS\lib\safsrational_ft.jar
+   <li>C:\SAFS\lib\safsrational_ft_enabler.jar
+   <li>C:\SAFS\lib\jna.zip
+   <li>C:\SAFS\lib\win32-x86.zip
+   <p>
+   <li>There may be other JARs you must include.
+   <br>For example, if using JSAFS you would want to include "safsmodel.jar"
+   <p>
+   <li>Configure Java Build Path to include SAFS SOURCE JAR\ZIP\Files.<br>
+   <small>(These are normally not included in a SAFS install.)</small>
+   </ul>
+   </ul>
+   <p>
+   <li><u><b>Run SAFS RFT <i>TestScript</i> in debug mode:</b></u>
+   <p>
+   <ul>
+	<dl>
+	<li><dt><b>Start STAF</b>
+	<p>
+	<dd>"Start->Programs->STAF->Start STAF"<br>
+	   This may or may not be in QuickLaunch.&nbsp; I'd place it there if I were doing this repetitively.<br>
+	   CMD Window will open and remain.<br>
+	<p>
+	<li><dt><b>Start SAFS Services</b>
+	<p>
+	<dd>Run "SAFSStartupDDEngine.BAT"<br>
+	   Should be located in C:\SAFS\Samples\Batch. &nbsp;
+	   May need to be edited for your desired SAFS Project location.<br>
+	   4 CMD Windows should open and may immediately close.<br>
+	<p>
+	<li><dt><b>'Run' or 'Debug' RFT Project "TestScript"</b>
+	<p>
+	<dd>RFT Playback Monitor should open and remain.<br>
+	   RFT and STAF are now process connected via SEMaphore events.
+	   <p>
+	   <small>(You may have to <b>'Reset Java Build Path'</b> in your RFT Project's <b>Properties</b>
+	   if RFT does NOT have its internal JARS listed in the Java Build Path.)</small>
+	<p>
+	<li><dt><i><u><b>*** DO NOT SHUTDOWN STAF or STOP RFT TESTSCRIPT EXCEPT AS FOLLOWS ***</b></u></i>
+	<dd/><p>
+	<li><dt><b>Stop RFT TestScript interface to STAF</b>
+	<p>
+	<dd>Run "SAFSRobotJShutdown.BAT"<br>
+	   Should be located in C:\SAFS\bin &nbsp;
+	   RFT will take 5-10 seconds to cleanup and shutdown.<br>
+	<p>
+	   You can leave STAF and services running for additional
+	   RFT TestScript executions, but you will eventually need to:<br>
+	<p>
+	<li><dt><b>Shutdown STAF</b>
+	<p>
+	<dd>"Start->Programs->STAF->Shutdown STAF"
+	</dl>
+   </ul>
+   <p>
+   <li><b><u>Configure the system for devlopment:</u></b>
+   <p>
+   <ul>
+   <li>Configure Java Build Path to include references to JARS:
+   <p><ul>
+   <li>C:\Program Files\IBM\SDP\FunctionalTester\bin\rational_ft.jar
+   <li>C:\STAF\bin\jstaf.jar
+   <li>C:\SAFS\lib\jai_core.jar
+   <li>C:\SAFS\lib\jai_codec.jar
+   <li>C:\SAFS\lib\jaccess.jar
+   <li>C:\SAFS\lib\jakarta-regexp-1.3.jar
+   <li>C:\SAFS\lib\jna.zip
+   <li>C:\SAFS\lib\win32-x86.zip
+   </ul>
+   <p>
+   <p>
+   <li>Insure "Installed JREs" knows about all your used Java runtimes.
+   <p>
+   <li>Optionally <b>Set Build Output to \classes subdirectory</b>.
+   <p>
+   Existing build utilities like JARIT.BAT assume the project class files are stored in a \classes subdirectory off the project root directory.
+   &nbsp; If you intend to use these build utilities then you will need to set your project Build Output
+   accordingly:
+   <p><ol>
+   <li>Right-Click your RFT Project in the RFT Project Explorer.
+   <li>Select <b>'Properties'</b> from the popup menu.
+   <li>Select <b>'Java Build Path'</b> in the Properties Dialog.
+   <li>Select the <b>'Source'</b> Tab in the Dialog.
+   <li>Set the 'Default output folder:' to '<b>&lt;projectroot>/classes</b>'.
+   <p>
+   If you are prompted to 'clean' and\or 'perform a new build' then you can do this.
+   </ol>
+   <p>
+   <li>Checkout\Update the latest sourcecode from CVS or download the SAFSSource ZIP file and
+   extract it ("use Folder Names") into the root RFT Project directory.
+   </UL></UL>
+<p>
+Information for downloading from SourceForge CVS can be located via
+<a href="http://sourceforge.net/cvs/?group_id=56751" target=_blank>CVS info on SourceForge</a>
+<p>
+More SAFSDEV-specific developer information:
+<p><ul>
+<li><a href="http://sourceforge.net/apps/mediawiki/safsdev/index.php?title=SAFSDEV_Developer_Environment"
+target="_blank">SAFSDEV Developer Environment</a>
+<li><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSDevelopment.htm"
+target="_blank">More SAFSDEV Developer Info</a>
+</ul><p>
+<i>Note: The RFT Engine has reserved the RFT script name "TestScript" for its internal
+use.
+&nbsp; This script is already compiled and stored in SAFSRATIONAL_FT.JAR and may have been copied into
+the RFT Project directory.
+&nbsp; The user should not attempt to create a new RFT script by this name as one may override the other.</i>
+</ol>
+<p><hr>
+<small>
+<a href="#top">Back to Top</a>&nbsp;,&nbsp;
+<a href="#safsexecution">Configure for Execution</a>&nbsp;,&nbsp;
+<a href="#usewithtid">Use with TID</a>&nbsp;,&nbsp;
+<a href="#safsdevelopment">Configure for Development</a>
+</small>
+<p>
+<pre>
+Carl Nagle, <a href="http://www.sas.com"  >SAS</a>
+Project Manager, <a href="http://safsdev.sourceforge.net"  >SAFSDEV</a>
+Subscribe to appropriate <a href="http://sourceforge.net/mail/?group_id=56751" alt="Go to Support Forums">Support Forums</a> to review support archives and ask questons.
+</pre>
+<p>
+</BODY></HTML>

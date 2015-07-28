@@ -1,0 +1,33 @@
+
+C, SetGeneralScriptFailureBlock, FailureBlock 
+T, UICatalog, NavBar, GuiDoesExist
+C, OnGuiNotExistGotoBlockID, NotReady, UICatalog, NavBar, 10, ^detail="UICatalog NavBar not present in timeout period."
+T, UICatalog, Buttons,    Click
+C, Pause, 2
+C, OnGuiExistsGotoBlockID, NotReady, UICatalog, NavBar, 10, ^detail="UICatalog NavBar still present after timeout period."
+C, OnGuiNotExistGotoBlockID, Continue, UICatalog, NavBar, 5
+C, GotoBlockId, NotReady, ^detail="UICatalog NavBar present after being gone in timeout period?"
+
+B, Continue
+C, SetGeneralScriptFailureBlock, ""
+C, LogFailureOK, "Main NavBar is NOT supposed to exist."
+T, UICatalog, NavBar, GuiDoesExist
+
+C, SetGeneralScriptFailureBlock, FailureBlock 
+T, UICatalog, NavBar, GuiDoesNotExist
+C, OnGuiNotExistGotoBlockID, NotReady, UIButtons, BackButton, 10, ^detail="BackButton not present in timeout period."
+T, UIButtons, BackButton, Tap, "Coords=90 50"
+C, Pause, 2
+C, OnGuiExistsGotoBlockID, NotReady, UIButtons, BackButton, 10, ^detail="BackButton still present after timeout period."
+C, OnGuiNotExistGotoBlockID, Continue, UIButtons, BackButton, 5
+C, GotoBlockId, NotReady, ^detail="BackButton present after being gone in timeout period?"
+
+B, Continue
+C, SetGeneralScriptFailureBlock, ""
+C, ExitTable
+;-----------
+
+B, FailureBlock, ^detail="Script Execution Failure Detected: "& ^detail
+B, NotReady
+C, SetGeneralScriptFailureBlock, ""
+C, LogTestFailure, "UICatalog App state may not be as expected.", ^detail

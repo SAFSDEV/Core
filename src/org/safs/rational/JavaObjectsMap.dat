@@ -1,0 +1,665 @@
+# 06/30/2003
+# JavaObjectMap.DAT
+# 07/08/2003 CANAGL Corrected for use of # as comment
+# 08/04/2003 CANAGL Adding some doc to the file.
+#                   Moved some customizations to CustomJavaObjectsMap
+# 09/02/2004 CANAGL ScrollPanes and Viewports map to JavaPanel
+# 11/01/2005 CANAGL Enabled comma-separated list of types
+# 12/19/2005 CANAGL Added Eclipse/SWT support.
+# 09/27/2007 CANAGL Added more HTML support.
+# 06/05/2008 CANAGL Added Html.Dialog and Html.DialogButton support
+# 06/06/2008 CANAGL Added Html.LI and Html.UL support
+# 07/11/2008 JunwuMa Added System.Windows.Forms.DataGridView support
+# 07/17/2008 LeiWang Added System.Windows.Forms.TableLayoutPanel
+#			   System.Windows.Forms.CheckBox
+#			   System.Windows.Forms.MenuStrip (ContextMenuStrip, ToolStripMenuItem)
+#			   System.Windows.Forms.MainMenu (ContextMenu, MenuItem)
+#		     	   Added type JavaMenuBar to class javax.swing.JMenuBar
+# 07/23/2008 JunwuMa Modified System.Windows.Forms.DataGrid 
+# 10/09/2008 JunwuMa Adding Flex support
+# 11/12/2008 CANAGL Adding JavaObject support
+# 05/11/2009 CANAGL Support JPopups in JFrames.
+# 07/14/2009 SINGRK Adding javax.swing.JSlider.
+# 07/15/2009 CANAGL Adding WNetscapeEmbeddedFrame for Applets in Firefox
+# 05/27/2010 CANAGL System.Windows.Window and MessageBox to support DotNetWindow, Window
+#
+#============  DO NOT MODIFY THE CONTENTS OF THIS FILE =============
+#
+# This file is used by algorithms searching an Application's GUI 
+# hierarchy for components that match a given recognition string.
+# The recognition strings provide a generic means for us to identify 
+# a component by its class, type, and other characteristics.
+# Modification to this file will alter the way we recognize 
+# and locate components and likely result in unsuccessful automation.
+#
+# This file provides object Class to object Type mapping--and vice-
+# versa.  For example, if we have in our possession a class of 
+# javax.swing.JFrame we will use the map to find that the JFrame 
+# class is of type JavaWindow.  A given class may actually have a 
+# comma-separated list of valid object types mapped.
+#
+# Conversely, if we have a recognition string that says it wants us 
+# to find a "Type=JavaWindow", we use this map to find out which 
+# classes are to be considered a match for "Type=JavaWindow".
+# 
+# This file is used in conjuntion with ObjectTypesMap.dat
+# 
+# For example, when we intend to perform an action on a Java menu 
+# item, we may find the recognition string "Type=JavaMenu" is used 
+# to help identify the menu item.  We will locate the appropriate 
+# object instance based on the recognition string mapping to acceptable 
+# menu classes defined in this file.
+# 
+# Once successful here, we will then search ObjectTypesMap.dat and 
+# see that JMenuBars, JMenus, and JMenuItems (all "JavaMenu"s) are 
+# handled by the "MenuBar" component functions class.  The class 
+# implementing "MenuBar" support will be instanced and invoked for 
+# processing as a result of this search.
+#===================================================================
+
+#Control
+System.Windows.Forms.Control=GenericObject
+System.Windows.Controls.Control=GenericObject
+
+#PopupWindow
+#===================
+javax.swing.DefaultPopupFactory$WindowPopup=JavaPopupWindow, PopupWindow, Window
+javax.swing.Popup$HeavyWeightWindow=JavaPopupWindow, PopupWindow, Window
+System.Windows.Controls.Primitives.Popup=WPFPopupWindow,PopupWindow, Window
+\#32768=WINPopupWindow,PopupWindow, Window, PopupMenu
+
+#Window
+#==========
+javax.swing.JFrame=JavaWindow, Window, JavaPopupContainer 
+javax.swing.JWindow=JavaWindow, Window
+javax.swing.JDialog=JavaWindow, Window
+
+java.awt.Frame=JavaWindow, Window
+java.awt.Dialog=JavaWindow, Window
+java.awt.Window=JavaWindow, Window
+
+System.Windows.Window=DotNetWindow, Window
+System.Windows.MessageBox=DotNetWindow, Window
+
+System.Windows.Forms.Form=DotNetWindow, Window
+
+System.Windows.Controls.Page=WPFWindow, Window
+System.Windows.Controls.PrintDialog=WPFWindow, Window
+System.Windows.Controls.WebBrowser=WPFWindow, Window
+
+FlexApplication=FlexWindow, Window
+
+#Window
+#==========
+Html.HtmlBrowser=Window
+Html.HtmlBrowser.ToolbarButton=PushButton
+Html.Dialog=Window
+Html.TITLE=HTMLTitle
+
+Html.!=HTML
+Html.HtmlDocument=HTML
+Html.HTML=HTML
+Html.HEAD=HTML
+Html.META=HTML
+Html.ADDRESS=HTML
+Html.APPLET=HTML
+
+Html.BODY=HTMLDocument
+
+Html.A=HTMLLink
+Html.AREA=HTMLMapArea
+Html.B=HTML
+Html.BASE=HTML
+Html.BASEFONT=HTML
+Html.BIG=HTML
+Html.BLOCKQUOTE=HTML
+Html.BR=HTML
+Html.BUTTON=PushButton
+Html.CAPTION=HTML
+Html.CENTER=HTML
+Html.CHECKBOX=CheckBox
+Html.CITE=HTML
+Html.CODE=HTML
+Html.COL=HTML
+Html.COLGROUP=HTML
+Html.DD=HTML
+Html.DIV=HTML
+Html.DL=HTML
+Html.DT=HTML
+Html.EM=HTML
+Html.EMBED=HTML
+Html.FONT=HTML
+Html.FORM=HTML
+Html.FRAME=HTMLFrame
+Html.FRAMESET=HTML
+Html.H1=HTML
+Html.H2=HTML
+Html.H3=HTML
+Html.H4=HTML
+Html.H5=HTML
+Html.H6=HTML
+Html.HR=HTML
+Html.I=HTML
+Html.IMG=HTMLImage
+
+Html.INPUT.hidden=Label
+Html.INPUT.image=HTMLImage
+Html.INPUT.text=EditBox
+Html.INPUT.checkbox=CheckBox
+Html.INPUT.password=EditBox
+Html.INPUT.radio=RadioButton
+Html.INPUT.submit=PushButton
+Html.INPUT.button=PushButton
+Html.INPUT.file=EditBox
+Html.INPUT.reset=PushButton
+
+Html.LABEL=Label
+Html.LI=HTML
+Html.LINK=HTML
+Html.MAP=HTMLMap
+Html.NOFRAMES=HTML
+Html.NOSCRIPT=HTML
+Html.OBJECT=HTML
+Html.OL=HTML
+Html.OPTGROUP=HTML
+Html.OPTION=HTML
+Html.P=HTML
+Html.PARAM=HTML
+Html.PASSWORD=EditBox
+Html.PRE=HTML
+Html.RADIO=RadioButton
+Html.SAMP=HTML
+Html.SCRIPT=HTML
+Html.SELECT=List, ComboBox
+Html.SMALL=HTML
+Html.SPAN=HTML
+Html.STRONG=HTML
+Html.STYLE=HTML
+Html.SUB=HTML
+Html.SUBMIT=PushButton
+Html.SUP=HTML
+Html.TABLE=HTMLTable
+Html.TBODY=HTML
+Html.TD=HTMLTableCell
+Html.TEXT=EditBox
+Html.TEXTAREA=EditBox
+Html.TextNode=Label
+Html.TH=HTMLTableHeaderCell
+Html.TR=HTML
+Html.TT=HTML
+Html.U=HTML
+Html.UL=HTML
+Html.VAR=HTML
+
+
+#SplitPane
+#==========
+javax.swing.JSplitPane=JavaSplitPane, SplitPane
+
+System.Windows.Forms.SplitContainer=NETSplitPane, SplitPane
+System.Windows.Forms.Splitter=NETSplitPane, SplitPane
+System.Windows.Controls.GridSplitter=WPFSplitPane, SplitPane
+
+
+#Flex mapping to mx.containers.VDividedBox and mx.containers.HDividedBox
+FlexDividedBox=FlexSplitPane,SplitPane
+
+
+#Java Applets
+#============
+sun.plugin.viewer.frame.IExplorerEmbeddedFrame=AppletFrame, AppletViewer
+sun.plugin.viewer.frame.WNetscapeEmbeddedFrame=AppletFrame, AppletViewer
+sun.plugin.AppletViewer=AppletFrame, AppletViewer
+
+
+#Panel
+#==========
+System.Windows.Forms.Panel=Panel
+System.Windows.Forms.TableLayoutPanel=Panel
+System.Windows.Forms.ContainerControl=Panel
+
+System.Windows.Controls.DockPanel=WPFPanel, Panel
+System.Windows.Controls.Grid=WPFPanel, Panel
+System.Windows.Controls.Canvas=WPFPanel, Panel
+System.Windows.Controls.Panel=WPFPanel, Panel
+System.Windows.Controls.StackPanel=WPFPanel, Panel
+System.Windows.Controls.Viewbox=WPFPanel, Panel
+System.Windows.Controls.VirtualizingStackPanel=WPFPanel, Panel
+System.Windows.Controls.WrapPanel=WPFPanel, Panel
+
+javax.swing.JPanel=JavaPanel, Panel
+javax.swing.JLayeredPane=JavaPanel, Panel
+javax.swing.JApplet=JavaPanel, Panel
+
+java.awt.Panel=JavaPanel, Panel
+java.awt.Applet=JavaPanel, Panel
+javax.swing.JScrollPane=JavaPanel, Panel
+javax.swing.JViewport=JavaPanel, Panel
+
+#Flex mapping to mx.containers.Panel,...Grid,...GridRow,...GridItem
+FlexPanel=FlexPanel,Panel
+#Flex mapping to mx.containers.VBox and mx.containers.HBox
+FlexBox=FlexPanel,Panel
+FlexCanvas=FlexPanel, Panel
+FlexContainer=FlexPanel, Panel
+FlexForm=FlexPanel, Panel
+FlexLayoutContainer=FlexPanel, Panel
+FlexAccordion=FlexPanel, Panel
+
+#PushButton
+#===========
+Button=PushButton
+javax.swing.JButton=PushButton
+javax.swing.JToggleButton=PushButton
+java.awt.Button=PushButton
+.PushButton=PushButton
+System.Windows.Forms.Button=PushButton
+Html.DialogButton=PushButton
+
+System.Windows.Forms.ToolStripButton=NETButton, PushButton, Button
+System.Windows.Forms.ToolBarButton=NETButton, PushButton, Button
+System.Windows.Forms.ToolStripSplitButton=NETButton, PushButton, Button
+
+System.Windows.Controls.Button=WPFButton, PushButton, Button
+
+#Flex mapping to mx.controls.Button
+FlexButton=PushButton
+
+#Calendar
+#==============
+System.Windows.Forms.MonthCalendar=Calendar
+
+
+#CheckBox
+#==============
+javax.swing.JCheckBox=CheckBox
+java.awt.Checkbox=CheckBox
+
+System.Windows.Forms.CheckBox=CheckBox
+System.Windows.Controls.CheckBox=WPFCheckBox, CheckBox
+System.Windows.Controls.Primitives.ToggleButton=WPFCheckBox, CheckBox
+
+#Flex mapping to mx.controls.CheckBox
+FlexCheckBox=CheckBox
+
+#ComboBox
+#==============
+javax.swing.JComboBox=ComboBox
+
+System.Windows.Forms.ComboBox=ComboBox
+System.Windows.Forms.ToolStripComboBox+ToolStripComboBoxControl=ComboBox
+
+System.Windows.Controls.ComboBox=WPFComboBox, ComboBox
+
+#Flex mapping to mx.controls.ComboBox
+FlexComboBox=FlexComboBox, ComboBox
+
+#ComboBoxItem
+#==== Should be ignored
+System.Windows.Controls.ComboBoxItem=WPFComboBoxItem
+
+#DateTime
+#==============
+System.Windows.Forms.DateTimePicker=DateTime
+FlexDateChooser=FlexDate
+FlexDateField=FlexDate
+
+
+#Color
+#==============
+#Flex mapping to mx.controls.ColorPicker
+FlexColorPicker=FlexColor
+
+#GroupBox
+#==============
+System.Windows.Forms.GroupBox=GroupBox
+
+
+#Component
+#==============
+javax.swing.JComponent=JComponent, JavaObject, GenericObject, Generic
+
+FlexObject=FlexComponent,GenericOject,Generic
+
+
+#Label
+#==============
+javax.swing.JLabel=Label
+java.awt.Label=Label
+
+System.Windows.Forms.Label=Label
+System.Windows.Forms.LinkLabel=Label
+System.Windows.Forms.ToolStripLabel=Label
+
+System.Windows.Controls.Label=WPFLabel, Label
+
+
+Html.DialogStatic=Label
+
+FlexLabel=Label
+FlexSliderLabel=Label
+FlexFormItemLabel=Label
+
+#AccessText, TextBlock
+#=======  These may be should be ignored
+System.Windows.Controls.AccessText=WPFAccessText
+System.Windows.Controls.TextBlock=WPFTextBlock
+
+#ListBox
+#==============
+javax.swing.JList=ListBox
+java.awt.List=ListBox
+
+System.Windows.Forms.ListBox=ListBox
+
+System.Windows.Controls.ListBox=WPFListBox, ListBox
+System.Windows.Controls.ListView=WPFListBox, ListBox
+
+#Flex mapping to mx.controls.List
+FlexList=FlexListBox, ListBox
+#Flex mapping to mx.controls.listClasses.ListItemRenderer
+ListItemRenderer=FlexListItemRender,GenericObject,Generic
+
+#ListView
+#==============
+System.Windows.Forms.ListView=ListView
+
+#ListBoxItem, ListViewItem
+#===== These should be ignored
+System.Windows.Controls.ListBoxItem=WPFListBoxItem
+System.Windows.Controls.ListViewItem=WPFListViewItem
+
+#MenuBar
+#==============
+javax.swing.JMenuBar=JavaMenuBar, MenuBar, JavaMenu, Menu
+java.awt.MenuBar=JavaMenuBar, MenuBar, JavaMenu, Menu
+
+System.Windows.Forms.MenuStrip=DotNetMenuBar, MenuBar, Menu
+System.Windows.Forms.MainMenu=DotNetMenuBar, MenuBar, Menu
+
+System.Windows.Controls.Menu=WPFMenuBar, MenuBar, Menu
+
+#Flex mapping to mx.controls.MenuBar
+FlexMenuBar=FlexMenuBar, MenuBar, Menu
+
+
+.Menubar=WinMenuBar, MenuBar, SWTMenu, Menu
+
+#Menu
+#===============
+javax.swing.JMenu=JavaMenu, Menu
+java.awt.Menu=JavaMenu, Menu
+
+#Flex mapping to mx.controls.Menu
+FlexMenu=FlexMenu, Menu
+
+#MenuItem
+#==============
+System.Windows.Forms.MenuItem=DotNetMenuItem,MenuItem
+System.Windows.Forms.ToolStripMenuItem=DotNetMenuItem,MenuItem
+
+System.Windows.Controls.MenuItem=WPFMenuItem,MenuItem
+
+javax.swing.JMenuItem=MenuItem
+javax.swing.JCheckBoxMenuItem=MenuItem
+javax.swing.JRadioButtonMenuItem=MenuItem
+
+java.awt.MenuItem=MenuItem
+java.awt.CheckboxMenuItem=MenuItem
+java.awt.RadioButtonMenuItem=MenuItem
+
+#Flex mapping to mx.controls.menuClasses.MenuBarItem
+MenuBarItem=FlexMenuBarItem, MenuItem
+#Flex mapping to mx.controls.menuClasses.MenuItemRenderer
+MenuItemRenderer=FlexMenuItem, MenuItem
+
+.Menuitem=WinMenuItem, MenuItem
+
+#PopupMenu
+#==============
+javax.swing.JPopupMenu=JavaPopupMenu, PopupMenu
+java.awt.PopupMenu=JavaPopupMenu, PopupMenu
+
+System.Windows.Forms.ContextMenuStrip=DotNetPopupMenu,PopupMenu
+System.Windows.Forms.ContextMenu=DotNetPopupMenu,PopupMenu
+System.Windows.Forms.ToolStripDropDownMenu=DotNetPopupMenu,PopupMenu
+
+System.Windows.Controls.ContextMenu=WPFPopupMenu, PopupMenu
+
+.Menupopup=WinPopupMenu, PopupMenu
+
+#PicutreBox Image
+#================
+System.Windows.Forms.PictureBox=PictureBox
+
+
+#RadioButton
+#==============
+javax.swing.JRadioButton=RadioButton
+
+System.Windows.Forms.RadioButton=RadioButton
+System.Windows.Controls.RadioButton=RadioButton
+
+#Flex mapping to mx.controls.RadioButton
+FlexRadioButton=RadioButton
+
+#ScrollBar
+#==============
+javax.swing.JScrollBar=ScrollBar
+java.awt.Scrollbar=ScrollBar
+javax.swing.JSlider=ScrollBar
+
+System.Windows.Forms.ScrollBar=ScrollBar
+System.Windows.Forms.HScrollBar=ScrollBar
+System.Windows.Forms.VScrollBar=ScrollBar
+
+FlexScrollBar=ScrollBar
+
+#StatusBar
+#==============
+System.Windows.Forms.StatusBar=StatusBar
+System.Windows.Forms.StatusStrip=StatusBar
+
+#SpinControl
+#===========
+System.Windows.Forms.UpDownBase=SpinControl
+System.Windows.Forms.DomainUpDown=SpinControl
+System.Windows.Forms.NumericUpDown=SpinControl
+
+System.Windows.Forms.UpDownBase+UpDownButtons=SpinControl
+System.Windows.Forms.UpDownBase+UpDownEdit=EditBox
+
+
+#TabControl
+#==============
+javax.swing.JTabbedPane=TabControl
+
+System.Windows.Forms.TabControl=TabControl
+System.Windows.Forms.TabPage=TabPage
+System.Windows.Controls.TabControl=WPFTabControl, TabControl
+System.Windows.Controls.TabItem=WPFTabItem, TabItem
+
+#Flex mapping to mx.containers.ViewStack
+FlexViewStack=FlexPanel, Panel
+FlexToggleButtonBar=FlexTabControl, TabControl
+FlexTabNavigator=FlexTabControl, TabControl
+
+.Pagetablist=WinTabControl, TabControl
+
+#Table
+#==============
+System.Windows.Forms.DataGrid=DotnetTable,Table
+System.Windows.Forms.DataGridView=DotnetTable,Table
+
+System.Windows.Controls.GridView=WPFTable,Table
+
+#The WPF Toolkit is a collection of WPF features and components that are being made available outside of the normal .NET Framework ship cycle. 
+#Below class with different name space owned by WPFToolkit, is easy to use and supposed to be supported in SAFS. 
+Microsoft.Windows.Controls.DataGrid=WPFTable,Table
+
+javax.swing.JTable=JavaTable, Table
+
+#Flex mapping to mx.controls.DataGrid
+FlexDataGrid=FlexTable,Table
+#Flex mapping to mx.controls.dataGridClasses.DataGridItemRenderer
+DataGridItemRenderer=FlexGridItemRenderer,GenericObject, Generic
+
+#JCTable
+#==============
+com.klg.jclass.table.JCTable=JCTable
+
+
+#TrackBar
+#==============
+System.Windows.Forms.TrackBar=TrackBar
+
+
+#TreeView
+#==============
+System.Windows.Forms.TreeView=DotNetTreeView, TreeView
+
+System.Windows.Controls.TreeView=WPFTreeView, TreeView
+
+javax.swing.JTree=JavaTree, TreeView
+
+#Flex mapping to mx.controls.Tree
+FlexTree=FlexTreeView, TreeView
+#Flex mapping to mx.controls.treeClasses.TreeItemRenderer
+TreeItemRenderer=FlexTreeItemRenderer,GenericObject,Generic
+
+#TreeViewItem
+#==== This should be ignored.
+System.Windows.Controls.TreeViewItem=WPFTreeViewItem
+
+#TableHeader
+#==============
+javax.swing.table.JTableHeader=JavaTableHeader, TableHeader
+
+
+#EditBox
+#==============
+javax.swing.JTextComponent=EditBox
+javax.swing.JTextArea=EditBox
+javax.swing.JTextField=EditBox
+
+java.awt.TextComponent=EditBox
+java.awt.TextArea=EditBox
+java.awt.TextField=EditBox
+
+System.Windows.Forms.TextBox=EditBox
+System.Windows.Forms.RichTextBox=EditBox
+System.Windows.Forms.DataGridTextBox=EditBox
+
+System.Windows.Controls.PasswordBox=WPFEditBox, EditBox
+System.Windows.Controls.RichTextBox=WPFEditBox, EditBox
+System.Windows.Controls.TextBox=WPFEditBox, EditBox
+
+#Flex mapping to mx.controls.TextInput and mx.controls.TextArea
+FlexTextArea=EditBox
+
+#ToolBar
+#==============
+javax.swing.JToolBar=ToolBar
+ToolbarWindow32=SWTToolBar, ToolBar
+
+System.Windows.Forms.ToolBar=NETToolBar, ToolBar
+System.Windows.Forms.ToolStrip=NETToolBar, ToolBar
+
+System.Windows.Controls.ToolBar=WPFToolBar, ToolBar
+
+FlexButtonBar=FlexButtonBar,ToolBar
+
+#Slider
+System.Windows.Controls.Slider=WPFSlider
+
+FlexSlider=FlexSlider
+
+#Image
+System.Windows.Controls.Image=WPFImage, Image
+
+#Separator
+System.Windows.Controls.Separator=Separator
+
+#others
+#==========
+javax.swing.plaf.basic.BasicInternalFrameTitlePane=BasicInternalFrameTitlePane
+javax.swing.JRootPane=RootPane
+javax.swing.JToolBar$Separator=JToolBarSeparator
+javax.swing.CellRendererPane=CellRendererPane
+
+System.Windows.Forms.ToolStripSeparator=Separator
+
+FlexNumericStepper=FlexNumericStepper
+
+
+#Eclipse SWT
+#===========
+SWT_Window0=SWTWindow, Window
+msctls_progress32=SWTProgressBar, GenericObject, Generic
+.Progressbar=SWTProgressBar, GenericObject, Generic
+.Pushbutton=SWTButton, PushButton
+.Checkbutton=SWTCheckBox, CheckBox
+.Radiobutton=SWTRadioButton, RadioButton
+.Titlebar=SWTTitleBar, GenericObject, Generic
+.Client=SWTPanel, Panel
+.Indicator=SWTIndicator, GenericObject, Generic
+.Scrollbar=SWTScrollBar, ScrollBar
+.Grip=SWTGrip, GenericObject,Generic
+.Statictext=SWTLabel, Label
+.Toolbar=SWTToolBar, ToolBar
+Edit=SWTEditBox, EditBox
+ListBox=SWTListBox, ListBox
+.ComboBox=SWTComboBox, ComboBox
+ComboBox=SWTComboBox, ComboBox
+SysListView32=SWTTable, Table
+SysTreeView32=SWTTree, TreeView
+org.eclipse.swt.browser.WebSite=JavaPanel
+org.eclipse.swt.browser.Browser=JavaPanel
+org.eclipse.swt.custom.CBanner=JavaPanel
+org.eclipse.swt.custom.CCombo=JavaComboBox
+org.eclipse.swt.custom.CTabFolder=JavaTabbedPane
+org.eclipse.swt.custom.TableTree=JavaTree
+org.eclipse.swt.ole.win32.OleFrame=OleEmbeddedFrame
+org.eclipse.swt.widgets.Button=PushButton
+org.eclipse.swt.widgets.Combo=ComboBox
+org.eclipse.swt.widgets.CoolBar=ToolBar
+org.eclipse.swt.widgets.Composite=JavaPanel
+org.eclipse.swt.widgets.Label=JavaLabel
+org.eclipse.swt.widgets.List=ListBox
+org.eclipse.swt.widgets.Menu=JavaComponent
+org.eclipse.swt.widgets.MenuItem=JavaComponent
+org.eclipse.swt.widgets.Shell=JavaWindow
+org.eclipse.swt.widgets.Table=JavaTable
+org.eclipse.swt.widgets.Text=JavaTextComponent
+org.eclipse.swt.widgets.ToolBar=ToolBar
+org.eclipse.swt.widgets.Tree=JavaTree
+org.eclipse.ui.forms.widgets.Form=JavaPanel
+org.eclipse.ui.forms.widgets.TreeNode=JavaPanel
+org.eclipse.ui.forms.widgets.Twistie=JavaPanel
+org.eclipse.ui.forms.widgets.Section=JavaPanel
+
+#For Android
+#Copied from SAFSTestRunner project res/raw/java_objects_map.dat
+com.android.internal.policy.impl.PhoneWindow$DecorView=Window
+android.widget.PopupWindow$PopupViewContainer=Window
+android.widget.ListView=ListView
+android.widget.GridView=GridView
+android.widget.Spinner=Spinner
+android.widget.EditText=EditText 
+android.widget.CheckBox=CheckBox
+android.widget.CompoundButton=CompoundButton
+android.widget.Button=Button
+android.widget.TextView=TextView
+android.view.View=View
+android.widget.TabHost=TabControl
+android.widget.ScrollView=ScrollBar
+android.widget.HorizontalScrollView=ScrollBar
+android.widget.DatePicker=DatePicker
+android.widget.TimePicker=TimePicker
+android.widget.ProgressBar=ProgressBar
+android.widget.SeekBar=ProgressBar
+android.widget.RadioButton=RadioButton
+android.widget.LinearLayout=Layout
+android.widget.FrameLayout=Layout
+android.widget.GridLayout=Layout
+android.widget.RelativeLayout=Layout

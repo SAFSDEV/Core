@@ -1,0 +1,8 @@
+
+T, TestApp, ComboBox, CLICK
+T, TestApp, ComboBox, SELECT, "Item 5"
+T, TestApp, ComboBox, SELECTINDEX, "3"
+T, TestApp, ComboBox, SelectPartialMatch, "9"
+T, TestApp, ComboBox, SELECTUNVERIFIED, "Item 7"
+T, TestApp, ComboBox, SETTEXTVALUE, "Test"
+T, TestApp, ComboBox, SETUNVERIFIEDTEXTVALUE, "MyPassword" 

@@ -1,0 +1,125 @@
+﻿#short_desc { 
+	font: 14px Arial, Verdana, sans-serif; 	color: #006600 }
+	
+#detail_desc { 
+	font: 14px Arial, Verdana, sans-serif; color: #000000 }
+
+#other { 
+	font: 14px Arial, Verdana, sans-serif }
+	
+#deprecated {	
+	color: #CC0000}
+
+#linkdeprecated  {
+	font: bold 14px sans-serif, Arial, Verdana; color: #CC0000; text-decoration: none }  
+
+#bg_color {
+	background: #CCCCCC  }
+	
+big { 
+	font: 20px Arial, Verdana, sans-serif; color: #000000 }
+
+small { 
+	font: 12px Arial, Verdana, sans-serif }
+	
+title { 
+	font: bold 16px Arial, Verdana, sans-serif; color: #006699 }
+	
+A:link    { 
+	font: bold 14px sans-serif, Arial, Verdana; color: #336699; text-decoration: none }   
+
+A:visited { 
+	font: bold 14px sans-serif, Arial, Verdana; color: #336699; text-decoration: none }   
+
+A:hover   { 
+	font: bold 14px sans-serif, Arial, Verdana; color: #6699CC; text-decoration: underline } 
+
+A:active  { 
+	font: bold 14px sans-serif, Arial, Verdana; color: #003366; text-decoration: underline }    
+
+h3 { 
+	font: bold 16px Arial, Verdana, sans-serif; color: #003366 }
+
+h4 { 
+	font: bold 14px Arial, Verdana, sans-serif; color: #000000 }
+
+td { 
+	font: 14px Arial, Verdana, sans-serif color: #000033 }
+
+#td.borderStyle { 
+	border-width:1px;
+	border-color:blue;
+	border-style:solid }
+
+.Support{
+	font-size: 11px;
+	font-weight: 700;
+	padding:0px 1px 0px 1px;
+	border:1px black solid;
+	background: url('Support.gif') 100%;
+}
+.WSupport{
+	font-size: 11px;
+	font-weight: 700;
+	padding:0px 1px 0px 1px;
+	border:1px black solid;
+	background: url('WSupport.gif') 100%;
+}
+.FSupport{
+	font-size: 11px;
+	font-weight: 700;
+	padding:0px 1px 0px 1px;
+	border:1px black solid;
+	background: url('FSupport.gif') 100%;
+}
+.WFSupport{
+	font-size: 11px;
+	font-weight: 700;
+	padding:0px 1px 0px 1px;
+	border:1px black solid;
+	background: url('WFSupport.gif') 100%;
+}
+
+.note{
+	font-size: 80%;
+	font-weight: 700;
+	font-style:italic;
+	background:Silver;
+}
+
+.noteLight{
+	font-size: 80%;
+	font-style:italic;
+	background:Silver;
+}
+
+.engineMarker{
+	color:black;
+	font-size: 11px;
+	font-weight: 700;
+	background:#00FF66;
+	padding:0px 1px 0px 1px;
+	border:1px black solid;
+}
+
+.domainMarker{
+	color:Blue;
+	font-size: 11px;
+	font-weight: 700;
+	background:LightBlue;
+	padding:0px 1px 0px 1px;
+	border:1px black solid;
+}
+
+.explain{
+	font-size:80%;
+	font-style:italic
+}
+.centeredImage{
+	border: 0;
+	width: 600px;
+	height: 400px;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}

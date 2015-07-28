@@ -1,0 +1,18 @@
+
+C	Expressions	ON
+C	LogMessage	"Current test is '" & ^safsActiveStep & "'."
+C	AppMapChaining	ON
+C	AppMapResolve	ON
+
+C	SetApplicationMap	TIDTest.MAP
+C	UseTestCompleteFunctions	ON
+
+C	ClearAppMapCache
+C	SetVariableValues	^result=^customStatusCode
+
+C	OnEqualGotoBlockID	Passed	^result	"-1"
+C	LogTestFailure	"TCAFS ClearAppMapCache failed with error:"& ^result
+C	ExitTable
+
+B	Passed
+C	LogTestSuccess	"TCAFS ClearAppMapCache was successful."

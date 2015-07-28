@@ -1,0 +1,324 @@
+<job id="SetupRationalClasspath">
+<script language="VBScript" src="_SharedFunctions.vbs"/>
+<script language="VBScript" src="_SharedRationalFunctions.vbs"/>
+<script language="VBScript">
+
+'******************************************************************************
+'* 
+'* SetupRationalClasspath.WSF  --  
+'*
+'* Setup System CLASSPATH for IBM Rational tools.
+'* This script only ensures System CLASSPATH settings are made as necessary to 
+'* include IBM Rational JAR files and SAFS Rational JAR files.
+'* 
+'* Required assets for this install:
+'* 
+'*   The target IBM Rational tools must already be installed.
+'*   _SharedFunctions.VBS must exist in the same directory as this script.
+'*     
+'* Environment variables may be modified by these Setup scripts.  Prior to making 
+'* any modification, the current value of the environment variable is saved in 
+'* a "*_SAFSRATIONAL_BAK" backup environment variable.  Note, this backup only occurs 
+'* once--the first time we detect that no backup has been done previously.
+'* 
+'* The affected environment variables and their backups are listed below:
+'* 
+'*     VARIABLE     BACKUP VARIABLE              PURPOSE
+'*     =========    =========================    ============================
+'*     CLASSPATH    CLASSPATH_SAFSRATIONALBAK    Search path for Java classes
+'* 
+'* JAR files added to CLASSPATH as appropriate:
+'*
+'*     \rational_ft.jar 
+'*     \rational_ft_core.jar 
+'*     \com.rational.test.ft.core_*.jar 
+'*     \datapool_api.jar 
+'*     \xerces.jar 
+'*     \rttssjava.jar              
+'*     \xmlParserAPIs.jar
+'*     \xercesImpl.jar
+'*     \safsrational_ft.jar
+'*     \safsrational_xde.jar
+'*     \safsrational_ft_enabler.jar
+'*
+'* Author: Carl Nagle
+'* Original Release: AUG 12, 2005
+'*
+'* Modified:
+'*
+'*	12.16.2005 bolawl - Added CleanEnvironment function to first rid the CLASSPATH 
+'*                          of all Rational required jars so that a proper CLASSPATH
+'*                          is built each time.
+'*
+'*	01.03.2006 canagl - Updated for new installation requirements including 
+'*                          converting to WSF file format for Windows Script Host.
+'*
+'*	02.14.2006 canagl - Removed unnecessary handling of sqarobot.jar
+'*
+'*	12.15.2008 canagl - Modifying for RFT V7 & 8
+'*	09.01.2009 canagl - Added Windows 7 support
+'*
+'* Copyright (C) SAS Institute
+'* General Public License: http://www.opensource.org/licenses/gpl-license.php
+'******************************************************************************
+
+Dim shell
+Dim env
+Dim fso
+Dim exec
+Dim cmdline
+Dim response
+Dim wow6432registry, normalregistry
+
+Const good_wsh_version = 5.6
+Const FT_DIR_SIGNATURE1 = "\IBM\Rational\SDP\"
+Const FT_DIR_SIGNATURE2 = "\IBM\Rational\FTTrial\"
+Const FT_DIR_SIGNATURE3 = "\IBM\SDP\"
+
+Const IM_DIR_SIGNATURE1 = "\IBM\IBMIMShared\"
+Const IM_DIR_SIGNATURE2 = "\IBM\Installation Manager\"
+
+Dim system_path
+Dim message
+Dim timeout
+Dim numerrors
+
+Dim arg
+Dim cr
+Dim q
+
+cr        = chr(13)  'carriage return
+q         = chr(34)  'double quote
+numerrors = 0
+
+normalregistry  = "HKLM\Software\"
+wow6432registry = "HKLM\Software\Wow6432Node\"
+
+'WScript.Interactive = false
+
+Set shell = WScript.CreateObject("WScript.Shell")
+Set env   = shell.Environment("SYSTEM")
+Set fso   = WScript.CreateObject("Scripting.FileSystemObject")
+
+'Check version of WSH prior to proceeding
+'=========================================
+response = checkWSHVersion(good_wsh_version)
+if response = -1 then WScript.Quit
+
+Dim eclipsedir, rationalinstalldir, rationalftdir, v3apachedir, safsdir, safsdatastoredir
+Dim rationalftjar, xercesjar, xercesapijar, xercesimpljar, rttssjavajar
+Dim rationalftcorejar, datapoolapijar, safsxdejar, safsftjar, safsftenablerjar
+Dim eclipsekey, rationalinstallkey, rationalftkey
+
+Dim ibminstalldir, ibmimftcorejar, ibmiminstallkey, ibmiminstalldir, ibmimshareddir
+Dim ibmimpluginsdir, ibmimftcorejar811
+
+'check for 64-bit OS 32-bit Registry
+if RegExistValue(wow6432node) then
+    eclipsekey = wow6432registry & "Rational Software\Rational Test\8\Eclipse Directory"
+    rationalinstallkey = wow6432registry & "Rational Software\Rational Test\8\Install Directory"
+    rationalftkey =  wow6432registry & "Rational Software\Rational Test\8\Rational FT Install Directory"
+    ibmiminstallkey= wow6432registry & "IBM\Installation Manager\location"
+else
+    eclipsekey = normalregistry & "Rational Software\Rational Test\8\Eclipse Directory"
+    rationalinstallkey = normalregistry & "Rational Software\Rational Test\8\Install Directory"
+    rationalftkey =  normalregistry & "Rational Software\Rational Test\8\Rational FT Install Directory"
+    ibmiminstallkey= normalregistry & "IBM\Installation Manager\location"
+end if
+
+ibmimpluginsdir="\IBMIMShared\plugins"
+
+
+'Rational Required Jars
+'----------------------
+Dim RatClassPathArray
+RatClassPathArray = getRationalClasspathArray()
+
+'APPENDS to rationalftdir for XDETester & FT
+'-------------------------------------------
+rationalftjar     = RatClassPathArray(0)
+
+'for FT
+datapoolapijar    = RatClassPathArray(1)
+rationalftcorejar = RatClassPathArray(2)
+
+'for XDE
+xercesjar         = RatClassPathArray(3)
+
+
+'APPENDS to rationalinstalldir
+'-----------------------------
+rttssjavajar = RatClassPathArray(4)
+
+
+'APPENDS to eclipsedir for RobotJ & XDETester
+'--------------------------------------------
+v3apachedir = "\plugins\org.apache.xerces_4.0.7"
+xercesapijar = RatClassPathArray(5)
+xercesimpljar = RatClassPathArray(6)
+
+
+'APPENDS to SAFSDIR for SAFS RATIONAL jars
+'-----------------------------------------
+safsftjar =  RatClassPathArray(7)
+safsxdejar = RatClassPathArray(8)
+safsftenablerjar =  RatClassPathArray(9)
+
+
+'For FT V7 & 8
+'-------------
+ibmimftcorejar = RatClassPathArray(10)
+ibmimftcorejar811 = RatClassPathArray(11)
+
+
+' BACKUP ORIGINAL 'CLASSPATH' (only once)
+'========================================
+Dim original, backup
+
+original = ""
+backup   = ""
+safsdir  = ""
+
+original = env("CLASSPATH")
+backup   = env("CLASSPATH_SAFSRATIONALBAK")
+safsdir  = env("SAFSDIR")
+safsdatastoredir = safsdir &"\datastorej"
+
+if Len(backup) = 0 then env("CLASSPATH_SAFSRATIONALBAK") = original
+
+
+' DETECT and ADD RATIONAL JARS to CLASSPATH
+'==========================================
+On Error Resume Next
+rationalinstalldir = shell.RegRead(rationalinstallkey)
+
+if Len(rationalinstalldir) = 0 then   
+   rationalinstalldir = shell.RegRead(rationalftkey)
+end if
+
+if Len(rationalinstalldir) > 0 then
+
+    'first clean the CLASSPATH of all Rational required jars
+    '-------------------------------------------------------
+    CleanEnvironment "CLASSPATH", RatClassPathArray
+
+    'now start building the entries to be added to CLASSPATH
+    
+    rationalftdir = shell.RegRead(rationalftkey)
+
+    eclipsedir = shell.RegRead(eclipsekey)
+    
+    rationalftjar = rationalftdir & rationalftjar
+    rationalftcorejar = rationalftdir & rationalftcorejar
+    datapoolapijar = rationalftdir & datapoolapijar
+    xercesjar = rationalftdir & xercesjar
+    rttssjavajar = rationalinstalldir & rttssjavajar
+    xercesapijar = eclipsedir & v3apachedir & xercesapijar
+    xercesimpljar = eclipsedir & v3apachedir & xercesimpljar
+    safsftjar = safsdir & safsftjar
+    safsxdejar = safsdir & safsxdejar
+    safsftenablerjar = safsdir & safsftenablerjar
+    
+    'update CLASSPATH
+    if (fso.FileExists(rationalftjar)) then appendEnvironment "CLASSPATH", rationalftjar
+    if (fso.FileExists(datapoolapijar)) then appendEnvironment "CLASSPATH", datapoolapijar
+    if (fso.FileExists(rationalftcorejar)) then appendEnvironment "CLASSPATH", rationalftcorejar
+    if (fso.FileExists(xercesjar)) then appendEnvironment "CLASSPATH", xercesjar
+    if (fso.FileExists(rttssjavajar)) then appendEnvironment "CLASSPATH", rttssjavajar
+    if (fso.FileExists(xercesapijar)) then appendEnvironment "CLASSPATH", xercesapijar
+    if (fso.FileExists(xercesimpljar)) then appendEnvironment "CLASSPATH", xercesimpljar
+    
+    
+    'detect FT 7 or 8
+    ibmiminstalldir = shell.RegRead(ibmiminstallkey)
+
+    if (fso.FolderExists(ibmiminstalldir)) then
+    	ibminstalldir = fso.GetParentFolderName(ibmiminstalldir) 
+    	ibmimpluginsdir = ibminstalldir & ibmimpluginsdir
+    end if
+
+    'strip off leading '\'
+    ibmimftcorejar = Mid(ibmimftcorejar,2)   
+    ibmimftcorejar811 = Mid(ibmimftcorejar811,2)   
+
+    'shell.Popup "FT Core Jar Name: "& ibmimftcorejar, 0, "Debug: Jar Prefix", 64
+    'shell.Popup "FT 811 Core Jar Name: "& ibmimftcorejar811, 0, "Debug: Jar Prefix", 64
+    'shell.Popup "FT Core Jar Dir: "& ibmimpluginsdir, 0, "Debug: Jar Folder", 64
+    
+    if Len(ibmiminstalldir) > 0 then
+    	if Len(ibmimpluginsdir) > 0 then    	    
+    	    
+    	    Dim versionedFiles, j, vfn
+
+            'Notes by CANAGL JUL 01, 2010
+            '===================================================================================
+	    'Currently we don't know the version of RFT user is running.
+	    'If 811 com.ibm.rational.test exists we assume this supersedes com.rational.test use
+	    'In 811 we believe 'com.ibm...ft.corecomponents_' does not have to be in the CLASSPATH.
+	    'We believe pre-811 'com.rational...ft.core_' *might* have to be in the CLASSPATH.
+	    'However, 'com.rational...ft.core_' in the CLASSPATH with 8111 can prevent RFT from seeing Java clients.
+            '===================================================================================
+
+    	    versionedFiles = getVersionedFileNameArray( ibmimpluginsdir, ibmimftcorejar811 )
+    	    if UBound(versionedFiles) > 0 then
+	        'CANAGL do not add 'com.ibm.rational.test.ft.corecomponents_*' to the CLASSPATH
+	    else
+	        'CANAGL add 'com.rational.test.ft.core_*' to the CLASSPATH
+    	        versionedFiles = getVersionedFileNameArray( ibmimpluginsdir, ibmimftcorejar )
+    	        if UBound(versionedFiles) > 0 then
+		    For j = 0 to UBound(versionedFiles)-1
+		        vfn = versionedFiles(j)
+		        'shell.Popup "Versioned Name #"& j+1 &": "& vfn, 0, "Debug: Jar Name", 64
+		        vfn = ibmimpluginsdir &"\"& vfn
+		        
+		        'shell.Popup "Versioned File Name: "& vfn, 0, "Debug: Jar Name", 64
+		        
+		        if Right(vfn, 4) = ".jar" then
+		            appendEnvironment "CLASSPATH", vfn		    	
+		        end if
+		    Next    	    
+    	        end if
+    	    End If
+    	end if
+    	
+    	'cleanup some old project datastore files, present
+    	cleanRFTProjectDatastore safsdatastoredir
+    	
+    end if
+    
+    
+    
+    'detect older FT or XDE  
+    if (InStr(1, rationalftdir, FT_DIR_SIGNATURE1, 1)> 0) then
+    
+        if (fso.FileExists(safsftjar)) then appendEnvironment "CLASSPATH", safsftjar
+    
+    elseif (InStr(1, rationalftdir, FT_DIR_SIGNATURE2, 1)> 0) then
+    
+        if (fso.FileExists(safsftjar)) then appendEnvironment "CLASSPATH", safsftjar
+    
+    elseif (InStr(1, rationalftdir, FT_DIR_SIGNATURE3, 1)> 0) then
+    
+        if (fso.FileExists(safsftjar)) then appendEnvironment "CLASSPATH", safsftjar
+    
+    else
+        if (fso.FileExists(safsxdejar)) then appendEnvironment "CLASSPATH", safsxdejar
+    end if
+
+    if (fso.FileExists(safsftenablerjar)) then appendEnvironment "CLASSPATH", safsftenablerjar
+
+else
+    message = "IBM Rational JAR files cannot be found."& cr & cr
+    message = message & "CLASSPATH cannot be updated."
+    shell.LogEvent 4, message
+    'WScript.Echo message
+    shell.Popup message, 4, "No IBM Rational Tools Detected", 64
+end if
+On Error Goto 0
+
+Set shell = nothing
+Set fso   = nothing
+Set exec  = nothing
+
+</script>
+</job>

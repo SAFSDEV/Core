@@ -1,0 +1,25 @@
+﻿presetPosition="Coords=200,400,640,480;Status=NORMAL"
+URL_Google=http://www.google.com/
+;For user in China, please use the following url
+;URL_Google=https://www.google.com.hk/
+
+
+[GoogleWindow]
+GoogleWindow="Type=Window;Caption={Google*}"
+Document="Type=HTMLDocument;Index=1"
+
+EditBox="Type=EditBox;name=q"
+PushButtonG="Type=PushButton;name=btnK"
+PushButtonI="Type=PushButton;name=btnI"
+
+LinkNotExist="Type=HTMLLink;HTMLId=gb_0"
+LinkWeb="Type=HTMLLink;HTMLId=gb_1"
+LinkImage="Type=HTMLLink;HTMLId=gb_2"
+LinkVideo="Type=HTMLLink;HTMLId=gb_12"
+LinkMaps="Type=HTMLLink;HTMLId=gb_8"
+LinkNews="Type=HTMLLink;HTMLId=gb_5"
+LinkShopping="Type=HTMLLink;HTMLId=gb_6"
+LinkGmail="Type=HTMLLink;Index=7"
+
+[GoogleSearchWindow]
+GoogleSearchWindow="Type=Window;Caption={Google Search*}"

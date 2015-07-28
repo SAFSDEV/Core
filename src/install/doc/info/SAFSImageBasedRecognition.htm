@@ -1,0 +1,516 @@
+<html>
+<head>
+<title>SAFS Image-Based Recognition</title>
+</head>
+<body><a name="top"/>
+<h1>SAFS Image-Based Recognition</h1>
+
+<small>Originated: Sept 09, 2008<br/>
+Updated: Oct 27, 2010 -- Update on OCR and PerImageModifiers.<br/>
+Updated: Dec 13, 2013 -- Update on new Fuzzy Matching.<br/>
+<p>
+Contents: <a href="#walkthru">Walk-Thru</a>, <a href="#syntax">Syntax</a>, <a href="#perimagemodifiers">PerImageModifiers</a>, <a href="#images">Images</a>, <a href="#fuzzymatching">FuzzyMatching</a>, <a href="#commands">Commands</a>, <a href="#more">more...</a>
+</small>
+<p>
+One of the big issues facing todays test automator is the fast-pace in which tools and application technologies are changing.  Applications might be developed in Java Swing, or RCP\SWT, or .NET 2.0, or 3.0, AJAX, Adobe Flex, Google's GWT\Chrome, Delphi, or PowerBuilder; and they might be running in IE6, or IE7, or Firefox 2.0, or Firefox 3.0 or who-knows-what else.
+<p>
+Tool manufacturers can hardly keep pace with the needs of cutting edge application testers.  If you are tasked with testing newer or novel technologies then it is usually difficult to find a tool that can work in that environment early in the development and testing lifecycle.  When the tools you have can't support the technologies you need to test you need to turn to something else.  This is a good time to consider Image-Based testing.
+<p>
+Image-Based testing allows us to test virtually anything that can be displayed on the screen.  It doesn't matter what the underlying technology is, if it is visible on the screen then we can interact with it.
+<p>
+The SAFS Framework to-date has largely been based on "Object-Based" testing and <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSComponentRecognition.htm"alt="SAFS Component Recognition Doc" target="reference">SAFS Component Recognition</a>.  With Image-Based testing we must now expand our recognition syntax to allow for testing based on finding and interacting with graphics on the screen.
+<hr><a name="walkthru"/>
+<small><a href="#top">Top</a>, <a href="#syntax">Syntax</a>, <a href="#perimagemodifiers">PerImageModifiers</a>, <a href="#images">Images</a>, <a href="#fuzzymatching">FuzzyMatching</a>, <a href="#commands">Commands</a>, <a href="#more">more...</a></small>
+<h2>A Walk-Thru:</h2>
+<p>
+Test records for image-based testing are the same as they are for object-based testing:
+<p><b>
+<ul>Test Records:
+<p>
+T,  IExplorer,  Maximize,  Click<br>
+T,  IExplorer,  Restore,  Click<br>
+T,  IExplorer,  Close,  Click<br>
+</ul></b>
+<p>
+The friendly names for the "window" and the "component" are mapped in the application map the same as for object-based tests, but the syntax facilitates image-based testing:
+<p><b>
+<ul>IExplorer App Map Entry:
+<p>
+[IExplorer]</b><br>
+IExplorer="Image=&lt;imagepath>"<br>
+</ul>
+<p>
+<i>&lt;imagepath</i> can be the full path to a single image or to a directory containing multiple images.  Multiple images are necessary if the target image is different in different environments.  For example, on different platforms, or different versions of the application or operating system.  The framework will search the screen for each of the images in the directory until it finds the match.
+<p>
+<i>&lt;imagepath></i> can also be an incomplete 'relative' path to a single image or to a directory of images.  The specified path can be relative to the SAFS project directory, or to the SAFS project\Datapool directory.
+<p>
+<b>Sample &lt;imagepath>:</b>
+<p><ul>
+Full Path: <br>
+<b>IExplorer</b>="Image=C:\SAFSProject\Datapool\IExplorer\AnchorIcoVista.BMP"<br>
+<img src="IExplorerAnchorVista.jpg" alt="IExplorer Icon"><br>
+Relative Path: <br>
+<b>IExplorer</b>="Image=IExplorer\"<br>
+</ul>
+<p>
+Right away we can tell that finding the IExplorer icon in the top-left of the titlebar does not give us enough information to locate significant areas within the IExplorer window.  We can find any individual image this way and act on areas relative to it.  But in many cases it will be beneficial to identify more specific bounds for the area we want to search or act upon.
+<p>
+We can enhance our IExplorer recognition to include an image to the right of the anchor that identifies the width or right-side bounds of the area of interest.  We can add an ImageRight or ImageR modifier to find the Close icon in the titlebar.  The framework knows to search only within the narrow band to the right of the anchor icon for this ImageR image.
+<p>
+<b>Enhanced &lt;imagepath>:</b>
+<p><ul>
+Full Path: <br>
+<b>IExplorer</b>="Image=C:\SAFSProject\Datapool\IExplorer\AnchorIcoVista.BMP;ImageR=C:\SAFSProject\Datapool\Titlebar\Close\CloseIcoVista.BMP"<br>
+<img src="TitlebarCloseVista.jpg" alt="Titlebar Close Icon"><br>
+Relative Path: <br>
+<b>IExplorer</b>="Image=IExplorer\;ImageR=Titlebar\Close\"<br>
+</ul>
+<p>
+By capturing these two small images, we are now able to complete our App Map and execute all three of the test records listed above. This works because we used two images to define the area of interest of our "window" and the framework knows to only seek "components" within this area of interest.
+<p>
+<img src="IExplorerTitlebarVista.jpg" alt="IExplorer Titlebar">
+<p><b>
+<ul>IExplorer App Map Entries:
+<p>
+[IExplorer]</b><br>
+IExplorer="Image=IExplorer\;ImageR=Titlebar\Close\"<br>
+Maximize="Image=Titlebar\Close\;Hotspot=-17"<br>
+Restore="Image=Titlebar\Close\;Hotspot=-17"<br>
+Minimize="Image=Titlebar\Close\;Hotspot=-35"<br>
+Close="Image=Titlebar\Close\"<br>
+</ul>
+<p>
+As you see we can also define Hotspots that tell the framework to act on a point relative or offset from the location where an image was actually found.  We specified Hotspot=-12 (12 pixels to the left) of the Close icon to act on the Maximize and Restore controls without having to capture their images.
+<p>
+<hr><a name="syntax"/>
+<small><a href="#top">Top</a>, <a href="#walkthru">Walk-Thru</a>, <a href="#perimagemodifiers">PerImageModifiers</a>, <a href="#images">Images</a>, <a href="#fuzzymatching">FuzzyMatching</a>, <a href="#commands">Commands</a>, <a href="#more">more...</a></small>
+<h2>Image-Based Recognition Syntax</h2>
+<p>
+<dl>
+<dt><b>Image=</b>
+<p><dd>
+The primary anchor image to seek identifying the item or area of interest on the screen.  When seeking a "window" mapping the entire screen is searched for this image. When seeking a "component" mapping the search area is limited to the area of interest found for the "window" mapping.  The bounds of the area of interest can be expanded by using the optional ImageR and ImageB items described below.
+<p>
+Sample: <p>
+IExplorer="Image=&lt;imagepath>"
+<p>
+<dt><b>ImageR|ImageWidth|ImageR|ImageRight=</b>
+<p><dd>
+Optional. A second (and, or third) image to seek to expand the area of interest to the right of the anchor image. This expands the width of the area of interest.  This can be used with 'ImageH=' to fully identify the area of interest rectangle by width and height.
+<p>
+Sample: <p>
+IExplorer="Image=&lt;imagepath>;ImageR=&lt;imagepath>"
+<p>
+<dt>
+<b>ImageH|ImageHeight|ImageB|ImageBottom=</b>
+<p><dd>
+Optional. A second (and, or third) image to seek to expand the area of interest down from the anchor image. This expands the height of the area of interest.  This can be used with 'ImageR=' to fully identify the area of interest rectangle by width and height.
+<p>
+Samples:<p>
+IExplorer="Image=&lt;imagepath>;ImageH=&lt;imagepath>"<br>
+IExplorer="Image=&lt;imagepath>;ImageW=&lt;imagepath>;ImageH=&lt;imagepath>"<br>
+IExplorer="Image=&lt;imagepath>;ImageB=&lt;imagepath>;ImageR=&lt;imagepath>"<br>
+<p>
+<dt>
+<b>ImageText=</b>
+<p><dd>
+An IBT search mode used to locate a component (non-top window) via OCR text. No recognition image needs to be stored for the component.  Only the Tesseract OCR engine supports it at this time. This mode can help SAFS IBT locate a child component without resorting to stored images.
+<p>
+This mode is not well supported for NLS testing at this time, and the accuracy of the Tesseract OCR could be better. However, if the text you seek is reliably found by this method it saves on having to capture and maintain child recognition images.
+<p>
+This mode supports the use of the following modifiers to fine tune the search and the ultimate point of interest:
+<p>
+<ul>
+<table cellpadding=3>
+<tr><td><i>SearchRect</i><td>Limit the area of the search in the "window" area.
+<tr><td><i>Index</i><td>Find the Nth match.
+<tr><td><i>PointRelative</i><td>Default Hotspot relative to the text location.
+<tr><td><i>Hotspot</i><td>Coordinate offset relative to the Default Hotspot.
+</table>
+</ul>
+<p>
+Samples:<p>
+Component="ImageText=Log Off"<br>
+<p>
+<dt><b>Index|Ind=</b>
+<p><dd>
+Optional. Specifies to find the Nth instance of the anchor image.  The first instance is N=1 which will be sought by default if Index is not specified.
+<p>
+Samples:<p>
+IExplorer="Image=&lt;imagepath>;Index=3"<br>
+IExplorer="Image=&lt;imagepath>;Index=3;ImageR=&lt;imagepath>"<br>
+<p>
+<dt><b>BitTolerance|BT=</b>
+<p><dd>
+Optional. Specifies the integer percentage (1-100) of image bits or pixels that must match for an image to be considered a successful match.  The default is, of course, 100.  This means ALL pixels must match unless some other BitTolerance is specified. NOTE: BitTolerance must be less than 100 for fuzzy logic to be be invoked by the search algorithm. See <a href="#fuzzymatching" >Fuzzy Matching</a> for more information.
+<p>
+Samples:<p>
+IExplorer="Image=&lt;imagepath>;BitTolerance=70"<br>
+IExplorer="Image=&lt;imagepath>;ImageR=&lt;imagepath>;BT=75"<br>
+<p>
+<dt>
+<b>Hotspot|HS=</b>
+<p><dd>
+Optional.  The X,Y offset for specific actions like Click relative to the overall area of interest.  The default Hotspot is the center of the area of interest and X,Y offsets specified in the recognition string are generally relative to this center point.  Negative values for X and Y are allowed and will be clipped to screen edge as needed.  The X,Y offset values can be separated by a comma or a space char.
+<p>
+Samples:<p>
+Close="Image=&lt;imagepath>;Hotspot=offsetX,offsetY"<br>
+Close="Image=&lt;imagepath>;Hotspot=-12"<br>
+Close="Image=&lt;imagepath>;Hotspot=-12,0"<br>
+Close="Image=&lt;imagepath>;Hotspot=-12 3"<br>
+Close="Image=&lt;imagepath>;Hotspot= ,3<br>
+Close="Image=&lt;imagepath>;Hotspot=0,3<br>
+<p>
+<dt><b>PointRelative|PR=</b>
+<p><dd>
+Optional.  The PR Value is used to change the default location of the Hotspot for the area of interest.  For example, we can change the default hotspot to be "TopLeft" or "BottomRight".  If a Hotspot= value is also specified then the Hotspot= offsets are relative to this PR value.
+<p>
+Valid PR= values are:
+<p><pre>
+  TopLeft       TL
+  TopCenter     TC
+  TopRight      TR
+  LeftCenter    LC
+  Center        C
+  RightCenter   RC
+  BottomLeft    BL
+  BottomCenter  BC
+  BottomRight   BR
+</pre><p>
+Samples:<p>
+Maximize="Image=&lt;imagepath>;PointRelative=LeftCenter"<br>
+Maximize="Image=&lt;imagepath>;PR=LC;Hotspot=-5" (5 pixels from the left edge vertically centered)<br>
+Maximize="Image=&lt;imagepath>;HS=0,5;PointRelative=BottomRight" (5 pixels below the bottom right corner)<br>
+<p>
+<dt><b>SearchRect|SR=</b>
+<p><dd>
+Optional. SearchRect alters the area X,Y,Width, and Height searched for a target image.  For a "window" mapping, SearchRect can alter the area of the screen searched.  For a "component" mapping, SearchRect alters the search rectangle relative to the found "window" area.
+<p>
+For component searches, SearchRect can now be used to expand or modify the area to be searched--not just reduce the scope of a search.  This enables very creative component searches that can actually be almost anywhere relative to the window rectangle previously found.
+<p>
+X,Y,W,and H are individually optional and their presence or absence will define or modify the search rectangle accordingly.  Missing X and\or Y values will default to 0.  Missing W and\or H values will default to the maximum width and height of the screen when searching for a window image and default to the width and height of the window rectangle when searching for a component relative to the window.
+<p>
+Coordinates can be comma OR space delimited, but only use one or the other.
+<p>
+All values can be absolute or can be specified as a percentage.  For component searches relative to a window the percentage is not limited to 100%.  For example, it is reasonable to expand the width of a search rectangle by more than 100%.  All percentages for component searches are considered to be percentage of window width and height NOT window position(X,Y) or screen width and height(W,H).
+<p>
+Window Search Samples:<p><pre>
+TopEdgeItem="Image=&lt;imagepath>;  SearchRect=0,0, ,75" (Search only the top 75 pixels)
+RightEdgeItem="Image=&lt;imagepath>;SR=750,0"        (Start search 750 pixels from left)
+LeftEdgeItem="Image=&lt;imagepath>; sr=0,0,25%"     (Search only the left 25% of screen)
+TaskBarItem="Image=&lt;imagepath>;  SR=0,90%"     (Search only the bottom 10% of screen)
+</pre>
+<p>
+Component Search Samples:<p><pre>
+a) TitleBarItem="Image=&lt;imagepath>;  SearchRect= ,  , , 10%"
+b) OffsetTitlebarItem="Image=&lt;imagepath>;SR=0,-15, 10, 120%"
+c) LeftSideItem="Image=&lt;imagepath>; sr= -150%, -5, 160%, 30"
+</pre>
+<p>
+<b>a) </b>The <b>TitleBarItem</b> SearchRect above indicates that only the top 10% of the found window rectangle should be searched for the required component image.  This limits the search to what is often considered to be the Titlebar of a window.<br>
+(<i>Of course, we aren't always looking for a window.  Sometimes we are just looking for a reference image anywhere on the screen.</i>)
+<p>
+EXAMPLE TitleBarItem SearchRect= 0, 0, 0, 10%
+<p>
+<ul>
+Window rectangle for the component search was: x=400, y=200, w=100, h=300
+<p>
+Modified rectangle for the component search is: x=400, y=200, w=100, <b>h=30</b>
+</ul>
+<p>
+<b>b) </b>The <b>OffsetTitlebarItem</b> SearchRect shows we want to start our search 15 pixels higher (y-15) than we otherwise would search.  This is useful if the component image we are seeking is not exactly inline or inside the window rectangle we are working with.  This SearchRect is also expanding the width of our search by 10 pixels (w+10) and the height of our search by 120% (h*120%).<br>
+(<i>We often want to alter the width and\or height of the search to accomodate changes we might have made to the x and y coordinates for the start of the search.</i>)
+<p>
+EXAMPLE OffsetTitlebarItem SearchRect= 0, -15, 10, 120%
+<p>
+<ul>
+Window rectangle for the component search was: x=400, y=200, w=100, h=300
+<p>
+Modified rectangle for the component search is: x=400, <b>y=185, w=110, h=360</b>
+</ul>
+<p>
+<b>c) </b>The <b>LeftSideItem</b> SearchRect shows an example where we aren't actually looking for something inside our "window".  Here we are actually trying to find an image that is actually to the left of our initial window image--outside the bounds of the "window".  In this case, we are changing the component search rectangle 'x' coordinate to move left of the window by 150% (w*150%).  If the window rectangle is 50 pixels wide then we are moving the start of our component search(x) 75 pixels to the left of the window rectangle.  This SearchRect is also expanding our search rect 5 pixels higher(y-5), making the search width 160% greater(w*160%), and adding 30 pixels to the height of the search(h+30).
+<p>
+EXAMPLE LeftSideItem SearchRect= -150%, -5, 160%, 30
+<p>
+<ul>
+Window rectangle for the component search was: x=400, y=200, w=100, h=300
+<p>
+Modified rectangle for the component search is: <b>x=250, y=195, w=160, h=330</b>
+</ul>
+<p>
+Notice how the LeftSideItem will be sought to the left of the original "window" and not inside it.
+<p>
+<dt>
+<hr><a name="perimagemodifiers"/>
+<small><a href="#top">Top</a>, <a href="#walkthru">Walk-Thru</a>, <a href="#syntax">Syntax</a>, <a href="#images">Images</a>, <a href="#fuzzymatching">FuzzyMatching</a>, <a href="#commands">Commands</a>, <a href="#more">more...</a></small>
+<h2>'UsePerImageModifiers'</h2>
+<p><dd>
+We have added the capability for a different SearchRect, Index, and BitTolerance to be specified for every image in a multi-image definition--like the kind generally used to identify the corners of a Window. &nbsp;An example using SearchRect is shown below:
+<p>
+<ul>Win="Image=image\topleft.tif;SR=,,,20%;ImageW=image\topright.tif;SR=0,-10,100%,30"</ul>
+<p>
+To enable this feature, you must set the following in your test INI file:
+<p><ul>
+<b>[SAFS_IBT]</b><br>
+...<br>
+<b>UsePerImageModifiers=TRUE</b><br>
+</ul>
+<p>
+Without UsePerImageModifiers set to TRUE, the first modified SearchRect found will be applied to the initial anchor image (Image=) only, and no modified SearchRect will be applied to ImageW or ImageH images. &nbsp;The same per-image usage is made available for Index and BitTolerance with this setting.
+<p>
+UsePerImageModifiers is actually correcting a defect in the original implementation. &nbsp;It was always intended to work this way. &nbsp;However, we have retained the old "broken" functionality as default to retain backward compatibility with existing tests.
+</dl>
+<p>
+<hr><a name="images"/>
+<small><a href="#top">Top</a>, <a href="#walkthru">Walk-Thru</a>, <a href="#syntax">Syntax</a>, <a href="#perimagemodifiers">PerImageModifiers</a>, <a href="#fuzzymatching">FuzzyMatching</a>, <a href="#commands">Commands</a>, <a href="#more">more...</a></small>
+<h2>Image Formats for Image-Based Recognition</h2>
+<p>
+Icons or images stored for screen matching must be in one of the formats supported by the JAI API:
+<p>
+<ul>
+<li><b>BMP</b>
+<li><b>FPX</b>
+<li><b>GIF</b>
+<li><b>JPEG</b>
+<li><b>PNG</b>
+<li><b>PNM</b>
+<li><b>TIFF</b>
+</ul>
+<p>
+It is important to note that images must be saved in a format that provides no-loss of pixel information.  &nbsp;Stored images must be able to match with 100% picture quality the image snapshots that will be retrieved from the screen. &nbsp;While "BitTolerance" discussed above allows for some degree of comparison fuzziness, it will usually not be able to compensate for stored images that cannot reproduce 100% picture quality due to excessive compression or intentional loss of pixel information.
+<p>
+It is also important to note there are differences in display configurations that will likely require separate images to support them. For example, performing the same test in the following display configurations--even on the same machine--might require a different set of images for each configuration:
+<p>
+<ul>
+<li>Normal Workstation Display
+<li>Remote Desktop Display
+<li>Remote Web (ex: Juniper) Display
+</ul>
+<p>
+This is not an issue of screen resolution.  Images stored for a particular Display typically work for most or all screen resolutions on that Display.
+<p>
+This is an issue that each Display is configured for different levels of data compression.  Bitmaps stored for the Normal Display have no data compression and no loss of image information.  The displayed image for the Remote displays is usually compressed--intentionally removing image information.  Because of this, Normal Display images usually will not match Remote Display images.
+<p>
+To compensate for this, it is highly recommended that recognition images always be captured in the display mode that will be used for runtime testing. &nbsp;For example, if you know all testing will be done via Remote Desktop sessions, then it is best to have all recognition images captured and prepared during Remote Desktop sessions.
+<p>
+Note:<b>*** Remote testing over VNC does NOT have this display problem! ***</b>  The target machine is actually using its Normal Display (uncompressed) so the images that work for the Normal Display continue to work locally even when manipulated or viewed remotely.
+<p>
+<hr><a name="fuzzymatching"/>
+<small><a href="#top">Top</a>, <a href="#walkthru">Walk-Thru</a>, <a href="#syntax">Syntax</a>, <a href="#perimagemodifiers">PerImageModifiers</a>, <a href="#images">Images</a>, <a href="#commands">Commands</a>, <a href="#more">more...</a></small>
+<h2>Fuzzy Matching:</h2>
+<p>
+There are occasions where strict image comparisons will not find an exact 1-to-1 match of the target image.  BitTolerance (BT) allows us to get past some of these problems, but not all.  There are cases where dynamic onscreen image dithering, color blending, and transparency can prove almost impossible to make an accurate match of a stored image to a dynamically generated onscreen location.  For these cases, you might want to try Fuzzy Matching.
+<p>
+When fuzzy matching is turned on, and the original algorithm fails to find the image, then it will make a fuzzy logic attempt to match the image.  This algorithm will expand the match attempt for each pixel tested to not just a single pixel at a specified location, but also the 8 pixels adjacent to the pixel being tested.  In this way, inconsequential image dithering and color blending normally causing comparison failures have a better chance of allowing a successful match.
+<p>
+It is important to note, however, that the improved chance of a successful match also heightens the chance of a false match--a "false positive"--indicating a particular location on the screen is an image match when really it is not. This concern makes it critical that the target images stored for matching are truly uniquely identifiable on the screen and not easily matched incorrectly to the wrong location on the screen.  It also means that BitTolerance must be carefully used to help guide the algorithm to correct matches, and not false positives.
+<p>
+It is also important to note that enabling a 9-to-1 fuzzy matching comparison across the entire screen, or any subarea of the screen, is by nature a much larger performance hit than the normal 1-to-1 comparison algorithm.  Consequently...
+<p><b>
+You do NOT want to leave fuzzy matching on unnecessarily. The algorithm can be a huge performance hit when you are conceivably performing nine pixel tests for every 1 pixel test normally attempted.
+</b></p>
+<p>
+To help reduce unnecessary performance hits, the algorithm does NOT attempt fuzzy matching if BitTolerance  (BT) is not specified, or is set to 100--an exact match. Thus, to enable fuzzy matching requires a two-step process.  The user must enable Fuzzy Matching with the <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverCommands&cmd=SetImageFuzzyMatching" target="reference">SetImageFuzzyMatching</a> Driver Command, and the recognition strings for the image(s) to be fuzzy matched must have a BT less than 100.
+<p>
+<u>Example App Map</u>:
+<p><ul><pre>
+[Window]
+;define an area on the screen to be considered our "Window"
+<b>Window=Image=Images\Product\WindowAnchorDir;ImageR=Images\Product\WindowRDir</b>
+
+;define a child within that "Window" space that *might* require fuzzy matching
+<b>Child1=Image=Images\Product\Child1Dir;BT=70</b>
+</pre></ul>
+<p>
+<u>Example TestRecord Usage</u>:
+<p><ul><pre>
+;testing has shown that fuzzy matching not needed here
+<b>T, Window, Window, Click</b>
+
+;testing has shown that fuzzy matching IS needed for Child1
+<b>C, SetImageFuzzyMatching, ON
+T, Window, Child1, Click
+C, SetImageFuzzyMatching, OFF</b>
+</pre></ul>
+<p>
+Note: In the above test records, the search for Window does NOT use fuzzy matching--even when fuzzy matching is turned ON. This is because the App Map recognition string for Window does not specify a BitTolerance (BT).  Thus, only the search for Child1 will take the performance penalty for using fuzzy matching.
+<p>
+<hr><a name="commands"/>
+<small><a href="#top">Top</a>, <a href="#walkthru">Walk-Thru</a>, <a href="#syntax">Syntax</a>, <a href="#perimagemodifiers">PerImageModifiers</a>, <a href="#images">Images</a>, <a href="#fuzzymatching">FuzzyMatching</a>, <a href="#more">more...</a></small>
+<h2>Supported Commands:</h2>
+<p>
+The following commands are supported for Image-Based Testing:
+<p>
+<ul>
+<b>Component Functions:</b>
+<p>
+    <ul><table>
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericObjectFunctions&cmd=Click" target="reference">Click</a><td> &nbsp;&nbsp;a.k.a. &nbsp;&nbsp;<a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericObjectFunctions&cmd=ClickScreenImage" target="reference">ClickScreenImage</a>
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericObjectFunctions&cmd=ClickScreenPoint" target="reference">ClickScreenPoint</a><td>Absolute location. No Window or Component needed.
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericObjectFunctions&cmd=ClickScreenLocation" target="reference">ClickScreenLocation</a><td>Absolute location + relative offsets. No Window or Component needed.
+    <tr><td>&nbsp;
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericObjectFunctions&cmd=RightClick" target="reference">RightClick</a><td> &nbsp;&nbsp;a.k.a. &nbsp;&nbsp;<a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericObjectFunctions&cmd=RightClickScreenImage" target="reference">RightClickScreenImage</a>
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericObjectFunctions&cmd=RightClickScreenPoint" target="reference">RightClickScreenPoint</a><td>Absolute location. No Window or Component needed.
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericObjectFunctions&cmd=RightClickScreenLocation" target="reference">RightClickScreenLocation</a><td>Absolute location + relative offsets. No Window or Component needed.
+    <tr><td>&nbsp;
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericObjectFunctions&cmd=DoubleClick" target="reference">DoubleClick</a><td> &nbsp;&nbsp;a.k.a. &nbsp;&nbsp;<a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericObjectFunctions&cmd=DoubleClickScreenImage" target="reference">DoubleClickScreenImage</a>
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericObjectFunctions&cmd=DoubleClickScreenPoint" target="reference">DoubleClickScreenPoint</a><td>Absolute location. No Window or Component needed.
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericObjectFunctions&cmd=DoubleClickScreenLocation" target="reference">DoubleClickScreenLocation</a><td>Absolute location + relative offsets. No Window or Component needed.
+    <tr><td>&nbsp;
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericObjectFunctions&cmd=MultiClick" target="reference">MultiClick</a><td> &nbsp;&nbsp;a.k.a. &nbsp;&nbsp;<a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericObjectFunctions&cmd=MultiClickScreenImage" target="reference">MultiClickScreenImage</a>
+    <tr><td>&nbsp;
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericObjectFunctions&cmd=CtrlClick" target="reference">CtrlClick</a><td> &nbsp;&nbsp;a.k.a. &nbsp;&nbsp;<a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericObjectFunctions&cmd=CtrlClickScreenImage" target="reference">CtrlClickScreenImage</a>
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericObjectFunctions&cmd=CtrlRightClick" target="reference">CtrlRightClick</a><td> &nbsp;&nbsp;a.k.a. &nbsp;&nbsp;<a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericObjectFunctions&cmd=CtrlRightClickScreenImage" target="reference">CtrlRightClickScreenImage</a>
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericObjectFunctions&cmd=ShiftClick" target="reference">ShiftClick</a><td> &nbsp;&nbsp;a.k.a. &nbsp;&nbsp;<a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericObjectFunctions&cmd=ShiftClickScreenImage" target="reference">ShiftClickScreenImage</a>
+    <tr><td>&nbsp;
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericObjectFunctions&cmd=LeftDrag" target="reference">LeftDrag</a>
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericObjectFunctions&cmd=RightDrag" target="reference">RightDrag</a>
+    <tr><td>&nbsp;
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericMasterFunctions&cmd=HoverMouse" target="reference">HoverMouse</a>
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericMasterFunctions&cmd=HoverScreenLocation" target="reference">HoverScreenLocation</a><td>Absolute location + relative offsets. No Window or Component needed.
+    <tr><td>&nbsp;
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericMasterFunctions&cmd=InputKeys" target="reference">InputKeys</a>
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericMasterFunctions&cmd=InputCharacters" target="reference">InputCharacters</a>
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericMasterFunctions&cmd=TypeKeys" target="reference">TypeKeys</a><td>No Window or Component necessary.
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericMasterFunctions&cmd=TypeChars" target="reference">TypeChars</a><td>No Window or Component necessary.
+    <tr><td>&nbsp;
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericMasterFunctions&cmd=GuiDoesExist" target="reference">GuiDoesExist</a>
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericMasterFunctions&cmd=GuiDoesNotExist" target="reference">GuiDoesNotExist</a>
+    <tr><td>&nbsp;
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericMasterFunctions&cmd=GetGUIImage" target="reference">GetGUIImage</a>
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericMasterFunctions&cmd=VerifyGUIImageToFile" target="reference">VerifyGUIImageToFile</a>
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericMasterFunctions&cmd=LocateScreenImage" target="reference">LocateScreenImage</a><td>Get location and dimensions of Window or Component.
+    <tr><td>&nbsp;
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericMasterFunctions&cmd=GetTextFromGUI" target="reference">GetTextFromGUI</a><td>OCR Text from Component and save to a variable.
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericMasterFunctions&cmd=SaveTextFromGUI" target="reference">SaveTextFromGUI</a><td>OCR Text from Component and save to a file.
+    </table>
+    </ul>
+    <p>
+    <ul>Examples:
+    <p>
+    <pre>
+    T, WindowID, WindowID , Click
+    T, WindowID, CompID   , Click, "Coords=20;45"
+    T, Notepad , CloseIco , RightClick
+    T, Notepad , Titlebar , DoubleClick
+    T, WindowID, CompID   , LeftDrag, Left2Right
+    T, WindowID, CompID   , LeftDrag, "10;10;200;20"
+
+    T, Notepad , Notepad  , InputCharacters, "Any Text Here"
+
+    T, Notepad , Notepad  , InputKeys, "{TAB}{DOWN 3}{ENTER}%{F4}"
+    T, Notepad , Notepad  , InputKeys, "%{F4}"</pre>
+    <small>The Click commands do not yet support the <i>AppMapSubKey</i> parameter as documented in the SAFS Keyword Reference.</small>
+    <p>
+    Consult the <a href="http://safsdev.sourceforge.net/doc/org/safs/tools/input/CreateUnicodeMap.html" target="reference">InputKeys Map</a> for the format of keystrokes for InputKeys.
+    </ul>
+<p>
+<b>Driver Commands:</b>
+<p>
+    <ul><table>
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverFileCommands&cmd=GetTextFromImage" target="reference">GetTextFromImage</a><td>Text OCR support.
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverFileCommands&cmd=SaveTextFromImage" target="reference">SaveTextFromImage</a><td>Text OCR support.
+    <tr><td>&nbsp;
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverFileCommands&cmd=FilterImage" target="reference">FilterImage</a><td>Remove specific content from image.
+    <tr><td>&nbsp;
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverCommands&cmd=CaptureMousePositionOnScreen" target="reference">CaptureMousePositionOnScreen</a><td>Retrieve the X,Y coordinates of the mouse cursor.
+    <tr><td>&nbsp;
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverCommands&cmd=SetImageDebug" target="reference">SetImageDebug</a><td>Enable verbose IBT debug info when Debug Log is enabled.
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverCommands&cmd=SetImageFuzzyMatching" target="reference">SetImageFuzzyMatching</a><td>Enable enhanced fuzzy logic IBT image comparison when enabled.
+    <tr><td>&nbsp;
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverCommands&cmd=WaitForGUI" target="reference">WaitForGui</a>
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverCommands&cmd=WaitForGUIGone" target="reference">WaitForGuiGone</a>
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverFlowCommands&cmd=OnGuiExistsGotoBlockID" target="reference">OnGuiExistsGotoBlockID</a>
+    <tr><td><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverFlowCommands&cmd=OnGuiNotExistGotoBlockID" target="reference">OnGuiNotExistGotoBlockID</a>
+    </table>
+    </ul>
+    <p>
+    <ul>Examples:
+    <p>
+    <pre>
+    C, WaitForGui     , WindowID , WindowID, 10
+    C, WaitForGui     , WindowID , CompID  , 15
+
+    C, WaitForGuiGone , WindowID , WindowID, 30
+    C, WaitForGuiGone , WindowID , CompID  , 5</pre>
+    <small>The WaitFor commands do support the default 15 second timeout when TIMEOUT is not specified.</small>
+    </ul>
+<p>
+<hr><a name="more"/>
+<small><a href="#top">Top</a>, <a href="#walkthru">Walk-Thru</a>, <a href="#syntax">Syntax</a>, <a href="#perimagemodifiers">PerImageModifiers</a>, <a href="#images">Images</a>, <a href="#fuzzymatching">FuzzyMatching</a>, <a href="#commands">Commands</a></small>
+<h2>Sample Window and Components "recognition strings"</h2>
+(this info needs further development)
+<pre>
+<b>WindowID="Image=[pathTo]\image.ext;[hotspot=x[,y][;pointrelative=constant]"</b>
+=================================================================================</pre>
+This sample syntax shows a single image defining a component or window.
+It shows the optional use of specifying a hotspot and an optional pointrelative location for that hotspot.
+<p>
+If image fullpath is not provided a path relative to the Project is assumed.
+If project-relative path is not found then path relative to project\Datapool
+is assumed.
+<p>
+For a WindowID, the bounds of the single image specifies the total bounds of the deduced rectangle for that "Window" object.  A subsequent CompID search will first attempt to be found within the bounds of that "Window".  If not found, then the top-left corner of the "Window" rectangle defines the top-left coordinate of the remaining area to search on the screen for the CompID image.
+<p>
+Example:
+<pre>
+1. WindowID="Image=\image.ext;HotSpot=2,2;PointRelative=TopLeft"
+
+   (hotspot is 2,2 pixels in from the top-left corner of the
+   deduced rectangle)
+
+2. WindowID="Image=\image.ext;hs=2,2;pr=tl"
+
+   (hotspot is 2,2 pixels in from the top-left corner of the
+   deduced rectangle)
+
+3. WindowID="Image=\image.ext;HS=-10;pr=LeftCenter"
+
+   (hotspot is 10 pixels to the left and vertically centered on
+   the left edge of the deduced rectangle)
+
+4. WindowID="Image=\image.ext;hotspot= ,-10;pr=TopCenter"
+
+   (hotspot is 10 pixels above and horizontally centered on the
+   top edge of the deduced rectangle)
+
+5. WindowID="Image=\image.ext;pr=BottomRight"
+
+   (hotspot is the bottom-right corner of the deduced rectangle)
+
+
+<b>WindowID="Image=[pathTo]\image1.ext;ImageRight=[pathTo]\image2.ext;....."</b>
+===============================================================================</pre>
+This sample syntax shows a double image defining for a component or window.  These two
+images are intended to define the top-left and top-right corners of the object's deduced rectangle (once both images are found).
+<p>
+If image fullpath is not provided a path relative to the Project is assumed.
+If project-relative path is not found then path relative to project\Datapool
+is assumed.
+<p>
+The top-left image1 will be sought first.  Once found,the top-right image2 will be sought within the vertically limited bounds defined by top-left image1 along with any Top and Bottom OutSets, if provided.
+<p>
+For a WindowID, coordinates for top-left image1 and top-right image2 deduces the top-left and width of the bounds for the deduced rectangle for that "Window" object.  The height of the window will be from that deduced top edge down to the bottom of the screen.
+A subsequent CompID search will be limited within these bounds of that "Window".
+<p>
+
+Example:
+<pre>
+1. WindowID="Image=\topleft.ext;ImageR=\topright.ext;HotSpot=0,2;PointRelative=TopCenter"
+
+   Hotspot is 2 pixels down from the top-center edge of the deduced rectangle.
+   The width of the deduced rectangle is limited by the outer coordinates at which
+   topright.ext was found.
+
+2. WindowID="Image=\topleft.ext;ImageR=topright.ext;hs=-10;pr=LeftCenter>
+
+   Hotspot is 10 pixels to the left and vertically centered on the left edge of the deduced
+   rectangle. The width of the deduced rectangle is limited by the outer coordinates at which
+   topright.ext was found.
+</pre><p>
+Recall that ImageBottom(ImageB) can be used to similarly limit the deduced height of the rectangle.  ImageB can be used with the anchor Image alone, or in conjunction with ImageRight to fully define the width and height of the target window or component.
+<p>
+<small><a href="#top">Top</a>, <a href="#walkthru">Walk-Thru</a>, <a href="#syntax">Syntax</a>, <a href="#perimagemodifiers">PerImageModifiers</a>, <a href="#images">Images</a>, <a href="#fuzzymatching">FuzzyMatching</a>, <a href="#commands">Commands</a>, <a href="#more">more...</a></small>
+<p>
+</body></html>

@@ -1,0 +1,98 @@
+
+SAFSReleaseNotes2003.10.29.txt
+
+Release notes for the new (Beta) release of the shared SAFS framework.  This framework is tool-independent and provides the first of many building blocks for future tool-independent enhancements for all SAFS Engines.  Both Rational Robot Classic and Rational RobotJ can independently use the new SAFS framework.  And through the new framework Robot Classic can provide Driver functionality for RobotJ--effectively allowing us to take advantage of both tools during a single test.
+
+The new SAFS pieces are implemented using STAF technology and have been developed in Java.  See http://staf.sourceforge.net for more information on STAF and how it can be used even outside of our SAFS environment.
+
+
+Installation Instructions:
+--------------------------
+
+Installation instructions for this SAFS Framework Beta release can be found in the following files (which are generally executed in this order):
+
+    SetupSAFS.README.txt      Install STAF and SAFS Services
+    SetupRobotJ.README.txt    Setup RobotJ to use STAF and SAFS Services
+    SetupRuntime.README.txt   Runtime Setup for Testing
+
+The above files are contained in the downloaded installation ZIP file and available once all contents of the ZIP file are extracted into some temporary directory.
+
+
+
+So, what does the new SAFS Framework do for me?
+------------------------------------------------
+
+This first release provides tool-independent services for the following SAFS Engine items:
+
+    SAFSVARS -- Truly Global Variables (DDVariables)
+    ================================================
+    Any number of tools or processes can get and set DDVariable values 
+    those values will be shared by all processes and tools on the machine.
+    Thus, Rational Robot can set values that RobotJ can read.  WinRunner, 
+    SilkTest, and even a human sitting at a command prompt have access to 
+    these values.  These values should also be available even to remote 
+    machines that are also running the underlying STAF software.  And like 
+    the existing Robot Classic implementation, the SAFSVARS service will 
+    perform "lookthru" to the SAFSMAPS service to look for "Application 
+    Constants".
+    
+    SAFSMAPS -- Truly Global Application Maps
+    ================================================
+    Tool-independent handling and processing of SAFS Application Maps.
+    This service can open and expose Application Map data to all tools 
+    and processes wishing to access the data.  Robot Classic, RobotJ,  
+    a human at a command prompt can all interrogate App Maps--even from 
+    remote machines that are also running the underlying STAF software.  
+    Like the existing Robot Classic implementation, the SAFSMAPS service 
+    will perform SAFSVARS lookups when component recognition strings are 
+    actually stored in global variables (via DDV: constant, as always).
+    
+    SAFSLOGS -- Truly Global Logging
+    ================================================
+    Any number of tools or processes can now log to the same running test 
+    log.  The SAFSLOGS service supports both the TEXT and XML log formats 
+    familiar with RRAFS users.  In addition, SAFSLOGS exchanges information 
+    with the tool clients (Robot Classic, RobotJ, etc.) so that modes like 
+    logging to the tools' consoles and tool log formats can be enabled 
+    or disabled as we have done in the past.  Also, by using standard 
+    STAF LOG services, the user has access to the running log and can 
+    view log information even while the test is in-progress.  The log need 
+    not be local to the machine running the tests.
+
+
+SAFS-Enabled Rational RobotJ (XDE Tester)
+------------------------------------------
+
+In addition to the above services, this release contains the Java code allowing us to use Rational RobotJ as the first SAFS Engine that is SAFS-enabled.  In other words, Rational RobotJ connects to the new SAFS framework and can be controlled by *ANY* driver that conforms to the framework protocol.  This type of SAFS-enabled Engine does not care who is sending it test records to process.  It simply processes the test records and returns the results to the caller.
+
+This will allow a SAFS-enabled Engine to focus more on implementing Component Functions and Driver Commands and less on rebuilding the entire SAFS Engine infrastructure.
+
+
+What does the Beta Release of the RobotJ Engine support?
+--------------------------------------------------------
+
+Currently, there is a large array of Component Function libraries and commands supporting the testing of Java applications.  The testing of HTML clients is not yet flushed out as deeply as Java clients.  Work is ongoing to add more features for both Web and Java testing.
+
+An ever-growing list of Driver Commands is also supported.  
+
+Keep in mind that the current implementation is for Robot Classic to be the Driver for RobotJ.  This means ALL of the Component Functions and Driver Commands already available via Robot Classic are fully supported.  RobotJ provides some overlap for these commands, but it also provides some new commands not available in Robot Classic.  This actually means that development of new commands or features can be developed in either Robot Classic or RobotJ--whichever is more comfortable to the developer.
+
+
+Why is this a "Beta Release" and not considered "Production"?
+-------------------------------------------------------------
+
+The primary SAFS services of SAFSVARS, SAFSMAPS, and SAFSLOGS are actually fairly stable.  We have been playing with those on our machines for months now.  These services are already in use in production testing environments with and without the RobotJ Engine.
+
+It is the underlying code and documentation for the RobotJ Engine that we must still consider "Beta".  Some of the code is tool-independent.  Some is the required Rational implementation of the abstract tool-independent code.  It is getting better all of the time!
+
+The RobotJ engine works very well.  It is actually being used for production testing on different projects SAFS developers are engaged in.  But it does need to get a little more polished, with a bit more documentation, before we can proudly say this is "production".
+
+Frankly, there are alot of people that want to see this new framework released.  Additionally, having it released in "Beta" form allows us to show the direction being taken, and possibly get more folks interested and involved.
+
+We continue to iron out wrinkles as we find them.  We continue to work on user documentation we know needs to be added.  But we also have the need for some user feedback to learn what is needed--what is missing--and what could be better.
+
+
+Carl Nagle
+SAS Institute
+Project Manager, SAFSDEV
+carl.nagle@sas.com

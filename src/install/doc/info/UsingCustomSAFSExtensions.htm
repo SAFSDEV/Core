@@ -1,0 +1,259 @@
+<html>
+<head>
+<style type="text/css">
+<!--
+.red  { color: red }
+.str  { color: green }
+.grey { color: grey }
+.blue { color: blue }
+-->
+</style>
+<title>Using Custom SAFS Extensions</title>
+<center><big><big><big>Using Custom SAFS Extensions</big><br/>
+SAFSDRIVER Processor Extensions
+</big></big><br/>
+<small>Released 2014.05.21</small></center>
+</head>
+<body bgcolor="#FFFFFF" color="#000000">
+<p>
+This document attempts to provide rudimentary information for a Java developer wishing to add custom support and functionality to the existing SAFS code without modifying the existing code.  This is useful when support for custom controls needs to be added, or when other custom features are desired.  This requires a Java developer familiar with their own Java development environment having the ability to implement a development project referencing SAFS JARS.
+<p><ul>
+<li>SAFS JavaDoc root: <a href="http://safsdev.sourceforge.net/doc/javadoc.html">http://safsdev.sourceforge.net/doc/javadoc.html</a><br>
+<li>Access to SAFS sourcecode is often beneficial for "how stuff works"
+<li>Detailed knowledge of the custom components or other custom features the developer is exposing
+</ul>
+<p>
+Because this type of customization is intended for experienced Java developers, very little general information for preparing the development environment is provided.
+</p><p>
+We must note that extending SAFS <i><b>inside</i></b> the core source is the most desirable of endeavors for generically useful functionality.  That is, if your intended extensions are useful for others, then they should be presented to the community as a proposed enhancement or implemented in the core SAFS code.
+<p>
+If, however, the extension is something very specific to your site or your applications, then this custom extensions feature is what you need to exploit.
+</p><hr>
+<!--
+The latest release includes the following libraries where the custom extensions can reside:
+<ul>
+<li><A href="CustomTestCommands.htm">CustomTestCommands</A></li>
+<li><A href="CustomRecordTypes.htm">CustomRecordTypes</A></li>
+<li><A href="CustomDriverCommands.htm">CustomDriverCommands</A></li>
+<li><A href="CustomStatusUtilities.htm">CustomStatusUtilities</A></li>
+<li><A href="CustomLogUtilities.htm">CustomLogUtilities</A></li>
+<li><A href="CustomUtilities.htm">CustomUtilities</A></li>
+</ul>
+-->
+<H2>How SAFS Invokes Custom Extensions</H2>
+<p>
+There are several different ways to inject customization:
+<p>
+<ul><p>
+<li><a href="https://sourceforge.net/apps/mediawiki/safsdev/index.php?title=SAFS_STAF_Environment" alt="SAFS STAF Environment">Custom engine interface</a> to SAFS <a href="https://sourceforge.net/apps/mediawiki/safsdev/index.php?title=SAFS_Test_Record_Data" alt="SAFS Test Record Data">Test Record Data</a>.
+<li>Customize existing <a href="http://safsdev.sourceforge.net/doc/org/safs/JavaHook.html">Engine Hooks</a> (future doc)
+<li>Entirely custom <a href="http://safsdev.sourceforge.net/doc/org/safs/Processor.html">Processors</a> (future doc)
+<li>Custom TestRecordHelpers (future doc)
+<li>Override or subclass existing Processors (below)
+</ul>
+</p><hr><!------------------------------------------------------------------------------->
+<H3>Override or Subclass Existing Processors</H3>
+</p><p>
+Existing Java-based engines like <a href="http://safsdev.sourceforge.net/doc/org/safs/tools/engines/SAFSROBOTJ.html">IBM Rational Functional Tester(RFT)</a> and <a href="http://safsdev.sourceforge.net/doc/org/safs/tools/engines/SAFSSELENIUM.html">Selenium 2.0 WebDriver</a> typically implement a subclass of TestRecordHelper allowing them to provide engine-specific processors for things like Driver Commands and Component Functions.
+<p>
+The actual order of Processor instantiation attempted is:
+<p>
+<ol><p>
+<li>Custom/Overriding (sub)class first
+<li>Standard class
+</ol>
+<p>
+Thus, using the predefined Package naming convention for each engine we can see that Driver Commands and Component Functions would be instanced in this order:
+<p>
+<ul>
+<li><b>IBM Rational Driver Commands</b>:<p>
+    <ul>
+	<li>org.safs.rational.custom.DCDriverCommands &nbsp;(Your custom class)
+	<li><a href="http://safsdev.sourceforge.net/doc/org/safs/rational/DCDriverCommand.html">org.safs.rational.DCDriverCommands</a> &nbsp;(Standard Processor superclass)
+	</ul>
+<p>
+<li><b>IBM Rational Component Functions</b>:<p>
+    <ul>
+	<li>org.safs.rational.custom.CF(compType) &nbsp;(Your custom class)
+	<li><a href="http://safsdev.sourceforge.net/doc/org/safs/rational/package-summary.html">org.safs.rational.CF(compType)</a> &nbsp;(Standard Processor superclass)
+	</ul>
+	<p>
+<li><b>Selenium WebDriver Driver Commands</b>:<p>
+    <ul>
+	<li>org.safs.selenium.webdriver.custom.DCDriverCommands &nbsp;(Your custom class)
+	<li><a href="http://safsdev.sourceforge.net/doc/org/safs/selenium/webdriver/DCDriverCommand.html">org.safs.selenium.webdriver.DCDriverCommands</a> &nbsp;(Standard Processor superclass)
+	</ul>
+<p>
+<li><b>Selenium WebDriver Component Functions</b>:<p>
+    <ul>
+	<li>org.safs.selenium.webdriver.custom.CF(compType) &nbsp;(Your custom class)
+	<li><a href="http://safsdev.sourceforge.net/doc/org/safs/selenium/webdriver/package-summary.html">org.safs.selenium.webdriver.CF(compType)</a> &nbsp;(Standard Processor superclass)
+	</ul>
+</ul>
+
+<p>
+In general, a custom class should be a subclass of the standard processor it is trying to extend.  The custom class has the opportunity to enhance, replace, and provide all new functionality while still having access to all existing functionality by invoking superclass methods.
+</p><hr><!------------------------------------------------------------------------------->
+<H3>The Custom Processor Extension</H3>
+</p><p>
+For every custom command you wish to handle, you generally need to define a custom keyword to represent that command, and then the function in the code to handle it.
+<p>
+Below is a sample SAFS Driver Command--record type "C"--that will ultimately get handled by the custom Driver Command processor:
+<p>
+<ul><code><b>C,</b> <b class="str">MyCustomCommand</b><b>, AParam, ^MyVar, "Anything At All"</b></code></ul>
+<p>
+Note in the example above how you can pass any number of parameters to the custom code. &nbsp;Consult your specific superclass JavaDoc or sourcecode to find how they are retrieved in your subclass implementation.
+<p>
+A sample SeleniumPlus TestCase invocation of the same custom command:
+<p>
+<ul><code>Runner.command(<b>"MyCustomCommand"</b>, AParam, "^MyVar", "Anything At All");</code></ul>
+<p>
+Below is a sample custom Selenium WebDriver Driver Command Processor intended to handle the <code><b class="str">MyCustomCommand</b></code> Driver Command.<br>
+We need our default custom subclass Constructor to invoke the superclass Constructor.<br>
+The Selenium WebDriver engine implementation suggests we override the superclass <b class="str">localProcess()</b> method, as shown below:
+<p>
+<ul><code><pre>
+<b class="red">package</b> org.safs.selenium.webdriver.custom;
+
+<b class="red">import</b> org.safs.Log; <b class="str">// The Debug Log</b>
+<b class="red">import</b> org.safs.SAFSException;
+<b class="red">import</b> org.safs.StatusCodes;
+
+<b class="red">public class</b> <b>DCDriverCommand</b> <b class="red">extends</b> <b>org.safs.selenium.webdriver.DCDriverCommand</b>{
+
+    <b class="red">public static final String</b> MY_CUSTOM_COMMAND = <b class="str">"MyCustomCommand"</b>;
+
+    <b class="str">/**************************
+    Default Constructor
+    Must initialize superclass
+    **************************/</b>
+    <b class="red">public</b> <b>DCDriverCommand()</b> {  super(); }
+
+    <b class="str">/******************************************************
+    localProcess() function
+    automatically invoked by superclass chain of Processors
+    *******************************************************/</b>
+    <span class="grey">@Override</span>
+    <b class="red">protected void</b> <b>localProcess()</b> {
+
+        <b class="str">// recommended debug message prefix for this method</b>
+        <b class="red">String</b> dbg = getClass().getName()+".localProcess ";
+
+        <b class="str">// handle the incoming command in much the same way the superclass does</b>
+
+        <b class="red">try</b> {
+
+            <b class="str">// command and params are already prepared for us</b>
+
+            <b class="red">if</b>( MY_CUSTOM_COMMAND.equalsIgnoreCase( command )){
+
+                <b class="str">// call our custom function implementation</b>
+
+                doMyCustomCommand();
+            }
+
+            <b class="str">// if we didn't recognize the command at all
+            // our superclass chain will automatically give it a try
+            // assuming it is NOT a custom command that we have implemented</b>
+
+
+        <b class="str">// gracefully handle Exceptions during our processing</b>
+        }<b class="red">catch</b> (SAFSException ex) {
+
+            Log.error(dbg+"error processing command "+ command, ex); <b class="str">// The Debug Log</b>
+            issueErrorPerformingAction(command, ex.getMessage());
+        }
+    }
+
+    <b class="str">/*********************************************
+    doMyCustomCommand() called from localProcess()
+    **********************************************/</b>
+    <b class="red">protected void</b> <b>doMyCustomCommand()</b>{
+
+        <b class="str">// recommended debug message prefix for this method</b>
+        <b class="red">String</b> dbg = getClass().getName()+".doMyCustomCommand ";
+
+        Log.info(dbg+"processing "+ command); <b class="str">// The Debug Log</b>
+
+        <b class="red">String</b> anArg = null;
+
+        <b class="str">// retrieve any parameters if the code expects them</b>
+        iterator = params.iterator();
+        <b class="red">if</b>( iterator.hasNext() ){
+
+            <b class="str">// assign <u>and validate</u> required and optional parameter(s)</b>
+            anArg = iterator.next();
+        }
+
+        <b class="str">// do it</b>
+        <b class="red">boolean</b> success = myWorkOutput();
+
+        <b class="str">// set appropriate status code and pass/fail/debug logging</b>
+        <b class="red">if</b>( success ){
+
+            Log.info(dbg+"successful executing "+ command +" using "+ anArg); <b class="str">// The Debug Log</b>
+            issueGenericSuccessUsing(anArg, null);
+
+        }<b class="red">else</b>{
+
+            Log.error(dbg+"failed when executing "+ command +" using "+ anArg); <b class="str">// The Debug Log</b>
+            issueErrorPerformingActionUsing(anArg, "Something terrible happened!");
+        }
+    }
+}
+</pre></code></ul></p>
+<p>
+Extending SAFS in this way can be trivial or exceeding complex. &nbsp;It all depends on what is trying to be done. &nbsp;Some extensions are easier than others. &nbsp;The developer needs to have a good understanding of the SAFS Processor API they are trying to extend, and the volume of utility libraries that come along with each SAFS engine. &nbsp;That generally comes with experience and exposure to the framework details.
+<p>
+Your best source of code samples are the superclass, or any of the other Processor classes provided for the target engine.
+
+</p><hr><!------------------------------------------------------------------------------->
+<H3>Making Custom Extensions available to SAFS</H3>
+<p>
+Ensuring the new custom classes are visible to SAFS and\or the automation tool that may be executing them is critical. &nbsp;For example, it may be possible the custom classes can reside in their own JAR and simply reside in the CLASSPATH. &nbsp;Some tools--notably IBM Rational Functional Tester using Eclipse--have implemented custom ClassLoaders that may or may not allow the custom extensions to exist in separate JAR files.
+<p>
+Essentially, you have to find what is required (or what works) for your specific tools and environment.
+</p><p>
+SAFS and SeleniumPlus support the automatic dependency inclusion of:
+<p><ul><b class="red">safscust.jar</b></ul>
+<p>
+You should be able to JAR up the custom classes into <b class="red">safscust.jar</b>.  As long as this JAR file is placed in the same directory as the SAFS and/or SeleniumPlus runtime JAR files it should be found along with the custom classes within it.
+</p><hr><!------------------------------------------------------------------------------->
+<H3>Use SAFS Debug Log to Verify Invocation</H3>
+</p><p>
+Read about using the <a href="http://safsdev.sourceforge.net/doc/org/safs/Log.html">SAFS Debug Log</a>.
+<p>
+A (silent) <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSVideo.php">video tutorial</a> on the SAFS Debug Log is also available.
+<p>
+The debug log will show when (and if) a custom processor was successfully invoked. &nbsp;Below is a sample debug log snippet showing the attempts at custom support invocation for the IBM Rational Functional Tester engine--SAFS/RobotJ:
+<p>
+<center>------------</center>
+<code>
+<pre><b class="str">[INFO 17:41:49.322:SAFS/RobotJ: PROC.IPAP2:Trying processor : org.safs.custom.DCDriverCommand<u>@3e103e10</u> ]
+[INFO 17:41:49.322:SAFS/RobotJ: Custom driver commands, FOR NOW< THERE ARE NONE > ]</b>
+[INFO 17:41:49.322:SAFS/RobotJ: DCP.IAPDC:Trying Custom Processors for WaitForGui ]
+[DEBUG 17:41:49.338:SAFS/RobotJ: org.safs.rational.RTestRecordData.getCompInstancePath()  return package name org.safs.rational. ]
+[DEBUG 17:41:49.338:SAFS/RobotJ: PROC.VPCN:trying processor:org.safs.rational.custom ]
+<b class="red">[INFO 17:41:49.369:SAFS/RobotJ: PROC.VPCN:org.safs.rational.custom:java.lang.ClassNotFoundException ]</b>
+[DEBUG 17:41:49.369:SAFS/RobotJ: org.safs.rational.RTestRecordData.getCompInstancePath()  return package name org.safs.rational. ]
+[DEBUG 17:41:49.369:SAFS/RobotJ: PROC.VPCN:trying processor:org.safs.rational.custom.DCDriverCommand ]
+<b class="red">[INFO 17:41:49.400:SAFS/RobotJ: PROC.VPCN:org.safs.rational.custom.DCDriverCommand:java.lang.ClassNotFoundException ]</b>
+[DEBUG 17:41:49.400:SAFS/RobotJ: PROC.VPCN:trying processor:org.safs.rational.custom.custom.DCDriverCommand ]
+<b class="red">[INFO 17:41:49.431:SAFS/RobotJ: PROC.VPCN:org.safs.rational.custom.custom.DCDriverCommand:java.lang.ClassNotFoundException ]</b>
+[INFO 17:41:49.431:SAFS/RobotJ: DCP.IAPDC:Trying SubClass Processors for WaitForGui ]
+[DEBUG 17:41:49.431:SAFS/RobotJ: org.safs.rational.RTestRecordData.getCompInstancePath()  return package name org.safs.rational. ]
+[DEBUG 17:41:49.431:SAFS/RobotJ: PROC.VPCN:trying processor:org.safs.rational. ]
+<b class="red">[INFO 17:41:49.478:SAFS/RobotJ: PROC.VPCN:org.safs.rational.:java.lang.ClassNotFoundException ]</b>
+[DEBUG 17:41:49.478:SAFS/RobotJ: org.safs.rational.RTestRecordData.getCompInstancePath()  return package name org.safs.rational. ]
+<b class="str">[DEBUG 17:41:49.478:SAFS/RobotJ: PROC.VPCN:trying processor:org.safs.rational.DCDriverCommand ]
+[DEBUG 17:41:49.478:SAFS/RobotJ: PROC.VPCN:processorClass: org.safs.rational.DCDriverCommand ]
+[INFO 17:41:49.478:SAFS/RobotJ: PROC.IPAP2:Trying processor : org.safs.rational.DCDriverCommand<u>@24d024d0</u> ]</b></pre>
+</code>
+<center>------------</center>
+<p>
+Note that every <b class="red">ClassNotFoundException</b> above is an indication of a custom class that COULD exist, but does not.
+<p>
+You might also note that <b class="str">org.safs.custom.DCDriverCommand</b> did <i>NOT</i> issue a ClassNotFoundException. &nbsp;That is because the class actually exists! &nbsp;It is a do-nothing sample implementation which simply displays the single debug log message shown.
+
+</p><hr><!------------------------------------------------------------------------------->
+</body></html>

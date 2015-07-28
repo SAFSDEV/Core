@@ -1,0 +1,280 @@
+<html>
+<head><title>SAFS Release Notes</title></head>
+<body>
+<a name="top" />
+<h1><center>
+SAFS Framework Release Notes<br/>
+2007.04.18</center></h1>
+<p>
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>,&#032;
+<a href="#newstuff">New Stuff</a>
+<hr/>
+<a name="definitions" />
+<p>
+<h3><b>Definitions:</b><br/></h3>
+<table border=0 cellspacing=7 >
+<tr><td><b>
+SAFS</b><td><b><a href="http://safsdev.sourceforge.net" target=_blank alt="SAFSDEV Home Page" >
+Software Automation Framework Support</a></b>
+<tr><td><b>
+SAFS Engine</b><td>
+A keyword-driven (aka data-driven) automation tool using SAFS.
+<tr><td><b>
+SAFS/DriverCommands</b><td>
+A SAFS Engine for tool-independent
+<a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverCommands"
+   target=_blank alt="SAFS Driver Commands Reference" >Driver Commands</a>
+<tr><td><b>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/tools/engines/SAFSSELENIUM.html"
+   target=_blank alt="SAFS Selenium Doc" >SAFS/Selenium</a></b><td>
+A SAFS Engine for web client testing using <a href="http://openqa.org/selenium-rc/"
+   target=_blank alt="OpenQA Selenium Site" >Selenium</a> by OpenQA.</td>
+</table>
+
+<hr/>
+<a name="reminders" />
+<small>
+<a href="#top">Back2Top</a>,&#032;
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>,&#032;
+<a href="#newstuff">New Stuff</a>
+</small>
+<p>
+<h3>CRITICAL REMINDERS</h3>
+<p>
+This release of SAFS has been a long-time in the making.  The primary focus of this release was to provide NLS testing support within RRAFS and SAFS. A major push to support Selenium as a web testing engine in SAFS was also performed.  If you contributed any code to the SAFSDEV project for inclusion in a future release please review the new source before assuming your contributed code is included in this release.
+<p><i>
+Because of the extensive NLS effort some generous contributions by third parties are not in this release.  These contributions are slated for another release later this year (2007).  It is not that we do not appreciate and value these contributions, we simply did not have the time and resources to merge, document, and test them while devoted to the NLS and Selenium efforts.</i>
+<p>
+Affected customizations from previous releases:<br/>
+<ul>
+<li>Custom modifications in your SAFS install directories &lt; C:\SAFS\bin > batch files
+(*.bat or *.vbs), or any SAFSTID.INI in the root SAFS install directory &lt; C:\SAFS >.
+</ul>
+<p>
+If you have taken advantage of any of the customization capabilities of this framework,
+then you must take some simple precautions prior to installing this new release.
+Installing a new version of the framework will install new, default versions of
+customizable files.
+<p>
+<b>SAFSTID.INI</b><br/>
+If you have a modified SAFSTID.INI in your install directory, you should make a back-up,
+then evaluate how and if you want to merge with the new file.
+<p>
+<b>SAFS Batch Files</b><br/>
+If you have previously installed the SAFS Framework then you may have manually
+modified batch files or VBS scripts to handle custom project paths.  You will need to
+backup modified files and evaluate how and if you want to merge such changes with the new
+files.
+<p>
+Failure to perform any of these prescribed backups may erase your prior customizations.
+Hopefully, you have backed them up somewhere already as part of your normal ongoing activities.
+Right?!
+<p>
+<b>The highest STAF release that can work with SAFS is STAF 2.6.11 !</b><br/>
+SAFS will not work with STAF 3.x or higher!
+<p>
+<hr/>
+<a name="safstools"/>
+<small>
+<a href="#top">Back2Top</a>,&#032;
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>,&#032;
+<a href="#newstuff">New Stuff</a>
+</small>
+<p>
+STAFWrap.DLL, ComponentFunctions.DLL, DDVariableStore.DLL and associated scripts for registering DVariableStore.DLL
+are included in the SAFS\bin directory.  The SetupSAFS script does register and\or move
+files to system directories as necessary.
+<p>
+COM classes supporting COM access to STAF for use in VBScript and other COM-related
+features exist in the latest version of DDVariableStore.DLL.  Consult the sourcecode in CVS
+or any VBA or COM object browser until more proper documentation is made available.  A very
+rudimentary "RUTHere" test script for this COM STAF interface can be found in
+SAFS\bin\DDVariableStoreTest.VBS .
+<p>
+<hr/>
+<a name="instructions"/>
+<small>
+<a href="#top">Back2Top</a>,&#032;
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>,&#032;
+<a href="#newstuff">New Stuff</a>
+</small>
+<p>
+<h3>Installation Instructions</h3>
+
+<dl><dt>
+<b>Review Backup Reminders in <a href="#reminders">Critical Reminders</a></b>
+<p><dd>
+If you have not done so, review the <a href="#reminders">Critical Reminders</a> concerning
+backups of locally modified or customized files from previous releases.  I'd hate to say,
+"I told ya so."
+<p></dd><dt>
+<b>Short-N-Sweet install instructions:</b>
+<p>
+A Java Runtime Environment (JRE) and Windows Scripting Host V5.6 or later is required.  Refer
+to <a href="http://safsdev.sourceforge.net/sqabasic2000/SetupSAFS.README.htm" >SetupSAFS.README</a>
+in the Java Runtime and Windows Scripting Host sections for more details and install
+information for those tools.
+<p><dd>
+<ol>
+<li><b>Extract the SAFSFramework .ZIP into ANY directory.</b><br/>
+Extract all files of the ZIP file into ANY directory.&nbsp; A good choice might be something
+like C:\TEMP, or even C:\SAFS.&nbsp; RRAFS (Rational Robot) users might do best to extract into
+their ".\Rational\Rational Test\sqabas32" directory. (Although this should not be
+necessary with a RRAFS release since that includes the SAFS install files already. Only do
+this if you are upgrading SAFS without upgrading RRAFS.)
+<p>
+Enable "OVERWRITE Existing Files" if you have a previous release.
+<p>
+<li><b>Run the extracted <b>SetupSAFS.wsf</b> script.</b><br/>
+In Windows Explorer, locate "SetupSAFS.wsf" in that directory and double-click to execute
+it.<br/>
+(Note: previous releases used SetupSAFS.vbs.&nbsp; This file has now been overwritten to call
+SetupSAFS.wsf instead.)
+<p>
+<b>SetupSAFS.wsf</b> will prompt to confirm for the installation of the SAFS Framework and
+STAF.&nbsp; The user has the option to skip these installations by pressing "No" or
+"Cancel" when prompted.  You do not need to re-install STAF if you already have STAF installed.
+<p>
+<li><b>Setup SAFS and (optionally) IBM Rational XDE Tester or Functional Tester per
+<a href="http://safsdev.sourceforge.net/sqabasic2000/SetupSAFS.README.htm">SetupSAFS.README</a></b><br/>
+Verify/Complete any setup per that doc.
+</ol>
+</dl>
+<p>
+<b>SetupSAFS.wsf</b> will not install any program that will appear in Control Panel's
+"Add/Remove Program" application.
+<p>
+<hr/>
+<a name="setupnotes"/>
+<small>
+<a href="#top">Back2Top</a>,&#032;
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#newstuff">New Stuff</a>
+</small>
+<p>
+<h3>Additional Setup Notes and Information</h3>
+
+Additional notes and instructions for this release can be found via the links below.
+These are generally reviewed in the listed order.  The files are contained in the
+downloaded installation ZIP file and available once all contents of the ZIP file are
+extracted into the install directory.
+(The links to these will work once unzipped locally.)
+<p>
+<table border=0 cellspacing=7 >
+<tr><td>
+<a href="SetupSAFS.README.htm"  >
+SetupSAFS.README</a><td>
+Install STAF and SAFS Services
+<tr><td>
+<a href="SetupRuntime.README.htm"  >
+SetupRuntime.README</a><td>
+Runtime Setup for Testing
+<tr><td>
+<a href="SetupRobotJ.README.htm"  >
+SetupRobotJ.README</a><td>
+Optionally, setup IBM Rational XDE Tester or Functional Tester to use STAF and SAFS
+Services.
+</table><p>
+
+<hr/>
+<a name="newstuff"/>
+<small>
+<a href="#top">Back2Top</a>,&#032;
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>,&#032;
+</small>
+<p>
+<h3>New, Fixed, or Enhanced Stuff</h3>
+This release of SAFS has been a long-time in the making.  The primary focus of this release was to provide NLS testing support within RRAFS and SAFS. A major push to support Selenium as a web testing engine in SAFS was also performed.
+<p><b><i>
+Because of this extensive NLS effort some generous contributions by third parties are not in this release.  These contributions are slated for another release later this year (2007).  It is not that we do not appreciate and value these contributions, we simply did not have the time and resources to merge, document, and test them while devoted to the NLS and Selenium efforts.</i></b>
+<p>
+Many thanks to those who have contributed in one way or another for this release:
+<ul>
+<li>Dawn Coen
+<li>John Crunk
+<li>Connie Dunbar
+<li>Bob Lawler
+<li>Wayne Pagot
+<li>Dan Pazehoski
+<li>Philippe Sabourin
+<li>Peter Savitsky
+<li>Csaba Szucs
+<li>Eileen Taht
+<li>Youqin Wang
+<li>Christopher Woolner
+<li>Anyone I may have missed -- please let me know!
+</ul>
+<p>
+Most notable items, but not all-inclusive are:
+<ul>
+<p>
+<li><b>Debut release of <a href="http://safsdev.sourceforge.net/doc/org/safs/tools/engines/SAFSSELENIUM.html"
+   target=_blank alt="SAFS Selenium Doc" >SAFS/Selenium</a> engine:</b>
+<p>
+<ul>
+Selenium support is fairly extensive, but there are some known issues with using SAFS/Selenium for testing of web clients.
+<p>
+<ul>
+<li><b>Pages with Frames are not currently supported.</b><br/>
+Frames may even crash the SAFS/Selenium engine causing testing to cease.
+<p>
+<li><b>Child browser windows or popup windows are not currently supported.</b><br/>
+Child browser windows or popup windows may confuse SAFS/Selenium.
+<p>
+<li>Selenium intercepts browser Alerts and MessageBoxes and these are not yet testable with SAFS/Selenium at this time.
+</ul>
+</ul>
+<p>
+<li>Improved messaging in many Driver Commands for Functional Tester, TID, and SDC.
+<p>
+<li>New <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverCommands&cmd=AppMapChaining" target=_blank>AppMapChaining</a> Driver Command for TID, and SDC.
+<li>New <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverCommands&cmd=AppMapResolve" target=_blank>AppMapResolve</a> Driver Command for TID, and SDC.
+<li>New <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverCommands&cmd=UseSAFSFunctions" target=_blank>UseSAFSFunctions</a> Driver Command for RC defined.
+<li>New <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverCommands&cmd=UseSeleniumFunctions" target=_blank>UseSeleniumFunctions</a> Driver Command for RC defined.
+<li>New <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverFileCommands&cmd=GetINIFileValue" target=_blank>GetINIFileValue</a> Driver Command for TID, and SDC.
+<li>New <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverFileCommands&cmd=CopyMatchingFiles" target=_blank>CopyMatchingFiles</a> Driver Command for RJ, TID, and SDC.
+<li>New <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverFileCommands&cmd=DeleteDirectoryContents" target=_blank>DeleteDirectoryContents</a> Driver Command for RJ, TID, and SDC.
+<li>New <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverFileCommands&cmd=FilterImage" target=_blank>FilterImage</a> Driver Command for RJ, TID, and SDC.
+<li>New <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverFileCommands&cmd=OpenUTF8File" target=_blank>OpenUTF8File</a> Driver Command for RJ, TID, and SDC.
+<p>
+<li>Better Support for NLS testing as documented in
+<a href="TestDesignGuidelines.htm" target="_blank" alt="TestDesignGuidelines">Test Design Guidelines</a>.
+<p>
+<li><b>Support for opening test tables encoded in UTF-8</b><br/>
+If existing multi-byte test tables encoded in another format cause problems, convert these tables to the recommended UTF-8 format.
+</ul>
+<p>
+<hr/>
+<small>
+<a href="#top">Back2Top</a>,&#032;
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>
+</small>
+<pre>
+Carl Nagle, <a href="http://www.sas.com"  >SAS</a>
+Project Manager, <a href="http://safsdev.sourceforge.net"  >SAFSDEV</a>
+<a href="mailto:carl.nagle@sas.com"  >carl.nagle@sas.com</a>
+</pre></body></html>

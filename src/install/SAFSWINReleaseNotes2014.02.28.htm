@@ -1,0 +1,316 @@
+<html>
+<head><title>SAFS Win Release Notes</title></head>
+<body>
+<a name="top" />
+<center><h1>
+SAFS Win Release Notes<br/></h1>
+2014.02.28</center>
+<p>
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>,&#032;
+<a href="#newstuff">New Stuff</a>
+<hr/>
+<a name="definitions" />
+<p>
+<h3><b>Definitions:</b><br/></h3>
+<table border=0 cellspacing=7 >
+<tr><td><b>
+SAFS</b><td><b><a href="http://safsdev.sourceforge.net" target=_blank title="SAFSDEV Home Page" >
+Software Automation Framework Support</a></b>
+<tr><td><b>
+SAFS Driver</b><td>
+The tool that initializes, opens, parses, and routes SAFS test records to available SAFS Engines.
+<tr><td><b>
+SAFS Engine</b><td>
+A keyword-driven automation tool capable of interpreting and executing SAFS test records.
+<tr><td><b>
+SAFS/DriverCommands</b><td>
+A SAFS Engine for tool-independent
+<a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverCommands"
+   target=_blank title="SAFS Driver Commands Reference" >Driver Commands</a>
+<tr><td><b>
+SAFS IBT</b><td>
+A patented SAFS Engine for <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSImageBasedRecognition.htm"
+   target=_blank title="SAFS Image-Based Testing Info" >Image-Based Testing</a>.</td>
+<tr><td><b>
+<a href="http://safsdev.sourceforge.net/sqabasic2000/UsingJSAFS.htm" target="JSAFS" title="Using JSAFS Doc">JSAFS</a></b><td>
+Java API for embedding SAFS in custom frameworks or your own <a href="http://safsdev.sourceforge.net/sqabasic2000/UsingJSAFS.htm#advancedruntime" target="JSAFS" title="Using JSAFS Advanced Runtime Doc">Advanced Runtime</a>.</td>
+<tr><td><b>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/tools/engines/SAFSROBOTJ.html"
+   target=_blank title="SAFS IBM Rational Functional Tester Engine Doc" >SAFS/RobotJ</a></b> (RFT)<td>
+A SAFS Engine for testing using <a href="http://www-01.ibm.com/software/awdtools/tester/functional/"
+   target=_blank title="IBM Rational Functional Tester Site" >Functional Tester</a> by IBM Rational.</td>
+<tr><td><b>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/tools/engines/SAFSTC.html"
+   target=_blank title="SAFS SmartBear TestComplete Doc" >SAFS/TC</a></b> (TCAFS)<td>
+A SAFS Engine for testing using <a href="http://smartbear.com/products/qa-tools/automated-testing-tools/"
+   target=_blank title="SmartBear TestComplete Site" >TestComplete</a> by SmartBear.</td>
+<tr><td><b>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/tools/engines/SAFSDROID.html"
+   target=_blank title="SAFS Android Engine Doc" >SAFS/DROID</a></b> (DRD)<td>
+A SAFS Engine for testing with the <a href="http://developer.android.com/sdk/index.html"
+   target=_blank title="Android SDK Home" >Android SDK</a> using Remote Control.</td>
+<tr><td><b>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/tools/engines/SAFSIOS.html"
+   target=_blank title="SAFS IOS Engine Doc" >SAFS/IOS</a></b> (IOS)<td>
+A SAFS Engine for testing with the <a href="http://developer.apple.com/library/ios/"
+   target=_blank title="Apple IOS SDK Home" >Apple XCode SDK</a> using Remote Control. (Mac Only)</td>
+<tr><td><b>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/tools/engines/SAFSSELENIUM.html"
+   target=_blank title="SAFS Selenium Engine Doc" >SAFS/SELENIUM</a></b> (Se)<td>
+A SAFS Engine for testing using <a href="http://seleniumhq.org/"
+   target=_blank title="Selenium Home" >Selenium</a>.</td>
+<tr><td><b>
+<a href="#" target="SeleniumPlus" title="SeleniumPlus Doc">SeleniumPlus</a></b> (Se+)<td>
+Enhanced Eclipse for using a custom JSAFS framework with a Selenium WebDriver <a href="http://safsdev.sourceforge.net/sqabasic2000/UsingJSAFS.htm#advancedruntime" target="JSAFS" title="Using JSAFS Advanced Runtime Doc">Advanced Runtime</a>.</td>
+</table>
+<hr/>
+<a name="reminders" />
+<small>
+<a href="#top">Back2Top</a>,&#032;
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>,&#032;
+<a href="#newstuff">New Stuff</a>
+</small>
+<p>
+<h3>CRITICAL REMINDERS</h3>
+<p>
+This release supports installing SAFS on 32-Bit and 64-Bit Windows Operating Systems.
+<p>
+This release, along with all future releases, provides a simplified install process that includes STAF 3.4.11 and our own private Java 7 JRE. &nbsp;All the latest functionality of SAFS on Windows--including JSAFS, and supported tools like IBM Rational Functional Tester, SmartBear TestComplete, Android SDK, Selenium, and Image-Based Testing are included in this release.
+<p>
+This release does NOT support installing SAFS on the Apple Mac for IOS testing, or installing and testing on Linux or Unix. &nbsp;For SAFS Mac and IOS Support please <a href="http://sourceforge.net/projects/safsdev/files/SAFS%20Mac/" target="_blank" title="SAFS Mac Download Page">download SAFS Mac</a> support and consult the <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSMACReleaseNotes2012.06.22.htm" target="_blank" title="SAFS Mac Release Notes">SAFS Mac Release Notes</a>.
+<p>
+<b>Affected customizations from previous releases:<br/></b>
+<ul>
+<li>Custom modifications in your SAFS install directories &lt;C:\SAFS\bin >
+<li>Batch files (*.bat or *.vbs), or any SAFSTID.INI in the root SAFS install directory &lt;C:\SAFS >
+<li>Project config files (*.bat or *.ini) in the SAFS Project directory &lt;C:\SAFS\Project >
+<li>Project test tables (*.cdd, *.std, *.sdd) files in the SAFS Project Datapool directory &lt;C:\SAFS\Project\Datapool >
+<li>Object mapping files (*.dat) in your SAFS lib directory &lt;C:\SAFS\lib >
+<li>Samples config, batch, or test table files of any kind.
+</ul>
+<p>
+If you have taken advantage of any of the customization capabilities of this framework,
+then you must take some simple precautions prior to installing this new release.
+Installing a new version of the framework will install new, default versions of
+customizable files.
+<p>
+<b>SAFSTID.INI</b><br/>
+If you have a modified SAFSTID.INI in your install directory, you should make a back-up,
+then evaluate how and if you want to merge with the new file.
+<p>
+<b>SAFS Batch Files</b><br/>
+If you have previously installed the SAFS Framework then you may have manually
+modified batch files or VBS scripts to handle custom project paths.  You will need to
+backup modified files and evaluate how and if you want to merge such changes with the new
+files.
+<p>
+In addition, some of the Batch files have been modified to show support for 64-bit Windows systems
+where Java is being invoked.&nbsp; These batch files should be edited to launch the new private JRE.
+<p>
+<b>SAFS Project Files</b><br/>
+If you have previously installed and edited any of the INI or BAT files in the SAFS\Project or SAFS\samples directories then you will need to backup these modified files and evaluate how and if you want to merge such changes with the new files.
+<p>
+<b>SAFS Object Mapping Files</b><br/>
+If you have previously installed and edited any of the following files then you will need to backup the modified files and evaluate how and if you want to merge your edits with the new (default) versions of these files:
+<ul>
+<li>JavaObjectsMap.dat
+<li>ObjectTypesMap.dat
+<li>CustomJavaObjectsMap.dat
+<li>CustomObjectTypesMap.dat
+<li>TCAFS\TCAFS\*.dat
+</ul>
+<p>
+Failure to perform any of these prescribed backups may erase your prior customizations.
+Hopefully, you have backed them up somewhere already as part of your normal backup activities...
+Right?!
+<p>
+<hr/>
+<a name="instructions"/>
+<small>
+<a href="#top">Back2Top</a>,&#032;
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>,&#032;
+<a href="#newstuff">New Stuff</a>
+</small>
+<p>
+<h3>Installation Instructions</h3>
+If you have not done so, review the <a href="#reminders">Critical Reminders</a> above concerning
+backups of locally modified or customized files from previous releases.
+<p>
+<ul>"I'd hate to say, <b>'I told ya so.'</b>"</ul>
+<p>
+<dl>
+<dt><b>Short-N-Sweet install instructions:</b>
+<p><dd>
+<ol>
+<li><b>Extract the SAFSRelease ZIP file into ANY directory.</b><br/>
+Extract all files of the ZIP file into ANY temporary directory.&nbsp; A good choice might be something
+like C:\TEMP, C:\SAFS, or C:\Downloads\SAFS.
+<p>
+Enable "OVERWRITE Existing Files" if you are overwriting a previous release of SAFS.
+<p>
+<li><b>Run</b> the extracted &nbsp;<b>Setup.BAT</b>&nbsp; script.</b><br/>
+<p>
+The installation will prompt to confirm the installation of SAFS. &nbsp;The user has the option to skip the installation by pressing "No" or "Cancel" when prompted.
+<p>
+<b>On a new installation with no previous STAF on the system the install process can take several minutes.</b><br>
+It may look like nothing is happening, but it is. &nbsp;Be patient.
+<p>
+<li><b>Verifying a successful SAFS install:</b>
+<p><ul>
+Following a successful standard install, you should be able to double-click or otherwise
+execute the program:
+<p><pre>
+    C:\SAFS\Project\<b>runTIDTest.BAT</b>
+</pre>
+<p>This should run a simple SAFS Test and generate logs in:
+<p><pre>
+    C:\SAFS\Project\Datapool\Logs
+</pre>
+</ul>
+<p>
+</ol>
+</dl>
+<p>
+The installation will not install any program that will appear in Control Panel's
+"Add/Remove Program" application.  However, depending upon the STAF install scenario, STAF might install <b>"STAF"</b> into the Control Panel's "Add/Remove Program" or "Programs and Features" application.
+<p>
+<hr/>
+<a name="setupnotes"/>
+<small>
+<a href="#top">Back2Top</a>,&#032;
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#newstuff">New Stuff</a>
+</small>
+<p>
+<h3>Default Installation Destination Directories on Windows:</h3>
+<p><pre>
+    SAFS  -  C:\SAFS
+    STAF  -  C:\STAF
+</pre>
+<p>
+<h3>Windows System Environment Variables</h3>
+<p>
+Environment variables may be modified or created by the installation.
+<p>
+The affected environment variables and their backups are listed below:
+<p><pre>
+    VARIABLE          PURPOSE
+    ============      ==================================
+    STAFDIR           Root install directory for STAF
+    SAFSDIR           Root install directory for SAFS
+    PATH              Search path for SAFS and STAF executables
+    CLASSPATH         Search path for SAFS and STAF Java classes
+    GOCRDATA_DIR      SAFS GOCR data directory
+    ROBOTIUMRC_HOME   SAFS Android support directory
+    TESSDATA_PREFIX   Tesseract OCR support directory
+    TESTCOMPLETE_EXE  TestComplete or TestExecute EXE filename
+    TESTCOMPLETE_HOME TestComplete or TestExecute install directory
+</pre>
+<p>
+<h3>Additional Setup Notes and Information</h3>
+
+Additional notes and instructions for this release can be found via the links below.
+These are generally reviewed in the listed order. &nbsp;The files can be found in the
+C:\SAFS\install directory following a successful install.
+(The links to these will work once unzipped locally.)
+<p>
+<table border=0 cellspacing=7 >
+<tr><td>
+<a href="install/SetupRobotJ.README.htm"  >
+SetupRobotJ</a><td>
+IBM Rational Functional Tester Setup for SAFS Testing.
+<tr><td>
+<a href="install/SetupTCAFS.README.htm"  >
+SetupTCAFS</a><td>
+AQA TestComplete Setup for SAFS Testing.
+<tr><td>
+<a href="install/SetupAndroid.README.htm"  >
+SetupAndroid</a><td>
+Android Setup for SAFS Testing.
+<tr><td>
+<a href="install/SAFSQuickStartSelenium.htm"  >
+SetupSelenium</a><td>
+Selenium Quick Start for SAFS Testing.
+</table>
+<p>
+<hr/>
+<a name="safstools"/>
+<small>
+<a href="#top">Back2Top</a>,&#032;
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>,&#032;
+<a href="#newstuff">New Stuff</a>
+</small>
+<p>
+<h3>SAFS COM Tools</h3>
+<p>
+SAFS comes with many useful tools and trinkets. &nbsp;Review the SAFS\bin directory for items that are platform-specific scripts instead of Java classes.
+<p>
+STAFWrap.DLL, ComponentFunctions.DLL, DDVariableStore.DLL and associated scripts for registering DVariableStore.DLL are included in the SAFS\bin directory. &nbsp;The install process does handle
+the registration of DDVariableStore.DLL automatically. &nbsp;DDVariableStore should already be enabled to run in either 32-bit or 64-bit processes.
+<p>
+COM classes supporting COM Automation access to STAF for use in TestComplete, VBScript, and other COM-related features exist in the latest version of DDVariableStore.DLL.
+<p>
+These COM classes include:
+<p><ul>
+<li>DDVariableStore.STAFUtilities
+<li>DDVariableStore.STAFResult
+<li>DDVariableStore.StringUtilities
+<li>DDVariableStore.TestRecordData
+<li>DDVariableStore.GlobalVariables
+<li>DDVariableStore.DDVariables
+<li>DDVariableStore.DDVariable
+</ul><p>
+Consult the sourcecode in CVS
+or any VBA or COM object browser until more proper documentation is made available.  A very
+rudimentary "RUTHere" test script for this COM STAF interface can be found in
+SAFS\bin\DDVariableStoreTest.VBS.
+<p>
+<hr/>
+<a name="newstuff"/>
+<small>
+<a href="#top">Back2Top</a>,&#032;
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>,&#032;
+</small>
+<p>
+<h3>New, Fixed, or Enhanced Stuff</h3>
+<ul>
+<li>See the local <a href="WhatsNewInSAFS.htm">Whats New In SAFS</a> doc!
+<li>See the online <a href="http://safsdev.sourceforge.net/WhatsNewInSAFS.htm">Whats New In SAFS</a> doc!
+</ul>
+<p>
+<hr/>
+<small>
+<a href="#top">Back2Top</a>,&#032;
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>
+</small>
+<pre>
+Carl Nagle, <a href="http://www.sas.com"  >SAS</a>
+Project Manager, <a href="http://safsdev.sourceforge.net"  >SAFSDEV</a>
+Subscribe to appropriate <a href="http://sourceforge.net/mail/?group_id=56751" alt="Go to Support Forums">Support Forums</a> to review support archives and ask questons.
+</pre>
+<p>
+</body></html>

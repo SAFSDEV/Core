@@ -1,0 +1,16 @@
+[ApplicationConstants]
+URL=http://...
+userid=myuserid
+ProgramName="testprogram.sas"
+BuildLevel="12.0.8"
+
+[MainWin]
+MainWin=<recognition string>
+AnyComp1=<recognition string>
+AnotherComp2=<recognition string>
+
+[AnotherWin]
+AnotherWin=<recognition string>
+SomeComp1=<recognition string>
+AnotherComp2=<recognition string>
+   

@@ -1,0 +1,7 @@
+
+grant { 
+	// Allow RMI server objects to receive requests on this machine on port 1024 or higher.
+        permission java.net.SocketPermission "*:1024-", "connect,accept,resolve";
+	permission java.lang.RuntimePermission "shutdownHooks";
+};
+

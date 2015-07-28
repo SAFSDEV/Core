@@ -1,0 +1,179 @@
+<html>
+<head><title>SAFS Release Notes</title></head>
+<body>
+<a name="top" />
+<h1><center>
+SAFS Framework Release Notes<br/>
+2004.10.05</center></h1>
+<p>
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>,&#032;
+<a href="#newstuff">New Stuff</a>
+<hr/>
+<a name="definitions" />
+<p>
+<h3><b>Definitions:</b><br/></h3>
+<table border=0 cellspacing=7 >
+<tr><td><b>
+SAFS</b><td><b>
+Software Automation Framework Support</b>
+<tr><td><b>
+SAFS Engine</b><td>
+A Data Driven Engine implemented using SAFS
+<tr><td><b>
+SAFS/DriverCommands</b><td>
+A SAFS Engine for tool-independent Driver Commands
+<tr><td><b>
+Home Page</b><td><a href="http://safsdev.sourceforge.net"  >
+SAFSDEV on Sourceforge</a>
+</table>
+
+<hr/>
+<a name="reminders" />
+<small>
+<a href="#top">Back2Top</a>,&#032;
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>,&#032;
+<a href="#newstuff">New Stuff</a>
+</small>
+<p>
+<h3>CRITICAL REMINDERS</h3>
+<p>
+Affected customizable files from previous releases:<br/>
+<ul>
+<li>Any modifications in your SAFS install directories &lt; C:\SAFS\bin > batch files (*.bat or *.vbs) or any SAFSTID.INI in the root SAFS install directory &lt; C:\SAFS >.
+</ul>
+<p>
+If you have taken advantage of any of the customization capabilities of this framework, then you must take some simple precautions prior to installing this new release.  Installing a new version of the framework will install new, default versions of these files.
+<p>
+<b>SAFSTID.INI</b><br/>
+You should make a backup of any SAFSTID.INI in your SAFS install directory (C:\SAFS) if you have this file and modified settings.  Then evaluate how and if you want to merge with the new file.
+<p>
+<b>SAFS Batch Files</b><br/>
+If you have previously installed the SAFS Framework separately, then you may have manually modified batch files or VBS script(s) to handle custom project paths.  You will need to backup modified files and evaluate how and if you want to merge such changes with the new files.
+<p>
+Failure to perform any of these prescribed backups may render your prior customizations nonexistent.  Hopefully, you have backed them up somewhere already as part of your normal ongoing activities.  Right?!
+<p>
+<hr/>
+<a name="safstools"/>
+<small>
+<a href="#top">Back2Top</a>,&#032;
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>,&#032;
+<a href="#newstuff">New Stuff</a>
+</small>
+<p>
+No new tools introduced with this release.
+<p>
+<hr/>
+<a name="instructions"/>
+<small>
+<a href="#top">Back2Top</a>,&#032;
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>,&#032;
+<a href="#newstuff">New Stuff</a>
+</small>
+<p>
+<h3>Installation Instructions</h3>
+
+<dl><dt>
+<b>Review Backup Reminders in <a href="#reminders">Critical Reminders</a></b>
+<p><dd>
+If you have not done so, review the <a href="#reminders">Critical Reminders</a> concerning backups of locally modified or customized files from previous releases.  I'd hate to say, "I told ya so."
+<p></dd><dt>
+<b>Short-N-Sweet install instructions:</b>
+<p>
+A Java JVM and Windows Scripting Host V5.6 or later is required.  Refer to <a href="http://safsdev.sourceforge.net/sqabasic2000/SetupSAFS.README.htm" >SetupSAFS.README</a> in the Java Runtime and Windows Scripting Host sections for more details and install information for those tools.
+<p><dd>
+<ol>
+<li><b>Extract the SAFSFramework .ZIP into ANY directory.</b><br/>
+Extract all files of the ZIP file into ANY directory.  A good choice might be something like C:\TEMP, or even C:\SAFS.  Enable "OVERWRITE Existing Files" if you have a previous release.
+<p>
+<li><b>Run the extracted <b>SetupSAFS.vbs</b> script.</b><br/>
+In Windows Explorer, locate "SetupSAFS.vbs" in that directory and double-click to execute it.
+<p>
+<li><b>Setup SAFS and (optionally) IBM Rational XDE Tester per <a href="http://safsdev.sourceforge.net/sqabasic2000/SetupSAFS.README.htm">SetupSAFS.README</a></b><br/>
+Verify/Complete any setup per doc.
+</ol>
+</dl>
+<b>SetupSAFS.vbs</b> will prompt to confirm for the installation of the SAFS Framework and STAF.&nbsp; The user has the option to skip these installations by pressing "No" or "Cancel" when prompted.
+<p>
+<b>SetupSAFS.vbs</b> will not install any program that will appear in Control Panel's "Add/Remove Program" application.
+<p>
+<hr/>
+<a name="setupnotes"/>
+<small>
+<a href="#top">Back2Top</a>,&#032;
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#newstuff">New Stuff</a>
+</small>
+<p>
+<h3>Additional Setup Notes and Information</h3>
+
+Additional notes and instructions for this release can be found via the links below.  These are generally reviewed in the listed order.  The files are contained in the downloaded installation ZIP file and available once all contents of the ZIP file are extracted into the install directory.
+(The links to these will work once unzipped locally.)
+<p>
+<table border=0 cellspacing=7 >
+<tr><td>
+<a href="SetupSAFS.README.htm"  >
+SetupSAFS.README</a><td>
+Install STAF and SAFS Services
+<tr><td>
+<a href="SetupRuntime.README.htm"  >
+SetupRuntime.README</a><td>
+Runtime Setup for Testing
+<tr><td>
+<a href="SetupRobotJ.README.htm"  >
+SetupRobotJ.README</a><td>
+Optionally, setup IBM Rational XDE Tester to use STAF and SAFS Services
+</table><p>
+
+<hr/>
+<a name="newstuff"/>
+<small>
+<a href="#top">Back2Top</a>,&#032;
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>,&#032;
+</small>
+<p>
+<h3>New, Fixed, or Enhanced Stuff</h3>
+
+Most notable, but not all-inclusive is:
+<ul>
+<li>Fixed the SetupSAFS install to allow bypassing STAF install, to provide better messaging, and to proceed automatically after initial user input.
+<p>
+<li>Extensive Enhancements to the Tool-Independent Driver and SAFSVARS<br/>
+This includes enabling EXPRESSION handling, DriverFlowCommands, DriverCounterCommands, and several others.
+<p>
+<li>Added a post-install executable test into SAFS\Project
+</ul>
+<p>
+<hr/>
+<small>
+<a href="#top">Back2Top</a>,&#032;
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>
+</small>
+<pre>
+Carl Nagle, <a href="http://www.sas.com"  >SAS</a>
+Project Manager, <a href="http://safsdev.sourceforge.net"  >SAFSDEV</a>
+<a href="mailto:carl.nagle@sas.com"  >carl.nagle@sas.com</a>
+</pre></body></html>

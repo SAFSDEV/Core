@@ -1,0 +1,407 @@
+<html>
+<head>
+<title>SAFS Selenium Quick Start</title>
+<style>
+.indicationSE{
+	color:gray;
+	background:lightgray;
+	padding:0px 5px;
+	border-radius:8px;
+}
+.indicationSE2{
+	color:sienna;
+	background:wheat;
+	padding:0px 5px;
+	border-radius:8px;
+}
+.indicationSeleniumEngine{
+	color:blue;
+	font-style:italic;
+	//background:lightblue;
+}
+.explain{
+	font-size:80%;
+	font-style:italic;
+	background:Silver;
+}
+.centeredImage{
+	border: 0;
+	width: 600px;
+	height: 400px;
+	display: block;
+	margin-left: auto;
+    margin-right: auto;
+}
+</style>
+</head>
+<body><a name="_top"/>
+<center><H1>SAFS Selenium Quick Start<br>
+for Windows</H1>
+<small>Updated: 2014.05.02</small></center>
+<hr>
+<b>Authors:</b>
+<ul>Lei Wang<br>
+Carl Nagle
+</ul>
+<p>
+<b>Copyright (C) SAS Institute</b><br>
+<a href="http://www.opensource.org/licenses/gpl-license.php" target="reference">General Public License</a>: http://www.opensource.org/licenses/gpl-license.php
+<hr>
+<p>
+Be sure to check the latest <a href="http://safsdev.sourceforge.net/WhatsNewInSAFS.htm" target="_blank" title="Whats New In SAFS Document">Whats New In SAFS</a> doc for the latest updates on SAFS and Selenium Support!
+<p>
+This tutorial intends to help you run SAFS tests with the <span class="indicationSeleniumEngine"><span class="indicationSeleniumEngine">SAFS Selenium Engine</span></span><br>
+The <span class="indicationSeleniumEngine">SAFS Selenium Engine</span> can work with both Selenium1.0 and Selenium2.0(WebDriver); But the settings/support are different,<br>
+to make it clear, 2 markers (<span class="indicationSE">SE</span>  and <span class="indicationSE2">SE2</span>) will be used to tell the settings/support are for Selenium1.0 or for Selenium2.0<br>
+The <span class="indicationSeleniumEngine">SAFS Selenium Engine</span> is originally part of <a href="https://sourceforge.net/projects/safsdev/files/SAFS%20Win/" title="SAFS Win Download Site">SAFS Win</a>,
+now it is also included in <a href="https://sourceforge.net/projects/safsdev/files/SeleniumPlus%20Win/" title="SeleniumPlus Download Site">SeleniumPlus</a>. You can install<br>
+either of them to get the engine works. This document supposes the installation directory is "C:\safs" for SAFS and<br>
+"C:\SeleniumPlus" for SeleniumPlus.<br>
+See the online version of this doc <a href="http://safsdev.sourceforge.net/selenium/doc/SAFSQuickStartSelenium.htm">with images</a>.
+<p>
+<b>Prerequisites:</b></p>
+<ol>
+	<li>Installation: <span class="explain">("SAFS Win" <b>OR</b> SeleniumPlus, install one of them)</span><br>
+	<ul>
+		<li>SAFS Win <span class="explain">(SAFS 2012 only supports Selenium1.0, with the latest update it can support both Selenium1.0 and Selenium2.0)</span>
+		<ol>
+			<li><a href="https://sourceforge.net/projects/safsdev/files/SAFS%20Win/SAFSWINRelease2012.08.07/">SAFS 2012 for Windows</a><span class="indicationSE">SE</span>
+				<ul>
+					<li>Windows XP or Windows 7
+					<li>IE version 8 or 9
+				</ul>
+			<li><a href="https://sourceforge.net/projects/safsdev/files/SAFS%20Win/SAFSWINRelease2012.08.07/">SAFS 2012 for Windows</a> with <a href="https://sourceforge.net/projects/safsdev/files/SAFS%20Win/ReleaseCandidates/">Latest SAFS Update</a><span class="indicationSE">SE</span><span class="indicationSE2">SE2</span>
+				<ul>
+					<li>Windows 7
+					<li>FireFox 27.0.1
+				</ul>
+		</ol>
+		<li>SeleniumPlus <span class="explain">(supports both Selenium1.0 and Selenium2.0)</span>
+		<ul>
+			<li><a href="https://sourceforge.net/projects/safsdev/files/SeleniumPlus%20Win/" target="_blank" title="SeleniumPlus Download Site">SeleniumPlus 2014 for Windows</a><span class="indicationSE">SE</span><span class="indicationSE2">SE2</span>
+				<ul>
+					<li>Windows 7
+					<li>FireFox 28
+				</ul>
+		</ul>
+	</ul>
+	<p>
+	<li>Check Steps:<br>
+	First, make sure you have the latest <a href="https://sourceforge.net/projects/safsdev/files/SAFS%20Win/" target="_blank" title="SAFS Download Site">SAFS Win</a> (or <a href="https://sourceforge.net/projects/safsdev/files/SeleniumPlus%20Win/" target="_blank" title="SeleniumPlus Download Site">SeleniumPlus Win</a>) on your machine.
+	You can also check for the <a href="https://sourceforge.net/projects/safsdev/files/SAFS%20Win/ReleaseCandidates/">Latest SAFS Update</a> (or <a href="https://sourceforge.net/projects/safsdev/files/SeleniumPlus%20Win/Release%20Candidates/">Latest SeleniumPlus Update</a>) to ensure your installed release has the latest updates.
+	<p>
+	Next, verify that the following 3rd-party jars are in folder C:\safs\lib\ (or C:\SeleniumPlus\libs)
+	<ul>
+		<li>selenium-server-standalone-2.41.0.jar<span class="indicationSE">SE</span><span class="indicationSE2">SE2</span>
+		<li>dom4j-2.0.0-ALPHA-2.jar<span class="indicationSE">SE</span>
+		<li>jaxen-1.1.1.jar<span class="indicationSE">SE</span>
+		<li>nekohtml.jar<span class="indicationSE">SE</span>
+		<li>jna.zip (JNA 3.3.0 dated 2012)<span class="indicationSE">SE</span>
+		<li>platform.zip (JNA 3.3.0 dated 2012)<span class="indicationSE">SE</span>
+		<li>selenium-plus-1.0.jar<span class="indicationSE">SE</span><span class="indicationSE2">SE2</span> <span class="explain">(Only exist with SeleniumPlus)</span>
+	</ul>
+	<p>
+	Finally, make sure that these jars are added to environment variable 'CLASSPATH':<br>
+	(Make sure any earlier versions of the selenium-server JAR(s) are removed from the CLASSPATH:)
+	<p><ul>
+	selenium-server-standalone-2.41.0.jar;<br>
+	dom4j-2.0.0-ALPHA-2.jar;<br>
+	jaxen-1.1.1.jar;<br>
+	nekohtml.jar;<br>
+	selenium-plus-1.0.jar;<span class="explain">(Only exist with SeleniumPlus)</span><br>
+	otherjars in CLASSPATH...
+	</ul>
+</ol>
+
+<p>
+<b>Start from "SAFS Selenium sample"</b>
+<p>
+The test script, "SAFS Selenium sample", intends to open an IE/FireFox with Google page, then it will
+verify the existence of some components, then input some characters on a Google search window,
+and then click the "Search" button to get the results, finally close window and exit.</p>
+<hr>
+<a name="step1"/>
+<p><b>1.&nbsp;&nbsp;&nbsp;The structure of "SAFS Selenium sample" project</b><br>
+<small>Go to:
+<a href="#_top">Top</a>,
+<a href="#step2">Use STAF Process Container</a>,
+<a href="#step3">Run SAFS Test with Selenium Engine</a>
+</small>
+<ul>
+<p>
+If SAFS has been installed, goto folder C:\safs\samples\Selenium <span class="indicationSE">SE</span>, or C:\safs\samples\Selenium2.0 <span class="indicationSE2">SE2</span><br>
+If SeleniumPlus has been installed, goto folder C:\SeleniumPlus\SAMPLE\traditional\Selenium1.0<span class="indicationSE">SE</span>, or C:\SeleniumPlus\SAMPLE\traditional\Selenium2.0<span class="indicationSE2">SE2</span><br>
+This folder is the ProjectRoot defined in the section SAFS_PROJECT of <a href="#configfile">configuration file</a>. The folder will contain files/folders as below.
+</p>
+
+<table>
+	<tr><td>SafsDevTest.ini  						</td> <td>--- Configuration file</td></tr>
+	<tr><td>testSele.bat     						</td> <td>--- Batch to Run test script</td></tr>
+	<tr><td>seleSPC.bat 							</td> <td>--- Batch to Run the Staf Processor Container, now only <span class="indicationSE">SE</span></td></tr>
+	<tr><td>Datapool\google.map 					</td> <td>--- Application map file</td></tr>
+	<tr><td>Datapool\SafsDevTest.CDD 				</td> <td>--- Test Cycle file</td></tr>
+	<tr><td>Datapool\KeywordHtmlTest.STD 			</td> <td>--- Test Suite file</td></tr>
+	<tr><td>Datapool\SeleniumDriverCommandTest.SDD </td> <td>--- Test Step file</td></tr>
+	<tr><td>Datapool\SeleniumEditBoxTest.SDD 		</td> <td>--- Test Step file</td></tr>
+	<tr><td>Datapool\Bench 							</td> <td>--- Folder containing bench files</td></tr>
+	<tr><td>Datapool\Dif 							</td> <td>--- Folder containing diff files</td></tr>
+	<tr><td>Datapool\Logs 							</td> <td>--- Folder containing SAFS logs</td></tr>
+	<tr><td>Datapool\Runtime 						</td> <td>--- Folder</td></tr>
+	<tr><td>Datapool\Test 							</td> <td>--- Folder containing files generated duirng test.</td></tr>
+</table>
+
+<p>
+
+<a name="configfile"/>
+<li><b>SafsDevTest.ini</b>
+<p>This is a <a
+href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#configfile">
+configuration file</a> that contains various information, which tells SAFS where and how to
+load user's test scripts, what engine to use, and the configuration about the engine etc.</p>
+<p>
+------------------------------------------------------------------
+<pre>
+[SAFS_DRIVER]
+;If SAFS installed, set DriverRoot to "C:\safs"; If SeleniumPlus installed, set DriverRoot to "C:\SeleniumPlus"
+;DriverRoot="C:\safs"
+DriverRoot="C:\SeleniumPlus"
+
+[SAFS_PROJECT]
+;If SAFS installed, set ProjectRoot to "C:\safs\samples\Selenium" or "C:\safs\samples\Selenium2.0"
+;ProjectRoot="C:\safs\samples\Selenium"<span class="indicationSE">SE</span>
+;ProjectRoot="C:\safs\samples\Selenium2.0"<span class="indicationSE2">SE2</span>
+;If SeleniumPlus installed, set ProjectRoot to "C:\SeleniumPlus\SAMPLE\traditional\Selenium1.0" or "C:\SeleniumPlus\SAMPLE\traditional\Selenium2.0"
+;ProjectRoot="C:\SeleniumPlus\SAMPLE\traditional\Selenium1.0"<span class="indicationSE">SE</span>
+ProjectRoot="C:\SeleniumPlus\SAMPLE\traditional\Selenium2.0"<span class="indicationSE2">SE2</span>
+
+[SAFS_TEST]
+TestName="SafsDevTest"
+TestLevel="Cycle"
+CycleSeparator=","
+SuiteSeparator=","
+StepSeparator=","
+CycleLogName="SafsDevTest.cycle"
+CycleLogMode="TEXTLOG|CONSOLELOG"
+
+[SAFS_SELENIUM]
+AUTOLAUNCH=TRUE
+GATEWAYHOST=your.gateway
+GATEWAYPORT=80
+
+;<span class="indicationSE">SE</span>
+;Use following settings if Selenium1.0 is wanted
+;HOOK=org.safs.selenium.SeleniumJavaHook
+;BROWSER="*iexplore"
+;SELENIUMPORT should be set to an unoccupied port
+;SELENIUMPORT=4444
+;DEBUGLOG specifies a debug log file, you may need to adjust it
+;DEBUGLOG=C:\safs\samples\Selenium\SeleniumDebugLog.txt
+
+;<span class="indicationSE2">SE2</span>
+;Use following settings if Selenium2.0 is wanted
+HOOK=org.safs.selenium.webdriver.SeleniumHook
+BROWSER="firefox"
+
+[SAFS_ENGINES]
+First=org.safs.tools.engines.SAFSSELENIUM
+</pre>
+------------------------------------------------------------------
+<br>
+<b>Note:</b>
+<ul>
+<li>Above settings are for Selenium2.0 with installation of SeleniumPlus<br>
+	If you want to use Selenuim1.0, just comment those settings with marker <span class="indicationSE2">SE2</span> and un-comment settings with marker <span class="indicationSE">SE</span><br>
+	If you have installed SAFS, follow the instructions in the comments of the configuration file.
+<li>About gateway<br>
+	If you need a gateway to access internet, please modify the folloing 2 settings:
+	<ul>
+	<li>GATEWAYHOST=your.gateway
+	<li>GATEWAYPORT=80
+	</ul>
+	If you do not use a gateway, please add semi-colon ; before these 2 settings to make them comments.
+	<ul>
+	<li>;GATEWAYHOST=no.gateway
+	<li>;GATEWAYPORT=80
+	</ul>
+</ul>
+<li><b>testSele.bat</b>
+<p>
+There is only one command line as below in this file. <a
+href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#driveroptions">SAFSDRIVE
+Command Line</a> takes SafsDevTest.ini as its project configuration file, launches
+<a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSEngineDetails.htm">Selenium Engine</a>
+and runs each step defined .CDD, .STD, .SDD files.
+<p>
+<ul>java -Dsafs.project.config=SafsDevTest.ini org.safs.tools.drivers.SAFSDRIVER</ul>
+<p>
+
+<li><b>seleSPC.bat</b> Now only <span class="indicationSE">SE</span>
+<p>
+There is only one command line as below in this file. <a
+href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#driveroptions">SAFSDRIVE
+Command Line</a> takes SafsDevTest.ini as its project configuration file, launches
+<a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSEngineDetails.htm">Selenium Engine</a>
+and runs the Staf Process Container.
+<p>
+<ul>java -Dsafs.project.config=SafsDevTest.ini org.safs.tools.drivers.SAFSDRIVER SPC</ul>
+<p>
+
+<li><b>SafsDevTest.CDD, KeywordHtmlTest.STD, SeleniumDriverCommandTest.SDD, SeleniumEditBoxTest.SDD</b>
+<p>
+They are scripts containing test case, refer to
+<a href="http://safsdev.sourceforge.net/DataDrivenTestAutomationFrameworks.htm#AutomationFrameworkWorkflow">Automation Workflow</a> for details.
+<p>
+
+<p>
+<li><b>google.map </b>
+<p>
+This is an <a
+href="http://safsdev.sourceforge.net/sqabasic2000/CreateAppMap.htm">application
+map</a> file.&nbsp; It contains the <a
+href="http://safsdev.sourceforge.net/sqabasic2000/SAFSComponentRecognition.htm">Recognition
+Strings</a> of the GUI components of Google Search page.
+<p>
+
+<p>
+<b>How do I get the standard Recognition Strings for those GUI components? </b>
+	<ul>
+		<li>With <span class="indicationSE">SE</span>, let's look at the next section on <a href="#step2">Selenium Process Container</a>.<br>
+		<li>With <span class="indicationSE2">SE2</span>
+		<ol type="I">
+			<li>How to specify Recognition String?<br>
+				<span class="explain">If equal sign (=) exists in the id, name, XPATH, CSS etc. expression, you need to escape it by backslash (<b>\</b>)</span><br>
+				<ol type="a">
+					<li>Use component's attributes to create RS, such as  id, name, class etc.
+						<ul>
+							<li>Unique attribute: If you use id or name, as they are unqiue for an element on a page,
+								you can simply specify RS as "id=xxx", "name=xxx".
+							<li>Non-unique attribute: If you use other attributes, to locate an element you may need
+							    more than 1 attribute to specify RS, such as "attr1=xxx;attr2=xxx;attr3=xxx",
+								attributes are separated by semi-comma(;)
+						</ul>
+					<li>Use XPATH or CSS to specify RS as "xpath=xxx" or "css=xxx".<br>
+						Take the <a href="https://www.google.com">Google</a> page as example:<br>
+						<ul>
+						<li>To specify the "Body" element
+							<ul>
+							<li>By XPATH: "xpath=/html/body"
+							<li>By CSS:	"css=body"
+							</ul>
+						<li>To specify the "Search Button" element
+							<ul>
+							<li>By XPATH: "xpath=//input[contains(@jsaction,'sf.c')]", or "xpath=//input[@jsaction\='sf.chk')]"
+							<li>By CSS:	"css=input[jsaction*='sf.c']" or "css=input[jsaction\='sf.chk']"
+							</ul>
+						</ul>
+						Refer to:
+						<ul>
+						<li><a href="http://docs.seleniumhq.org/docs/appendix_locating_techniques.jsp">Selenium Locating Technique</a>
+						<li><a href="Xpath_Css_selenium_Locators_table_1_0_2.pdf">XPATH CSS Locators Table</a>
+						</ul>
+				</ol>
+			<BR>
+			<li>How to get the element's attributes?
+				<ul>
+					You can use browser to get them. Here, FireFox will be used to illustrate, it is quite similliar for IE.
+					<li>Open the FireBug by clicking menu "Tools->Web Developper->Firebug->Open Firebug", or simply press "F12"
+						<img class="centeredImage" src="images/openFireBug.png" alt="Open FireBug"/>
+					<li>Switch to 'HTML' View by clicking the 'HTML' tab in the left side of Firebug.
+						<img class="centeredImage" src="images/switchHtmView.png" alt="Switch to HTML View"/>
+					<li>Search a component. In the right side of Firebug, there is an editbox where a string can be filled to find a compoent.
+						For example, we try to find the Google's Input search box, as we know its tag name is 'input', we write 'input' in the
+						editbox, a popup menu will be shown, we can click the 'Next' button to locate the html component with tagname as 'input'
+						in the 'HTML' view of Firebug.
+						<img class="centeredImage" src="images/searchComponent.png" alt="Search Component"/>
+					<li>Highlight a component. In the 'HTML' view of Firebug, if the mouse hovers on a component, that component will be
+						highlighted on the page so that you will know if this is what you want or not.
+						<img class="centeredImage" src="images/highlightComponent.png" alt="Highlight Component"/>
+					<li>Look at the componet in the 'HTML' view, we can see all attributes.
+				</ul>
+			<li>Store the Recognition String into map file.<br>
+				If you specify "id=lst-ib" for the search input box of Google page, you can name it as EditBox and store
+				<b>EditBox="id=lst-ib"</b> in the map file so that 'EditBox' can represent the Google's Input search
+				box in the future test.
+			<li><b>The quickest way to get the Recognition String.</b><br>
+			    Use <a href="http://docs.seleniumhq.org/projects/ide/">Selenium IDE</a> to record a script, then in the IDE,
+				the recorded steps will be shown under the tab "Table"; In the column "Target" the "Recognition String" will
+				be listed there. Normally it can be used by SeleniumPlus directly,
+				<span class="explain">But if the string is XPATH, you need to add prefix "XPATH="; If equal sign (=) exists in the id, name, XPATH, CSS etc. expression, you need to escape it by backslash (<b>\</b>)</span><br>
+				IDE recorded table, refer to picture <img class="centeredImage" src="images/SeleniumIDERecord.png" alt="Selenium IDE Record Recognition String"/>
+		</ol>
+	</ul>
+</ul>
+<p>
+
+<a name="step2"/>
+<b>2.&nbsp;&nbsp;&nbsp;Use Selenium Process Container</b> Now only <span class="indicationSE">SE</span><br>
+<small>Go to:
+<a href="#_top">Top</a>,
+<a href="#step1">The structure of "SAFS Selenium sample" project</a>,
+<a href="#step3">Run SAFS Test with Selenium Engine</a>,
+</small><br>
+<p>
+<ul>
+The Selenium ProcessContainer is a SAFS test tool used to define application map. It can drill down a chosen web page and generate the Recognition Strings for each GUI component on the page.
+<p>
+It is better to have STAF started up before running ProcessContainer.
+<p>
+Execute "seleSPC.bat" to start ProcessContainer.
+<p>
+In the combo box at the side of "URL:", input the the link of page you want to test, for example: http://www.google.com
+<p>
+Select the type of Browser in the next combo box, choose "*iexplore" for IE.<br>
+<p>
+<img class="centeredImage" src="images/QuickStartSelenium_SPC.png" alt="Selenium Process Container Window"/>
+<p>
+Click the "Start" button. ProcessContainer will launch IE, open the requested page, and begin processing the  whole window.
+<p>
+When finished, a tree will be shown on the bottom, it shows the hierarchy tree of the Google page.<br>
+<p>
+<img class="centeredImage" src="images/QuickStartSelenium_ComponentHierarchy.png" alt="SPC Component Hierarchy"/>
+<p>
+You can click on the tree node to get its Recognition String.<br>
+When you click on the tree node:
+<p><ul>
+First, that component will be highlighted by "red rectangle" in the browser (this functionality may not work for all browsers);
+<p>
+If the highlight can not be performed, a popup window "NOT HIGHLIGHTED" will be shown, just close it and ignore that.
+<p>
+Next, the "Recognition String" for that component will be shown in the EditBox "Robot Recogniton String:", you can copy it and save it to map file mannually.<br>
+<p></ul>
+You can save all these "Recognition Strings" to a file by clicking on button "Save To Map".
+</ul>
+
+<p>
+<a name="step3"/>
+<b>3.&nbsp;&nbsp;&nbsp;Run SAFS Test with Selenium Engine</b><br>
+<small>Go to:
+<a href="#_top">Top</a>,
+<a href="#step1">The structure of "SAFS Selenium sample" project</a>,
+<a href="#step2">Use STAF Process Container</a>,
+<a href="#appendix">Appendix</a>
+</small>
+<p>
+<ul>
+Double-click <i>testSele.bat</i> to run the SAFS Test.</a>.
+<p>
+When running testSele.bat, the console below should appear, and SAFS-Selenium will
+open a browser containing the Google home page, input some characters, and press the Enter key
+automatically.<br>
+The log file <b><i>SafsDevTest.cycle.txt</i></b> should be output into the
+<i>C:\safs\samples\Selenium\Datapool\Logs</i> <span class="indicationSE">SE</span>
+(<i>C:\safs\samples\Selenium2.0\Datapool\Logs</i> <span class="indicationSE2">SE2</span>) directory if you install SAFS;<br>
+The log file will be output into the
+<i>D:\SeleniumPlus\SAMPLE\traditional\Selenium1.0\Datapool\Logs</i> <span class="indicationSE">SE</span>
+(<i>D:\SeleniumPlus\SAMPLE\traditional\Selenium2.0\Datapool\Logs</i> <span class="indicationSE2">SE2</span>) directory if you install SeleniumPlus;<br>
+<p>
+<img class="centeredImage" src="images/QuickStartSelenium_SAFSConsole.png" alt="SAFSSelenium Console"/>
+<p>
+</ul>
+<hr>
+<pre>
+Carl Nagle, <a href="http://www.sas.com"  >SAS</a>
+Project Manager, <a href="http://safsdev.sourceforge.net"  >SAFSDEV</a>
+Subscribe to appropriate <a href="http://sourceforge.net/mail/?group_id=56751" alt="Go to Support Forums">Support Forums</a> to review support archives and ask questons.
+</pre>
+<p>
+</body></html>

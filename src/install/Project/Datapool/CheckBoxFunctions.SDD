@@ -1,0 +1,5 @@
+
+T, TestApp, CheckBox, Check
+T, Testapp, CheckBox, UnCheck
+T, TestApp, CheckBox, Click
+T, TestApp, CheckBox, Click, coords

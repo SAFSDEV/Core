@@ -1,0 +1,144 @@
+<job id="Setup" >
+<script language="VBScript" >
+
+'******************************************************************************
+'* 
+'* Setup.WSF  --  *** MUST BE RUN WITH 32-BIT WSH on 64-BIT SYSTEMS ***
+'* 
+'* args(0) -- SAFS Install Directory -- where SAFS will reside.
+'* args(1) -- STAF Install Directory -- where STAF will reside.
+'*
+'* Copyright (C) SAS Institute
+'* General Public License: http://www.opensource.org/licenses/gpl-license.php
+'******************************************************************************
+
+Dim arg, shell, env, fso, cmd, winfolder, existdir
+Dim exec, stafenv, safsenv, safstitle, returncode
+Dim stafdir, safsdir, installstaf, msg, args, OutStream
+Dim cr
+Dim q
+Dim nl
+Dim newline
+
+CONST OK_BUTTON_CLICKED=1
+CONST CANCEL_BUTTON_CLICKED=2
+CONST ABORT_BUTTON_CLICKED=3
+CONST RETRY_BUTTON_CLICKED=4
+CONST IGNORE_BUTTON_CLICKED=5
+CONST YES_BUTTON_CLICKED=6
+CONST NO_BUTTON_CLICKED=7
+
+cr        = chr(13)   'carriage return
+q         = chr(34)   'double quote
+nl		  = chr(10)		'next line
+newline   = cr & nl		'use "carriage return" and "next line" to form a newline
+stafenv   = "STAFDIR" 'Environment Variable for STAF root directory.
+safsenv   = "SAFSDIR" 'Environment Variable for root install directory.
+
+safsdir = "C:\SAFS"
+stafdir = "C:\STAF"
+installstaf = true
+
+WScript.Interactive = True
+
+Set shell = WScript.CreateObject("WScript.Shell")
+Set env   = shell.Environment("SYSTEM")
+Set fso   = WScript.CreateObject("Scripting.FileSystemObject")
+Set args  = WScript.Arguments
+
+safstitle = "SAFS Install"
+
+if args.Count > 0 then safsdir = args(0)
+if args.Count > 1 then stafdir = args(1)
+
+if Len(safsdir) = 0 then
+   msg = "Required path to SAFS install directory was not provided."& cr & cr
+   shell.Popup msg,0,"SAFS Installation",64
+   WScript.Quit
+end if
+
+if Len(stafdir) = 0 then
+   msg = "Required path to STAF install directory was not provided."& cr & cr
+   shell.Popup msg,0,"SAFS Installation",64
+   WScript.Quit
+end if
+
+cmd = q & ".\jre\bin\java.exe"& q & " -cp .\install\safsinstall.jar org.safs.install.SilentInstaller -safs "& q & safsdir & q
+
+'use previous install SAFS and STAF directories if existing
+'==========================================================
+arg = ""
+arg = env(stafenv)
+if Len(arg)> 0 then stafdir = arg
+If fso.FileExists(stafdir & "\bin\JSTAF.jar") Then 
+   installstaf = false
+   cmd = cmd &" -nostaf"
+ELSE
+   cmd = cmd &" -staf "& q & stafdir & q
+End If
+
+arg = ""
+arg = env(safsenv)
+if Len(arg)> 0 then 
+   msg = "SAFS may already exists at "& arg & "." & cr
+   msg = msg & "It is recommended to UNINSTALL the old version before proceeding with this new install" & cr & cr
+   msg = msg & "Continue to install the new version anyway?"& cr & cr
+   msg = msg &"Click YES to proceed; NO to cancel the install."
+   returncode = shell.Popup(msg, 0, safstitle, 32+4) 
+   If ((returncode = 2) Or (returncode = 7)) Then
+      shell.Popup "Installation cancelled.",0,safstitle,64
+      WScript.Quit
+   End If
+ELSE
+   msg = "Preparing to install SAFS." & cr & cr
+   msg = msg & "Continue with the install?"& cr & cr
+   msg = msg &"Click YES to proceed; NO to cancel the install."
+   returncode = shell.Popup(msg, 0, safstitle, 36) 
+   If ((returncode = 2) Or (returncode = 7)) Then
+      shell.Popup "Installation cancelled.",0,safstitle,64
+      WScript.Quit
+   End If
+End if
+
+'reset/clear variable
+arg=""
+
+On Error Resume Next
+Set exec = shell.Exec(cmd)
+
+If Err.Number <> 0 then
+    WScript.Interactive = True
+    shell.Popup "Error <"& CStr(Err.Number) &":"& Err.Description &"> occurred while trying to install.",0, "Installation Aborted.",16
+    Wscript.Quit    
+End if
+
+On Error Goto 0
+
+arg = ""
+Do While exec.Status = 0
+    if not exec.StdOut.AtEndOfStream then
+        arg = arg & exec.StdOut.ReadAll        
+    end if
+
+    if not exec.StdErr.AtEndOfStream then
+        arg = arg & exec.StdErr.ReadAll        
+    end if
+    WScript.Sleep(2000)
+Loop
+
+On Error Resume Next
+Set OutStream = fso.OpenTextFile(".\setup.log", 2, True)
+OutStream.Write arg
+On Error Goto 0
+
+msg = "SAFS installation is complete." & cr
+shell.Popup msg,0,safstitle,64
+
+Set shell = nothing
+Set env   = nothing
+Set exec  = nothing
+Set fso   = nothing
+Set OutStream = Nothing
+
+</script>
+</job>

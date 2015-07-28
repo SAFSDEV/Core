@@ -1,0 +1,113 @@
+
+C, Expressions, ON
+
+C, LogMessage, "Current test is '" & ^safsActiveCycle & "'."
+
+C, AppMapChaining, ON
+C, AppMapResolve, ON
+
+C, SetApplicationMap, TIDTest2.MAP
+C, SetApplicationMap, TIDTest.MAP
+
+C, BreakPoints, ON
+BP
+
+C, Concatenate, ^var1 , ^var2, "result"
+
+BP
+
+C, OnNotEqualGotoBlockID, "ERROR", ^result, "abcdef"
+
+C, Concatenate, ^result , ^badVar, "result2"
+
+BP
+
+C, OnNotEqualGotoBlockID, "ERROR", ^result2, "abcdef"
+
+C, Concatenate, ^result2 , ^hidden2, "result3"
+C, OnNotEqualGotoBlockID, "ERROR", ^result3, "abcdeftrue"
+
+C, Concatenate, ^result3 , ^hidden1, "result4"
+C, OnNotEqualGotoBlockID, "ERROR", ^result4, "abcdeftruefalse"
+
+C, LogFailureOK, "Expect invalid parameter."
+C, AppMapChaining, invalid
+C, LogFailureOK, "Expect missing parameter."
+C, AppMapChaining
+
+C, AppMapChaining, OFF
+
+C, Concatenate, ^var1 , ^var2, "result"
+
+BP,
+
+C, OnNotEqualGotoBlockID, "ERROR", ^result, "abc"
+
+C, Concatenate, ^result , ^badVar, "result2"
+C, OnNotEqualGotoBlockID, "ERROR", ^result2, "abc"
+
+C, Concatenate, ^result2 , ^hidden2, "result3"
+C, OnNotEqualGotoBlockID, "ERROR", ^result3, "abc"
+
+C, Concatenate, ^result3 , ^hidden1, "result4"
+C, OnNotEqualGotoBlockID, "ERROR", ^result4, "abcfalse"
+
+C, AppMapChaining, ON
+
+C, Concatenate, ^var1 , ^var2, "result"
+C, OnNotEqualGotoBlockID, "ERROR", ^result, "abcdef"
+
+C, Concatenate, ^result , ^badVar, "result2"
+C, OnNotEqualGotoBlockID, "ERROR", ^result2, "abcdef"
+
+C, Concatenate, ^result2 , ^hidden2, "result3"
+C, OnNotEqualGotoBlockID, "ERROR", ^result3, "abcdeftrue"
+
+C, Concatenate, ^result3 , ^hidden1, "result4"
+C, OnNotEqualGotoBlockID, "ERROR", ^result4, "abcdeftruefalse"
+
+C, LogFailureOK, "Expect invalid parameter."
+C, AppMapResolve, invalid
+
+C, LogFailureOK, "Expect missing parameter."
+C, AppMapResolve
+
+C, AppMapResolve, OFF
+
+C, GetAppMapValue, ,Section1, EmbedVar, embedVar
+C, OnNotEqualGotoBlockID, "ERROR", ^embedVar, "This string {^does_not_contain} an embedded string."
+
+C, AppMapResolve, ON
+
+C, GetAppMapValue, ,Section1, EmbedVar, embedVar
+C, OnNotEqualGotoBlockID, "ERROR", ^embedVar, "This string contains an embedded string."
+
+C, GetAppMapValue, TidTest.MAP, , hidden1, hiddenvar
+C, OnNotEqualGotoBlockID, "ERROR", ^hiddenVar, "false"
+
+C, GetAppMapValue, TidTest2.MAP, , hidden1, bogusvar
+C, OnNotEqualGotoBlockID, "ERROR", ^bogusVar, ""
+
+C, GetAppMapValue, TidTest2.MAP, , hidden2, truevar
+C, OnNotEqualGotoBlockID, "ERROR", ^trueVar, "true"
+
+C, LogFailureOK, "Expect invalid parameter."
+C, GetAppMapValue, , , , hiddenvar
+
+C, LogFailureOK, "Expect invalid parameter."
+C, GetAppMapValue, , , hidden1
+
+;no such variable
+C, OnNotEqualGotoBlockID, "ERROR", ^invalidVar, ""
+
+C, GetAppMapValue, , invalidSection, invalidItem, invalidVar
+C, OnNotEqualGotoBlockID, "ERROR", ^invalidVar, ""
+
+C, GetAppMapValue, , Section1, invalidItem, invalidVar2
+C, OnNotEqualGotoBlockID, "ERROR", ^invalidVar2, ""
+
+C, LogTestSuccess, "TIDTest Services all present and working."
+C, ExitTable
+
+B, ERROR
+C, LogTestFailure, "Error in one or more SAFS modules!"

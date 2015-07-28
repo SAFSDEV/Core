@@ -1,0 +1,454 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=Generator content="Microsoft Word 14 (filtered)">
+<title>RFSM FAQs</title>
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+@font-face
+	{font-family:Tahoma;
+	panose-1:2 11 6 4 3 5 4 4 2 4;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:10.0pt;
+	margin-left:0in;
+	line-height:115%;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";}
+p.MsoAcetate, li.MsoAcetate, div.MsoAcetate
+	{mso-style-link:"Balloon Text Char";
+	margin:0in;
+	margin-bottom:.0001pt;
+	font-size:8.0pt;
+	font-family:"Tahoma","sans-serif";}
+p.MsoNoSpacing, li.MsoNoSpacing, div.MsoNoSpacing
+	{margin:0in;
+	margin-bottom:.0001pt;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:10.0pt;
+	margin-left:.5in;
+	line-height:115%;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";}
+span.BalloonTextChar
+	{mso-style-name:"Balloon Text Char";
+	mso-style-link:"Balloon Text";
+	font-family:"Tahoma","sans-serif";}
+p.msolistparagraphcxspfirst, li.msolistparagraphcxspfirst, div.msolistparagraphcxspfirst
+	{mso-style-name:msolistparagraphcxspfirst;
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:115%;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";}
+p.msolistparagraphcxspmiddle, li.msolistparagraphcxspmiddle, div.msolistparagraphcxspmiddle
+	{mso-style-name:msolistparagraphcxspmiddle;
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:115%;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";}
+p.msolistparagraphcxsplast, li.msolistparagraphcxsplast, div.msolistparagraphcxsplast
+	{mso-style-name:msolistparagraphcxsplast;
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:10.0pt;
+	margin-left:.5in;
+	line-height:115%;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";}
+p.msochpdefault, li.msochpdefault, div.msochpdefault
+	{mso-style-name:msochpdefault;
+	margin-right:0in;
+	margin-left:0in;
+	font-size:10.0pt;
+	font-family:"Calibri","sans-serif";}
+.MsoChpDefault
+	{font-size:10.0pt;
+	font-family:"Calibri","sans-serif";}
+@page WordSection1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.0in 1.0in 1.0in;}
+div.WordSection1
+	{page:WordSection1;}
+-->
+</style>
+
+</head>
+
+<body lang=EN-US>
+
+<div class=WordSection1>
+
+<p class=MsoNoSpacing style='margin-left:20.25pt;text-indent:-20.25pt'><b>1.</b><b><span
+style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>What does RFSM mean?</b></p>
+
+<p class=MsoNoSpacing style='margin-left:20.25pt'>RFSM means RFT Find Search
+Mode . RFSM is a name of the search algorithm. It uses RFT API to find AUT’s
+objects.&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:20.25pt'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:20.25pt;text-indent:-20.25pt'><b>2.</b><b><span
+style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>How can I use RFSM algorithm?</b></p>
+
+<p class=MsoNoSpacing style='text-indent:.25in'>&nbsp;Just add&nbsp; :RFSM:
+prefix at beginning of the recognition string.&nbsp; </p>
+
+<p class=MsoNoSpacing style='margin-left:20.25pt'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;Example:&nbsp; :RFSM:
+.domain=Java;.class=com.sas.test</p>
+
+<p class=MsoNoSpacing style='text-indent:.25in'>&nbsp;Using above, user can run
+any search mode simultaneously with FPSM or/and MCSM.</p>
+
+<p class=MsoNoSpacing style='text-indent:.5in'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>Or</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>Turn on exclusively RFMS mode
+by adding RFSMOnly=true flag into the tidtest.ini file of the&nbsp;&nbsp;&nbsp;
+automation project. Once you turn on the flag then the recognition string
+doesn’t require :&nbsp; RFSM: prefix. </p>
+
+<p class=MsoNoSpacing style='text-indent:.25in'>Example:&nbsp;
+.domain=Java;.class=com.sas.test</p>
+
+<p class=MsoNoSpacing style='text-indent:.25in'>Using above, Only RFSM runs
+exclusively.</p>
+
+<p class=MsoNoSpacing style='text-indent:.5in'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:20.25pt;text-indent:-20.25pt'><b>3.</b><b><span
+style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Can I use RFSM mode with others mode such as MCSM, FPSM or both?</b></p>
+
+<p class=MsoNoSpacing style='margin-left:20.25pt'>Yes, Add :RFSM: prefix to the
+recognition string. SAFS engine will process
+prefix&nbsp;tag&nbsp;appropriately.</p>
+
+<p class=MsoNoSpacing style='margin-left:20.25pt'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:20.25pt'>User also can keep Main
+window string FPSM or MCSM mode and child recognition string FSMS mode. Any
+combination works. </p>
+
+<p class=MsoNoSpacing style='text-indent:.5in'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='text-indent:.25in'>Example:&nbsp; User can define
+appmap following way</p>
+
+<p class=MsoNoSpacing style='text-indent:.5in'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;[SASHelp]</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;SASHelp=”Type=Window;Caption={^T.SASHelp.Caption}”</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;ButtonPrint=
+“:RFSM:.class=javax.swing.JButton;.text=Print”</p>
+
+<p class=MsoNoSpacing>&nbsp;</p>
+
+<p class=MsoNoSpacing><b>4.</b><b><span style='font-size:7.0pt;font-family:
+"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>Does
+RFSM support regular expression to find dynamic object window?</b></p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>Yes, RFSM supports regular
+expression and follow java’s regular expression rules. Regular Expression
+syntax will specify into / regular expression / block. </p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>Examples: if regular expression
+is ^SAS Management Console or Server$&nbsp; or gv\d+ </p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>a.<span style='font-size:7.0pt;
+font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:RFSM:.domain=Java;class=com.sas.comsole.managment;title=/^SAS
+Management Console/</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>b.<span style='font-size:7.0pt;
+font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:RFSM:.domain=Java;class=com.sas.comsole.managment;title={^T.ServerName},
+where T.ServerName= /Server$/</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>c.<span style='font-size:7.0pt;
+font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:RFSM:.domain=Java;class=com.sas.comsole.managment;.id=/gv\d+/</p>
+
+<p class=MsoNoSpacing>&nbsp;</p>
+
+<p class=MsoNoSpacing><b>5.</b><b><span style='font-size:7.0pt;font-family:
+"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>Does
+recognition string have any reserved words for the syntax?</b></p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>Yes, “<b>;</b>” "<b>;\;</b>" and “<b>=</b>” are reserves for recognition strings. Don’t use them as part of regular expression or
+object property value. If it required as object property value, then make
+regular expression to substitute.</p>
+
+<p class=MsoNoSpacing>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>Example:</p>
+
+<p class=MsoNoSpacing style='text-indent:.25in'>&nbsp;Wrong recognition string
+example</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>a.<span style='font-size:7.0pt;
+font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:RFSM:.domain=Java;class=com.sas.comsole.managment;title=SAS
+Management Console<b>;My profile</b></p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>b.<span style='font-size:7.0pt;
+font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:RFSM:.domain=Java;class=com.sas.comsole.managment;title=/<b>temp=</b>[a-z]\d+/</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>Correct recognition string
+example</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>c.<span style='font-size:7.0pt;
+font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:RFSM:.domain=Java;class=com.sas.comsole.managment;title=/SAS
+Management Console<b>$</b>/</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>d.<span style='font-size:7.0pt;
+font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:RFSM:.domain=Java;class=com.sas.comsole.managment;title=/temp<b>.</b>[a-z]\d+/</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;</p>
+
+<p class=MsoNoSpacing><b>6.</b><b><span style='font-size:7.0pt;font-family:
+"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>How can
+I capture recognition string for the RFSM?</b></p>
+
+<p class=MsoNoSpacing style='margin-left:20.25pt'>Use RFT’s Test Object Inspector
+(Run-&gt;Test Object Inspector…) utility to find AUT object’s property. There
+are many property starts with “.” prefix, keep them as they are display.&nbsp; </p>
+
+<p class=MsoNoSpacing>&nbsp;</p>
+
+<p class=MsoNoSpacing><b>7.</b><b><span style='font-size:7.0pt;font-family:
+"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>How can
+I find dynamic property change objects which are inserted into table’s row? Or
+regular expression finds more objects while user would like to process as
+objects order display into the Application Under Test.</b></p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;Yes, there is a way the
+RFSM gives the object back as user pass selection through by recognition
+string. </p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>Example: </p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>:RFSM:.domain=Html;class=Html.IMG;.id=/gv\d+/;<b>Index=1</b></p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'><b>&nbsp;</b></p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>Above case, Index is not an
+object recognition property. But if above regular expression finds more than
+one HTML Images by id=gvxxxx, Index helps user to select/get first object among
+all.</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;</p>
+
+<p class=MsoNoSpacing><b>8. &nbsp;&nbsp;&nbsp;How can I improve the
+performance? Or RFSM is taking long time to find first/main window?</b></p>
+
+<p class=MsoNoSpacing>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</p>
+
+<p class=MsoNoSpacing>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;User can do
+following steps to improve performance quickly</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in;text-indent:-.25in'>a.<span
+style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>Remove unnecessary domains. Open
+RFT’s IDE, Configure-&gt;Enable Environments-&gt;Java Environment.
+Remove/Disable all Java except IBM Rational SDP and the AUT’s (Application
+Under Test) JRE/JDK. </p>
+
+<p class=MsoNoSpacing>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in;text-indent:-.25in'>b.<span
+style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>User should pass “.domain=Java
+or Html or Flex” on main window recognition string to speed up finding process.
+</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>Example:</p>
+
+<p class=MsoNoSpacing style='margin-left:.75in;text-indent:-.25in'>a.<span
+style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;</span>:RFSM:.domain=Java;class=com.sas.comsole.managment;title=/temp<b>.</b>[a-z]\d+/</p>
+
+<p class=MsoNoSpacing style='margin-left:.75in;text-indent:-.25in'>b.<span
+style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>:RFSM:.domain=Html;.class=Html.HtmlBrowser</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>It is recommended to add
+“.domain=Flex or Java or Html” for each new window into the appmap, so new
+window find narrow down to the specific domain. </p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>Example:</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>[WRSWindow]</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>WRSWindow=&quot;:RFSM:.domain=Html;.class=Html.HtmlBrowser&quot;</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>FileButton=&quot;:RFSM:.class=Html.BUTTON;.id=citationFileButton&quot;</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>[FlexWindow]</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>FlexWindow=&quot;:RFSM:.domain=Flex;className=RunTimeLoaderFlex30.class=FlexApplication;automationClassName=FlexApplication&quot;</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>MenuBar=&quot;:RFSM:.class=FlexMenuBar;className=mx.controls.MenuBar;id=menuBar;automationClassName=FlexMenuBar&quot;</p>
+
+<p class=MsoNoSpacing>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in;text-indent:-.25in'>c.<span
+style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>User should consider adding additional hierarchy (parent;\;child) information into the recognition string to guide the search algorithm down the right path. &nbsp;Notice the use of '<b>;\;</b>' to separate parent\child hierarchy.
+</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>Example:</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>[WRSWindow]</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>WRSWindow=&quot;:RFSM:.domain=Html;.class=Html.HtmlBrowser&quot;</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>DeepButton=&quot;:RFSM:.class=Html.HtmlDocument;.title=topDoc;\;.class=Html.HtmlFrame;.id=contentPane;\;.class=Html.HtmlDocument;.title=buttonPane;\;.class=Html.HtmlButton;.id=myButton&quot;</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>&nbsp;</p>
+
+<p class=MsoNoSpacing><b>9. &nbsp;&nbsp;&nbsp;Do we have any timeout value for
+RFSM ?</b></p>
+
+<p class=MsoNoSpacing style='margin-left:15.75pt'>No, there is not any timeout
+value for the RFSM, if object doesn’t find then RFSM will return null object.
+However, SAFS have some setting about window and their component, and they are
+in tidtest.ini file. User can set “SECSWaitForComponent=5” and “SECSWaitForWindow=5”
+value to retry RFSM finding object until reach the value those values. </p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;</p>
+
+<p class=MsoNoSpacing><b>10. &nbsp;Sometime I get null object or object can’t
+be find, even though the RFT object inspector can view them?</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>Check your regular expression
+string or object’s property. Make sure about property start with “.” Prefix. If
+regular expression finds more object then RFSM select first one.&nbsp; User can
+record a script and see the object property match or contact SAFS dev team. </p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;</p>
+
+<p class=MsoNoSpacing><b>11. How can I capture RFSM recognition string?</b></p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>You can capture RFSM
+recognition string by two way, they are following </p>
+
+<p class=MsoNoSpacing style='margin-left:.5in;text-indent:-.25in'><b>a.</b><b><span
+style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>RFT’s Test Object Inspector </b></p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>Start RFT,&nbsp; Run-&gt; Test
+Object Inspector or see for spy glasses with red arrow. It will bring Test
+Object Inspector GUI, move your mouse to the AUT objects/component (Button
+etc…), object property will be display into Test Object Inspector. </p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'><img width=415 height=476
+id="Picture 4" src="RFSMFAQ_files/image001.jpg"></p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>The HTML Tab recognition string
+would be “:RFSM:.id=tablink2;.text=By Industry”. Normally, two unique
+properties are enough.</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in;text-indent:-.25in'><b>b.</b><b><span
+style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></b>Find object by recording script for RFT. </p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>Open RFT, create a project and
+an empty script. &nbsp;Insert recording by Script-&gt; Insert Recording, the
+recording will start and click on object to record. Once you record the object
+then click hit for stop. The new object will insert into RFT object map and it
+will display on RFT right side Script Explorer view.</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'><img width=234 height=214
+id="Picture 5" src="RFSMFAQ_files/image002.jpg"></p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>Double click on link_tablink2
+for the property info. </p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'><img width=624 height=467
+id="Picture 6" src="RFSMFAQ_files/image003.jpg"></p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>The recognition string would be
+“:RFSM:.id=tablink2;.text=By Industry</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>User can use any one above method
+to capture recognition RFSM string; there is no difference, but different ways</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'>&nbsp;</p>
+
+</div>
+
+</body>
+
+</html>

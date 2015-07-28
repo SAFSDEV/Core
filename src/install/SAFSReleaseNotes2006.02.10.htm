@@ -1,0 +1,256 @@
+<html>
+<head><title>SAFS Release Notes</title></head>
+<body>
+<a name="top" />
+<h1><center>
+SAFS Framework Release Notes<br/>
+2006.02.10</center></h1>
+<p>
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>,&#032;
+<a href="#newstuff">New Stuff</a>
+<hr/>
+<a name="definitions" />
+<p>
+<h3><b>Definitions:</b><br/></h3>
+<table border=0 cellspacing=7 >
+<tr><td><b>
+SAFS</b><td><b><a href="http://safsdev.sourceforge.net" target=_blank alt="SAFSDEV Home Page" >
+Software Automation Framework Support</a></b>
+<tr><td><b>
+SAFS Engine</b><td>
+A keyword-driven (aka data-driven) automation tool using SAFS.
+<tr><td><b>
+SAFS/DriverCommands</b><td>
+A SAFS Engine for tool-independent
+<a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverCommands"
+   target=_blank alt="SAFS Driver Commands Reference" >Driver Commands</a>
+</table>
+
+<hr/>
+<a name="reminders" />
+<small>
+<a href="#top">Back2Top</a>,&#032;
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>,&#032;
+<a href="#newstuff">New Stuff</a>
+</small>
+<p>
+<h3>CRITICAL REMINDERS</h3>
+<p>
+Affected customizations from previous releases:<br/>
+<ul>
+<li>Custom modifications in your SAFS install directories &lt; C:\SAFS\bin > batch files
+(*.bat or *.vbs), or any SAFSTID.INI in the root SAFS install directory &lt; C:\SAFS >.
+</ul>
+<p>
+If you have taken advantage of any of the customization capabilities of this framework,
+then you must take some simple precautions prior to installing this new release.
+Installing a new version of the framework will install new, default versions of
+customizable files.
+<p>
+<b>SAFSTID.INI</b><br/>
+If you have a modified SAFSTID.INI in your install directory, you should make a back-up,
+then evaluate how and if you want to merge with the new file.
+<p>
+<b>SAFS Batch Files</b><br/>
+If you have previously installed the SAFS Framework then you may have manually
+modified batch files or VBS scripts to handle custom project paths.  You will need to
+backup modified files and evaluate how and if you want to merge such changes with the new
+files.
+<p>
+Failure to perform any of these prescribed backups may erase your prior customizations.
+Hopefully, you have backed them up somewhere already as part of your normal ongoing activities.
+Right?!
+<p>
+<hr/>
+<a name="safstools"/>
+<small>
+<a href="#top">Back2Top</a>,&#032;
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>,&#032;
+<a href="#newstuff">New Stuff</a>
+</small>
+<p>
+STAFWrap.DLL, DDVariableStore.DLL and associated scripts for registering DVariableStore.DLL
+are now included in the SAFS\bin directory.  The SetupSAFS script does register and\or move
+files to system directories as necessary.
+<p>
+New COM classes supporting COM access to STAF for use in VBScript and other COM-related
+features exist in the latest version of DDVariableStore.DLL.  Consult the sourcecode in CVS
+or any VBA or COM object browser until more proper documentation is made available.  A very
+rudimentary "RUTHere" test script for this COM STAF interface can be found in
+SAFS\bin\DDVariableStoreTest.VBS .
+<p>
+SAFS/Abbot and the RMI bridge for SAFS Java Enablers used by Abbot are still largely
+undocumented.  However, Abbot icons for the few keywords supported are do now show up in the
+SAFS Keywords Reference.
+<p>
+<hr/>
+<a name="instructions"/>
+<small>
+<a href="#top">Back2Top</a>,&#032;
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>,&#032;
+<a href="#newstuff">New Stuff</a>
+</small>
+<p>
+<h3>Installation Instructions</h3>
+
+<dl><dt>
+<b>Review Backup Reminders in <a href="#reminders">Critical Reminders</a></b>
+<p><dd>
+If you have not done so, review the <a href="#reminders">Critical Reminders</a> concerning
+backups of locally modified or customized files from previous releases.  I'd hate to say,
+"I told ya so."
+<p></dd><dt>
+<b>Short-N-Sweet install instructions:</b>
+<p>
+A Java Runtime Environment (JRE) and Windows Scripting Host V5.6 or later is required.  Refer
+to <a href="http://safsdev.sourceforge.net/sqabasic2000/SetupSAFS.README.htm" >SetupSAFS.README</a>
+in the Java Runtime and Windows Scripting Host sections for more details and install
+information for those tools.
+<p><dd>
+<ol>
+<li><b>Extract the SAFSFramework .ZIP into ANY directory.</b><br/>
+Extract all files of the ZIP file into ANY directory.&nbsp; A good choice might be something
+like C:\TEMP, or even C:\SAFS.&nbsp; RRAFS (Rational Robot) users might do best to extract into
+their ".\Rational\Rational Test\sqabas32" directory. (Although this should not be
+necessary with a RRAFS release since that includes the SAFS install files already. Only do
+this if you are upgrading SAFS without upgrading RRAFS.)
+<p>
+Enable "OVERWRITE Existing Files" if you have a previous release.
+<p>
+<li><b>Run the extracted <b>SetupSAFS.wsf</b> script.</b><br/>
+In Windows Explorer, locate "SetupSAFS.wsf" in that directory and double-click to execute
+it.<br/>
+(Note: previous releases used SetupSAFS.vbs.&nbsp; This file has now been overwritten to call
+SetupSAFS.wsf instead.)
+<p>
+<li><b>Setup SAFS and (optionally) IBM Rational XDE Tester or Functional Tester per
+<a href="http://safsdev.sourceforge.net/sqabasic2000/SetupSAFS.README.htm">SetupSAFS.README</a></b><br/>
+Verify/Complete any setup per that doc.
+</ol>
+</dl>
+<b>SetupSAFS.wsf</b> will prompt to confirm for the installation of the SAFS Framework and
+STAF.&nbsp; The user has the option to skip these installations by pressing "No" or
+"Cancel" when prompted.
+<p>
+<b>SetupSAFS.wsf</b> will not install any program that will appear in Control Panel's
+"Add/Remove Program" application.
+<p>
+<hr/>
+<a name="setupnotes"/>
+<small>
+<a href="#top">Back2Top</a>,&#032;
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#newstuff">New Stuff</a>
+</small>
+<p>
+<h3>Additional Setup Notes and Information</h3>
+
+Additional notes and instructions for this release can be found via the links below.
+These are generally reviewed in the listed order.  The files are contained in the
+downloaded installation ZIP file and available once all contents of the ZIP file are
+extracted into the install directory.
+(The links to these will work once unzipped locally.)
+<p>
+<table border=0 cellspacing=7 >
+<tr><td>
+<a href="SetupSAFS.README.htm"  >
+SetupSAFS.README</a><td>
+Install STAF and SAFS Services
+<tr><td>
+<a href="SetupRuntime.README.htm"  >
+SetupRuntime.README</a><td>
+Runtime Setup for Testing
+<tr><td>
+<a href="SetupRobotJ.README.htm"  >
+SetupRobotJ.README</a><td>
+Optionally, setup IBM Rational XDE Tester or Functional Tester to use STAF and SAFS
+Services.
+</table><p>
+
+<hr/>
+<a name="newstuff"/>
+<small>
+<a href="#top">Back2Top</a>,&#032;
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>,&#032;
+</small>
+<p>
+<h3>New, Fixed, or Enhanced Stuff</h3>
+
+Many thanks to those who have contributed in one way or another for this release:
+<ul>
+<li>Matthew Casebeer
+<li>Dawn Coen
+<li>John Crunk
+<li>Patrick Cuff
+<li>Robert D'Antonio
+<li>Robert Ducharme
+<li>Jack Imbriani
+<li>Bob Lawler
+<li>Ryan Norris
+<li>Ken Peressini
+<li>John Ruxlow
+<li>Steven Sampson
+<li>Peter Savitsky
+<li>Chris Schroter
+<li>Jeremy Smith
+<li>Belinda White
+<li>Chris Woolner
+<li>Anyone I may have missed -- please let me know!
+</ul>
+<p>
+
+Most notable items, but not all-inclusive is:
+<ul>
+<p>
+<li>Improved messaging in many Driver Commands for RobotJ, TID, and SDC.
+<p>
+<li>New <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverTimerCommands" target=_blank>DDDriverTimerCommands</a> for RJ, TID, and SDC.
+<p>
+<li>New <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverStringCommands" target=_blank>DDDriverStringCommands</a> for RC.
+<p>
+<li>More commands for RJ as we try to bring it up to RC standards.
+<p>
+<li>Explicit Functional Tester support in addition to XDE Tester support.
+<p>
+<li>.NET support in RJ through Functional Tester enabled (needs improvement).
+<p>
+<li>Large scale Keyword Cleanup initiative as proposed in <a href="http://sourceforge.net/mailarchive/message.php?msg_id=13137417"
+target=_blank>Keyword Cleanup</a> posting.&nbsp; More info, but not necessarily better info on
+these changes can be gleaned from the <a href="SAFSKeywordsReleaseNotes2006.02.10.txt" target=_blank>SAFS Keywords
+Release Notes</a>.
+</ul>
+<p>
+<hr/>
+<small>
+<a href="#top">Back2Top</a>,&#032;
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#safstools">SAFS Tools</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Setup Notes</a>
+</small>
+<pre>
+Carl Nagle, <a href="http://www.sas.com"  >SAS</a>
+Project Manager, <a href="http://safsdev.sourceforge.net"  >SAFSDEV</a>
+<a href="mailto:carl.nagle@sas.com"  >carl.nagle@sas.com</a>
+</pre></body></html>

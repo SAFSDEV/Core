@@ -1,0 +1,44 @@
+<html>
+<head>
+<title>Using Custom Extensions</title><center><big><big><big>Using Custom Extensions</big><br/>DDE for Rational Robot
+</big></big><br/><small>Updated 10/22/2002</small></center>
+</head>
+<body bgcolor="#FFFFFF" color="#000000">
+<p>
+With the May 2002 release of the DDE for Rational Robot came the ability to easily extend the capabilities of the DDE with your own unique customizations <b><i>outside</i></b> of the core DDE source.  Users could now easily add their own Record Types, Driver Commands, and Component Function Test Commands (Action Commands) without impacting their ability to accept later releases of the DDE.  The latest release allows even more local customizations.
+</p><p>
+We must note that extending the DDE <i><b>inside</i></b> the core source is the most desirable of endeavors.  That is, if your intended extensions are useful for other users, then they should be presented to the community as a proposed extension to the core DDE.  If, however, the extension is something very specific to your site and your applications, then this new feature is what you need to exploit.
+</p><p>
+The latest release includes the following libraries where the custom extensions can reside:
+<ul>
+<li><A href="CustomTestCommands.htm">CustomTestCommands</A></li>
+<li><A href="CustomRecordTypes.htm">CustomRecordTypes</A></li>
+<li><A href="CustomDriverCommands.htm">CustomDriverCommands</A></li>
+<li><A href="CustomStatusUtilities.htm">CustomStatusUtilities</A></li>
+<li><A href="CustomLogUtilities.htm">CustomLogUtilities</A></li>
+<li><A href="CustomUtilities.htm">CustomUtilities</A></li>
+</ul>
+
+<STRONG>How the DDE uses Custom Extensions</STRONG>
+<p>
+In short, the DDE defers to one of these libraries anytime it cannot resolve the item in question.  For example, while processing a record, if the DDE does not recognize the value of the Record Type field, it invokes the CustomDDERecord function in the CustomRecordTypes library allowing the user to implement their own record types.  Similar functions exist in the other extension libraries when trying to resolve unknown commands, actions, or other features.
+</p>
+<STRONG>The CustomUtilities Library</STRONG>
+<p>
+The DDE provides the <A HREF="CustomUtilities.htm">CustomUtilities</A> library as a convenience for users to house their own code resources and functions.  The DDE itself will not use this, but the user has a convenient $INCLUDE that will pull in everything associated with the DDE and all the customizations made available via CustomUtilities into other scripts or libraries.  That $Include would be:
+</p>
+<ul><li>‘$Include: "DDEngine.SBH"</li></ul>
+<p>
+By placing that single statement at the top of each script or library, the user imports nearly ALL of the DDE libraries AND whatever they have added to the custom library files.
+</p><p>
+The CustomUtilities source files also serve as a good template for user libraries to be processed by <A href="SQAPublisher.htm">SQAPublisher</A>--the document extraction tool available with the DDE source.  If a user sticks to the structure and format presented in this set of files, they can extract and publish embedded documentation with the tool.
+</p><p>
+<STRONG>Taking Advantage of Extension Libraries and Future DDE Releases</STRONG>
+</p><p>
+Extending the DDE in this way is not something trivial.  Some extensions are easier than others.  The user needs to have a good understanding of the DDE framework, data structures used and available to the extension, and functions available for setting or updating status if necessary.  That comes with experience and exposure to the DDE--a great deal of documentation and/or source to study over time.
+</p><p>
+These new generic (blank) Custom library files will now be part of each release of the DDE.  As long as you do not implement any customizations, you can readily install a new DDE release without any effort whatsoever.  Some simple caution is warranted, though, when installing the "next" release of the DDE after implementing your own customizations in these custom libraries.
+</p><p>
+After making customizations, you don’t want the next release of the DDE to overwrite them with new blank custom library files.  Instead, make sure you have backups or copies of your customization files.  After you install the new DDE files, simply overwrite the new blank custom library files with your existing customized files.
+</p><hr/>
+</body></html>

@@ -1,0 +1,40 @@
+<HTML><HEAD>
+<TITLE>SwingApp Applet</TITLE>
+</HEAD>
+<BODY>
+<script language="javascript" type="text/javascript">
+<!--
+var _info = navigator.userAgent
+var _ie = (_info.indexOf("MSIE") > 0
+          && _info.indexOf("Win") > 0
+          && _info.indexOf("Windows 3.1") < 0);
+
+//-->
+</script>
+SwingApp Applet:
+<p/>
+<script language="javascript" type="text/javascript">
+<!--
+   document.writeln("<OBJECT");
+   document.writeln("WIDTH=640");
+   document.writeln("HEIGHT=480");
+   document.writeln("ALIGN=\"baseline\"");
+if (_ie == true) {
+   document.writeln("CLASSID=\"clsid:8AD9C840-044E-11D1-B3E9-00805F499D93\"");
+   document.writeln("CODEBASE=\"http://java.sun.com/update/1.5.0/jinstall-1_5_0_12-windows-i586.cab#Version=1,5,0,0\"");
+}
+else {
+   document.writeln("TYPE=\"application/x-java-applet;version=1.5\"");
+   document.writeln("CODEBASE=\"http://java.sun.com/javase/downloads/index_jdk5.jsp\"");
+}
+   document.writeln(">");
+
+//-->
+</script>
+   <PARAM name=code value="swingapp.SwingAppApplet.class">
+   <PARAM name=type value="application/x-java-applet;jpi-version=1.5">
+   <PARAM name=archive value="swingapp.jar">
+   <PARAM name=locale value="en">
+   <!--PARAM name=locale value="zh"--><!--If locale's value is zh, applet will have chinese UI-->
+</OBJECT>
+</BODY></HTML>

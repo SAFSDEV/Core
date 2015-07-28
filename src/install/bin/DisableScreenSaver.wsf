@@ -1,0 +1,8 @@
+<job id="DisableScreenSaver">
+<script language="VBScript" src="..\install\_SharedFunctions.vbs"/>
+<script language="VBScript">
+
+DisableScreenSaver
+
+</script>
+</job>

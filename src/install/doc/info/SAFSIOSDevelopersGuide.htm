@@ -1,0 +1,240 @@
+<html>
+<head><title>SAFS iOS Developer's Guide</title></head>
+<body bgcolor=white text=black>
+<a name="top" />
+<h1><center>
+SAFS iOS Developer's Guide<br/>
+2012.10.26<br></center></h1>
+<hr/><! ======================================================================>
+<a name="definitions" />
+<p>
+<h3><b>Definitions:</b></h3>
+<table border=0 cellspacing=7 >
+<tr><td><b>
+SAFS</b><td><b><a href="http://safsdev.sourceforge.net" target=_blank alt="SAFSDEV Home Page" >
+Software Automation Framework Support</a></b>
+<tr><td><b>
+SAFS Driver</b><td>
+The tool that initializes, opens, parses, and routes SAFS test records to available SAFS Engines.
+<tr><td><b>
+SAFS Engine</b><td>
+A keyword-driven automation tool capable of interpreting and executing SAFS test records.
+<tr><td><b>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/tools/engines/SAFSIOS.html"
+   target=_blank alt="SAFS IOS Engine Doc" >SAFS/IOS</a></b> (IOS)<td>
+A SAFS Engine for the <a href="http://developer.apple.com/library/ios/#documentation/DeveloperTools/Conceptual/InstrumentsUserGuide/Built-InInstruments/Built-InInstruments.html#//apple_ref/doc/uid/TP40004652-CH6-SW75"
+   target=_blank alt="Apple UIAutomation Instrument" >UIAutomation Instrument</a> provided by the <a href="http://developer.apple.com/library/ios/navigation/" target=_blank alt="Apple IOS Development and Testing Technologies" >Apple IOS Development SDK</a>.</td>
+</table>
+
+<hr/><! ======================================================================>
+<a name="design" />
+<big><b>Design:</b></big><br>
+<small>
+<a href="#top">Top</a>, <a href="#develop">Develop</a>, <a href="#debug">Debug</a>, <a href="#callscript">CallScript</a>
+</small>
+<p>
+A typical SAFS Engine can dynamically interact at runtime with the SAFS Driver via a Java API, COM objects, or some other mechanism allowing 2-way communication:
+<center><img src="SAFSIOSTypicalDesign.GIF" alt="Typical Driver Engine App Interface"/></center>
+<p>
+The SAFS IOS Engine is a bit more complicated than that:
+<center><img src="SAFSIOSDesign.GIF" alt="SAFS IOS Engine App Interface"/></center>
+<p>
+Note the <img src="SAFSIOSGreenBox.GIF"/> denotes areas requiring development for each SAFS keyword to be implemented. &nbsp;As you can see, a typical implementation is handled in one location using one codebase or API. &nbsp;In SAFS/IOS, we are required to develop a SAFS Java side and a UIAutomation Javascript side for every implemented keyword.
+<p>
+
+<hr/><! ======================================================================>
+<a name="develop" />
+<big><b>Develop:</b></big><br>
+<small>
+<a href="#top">Top</a>, <a href="#design">Design</a>, <a href="#debug">Debug</a>, <a href="#callscript">CallScript</a>
+</small>
+<p>
+Below is an attempt to show SAFS IOS keyword development requirements:
+<p>
+<center><img src="SAFSIOSKeywordDevelopment.GIF" alt="SAFS IOS Engine Keyword Development"/></center>
+<p>
+Note a few items that are important to recognize during keyword development:
+<p>
+<ul>
+<li>The SAFS/IOS Engine Java code receives the Test Record Data (inputrecord) to execute.
+<li>The Java code has no way of knowing which type of component the command is for.<br>
+<li>All Component Functions will be implemented in or routed thru:
+<p><ul><b>org.safs.ios.CFComponent</b></ul>
+<p>
+<li>All IOS-specific Driver Commands will be implemented in or at least routed thru:
+<p><ul><b>org.safs.ios.IDriverCommand</b></ul>
+</ul>
+<p>
+Using the above diagram for reference, keyword development essentially follows the steps below:
+<p>
+<ol>
+<li>Implements the "click.js" JavaScript code to process the keyword "click":
+<table>
+<tr>
+<td><img src="SAFSIOSKeywordJavaScript.GIF" alt="SAFS IOS JavaScript"/>
+<td><ul>
+    <li>tag any debug messages for the Java code to log,<br>
+    (See the <a href="#debug">Debug</a> section below for more info.)
+    <li>extract window and component recognition information from trd.js,
+    <li>extract any other information (ex: coords) required from trd.js,
+    <li>search for the IOS window and component to be acted upon,
+    <li>perform the action on the component, or log "not found",
+    <li>tag appropriate return codes and messages for the Java code to log.
+    </ul>
+</table>
+<p>
+<li>Implement Java code to process the keyword "click":
+<p>
+<table>
+<tr>
+<td><img src="SAFSIOSKeywordJavaCode.GIF" alt="SAFS IOS Engine Java Code"/>
+<td><ul>
+    <li>verify all required parameters are present,
+    <li>gather all necessary SAFS Test Record Data to convert to JavaScript,
+    <li>gather any App Map data needed to convert to JavaScript,
+    <li>gather any parameter data needed to convert to JavaScript code,
+    <li>write the trd.js JavaScript for import into static SAFSRuntime.js,
+    <li>copy "click.js" to "hook.js" for import into static SAFSRuntime.js,
+    <li>trigger the execution of SAFSRuntime.js in Instruments,
+    <li>wait for the execution to be finished,
+    <li>log the results of the execution as parsed from the UIAutomation Instruments log.
+    </ul>
+</table>
+</ol>
+<p>
+<b>Developers should review existing SAFS IOS keyword implementations on both the Java side and the JavaScript side for real-world examples and reference.</b>
+
+<hr/><! ======================================================================>
+<a name="debug" />
+<big><b>Debug:</b></big><br>
+<small>
+<a href="#top">Top</a>, <a href="#design">Design</a>, <a href="#develop">Develop</a>, <a href="#callscript">CallScript</a>
+</small>
+<p>
+The SAFS/IOS Engine can only know what's going on in the device by monitoring the UIAutomation debug log. &nbsp;
+Thus, all standard SAFS messaging, status, and debug logging from the device is retrieved out of the
+UIAutomation log while the test is running.
+<p>
+On the JavaScript side all UIAutomation messaging intended for SAFS monitoring and logging are
+prefixed with special TAGS indicating the type of message being logged so that SAFS can route the message appropriately.
+<p>
+Generally, there are 4 TAG Constants of interest:
+<p>
+<ul><pre>
+DEBUG_TAG    ;Log a message to the SAFS Debug Log.
+COMMENT_TAG  ;Log this Comment when logging to the SAFS Test Log.
+DETAIL_TAG   ;Log these additional Details when logging to the SAFS Test Log.
+STATUS_TAG   ;Set the Status Code to the provided Constant value (below).
+</pre></ul>
+<p>
+The most typical Status Constants of interest:
+<p>
+<ul><pre>
+NO_SCRIPT_FAILURE       ;The script executed with no problems.
+SCRIPT_WARNING          ;The script is setting a WARNING status.
+GENERAL_SCRIPT_FAILURE  ;The script is setting a FAILURE status.
+EXIT_TABLE              ;The script is requesting an exit/abort of the test table.
+</pre></ul>
+<p>
+The developer should review the <b><code>safs/IOS/jscript/constants.js</code></b> file for more.
+<p>
+Example usage within the JavaScript: [ <b><code>UIALogger.logDebug(&lt;TAG> + message)</code></b> ]
+<p><ul><code><pre>
+// set an initial default status
+UIALogger.logDebug(STATUS_TAG + GENERAL_SCRIPT_FAILURE);
+UIALogger.logDebug(DEBUG_TAG +"My JavaScript file is now running...");
+
+...do stuff...
+
+// set whatever the actual final status is
+UIALogger.logDebug(STATUS_TAG + NO_SCRIPT_FAILURE);
+UIALogger.logDebug(DEBUG_TAG +"My JavaScript file has finished.");
+</pre></code></ul>
+<p>
+<b>Note that every message logged directly via UIALogger is sent and impacts overall performance.</b><br>
+Embedding a large amount of SAFS Debug messages (DEBUG_TAG) in this way can potentially produce a
+significant and noticeable performance degradation.
+<p>
+To alleviate this, there is a <b><code>safs/IOS/jscript/safs_debug_settings.js</code></b> file
+in which we can enable and disable SAFS Debug messages from actually being sent. &nbsp;
+By setting the DEBUG_ENABLED var in this file we can turn on or off the sending of these messages.
+<p><ul>
+<code>var DEBUG_ENABLED = false;</code>
+</ul><p>
+In order to take advantage of this feature there is another function to call when logging
+the SAFS Debug messages:
+<p><ul><code><pre>
+UIALogger.logDebug(DEBUG_TAG + message); // use this to ALWAYS send the message
+safs_debug(message);                     // use this to conditionally send the message
+</pre></code></ul>
+<p>
+Modified example using conditional SAFS Debug logging:
+<p><ul><code><pre>
+// set an initial default status
+UIALogger.logDebug(STATUS_TAG + GENERAL_SCRIPT_FAILURE);
+safs_debug("My JavaScript file is now running...");
+
+...do stuff...
+
+// set whatever the actual final status is
+UIALogger.logDebug(STATUS_TAG + NO_SCRIPT_FAILURE);
+safs_debug("My JavaScript file has finished.");
+</pre></code></ul>
+<p>
+
+<hr/><! ======================================================================>
+<a name="callscript" />
+<big><b>CallScript:</b></big><br>
+<small>
+<a href="#top">Top</a>, <a href="#design">Design</a>, <a href="#develop">Develop</a>, <a href="#debug">Debug</a>
+</small>
+<p>
+SAFS testers have access to a special <b>"<a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverFlowCommands&cmd=CallScript" target="_blank" title="CallScript DriverCommand Doc" alt="CallScript DriverCommand Doc">CallScript</a>"</b> Driver Command.
+<p>
+This allows testers to create their own custom JavaScript to be executed at runtime. &nbsp;
+Any number of custom scripts can be called at various times during the testing run without having to close and reopen the UIAutomation Instrument--or the Application being tested.
+<p>
+The IOS JavaScript developer has access to all the normal JavaScript objects and API provided by UIAutomation. &nbsp;
+In addition, the developer has access to all the SAFS JavaScript code and Utilities found at
+<p><ul><b><code>safs/IOS/jscript/</code></b></ul>
+<p>
+This includes all the SAFS logging and SAFS Debug logging capabilities discussed in the preceding <a href="#debug">Debug</a> section.
+<p>
+Note the custom JavaScript must be accessible to Java on the system. &nbsp;By default, we have provided a
+custom JavaScript directory for IOS at
+<p><ul><b><code>safs/IOS/jscript/custom/</code></b></ul>
+<p>
+However, the IOS CallScript implementation will allow for the ScriptName parameter to be:
+<p><ul>
+<li>A variable value used to define the ScriptName or ApplicationConstant
+<li>An ApplicationConstant to be retrieved from the AppMap
+<p>
+The literal ScriptName or ApplicationConstant can contain:
+<p>
+<li>A relative "&lt;filename>" relative to <b><code>safs/IOS/jscript/custom/</code></b>
+<li>A relative "&lt;filename>" relative to <b><code>safs/IOS/jscript/</code></b>
+<li>An absolute full filepath accessible anywhere on the system.
+</ul>
+<p>
+In addition, the SAFS tester can pass variable parameters making them available to the custom JavaScript. &nbsp;
+See the <b>"<a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverFlowCommands&cmd=CallScript" target="_blank" title="CallScript DriverCommand Doc" alt="CallScript DriverCommand Doc">CallScript</a>"</b> command documentation for usage.
+<p>
+In essence, the parameters are available to the JavaScript via <b><code>trd.js</code></b> as variables. &nbsp;
+The name of each custom variable is dependent upon how they were processed by the CallScript DriverCommand.
+<p>
+<center>
+<table border=2 cellpadding=3><th>CallScript Command<th>TRD.js Variables
+<tr><td>C, CallScript, "MyScript", &nbsp;<b>"</b>USERID=papa<b>"</b>, &nbsp;<b>"</b>DOMAIN=ios<b>"</b>&nbsp;<td>var USERID="papa"<br>var DOMAIN="ios"
+<tr><td>C, CallScript, "MyScript", &nbsp;"papa", &nbsp;"ios"&nbsp;<td>var VAR1="papa"<br>var VAR2="ios"
+<tr><td>C, CallScript, "MyScript", &nbsp;<b>^</b>USERID="papa", &nbsp;<b>^</b>DOMAIN="ios"&nbsp;<td>var VAR1="papa"<br>var VAR2="ios"
+</table>
+</center>
+<p>
+A simple reminder to SAFS testers: it is important to note that SAFS variable expressions are processed and dereferenced <b>BEFORE</b> the CallScript command is executed. &nbsp;That is why the 3rd example above produces the JavaScript variables shown.
+<hr/><! ======================================================================>
+<small>
+<a href="#top">Top</a>, <a href="#design">Design</a>, <a href="#develop">Develop</a>, <a href="#debug">Debug</a>, <a href="#callscript">CallScript</a>
+</small>
+
+</body>
+</html>
