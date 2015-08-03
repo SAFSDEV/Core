@@ -1,0 +1,120 @@
+
+
+generic_error  				:*** 错误 *** %1%
+staf_error     				:*** STAF 错误 *** %1%
+file_error     				:错误地打开/读/写文件 '%1%'
+file_read_denied			:对于文件 '%1%， 缺少读权限' 
+file_write_denied			:对于文件 '%1%， 缺少写权限' 
+file_write_error			:在写入文件 '%1%' 时，发生错误
+file_read_error				:在读取文件 '%1%' 时，发生错误 
+file_open_error				:文件 '%1%' 正在被打开进行读/写操作. 
+file_ext_error              :'%1%' 不包含期望的文件后缀 '%2%'
+
+cant_create_file    		: 无法创建文件 '%1%'
+cant_create_directroy		: 无法创建目录 '%1%'
+cant_delete_file			: 无法删除文件 '%1%'
+cant_delete_directory    	: 无法删除目录 '%1%'
+not_a_file                  :'%1%' 不是文件
+not_a_directory             :'%1%' 不是目录
+
+no_success1		:%1% 没有成功.
+no_success2		:%1% 没有成功, 使用参数 %2%
+
+staf_reg_null  :%1%:无法登记 NULL/空的 STAF 进程名!
+
+standard_err   :%1% 失败在文件 %2% 中, 在 %3% 行.
+standard_warn  :%1% 警告在文件 %2% 中, 在 %3% 行.
+
+failure1   :无法完成  %1%.
+failure2   :在 %1% 上, 无法完成  %2%.
+failure3   :在 %2% 上, 在 %1% 中, 无法完成  %3%.
+failure3a  :在 %2% 上, 在 %1% 中, 使用参数 %4%, 无法完成  %3%.
+failure4   :在 %2% 上, 在 %1% 中, 无法完成  %3%. %4%
+failure5   :在 %2% 上, 在 %1% 中, 无法完成  %3%. %4% %5%
+
+error_performing_1   :%1% 错误.
+error_performing_2   :%1% 在 %2% 上 错误.
+
+linefail4  :在 %2% 上, 在 %1% 中, 在第%4%行,  无法完成  %3%.
+
+failureDetail :在 %2% 中, 在第 %1%行, 发生错误: %3%
+unknownDetail :在 %3% 中, 在第 %4% 行,%1% "%2%" 未知.
+
+unknown_record:在 %1% 中, 在第 %2% 行, 出现未知的记录类型, 脚本名称, 或命令.
+
+ignore_bad_param  :%1% 忽略无效的参数 '%2%'.
+
+bad_param  :对于 %1%， 是无效的参数值。
+paramsize  :提供的参数数目不够.
+paramsize1 :%1%, 参数数目错误.
+paramsize2 :%1%, 参数数目错误: %2%.
+paramsize3 :%1%, 参数数目错误: %2%, %3%
+paramsize4 :%1%, 参数数目错误: %2%, %3%:%4%
+
+invalid_missing   :在 %2% 中, 在第 %3%行, %1%无效或缺失.
+missing_parameter :在 %2% 中, 在第 %3%行, %1%缺失.
+missing_app_map   :缺少 Application Map 说明.
+missing_blockid   :缺少 BlockID 说明.
+object_not_found  :被请求的 object 没有被找到.
+
+something_not_found :%1% 没有被找到.
+delimiter_not_found :分隔符 '%1%' 没有被找到.
+not_found_on_screen :在屏幕上,%1% 没有被找到.
+not_found_timeout   :在规定的超时 %2%时间内, %1% 没有被找到.
+not_gone_timeout    :在规定的超时 %2%时间内, %1% 没有消失.
+
+object_not_valid  :被请求的 object 是无效的.
+action_not_valid  :被请求的 action 是无效的.
+
+improper_testlevel:在这个测试等级上,不被支持.
+
+invalid_app_map   :无效的 Application Map 说明.
+bad_app_map_item  :在 Application Map '%2%' 中, '%1%' 没有被找到.
+
+support_not_found :对 %1% 的支持没有被找到!
+support_not_installed :对 %1% 的支持可能没有被正确地安装!
+support_not_initialized :对 %1% 的支持可能没有被正确地初始化!
+
+add_to_classpath  :把 %1% 加到 CLASSPATH 中.
+
+no_substrings     :没有发现匹配的子字符串.
+substring_not_found_2 :在 '%2%'中,没有发现子字符串 '%1%'.
+no_node           :没有发现匹配的节点.
+no_node1          :对于 '%1%',没有发现匹配的节点.
+no_node3          :在 %3%中,%1% 没有发现节点 '%2%'.
+
+no_action_for_type   :对于 %3%, 在 %2%中,  %1% 不被支持.
+
+something_not_match       :%1% 值 '%2%' 和期望值 '%3%' 不一致.
+selection_not_match       :选择的值 '%1%' 和期望值 '%2%' 不一致.
+selected_index_not_match  :选择的索引 '%1%' 和期望值 '%2%' 不一致.
+could_not_select          :在 %2%中,无法选择 '%1%'
+selection_not_partial_match :选择的值 '%1%' 不包含子字符串 '%2%'.
+
+could_not_set      :无法把值 '%1%' 设置给 '%2%'.
+could_not_set_vars :无法设置一个或多个变量的值.
+could_not_get_vars :无法得到一个或多个变量的值.
+could_not_reset	   :无法重置变量 '%1%' 为缺省值.
+could_not_get	   :无法得到 '%1%'.
+
+unable_to_transfer  :无法转到 BLOCKID '%1%'
+blockid_not_found   :BlockID '%1%' 没有被发现.
+
+fail.extract		:提取 '%1%' 失败.
+fail.match			:匹配失败.
+executed_with_negativeResult	:%1%:%2% %3% 执行的结果是否定的(negative).
+
+can_not_get_text				:无法得到组件的标签(text).
+text_different					:组件当前的标签(text) 与 '%1%'不一致.
+
+property.not.found				:无法得到属性.
+property.value.is.null			:属性: %1%, 它的值是 null.
+method.not.found				:无法得到方法.
+scrollbar.not.visible			:滚动条不可见, 无法执行滚动操作.
+script_not_found				:没有找到脚本 '%1%'.
+script_error					:脚本 '%1%' 错误: %2%
+
+unexpected_object				:非预期的 object: 不是 '%1%' 的实例,无法被处理.
+invalid_index_format	        :不正确的索引格式: %1%.
+no_match_found					:对于 %1%, 没有找到匹配.
+text_uneditable				    :组件当前的标签(text)是不可编辑的.  	

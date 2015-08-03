@@ -1,0 +1,27 @@
+# 08/04/2003
+# CustomJavaObjectMap.DAT
+#
+#============  DO NOT MODIFY THE CONTENTS OF THIS FILE =============
+#
+# Only someone who understands the ramifications of additions and 
+# changes to this file should, in fact, modify this file.
+# 
+#===================================================================
+
+com.klg.jclass.swing.JCTreeTable=JCTreeTable
+com.klg.jclass.table.CellArea=CellArea
+sun.beans.ole.OleEmbeddedFrame=OleEmbeddedFrame
+
+#=========  I am not sure what type should be given to the custom class listed below
+#=========  If we add these classes, maybe we should also add the correspondant classes
+#=========  (like org.safs.rational.custom.CFJCTreeTable) to manipulate them.
+
+#SAS.Shared.FileSelectionDialogs.Controls.PlacesBar
+#SAS.Shared.FileSelectionDialogs.Controls.PlacesBarItem
+#SAS.Shared.FileSelectionDialogs.Filespaces.LocalFilespace
+#SAS.Shared.FileSelectionDialogs.Filespaces.ShellListView
+#SAS.Shared.FileSelectionDialogs.Filespaces.ServersFilespace
+#SAS.Shared.FileSelectionDialogs.Filespaces.SASFoldersFilespace
+#SAS.Shared.FileSelectionDialogs.Filespaces.GenericPreviewer
+#SAS.Shared.FileSelectionDialogs.Controls.SasVarList
+#SAS.EG.SDS.Views.ListView

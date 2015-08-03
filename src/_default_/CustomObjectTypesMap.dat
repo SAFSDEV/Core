@@ -1,0 +1,13 @@
+# 08/04/2003
+# CustomObjectTypesMap.DAT
+#
+#============  DO NOT MODIFY THE CONTENTS OF THIS FILE =============
+#
+# Only someone who understands the ramifications of additions and 
+# changes to this file should, in fact, modify this file.
+# 
+#===================================================================
+
+JCTreeTable		:JCTreeTable
+CellArea			:Component
+OleEmbeddedFrame	:OleEmbeddedFrame
