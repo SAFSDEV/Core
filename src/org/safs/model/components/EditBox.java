@@ -88,6 +88,7 @@ public class EditBox extends GenericObject {
     <LI>Mercury Interactive WinRunner</LI>
     <LI>Automated QA TestComplete</LI>
     <LI>OpenQA Selenium</LI>
+    <LI>OpenQA Selenium</LI>
     </UL>
 
      @param textValue  Optional:YES  DefaultVal: 
@@ -115,6 +116,7 @@ public class EditBox extends GenericObject {
     <LI>Rational RobotJ</LI>
     <LI>Mercury Interactive WinRunner</LI>
     <LI>Automated QA TestComplete</LI>
+    <LI>OpenQA Selenium</LI>
     <LI>OpenQA Selenium</LI>
     </UL>
 
@@ -225,6 +227,7 @@ public class EditBox extends GenericObject {
     <LI>Mercury Interactive WinRunner</LI>
     <LI>Automated QA TestComplete</LI>
     <LI>OpenQA Selenium</LI>
+    <LI>OpenQA Selenium</LI>
     </UL>
 
      @param textValue  Optional:YES  DefaultVal: 
@@ -251,6 +254,7 @@ public class EditBox extends GenericObject {
     <LI>Rational RobotJ</LI>
     <LI>Mercury Interactive WinRunner</LI>
     <LI>Automated QA TestComplete</LI>
+    <LI>OpenQA Selenium</LI>
     <LI>OpenQA Selenium</LI>
     </UL>
 
@@ -284,6 +288,7 @@ public class EditBox extends GenericObject {
     <LI>Mercury Interactive WinRunner</LI>
     <LI>Automated QA TestComplete</LI>
     <LI>OpenQA Selenium</LI>
+    <LI>OpenQA Selenium</LI>
     <LI>Google Android</LI>
     </UL>
 
@@ -312,6 +317,7 @@ public class EditBox extends GenericObject {
     <LI>Rational RobotJ</LI>
     <LI>Mercury Interactive WinRunner</LI>
     <LI>Automated QA TestComplete</LI>
+    <LI>OpenQA Selenium</LI>
     <LI>OpenQA Selenium</LI>
     <LI>Google Android</LI>
     </UL>
