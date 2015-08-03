@@ -1,0 +1,109 @@
+
+success1   :%1% 成功.
+success2   :%1% %2% 成功.
+success2a  :使用参数 %2%， %1% 成功.
+success3   :%1%:%2% %3% 成功.
+success3a  :使用参数 %4%， %1%:%2% %3% 成功. 
+success4   :%1%:%2% %3% 成功. %4%
+presuccess4:%1%, %2%:%3% %4% 成功.
+success5   :%1%:%2% %3% 成功. %4% %5%
+presuccess5:%1%;%2%, %3%:%4% %5% 成功.
+sentmsg3   :%1% %2% 发送到 %3%.
+perfnode3  :在 %3% 中，在 '%2%' 上， %1% 被执行了.
+perfnode4  :在 %3% 中，在 '%2%' 上， %1% 被执行了; 输出文件 '%4%'.
+perfnode4a :在 '%2%' 上, %1% 被执行了; 输出文件 '%3%'.
+
+item_open_write : %1% 被打开了用于写操作.
+item_open_read  : %1% 被打开了用于读操作.
+
+attempt3a  :使用参数 %4%, %1%:%2% %3% 被尝试执行了。
+
+activate_warn  :%1% 激活警告.  %1% 可能被禁用或阻塞.
+where_detail   :%1% 在文件 %2% 中, 在第 %3%行.
+
+engine_domain_enabled  :%1% '%2%' 域被启用.
+engine_domain_disabled :%1% '%2%' 域被禁用.
+
+found3	      :在 %3% 中,%1%  发现节点 '%2%'.
+found_timeout :在规定的超时 %2%时间内, %1% 被找到.
+gone_timeout  :在规定的超时 %2%时间内, %1% 消失.
+
+varAssigned2:值'%1%' 被赋给变量 '%2%'.
+
+MyMsg  :%3% 信息使用 %1% 参数, 由于 %3%, 而不是 %2%.
+log1   :howdy
+
+regular_expressions :正则表达式
+
+functions_preferred     :%1% 函数的优先权启用.
+functions_not_preferred :%1% 函数的优先权禁用.
+
+app_map_set         :Application Map 被设置为'%1%'
+something_set       :'%1%' 被设置为 '%2%'
+app_map_value       :Application Map '%1%' %2%:%3% = '%4%'.
+
+terminating_early   :由于命令,%1% 过早地终止了.
+
+default_missing_param :%1% 可选参数 '%2%' 被设置为 '%3%'.
+default_bad_param     :%1% 无效的可选参数 '%2%' 被设置为  '%3%'.
+
+transfer_to_block   :转移到 BLOCKID '%1%'
+extended_info       :在文件 %2%中,%1% 在第 %3%行,.
+
+not_contain :'%1%' 不包含 '%2%'
+contains    :'%1%' 包含 '%2%'
+
+exists     :'%1%' 存在
+not_exist  :'%1%' 不存在
+
+equals     :'%1%' 等于 '%2%'
+not_equal  :'%1%' 不等于 '%2%'
+
+something_matches  :%1% 与期望值 '%2%' 相符合.
+selection_matches  :%1%: 选择的值 %2% 与期望值 '%3%' 相符合.
+selected_index_matches  :%1%:选择的索引 '%2%' 和期望值 '%3%' 相符合.
+
+selection_partial_match :%1%:%2% 选择的值 '%3%' 包含子字符串  '%4%'.
+
+is_selected    :在 %2% 中,'%1%' 被选中.
+is_not_selected:在 %2% 中,'%1%' 没有被选中.
+
+in_range       :%1% 在范围 %2% 到 %3% 中.
+not_in_range  :%1% 不在范围 %2% 到 %3% 中.
+
+less       :%1% 小于 %2%
+not_less   :%1% 不小于 %2%
+
+greater    :%1% 大于 %2%
+not_greater:%1% 不大于 %2%
+
+branching :%1% 试图到分支 %2%.
+not_branching :%1% 没有到分支 %2%.
+
+reset_counter :重置状态计数器 %1%
+deleted_counter :删除状态计数器 %1%
+
+disabled_counters :所有的公共的和私有的计数器都被暂时禁用了.
+enabled_counters  :所有的公共的和私有的计数器都被启用了.
+
+set_counter_mode    :设置状态计数器 %1% 为模式 %2%.
+stored_counter_info :存储状态计数器 "%1%" 到变量 "%2%" 中.
+
+content_matches       :'%1%' 的内容与 '%2%' 的内容相符合.
+content_not_matches   :'%1%' 的内容与 '%2%' 的内容不符合.
+no_file_matches       :没有文件或目录与过滤器'%1%' 相符合.
+
+be_saved_to				:'%1%' 被存储到 '%2%' 中.
+see_difference_file		:请在文件'%1%' 中查看不同点.
+
+eof_not_reached			:没有到达文件结尾(EOF).
+mouse_position_saved	:鼠标位置 %1%,%2% 被保存. 
+
+file_protection			:File Protection
+file_read_only			:Read-Only
+file_hidden				:Hidden
+file_archive			:Archive
+file_system				:System
+file_normal				:Normal
+
+property.value.is 		:属性: %1%, 值为 %2%.
