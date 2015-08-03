@@ -87,6 +87,8 @@ public class DriverCommands {
     static public final String GETSYSTEMDATETIME_KEYWORD = "GetSystemDateTime";
     /** "GetSystemTime" */
     static public final String GETSYSTEMTIME_KEYWORD = "GetSystemTime";
+    /** "GetURL" */
+    static public final String GETURL_KEYWORD = "GetURL";
     /** "GetVersion" */
     static public final String GETVERSION_KEYWORD = "GetVersion";
     /** "HideSoftKeyboard" */
@@ -101,6 +103,8 @@ public class DriverCommands {
     static public final String PAUSE_KEYWORD = "Pause";
     /** "SaveClipboardToFile" */
     static public final String SAVECLIPBOARDTOFILE_KEYWORD = "SaveClipboardToFile";
+    /** "SaveURLToFile" */
+    static public final String SAVEURLTOFILE_KEYWORD = "SaveURLToFile";
     /** "ScrollWheel" */
     static public final String SCROLLWHEEL_KEYWORD = "ScrollWheel";
     /** "SendEmail" */
@@ -173,6 +177,10 @@ public class DriverCommands {
     static public final String USEWEBBROWSER_KEYWORD = "UseWebBrowser";
     /** "VerifyClipboardToFile" */
     static public final String VERIFYCLIPBOARDTOFILE_KEYWORD = "VerifyClipboardToFile";
+    /** "VerifyURLContent" */
+    static public final String VERIFYURLCONTENT_KEYWORD = "VerifyURLContent";
+    /** "VerifyURLToFile" */
+    static public final String VERIFYURLTOFILE_KEYWORD = "VerifyURLToFile";
     /** "Version" */
     static public final String VERSION_KEYWORD = "Version";
     /** "WaitForGUI" */
@@ -2238,6 +2246,53 @@ public class DriverCommands {
     }
 
 
+    /*********** <pre>Send an HTTP GET request, and get the response.    </pre>    Supporting Engines:
+    <P/><UL>
+        <LI>OpenQA Selenium</LI>
+    </UL>
+
+     @param uRL  Optional:NoThe URL to request.
+     @param variable  Optional:NoThe name of the variable holding the response sent back from the server.
+     @param timeout  Optional:YesThe timeout (in seconds) waiting for the response from HTTP server. The default value is 120 seconds.
+     @param headerName  Optional:YesThe HTTP request header name.
+     @param headerValue  Optional:YesThe value to set for the HTTP request header.
+     **********/
+    static public DriverCommand getURL (String uRL, String variable, String timeout, String headerName, String headerValue) {
+
+        if ( uRL == null ) throw new IllegalArgumentException ( "getURL.uRL = null");
+        if ( variable == null ) throw new IllegalArgumentException ( "getURL.variable = null");
+        DriverCommand dc = new DriverCommand(GETURL_KEYWORD);
+        dc.addParameter(uRL);
+        dc.addParameter(variable);
+        dc.addParameter(timeout);
+        dc.addParameter(headerName);
+        dc.addParameter(headerValue);
+        return dc;
+    }
+
+
+    /*********** <pre>Send an HTTP GET request, and get the response.    </pre>    
+    Supporting Engines:
+    <P/><UL>
+        <LI>OpenQA Selenium</LI>
+    </UL>
+
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>        uRL -- Optional:NoThe URL to request.<BR/>        variable -- Optional:NoThe name of the variable holding the response sent back from the server.<BR/>        timeout -- Optional:YesThe timeout (in seconds) waiting for the response from HTTP server. The default value is 120 seconds.<BR/>        headerName -- Optional:YesThe HTTP request header name.<BR/>        headerValue -- Optional:YesThe value to set for the HTTP request header.
+    </UL>
+
+     **********/
+    static public DriverCommand getURL (String[] parameters) {
+
+        if ( parameters == null ) throw new IllegalArgumentException ( "getURL.parameters = null");
+        DriverCommand dc = new DriverCommand(GETURL_KEYWORD);
+        dc.addParameters(parameters);
+        return dc;
+    }
+
+
     /*********** <pre>Get the engine VERSION
         Used to specify the VERSION of the engine.
            </pre>    Supporting Engines:
@@ -2588,6 +2643,53 @@ public class DriverCommands {
 
         if ( parameters == null ) throw new IllegalArgumentException ( "saveClipboardToFile.parameters = null");
         DriverCommand dc = new DriverCommand(SAVECLIPBOARDTOFILE_KEYWORD);
+        dc.addParameters(parameters);
+        return dc;
+    }
+
+
+    /*********** <pre>Send an HTTP GET request, and save the response into a file.    </pre>    Supporting Engines:
+    <P/><UL>
+        <LI>OpenQA Selenium</LI>
+    </UL>
+
+     @param uRL  Optional:NoThe URL to request.
+     @param file  Optional:NoThe name of the file holding the response sent back from the server.
+     @param timeout  Optional:YesThe timeout (in seconds) waiting for the response from HTTP server. The default value is 120 seconds.
+     @param headerName  Optional:YesThe HTTP request header name.
+     @param headerValue  Optional:YesThe value to set for the HTTP request header.
+     **********/
+    static public DriverCommand saveURLToFile (String uRL, String file, String timeout, String headerName, String headerValue) {
+
+        if ( file == null ) throw new IllegalArgumentException ( "saveURLToFile.file = null");
+        if ( uRL == null ) throw new IllegalArgumentException ( "saveURLToFile.uRL = null");
+        DriverCommand dc = new DriverCommand(SAVEURLTOFILE_KEYWORD);
+        dc.addParameter(uRL);
+        dc.addParameter(file);
+        dc.addParameter(timeout);
+        dc.addParameter(headerName);
+        dc.addParameter(headerValue);
+        return dc;
+    }
+
+
+    /*********** <pre>Send an HTTP GET request, and save the response into a file.    </pre>    
+    Supporting Engines:
+    <P/><UL>
+        <LI>OpenQA Selenium</LI>
+    </UL>
+
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>        uRL -- Optional:NoThe URL to request.<BR/>        file -- Optional:NoThe name of the file holding the response sent back from the server.<BR/>        timeout -- Optional:YesThe timeout (in seconds) waiting for the response from HTTP server. The default value is 120 seconds.<BR/>        headerName -- Optional:YesThe HTTP request header name.<BR/>        headerValue -- Optional:YesThe value to set for the HTTP request header.
+    </UL>
+
+     **********/
+    static public DriverCommand saveURLToFile (String[] parameters) {
+
+        if ( parameters == null ) throw new IllegalArgumentException ( "saveURLToFile.parameters = null");
+        DriverCommand dc = new DriverCommand(SAVEURLTOFILE_KEYWORD);
         dc.addParameters(parameters);
         return dc;
     }
@@ -3967,6 +4069,100 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
 
         if ( parameters == null ) throw new IllegalArgumentException ( "verifyClipboardToFile.parameters = null");
         DriverCommand dc = new DriverCommand(VERIFYCLIPBOARDTOFILE_KEYWORD);
+        dc.addParameters(parameters);
+        return dc;
+    }
+
+
+    /*********** <pre>Send an HTTP GET request, and verify the response with the content provided as parameter.    </pre>    Supporting Engines:
+    <P/><UL>
+        <LI>OpenQA Selenium</LI>
+    </UL>
+
+     @param uRL  Optional:NoThe URL to request.
+     @param benchContent  Optional:NoThe bench content to be compared with the response sent back from the server.
+     @param timeout  Optional:YesThe timeout (in seconds) waiting for the response from HTTP server. The default value is 120 seconds.
+     @param headerName  Optional:YesThe HTTP request header name.
+     @param headerValue  Optional:YesThe value to set for the HTTP request header.
+     **********/
+    static public DriverCommand verifyURLContent (String uRL, String benchContent, String timeout, String headerName, String headerValue) {
+
+        if ( benchContent == null ) throw new IllegalArgumentException ( "verifyURLContent.benchContent = null");
+        if ( uRL == null ) throw new IllegalArgumentException ( "verifyURLContent.uRL = null");
+        DriverCommand dc = new DriverCommand(VERIFYURLCONTENT_KEYWORD);
+        dc.addParameter(uRL);
+        dc.addParameter(benchContent);
+        dc.addParameter(timeout);
+        dc.addParameter(headerName);
+        dc.addParameter(headerValue);
+        return dc;
+    }
+
+
+    /*********** <pre>Send an HTTP GET request, and verify the response with the content provided as parameter.    </pre>    
+    Supporting Engines:
+    <P/><UL>
+        <LI>OpenQA Selenium</LI>
+    </UL>
+
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>        uRL -- Optional:NoThe URL to request.<BR/>        benchContent -- Optional:NoThe bench content to be compared with the response sent back from the server.<BR/>        timeout -- Optional:YesThe timeout (in seconds) waiting for the response from HTTP server. The default value is 120 seconds.<BR/>        headerName -- Optional:YesThe HTTP request header name.<BR/>        headerValue -- Optional:YesThe value to set for the HTTP request header.
+    </UL>
+
+     **********/
+    static public DriverCommand verifyURLContent (String[] parameters) {
+
+        if ( parameters == null ) throw new IllegalArgumentException ( "verifyURLContent.parameters = null");
+        DriverCommand dc = new DriverCommand(VERIFYURLCONTENT_KEYWORD);
+        dc.addParameters(parameters);
+        return dc;
+    }
+
+
+    /*********** <pre>Send an HTTP GET request, and verify the response with the content of a file.    </pre>    Supporting Engines:
+    <P/><UL>
+        <LI>OpenQA Selenium</LI>
+    </UL>
+
+     @param uRL  Optional:NoThe URL to request.
+     @param benchFile  Optional:NoThe name of the bench file holding the content to be compared with the response sent back from the server.
+     @param timeout  Optional:YesThe timeout (in seconds) waiting for the response from HTTP server. The default value is 120 seconds.
+     @param headerName  Optional:YesThe HTTP request header name.
+     @param headerValue  Optional:YesThe value to set for the HTTP request header.
+     **********/
+    static public DriverCommand verifyURLToFile (String uRL, String benchFile, String timeout, String headerName, String headerValue) {
+
+        if ( benchFile == null ) throw new IllegalArgumentException ( "verifyURLToFile.benchFile = null");
+        if ( uRL == null ) throw new IllegalArgumentException ( "verifyURLToFile.uRL = null");
+        DriverCommand dc = new DriverCommand(VERIFYURLTOFILE_KEYWORD);
+        dc.addParameter(uRL);
+        dc.addParameter(benchFile);
+        dc.addParameter(timeout);
+        dc.addParameter(headerName);
+        dc.addParameter(headerValue);
+        return dc;
+    }
+
+
+    /*********** <pre>Send an HTTP GET request, and verify the response with the content of a file.    </pre>    
+    Supporting Engines:
+    <P/><UL>
+        <LI>OpenQA Selenium</LI>
+    </UL>
+
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>        uRL -- Optional:NoThe URL to request.<BR/>        benchFile -- Optional:NoThe name of the bench file holding the content to be compared with the response sent back from the server.<BR/>        timeout -- Optional:YesThe timeout (in seconds) waiting for the response from HTTP server. The default value is 120 seconds.<BR/>        headerName -- Optional:YesThe HTTP request header name.<BR/>        headerValue -- Optional:YesThe value to set for the HTTP request header.
+    </UL>
+
+     **********/
+    static public DriverCommand verifyURLToFile (String[] parameters) {
+
+        if ( parameters == null ) throw new IllegalArgumentException ( "verifyURLToFile.parameters = null");
+        DriverCommand dc = new DriverCommand(VERIFYURLTOFILE_KEYWORD);
         dc.addParameters(parameters);
         return dc;
     }

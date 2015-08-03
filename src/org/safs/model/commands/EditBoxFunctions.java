@@ -72,6 +72,7 @@ public class EditBoxFunctions {
         <LI>Mercury Interactive WinRunner</LI>
         <LI>Automated QA TestComplete</LI>
         <LI>OpenQA Selenium</LI>
+        <LI>OpenQA Selenium</LI>
     </UL>
 
      @param winname  Optional:NO
@@ -156,6 +157,7 @@ public class EditBoxFunctions {
         <LI>Mercury Interactive WinRunner</LI>
         <LI>Automated QA TestComplete</LI>
         <LI>OpenQA Selenium</LI>
+        <LI>OpenQA Selenium</LI>
     </UL>
 
      @param winname  Optional:NO
@@ -193,6 +195,7 @@ public class EditBoxFunctions {
         <LI>Rational RobotJ</LI>
         <LI>Mercury Interactive WinRunner</LI>
         <LI>Automated QA TestComplete</LI>
+        <LI>OpenQA Selenium</LI>
         <LI>OpenQA Selenium</LI>
         <LI>Google Android</LI>
     </UL>
