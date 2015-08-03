@@ -1,3 +1,2 @@
 secsWaitForWindow    :30
 secsWaitForComponent :30
-testDomains          :Java;Html;Swt;Net
