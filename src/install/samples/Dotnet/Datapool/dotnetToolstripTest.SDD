@@ -1,0 +1,13 @@
+
+;====  System.Windows.Forms.ToolStripComboBox+ToolStripComboBoxControl
+T, DotnetAppWindow, ComboBox, CaptureItemsToFile , comboContent.txt
+
+;T, DotnetAppWindow, ComboBox, ShowList
+T, DotnetAppWindow, ComboBox, Select, "JTree2"
+T, DotnetAppWindow, ComboBox, SelectIndex, 1
+T, DotnetAppWindow, ComboBox, SelectPartialMatch, "JTr"
+T, DotnetAppWindow, ComboBox, SelectUnverified, "JTree2"
+T, DotnetAppWindow, ComboBox, VerifySelected, "JTree2"
+T, DotnetAppWindow, ComboBox, SetTextValue, "ValueSetted"
+T, DotnetAppWindow, ComboBox, SetUnverifiedTextValue, "ValueSettedNoVerify"
+;T, DotnetAppWindow, ComboBox, HideList

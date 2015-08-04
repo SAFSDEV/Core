@@ -1,0 +1,4 @@
+T, DotnetAppWindow, DotnetAppWindow, Click
+;T, DotnetAppWindow, menuBar, SelectMenuItem, "Tools->JPanel Control"
+;T, DotnetAppWindow, textBox2, InputCharacters, "Tools->JPanel Control"
+;T, DotnetAppWindow, textBox3, InputCharacters, "Tools->JPanel Control"
