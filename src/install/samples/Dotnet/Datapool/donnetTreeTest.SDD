@@ -1,0 +1,88 @@
+;####################	JavaTreeFunctions (CFTree)  ###############################
+T, DotnetAppWindow, menuBar, SelectMenuItem, "Tools->JTree2 Viewer"
+
+;===========================TEST FULL MATCHES
+T, DotnetAppWindow, treeView2, SetTreeContainsNode, "Top Node", containsTopNodeVar
+T, DotnetAppWindow, treeView2, CaptureTreeDataToFile, javaTree2.ext
+T, DotnetAppWindow, treeView2, CaptureTreeDataToFile, javaTree2LastNode.ext, "Last Node"
+T, DotnetAppWindow, treeView2, ExpandTextNode, "Top Node"
+T, DotnetAppWindow, treeView2, SelectTextNode, "Top Node->ListItem2"
+T, DotnetAppWindow, treeView2, CollapseTextNode, "Top Node"
+
+T, DotnetAppWindow, treeView2, ExpandTextNode, "Last Node"
+T, DotnetAppWindow, treeView2, ClickTextNode, "Last Node"
+T, DotnetAppWindow, treeView2, SelectTextNode, "Last Node->3ListItem1", "Index=1"
+C, PAUSE, 1
+C, LOGFailureOK, "There is no second node 'Last Node->3ListItem1' SelectTextNode command will fail."
+T, DotnetAppWindow, treeView2, SelectTextNode, "Last Node->3ListItem1", "Index=2"
+T, DotnetAppWindow, treeView2, SelectTextNode, "Last Node->3ListItem5"
+
+;RFT 8.0.0.2,  VerifySelectedNode does not work
+;C, LOGFailureOK, "Last Node->Branch Nodes has not been selected VerifySelectedNode command will fail."
+;T, DotnetAppWindow, treeView2, VerifySelectedNode, "Last Node->Branch Nodes"
+;T, DotnetAppWindow, treeView2, SelectTextNode, "Last Node->Branch Nodes"
+;T, DotnetAppWindow, treeView2, VerifySelectedNode, "Last Node->Branch Nodes"
+;C, LOGFailureOK, "Last Node->Branch Nodes has been selected VerifyNodeUnselected command will fail."
+;T, DotnetAppWindow, treeView2, VerifyNodeUnselected, "Last Node->Branch Nodes"
+
+
+T, DotnetAppWindow, treeView2, Collapse, "Last Node"
+
+T, DotnetAppWindow, treeView2, ExpandTextNode, "Last Node", "index=1"
+C, PAUSE, 1
+T, DotnetAppWindow, treeView2, CollapseTextNode, "Last Node", "index=1"
+
+;===========================without full path, not work================================
+C, LOGFailureOK, "Without full path the following two command will fail."
+T, DotnetAppWindow, treeView2, ExpandTextNode, "Branch Nodes"
+T, DotnetAppWindow, treeView2, CollapseTextNode, "Branch Nodes"
+;=========================== with full path, work =====================================
+T, DotnetAppWindow, treeView2, ExpandTextNode, "Last Node->Branch Nodes"
+T, DotnetAppWindow, treeView2, CollapseTextNode, "Last Node->Branch Nodes"
+;================================================================
+
+;===========================TEST FULL_UNVERIFIED MATCHES
+T, DotnetAppWindow, treeView2, RightClickUnverifiedTextNode, "Last Node"
+C, PAUSE, 1
+T, DotnetAppWindow, treeView2, InputKeys, "{ESC}"
+T, DotnetAppWindow, treeView2, ClickUnverifiedTextNode, "Last Node"
+C, LOGFailureOK, "The following test is expected to fail; There is no second Last Node."
+T, DotnetAppWindow, treeView2, ClickUnverifiedTextNode, "Last Node", "2"
+T, DotnetAppWindow, treeView2, SelectUnverifiedTextNode, "Last Node"
+C, LOGFailureOK, "The following three tests are expected to fail; There is no second Last Node."
+T, DotnetAppWindow, treeView2, SelectUnverifiedTextNode, "Last Node", "2"
+T, DotnetAppWindow, treeView2, ActivateUnverifiedTextNode, "Last Node", "index=2"
+T, DotnetAppWindow, treeView2, DoubleClickUnverifiedTextNode, "Last Node", "index=2"
+T, DotnetAppWindow, treeView2, ActivateUnverifiedTextNode, "Last Node"
+T, DotnetAppWindow, treeView2, SelectUnverifiedTextNode, "Last Node->Branch Nodes"
+T, DotnetAppWindow, treeView2, CtrlClickUnverifiedTextNode, "Last Node->3ListItem2"
+T, DotnetAppWindow, treeView2, SelectUnverifiedTextNode, "Last Node->3ListItem1"
+T, DotnetAppWindow, treeView2, ShiftClickUnverifiedTextNode, "Last Node->3ListItem6"
+T, DotnetAppWindow, treeView2, DoubleClickUnverifiedTextNode, "Last Node"
+
+;==========================TEST PARTIAL MATCHES
+T, DotnetAppWindow, treeView2, SetTreeContainsPartialMatch, "top no", containsTopNoVar
+T, DotnetAppWindow, treeView2, PartialMatchTreeDataToFile, javaTree2LastNodePartialMatch.ext, "last nod"
+T, DotnetAppWindow, treeView2, ExpandPartialTextNode  , "last"
+T, DotnetAppWindow, treeView2, CollapsePartialTextNode, "last"
+T, DotnetAppWindow, treeView2, DoubleClickPartial  , "last"
+T, DotnetAppWindow, treeView2, ClickPartial, "last node->3listitem6"
+T, DotnetAppWindow, treeView2, SelectPartial, "last node->nodes"
+C, PAUSE, 1
+T, DotnetAppWindow, treeView2, ExpandPartialTextNode  , "last->ranch no"
+T, DotnetAppWindow, treeView2, ExpandPartialTextNode  , "last->nodes->child"
+C, LOGFailureOK, "The following test is expected to fail."
+T, DotnetAppWindow, treeView2, SelectPartialTextNode  , "last->nodes->child->item3"
+T, DotnetAppWindow, treeView2, CollapsePartialTextNode  , "last no->branc->child"
+T, DotnetAppWindow, treeView2, CollapsePartialTextNode, "last nod->nodes"
+T, DotnetAppWindow, treeView2, RightClickPartial, "last node->nodes"
+T, DotnetAppWindow, treeView2, InputKeys, "{ESC}"
+T, DotnetAppWindow, treeView2, SelectPartial, "last node->nodes"
+T, DotnetAppWindow, treeView2, CollapsePartial, "last node"
+
+T, DotnetAppWindow, treeView2, ExpandPartialTextNode  , "p node"
+C, PAUSE, 1
+T, DotnetAppWindow, treeView2, CollapsePartialTextNode, "top"
+
+C, LOGFailureOK, "The following test is expected to fail."
+T, DotnetAppWindow, treeView2, SelectPartialTextNode, "first->nodes->child->item5"

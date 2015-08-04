@@ -1,0 +1,42 @@
+;Test CFList::  System.Windows.Forms.ListBox--> ok; 			listBox1  ## in page "TBasic Component"
+;				System.Windows.Forms.ListView--> ok. 			listView1  ## in page "JPanel Control"
+;T, DotnetAppWindow, menuBar, SelectMenuItem, "Tools->Basic Component"
+T, DotnetAppWindow, menuBar, SelectMenuItem, "Tools->JPanel Control"
+T, DotnetAppWindow, listView1, ActivatePartialMatch, "Item"
+T, DotnetAppWindow, listView1, ActivateTextItem, "Item2"
+T, DotnetAppWindow, listView1, ActivateUnverifiedPartialMatch , "Item"
+T, DotnetAppWindow, listView1, ActivateUnverifiedTextItem , "Item2"
+T, DotnetAppWindow, listView1, CaptureItemsToFile , listDatas.txt
+
+T, DotnetAppWindow, listView1, ClickTextItem , "Item1"
+T, DotnetAppWindow, listView1, ExtendSelectionToTextItem, "Item3"
+
+c, pause, 1
+T, DotnetAppWindow, listView1, ClickTextItem, "Item1"
+T, DotnetAppWindow, listView1, SelectAnotherTextItem , "Item4"
+T, DotnetAppWindow, listView1, SelectAnotherUnverifiedTextItem , "Item3"
+T, DotnetAppWindow, listView1, SelectIndex , 1
+T, DotnetAppWindow, listView1, SelectPartialMatch , "em4" 
+T, DotnetAppWindow, listView1, SelectTextItem , "Item11"
+T, DotnetAppWindow, listView1, SelectUnverifiedPartialMatch , "Item"
+T, DotnetAppWindow, listView1, SelectUnverifiedTextItem , "Item2"
+
+T, DotnetAppWindow, listView1, VerifyItem , 1, "Item1"
+T, DotnetAppWindow, listView1, VerifyItemUnselected , "Item2"
+T, DotnetAppWindow, listView1, VerifyListContains, "item3", "False"
+T, DotnetAppWindow, listView1, VerifyListContains, "item3", "True"
+T, DotnetAppWindow, listView1, VerifyListContainsPartialMatch , "item", "False"
+T, DotnetAppWindow, listView1, VerifyListContainsPartialMatch , "tem3", "True"
+
+T, DotnetAppWindow, listView1, VerifyListDoesNotContain, "item3", "True"
+T, DotnetAppWindow, listView1, VerifyListDoesNotContainPartialMatch, "itm3", "True"
+
+
+T, DotnetAppWindow, listView1, VerifyMenuItem  , "Item3"
+T, DotnetAppWindow, listView1, VerifyMenuPartialMatch  , "em3"
+T, DotnetAppWindow, listView1, VerifyPartialMatch   , 1, "em"
+
+T, DotnetAppWindow, listView1, SelectTextItem  , "Item1"
+T, DotnetAppWindow, listView1, VerifySelectedItem  , "Item1"
+T, DotnetAppWindow, listView1, VerifyItemUnselected  , "Item1"
+T, DotnetAppWindow, listView1, VerifySelectedPartialMatch , "Item1"

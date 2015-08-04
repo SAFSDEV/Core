@@ -1,0 +1,24 @@
+C, Version, 1.0
+C, SetApplicationMap, dotnet.map
+
+;####################	Launch Application #########################
+;C, LaunchApplication, JavaApp, "java -jar D:\IBM\workspace\swingProj\swing.jar"
+;C, Pause, 5
+;####################################################################
+
+
+;####################	Use RobotJ if available #####################
+C, UseRobotJFunctions, ON
+;####################	Wait the application windows to be active ###
+;C, SetContext, DotnetAppWindow, DotnetAppWindow
+;C, WaitForGUI, DotnetAppWindow, DotnetAppWindow, 40
+;####################	Begin the main test #########################
+T, dotnetGenericTest
+T, dotnetBasicComponentsTest
+T, donnetMenuTest
+T, donnetTreeTest
+T, dotnetListTest
+T, dotnetToolstripTest
+;####################	stop using RobotJ if available  #############
+C, UseRobotJFunctions, OFF
+;####################################################################

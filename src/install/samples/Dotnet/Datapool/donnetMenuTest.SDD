@@ -1,0 +1,50 @@
+;Test Menu::  System.Windows.Forms.MenuStrip (ContextMenuStrip, ToolStripMenuItem)
+;			  System.Windows.Forms.MainMenu (ContextMenu, MenuItem)
+;============================   Test keyword of JavaMenuFunctions
+;SelectMenuItem
+T, DotnetAppWindow, menuBar, SelectMenuItem, "Tools->JTAble Viewer"
+T, DotnetAppWindow, toolsToolStripMenuItem, SelectMenuItem, "Basic Component"
+
+;SelectMenuItemContains
+T, DotnetAppWindow, menuBar, SelectMenuItemContains, "Too->JTAble Viewer"
+T, DotnetAppWindow, toolsToolStripMenuItem, SelectMenuItemContains, "Basic Comp"
+
+;VerifyMenuItem
+T, DotnetAppWindow, menuBar, VerifyMenuItem, "Tools->JTAble Viewer"
+T, DotnetAppWindow, toolsToolStripMenuItem, VerifyMenuItem, "Basic Component"
+T, DotnetAppWindow, menuBar, VerifyMenuItem, "Tools->JTAble Viewer", "Enabled"
+T, DotnetAppWindow, toolsToolStripMenuItem, VerifyMenuItem, "Basic Component", "Enabled"
+T, DotnetAppWindow, menuBar, VerifyMenuItem, "Tools", "Enabled Menu With 7 MenuItems"
+T, DotnetAppWindow, menuBar, VerifyMenuItem, "Weird", "Enabled Menu With 2 MenuItems"
+T, DotnetAppWindow, menuBar, VerifyMenuItem, "Weird->CheckButton", "Enabled Checked"
+T, DotnetAppWindow, weirdToolStripMenuItem, VerifyMenuItem, "CheckButton", "Enabled Checked"
+
+
+;VerifyMenuItemContains
+T, DotnetAppWindow, menuBar, VerifyMenuItemContains, "Tools->JTAble View"
+T, DotnetAppWindow, toolsToolStripMenuItem, VerifyMenuItemContains, "Basic Compone"
+T, DotnetAppWindow, menuBar, VerifyMenuItemContains, "Tools->JTAble Vie", "Enabled"
+T, DotnetAppWindow, toolsToolStripMenuItem, VerifyMenuItemContains, "asic Comp", "Enabled"
+
+;===============    Test popup menu
+T, DotnetAppWindow, menuBar, RightClick
+T, DotnetAppWindow, popupMenuBar, SelectMenuItem, "PHelp->PAbout"
+T, DotnetAppWindow, menuBar, RightClick
+T, DotnetAppWindow, popupMenuBar, SelectPopupMenuItem, "PHelp->PAbout"
+T, DotnetAppWindow, menuBar, RightClick
+T, DotnetAppWindow, popupMenuBar, SelectUnverifiedPopupMenuItem, "PHelp->PAbout"
+T, DotnetAppWindow, menuBar, RightClick
+T, DotnetAppWindow, popupMenuBar, VerifyPopupMenuItem, "PWeird->PCheckBox", "Enabled UnChecked"
+T, DotnetAppWindow, popupMenuBar, VerifyPopupMenuPartialMatch, "PWei->dioBox"
+T, DotnetAppWindow, menuBar, RightClick
+C, LogMessage, "If JPopupMenu.txt does not exist in bench folder verification will fail."
+T, DotnetAppWindow, popupMenuBar, VerifyPopupMenu, "JPopupMenu.txt", "Normal JPopupMenu" , "JPopupMenu.txt", "JPopupMenuDiff.txt"
+T, DotnetAppWindow, popupMenuBar, InputKeys, "{ESC}"
+
+
+;============================   Test keyword of WindowsFunction (menu related)
+T, DotnetAppWindow, DotnetAppWindow, SelectMenuItem, "Tools->JTAble Viewer"
+T, DotnetAppWindow, DotnetAppWindow, SelectMenuItemContains, "Tools->Able Viewer"
+T, DotnetAppWindow, DotnetAppWindow, VerifyMenuItem, "File","Enabled Menu With 1 MenuItems"
+T, DotnetAppWindow, DotnetAppWindow, VerifyMenuItemContains, "le","Enabled Menu With 1 MenuItems"
+ 

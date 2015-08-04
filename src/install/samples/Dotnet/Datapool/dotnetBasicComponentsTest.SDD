@@ -1,0 +1,52 @@
+;Some general test
+T, DotnetAppWindow, menuBar, SelectMenuItem, "Tools->Basic Component"
+T, DotnetAppWindow, bascCompTab, HoverMouse, "Coords=20;40" , 3000 
+T, DotnetAppWindow, bascCompTab, GetGUIImage, "bascTab.jpg" 
+T, DotnetAppWindow, bascCompTab, VerifyGUIImageToFile, "bascTab.jpg"
+
+
+;;;;;;;;;;;Test scroll function of CFComponent
+T, DotnetAppWindow, menuBar, SelectMenuItem, "Tools->JTAble Viewer"
+T, DotnetAppWindow, VScrollBar, VSCROLLTO, 150
+C, Pause, 2
+T, DotnetAppWindow, VScrollBar, VSCROLLTO, 0
+
+;Test System.Windows.Forms.RichTextBox
+T, DotnetAppWindow, menuBar, SelectMenuItem, "Tools->Basic Component"
+C, Pause, 2
+T, DotnetAppWindow, richTextBox1, InputKeys, "^a"
+T, DotnetAppWindow, richTextBox1, InputKeys, "{ExtDelete}"
+T, DotnetAppWindow, richTextBox1, SetTextValue, "chinese"
+T, DotnetAppWindow, richTextBox1, SetUnverifiedTextValue, "+(unverifiedTextValue)"
+C, Pause, 1
+T, DotnetAppWindow, richTextBox1, SetTextValue, "+(verifiedTextValue)"
+C, Pause, 1
+T, DotnetAppWindow, richTextBox1, SetUnverifiedTextCharacters, "+(unverifiedTextChar)"
+C, Pause, 1
+T, DotnetAppWindow, richTextBox1, SetTextCharacters, "+(verifiedTextChar)"
+
+
+;Test System.Windows.Forms.TextBox (textBox2)  and custom class WinDemo.MyTextBox (textBox3)
+T, DotnetAppWindow, menuBar, SelectMenuItem, "Tools->JPanel Control"
+T, DotnetAppWindow, textBox3, SetUnverifiedTextValue, "+(unverifiedTextValue)"
+C, Pause, 1
+T, DotnetAppWindow, textBox3, SetTextValue, "+(unverifiedTextValue)"
+C, Pause, 1
+T, DotnetAppWindow, textBox3, SetUnverifiedTextCharacters, "+(unverifiedTextValue)"
+C, Pause, 1
+T, DotnetAppWindow, textBox3, SetTextCharacters, "+(unverifiedTextValue)"
+
+T, DotnetAppWindow, textBox2, SetUnverifiedTextValue, "+(unverifiedTextValue)"
+C, Pause, 1
+T, DotnetAppWindow, textBox2, SetTextValue, "+(verifiedTextValue)"
+C, Pause, 1
+T, DotnetAppWindow, textBox2, SetUnverifiedTextCharacters, "+(unverifiedTextChar)"
+C, Pause, 1
+T, DotnetAppWindow, textBox2, SetTextCharacters, "+(verifiedTextChar)"
+
+
+;=====  Test ComboBox
+T, DotnetAppWindow, menuBar, SelectMenuItem, "Tools->Basic Component"
+T, DotnetAppWindow, comboBox1, ShowList
+C, pause, 1
+T, DotnetAppWindow, comboBox1, HideList
