@@ -231,6 +231,7 @@ public class DCDriverCommand extends DriverCommand {
 					}
 				}
 			});
+			threadGetUrl.start();
 			//Wait for the sub thread to terminate
 			threadGetUrl.join(timeout*1000);
 			if(!resultReady.isReady()){
@@ -324,6 +325,7 @@ public class DCDriverCommand extends DriverCommand {
 		wdgu = (WebDriverGUIUtilities) testRecordData.getDDGUtils();
       
 		command = testRecordData.getCommand();
+		iterator = params.iterator();
 		
 		localProcess();
 		if(testRecordData.getStatusCode()==StatusCodes.SCRIPT_NOT_EXECUTED){
