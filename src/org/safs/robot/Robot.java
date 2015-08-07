@@ -213,7 +213,7 @@ public class Robot {
 	 * @see #doEvents(java.awt.Robot, Vector, int)
 	 */
 	public static Object inputChars(String input) throws AWTException{
-	   	Log.info("SAFS Robot processing InputKeys: "+ input);
+	   	Log.info("SAFS Robot processing InputChars: "+ input);
 	   	InputKeysParser parser = getInputKeysParser();
 	   	java.awt.Robot bot = getRobot();
 	   	Vector keystrokes = parser.parseChars(input);
