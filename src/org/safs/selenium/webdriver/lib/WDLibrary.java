@@ -34,6 +34,7 @@ package org.safs.selenium.webdriver.lib;
 *  <br>   JUN 15, 2015    (Carl Nagle) Add isPointInBounds to account for points that might be on the width & height edge.
 *  <br>   JUL 24, 2015    (Lei Wang) Create class WD_XMLHttpRequest and its static instance AJAX.
 *  <br>   JUL 25, 2015    (Lei Wang) Modify windowSetFocus(): remove the unnecessary parameter element.
+*  <br>	  AUG 08, 2015    (Dharmesh) Added delayWaitReady for WaitOnClick.
 */
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -301,7 +302,9 @@ public class WDLibrary extends SearchObject {
 			IndependantLog.warn(debugmsg+"Met Exception "+StringUtils.debugmsg(thr));
 
 			// let the failed listeners exit.
-			try{Thread.sleep(DocumentClickCapture.LISTENER_LOOP_DELAY);}catch(Exception x){}
+			try{Thread.sleep(DocumentClickCapture.LISTENER_LOOP_DELAY + DocumentClickCapture.delayWaitReady);}catch(Exception x){
+				IndependantLog.debug(debugmsg + StringUtils.debugmsg(x));
+			}
 
 			try {
 				//2. Perform the click action by Selenium
