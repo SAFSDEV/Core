@@ -4,15 +4,10 @@
  **/
 package org.safs.selenium.webdriver.lib.interpreter;
 
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.remote.server.handler.GetLogHandler;
 import org.safs.selenium.webdriver.lib.SearchObject;
-
-import sun.util.logging.resources.logging;
 
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.steptype.SwitchToFrame;
-import com.sebuilder.interpreter.steptype.SwitchToFrameByIndex;
 
 /**
  * Override standard SeBuilder switchToFrame. Call SE+ version switchFrame() to finish work.
