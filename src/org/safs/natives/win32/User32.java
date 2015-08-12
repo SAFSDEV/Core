@@ -6,7 +6,9 @@ import com.sun.jna.Native;
 import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
+import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.win32.StdCallLibrary;
+import com.sun.jna.win32.W32APIOptions;
 /**
  * A JNA Library definition for the Windows user32.dll
  * <p>
@@ -17,9 +19,11 @@ import com.sun.jna.win32.StdCallLibrary;
  * @since 2009.02.03
  * @see org.safs.natives.NativeWrapper
  */
-public interface User32 extends StdCallLibrary {
+public interface User32 extends W32APIOptions, StdCallLibrary {
 	
-	User32 INSTANCE = (User32) Native.loadLibrary("user32", User32.class);
+	User32 INSTANCE = (User32) Native.loadLibrary("user32", User32.class, DEFAULT_OPTIONS);
+	
+	int SW_SHOW = 1;
 	
 	/**
 	 * HWND GetForegroundWindow(VOID)
@@ -33,6 +37,15 @@ public interface User32 extends StdCallLibrary {
 	 */
 	NativeLong GetForegroundWindow();
 
+	/**
+	 * Show window on desktop 	
+	 * @param hWnd
+	 * @param nCmdShow
+	 * @return boolean 
+	 * @see org.safs.natives.NativeWrapper#SetForegroundWindow(String)
+	 */
+	boolean ShowWindow(NativeLong hWnd, int nCmdShow);
+		
 	/**
 	 * HWND GetDesktopWindow(VOID)
 	 * The GetDesktopWindow function returns a handle to the main Desktop window 
@@ -368,6 +381,16 @@ public interface User32 extends StdCallLibrary {
 	 *
 	 */
 	int GetWindowTextA(NativeLong hWnd, Pointer lpString, int nMaxCount);
+	
+	/**
+	 *	int WINAPI GetWindowText(
+  	 *	__in   HWND hWnd,
+  	 *	__out  LPTSTR lpString,
+  	 *	__in   int nMaxCount
+	 *	);
+	 *
+	 */
+	int GetWindowTextA(NativeLong hWnd, byte[] lpString, int nMaxCount);
 	
 	/**
 	 * 
