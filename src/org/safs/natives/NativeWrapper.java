@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
+import java.util.regex.Pattern;
 
 import org.safs.IndependantLog;
 import org.safs.StringUtils;
@@ -27,9 +28,12 @@ import org.safs.tools.consoles.ProcessCapture;
 import org.safs.tools.stringutils.StringUtilities;
 
 import com.sun.jna.Memory;
+import com.sun.jna.Native;
 import com.sun.jna.NativeLong;
 import com.sun.jna.Platform;
 import com.sun.jna.Pointer;
+import com.sun.jna.platform.win32.BaseTSD.LONG_PTR;
+import com.sun.jna.platform.win32.WinDef.HWND;
 
 /**
  * This class is used to encapsulate platform independent calls to native operating systems through JNA,
@@ -1068,6 +1072,44 @@ public class NativeWrapper {
 		}
 		return rc;
 	}
+	
+	/**
+	 * Set ForeGroundWindow active by title. If there are same title match then first window make active.
+	 * Regular expression is allowed for windows title.
+	 * @param title - Title of the window; Regular expression allowed.
+	 * @return boolean
+	 * @see org.safs.natives.win32.User32#ShowWindow(NativeLong, int)
+	 */
+	public static boolean SetForegroundWindow(String regex_title){
+		
+		if(Platform.isWindows()){ 
+		
+			byte[] windowText = new byte[512];
+			
+			try {
+				
+				Object[] hWnd = EnumWindows();
+				if (hWnd != null) {
+					for (int i = 0; i < hWnd.length; i++) {
+						NativeLong nHwnd = new NativeLong(((Long)hWnd[i]).longValue());
+						User32.INSTANCE.GetWindowTextA(nHwnd, windowText, 512);
+						String wText = Native.toString(windowText);
+						Pattern pattern = Pattern.compile(regex_title);
+						boolean match = pattern.matcher(wText).find(); 
+						if (match) {
+							User32.INSTANCE.ShowWindow(nHwnd, User32.SW_SHOW);
+							return true;
+						}
+					}
+				}
+			}catch(Exception x){
+				IndependantLog.debug("NativeWrapper for WIN32 SetForegroundWindow IGNORING Exception: "+ x.getClass().getSimpleName());
+			}catch(Error x){
+				IndependantLog.debug("NativeWrapper for WIN32 SetForegroundWindow IGNORING ERROR: "+ x.getClass().getSimpleName());
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * Platform independent entry-point to receive the ID or HANDLE of the Desktop window.
@@ -1855,6 +1897,7 @@ public class NativeWrapper {
 	 */
 	public static void main(String[] args){
 		
+		/*
 		IndependantLog.parseArguments(args);
 		IndependantLog.debug("Test NativeWrapper on OS '"+Console.getOsFamilyName()+"', Platform type "+Platform.getOSType());
 		
@@ -1958,6 +2001,8 @@ public class NativeWrapper {
 		test_getFileTime(args);
 
 		test_getHostIp(args);
+		*/
+		SetForegroundWindow("SAS");
 
 	}
 }
