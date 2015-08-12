@@ -1,4 +1,4 @@
-/** Copyright (C) SAS Institute, Inc. All rights reserved.
+﻿/** Copyright (C) SAS Institute, Inc. All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
 package org.safs.natives;
@@ -1897,7 +1897,7 @@ public class NativeWrapper {
 	 */
 	public static void main(String[] args){
 		
-		/*
+		
 		IndependantLog.parseArguments(args);
 		IndependantLog.debug("Test NativeWrapper on OS '"+Console.getOsFamilyName()+"', Platform type "+Platform.getOSType());
 		
@@ -2001,8 +2001,7 @@ public class NativeWrapper {
 		test_getFileTime(args);
 
 		test_getHostIp(args);
-		*/
-		SetForegroundWindow("SAS");
+		
 
 	}
 }
