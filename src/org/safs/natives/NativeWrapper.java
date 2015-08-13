@@ -1,4 +1,4 @@
-﻿/** Copyright (C) SAS Institute, Inc. All rights reserved.
+/** Copyright (C) SAS Institute, Inc. All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
 package org.safs.natives;
