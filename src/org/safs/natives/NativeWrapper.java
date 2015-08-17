@@ -54,8 +54,8 @@ import com.sun.jna.platform.win32.WinDef.HWND;
  *         JunwuMa JUL 23, 2010  Updated to get GetRegistryKeyValue support Win7.<br>
  *         (SBJLWA)NOV 18, 2011  Add method getFileTime() and convertFileTimeToJavaTime()<br>
  *         CANAGL  OCT 29, 2013  Added SetRegistryKeyValue and SetSystemEnvironmentVariable routines.<br>
- *         DHARMESH  FEB 19, 2014  Added runAsyncExec call.<br>  
- *         
+ *         DHARMESH4  FEB 19, 2014  Added runAsyncExec call.<br>  
+ *         DHARMESH4  AUG 17, 2015  Added setForgroundWindow call<br>  
  * @since 2009.02.03
  */
 public class NativeWrapper {
@@ -1098,6 +1098,7 @@ public class NativeWrapper {
 						boolean match = pattern.matcher(wText).find(); 
 						if (match) {
 							User32.INSTANCE.ShowWindow(nHwnd, User32.SW_SHOW);
+							User32.INSTANCE.SetForegroundWindow(nHwnd);
 							return true;
 						}
 					}
@@ -1109,8 +1110,8 @@ public class NativeWrapper {
 			}
 		}
 		return false;
-	}
-
+	}	
+	
 	/**
 	 * Platform independent entry-point to receive the ID or HANDLE of the Desktop window.
 	 * The GetDesktopWindow function returns a "handle" to the window on which  
@@ -2002,6 +2003,6 @@ public class NativeWrapper {
 
 		test_getHostIp(args);
 		
-
+		
 	}
 }

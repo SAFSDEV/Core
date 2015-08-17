@@ -48,7 +48,7 @@ package org.safs.selenium.webdriver;
  *  <br>   JUL 07, 2015    (SCNTAX) Add EditBox.SetTextCharacters(), EditBox.SetUnverifiedTextCharacters() and EditBox.SetUnverifiedTextValue() keywords.
  *  <br>                            Change comments of EditBox.SetTextValue(). 
  *  <br>   JUL 24, 2015    (SBJLWA) Add GetURL, SaveURLToFile, VerifyURLContent, VerifyURLToFile in Misc.
- *  
+ *  <br>   AUG 17, 2015    (DHARMESH4) Add SetFocus call in Window.
  *  
  */
 import java.awt.Rectangle;
@@ -473,7 +473,23 @@ public abstract class SeleniumPlus {
 		 * </pre>	 
 		 */
 		public static boolean CloseWindow(org.safs.model.Component window){
+			
 			return action(window, WindowFunctions.CLOSEWINDOW_KEYWORD);
+		}
+		
+		/**
+		 * Set focus to the window
+		 * @param window - windows 
+		 * @return true on success
+		 * @example
+		 * <pre>
+		 * {@code
+		 * 	Window.SetFocus(Map.Google.Google);		 
+		 * }
+		 * </pre>
+		 */
+		public static boolean SetFocus(org.safs.model.Component window){
+			return action(window, WindowFunctions.SETFOCUS_KEYWORD);
 		}
 		
 		/**
