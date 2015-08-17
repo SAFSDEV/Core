@@ -42,7 +42,10 @@ import org.safs.SAFSException;
 import org.safs.StatusCodes;
 import org.safs.StringUtils;
 import org.safs.image.ImageUtils;
+import org.safs.model.commands.CheckBoxFunctions;
 import org.safs.model.commands.GenericMasterFunctions;
+import org.safs.model.commands.WindowFunctions;
+import org.safs.selenium.webdriver.lib.CheckBox;
 import org.safs.selenium.webdriver.lib.Component;
 import org.safs.selenium.webdriver.lib.Json;
 import org.safs.selenium.webdriver.lib.SeleniumPlusException;
@@ -201,6 +204,9 @@ public class CFComponent extends ComponentFunction{
 	 * @throws SeleniumPlusException
 	 */
 	protected void localProcess() throws SeleniumPlusException{
+		
+		String debugmsg = StringUtils.debugmsg(getClass(), "localProcess");
+		
 		try{
 			synchronized(libComponentCache){
 				//compObject may be null, which will cause Exception, and libComponent will be null
@@ -213,11 +219,7 @@ public class CFComponent extends ComponentFunction{
 					IndependantLog.debug("CFComponent.localProcess retrieving CACHED library for this WebElement.");
 					libComponent = libComponentCache.get(compObject);
 				}
-			}
-			if(libComponent==null) IndependantLog.warn("component library is null!");
-			//refresh the compObject if stable, 
-			//TODO do we need to refresh winObject too???
-			refresh(false);
+			}			
 			
 		}catch(SeleniumPlusException se){
 			se.setInfo("Fail to get the component's library! "+se.getInfo());
@@ -225,6 +227,40 @@ public class CFComponent extends ComponentFunction{
 		}catch(Exception e){
 			throw new SeleniumPlusException("Fail to get the component's library! Met Exception "+StringUtils.debugmsg(e));
 		}
+		
+	
+		if (action != null) {
+			String msg = null;
+			String detail = null;
+
+			try{
+								
+				Log.debug(debugmsg+" processing command '"+action+"' with parameters "+params);
+				iterator = params.iterator();
+
+				if(action.equalsIgnoreCase(WindowFunctions.SETFOCUS_KEYWORD)){
+					
+					WDLibrary.windowSetFocus();
+				
+					testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
+					msg = genericText.convert("success3", windowName +":"+ compName + " "+ action +" successful.",
+							windowName, compName, action);
+					log.logMessage(testRecordData.getFac(), msg, PASSED_MESSAGE);						
+
+				}else{
+					testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
+					Log.warn(debugmsg+action+" could not be handled here.");
+				}
+				
+			}catch(SAFSException e){
+				Log.error(debugmsg+"SeleniumPlus Error processing '"+action+"'.", e);
+				testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
+				msg = getStandardErrorMessage(windowName +":"+ compName +" "+ action);
+				detail = "Met Exception "+e.getMessage();
+				log.logMessage(testRecordData.getFac(),msg, detail, FAILED_MESSAGE);
+			}
+		}
+		
 	}
 
 	/** sub class MUST to override this method and provide its own library Component.*/

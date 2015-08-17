@@ -83,6 +83,7 @@ import org.safs.IndependantLog;
 import org.safs.Processor;
 import org.safs.StringUtils;
 import org.safs.image.ImageUtils;
+import org.safs.natives.NativeWrapper;
 import org.safs.net.XMLHttpRequest;
 import org.safs.robot.Robot;
 import org.safs.selenium.util.DocumentClickCapture;
@@ -1881,12 +1882,12 @@ public class WDLibrary extends SearchObject {
 
 		try{
 			org.openqa.selenium.Point position = new org.openqa.selenium.Point(x, y);
-			lastUsedWD.manage().window().setPosition(position);
+			lastUsedWD.manage().window().setPosition(position);			
 		} catch (Exception e){
 			throw new SeleniumPlusException("Failed to set position of current browser window to ("+x+","+y+") "+ e.getMessage());
 		}
 	}
-
+		
 	/**
 	 * Maximize current browser window
 	 * @throws SeleniumPlusException
@@ -2176,11 +2177,23 @@ public class WDLibrary extends SearchObject {
 		//we don't really need element as parameter for executing js code "window.top.focus();"
 		//and if element is dynamically added by javascript and will be considered as stale
 		//which will cause executeJavaScriptOnWebElement to throw SeleniumPlusException
-//		executeJavaScriptOnWebElement("try{ window.top.focus();}catch(error){ debug(error); }", element);
+		//executeJavaScriptOnWebElement("try{ window.top.focus();}catch(error){ debug(error); }", element);
 		executeScript("try{ window.top.focus();}catch(error){ debug(error); }");
 		return true;
 	}
 
+	/**
+	 * Set focus and move fornt the browser window. 
+	 * @return true on success
+	 * @throws SeleniumPlusException
+	 */
+	public static boolean windowSetFocus() throws SeleniumPlusException{
+		IndependantLog.info("WDLibrary.windowSetFocus set focus window title: " + lastUsedWD.getTitle());
+		boolean rc = NativeWrapper.SetForegroundWindow(lastUsedWD.getTitle());
+		if (!rc) throw new SeleniumPlusException("Failed to setfocus, return:" + rc);
+		return rc;
+	}
+	
 	/**
 	 * Attempt to SetFocus on the WebElement.
 	 * @param element WebElement, to get focus.

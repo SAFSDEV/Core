@@ -49,6 +49,8 @@ public class WindowFunctions {
     static public final String CLICK_KEYWORD = "Click";
     /** "CloseWindow" */
     static public final String CLOSEWINDOW_KEYWORD = "CloseWindow";
+    /** "FocusWindow" */
+    static public final String SETFOCUS_KEYWORD = "SetFocus";
     /** "CompareStoredProperties" */
     static public final String COMPARESTOREDPROPERTIES_KEYWORD = "CompareStoredProperties";
     /** "DoubleClick" */
