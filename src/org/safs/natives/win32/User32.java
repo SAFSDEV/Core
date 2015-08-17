@@ -16,7 +16,7 @@ import com.sun.jna.win32.W32APIOptions;
  * @author canagl
  * @author CANAGL  Jun 04, 2009  Added GetGuiResources API interface.  
  * @author JunwuMa Oct 21, 2010  Adding API interfaces for using low-level Mouse/Keyboard callback hooks. 
- * @author dharmesh4 Aug 12, 2015 Added ShowWindow User32 Interface method.
+ * @author dharmesh4 Aug 12, 2015 Added ShowWindow/SetForgebackground User32 Interface method.
  * @since 2009.02.03
  * @see org.safs.natives.NativeWrapper
  */
@@ -39,14 +39,21 @@ public interface User32 extends W32APIOptions, StdCallLibrary {
 	NativeLong GetForegroundWindow();
 
 	/**
-	 * Show window on desktop 	
+	 * Bring the window to focus
 	 * @param hWnd
 	 * @param nCmdShow
 	 * @return boolean 
 	 * @see org.safs.natives.NativeWrapper#SetForegroundWindow(String)
 	 */
 	boolean ShowWindow(NativeLong hWnd, int nCmdShow);
-		
+	
+	/**
+	 * Bring the window to front
+	 * @param hWnd
+	 * @return true on success
+	 */
+	boolean SetForegroundWindow(NativeLong hWnd);
+	
 	/**
 	 * HWND GetDesktopWindow(VOID)
 	 * The GetDesktopWindow function returns a handle to the main Desktop window 
@@ -56,7 +63,7 @@ public interface User32 extends W32APIOptions, StdCallLibrary {
 	 * library instead. 
 	 * @return HWND wrapped in a JNA NativeLong
 	 * @see org.safs.natives.NativeWrapper#GetDesktopWindow()
-	 */
+	 */	
 	NativeLong GetDesktopWindow();
 
 	/**
