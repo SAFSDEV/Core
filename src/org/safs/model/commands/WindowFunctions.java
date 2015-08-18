@@ -49,8 +49,6 @@ public class WindowFunctions {
     static public final String CLICK_KEYWORD = "Click";
     /** "CloseWindow" */
     static public final String CLOSEWINDOW_KEYWORD = "CloseWindow";
-    /** "FocusWindow" */
-    static public final String SETFOCUS_KEYWORD = "SetFocus";
     /** "CompareStoredProperties" */
     static public final String COMPARESTOREDPROPERTIES_KEYWORD = "CompareStoredProperties";
     /** "DoubleClick" */
@@ -81,6 +79,8 @@ public class WindowFunctions {
     static public final String SELECTMENUITEM_KEYWORD = "SelectMenuItem";
     /** "SelectMenuItemContains" */
     static public final String SELECTMENUITEMCONTAINS_KEYWORD = "SelectMenuItemContains";
+    /** "SetFocus" */
+    static public final String SETFOCUS_KEYWORD = "SetFocus";
     /** "SetPosition" */
     static public final String SETPOSITION_KEYWORD = "SetPosition";
     /** "VerifyImage" */
@@ -989,6 +989,34 @@ public class WindowFunctions {
         if ( textValue == null ) throw new IllegalArgumentException ( "selectMenuItemContains.textValue = null");
         ComponentFunction cf = new ComponentFunction(SELECTMENUITEMCONTAINS_KEYWORD, winname, compname);
         cf.addParameter(textValue);
+        return cf;
+    }
+
+
+    /*********** <pre> 
+                Set focus on the window.
+               
+                Set focus and bring the window forward.
+                
+                	Bring the window forward. If there are same name/caption/title windows then the first 
+                	window will come forward. The window is find by title. 
+                                          
+                  </pre>    Supporting Engines:
+    <P/><UL>
+        <LI>OpenQA Selenium</LI>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction setFocus (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "setFocus.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "setFocus.compname = null");
+
+        ComponentFunction cf = new ComponentFunction(SETFOCUS_KEYWORD, winname, compname);
         return cf;
     }
 
