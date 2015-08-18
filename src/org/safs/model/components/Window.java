@@ -1523,6 +1523,48 @@ public class Window extends GenericObject {
     }
 
     /*********** <pre> 
+                Set focus on the window.
+               
+                Set focus and bring the window forward.
+                
+                	Bring the window forward. If there are same name/caption/title windows then the first 
+                	window will come forward. The window is find by title. 
+                                          
+                  </pre>    Supporting Engines:
+    <P/><UL>
+    <LI>OpenQA Selenium</LI>
+    </UL>
+
+     **********/
+    public ComponentFunction setFocus( ) {
+
+        return WindowFunctions.setFocus(getWindow().getName(), getName());
+    }
+
+    /*********** <pre> 
+                Set focus on the window.
+               
+                Set focus and bring the window forward.
+                
+                	Bring the window forward. If there are same name/caption/title windows then the first 
+                	window will come forward. The window is find by title. 
+                                          
+                  </pre>    Supporting Engines:
+    <P/><UL>
+    <LI>OpenQA Selenium</LI>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void setFocus(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "setFocus.table = null");
+
+        table.add( WindowFunctions.setFocus(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre> 
                 Sends a SetPosition command to the window to set the position, size, and status of the window.
                
                 Sends a SetPosition command to the window to set the position, size, 
