@@ -78,6 +78,7 @@ import org.openqa.selenium.internal.Locatable;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.remote.RemoteWebElement;
 import org.openqa.selenium.safari.SafariDriver;
 import org.safs.IndependantLog;
 import org.safs.Processor;
@@ -2168,28 +2169,57 @@ public class WDLibrary extends SearchObject {
 
 	/**
 	 * Attempt to SetFocus on the topmost window containing the WebElement.
-	 * @param element WebElement
+	 * @param element WebElement from which to get the proper RemoteWebDriver
 	 * @return boolean true if the window is focused.
 	 * @throws SeleniumPlusException if an error occured during the execution attempt.
-	 * @see #executeJavaScriptOnWebElement(String, WebElement, Object...)
+	 * @see #windowSetFocus(WebDriver)
 	 */
 	public static boolean windowSetFocus(WebElement element)throws SeleniumPlusException{
 		//we don't really need element as parameter for executing js code "window.top.focus();"
 		//and if element is dynamically added by javascript and will be considered as stale
 		//which will cause executeJavaScriptOnWebElement to throw SeleniumPlusException
 		//executeJavaScriptOnWebElement("try{ window.top.focus();}catch(error){ debug(error); }", element);
+		
+		IndependantLog.info("WDLibrary.windowSetFocus set focus via RemoteWebElement window title");
+		try{
+			RemoteWebElement relement = (RemoteWebElement) element;
+			WebDriver rd = relement.getWrappedDriver();
+			windowSetFocus(rd);
+		}catch(Exception x){
+			IndependantLog.info("WDLibrary.windowSetFocus RemoteWebElement ignoring "+ getThrowableMessages(x)+ ": "+ x.getMessage());
+		}
 		executeScript("try{ window.top.focus();}catch(error){ debug(error); }");
 		return true;
 	}
 
 	/**
-	 * Set focus and move fornt the browser window. 
+	 * Attempt to SetFocus on the topmost window for the provided WebDriver.
+	 * @param adriver WebDriver from which to get the window title
+	 * @return boolean true if the window is focused.
+	 * @throws SeleniumPlusException if an error occured during the execution attempt.
+	 * @see #windowSetFocus(String)
+	 */
+	public static boolean windowSetFocus(WebDriver adriver)throws SeleniumPlusException{
+		boolean rc = false;
+		IndependantLog.info("WDLibrary.windowSetFocus set focus via WebDriver window title");
+		try{
+			rc = windowSetFocus(adriver.getTitle()); 
+		}catch(Exception x){
+			IndependantLog.info("WDLibrary.windowSetFocus RemoteWebElement ignoring "+ getThrowableMessages(x)+ ": "+ x.getMessage());
+		}
+		return rc;
+	}
+
+	/**
+	 * Set a specific Window matching the provided title to be the foreground window. 
+	 * @param titleRegExp -- title or regular expression matching the target window's caption.
 	 * @return true on success
 	 * @throws SeleniumPlusException
+	 * @see {@link NativeWrapper#SetForegroundWindow(String)}
 	 */
-	public static boolean windowSetFocus() throws SeleniumPlusException{
-		IndependantLog.info("WDLibrary.windowSetFocus set focus window title: " + lastUsedWD.getTitle());
-		boolean rc = NativeWrapper.SetForegroundWindow(lastUsedWD.getTitle());
+	public static boolean windowSetFocus(String titleRegExp) throws SeleniumPlusException{
+		IndependantLog.info("WDLibrary.windowSetFocus set focus window title: " + titleRegExp);
+		boolean rc = NativeWrapper.SetForegroundWindow(titleRegExp);
 		if (!rc) throw new SeleniumPlusException("Failed to setfocus, return:" + rc);
 		return rc;
 	}
