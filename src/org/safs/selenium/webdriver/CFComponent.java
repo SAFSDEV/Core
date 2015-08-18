@@ -165,6 +165,22 @@ public class CFComponent extends ComponentFunction{
 			try {
 				// do the work
 				localProcess();
+
+				if (testRecordData.getStatusCode() == StatusCodes.SCRIPT_NOT_EXECUTED &&
+					action != null && 
+					action.equalsIgnoreCase(WindowFunctions.SETFOCUS_KEYWORD)) {
+					try{								
+						Log.debug(debugmsg+" processing command '"+action+"' with parameters "+params);
+						iterator = params.iterator();
+					    _setFocus();	
+					}catch(SAFSException e){
+						Log.error(debugmsg+"SeleniumPlus Error processing '"+action+"'.", e);
+						testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
+						String msg = getStandardErrorMessage(windowName +":"+ compName +" "+ action);
+						String detail = "Met Exception "+e.getMessage();
+						log.logMessage(testRecordData.getFac(),msg, detail, FAILED_MESSAGE);
+					}
+				}										
 			} catch (SeleniumPlusException ignore) {
 				IndependantLog.debug(debugmsg+" ignore Exception "+StringUtils.debugmsg(ignore));
 			}
@@ -219,7 +235,12 @@ public class CFComponent extends ComponentFunction{
 					IndependantLog.debug("CFComponent.localProcess retrieving CACHED library for this WebElement.");
 					libComponent = libComponentCache.get(compObject);
 				}
-			}			
+				if(libComponent==null) IndependantLog.warn("component library is null!");
+			}
+			if(libComponent==null) IndependantLog.warn("component library is null!");
+			//refresh the compObject if stable, 
+			//TODO do we need to refresh winObject too???
+			refresh(false);
 			
 		}catch(SeleniumPlusException se){
 			se.setInfo("Fail to get the component's library! "+se.getInfo());
@@ -227,40 +248,7 @@ public class CFComponent extends ComponentFunction{
 		}catch(Exception e){
 			throw new SeleniumPlusException("Fail to get the component's library! Met Exception "+StringUtils.debugmsg(e));
 		}
-		
-	
-		if (action != null) {
-			String msg = null;
-			String detail = null;
-
-			try{
-								
-				Log.debug(debugmsg+" processing command '"+action+"' with parameters "+params);
-				iterator = params.iterator();
-
-				if(action.equalsIgnoreCase(WindowFunctions.SETFOCUS_KEYWORD)){
-					
-					WDLibrary.windowSetFocus();
-				
-					testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
-					msg = genericText.convert("success3", windowName +":"+ compName + " "+ action +" successful.",
-							windowName, compName, action);
-					log.logMessage(testRecordData.getFac(), msg, PASSED_MESSAGE);						
-
-				}else{
-					testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
-					Log.warn(debugmsg+action+" could not be handled here.");
-				}
-				
-			}catch(SAFSException e){
-				Log.error(debugmsg+"SeleniumPlus Error processing '"+action+"'.", e);
-				testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
-				msg = getStandardErrorMessage(windowName +":"+ compName +" "+ action);
-				detail = "Met Exception "+e.getMessage();
-				log.logMessage(testRecordData.getFac(),msg, detail, FAILED_MESSAGE);
-			}
-		}
-		
+			
 	}
 
 	/** sub class MUST to override this method and provide its own library Component.*/
@@ -278,6 +266,12 @@ public class CFComponent extends ComponentFunction{
 			libComponentCache.clear();
 		}
 	}
+	
+	public void _setFocus() throws SAFSException{				
+		libComponent.setFocus();  		
+		issuePassedSuccess(null);
+	}
+	
 	
 	/**clear the cache 'libComponentCache'*/
 	public void clearCache(){
