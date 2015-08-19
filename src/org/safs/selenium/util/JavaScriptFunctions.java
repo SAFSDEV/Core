@@ -686,13 +686,18 @@ public class JavaScriptFunctions {
 	 * <br><b>depending level: 0</b><br>
 	 * 
 	 * @param message (<b>Javascript</b>) String, the javascript exception Error object.
-	 */	
+	 */		
 	public static String debug(){
 		StringBuffer scriptCommand = new StringBuffer();
 		
 		final String msgVar = "message";
+		final String currenttimeVar = "currenttime";
 		scriptCommand.append("function debug("+msgVar+"){\n");
-		if(jsDebugLogEnable) scriptCommand.append("  "+addToJSDebugArray(msgVar));
+		if(jsDebugLogEnable){
+			scriptCommand.append("  var currentdate = new Date();\n");
+			scriptCommand.append("  var "+currenttimeVar+" = 'JS Log time '+ currentdate.getHours() + ':' + currentdate.getMinutes() + ':' + currentdate.getSeconds() + '.'+currentdate.getMilliseconds()+'# ';\n");
+			scriptCommand.append("  "+addToJSDebugArray(currenttimeVar+"+"+msgVar));
+		}
 		scriptCommand.append("}\n");
 		
 		return scriptCommand.toString();
