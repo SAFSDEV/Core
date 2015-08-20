@@ -48,6 +48,8 @@ package org.safs;
  * <br> SEP 11, 2013    (CANAGL)  Added removeShutdownHook to prevent premature release of handle when necessary.
  * <br> JUL 15, 2014    (CANAGL)  Added support for STAFHandle registration to optionally NOT use STAF.
  * <br> JUL 01, 2015    (LeiWang) Added startProcess(): can start process on any host trusting us.
+ * <br> AUG 20, 2015    (CANAGL)  Added INI STAF:EmbedDebugMainClass True|False support and 
+ *                                -Dtestdesigner.debuglogname support for embedded debug log filenames.
  **/
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -66,6 +68,7 @@ import org.safs.staf.service.InfoInterface;
 import org.safs.staf.service.queue.EmbeddedQueueService;
 import org.safs.staf.service.sem.EmbeddedSemService;
 import org.safs.tools.CoreInterface;
+import org.safs.tools.MainClass;
 import org.safs.tools.drivers.ConfigureInterface;
 import org.safs.tools.drivers.DriverConstant;
 import org.safs.tools.stringutils.StringUtilities;
@@ -236,10 +239,12 @@ public class STAFHelper implements CoreInterface{
 
   /**
    * Evaluate [STAF] to determine if any or all Embeddable Services should be launched.<br>
-   * Currently only the EmbeddedSemService is handled.
+   * Currently only the EmbeddedSemService and EmbeddedQueue services are handled.
+   * <p>
+   * We also will launch an Embedded Debug Log if the System properties or INI file are configured.
    */
   public static void configEmbeddedServices(ConfigureInterface config){
-	String value;
+	String value = null;
 	if(!embeddedDebugTried && ! embeddedSEMTried && ! embeddedQUEUETried){
 		System.out.println("STAFHelper.configEmbeddedServices() checking config for embeddable services...");  
 	    Log.info("STAFHelper.configEmbeddedServices() checking config for embeddable services...");
@@ -251,8 +256,23 @@ public class STAFHelper implements CoreInterface{
 			if(value != null) no_staf_handles = StringUtilities.convertBool(value);
 		}
 		if(no_staf_handles){
-			value = config.getNamedValue(DriverConstant.SECTION_STAF, "EMBEDDEBUG");
+			boolean useMainClass = false;
+			value = System.getProperty("testdesigner.debuglogname");
+			if(value == null) {
+				value = config.getNamedValue(DriverConstant.SECTION_STAF, "EMBEDDEBUG");
+				String prefix = config.getNamedValue(DriverConstant.SECTION_STAF, "EMBEDDEBUGMAINCLASS");
+				useMainClass = prefix == null ? false: StringUtilities.convertBool(prefix);
+			}
+			
 			if(value != null && value.length()> 4){
+				if(useMainClass){
+					String mainclass = MainClass.getMainClass() == null ? 
+							           "": MainClass.getMainClass();
+					if(mainclass.lastIndexOf('.')> 0) 
+						mainclass = mainclass.substring(mainclass.lastIndexOf('.')+1);
+					
+					if(mainclass.length() > 0) value = mainclass + value;
+				}
 				Log.runEmbedded(new String[]{"-file:"+value});
 				System.out.println("STAFHelper.configEmbeddedServices() Embedded Debug Log: "+ value);
 				embeddedDebug = true;
