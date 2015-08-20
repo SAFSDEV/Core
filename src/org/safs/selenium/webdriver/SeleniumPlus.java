@@ -49,7 +49,7 @@ package org.safs.selenium.webdriver;
  *  <br>                            Change comments of EditBox.SetTextValue(). 
  *  <br>   JUL 24, 2015    (Lei Wang) Add GetURL, SaveURLToFile, VerifyURLContent, VerifyURLToFile in Misc.
  *  <br>   AUG 17, 2015    (DHARMESH4) Add SetFocus call in Window.
- *  
+ *  <br>   AUG 20, 2015    (Carl Nagle) Document -Dtestdesigner.debuglogname support in main().
  */
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
@@ -9924,6 +9924,12 @@ public abstract class SeleniumPlus {
 	 * -Dselenium.host=localhost  or<br>
 	 * -Dselenium.host=L12345.company.com<br>
 	 * -Dselenium.port=5555<br>
+	 * </ul>
+	 * <p>By default, a Debug Log is usually enabled and named in the test configuration (INI) file.   
+	 * The user can specify or override the name of this debug log file by using the following JVM argument:
+	 * <p>
+	 * <ul>
+	 * -Dtestdesigner.debuglogname=mydebuglog.txt
 	 * </ul>
 	 * <p>
 	 * @param args -- 
