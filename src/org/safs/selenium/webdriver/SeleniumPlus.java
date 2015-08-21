@@ -2075,7 +2075,9 @@ public abstract class SeleniumPlus {
 	 * @param comp org.safs.model.Component, (from generated Map.java).<br>
 	 *                                       In your script you reference this DOM WebElement as '<b>arguments[0]</b>'.<br>
 	 * @param script String, the javascript to execute.<br>
-	 * @param scriptParams optional 
+	 * @param scriptParams optional, Script arguments must be a number, a boolean, a String, WebElement, or a List of any combination of the above.
+	 *                               An exception will be thrown if the arguments do not meet these criteria.
+	 *                               The arguments will be made available to the JavaScript via the "arguments" variable.
 	 * <ul>
 	 * scriptParams[0] : Passed to the script as '<b>arguments[1]</b>', if used.<br>
 	 * scriptParams[1] : Passed to the script as '<b>arguments[2]</b>', if used.<br>
@@ -2103,11 +2105,30 @@ public abstract class SeleniumPlus {
 	 */	
 	public static boolean ExecuteScript(org.safs.model.Component comp, String script, String... scriptParams){
 		return action(comp,GenericMasterFunctions.EXECUTESCRIPT_KEYWORD, combineParams(scriptParams, script));
-	}
+	}	
 	/**
-	 * Execute javascript asynchronously.
+	 * Following explanations come from <a href="http://selenium.googlecode.com/git/docs/api/java/org/openqa/selenium/JavascriptExecutor.html#executeAsyncScript-java.lang.String-java.lang.Object...-">Selenium Java Doc</a>.<br>
+	 * Execute an asynchronous piece of JavaScript in the context of the currently selected frame or window. 
+	 * Unlike executing synchronous JavaScript, scripts executed with this method must explicitly signal they are finished by invoking the provided callback. 
+	 * This callback is always injected into the executed function as the last argument.<br>
+	 * <br>
+	 * The first argument passed to the callback function will be used as the script's result. This value will be handled as follows:<br>
+	 * <ul>
+	 * <li>For an HTML element, this method returns a WebElement
+	 * <li>For a number, a Long is returned
+	 * <li>For a boolean, a Boolean is returned
+	 * <li>For all other cases, a String is returned.
+	 * <li>For an array, return a List&lt;Object> with each object following the rules above. We support nested lists.
+	 * <li>Unless the value is null or there is no return value, in which null is returned
+	 * </ul>
+	 * 
+	 * The default timeout for a script to be executed is 0ms. In most cases, including the examples below, 
+	 * one must set the script timeout WebDriver.Timeouts.setScriptTimeout(long, java.util.concurrent.TimeUnit) beforehand to a value sufficiently large enough.<br>
+	 * 
 	 * @param script String, the script to execute
-	 * @param scriptParams optional 
+	 * @param scriptParams optional, Script arguments must be a number, a boolean, a String, WebElement, or a List of any combination of the above.
+	 *                               An exception will be thrown if the arguments do not meet these criteria.
+	 *                               The arguments will be made available to the JavaScript via the "arguments" variable.
 	 * <ul>
 	 * scriptParams[0] Object, Passed to the script as '<b>arguments[0]</b>', if used.<br>
 	 * scriptParams[1] Object, Passed to the script as '<b>arguments[1]</b>', if used.<br>
@@ -2117,19 +2138,32 @@ public abstract class SeleniumPlus {
 	 * @example	 
 	 * <pre>
 	 * {@code
-	 * //set "your text" to innerHTML of component Map.Google.SignIn
-	 * WebElement we = SeleniumPlus.getObject(Map.Google.SignIn);
-	 * String script = "arguments[0].innerHTML=arguments[1];";
-	 * List<Object> params = new ArrayList<Object>();
-	 * params.add(we);//arguments[0]
-	 * params.add("your text");//arguments[1]
-	 * SeleniumPlus.executeAsyncScript(script, params.toArray(new Object[0]));
+	 * //Example #1: Performing a sleep in the browser under test. 
+	 * long start = System.currentTimeMillis();
+	 * String script = "window.setTimeout(arguments[arguments.length - 1], 500);";
+	 * SeleniumPlus.executeAsyncScript(script);
+	 * System.out.println("Elapsed time: " + System.currentTimeMillis() - start);
 	 * 
-	 * //get innerHTML of component Map.Google.SignIn
-	 * script = "return arguments[0].innerHTML;";
-	 * params.clear();
-	 * params.add(we);//arguments[0]
-	 * Object result = SeleniumPlus.executeAsyncScript(script, params.toArray(new Object[0]));
+	 * //Example #2: Synchronizing a test with an AJAX application:
+	 * Click(Map.Mail.ComposeButton);
+	 * String script = "var callback = arguments[arguments.length - 1];" +
+	 *                 "mailClient.getComposeWindowWidget().onload(callback);";
+	 * Object result = SeleniumPlus.executeAsyncScript(script);
+	 * Component.InputCharacters(Map.Mail.To, "bog@example.com");
+	 * 
+	 * //Example #3: Injecting a XMLHttpRequest and waiting for the result:
+	 * String script =  "var callback = arguments[arguments.length - 1];" +
+	 *                  "var xhr = new XMLHttpRequest();" +
+	 *                  "xhr.open('GET', '/resource/data.json', true);" +
+	 *                  "xhr.onreadystatechange = function() {" +
+	 *                  "  if (xhr.readyState == 4) {" +
+	 *                  "    callback(xhr.responseText);" +
+	 *                  "  }" +
+	 *                  "};" +
+	 *                  "xhr.send();";
+	 * Object result = SeleniumPlus.executeAsyncScript(script);
+	 * JsonObject json = new JsonParser().parse((String) response);
+	 * 
 	 * }
 	 * @see org.safs.selenium.webdriver.lib.WDLibrary#executeAsyncScript(String, Object...)
 	 * @throws SeleniumPlusException
@@ -2139,9 +2173,27 @@ public abstract class SeleniumPlus {
 	}
 	
 	/**
-	 * Execute javascript synchronously.
+	 * Following explanations come from <a href="http://selenium.googlecode.com/git/docs/api/java/org/openqa/selenium/JavascriptExecutor.html#executeScript-java.lang.String-java.lang.Object...-">Selenium Java Doc</a>.<br>
+	 * Executes JavaScript synchronously in the context of the currently selected frame or window. 
+	 * The script fragment provided will be executed as the body of an anonymous function.<br>
+	 * <br>
+	 * Within the script, use document to refer to the current document. 
+	 * Note that local variables will not be available once the script has finished executing, though global variables will persist.<br>
+	 * <br>
+	 * If the script has a return value (i.e. if the script contains a return statement), then the following steps will be taken:
+	 * <ul>
+	 * <li>For an HTML element, this method returns a WebElement
+	 * <li>For a decimal, a Double is returned
+	 * <li>For a non-decimal number, a Long is returned
+	 * <li>For a boolean, a Boolean is returned
+	 * <li>For all other cases, a String is returned.
+	 * <li>For an array, return a List&lt;Object> with each object following the rules above. We support nested lists.
+	 * <li>Unless the value is null or there is no return value, in which null is returned
+	 * </ul>
 	 * @param script String, the script to execute
-	 * @param scriptParams optional 
+	 * @param scriptParams optional, Script arguments must be a number, a boolean, a String, WebElement, or a List of any combination of the above.
+	 *                               An exception will be thrown if the arguments do not meet these criteria.
+	 *                               The arguments will be made available to the JavaScript via the "arguments" variable.
 	 * <ul>
 	 * scriptParams[0] Object, Passed to the script as '<b>arguments[0]</b>', if used.<br>
 	 * scriptParams[1] Object, Passed to the script as '<b>arguments[1]</b>', if used.<br>
