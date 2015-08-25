@@ -32,7 +32,7 @@ import java.io.*;
  * standards for defining keystrokes in scripting languages:
  * <p><ul>
  * Some characters in the string are passed to the active window as literal characters, 
- * meaning that they are passed just as they appear in the string — for example, the 
+ * meaning that they are passed just as they appear in the string. For example, the 
  * letters a through z and the numbers 0 through 9. 
  * <p>
  * The following characters cause the associated keystroke to be performed:
@@ -56,7 +56,7 @@ import java.io.*;
  * curly braces ( {} ). Names are not case-sensitive. The valid key names you can specify 
  * in curly braces are included in the table at the end of the Comments section.
  * <p>
- * To insert one of the above special characters — that is, ~+^%({ — as itself rather 
+ * To insert one of the above special characters, that is, ~+^%({ as itself rather 
  * than as the special activity that it represents, enclose the character in curly 
  * braces. For example, the following command inserts a plus sign (+) into the active 
  * window:
@@ -69,7 +69,7 @@ import java.io.*;
  * <tr>
  * <td>Keytext value	<td>Keyboard equivalent 
  * <tr><td>Actual printable character.<br>Examples:  A1.&
- * <td>Letters A–Z, a–z, numbers 0–9, punctuation, other printable characters on the main 
+ * <td>Letters A-Z, a-z, numbers 0-9, punctuation, other printable characters on the main 
  * keyboard.
  * <tr><td>{Alt}<td>Default Alt key (either left or right).
  * <tr><td>{BackSpace}<br>{BS}<br>{BkSp}<td>	Backspace.

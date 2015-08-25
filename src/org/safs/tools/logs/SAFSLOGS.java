@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright ©  2004 Novell, Inc
+ * Copyright (C) 2004 Novell, Inc
  * GNU General Public License (GPL) http://www.opensource.org/licenses/gpl-license.php
  */
 package org.safs.tools.logs;
@@ -8,7 +8,6 @@ import org.safs.Log;
 import org.safs.STAFHelper;
 import org.safs.logging.AbstractLogFacility;
 import org.safs.staf.service.InfoInterface;
-import org.safs.staf.service.input.EmbeddedInputService;
 import org.safs.staf.service.logging.AbstractSAFSLoggingService;
 import org.safs.staf.service.logging.EmbeddedLogService;
 import org.safs.tools.ConfigurableToolsInterface;

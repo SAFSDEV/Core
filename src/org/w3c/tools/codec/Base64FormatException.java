@@ -1,9 +1,9 @@
 /**
     W3C Base64 Codec: http://www.w3.org/Jigsaw/ 
 <p>
-    Copyright © 2002 World Wide Web Consortium, (Massachusetts Institute of Technology, 
+    Copyright (C) 2002 World Wide Web Consortium, (Massachusetts Institute of Technology, 
     European Research Consortium for Informatics and Mathematics, Keio University). 
-    All Rights Reserved. This work is distributed under the W3C® Software License [1] 
+    All Rights Reserved. This work is distributed under the W3C (R) Software License [1] 
     in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the 
     implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 <p>

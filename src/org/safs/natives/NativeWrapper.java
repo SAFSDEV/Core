@@ -32,8 +32,6 @@ import com.sun.jna.Native;
 import com.sun.jna.NativeLong;
 import com.sun.jna.Platform;
 import com.sun.jna.Pointer;
-import com.sun.jna.platform.win32.BaseTSD.LONG_PTR;
-import com.sun.jna.platform.win32.WinDef.HWND;
 
 /**
  * This class is used to encapsulate platform independent calls to native operating systems through JNA,
@@ -1869,9 +1867,9 @@ public class NativeWrapper {
 		
 		System.out.println("GetFileTime for File '"+file+"'");
 		if (getFileTime (file, ct, at, wt)){
-			System.out.println("	Created Time：" + ct);
-			System.out.println("	Access Time：" + at);
-			System.out.println("	Modified Time：" + wt);
+			System.out.println("	Created Time: " + ct);
+			System.out.println("	Access Time: " + at);
+			System.out.println("	Modified Time: " + wt);
 		}else{
 			System.out.println("GetFileTime Fail");
 		}
