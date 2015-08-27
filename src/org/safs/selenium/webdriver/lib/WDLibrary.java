@@ -2184,7 +2184,7 @@ public class WDLibrary extends SearchObject {
 		try{
 			RemoteWebElement relement = (RemoteWebElement) element;
 			WebDriver rd = relement.getWrappedDriver();
-			windowSetFocus(rd);
+			return windowSetFocus(rd);
 		}catch(Exception x){
 			IndependantLog.info("WDLibrary.windowSetFocus RemoteWebElement ignoring "+ getThrowableMessages(x)+ ": "+ x.getMessage());
 		}
