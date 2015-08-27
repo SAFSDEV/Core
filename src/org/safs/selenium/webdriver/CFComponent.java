@@ -268,7 +268,8 @@ public class CFComponent extends ComponentFunction{
 	}
 	
 	public void _setFocus() throws SAFSException{				
-		libComponent.setFocus();  		
+		boolean rc = libComponent.setFocus(); 
+		if (!rc) throw new SAFSException("setFocus failed on window");
 		issuePassedSuccess(null);
 	}
 	
