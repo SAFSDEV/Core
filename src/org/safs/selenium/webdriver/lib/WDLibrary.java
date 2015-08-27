@@ -338,12 +338,12 @@ public class WDLibrary extends SearchObject {
 					//But we don't want to waste that time, so just set 'implicit timeout' to 0 and don't wait.
 					WDTimeOut.setImplicitlyWait(0, TimeUnit.SECONDS);
 					actions.build().perform();
-					event = listener.waitForClick(timeoutWaitClick);
+					/*event = listener.waitForClick(timeoutWaitClick);
 					if(event != null)
 						IndependantLog.debug(debugmsg+"click has been performed.");
 					else{
 						throw new SeleniumPlusException("Selenium Action.click failed to return the MouseEvent.");
-					}
+					}*/
 				}catch(StaleElementReferenceException x){
 					listener.stopListening();  // chrome is NOT stopping!
 					// the click probably was successful because the elements have changed!
