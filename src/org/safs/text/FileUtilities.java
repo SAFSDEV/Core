@@ -207,6 +207,8 @@ public class FileUtilities
 	 * The Method object of method detectFileEncoding() of class {@link org.safs.text.FileUtilitiesByThirdParty}.
 	 */
 	private static Method detectFileEncodingMethod = null;
+	
+	private static Method detectStringEncodingMethod = null;
 	/**
 	 * Detects file's encoding.<br>
 	 * This depends on class {@link org.safs.text.FileUtilitiesByThirdParty}, which requires jar
@@ -228,6 +230,28 @@ public class FileUtilities
 		return encoding;
 	}
 
+	/**
+	 * Detects String encoding.<br>
+	 * This depends on class {@link org.safs.text.FileUtilitiesByThirdParty}, which requires jar
+	 * <a href="http://code.google.com/p/juniversalchardet/">juniversalchardet</a><br>
+	 * @param str - input as string.
+	 * @return String, the file encoding; null, if some Exceptions occur.
+	 */
+	public static String detectStringEncoding(String str){
+		String encoding = null;
+		try {
+			if(detectStringEncodingMethod==null) detectStringEncodingMethod = FileUtilitiesbYThirdPartyClass.getMethod("detectStringEncoding", String.class);
+			encoding = (String) detectStringEncodingMethod.invoke(null, str);
+		} catch (Exception e) {
+			IndependantLog.warn("Cannot get file encoding for "+str+", met "+e.getClass().getSimpleName()+":"+e.getMessage());
+			Throwable cause = e.getCause();
+			IndependantLog.warn("caused by "+cause.getClass().getSimpleName()+":"+cause.getMessage());
+		}
+		
+		return encoding;
+	}
+	
+	
 	/**
 	 * Attempt to replace all filename path separators ( "\" or "/" ) with the correct ones for
 	 * the current environment.

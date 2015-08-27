@@ -95,4 +95,48 @@ public class FileUtilitiesByThirdParty {
 		
 		return encoding;
 	}
+	
+	/**
+	 * Read String as input to find encoding. If no encoding is detected, the default system
+	 * encoding will be returned.
+	 * {@link http://code.google.com/p/juniversalchardet/}
+	 * {@link http://www-archive.mozilla.org/projects/intl/UniversalCharsetDetection.html}
+	 * @param String 
+	 * @return String, the file encoding, it might be null.
+	 * @see FileUtilities#detectFileEncoding(String)
+	 */
+	public static String detectStringEncoding(String str){
+		
+		String encoding = null;		
+		
+		try{
+			
+			UniversalDetector detector = new UniversalDetector(null);
+			
+			detector.handleData(str.getBytes(), 0, str.getBytes().length);
+					
+			detector.dataEnd();
+			
+			//Get the file encoding string (defined in org.mozilla.universalchardet.Constants)
+			encoding = detector.getDetectedCharset();
+			detector.reset();
+
+		}catch(Exception e){
+			IndependantLog.warn(StringUtils.debugmsg(false)+StringUtils.debugmsg(e));
+		}	
+
+		//If no encoding is detected, get the default file encoding
+		try{
+			if(encoding==null || encoding.trim().isEmpty()) encoding = System.getProperty("file.encoding");
+			if(!Charset.isSupported(encoding)){
+				String error = "The detected encoding is '"+encoding+"', it is not supported by java.nio.charset.Charset";
+				IndependantLog.warn(error);//We need to map org.mozilla.universalchardet.Constants and java.nio.charset.Charset ?
+				throw new IOException(error);
+			}
+		} catch (Exception e) {
+			IndependantLog.warn(StringUtils.debugmsg(false)+StringUtils.debugmsg(e));
+		}
+		
+		return encoding;
+	}
 }
