@@ -199,8 +199,8 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 	 * @throws SeleniumPlusException if we are unable to process the keystrokes successfully.
 	 * @see org.safs.robot.Robot#inputKeys(String)
 	 **/
-	public void setFocus() throws SeleniumPlusException{
-		WDLibrary.windowSetFocus(getWebElement());
+	public boolean setFocus() throws SeleniumPlusException{
+		return WDLibrary.windowSetFocus(getWebElement());
 	}
 	
 	/**
