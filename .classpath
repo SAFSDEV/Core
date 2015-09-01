@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/SAFS-Android-Remote-Control"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/jna.zip"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/org.json.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/cuke/cucumber-core-1.1.3.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/cuke/cucumber-java-1.1.3.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/cuke/gherkin-2.12.0.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/cuke/sas-gat-cukes.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/android/ddmlib.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/selenium/selenium-server-standalone-2.46.0.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/selenium/SeInterpreter.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/staf/JSTAF3.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/staf/JSTAF2.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/jai_imageio.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/jai_core.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/jai_codec.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/dom4j-2.0.0-ALPHA-2.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/nekohtml.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/juniversalchardet-1.0.3.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/javax.mail.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/rft/com.ibm.terminal.tester.ft.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/rft/org.eclipse.tptp.platform.models_4.6.205.v201209141700.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/rft/com.ibm.rational.test.ft.util_8.3.0.v20130102_2345.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/rft/com.ibm.rational.test.ft.corecomponents_8.3.0.v20121022_1402.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/rft/com.ibm.rational.test.ft.autbase_8.3.0.v20121022_1402.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/rft/com.ibm.rational.test.ft.playback_8.3.0.v20121022_1402.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/rft/com.rational.test.ft.wswplugin_8.3.0.v20130102_2345.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/rft/com.rational.test.ft.wpf_8.3.0.v20121022_1402.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/rft/com.rational.test.ft.siebel_8.3.0.v20121022_1402.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/rft/com.rational.test.ft.sap_8.3.0.v20121022_1402.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/rft/com.ibm.test.terminal.testobjects_8.2.1.v20110715_1630.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/rft/com.ibm.rational.test.ft.sdk_8.3.0.v20121022_1402.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/rft/com.ibm.rational.test.ft.html.sapwebportal.testobjects_8.3.0.v20121022_1402.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/rft/com.ibm.rational.test.ft.domain_8.3.0.v20130319_1934.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/rft/com.ibm.rational.test.ft.domain.testobjects_8.3.0.v20121022_1402.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/rft/com.ibm.rational.test.ft.domain.html.dojo.testobjects_8.3.0.v20130226_1842.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/rft/com.ibm.rational.test.ft.clientbase_8.3.0.v20130117_1954.jar"/>
+	<classpathentry kind="var" path="JUNIT_SRC_HOME"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
