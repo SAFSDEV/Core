@@ -21,7 +21,7 @@
 	<classpathentry kind="var" path="SAFS_BUILD/libs/nekohtml.jar"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/juniversalchardet-1.0.3.jar"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/javax.mail.jar"/>
-	<classpathentry kind="var" path="SAFS_BUILD/libs/rft/com.ibm.terminal.tester.ft.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/rft/customization/com.ibm.terminal.tester.ft.jar"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/rft/org.eclipse.tptp.platform.models_4.6.205.v201209141700.jar"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/rft/com.ibm.rational.test.ft.util_8.3.0.v20130102_2345.jar"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/rft/com.ibm.rational.test.ft.corecomponents_8.3.0.v20121022_1402.jar"/>
