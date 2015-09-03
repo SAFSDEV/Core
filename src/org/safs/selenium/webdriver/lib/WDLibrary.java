@@ -2186,15 +2186,7 @@ public class WDLibrary extends SearchObject {
 		//and if element is dynamically added by javascript and will be considered as stale
 		//which will cause executeJavaScriptOnWebElement to throw SeleniumPlusException
 		//executeJavaScriptOnWebElement("try{ window.top.focus();}catch(error){ debug(error); }", element);
-		
-		IndependantLog.info("WDLibrary.windowSetFocus set focus via RemoteWebElement window title");
-		try{
-			RemoteWebElement relement = (RemoteWebElement) element;
-			WebDriver rd = relement.getWrappedDriver();
-			return windowSetFocus(rd);
-		}catch(Exception x){
-			IndependantLog.info("WDLibrary.windowSetFocus RemoteWebElement ignoring "+ getThrowableMessages(x)+ ": "+ x.getMessage());
-		}
+				
 		executeScript("try{ window.top.focus();}catch(error){ debug(error); }");
 		return true;
 	}
