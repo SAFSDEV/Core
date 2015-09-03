@@ -339,9 +339,9 @@ public class WDLibrary extends SearchObject {
 					WDTimeOut.setImplicitlyWait(0, TimeUnit.SECONDS);
 					actions.build().perform();
 					
-					// Dharmesh -- Do not report waitForClick failure due to listener event not capture 
-					// if click coordination out of component size or on background. 
-					// It is hard to find sibling component as well to insert listener.
+					// Dharmesh: Not report waitForClick failure due to listener event not capture 
+					// if click coordination out of component size or background. 
+					// It is hard to find sibling component.
 					try {event = listener.waitForClick(timeoutWaitClick);} 
 					catch (Throwable the) {IndependantLog.debug(debugmsg+" waitForClick failed but not reported");};
 					
