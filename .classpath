@@ -10,7 +10,7 @@
 	<classpathentry kind="var" path="SAFS_BUILD/libs/cuke/gherkin-2.12.0.jar"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/cuke/sas-gat-cukes.jar"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/android/ddmlib.jar"/>
-	<classpathentry kind="var" path="SAFS_BUILD/libs/selenium/selenium-server-standalone-2.46.0.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/selenium/selenium-server-standalone-2.47.1.jar"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/selenium/SeInterpreter.jar"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/staf/JSTAF3.jar"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/staf/JSTAF2.jar"/>
