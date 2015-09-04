@@ -28,6 +28,7 @@ import java.util.Map;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.firefox.internal.ProfilesIni;
@@ -106,6 +107,8 @@ public class SelectBrowser {
 	public static final String SYSTEM_PROPERTY_WEBDRIVER_IE = "webdriver.ie.driver";
 	/**'webdriver.chrome.driver'*/
 	public static final String SYSTEM_PROPERTY_WEBDRIVER_CHROME = "webdriver.chrome.driver";
+	/**'webdriver.edge.driver'*/
+	public static final String SYSTEM_PROPERTY_WEBDRIVER_EDGE = "webdriver.edge.driver";
 	
 	/**'BROWSER'*/
 	public static final String SYSTEM_PROPERTY_BROWSER_NAME = "BROWSER";
@@ -124,6 +127,8 @@ public class SelectBrowser {
 	public static final String BROWSER_NAME_FIREFOX = "firefox";
 	/**'<b>safari</b>'*/
 	public static final String BROWSER_NAME_SAFARI = "safari";
+	/**'<b>MicrosoftEdge</b>'*/
+	public static final String BROWSER_NAME_EDGE = "MicrosoftEdge";
 	/**'<b>htmlunit</b>'*/
 	public static final String BROWSER_NAME_HTMLUNIT = "htmlunit";
 	/** '<b>android.chrome</b>' chrome browser on android */
@@ -204,6 +209,9 @@ public class SelectBrowser {
 		} else if (browserNameLC.equals(BROWSER_NAME_CHROME)) {
 			System.setProperty(SYSTEM_PROPERTY_WEBDRIVER_CHROME, installdir + "/extra/chromedriver.exe");
 			instance = (caps!=null)? new ChromeDriver(caps):new ChromeDriver();
+		} else if (browserNameLC.equals(BROWSER_NAME_EDGE)) {
+			System.setProperty(SYSTEM_PROPERTY_WEBDRIVER_EDGE, installdir + "/extra/MicrosoftWebDriver.exe");
+			instance = (caps!=null)? new EdgeDriver(caps):new EdgeDriver();
 		} else if (browserNameLC.equals(BROWSER_NAME_ANDROID_CHROME)) {
 			System.setProperty(SYSTEM_PROPERTY_WEBDRIVER_CHROME, installdir + "/extra/chromedriver.exe");
 			instance = (caps!=null)? new ChromeDriver(caps):new ChromeDriver();
@@ -241,6 +249,10 @@ public class SelectBrowser {
 			System.setProperty(SYSTEM_PROPERTY_WEBDRIVER_CHROME, "chromedriver.exe");
 			caps = DesiredCapabilities.chrome();
 			caps.setCapability("browserName", BROWSER_NAME_CHROME);
+		} else if (browserName.equals(BROWSER_NAME_EDGE)) {
+			System.setProperty(SYSTEM_PROPERTY_WEBDRIVER_EDGE, "MicrosoftWebDriver.exe");
+			caps = DesiredCapabilities.edge();
+			caps.setCapability("browserName", BROWSER_NAME_EDGE);
 		} else if (browserName.equals(BROWSER_NAME_ANDROID_CHROME)) {
 			System.setProperty(SYSTEM_PROPERTY_WEBDRIVER_CHROME, "chromedriver.exe");
 			caps = DesiredCapabilities.chrome();
