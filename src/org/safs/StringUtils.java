@@ -24,8 +24,10 @@ package org.safs;
  * <br>     JUN 23,2015     (Lei Wang) 	Add getCallerClassName(), isLocalHost(), isMacAddress() and getHostIP().
  *                                      Modify deduceUnusedSeparatorString(): avoid NullPointerException.
  * <br>     JUL 08,2015     (Lei Wang) 	Add some constant. Add method urlEncode().
+ * <br>     SEP 07,2015     (Lei Wang) 	Move some content from method convertLine() to a new method convertCoordsToArray().
  *                                      
  **/
+import java.awt.Point;
 import java.awt.Polygon;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -38,9 +40,7 @@ import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.net.InetAddress;
 import java.net.URLEncoder;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -54,7 +54,6 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
-import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -62,7 +61,6 @@ import org.safs.ComponentFunction.Window;
 import org.safs.sockets.DebugListener;
 import org.safs.text.FileUtilities;
 import org.safs.tools.CaseInsensitiveFile;
-import org.safs.tools.consoles.ProcessCapture;
 import org.safs.tools.drivers.ConfigureInterface;
 import org.w3c.tools.codec.Base64Decoder;
 import org.w3c.tools.codec.Base64Encoder;
@@ -1484,61 +1482,86 @@ public class StringUtils{
 	 * into a java.awt.Polygon object.
      * 
      * @param   coords String, x1;y1;x2;y2 or x1,y1,x2,y2 or Coords=x1;y1;x2;y2  or Coords=x1,y1,x2,y2
-     * @return  Polygon if successfull, null otherwise
+     * @return  Polygon if successful, null otherwise
      **/
     public static java.awt.Polygon convertLine(String coords) {
 	    try {
-	    	String ncoords = new String(coords);
-    		int coordsindex = coords.indexOf(EQUAL);
-    		if(coordsindex > 0) ncoords = ncoords.substring(coordsindex+1);
-    		ncoords=ncoords.trim();
-      		Log.info("working with points: "+ coords +" prefix stripped to: "+ncoords);
-    		
-      		String sep = parseSeparator(ncoords);
-      		if (sep == null){
-          		Log.error("invalid points: "+ ncoords +".");
-      			return null;
-      		}
-			// properly handles case where coordsindex = -1 (not found)
-		    String x1S = null;
-      		String y1S = null;
-      		String x2S = null;
-      		String y2S = null;
-       		Log.info("converting points: "+ ncoords);
-    		StringTokenizer toker = new StringTokenizer(ncoords, sep);
-      		if(toker.countTokens() < 4) {
-            	Log.error("invalid points present: "+ ncoords);
-      			return null;
-      		}
-      		x1S = toker.nextToken().trim();
-      		y1S = toker.nextToken().trim();
-      		x2S = toker.nextToken().trim();
-      		y2S = toker.nextToken().trim();
-      		
-      		if ((x1S.length()==0)||(y1S.length()==0)||(x2S.length()==0)||(y2S.length()==0)){
-          		Log.error("invalid points substrings  "+ x1S +","+ y1S +", "+ x2S +","+ y2S);
-      			return null; // assumption
-      		}
-
-      		Log.info("x1: "+x1S);
-      		Log.info("y1: "+y1S);
-      		Log.info("x2: "+x2S);
-      		Log.info("y2: "+y2S);
-
-      		int y1 = (int) Float.parseFloat(y1S);
-      		int x1 = (int) Float.parseFloat(x1S);
-      		int y2 = (int) Float.parseFloat(y2S);
-      		int x2 = (int) Float.parseFloat(x2S);
+	    	String[] coordsArray = convertCoordsToArray(coords, 4);
+	    	
+	    	int x1 = (int) Float.parseFloat(coordsArray[0]);
+      		int y1 = (int) Float.parseFloat(coordsArray[1]);
+      		int x2 = (int) Float.parseFloat(coordsArray[2]);
+      		int y2 = (int) Float.parseFloat(coordsArray[3]);
       		
       		Log.debug("converted points: x1: "+x1+", y1: "+y1 +", x2:"+ x2 +", y2:"+ y2);
       		Polygon poly = new Polygon();
       		poly.addPoint(x1, y1);
-      		poly.addPoint(x2,y2);
+      		poly.addPoint(x2, y2);
+      		
         	return poly;
-
 	    } catch (Exception ee) {
       		Log.debug( "bad points format: "+ coords, ee);
       		return null;
+    	}
+    }
+    
+    /** 
+     * Convert coordinates string of the formats:
+     * <ul>
+     * <li>"x1;y1;x2;y2"
+	 * <li>"x1,y1,x2,y2"
+	 * <li>"x1 y1 x2 y2"
+	 * <li>"x1;y1;x2;y2;x3;y3;x4;y4"
+	 * <li>"Coords=x1;y1;x2;y2"
+	 * <li>"Coords=x1,y1,x2,y2"
+	 * <li>"Coords=x1 y1 x2 y2"
+	 * <li>"Coords=x1 y1 x2 y2 x3 y3 x4 y4"
+	 * </ul> 
+	 * into an array object.
+     * 
+     * @param coords String, x1;y1;x2;y2 or x1,y1,x2,y2 or Coords=x1;y1;x2;y2  or Coords=x1,y1,x2,y2
+     * @param length int, the number of token contained in the first parameter coords. 
+     * @return  String[] an array of coordinates if successful, null otherwise.
+     **/
+    public static String[] convertCoordsToArray(String coords, int length) {
+    	try {
+    		String[] coordsArray = new String[length];
+    		
+    		String ncoords = new String(coords);
+    		int coordsindex = coords.indexOf(EQUAL);
+    		if(coordsindex > 0) ncoords = ncoords.substring(coordsindex+1);
+    		ncoords=ncoords.trim();
+    		Log.info("working with coods: "+ coords +" prefix stripped to: "+ncoords);
+    		
+    		String sep = parseSeparator(ncoords);
+    		if (sep == null){
+    			Log.error("invalid coods: "+ ncoords +".");
+    			return null;
+    		}
+    		// properly handles case where coordsindex = -1 (not found)
+    		Log.info("converting coods: "+ ncoords);
+    		StringTokenizer toker = new StringTokenizer(ncoords, sep);
+    		if(toker.countTokens() < length) {
+    			Log.error("invalid coods present: "+ ncoords);
+    			return null;
+    		}
+    		//Put the token into the array
+    		for(int i=0;i<length;i++) coordsArray[i] = toker.nextToken().trim();
+    		
+    		String coord = null;
+    		for(int i=0; i<coordsArray.length; i++){
+    			coord = coordsArray[i];
+    			if(coord==null || coord.isEmpty()){
+    				Log.error("invalid coods substrings  "+ Arrays.toString(coordsArray));    				
+    				return null; // assumption
+    			}
+    			Log.info("coord "+i+": "+coord);
+    		}
+    		
+    		return coordsArray;
+    	} catch (Exception ee) {
+    		Log.debug( "bad coods format: "+ coords, ee);
+    		return null;
     	}
     }
     
@@ -2590,6 +2613,19 @@ public class StringUtils{
 		reverseArray(null);
 	}
 	
+	public static void test_convertLine(){
+		Point pointA = new Point(13, 45);
+		Point pointB = new Point(18, 27);
+		String coords = pointA.x+", "+pointA.y+", "+pointB.x+", "+pointB.y;
+		java.awt.Polygon poly = convertLine(coords);
+		
+		if(pointA.equals(new Point(poly.xpoints[0], poly.ypoints[0])) && pointB.equals(new Point(poly.xpoints[1], poly.ypoints[1]))){
+			System.out.println("Succeed convert "+coords+" to polygon "+poly);
+		}else{
+			System.err.println("Fail to convert "+coords+" to polygon. The polygon is "+poly);
+		}
+	}
+	
 	private static void testErrorLineParser(){
 		debug("\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$"+debugmsg(false)+"$$$$$$$$$$$$$$$$$$$");
 		String[] testStrings = {"Error at line 50 in file sample.testcases.TestCase1#main(): Some error happened.",
@@ -2641,6 +2677,7 @@ public class StringUtils{
 		test_breakXpath();
 		test_replaceJVMOptionValue();
 		test_urlEncode();
+		test_convertLine();
 		
 	}
 	
