@@ -35,6 +35,7 @@ package org.safs.selenium.webdriver.lib;
 *  <br>   JUL 24, 2015    (Lei Wang) Create class WD_XMLHttpRequest and its static instance AJAX.
 *  <br>   JUL 25, 2015    (Lei Wang) Modify windowSetFocus(): remove the unnecessary parameter element.
 *  <br>	  AUG 08, 2015    (Dharmesh) Added delayWaitReady for WaitOnClick.
+*  <br>   SEP 07, 2015    (Lei Wang) Add method getElementOffsetScreenLocation().
 */
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -78,7 +79,6 @@ import org.openqa.selenium.internal.Locatable;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
-import org.openqa.selenium.remote.RemoteWebElement;
 import org.openqa.selenium.safari.SafariDriver;
 import org.safs.IndependantLog;
 import org.safs.Processor;
@@ -1354,6 +1354,36 @@ public class WDLibrary extends SearchObject {
 		if(point.y > ImageUtils.getScreenHeight()-1) point.y = ImageUtils.getScreenHeight()-1;
 	}
 
+    /**
+     * Given the element, and the (offsetX, offsetY) relative to element.
+     * This function will calculate the offset point screen coordination.
+     * 
+     * @param element WebElement, the element relative to which the coordination will be calculated.
+     * @param offsetX String, the offset on x axis, in pixel or in percentage, for example 15 or 30%.
+     * @param offsetX String, the offset on y axis, in pixel or in percentage, for example 45 or 50%.
+     * 
+     * @return Point, the offset point screen coordination; or null if any exception occured.
+     *
+     **/
+    public static Point getElementOffsetScreenLocation(WebElement element, String offsetX, String offsetY){
+    	String debugmsg = StringUtils.debugmsg(false);
+    	
+    	try {
+    		Point screenLoc = WDLibrary.getScreenLocation(element);
+    		Dimension dimemsion = element.getSize();
+    		
+    		//calc coords according to the offset and element's location and dimension
+    		double dx, dy;
+    		dx = ImageUtils.calculateAbsoluteCoordinate(screenLoc.getX(), dimemsion.getWidth(), offsetX);
+    		dy = ImageUtils.calculateAbsoluteCoordinate(screenLoc.getY(), dimemsion.getHeight(), offsetY);
+
+    		return new Point((int)dx, (int)dy);
+    	}catch (Exception e) {
+    		IndependantLog.error(debugmsg +": Exception", e);
+    		return null;
+    	}
+    }
+    
 	/**
 	 * Capture component image
 	 * @param we - WebElement object.
