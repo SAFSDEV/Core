@@ -1,7 +1,70 @@
 /** Copyright (C) (MSA, Inc) All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
-
+/**
+ * Developer Histories:
+ *
+ * As of OCT 31, 2005 there is a new Java JAI dependency added for compiling the
+ * code or using the GetGUIImage command.  The download for JAI can be found at:
+ * <pre>
+ *     http://java.sun.com/products/java-media/jai/
+ * </pre>
+ * The build requires the following JAR files be in the build path:
+ * <pre>
+ *     jai_core.jar
+ *     jai_codec.jar
+ * </pre>
+ * To actually use the new command and other future image related commands the
+ * developer and\or user will need to install the Java JAI support if it does
+ * not become part of our standard install.
+ * <p>
+ * @author  Doug Bauman
+ * @since   JUN 04, 2003
+ *
+ *   <br>   AUG 19, 2003    (DBauman) Original Release
+ *   <br>   SEP 02, 2005    (Bob Lawler) reverting to previous code w/ some
+ *                            cosmetic cleanup.  Also commented out call to
+ *                            getGuiImage() as it is clearly not working (RJl).
+ *   <br>   OCT 17, 2005    (Carl Nagle) Added DoubleClick Support
+ *   <br>   OCT 28, 2005    (Carl Nagle) Refactored for click variant extensions
+ *   <br>   OCT 31, 2005    (Carl Nagle) Adding a generic GetGUIIMage submitted by
+ *                                   Bob Lawler.  Adds a new Java JAI dependency.
+ *   <br>   AUG 08, 2006    (PHSABO) Moved getSubAreaRectangle and getClippedSubAreaRectangle
+ *   								 helper functions to Processor superclass.
+ *   <br>   MAR 11, 2008    (JunwuMa)Added HoverMouse,CtrlClick,CtrlRightClick and ShiftClick support
+ *   <br>   MAR 11, 2008    (LeiWang)Added SetPropertyValue, VerifyGUIImageToFile support
+ *   <br>   MAR 26, 2008    (LeiWang)Modified GetGuiImage, VerifyGUIImageToFile
+ * 	 <br>   MAR 26, 2008    (LeiWang)Added HScrollTo, VScrollTo
+ *   <br>   APR 21, 2008    (JunwuMa)Added SelectMenuItem, SelectMenuItemContains
+ *   <br>                            VerifyMenuItem, VerifyMenuItemContains 
+ *   <br>   APR 22, 2008    (JunwuMa)Added SetPosition 
+ *   <br>   MAY 8,  2008    (JunwuMa)Added LeftDrag and RightDrag
+ *   <br>   JUL 11, 2008	(LeiWang)Add static method isJavaDomain(), isDotnetDomain(), isHtmlDomain(), isWinDomain(), isSwtDomain()
+ *   <br>   JUL 31, 2008	(LeiWang)Modify method verifyMenuItem(),selectMenuItem()
+ *   								 Add method findMenuBars()
+ *   <br>	AUG 11, 2008	(LeiWang)Modify method performScorll() to support .NET application
+ *   <br>   AUG 11, 2008    (JunwuMa)Add .NET support for setPropertyValue,CaptureObjectDataToFile and VerifyObjectDataToFile.
+ *   <br>	NOV 11, 2008	(LeiWang)Added method getAbsolutFileName(),capturePropertyToFile()
+ *   								 Modified method verifyArrayPropertyToFile(), see defect S0543643.
+ *   <br>	JAN 12, 2009	(LeiWang)Modify method performScorll() to support FLEX application
+ *   <br>	JAN 20, 2009    (JunwuMa)Modify methods findMenuBars, selectMenuItem, matchedPathOfMenuItem and verifyMenuItem to support keywords on FLEX menu bar.
+ *   <br>	FEB 20, 2009	(JunwuMa)Modify inputkeys() to support FLEX for keywords Inputkeys and InputCharacters.
+ *   <br>   MAY 01, 2009    (Carl Nagle) Adding Float value support for numeric parameters.
+ *   <br>   JUN 12, 2009    (LeiWang)Modify method:findMenuBars(),matchedPathOfMenuItem(),selectMenuItem(),verifyMenuItem().
+ *    								 For supporting the menu (type is .Menubar) of win domain.
+ *   <br>   JUN 30, 2009    (Girish Kolapkar) Added LeftDrag variations using MouseModifiers
+ *   <br>   NOV 03, 2009    (JunwuMa)Added method findMenuBarsForWPF() as a workaround for finding the menu bars of a DotNet WPF application.
+ *   <br>   NOV 12, 2009    (Carl Nagle) Attempt to catch Exceptions resulting from intended Window closures.
+ *   <br>   FEB 05, 2010    (Carl Nagle) Adding SendEvent support for Flex. FlexObjectTestObject.performAction() is 
+ *                                   only supported in RFT 8.1 or later.
+ *   <br>	FEB 25, 2010    (JunwuMa)Added keywords GetTextFromGUI and SaveTextFromGUI for detecting text on GUI 
+ *                                   using OCR.
+ *   <br>   APR 14, 2010    (JunwuMa)Adding keyword LocateScreenImage for RJ.
+ *   <br>   APR 20, 2010    (LeiWang)Modify method action_GetSaveTextFromGUI(): use static method of OCREngine to get
+ *                                   an OCR engine to use.
+ *   <br>   JUN 30, 2011	(Dharmesh4) Added new Keyword MouseClick for RJ. 
+ *   <br>   SEP 07, 2015    (Lei Wang) Correct a typo, change method preformDrag to performDrag. Modify comments: developer history will not show in java doc.
+ **/
 package org.safs.rational;
 
 import java.awt.AWTError;
@@ -67,68 +130,10 @@ import com.rational.test.ft.script.SubitemFactory;
 import com.rational.test.ft.value.MethodInfo;
 
 /**
- * CFComponent, process a generic component.
- *
- * As of OCT 31, 2005 there is a new Java JAI dependency added for compiling the
- * code or using the GetGUIImage command.  The download for JAI can be found at:
- * <pre>
- *     http://java.sun.com/products/java-media/jai/
- * </pre>
- * The build requires the following JAR files be in the build path:
- * <pre>
- *     jai_core.jar
- *     jai_codec.jar
- * </pre>
- * To actually use the new command and other future image related commands the
- * developer and\or user will need to install the Java JAI support if it does
- * not become part of our standard install.
- * <p>
- * @author  Doug Bauman
- * @since   JUN 04, 2003
- *
- *   <br>   AUG 19, 2003    (DBauman) Original Release
- *   <br>   SEP 02, 2005    (Bob Lawler) reverting to previous code w/ some
- *                            cosmetic cleanup.  Also commented out call to
- *                            getGuiImage() as it is clearly not working (RJl).
- *   <br>   OCT 17, 2005    (Carl Nagle) Added DoubleClick Support
- *   <br>   OCT 28, 2005    (Carl Nagle) Refactored for click variant extensions
- *   <br>   OCT 31, 2005    (Carl Nagle) Adding a generic GetGUIIMage submitted by
- *                                   Bob Lawler.  Adds a new Java JAI dependency.
- *   <br>   AUG 08, 2006    (PHSABO) Moved getSubAreaRectangle and getClippedSubAreaRectangle
- *   								 helper functions to Processor superclass.
- *   <br>   MAR 11, 2008    (JunwuMa)Added HoverMouse,CtrlClick,CtrlRightClick and ShiftClick support
- *   <br>   MAR 11, 2008    (LeiWang)Added SetPropertyValue, VerifyGUIImageToFile support
- *   <br>   MAR 26, 2008    (LeiWang)Modified GetGuiImage, VerifyGUIImageToFile
- * 	 <br>   MAR 26, 2008    (LeiWang)Added HScrollTo, VScrollTo
- *   <br>   APR 21, 2008    (JunwuMa)Added SelectMenuItem, SelectMenuItemContains
- *   <br>                            VerifyMenuItem, VerifyMenuItemContains 
- *   <br>   APR 22, 2008    (JunwuMa)Added SetPosition 
- *   <br>   MAY 8,  2008    (JunwuMa)Added LeftDrag and RightDrag
- *   <br>   JUL 11, 2008	(LeiWang)Add static method isJavaDomain(), isDotnetDomain(), isHtmlDomain(), isWinDomain(), isSwtDomain()
- *   <br>   JUL 31, 2008	(LeiWang)Modify method verifyMenuItem(),selectMenuItem()
- *   								 Add method findMenuBars()
- *   <br>	AUG 11, 2008	(LeiWang)Modify method performScorll() to support .NET application
- *   <br>   AUG 11, 2008    (JunwuMa)Add .NET support for setPropertyValue,CaptureObjectDataToFile and VerifyObjectDataToFile.
- *   <br>	NOV 11, 2008	(LeiWang)Added method getAbsolutFileName(),capturePropertyToFile()
- *   								 Modified method verifyArrayPropertyToFile(), see defect S0543643.
- *   <br>	JAN 12, 2009	(LeiWang)Modify method performScorll() to support FLEX application
- *   <br>	JAN 20, 2009    (JunwuMa)Modify methods findMenuBars, selectMenuItem, matchedPathOfMenuItem and verifyMenuItem to support keywords on FLEX menu bar.
- *   <br>	FEB 20, 2009	(JunwuMa)Modify inputkeys() to support FLEX for keywords Inputkeys and InputCharacters.
- *   <br>   MAY 01, 2009    (Carl Nagle) Adding Float value support for numeric parameters.
- *   <br>   JUN 12, 2009    (LeiWang)Modify method:findMenuBars(),matchedPathOfMenuItem(),selectMenuItem(),verifyMenuItem().
- *    								 For supporting the menu (type is .Menubar) of win domain.
- *   <br>   JUN 30, 2009    (Girish Kolapkar) Added LeftDrag variations using MouseModifiers
- *   <br>   NOV 03, 2009    (JunwuMa)Added method findMenuBarsForWPF() as a workaround for finding the menu bars of a DotNet WPF application.
- *   <br>   NOV 12, 2009    (Carl Nagle) Attempt to catch Exceptions resulting from intended Window closures.
- *   <br>   FEB 05, 2010    (Carl Nagle) Adding SendEvent support for Flex. FlexObjectTestObject.performAction() is 
- *                                   only supported in RFT 8.1 or later.
- *   <br>	FEB 25, 2010    (JunwuMa)Added keywords GetTextFromGUI and SaveTextFromGUI for detecting text on GUI 
- *                                   using OCR.
- *   <br>   APR 14, 2010    (JunwuMa)Adding keyword LocateScreenImage for RJ.
- *   <br>   APR 20, 2010    (LeiWang)Modify method action_GetSaveTextFromGUI(): use static method of OCREngine to get
- *                                   an OCR engine to use.
- *   <br>   JUN30, 2011	    (Dharmesh4) Added new Keyword MouseClick for RJ. 
- ***/
+ * CFComponent, process a generic component to handle 
+ * <a href="http://safsdev.github.io/sqabasic2000/GenericMasterFunctionsIndex.htm">Generic Master Keywords</a>
+ * and <a href="http://safsdev.github.io/sqabasic2000/GenericObjectFunctionsIndex.htm">Generic Object Keywords</a><br>
+ **/
 public class CFComponent extends ComponentFunction {
 
   protected Script script;
@@ -503,12 +508,12 @@ public class CFComponent extends ComponentFunction {
   }
  
   /**
-   * preform LeftDrag or RightDrag on component moving from (x1,y1) to (x2,y2).
+   * perform LeftDrag or RightDrag on component moving from (x1,y1) to (x2,y2).
    * Format: "T,SwingApp,component,LeftDrag,"Coords=x1;y1;x2;y2" 
    * @exception SAFSException
    */
-  protected void preformDrag() throws SAFSException{
-      String debugInf = getClass().getName()+".preformDrag() ";
+  protected void performDrag() throws SAFSException{
+      String debugInf = StringUtils.debugmsg(false);
       if (params.size()<1) {
             paramsFailedMsg(windowName, compName);  
             return;
@@ -553,42 +558,38 @@ public class CFComponent extends ComponentFunction {
             	  guiObj.dragToScreenPoint(Script.LEFT,point1,point2); 
               else
             	  guiObj.drag(Script.LEFT,point1,point2);
-          }else      	  
-          if (action.equalsIgnoreCase(SHIFTLEFTDRAG)){ 
+          }else if (action.equalsIgnoreCase(SHIFTLEFTDRAG)){ 
         	  if (useScreenCoords ) 
         		  guiObj.dragToScreenPoint(Script.SHIFT_LEFT,point1,point2); 
               else
             	  guiObj.drag(Script.SHIFT_LEFT,point1,point2);
-          }
-          if (action.equalsIgnoreCase(CTRLSHIFTLEFTDRAG)){ 
+          }else if (action.equalsIgnoreCase(CTRLSHIFTLEFTDRAG)){ 
         	  if (useScreenCoords ) 
         		  guiObj.dragToScreenPoint(Script.CTRL_SHIFT_LEFT,point1,point2); 
               else
             	  guiObj.drag(Script.CTRL_SHIFT_LEFT,point1,point2);
-          }
-          if (action.equalsIgnoreCase(CTRLLEFTDRAG)){ 
+          }else if (action.equalsIgnoreCase(CTRLLEFTDRAG)){ 
         	  if (useScreenCoords ) 
         		  guiObj.dragToScreenPoint(Script.CTRL_LEFT,point1,point2); 
               else
             	  guiObj.drag(Script.CTRL_LEFT,point1,point2);
-          }
-          if (action.equalsIgnoreCase(ALTLEFTDRAG)){ 
+          }else if (action.equalsIgnoreCase(ALTLEFTDRAG)){ 
         	  if (useScreenCoords ) 
         		  guiObj.dragToScreenPoint(Script.ALT_LEFT,point1,point2); 
               else
             	  guiObj.drag(Script.ALT_LEFT,point1,point2);
-          }	  
-          if (action.equalsIgnoreCase(CTRLALTLEFTDRAG)){ 
+          }else if (action.equalsIgnoreCase(CTRLALTLEFTDRAG)){ 
         	  if (useScreenCoords ) 
         		  guiObj.dragToScreenPoint(Script.CTRL_ALT_LEFT,point1,point2); 
               else
             	  guiObj.drag(Script.CTRL_ALT_LEFT,point1,point2);
-          }	  
-          if (action.equalsIgnoreCase(RIGHTDRAG)){          
+          }else if (action.equalsIgnoreCase(RIGHTDRAG)){          
               if (useScreenCoords ) 
             	  guiObj.dragToScreenPoint(Script.RIGHT,point1,point2); 
               else
             	  guiObj.drag(Script.RIGHT,point1,point2);
+          }else{
+        	  throw new SAFSException(action+" Not supported yet.", SAFSException.CODE_ACTION_NOT_SUPPORTED);
           }
           
           testRecordData.setStatusCode(StatusCodes.OK);
