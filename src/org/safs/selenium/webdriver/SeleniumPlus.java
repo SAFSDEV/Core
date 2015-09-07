@@ -50,6 +50,8 @@ package org.safs.selenium.webdriver;
  *  <br>   JUL 24, 2015    (Lei Wang) Add GetURL, SaveURLToFile, VerifyURLContent, VerifyURLToFile in Misc.
  *  <br>   AUG 17, 2015    (DHARMESH4) Add SetFocus call in Window.
  *  <br>   AUG 20, 2015    (Carl Nagle) Document -Dtestdesigner.debuglogname support in main().
+ *  <br>   SEP 07, 2015    (Lei Wang) Add method DragTo(): parameter 'offset' will also support pixel format; 
+ *                                                       optional parameter 'FromSubItem' and 'ToSubItem' are not supported yet.
  */
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
@@ -716,6 +718,41 @@ public abstract class SeleniumPlus {
 		 */		
 		public static boolean ClearCache(org.safs.model.Component comp){
 			return action(comp, GenericMasterFunctions.CLEARCACHE_KEYWORD);
+		}
+
+		/**
+		 * A left mouse drag is performed from one object to another object based on the offsets values. 
+		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericObjectFunctionsReference.htm#detail_DragTo">Detailed Reference</a>
+		 * @param from Component, the component (from App Map) relative to which to calculate start coordinates to drag
+		 * @param to Component, the component (from App Map) relative to which to calculate end coordinates to drag
+		 * @param params optional<ul>
+		 * <b>params[0] offsets</b> String, indicating the offset relative to component in percentage or in pixel, 
+		 *                                  like "20%,10%, %50, %60", "30, 55, 70, 80", or even "20%,10%, 70, 80".
+		 *                                  If not provided, then "50%, 50%, 50%, 50%" will be used as default value, 
+		 *                                  which means the drag point is the center of the component.<br>
+		 * <b>params[1] fromSubItem</b> String, as text. e.g tree node or list item or any sub main component's item.<br>
+		 * <b>params[2] toSubItem</b> String, as text. e.g tree node or list item or any sub main component item.<br>
+		 * </ul>
+		 * @return true if successfully executed, false otherwise.<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example	 
+		 * <pre>
+		 * {@code
+		 * boolean success = DragTo(Map.Google.Apps, Map.Google.Area);//Left-Drag from center of component Map.Google.Apps to center of component Map.Google.Area
+		 * boolean success = DragTo(Map.Google.Apps, Map.Google.Area, "20%,10%, %50, %60");//Left-Drag from (20%,10%) of component Map.Google.Apps to (%50, %60) of component Map.Google.Area
+		 * //one of the above and then,
+		 * int rc = prevResults.getStatusCode();      // if useful
+		 * String info = prevResults.getStatusInfo(); // if useful
+		 * }
+		 * 
+		 * </pre>	 
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 */
+		public static boolean DragTo(org.safs.model.Component from, org.safs.model.Component to, String... optionals){
+			String parentNameOfDestination = to.getParentName()==null? to.getName():to.getParentName();
+			return action(from, GenericObjectFunctions.DRAGTO_KEYWORD, combineParams(replaceSeparator(optionals), parentNameOfDestination, to.getName()));
 		}
 
 		/**
