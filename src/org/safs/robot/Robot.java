@@ -2,6 +2,19 @@
  * Copyright (C) SAS Institute. All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
+
+/**
+ * Developer history:
+ * 
+ * <br> JunwuMa SEP 23, 2008  Added doEvents(Robot, Vector) running RobotClipboardPasteEvent with proper delay time
+ *                            for ctrl+v(paste) job done. 
+ * <br> Carl Nagle  MAR 25, 2009  Added MouseDrag support
+ * <br> Carl Nagle  APR 03, 2009  Enhance MouseDrag support to work for more apps.
+ * <br> LeiWang JUL 04, 2011  Add methods to maximize, minimize, restore, close window by key-mnemonic.
+ * <br> LeiWang JAN 04, 2015  Add method mouseWheel().
+ * <br> Carl Nagle  MAY 29, 2015  Add support for setMillisBetweenKeystrokes
+ * <br> LeiWang SEP 08, 2015  Modify mouseDrag(): after mouse down, we should move slightly to mimic the drag.
+ */
 package org.safs.robot;
 
 import java.awt.AWTException;
@@ -40,19 +53,14 @@ import org.safs.tools.stringutils.StringUtilities;
  * @see org.safs.tools.input.CreateUnicodeMap
  * @see org.safs.tools.input.InputKeysParser
  * 
- * <br> JunwuMa SEP 23, 2008  Added doEvents(Robot, Vector) running RobotClipboardPasteEvent with proper delay time
- *                            for ctrl+v(paste) job done. 
- * <br> Carl Nagle  MAR 25, 2009  Added MouseDrag support
- * <br> Carl Nagle  APR 03, 2009  Enhance MouseDrag support to work for more apps.
- * <br> LeiWang JUL 04, 2011  Add methods to maximize, minimize, restore, close window by key-mnemonic.
- * <br> LeiWang JAN 04, 2015  Add method mouseWheel().
- * <br> Carl Nagle  MAY 29, 2015  Add support for setMillisBetweenKeystrokes
  */
 public class Robot {
 	
-	static java.awt.Robot robot = null;
-	static InputKeysParser keysparser = null;
-	static int millisBetweenKeystrokes = 1;
+	private static java.awt.Robot robot = null;
+	private static InputKeysParser keysparser = null;
+	private static int millisBetweenKeystrokes = 1;
+	private static Point dragStartPointOffset = new Point(3, 3);
+	private static Point dragEndPointOffset = new Point(-3, -3);
 	
 	public final static Dimension SCREENSZIE = Toolkit.getDefaultToolkit().getScreenSize();
 	
@@ -65,6 +73,26 @@ public class Robot {
 	 */
 	public static void setMillisBetweenKeystrokes(int msBetween){
 		millisBetweenKeystrokes = msBetween >= 0 ? msBetween : millisBetweenKeystrokes;
+	}
+	/**
+	 * Set the offset from the start point for dragging. The object will be firstly
+	 * dragged to the position (startPoint+dragStartPointOffset)
+	 * @param offsetx int, offset in x-axis
+	 * @param offsety int, offset in y-axis 
+	 * @see #mouseDrag(Point, Point, int)
+	 */
+	public static void setDragStartPointOffset(int offsetx, int offsety){
+		dragStartPointOffset = new Point(offsetx, offsety);
+	}
+	/**
+	 * Set the offset from the end point for dragging. The object will be firstly
+	 * dragged to the position (endPoint+dragEndPointOffset)
+	 * @param offsetx int, offset in x-axis
+	 * @param offsety int, offset in y-axis 
+	 * @see #mouseDrag(Point, Point, int)
+	 */
+	public static void setDragEndPointOffset(int offsetx, int offsety){
+		dragEndPointOffset = new Point(offsetx, offsety);
 	}
 	
 	/**
@@ -400,13 +428,13 @@ public class Robot {
 	public static Object mouseDrag(java.awt.Point start, java.awt.Point end, int buttonMasks) throws java.awt.AWTException{
 		java.awt.Robot bot = getRobot();
 		Log.info("Robot mouseDrag from:"+ start +" to:"+ end +" using button mask "+ buttonMasks);
-		bot.mouseMove(start.x+1, start.y+1);
-		bot.delay(150);
 		bot.mouseMove(start.x, start.y);
 		bot.delay(400);
 		bot.mousePress(buttonMasks);
 		bot.delay(400);
-		bot.mouseMove(end.x-1, end.y-1);
+		bot.mouseMove(start.x+dragStartPointOffset.x, start.y+dragStartPointOffset.y);
+		bot.delay(150);
+		bot.mouseMove(end.x+dragEndPointOffset.x, end.y+dragEndPointOffset.y);
 		bot.delay(150);
 		bot.mouseMove(end.x, end.y);
 		bot.delay(800);
