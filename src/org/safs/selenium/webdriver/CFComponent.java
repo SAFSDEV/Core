@@ -109,7 +109,29 @@ public class CFComponent extends ComponentFunction{
 			//If check the GUI's existence, don't waste time to wait here. waitForObject() will be called later.
 			//If action is GUILess, NO window/component to wait.
 			Log.debug(debugmsg +" action '"+action+"' is GUILess or CheckGUIExistence, don't need to wait GUI.");
-
+			if(action.equalsIgnoreCase(GenericMasterFunctions.TYPEKEYS_KEYWORD)|| 
+			   action.equalsIgnoreCase(GenericMasterFunctions.TYPECHARS_KEYWORD)) {
+				String keystrokes = null;
+				try {
+					iterator = params.iterator();
+					if(!iterator.hasNext()){
+						issueParameterValueFailure("TextValue");
+					}else{
+						keystrokes = iterator.next();
+						Log.debug(debugmsg+" processing command '"+action+"' with TextValue "+keystrokes);
+						if(action.equalsIgnoreCase(GenericMasterFunctions.TYPEKEYS_KEYWORD)){
+							WDLibrary.inputKeys(null, keystrokes);									
+						}else{
+							WDLibrary.inputChars(null, keystrokes);
+						}
+						issuePassedSuccessUsing(keystrokes);
+					}
+				} catch (Exception e) {
+					Log.error(debugmsg+"SeleniumPlus Error processing '"+action+"'.", e);
+					issueErrorPerformingActionUsing(keystrokes, e.getClass().getSimpleName()+", "+ e.getMessage());
+				}
+				return;
+			}
 		}else{
 			if(winObject==null){
 					String winRec = null;
@@ -167,19 +189,19 @@ public class CFComponent extends ComponentFunction{
 				// do the work
 				localProcess();
 
-				if (testRecordData.getStatusCode() == StatusCodes.SCRIPT_NOT_EXECUTED &&
-					action != null && 
-					action.equalsIgnoreCase(WindowFunctions.SETFOCUS_KEYWORD)) {
-					try{								
-						Log.debug(debugmsg+" processing command '"+action+"' with parameters "+params);
-						iterator = params.iterator();
-					    _setFocus();	
-					}catch(SAFSException e){
-						Log.error(debugmsg+"SeleniumPlus Error processing '"+action+"'.", e);
-						testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
-						String msg = getStandardErrorMessage(windowName +":"+ compName +" "+ action);
-						String detail = "Met Exception "+e.getMessage();
-						log.logMessage(testRecordData.getFac(),msg, detail, FAILED_MESSAGE);
+				if (testRecordData.getStatusCode() == StatusCodes.SCRIPT_NOT_EXECUTED && action != null){
+					if(action.equalsIgnoreCase(WindowFunctions.SETFOCUS_KEYWORD)) {
+						try{								
+							Log.debug(debugmsg+" processing command '"+action+"' with parameters "+params);
+							iterator = params.iterator();
+						    _setFocus();	
+						}catch(SAFSException e){
+							Log.error(debugmsg+"SeleniumPlus Error processing '"+action+"'.", e);
+							testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
+							String msg = getStandardErrorMessage(windowName +":"+ compName +" "+ action);
+							String detail = "Met Exception "+e.getMessage();
+							log.logMessage(testRecordData.getFac(),msg, detail, FAILED_MESSAGE);
+						}
 					}
 				}										
 			} catch (SeleniumPlusException ignore) {
