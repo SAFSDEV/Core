@@ -93,6 +93,7 @@ import org.safs.model.commands.ScrollBarFunctions;
 import org.safs.model.commands.TabControlFunctions;
 import org.safs.model.commands.TreeViewFunctions;
 import org.safs.model.commands.WindowFunctions;
+import org.safs.model.components.GenericObject;
 import org.safs.model.tools.EmbeddedHookDriverRunner;
 import org.safs.selenium.webdriver.lib.SelectBrowser;
 import org.safs.selenium.webdriver.lib.SeleniumPlusException;
@@ -884,6 +885,37 @@ public abstract class SeleniumPlus {
 		}
 		
 		/**
+		 * Sends AWT Robot keystrokes to whatever currently has keyboard focus.  
+		 * This is intended to work for both local and remote Selenium Servers (when Remote RMI is properly enabled).
+		 * <p>
+		 * This supports special key characters like:
+		 * <p><pre>
+		 *     {Enter} = ENTER Key
+		 *     {Tab} = TAB Key
+		 *     ^ = CONTROL Key with another key ( "^s" = CONTROL + s )
+		 *     % = ALT Key with another key ( "%F" = ALT + F )
+		 *     + = SHIFT Key with another key ( "+{Enter}" = SHIFT + ENTER )  
+		 * </pre>
+		 * We are generally providing special key support through our generic <a href="http://safsdev.sourceforge.net/doc/org/safs/tools/input/CreateUnicodeMap.html">InputKeys Support</a>.
+		 * <p>
+		 * @param textvalue -- to send via Robot to the current keyboard focus.
+		 * @return
+		 * @see #TypeChars(String)
+		 * @see org.safs.selenium.webdriver.lib.WDLibrary#inputKeys(WebElement,String)
+		 * @see SeleniumPlus#quote(String)
+		 * @example	 
+		 * <pre>
+		 * {@code
+		 * Component.TypeKeys(quote("^a"));//"Ctrl+a" Select all text of this EditBox
+		 * }
+		 * </pre>
+		 */
+		public static boolean TypeKeys(String textvalue){
+			String[] parms = textvalue == null ? new String[0] : new String[]{textvalue};
+			return action(new GenericObject("CurrentWindow", "CurrentWindow"), GenericMasterFunctions.TYPEKEYS_KEYWORD, parms);
+		}
+		
+		/**
 		 * Sends key characters to the specified Component.
 		 * <p>
 		 * @param comp -- Component (from App Map).  
@@ -902,6 +934,29 @@ public abstract class SeleniumPlus {
 		 */
 		public static boolean InputCharacters(org.safs.model.Component comp, String textvalue){
 			return action(comp, GenericMasterFunctions.INPUTCHARACTERS_KEYWORD, textvalue);
+		}
+		
+		/**
+		 * Sends key characters to the current keyboard focus via AWT Robot.  
+		 * This is intended to work for both local and remote Selenium Servers (when Remote RMI is properly enabled).
+		 * <p>
+		 * @param textvalue -- to send via input by AWT Robot.
+		 * @return
+		 * @see #TypeKeys(String)
+		 * @see org.safs.selenium.webdriver.lib.WDLibrary#inputChars(WebElement,String)
+		 * @see SeleniumPlus#quote(String)
+		 * @example
+		 * <pre>
+		 * {@code
+		 * Component.TypeChars("Test Value");
+		 * Component.TypeChars(quote("UTF-8"));
+		 * Component.TypeChars(quote("^NotVariable"));
+		 * }
+		 * </pre>
+		 */
+		public static boolean TypeChars(String textvalue){
+			String[] parms = textvalue == null ? new String[0] : new String[]{textvalue};
+			return action(new GenericObject("CurrentWindow", "CurrentWindow"), GenericMasterFunctions.TYPECHARS_KEYWORD, parms);
 		}
 		
 		/**
