@@ -120,7 +120,7 @@ public class SelectBrowser {
 	public static final String KEY_GRID_NODES_SETTING = SYSTEM_PROPERTY_SELENIUM_NODE;
 	
 	/**'<b>explorer</b>'*/
-	public static final String BROWSER_NAME_IE = "explorer";
+	public static final String BROWSER_NAME_IE = "internet explorer";
 	/**'<b>chrome</b>'*/
 	public static final String BROWSER_NAME_CHROME = "chrome";
 	/**'<b>firefox</b>'*/
