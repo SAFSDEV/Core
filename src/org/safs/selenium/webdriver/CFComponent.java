@@ -12,6 +12,7 @@
  *   <br>   SEP 15, 2014    (SBJLWA) Modify showComponentAsMuchPossible(): before scrolling, check if the component is fully shown.
  *   <br>   MAY 18, 2015    (SBJLWA) Add refresh(): Try to refresh a stale WebElement.
  *   <br>   JUL 24, 2015    (SBJLWA) Add refresh(boolean): call it in localProcess to refresh WebElement if it is stale.
+ *   <br>   SEP 07, 2015    (SBJLWA) Add method dragTo().
  */
 package org.safs.selenium.webdriver;
 
@@ -42,10 +43,10 @@ import org.safs.SAFSException;
 import org.safs.StatusCodes;
 import org.safs.StringUtils;
 import org.safs.image.ImageUtils;
-import org.safs.model.commands.CheckBoxFunctions;
 import org.safs.model.commands.GenericMasterFunctions;
+import org.safs.model.commands.GenericObjectFunctions;
 import org.safs.model.commands.WindowFunctions;
-import org.safs.selenium.webdriver.lib.CheckBox;
+import org.safs.robot.Robot;
 import org.safs.selenium.webdriver.lib.Component;
 import org.safs.selenium.webdriver.lib.Json;
 import org.safs.selenium.webdriver.lib.SeleniumPlusException;
@@ -108,7 +109,29 @@ public class CFComponent extends ComponentFunction{
 			//If check the GUI's existence, don't waste time to wait here. waitForObject() will be called later.
 			//If action is GUILess, NO window/component to wait.
 			Log.debug(debugmsg +" action '"+action+"' is GUILess or CheckGUIExistence, don't need to wait GUI.");
-
+			if(action.equalsIgnoreCase(GenericMasterFunctions.TYPEKEYS_KEYWORD)|| 
+			   action.equalsIgnoreCase(GenericMasterFunctions.TYPECHARS_KEYWORD)) {
+				String keystrokes = null;
+				try {
+					iterator = params.iterator();
+					if(!iterator.hasNext()){
+						issueParameterValueFailure("TextValue");
+					}else{
+						keystrokes = iterator.next();
+						Log.debug(debugmsg+" processing command '"+action+"' with TextValue "+keystrokes);
+						if(action.equalsIgnoreCase(GenericMasterFunctions.TYPEKEYS_KEYWORD)){
+							WDLibrary.inputKeys(null, keystrokes);									
+						}else{
+							WDLibrary.inputChars(null, keystrokes);
+						}
+						issuePassedSuccessUsing(keystrokes);
+					}
+				} catch (Exception e) {
+					Log.error(debugmsg+"SeleniumPlus Error processing '"+action+"'.", e);
+					issueErrorPerformingActionUsing(keystrokes, e.getClass().getSimpleName()+", "+ e.getMessage());
+				}
+				return;
+			}
 		}else{
 			if(winObject==null){
 					String winRec = null;
@@ -166,19 +189,19 @@ public class CFComponent extends ComponentFunction{
 				// do the work
 				localProcess();
 
-				if (testRecordData.getStatusCode() == StatusCodes.SCRIPT_NOT_EXECUTED &&
-					action != null && 
-					action.equalsIgnoreCase(WindowFunctions.SETFOCUS_KEYWORD)) {
-					try{								
-						Log.debug(debugmsg+" processing command '"+action+"' with parameters "+params);
-						iterator = params.iterator();
-					    _setFocus();	
-					}catch(SAFSException e){
-						Log.error(debugmsg+"SeleniumPlus Error processing '"+action+"'.", e);
-						testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
-						String msg = getStandardErrorMessage(windowName +":"+ compName +" "+ action);
-						String detail = "Met Exception "+e.getMessage();
-						log.logMessage(testRecordData.getFac(),msg, detail, FAILED_MESSAGE);
+				if (testRecordData.getStatusCode() == StatusCodes.SCRIPT_NOT_EXECUTED && action != null){
+					if(action.equalsIgnoreCase(WindowFunctions.SETFOCUS_KEYWORD)) {
+						try{								
+							Log.debug(debugmsg+" processing command '"+action+"' with parameters "+params);
+							iterator = params.iterator();
+						    _setFocus();	
+						}catch(SAFSException e){
+							Log.error(debugmsg+"SeleniumPlus Error processing '"+action+"'.", e);
+							testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
+							String msg = getStandardErrorMessage(windowName +":"+ compName +" "+ action);
+							String detail = "Met Exception "+e.getMessage();
+							log.logMessage(testRecordData.getFac(),msg, detail, FAILED_MESSAGE);
+						}
 					}
 				}										
 			} catch (SeleniumPlusException ignore) {
@@ -779,9 +802,14 @@ public class CFComponent extends ComponentFunction{
 		}
 		return false;
 	}
-	
-	protected void preformDrag() throws SAFSException{
-		String debugInf = getClass().getName()+".preformDrag() ";
+
+	/**
+	 * perform LeftDrag or RightDrag on component moving from (x1,y1) to (x2,y2).
+	 * Format: "T,SwingApp,component,LeftDrag,"Coords=x1;y1;x2;y2" 
+	 * @exception SAFSException
+	 */
+	protected void performDrag() throws SAFSException{
+		String debugInf = StringUtils.debugmsg(false);
 		if (params.size()<1) {
 			paramsFailedMsg(windowName, compName);  
 			return;
@@ -826,6 +854,57 @@ public class CFComponent extends ComponentFunction{
 
 		} catch (Exception e) {
 			Log.debug(debugInf+e.getMessage());
+			testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
+			componentFailureMessage(e.getMessage());
+		}       
+	}
+	/**
+	 * perform dragTo from component1 to component2 with offset.
+	 * @exception SAFSException
+	 */
+	protected void dragTo() throws SAFSException{
+		String debugmsg = StringUtils.debugmsg(false);
+		if (params.size()<2) {
+			paramsFailedMsg(windowName, compName);  
+			return;
+		}
+		
+		try{
+			String toWindow = (String)iterator.next();
+			String toComponent = (String)iterator.next();
+			
+			IndependantLog.debug("Original component is '"+windowName+":"+compName+"'");
+			IndependantLog.debug("Before getting '"+toWindow+":"+toComponent+"', TestRecordData: "+testRecordData);
+			//BE CAREFUL!!! This calling (wdUtils.getTestObject) may change the testRecordData object!!!
+			WebElement toElement = wdUtils.getTestObject(mapname, toWindow, toComponent, true);
+			IndependantLog.debug("After getting '"+toWindow+":"+toComponent+"', TestRecordData: "+testRecordData);
+			
+			//offset
+			String offset = "50%, 50%, 50%, 50%";
+			if(iterator.hasNext()){
+				offset = (String) iterator.next();
+				offset = getPossibleMapItem(offset);
+			}
+			IndependantLog.debug(debugmsg+" offset is "+offset);
+			String[] offsetArray = StringUtils.convertCoordsToArray(offset, 4);
+			
+			Point p1 = WDLibrary.getElementOffsetScreenLocation(compObject, offsetArray[0], offsetArray[1]);
+			Point p2 = WDLibrary.getElementOffsetScreenLocation(toElement, offsetArray[2], offsetArray[3]);
+			
+			if(action.equalsIgnoreCase(GenericObjectFunctions.DRAGTO_KEYWORD)){
+				Robot.leftDrag(p1, p2);
+			}else{
+				throw new SAFSException("Not supported yet.", SAFSException.CODE_ACTION_NOT_SUPPORTED);
+			}
+			
+			String msg = " :"+action+" from "+p1.toString()+" to "+p2.toString();
+			testRecordData.setStatusCode(StatusCodes.OK);
+			log.logMessage(testRecordData.getFac(),
+					genericText.convert(TXT_SUCCESS_4, altText+msg, windowName, compName, action, msg),
+					PASSED_MESSAGE);	    
+			
+		} catch (Exception e) {
+			Log.debug(debugmsg+StringUtils.debugmsg(e));
 			testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
 			componentFailureMessage(e.getMessage());
 		}       

@@ -28,6 +28,7 @@ package org.safs;
  *   <br>   DEC 12, 2014    (SBJLWA) Add extra parameter "FilteredAreas" for GetGUIImage/VerifyGUIImage.
  *   <br>   JAN 12, 2015    (SBJLWA) Modify some methods issueXXX(): Make comment and code consistent.
  *                                   Modify some methods to give more detail (line number, file name) if keyword fails.
+ *   <br>   SEP 07, 2015    (SBJLWA) Handle DragTo. Correct a typo, change method preformDrag to performDrag.
  */
 import java.awt.AWTException;
 import java.awt.Dimension;
@@ -1676,7 +1677,9 @@ public abstract class ComponentFunction extends Processor{
 					action.equalsIgnoreCase(CTRLLEFTDRAG) ||
 					action.equalsIgnoreCase(ALTLEFTDRAG) ||
 					action.equalsIgnoreCase(CTRLALTLEFTDRAG )) {
-				preformDrag();
+				performDrag();
+			} else if (action.equalsIgnoreCase(GenericObjectFunctions.DRAGTO_KEYWORD)) {
+				dragTo();
 			} else if (action.equalsIgnoreCase(SENDEVENT)) {
 				sendEvent();
 			} else if (action.equalsIgnoreCase(GETTEXTFROMGUI) || 
@@ -2505,7 +2508,10 @@ public abstract class ComponentFunction extends Processor{
 	protected void verifyMenuItem(boolean fuzzy) throws SAFSException {
 		throw new SAFSException("Not supported yet.", SAFSException.CODE_ACTION_NOT_SUPPORTED);
 	}
-	protected void preformDrag() throws SAFSException {
+	protected void performDrag() throws SAFSException {
+		throw new SAFSException("Not supported yet.", SAFSException.CODE_ACTION_NOT_SUPPORTED);
+	}
+	protected void dragTo() throws SAFSException {
 		throw new SAFSException("Not supported yet.", SAFSException.CODE_ACTION_NOT_SUPPORTED);
 	}
 	protected void sendEvent() throws SAFSException {

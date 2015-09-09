@@ -141,16 +141,19 @@ public abstract class AbstractDriver {
 	 */	
 	protected String[] processExpressions(String... parameters){
 		if(parameters instanceof String[] && parameters.length > 0){
-			int i=0;
-			for(String arg: parameters){
-				if(arg.trim().length() > 0) {
-					try{ arg = processExpression(arg);}
-					catch(Throwable ignore){
-						// ignore?
+			String parm = null;
+			for(int i=0;i < parameters.length;i++){
+				parm = parameters[i];
+				try{
+					if(parm.trim().length() > 0){			
+						parameters[i] = processExpression(parm);
 					}
-					parameters[i++] = arg;
-				}else{
-					i++;
+				}catch(NullPointerException np){
+					// if someone passed in a single null String as the array
+					if(i==0 && parameters.length==1){
+						parameters = new String[0];
+						break;
+					}
 				}
 			}
 		}
