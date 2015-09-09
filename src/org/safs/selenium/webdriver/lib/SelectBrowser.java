@@ -120,7 +120,7 @@ public class SelectBrowser {
 	public static final String KEY_GRID_NODES_SETTING = SYSTEM_PROPERTY_SELENIUM_NODE;
 	
 	/**'<b>explorer</b>'*/
-	public static final String BROWSER_NAME_IE = "internet explorer";
+	public static final String BROWSER_NAME_IE = "explorer";
 	/**'<b>chrome</b>'*/
 	public static final String BROWSER_NAME_CHROME = "chrome";
 	/**'<b>firefox</b>'*/
@@ -244,15 +244,15 @@ public class SelectBrowser {
 			System.setProperty(SYSTEM_PROPERTY_WEBDRIVER_IE, "IEDriverServer.exe");
 			caps = DesiredCapabilities.internetExplorer();
 			caps.setCapability("nativeEvents", false);
-			caps.setCapability("browserName", BROWSER_NAME_IE);
+			//caps.setCapability("browserName", BROWSER_NAME_IE);
 		} else if (browserName.equals(BROWSER_NAME_CHROME)) {
 			System.setProperty(SYSTEM_PROPERTY_WEBDRIVER_CHROME, "chromedriver.exe");
 			caps = DesiredCapabilities.chrome();
-			caps.setCapability("browserName", BROWSER_NAME_CHROME);
+			//caps.setCapability("browserName", BROWSER_NAME_CHROME);
 		} else if (browserName.equals(BROWSER_NAME_EDGE)) {
 			System.setProperty(SYSTEM_PROPERTY_WEBDRIVER_EDGE, "MicrosoftWebDriver.exe");
 			caps = DesiredCapabilities.edge();
-			caps.setCapability("browserName", BROWSER_NAME_EDGE);
+			//caps.setCapability("browserName", BROWSER_NAME_EDGE);
 		} else if (browserName.equals(BROWSER_NAME_ANDROID_CHROME)) {
 			System.setProperty(SYSTEM_PROPERTY_WEBDRIVER_CHROME, "chromedriver.exe");
 			caps = DesiredCapabilities.chrome();
