@@ -11,6 +11,7 @@ package org.safs.selenium.webdriver.lib;
  *  <br>   Jul 02, 2015    (Tao Xie) Add inputEditBoxChars(): set the text as the content of EditBox without special key dealing.
  *  <br>                            Add verifyEditBox(): verify the contents of EditBox to the original keys.
  *  <br>                            Change inputEditBox() into inputEditBoxKeys(): set the text as the content of EditBox with special key dealing.
+ *  <br>   SEP 16, 2015    (Lei Wang) Add waitReactOnBrowser(): wait reaction of browser for input keys.
  */
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
@@ -18,6 +19,7 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.safs.IndependantLog;
 import org.safs.StringUtils;
+import org.safs.tools.stringutils.StringUtilities;
 
 public class EditBox extends Component {
 
@@ -122,6 +124,23 @@ public class EditBox extends Component {
 	}
 	
 	/**
+	 * After Robot input keys into a browser, the browser needs time to react. 
+	 * Before that reaction, the EditBox may contain incomplete text. And the
+	 * verification will fail.
+	 */
+	protected void waitReactOnBrowser(String text){
+		String debugmsg = StringUtils.debugmsg(false);
+		try {
+			//We may still need to adjust the time to wait for different situation (string, browser etc.)
+			int waitReactOnBrowser = (text.length()/100+1)*100 + 200;
+			Thread.sleep(waitReactOnBrowser);
+			IndependantLog.debug(debugmsg+" pause '"+waitReactOnBrowser+"' milli seconds to wait browser react to input keys.");
+		} catch (Exception sere) {
+			IndependantLog.warn(debugmsg+" fail to wait browser react to input keys.");
+		}
+	}
+	
+	/**
 	 * <em>Purpose:</em> Compare the contents of EditBox to the original keys,<br>
 	 * If they are same, return true; Otherwise, return false. <br>
 	 * @param keys String, the string to be compared to during verification.
@@ -130,9 +149,10 @@ public class EditBox extends Component {
 	public boolean verifyEditBox(String keys) throws SeleniumPlusException {
 		String debugmsg = getClass().getName() + ".verifyEditBox(): ";		
 		boolean passVerification = false;		
-		String contents;
+		String contents = "";
 		
 		try {
+			waitReactOnBrowser(keys);
 			contents = WDLibrary.getProperty(webelement, ATTRIBUTE_VALUE);
 		} catch (SeleniumPlusException sere) {
 			String msg = "EditBox get property action failed" + "(input value = " + keys + "): caused by " + StringUtils.debugmsg(sere);
