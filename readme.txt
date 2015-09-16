@@ -11,4 +11,4 @@ This repository can be imported in Eclipse a normal Java Project, it depends on
 another project in repository "SAFS-Android-Remote-Control". To set up the 
 development correctly, please refer to document developer_setup.txt.
 
-SEP 16, 20150
+SEP 16, 2015
