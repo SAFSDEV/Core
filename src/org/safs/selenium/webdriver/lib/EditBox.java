@@ -19,7 +19,6 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.safs.IndependantLog;
 import org.safs.StringUtils;
-import org.safs.tools.stringutils.StringUtilities;
 
 public class EditBox extends Component {
 
