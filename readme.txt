@@ -1,14 +1,20 @@
-This repository contains Core codes like services, drivers, engines and hooks etc. 
-Above these framework codes, it also provides sepcial driver like SAFS, JSAFS, 
-SeleniumPlus for handling traditional keywords test record and java test record. 
-It also contains keyword implementation code for different testing tools like 
-"Rational Functional Tester", "Selenium1.0", "Selenium2.0 WebDriver", 
-"ISO UIAutomation", "Android Robotium" etc. There are codes about "Image Based Test",
-"Optical Character Recognition", "Cucumber Test" and "Java Robot Test".
-There are still many other iteresting codes in this repository. 
-The SAFS installation code is also included in this repository.
-This repository can be imported in Eclipse a normal Java Project, it depends on 
-another project in repository "SAFS-Android-Remote-Control". To set up the 
-development correctly, please refer to document developer_setup.txt.
+This repository contains Core codes like services, drivers, engines and hooks etc.
 
-SEP 16, 2015
+On top of the framework code, we also provide special drivers like SAFS, JSAFS, 
+and SeleniumPlus for handling traditional keywords test records and Java API calls. 
+
+The project contains keyword implementation "engines" for different testing tools 
+like "IBM Rational Functional Tester", "Selenium 1.0", "Selenium 2.0 WebDriver", 
+"iOS UIAutomation", "Android Robotium" etc..
+
+There is code for Image-Based Testing, some rudimentary "Optical Character 
+Recognition (OCR)", Cucumber integration, and Java AWT Robot enhancements.
+
+The SAFS installation code is also included in this repository.
+
+This repository can be imported in Eclipse as a normal Java Project. 
+It does have a dependency on another repository: SAFS-Android-Remote-Control 
+
+To set up the development correctly, please refer to document developer_setup.txt.
+
+SEP 17, 2015
