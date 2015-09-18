@@ -2,7 +2,11 @@
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
-
+/**
+ * Developer History:
+ * <br> CANAGL  MAY 29, 2015  Add support for remoteSetKeyDelay
+ * <br> SBJLWA  SEP 18, 2015  Add support for setWaitReaction
+ */
 package org.safs.selenium.rmi.agent;
 
 import java.rmi.RemoteException;
@@ -13,7 +17,6 @@ import java.rmi.server.ObjID;
 
 import org.safs.IndependantLog;
 import org.safs.rmi.engine.RemoteRoot;
-import org.safs.robot.Robot;
 import org.safs.selenium.rmi.server.SeleniumRMIServer;
 import org.safs.selenium.rmi.server.SeleniumServer;
 
@@ -44,7 +47,6 @@ import org.safs.selenium.rmi.server.SeleniumServer;
  * <ul><code>-Dsafs.server.hostname=hostname.company.internal.net</code></ul>
  * </ul>
  * @author canagl MAR 03, 2015 Original Release
- * <br> CANAGL  MAY 29, 2015  Add support for remoteSetKeyDelay
  * @see org.safs.selenium.util.SeleniumServerRunner
  * @see org.safs.selenium.rmi.server.SeleniumRMIServer
  * @see org.safs.selenium.rmi.server.SeleniumServer
@@ -260,6 +262,37 @@ public class SeleniumAgent extends RemoteRoot implements SeleniumRMIAgent{
 	public void remoteSetKeyDelay(int millisDelay) throws ServerException, Exception{
 		String s = separator;
 		server.runCommand(s+ SeleniumServer.CMD_SET_KEY_DELAY +s+ String.valueOf(millisDelay)); 
+	}
+	
+	/**
+	 * Set if wait for reaction to "input keys/chars" for remote server.
+	 * @param wait boolean if wait or not.
+	 * @throws ServerException if the command did not execute successfully
+	 * @see org.safs.robot.Robot#setWaitReaction(boolean)
+	 **/
+	public void remoteWaitReaction(boolean wait) throws ServerException, Exception{
+		String s = separator;
+		server.runCommand(s+ SeleniumServer.CMD_SET_WAIT_REACTION +s+ String.valueOf(wait)); 
+	}
+	/**
+	 * Set if wait for reaction to "input keys/chars" for remote server.
+	 * @param wait boolean, if wait or not.
+	 * @param tokenLength int, the length of a token. Only if the string is longer than this 
+	 *                         then we wait the reaction after input-keys a certain time 
+	 *                         indicated by the parameter dealyForToken.
+	 * @param dealyForToken int, The delay in millisecond to wait the reaction after input-keys 
+	 *                           for the string as long as a token.
+	 * @param dealy int, The constant delay in millisecond to wait the reaction after input-keys.
+	 * @throws ServerException if the command did not execute successfully
+	 * @see org.safs.robot.Robot#setWaitReaction(boolean, int, int, int)
+	 **/
+	public void remoteWaitReaction(boolean wait, int tokenLength, int dealyForToken, int dealy) throws ServerException, Exception{
+		String s = separator;
+		server.runCommand(s+ SeleniumServer.CMD_SET_WAIT_REACTION +
+				          s+ String.valueOf(wait) +
+				          s+ String.valueOf(tokenLength) +
+				          s+ String.valueOf(dealyForToken) +
+				          s+ String.valueOf(dealy)); 
 	}
 	
 	/**
