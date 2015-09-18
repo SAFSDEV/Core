@@ -2,23 +2,28 @@
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
-
+/**
+ * Developer History:
+ * <br> CANAGL  MAY 29, 2015  Add support for setMillisBetweenKeystrokes
+ * <br> SBJLWA  SEP 18, 2015  Add support for setWaitReaction
+ */
 package org.safs.selenium.rmi.server;
 
 import java.awt.AWTException;
 import java.rmi.RemoteException;
 import java.rmi.ServerException;
 import java.rmi.server.ObjID;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
 import org.safs.IndependantLog;
-import org.safs.rmi.engine.Agent;
+import org.safs.SAFSException;
 import org.safs.rmi.engine.RemoteRoot;
 import org.safs.robot.Robot;
-import org.safs.selenium.rmi.agent.SeleniumAgent;
 import org.safs.selenium.rmi.agent.SeleniumRMIAgent;
 import org.safs.selenium.webdriver.lib.WDLibrary;
+import org.safs.tools.stringutils.StringUtilities;
 
 /**
  * Default SAFS SeleniumPlus RMI Server normally embedded inside a remote standalone Selenium Server JVM.
@@ -47,21 +52,21 @@ import org.safs.selenium.webdriver.lib.WDLibrary;
  * <ul><code>-Djava.rmi.server.hostname=hostname.company.internal.net</code></ul>
  * </ul>
  * @author canagl MAR 03, 2015 Original Release
- * <br> CANAGL  MAY 29, 2015  Add support for setMillisBetweenKeystrokes
  * @see org.safs.selenium.util.SeleniumServerRunner
  * @see org.safs.selenium.rmi.agent.SeleniumRMIAgent
  * @see org.safs.selenium.rmi.agent.SeleniumAgent
  */
 public class SeleniumServer extends RemoteRoot implements SeleniumRMIServer{
 	
-	public static final String CMD_CLICK 			= "CLICK";
-	public static final String CMD_CLICK_WITH_KEY 	= "CLICK-KEY";
-	public static final String CMD_KEYPRESS 		= "KEY-PRESS";
-	public static final String CMD_KEYRELEASE 		= "KEY-RELEASE";
-	public static final String CMD_MOUSEWHEEL 		= "MOUSE-WHEEL";
-	public static final String CMD_TYPEKEYS 		= "TYPE-KEYS";
-	public static final String CMD_TYPECHARS 		= "TYPE-CHARS";
-	public static final String CMD_SET_KEY_DELAY 	= "SET-KEY-DELAY";
+	public static final String CMD_CLICK 				= "CLICK";
+	public static final String CMD_CLICK_WITH_KEY 		= "CLICK-KEY";
+	public static final String CMD_KEYPRESS 			= "KEY-PRESS";
+	public static final String CMD_KEYRELEASE 			= "KEY-RELEASE";
+	public static final String CMD_MOUSEWHEEL 			= "MOUSE-WHEEL";
+	public static final String CMD_TYPEKEYS 			= "TYPE-KEYS";
+	public static final String CMD_TYPECHARS 			= "TYPE-CHARS";
+	public static final String CMD_SET_KEY_DELAY 		= "SET-KEY-DELAY";
+	public static final String CMD_SET_WAIT_REACTION 	= "SET-WAIT-REACTION";
 	
 	private Hashtable agents = new Hashtable();
 	
@@ -302,6 +307,41 @@ public class SeleniumServer extends RemoteRoot implements SeleniumRMIServer{
 	}
 	
 	/**
+	 * {@link Robot#setWaitReaction(boolean)} and {@link Robot#setWaitReaction(boolean, int, int, int)}.
+	 * @param params String[]
+	 * <pre>
+	 * params[0] wait boolean, if wait or not.
+	 * params[1] tokenLength int, the length of a token. Only if the string is longer than this 
+	 *                            then we wait the reaction after input-keys a certain time 
+	 *                            indicated by the parameter dealyForToken.
+	 * params[2] dealyForToken int, The delay in millisecond to wait the reaction after input-keys 
+	 *                              for the string as long as a token.
+	 * params[3] dealy int, The constant delay in millisecond to wait the reaction after input-keys.
+	 * </pre>
+	 * @return An empty String on success.
+	 * @throws ServerException on failure.
+	 * @see Robot#setWaitReaction(boolean)
+	 * @see Robot#setWaitReaction(boolean, int, int, int)
+	 */
+	protected Object setWaitReaction(String[] params) throws ServerException{		
+		try{			
+			IndependantLog.info(remoteType +" performing Robot.setWaitReaction with parameters="+Arrays.toString(params));
+			if(params.length==1){
+				Robot.setWaitReaction(StringUtilities.convertBool(params[0]));
+			}else if(params.length==4){
+				Robot.setWaitReaction(StringUtilities.convertBool(params[0]), Integer.parseInt(params[1]), Integer.parseInt(params[2]), Integer.parseInt(params[3]));
+			}else{
+				throw new SAFSException(" the parameter number is not correct.");
+			}
+		}catch(Exception any){
+			String msg = remoteType +" Robot.setWaitReaction "+any.getClass().getName()+", "+ any.getMessage();
+			IndependantLog.warn(msg);
+			throw new ServerException(msg, any);
+		}
+		return new String();
+	}
+	
+	/**
 	 * Robot.inputKeys(string);
 	 * @param params String[]
 	 * <pre>
@@ -384,6 +424,7 @@ public class SeleniumServer extends RemoteRoot implements SeleniumRMIServer{
 			if(CMD_KEYRELEASE.equalsIgnoreCase(action)) return keyRelease(params);
 			if(CMD_MOUSEWHEEL.equalsIgnoreCase(action)) return mouseWheel(params);
 			if(CMD_SET_KEY_DELAY.equalsIgnoreCase(action)) return setMillisBetweenKeystrokes(params);
+			if(CMD_SET_WAIT_REACTION.equalsIgnoreCase(action)) return setWaitReaction(params);
 		}
 		IndependantLog.warn(remoteType +" does not support command "+ action);
 		throw new ServerException(remoteType +" Unsupported commmand type or parameters.");
