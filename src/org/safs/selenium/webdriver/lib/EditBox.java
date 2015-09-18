@@ -11,7 +11,8 @@ package org.safs.selenium.webdriver.lib;
  *  <br>   Jul 02, 2015    (SCNTAX) Add inputEditBoxChars(): set the text as the content of EditBox without special key dealing.
  *  <br>                            Add verifyEditBox(): verify the contents of EditBox to the original keys.
  *  <br>                            Change inputEditBox() into inputEditBoxKeys(): set the text as the content of EditBox with special key dealing.
- *  <br>   SEP 16, 2015    (SBJLWA) Add waitReactOnBrowser(): wait reaction of browser for input keys.
+ *  <br>   SEP 18, 2015    (SBJLWA) Move the functionality of waitReactOnBrowser() to Robot.
+ *                                  Modify inputEditBoxChars/Keys(): turn on the 'waitReaction' for inputkeys and inputchars.
  */
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
@@ -19,6 +20,7 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.safs.IndependantLog;
 import org.safs.StringUtils;
+import org.safs.robot.Robot;
 
 public class EditBox extends Component {
 
@@ -78,6 +80,7 @@ public class EditBox extends Component {
 		String debugmsg = getClass().getName() + ".inputEditBoxChars(): ";
 				
 		try {
+			WDLibrary.setWaitReaction(true);
 			try {
 				WDLibrary.inputChars(webelement, text);
 			} catch (SeleniumPlusException sere) {
@@ -92,6 +95,8 @@ public class EditBox extends Component {
 			String msg = "EditBox enter action failed" + "(input value = " + text + "): caused by " + StringUtils.debugmsg(e);
 			IndependantLog.debug(debugmsg + msg);
 			throw new SeleniumPlusException(msg);
+		}finally{
+			WDLibrary.setWaitReaction(Robot.DEFAULT_WAIT_REACTION);
 		}
 	}
 	
@@ -106,6 +111,7 @@ public class EditBox extends Component {
 		String debugmsg = getClass().getName() + ".inputEditBoxKeys(): ";
 				
 		try {
+			WDLibrary.setWaitReaction(true);
 			try {
 				WDLibrary.inputKeys(webelement, text);
 			} catch (SeleniumPlusException sere) {
@@ -119,23 +125,8 @@ public class EditBox extends Component {
 			String msg = "EditBox enter action failed" + "(input value = " + text + "): caused by " + StringUtils.debugmsg(e);
 			IndependantLog.debug(debugmsg + msg);
 			throw new SeleniumPlusException(msg);
-		}
-	}
-	
-	/**
-	 * After Robot input keys into a browser, the browser needs time to react. 
-	 * Before that reaction, the EditBox may contain incomplete text. And the
-	 * verification will fail.
-	 */
-	protected void waitReactOnBrowser(String text){
-		String debugmsg = StringUtils.debugmsg(false);
-		try {
-			//We may still need to adjust the time to wait for different situation (string, browser etc.)
-			int waitReactOnBrowser = (text.length()/100+1)*100 + 200;
-			Thread.sleep(waitReactOnBrowser);
-			IndependantLog.debug(debugmsg+" pause '"+waitReactOnBrowser+"' milli seconds to wait browser react to input keys.");
-		} catch (Exception sere) {
-			IndependantLog.warn(debugmsg+" fail to wait browser react to input keys.");
+		}finally{
+			WDLibrary.setWaitReaction(Robot.DEFAULT_WAIT_REACTION);
 		}
 	}
 	
@@ -151,7 +142,6 @@ public class EditBox extends Component {
 		String contents = "";
 		
 		try {
-			waitReactOnBrowser(keys);
 			contents = WDLibrary.getProperty(webelement, ATTRIBUTE_VALUE);
 		} catch (SeleniumPlusException sere) {
 			String msg = "EditBox get property action failed" + "(input value = " + keys + "): caused by " + StringUtils.debugmsg(sere);
