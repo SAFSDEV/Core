@@ -14,6 +14,9 @@
  * <br> LeiWang JAN 04, 2015  Add method mouseWheel().
  * <br> CANAGL  MAY 29, 2015  Add support for setMillisBetweenKeystrokes
  * <br> LeiWang SEP 08, 2015  Modify mouseDrag(): after mouse down, we should move slightly to mimic the drag.
+ * <br> LeiWang SEP 18, 2015  Add waitReaction() and modify inputKeys()/inputChars(): wait reaction of browser
+ *                            for input keys if the switch 'waitReaction' is on.
+ *                            Add method to clear/set/get system clip-board, and testInputKeys().
  */
 package org.safs.robot;
 
@@ -22,6 +25,11 @@ import java.awt.Dimension;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
@@ -33,7 +41,6 @@ import java.util.Iterator;
 import java.util.MissingResourceException;
 import java.util.Vector;
 
-import org.safs.IndependantLog;
 import org.safs.Log;
 import org.safs.SAFSException;
 import org.safs.StringUtils;
@@ -58,11 +65,65 @@ public class Robot {
 	
 	private static java.awt.Robot robot = null;
 	private static InputKeysParser keysparser = null;
+	
 	private static int millisBetweenKeystrokes = 1;
+	
+	/**
+	 * To make mouse drag correctly, after mouse key is pressed down, 
+	 * the mouse needs to be moved slightly so that the drag action will be triggered.<br>
+	 * If the drag action cannot be triggered, this field needs to be modified by 
+	 * method {@link #setDragStartPointOffset(int, int)}.
+	 */
 	private static Point dragStartPointOffset = new Point(3, 3);
 	private static Point dragEndPointOffset = new Point(-3, -3);
 	
 	public final static Dimension SCREENSZIE = Toolkit.getDefaultToolkit().getScreenSize();
+	
+	public static final boolean DEFAULT_WAIT_REACTION = false;
+	/** If wait for reaction to "input keys/chars", the default is false */
+	private static boolean waitReaction = DEFAULT_WAIT_REACTION;
+	/** 
+	 * The length of a token. Only if the string is longer than this 
+	 * then we wait the reaction after input-keys a certain time 
+	 * indicated by waitReactionDelayInMillisecondForToken.
+	 * If the string is several times longer than this token, then we wait several
+	 * times of waitReactionDelayInMillisecondForToken.
+	 */
+	private static int waitReactionTokenLength = 100;
+	/** The delay in millisecond to wait the reaction after input-keys for the string as long as a token. */
+	private static int waitReactionDelayInMillisecondForToken = 100;
+	/** The constant delay in millisecond to wait the reaction after input-keys. */
+	private static int waitReactionDelayInMillisecond = 1000;
+	
+	/** The system clip-board, it is a singleton, we keep it in a static field. */
+	public static final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+	
+	/**
+	 * Set if wait for reaction to "input keys/chars".
+	 * @param wait boolean, if wait or not.
+	 */
+	public static void setWaitReaction(boolean wait){
+		waitReaction = wait;
+	}
+	/**
+	 * Set if wait for reaction to "input keys/chars".
+	 * @param wait boolean, if wait or not.
+	 * @param tokenLength int, the length of a token. Only if the string is longer than this 
+	 *                         then we wait the reaction after input-keys a certain time 
+	 *                         indicated by the parameter dealyForToken.
+	 * @param dealyForToken int, The delay in millisecond to wait the reaction after input-keys 
+	 *                           for the string as long as a token.
+	 * @param dealy int, The constant delay in millisecond to wait the reaction after input-keys.
+	 * @see #waitReactionDelayInMillisecond
+	 * @see #waitReactionDelayInMillisecondForToken
+	 * @see #waitReactionTokenLength
+	 */
+	public static void setWaitReaction(boolean wait, int tokenLength, int dealyForToken, int dealy){
+		waitReaction = wait;
+		waitReactionTokenLength = tokenLength;
+		waitReactionDelayInMillisecondForToken = dealyForToken;
+		waitReactionDelayInMillisecond = dealy;
+	}
 	
 	/**
 	 * Set the delay in milliseconds between Robot key events.
@@ -221,6 +282,7 @@ public class Robot {
 	   	java.awt.Robot bot = getRobot();
 	   	Vector keystrokes = parser.parseInput(input);
 	   	doEvents(bot, keystrokes, millisBetweenKeystrokes);
+	   	waitReaction(input);
 	   	return new Boolean(true);
 	}
 	
@@ -246,7 +308,27 @@ public class Robot {
 	   	java.awt.Robot bot = getRobot();
 	   	Vector keystrokes = parser.parseChars(input);
 	   	doEvents(bot, keystrokes, millisBetweenKeystrokes);
+	   	waitReaction(input);
 	   	return new Boolean(true);
+	}
+	
+	/**
+	 * After Robot input keys/chars into a browser or an application, 
+	 * the browser/application may need time to react. 
+	 * Before that reaction, the EditBox may contain incomplete text.
+	 * And the next test action may fail and the verification will fail too.
+	 */
+	protected static void waitReaction(String text){
+		if(!waitReaction) return;
+		String debugmsg = StringUtils.debugmsg(false);
+		try {
+			//We may still need to adjust the time to wait for different situation (string, browser/application etc.)
+			int waitReactOnBrowser = (text.length()/waitReactionTokenLength)*waitReactionDelayInMillisecondForToken + waitReactionDelayInMillisecond;
+			Thread.sleep(waitReactOnBrowser);
+			Log.debug(debugmsg+" pause '"+waitReactOnBrowser+"' milli seconds to wait reaction to input keys.");
+		} catch (Exception sere) {
+			Log.warn(debugmsg+" fail to wait reaction to input keys.");
+		}
 	}
 	
 	private static void doEvents(java.awt.Robot bot, Vector RobotKeys, int msBetweenEvents){
@@ -263,7 +345,7 @@ public class Robot {
    				//setting ms_delay=50, for the Paste from Clipboard needs to wait until copying Clipboard finished.
    				((RobotClipboardPasteEvent)event).doEvent(bot, pasteDelay);
    			else
-   				((RobotKeyEvent)event).doEvent(bot, msBetweenEvents);	   	
+   				((RobotKeyEvent)event).doEvent(bot, msBetweenEvents);
    		}		
 	}
 
@@ -561,7 +643,7 @@ public class Robot {
 			bot.mouseWheel(wheelAmt);
 			return true;
 		}catch(Throwable th){
-			IndependantLog.error("Met "+StringUtils.debugmsg(th));
+			Log.error("Met "+StringUtils.debugmsg(th));
 			return false;
 		}
 	}
@@ -577,7 +659,7 @@ public class Robot {
 			bot.keyPress(keycode);
 			return true;
 		}catch(Throwable th){
-			IndependantLog.error("Met "+StringUtils.debugmsg(th));
+			Log.error("Met "+StringUtils.debugmsg(th));
 			return false;
 		}
 	}
@@ -593,7 +675,7 @@ public class Robot {
 			bot.keyRelease(keycode);
 			return true;
 		}catch(Throwable th){
-			IndependantLog.error("Met "+StringUtils.debugmsg(th));
+			Log.error("Met "+StringUtils.debugmsg(th));
 			return false;
 		}
 	}
@@ -739,5 +821,106 @@ public class Robot {
 	public static void closeFocusedWindow() throws AWTException{
 		getWindowSystemMenu();
 		robot.keyPress(KeyEvent.VK_C);
+	}
+	
+	/**
+	 * Clear the system clip-board.
+	 */
+	public static void clearClipboard(){
+		clipboard.setContents(new Transferable() {
+		    public DataFlavor[] getTransferDataFlavors() {
+		        return new DataFlavor[0];
+		      }
+
+		      public boolean isDataFlavorSupported(DataFlavor flavor) {
+		        return false;
+		      }
+
+		      public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException {
+		        throw new UnsupportedFlavorException(flavor);
+		      }
+		}, null);
+	}
+	
+	/**
+	 * Set a string value to the clip-board.
+	 * @param content String, the content to set.
+	 */
+	public static void setClipboard(String content){
+		StringSelection ss = new StringSelection(content);
+		clipboard.setContents(ss, ss);
+	}
+	
+	/**
+	 * Get content from system clip-board.
+	 * @param flavor DataFlavor, provides meta information about data.
+	 * @return Object
+	 * @throws SAFSException if there is something wrong.
+	 */
+	public static Object getClipboard(DataFlavor flavor) throws SAFSException{
+		String debugmsg = StringUtils.debugmsg(false);
+		
+		try {
+			return clipboard.getData(flavor);
+		} catch (Exception e) {
+			String msg = "Fail to get content from clipboard, Met "+StringUtils.debugmsg(e);
+			Log.error(debugmsg+msg);
+			throw new SAFSException(msg);
+		}
+	}
+	
+	/**
+	 * Test if the Robot.inputKeys() can put all characters correctly into an edit box.<br>
+	 * Prerequisite: Have an application with Input Box focused<br>
+	 * 
+	 * <br>
+	 * For example, 
+	 * open an IE browser and visit Google page, click the search box to let it have focus,
+	 * and this method will input a long string and verify if the string has been input correctly, it
+	 * will repeat this action in a loop for several times.<br>
+	 * If the IE is opened manually, the test will pass without any problem.<br>
+	 * If the IE is launched by SELENIUM, the test will fail a few times. To start IE by Selenium,<br>
+	 *  1. Start the selenium-standalone-server<br>
+	 *  2. Visit page http://127.0.0.1:4444/wd/hub/<br>
+	 *  3. Click "Create Session", and choose browser as "Internet explorer"<br>
+	 * 
+	 */
+	private static void testInputKeys(){
+		try {
+			//un-comment the clause setWaitReaction() may help to reduce the error in IE browser.
+//			setWaitReaction(true);
+			System.out.println("!!!CLICK your mouse on the box receiving input!!!, You have 10 seconds to do it.");
+			Thread.sleep(2000);
+			String string = ".12345678890qwertyuiopasdfghjkl;'zxcvbnm,./1234567890 cdefghijklmnopqrstuvwxyz 0123456789 0000000 space cannot be consecutive, it will cause error yyyyyyyyyyyyyyyy aaaaaaaaaaaaaaa lllllllllll 00000000000000 aaaaa bbbbb cccc dddd eeee ffff eeee g sss a very very long long string has been input.";
+			String result = null;
+			int loop = 100;
+			String errmsg = "Hello";
+						
+			for(int i=0;i<loop;i++){
+				//Clean the clip-board, we must wait a while before copying current text into the edit box
+				clearClipboard();
+				Thread.sleep(1000);
+				//Input keys to the edit box
+				Robot.inputKeys(string);
+				//Cut the content to set to the clip-board
+				Robot.inputKeys("^a");
+				Robot.inputKeys("^x");
+				//Get the content from the clip-board, we MUST wait a while before the clip-board is set correctly.
+				Thread.sleep(1000);
+				result = (String) getClipboard(DataFlavor.stringFlavor);
+				
+				if(!result.equals(string)){
+					errmsg = i+": fail to input keys:\nresult='"+result+"'\nstring='"+string+"'";
+					System.err.println(errmsg);
+					break;
+				}
+			}
+		} catch (Exception e) {
+			System.err.println("Met Exception."+StringUtils.debugmsg(e));
+		}
+	}
+	
+	public static void main(String[] args){
+		testInputKeys();
 	}
 }
