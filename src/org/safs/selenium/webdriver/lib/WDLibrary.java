@@ -990,6 +990,65 @@ public class WDLibrary extends SearchObject {
 			throw new SeleniumPlusException("Unable to successfully complete setDelayBetweenKeystrokes due to "+ e.getMessage(), e);
 		}
 	}
+	
+	/**
+	 * Set if wait for reaction to "input keys/chars" for both local and remote servers.
+	 * @param wait boolean if wait or not.
+	 * @throws SeleniumPlusException if fail.
+	 * @see org.safs.robot.Robot#setWaitReaction(boolean)
+	 **/
+	public static void setWaitReaction(boolean wait) throws SeleniumPlusException{
+		String debugmsg = StringUtils.debugmsg(false);
+		try {
+			RemoteDriver wd = null;
+			try{ wd = (RemoteDriver) getWebDriver();}catch(Exception x){}
+			if(wd == null || wd.isLocalServer()){
+				IndependantLog.info(debugmsg+" sending SetWaitReaction  '"+String.valueOf(wait)+"' to local Robot.");
+				Robot.setWaitReaction(wait);
+			}else {
+				try{
+					IndependantLog.info(debugmsg+" sending RMI Agent SetWaitReaction '"+String.valueOf(wait)+"' to RMI Server");
+					wd.rmiAgent.remoteWaitReaction(wait);
+				}catch(Exception e){
+					IndependantLog.warn(debugmsg+" Fail RMI Agent SetWaitReaction '"+String.valueOf(wait)+"' due to "+StringUtils.debugmsg(e));
+				}
+			}
+		} catch (Exception e) {
+			throw new SeleniumPlusException("Unable to successfully complete setWaitReaction due to "+ e.getMessage(), e);
+		}
+	}
+	/**
+	 * Set if wait for reaction to "input keys/chars" for both local and remote servers.
+	 * @param wait boolean, if wait or not.
+	 * @param tokenLength int, the length of a token. Only if the string is longer than this 
+	 *                         then we wait the reaction after input-keys a certain time 
+	 *                         indicated by the parameter dealyForToken.
+	 * @param dealyForToken int, The delay in millisecond to wait the reaction after input-keys 
+	 *                           for the string as long as a token.
+	 * @param dealy int, The constant delay in millisecond to wait the reaction after input-keys.
+	 * @throws SeleniumPlusException if fail.
+	 * @see org.safs.robot.Robot#setWaitReaction(boolean, int, int, int)
+	 **/
+	public static void setWaitReaction(boolean wait, int tokenLength, int dealyForToken, int dealy) throws SeleniumPlusException{
+		String debugmsg = StringUtils.debugmsg(false);
+		try {
+			RemoteDriver wd = null;
+			try{ wd = (RemoteDriver) getWebDriver();}catch(Exception x){}
+			if(wd == null || wd.isLocalServer()){
+				IndependantLog.info(debugmsg+" sending SetWaitReaction  '"+String.valueOf(wait)+"' to local Robot.");
+				Robot.setWaitReaction(wait, tokenLength, dealyForToken, dealy);
+			}else {
+				try{
+					IndependantLog.info(debugmsg+" sending RMI Agent SetWaitReaction '"+String.valueOf(wait)+"' to RMI Server");
+					wd.rmiAgent.remoteWaitReaction(wait, tokenLength, dealyForToken, dealy);
+				}catch(Exception e){
+					IndependantLog.warn(debugmsg+" Fail RMI Agent SetWaitReaction '"+String.valueOf(wait)+"' due to "+StringUtils.debugmsg(e));
+				}
+			}
+		} catch (Exception e) {
+			throw new SeleniumPlusException("Unable to successfully complete setWaitReaction due to "+ e.getMessage(), e);
+		}
+	}
 
 	/**
 	 * Does NOT clear any existing text in the control, but does attempt to insure the window/control has focus.
