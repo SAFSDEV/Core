@@ -889,8 +889,8 @@ public class Robot {
 		try {
 			//un-comment the clause setWaitReaction() may help to reduce the error in IE browser.
 //			setWaitReaction(true);
-			System.out.println("!!!CLICK your mouse on the box receiving input!!!, You have 10 seconds to do it.");
-			Thread.sleep(2000);
+			System.out.println("!!!CLICK your mouse on the box receiving input!!!, You have 5 seconds to do it.");
+			Thread.sleep(5000);
 			String string = ".12345678890qwertyuiopasdfghjkl;'zxcvbnm,./1234567890 cdefghijklmnopqrstuvwxyz 0123456789 0000000 space cannot be consecutive, it will cause error yyyyyyyyyyyyyyyy aaaaaaaaaaaaaaa lllllllllll 00000000000000 aaaaa bbbbb cccc dddd eeee ffff eeee g sss a very very long long string has been input.";
 			String result = null;
 			int loop = 100;
