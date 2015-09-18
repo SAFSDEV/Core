@@ -17,13 +17,16 @@
 <div class=b1>
 <center>
 <h1>What's New in SAFS</h1>
-<h2>Updated: 2015.07.14</h2>
-<small>Since:<b> 2012.08.07 </b></small><p>
+<h2>Updated: 2015.09.18</h2>
+<small>Since:<b> 2012.08.07 </b></small>
+<h2>---  All active <b>"development"</b> is now at <a href="https://github.com/SAFSDEV" target="_blank" title="Link to SAFSDEV Organization on GitHub">SAFSDEV on GitHub</a>  ---</h2>
+<b>(Releases/Updates and other Binaries will be available on both GitHub and SourceForge)</b>
+<p>
 </center>
 <hr>
 </div>
 <p>
-Here we provide info as to what has been added or fixed since the <a href="http://safsdev.sourceforge.net/WhatsNewInSAFS.2012.08.07.htm" target="_blank" title="Whats New In Release 2012.08.07">SAFS Win Release 2012.08.07</a>.<br>
+Here we provide info as to what has been added or fixed since the <a href="WhatsNewInSAFS.2012.08.07.htm" target="_blank" title="Whats New In Release 2012.08.07">SAFS Win Release 2012.08.07</a>.<br>
 Check to see if any <a href="http://sourceforge.net/projects/safsdev/files/SAFS%20Updates/" target="_blank" title="SAFS Updates Download Site on SourceForge">Downloadable SAFS Updates</a> or <a href="http://sourceforge.net/projects/safsdev/files/SAFS%20Win/" target="_blank" title="SAFS Win Download Site on SourceForge">SAFS Win Release Candidates</a> are available since the last release.<br>
 Check to see if any <a href="http://sourceforge.net/projects/safsdev/files/Robotium%20RemoteControl/" target="_blank" title="Robotium RemoteControl Download Site on SourceForge">Downloadable Robotium RemoteControl Updates or Release Candidates</a> are available since the last release.<br>
 Check to see if any <a href="http://sourceforge.net/projects/safsdev/files/SeleniumPlus%20Win/" target="_blank" title="SeleniumPlus Download Site on SourceForge">SeleniumPlus Release Candidates</a> are available since the last release.<br>
@@ -114,6 +117,282 @@ As you can see below, SAFS is undergoing a very rapid pace of development in man
 <table width="100%" align=center border=1 cellpadding=4 rules=rows>
 
 <th>DATE<th>AFFECTED<th>NEW STUFF<th>FIXES<th>DEPENDENCIES
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.09.18 </b>
+<td rowspan=2><!--AFFECT-->Core<br>Se+
+<td><!--NEW----->Core Robot<br>Se+ Remote
+<td><!--FIXED--->
+<td><!--DEPEND-->Core JARs<br>Se+ JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Enabled Remote Selenium Server execution of Robot InputKeys "waitFor" typed keys features.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.09.16 </b>
+<td rowspan=2><!--AFFECT-->Se+<br>Core
+<td><!--NEW----->Se+ Imports
+<td><!--FIXED--->Core InputKeys
+<td><!--DEPEND-->Se+ PlugIn<br>Core JARs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Added SeleniumPlus PlugIn support for auto-refresh of imported Se+ Projects.
+<li>Added InputKeys delays to allow controls to register the completion (waitFor) typed keys.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.09.09 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->Se+ MSDriver
+<td><!--FIXED--->Se+ Win10
+<td><!--DEPEND-->Se+ JARs<br>Se+ Update
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fixed SeleniumPlus InternetExplorer/Edge support to be backwards compatible.
+<li>Added the Selenium Microsoft Driver EXE dependency for the Win 10 Edge browser.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.09.08 </b>
+<td rowspan=2><!--AFFECT-->Core<br>Se+
+<td><!--NEW----->Se+ Remote<br>Se+ REGRESSION
+<td><!--FIXED--->Core Robot<br>Core Model
+<td><!--DEPEND-->Core JARs<br>Se+ JARs<br>Se+ REGRESSION
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fix Core AWT Robot Drag support to move the mouse properly to perform a real drag operation.
+<li>Extend SeleniumPlus TypeKeys and TypeChars support to work on remote Selenium Servers too.
+<li>Fix the Core processExpressions Model to account for NULL passed in String[] as invalid String[].
+<li>Add SeleniumPlus REGRESSION test for new DragTo support.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.09.06 </b>
+<td rowspan=2><!--AFFECT-->Core<br>Se+<br>RFT
+<td><!--NEW----->Core StringUtils<br>Se+ DragTo
+<td><!--FIXED--->
+<td><!--DEPEND-->Core JARs<br>Se+ JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Update Core StringUtils to support convertCoordsToArray()--for DragTo support.
+<li>Added enhanced DragTo support in SeleniumPlus.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.09.04 </b>
+<td rowspan=2><!--AFFECT-->Core<br>Se+
+<td><!--NEW----->
+<td><!--FIXED--->Core JSON
+<td><!--DEPEND-->Core JARs<br>Se+ JARs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Updated SAFS/SeleniumPlus JSON support to use org.json.jar.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.09.03 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->Se+ Win10 Edge
+<td><!--FIXED--->Se+ PlugIn
+<td><!--DEPEND-->Se+ PlugIn<br>Se+ JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fixed SeleniumPlus Preferences to trim leading and trailing spaces from Update Site URLs.
+<li>Added SeleniumPlus support of Windows 10 "Edge" browser with Selenium Server 2.47.1.JAR.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.09.01 </b>
+<td rowspan=2><!--AFFECT-->Core
+<td><!--NEW----->Core Build
+<td><!--FIXED--->
+<td><!--DEPEND-->Core Build
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Transferred public build dependencies off internal FTPServer to GitHub Repository.
+<li>Updated some 3rd party dependencies to newer versions.
+<li>Added Eclipse .project and .classpath assets for external user imports.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.08.28 </b>
+<td rowspan=2><!--AFFECT-->Core<br>Se+
+<td><!--NEW----->Core Encoding
+<td><!--FIXED--->Se+ SetFocus
+<td><!--DEPEND-->Core JARs<br>Se+ JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Added Core FileUtilities support to detect String encodings.
+<li>Attempts to resolve SetFocus/SetForeground issues in SeleniumPlus.
+<li>Attempts to resolve waitForClick Listener issues in SeleniumPlus.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.08.21 </b>
+<td rowspan=2><!--AFFECT-->Core<br>Se+
+<td><!--NEW----->Core EmbedDebug
+<td><!--FIXED--->Se+ JavaScript
+<td><!--DEPEND-->Core JARs<br>Se+ JARs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Added support for Embedded Drivers to accept command-line arg (-Dtestdesigner.debuglogname) to override EmbedDebug log name in INI files.
+<li>Added support for Embedded Driver to accept EmbedDebugMainClass=True|False in INI file to prepend the main test execution class name in the name of the debug log--making it more unique for different tests.
+<li>Fixed SeleniumPlus JavaScriptFunctions util to show the true runtime timestamp for logged debug messages coming from JavaScript into our Debug Log.
+<li>Updates to SeleniumPlus.executeScript and executeAsyncScript documentation.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.08.17 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->Se+ SetFocus
+<td><!--FIXED--->Se+ REGRESSION
+<td><!--DEPEND-->Se+ REGRESSION
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Updates to SeleniumPlus REGRESSION MiscTests to improve waitOnClick timeout issues.
+<li>End-To-End WindowFunctions.SetFocus in SeleniumPlus using Native JNA calls on Windows.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.08.15 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->Se+ SetFocus
+<td><!--FIXED--->
+<td><!--DEPEND-->Se+ JARs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Added initial SeleniumPlus support for new WindowFunction.SetFocus.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.08.13 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->
+<td><!--FIXED--->Se+ REGRESSION
+<td><!--DEPEND-->Se+ REGRESSION
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>More updates to SeleniumPlus REGRESSION due to changes in Google''s new login flow.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.08.12 </b>
+<td rowspan=2><!--AFFECT-->Core
+<td><!--NEW----->Core W3CTools<br>Core Native
+<td><!--FIXED--->
+<td><!--DEPEND-->Core JARs<br>Se+ JARs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Added a new BinaryFileEncoder.java executable from the command-line to convert a binary file to Base64 encoding suitable for upload over HTTP protocols.
+<li>Added JNA Native support (Windows) for SetForegroundWindow.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.08.10 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->
+<td><!--FIXED--->Se+ REGRESSION<br>Se+ WDLibrary
+<td><!--DEPEND-->Se+ REGRESSION<br>Se+ JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Update SeleniumPlus REGRESSION with more changes in Google's new login flow.
+<li>Updates to SeleniumPlus waitForReady delay with waitOnClick timeouts.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.08.07 </b>
+<td rowspan=2><!--AFFECT-->Core<br>Se+
+<td><!--NEW----->GitHub UpdateSite
+<td><!--FIXED--->Se+ REGRESSION
+<td><!--DEPEND-->GitHub UpdateSite<br>Se+ REGRESSION
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Begin to provide UpdateSite Release assets for SAFS and SeleniumPlus.
+<li>Updates to SeleniumPlus REGRESSION tests to accommodate recent changes to Google and SeleniumPlus.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.08.06 </b>
+<td rowspan=2><!--AFFECT-->Core<br>Se+
+<td><!--NEW----->
+<td><!--FIXED--->Core Robot<br>Se+ REGRESSION
+<td><!--DEPEND-->Core JARs<br>Se+ JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fixed the Core Robot inputChars for better logging information.
+<li>Fixed portions of the SeleniumPlus Regression dealing with the new Google Login flow.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.08.04 </b>
+<td rowspan=2><!--AFFECT-->Core<br>Se+
+<td><!--NEW----->GitHub Migration<br>Se+ GetURL
+<td><!--FIXED--->Se+ DCDriverCommands
+<td><!--DEPEND--><a href="https://github.com/SAFSDEV" target="_blank" title="Link to SAFSDEV Organization on GitHub">SAFSDEV on GitHub</a><br>Se+ JARs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Migrated all active sourcecode and builds to pull from <a href="https://github.com/SAFSDEV" target="_blank" title="Link to SAFSDEV Organization on GitHub">SAFSDEV on GitHub</a>.
+<li>Added Regression tests for new GetURL DriverCommand for REST API testing in SeleniumPlus.
+<li>Added SeleniumPlus regression test for EditBox commands.
+<li>Fixed SeleniumPlus DCDriverCommand internal parameter iterator issue.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.08.03 </b>
+<td rowspan=2><!--AFFECT-->Core<br>Se+
+<td><!--NEW----->
+<td><!--FIXED--->Core Install
+<td><!--DEPEND-->Core JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fixed Core SAFS installs for Selenium 2.0 sample to install missing files and settings.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.07.16 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->
+<td><!--FIXED--->Se+ Keywords
+<td><!--DEPEND-->SAFS Keywords Reference
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Updated Core EditBox XML to indicate SeleniumPlus support of SetUnverifiedTextValue, SetUnverifiedTextCharacters, and SetTextCharacters.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.07.15 </b>
+<td rowspan=2><!--AFFECT-->Se+<br>Core
+<td><!--NEW----->
+<td><!--FIXED--->Se+ WDLibrary<br>Se+ Update/Refresh<br>Core Build
+<td><!--DEPEND-->Se+ JARs<br>Se+ PlugIn<br>Core JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fixed SeleniumPlus calculations for component bounds on some edge cases.
+<li>Fixed SeleniumPlus PlugIn messages following an Update and JAR Refresh operations.
+<li>Fixed Core SAFS and SeleniumPlus builds and JAR scripts for missing class dependencies and new dependency ordering.
+</ul>
 
 <tr class=b1>
 <td rowspan=2><!--DATE----><b> 2015.07.14 </b>
