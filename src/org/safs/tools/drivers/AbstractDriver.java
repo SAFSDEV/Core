@@ -47,6 +47,8 @@ public abstract class AbstractDriver implements DriverInterface{
 	protected EngineInterface          tidcomponent = null;
 	/** {@link org.safs.tools.engines.SAFSDRIVERCOMMANDS} */
 	protected EngineInterface          ipcommands  = null;
+	/** {@link org.safs.tools.engines.AUTOITComponent} */
+	protected EngineInterface          autoitcomponent  = null;
 	/** {@link org.safs.tools.status.StatusCounter} */
 	protected StatusInterface         statuscounts = new StatusCounter();
 	protected int            millisBetweenRecords  = 0;
@@ -257,6 +259,11 @@ public abstract class AbstractDriver implements DriverInterface{
 	 * @see DriverInterface#getTIDGUIlessComponentSupport()
 	 */
 	public EngineInterface getTIDGUIlessComponentSupport() { return tidcomponent; }
+	
+	/**
+	 * @see DriverInterface#getTIDGUIlessComponentSupport()
+	 */
+	public EngineInterface getAutoItGUIlessComponentSupport() { return autoitcomponent; }
 	
 	/**
 	 * @see DriverInterface#getIPDriverCommands()
