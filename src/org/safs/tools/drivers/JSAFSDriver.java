@@ -563,8 +563,9 @@ public class JSAFSDriver extends DefaultDriver {
 	    catch(NullPointerException x){;}
 		
 		// try internal CF support
-		try{ rc = getTIDGUIlessComponentSupport().processRecord(testRecordHelper);}
-	    catch(NullPointerException x){;}
+		if ((rc==DriverConstant.STATUS_SCRIPT_NOT_EXECUTED)&&
+				(! testRecordHelper.getStatusInfo().equalsIgnoreCase(JavaHook.SHUTDOWN_RECORD)))
+			rc = getTIDGUIlessComponentSupport().processRecord(testRecordHelper);	    
 		
 	    // try preferred engines next
 		if ((rc==DriverConstant.STATUS_SCRIPT_NOT_EXECUTED)&&
