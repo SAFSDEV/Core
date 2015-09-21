@@ -558,10 +558,14 @@ public class JSAFSDriver extends DefaultDriver {
 	protected long processComponentFunction(){
 		long rc = DriverConstant.STATUS_SCRIPT_NOT_EXECUTED;		
 		
+		// try Autoit CF support
+		try{ rc = getAutoItGUIlessComponentSupport().processRecord(testRecordHelper);}
+	    catch(NullPointerException x){;}
+		
 		// try internal CF support
 		try{ rc = getTIDGUIlessComponentSupport().processRecord(testRecordHelper);}
 	    catch(NullPointerException x){;}
-
+		
 	    // try preferred engines next
 		if ((rc==DriverConstant.STATUS_SCRIPT_NOT_EXECUTED)&&
 			(! testRecordHelper.getStatusInfo().equalsIgnoreCase(JavaHook.SHUTDOWN_RECORD)))
