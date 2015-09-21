@@ -60,6 +60,8 @@ import org.safs.STAFHelper;
 import org.safs.StringUtils;
 import org.safs.TestRecordData;
 import org.safs.Tree;
+import org.safs.autoit.AutoIt;
+import org.safs.autoit.AutoItRs;
 import org.safs.image.ImageUtils;
 import org.safs.jvmagent.AgentClassLoader;
 import org.safs.logging.LogUtilities;
@@ -530,6 +532,16 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 //				winObj = (WebElement)map.getParentObject(windowName);
 //				Log.info("WDGU: winObj got from cache: "+ winObj);
 //			}
+            
+            // check for possible Autoit-Based Testing recognition string
+            if(AutoItRs.isAutoitBasedRecognition(winRec)){
+	    		trdata.setWindowGuiId(winRec);
+	    		trdata.setCompTestObject(null);
+	    		trdata.setWindowTestObject(null);		
+	    		trdata.setCompType("Component");
+	    		Log.info( "WDGU returning. Assuming AutoIt Testing for "+trdata.getCommand());				
+				return 0;
+            }
             
             // check for possible Image-Based Testing recognition string
             if(ImageUtils.isImageBasedRecognition(winRec)){

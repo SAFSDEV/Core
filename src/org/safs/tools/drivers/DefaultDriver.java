@@ -18,6 +18,7 @@ import org.safs.tools.GenericToolsInterface;
 import org.safs.tools.MainClass;
 import org.safs.tools.consoles.SAFSMonitorFrame;
 import org.safs.tools.counters.CountersInterface;
+import org.safs.tools.engines.AutoItComponent;
 import org.safs.tools.engines.EngineInterface;
 import org.safs.tools.engines.SAFSDRIVERCOMMANDS;
 import org.safs.tools.engines.TIDComponent;
@@ -1194,6 +1195,7 @@ public abstract class DefaultDriver extends AbstractDriver {
 		
 		if (tidcommands == null) tidcommands = new TIDDriverCommands(this);
 		if (tidcomponent == null) tidcomponent = new TIDComponent(this);
+		if (autoitcomponent == null) autoitcomponent = new AutoItComponent(this);
 		if (ipcommands  == null)  ipcommands = new SAFSDRIVERCOMMANDS(this);
 		
 		String[] items = {"First", "Second", "Third", "Fourth", "Fifth", 
