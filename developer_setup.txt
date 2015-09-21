@@ -71,6 +71,12 @@ Before you can successfully run any build, you need to install/verify the follow
 
 ======================================================================================
 
+==============================       Note               ==============================
+If the internet connection is slow, the script running may stuck in DOS console,
+user can press the “Enter” to let it continue. Please don't terminate the script
+mannually or close the DOS console, which will leave some hidden folders like "Core"
+and they will cause the failure for next build.
+======================================================================================
 
 ==============================       Help me            ==============================
 If you still have any problem or question, please consult our forum at 
