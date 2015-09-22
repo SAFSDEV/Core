@@ -559,7 +559,7 @@ public class JSAFSDriver extends DefaultDriver {
 		long rc = DriverConstant.STATUS_SCRIPT_NOT_EXECUTED;		
 		
 		// try Autoit CF support
-		try{ rc = getAutoItGUIlessComponentSupport().processRecord(testRecordHelper);}
+		try{ rc = getAutoItComponentSupport().processRecord(testRecordHelper);}
 	    catch(NullPointerException x){;}
 		
 		// try internal CF support

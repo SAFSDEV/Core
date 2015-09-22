@@ -1,3 +1,6 @@
+/** Copyright (C) (SAS) All rights reserved.
+ ** General Public License: http://www.opensource.org/licenses/gpl-license.php
+ **/
 package org.safs.tools.drivers;
 
 import java.io.File;
@@ -1194,8 +1197,8 @@ public abstract class DefaultDriver extends AbstractDriver {
 	protected void initializeRuntimeEngines(){
 		
 		if (tidcommands == null) tidcommands = new TIDDriverCommands(this);
-		if (tidcomponent == null) tidcomponent = new TIDComponent(this);
 		if (autoitcomponent == null) autoitcomponent = new AutoItComponent(this);
+		if (tidcomponent == null) tidcomponent = new TIDComponent(this);
 		if (ipcommands  == null)  ipcommands = new SAFSDRIVERCOMMANDS(this);
 		
 		String[] items = {"First", "Second", "Third", "Fourth", "Fifth", 
@@ -1386,6 +1389,7 @@ public abstract class DefaultDriver extends AbstractDriver {
 
 		if(tidcommands !=null) tidcommands.shutdown();
 		if(tidcomponent !=null) tidcomponent.shutdown();
+		if(autoitcomponent !=null) autoitcomponent.shutdown();
 		if(ipcommands != null) ipcommands.shutdown();
 	}
 

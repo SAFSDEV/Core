@@ -11,6 +11,7 @@ import org.safs.StatusCodes;
 import org.safs.tools.CaseInsensitiveFile;
 import org.safs.tools.CoreInterface;
 import org.safs.tools.GenericToolsInterface;
+import org.safs.tools.engines.AutoItComponent;
 import org.safs.tools.engines.EngineInterface;
 import org.safs.tools.input.InputInterface;
 import org.safs.tools.input.MapsInterface;
@@ -41,14 +42,14 @@ public abstract class AbstractDriver implements DriverInterface{
 	protected CoreInterface            core        = null;
 	protected CountersInterface        counts      = null;	
 	protected DebugInterface           debug       = new DebugInfo();
+	/** {@link org.safs.tools.engines.AutoItComponent} */
+	protected AutoItComponent autoitcomponent = null;	
 	/** {@link org.safs.tools.engines.TIDDriverCommands} */
 	protected EngineInterface          tidcommands = null;
 	/** {@link org.safs.tools.engines.TIDComponent} */
 	protected EngineInterface          tidcomponent = null;
 	/** {@link org.safs.tools.engines.SAFSDRIVERCOMMANDS} */
 	protected EngineInterface          ipcommands  = null;
-	/** {@link org.safs.tools.engines.AUTOITComponent} */
-	protected EngineInterface          autoitcomponent  = null;
 	/** {@link org.safs.tools.status.StatusCounter} */
 	protected StatusInterface         statuscounts = new StatusCounter();
 	protected int            millisBetweenRecords  = 0;
@@ -256,14 +257,17 @@ public abstract class AbstractDriver implements DriverInterface{
 	public EngineInterface getTIDDriverCommands() { return tidcommands; }
 
 	/**
-	 * @see DriverInterface#getTIDGUIlessComponentSupport()
+	 * @see DriverInterface#getAutoItComponentSupport()
 	 */
-	public EngineInterface getTIDGUIlessComponentSupport() { return tidcomponent; }
+	public EngineInterface getAutoItComponentSupport() { 
+		if (autoitcomponent == null) autoitcomponent = new AutoItComponent(this);
+		return autoitcomponent;	}
+
 	
 	/**
 	 * @see DriverInterface#getTIDGUIlessComponentSupport()
 	 */
-	public EngineInterface getAutoItGUIlessComponentSupport() { return autoitcomponent; }
+	public EngineInterface getTIDGUIlessComponentSupport() { return tidcomponent; }
 	
 	/**
 	 * @see DriverInterface#getIPDriverCommands()
