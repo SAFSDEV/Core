@@ -1,13 +1,19 @@
+/** Copyright (C) (SAS) All rights reserved.
+ ** General Public License: http://www.opensource.org/licenses/gpl-license.php
+ **/
 package org.safs.autoit;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.Vector;
 
 import org.safs.IndependantLog;
 import org.safs.SAFSException;
+import org.safs.SAFSProcessorInitializationException;
 import org.safs.image.ImageUtils;
+import org.safs.tools.consoles.ProcessCapture;
 import org.safs.tools.drivers.DriverConstant;
 
 import autoitx4java.AutoItX;
@@ -15,14 +21,20 @@ import autoitx4java.AutoItX;
 import com.jacob.com.ComFailException;
 import com.jacob.com.LibraryLoader;
 
+/**
+ * Class used to instantiate AutoIt support.
+ * Will automatically register the DLLs on the system at runtime if that has never occurred.
+ * @author dharmesh
+ */
 public class AutoIt {
     
 	private static AutoItX it = null;
 	private static final String JACOB_DLL_32 = "jacob-1.18-x86.dll";
 	private static final String JACOB_DLL_64 = "jacob-1.18-x64.dll";
 
-	public static AutoItX AutoItObject() {
-		
+	public static AutoItX AutoItObject() throws SAFSProcessorInitializationException{
+
+		/** COM class instantiation method */
 		String methodName = "AutoItX.AutoItObject() ";
 		
 		if (it == null) {
@@ -36,32 +48,59 @@ public class AutoIt {
 				jacobDllVersionToUse = JACOB_DLL_64;
 			}
 			
-			if (System.getenv(DriverConstant.SYSTEM_PROPERTY_SAFS_DIR) != null) {
-				libdir = System.getenv(DriverConstant.SYSTEM_PROPERTY_SAFS_DIR)+ File.separator+"lib"+File.separator;
+			// ****************************************
+			// this test for SAFS or SeleniumPlus should become more centally located for all of SAFS.
+			// See org.safs.install.InstallerImpl, or associated classes.
+			String root = null;
+			root = System.getenv(DriverConstant.SYSTEM_PROPERTY_SAFS_DIR);
+			if (root != null) {
+				libdir = root + File.separator+"lib"+File.separator;
 			} else {
-			    libdir = System.getenv(DriverConstant.SYSTEM_PROPERTY_SELENIUMPLUS_DIR)+ File.separator +"libs"+File.separator;
+				root = System.getenv(DriverConstant.SYSTEM_PROPERTY_SELENIUMPLUS_DIR);
+				if (root != null){
+				    libdir = root + File.separator +"libs"+File.separator;
+				}
 			}
+			if(root == null){
+				IndependantLog.debug(methodName +"cannot deduce a valid SAFS installation directory!");
+				throw new SAFSProcessorInitializationException(methodName +"cannot deduce a valid SAFS installation directory.");
+			}
+			// end test for SAFS install directories.
+			// **************************************
 		
 			File file = new File(libdir, jacobDllVersionToUse);
-			System.setProperty(LibraryLoader.JACOB_DLL_PATH, file.getAbsolutePath());
-			
-			IndependantLog.debug(methodName + "AutoItX object is created");
+			if(!file.isFile()){
+				IndependantLog.debug(methodName +"cannot locate required AutoIt binary DLLs!");
+				throw new SAFSProcessorInitializationException(methodName +"cannot locate required AutoIt binary DLL!");
+			}
+			System.setProperty(LibraryLoader.JACOB_DLL_PATH, file.getAbsolutePath());			
+			IndependantLog.debug(methodName + "attempting to create AutoItX object.");
 			
 			try {
 				it = new AutoItX();
+				IndependantLog.debug(methodName + "AutoItX object was created");
 			} catch (ComFailException cfe) {
 				// register dll and re initiate object
-				IndependantLog.debug(methodName + "Register DLL to the system.");
-				
+				IndependantLog.debug(methodName + "Registering AutoIt DLLs on the System.");
+								
 				String cmd =  System.getenv("SYSTEMDRIVE") + "\\Windows\\SysWOW64\\regsvr32 /s "+libdir+"AutoItX3.dll";
 				executeCommand(cmd);
 				cmd = System.getenv("SYSTEMDRIVE") + "\\Windows\\System32\\regsvr32 /s "+libdir+"AutoItX3_x64.dll";
 				executeCommand(cmd);
 				
-				it = new AutoItX();
+				IndependantLog.debug(methodName + "AutoItX DLLs should now be registered.");
+				
+				try{ 
+					it = new AutoItX();
+					IndependantLog.debug(methodName + "AutoItX object was finally created");
+				}
+				catch(ComFailException cf){
+					IndependantLog.debug(methodName + "still cannot instantiate AutoIt Object due to "+
+				                         cf.getClass().getSimpleName()+", "+ cf.getMessage());					
+				}
 			}			
 	
-			if(it == null) IndependantLog.debug(methodName + "AutoItX object is null");
+			if(it == null) IndependantLog.debug(methodName + "AutoItX object was NOT created!");
 			
 		} else { // use existing object
 			IndependantLog.debug(methodName + "Recycle AutoIt object");
@@ -70,30 +109,36 @@ public class AutoIt {
 		return it;
 	}	
 	
-	private static String executeCommand(String command) {
+	/**
+	 * Used internally to register the DLLs if that has never been done.
+	 * @param command
+	 * @return Vector containing any data made available by the ProcessCapture console.
+	 * @see org.safs.tools.consoles.ProcessCapture
+	 */
+	private static Vector executeCommand(String command) {
 
 		StringBuffer output = new StringBuffer();
 
 		Process p;
+		ProcessCapture console;
+		Vector data = new Vector();
+		
 		try {
 			p = Runtime.getRuntime().exec(command);
-			p.waitFor();
-			BufferedReader reader = 
-                           new BufferedReader(new InputStreamReader(p.getInputStream()));
-
-			String line = "";			
-			while ((line = reader.readLine())!= null) {
-				output.append(line + "\n");
-			}
-
+			console = new ProcessCapture(p, null, true, true);
+			try{ console.thread.join(); }catch(InterruptedException x){;}
+			console.shutdown();
+			data = console.getData();
 		} catch (Exception e) {
-			e.printStackTrace();
+			IndependantLog.debug("AutoIt.executeCommand "+ e.getClass().getSimpleName()+", "+ e.getMessage(), e);
 		}
-
-		return output.toString();
-
+		return data;
 	}
 
+	/**
+	 * Determine 32-bit vs 64-bit architecture.
+	 * @return System Property value for "sun.arch.data.model"
+	 */
 	private static String jvmBitVersion(){
 		return System.getProperty("sun.arch.data.model");
 	}	
