@@ -42,6 +42,7 @@ import org.safs.Log;
 import org.safs.SAFSException;
 import org.safs.StatusCodes;
 import org.safs.StringUtils;
+import org.safs.autoit.AutoItRs;
 import org.safs.image.ImageUtils;
 import org.safs.model.commands.GenericMasterFunctions;
 import org.safs.model.commands.GenericObjectFunctions;
@@ -134,13 +135,19 @@ public class CFComponent extends ComponentFunction{
 			}
 		}else{
 			if(winObject==null){
-					String winRec = null;
-					try{ winRec = testRecordData.getWindowGuiId();}catch(Exception ignore){}
-					if( (winRec != null) && ImageUtils.isImageBasedRecognition(winRec)){
+				String winRec = null;
+				try{ winRec = testRecordData.getWindowGuiId();}catch(Exception ignore){}
+				if( (winRec != null) && ImageUtils.isImageBasedRecognition(winRec)){
 						testRecordData.setStatusCode( StatusCodes.SCRIPT_NOT_EXECUTED );
 						Log.info(debugmsg +" returning SCRIPT_NOT_EXECUTED assuming Image-Based Testing...");
 					return;					
-				}
+				} else if( (winRec != null) && AutoItRs.isAutoitBasedRecognition(winRec)){  
+					testRecordData.setStatusCode( StatusCodes.SCRIPT_NOT_EXECUTED );  
+					Log.info(debugmsg +" returning SCRIPT_NOT_EXECUTED assuming AutoIt Testing...");  
+					return;  
+				}  
+
+
 			}
 
 			if(compObject==null){

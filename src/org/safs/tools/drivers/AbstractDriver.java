@@ -11,6 +11,7 @@ import org.safs.StatusCodes;
 import org.safs.tools.CaseInsensitiveFile;
 import org.safs.tools.CoreInterface;
 import org.safs.tools.GenericToolsInterface;
+import org.safs.tools.engines.AutoItComponent;
 import org.safs.tools.engines.EngineInterface;
 import org.safs.tools.input.InputInterface;
 import org.safs.tools.input.MapsInterface;
@@ -41,6 +42,8 @@ public abstract class AbstractDriver implements DriverInterface{
 	protected CoreInterface            core        = null;
 	protected CountersInterface        counts      = null;	
 	protected DebugInterface           debug       = new DebugInfo();
+	/** {@link org.safs.tools.engines.AutoItComponent} */
+	protected AutoItComponent autoitcomponent = null;	
 	/** {@link org.safs.tools.engines.TIDDriverCommands} */
 	protected EngineInterface          tidcommands = null;
 	/** {@link org.safs.tools.engines.TIDComponent} */
@@ -253,6 +256,14 @@ public abstract class AbstractDriver implements DriverInterface{
 	 */
 	public EngineInterface getTIDDriverCommands() { return tidcommands; }
 
+	/**
+	 * @see DriverInterface#getAutoItComponentSupport()
+	 */
+	public EngineInterface getAutoItComponentSupport() { 
+		if (autoitcomponent == null) autoitcomponent = new AutoItComponent(this);
+		return autoitcomponent;	}
+
+	
 	/**
 	 * @see DriverInterface#getTIDGUIlessComponentSupport()
 	 */
