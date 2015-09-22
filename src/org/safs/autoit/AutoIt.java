@@ -52,27 +52,36 @@ public class AutoIt {
 			// this test for SAFS or SeleniumPlus should become more centally located for all of SAFS.
 			// See org.safs.install.InstallerImpl, or associated classes.
 			String root = null;
+			boolean found = false;
+			File file = null;
 			root = System.getenv(DriverConstant.SYSTEM_PROPERTY_SAFS_DIR);
 			if (root != null) {
 				libdir = root + File.separator+"lib"+File.separator;
-			} else {
+				file = new File(libdir, jacobDllVersionToUse);
+				if(file.isFile()){
+					found = true;
+				}
+			}
+			
+			if (!found) { // check SEL+ environment or other...
 				root = System.getenv(DriverConstant.SYSTEM_PROPERTY_SELENIUMPLUS_DIR);
 				if (root != null){
 				    libdir = root + File.separator +"libs"+File.separator;
+				    file = new File(libdir, jacobDllVersionToUse);
+					if(!file.isFile()){
+						IndependantLog.debug(methodName +"cannot locate required AutoIt binary DLLs!");
+						throw new SAFSProcessorInitializationException(methodName +"cannot locate required AutoIt binary DLL!");
+					}
 				}
 			}
+			
 			if(root == null){
 				IndependantLog.debug(methodName +"cannot deduce a valid SAFS installation directory!");
 				throw new SAFSProcessorInitializationException(methodName +"cannot deduce a valid SAFS installation directory.");
 			}
 			// end test for SAFS install directories.
 			// **************************************
-		
-			File file = new File(libdir, jacobDllVersionToUse);
-			if(!file.isFile()){
-				IndependantLog.debug(methodName +"cannot locate required AutoIt binary DLLs!");
-				throw new SAFSProcessorInitializationException(methodName +"cannot locate required AutoIt binary DLL!");
-			}
+					
 			System.setProperty(LibraryLoader.JACOB_DLL_PATH, file.getAbsolutePath());			
 			IndependantLog.debug(methodName + "attempting to create AutoItX object.");
 			
