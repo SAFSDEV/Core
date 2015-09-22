@@ -1,3 +1,6 @@
+/** Copyright (C) (SAS) All rights reserved.
+ ** General Public License: http://www.opensource.org/licenses/gpl-license.php
+ **/
 package org.safs.tools.drivers;
 
 import java.util.ListIterator;
@@ -8,6 +11,7 @@ import org.safs.TestRecordHelper;
 import org.safs.DCTestRecordHelper;
 import org.safs.tools.UniqueIDInterface;
 import org.safs.tools.counters.CountersInterface;
+import org.safs.tools.engines.AutoItComponent;
 import org.safs.tools.engines.EngineInterface;
 import org.safs.tools.engines.TIDDriverCommands;
 import org.safs.tools.engines.TIDComponent;
@@ -58,6 +62,9 @@ public abstract class AbstractInputProcessor implements DriverInterface {
 	/**This allows us to provide local support for non-GUI CF test records. */
 	protected TIDComponent tidComponentCommands = null;
 
+	/**This allows us to provide local support AutoIt CF test records. */
+	protected AutoItComponent autoitComponentCommands = null;
+	
 	/**
 	 * Constructor for AbstractInputProcessor
 	 */
@@ -241,6 +248,15 @@ public abstract class AbstractInputProcessor implements DriverInterface {
 	public EngineInterface getTIDDriverCommands() { 
 		if (tidDriverCommands == null) tidDriverCommands = new TIDDriverCommands(this);
 		return tidDriverCommands;	}
+
+	/**
+	 * We provide AutoIt Component Function support.  
+	 * 
+	 * @see DriverInterface#getAutoItComponentSupport()
+	 */
+	public EngineInterface getAutoItComponentSupport() { 
+		if (autoitComponentCommands == null) autoitComponentCommands = new AutoItComponent(this);
+		return autoitComponentCommands;	}
 
 	/**
 	 * We provide generic support for certain Component Function commands that don't actually 
