@@ -258,10 +258,9 @@ public class AutoItComponent extends GenericEngine {
 					
 					testRecordData.setStatusCode(StatusCodes.OK);
 					// log success message and status
-					log.logMessage(testRecordData.getFac(), 
-							genericText.convert("success2a", windowName +":"+ compName + " "+ action
-									+" successful.", windowName, compName, action), 
-							PASSED_MESSAGE);
+					String altText = windowName +":"+ compName + " "+ action +" successful.";
+					String msg = genericText.convert("success3", altText, windowName, compName, action);
+					log.logMessage(testRecordData.getFac(),msg, PASSED_MESSAGE);
 					
 			} catch (Exception x) {
 				this.issueErrorPerformingActionOnX("SetFocus", x.getClass().getSimpleName()+": "+ x.getMessage());
@@ -286,10 +285,9 @@ public class AutoItComponent extends GenericEngine {
 					
 					testRecordData.setStatusCode(StatusCodes.OK);
 					// log success message and status
-					log.logMessage(testRecordData.getFac(), 
-							genericText.convert("success3a", windowName +":"+ compName + " "+ action
-									+" successful.", windowName, compName, action), 
-							PASSED_MESSAGE);
+					String altText = windowName +":"+ compName + " "+ action +" successful.";
+					String msg = genericText.convert("success3", altText, windowName, compName, action);
+					log.logMessage(testRecordData.getFac(),msg, PASSED_MESSAGE);
 					
 			} catch (Exception x) {
 				this.issueErrorPerformingActionOnX("Click", x.getClass().getSimpleName()+": "+ x.getMessage());
