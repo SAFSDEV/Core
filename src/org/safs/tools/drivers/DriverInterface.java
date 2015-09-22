@@ -43,6 +43,7 @@ public interface DriverInterface extends PathInterface {
 	public boolean              isPreferredEngine(String key);
 	public boolean              isPreferredEngine(EngineInterface engine);
 	
+	public EngineInterface       getAutoItComponentSupport();
 	public EngineInterface       getTIDDriverCommands();
 	public EngineInterface       getTIDGUIlessComponentSupport();
 	public EngineInterface       getIPDriverCommands();
