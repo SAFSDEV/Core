@@ -43,16 +43,11 @@ import org.safs.tools.stringutils.StringUtilities;
 import autoitx4java.AutoItX;
 
 /**
- * Provides local in-process support for GUIless Component Functions.
- * <p>
- * These are Component Functions that do not actually reference any GUI component.  
- * Some examples of these are commands like VerifyValues and certain database commands 
- * that allow the Window and Component references to be "Anything" "At All".
+ * Provides local in-process support for AutoIt Component Functions on Windows.
  * <p>
  * This engine does not assume the use of STAF. Instead, it uses the
  * various org.safs.tools Interfaces to talk with the rest of the framework (as made
  * available via the DriverInterface configuration).
- * 
  */
 public class AutoItComponent extends GenericEngine {
 
