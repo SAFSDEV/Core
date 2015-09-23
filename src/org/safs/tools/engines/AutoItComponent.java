@@ -326,14 +326,18 @@ public class AutoItComponent extends GenericEngine {
 					return;
 				}
 				
-				it.controlCommandAddString(ars.getTitle(), ars.getText(), ars.getControl(), text);
-				
+				boolean rc = it.ControlSetText(ars.getTitle(), ars.getText(), ars.getControl(), text);
+				if (rc) {
 			   	testRecordData.setStatusCode(StatusCodes.OK);
 				// log success message and status
 				log.logMessage(testRecordData.getFac(), 
 						genericText.convert("success3a", windowName +":"+ compName + " "+ action
 								+" successful using "+ text, windowName, compName, action, text), 
 						PASSED_MESSAGE);
+				} else {
+					testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );	 
+					this.issueErrorPerformingActionOnX("SetText","failed with rc= " + it.getError());	
+				}
 		   
 		   	}catch(Exception x){
 		   		this.issueErrorPerformingActionOnX(text, x.getClass().getSimpleName()+": "+ x.getMessage());
