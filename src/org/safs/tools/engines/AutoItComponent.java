@@ -244,12 +244,12 @@ public class AutoItComponent extends GenericEngine {
 			testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );	 
 			try {
 					AutoItX it = AutoIt.AutoItObject();
-					if (!it.winExists(ars.getTitle())){
+					if (!it.winExists(ars.getWindowsRS())){
 						testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );	 
-						this.issueErrorPerformingActionOnX("SetFocus","failed due to the windows didn't found");
+						this.issueErrorPerformingAction("failed due to the windows didn't found");
 						return;
 					}
-					it.winActivate(ars.getTitle());
+					it.winActivate(ars.getWindowsRS());
 					
 					testRecordData.setStatusCode(StatusCodes.OK);
 					// log success message and status
@@ -258,7 +258,7 @@ public class AutoItComponent extends GenericEngine {
 					log.logMessage(testRecordData.getFac(),msg, PASSED_MESSAGE);
 					
 			} catch (Exception x) {
-				this.issueErrorPerformingActionOnX("SetFocus", x.getClass().getSimpleName()+": "+ x.getMessage());
+				this.issueErrorPerformingAction(x.getClass().getSimpleName()+": "+ x.getMessage());
 			}		
 		}
 		
@@ -268,24 +268,27 @@ public class AutoItComponent extends GenericEngine {
 			try {
 					AutoItX it = AutoIt.AutoItObject();
 					
-					if (!it.winExists(ars.getTitle())){
+					if (!it.winExists(ars.getWindowsRS())){
 						testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );	 
-						this.issueErrorPerformingActionOnX("Click","failed due to the windows didn't found");
+						this.issueErrorPerformingActionOnX("Click","Failed due to the windows didn't found");
 						return;
 					}
-							
 					
-					it.controlClick(ars.getTitle(), ars.getText(), ars.getControl());
-					
-					
-					testRecordData.setStatusCode(StatusCodes.OK);
-					// log success message and status
-					String altText = windowName +":"+ compName + " "+ action +" successful.";
-					String msg = genericText.convert("success3", altText, windowName, compName, action);
-					log.logMessage(testRecordData.getFac(),msg, PASSED_MESSAGE);
+					boolean rc = it.controlClick(ars.getWindowsRS(), "", ars.getComponentRS());
+						
+					if (rc){
+						testRecordData.setStatusCode(StatusCodes.OK);
+						// log success message and status
+						String altText = windowName +":"+ compName + " "+ action +" successful.";
+						String msg = genericText.convert("success3", altText, windowName, compName, action);
+						log.logMessage(testRecordData.getFac(),msg, PASSED_MESSAGE);
+					} else {
+						testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );	 
+						this.issueErrorPerformingAction("Failed with rc= " + it.getError());	
+					}
 					
 			} catch (Exception x) {
-				this.issueErrorPerformingActionOnX("Click", x.getClass().getSimpleName()+": "+ x.getMessage());
+				this.issueErrorPerformingAction(x.getClass().getSimpleName()+": "+ x.getMessage());
 			}		
 		}		
 		
@@ -315,13 +318,13 @@ public class AutoItComponent extends GenericEngine {
 
 		   		AutoItX it = AutoIt.AutoItObject();
 				
-				if (!it.winExists(ars.getTitle())){
+				if (!it.winExists(ars.getWindowsRS())){
 					testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );	 
-					this.issueErrorPerformingActionOnX("SetText","failed due to the windows didn't found");					
+					this.issueErrorPerformingActionOnX("SetText","Failed due to the windows didn't found");					
 					return;
 				}
 				
-				boolean rc = it.ControlSetText(ars.getTitle(), ars.getText(), ars.getControl(), text);
+				boolean rc = it.ControlSetText(ars.getWindowsRS(), "", ars.getComponentRS(), text);
 				if (rc) {
 			   	testRecordData.setStatusCode(StatusCodes.OK);
 				// log success message and status
@@ -331,11 +334,11 @@ public class AutoItComponent extends GenericEngine {
 						PASSED_MESSAGE);
 				} else {
 					testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );	 
-					this.issueErrorPerformingActionOnX("SetText","failed with rc= " + it.getError());	
+					this.issueErrorPerformingAction("Failed with rc= " + it.getError());	
 				}
 		   
 		   	}catch(Exception x){
-		   		this.issueErrorPerformingActionOnX(text, x.getClass().getSimpleName()+": "+ x.getMessage());
+		   		this.issueErrorPerformingAction(x.getClass().getSimpleName()+": "+ x.getMessage());
 		   	}
 		}
 	
