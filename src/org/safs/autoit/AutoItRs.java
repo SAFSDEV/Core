@@ -22,9 +22,10 @@ import org.safs.IndependantLog;
  * 
  *   childName=":AutoIt:text=Some Text"
  *   childName="text=Some Text"
- *   childName="control=theControlID"
- *   childName="id=theControlID"
- *   childName="title=MDI Caption;id=theControlID"    (future)
+ *   childName="id=ID"
+ *   childName="class=class name"
+ *   childName="id=some id;class=class name" 
+ *   childName="class=class name;instance=8" 
  *   childName="caption=MDI Caption;id=theControlID"  (future)
  *   
  * Note: the case-insensitive ":autoit:" prefix CAN appear in Control RS and will be removed if present.
@@ -39,25 +40,39 @@ public class AutoItRs {
     public static final String AUTOIT_DELIMITER=";";
 	
 	/** "caption" */
-	public final static String CAPTION = "caption";
+	public final static String CAPTION = "caption=";
 	/** "title" */
-	public final static String TITLE = "title";
+	public final static String TITLE = "title=";
 	
-	/** "text" */
-	public final static String TEXT = "text";
 	
-	/** "control" */  //used same as id
-	public final static String CONTROL = "control";
-	/** "id" */       //used same as control
-	public final static String ID = "id";
+	/** "id" */       //Component ID
+	public final static String ID = "id=";
+	/** "class" */    //Component CLASS
+	public final static String CLASS = "class=";
+	/** "text" */     //Component TEXT
+	public final static String TEXT = "text=";
+	/** "instance" */    //Component INSTANCE
+	public final static String INSTANCE = "instance=";
+	/** "classnameNN" */   //Component CLASSNAMENN
+	public final static String CLASSNAMENN = "ClassnameNN=";
+	/** "Name" */        //Component NAME
+	public final static String NAME = "Name=";
+	
+	
 	
 	private String winRs;
 	private String compRs;
 	
-	private String title;
+	private String title; // windows title
+	
 	private String compTitle; // (future) possible sub/child/mdi Window
 	private String text;
-	private String control;
+	private String id;
+	private String instance;
+	private String classnamenn;
+	private String classname;
+	private String name;
+	
 	
 	
 	public AutoItRs(String winRS, String compRS){
@@ -88,8 +103,7 @@ public class AutoItRs {
 		String[] sWinRs = cleanWinRs.split(AUTOIT_DELIMITER);
 		for (String string : sWinRs) {
 			if((string.toLowerCase().startsWith(TITLE))||
-			   (string.toLowerCase().startsWith(CAPTION))||
-			   (string.toLowerCase().startsWith(TEXT))){
+			   (string.toLowerCase().startsWith(CAPTION))){
 				try { title = string.split("=")[1];}		
 				catch(IndexOutOfBoundsException x){;}
 			}
@@ -107,9 +121,24 @@ public class AutoItRs {
 				try{ text = string.split("=")[1];}
  			    catch(IndexOutOfBoundsException x){;}
 			}
-			if((string.toLowerCase().startsWith(CONTROL))||
-			   (string.toLowerCase().startsWith(ID))){
-				try{ control = string.split("=")[1]; }
+			if(string.toLowerCase().startsWith(ID)){
+			   	try{ id = string.split("=")[1]; }
+ 			    catch(IndexOutOfBoundsException x){;}
+			}
+			if(string.toLowerCase().startsWith(CLASSNAMENN)){
+			   	try{ classnamenn = string.split("=")[1]; }
+ 			    catch(IndexOutOfBoundsException x){;}
+			}
+			if(string.toLowerCase().startsWith(CLASS)){
+			   	try{ classname = string.split("=")[1]; }
+ 			    catch(IndexOutOfBoundsException x){;}
+			}
+			if(string.toLowerCase().startsWith(NAME)){
+			   	try{ name = string.split("=")[1]; }
+ 			    catch(IndexOutOfBoundsException x){;}
+			}
+			if(string.toLowerCase().startsWith(INSTANCE)){
+			   	try{ instance = string.split("=")[1]; }
  			    catch(IndexOutOfBoundsException x){;}
 			}
 		}	
@@ -129,34 +158,35 @@ public class AutoItRs {
 			if(lcrec.startsWith(AUTOIT_PREFIX)) return true;			
 		}catch(Exception x) {}
 		return false;
-	}	
-
+	}
+	
 	/**
-	 * @return specified Window title, or null if never specified.
+	 * Get Windows AutoIt format recognition string.
+	 * @return Autoit object locator.
 	 */
-	public String getTitle() {
+	public String getWindowsRS(){
+		IndependantLog.debug("AutoItRS.getWindowsRS(): " + title);
 		return title;
 	}
 	
 	/**
-	 * (future)
-	 * @return specified Child Control title (mid window, etc..), or null if never specified.
+	 * Get Component AutoIt format recognition string.
+	 * @return - AutoIt object locator.
 	 */
-	public String getCompTitle() {
-		return compTitle;
+	public String getComponentRS(){
+	
+		String autoitrs="";
+		if (text != null) autoitrs = autoitrs + ";TEXT:" + text;
+		if (id != null) autoitrs = autoitrs + ";ID:" + id;
+		if (instance != null) autoitrs = autoitrs + ";INSTANCE:" + instance;
+		if (classnamenn != null) autoitrs = autoitrs + ";CLASSNAMENN:" + classnamenn;
+		if (classname != null) autoitrs = autoitrs + ";CLASS:" + classname;
+		if (name != null) autoitrs = autoitrs + ";NAME:" + name;
+		
+		String a = autoitrs.replaceFirst(";", ""); // remove fist ";" always
+		String b = "[" + a + "]"; // add autoit format
+		IndependantLog.debug("AutoItRS.getComponentRS(): " + b);
+		return b;
 	}
 	
-	/**
-	 * @return specified Child Control text, or null if never specified.
-	 */
-	public String getText() {
-		return text;
-	}
-	
-	/**
-	 * @return specified Child Control ID, or null if never specified.
-	 */
-	public String getControl() {
-		return control;
-	}	
 }
