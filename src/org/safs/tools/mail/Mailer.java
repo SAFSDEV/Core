@@ -2,6 +2,14 @@
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
+/**
+ * History for developers:
+ * 
+ * JUN,15 2015 Added SendMail call for and misc fixes.
+ * SEP,23 2015 (LeiWang) Add method send(): get transport from session so that "properties", "authentication" will be taken into account.
+ *                       Modify other send() methods: throw out the Exception if there is something wrong.
+ * 
+ */
 package org.safs.tools.mail;
 
 import java.io.File;
@@ -29,10 +37,16 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.ParseException;
 
 import org.safs.IndependantLog;
+import org.safs.SAFSException;
+import org.safs.StringUtils;
+import org.safs.tools.stringutils.StringUtilities;
 
 /**
- * Used to send email.
+ * Used to send email.<br>
+ * If the mail server is not in local network and "http proxy server" is needed to connect Internet,<br>
+ * then the VM properties -Dhttp.proxyHost and -Dhttp.proxyPort are required to avoid the connection problem.<br>
  * 
+ * <br>
  * Examples:<br>
  * <ol>
  * <LI>java org.safs.tools.logs.Mailer -h<br>
@@ -54,7 +68,6 @@ import org.safs.IndependantLog;
  * </ol>
  * 
  * @author (LeiWang)
- * <br> JUN,15 2015 Added SendMail call for and misc fixes.
  */
 public class Mailer {
 	
@@ -120,6 +133,7 @@ public class Mailer {
 	public static final int DEFAULT_PORT = 25;
 	/** {@link Protocol#SMTP}*/
 	public static final Protocol DEFAULT_PROTOCOL = Protocol.SMTP;
+	/** If true, the debug message will be output to console. */
 	public static boolean debug = false;
 
 	private String sender = "noreply@sas.com";
@@ -163,7 +177,7 @@ public class Mailer {
 	 */
 	public Mailer(String user, String password) throws Exception{
 		prepareProperties(DEFAULT_HOST, DEFAULT_PORT, DEFAULT_PROTOCOL);
-		prepareProperties(user, password);
+		prepareProperties(user, password, DEFAULT_PROTOCOL);
 		getSession();
 	}
 
@@ -178,7 +192,7 @@ public class Mailer {
 	 */
 	public Mailer(String host, int port, Protocol protocol, String user, String password) throws Exception{
 		prepareProperties(host, port, protocol);
-		prepareProperties(user, password);
+		prepareProperties(user, password, protocol);
 		getSession();
 	}
 	
@@ -190,8 +204,13 @@ public class Mailer {
 	 * @see #getSession()
 	 */
 	private void prepareProperties(String host, int port, Protocol protocol){
-		props.put("mail.smtp.host", host);
-		props.put("mail.smtp.port", port);
+		String protocolLC = protocol.toString().toLowerCase();
+		props.put("mail."+protocolLC+".host", host);
+		props.put("mail."+protocolLC+".port", port);
+		//"mail.transport.protocol" will decide what protocol to use to transfer message, very important!
+		//it can be smtp, smtps, but tls fails!!!
+		props.put("mail.transport.protocol", protocolLC);
+		
 		switch (protocol) {
 		case SMTPS:
 			props.put("mail.smtp.ssl.enable", true);
@@ -208,8 +227,11 @@ public class Mailer {
 	 * @param password , String, the password of the user.
 	 * @see #getSession()
 	 */
-	private void prepareProperties(final String user, final String password){
-		props.put("mail.smtp.auth", true);
+	private void prepareProperties(final String user, final String password, Protocol protocol){
+		String protocolLC = protocol.toString().toLowerCase();
+		props.put("mail."+protocolLC+".auth", true);
+		props.put("mail."+protocolLC+".user", user);
+		props.put("mail."+protocolLC+".password", password);
 		auth = new Authenticator() {
 			private PasswordAuthentication pa = new PasswordAuthentication(user, password);
 			public PasswordAuthentication getPasswordAuthentication() {
@@ -225,6 +247,7 @@ public class Mailer {
 	 * @see #prepareProperties(String, String)
 	 */
 	protected Session getSession() throws Exception{
+		props.setProperty("mail.debug", String.valueOf(debug));
 		if(session==null) session = Session.getInstance(props, auth);
 		if(session==null) throw new Exception("Cannot get session!!!");
 		
@@ -314,21 +337,74 @@ public class Mailer {
 	}
 	
 	/**
+	 * Before calling this method, the property "mail.transport.protocol" should be ready, 
+	 * refer to {@link #prepareProperties(String, int, Protocol)}.
+	 * @param message
+	 * @throws SAFSException
+	 * @see {@link #prepareProperties(String, int, Protocol)}
+	 * @see #prepareProperties(String, String, Protocol)
+	 * @see #getSession()
+	 */
+	protected void send(MimeMessage message) throws SAFSException{
+		String debugmsg = StringUtils.debugmsg(false);
+		Transport trans = null;
+		//Get transport from session
+		try {
+			trans = session.getTransport();
+		} catch (Exception e) {
+			throw new SAFSException("Fail to get transport from session, due to "+StringUtils.debugmsg(e));
+		}
+		//Connect to mail server
+		try {
+			trans.connect();
+		} catch (Exception e) {
+			IndependantLog.warn(debugmsg+" Fail to connect to mail server, due to "+StringUtils.debugmsg(e));
+			try {
+				Object protocol = props.get("mail.transport.protocol");
+				if(protocol!=null){
+					String host = (String) props.get("mail."+protocol+".host");
+					Integer port = (Integer) props.get("mail."+protocol+".port");
+					Object auth = props.get("mail."+protocol+".auth");
+					if(StringUtilities.convertBool(auth)){
+						String user = (String)props.get("mail."+protocol+".user");
+						String password = (String)props.get("mail."+protocol+".password");
+						trans.connect(host, port, user, password);
+					}
+				}
+			} catch (Exception e1) {
+				throw new SAFSException("Fail to connect to mail server, due to "+StringUtils.debugmsg(e));
+			}
+		}
+		//Send message
+		try{
+			trans.sendMessage(message, message.getAllRecipients());
+		}catch(Exception e){
+			throw new SAFSException("Fail to send messag, due to "+StringUtils.debugmsg(e));
+		}finally{
+			if(trans!=null) try {trans.close();} catch (Exception e) {}
+		}
+	}
+	
+	/**
 	 * Mail text message.
 	 * 
 	 * @param recipients , List<String>, a list of recipients
 	 * @param subject , String, the mail's subject
 	 * @param body , String, the text message to mail.
+	 * @throws SAFSException if there is something wrong
 	 */
-	public void send(List<String> recipients, String subject, String body){
+	public void send(List<String> recipients, String subject, String body) throws SAFSException{
 		try {
 			MimeMessage message = prepareMimeMessage(recipients, subject);
 		    message.setText(body);	         
-		    Transport.send(message);
+		    send(message);
 		    
 		    IndependantLog.debug("Sent text message successfully....");
-		} catch (Exception ex) {
+		}catch(SAFSException se){
+			throw se;
+		}catch (Exception ex) {
 		    IndependantLog.error("Fail to send mail.", ex);
+		    throw new SAFSException("Fail to send mail, due to "+StringUtils.debugmsg(ex));
 		}
 	}
 	
@@ -339,15 +415,19 @@ public class Mailer {
 	 * @param subject , String, the mail's subject
 	 * @param body , Object, the object to mail.
 	 * @param type , the MimeType of the mail body.
+	 * @throws SAFSException if there is something wrong
 	 */
-	public void send(List<String> recipients, String subject, Object body, MimeType type){
+	public void send(List<String> recipients, String subject, Object body, MimeType type) throws SAFSException{
 		try {
 		    MimeMessage message = prepareMimeMessage(recipients, subject);
 	        message.setContent(body, type.contentType);
-		    Transport.send(message);
+		    send(message);
 		    IndependantLog.debug("Sent '"+type.contentType+"' message successfully....");
+		}catch(SAFSException se){
+			throw se;
 		} catch (Exception ex) {
 			IndependantLog.error("Fail to send mail.", ex);
+			throw new SAFSException("Fail to send mail, due to "+StringUtils.debugmsg(ex));
 		}
 	}
 	
@@ -360,9 +440,10 @@ public class Mailer {
 	 * @param body , Object, the object to mail.
 	 * @param type , the MimeType of the mail body.
 	 * @param attachment , String, a  full path file name to attach
+	 * @throws SAFSException if there is something wrong 
 	 */
 	public void send(List<String> recipients, String subject, Object body, MimeType type,
-			String/*full path file name*/ attachment){
+			String/*full path file name*/ attachment) throws SAFSException{
 		List<String> files = new ArrayList<String>();
 		files.add(attachment);
 		send(recipients, subject, body, type, files);
@@ -376,9 +457,10 @@ public class Mailer {
 	 * @param body , Object, the object to mail.
 	 * @param type , the MimeType of the mail body.
 	 * @param attachments , List<String>, a list of full path file name to attach
+	 * @throws SAFSException if there is something wrong 
 	 */
 	public void send(List<String> recipients, String subject, Object body, MimeType type,
-			List<String/*full path file name*/> attachments){
+			List<String/*full path file name*/> attachments) throws SAFSException{
 		
 		HashMap<Integer/*the message order*/, MimeContent> contents = new HashMap<Integer, MimeContent>();
 		HashMap<String/*full path file name*/,String/*alias*/> attchments_alias = new HashMap<String,String>();
@@ -401,9 +483,10 @@ public class Mailer {
 	 * @param body , Object, the object to mail.
 	 * @param type , the MimeType of the mail body.
 	 * @param attchments_alias , HashMap<String//full path file name,String//alias>
+	 * @throws SAFSException if there is something wrong
 	 */	
 	public void send(List<String> recipients, String subject, Object body, MimeType type,
-			HashMap<String/*full path file name*/,String/*alias*/> attchments_alias){
+			HashMap<String/*full path file name*/,String/*alias*/> attchments_alias) throws SAFSException{
 		
 		HashMap<Integer/*the message order*/, MimeContent> contents = new HashMap<Integer, MimeContent>();
 		contents.put(new Integer(0), new MimeContent(body,type));
@@ -420,13 +503,14 @@ public class Mailer {
 	 * @param contents , HashMap<Integer//message order, MimeContent>
 	 *                   only the first element will be sent as main message, other will be sent as attachment.
 	 * @param attchments_alias , HashMap<String//full path file name,String//alias>
+	 * @throws SAFSException if there is something wrong
 	 */
 	public void send(List<String> recipients, String subject, 
 			HashMap<Integer/*the message order*/, MimeContent> contents,
-			HashMap<String/*full path file name*/,String/*alias*/> attchments_alias){
+			HashMap<String/*full path file name*/,String/*alias*/> attchments_alias) throws SAFSException{
 		HashMap<Message.RecipientType, List<String>> type_recipients = new HashMap<Message.RecipientType, List<String>>();
 		type_recipients.put(Message.RecipientType.TO, recipients);
-		this.send(type_recipients, subject, contents, attchments_alias);
+		send(type_recipients, subject, contents, attchments_alias);
 	}
 	
 	/**
@@ -438,10 +522,13 @@ public class Mailer {
 	 * @param contents , HashMap<Integer//message order, MimeContent>, 
 	 *                   only the first element will be sent as main message, other will be sent as attachment.
 	 * @param attchments_alias , HashMap<String//full path file name,String//alias>
+	 * @throws SAFSException if there is something wrong
 	 */
 	public void send(HashMap<Message.RecipientType, List<String>> type_recipients, String subject, 
 			HashMap<Integer/*the message order*/, MimeContent> contents,
-			HashMap<String/*full path file name*/,String/*alias*/> attchments_alias){
+			HashMap<String/*full path file name*/,String/*alias*/> attchments_alias) throws SAFSException{
+		String debugmsg = StringUtils.debugmsg(false);
+		
 		try {
 			MimeMessage message = prepareMimeMessage(type_recipients, subject);
 						
@@ -464,7 +551,7 @@ public class Mailer {
 					}
 				}
 			}else{
-				IndependantLog.debug("No content.");
+				IndependantLog.debug(debugmsg+"No content.");
 			}
 			
 			//Other Parts are attachments
@@ -483,24 +570,27 @@ public class Mailer {
 						messageBodyPart.setFileName((alias!=null? alias:attchedFile.getName()));
 						multipart.addBodyPart(messageBodyPart);
 					}else{
-						IndependantLog.debug(filename+" doesn't exist or is not a file.");
+						IndependantLog.debug(debugmsg+filename+" doesn't exist or is not a file.");
 						continue;
 					}
 				}
 			}else{
-				IndependantLog.debug("No attachment.");
+				IndependantLog.debug(debugmsg+"No attachment.");
 			}
 			
 			if(multipart.getCount()>0){
 				message.setContent(multipart );
-				Transport.send(message);
-				IndependantLog.debug("Sent objects with attachments successfully....");
+				send(message);
+				IndependantLog.debug(debugmsg+"Sent objects with attachments successfully....");
 			}else{
-				IndependantLog.debug("Nothing to send, return successfully....");
+				IndependantLog.debug(debugmsg+"Nothing to send, return successfully....");
 			}
 			
-		} catch (Exception ex) {
-			IndependantLog.error("Fail to send mail.", ex);
+		}catch(SAFSException se){
+			throw se;
+		}catch (Exception ex) {
+			IndependantLog.error(debugmsg+"Fail to send mail.", ex);
+			throw new SAFSException("Fail to send message, due to "+StringUtils.debugmsg(ex));
 		}
 	}
 	
@@ -871,7 +961,7 @@ public class Mailer {
 	}
 	
 	public static enum Protocol {
-		SMTP, SMTPS, TLS;
+		SMTP, SMTPS, TLS, POP3, IMAP;
 		
 		public static Protocol get(String name) throws ParseException{
 			if("SMTP".equalsIgnoreCase(name)){
@@ -880,12 +970,15 @@ public class Mailer {
 				return SMTPS;
 			}else if("TLS".equalsIgnoreCase(name)){
 				return TLS;
+			}else if("POP3".equalsIgnoreCase(name)){
+				return POP3;
+			}else if("IMAP".equalsIgnoreCase(name)){
+				return IMAP;
 			}
 			
 			throw new ParseException("Unknown protocol name '"+name+"'");
 		}
 	}
-	
 	
 	public static enum MimeType {
 	    $323 ("text/h323"),
@@ -1356,4 +1449,3 @@ public class Mailer {
 	    }
 	}
 }
-
