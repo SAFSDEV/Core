@@ -6,6 +6,7 @@ package org.safs.tools.drivers;
 /**
  * History:
  * APR 07, 2015    (Lei Wang) Add static class SeleniumConfigConstant.
+ * SEP 24, 2015    (Lei Wang) Add static class MailConstant.
  */
 import org.safs.JavaConstant;
 import org.safs.StringUtils;
@@ -506,6 +507,39 @@ public class DriverConstant extends JavaConstant{
 	public static final String SECTION_SAFS_SELENIUM ="SAFS_SELENIUM";
 
 	/**
+	 * Define some constant strings used under section {@link DriverConstant#SECTION_SAFS_DIFFER} for Mail.
+	 * 
+	 * @see org.safs.tools.mail.Mailer
+	 */
+	public static final class MailConstant{
+		
+		/** "OUT_MAILSERVER" define the mail server for sending mails. */
+		public static final String OUT_MAILSERVER 			="OUT_MAILSERVER";
+		/** "OUT_MAILSERVERPORT" define the port of mail server for sending mails. */
+		public static final String OUT_MAILSERVERPORT 		="OUT_MAILSERVERPORT";
+		/** "OUT_MAILSERVERPROTOCOL" define the protocol used by mail server for sending mails.
+		 * The value could be SMTP, SMTPS etc. */
+		public static final String OUT_MAILSERVERPROTOCOL 	="OUT_MAILSERVERPROTOCOL";
+		/** "OUT_MAILUSER" define the user for authentication on mail server for sending mails. */
+		public static final String OUT_MAILUSER 			="OUT_MAILUSER";
+		/** "OUT_MAILPASS" define the password for authentication on mail server for sending mails. */
+		public static final String OUT_MAILPASS 			="OUT_MAILPASS";
+		
+		/** "IN_MAILSERVER" define the mail server for receiving mails. */
+		public static final String IN_MAILSERVER 			="IN_MAILSERVER";
+		/** "IN_MAILSERVERPORT" define the port of mail server for receiving mails. */
+		public static final String IN_MAILSERVERPORT 		="IN_MAILSERVERPORT";
+		/** "IN_MAILSERVERPROTOCOL" define the protocol used by mail server for receiving mails. 
+		 * The value could be IMAP, POP3 etc. */
+		public static final String IN_MAILSERVERPROTOCOL 	="IN_MAILSERVERPROTOCOL";
+		/** "IN_MAILUSER" define the user for authentication on mail server for receiving mails. */
+		public static final String IN_MAILUSER 				="IN_MAILUSER";
+		/** "IN_MAILPASS" define the password for authentication on mail server for receiving mails. */
+		public static final String IN_MAILPASS 				="IN_MAILPASS";
+		
+	}
+	/**
+	 * 
 	 * Define some constant strings used under section {@link DriverConstant#SECTION_SAFS_SELENIUM} for SELENIUM.
 	 */
 	public static final class SeleniumConfigConstant{
