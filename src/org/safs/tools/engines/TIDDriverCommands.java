@@ -1,3 +1,22 @@
+/** 
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: http://www.opensource.org/licenses/gpl-license.php
+ **/
+/**
+ * Developer history:
+ * 
+ * AUG 23, 2010	(LeiWang)	Modify method cmdWaitForGUI(): assign the testRecord's windowGuiId to winrec.
+ *                                  If we use Mixed-Mode-RS (OBT-RS for window, IBT-RS for component), we will set
+ *                                  the windowGuiId to an IBT-RS in the RJ engine side. In this method, if we still
+ *                                  take RS from map, the window's RS will be still OBT-RS, then the TestRecord 
+ *                                  can NOT be processed here;
+ *                                  Add a constructor with parameter of type LogUtilities, and set LogUtilities for
+ *                                  itself and its inner TID engines like Log, Flow, Counter engines.
+ * SEP 30, 2010	(LeiWang)   Implement keyword UseSAFSFunctions and UseSeleniumFunctions.
+ * SEP 17, 2014  Carl Nagle     Fixing SAFS Crashes due to incomplete initialization.
+ * JUN 09, 2015  DHARMESH4  Added result email support.
+ * SEP 24, 2015  LeiWang	Modify sendEMail(): get more parameters from configuration file to initialize Mailer.
+ */
 package org.safs.tools.engines;
 
 import java.awt.AWTException;
@@ -9,13 +28,17 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Properties;
 
+import javax.mail.Message;
+import javax.mail.internet.ParseException;
+
+import org.safs.IndependantLog;
 import org.safs.Log;
 import org.safs.SAFSException;
 import org.safs.SAFSNullPointerException;
 import org.safs.STAFHelper;
 import org.safs.StatusCodes;
+import org.safs.StringUtils;
 import org.safs.TestRecordHelper;
 import org.safs.image.ImageUtils;
 import org.safs.logging.AbstractLogFacility;
@@ -24,7 +47,9 @@ import org.safs.staf.STAFProcessHelpers;
 import org.safs.text.FAILStrings;
 import org.safs.text.GENStrings;
 import org.safs.tools.CaseInsensitiveFile;
+import org.safs.tools.drivers.ConfigureInterface;
 import org.safs.tools.drivers.DriverConstant;
+import org.safs.tools.drivers.DriverConstant.MailConstant;
 import org.safs.tools.drivers.DriverInterface;
 import org.safs.tools.input.MapsInterface;
 import org.safs.tools.input.UniqueStringMapInfo;
@@ -33,14 +58,6 @@ import org.safs.tools.mail.Mailer.MimeContent;
 import org.safs.tools.mail.Mailer.MimeType;
 import org.safs.tools.mail.Mailer.Protocol;
 import org.safs.tools.stringutils.StringUtilities;
-
-import com.thoughtworks.selenium.webdriven.commands.AttachFile;
-
-import javax.activation.DataHandler;
-import javax.activation.DataSource;
-import javax.activation.FileDataSource;
-import javax.mail.*;
-import javax.mail.internet.*;
 
 /**
  * Provides local in-process support for Driver Commands.Data
@@ -52,17 +69,7 @@ import javax.mail.internet.*;
  * This DriverCommands engine does not assume the use of STAF. Instead, it uses the
  * various org.safs.tools Interfaces to talk with the rest of the framework (as made
  * available via the DriverInterface configuration).
- * 
- * <br>   AUG 23, 2010	(LeiWang)	Modify method cmdWaitForGUI(): assign the testRecord's windowGuiId to winrec.
- *                                  If we use Mixed-Mode-RS (OBT-RS for window, IBT-RS for component), we will set
- *                                  the windowGuiId to an IBT-RS in the RJ engine side. In this method, if we still
- *                                  take RS from map, the window's RS will be still OBT-RS, then the TestRecord 
- *                                  can NOT be processed here;
- *                                  Add a constructor with parameter of type LogUtilities, and set LogUtilities for
- *                                  itself and its inner TID engines like Log, Flow, Counter engines.
- * <br>   SEP 30, 2010	(LeiWang)   Implement keyword UseSAFSFunctions and UseSeleniumFunctions.
- * <br>   SEP 17, 2014  Carl Nagle      Fixing SAFS Crashes due to incomplete initialization.
- * <br>   JUN 09, 2015  DHARMESH4   Added result email support.
+ *
  */
 public class TIDDriverCommands extends GenericEngine {
 
@@ -1011,7 +1018,8 @@ public class TIDDriverCommands extends GenericEngine {
 	   */
 	  private long sendEmail() {
 		  
-		  String debugmsg = getClass().getName()+".sendEmail() ";  
+		  String debugmsg = StringUtils.debugmsg(false);
+		  
 		  String from = "";
 		  String tos = "";
 		  String subject = "";
@@ -1022,22 +1030,53 @@ public class TIDDriverCommands extends GenericEngine {
 		  HashMap<Message.RecipientType,List<String>> recipients = new HashMap<Message.RecipientType,List<String>>();
 		  HashMap<String,String> attachments_alias = new HashMap<String,String>();
 		  MimeType msg_type = MimeType.html; // default support
-			
-		  String host = driver.getConfigureInterface().getNamedValue(DriverConstant.SECTION_SAFS_DRIVER,"SMTP");
-		 
+
+		  //Get configuration parameters for initialize a Mailer
+		  ConfigureInterface config = driver.getConfigureInterface();
+		  String host = config.getNamedValue(DriverConstant.SECTION_SAFS_DRIVER,"SMTP");
+		  if(host==null) host = config.getNamedValue(DriverConstant.SECTION_SAFS_DRIVER, MailConstant.OUT_MAILSERVER);
 		  if (host == null){
-			  message = failedText.convert("bad_param", "Invalid parameter value for test.ini", "SMTP HOST not found in test.ini");
+			  String param = "'Mail Server' not found.";
+			  message = failedText.convert("bad_param", "Invalid parameter value for "+param, param);
 			  standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
 			  return setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
 		  }
-		 
-		  String portStr = driver.getConfigureInterface().getNamedValue(DriverConstant.SECTION_SAFS_DRIVER,"PORT");
-		  if (portStr == null){
-			  message = failedText.convert("bad_param", "Invalid parameter value for test.ini", "SMTP PORT not found in test.ini");
+		  host = host.trim();
+		  
+		  int port = Mailer.DEFAULT_PORT;
+		  String portStr = config.getNamedValue(DriverConstant.SECTION_SAFS_DRIVER,"PORT");
+		  if(portStr==null) portStr = config.getNamedValue(DriverConstant.SECTION_SAFS_DRIVER, MailConstant.OUT_MAILSERVERPORT);
+		  try{
+			  portStr = portStr.trim();
+			  port = Integer.parseInt(portStr);
+		  }catch(Exception e){
+			  String param = portStr==null? "Mail Server PORT not found.": "Mail Server PORT '"+portStr+"' is not integer.";
+			  message = failedText.convert("bad_param", "Invalid parameter value for "+param, param);
 			  standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
 			  return setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
 		  }
 		  
+		  String protocolStr = config.getNamedValue(DriverConstant.SECTION_SAFS_DRIVER, MailConstant.OUT_MAILSERVERPROTOCOL);
+		  Protocol protocol = Mailer.DEFAULT_PROTOCOL;
+		  if(protocolStr!=null){
+			  try{
+				  protocolStr = protocolStr.trim();
+				  protocol = Protocol.get(protocolStr);
+			  }catch(ParseException e){
+				  IndependantLog.error(debugmsg+e.getMessage());
+				  String param = "protocol "+protocolStr;
+				  message = failedText.convert("bad_param", "Invalid parameter value for "+param, param);
+				  standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
+				  return setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
+			  }
+		  }
+		  
+		  String user = config.getNamedValue(DriverConstant.SECTION_SAFS_DRIVER, MailConstant.OUT_MAILUSER);
+		  if(user!=null) user = user.trim();
+		  String password = config.getNamedValue(DriverConstant.SECTION_SAFS_DRIVER, MailConstant.OUT_MAILPASS);
+		  if(password!=null) password = password.trim();
+		  
+		  IndependantLog.debug(debugmsg+" configuration parameters: host="+host+"; port="+port+"; protocol="+protocol+"; user="+user+"; password=******");
 		  
 		  // from email address
 		  try{ from = testRecordData.getTrimmedUnquotedInputRecordToken(2);}
@@ -1086,14 +1125,15 @@ public class TIDDriverCommands extends GenericEngine {
 		 
 		  
 		  try{
-			  
-			  int port = Integer.parseInt(portStr);
-			  Protocol protocol = Protocol.get("SMTP");
-			  mailer = new Mailer(host, port, protocol);
+			  if(user!=null && password!=null){
+				  mailer = new Mailer(host, port, protocol, user, password);
+			  }else{
+				  mailer = new Mailer(host, port, protocol);
+			  }
 			  
 			  // set sender
 			  mailer.setSender(from);
-			  
+
 			  // set tos
 			  Mailer.handleRecipients(tos, recipientsTo);
 			  recipients.put(Message.RecipientType.TO, recipientsTo);
@@ -1109,8 +1149,8 @@ public class TIDDriverCommands extends GenericEngine {
 			  mailer.send(recipients, subject, contents , attachments_alias);
 			  
 	      }catch (Exception mex) {
-	         mex.printStackTrace();
-	         message = FAILStrings.convert(FAILStrings.BAD_PARAM, "Failed to send email", "sendEmail");
+	         IndependantLog.error(debugmsg+" Fail to send email, due to "+StringUtils.debugmsg(mex));
+	         message = "Fail to send email.";
 			 standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
 		     return setTRDStatus(testRecordData,DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
 	      }		  
