@@ -38,5 +38,7 @@
 	<classpathentry kind="var" path="SAFS_BUILD/libs/rft/com.ibm.rational.test.ft.domain.testobjects_8.3.0.v20121022_1402.jar"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/rft/com.ibm.rational.test.ft.domain.html.dojo.testobjects_8.3.0.v20130226_1842.jar"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/rft/com.ibm.rational.test.ft.clientbase_8.3.0.v20130117_1954.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/autoit/AutoItX4Java.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/autoit/jacob.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
