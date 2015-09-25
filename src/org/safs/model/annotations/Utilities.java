@@ -39,6 +39,7 @@ import org.safs.tools.RuntimeDataInterface;
  * 
  * @author canagl
  * @since OCT 15, 2013
+ * <br>SEP 25, 2015 CANAGL Added support for AutoConfigureJSAFS classes to identify external RuntimeDataAware classes.
  */
 public class Utilities {
 
@@ -265,7 +266,8 @@ public class Utilities {
 	        }
 	    }
 		debug("getPackageClasses found '"+ classes.size() +"' configurable classes.");
-	    cList.addAll(classes);
+		// Attempt to avoid duplicating items already in the List.
+		for(Class c:classes) if(!cList.contains(c)) cList.add(c);
 	    return cList;
 	}
 	
@@ -368,6 +370,28 @@ public class Utilities {
 				debug("injectRuntimeDataAwareClasses detected no standalone Package "+ rootPackageName );
 			}
 		}
+		// check for AutoConfigureJSAFS Annotated classes to enable external RuntimeDataAware dependencies
+		List<String> auto_inclusions = new ArrayList<String>();
+		List<String> auto_exclusions = new ArrayList<String>();
+		for (Class c:cList){
+			if(c.isAnnotationPresent(AutoConfigureJSAFS.class)){
+				AutoConfigureJSAFS ann = (AutoConfigureJSAFS) c.getAnnotation(AutoConfigureJSAFS.class);
+				String include = ann.include();
+				String exclude = ann.exclude();
+				if(include.length() > 0){
+					String[] ps = include.split(";");
+					for(String i:ps) auto_inclusions.add(i);					
+				}
+				if(exclude.length() > 0){
+					String[] ps = exclude.split(";");
+					for(String i:ps) auto_exclusions.add(i);
+				}
+			}			
+		}
+		// add package exclusions to the list before class inclusions
+		for(String s:auto_exclusions) if(!exclusions.contains(s)) exclusions.add(s);
+		for(String s:auto_inclusions) cList = getPackageClasses(s, cList, exclusions);
+		
 		// look for RuntimeDataAware classes to instantiate and inject.
 		String matchname = RuntimeDataAware.class.getName();
 		for(Class c: cList){
