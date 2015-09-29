@@ -309,9 +309,14 @@ public class DocumentClickCapture implements Runnable{
 		long curTime = System.currentTimeMillis();
 		long endTime = curTime + (1000*secondsTimeout);
 		IndependantLog.info(debugmsg+" waiting for event fired signal.");
-		while((curTime < endTime)&&!isReady()){
+		while((curTime < endTime)&&!isEventFired()){
 			try{Thread.sleep(delayWaitReady);}catch(InterruptedException ignore){}
 			curTime = System.currentTimeMillis();
+		}
+		if(isEventFired()){
+			IndependantLog.info(debugmsg+" detected event has been fired. Checking READY.");
+		}else{
+			IndependantLog.info(debugmsg+" detected event has NOT been fired.");
 		}
 		setRunning(false);
 		notListening = true;
@@ -323,14 +328,18 @@ public class DocumentClickCapture implements Runnable{
 			while(!isReady() && tic++<totalTics){//Wait ready for more times
 				try{Thread.sleep(delayWaitReady);}catch(InterruptedException ignore){}
 			}
+			// TODO Carl Nagle resetting eventFired may be wrong here?!
+			// only if !isReady() ?
 			setEventFired(false);
 		}
 		
 		if(isReady()){
 			setReady(false);
 		}else{
-			throw new InterruptedException(debugmsg +"timeout has been reached.");
+			IndependantLog.info(debugmsg+" isReady() timeout has been reached.");
+			throw new InterruptedException(debugmsg +" isReady() timeout has been reached.");
 		}
+		IndependantLog.info(debugmsg+" returning mouseEvent: "+ mouseEvent);
 		return mouseEvent;
 	}
 	
@@ -374,12 +383,19 @@ public class DocumentClickCapture implements Runnable{
 		while(isRunning()){
 			try {
 				IndependantLog.suspendLogging();
-
-				try{ eventfired = SearchObject.js_getGlobalBoolVariable(listenerID);}
+				try{ 
+					eventfired = SearchObject.js_getGlobalBoolVariable(listenerID);
+				}
 				catch(IllegalStateException is){
 					// 99% likely the page has been refreshed because of the click!
 					// our global variables and such are GONE!
+					IndependantLog.resumeLogging();
 					IndependantLog.debug(debugmsg+ listenerID+ " global data appears to be GONE! DOM refresh?");
+					eventfired = true;
+					jsGone = true;
+				}catch(Throwable thr){
+					IndependantLog.resumeLogging();
+					IndependantLog.debug(debugmsg+ listenerID+ " getGlobalBoolVariable Throws "+ thr.getClass().getSimpleName()+", "+ thr.getMessage());
 					eventfired = true;
 					jsGone = true;
 				}
@@ -406,7 +422,12 @@ public class DocumentClickCapture implements Runnable{
 					}
 					setRunning(false);
 					//reset the global variable
-					if(!jsGone) SearchObject.js_setGlobalBoolVariable(listenerID, false);
+					if(!jsGone) {
+						IndependantLog.debug(debugmsg+ listenerID+ " resetting global javascript variable.");
+						SearchObject.js_setGlobalBoolVariable(listenerID, false);
+					}else{
+						IndependantLog.debug(debugmsg+ listenerID+ " javascript variable GONE and will not be reset.");
+					}
 				}else{
 					try { Thread.sleep(LISTENER_LOOP_DELAY); } catch (InterruptedException ignore) { }
 				}
@@ -416,10 +437,13 @@ public class DocumentClickCapture implements Runnable{
 				break;
 			}
 		}		
+		IndependantLog.resumeLogging();
 		setRunning(false);
 		try{
 			removeEventListeners(); 
-		}catch(Exception ignore){}
+		}catch(Throwable ignore){
+			IndependantLog.warn(debugmsg+" ignoring failure to removeEventListeners: "+ ignore.getClass().getSimpleName()+", "+ ignore.getMessage());
+		}
 		IndependantLog.debug(debugmsg+"ended pollingThread for "+ listenerID);
 	}
 		
@@ -578,10 +602,10 @@ public class DocumentClickCapture implements Runnable{
 		String debugmsg = "DocumentClickCapture.removeEventListeners ";		
 		setRunning(false);	
 		String errmsg = "";
-		// listenerSent will be true when/if addEventListeners sets it
-		// if it was not set there, then we need to send it each time (Firefox?).
-		String listener = isSet() ? "" : getEventListener();
 		try{ 
+			// listenerSent will be true when/if addEventListeners sets it
+			// if it was not set there, then we need to send it each time (Firefox?).
+			String listener = isSet() ? "" : getEventListener();
 			notListening = true;
 			String script = listener + _removeEventListeners()+" _removeEventListeners(arguments[0]);";;
 			SearchObject.executeScript(script, target);
