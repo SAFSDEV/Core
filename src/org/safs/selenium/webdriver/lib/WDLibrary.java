@@ -126,9 +126,16 @@ public class WDLibrary extends SearchObject {
 
     /** 2 seconds to wait for a click action finished on page. */
 	public static final int DEFAULT_TIMEOUT_WAIT_CLICK = 2;//seconds
+
 	/** time (in seconds) to wait for a click action finished on page. */
 	public static int timeoutWaitClick = DEFAULT_TIMEOUT_WAIT_CLICK;//seconds
 
+    /** 10 seconds to wait for a Robot click action finished on page. */
+	public static final int DEFAULT_TIMEOUT_WAIT_ROBOT_CLICK = 10;//seconds
+
+	/** time (in seconds) to wait for a Robot click action finished on page. */
+	public static int timeoutWaitRobotClick = DEFAULT_TIMEOUT_WAIT_ROBOT_CLICK;//seconds
+	
 	static protected InputKeysParser keysparser = null;
 
 	/**
@@ -293,14 +300,17 @@ public class WDLibrary extends SearchObject {
 			// Carl Nagle -- FIREFOX PROBLEM: A link that takes you to a new page (like the Google SignIn link) will
 			// trigger the default action and apparently will NOT allow us to detect the Click occurred.
 			// So this WILL generate a waitForClick InterruptedException (Timeout)
-			event = listener.waitForClick(timeoutWaitClick);
+			event = listener.waitForClick(timeoutWaitRobotClick);
 			if(event == null){
+				IndependantLog.resumeLogging();
 				IndependantLog.warn(debugmsg+" Robot may fail to perform click. Click screen location is "+location);
-				throw new SeleniumPlusException("The click action didn't happen.");
+				throw new SeleniumPlusException("The Robot click action didn't happen.");
 			}else{
-				IndependantLog.debug(debugmsg+"click has been performed.");
+				IndependantLog.resumeLogging();
+				IndependantLog.debug(debugmsg+"Robot click successful.");
 			}
 		} catch (Throwable thr){
+			IndependantLog.resumeLogging();
 			IndependantLog.warn(debugmsg+"Met Exception "+StringUtils.debugmsg(thr));
 
 			// let the failed listeners exit.
@@ -371,7 +381,7 @@ public class WDLibrary extends SearchObject {
 				}
 			}
 		}finally{
-			IndependantLog.debug(debugmsg+"Robot API click finally stopping listener.");
+			IndependantLog.debug(debugmsg+"FINALLY stopping any ongoing listener, if any.");
 			listener.stopListening();  // chrome is NOT stopping!
 		}
 	}
