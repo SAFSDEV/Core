@@ -50,29 +50,34 @@ abstract public class AbstractListSelectable extends AbstractSelectable implemen
 			if(criterion.getText()!=null){
 				Item[] items = getContent();
 				if(items==null || items.length==0){
-					IndependantLog.error(debugmsg+" ====== Cannot get elements from container.");
+					IndependantLog.error(debugmsg+" ====== Did NOT get any elements from container.");
+				}else{
+					IndependantLog.info(debugmsg+" processing "+ items.length +" items.");
 				}
-				int i = 0;
-				
-				for(Item item: items){
-					if(criterion.matchText(item.getLabel())){
-						if(i++==matchIndex){
+				int matchedIndex = 0;
+				Item item = null;
+				String label = null;
+				for(int i=0;i<items.length;i++){
+					item = items[i];
+					label = item.getLabel();
+					if(criterion.matchText(label)){
+						if(matchedIndex++ == matchIndex){
 							matchedItem = item;
+							IndependantLog.info(debugmsg+" matched item '"+ label +"' at child index "+ i);
 							break;
 						}
 					}
 				}
 			}else{//criterion.getText()==null, only index is valid for searching
 				matchedItem = getMatchedItem(matchIndex);
-			}
-			
+			}			
 		} catch (SeleniumPlusException e) {
 			IndependantLog.error(debugmsg+"Cannot get elements from container.", e);
 		}
 
 		if(matchedItem==null){
-			IndependantLog.error(debugmsg+"Fail to find element "+criterion.toString());
-			throw new SeleniumPlusException("Fail to find element '"+criterion.getText()+"'.");
+			IndependantLog.error(debugmsg+"Failed to find matching element "+criterion.toString());
+			throw new SeleniumPlusException("Failed to find matching element '"+criterion.getText()+"'.");
 		}
 		return matchedItem;
 	}
