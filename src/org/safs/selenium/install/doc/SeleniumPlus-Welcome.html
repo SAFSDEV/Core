@@ -21,6 +21,7 @@ function hideAllContentPanels(){
     document.getElementById("project-import").style.display="none";
     document.getElementById("project-edit").style.display="none";
     document.getElementById("expressions").style.display="none";
+    document.getElementById("auto-config").style.display="none";
     document.getElementById("tests-run").style.display="none";
     document.getElementById("logging").style.display="none";
     document.getElementById("tests-backup").style.display="none";
@@ -40,6 +41,7 @@ function hideAllContentPanels(){
     document.getElementById("href-project-import").style.fontWeight="normal";
 	document.getElementById("href-project-edit").style.fontWeight="normal";
 	document.getElementById("href-expressions").style.fontWeight="normal";
+    document.getElementById("href-auto-config").style.fontWeight="normal";
 	document.getElementById("href-tests-run").style.fontWeight="normal";
 	document.getElementById("href-logging").style.fontWeight="normal";
 	document.getElementById("href-tests-backup").style.fontWeight="normal";
@@ -86,6 +88,11 @@ function expressions(){
 	hideAllContentPanels();
     document.getElementById("expressions").style.display="block";
     document.getElementById("href-expressions").style.fontWeight="900";
+}
+function autoConfig(){
+	hideAllContentPanels();
+    document.getElementById("auto-config").style.display="block";
+    document.getElementById("href-auto-config").style.fontWeight="900";
 }
 function runTests(){
 	hideAllContentPanels();
@@ -148,7 +155,7 @@ function remoteServers(){
 <body>
 <span style="font-size: 32px;font-weight: bold">Intro to SeleniumPlus</span>
 <br>
-<small>Updated: 2015.07.22</small>
+<small>Updated: 2015.09.29</small>
 <br>
 <div id="menu" class="panelselector">
 <hr>
@@ -159,6 +166,7 @@ function remoteServers(){
 <a href="#" onclick="editAppMaps()" id="href-appmaps" >Edit AppMaps</a>&nbsp;&nbsp;
 <a href="#" onclick="expressions()" id="href-expressions">Expressions</a>&nbsp;&nbsp;
 <a href="#" onclick="editTests()" id="href-project-edit">Edit Tests</a>&nbsp;&nbsp;
+<a href="#" onclick="autoConfig()" id ="href-auto-config" >Auto Config</a>&nbsp;&nbsp;
 <a href="#" onclick="runTests()" id ="href-tests-run" >Run Tests</a>&nbsp;&nbsp;
 <a href="#" onclick="logging()" id ="href-logging" >Logging</a>&nbsp;&nbsp;
 <a href="#" onclick="backupTests()" id ="href-tests-backup" >CVS/Check-in</a>&nbsp;&nbsp;
@@ -840,6 +848,54 @@ GoogleURL="http://www.google.com"
 	    <li>Remember, every program statement must end with a semi-colon.
 	</ol>
 </ol>
+<hr>
+</div>
+
+<!--------------------------------->
+<!-- Auto Config Instructions      -->
+<!--------------------------------->
+<div id="auto-config" style="display: none;">
+<h2>Automatic Configuration</h2>
+<p>
+Classes in your "<b>current</b>" project will automatically receive <a href="http://safsdev.sourceforge.net/doc/org/safs/model/tools/RuntimeDataAware.html" target="_blank" title="RuntimeDataAware Class Reference">RuntimeDataAware</a>-ness at Runtime (i.e. when the test is run.)  These classes will receive required object instances at runtime for doing things like retrieving values out of the runtime App Maps.
+<p>
+You normally don't have to think or worry about this because it happens for you behind the scenes every time you run a test. If you only use classes in your current Project, and don't reference Maps or Utility classes from other SeleniumPlus projects, then you can stop reading this and explore other sections of the Intro.
+<p>
+However, if you DO reference "<b>other</b>" SeleniumPlus projects in your current project--like an external "<b>helper</b>" project--or other projects that have runtime functionality you want to share and NOT duplicate--then you do need to consider the following.
+<p>
+Classes in those "<b>other</b>" projects that are not the "<b>current</b>" project will NOT receive their normal RuntimeDataAware-ness at runtime.  This can present a problem if your try to use another project's testcases, or if you try to use those other projects' Map classes:<pre>
+    <b>String val = helper.Map.SomeConstant();</b>
+</pre>
+<p>
+The call will work normally when that project is the "current" project, but it may not work correctly if it is the "other" project. You can verify this by reviewing the Debug Log after a run.  The Debug Log will show which packages and classes were checked for automatic injection of RuntimeDataAware-ness.  The classes in the "other" project will NOT be listed in the log.
+<p>
+To fix this runtime issue:
+<p>
+<ul>
+<li>Any Class--usually any one testcase or testrun (except the dynamically generated Map class)--you have in the "<b>current</b>" project can be modified to support automatic injection of RuntimeDataAware classes in other projects referenced at runtime. Those other project classes <b>must</b> be in the Classpath (or BuildPath) of the <b>current</b> project. In other words, those <b>other</b> external classes have to be <b>findable</b> at runtime.
+<p>
+<li>To the desired Class in the <b>current</b> project, you add a Java annotation right above the Class definition.  Below I show a sample.Utilities class as an example of enabling:
+<p><ul>
+@<b><a href="http://safsdev.sourceforge.net/doc/org/safs/model/annotations/AutoConfigureJSAFS.html"
+target="_blank" title="AutoConfigureJSAFS Class Reference">AutoConfigureJSAFS</a></b>(include="otherproject.Map;anotherproject.Map")<br>
+<b>public class</b> Utilities <b>extends</b> SeleniumPlus {<br>
+<b>...</b><br>
+   </ul>
+<li>You only have to place this annotation on any one class in your <b>current</b> project--perhaps a Utilities class?<br>
+(But not the dynamically generated Map class.)
+<p>
+<li>The annotation will enable this for all tests in the <b>current</b> project.<br>
+This is because when we check to auto-inject dependencies for a test/Class we check all classes in the same packages and all subpackages of that test/Class.
+<p>
+<li>The compiler may warn/inform you that you need to import the AutoConfigureJSAFS annotation class:
+<p><ul>
+   <b>import</b> org.safs.model.annotations.AutoConfigureJSAFS;
+   </ul>
+</ul>
+<p>
+Recompile and Run and the issues encountered in the "other" project(s) should be resolved.
+<p>
+You can review the Debug Log after the Run and you should see where injecting the RuntimeDataAware classes in the "other" project(s) was attempted.
 <hr>
 </div>
 
