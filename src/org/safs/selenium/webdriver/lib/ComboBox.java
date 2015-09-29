@@ -14,6 +14,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.safs.IndependantLog;
 import org.safs.StringUtils;
@@ -953,7 +954,13 @@ public class ComboBox extends Component{
 		 */
 		public void hidePopup() throws SeleniumPlusException {
 			try{
-				webelement().sendKeys(Keys.ESCAPE);
+				try {
+					webelement().sendKeys(Keys.ESCAPE);
+				} catch (WebDriverException wde) {
+					// In Chrome, the Selenium API may fail. Using Robot as workaround.
+					IndependantLog.debug("Failed to use Selenium API to hide the combo-box's popup, try to use Robot API instead.");
+					WDLibrary.inputKeys(webelement(), "{Esc}");
+				}
 			}catch(Throwable th){
 				IndependantLog.error("Fail to hide the combo-box's popup.", th);
 				throw new ComboBoxException("Fail to hide the combo-box's popup.",ComboBoxException.CODE_FAIL_CLOSE_POPUP);
@@ -966,7 +973,13 @@ public class ComboBox extends Component{
 		public void showPopup() throws SeleniumPlusException {
 			try{
 				//First hide the popup
-				webelement().sendKeys(Keys.ESCAPE);
+				try {
+					webelement().sendKeys(Keys.ESCAPE);
+				} catch (WebDriverException wde) {
+					// In Chrome, the Selenium API may fail. Using Robot as workaround.
+					IndependantLog.debug("Failed to use Selenium API to hide the combo-box's popup, try to use Robot API instead.");
+					WDLibrary.inputKeys(webelement(), "{Esc}");
+				}
 				//Then click the combo-box to show the popup
 				webelement().click();
 //				Then click the combo-box at the button of right side to show the popup
@@ -1164,7 +1177,13 @@ public class ComboBox extends Component{
 		public void showPopup() throws SeleniumPlusException {
 			try{
 				//First hide the popup
-				webelement().sendKeys(Keys.ESCAPE);
+				try {
+					webelement().sendKeys(Keys.ESCAPE);
+				} catch (WebDriverException wde) {
+					// In Chrome, the Selenium API may fail. Using Robot as workaround.
+					IndependantLog.debug("Failed to use Selenium API to hide the combo-box's popup, try to use Robot API instead.");
+					WDLibrary.inputKeys(webelement(), "{Esc}");
+				}
 				//Then click the combo-box at the button of right side to show the popup
 				Dimension d = webelement().getSize();
 				//offset will be the location of the combobox-button
