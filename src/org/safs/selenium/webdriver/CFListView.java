@@ -156,16 +156,28 @@ public class CFListView extends CFComponent {
 		   ){
 
 			//'matchIndex' optional parameter
-			if(iterator.hasNext()) matchIndex = StringUtilities.getIndex((String)iterator.next());
+			if(iterator.hasNext()) {
+				IndependantLog.info(debugmsg+" command '"+action+"' retrieving optional matchIndex...");
+				matchIndex = StringUtilities.getIndex((String)iterator.next());
+				IndependantLog.info(debugmsg+" command '"+action+"' matchIndex: "+ matchIndex);
+			}
 		}
 		else if(action.equalsIgnoreCase(ListViewFunctions.CAPTUREITEMSTOFILE_KEYWORD)){
 			//'encoding' optional parameter
-			if(iterator.hasNext()) encoding = (String)iterator.next();
+			if(iterator.hasNext()) {
+				IndependantLog.info(debugmsg+" command '"+action+"' retrieving optional encoding...");
+				encoding = (String)iterator.next();
+				IndependantLog.info(debugmsg+" command '"+action+"' encoding: "+ encoding);
+			}
 			
 		}
 		else if(action.equalsIgnoreCase(ListViewFunctions.SETLISTCONTAINS_KEYWORD)){
 			//'variable' optional parameter
-			if(iterator.hasNext()) variable = (String)iterator.next();
+			if(iterator.hasNext()) {
+				IndependantLog.info(debugmsg+" command '"+action+"' retrieving optional variableName...");
+				variable = (String)iterator.next();
+				IndependantLog.info(debugmsg+" command '"+action+"' variableName: "+ variable);
+			}
 			
 		}
 		
