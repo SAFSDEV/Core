@@ -1684,6 +1684,25 @@ public class JavaScriptFunctions {
 		return scriptCommand.toString();
 	}
 	
+	public static final class GENERIC{
+		/** OL or UL list items */
+		public static String generic_getListItems(){
+			StringBuffer scriptCommand = new StringBuffer();
+			scriptCommand.append("function generic_getListItems(webElement){\n");
+			scriptCommand.append("  try{\n");
+			scriptCommand.append("    var object = webElement.getElementsByTagName('LI');\n");
+			scriptCommand.append("    if(object==undefined){\n");
+			scriptCommand.append("      throw new Error('can not find items in List.');\n");
+			scriptCommand.append("    }\n");
+			scriptCommand.append("    return object;\n");
+			scriptCommand.append("  }catch(error){\n");
+			scriptCommand.append("    throw error;\n");
+			scriptCommand.append("  }\n");
+			scriptCommand.append("}\n");			
+			return scriptCommand.toString();
+		}
+	}
+	
 	public static final class SAP{
 		
 		/**
