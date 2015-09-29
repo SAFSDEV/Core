@@ -13,6 +13,7 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.safs.IndependantLog;
 import org.safs.StringUtils;
+import org.safs.selenium.util.JavaScriptFunctions;
 import org.safs.selenium.util.JavaScriptFunctions.SAP;
 import org.safs.selenium.webdriver.lib.model.AbstractListSelectable;
 import org.safs.selenium.webdriver.lib.model.Element;
@@ -51,6 +52,7 @@ public class ListView extends Component implements IListSelectable{
 		IListSelectable operable = null;
 		try{
 			if(WDLibrary.isDojoDomain(listview)){
+				IndependantLog.warn(debugmsg+" Cannot create Selectable operable of Dojo Selectable at this time.");
 				//				return new DojoSelectable_MultiSelect(this);
 			}else if(WDLibrary.isSAPDomain(listview)){
 				try{ operable = new SapSelectable_ListBox(this);}catch(SeleniumPlusException se0){
@@ -61,6 +63,10 @@ public class ListView extends Component implements IListSelectable{
 							IndependantLog.warn(debugmsg+" Cannot create Selectable of "+Arrays.toString(SapSelectable_m_SelectList.supportedClazzes));
 						}					
 					}					
+				}
+			}else {
+				try{ operable = new GenericSelectableList(this);}catch(SeleniumPlusException se0){
+					IndependantLog.debug(debugmsg+" Cannot create Selectable of "+Arrays.toString(GenericSelectableList.supportedClazzes));
 				}
 			}
 
@@ -505,6 +511,57 @@ public class ListView extends Component implements IListSelectable{
 				super.verifyItemSelected(element);
 			}
 		}
+	}
+
+	static class GenericSelectableList extends AbstractListSelectable{
+		public static final String CLASS_NAME_UL_LIST 	= "ul";
+		public static final String CLASS_NAME_OL_LIST	= "ol";//child of sap.m.ListBase
+		public static final String[] supportedClazzes = {CLASS_NAME_UL_LIST, CLASS_NAME_OL_LIST};
+
+		public GenericSelectableList(Component component) throws SeleniumPlusException {
+			super(component);
+		}
+
+		/* (non-Javadoc)
+		 * @see org.safs.selenium.webdriver.lib.model.Supportable#getSupportedClassNames()
+		 */
+		public String[] getSupportedClassNames() {
+			return supportedClazzes;
+		}
+
+		/* (non-Javadoc)
+		 * @see org.safs.selenium.webdriver.lib.model.ISelectable#getContent()
+		 */
+		public Item[] getContent() throws SeleniumPlusException {
+			String debugmsg = StringUtils.debugmsg(this.getClass(), "getContent");
+			List<Item> items = new ArrayList<Item>();
+
+			try {
+				StringBuffer jsScript = new StringBuffer();
+				jsScript.append(JavaScriptFunctions.GENERIC.generic_getListItems());
+				jsScript.append(" return generic_getListItems(arguments[0]);");
+				Object result = WDLibrary.executeJavaScriptOnWebElement(jsScript.toString(), webelement());
+
+				if(result instanceof List){
+					Object[] objects = ((List<?>) result).toArray();
+					Item item = null;
+					for(Object object:objects){
+						if(object!=null){
+							item = new Item(object);
+							items.add(item);
+						}
+					}
+				}else if(result!=null){
+					IndependantLog.warn("Need to handle javascript result whose type is '"+result.getClass().getName()+"'!");
+					IndependantLog.warn("javascript result:\n"+result);
+				}
+			} catch(Exception e) {
+				IndependantLog.debug(debugmsg+" Met exception.",e);
+			}
+
+			return items.toArray(new Item[0]);
+		}
+
 	}
 
 	static class SapSelectable_m_SelectList extends AbstractListSelectable{
