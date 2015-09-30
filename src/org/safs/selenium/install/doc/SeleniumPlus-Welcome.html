@@ -155,7 +155,7 @@ function remoteServers(){
 <body>
 <span style="font-size: 32px;font-weight: bold">Intro to SeleniumPlus</span>
 <br>
-<small>Updated: 2015.09.29</small>
+<small>Updated: 2015.09.30</small>
 <br>
 <div id="menu" class="panelselector">
 <hr>
@@ -872,22 +872,30 @@ The call will work normally when that project is the "current" project, but it m
 To fix this runtime issue:
 <p>
 <ul>
-<li>Any Class--usually any one testcase or testrun (except the dynamically generated Map class)--you have in the "<b>current</b>" project can be modified to support automatic injection of RuntimeDataAware classes in other projects referenced at runtime. Those other project classes <b>must</b> be in the Classpath (or BuildPath) of the <b>current</b> project. In other words, those <b>other</b> external classes have to be <b>findable</b> at runtime.
+<li>Any Class--usually any one testcase or testrun (except the dynamically generated Map class)--you have in the "<b>current</b>" project can be modified to support automatic injection of <a href="http://safsdev.sourceforge.net/doc/org/safs/model/tools/RuntimeDataAware.html" target="_blank" title="RuntimeDataAware Class Reference">RuntimeDataAware</a> classes in other projects referenced at runtime. Those other project classes <b>must</b> be in the Classpath (or BuildPath) of the <b>current</b> project. In other words, those <b>other</b> external classes have to be <b>findable</b> at runtime.
 <p>
 <li>To the desired Class in the <b>current</b> project, you add a Java annotation right above the Class definition.  Below I show a sample.Utilities class as an example of enabling:
 <p><ul>
 @<b><a href="http://safsdev.sourceforge.net/doc/org/safs/model/annotations/AutoConfigureJSAFS.html"
-target="_blank" title="AutoConfigureJSAFS Class Reference">AutoConfigureJSAFS</a></b>(include="otherproject.Map;anotherproject.Map")<br>
+target="_blank" title="AutoConfigureJSAFS Class Reference">AutoConfigureJSAFS</a></b>(include="mypackage.Map;another.package.Map")<br>
 <b>public class</b> Utilities <b>extends</b> SeleniumPlus {<br>
 <b>...</b><br>
-   </ul>
+<p>
+The above example tells SeleniumPlus to check all classes in:
+<p><ul>
+    <li>"mypackage" package and all its subpackages, and<br>
+    <li>"another.package" package and all its subpackages.
+    </ul>
+    </ul>
+<p>
 <li>You only have to place this annotation on any one class in your <b>current</b> project--perhaps a Utilities class?<br>
 (But not the dynamically generated Map class.)
 <p>
 <li>The annotation will enable this for all tests in the <b>current</b> project.<br>
 This is because when we check to auto-inject dependencies for a test/Class we check all classes in the same packages and all subpackages of that test/Class.
 <p>
-<li>The compiler may warn/inform you that you need to import the AutoConfigureJSAFS annotation class:
+<li>The compiler may warn/inform you that you need to import the <a href="http://safsdev.sourceforge.net/doc/org/safs/model/annotations/AutoConfigureJSAFS.html"
+target="_blank" title="AutoConfigureJSAFS Class Reference">AutoConfigureJSAFS</a> annotation class:
 <p><ul>
    <b>import</b> org.safs.model.annotations.AutoConfigureJSAFS;
    </ul>
