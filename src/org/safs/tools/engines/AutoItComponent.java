@@ -1,3 +1,6 @@
+/** Copyright (C) SAS Institute All rights reserved.
+ ** General Public License: http://www.opensource.org/licenses/gpl-license.php
+ **/
 package org.safs.tools.engines;
 
 import java.awt.AWTException;
@@ -48,6 +51,8 @@ import autoitx4java.AutoItX;
  * This engine does not assume the use of STAF. Instead, it uses the
  * various org.safs.tools Interfaces to talk with the rest of the framework (as made
  * available via the DriverInterface configuration).
+ * @author Dharmesh Patel
+ * <br> SEP 30, 2015 Carl Nagle CFComponent return NOT_EXECUTED if RS is empty, missing, or not AutoIt RS. 
  */
 public class AutoItComponent extends GenericEngine {
 
@@ -202,42 +207,39 @@ public class AutoItComponent extends GenericEngine {
 		 * Process the record present in the provided testRecordData.
 		 */
 		public void process(){
-			String debugmsg = getClass().getName()+".process(): ";
+			String debugmsg = "AutoItComponent$CFComponent.process() "+ action +": ";
 			updateFromTestRecordData();
 			
-			try {
-			
-				String winrec = testRecordData.getWindowGuiId();
-				String comprec = testRecordData.getCompGuiId();
-				if (!AutoItRs.isAutoitBasedRecognition(winrec)){
-					Log.info(debugmsg + " processing " + action + " for AutoIt Engine.");
-		        	testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
-		        	return;
-		        }
-				Log.info(debugmsg + " processing '"+action+"'; win: "+ windowName +"; comp: "+ compName+"; with params: "+params);
+			String winrec = null;
+			String comprec = null;
+			// GUILess commands may NOT have a recognition string
+			try{
+				winrec = testRecordData.getWindowGuiId();
+				comprec = testRecordData.getCompGuiId();
+			}catch(SAFSException e){
+				Log.debug(debugmsg + "recognition strings missing or invalid for AutoIt engine.");
+	        	testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
+	        	return;
+			}
+			if (!AutoItRs.isAutoitBasedRecognition(winrec)){
+				Log.info(debugmsg + " skipping due to non-AutoIt recognition.");
+	        	testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
+	        	return;
+	        }
+			Log.info(debugmsg + " win: "+ windowName +"; comp: "+ compName+"; with params: "+params);
 
-				// prepare Autoit RS
-				AutoItRs rs = new AutoItRs(winrec,comprec);
-				
-				if ( action.equalsIgnoreCase( COMMAND_CLICK )){		                
-					click(rs);	                
-				} else if ( action.equalsIgnoreCase( COMMAND_SETFOCUS )) {
-				    setFocus(rs);
-				} else if ( action.equalsIgnoreCase(SETTEXTVALUE_KEYWORD)) {
-					setText(rs);
-				}
-	             
-			}catch(SAFSException x){
-				Log.info( debugmsg + " exception \""+ x.getMessage() +"\".");
-	  			testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
-	  		    log.logMessage(testRecordData.getFac(),
-	  		                   " SAFSException: " + x.toString(),
-	  		                   FAILED_MESSAGE);
-		    }
+			// prepare Autoit RS
+			AutoItRs rs = new AutoItRs(winrec,comprec);
+			
+			if ( action.equalsIgnoreCase( COMMAND_CLICK )){		                
+				click(rs);	                
+			} else if ( action.equalsIgnoreCase( COMMAND_SETFOCUS )) {
+			    setFocus(rs);
+			} else if ( action.equalsIgnoreCase(SETTEXTVALUE_KEYWORD)) {
+				setText(rs);
+			}
 		}
-		
-		
-		
+						
 		
 		/** setfoucs **/
 		protected void setFocus(AutoItRs ars){
