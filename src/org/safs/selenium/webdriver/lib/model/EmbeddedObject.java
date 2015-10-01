@@ -47,18 +47,21 @@ public abstract class EmbeddedObject implements Supportable{
 	 * Test if the element is supported. Handle different domains such as SAP, DOJO, HTML etc.
 	 */
 	public boolean isSupported(WebElement element){
+		boolean rc = false;
 		try {
 			if(WDLibrary.isDojoDomain(element)){
-				return WDLibrary.DOJO.isSupported(element, getSupportedClassNames());
-			}else if(WDLibrary.isSAPDomain(element)){
-				return WDLibrary.SAP.isSupported(element, getSupportedClassNames());
-			}else{
-				return WDLibrary.HTML.isSupported(element, getSupportedClassNames());
+				rc = WDLibrary.DOJO.isSupported(element, getSupportedClassNames());
+			} 
+			if(!rc && WDLibrary.isSAPDomain(element)){
+				rc = WDLibrary.SAP.isSupported(element, getSupportedClassNames());
+			}
+			if(!rc){
+				rc = WDLibrary.HTML.isSupported(element, getSupportedClassNames());
 			}
 		} catch (SeleniumPlusException e) {
 			IndependantLog.error("not supported due to "+StringUtils.debugmsg(e));
-			return false;
 		}
+		return rc;
 	}
 	
 	/**
