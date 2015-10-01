@@ -55,6 +55,7 @@ public class ListView extends Component implements IListSelectable{
 				IndependantLog.warn(debugmsg+" Cannot create Selectable operable of Dojo Selectable at this time.");
 				//				return new DojoSelectable_MultiSelect(this);
 			}else if(WDLibrary.isSAPDomain(listview)){
+				IndependantLog.info(debugmsg+" trying to create Selectable operable of SAP/OpenUI5 at this time.");
 				try{ operable = new SapSelectable_ListBox(this);}catch(SeleniumPlusException se0){
 					IndependantLog.debug(debugmsg+" Cannot create Selectable of "+Arrays.toString(SapSelectable_ListBox.supportedClazzes));
 					try{ operable = new SapSelectable_m_List(this);}catch(SeleniumPlusException se1){
@@ -64,7 +65,9 @@ public class ListView extends Component implements IListSelectable{
 						}					
 					}					
 				}
-			}else {
+			}
+			if(operable == null) {
+				IndependantLog.info(debugmsg+" trying to create Selectable operable of for Generic Lists at this time.");
 				try{ operable = new GenericSelectableList(this);}catch(SeleniumPlusException se0){
 					IndependantLog.debug(debugmsg+" Cannot create Selectable of "+Arrays.toString(GenericSelectableList.supportedClazzes));
 				}
@@ -99,7 +102,14 @@ public class ListView extends Component implements IListSelectable{
 	public void selectItem(TextMatchingCriterion criterion, boolean verify, Keys key, Point offset, int mouseButtonNumber) throws SeleniumPlusException {
 		String debugmsg = StringUtils.debugmsg(this.getClass(), "selectItem");
 		try{
-			listable.selectItem(criterion, verify, key, offset, mouseButtonNumber);
+			// prevent infinite loop
+			if(listable != this) { 
+				listable.selectItem(criterion, verify, key, offset, mouseButtonNumber);
+			}else{
+				String msg = debugmsg +" listable(this) infinite loop prevention!";
+				IndependantLog.error(msg);
+				throw new SeleniumPlusException(msg);
+			}
 		}catch(Exception e){
 			if(e instanceof SeleniumPlusException) throw (SeleniumPlusException)e;
 			else{
@@ -128,7 +138,14 @@ public class ListView extends Component implements IListSelectable{
 	public void selectItem(int index, boolean verify, Keys key, Point offset, int mouseButtonNumber) throws SeleniumPlusException {
 		String debugmsg = StringUtils.debugmsg(this.getClass(), "selectItem");
 		try{
-			listable.selectItem(index, verify, key, offset, mouseButtonNumber);
+			// prevent infinite loop
+			if(listable != this) { 
+				listable.selectItem(index, verify, key, offset, mouseButtonNumber);
+			}else{
+				String msg = debugmsg +" listable(this) infinite loop prevention!";
+				IndependantLog.error(msg);
+				throw new SeleniumPlusException(msg);
+			}
 		}catch(Exception e){
 			if(e instanceof SeleniumPlusException) throw (SeleniumPlusException)e;
 			else{
@@ -143,7 +160,13 @@ public class ListView extends Component implements IListSelectable{
 	public void activateItem(TextMatchingCriterion criterion, boolean verify, Keys key, Point offset) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(this.getClass(), "activateItem");
 		try{
-			listable.activateItem(criterion, verify, key, offset);
+			if(listable != this) { 
+				listable.activateItem(criterion, verify, key, offset);
+			}else{
+				String msg = debugmsg +" listable(this) infinite loop prevention!";
+				IndependantLog.error(msg);
+				throw new SeleniumPlusException(msg);
+			}
 		}catch(Exception e){
 			if(e instanceof SeleniumPlusException) throw (SeleniumPlusException)e;
 			else{
@@ -157,7 +180,13 @@ public class ListView extends Component implements IListSelectable{
 	public void activateItem(int index, boolean verify, Keys key, Point offset) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(this.getClass(), "activateItem");
 		try{
-			listable.activateItem(index, verify, key, offset);
+			if(listable != this) { 
+				listable.activateItem(index, verify, key, offset);
+			}else{
+				String msg = debugmsg +" listable(this) infinite loop prevention!";
+				IndependantLog.error(msg);
+				throw new SeleniumPlusException(msg);
+			}
 		}catch(Exception e){
 			if(e instanceof SeleniumPlusException) throw (SeleniumPlusException)e;
 			else{
@@ -175,7 +204,13 @@ public class ListView extends Component implements IListSelectable{
 		String debugmsg = StringUtils.debugmsg(this.getClass(), "verifyItemSelection");
 
 		try{
-			listable.verifyItemSelection(criterion, expectSelected);
+			if(listable != this) { 
+				listable.verifyItemSelection(criterion, expectSelected);
+			}else{
+				String msg = debugmsg +" listable(this) infinite loop prevention!";
+				IndependantLog.error(msg);
+				throw new SeleniumPlusException(msg);
+			}
 		}catch(Exception e){
 			if(e instanceof SeleniumPlusException) throw (SeleniumPlusException)e;
 			else{
@@ -193,7 +228,13 @@ public class ListView extends Component implements IListSelectable{
 		String debugmsg = StringUtils.debugmsg(this.getClass(), "verifyContains");
 
 		try{
-			listable.verifyContains(criterion);
+			if(listable != this) { 
+				listable.verifyContains(criterion);
+			}else{
+				String msg = debugmsg +" listable(this) infinite loop prevention!";
+				IndependantLog.error(msg);
+				throw new SeleniumPlusException(msg);
+			}
 		}catch(Exception e){
 			if(e instanceof SeleniumPlusException) throw (SeleniumPlusException)e;
 			else{
@@ -211,7 +252,13 @@ public class ListView extends Component implements IListSelectable{
 		String debugmsg = StringUtils.debugmsg(this.getClass(), "verifyItemSelection");
 
 		try{
-			listable.verifyItemSelection(index, expectSelected);
+			if(listable != this) { 
+				listable.verifyItemSelection(index, expectSelected);
+			}else{
+				String msg = debugmsg +" listable(this) infinite loop prevention!";
+				IndependantLog.error(msg);
+				throw new SeleniumPlusException(msg);
+			}
 		}catch(Exception e){
 			if(e instanceof SeleniumPlusException) throw (SeleniumPlusException)e;
 			else{
@@ -230,7 +277,13 @@ public class ListView extends Component implements IListSelectable{
 		String debugmsg = StringUtils.debugmsg(this.getClass(), "getContent");
 
 		try{
-			return listable.getContent();
+			if(listable != this) { 
+				return listable.getContent();
+			}else{
+				String msg = debugmsg +" listable(this) infinite loop prevention!";
+				IndependantLog.error(msg);
+				throw new SeleniumPlusException(msg);
+			}
 		}catch(Exception e){
 			if(e instanceof SeleniumPlusException) throw (SeleniumPlusException)e;
 			else{
@@ -245,7 +298,13 @@ public class ListView extends Component implements IListSelectable{
 		String debugmsg = StringUtils.debugmsg(this.getClass(), "getMatchedElement");
 
 		try{
-			return listable.getMatchedElement(criterion);
+			if(listable != this) { 
+				return listable.getMatchedElement(criterion);
+			}else{
+				String msg = debugmsg +" listable(this) infinite loop prevention!";
+				IndependantLog.error(msg);
+				throw new SeleniumPlusException(msg);
+			}
 		}catch(Exception e){
 			if(e instanceof SeleniumPlusException) throw (SeleniumPlusException)e;
 			else{
