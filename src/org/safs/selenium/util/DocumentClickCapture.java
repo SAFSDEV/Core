@@ -309,7 +309,7 @@ public class DocumentClickCapture implements Runnable{
 		long curTime = System.currentTimeMillis();
 		long endTime = curTime + (1000*secondsTimeout);
 		IndependantLog.info(debugmsg+" waiting for event fired signal.");
-		while((curTime < endTime)&&!isEventFired()){
+		while((curTime < endTime)&& isRunning() && !isEventFired()){
 			try{Thread.sleep(delayWaitReady);}catch(InterruptedException ignore){}
 			curTime = System.currentTimeMillis();
 		}
