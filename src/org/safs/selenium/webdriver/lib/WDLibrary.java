@@ -69,6 +69,7 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.remote.RemoteWebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
@@ -277,7 +278,10 @@ public class WDLibrary extends SearchObject {
 			//2. Perform the click action by Robot
 			Point location = getScreenLocation(clickable);
 			if(offset!=null) location.translate(offset.x, offset.y);
-			else	location.translate(clickable.getSize().width/2, clickable.getSize().height/2);
+			else	{
+				Dimension d = clickable.getSize();
+				location.translate(d.width/2, d.height/2);
+			}
 			listener.startListening();
 			if(rd==null || rd.isLocalServer()){
 				if(specialKey==null){
@@ -525,23 +529,48 @@ public class WDLibrary extends SearchObject {
 
 		try {
 			//1. Get the element's location relative to the frame
-			org.openqa.selenium.Point p = webelement.getLocation();//relative to a frame, the browser client area may contain more than one frame.
-			IndependantLog.debug(debugmsg+"Selenium reports the WebElement PAGE (not screen) location as ("+p.x+","+p.y+")");
-//			if(webelement instanceof RemoteWebElement){
-////				p = ((RemoteWebElement)webelement).getCoordinates().onPage();//the same as getLocation
-////				p = ((RemoteWebElement)webelement).getCoordinates().onScreen();//not implemented
-//				p = ((RemoteWebElement)webelement).getCoordinates().inViewPort();//relative to the browser's client view, will scroll to the element automatically
-//			}else{
-//				IndependantLog.debug(debugmsg+"");
-//			}
+            Coordinates c = ((RemoteWebElement)webelement).getCoordinates();
+			org.openqa.selenium.Point p;
+			org.openqa.selenium.Point screen;
+			try{ 
+				screen = c.onScreen();
+				IndependantLog.debug(debugmsg+"Selenium reports the WebElement SCREEN location as ("+screen.x+","+screen.y+")");
+			}
+			catch(UnsupportedOperationException x){
+				IndependantLog.debug(debugmsg+"Selenium reports coordinates.onScreen() is NOT yet supported.");
+			}
+			try{
+				p = c.onPage();
+			}
+			catch(UnsupportedOperationException x){
+				IndependantLog.debug(debugmsg+"Selenium reports coordinates.onPage() is NOT yet supported.");
+				p = webelement.getLocation();
+			}
+			IndependantLog.debug(debugmsg+"Selenium reports the WebElement PAGE location as ("+p.x+","+p.y+")");
 
 			//2. Add the frame's location (relative to the the browser client area)
 			if(lastFrame!=null){
 				p.x += lastFrame.getLocation().x;
 				p.y += lastFrame.getLocation().y;
 				//IndependantLog.debug(debugmsg+"added lastFrame offsets, new tentative PAGE location ("+p.x+","+p.y+")");
+			}else{
+				if (lastBrowserWindow.getClientX() == 0
+						&& lastBrowserWindow.getBorderWidth() == 0
+						&& lastBrowserWindow.getPageXOffset() == 0
+						&& (lastBrowserWindow.getWidth() > lastBrowserWindow.getClientWidth())) {
+					int diff = Math.round(lastBrowserWindow.getWidth()- lastBrowserWindow.getClientWidth())/2;
+					IndependantLog.debug(debugmsg
+							+ "detecting potential client area LOCATION offset problem of "+ diff +" pixels");
+					if (diff < 12) {
+						p.x += diff;
+						p.y += diff;
+						IndependantLog.debug(debugmsg
+										+ "added lastBrowserWindow suspected location offset error, new tentative PAGE location ("
+										+ p.x + "," 
+										+ p.y + ")");
+					}
+				}
 			}
-
 			//3. Add the browser client area's location (relative to the browser's window): different according to browser
 			p.x += lastBrowserWindow.getClientX();
 			p.y += lastBrowserWindow.getClientY();
