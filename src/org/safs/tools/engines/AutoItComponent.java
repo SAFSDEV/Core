@@ -18,6 +18,7 @@ import java.util.StringTokenizer;
 import org.safs.ComponentFunction;
 import org.safs.IndependantLog;
 import org.safs.Log;
+import org.safs.Processor;
 import org.safs.RSA;
 import org.safs.SAFSException;
 import org.safs.STAFHelper;
@@ -107,6 +108,11 @@ public class AutoItComponent extends GenericEngine {
 
 	public long processRecord (TestRecordHelper testRecordData){
 		
+		if(!Processor.RECTYPE_TEST_STEP.equalsIgnoreCase(testRecordData.getRecordType())){
+			Log.info("AUTOITC: only handles CF TestRecords at this time....");
+        	testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
+        	return StatusCodes.SCRIPT_NOT_EXECUTED;
+		}
 		Log.info("AUTOITC:processing \""+ testRecordData.getCommand() +"\".");
 		this.testRecordData = testRecordData;
 		boolean resetTRD = false;
