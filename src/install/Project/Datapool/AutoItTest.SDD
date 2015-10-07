@@ -1,0 +1,7 @@
+
+C, SetApplicationMap, AutoItTest.MAP
+C, LaunchApplication, "Calculator", "calc.exe"
+T, SAFS Monitor, SAFS Monitor, SetFocus
+C, Pause, 2
+T, Calculator, Calculator, SetFocus
+C, CloseApplication, "Calculator"
