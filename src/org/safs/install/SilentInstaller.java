@@ -112,14 +112,14 @@ public class SilentInstaller {
 	static boolean installsilent = true;
 	
 	static int pctProgress = 0;
-	static int pctIncrement = 14;
-	static int pctSTAFUninstall = pctIncrement;                    // 14
-	static int pctSAFSUninstall = pctSTAFUninstall + pctIncrement; // 28
-	static int pctSAFSInstall = pctSAFSUninstall + pctIncrement;   // 42
-	static int pctSAFSOverlay = pctSAFSInstall + pctIncrement;     // 56
-	static int pctCopyEmbedded = pctSAFSOverlay + pctIncrement;    // 70
-	static int pctPostInstall = pctCopyEmbedded + pctIncrement;    // 85
-	static int pctSTAFInstall = 100;
+	static int pctSTAFUninstall = 10;
+	static int pctSAFSUninstall = 20;
+	static int pctSAFSInstall   = 30;
+	static int pctSAFSOverlay   = 40;
+	static int pctCopyEmbedded  = 50;
+	static int pctPostInstall   = 60;
+	static int pctPreSTAFInstall = 70;
+	static int pctPostSTAFInstall = 95;
 
 	static Console console = null;
 	/** progressbar is a swing panel to show the progress of installation.*/
@@ -446,18 +446,25 @@ public class SilentInstaller {
 		// If the directory where staf will be installed exists, delete it firstly.
 		progresser.setProgressMessage("Delete old STAF files from '"+stafdir+"' ...");
 		FileUtilities.deleteDirectoryRecursively(stafdir, verbose);
-		progresser.setProgress(pctSTAFInstall + (pctIncrement /2));
+		progresser.setProgressMessage("STAF installing to '"+stafdir+"' ...");
+		
+		progresser.setProgress(pctPreSTAFInstall);
 		
 		// Execute the installation command by shell
 		ConsumOutStreamProcess p = new ConsumOutStreamProcess(cmd, verbose, false);
 		status = p.start();
 		progresser.setProgressMessage("STAF install exit code: "+ status);
 		
+		progresser.setProgress(pctPreSTAFInstall + 10);
+		
+		progresser.setProgressMessage("Deleting STAF IBM Registration file...");		
 		File regFile = new CaseInsensitiveFile(stafdir + File.separator+ STAF_REG_FILE).toFile();
 		if (regFile.exists()) { regFile.delete(); }
+		progresser.setProgressMessage("Performing STAF post-install configuration...");		
 		STAFInstaller si = new STAFInstaller();
 		si.install(stafdir);
 		progresser.setProgressMessage("Finished Installation of STAF.");
+		progresser.setProgress(pctPostSTAFInstall);
 
 		return status;
 	}
@@ -858,9 +865,10 @@ public class SilentInstaller {
 			progresser.setProgress(pctPostInstall);
 	        
 			if (installstaf){ status = doSTAFInstall(installstafversion);}
-			progresser.setProgress(pctSTAFInstall);
+			progresser.setProgress(pctPostSTAFInstall);
 			
-			if(installsafs) createSAFSProgramGroup(safsdir);
+			if(installsafs) createSAFSProgramGroup(safsdir);			
+			progresser.setProgress(100);
 			
 		}catch(FileNotFoundException fnf){
 			System.out.println(" ");
