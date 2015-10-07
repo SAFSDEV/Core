@@ -38,7 +38,7 @@ End Sub
 '*     "Uninstall"                ------> <ROOTDIR>\uninstall\Uninstall.bat
 '*     "Keywords Reference"       ------> <ROOTDIR>\doc\SAFSReference.htm
 '*******************************************************************************
-Const groupTitle = "SAFS 2014.01"     'title of group on Windows program menu 
+Const groupTitle = "SAFS 2016"     'title of group on Windows program menu 
 Const docGroupTitle  = "Documentation"    'sub-group for documentation
 Dim file, shell, fso, env, installdir, stafdir
 Dim mainProgramsDir, safsProgramDir, safsDocProgramDir 
