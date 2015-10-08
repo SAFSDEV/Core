@@ -6,7 +6,7 @@
 <p>
 ==========================================================================<br>
 Author: Carl Nagle<br>
-UPDATED: Aug 03, 2012<br>
+UPDATED: Oct 08, 2015<br>
 <br>
 Copyright (C) SAS Institute<br>
 <a href="http://www.opensource.org/licenses/gpl-license.php" target="reference">General Public License</a>: http://www.opensource.org/licenses/gpl-license.php<br>
@@ -43,7 +43,7 @@ menu.
 <p>
 If you intend to have your own RFT scripts, or if you intend to use RFT Object Maps with your SAFS tests, then you must create a valid RFT Project then configure it as descibed below for your production testing.
 <p>
-<i>With RFT V8 the project setup requirements are significantly simpler than previous versions of RFT.</i></b>
+<i>With RFT V8 and later, the project setup requirements are significantly simpler than previous versions of RFT.</i></b>
 <p><hr>
 <a name="safsexecution"/>
 <small>
@@ -68,7 +68,7 @@ Note different versions of RFT behave very differently and have different projec
 <p>
 Assets provided by SAFS for an RFT project should be located in <b>C:\SAFS\DatastoreJ</b> or, in extreme circumstances, may need to be extracted from <b>C:\SAFS\lib, SAFS.JAR, or SAFSRATIONAL_FT.JAR</b>.
 <p>
-  <li><b><i>Populate an existing RFT V8 Project / Create a RFT Datastore</i></b>:
+  <li><b><i>Populate one of your existing RFT V8 Project / Create a RFT Datastore</i></b>:
 <p><ul>
       <li>Copy the following files from the <b>C:\SAFS\DatastoreJ</b> directories:
       <p><ul>
@@ -128,7 +128,7 @@ First=org.safs.tools.engines.SAFSROBOTJ     (SAFS/RobotJ engine defined to be us
 	  </ul>
 	  <ul>
     <li> The command to execute SAFS tests with the SAFS Driver:
-    <p>java -Dsafs.project.config="C:\mySAFSTest\helloSafs.ini" org.safs.tools.drivers.SAFSDRIVER
+    <p><b>%SAFSDIR%</b>\jre\bin\java -Dsafs.project.config="C:\mySAFSTest\helloSafs.ini" org.safs.tools.drivers.SAFSDRIVER
     <p>Via above command, SAFS takes 'C:\mySAFSTest\DATASTOREJ' as the RFT datastore, and runs the SAFS tests in 'C:\mySAFSTest\Datapool\helloSafs.CDD'.
     </ul>
 <p>
@@ -161,7 +161,7 @@ First=org.safs.tools.engines.SAFSROBOTJ     (SAFS/RobotJ engine defined to be us
      <li>You may have to use the 'Search' capability to locate all possible environments.
   </ul>
 <p>
-  <li>If needed, execute the C:\SAFS\<b>SetupRationalClasspath.WSF</b> script to locate and add IBM Rational JAR files to the CLASSPATH.
+  <li>If needed, execute the C:\SAFS\install\<b>SetupRationalClasspath.wsf</b> script to locate and add IBM Rational JAR files to the CLASSPATH.
   <br/>(The SAFS install does this for you. &nbsp;You only need to do this if you bypassed the Rational install during the SAFS install,
   or if you recently upgraded RFT *after* the SAFS install.)
 <p>
@@ -247,20 +247,14 @@ CLASSPATH to locate class files and other resources.</i>
    <li>Configure Java Build Path to include references to JARS:
    <p><ul>
    <li>C:\Program Files\IBM\SDP\FunctionalTester\bin\rational_ft.jar
-   <li>C:\STAF\bin\jstaf.jar
+   <li><b>C:\STAF</b>\bin\jstaf.jar
+   <li><b>C:\SAFS</b>\lib\JSTAF2.jar
    <li>C:\SAFS\lib\safs.jar
-   <li>C:\SAFS\lib\safscust.jar
-   <li>C:\SAFS\lib\safsjvmagent.jar
-   <li>C:\SAFS\lib\jai_core.jar
-   <li>C:\SAFS\lib\jai_codec.jar
    <li>C:\SAFS\lib\jaccess.jar
-   <li>C:\SAFS\lib\jakarta-regexp-1.3.jar
    <li>C:\SAFS\lib\safsrational_ft.jar
    <li>C:\SAFS\lib\safsrational_ft_enabler.jar
-   <li>C:\SAFS\lib\jna.zip
-   <li>C:\SAFS\lib\win32-x86.zip
    <p>
-   <li>There may be other JARs you must include.
+   <li>There may be other JARs you must include from the SAFS\lib directory.
    <br>For example, if using JSAFS you would want to include "safsmodel.jar"
    <p>
    <li>Configure Java Build Path to include SAFS SOURCE JAR\ZIP\Files.<br>
@@ -280,15 +274,15 @@ CLASSPATH to locate class files and other resources.</i>
 	<p>
 	<li><dt><b>Start SAFS Services</b>
 	<p>
-	<dd>Run "SAFSStartupDDEngine.BAT"<br>
-	   Should be located in C:\SAFS\Samples\Batch. &nbsp;
-	   May need to be edited for your desired SAFS Project location.<br>
+	<dd>Run "<b>SAFSStartupSAFSProject.BAT</b>"<br>
+	   Should be located in C:\SAFS\Project directory. &nbsp;
+	   May need to be edited for your desired runtime SAFS Project location.<br>
 	   4 CMD Windows should open and may immediately close.<br>
 	<p>
 	<li><dt><b>'Run' or 'Debug' RFT Project "TestScript"</b>
 	<p>
 	<dd>RFT Playback Monitor should open and remain.<br>
-	   RFT and STAF are now process connected via SEMaphore events.
+	   RFT and STAF are now connected via STAF SEMaphore events.
 	   <p>
 	   <small>(You may have to <b>'Reset Java Build Path'</b> in your RFT Project's <b>Properties</b>
 	   if RFT does NOT have its internal JARS listed in the Java Build Path.)</small>
@@ -297,12 +291,12 @@ CLASSPATH to locate class files and other resources.</i>
 	<dd/><p>
 	<li><dt><b>Stop RFT TestScript interface to STAF</b>
 	<p>
-	<dd>Run "SAFSRobotJShutdown.BAT"<br>
-	   Should be located in C:\SAFS\bin &nbsp;
+	<dd>Run "<b>SAFSRobotJShutdown.BAT</b>"<br>
+	   Should be located in C:\SAFS\Project <br>
 	   RFT will take 5-10 seconds to cleanup and shutdown.<br>
 	<p>
-	   You can leave STAF and services running for additional
-	   RFT TestScript executions, but you will eventually need to:<br>
+	   You can leave STAF and services running for additional RFT TestScript executions,<br>
+	   but you will eventually need to:<br>
 	<p>
 	<li><dt><b>Shutdown STAF</b>
 	<p>
@@ -310,21 +304,48 @@ CLASSPATH to locate class files and other resources.</i>
 	</dl>
    </ul>
    <p>
-   <li><b><u>Configure the system for devlopment:</u></b>
+   <li><b><u>Configure the system for development:</u></b>
    <p>
    <ul>
-   <li>Configure Java Build Path to include references to JARS:
-   <p><ul>
+   <li>Configure Java Build Path to include references to necessary JARS:<br>
+   (See the <a href="https://github.com/SAFSDEV/Core/blob/master/developer_setup.md" target="_blank"
+   title="Environment Setup info on GitHub" >
+   Environment Setup for Developers</a> doc on GitHub SAFSDEV Core for latest info.)
+   <p>
+   <ul>
    <li>C:\Program Files\IBM\SDP\FunctionalTester\bin\rational_ft.jar
-   <li>C:\STAF\bin\jstaf.jar
+   <li><b>C:\STAF</b>\bin\jstaf.jar
+   <li><b>C:\SAFS</b>\lib\JSTAF2.jar
+   <li>C:\SAFS\lib\bsh.jar (Abbot support)
+   <li>C:\SAFS\lib\AutoItX4Java.jar
+   <li>C:\SAFS\lib\clibwrapper_jiio.jar
+   <li>C:\SAFS\lib\dom4j-2.0.0-ALPHA-2.jar
+   <li>C:\SAFS\lib\jacob.jar
+   <li>C:\SAFS\lib\javax.mail.jar
    <li>C:\SAFS\lib\jai_core.jar
    <li>C:\SAFS\lib\jai_codec.jar
-   <li>C:\SAFS\lib\jaccess.jar
+   <li>C:\SAFS\lib\jai_imageio.jar
    <li>C:\SAFS\lib\jakarta-regexp-1.3.jar
-   <li>C:\SAFS\lib\jna.zip
-   <li>C:\SAFS\lib\win32-x86.zip
+   <li>C:\SAFS\lib\jaxen-1.1.3.jar
+   <li>C:\SAFS\lib\juniversalchardet-1.0.3.jar
+   <li>C:\SAFS\lib\nekohtml.jar
+   <li>C:\SAFS\lib\org.json.jar
+   <li>C:\SAFS\lib\SeInterpreter.jar
+   <li>C:\SAFS\lib\selenium-server-standalone-N.N.N.jar  (latest installed)
+   <li><b>&lt;pathTo></b>\cucumber-java-1.1.3.jar (Cucumber install location)
+   <li><b>&lt;pathTo></b>\ddmlib.jar (Android SDK)
+   <li><b>&lt;pathTo></b>\jna-3.4.0.jar
    </ul>
    <p>
+   If dependencies like Cucumber or Android are NOT to be used and are NOT available '
+   then the associated classes/packages using those dependencies will need to be removed
+   from the project:
+   <p>
+   <ul>
+   <li>org.safs.abbot
+   <li>org.safs.cukes
+   <li>org.safs.android  (but not necessarily org.safs.android.auto)
+   </ul>
    <p>
    <li>Insure "Installed JREs" knows about all your used Java runtimes.
    <p>
@@ -343,19 +364,16 @@ CLASSPATH to locate class files and other resources.</i>
    If you are prompted to 'clean' and\or 'perform a new build' then you can do this.
    </ol>
    <p>
-   <li>Checkout\Update the latest sourcecode from CVS or download the SAFSSource ZIP file and
-   extract it ("use Folder Names") into the root RFT Project directory.
+   <li>Checkout\Update the latest sourcecode from GitHub place it into the root RFT Project directory.<br>
+   (See the <a href="https://github.com/SAFSDEV/Core/blob/master/developer_setup.md" target="_blank" title="Environment Setup info on GitHub" >Environment Setup for Developers</a> doc on GitHub SAFSDEV Core.)
    </UL></UL>
-<p>
-Information for downloading from SourceForge CVS can be located via
-<a href="http://sourceforge.net/cvs/?group_id=56751" target=_blank>CVS info on SourceForge</a>
 <p>
 More SAFSDEV-specific developer information:
 <p><ul>
-<li><a href="http://sourceforge.net/apps/mediawiki/safsdev/index.php?title=SAFSDEV_Developer_Environment"
+<li><a href="https://github.com/SAFSDEV/Core/blob/master/developer_setup.md"
 target="_blank">SAFSDEV Developer Environment</a>
 <li><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSDevelopment.htm"
-target="_blank">More SAFSDEV Developer Info</a>
+target="_blank">More (older) SAFSDEV Developer Info</a>
 </ul><p>
 <i>Note: The RFT Engine has reserved the RFT script name "TestScript" for its internal
 use.
@@ -373,8 +391,8 @@ the RFT Project directory.
 <p>
 <pre>
 Carl Nagle, <a href="http://www.sas.com"  >SAS</a>
-Project Manager, <a href="http://safsdev.sourceforge.net"  >SAFSDEV</a>
-Subscribe to appropriate <a href="http://sourceforge.net/mail/?group_id=56751" alt="Go to Support Forums">Support Forums</a> to review support archives and ask questons.
+Project Lead, <a href="https://github.com/safsdev"  >SAFSDEV</a>
+Subscribe to appropriate <a href="http://safsdev.freeforums.net" alt="Go to Support Forums">Support Forums</a> to review support archives and ask questons.
 </pre>
 <p>
 </BODY></HTML>
