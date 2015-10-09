@@ -6,17 +6,11 @@
 <h1>Setup SmartBear TestComplete<br/>
 for SAFS on Windows<br/>
 </h1>
-Updated 2014.02.24
+Updated 2015.10.09
 </center>
 <hr>
 <b>Authors:</b>
-<ul>Carl Nagle<br>
-Eileen Taht<br>
-Cliff Bills<br>
-Xiaohui Zhang<br>
-Dharmesh Patel<br>
-Judy Rink
-</ul>
+<ul>Carl Nagle, Eileen Taht, Cliff Bills, Xiaohui Zhang, Dharmesh Patel, Judy Rink</ul>
 <p>
 <b>Copyright (C) SAS Institute</b><br>
 <a href="http://www.opensource.org/licenses/gpl-license.php" target="reference">General Public License</a>: http://www.opensource.org/licenses/gpl-license.php
@@ -25,19 +19,30 @@ Judy Rink
 <a href="#top">Top</a>, <a href="#verify">Verify&nbsp;Install</a>, <a href="#updateold">Update&nbsp;Old&nbsp;SAFS</a>, <a href="#updates">Updates</a>, <a href="#usagetips">Configure</a>, <a href="#both">Both&nbsp;TestComplete/Execute</a>, <a href="#htmlflex">HTML&nbsp;&amp;&nbsp;Flex</a>, <a href="#recognition">Recognition&nbsp;Strings</a>, <a href="#tc9tc8">Both&nbsp;TC9&nbsp;&amp;&nbsp;TC10</a>,
 </small>
 <p>
-The TestComplete Project at <b>C:\SAFS\TCAFS</b> has been "upgraded" to TestComplete V9.
+The TestComplete Project (installed at <b>C:\SAFS\TCAFS</b>) has been "upgraded" to TestComplete V10.
 <p>
-If you are running an earlier version of TestComplete you will need to upgrade to TestComplete 9 (v9.31 currently) or transfer the Script and UserForms to your pre-V9 TestComplete Project repository.  Alternatively, you <b>*might*</b> be able to overwrite this V9 repository with an appropriate earlier version.
+If you are running an earlier version of TestComplete you will need to:
+<p><ul>
+    <li><b>Upgrade</b> to TestComplete 10, OR
+    <li><b>Transfer</b> TCAFS Script and UserForms to your pre-V10 TestComplete Project repository, OR
+    <li>You *might* be able to <b>Overwrite</b> this V10 TCAFS repository with an earlier version you already have.
+</ul><p>
+After the SAFS install, if you install a version of TestComplete that is newer than V10, you will need to manually open and convert the existing TCAFS project at C:<b>\SAFS\TCAFS\TCAFS.PJS</b> for your newer version of TestComplete. &nbsp;Open the TCAFS project and TestComplete will prompt for your approval to convert the project for you.
 <p>
-After the SAFS install, if you are running a newer version of TestComplete (TC 10.0 or later) you will need to manually open and convert the existing TCAFS project at C:<b>\SAFS\TCAFS\TCAFS.PJS</b> for your newer version of TestComplete. &nbsp;Open that project and TestComplete will prompt for your approval to convert the project for you. &nbsp;Do so. <p>
-<center><b>Without proper conversion to match your version of TestComplete the test automation will not be allowed to run.</b></center>
+<center><b>Without proper conversion to match your version of TestComplete the TCAFS test automation will not be allowed to run.</b></center>
 <p><a name="updates"/>
 <hr><small>
 <a href="#top">Top</a>, <a href="#verify">Verify Install</a>, <a href="#updateold">Update&nbsp;Old&nbsp;SAFS</a>, <a href="#usagetips">Configure</a>, <a href="#both">Both&nbsp;TestComplete/Execute</a>, <a href="#htmlflex">HTML&nbsp;&amp;&nbsp;Flex</a>, <a href="#recognition">Recognition&nbsp;Strings</a>, <a href="#tc9tc8">Both&nbsp;TC9&nbsp;&amp;&nbsp;TC10</a>
 </small>
 <h3>Script Updates and Overlays:</h3>
 <p>
-Released updates to SAFS and TCAFS can be found at the <a href="http://sourceforge.net/projects/safsdev/files/SAFS%20Updates/" alt="SAFS Updates Downloads website" title="SAFS Updates Downloads website" target="_blank">SAFS Updates Downloads</a> website. &nbsp;Users should always check for and install any updates that might be available after the installed release.
+Released updates to SAFS and TCAFS can be found at:
+<p><ul>
+    <li>The <a href="https://github.com/SAFSDEV/UpdateSite/releases/tag/safs" alt="SAFS Updates Downloads on GitHub" title="SAFS Updates Downloads on GitHub" target="_blank"><b>GitHub</b> SAFS Updates Downloads</a> website.
+    <li>The <a href="http://sourceforge.net/projects/safsdev/files/SAFS%20Updates/" alt="SAFS Updates Downloads on SourceForge" title="SAFS Updates Downloads on SourceForge" target="_blank"><b>SourceForge</b> SAFS Updates Downloads</a> website.
+    <p>
+    <b>Users should always check for and install any updates that might be available after the installed release.</b>
+</ul>
 <p>
 If there are no updates to be installed, proceed to <a href="#verify">Verify Install</a>.
 <p>
@@ -73,9 +78,9 @@ SmartBear TestComplete 9.0 or higher must be installed and connecting properly t
 <ol>
 	<li>If not done as part of the original SAFS install, or if TestComplete has been installed or upgraded AFTER the SAFS install:
 	<p>
-	<ul>Execute: <b>%SAFSDIR%\jre\bin\java org.safs.install.TCAFSInstaller</b>,  OR
+	<ul>Execute: <b>%SAFSDIR%</b>\jre\bin\java org.safs.install.TCAFSInstaller,  OR
 	    <p>
-	    Execute: <b>%SELENIUM_PLUS%\Java\bin\java org.safs.install.TCAFSInstaller</b>,
+	    Execute: <b>%SELENIUM_PLUS%</b>\Java\bin\java org.safs.install.TCAFSInstaller,
 	    <p>
 	    which will:
 		<p>
@@ -108,7 +113,7 @@ SmartBear TestComplete 9.0 or higher must be installed and connecting properly t
 		<p>
 		<li>'command' points to correct and existing executable:
 		<p><ul>
-			...\bin\<b>TestComplete.exe</b>, or <br>
+			...\bin\<b>TestComplete.exe</b>, OR <br>
 			...\bin\<b>TestExecute.exe</b>
 		</ul><p>
 		<li>Try to execute the test again after all edits are complete.
@@ -154,7 +159,7 @@ SmartBear TestComplete 9.0 or higher must be installed and connecting properly t
 			<p>
 			make sure the <b>‘Activate after test run’</b> option is not checked.
 			<p>
-			<li>In <b>TestExecute</b>, select <b>Options > Engines > Log</b>
+			<li>In <b>TestExecute</b>--from the TaskBar--select <b>Options > Engines > Log</b>
 			<p>
 			make sure the <b>‘Activate after test run’</b> option is not checked.
 		</ul>
@@ -342,9 +347,9 @@ Read this entire section before deciding which method to use to set your machine
 <li>When you are just running tests and not developing tests, you should use TestExecute instead of TestComplete.
 <li>TestExecute licenses are separate and cheaper than TestComplete licenses, so you can have more of them.
 <li>You can have both TestComplete and TestExecute installed on the same machine and you can execute either one.
-<li>You can modify the C:SAFS\TCAFS\<b>TCAFS.vbs</b> file to invoke TestExecute instead of TestComplete.
+<li>You can modify the the System Environment Variables or C:SAFS\TCAFS\<b>TCAFS.vbs</b> file to invoke TestExecute instead of TestComplete.
 <p>
-<li>You can also switch runtime execution between TestComplete and TestExecute by setting the system environment variable <b>TESTCOMPLETE_EXE</b> to the desired EXE--"TestComplete.exe" or "TestExecute.exe".
+<li>You can switch runtime execution between TestComplete and TestExecute by setting the system environment variable <b>TESTCOMPLETE_EXE</b> to the desired EXE--"TestComplete.exe" or "TestExecute.exe" and <b>TESTCOMPLETE_HOME</b> to the proper install location.
 <p>
 <li>You can also prepare separate TCAFS.vbs files--one for TestComplete and one for TestExecute.
 </ol>
@@ -482,6 +487,9 @@ If you want/need to have both TestComplete 9 and 10 on the same machine, please 
 		<p>
 		"C:\Program Files (x86)\<b>SmartBear\TestComplete 9</b>\Bin\TestComplete.exe"<br>
 		"C:\Program Files (x86)\<b>SmartBear\TestComplete 10</b>\Bin\TestComplete.exe"
+		<p>
+		"C:\Program Files (x86)\<b>SmartBear\TestExecute 9</b>\Bin\TestExecute.exe"<br>
+		"C:\Program Files (x86)\<b>SmartBear\TestExecute 10</b>\Bin\TestExecute.exe"
 	<p>
 	</ul>
 	<li>Updating the Adobe Debug Flash Player..\<b>mm.cfg</b> file to load the correct swf
@@ -503,8 +511,8 @@ If you want/need to have both TestComplete 9 and 10 on the same machine, please 
 </small>
 <pre>
 Carl Nagle, <a href="http://www.sas.com"  >SAS</a>
-Project Manager, <a href="http://safsdev.sourceforge.net"  >SAFSDEV</a>
-Subscribe to appropriate <a href="http://sourceforge.net/mail/?group_id=56751" alt="Go to Support Forums">Support Forums</a> to review support archives and ask questons.
+Project Manager, <a href="https://github.com/safsdev"  >SAFSDEV</a>
+Subscribe to appropriate <a href="http://safsdev.freeforums.net" alt="Go to Support Forums">Support Forums</a> to review support archives and ask questons.
 </pre>
 <p>
 </BODY></HTML>
