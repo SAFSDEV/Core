@@ -36,6 +36,7 @@ package org.safs.selenium.webdriver.lib;
 *  <br>   JUL 25, 2015    (SBJLWA) Modify windowSetFocus(): remove the unnecessary parameter element.
 *  <br>	  AUG 08, 2015    (Dharmesh) Added delayWaitReady for WaitOnClick.
 *  <br>   SEP 07, 2015    (SBJLWA) Add method getElementOffsetScreenLocation().
+*  <br>   OCT 12, 2015    (SBJLWA) Modify method getProperty(): get property by native SAP method.
 */
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -69,7 +70,6 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.RemoteWebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
@@ -80,6 +80,7 @@ import org.openqa.selenium.internal.Locatable;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.remote.RemoteWebElement;
 import org.openqa.selenium.safari.SafariDriver;
 import org.safs.IndependantLog;
 import org.safs.Processor;
@@ -2445,13 +2446,32 @@ public class WDLibrary extends SearchObject {
 					IndependantLog.debug(dbg+ "propertyNames: "+ keys);
 				}
 			}
+			if (value == null){
+				IndependantLog.debug(dbg+ "trying *NATIVE JS function* to get property '"+ property +"'");
+				StringBuffer script = new StringBuffer();
+				script.append(JavaScriptFunctions.SAP.sap_getProperty(true, property));
+				script.append("return sap_getProperty(arguments[0], arguments[1]);");
+				Object result = null;
+				try{
+					result = WDLibrary.executeJavaScriptOnWebElement(script.toString(), element, property);
+					if(result!=null){
+						IndependantLog.debug(dbg+" got '"+result+"' by *NATIVE JS function*.");
+						value = result.toString();
+						if(!(result instanceof String)){
+							IndependantLog.warn(dbg+" the result is not String, it is "+result.getClass().getName()+", may need more treatment.");
+						}
+					}
+				}catch(SeleniumPlusException se){
+					IndependantLog.error(dbg+ StringUtils.debugmsg(se));
+				}
+			}
 			if(value == null){
-				IndependantLog.debug(dbg+ "got nothing but (null) for all getProperty attempts using '"+ property +"'");
+				IndependantLog.error(dbg+ "got nothing but (null) for all getProperty attempts using '"+ property +"'");
 				throw new SeleniumPlusException(property+" not found.");
 			}
 			return value;
 		} catch(Exception e){
-			IndependantLog.debug(dbg+ "caught "+ e.getClass().getName()+": "+ e.getMessage());
+			IndependantLog.error(dbg+ "caught "+ e.getClass().getName()+": "+ e.getMessage());
 			throw new SeleniumPlusException(property +" not found.", SeleniumPlusException.CODE_PropertyNotFoundException);
 		}
 	}
