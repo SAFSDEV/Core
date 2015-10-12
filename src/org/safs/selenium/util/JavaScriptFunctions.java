@@ -31,6 +31,7 @@ package org.safs.selenium.util;
  *                                  We need to put this kind of calling in a try catch clause.
  *  <br>   FEB 05, 2015    (Lei Wang) Modify parse_sap_m_ListItemBase(): Try property 'title' at last, and log debug message if no text is set.
  *  <br>   JUL 23, 2015    (Lei Wang) Add sendHttpRequest(): send HTTP request by AJAX.
+ *  <br>   OCT 12, 2015    (Lei Wang) Add sap_getProperty(): get value of a property for a SAP object.
  *                                  
  */
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.lang3.text.WordUtils;
 import org.safs.IndependantLog;
 import org.safs.StringUtils;
 import org.safs.net.IHttpRequest.HttpResponseStatus;
@@ -1704,6 +1706,71 @@ public class JavaScriptFunctions {
 	}
 	
 	public static final class SAP{
+		/**
+		 * Get the value of a property for the sap object and return it.<br>
+		 * 
+		 * <br><b>depending on:</b><br>
+		 * {@link #sap_getObject()} <br>
+		 * <br><b>depending level: 1</b><br>
+		 * 
+		 * @param propertyName (<b>Java</b>) String, the property name.
+		 * @param domelement (<b>Javascript</b>) Object, the dom-element used to find a SAP object.
+		 * @param property (<b>Javascript</b>) String, the property name.
+		 */
+		public static String sap_getProperty(boolean includeDependency, String propertyName){
+			StringBuffer scriptCommand = new StringBuffer();
+			
+			if(includeDependency){
+				scriptCommand.append(sap_getObject());
+			}
+			
+			scriptCommand.append("/**\n");
+			scriptCommand.append(" * Get the value of a property for the sap object and return it.\n");
+			scriptCommand.append(" * Parameters:\n");
+			scriptCommand.append(" *   domelement Object, the dom-element used to find a SAP object.\n");
+			scriptCommand.append(" *   property String, the property name.\n");
+			scriptCommand.append(" * Retrun:\n");
+			scriptCommand.append(" *   the value of the property.\n");
+			scriptCommand.append(" */\n");
+			
+			scriptCommand.append("function sap_getProperty(domelement, property){\n");
+			scriptCommand.append("  //get the SAP object according to dom object.\n");
+			scriptCommand.append("  var object = sap_getObject(domelement);\n");
+			scriptCommand.append("  if(object==undefined){\n");
+			scriptCommand.append("    throw new Error('did NOT get a valid SAP object.');\n");
+			scriptCommand.append("  }\n");
+			
+			scriptCommand.append("  try{\n");
+			scriptCommand.append("    //use the property name to form a method getXXX()\n");
+			scriptCommand.append("    //if the property is value, we will call getValue() on this sap object\n");
+			//Create the get method name
+			String getMethod = "get"+WordUtils.capitalize(propertyName)+"()";
+			scriptCommand.append("    var result = object."+getMethod+";\n");
+			scriptCommand.append("    if(result==undefined){\n");
+			scriptCommand.append("      debug('did NOT get value for property '+property+'.');\n");
+			scriptCommand.append("    }else{\n");
+			scriptCommand.append("      return result;\n");
+			scriptCommand.append("    }\n");
+			scriptCommand.append("  }catch(error){\n");
+			scriptCommand.append("    debug('Met JS error: '+error);\n");
+			scriptCommand.append("  }\n");
+			
+			//Finally try the SAP low level API getProperty(), though it is not recommanded to use.
+			scriptCommand.append("  try{\n");
+			scriptCommand.append("    //getProperty is a low level method of sap.ui.base.ManagedObject, and it is not recommanded to use.\n");
+			scriptCommand.append("    //see https://sapui5.hana.ondemand.com/docs/api/symbols/sap.ui.base.ManagedObject.html#lowlevelapi\n");
+			scriptCommand.append("    var result = object.getProperty(property);\n");
+			scriptCommand.append("    if(result==undefined){\n");
+			scriptCommand.append("      throw new Error('did NOT get value for property '+property+'.');\n");
+			scriptCommand.append("    }\n");
+			scriptCommand.append("    return result;\n");
+			scriptCommand.append("  }catch(error){\n");
+			scriptCommand.append("    throw error;\n");
+			scriptCommand.append("  }\n");
+			scriptCommand.append("}\n");
+			
+			return scriptCommand.toString();
+		}
 		
 		/**
 		 * According to a sap object, find the related DOM Object and return it.<br>
@@ -5024,6 +5091,7 @@ public class JavaScriptFunctions {
 	public static String getAllSAPFunctions(){
 		StringBuffer definition = new StringBuffer();
 		
+		definition.append(SAP.sap_getProperty(false, "value"));
 		definition.append(SAP.sap_getDOMRef());
 		definition.append(SAP.sap_getObject());
 		definition.append(SAP.sap_getObjectById());
