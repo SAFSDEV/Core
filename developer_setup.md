@@ -40,7 +40,7 @@ Before you can successfully run any build, you need to install/verify the follow
 2. Import the project **SAFS-Android-Remote-Control** into Eclipse and build it, it should succeed.
 3. Import the core project **Core**
   1. If you don't have the folder **%SAFS_BUILD%/libs/rft** or you don't plan to develop for **SAFS_RFT**:
-    1. Delete the whole folder *org\safs\ratinal*.
+    1. Delete the whole folder *org\safs\rational*.
     2. Delete all items beginning with *SAFS_BUILD/libs/rft* in **Java Build Path->Libraries**.
   2. Finally you can build this project, it should succeed.
 
