@@ -34,13 +34,12 @@ public class EditBox extends Component {
 	 */
 	public void clearEditBox() throws SeleniumPlusException{
 		String debugmsg = getClass().getName()+".clearEditBox(): ";
-		//element.sendKeys(Keys.HOME,Keys.chord(Keys.SHIFT,Keys.END),"55");		
 		try {
 			try{
 				// chrome and ie are failing element.clear
 				webelement.clear();
 			}catch (StaleElementReferenceException sere){
-				IndependantLog.warn(debugmsg+"StaleElementReferenceException --Object reference is stale.");			
+				IndependantLog.warn(debugmsg+StringUtils.debugmsg(sere));			
 				//fresh the element and clear again.
 				refresh(false);
 				webelement.clear();
@@ -53,14 +52,16 @@ public class EditBox extends Component {
 			throw new SeleniumPlusException("EditBox object not found");
 
 		} catch (Exception e){
+			IndependantLog.debug(debugmsg+StringUtils.debugmsg(e));
 			// chrome is failing element.clear
 			try{
+				refresh(true);
 				String t = webelement.getText();
 				if(t==null || t.length()==0) {
-					IndependantLog.debug(debugmsg+"ignoring "+e.getClass().getName()+": element may already be cleared.");
+					IndependantLog.debug(debugmsg+"element may already be cleared.");
 					return;				
 				}else{
-					webelement.sendKeys(Keys.HOME,Keys.chord(Keys.SHIFT,Keys.END),"55");		
+					webelement.sendKeys(Keys.HOME,Keys.chord(Keys.SHIFT,Keys.END),"55");
 				}
 			}catch(Exception x){
 				IndependantLog.debug(debugmsg+x.getClass().getName()+", "+x.getMessage(),x);
