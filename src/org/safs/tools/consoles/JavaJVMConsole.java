@@ -1,7 +1,7 @@
 package org.safs.tools.consoles;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.io.BufferedReader;
 import java.io.File;
@@ -105,10 +105,8 @@ public abstract class JavaJVMConsole extends JFrame implements Runnable{
 		
 		JScrollPane propsscroll = new JScrollPane(display);
 		propsscroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		propsscroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-		propsscroll.setPreferredSize(new Dimension(540,400));
-		setLayout(new FlowLayout(FlowLayout.CENTER));
-		add(propsscroll);
+		propsscroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		add(propsscroll, BorderLayout.CENTER);
 		setVisible(true);	
 		Thread runner = new Thread(this);
 		runner.setDaemon(true);
