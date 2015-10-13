@@ -1,7 +1,7 @@
 package org.safs.selenium.spc;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
@@ -130,10 +130,14 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		JLabel hlbl = new JLabel("H:", JLabel.LEFT);
 		JTextField htxt = new JTextField(String.valueOf(node.bounds.height));
 		htxt.setEditable(false);				
-		coords.add(xlbl); coords.add(xtxt);		
-		coords.add(ylbl); coords.add(ytxt);		
-		coords.add(wlbl); coords.add(wtxt);		
-		coords.add(hlbl); coords.add(htxt);		
+		coords.add(xlbl); 
+		coords.add(xtxt);		
+		coords.add(ylbl); 
+		coords.add(ytxt);		
+		coords.add(wlbl); 
+		coords.add(wtxt);		
+		coords.add(hlbl); 
+		coords.add(htxt);		
 		
 		// ATTRS panel
 		JLabel taglbl = new JLabel("Tag:", JLabel.LEFT);
@@ -148,10 +152,14 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		JLabel titlelbl = new JLabel("Title:", JLabel.LEFT);
 		JTextField titletxt = new JTextField(node.getTitle());
 		titletxt.setEditable(false);
-		attrs.add(taglbl); attrs.add(tagtxt);
-		attrs.add(idlbl); attrs.add(idtxt);
-		attrs.add(namelbl); attrs.add(nametxt);
-		attrs.add(titlelbl); attrs.add(titletxt);
+		attrs.add(taglbl); 
+		attrs.add(tagtxt);
+		attrs.add(idlbl); 
+		attrs.add(idtxt);
+		attrs.add(namelbl); 
+		attrs.add(nametxt);
+		attrs.add(titlelbl); 
+		attrs.add(titletxt);
 		
 		// DOMAIN panel
 		JLabel dmnlbl = new JLabel("Domain:", JLabel.LEFT);
@@ -163,9 +171,12 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		JLabel dmnTypelbl = new JLabel("Type:", JLabel.LEFT);
 		JTextField dmnTypetxt = new JTextField(node.getCompType());
 		dmnTypetxt.setEditable(false);
-		domain.add(dmnlbl); domain.add(dmntxt);
-		domain.add(dmnClasslbl); domain.add(dmnClasstxt);
-		domain.add(dmnTypelbl); domain.add(dmnTypetxt);
+		domain.add(dmnlbl); 
+		domain.add(dmntxt);
+		domain.add(dmnClasslbl); 
+		domain.add(dmnClasstxt);
+		domain.add(dmnTypelbl); 
+		domain.add(dmnTypetxt);
 
 		// DOMAINREC panel
 		JLabel dmnReclbl = new JLabel("DoRec:", JLabel.LEFT);
@@ -181,7 +192,8 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		dmnSetbtn = new JButton("Set");
 		dmnSetbtn.addActionListener(this);
 		dmnSetbtn.setToolTipText("Set Domain recognition string as Map recognition string.");
-		domainRec.add(dmnReclbl); domainRec.add(dmnRecscroll);
+		domainRec.add(dmnReclbl); 
+		domainRec.add(dmnRecscroll);
 		domainRec.add(dmnSetbtn);
 		
 		// XPART RECOGNITION panel
@@ -189,7 +201,8 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		JTextField shrtRectxt = new JTextField(node.xpart);
 		shrtRectxt.setEditable(false);
 		shrtRectxt.setToolTipText("Short 'last child' part of XPath recognition string.");
-		shrt_rec.add(shrtReclbl); shrt_rec.add(shrtRectxt);
+		shrt_rec.add(shrtReclbl); 
+		shrt_rec.add(shrtRectxt);
 		
 		// CLASSES panel
 		JLabel classlbl = new JLabel(" class:", JLabel.LEFT);
@@ -201,7 +214,8 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		classscroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		classscroll.setPreferredSize(new Dimension(400,38));
 		classlbl.setLabelFor(classscroll);
-		classes.add(classlbl); classes.add(classscroll);
+		classes.add(classlbl); 
+		classes.add(classscroll);
 
 		// XPATH RECOGNITION panel
 		JLabel xpathReclbl = new JLabel("XPath:", JLabel.LEFT);
@@ -215,7 +229,8 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		xpathSetbtn = new JButton("Set");
 		xpathSetbtn.addActionListener(this);
 		xpathSetbtn.setToolTipText("Set XPath recognition string as Map recognition string.");
-		full_rec.add(xpathReclbl); full_rec.add(xpathscroll);
+		full_rec.add(xpathReclbl); 
+		full_rec.add(xpathscroll);
 		full_rec.add(xpathSetbtn);	
 		
 		// MAP RECOGNITION panel
@@ -231,7 +246,8 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		mapClrbtn = new JButton("Clr");
 		mapClrbtn.addActionListener(this);
 		mapClrbtn.setToolTipText("Clear Map recognition string.");
-		map_rec.add(mapReclbl); map_rec.add(mapscroll);
+		map_rec.add(mapReclbl); 
+		map_rec.add(mapscroll);
 		map_rec.add(mapClrbtn);
 		
 		// PROPERTIES panel
@@ -276,8 +292,6 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		propsscroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		propsscroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		propsscroll.setPreferredSize(new Dimension(500,230));
-		//propslbl.setLabelFor(propsscroll);
-		//properties.add(propslbl); 
 		properties.add(propsscroll);
 				
 		pnl.add(coords);
@@ -290,8 +304,7 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		pnl.add(classes);
 		pnl.add(properties);
 		
-		setLayout(new FlowLayout(FlowLayout.LEFT));
-		add(pnl);
+		add(pnl, BorderLayout.CENTER);
 		setVisible(true);
 	}
 	/**
