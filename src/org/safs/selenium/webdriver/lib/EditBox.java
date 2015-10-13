@@ -13,11 +13,13 @@ package org.safs.selenium.webdriver.lib;
  *  <br>                            Change inputEditBox() into inputEditBoxKeys(): set the text as the content of EditBox with special key dealing.
  *  <br>   SEP 18, 2015    (Lei Wang) Move the functionality of waitReactOnBrowser() to Robot.
  *                                  Modify inputEditBoxChars/Keys(): turn on the 'waitReaction' for inputkeys and inputchars.
+ *  <br>   OCT 13, 2015    (Lei Wang) Modify clearEditBox(): make it robust.
  */
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.safs.IndependantLog;
 import org.safs.StringUtils;
 import org.safs.robot.Robot;
@@ -39,7 +41,7 @@ public class EditBox extends Component {
 				// chrome and ie are failing element.clear
 				webelement.clear();
 			}catch (StaleElementReferenceException sere){
-				IndependantLog.warn(debugmsg+StringUtils.debugmsg(sere));			
+				IndependantLog.warn(debugmsg+"Met "+StringUtils.debugmsg(sere));			
 				//fresh the element and clear again.
 				refresh(false);
 				webelement.clear();
@@ -52,20 +54,19 @@ public class EditBox extends Component {
 			throw new SeleniumPlusException("EditBox object not found");
 
 		} catch (Exception e){
-			IndependantLog.debug(debugmsg+StringUtils.debugmsg(e));
-			// chrome is failing element.clear
+			IndependantLog.debug(debugmsg+"Met "+StringUtils.debugmsg(e));
 			try{
-				refresh(true);
-				String t = webelement.getText();
-				if(t==null || t.length()==0) {
-					IndependantLog.debug(debugmsg+"element may already be cleared.");
-					return;				
-				}else{
-					webelement.sendKeys(Keys.HOME,Keys.chord(Keys.SHIFT,Keys.END),"55");
-				}
+				webelement.sendKeys(Keys.chord(Keys.CONTROL, "a", Keys.DELETE));
 			}catch(Exception x){
-				IndependantLog.debug(debugmsg+x.getClass().getName()+", "+x.getMessage(),x);
-				throw new SeleniumPlusException("EditBox clear action failed");
+				IndependantLog.debug(debugmsg+"Met "+StringUtils.debugmsg(x));
+				try{
+					 Actions delete = new Actions(WDLibrary.getWebDriver());
+					 delete.sendKeys(webelement, Keys.chord(Keys.CONTROL, "a", Keys.DELETE));
+					 delete.perform();
+				}catch(Exception ex){
+					IndependantLog.debug(debugmsg+"Met "+StringUtils.debugmsg(ex));
+					throw new SeleniumPlusException("EditBox clear action failed");
+				}
 			}
 		}		
 	}
@@ -132,6 +133,23 @@ public class EditBox extends Component {
 	}
 	
 	/**
+	 * @return String, the content of EditBox
+	 */
+	protected String getValue(){
+		String debugmsg = StringUtils.debugmsg(false);
+		String value = null;
+
+		try {
+			value = WDLibrary.getProperty(webelement, ATTRIBUTE_VALUE);
+		} catch (SeleniumPlusException e) {
+			String msg = "Failed, caused by " + StringUtils.debugmsg(e);
+			IndependantLog.warn(debugmsg + msg);
+		}
+
+		return value;
+	}
+	
+	/**
 	 * <em>Purpose:</em> Compare the contents of EditBox to the original keys,<br>
 	 * If they are same, return true; Otherwise, return false. <br>
 	 * @param keys String, the string to be compared to during verification.
@@ -140,21 +158,13 @@ public class EditBox extends Component {
 	public boolean verifyEditBox(String keys) throws SeleniumPlusException {
 		String debugmsg = getClass().getName() + ".verifyEditBox(): ";		
 		boolean passVerification = false;		
-		String contents = "";
+		String contents = getValue();
 		
-		try {
-			contents = WDLibrary.getProperty(webelement, ATTRIBUTE_VALUE);
-		} catch (SeleniumPlusException sere) {
-			String msg = "EditBox get property action failed" + "(input value = " + keys + "): caused by " + StringUtils.debugmsg(sere);
-			IndependantLog.debug(debugmsg + msg);
-			throw new SeleniumPlusException(msg);
-		}
-		
-		if(contents.equals(keys)) {
+		if(keys.equals(contents)) {
 			passVerification = true;
 		} else {
 			passVerification = false;
-			String msg = "EditBox verify errors: property:'" + contents + "'" + " NOT equals " + " value:'" + keys + "'";
+			String msg = "EditBox verify errors: property:'" + contents + "'" + " does NOT equal to " + " value:'" + keys + "'";
 			IndependantLog.debug(debugmsg + msg);
 			throw new SeleniumPlusException(msg);
 		}
