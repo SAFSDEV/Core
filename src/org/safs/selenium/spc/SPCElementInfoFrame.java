@@ -2,8 +2,10 @@ package org.safs.selenium.spc;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -90,31 +92,45 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		setMinimumSize(new Dimension(540,600));
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);	
 		
+		Dimension recMinimums = new Dimension(400,38);
+		
 		GridBagLayout layout = new GridBagLayout();
 		GridBagConstraints remainder = new GridBagConstraints();
 		remainder.gridx=0;
+		remainder.insets = new Insets(2,6,2,6);
 		remainder.anchor=GridBagConstraints.NORTHWEST;
 		remainder.gridwidth = GridBagConstraints.REMAINDER;
+		remainder.fill = GridBagConstraints.HORIZONTAL;
+		remainder.weightx = 0.0;
 		
 		JPanel pnl = new JPanel(layout);
-		JPanel coords = new JPanel();
-		JPanel attrs = new JPanel();
-		JPanel domain = new JPanel();
-		JPanel domainRec = new JPanel();
-		JPanel classes = new JPanel();
-		JPanel shrt_rec = new JPanel();
-		JPanel full_rec = new JPanel();
-		JPanel map_rec = new JPanel();
-		JPanel properties = new JPanel();
+		JPanel coords = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JPanel attrs = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JPanel domain = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JPanel domainRec = new JPanel(new BorderLayout());
+		JPanel classes = new JPanel(new BorderLayout());
+		JPanel shrt_rec = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JPanel full_rec = new JPanel(new BorderLayout());
+		JPanel map_rec = new JPanel(new BorderLayout());
+		JPanel properties = new JPanel(new BorderLayout());
 
 		layout.setConstraints(coords, remainder);
 		layout.setConstraints(attrs, remainder);
 		layout.setConstraints(domain, remainder);
+
+		remainder.weightx = 1.0;
 		layout.setConstraints(domainRec, remainder);
 		layout.setConstraints(map_rec, remainder);
+
+		remainder.weightx = 0.0;
 		layout.setConstraints(shrt_rec, remainder);
+		
+		remainder.weightx = 1.0;
 		layout.setConstraints(classes, remainder);
 		layout.setConstraints(full_rec, remainder);
+		
+		remainder.weighty = 1.0;
+		remainder.fill = GridBagConstraints.BOTH;
 		layout.setConstraints(properties, remainder);
 		
 		// COORDS panel
@@ -187,14 +203,14 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		dmnRectxt.setToolTipText("The calculated Domain-specific recognition string of the Element.");
 		JScrollPane dmnRecscroll = new JScrollPane(dmnRectxt);
 		dmnRecscroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-		dmnRecscroll.setPreferredSize(new Dimension(400,38));
+		dmnRecscroll.setMinimumSize(recMinimums);
 		dmnReclbl.setLabelFor(dmnRecscroll);
 		dmnSetbtn = new JButton("Set");
 		dmnSetbtn.addActionListener(this);
 		dmnSetbtn.setToolTipText("Set Domain recognition string as Map recognition string.");
-		domainRec.add(dmnReclbl); 
-		domainRec.add(dmnRecscroll);
-		domainRec.add(dmnSetbtn);
+		domainRec.add(dmnReclbl, BorderLayout.WEST); 
+		domainRec.add(dmnRecscroll, BorderLayout.CENTER);
+		domainRec.add(dmnSetbtn, BorderLayout.EAST);
 		
 		// XPART RECOGNITION panel
 		JLabel shrtReclbl = new JLabel("XPart:", JLabel.LEFT);
@@ -205,17 +221,17 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		shrt_rec.add(shrtRectxt);
 		
 		// CLASSES panel
-		JLabel classlbl = new JLabel(" class:", JLabel.LEFT);
+		JLabel classlbl = new JLabel(" Class:", JLabel.LEFT);
 		JTextArea classtxt = new JTextArea(node.getAttrClass());
 		classtxt.setEditable(false);
 		classtxt.setAutoscrolls(true);
 		classtxt.setToolTipText("The 'class' attribute of the Element.");
 		JScrollPane classscroll = new JScrollPane(classtxt);
 		classscroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-		classscroll.setPreferredSize(new Dimension(400,38));
+		classscroll.setMinimumSize(recMinimums);
 		classlbl.setLabelFor(classscroll);
-		classes.add(classlbl); 
-		classes.add(classscroll);
+		classes.add(classlbl,BorderLayout.WEST); 
+		classes.add(classscroll, BorderLayout.CENTER);
 
 		// XPATH RECOGNITION panel
 		JLabel xpathReclbl = new JLabel("XPath:", JLabel.LEFT);
@@ -224,14 +240,14 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		xpathRectxt.setToolTipText("The calculated generic XPath recognition string of the Element.");
 		JScrollPane xpathscroll = new JScrollPane(xpathRectxt);
 		xpathscroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-		xpathscroll.setPreferredSize(new Dimension(400,38));
+		xpathscroll.setMinimumSize(recMinimums);
 		xpathReclbl.setLabelFor(xpathscroll);
 		xpathSetbtn = new JButton("Set");
 		xpathSetbtn.addActionListener(this);
 		xpathSetbtn.setToolTipText("Set XPath recognition string as Map recognition string.");
-		full_rec.add(xpathReclbl); 
-		full_rec.add(xpathscroll);
-		full_rec.add(xpathSetbtn);	
+		full_rec.add(xpathReclbl, BorderLayout.WEST); 
+		full_rec.add(xpathscroll, BorderLayout.CENTER);
+		full_rec.add(xpathSetbtn, BorderLayout.EAST);	
 		
 		// MAP RECOGNITION panel
 		JLabel mapReclbl = new JLabel("  Map  :", JLabel.LEFT);
@@ -241,14 +257,14 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		mapRectxt.setToolTipText("The recognition set by tester to be used in App Map.");
 		JScrollPane mapscroll = new JScrollPane(mapRectxt);
 		mapscroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-		mapscroll.setPreferredSize(new Dimension(400,38));
+		mapscroll.setMinimumSize(recMinimums);
 		mapReclbl.setLabelFor(mapscroll);
 		mapClrbtn = new JButton("Clr");
 		mapClrbtn.addActionListener(this);
 		mapClrbtn.setToolTipText("Clear Map recognition string.");
-		map_rec.add(mapReclbl); 
-		map_rec.add(mapscroll);
-		map_rec.add(mapClrbtn);
+		map_rec.add(mapReclbl, BorderLayout.WEST); 
+		map_rec.add(mapscroll, BorderLayout.CENTER);
+		map_rec.add(mapClrbtn, BorderLayout.EAST);
 		
 		// PROPERTIES panel
 		//JLabel propslbl = new JLabel("Properties:");
@@ -290,9 +306,9 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		propstxt.setToolTipText("The known properties of the Element.");
 		JScrollPane propsscroll = new JScrollPane(propstxt);
 		propsscroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		propsscroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-		propsscroll.setPreferredSize(new Dimension(500,230));
-		properties.add(propsscroll);
+		propsscroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		propsscroll.setMinimumSize(new Dimension(500,230));
+		properties.add(propsscroll, BorderLayout.CENTER);
 				
 		pnl.add(coords);
 		pnl.add(attrs);
@@ -303,8 +319,12 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		pnl.add(full_rec);
 		pnl.add(classes);
 		pnl.add(properties);
-		
+
 		add(pnl, BorderLayout.CENTER);
+		pack();
+		// fixes problem with JFrame being way too big on first display
+		setSize(getMinimumSize());
+		revalidate();
 		setVisible(true);
 	}
 	/**
