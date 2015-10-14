@@ -41,9 +41,15 @@ public class AndroidInstaller extends InstallerImpl{
 	 */
 	public boolean install(String... args){
 		String safsdir = this.getEnvValue(SAFSInstaller.SAFSDIREnv);
-		if(safsdir == null || safsdir.length() == 0) return false;
+		if(safsdir == null || safsdir.length() == 0) {
+			setProgressMessage("AndroidInstaller did not find expected '"+ SAFSInstaller.SAFSDIREnv +"' Environment Variable");
+			return false;
+		}
 		File file = new CaseInsensitiveFile(safsdir).toFile();
-		if(!file.isDirectory()) return false;
+		if(!file.isDirectory()) {
+			setProgressMessage("AndroidInstaller '"+ SAFSInstaller.SAFSDIREnv +"' Environment Variable is NOT a directory!");
+			return false;
+		}
 
 		boolean setHome = true;
 		File rchome = null;
@@ -53,6 +59,9 @@ public class AndroidInstaller extends InstallerImpl{
 			if (rchome.isDirectory()){
 				setHome = false;
 				if(val.endsWith(s)) val = val.substring(0, val.length() - s.length());
+				setProgressMessage("AndroidInstaller found '"+ ROBOTIUMRC_HOME +"' Environment Variable set to: "+ val);
+			}else{
+				setProgressMessage("AndroidInstaller found '"+ ROBOTIUMRC_HOME +"' Environment Variable is NOT a valid directory.");
 			}
 		}
 		if(setHome){		
@@ -60,19 +69,39 @@ public class AndroidInstaller extends InstallerImpl{
 			rchome = new CaseInsensitiveFile(val).toFile();
 			if(rchome.isDirectory()){
 				if(val.endsWith(s)) val = val.substring(0, val.length() - s.length());
-				if(! setEnvValue(ROBOTIUMRC_HOME, val)) return false;
-			}else return false;				
+				if(! setEnvValue(ROBOTIUMRC_HOME, val)) {
+					setProgressMessage("AndroidInstaller could not SET '"+ ROBOTIUMRC_HOME +"' Environment Variable to: "+ val);
+					return false;
+				}else{
+					setProgressMessage("AndroidInstaller SET '"+ ROBOTIUMRC_HOME +"' Environment Variable to: "+ val);
+				}
+			}else {
+				setProgressMessage("AndroidInstaller expected location '"+ val +"' is NOT a valid directory!");
+				return false;				
+			}
 		}
 		String sdkhome = getEnvValue(ANDROID_HOME);
-		if(sdkhome == null) return false;
+		if(sdkhome == null) {
+			setProgressMessage("AndroidInstaller '"+ ANDROID_HOME +"' Environment Variable is NOT set.");
+			return false;
+		}
 		rchome = new CaseInsensitiveFile(sdkhome).toFile();
-		if(! rchome.isDirectory()) return false;
+		if(! rchome.isDirectory()) {
+			setProgressMessage("AndroidInstaller '"+ ANDROID_HOME +"' setting '"+ rchome.getAbsolutePath()+"' is NOT a valid directory!");
+			return false;
+		}
 		String sdkjavapath = Platform.isWindows()? sdkhome.replace(s, s+s): sdkhome;
 	    String arg = " \n# location of the SDK. This is only used by Ant\n";
 	    arg += "sdk.dir="+ sdkjavapath +"\n";
 	    try{
-	    	FileUtilities.writeStringToUTF8File(safsdir + SAFSTestRunnerDir +s+"local.properties", arg);
-		    FileUtilities.writeStringToUTF8File(safsdir + SpinnerSampleDir +s+"local.properties", arg);
+	    	try{FileUtilities.writeStringToUTF8File(safsdir + SAFSTestRunnerDir +s+"local.properties", arg);}
+	    	catch(Exception x){
+				setProgressMessage("Android SAFSTestRunner installer "+ x.getClass().getSimpleName()+": "+ x.getMessage());
+	    	}
+		    try{FileUtilities.writeStringToUTF8File(safsdir + SpinnerSampleDir +s+"local.properties", arg);}
+	    	catch(Exception x){
+				setProgressMessage("Android SampleSpinner installer "+ x.getClass().getSimpleName()+": "+ x.getMessage());
+	    	}
 	   	    String targ = safsdir;
 	   	    String runner = SAFSTestRunnerDir + s;
 	   	    if(Platform.isWindows()){
@@ -80,18 +109,37 @@ public class AndroidInstaller extends InstallerImpl{
 	   	    	runner = runner.replace(s, s+s);
 	   	    }
     	    arg += "safs.droid.automation.libs="+ targ + runner +"libs\n";
-		    FileUtilities.writeStringToUTF8File(safsdir + SAFSMessengerDir +s+ "local.properties", arg);
+		    try{FileUtilities.writeStringToUTF8File(safsdir + SAFSMessengerDir +s+ "local.properties", arg);}
+	    	catch(Exception x){
+				setProgressMessage("Android SAFSTestMessenger installer "+ x.getClass().getSimpleName()+": "+ x.getMessage());
+	    	}
 		    String oldline = "C:\\Program Files\\Android\\android-sdk";
-		    FileUtilities.replaceDirectoryFilesSubstrings(
+		    try{ FileUtilities.replaceDirectoryFilesSubstrings(
 		    	 		  safsdir + SamplesDroidDir, 
 		    			  new String[]{".bat",".ini"}, 
 		    			  oldline, 
 		    			  sdkhome, 
 		    			  false);
-	    }catch(Exception x){return false;}
+		    }catch(Exception x){
+				setProgressMessage("Android BAT/INI installer "+ x.getClass().getSimpleName()+": "+ x.getMessage());
+	    	}
+		    if(Platform.isWindows()){
+		    	arg = "\nSET CLASSPATH=\"\"\nstart \"AnT Debug\" /B /WAIT \"cmd.exe\" /C \"ant debug\"\n";
+			    try{FileUtilities.writeStringToUTF8File(safsdir + SAFSMessengerDir +s+ "build.bat", arg);}
+		    	catch(Exception x){
+					setProgressMessage("Android SAFSTestMessenger BUILD.BAT installer "+ x.getClass().getSimpleName()+": "+ x.getMessage());
+		    	}
+			    try{FileUtilities.writeStringToUTF8File(safsdir + SAFSTestRunnerDir +s+ "build.bat", arg);}
+		    	catch(Exception x){
+					setProgressMessage("Android SAFSTestRunner BUILD.BAT installer "+ x.getClass().getSimpleName()+": "+ x.getMessage());
+		    	}
+		    }
+	    }catch(Exception x){
+			setProgressMessage("Android support installer "+ x.getClass().getSimpleName()+": "+ x.getMessage());
+	    	return false;
+	    }
 	    
-	    // TODO: Perform automated first-time debug build 
-	    
+	    // TODO: Perform automated first-time debug build 	    
 	    return true;
 	}
 	
