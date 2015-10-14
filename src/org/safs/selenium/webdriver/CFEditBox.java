@@ -5,6 +5,7 @@
 package org.safs.selenium.webdriver;
 
 import org.openqa.selenium.WebElement;
+import org.safs.IndependantLog;
 import org.safs.Log;
 import org.safs.StatusCodes;
 import org.safs.StringUtils;
@@ -94,9 +95,9 @@ public class CFEditBox extends CFComponent {
 			
 			if (needVerify) {
 				Log.info("Verifying the EditBox ...");
-				boolean isVerifying = editbox.verifyEditBox(option);
+				boolean verified = editbox.verifyEditBox(option);
 
-				if (isVerifying) {
+				if (verified) {
 					testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
 					msg = genericText.convert(GENKEYS.SUCCESS_2,
 							SETTEXTCHARACTERS_KEYWORD + " '"+ "verifying" + "' successful",
@@ -147,32 +148,33 @@ public class CFEditBox extends CFComponent {
 			editbox.clearEditBox();
 			editbox.inputEditBoxKeys(option);
 			
+			if(needVerify){
+				// Check if there's special keyword, if there're special keywords, no verification.
+				if(StringUtils.containsSepcialKeys(option)){
+					IndependantLog.debug(dbg+"Input text contains special key words, ignoring verification.");
+					needVerify = false;
+				}
+			}
+			
 			// Verify if needed
 			if (needVerify) {
-				// Check if there's special keyword. If there're special keywords, not verify; If not, verify the contents.
-				if(! StringUtils.containsSepcialKeys(option)) {
-					Log.info("Verifying the EditBox ...");
-					boolean isVerifying = editbox.verifyEditBox(option);
-					
-					if (isVerifying) {
-						testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
-						msg = genericText.convert(GENKEYS.SUCCESS_2,
-								SETTEXTVALUE_KEYWORD + " '" + "verifying" + "' successful",
-								SETTEXTVALUE_KEYWORD,
-								"verifying");
-						log.logMessage(testRecordData.getFac(), msg, PASSED_MESSAGE);
-					} else {
-						testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
-						msg = failedText.convert(FAILKEYS.ERROR_PERFORMING_2,
-											"Error performing '" + "verification" + "' on " + SETTEXTVALUE_KEYWORD,
-											"verification",
-											SETTEXTVALUE_KEYWORD);
-						standardFailureMessage(msg, testRecordData.getInputRecord());
-					}
-				} else {
+				Log.info("Verifying the EditBox ...");
+				boolean verified = editbox.verifyEditBox(option);
+
+				if (verified) {
 					testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
-					msg = "Input text contains special key words, ignoring verification.";
+					msg = genericText.convert(GENKEYS.SUCCESS_2,
+							SETTEXTVALUE_KEYWORD + " '" + "verifying" + "' successful",
+							SETTEXTVALUE_KEYWORD,
+							"verifying");
 					log.logMessage(testRecordData.getFac(), msg, PASSED_MESSAGE);
+				} else {
+					testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
+					msg = failedText.convert(FAILKEYS.ERROR_PERFORMING_2,
+							"Error performing '" + "verification" + "' on " + SETTEXTVALUE_KEYWORD,
+							"verification",
+							SETTEXTVALUE_KEYWORD);
+					standardFailureMessage(msg, testRecordData.getInputRecord());
 				}
 			}else{
 				//If we don't need to verify, we just set status to OK.
