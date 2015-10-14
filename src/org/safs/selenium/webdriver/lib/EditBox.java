@@ -56,12 +56,12 @@ public class EditBox extends Component {
 		} catch (Exception e){
 			IndependantLog.debug(debugmsg+"Met "+StringUtils.debugmsg(e));
 			try{
-				webelement.sendKeys(Keys.chord(Keys.CONTROL, "a", Keys.DELETE));
+				webelement.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.DELETE);
 			}catch(Exception x){
 				IndependantLog.debug(debugmsg+"Met "+StringUtils.debugmsg(x));
 				try{
 					 Actions delete = new Actions(WDLibrary.getWebDriver());
-					 delete.sendKeys(webelement, Keys.chord(Keys.CONTROL, "a", Keys.DELETE));
+					 delete.sendKeys(webelement, Keys.chord(Keys.CONTROL, "a"), Keys.DELETE);
 					 delete.perform();
 				}catch(Exception ex){
 					IndependantLog.debug(debugmsg+"Met "+StringUtils.debugmsg(ex));
