@@ -72,7 +72,7 @@ public abstract class InstallerImpl implements InstallerInterface{
 	}
 	
 	protected static void setProgressMessage(String message){
-		try{ progresser.setProgressMessage(message);}catch(Throwable ignore){}
+		try{ progresser.setProgressMessage(message);}catch(Throwable ignore){System.out.println(message);}
 	}
 	
 	/**
