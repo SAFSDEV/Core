@@ -90,42 +90,67 @@ public class SAFSInstaller extends InstallerImpl {
 				try{
 					installer = new TCAFSInstaller();
 					installer.setProgressIndicator(progresser);
-					installer.install();
+					if(installer.install()){
+						setProgressMessage("Windows SmartBear TestComplete support successfully installed.");
+					}else{
+						setProgressMessage("Windows SmartBear TestComplete support installation did NOT complete successfully.");
+					}
 				}catch(Throwable t){
 					setProgressMessage("SmartBear TestComplete support installer "+ t.getClass().getSimpleName()+": "+ t.getMessage());
+					setProgressMessage("Windows SmartBear TestComplete support installation did NOT complete successfully.");
 				}
 				setProgressMessage("Evaluating Windows IBM Rational Functional Tester support requirements.");
 				try{
 					installer = new RFTInstaller();
 					installer.setProgressIndicator(progresser);
-					installer.install();
+					if(installer.install()){
+						setProgressMessage("Windows IBM Rational Functional Tester support successfully installed.");
+					}else{
+						setProgressMessage("Windows IBM Rational Functional Tester support installation did NOT complete successfully.");
+					}
 				}catch(Throwable t){
 					setProgressMessage("IBM Rational support installer "+ t.getClass().getSimpleName()+": "+ t.getMessage());
+					setProgressMessage("Windows IBM Rational Functional Tester support installation did NOT complete successfully.");
 				}
 				setProgressMessage("Evaluating Windows OCR support requirements.");
 				try{
 					installer = new OCRInstaller();
 					installer.setProgressIndicator(progresser);
-					installer.install();
+					if(installer.install()){
+						setProgressMessage("Windows OCR support successfully installed.");
+					}else{
+						setProgressMessage("Windows OCR support installation did NOT complete successfully.");
+					}
 				}catch(Throwable t){
 					setProgressMessage("Windows OCR support installer "+ t.getClass().getSimpleName()+": "+ t.getMessage());
+					setProgressMessage("Windows OCR support installation did NOT complete successfully.");
 				}
 				setProgressMessage("Evaluating Windows DLL support requirements.");
 				try{
 					installer = new DLLInstaller();
 					installer.setProgressIndicator(progresser);
-					installer.install();
+					if(installer.install()){
+						setProgressMessage("Windows DLL support successfully installed.");
+					}else{
+						setProgressMessage("Windows DLL support installation did NOT complete successfully.");
+					}
 				}catch(Throwable t){
 					setProgressMessage("Windows DLL support installer "+ t.getClass().getSimpleName()+": "+ t.getMessage());
+					setProgressMessage("Windows DLL support installation did NOT complete successfully.");
 				}
 			}
 			setProgressMessage("Evaluating Android support requirements.");
 			try{
 				installer = new AndroidInstaller();
 				installer.setProgressIndicator(progresser);
-				installer.install();			
+				if(installer.install()){
+					setProgressMessage("Windows Android support successfully installed.");
+				}else{
+					setProgressMessage("Windows Android support installation did NOT complete successfully.");
+				}
 			}catch(Throwable t){
 				setProgressMessage("Android support installer "+ t.getClass().getSimpleName()+": "+ t.getMessage());
+				setProgressMessage("Windows Android support installation did NOT complete successfully.");
 			}
 		}
 		if(Platform.isWindows()){

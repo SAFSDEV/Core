@@ -6,6 +6,7 @@ package org.safs.selenium.webdriver.lib;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.openqa.selenium.Keys;
@@ -17,6 +18,7 @@ import org.safs.selenium.util.JavaScriptFunctions.SAP;
 import org.safs.selenium.webdriver.lib.model.AbstractListSelectable;
 import org.safs.selenium.webdriver.lib.model.Element;
 import org.safs.selenium.webdriver.lib.model.IListSelectable;
+import org.safs.selenium.webdriver.lib.model.IOperable;
 import org.safs.selenium.webdriver.lib.model.Item;
 import org.safs.selenium.webdriver.lib.model.TextMatchingCriterion;
 
@@ -26,6 +28,7 @@ import org.safs.selenium.webdriver.lib.model.TextMatchingCriterion;
  * 
  *  <br>   APR 21, 2014    (sbjlwa) Initial release.
  *  <br>   APR 23, 2014    (sbjlwa) Update to support DOJO domain.
+ *  <br>   OCT 14, 2015    (sbjlwa) Use the default operable object to make this class robust for generic functionality.
  */
 public class TabControl extends Component{
 	
@@ -40,25 +43,34 @@ public class TabControl extends Component{
 
 	protected void updateFields(){
 		super.updateFields();
-		tabbable = (IListSelectable) anOperableObject;
+		try{
+			tabbable = (IListSelectable) anOperableObject;			
+		}catch(Exception e){
+			IndependantLog.warn(StringUtils.debugmsg(false)+" the operable object is NOT an instance of IListSelectable, it can ONLY support generic functionality!");
+		}
 	}
 	/**
 	 * @param tabcontrol	WebElement tabcontrol object, for example a sap.ui.commons.TabStrip object.
 	 */
-	protected IListSelectable createOperable(WebElement tabcontrol){
+	protected IOperable createOperable(WebElement tabcontrol){
 		String debugmsg = StringUtils.debugmsg(false);
 		IListSelectable operable = null;
 		try{			
 			if(WDLibrary.isDojoDomain(tabcontrol)){
-				operable = new DojoTabbable_TabContainer(this);
+				try{ operable = new DojoTabbable_TabContainer(this); }catch(SeleniumPlusException e){
+					IndependantLog.debug(debugmsg+" Cannot create IListSelectable for "+Arrays.toString(DojoTabbable_TabContainer.supportedClazzes));
+				}
 			}else if(WDLibrary.isSAPDomain(tabcontrol)){
-				operable = new SapTabbable_TabStrip(this);
+				try{ operable = new SapTabbable_TabStrip(this); }catch(SeleniumPlusException e){
+					IndependantLog.debug(debugmsg+" Cannot create IListSelectable for "+Arrays.toString(SapTabbable_TabStrip.supportedClazzes));
+				}
 			}
 			
 		}catch(Exception e){ IndependantLog.debug(debugmsg+" Met Exception ", e); }
 		
 		if(operable==null){
-			IndependantLog.error(debugmsg + "Can not create a proper Selectable object.");
+			IndependantLog.warn(debugmsg + "Can NOT create a proper IListSelectable object, use the default operable object.");
+			return super.createOperable(tabcontrol);
 		}
 		
 		return operable;
@@ -129,8 +141,9 @@ public class TabControl extends Component{
 		}
 	}
 	
-	class SapTabbable_TabStrip extends AbstractListSelectable{
+	protected static class SapTabbable_TabStrip extends AbstractListSelectable{
 		public static final String CLASS_NAME_TABSTRIP = "sap.ui.commons.TabStrip";
+		public static final String[] supportedClazzes = {CLASS_NAME_TABSTRIP};
 
 		public SapTabbable_TabStrip(Component component) throws SeleniumPlusException {
 			super(component);
@@ -140,8 +153,7 @@ public class TabControl extends Component{
 		 * @see org.safs.selenium.webdriver.lib.model.Supportable#getSupportedClassNames()
 		 */
 		public String[] getSupportedClassNames() {
-			String[] clazzes = {CLASS_NAME_TABSTRIP};
-			return clazzes;
+			return supportedClazzes;
 		}
 
 		protected void  clickElement(Element element, Keys key, Point offset, int mouseButtonNumber, int numberOfClick) throws SeleniumPlusException {
@@ -240,8 +252,9 @@ public class TabControl extends Component{
 
 	}
 	
-	class DojoTabbable_TabContainer extends AbstractListSelectable{
+	protected static class DojoTabbable_TabContainer extends AbstractListSelectable{
 		public static final String CLASS_NAME_TABCONTAINER = "dijit.layout.TabContainer";
+		public static final String[] supportedClazzes = {CLASS_NAME_TABCONTAINER};		
 
 		public DojoTabbable_TabContainer(Component component) throws SeleniumPlusException {
 			super(component);
@@ -251,8 +264,7 @@ public class TabControl extends Component{
 		 * @see org.safs.selenium.webdriver.lib.model.Supportable#getSupportedClassNames()
 		 */
 		public String[] getSupportedClassNames() {
-			String[] clazzes = {CLASS_NAME_TABCONTAINER};
-			return clazzes;
+			return supportedClazzes;
 		}
 
 		protected void clickElement(Element element, Keys key, Point offset, int mouseButtonNumber, int numberOfClick) throws SeleniumPlusException {
