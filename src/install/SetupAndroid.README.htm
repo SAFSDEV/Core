@@ -5,7 +5,7 @@
 <center><h1>
 SAFS Android Setup<br>
 for Windows</h1>
-Updated 2015.10.14</center>
+Updated 2015.10.15</center>
 <hr>
 <b>Authors:</b>
 <ul>
@@ -74,7 +74,7 @@ SAFS Android Remote Control support and execution has the same system requiremen
 
 <p><ol>
 <li><b>Verify (<a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html" target="_blank" title="Java JDK Home Page">Install if needed</a>) a Java JDK (not a JRE)</b>:<br>
-The Java SDK should be version 1.6 or higher.<br>
+The Java SDK should be version 1.7 or higher.<br>
 <p>
 <b>*</b> The System environment variable <b>JAVA_HOME</b> should be set to the path to the Java SDK.<br>
 <b>*</b> The System environment variable <b>PATH</b> should contain the path to the Java SDK '<b>bin</b>' subfolder.
@@ -143,25 +143,23 @@ Within the '<b>&lt;instrumentation </b>' element set the '<b>android:targetPacka
 
 
 <p>
-<li><b>Repackage your AUT APK with your tester/developer debug profile</b>(if needed):<br>
+<li><b>This next step is only required to build and test the sample SpinnerActivity App.</b>
+<p>
+<b>Rebuild Sample SpinnerActivity-debug.apk</b>:<br>
+Required only once to build with your tester/developer debug profile.<br>
+<p>
+<ul>
+<li>Go to the <b>samples\Droid\SpinnerSample</b> project and verify/edit the file <b>local.properties</b>:
 <p><ul>
-<li>3rd-party '<b>re-sign.jar</b>' is located in the <b>SAFS</b> '<b>lib</b>' subfolder.
-<li>The re-sign application takes 2 parameters:
-<p>
-<ol>
-<li>&lt;in> path to AUT apk to re-sign
-<li>&lt;out> path to newly created AUT-debug.apk
-</ol>
-<p>
-<li>In a CMD/Shell/Terminal window run the re-sign Java program:<br>
-(Practice on the SpinnerSample APK provided with SAFS)
-<p>
-<b>java&nbsp;-jar&nbsp;&lt;path\to\re-sign.jar>&nbsp;&lt;path\to\SpinnerActivity.apk>&nbsp;&lt;out\to\SpinnerActivity-debug.apk></b>
-<p>
-<li>Verify the AUT-debug.apk was built in the target output path.
+<b>sdk.dir</b>=&lt;path-to-android-sdk><br>
 </ul>
 <p>
+<li>In a CMD/Shell/Terminal window navigate to the <b>samples\Droid\SpinnerSample</b> project directory.
+<li>Execute '<b>build.bat</b>' to build the <b>SpinnerActivity-debug.apk</b>.
+<li>Verify the APK was built in the <b>SpinnerSample</b> '<b>bin</b>' subfolder.
+</ul>
 
+<p>
 </ol>
 
 <hr/><! ======================================================================>
@@ -178,7 +176,25 @@ Once you have successfully completed the Setup Instructions above, you should be
 The SAFS Droid sample comes with a ready-to-run test for the SpinnerSample provided by SAFS. &nbsp;As mentioned in <a href="#definitions">Definitions</a> and the Setup Instructions above, you must have a valid emulator AVD or a real Device working properly with your Android SDK.
 <p>
 <ol>
-<li>Navigate to and verify/edit all paths in <b>samples\Droid\droidTest.ini</b>.
+<li>Navigate to and verify/edit <b>samples\Droid\droidTest.ini</b>.<br>
+(Consult the <a href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#configfile" title="Configuration File Options" target="_blank">Configuration File Options<a> to list all available INI options for [SAFS_DROID].)
+<p>
+<ul>
+    <li>Edit/Verify paths in the INI file:
+    <p><ol>
+    <li>DriverRoot
+    <li>ProjectRoot
+    <li>DroidProject
+    <li>Android-SDK
+    <li>Android-Tools
+    <li>TestRunnerAPK
+    <li>TCPMessengerAPK
+    <li>TargetAPK
+    </ol>
+    <p>
+    <li>Edit/Verify the <b>EMULATOR_AVD</b> setting if using an AVD.
+    <p>
+</ul>
 <p>
 <li>Verify your Device is connected and properly configured for Development/Debugging.
 <p>
@@ -193,7 +209,7 @@ The SAFS Droid sample comes with a ready-to-run test for the SpinnerSample provi
 <li>The brief test will then shutdown the SpinnerActivity application and exit the test.
 </ul>
 <p>
-<li>You should be able to review the test results at <b>samples\Droid\Datapool\Logs\DroidTestCycle.txt</b>.
+<li>You should be able to review the test results at <b>samples\Droid\Logs\DroidTestCycle.txt</b>.
 </ol>
 <p>
 Consult the <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php" title="SAFS Keyword Reference" target="_blank">SAFS Keyword Reference</a> for specific <img src="http://safsdev.sourceforge.net/sqabasic2000/DRD.GIF" alt="Droid Support Icon" title="Droid Support Icon"> Android (DRD) support currently available in SAFS.
@@ -207,4 +223,10 @@ Specifically:
 </ul>
 <p>
 Enjoy!
+<hr>
+<pre>Carl Nagle, <a href="http://www.sas.com"  >SAS Institute</a>
+Project Manager, <a href="https://github.com/safsdev"  >SAFSDEV</a>
+Subscribe to appropriate <a href="http://safsdev.freeforums.net" alt="Go to Support Forums">Support Forums</a> to review support archives and ask questons.
+</pre>
+<p>
 </body></html>
