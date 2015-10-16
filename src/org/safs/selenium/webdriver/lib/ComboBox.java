@@ -2,6 +2,14 @@
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
+/**
+ * History:
+ * 
+ *  DEC 20, 2013    (Lei Wang) Initial release.
+ *  JAN 15, 2014    (Lei Wang) Update to support Dojo combo box (FilteringSelect, ComboBox, and Select)
+ *  SEP 02, 2014    (LeiWang) Update to support sap.m.Select, sap.m.ComboBox
+ *  OCT 16, 2015    (Lei Wang) Refector to create IOperable object properly.
+ */
 package org.safs.selenium.webdriver.lib;
 
 import java.awt.Point;
@@ -24,13 +32,8 @@ import org.safs.selenium.webdriver.lib.model.EmbeddedObject;
 import org.safs.selenium.webdriver.lib.model.IOperable;
 import org.safs.selenium.webdriver.lib.model.Option;
 
-/**
- * 
- * History:<br>
- * 
- *  <br>   Dec 20, 2013    (Lei Wang) Initial release.
- *  <br>   Jan 15, 2014    (Lei Wang) Update to support Dojo combo box (FilteringSelect, ComboBox, and Select)
- *  <br>   Sep 02, 2014    (LeiWang) Update to support sap.m.Select, sap.m.ComboBox
+/** 
+ * A library class to handle different specific ComboBox.
  */
 public class ComboBox extends Component{
 
@@ -59,37 +62,39 @@ public class ComboBox extends Component{
 		initialize(combobox);
 	}
 
-	protected void updateFields(){
-		super.updateFields();
+	protected void castOperable(){
+		super.castOperable();
 		select = (Selectable) anOperableObject;
 	}
 	
-	protected Selectable createOperable(WebElement combobox){
+	protected IOperable createDOJOOperable(){
 		String debugmsg = StringUtils.debugmsg(false);
 		Selectable operable = null;
-		try{
-			if(WDLibrary.isDojoDomain(combobox)){
-				try{ operable = new DojoSelect_ComboBox(this); }catch(SeleniumPlusException e){
-					IndependantLog.debug(debugmsg, e); 
-					try{ operable = new DojoSelect_FilteringSelect(this); }catch(SeleniumPlusException e1){
-						IndependantLog.debug(debugmsg, e1); 
-						try{ operable = new DojoSelect_Select(this); }catch(SeleniumPlusException e2){
-							IndependantLog.debug(debugmsg, e2); 
-						} 
-					}
-				}
-			}else if(WDLibrary.isSAPDomain(combobox)){
-				try{ operable = new SapSelect_ComboBox(this); }catch(SeleniumPlusException e){
-					IndependantLog.debug(debugmsg+" Cannot create selectable of "+Arrays.toString(SapSelect_ComboBox.supportedClazzes), e);
-				}				
-			}else{
-				operable = new HtmlSelect(this);
-			}
-		}catch(Exception e){ IndependantLog.debug(debugmsg+" Met Exception ", e); }
-		
-		if(operable==null){
-			IndependantLog.error("Can not create a proper Selectable object.");
-		}		
+		try{ operable = new DojoSelect_ComboBox(this); }catch(SeleniumPlusException e){
+			IndependantLog.debug(debugmsg+" Cannot create Selectable of "+Arrays.toString(DojoSelect_ComboBox.supportedClazzes));
+		}
+		try{ if(operable==null) operable = new DojoSelect_FilteringSelect(this); }catch(SeleniumPlusException e1){
+			IndependantLog.debug(debugmsg+" Cannot create Selectable of "+Arrays.toString(DojoSelect_FilteringSelect.supportedClazzes));
+		}
+		try{ if(operable==null) operable = new DojoSelect_Select(this); }catch(SeleniumPlusException e2){
+			IndependantLog.debug(debugmsg+" Cannot create Selectable of "+Arrays.toString(DojoSelect_Select.supportedClazzes));
+		}
+		return operable;
+	}
+	protected IOperable createSAPOperable(){
+		String debugmsg = StringUtils.debugmsg(false);
+		Selectable operable = null;
+		try{ operable = new SapSelect_ComboBox(this); }catch(SeleniumPlusException e){
+			IndependantLog.debug(debugmsg+" Cannot create Selectable of "+Arrays.toString(SapSelect_ComboBox.supportedClazzes), e);
+		}
+		return operable;
+	}
+	protected IOperable createHTMLOperable(){
+		String debugmsg = StringUtils.debugmsg(false);
+		Selectable operable = null;
+		try{ operable = new HtmlSelect(this); }catch(SeleniumPlusException e){
+			IndependantLog.debug(debugmsg+" Cannot create Selectable of "+Arrays.toString(HtmlSelect.supportedClazzes), e);
+		}
 		return operable;
 	}
 	
@@ -493,9 +498,11 @@ public class ComboBox extends Component{
 	 * Models a SELECT tag, providing helper methods to select and deselect options.<br>
 	 * @see Selectable
 	 */
-	public static class HtmlSelect extends EmbeddedObject implements Selectable{
+	protected static class HtmlSelect extends EmbeddedObject implements Selectable{
 		/**traditional HTML tag &lt;select&gt;*/
 		public static final String CLASS_NAME = TAG_HTML_SELECT;
+		public static final String[] supportedClazzes = {CLASS_NAME};
+		
 		protected final boolean isMulti;
 	
 		public void clearCache(){
@@ -531,8 +538,7 @@ public class ComboBox extends Component{
 		 * @see org.safs.selenium.webdriver.lib.Component.Supportable#getSupportedClassNames()
 		 */
 		public String[] getSupportedClassNames() {
-			String[] classes = {CLASS_NAME};
-			return classes;
+			return supportedClazzes;
 		}
 		
 		public Option getItemByIndex(int index){
@@ -994,7 +1000,7 @@ public class ComboBox extends Component{
 		}
 	}
 
-	static abstract class AbstractSelect extends HtmlSelect{
+	protected static abstract class AbstractSelect extends HtmlSelect{
 		/**
 		 * @param webelement
 		 * @throws SeleniumPlusException
@@ -1201,7 +1207,7 @@ public class ComboBox extends Component{
 	 * @see Selectable
 	 * @see HtmlSelect
 	 */
-	abstract class DojoSelect extends AbstractSelect{
+	protected static abstract class DojoSelect extends AbstractSelect{
 		/**
 		 * popup is the popup menu associated with the combo box.<br>
 		 * It can be used to handle each 'menu item' (the combo box option)<br>
@@ -1423,7 +1429,7 @@ public class ComboBox extends Component{
 	 * @see HtmlSelect
 	 * @see DojoSelect
 	 */
-	class DojoSelect_Select extends DojoSelect{
+	protected static class DojoSelect_Select extends DojoSelect{
 		//dijit/form/Select, is a HTML tag <table>, a popup is associated
 		//https://dojotoolkit.org/documentation/tutorials/1.9/selects/demo/Select.php
 		public static final String CLASS_NAME = "dijit.form.Select";//<table>
@@ -1439,6 +1445,8 @@ public class ComboBox extends Component{
 		public static final String CLASS_DOJO_SELECT_MENUITEM = "dijitReset dijitMenuItem";//<tr>
 		public static final String CLASS_DOJO_SELECT_MENU_LABEL = "dijitReset dijitMenuItemLabel";//<td> .innerHTML .textContent
 		
+		public static final String[] supportedClazzes = {CLASS_NAME};
+		
 		public DojoSelect_Select(Component component) throws SeleniumPlusException {
 			super(component);
 		}
@@ -1447,8 +1455,7 @@ public class ComboBox extends Component{
 		 * @see org.safs.selenium.webdriver.lib.DojoSelect#getSupportedClassNames()
 		 */
 		public String[] getSupportedClassNames() {
-			String[] names = {CLASS_NAME}; 
-			return names;
+			return supportedClazzes;
 		}
 		
 		public boolean isSupported(WebElement element){
@@ -1661,7 +1668,7 @@ public class ComboBox extends Component{
 	 * @see HtmlSelect
 	 * @see DojoSelect
 	 */
-	class DojoSelect_ComboBox extends DojoSelect{
+	protected static class DojoSelect_ComboBox extends DojoSelect{
 		//dijit/form/ComboBox, is a HTML tag <div>, a popup is associated
 		//https://dojotoolkit.org/documentation/tutorials/1.9/selects/demo/ComboBox.php
 		public static final String CLASS_NAME = "dijit.form.ComboBox";//<div>
@@ -1676,6 +1683,7 @@ public class ComboBox extends Component{
 		public static final String CLASS_DOJO_COMBOBOX_MENU = "dijitReset dijitMenu dijitComboBoxMenu";//<div>
 		public static final String CLASS_DOJO_COMBOBOX_MENUITEM = "dijitReset dijitMenuItem";//<div> .item seems like index from 0
 		
+		public static final String[] supportedClazzes = {CLASS_NAME};
 		
 		public DojoSelect_ComboBox(Component component) throws SeleniumPlusException {
 			super(component);
@@ -1698,8 +1706,7 @@ public class ComboBox extends Component{
 		 * @see org.safs.selenium.webdriver.lib.DojoSelect#getSupportedClassNames()
 		 */
 		public String[] getSupportedClassNames() {
-			String[] names = {CLASS_NAME}; 
-			return names;
+			return supportedClazzes;
 		}
 	
 		/**
@@ -1773,10 +1780,11 @@ public class ComboBox extends Component{
 	 * @see HtmlSelect
 	 * @see DojoSelect
 	 */
-	class DojoSelect_FilteringSelect extends DojoSelect{
+	protected static class DojoSelect_FilteringSelect extends DojoSelect{
 		//dijit/form/FilteringSelect, is a traditional HTML tag <select>
 		//https://dojotoolkit.org/documentation/tutorials/1.9/selects/demo/FilteringSelect.php
 		public static final String CLASS_NAME = "dijit.form.FilteringSelect";//<table>
+		public static final String[] supportedClazzes = {CLASS_NAME};
 		
 		public DojoSelect_FilteringSelect(Component component) throws SeleniumPlusException {
 			super(component);
@@ -1786,8 +1794,7 @@ public class ComboBox extends Component{
 		 * @see org.safs.selenium.webdriver.lib.DojoSelect#getSupportedClassNames()
 		 */
 		public String[] getSupportedClassNames() {
-			String[] names = {CLASS_NAME}; 
-			return names;
+			return supportedClazzes;
 		}
 	
 		/**

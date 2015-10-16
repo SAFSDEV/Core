@@ -2,7 +2,15 @@
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
+/**
+ * History:
+ * 
+ *  SEP 10, 2014    (Lei Wang) Initial release.
+ *  OCT 16, 2015    (Lei Wang) Refector to create IOperable object properly.
+ */
 package org.safs.selenium.webdriver.lib;
+
+import java.util.Arrays;
 
 import org.openqa.selenium.WebElement;
 import org.safs.IndependantLog;
@@ -11,10 +19,8 @@ import org.safs.selenium.util.JavaScriptFunctions.SAP;
 import org.safs.selenium.webdriver.lib.model.EmbeddedObject;
 import org.safs.selenium.webdriver.lib.model.IOperable;
 
-/**
- * History:<br>
- * 
- *  <br>   Sep 10, 2014    (Lei Wang) Initial release.
+/** 
+ * A library class to handle different specific ScrollBar.
  */
 public class ScrollBar extends Component{
 	
@@ -32,27 +38,16 @@ public class ScrollBar extends Component{
 		initialize(scrollbar);
 	}
 
-	protected void updateFields(){
-		super.updateFields();
+	protected void castOperable(){
+		super.castOperable();
 		scrollable = (IScrollable) anOperableObject;
 	}
 	
-	protected IScrollable createOperable(WebElement treeview){
+	protected IOperable createSAPOperable(){
 		String debugmsg = StringUtils.debugmsg(false);
 		IScrollable operable = null;
-		try{
-			//Try to get the possible Checkable
-			if(WDLibrary.isDojoDomain(treeview)){
-				//TODO
-			}else if(WDLibrary.isSAPDomain(treeview)){
-				try { operable = new SapScrollable_ScrollBar(this);}catch(Exception e){} 
-			}else{
-//				operable = new HtmlCheckable_InputCheckBox(this);
-			}
-		}catch(Exception e){ IndependantLog.debug(debugmsg+" Met Exception ", e); }
-		
-		if(operable==null){
-			IndependantLog.error("Can not create a proper Checkable object.");
+		try{ operable = new SapScrollable_ScrollBar(this);}catch(SeleniumPlusException se0){
+			IndependantLog.debug(debugmsg+" Cannot create IScrollable of "+Arrays.toString(SapScrollable_ScrollBar.supportedClazzes));				
 		}
 		return operable;
 	}
@@ -166,7 +161,7 @@ public class ScrollBar extends Component{
 		
 	}
 	
-	static class SapScrollable_ScrollBar extends SapScrollbale{
+	protected static class SapScrollable_ScrollBar extends SapScrollbale{
 		public static final String CLASS_NAME_SCROLLBAR = "sap.ui.core.ScrollBar";
 		public static final String[] supportedClazzes = {CLASS_NAME_SCROLLBAR};
 		
