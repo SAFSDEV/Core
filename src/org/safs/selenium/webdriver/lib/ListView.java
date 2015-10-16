@@ -2,6 +2,13 @@
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
+/**
+ * History:
+ * 
+ *  APR 2, 2014    (sbjlwa) Initial release.
+ *  SEP 2, 2014    (LeiWang) Support sap.m.ListBase.
+ *  OCT 16, 2015   (sbjlwa) Refector to create IOperable object properly.
+ */
 package org.safs.selenium.webdriver.lib;
 
 import java.awt.Point;
@@ -22,12 +29,8 @@ import org.safs.selenium.webdriver.lib.model.IOperable;
 import org.safs.selenium.webdriver.lib.model.Item;
 import org.safs.selenium.webdriver.lib.model.TextMatchingCriterion;
 
-/**
- * 
- * History:<br>
- * 
- *  <br>   APR 2, 2014    (sbjlwa) Initial release.
- *  <br>   SEP 2, 2014    (LeiWang) Support sap.m.ListBase.
+/** 
+ * A library class to handle different specific ListView.
  */
 public class ListView extends Component implements IListSelectable{
 	IListSelectable listable = null;
@@ -39,45 +42,30 @@ public class ListView extends Component implements IListSelectable{
 		initialize(listview);
 	}
 
-	protected void updateFields(){
-		super.updateFields();
+	protected void castOperable(){
+		super.castOperable();
 		listable = (IListSelectable) anOperableObject;
 	}
 
-	/**
-	 * @param listview	WebElement listview object, for example a sap.ui.commons.ListBox object.
-	 */
-	protected IOperable createOperable(WebElement listview){
+	protected IOperable createSAPOperable(){
 		String debugmsg = StringUtils.debugmsg(false);
 		IListSelectable operable = null;
-		try{
-			if(WDLibrary.isDojoDomain(listview)){
-				IndependantLog.warn(debugmsg+" Cannot create Selectable operable of Dojo Selectable at this time.");
-				//				return new DojoSelectable_MultiSelect(this);
-			}else if(WDLibrary.isSAPDomain(listview)){
-				IndependantLog.info(debugmsg+" trying to create Selectable operable of SAP/OpenUI5 at this time.");
-				try{ operable = new SapSelectable_ListBox(this);}catch(SeleniumPlusException se0){
-					IndependantLog.debug(debugmsg+" Cannot create Selectable of "+Arrays.toString(SapSelectable_ListBox.supportedClazzes));
-					try{ operable = new SapSelectable_m_List(this);}catch(SeleniumPlusException se1){
-						IndependantLog.warn(debugmsg+" Cannot create Selectable of "+Arrays.toString(SapSelectable_m_List.supportedClazzes));
-						try{ operable = new SapSelectable_m_SelectList(this);}catch(SeleniumPlusException se2){
-							IndependantLog.warn(debugmsg+" Cannot create Selectable of "+Arrays.toString(SapSelectable_m_SelectList.supportedClazzes));
-						}					
-					}					
-				}
-			}
-			if(operable == null) {
-				IndependantLog.info(debugmsg+" trying to create Selectable operable of for Generic Lists at this time.");
-				try{ operable = new GenericSelectableList(this);}catch(SeleniumPlusException se0){
-					IndependantLog.debug(debugmsg+" Cannot create Selectable of "+Arrays.toString(GenericSelectableList.supportedClazzes));
-				}
-			}
-
-		}catch(Exception e){ IndependantLog.debug(debugmsg+" Met Exception ", e); }
-
-		if(operable==null){
-			IndependantLog.error("Can not create a proper Selectable object.");
-			return super.createOperable(listview);
+		try{ operable = new SapSelectable_ListBox(this);}catch(SeleniumPlusException se0){
+			IndependantLog.debug(debugmsg+" Cannot create IListSelectable of "+Arrays.toString(SapSelectable_ListBox.supportedClazzes));
+			try{ operable = new SapSelectable_m_List(this);}catch(SeleniumPlusException se1){
+				IndependantLog.warn(debugmsg+" Cannot create IListSelectable of "+Arrays.toString(SapSelectable_m_List.supportedClazzes));
+				try{ operable = new SapSelectable_m_SelectList(this);}catch(SeleniumPlusException se2){
+					IndependantLog.warn(debugmsg+" Cannot create IListSelectable of "+Arrays.toString(SapSelectable_m_SelectList.supportedClazzes));
+				}					
+			}					
+		}
+		return operable;
+	}
+	protected IOperable createDefaultOperable(){
+		String debugmsg = StringUtils.debugmsg(false);
+		IListSelectable operable = null;
+		try{ operable = new DefaultSelectableList(this);}catch(SeleniumPlusException se0){
+			IndependantLog.debug(debugmsg+" Cannot create IListSelectable of "+Arrays.toString(DefaultSelectableList.supportedClazzes));
 		}
 		return operable;
 	}
@@ -315,7 +303,7 @@ public class ListView extends Component implements IListSelectable{
 		}
 	}
 
-	static class SapSelectable_ListBox extends AbstractListSelectable{
+	protected static class SapSelectable_ListBox extends AbstractListSelectable{
 		public static final String CLASS_NAME_LISTBOX 		= "sap.ui.commons.ListBox";
 		public static final String[] supportedClazzes = {CLASS_NAME_LISTBOX};
 
@@ -446,7 +434,7 @@ public class ListView extends Component implements IListSelectable{
 		}
 	}
 
-	static class SapSelectable_m_List extends AbstractListSelectable{
+	protected static class SapSelectable_m_List extends AbstractListSelectable{
 		public static final String CLASS_NAME_M_LISTBASE 	= "sap.m.ListBase";
 		public static final String CLASS_NAME_M_LIST 		= "sap.m.List";//child of sap.m.ListBase
 		public static final String CLASS_NAME_SAS_HC_LIST 	= "sas.hc.m.List";//child of sap.m.List
@@ -572,12 +560,12 @@ public class ListView extends Component implements IListSelectable{
 		}
 	}
 
-	static class GenericSelectableList extends AbstractListSelectable{
+	protected static class DefaultSelectableList extends AbstractListSelectable{
 		public static final String CLASS_NAME_UL_LIST 	= "ul";
 		public static final String CLASS_NAME_OL_LIST	= "ol";//child of sap.m.ListBase
 		public static final String[] supportedClazzes = {CLASS_NAME_UL_LIST, CLASS_NAME_OL_LIST};
 
-		public GenericSelectableList(Component component) throws SeleniumPlusException {
+		public DefaultSelectableList(Component component) throws SeleniumPlusException {
 			super(component);
 		}
 
@@ -623,7 +611,7 @@ public class ListView extends Component implements IListSelectable{
 
 	}
 
-	static class SapSelectable_m_SelectList extends AbstractListSelectable{
+	protected static class SapSelectable_m_SelectList extends AbstractListSelectable{
 		public static final String CLASS_NAME_M_SELECTLIST 		= "sap.m.SelectList";
 		public static final String CLASS_NAME_SAS_HC_SELECTLIST = "sas.hc.m.SelectList"; //child of sap.m.SelectList
 		public static final String[] supportedClazzes = {CLASS_NAME_M_SELECTLIST};

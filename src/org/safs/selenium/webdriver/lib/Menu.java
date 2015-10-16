@@ -2,16 +2,17 @@
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
+/**
+ * History:
+ * 
+ *  JAN 20, 2014    (DHARMESH4) Initial release.
+ *  JUN 10, 2014    (SBJLWA) Implement keywords.
+ *  JAN 08, 2015    (SBJLWA) Support "sas.hc.ui.commons.pushmenu.PushMenu"
+ *  JAN 29, 2015    (SBJLWA) Provide a way to go home for "sas.hc.ui.commons.pushmenu.PushMenu"
+ *  OCT 16, 2015    (sbjlwa) Refector to create IOperable object properly.
+ */
 package org.safs.selenium.webdriver.lib;
 
-/**
- * History:<br>
- * 
- *  <br>   JAN 20, 2014    (DHARMESH4) Initial release.
- *  <br>   JUN 10, 2014    (SBJLWA) Implement keywords.
- *  <br>   JAN 08, 2015    (SBJLWA) Support "sas.hc.ui.commons.pushmenu.PushMenu"
- *  <br>   JAN 29, 2015    (SBJLWA) Provide a way to go home for "sas.hc.ui.commons.pushmenu.PushMenu"
- */
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,12 +33,13 @@ import org.safs.selenium.webdriver.lib.model.AbstractMenuSelectable;
 import org.safs.selenium.webdriver.lib.model.Element;
 import org.safs.selenium.webdriver.lib.model.EmbeddedObject;
 import org.safs.selenium.webdriver.lib.model.IMenuSelectable;
+import org.safs.selenium.webdriver.lib.model.IOperable;
 import org.safs.selenium.webdriver.lib.model.MenuItem;
 import org.safs.selenium.webdriver.lib.model.TextMatchingCriterion;
 import org.safs.tools.stringutils.StringUtilities;
 
 /** 
- * A library class to handle different specific Menu.  
+ * A library class to handle different specific Menu.
  */
 public class Menu extends Component implements IMenuSelectable{
 	IMenuSelectable menuSelectable = null;
@@ -48,35 +50,27 @@ public class Menu extends Component implements IMenuSelectable{
 		initialize(menubar);
 	}
 
-	protected void updateFields(){
-		super.updateFields();
+	protected void castOperable(){
+		super.castOperable();
 		menuSelectable = (IMenuSelectable) anOperableObject;
 	}
 	
-	/**
-	 * @param menubar	WebElement menubar object, for example a sap.ui.commons.MenuBar object.
-	 */
-	protected IMenuSelectable createOperable(WebElement menubar){
+	protected IOperable createSAPOperable(){
 		String debugmsg = StringUtils.debugmsg(false);
 		IMenuSelectable operable = null;
-		try{			
-			if(WDLibrary.isDojoDomain(menubar)){
-				
-			}else if(WDLibrary.isSAPDomain(menubar)){
-				try{ operable = new SapSelectable_Menu(this);}catch(SeleniumPlusException se0){
-					IndependantLog.debug(debugmsg+" Cannot create selectable of "+Arrays.toString(SapSelectable_Menu.supportedClazzes));
-					try{ operable = new SAS_HC_PushMenu(this);}catch(SeleniumPlusException se1){
-						IndependantLog.warn(debugmsg+" Cannot create selectable of "+Arrays.toString(SAS_HC_PushMenu.supportedClazzes));
-					}					
-				}
-			}else{
-				operable = new DefaultSelectable_Menu(this);
-			}
-			
-		}catch(Exception e){ IndependantLog.debug(debugmsg+" Met Exception ", e); }
-		
-		if(operable==null){
-			IndependantLog.error("Can not create a proper Selectable object.");
+		try{ operable = new SapSelectable_Menu(this);}catch(SeleniumPlusException se0){
+			IndependantLog.debug(debugmsg+" Cannot create IMenuSelectable of "+Arrays.toString(SapSelectable_Menu.supportedClazzes));
+			try{ operable = new SAS_HC_PushMenu(this);}catch(SeleniumPlusException se1){
+				IndependantLog.warn(debugmsg+" Cannot create IMenuSelectable of "+Arrays.toString(SAS_HC_PushMenu.supportedClazzes));
+			}					
+		}
+		return operable;
+	}
+	protected IOperable createDefaultOperable(){
+		String debugmsg = StringUtils.debugmsg(false);
+		IMenuSelectable operable = null;
+		try{ operable = new DefaultSelectable_Menu(this); }catch(SeleniumPlusException se0){
+			IndependantLog.debug(debugmsg+" Cannot create IMenuSelectable. ");
 		}
 		return operable;
 	}
