@@ -2,11 +2,19 @@
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
+/**
+ * History:
+ * 
+ *  JAN 20, 2014    (DHARMESH4) Initial release.
+ *  JUN 10, 2014    (SBJLWA) Implement keywords.
+ *  OCT 16, 2015    (sbjlwa) Refector to create IOperable object properly.
+ */
 package org.safs.selenium.webdriver.lib;
 
 import java.awt.Point;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,17 +36,14 @@ import org.safs.selenium.webdriver.SeleniumPlus;
 import org.safs.selenium.webdriver.SeleniumPlus.WDTimeOut;
 import org.safs.selenium.webdriver.lib.model.AbstractTreeSelectable;
 import org.safs.selenium.webdriver.lib.model.Element;
+import org.safs.selenium.webdriver.lib.model.IOperable;
 import org.safs.selenium.webdriver.lib.model.ITreeSelectable;
 import org.safs.selenium.webdriver.lib.model.TextMatchingCriterion;
 import org.safs.selenium.webdriver.lib.model.TreeNode;
 import org.safs.tools.stringutils.StringUtilities;
 
-/**
- * 
- * History:<br>
- * 
- *  <br>   JAN 20, 2014    (DHARMESH4) Initial release.
- *  <br>   JUN 10, 2014    (SBJLWA) Implement keywords.
+/** 
+ * A library class to handle different specific Tree.
  */
 public class Tree extends Component implements ITreeSelectable{
 	ITreeSelectable treeListable = null;
@@ -49,26 +54,25 @@ public class Tree extends Component implements ITreeSelectable{
 		initialize(treeview);
 	}
 
-	protected void updateFields(){
-		super.updateFields();
+	protected void castOperable(){
+		super.castOperable();
 		treeListable = (ITreeSelectable) anOperableObject;
 	}
 	
-	protected ITreeSelectable createOperable(WebElement treeview){
+	protected IOperable createSAPOperable(){
 		String debugmsg = StringUtils.debugmsg(false);
 		ITreeSelectable operable = null;
-		try{
-			if(WDLibrary.isDojoDomain(treeview)){
-//				return new DojoSelectable_MultiSelect(this);
-			}else if(WDLibrary.isSAPDomain(treeview)){
-				operable = new SapSelectable_Tree(this);
-			}else{
-				operable = new DefaultSelectable_Tree(this);
-			}
-		}catch(Exception e){ IndependantLog.debug(debugmsg+" Met Exception ", e); }
-		
-		if(operable==null) IndependantLog.error("Can not create a proper Selectable object.");
-
+		try{ operable = new SapSelectable_Tree(this);}catch(SeleniumPlusException se0){
+			IndependantLog.debug(debugmsg+" Cannot create ITreeSelectable of "+Arrays.toString(SapSelectable_Tree.supportedClazzes));				
+		}
+		return operable;
+	}
+	protected IOperable createDefaultOperable(){
+		String debugmsg = StringUtils.debugmsg(false);
+		ITreeSelectable operable = null;
+		try{ operable = new DefaultSelectable_Tree(this); }catch(SeleniumPlusException se0){
+			IndependantLog.debug(debugmsg+" Cannot create ITreeSelectable. ");
+		}
 		return operable;
 	}
 	
@@ -353,16 +357,16 @@ public class Tree extends Component implements ITreeSelectable{
 		}
 	}
 	
-	class SapSelectable_Tree extends AbstractTreeSelectable{
+	protected static class SapSelectable_Tree extends AbstractTreeSelectable{
 		public static final String CLASS_NAME_TREE = "sap.ui.commons.Tree";
+		public static final String[] supportedClazzes = {CLASS_NAME_TREE};
 
 		public SapSelectable_Tree(Component component) throws SeleniumPlusException {
 			super(component);
 		}
 
 		public String[] getSupportedClassNames() {
-			String[] clazzes = {CLASS_NAME_TREE};
-			return clazzes;
+			return supportedClazzes;
 		}
 
 		public TreeNode[] getContent() throws SeleniumPlusException {

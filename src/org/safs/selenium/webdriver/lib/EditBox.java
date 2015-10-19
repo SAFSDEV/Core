@@ -2,19 +2,20 @@
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
-package org.safs.selenium.webdriver.lib;
 /**
+ * History:
  * 
- * History:<br>
- * 
- *  <br>   FEB 05, 2015    (SBJLWA) Refresh the element when meet StaleElementReferenceException.
- *  <br>   Jul 02, 2015    (SCNTAX) Add inputEditBoxChars(): set the text as the content of EditBox without special key dealing.
- *  <br>                            Add verifyEditBox(): verify the contents of EditBox to the original keys.
- *  <br>                            Change inputEditBox() into inputEditBoxKeys(): set the text as the content of EditBox with special key dealing.
- *  <br>   SEP 18, 2015    (SBJLWA) Move the functionality of waitReactOnBrowser() to Robot.
- *                                  Modify inputEditBoxChars/Keys(): turn on the 'waitReaction' for inputkeys and inputchars.
- *  <br>   OCT 13, 2015    (SBJLWA) Modify clearEditBox(): make it robust.
+ *  FEB 05, 2015    (SBJLWA) Refresh the element when meet StaleElementReferenceException.
+ *  JUL 02, 2015    (SCNTAX) Add inputEditBoxChars(): set the text as the content of EditBox without special key dealing.
+ *                           Add verifyEditBox(): verify the contents of EditBox to the original keys.
+ *                           Change inputEditBox() into inputEditBoxKeys(): set the text as the content of EditBox with special key dealing.
+ *  SEP 18, 2015    (SBJLWA) Move the functionality of waitReactOnBrowser() to Robot.
+ *                           Modify inputEditBoxChars/Keys(): turn on the 'waitReaction' for inputkeys and inputchars.
+ *  OCT 13, 2015    (SBJLWA) Modify clearEditBox(): make it robust, call Robot to clear finally.
+ *  OCT 16, 2015    (sbjlwa) Refector to create IOperable object properly.
  */
+package org.safs.selenium.webdriver.lib;
+
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -24,6 +25,9 @@ import org.safs.IndependantLog;
 import org.safs.StringUtils;
 import org.safs.robot.Robot;
 
+/** 
+ * A library class to handle different specific EditBox.
+ */
 public class EditBox extends Component {
 
 	public EditBox(WebElement editbox) throws SeleniumPlusException{
@@ -62,15 +66,17 @@ public class EditBox extends Component {
 				IndependantLog.debug(debugmsg+"Met "+StringUtils.debugmsg(x));
 				try{
 					refresh(true);
-					 Actions delete = new Actions(WDLibrary.getWebDriver());
-					 delete.sendKeys(webelement, Keys.chord(Keys.CONTROL, "a"), Keys.DELETE);
-					 delete.perform();
+					Actions delete = new Actions(WDLibrary.getWebDriver());
+					delete.sendKeys(webelement, Keys.chord(Keys.CONTROL, "a"), Keys.DELETE);
+					delete.perform();
 				}catch(Exception ex){
-					IndependantLog.debug(debugmsg+"Met "+StringUtils.debugmsg(ex));
-					throw new SeleniumPlusException("EditBox clear action failed");
+					IndependantLog.warn(debugmsg+"EditBox clear action failed, Met "+StringUtils.debugmsg(ex));
 				}
 			}
-		}		
+		}finally{
+			IndependantLog.debug(debugmsg+" Finally use SAFS Robot to clear again.");
+			WDLibrary.inputKeys(webelement, "^a{Delete}");
+		}
 	}
 	
 	/**
