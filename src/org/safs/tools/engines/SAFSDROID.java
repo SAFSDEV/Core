@@ -4,6 +4,8 @@
 
 package org.safs.tools.engines;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
@@ -19,6 +21,8 @@ import org.safs.tools.consoles.ProcessCapture;
 import org.safs.tools.consoles.ProcessConsole;
 
 import org.safs.Log;
+
+import com.sun.jna.Platform;
 
 /**
  * A wrapper to Google's Android Automation SAFS engine--the "Droid" engine.
@@ -155,7 +159,16 @@ public class SAFSDROID extends GenericEngine {
 				String tempstr = null;
 
 				// JVM	
-			    String jvm = "java";				    
+			    String jvm;
+			    String jrebin = null;
+			    try{ 
+			    	jrebin = getEmbeddedJVMBinPath().getCanonicalPath();
+			    	jvm = jrebin + File.separatorChar + "java";
+			    }
+			    catch(Exception fnf){
+					Log.warn(ENGINE_NAME +" embedded JRE path is was not detected.");
+					jvm = "java";
+			    }
 			    tempstr   = config.getNamedValue(DriverConstant.SECTION_SAFS_DROID, JVM_OPTION);
 			    if (tempstr != null) {
 			    	CaseInsensitiveFile afile = new CaseInsensitiveFile(tempstr);

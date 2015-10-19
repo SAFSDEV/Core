@@ -1,2 +1,7 @@
+;
+; COMMENT OUT THE LaunchApplication call below if simply debugging the launching of the Device\AVD
+;
+C, LaunchApplication
 
 C, SetVariableValues, ^SAFS_DRIVER_CONTROL="PAUSE"
+C, CloseApplication
