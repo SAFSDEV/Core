@@ -133,6 +133,10 @@ public class AndroidInstaller extends InstallerImpl{
 		    	catch(Exception x){
 					setProgressMessage("Android SAFSTestRunner BUILD.BAT installer "+ x.getClass().getSimpleName()+": "+ x.getMessage());
 		    	}
+			    try{FileUtilities.writeStringToUTF8File(safsdir + SpinnerSampleDir +s+ "build.bat", arg);}
+		    	catch(Exception x){
+					setProgressMessage("Android SpinnerSample BUILD.BAT installer "+ x.getClass().getSimpleName()+": "+ x.getMessage());
+		    	}
 		    }
 	    }catch(Exception x){
 			setProgressMessage("Android support installer "+ x.getClass().getSimpleName()+": "+ x.getMessage());

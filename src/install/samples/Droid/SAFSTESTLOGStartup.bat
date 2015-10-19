@@ -1,4 +1,4 @@
 @CLS
-java org.safs.Log debug -file:%SAFSDIR%\samples\Droid\debuglog.txt
+%SAFSDIR%\jre\bin\java org.safs.Log debug -file:%SAFSDIR%\samples\Droid\debuglog.txt
 
 

@@ -2,7 +2,17 @@
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
+/**
+ * History:
+ * 
+ *  JAN 29, 2014    (Lei Wang) Initial release.
+ *  FEB 12, 2014    (Lei Wang) Modify method SapCheckable_CheckBox.setChecked() to refresh the stale embedded webelement.
+ *  JUN 12, 2015    (Lei Wang) Click to check/uncheck firstly, native-javascript will be a backup.
+ *  OCT 16, 2015    (Lei Wang) Refector to create IOperable object properly.
+ */
 package org.safs.selenium.webdriver.lib;
+
+import java.util.Arrays;
 
 import org.openqa.selenium.WebElement;
 import org.safs.IndependantLog;
@@ -11,13 +21,8 @@ import org.safs.selenium.util.JavaScriptFunctions.SAP;
 import org.safs.selenium.webdriver.lib.model.EmbeddedObject;
 import org.safs.selenium.webdriver.lib.model.IOperable;
 
-/**
- * 
- * History:<br>
- * 
- *  <br>   JAN 29, 2014    (Lei Wang) Initial release.
- *  <br>   FEB 12, 2014    (Lei Wang) Modify method SapCheckable_CheckBox.setChecked() to refresh the stale embedded webelement.
- *  <br>   JUN 12, 2015    (Lei Wang) Click to check/uncheck firstly, native-javascript will be a backup.
+/** 
+ * A library class to handle different specific CheckBox.
  */
 public class CheckBox extends Component{
 	
@@ -30,27 +35,24 @@ public class CheckBox extends Component{
 		initialize(checkbox);
 	}
 
-	protected void updateFields(){
-		super.updateFields();
+	protected void castOperable(){
+		super.castOperable();
 		checkable = (Checkable) anOperableObject;
 	}
 	
-	protected Checkable createOperable(WebElement checkbox){
+	protected IOperable createSAPOperable(){
 		String debugmsg = StringUtils.debugmsg(false);
 		Checkable operable = null;
-		try{
-			//Try to get the possible Checkable
-			if(WDLibrary.isDojoDomain(checkbox)){
-				//TODO
-			}else if(WDLibrary.isSAPDomain(checkbox)){
-				operable = new SapCheckable_CheckBox(this); 
-			}else{
-				operable = new HtmlCheckable_InputCheckBox(this);
-			}
-		}catch(Exception e){ IndependantLog.debug(debugmsg+" Met Exception ", e); }
-		
-		if(operable==null){
-			IndependantLog.error("Can not create a proper Checkable object.");
+		try{ operable = new SapCheckable_CheckBox(this); }catch(SeleniumPlusException e){
+			IndependantLog.debug(debugmsg+" Cannot create Checkable of "+Arrays.toString(SapCheckable_CheckBox.supportedClazzes));
+		}
+		return operable;
+	}
+	protected IOperable createHTMLOperable(){
+		String debugmsg = StringUtils.debugmsg(false);
+		Checkable operable = null;
+		try{ operable = new HtmlCheckable_InputCheckBox(this); }catch(SeleniumPlusException e){
+			IndependantLog.debug(debugmsg+" Cannot create Checkable of "+Arrays.toString(HtmlCheckable_InputCheckBox.supportedClazzes));
 		}
 		return operable;
 	}
@@ -105,7 +107,7 @@ public class CheckBox extends Component{
 		public boolean isChecked() throws SeleniumPlusException;
 	}
 	
-	abstract class AbstractCheckable extends EmbeddedObject implements Checkable{
+	protected static abstract class AbstractCheckable extends EmbeddedObject implements Checkable{
 		
 		public void clearCache(){
 			String methodName = StringUtils.getCurrentMethodName(true);
@@ -201,36 +203,7 @@ public class CheckBox extends Component{
 		}
 	}
 	
-	abstract class SapCheckable extends AbstractCheckable{
-
-		public SapCheckable(Component component) throws SeleniumPlusException {
-			super(component);
-		}
-
-		/* (non-Javadoc)
-		 * @see org.safs.selenium.webdriver.lib.Component.Supportable#isSupported(org.openqa.selenium.WebElement)
-		 */
-		public boolean isSupported(WebElement element){
-			return WDLibrary.SAP.isSupported(element, getSupportedClassNames());
-		}
-
-	}
-	
-	abstract class DojoCheckable extends AbstractCheckable{
-
-		public DojoCheckable(Component component) throws SeleniumPlusException {
-			super(component);
-		}
-
-		/* (non-Javadoc)
-		 * @see org.safs.selenium.webdriver.lib.Component.Supportable#isSupported(org.openqa.selenium.WebElement)
-		 */
-		public boolean isSupported(WebElement element){
-			return WDLibrary.DOJO.isSupported(element, getSupportedClassNames());
-		}
-	}
-	
-	abstract class HtmlCheckable extends AbstractCheckable{
+	protected static abstract class HtmlCheckable extends AbstractCheckable{
 
 		public HtmlCheckable(Component component) throws SeleniumPlusException {
 			super(component);
@@ -250,14 +223,22 @@ public class CheckBox extends Component{
 		
 	}
 	
-	class SapCheckable_CheckBox extends SapCheckable{
+	protected static class SapCheckable_CheckBox extends AbstractCheckable{
 		public static final String CLASS_NAME_UI_COMMONS_COMBOBOX = "sap.ui.commons.CheckBox";
 		public static final String CLASS_NAME_M_COMBOBOX = "sap.m.CheckBox";
+		public static final String[] supportedClazzes = {CLASS_NAME_UI_COMMONS_COMBOBOX, CLASS_NAME_M_COMBOBOX};
 
 		public SapCheckable_CheckBox(Component component) throws SeleniumPlusException {
 			super(component);
 		}
 
+		/* (non-Javadoc)
+		 * @see org.safs.selenium.webdriver.lib.Component.Supportable#getSupportedClassNames()
+		 */
+		public String[] getSupportedClassNames() {
+			return supportedClazzes;
+		}
+		
 		protected void nativeSetChecked(boolean bChecked)  throws SeleniumPlusException{
 			String debugmsg = StringUtils.debugmsg(false);
 			
@@ -306,18 +287,11 @@ public class CheckBox extends Component{
 			
 			throw new SeleniumPlusException("Fail to get value of property 'checked'");
 		}
-
-		/* (non-Javadoc)
-		 * @see org.safs.selenium.webdriver.lib.Component.Supportable#getSupportedClassNames()
-		 */
-		public String[] getSupportedClassNames() {
-			String[] clazzes = {CLASS_NAME_UI_COMMONS_COMBOBOX, CLASS_NAME_M_COMBOBOX};
-			return clazzes;
-		}
 	}
 	
-	class HtmlCheckable_InputCheckBox extends HtmlCheckable{
+	protected static class HtmlCheckable_InputCheckBox extends HtmlCheckable{
 		public static final String CLASS_NAME = TAG_HTML_INPUT;
+		public static final String[] supportedClazzes = {CLASS_NAME};
 
 		public HtmlCheckable_InputCheckBox(Component component) throws SeleniumPlusException {
 			super(component);
@@ -327,8 +301,7 @@ public class CheckBox extends Component{
 		 * @see org.safs.selenium.webdriver.lib.Component.Supportable#getSupportedClassNames()
 		 */
 		public String[] getSupportedClassNames() {
-			String[] clazzes = {CLASS_NAME};
-			return clazzes;
+			return supportedClazzes;
 		}
 		
 	}
