@@ -2,6 +2,13 @@
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
+/**
+ * History:
+ * 
+ *  APR 21, 2014    (Lei Wang) Initial release.
+ *  APR 23, 2014    (Lei Wang) Update to support DOJO domain.
+ *  OCT 16, 2015    (Lei Wang) Refector to create IOperable object properly.
+ */
 package org.safs.selenium.webdriver.lib;
 
 import java.awt.Point;
@@ -22,13 +29,8 @@ import org.safs.selenium.webdriver.lib.model.IOperable;
 import org.safs.selenium.webdriver.lib.model.Item;
 import org.safs.selenium.webdriver.lib.model.TextMatchingCriterion;
 
-/**
- * 
- * History:<br>
- * 
- *  <br>   APR 21, 2014    (Lei Wang) Initial release.
- *  <br>   APR 23, 2014    (Lei Wang) Update to support DOJO domain.
- *  <br>   OCT 14, 2015    (Lei Wang) Use the default operable object to make this class robust for generic functionality.
+/** 
+ * A library class to handle different specific TabControl.
  */
 public class TabControl extends Component{
 	
@@ -41,38 +43,25 @@ public class TabControl extends Component{
 		initialize(tabcontrol);
 	}
 
-	protected void updateFields(){
-		super.updateFields();
-		try{
-			tabbable = (IListSelectable) anOperableObject;			
-		}catch(Exception e){
-			IndependantLog.warn(StringUtils.debugmsg(false)+" the operable object is NOT an instance of IListSelectable, it can ONLY support generic functionality!");
-		}
+	protected void castOperable(){
+		super.castOperable();
+		tabbable = (IListSelectable) anOperableObject;			
 	}
-	/**
-	 * @param tabcontrol	WebElement tabcontrol object, for example a sap.ui.commons.TabStrip object.
-	 */
-	protected IOperable createOperable(WebElement tabcontrol){
+		
+	protected IOperable createDOJOOperable(){
 		String debugmsg = StringUtils.debugmsg(false);
 		IListSelectable operable = null;
-		try{			
-			if(WDLibrary.isDojoDomain(tabcontrol)){
-				try{ operable = new DojoTabbable_TabContainer(this); }catch(SeleniumPlusException e){
-					IndependantLog.debug(debugmsg+" Cannot create IListSelectable for "+Arrays.toString(DojoTabbable_TabContainer.supportedClazzes));
-				}
-			}else if(WDLibrary.isSAPDomain(tabcontrol)){
-				try{ operable = new SapTabbable_TabStrip(this); }catch(SeleniumPlusException e){
-					IndependantLog.debug(debugmsg+" Cannot create IListSelectable for "+Arrays.toString(SapTabbable_TabStrip.supportedClazzes));
-				}
-			}
-			
-		}catch(Exception e){ IndependantLog.debug(debugmsg+" Met Exception ", e); }
-		
-		if(operable==null){
-			IndependantLog.warn(debugmsg + "Can NOT create a proper IListSelectable object, use the default operable object.");
-			return super.createOperable(tabcontrol);
+		try{ operable = new DojoTabbable_TabContainer(this); }catch(SeleniumPlusException e){
+			IndependantLog.debug(debugmsg+" Cannot create IListSelectable of "+Arrays.toString(DojoTabbable_TabContainer.supportedClazzes));
 		}
-		
+		return operable;
+	}
+	protected IOperable createSAPOperable(){
+		String debugmsg = StringUtils.debugmsg(false);
+		IListSelectable operable = null;
+		try{ operable = new SapTabbable_TabStrip(this); }catch(SeleniumPlusException e){
+			IndependantLog.debug(debugmsg+" Cannot create IListSelectable of "+Arrays.toString(SapTabbable_TabStrip.supportedClazzes));
+		}
 		return operable;
 	}
 	

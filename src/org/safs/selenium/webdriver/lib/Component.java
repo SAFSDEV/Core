@@ -2,30 +2,31 @@
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
+/**
+ * History:
+ * 
+ *  DEC 26, 2013    (Lei Wang) Initial release.
+ *  FEB 12, 2014    (Lei Wang) Add method refresh() to refresh the stale embedded webelement.
+ *  OCT 16, 2015    (Lei Wang) Refector to create IOperable object properly. 
+ */
 package org.safs.selenium.webdriver.lib;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.safs.IndependantLog;
-import org.safs.selenium.webdriver.SeleniumPlus.WDTimeOut;
+import org.safs.StringUtils;
 import org.safs.selenium.webdriver.lib.model.DefaultRefreshable;
 import org.safs.selenium.webdriver.lib.model.Element;
 import org.safs.selenium.webdriver.lib.model.IOperable;
 import org.safs.selenium.webdriver.lib.model.IWebAccessibleInternetRole;
 import org.safs.selenium.webdriver.lib.model.TextMatchingCriterion;
 
-/**
- * 
- * History:<br>
- * 
- *  <br>   Dec 26, 2013    (Lei Wang) Initial release.
- *  <br>   Feb 12, 2014    (Lei Wang) Add method refresh() to refresh the stale embedded webelement.
+/** 
+ * A library class to handle generic functionalities, such as Click, HoverMouse, GetGUIImage etc. for
+ * all kinds of component.
  */
 public class Component extends DefaultRefreshable implements IWebAccessibleInternetRole, IOperable{
 	/**'id' a standard html attribute*/
@@ -124,6 +125,7 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 	}
 	
 	protected void updateFields(){
+		String debugmsg = StringUtils.debugmsg(false);
 		super.updateFields();
 		widgetid = getAttribute(ATTRIBUTE_WIDGETID);		
 		dijitpopupparent = getAttribute(ATTRIBUTE_DIJITPOPUPPARENT);
@@ -142,18 +144,123 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 				anOperableObject = operableObjects.get(webelement);
 			}			
 		}
-		if(anOperableObject!=null) IndependantLog.debug("Using '"+anOperableObject.getClass().getName()+"'");
+
+		if(anOperableObject==null){
+			IndependantLog.error(debugmsg+"The Operable object is null!");
+		}else{
+			IndependantLog.debug(debugmsg+"Using Operable '"+anOperableObject.getClass().getName()+"'");
+			try{
+				castOperable();
+			}catch(Exception e){
+				IndependantLog.warn(debugmsg+"fail to convert the Operable object to specific one, it can ONLY support generic functionality!");
+			}
+		}
+	}
+	
+	/**
+	 * Cast the IOperable object to the specific one.<br>
+	 * The subclasses will override this method as they know what specific Operable to use.<br>
+	 * Here a void implementation is given, as not all subclass need the specific Operable, such as EditBox.<br>
+	 * Cast may throw Exception, we should catch it if calling this method.<br>
+	 * This method should be called after {@link #anOperableObject} has been initialized.<br>
+	 * 
+	 * @see #anOperableObject
+	 * @see #updateFields()
+	 */
+	protected void castOperable(){
+		IndependantLog.info(StringUtils.debugmsg(false)+" Casting Operable ojbect '"+anOperableObject.getClass().getName()+"' to specific one.");
 	}
 	
 	/**
 	 * Create a IOperable object according to 'webelement'.<br>
-	 * User needs to override this method to provide a real IOperable object.<br>
+	 * User could to override this method to provide an IOperable object, but mostly<br>
+	 * user should override {@link #createDOJOOperable()}, {@link #createGenericOperable()}, <br>
+	 * {@link #createHTMLOperable()} and {@link #createSAPOperable()} to provide specific <br>
+	 * IOperable of certain domain.<br> 
 	 * @param webelement WebElement, from which the IOperable object will be created
 	 * @return IOperable
+	 * @see #createDOJOOperable()
+	 * @see #createGenericOperable()
+	 * @see #createHTMLOperable()
+	 * @see #createSAPOperable()
 	 */
 	protected IOperable createOperable(WebElement webelement){
-		IndependantLog.warn("Correct IOperable object support is missing in "+ getClass().getName());
-		IndependantLog.warn("Using default IOperable Component with minimal functionality.");
+		String debugmsg = StringUtils.debugmsg(false);
+		IOperable operable = null;
+		try{			
+			if(WDLibrary.isDojoDomain(webelement)){
+				IndependantLog.info(debugmsg+" trying to create IOperable for DOJO.");
+				operable = createDOJOOperable();
+			}else if(WDLibrary.isSAPDomain(webelement)){
+				IndependantLog.info(debugmsg+" trying to create IOperable for SAP/OpenUI5.");
+				operable = createSAPOperable();
+			}else{
+				IndependantLog.info(debugmsg+" trying to create IOperable for HTML.");
+				operable = createHTMLOperable();
+			}
+		}catch(Exception e){ IndependantLog.debug(debugmsg+" Met Exception ", e); }
+		
+		if(operable==null){
+			IndependantLog.info(debugmsg+" trying to create default IOperable for "+getClass().getName());
+			operable = createDefaultOperable();
+		}
+		
+		if(operable==null){
+			IndependantLog.warn(debugmsg+"Correct IOperable object support is missing in "+ getClass().getName());
+			operable = createGenericOperable();
+		}
+		
+		return operable;
+	}
+	/**
+	 * Create the IOperable object for DOJO domain.<br>
+	 * Subclass SHOULD override this method if DOJO will be supported.<br>
+	 * @see #createOperable(WebElement)
+	 */
+	protected IOperable createDOJOOperable(){
+		IndependantLog.warn(StringUtils.debugmsg(false)+" Cannot create IOperable for DOJO at this time.");
+		return null;
+	}
+	/**
+	 * Create the IOperable object for SAP domain.<br>
+	 * Subclass SHOULD override this method if SAP will be supported.<br>
+	 * @see #createOperable(WebElement)
+	 */
+	protected IOperable createSAPOperable(){
+		IndependantLog.warn(StringUtils.debugmsg(false)+" Cannot create IOperable for SAP at this time.");
+		return null;
+	}
+	/**
+	 * Create the IOperable object for HTML domain.<br>
+	 * Subclass SHOULD override this method if HTML will be supported.<br>
+	 * @see #createOperable(WebElement)
+	 */
+	protected IOperable createHTMLOperable(){
+		IndependantLog.warn(StringUtils.debugmsg(false)+" Cannot create IOperable for HTML at this time.");
+		return null;
+	}
+	/**
+	 * Create the default IOperable object for a certain specific component.<br>
+	 * It is different from the {@link #createGenericOperable()}, which will provide an IOperable<br>
+	 * to support the minimal generic functionalities, like GetGUIImage, Click, HoverMouse etc.<br>
+	 * Subclass COULD override this method to provide a default backup IOperable when other ways fail to create IOperable.<br>
+	 * @see #createOperable(WebElement)
+	 * @see #createDOJOOperable()
+	 * @see #createHTMLOperable()
+	 * @see #createSAPOperable()
+	 */
+	protected IOperable createDefaultOperable(){
+		IndependantLog.warn(StringUtils.debugmsg(false)+" Cannot create Default IOperable at this time.");
+		return null;
+	}
+	
+	/**
+	 * Create the generic IOperable object to support the minimal generic functionalities, like GetGUIImage, Click, HoverMouse etc.<br>
+	 * This generic IOperable will be used if no other specific IOperable is available.<br>
+	 * Normally, subclass should NOT override this method.<br>
+	 */
+	protected IOperable createGenericOperable(){
+		IndependantLog.warn("Using generic IOperable Component with minimal functionalities.");
 		return this;
 	}
 	
