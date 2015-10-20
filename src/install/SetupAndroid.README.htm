@@ -19,6 +19,7 @@ Carl Nagle
 <a href="#reminders">Critical Reminders</a>,&#032;
 <a href="#instructions">Setup Instructions</a>,&#032;
 <a href="#setupnotes">Test It</a>&#032;
+<a href="#remotecontrol">RemoteControl</a>&#032;
 <a name="definitions" />
 <p>
 <h3><b>Definitions:</b><br/></h3>
@@ -45,6 +46,7 @@ More native SAFS/Robotium Remote Control tests are also possible.
 <small><a href="#definitions">Definitions</a>,&#032;
 <a href="#instructions">Setup Instructions</a>,&#032;
 <a href="#setupnotes">Test It</a>&#032;
+<a href="#remotecontrol">RemoteControl</a>&#032;
 </small>
 <p>
 <h3><b>Critical Reminders:</b><br/></h3>
@@ -66,6 +68,7 @@ that DO NOT have the required INTERNET permissions necessary for TCP communicati
 <small><a href="#definitions">Definitions</a>,&#032;
 <a href="#reminders">Critical Reminders</a>,&#032;
 <a href="#setupnotes">Test It</a>&#032;
+<a href="#remotecontrol">RemoteControl</a>&#032;
 </small>
 <p>
 <h3><b>Setup Instructions:</b><br/></h3>
@@ -167,6 +170,7 @@ Required only once to build with your tester/developer debug profile.<br>
 <small><a href="#definitions">Definitions</a>,&#032;
 <a href="#reminders">Critical Reminders</a>,&#032;
 <a href="#instructions">Setup Instructions</a>&#032;
+<a href="#remotecontrol">RemoteControl</a>&#032;
 </small>
 <p>
 <h3><b>Test It:</b><br/></h3>
@@ -226,7 +230,190 @@ Specifically:
 </ul>
 <p>
 Enjoy!
-<hr>
+<hr/><! ======================================================================>
+<a name="remotecontrol" />
+<small><a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#instructions">Setup Instructions</a>&#032;
+<a href="#setupnotes">Test It</a>&#032;
+</small>
+<p>
+<h3><b>Remote Control Development:</b><br/></h3>
+<p>
+<p>
+You can also use the <b>SoloRemoteControl</b> project installed with the Droid samples as a reference for your own Java test development project for SAFS/Robotium Remote Control. &nbsp;This is completely different than writing SAFS Test Tables with Driver Commands and Component Functions. &nbsp;This is for Java developers, or testers with Java develoment experience.
+<p>
+The <b>SoloRemoteControl/src</b> directory contains all the sourcecode contained in the safs-remotecontrol.jar.
+<p>
+<ol>
+<li><b>Create your Java development project and reference the following JAR file</b>:<br>
+It can be found in <b>SoloRemoteControl/libs</b>:
+<p><ul><pre>
+<b>safs-remotecontrol.jar</b>
+
+(re-sign.jar is also present, but is not normally part of a development project.)
+</ul></pre><pre>
+The quickest way to do the above in Eclipse:
+
+    Create a <b>New->Java Project</b> from the existing source at:
+
+    <b>samples\Droid\SoloRemoteControl</b>
+</pre>
+<p>
+<li><b>Create/Review your MyTest class</b>:<br>
+For simplicity, this class should extend the <a href="http://safsdev.sourceforge.net/doc/com/jayway/android/robotium/remotecontrol/solo/SoloTest.html" target="_blank" title="SoloTest JavaDoc">SoloTest class</a>.<br>
+The source for SoloTest can be found in the SoloRemoteControl/src folder at:
+<p>
+
+<ul>com/jayway/android/robotium/remotecontrol/solo/SoloTest.java</ul>
+
+<p>
+You can find the existing sample MyTest code in the SoloRemoteControl/src folder at:
+<p>
+
+<ul><b>com/jayway/android/robotium/remotecontrol/MyTest.java</b></ul>
+
+<p>
+Your MyTest class will need to minimally import a few classes:
+<p>
+<ul><pre>
+import java.util.Properties;
+import com.jayway.android.robotium.remotecontrol.solo.Message;
+import com.jayway.android.robotium.remotecontrol.solo.SoloTest;
+import com.jayway.android.robotium.remotecontrol.solo.Solo;
+
+public class MyTest extends SoloTest{
+   // see the existing MyTest.java for a completed example
+}
+</pre></ul>
+
+
+<p>
+<li><b>Review/Override/Provide and invoke the same constructors as SoloTest</b>:
+<ul><pre>
+public MyTest(){ super(); }
+public MyTest(String[] args){ super(args); }
+public MyTest(String messengerApk, String testRunnerApk, String instrumentArg){
+    super(messengerApk, testRunnerApk, instrumentArg);
+}
+</pre></ul>
+<p>
+<li><b>Review/Override the static 'main' method for MyTest</b>:
+<ul><pre>
+public static void main(String[] args){
+    SoloTest soloTest = new MyTest(args);
+    soloTest.process();
+}
+</pre></ul>
+
+
+<p>
+<li><b>Review/Override and implement your 'test()' method</b>:<br>
+This is where your remote control test code will go.<br>
+Below is the code in the existing MyTest.java:
+<ul><pre>
+protected void test(){
+
+    String action = "MyTest";
+    try{
+	  String activityID = solo.getCurrentActivity();
+	  Properties props = solo._last_remote_result;
+	  String activityName = props.getProperty(Message.PARAM_NAME);
+	  String activityClass = props.getProperty(Message.PARAM_CLASS);
+
+	  log.pass(action, "CurrentActivity   UID: "+ activityID);
+	  log.pass(action, "CurrentActivity Class: "+ activityClass);
+	  log.pass(action, "CurrentActivity  Name: "+ activityName);
+
+    }catch(Throwable e){
+        e.printStackTrace();
+    }
+}
+</pre></ul>
+<p><pre>
+Refer to: JavaDoc for <a href="http://safsdev.sourceforge.net/doc/com/jayway/android/robotium/remotecontrol/solo/package-summary.html" target="packageFrame" alt="SAFS/Robotium RemoteControl API" title="SAFS/Robotium RemoteControl API">com.jayway.android.robotium.remotecontrol.solo</a>
+          JavaDoc for <a href="http://safsdev.sourceforge.net/doc/com/jayway/android/robotium/remotecontrol/package-summary.html" target="packageFrame" alt="SAFS/Robotium RemoteControl API" title="SAFS/Robotium RemoteControl API">com.jayway.android.robotium.remotecontrol</a>
+
+Also review: <a href="http://safsdev.sourceforge.net/sqabasic2000/UsingRobotiumRCSerializable.htm" target="using" alt="Using Serializable Classes Doc" title="Using Serializable Classes Doc">Using Serializable in SAFS/Robotium RemoteControl</a>
+</pre><p>
+<li><b>Compile your work appropriate for your development environment</b>:<br>
+Remember, the minimum JAR file needed in the Java build path (CLASSPATH):
+<p><ul><pre>
+safs-remotecontrol.jar
+</pre></ul>
+<p>
+(The above can be found in the <b>SoloRemoteControl/libs</b> folder.)
+<p>
+<li><b>Run the test using all appropriate <a href="http://safsdev.sourceforge.net/doc/com/jayway/android/robotium/remotecontrol/solo/SoloTest.html" target="_blank" title="SoloTest JavaDoc">command-line parameters for SoloTest</a></b>:<br>
+Remember, the same JAR files needed for the build are needed in the CLASSPATH for execution.<br>
+In addition, there is also a runtime dependency on an Android SDK lib:
+<p>
+<ul>
+<b>ddmlib.jar</b>
+(found in the Android SDK: <b>%ANDROID_HOME%\tools\lib</b> directory
+</ul>
+<p>
+The following command (all on one line) for MyTest (see the <b>runSoloTest</b> file below):
+<ul><pre>
+<b>%SAFSDIR%</b>\jre\bin\java <b>com.jayway.android.robotium.remotecontrol.MyTest</b>
+     aut=&lt;path-to-your/aut-debug.apk>
+     messenger=&lt;path-to/SAFSTCPMessenger-debug.apk>
+     runner=&lt;path-to/SAFSTestRunner-debug.apk>
+     instrument=org.safs.android.engine/org.safs.android.engine.DSAFSTestRunner
+     avd=SprintEvo (only if sending to an emulator)
+</pre></ul>
+<p>
+Of course, you can hardcode your arguments and paths in MyTest.java, or create a script file that performs the invocation for you. &nbsp;We show the arguments here so the user can get an idea of what is involved, and arguments that might be able to be changed with the same test class.&nbsp; The same test can be run against different AVDs or devices, too.
+<p>
+<ol>
+<li>Navigate to and verify/edit <b>samples\Droid\runSoloTest</b>.<br>
+<p>
+<ul>
+    <li>Verify <b>-Dandroid-home</b>= points to the Android SDK.
+    <li>Edit/Verify paths in the BAT file:
+    <p><ol>
+    <li>avd=yourAVD, if any
+    <li>aut=pathTo\SpinnerActivity-debug.APK
+    <li>runner=pathTo\SAFSTestRunner-debug.APK
+    <li>messenger=pathTo\SAFSTCPMessenger-debug.APK
+    <li>instrument=org.safs.android.engine/org.safs.android.engine.DSAFSTestRunner
+    </ol>
+    <p>
+</ul>
+<p>
+<li>Verify your Device is connected and properly configured for Development/Debugging.
+<p>
+<li>If you have used SAFS/Robotium Remote Control or SAFS Android support before, you should make sure you have deleted any TestRunner, Messenger, and AUT APKs previously installed on the Device. &nbsp;This is especially true if you are using different SDKs on different machines (Mac, Windows, etc.) as your debug profile/certificates are different with different SDK installs.
+<p>
+<li>You should now be ready to navigate to and execute <b>samples\Droid\runSoloTest</b>.
+<p>
+<ul>
+<li>Using an AVD will be painfully slow as the AVD takes a long time to bootstrap.<br>
+    Using a real device will prove much faster!
+<li>The first indication of activity on the Device will be a short note in the device Notification    Bar.<br>
+This indicates the SAFS TCP Messenger Service has been activated.<br>
+The SAFS TCP Messenger Arrows Icon will remain in the device Notification Bar.
+<li>Shortly thereafter you should see the SpinnerActivity application launched on the Device.
+<li>The brief test will then shutdown the SpinnerActivity application and exit the test.
+</ul>
+<p>
+</ol>
+<p>
+Hopefully, upon execution you should see a torrent of activity appear in the console as everything mentioned above transpires.
+<p>
+Upon completion, the default "<b>RemoteControl.log</b>" is stored in the "current working directory".<br>
+The default runSoloTest script should have that in the <b>SoloRemoteControl\bin</b>.
+<p>
+The log will contain something like:
+<p>
+<ul><pre>
+PASS : MyTest: CurrentActivity   UID: 669d9657-6d3b-4706-994b-6cb6a7cc3235
+PASS : MyTest: CurrentActivity Class: com.android.example.spinner.SpinnerActivity
+PASS : MyTest: CurrentActivity  Name: SpinnerActivity
+</pre>
+</ul>
+</ol>
+<hr/><! ======================================================================>
 <pre>Carl Nagle, <a href="http://www.sas.com"  >SAS Institute</a>
 Project Manager, <a href="https://github.com/safsdev"  >SAFSDEV</a>
 Subscribe to appropriate <a href="http://safsdev.freeforums.net" alt="Go to Support Forums">Support Forums</a> to review support archives and ask questons.
