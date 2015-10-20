@@ -22,6 +22,7 @@ import org.safs.IndependantLog;
 import org.safs.StringUtils;
 import org.safs.selenium.util.JavaScriptFunctions;
 import org.safs.selenium.util.JavaScriptFunctions.SAP;
+import org.safs.selenium.webdriver.lib.SearchObject.HTML;
 import org.safs.selenium.webdriver.lib.model.AbstractListSelectable;
 import org.safs.selenium.webdriver.lib.model.Element;
 import org.safs.selenium.webdriver.lib.model.IListSelectable;
@@ -46,7 +47,6 @@ public class ListView extends Component implements IListSelectable{
 		super.castOperable();
 		listable = (IListSelectable) anOperableObject;
 	}
-
 	protected IOperable createSAPOperable(){
 		String debugmsg = StringUtils.debugmsg(false);
 		IListSelectable operable = null;
@@ -70,6 +70,24 @@ public class ListView extends Component implements IListSelectable{
 		return operable;
 	}
 
+	/**
+	 * Allow invisible "ul"/"ol" element to be handled.
+	 */
+	protected boolean permitInvisible(WebElement component){
+		String debugmsg = StringUtils.debugmsg(false);
+		boolean permitted = super.permitInvisible(component);
+		
+		if(!permitted){
+			//permit HTML TAG "ul" and "ol"
+			permitted = HTML.isSupported(component, DefaultSelectableList.supportedClazzes);
+			if(permitted){
+				IndependantLog.debug(debugmsg+" Invisible component allowed. It is of class "+ Arrays.toString(DefaultSelectableList.supportedClazzes));
+			}
+		}
+
+		return permitted;
+	}
+	
 	/**
 	 * Try to select an item according to the name (fully or partially given), 
 	 * and then verify if the tab has been really selected according to the parameter 'verify'.
