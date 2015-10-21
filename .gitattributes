@@ -21,3 +21,10 @@ ECLIPSE_WIN.ZIP filter=lfs diff=lfs merge=lfs -text
 JDK7_WIN.ZIP filter=lfs diff=lfs merge=lfs -text
 JRE7_64_WIN.ZIP filter=lfs diff=lfs merge=lfs -text
 JRE7_WIN.ZIP filter=lfs diff=lfs merge=lfs -text
+.\dependencies\tools\ocr\ocrbin\gocr.exe filter=lfs diff=lfs merge=lfs -text
+.\dependencies\tools\ocr\ocrbin\SafsTessdll.exe filter=lfs diff=lfs merge=lfs -text
+.\dependencies\tools\ocr\ocrbin\tessdll.dll filter=lfs diff=lfs merge=lfs -text
+.\dependencies\tools\ocr\ocrbin\tessdllWrapper.dll filter=lfs diff=lfs merge=lfs -text
+.\dependencies\tools\ocr\ocrbin\tesseract.exe filter=lfs diff=lfs merge=lfs -text
+.\dependencies\tools\ocr\ocrbin\trainGOCR.bat filter=lfs diff=lfs merge=lfs -text
+.\dependencies\tools\ocr\ocrbin\vcredist_x86.exe filter=lfs diff=lfs merge=lfs -text
