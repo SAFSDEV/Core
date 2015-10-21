@@ -18,4 +18,4 @@ REM execute either class: com.jayway.android.robotium.remotecontrol.MyTest      
 REM avd=yourAVD, or remove it to locate a real connected device.
 REM aut=path to the APK, or use -noaut if the APK is already installed on the device.
 REM 
-%SAFSDIR%\jre\bin\java -Dandroid-home="%ANDROID_HOME%" com.jayway.android.robotium.remotecontrol.MyTest avd=SprintEvo aut=C:\\SAFS\samples\\Droid\\SpinnerSample\\bin\\SpinnerActivity-debug.apk messenger=c:\\SAFS\\sample\\Droid\\SAFSTCPMessenger\\bin\\SAFSTCPMessenger-debug.apk runner=c:\\SAFS\\sample\\Droid\\SAFSTestRunner\\bin\\SAFSTestRunner-debug.apk instrument=org.safs.android.engine/org.safs.android.engine.DSAFSTestRunner
+%SAFSDIR%\jre\bin\java -Dandroid-home="%ANDROID_HOME%" com.jayway.android.robotium.remotecontrol.MyTest avd=SprintEvo aut=C:\\SAFS\samples\\Droid\\SpinnerSample\\bin\\SpinnerActivity-debug.apk messenger=c:\\SAFS\\samples\\Droid\\SAFSTCPMessenger\\bin\\SAFSTCPMessenger-debug.apk runner=c:\\SAFS\\samples\\Droid\\SAFSTestRunner\\bin\\SAFSTestRunner-debug.apk instrument=org.safs.android.engine/org.safs.android.engine.DSAFSTestRunner
