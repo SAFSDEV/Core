@@ -482,6 +482,7 @@ public class JSAFSDriver extends DefaultDriver {
 	protected void setGlobalTestRecordHelper(AbstractCommand command, String separator, String record){
 		testRecordHelper = this.initTestRecordData(null);
 		testRecordHelper.setSeparator(separator);
+		testRecordHelper.setRecordType(command.getTestRecordID());
 		
 		String testRecord = null;
 		if(record==null){
