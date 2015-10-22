@@ -1014,7 +1014,20 @@ public class TIDDriverCommands extends GenericEngine {
 	  }
 	  
 	  /**
-	   * Send email of result. User needs to specify SMTP host/port into ini file. 
+	   * Send email of result. User needs to specify Mail server information into .INI file as below:
+	   * <pre>  
+	   *   [SAFS_DRIVERCOMMANDS]
+	   *   OUT_MAILSERVER="mail server"
+	   *   OUT_MAILSERVERPORT=25|465|587
+	   *   OUT_MAILSERVERPROTOCOL=SMTP|SMTPS|TLS
+	   *   OUT_MAILUSER=user.name@mail.com
+	   *   OUT_MAILPASS=*******
+	   *   
+	   *   [SAFS_DRIVER]
+	   *   #SMTP=xxx (deprecated, replaced by OUT_MAILSERVER)
+	   *   #PORT=xxx (deprecated, replaced by OUT_MAILSERVERPORT)
+	   *   
+	   *</pre>   
 	   */
 	  private long sendEmail() {
 		  
@@ -1033,8 +1046,8 @@ public class TIDDriverCommands extends GenericEngine {
 
 		  //Get configuration parameters for initialize a Mailer
 		  ConfigureInterface config = driver.getConfigureInterface();
-		  String host = config.getNamedValue(DriverConstant.SECTION_SAFS_DRIVER,"SMTP");
-		  if(host==null) host = config.getNamedValue(DriverConstant.SECTION_SAFS_DRIVER, MailConstant.OUT_MAILSERVER);
+		  String host = config.getNamedValue(DriverConstant.SECTION_SAFS_DRIVERCOMMANDS, MailConstant.OUT_MAILSERVER);
+		  if(host==null) host = config.getNamedValue(DriverConstant.SECTION_SAFS_DRIVER,"SMTP");
 		  if (host == null){
 			  String param = "'Mail Server' not found.";
 			  message = failedText.convert("bad_param", "Invalid parameter value for "+param, param);
@@ -1044,8 +1057,8 @@ public class TIDDriverCommands extends GenericEngine {
 		  host = host.trim();
 		  
 		  int port = Mailer.DEFAULT_PORT;
-		  String portStr = config.getNamedValue(DriverConstant.SECTION_SAFS_DRIVER,"PORT");
-		  if(portStr==null) portStr = config.getNamedValue(DriverConstant.SECTION_SAFS_DRIVER, MailConstant.OUT_MAILSERVERPORT);
+		  String portStr = config.getNamedValue(DriverConstant.SECTION_SAFS_DRIVERCOMMANDS, MailConstant.OUT_MAILSERVERPORT);
+		  if(portStr==null) portStr = config.getNamedValue(DriverConstant.SECTION_SAFS_DRIVER, "PORT");
 		  try{
 			  portStr = portStr.trim();
 			  port = Integer.parseInt(portStr);
@@ -1056,7 +1069,7 @@ public class TIDDriverCommands extends GenericEngine {
 			  return setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
 		  }
 		  
-		  String protocolStr = config.getNamedValue(DriverConstant.SECTION_SAFS_DRIVER, MailConstant.OUT_MAILSERVERPROTOCOL);
+		  String protocolStr = config.getNamedValue(DriverConstant.SECTION_SAFS_DRIVERCOMMANDS, MailConstant.OUT_MAILSERVERPROTOCOL);
 		  Protocol protocol = Mailer.DEFAULT_PROTOCOL;
 		  if(protocolStr!=null){
 			  try{
@@ -1071,9 +1084,9 @@ public class TIDDriverCommands extends GenericEngine {
 			  }
 		  }
 		  
-		  String user = config.getNamedValue(DriverConstant.SECTION_SAFS_DRIVER, MailConstant.OUT_MAILUSER);
+		  String user = config.getNamedValue(DriverConstant.SECTION_SAFS_DRIVERCOMMANDS, MailConstant.OUT_MAILUSER);
 		  if(user!=null) user = user.trim();
-		  String password = config.getNamedValue(DriverConstant.SECTION_SAFS_DRIVER, MailConstant.OUT_MAILPASS);
+		  String password = config.getNamedValue(DriverConstant.SECTION_SAFS_DRIVERCOMMANDS, MailConstant.OUT_MAILPASS);
 		  if(password!=null) password = password.trim();
 		  
 		  IndependantLog.debug(debugmsg+" configuration parameters: host="+host+"; port="+port+"; protocol="+protocol+"; user="+user+"; password=******");
