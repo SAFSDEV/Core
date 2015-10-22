@@ -108,13 +108,20 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 	 * @see {@link #initialize(Object)}
 	 */
 	public void initialize(WebElement component) throws SeleniumPlusException{
+		String debugmsg = StringUtils.debugmsg(false);
 		WDLibrary.checkNotNull(component);
 		
 		// Carl Nagle -- RE EVALUATE this.  
 		// It may be desirable we want to interrogate properties of HIDDEN form controls
 		if(!WDLibrary.isVisible(component)){
 			String msg = "The web element is NOT visible! You should not operate it.";
-			throw new SeleniumPlusException(msg, SeleniumPlusException.CODE_OBJECT_IS_INVISIBLE);
+			IndependantLog.warn(debugmsg+msg);
+			if(permitInvisible(component)){
+				IndependantLog.debug(debugmsg+" Invisible component allowed.");
+			}else{
+				throw new SeleniumPlusException(msg, SeleniumPlusException.CODE_OBJECT_IS_INVISIBLE);
+			}
+
 		}
 
 		super.initialize(component);
@@ -122,6 +129,21 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 		if(anOperableObject==null){
 			throw new SeleniumPlusException("Can not create a proper Operable object.", SeleniumPlusException.CODE_OBJECT_IS_NULL);
 		}
+	}
+	
+	/**
+	 * This method will decide if the invisible web element is permitted to be operated.<br>
+	 * Subclass could override this method to provide the detail implementation.<br>
+	 * @param component WebElement the component to check
+	 * @return boolean true if this invisible component is permitted to operate.
+	 * @see #initialize(WebElement)
+	 */
+	protected boolean permitInvisible(WebElement component){
+		boolean permitted = false;
+
+		IndependantLog.debug(StringUtils.debugmsg(false)+" Trying to see if the invisible component is allowed to be handled.");
+		
+		return permitted;
 	}
 	
 	protected void updateFields(){
