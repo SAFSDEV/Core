@@ -30,9 +30,9 @@ Before you can successfully run any build, you need to install/verify the follow
    - VBDDVariables
 2. Create a "SAFS Build folder", such as *c:\SAFSBuild*, which is used to build SAFS/SE+. Create an Environment Variable **%SAFS_BUILD%** pointing to "SAFS Build folder".
 3. Go to *c:\SAFSDev\build\safs*, copy the file *bootstrap.build.xml* to **%SAFS_BUILD%**.
-4. Provide private FTP server:
+4. Call ```ant -f bootstrap.build.xml bootstrapbuild``` to get all latest ant build scripts.
+5. Provide private FTP server:
   1. In *%SAFS_BUILD%/safs.properties* file, you can provide your own private FTP server, which contains the NOT free testing engines, like: Rational Functional Tester, by setting properties: "private.ftpserver", "private.ftpuserid", and "private.ftppasswd". If you don't have private testing engines, the Ant scripts will just ignore these things.
-5. Call ```ant -f bootstrap.build.xml bootstrapbuild``` to get all latest ant build scripts.
 6. Call ```ant safs.win.prepare``` to prepare the development environment. When this succeed, you will be able to see the **libs** and **safsjars**, which contain the dependency files
    needed by SAFS projects.
 
