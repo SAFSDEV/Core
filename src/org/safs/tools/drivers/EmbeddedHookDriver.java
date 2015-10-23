@@ -461,7 +461,7 @@ public class EmbeddedHookDriver extends JavaHook {
 	 * <p>
 	 * Invokes:<br/>
 	 * @see org.safs.tools.drivers.JSAFSDriver#removeShutdownHook()<br/>
-	 * @see org.safs.tools.drivers.JSAFSDriver#validateRootConfigureParameters()<br/>
+	 * @see org.safs.tools.drivers.JSAFSDriver#validateRootConfigureParameters(boolean)<br/>
 	 * @see org.safs.tools.drivers.JSAFSDriver#validateLogParameters()<br/>
 	 * @see org.safs.tools.drivers.JSAFSDriver#initializeRuntimeInterface()<br/>
 	 * @see org.safs.tools.drivers.JSAFSDriver#initializePresetVariables()<br/>
@@ -480,7 +480,7 @@ public class EmbeddedHookDriver extends JavaHook {
 			    catch(Throwable ignore){}
 			if( System.getProperty(SAFS_PROJECT_CONFIG) == null ) System.setProperty(SAFS_PROJECT_CONFIG, TEST_INI_DEFAULT);			
 		    System.out.println("Validating Root Configure Parameters...");
-		    jsafs.validateRootConfigureParameters();	
+		    jsafs.validateRootConfigureParameters(false);	
 
 		    // moved out of setProcessName for EmbeddedDrivers which might not use STAF.
 		    setHelper(process_name);
