@@ -17,7 +17,7 @@
 <div class=b1>
 <center>
 <h1>What's New in SAFS</h1>
-<h2>Updated: 2015.09.18</h2>
+<h2>Updated: 2015.10.23</h2>
 <small>Since:<b> 2012.08.07 </b></small>
 <h2>---  All active <b>"development"</b> is now at <a href="https://github.com/SAFSDEV" target="_blank" title="Link to SAFSDEV Organization on GitHub">SAFSDEV on GitHub</a>  ---</h2>
 <b>(Releases/Updates and other Binaries will be available on both GitHub and SourceForge)</b>
@@ -26,30 +26,36 @@
 <hr>
 </div>
 <p>
-Here we provide info as to what has been added or fixed since the <a href="WhatsNewInSAFS.2012.08.07.htm" target="_blank" title="Whats New In Release 2012.08.07">SAFS Win Release 2012.08.07</a>.<br>
-Check to see if any <a href="http://sourceforge.net/projects/safsdev/files/SAFS%20Updates/" target="_blank" title="SAFS Updates Download Site on SourceForge">Downloadable SAFS Updates</a> or <a href="http://sourceforge.net/projects/safsdev/files/SAFS%20Win/" target="_blank" title="SAFS Win Download Site on SourceForge">SAFS Win Release Candidates</a> are available since the last release.<br>
-Check to see if any <a href="http://sourceforge.net/projects/safsdev/files/Robotium%20RemoteControl/" target="_blank" title="Robotium RemoteControl Download Site on SourceForge">Downloadable Robotium RemoteControl Updates or Release Candidates</a> are available since the last release.<br>
-Check to see if any <a href="http://sourceforge.net/projects/safsdev/files/SeleniumPlus%20Win/" target="_blank" title="SeleniumPlus Download Site on SourceForge">SeleniumPlus Release Candidates</a> are available since the last release.<br>
+Here we provide info as to what has been added or fixed since the previous <a href="WhatsNewInSAFS.2012.08.07.htm" target="_blank" title="Whats New In Release 2012.08.07">SAFS Win Release 2012.08.07</a> document.
 <p>
-It should be noted that:
+Frequently Updated:
 <p><ul>
-SAFS for Windows--including Android Support--was released on 2012.08.07. There IS a new Release Candidate Available!<br>
-<b>Robotium Remote Control for Android testing new Release Candidate for Robotium 5.2.1!</b><br>
-SAFS for the Apple Mac and IOS testing was released on 2012.06.22!<br>
-<b>SAFS Win</b> Release Candidates and <b>SeleniumPlus</b> Release Candidates are updated <b>FREQUENTLY</b>!
+Downloadable <b>SAFS Updates</b> from <a href="http://sourceforge.net/projects/safsdev/files/SAFS%20Updates/" target="_blank" title="SAFS Update Site on SourceForge">SourceForge</a>|<a href="https://github.com/SAFSDEV/UpdateSite/releases/tag/safs" target="_blank" title="SAFS Update Site on GitHub">GitHub</a>.
+<br>
+Downloadable <b>SAFS WIN Release Candidates</b> from <a href="http://sourceforge.net/projects/safsdev/files/SAFS%20Win/" target="_blank" title="SAFS Win Download Site on SourceForge">SourceForge</a>|<a href="https://github.com/SAFSDEV/Core/releases" target="_blank" title="SAFS Win Download Site on GitHub">GitHub</a>.
+<p>
+Downloadable <b>SeleniumPlus Updates</b> from <a href="http://sourceforge.net/projects/safsdev/files/SeleniumPlus%20Win/" target="_blank" title="SeleniumPlus Update Site on SourceForge">SourceForge</a>|<a href="https://github.com/SAFSDEV/UpdateSite/releases/tag/seleniumplus" target="_blank" title="SeleniumPlus Update Site on GitHub">GitHub</a>.
+<br>
+Downloadable <b>SeleniumPlus WIN Release Candidates</b> from <a href="http://sourceforge.net/projects/safsdev/files/SeleniumPlus%20Win/" target="_blank" title="SeleniumPlus Download Site on SourceForge">SourceForge</a>|<a href="https://github.com/SAFSDEV/SeleniumPlus-Plugin/releases" target="_blank" title="SeleniumPlus Download Site on GitHub">GitHub</a>.
 </ul>
 <p>
+Less so:
+<p><ul>
+Download (older) <a href="http://sourceforge.net/projects/safsdev/files/Robotium%20RemoteControl/" target="_blank" title="Robotium RemoteControl Download Site on SourceForge">Robotium RemoteControl Updates or Release Candidates</a> for Robotium 5.2.1.
+<br>
+(Note: The latest SAFS WIN Release Candidate above now supports Remote Control with Robotium <b>5.3.1</b>)
+</ul><p>
 As you can see below, SAFS is undergoing a very rapid pace of development in many areas expanding support in:
 <ul>
 	<li>Core SAFS Framework robustness and performance
 	<li>Selenium WebDriver/SeInterpreter Support and Integration
-	<li>Robotium Remote Control (Android)
+	<li>SeleniumPlus Eclipse Test Development Environment
+	<li>AutoIt WIN support for native Windows interactions.
 	<li>SmartBear Test Complete (NET/WPF/Flex/Java/HTML)
-	<li>SAFS Cukes (Cucumber) Support and Integration
-	<li>SAFS Engine for Android Automation (DRD Apps)
-	<li>JSAFS Object Model (All Domains)
 	<li>IBM Rational Functional Tester (Flex/Web/Java/Net/WPF)
-	<li>Apple UIAutomation (Mac/IBT/IOS Apps)
+	<li>JSAFS Object Model (for ALL Domains -- ALL tools)
+	<li>SAFS/Robotium Remote Control (Android)
+	<li>SAFS Engine for Android Automation (DRD Apps)
 </ul>
 <p>
 <a name="legend"/>
@@ -58,36 +64,36 @@ As you can see below, SAFS is undergoing a very rapid pace of development in man
 <th bgcolor=#D8D8D8 colspan=2 border=1>Legend
 <tr>
 <td><table cellpadding=2>
-<tr><td class=b1>CUK<td class=s2><b>SAFS Cucumber Support.</b>
+<tr><td class=b1>COM<td class=s1>COM-related support--including DDVariableStore DLL.
 <tr><td class=b1>Core<td class=s1>The core SAFS Framework used by all SAFS clients/services.
+<tr><td class=b1>Flex<td class=s1>Flex/Flash client/domain support.
 <tr><td class=b1>SPC<td class=s1>SAFS Process Container.
-<tr><td class=b1>IOSPC<td class=s1>Apple IOS Process Container.
-<tr><td class=b1>WDSPC<td class=s1>Selenium WebDriver Process Container.
-<tr><td class=b1>TLNK<td class=s2>SAFS TestLink Test Development Environment.
+<tr><td class=b1>WDSPC<td class=s1><b>Selenium WebDriver Process Container</b>.
 <tr><td class=b1>TID<td class=s1>The primary Tool-Independent Driver (SAFSDRIVER).
-<tr><td class=b1>JSAFS<td class=s1>The Java API for Advanced SAFS test development and execution.
+<tr><td class=b1>Java<td class=s1>Java client/domain support.
+<tr><td class=b1>JSAFS<td class=s1><b>The Java API for Advanced SAFS test development and execution</b>.
 <tr><td class=b1>IBT<td class=s1>SAFS Image-Based Testing support.
+<tr><td class=b1>Net<td class=s1>MS .NET client/domain support.
+<tr><td class=b1>RBTM<td class=s1>Robotium Remote Control (Android).
 <tr><td class=b1>RFT<td class=s1>IBM Rational Functional Tester support.
 <tr><td class=b1>RFSM<td class=s1>RFT Find Search Mode (higher-performance Flex recognition).
-<tr><td class=b1>Win<td>MS Windows client/domain support.
-<tr><td class=b1>Mac<td>Apple Mac client/domain support.
-<tr><td class=b1>Unx<td>Generic Unix client/domain support.
+<tr><td class=b1>Se+<td class=s1><b>SeleniumPlus WebDriver support</b>.
+<tr><td class=b1>TC<td class=s1><b>SmartBear TestComplete support</b>.
+<tr><td class=b1>TCPM<td class=s1>SAFS TCP Messenger (Android).
+<tr><td class=b1>Win<td class=s1>MS Windows client/domain support.
+<tr><td class=b1>Web<td class=s1>Web client support (HTML support).
+<tr><td class=b1>WPF<td class=s1>MS WPF client/domain support.
 </table>
 <td><table cellpadding=2>
-<tr><td class=b1>TCPM<td class=s1>SAFS TCP Messenger (Android).
-<tr><td class=b1>RBTM<td class=s1>Robotium Remote Control (Android).
+<tr><td class=b1>AIT<td class=s2><b>SAFS AutoIt WIN Support.</b>
+<tr><td class=b1>CUK<td class=s2>SAFS Cucumber Support.
 <tr><td class=b1>DRD<td class=s2>SAFS Android Engine support.
 <tr><td class=b1>IOS<td class=s2>Apple IOS support.
+<tr><td class=b1>IOSPC<td class=s2>Apple IOS Process Container.
 <tr><td class=b1>Se<td class=s2>Selenium support (&lt;2.0).
-<tr><td class=b1>Se+<td class=s1>SeleniumPlus WebDriver support.
 <tr><td class=b1>QTP<td class=s2>HP QuickTest Pro support.
-<tr><td class=b1>TC<td class=s1>SmartBear TestComplete support.
-<tr><td class=b1>Web<td>Web client support (HTML support).
-<tr><td class=b1>Flex<td>Flex/Flash client/domain support.
-<tr><td class=b1>Net<td>MS .NET client/domain support.
-<tr><td class=b1>WPF<td>MS WPF client/domain support.
-<tr><td class=b1>Java<td>Java client/domain support.
-<tr><td class=b1>COM<td>COM-related support--including DDVariableStore DLL.
+<tr><td class=b1>Mac<td>Apple Mac client/domain support.
+<tr><td class=b1>Unx<td>Generic Unix client/domain support.
 </table>
 <tr>
 <td class=s1 align=center>Mature. In-Use. Active Development.
