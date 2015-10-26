@@ -1,8 +1,5 @@
 <html>
-
 <head>
-<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
-<meta name=Generator content="Microsoft Word 14 (filtered)">
 <title>Using AutoIT</title>
 <style>
 <!--
@@ -94,14 +91,29 @@ div.WordSection1
 </head>
 
 <body lang=EN-US>
-
+<center><H1>Using AutoIt for Native Windows</H1></center>
+<p>
+<hr>
+Author: Dharmesh Patel<br/>
+Update: OCT 26, 2015 Carl Nagle
+<p>
+Copyright, SAS Institute
+<a href="http://www.sas.com" target="altwin">http://www.sas.com</a><br/>
+<a href="http://www.opensource.org/licenses/gpl-license.php" target="altwin">General Public License (GPL)</a>:&nbsp;
+http://www.opensource.org/licenses/gpl-license.php<br/>
+<hr>
 <div class=WordSection1>
 
 <p class=MsoNoSpacing style='margin-left:20.25pt;text-indent:-20.25pt'><b>1.</b><b><span
 style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span>What is AutoIt?</b></p>
 
-<p class=MsoNoSpacing style='margin-left:20.25pt'>AutoIT is designed for automating for Microsoft Windows using JAVA API.&nbsp;</p>
+<p class=MsoNoSpacing style='margin-left:20.25pt'>
+<a href="https://www.autoitscript.com/site/autoit/" target="_blank" title="AutoIt Test Automation Home Page">AutoIT</a> is a freeware test automation tool provided by Jonathan Bennett and the AutoIt Team designed for automating native Microsoft Windows apps and components.</p>
+<p>
+<p class=MsoNoSpacing style='margin-left:20.25pt'>
+SAFS uses and controls AutoIt via <a href="https://github.com/accessrichard/autoitx4java" target="_blank" title="AutoItX Java Bridge Home Page">AutoItX Java Bridge</a> as a standard SAFS Engine so the user does NOT have to learn the Java API, the AutoIt Scripting Language, or the AutoItX COM API. &nbsp;The AutoItX Java Bridge is provided freely as open source by Richard Kanavati on GitHub.
+</p>
 
 <p class=MsoNoSpacing style='margin-left:20.25pt'>&nbsp;</p>
 
@@ -109,10 +121,11 @@ style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;
 style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span>How can I use AutoIT with other engines?</b></p>
 
-<p class=MsoNoSpacing style='text-indent:.25in'>&nbsp;Just add&nbsp; :autoit:
-prefix at beginning of the main window recognition string and/or component recognition string.&nbsp; </p>
-
-<p class=MsoNoSpacing style='text-indent:.25in'>Example:&nbsp; User can define
+<p class=MsoNoSpacing style='text-indent:.25in'>
+Just add&nbsp; <b>:autoit:</b> &nbsp;prefix at beginning of the main window recognition string and/or component recognition string.&nbsp; </p>
+<p>
+<p class=MsoNoSpacing style='text-indent:.25in'>
+Example:&nbsp; User can define
 appmap following way</p>
 
 <p class=MsoNoSpacing style='text-indent:.5in'>&nbsp;</p>
@@ -132,9 +145,10 @@ appmap following way</p>
 
 <p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;Num3=
 “id=133”</p>
-
-<p class=MsoNoSpacing style='text-indent:.5in'>&nbsp;</p>
-
+<p>
+<p class=MsoNoSpacing style='text-indent:.25in'>
+Consult this link for more info on <a href="http://safsdev.sourceforge.net/doc/org/safs/autoit/AutoItRs.html" target="_blank" title="SAFS AutoIt Recognition Strings">SAFS AutoIt Recognition Strings</a>.</p>
+<p>
 <p class=MsoNoSpacing style='margin-left:20.25pt;text-indent:-20.25pt'><b>3.</b><b><span
 style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span>How can I capture AutoIT recognition string(RS)?</b></p>
