@@ -22,6 +22,7 @@ import org.safs.StatusCodes;
 import org.safs.TestRecordHelper;
 import org.safs.logging.AbstractLogFacility;
 import org.safs.model.Component;
+import org.safs.model.Utils;
 import org.safs.model.annotations.AutoConfigureJSAFS;
 import org.safs.model.annotations.JSAFSConfiguredClassStore;
 import org.safs.model.annotations.Utilities;
@@ -316,6 +317,54 @@ public class Runner implements JSAFSConfiguredClassStore{
 		command(DDDriverCommands.PAUSE_KEYWORD, String.valueOf(seconds));
 	}
 
+	/**
+	 * Provide the Application Map for the test to use. <br>
+	 * This command must be used prior to ANY other command or script trying to reference the AppMap contents.<br>
+	 * @param mapName - The name of the text-based runtime AppMap to load (not the Java Map class that might be used in code).
+	 * @throws Throwable
+	 */
+	public static void SetApplicationMap(String mapName) throws Throwable{
+		command(DDDriverCommands.SETAPPLICATIONMAP_KEYWORD, mapName);
+	}
+	
+	/**
+	 * Identify and Launch a specified application.<br>
+	 * 
+	 * @param appID -- id for this app to use in CloseApplication.
+	 * @param executable -- The path and filename to the executable OR an ApplicationConstant.<br>
+	 * This can and should include the full command line syntax with application specific command line parameters 
+	 * unless the application is unable to successfully handle this invocation.<br>
+	 * This parameter may instead contain a reference to an ApplicationConstant from the currently active Application Map. 
+	 * The value of the retrieved constant will be used as the executable path.
+	 * @param optionals -- if used must be specified in proper order.<br>  
+	 * Use "" empty strings to skip parameters you don't want to use:<br>
+	 * <b>workdir</b> - working directory for the application (if required)<br>
+	 * <b>cmdlineparams</b> - one string of separate command line parameters for the application (if required)<br>
+	 * <b>appmap</b> - filename of the application map associated with the application (if required)<br>
+	 * @see #CloseApplication(String)
+	 * @throws Throwable
+	 */
+	public static void LaunchApplication(String appID, String executable, String...optionals) throws Throwable{
+		if (optionals==null) optionals = new String[0];
+		ArrayList<String> ps = new ArrayList<String>();
+		ps.add(appID);
+		ps.add(executable);
+		for(String item:optionals){
+			ps.add(item);
+		}
+		command(DDDriverCommands.LAUNCHAPPLICATION_KEYWORD, ps.toArray(new String[ps.size()]));
+	}
+
+	/**
+	 * Close an application that was launched with LaunchApplication.
+	 * @param appID
+	 * @see #LaunchApplication(String, String, String...)
+	 * @throws Throwable
+	 */
+	public static void CloseApplication(String appID) throws Throwable{
+		command(DDDriverCommands.CLOSEAPPLICATION_KEYWORD, appID);
+	}
+	
 	/**
 	 * Sets a single SAFS variable value for use by the SAFS system. 
 	 * The varName and varValue are used as is--no special SAFS expression processing.
