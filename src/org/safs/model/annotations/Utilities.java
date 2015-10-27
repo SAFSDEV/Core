@@ -531,6 +531,11 @@ public class Utilities {
 						debug("AutoConfigure injecting the Runner into Class instance "+ c.getName()+" ...");
 						((RunnerAware)object).setRunner((Runner) store);
 				}
+				if( object instanceof RuntimeDataAware && 
+						store instanceof Runner){
+						debug("AutoConfigure injecting the RuntimeDataInterface into Class instance "+ c.getName()+" ...");
+						((RuntimeDataAware)object).setRuntimeDataInterface((RuntimeDataInterface) ((Runner)store).jsafs().getCoreInterface());
+				}
 				
 				//According to
 				if(aClass.isAnnotationPresent(AutoConfigureJSAFS.class))
