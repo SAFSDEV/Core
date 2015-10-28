@@ -17,7 +17,7 @@
 <div class=b1>
 <center>
 <h1>What's New in SAFS</h1>
-<h2>Updated: 2015.09.18</h2>
+<h2>Updated: 2015.10.26</h2>
 <small>Since:<b> 2012.08.07 </b></small>
 <h2>---  All active <b>"development"</b> is now at <a href="https://github.com/SAFSDEV" target="_blank" title="Link to SAFSDEV Organization on GitHub">SAFSDEV on GitHub</a>  ---</h2>
 <b>(Releases/Updates and other Binaries will be available on both GitHub and SourceForge)</b>
@@ -26,30 +26,37 @@
 <hr>
 </div>
 <p>
-Here we provide info as to what has been added or fixed since the <a href="WhatsNewInSAFS.2012.08.07.htm" target="_blank" title="Whats New In Release 2012.08.07">SAFS Win Release 2012.08.07</a>.<br>
-Check to see if any <a href="http://sourceforge.net/projects/safsdev/files/SAFS%20Updates/" target="_blank" title="SAFS Updates Download Site on SourceForge">Downloadable SAFS Updates</a> or <a href="http://sourceforge.net/projects/safsdev/files/SAFS%20Win/" target="_blank" title="SAFS Win Download Site on SourceForge">SAFS Win Release Candidates</a> are available since the last release.<br>
-Check to see if any <a href="http://sourceforge.net/projects/safsdev/files/Robotium%20RemoteControl/" target="_blank" title="Robotium RemoteControl Download Site on SourceForge">Downloadable Robotium RemoteControl Updates or Release Candidates</a> are available since the last release.<br>
-Check to see if any <a href="http://sourceforge.net/projects/safsdev/files/SeleniumPlus%20Win/" target="_blank" title="SeleniumPlus Download Site on SourceForge">SeleniumPlus Release Candidates</a> are available since the last release.<br>
+Here we provide info as to what has been added or fixed since the previous <a href="WhatsNewInSAFS.2012.08.07.htm" target="_blank" title="Whats New In Release 2012.08.07">SAFS Win Release 2012.08.07</a> document.
 <p>
-It should be noted that:
+Frequently Updated:
 <p><ul>
-SAFS for Windows--including Android Support--was released on 2012.08.07. There IS a new Release Candidate Available!<br>
-<b>Robotium Remote Control for Android testing new Release Candidate for Robotium 5.2.1!</b><br>
-SAFS for the Apple Mac and IOS testing was released on 2012.06.22!<br>
-<b>SAFS Win</b> Release Candidates and <b>SeleniumPlus</b> Release Candidates are updated <b>FREQUENTLY</b>!
+Downloadable <b>SAFS Updates</b> from <a href="http://sourceforge.net/projects/safsdev/files/SAFS%20Updates/" target="_blank" title="SAFS Update Site on SourceForge">SourceForge</a>|<a href="https://github.com/SAFSDEV/UpdateSite/releases/tag/safs" target="_blank" title="SAFS Update Site on GitHub">GitHub</a>.
+<br>
+Downloadable <b>SAFS WIN Release Candidates</b> from <a href="http://sourceforge.net/projects/safsdev/files/SAFS%20Win/" target="_blank" title="SAFS Win Download Site on SourceForge">SourceForge</a>|<a href="https://github.com/SAFSDEV/Core/releases" target="_blank" title="SAFS Win Download Site on GitHub">GitHub</a>.
+<p>
+Downloadable <b>SeleniumPlus Updates</b> from <a href="http://sourceforge.net/projects/safsdev/files/SeleniumPlus%20Win/" target="_blank" title="SeleniumPlus Update Site on SourceForge">SourceForge</a>|<a href="https://github.com/SAFSDEV/UpdateSite/releases/tag/seleniumplus" target="_blank" title="SeleniumPlus Update Site on GitHub">GitHub</a>.
+<br>
+Downloadable <b>SeleniumPlus WIN Release Candidates</b> from <a href="http://sourceforge.net/projects/safsdev/files/SeleniumPlus%20Win/" target="_blank" title="SeleniumPlus Download Site on SourceForge">SourceForge</a>|<a href="https://github.com/SAFSDEV/SeleniumPlus-Plugin/releases" target="_blank" title="SeleniumPlus Download Site on GitHub">GitHub</a>.
 </ul>
 <p>
+Less so:
+<p><ul>
+Download (older) <a href="http://sourceforge.net/projects/safsdev/files/Robotium%20RemoteControl/" target="_blank" title="Robotium RemoteControl Download Site on SourceForge">Robotium RemoteControl Updates or Release Candidates</a> for Robotium 5.2.1.
+<br>
+(Note: The latest SAFS WIN Release Candidate above supports Remote Control with Robotium <b>5.3.1</b>)
+</ul><p>
+<HR><!-- ------------------------------------------------------------------------------------ -->
 As you can see below, SAFS is undergoing a very rapid pace of development in many areas expanding support in:
 <ul>
 	<li>Core SAFS Framework robustness and performance
 	<li>Selenium WebDriver/SeInterpreter Support and Integration
-	<li>Robotium Remote Control (Android)
+	<li>SeleniumPlus Eclipse Test Development Environment
+	<li><b>NEW! AutoIt WIN support for native Windows interactions</b>.
 	<li>SmartBear Test Complete (NET/WPF/Flex/Java/HTML)
-	<li>SAFS Cukes (Cucumber) Support and Integration
-	<li>SAFS Engine for Android Automation (DRD Apps)
-	<li>JSAFS Object Model (All Domains)
 	<li>IBM Rational Functional Tester (Flex/Web/Java/Net/WPF)
-	<li>Apple UIAutomation (Mac/IBT/IOS Apps)
+	<li>JSAFS Object Model (for ALL Domains -- ALL tools)
+	<li>SAFS/Robotium Remote Control (Android)
+	<li>SAFS Engine for Android Automation (DRD Apps)
 </ul>
 <p>
 <a name="legend"/>
@@ -58,36 +65,36 @@ As you can see below, SAFS is undergoing a very rapid pace of development in man
 <th bgcolor=#D8D8D8 colspan=2 border=1>Legend
 <tr>
 <td><table cellpadding=2>
-<tr><td class=b1>CUK<td class=s2><b>SAFS Cucumber Support.</b>
+<tr><td class=b1>COM<td class=s1>COM-related support--including DDVariableStore DLL.
 <tr><td class=b1>Core<td class=s1>The core SAFS Framework used by all SAFS clients/services.
+<tr><td class=b1>Flex<td class=s1>Flex/Flash client/domain support.
 <tr><td class=b1>SPC<td class=s1>SAFS Process Container.
-<tr><td class=b1>IOSPC<td class=s1>Apple IOS Process Container.
-<tr><td class=b1>WDSPC<td class=s1>Selenium WebDriver Process Container.
-<tr><td class=b1>TLNK<td class=s2>SAFS TestLink Test Development Environment.
+<tr><td class=b1>WDSPC<td class=s1><b>Selenium WebDriver Process Container</b>.
 <tr><td class=b1>TID<td class=s1>The primary Tool-Independent Driver (SAFSDRIVER).
-<tr><td class=b1>JSAFS<td class=s1>The Java API for Advanced SAFS test development and execution.
+<tr><td class=b1>Java<td class=s1>Java client/domain support.
+<tr><td class=b1>JSAFS<td class=s1><b>The Java API for Advanced SAFS test development and execution</b>.
 <tr><td class=b1>IBT<td class=s1>SAFS Image-Based Testing support.
+<tr><td class=b1>Net<td class=s1>MS .NET client/domain support.
+<tr><td class=b1>RBTM<td class=s1>Robotium Remote Control (Android).
 <tr><td class=b1>RFT<td class=s1>IBM Rational Functional Tester support.
 <tr><td class=b1>RFSM<td class=s1>RFT Find Search Mode (higher-performance Flex recognition).
-<tr><td class=b1>Win<td>MS Windows client/domain support.
-<tr><td class=b1>Mac<td>Apple Mac client/domain support.
-<tr><td class=b1>Unx<td>Generic Unix client/domain support.
+<tr><td class=b1>Se+<td class=s1><b>SeleniumPlus WebDriver support</b>.
+<tr><td class=b1>TC<td class=s1><b>SmartBear TestComplete support</b>.
+<tr><td class=b1>TCPM<td class=s1>SAFS TCP Messenger (Android).
+<tr><td class=b1>Win<td class=s1>MS Windows client/domain support.
+<tr><td class=b1>Web<td class=s1>Web client support (HTML support).
+<tr><td class=b1>WPF<td class=s1>MS WPF client/domain support.
 </table>
 <td><table cellpadding=2>
-<tr><td class=b1>TCPM<td class=s1>SAFS TCP Messenger (Android).
-<tr><td class=b1>RBTM<td class=s1>Robotium Remote Control (Android).
+<tr><td class=b1>AIT<td class=s2><b>SAFS AutoIt WIN Support.</b>
+<tr><td class=b1>CUK<td class=s2>SAFS Cucumber Support.
 <tr><td class=b1>DRD<td class=s2>SAFS Android Engine support.
 <tr><td class=b1>IOS<td class=s2>Apple IOS support.
+<tr><td class=b1>IOSPC<td class=s2>Apple IOS Process Container.
 <tr><td class=b1>Se<td class=s2>Selenium support (&lt;2.0).
-<tr><td class=b1>Se+<td class=s1>SeleniumPlus WebDriver support.
 <tr><td class=b1>QTP<td class=s2>HP QuickTest Pro support.
-<tr><td class=b1>TC<td class=s1>SmartBear TestComplete support.
-<tr><td class=b1>Web<td>Web client support (HTML support).
-<tr><td class=b1>Flex<td>Flex/Flash client/domain support.
-<tr><td class=b1>Net<td>MS .NET client/domain support.
-<tr><td class=b1>WPF<td>MS WPF client/domain support.
-<tr><td class=b1>Java<td>Java client/domain support.
-<tr><td class=b1>COM<td>COM-related support--including DDVariableStore DLL.
+<tr><td class=b1>Mac<td>Apple Mac client/domain support.
+<tr><td class=b1>Unx<td>Generic Unix client/domain support.
 </table>
 <tr>
 <td class=s1 align=center>Mature. In-Use. Active Development.
@@ -117,6 +124,300 @@ As you can see below, SAFS is undergoing a very rapid pace of development in man
 <table width="100%" align=center border=1 cellpadding=4 rules=rows>
 
 <th>DATE<th>AFFECTED<th>NEW STUFF<th>FIXES<th>DEPENDENCIES
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.10.23 </b>
+<td rowspan=2><!--AFFECT-->Core
+<td><!--NEW----->
+<td><!--FIXED--->Core Drivers
+<td><!--DEPEND-->Core JARs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fixed Core Drivers to "autofix" missing Project directories on bootstrap like we do in SeleniumPlus.<br>
+This now works for ALL drivers--including JSAFSDrivers, EmbeddedHookDrivers, and STAF ProcessContainer.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.10.22 </b>
+<td rowspan=2><!--AFFECT-->Core<br>Se+
+<td><!--NEW----->
+<td><!--FIXED--->Core JSAFS
+<td><!--DEPEND-->Core JARs<br>Se+ JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fixed Core JSAFSDriver to properly initialize recordType in the Global TestRecordHelper.<br>
+This prevented proper operation of AutoIt engine to recognize Component test records in SeleniumPlus embedded environment.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.10.21 </b>
+<td rowspan=2><!--AFFECT-->Core<br>Se+
+<td><!--NEW----->Core Email<br>Se+ REGRESSION
+<td><!--FIXED--->Core Install
+<td><!--DEPEND-->Core JARs<br>Se+ JARs<br>Core Install
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Update Core email support for new INI options.
+<li>Update SeleniumPlus support to use the new Core email INI options.
+<li>Added SeleniumPlus REGRESSION tests of new sending email options.
+<li>Fixed SAFS Core install runSoloTest.bat path errors to SAFSTCPMessenger and SAFSTestRunner.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.10.20 </b>
+<td rowspan=2><!--AFFECT-->Core<br>RBTM
+<td><!--NEW----->RBTM Logging
+<td><!--FIXED--->
+<td><!--DEPEND-->Core Install
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Update SAFS/Robotium RemoteControl samples to create and use a separate LogsImpl for output.
+<li>Update the SetupAndroid.README.htm to include info on the new SoloRemoteControl sample project.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.10.19 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->
+<td><!--FIXED--->Se+ ListView
+<td><!--DEPEND-->Se+ JARs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Enhanced SeleniumPlus ListView support for UL and OL even when lists might be "hidden"--such as when implemented as the underlying List in a more complex SAP ListView.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.10.16 </b>
+<td rowspan=2><!--AFFECT-->Se+<br>Core
+<td><!--NEW----->SAFS TC&nbsp;V10
+<td><!--FIXED--->Se+ EditBox<br>Se+ Generic
+<td><!--DEPEND-->Se+ JARs<br>Core Install
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fix SeleniumPlus EditBox sap.m.Input support in Firefox for clearEditBox.
+<li>Insure all SeleniumPlus Component libraries properly handle generic object support.
+<li>Update the SAFS Core Install for TestComplete (TCAFS) to install TestComplete V10 assets.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.10.15 </b>
+<td rowspan=2><!--AFFECT-->Core<br>Se+
+<td><!--NEW----->
+<td><!--FIXED--->Core Install<br>Se+ REGRESSION
+<td><!--DEPEND-->Core Install<br>Se+ REGRESSION
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Core Install asset updates and SetupAndroid.README.htm updates for Android support in upcoming SAFS Release.
+<li>Enhancements to the SAFS Core Android sample Project test provided with the upcoming SAFS Release.
+<li>Fixed Core packaging of Android's safs-guiclassdata.jar to remove duplicates in other JARs.
+<li>Fix SeleniumPlus REGRESSION ListViewTests for improper handling of Expressions.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.10.14 </b>
+<td rowspan=2><!--AFFECT-->Core<br>RBTM<br>Se+
+<td><!--NEW----->Core Robotium<br>Core Install
+<td><!--FIXED--->RBTM TestRunner<br>Core Droid<br>Se+ TabControl
+<td><!--DEPEND-->Core JARs<br>RBTM JARs<br>Core Install<br>Se+ JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Update SAFS Release so that both SAFS and Robotium Remote Control use DSAFSTestRunner on Android.
+<li>Fix SAFS Core Android sample SpinnerSample installation assets.
+<li>Provide for full SAFS Robotium RemoteControl support in upcoming SAFS Release.
+<li>Updated SAFS Robotium support to Robotium 5.3.1.
+<li>Updated SAFS Installers for full Android support.
+<li>Updated SetupAndroid.README.htm for SAFS support in upcoming SAFS Release.
+<li>Fixed SAFS Android installation assets to support required APK builds of SAFSTCPMessenger and SAFSTestRunner.
+<li>Fixed SeleniumPlus TabControl support to load default support for generic operations when needed.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.10.13 </b>
+<td rowspan=2><!--AFFECT-->Se+<br>Core
+<td><!--NEW----->Se+ REGRESSION
+<td><!--FIXED--->Se+ EditBox<br>Se+ ProcessContainer<br>Core JVMConsole
+<td><!--DEPEND-->Se+ REGRESSION<br>Se+ JARs<br>Core JARs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Added SeleniumPlus regression test for SAP sap.m.Input EditBox.
+<li>Added SeleniumPlus regression SearchBox on Google page support.
+<li>Enhanced SeleniumPlus EditBox support to be more robust for clearEditBox.
+<li>Fixed SeleniumPlus ProcessContainer ElementInfo dialog for better resizing support.
+<li>Fixed Core SAFS JavaJVMConsoles to properly resize with user changes.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.10.12 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->Se+ SAP
+<td><!--FIXED--->Se+ EditBox
+<td><!--DEPEND-->Se+ JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Added SeleniumPlus ability to get SAP class properties via SAP native methods.
+<li>Fixed SeleniumPlus EditBox to better handle or avoid stale element exceptions.
+<li>Fixed SeleniumPlus EditBox for appropriate messages.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.10.09 </b>
+<td rowspan=2><!--AFFECT-->Core
+<td><!--NEW----->
+<td><!--FIXED--->Core Install
+<td><!--DEPEND-->Core Install
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Test and Update SetupTCAFS.README.htm for upcoming SAFS Core Release.
+<li>Test and Update SAFSQuickStartSelenium.htm for upcoming SAFS Core Release.
+<li>Additional updates to SAFSWinReleaseNotes links to new online locations for upcoming SAFS Core Release.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.10.08 </b>
+<td rowspan=2><!--AFFECT-->Core
+<td><!--NEW----->
+<td><!--FIXED--->Core Install
+<td><!--DEPEND-->Core Install
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Test and Update SetupRobotJ.README.htm for upcoming SAFS Core Release.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.10.07 </b>
+<td rowspan=2><!--AFFECT-->AIT<br>Core
+<td><!--NEW----->AIT Sample<br>Core Install
+<td><!--FIXED--->AIT Commands
+<td><!--DEPEND-->Core JARs<br>Se+JARs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fixed the AutoIt engine to properly bypass processing of Driver Commands which it does not support at this time.
+<li>Added AutoIt sample test to SAFS Project installation.
+<li>Updated SAFS Installation Program Group to use "2016" label.
+<li>Enhanced the SAFS Core installation Progress Indicator percentages.
+<li>Updated SAFSWINReleaseNotes for upcoming SAFS Release.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.10.06 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->
+<td><!--FIXED--->Se+ Click<br>Se+ Chrome
+<td><!--DEPEND-->Se+ JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fix SeleniumPlus Click Listeners to properly exit before timeout when errors or page change occurs.
+<li>Fix SeleniumPlus Chrome errors in web element locations due to border offset issues in Chrome.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.10.01</b>
+<td rowspan=2><!--AFFECT-->Core<br>Se+
+<td><!--NEW----->Core Robot
+<td><!--FIXED--->Se+ Model
+<td><!--DEPEND-->Core JARs<br>Se+ JARs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Added Core Robot delayToRelease support for MouseEvents Click+Hold support.
+<li>Fix SeleniumPlus ListView support infinite loop from unrecognized ListView classes.
+<li>Provide default generic HTML support in SeleniumPlus when DOJO or SAP classes are not otherwise supported.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.09.30 </b>
+<td rowspan=2><!--AFFECT-->AIT
+<td><!--NEW----->
+<td><!--FIXED--->AIT Routing
+<td><!--DEPEND-->Core JARs<br>Se+ JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fixed Core AutoIt engine to properly return SCRIPT_NOT_EXECUTED for GUILess commands intended for other engines.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.09.29 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->Se+ Doc
+<td><!--FIXED--->Se+ ComboBox<br>Se+ Click<br>Se+ ListView
+<td><!--DEPEND-->Se+ JARs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fixed SeleniumPlus support of Chrome to better show/hide ComboBox lists.
+<li>Significant SeleniumPlus ClickListener updates for debugging.
+<li>Separate Robot Click listener timeouts from SeleniumPlus Click listener timeouts.
+<li>Added SeleniumPlus Generic ListView support for OL and UL web elements.
+<li>Released updated SeleniumPlus-Welcome doc with Auto Config info for external projects.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.09.25 </b>
+<td rowspan=2><!--AFFECT-->Core<br>Se+
+<td><!--NEW----->Core Annotations
+<td><!--FIXED--->Core Annotations
+<td><!--DEPEND-->Core JARs<br>Se+JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Cleaned up Java annotation Utilities to remove unnecessary Class duplicates during evaluations.
+<li>Updated Java annotation Utilities to enable the ability to evaluate auto-injection needs in associated (Helper) project packages and not just in current project packages.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.09.24 </b>
+<td rowspan=2><!--AFFECT-->Core<br>Se+
+<td><!--NEW----->
+<td><!--FIXED--->Core Mail
+<td><!--DEPEND-->Core JARs<br>Se+ JARs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Core email send support updated to handle session properties and authentication better.
+<li>Core email config file (test INI) enhancements.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.09.23 </b>
+<td rowspan=2><!--AFFECT-->Core<br>Se+
+<td><!--NEW----->AIT SPY<br>AIT Find
+<td><!--FIXED--->AIT Install
+<td><!--DEPEND-->Core JARs<br>Se+ JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Updated AutoIt spy executables for native Windows support.
+<li>Fixed AutoIt support to bypass SAFS use if SAFS not updated for AutoIt support.
+<li>Enhanced AutoIt recognition support to include more properties.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.09.22 </b>
+<td rowspan=2><!--AFFECT-->TC<br>Core<br>AIT
+<td><!--NEW----->CORE AIT<br>Se+ AIT
+<td><!--FIXED--->TC FlexTree
+<td><!--DEPEND-->TC SVBs<br>Core JARs<br>Se+ JARs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Add backup Click attempt after failed Test Complete FlexTree item expansion.
+<li>Introduce Windows native AutoIt support in SAFS Core and SeleniumPlus.
+</ul>
 
 <tr class=b2>
 <td rowspan=2><!--DATE----><b> 2015.09.18 </b>
