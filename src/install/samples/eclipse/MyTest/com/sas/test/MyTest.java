@@ -10,12 +10,39 @@ public class MyTest {
 		super();
 	}
 	
+	/** 
+	 * Non-working example ONLY.
+	 * Not automatically executed.
+	 * Executed only when called by other methods. 
+	 * @throws Throwable
+	 */
+	public void SomeUtilitiyMethod() throws Throwable{
+		Runner.Pause(2);
+	}
+
 	@JSAFSTest(Order=1000)
 	public void TestMethodA() throws Throwable{
-		Runner.action("Click", "AnyComp1", "MainWin");
-		Runner.command("Pause","10");
-		Runner.Click(AppMap.MainWin.AnotherComp2);
-		Runner.action(AppMap.AnotherWin.SomeComp1, "GetGUIImage", "SomeCompSnapshot.png");
+		
+		// SetApplicationMap not really necessary if automatically loaded via AppMap.order file
+		Runner.SetApplicationMap(AppMap.AutoItTestMap()); 
+		Runner.LaunchApplication(AppMap.CalculatorApp(), AppMap.CalcEXE());
+		
+		// example of running ANY ComponentFunction that Runner doesn't already expose.
+		// note the use of literal Strings for Child and Window component ids in the App Map (rarely recommended).
+		Runner.action("SetFocus", "SAFS Monitor", "SAFS Monitor");
+
+		// example of running ANY DriverCommand that Runner doesn't already expose.
+		Runner.command("Pause", "2");
+
+		// note the use of App Map Component objects (instead of literal Strings) identifying the component from the App Map.
+		Runner.action(AppMap.Calculator.Calculator, "SetFocus");
+		
+		// but the Runner DOES expose the Pause command
+		Runner.Pause(2); 
+		
+		Runner.action(AppMap.SAFS_Monitor.SAFS_Monitor, "SetFocus");
+
+		Runner.CloseApplication(AppMap.CalculatorApp());
 	}
 	
 	public static void main(String[] args) throws Throwable {
