@@ -1,0 +1,171 @@
+<html>
+<head>
+<title>Using AutoIT</title>
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+@font-face
+	{font-family:Tahoma;
+	panose-1:2 11 6 4 3 5 4 4 2 4;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:10.0pt;
+	margin-left:0in;
+	line-height:115%;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";}
+p.MsoAcetate, li.MsoAcetate, div.MsoAcetate
+	{mso-style-link:"Balloon Text Char";
+	margin:0in;
+	margin-bottom:.0001pt;
+	font-size:8.0pt;
+	font-family:"Tahoma","sans-serif";}
+p.MsoNoSpacing, li.MsoNoSpacing, div.MsoNoSpacing
+	{margin:0in;
+	margin-bottom:.0001pt;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:10.0pt;
+	margin-left:.5in;
+	line-height:115%;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";}
+span.BalloonTextChar
+	{mso-style-name:"Balloon Text Char";
+	mso-style-link:"Balloon Text";
+	font-family:"Tahoma","sans-serif";}
+p.msolistparagraphcxspfirst, li.msolistparagraphcxspfirst, div.msolistparagraphcxspfirst
+	{mso-style-name:msolistparagraphcxspfirst;
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:115%;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";}
+p.msolistparagraphcxspmiddle, li.msolistparagraphcxspmiddle, div.msolistparagraphcxspmiddle
+	{mso-style-name:msolistparagraphcxspmiddle;
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:115%;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";}
+p.msolistparagraphcxsplast, li.msolistparagraphcxsplast, div.msolistparagraphcxsplast
+	{mso-style-name:msolistparagraphcxsplast;
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:10.0pt;
+	margin-left:.5in;
+	line-height:115%;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";}
+p.msochpdefault, li.msochpdefault, div.msochpdefault
+	{mso-style-name:msochpdefault;
+	margin-right:0in;
+	margin-left:0in;
+	font-size:10.0pt;
+	font-family:"Calibri","sans-serif";}
+.MsoChpDefault
+	{font-size:10.0pt;
+	font-family:"Calibri","sans-serif";}
+@page WordSection1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.0in 1.0in 1.0in;}
+div.WordSection1
+	{page:WordSection1;}
+-->
+</style>
+
+</head>
+
+<body lang=EN-US>
+<center><H1>Using AutoIt for Native Windows</H1></center>
+<p>
+<hr>
+Author: Dharmesh Patel<br/>
+Update: OCT 26, 2015 Carl Nagle
+<p>
+Copyright, SAS Institute
+<a href="http://www.sas.com" target="altwin">http://www.sas.com</a><br/>
+<a href="http://www.opensource.org/licenses/gpl-license.php" target="altwin">General Public License (GPL)</a>:&nbsp;
+http://www.opensource.org/licenses/gpl-license.php<br/>
+<hr>
+<div class=WordSection1>
+
+<p class=MsoNoSpacing style='margin-left:20.25pt;text-indent:-20.25pt'><b>1.</b><b><span
+style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>What is AutoIt?</b></p>
+
+<p class=MsoNoSpacing style='margin-left:20.25pt'>
+<a href="https://www.autoitscript.com/site/autoit/" target="_blank" title="AutoIt Test Automation Home Page">AutoIT</a> is a freeware test automation tool provided by Jonathan Bennett and the AutoIt Team designed for automating native Microsoft Windows apps and components.</p>
+<p>
+<p class=MsoNoSpacing style='margin-left:20.25pt'>
+SAFS uses and controls AutoIt via <a href="https://github.com/accessrichard/autoitx4java" target="_blank" title="AutoItX Java Bridge Home Page">AutoItX Java Bridge</a> as a standard SAFS Engine so the user does NOT have to learn the Java API, the AutoIt Scripting Language, or the AutoItX COM API. &nbsp;The AutoItX Java Bridge is provided freely as open source by Richard Kanavati on GitHub.
+</p>
+
+<p class=MsoNoSpacing style='margin-left:20.25pt'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:20.25pt;text-indent:-20.25pt'><b>2.</b><b><span
+style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>How can I use AutoIT with other engines?</b></p>
+
+<p class=MsoNoSpacing style='text-indent:.25in'>
+Just add&nbsp; <b>:autoit:</b> &nbsp;prefix at beginning of the main window recognition string and/or component recognition string.&nbsp; </p>
+<p>
+<p class=MsoNoSpacing style='text-indent:.25in'>
+Example:&nbsp; User can define
+appmap following way</p>
+
+<p class=MsoNoSpacing style='text-indent:.5in'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;[Calculator]</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;Calculator=":autoit:title=Calculator”</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;Num3=
+“class=Button;id=133”</p>
+
+<p class=MsoNoSpacing style='text-indent:.5in'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;[Calculator]</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;Calculator=":autoit:title=Calculator”</p>
+
+<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;Num3=
+“id=133”</p>
+<p>
+<p class=MsoNoSpacing style='text-indent:.25in'>
+Consult this link for more info on <a href="http://safsdev.sourceforge.net/doc/org/safs/autoit/AutoItRs.html" target="_blank" title="SAFS AutoIt Recognition Strings">SAFS AutoIt Recognition Strings</a>.</p>
+<p>
+<p class=MsoNoSpacing style='margin-left:20.25pt;text-indent:-20.25pt'><b>3.</b><b><span
+style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>How can I capture AutoIT recognition string(RS)?</b></p>
+
+<p class=MsoNoSpacing style='text-indent:.25in'>&nbsp;Au3Info.exe or Au3Info_x64.exe is located in 'c:\safs\lib' or 'c:\seleniumplus\extra' dir.</p>
+
+<p class=MsoNoSpacing style='margin-left:.5in'><img
+id="Picture 6" src="AutoItInfo.jpg"></p>
+<p class=MsoNoSpacing style='margin-left:.5in'>&nbsp;</p>
+<p class=MsoNoSpacing style='margin-left:20.25pt;text-indent:-20.25pt'><b>4.</b><b><span
+style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Is AutoIT not working?</b></p>
+<p class=MsoNoSpacing style='text-indent:.25in'>&nbsp;When AutoIt load, DLLs will be registered to the system. If AutoIT already installed to the system then uninstall AutoIT or DLLs.</p>
+
+
+</div>
+
+</body>
+
+</html>
