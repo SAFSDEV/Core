@@ -31,7 +31,9 @@ Before you can successfully run any build, you need to install/verify the follow
 2. Create a "SAFS Build folder", such as *c:\SAFSBuild*, which is used to build SAFS/SE+. Create an Environment Variable **%SAFS_BUILD%** pointing to "SAFS Build folder".
 3. Go to *c:\SAFSDev\build\safs*, copy the file *bootstrap.build.xml* to **%SAFS_BUILD%**.
 4. Call ```ant -f bootstrap.build.xml bootstrapbuild``` to get all latest ant build scripts.
-5. Call ```ant safs.win.prepare``` to prepare the development environment. When this succeed, you will be able to see the **libs** and **safsjars**, which contain the dependency files
+5. Provide private FTP server:
+  1. In *%SAFS_BUILD%/safs.properties* file, you can provide your own private FTP server, which contains the NOT free testing engines, like: Rational Functional Tester, by setting properties: "private.ftpserver", "private.ftpuserid", and "private.ftppasswd". If you don't have private testing engines, the Ant scripts will just ignore these things.
+6. Call ```ant safs.win.prepare``` to prepare the development environment. When this succeed, you will be able to see the **libs** and **safsjars**, which contain the dependency files
    needed by SAFS projects.
 
 
@@ -40,7 +42,7 @@ Before you can successfully run any build, you need to install/verify the follow
 2. Import the project **SAFS-Android-Remote-Control** into Eclipse and build it, it should succeed.
 3. Import the core project **Core**
   1. If you don't have the folder **%SAFS_BUILD%/libs/rft** or you don't plan to develop for **SAFS_RFT**:
-    1. Delete the whole folder *org\safs\ratinal*.
+    1. Delete the whole folder *org\safs\rational*.
     2. Delete all items beginning with *SAFS_BUILD/libs/rft* in **Java Build Path->Libraries**.
   2. Finally you can build this project, it should succeed.
 
