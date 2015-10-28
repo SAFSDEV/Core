@@ -1,0 +1,177 @@
+<job id="setOCREnv" >
+<script language="VBScript" src="..\_SharedFunctions.vbs"/>
+<script language="VBScript" >
+'************************************************************************************************************
+'* This script intends to set up OCR environment for SAFS.
+'* OCR engines supported: Tesseract and GOCR
+'*
+'* 1) If the OCR DLLs and EXEs reside in SAFS\ocr then we will append the System PATH to insure they are found.
+'*    Otherwise, we insure the DLLs and EXEs are in SAFS\bin which should already be part of the System PATH.
+'*
+'* 2) Add system variable "TESSDATA_PREFIX" that defines a folder (OCR root) with subfolder "tessdata" inside.
+'*    It is for tesseract using its language data that is supposed to be stored in TESSDATA_PREFIX\tessdata
+'*
+'* For example:
+'*   If c:\safs\ocr is the root of safs supported OCR (recommended)
+'*   TESSDATA_PREFIX = c:\safs\ocr  
+'*     
+'* The OCR assets for SAFS:
+'*   c:\safs\
+'*      +--- bin
+'*           +--- tesseract.exe
+'*           +--- gocr.exe
+'*           +--- tessdll.dll
+'*           +--- tessdllWrapper.dll
+'*           +--- vcredist_x86.exe
+'*           +--- trainGOCR.bat
+'*           +--- SafsTessdll.exe
+'*      +--- ocr
+'*           +--- setOCREnv.wsf
+'*           +--- tessdata
+'*                +--- eng.word-dawg.WORD-DAWG
+'*                +--- ....
+'*           +--- gocrdata  (auto created for storing GOCR trained data)
+'*                |
+'*
+'*
+'* Optional script parameters:
+'*     
+'*     -silent 
+'*     
+'*          Will not prompt to abort unintentional execution, nor report on completion.
+'*          Problems or error dialogs may still occur.
+'*     
+'*
+'* Author: Junwu Ma
+'* Original Release: DEC 14, 2009 
+'*
+'*           CANAGL: JAN 05, 2010 Moved DLLs and EXEs to SAFS\bin (%SAFSDIR%\bin)
+'*           CANAGL: JAN 08, 2010 Support vcredist_x86.exe required for ocr dlls on windows.
+'*           Junwu : JAN 19, 2010 Added gocr training 
+'*
+'************************************************************************************************************
+Dim ocrDir, safsdir, isBin, redistEXE
+Dim pathEnv, tessDataEnv, args, arg, isSilent
+Dim message, response, redistPATH, exec, cr
+
+Set shell = WScript.CreateObject("WScript.Shell")
+Set env   = shell.Environment("SYSTEM")
+Set fso   = WScript.CreateObject("Scripting.FileSystemObject")
+Set args  = WScript.Arguments
+
+isBin       = false
+isSilent    = false
+pathEnv     ="PATH"
+tessDataEnv = "TESSDATA_PREFIX"      'define the folder where a subfolder "\tessdata" stores language data in Tesseract OCR
+gocrDataDir = "GOCRDATA_DIR"         'system variable defining the path of GOCR training data
+redistEXE   = "vcredist_x86.exe"
+cr          = chr(13) & chr(10)
+
+safsdir = env("SAFSDIR")
+ocrDir  = safsdir & "\ocr"
+
+'**************************************************************
+
+For i = 0 to args.Count -1
+    arg = args(i)
+        
+    lcarg = lcase(arg)
+
+    'check safsdir and stafdir alternate install locations
+    '====================================================
+    if (arg = "-silent") then isSilent = true
+Next
+
+'Interactive User choice to run the script, or not
+'=================================================
+if NOT isSilent then
+    message = "Preparing SAFS Image-Based OCR Support..."& cr & cr
+    message = message &"Do you wish to proceed?"& cr & cr
+    message = message &"Click YES to proceed; NO to cancel the install."
+
+    '36=32+4  32=Question Icon; 4=Yes/No buttons
+    response = shell.Popup (message,0, "Preparing SAFS OCR Support",36)
+
+    'possible responses:
+    'Yes   = 6
+    'No    = 7
+    'Cancel= 2
+
+    if response = 7 then WScript.Quit
+end if
+
+'**************************************************************
+
+'to see if tessdllWrapper.dll exists
+If Not fso.FileExists(ocrDir & "\tessdllWrapper.dll") Then 
+    If Not fso.FileExists(safsdir &"\bin\tessdllWrapper.dll") Then 
+    	shell.Popup "tessdllWrapper.dll not found" & cr & "Building OCR environment for SAFS Aborted.",0, "Information",16
+    	Wscript.Quit 
+    Else
+        isBin = true
+    End If
+End If   
+
+'append ocr path to system path, if required
+If Not isBin then
+    pathbak = env(pathEnv)
+    lcpathbak = lcase(pathbak)
+    lcocrDir = lcase(ocrDir)	
+
+    'no need to append ocrDir if system path already contains it
+    if InStr(1, lcpathbak, lcocrDir, 1) <= 0 Then 
+	if Right(pathbak,1)<>";" then pathbak = pathbak & ";"
+	env(pathEnv) = pathbak & ocrDir
+    End If
+End If	
+
+'set TESSDATA_PREFIX for tesseract to search its language data
+env(tessDataEnv) = ocrDir & "\"
+
+'create gocr data folder and set GOCRDATA_DIR
+gocrDatapathbak = ocrDir & "\gocrdata\"
+if Not fso.FolderExists(gocrDatapathbak) then
+	fso.CreateFolder(gocrDatapathbak)
+end if
+env(gocrDataDir) = gocrDatapathbak
+
+'**************************************************************
+'* insure redistributable vc support for tesseract is installed
+'**************************************************************
+On Error Resume Next
+if isBin then
+    redistPATH = safsdir &"\bin\"& redistEXE
+else
+    redistPATH = ocrdir &"\"& redistEXE
+end if
+
+If Not fso.FileExists(redistPATH) Then 
+    shell.Popup redistPATH &" not found." & cr & "Required Visual Studio support may not be available...",0, "Warning",64
+Else
+    Set exec = shell.Exec(redistPATH &" /q")
+
+    If Err.Number <> 0 then
+        shell.Popup "Error <"& CStr(Err.Number) &":"& Err.Description &"> occurred while trying to install Visual Studio support.",0, "Warning",64
+    else
+        On Error Goto 0
+        arg = ""
+        Do While Exec.Status = 0
+            arg = arg & readall(exec)
+	    WScript.Sleep(1000)
+        Loop
+
+	'shell.Popup "Visual Studio Redist Install results:"& cr & arg,0, "Visual Studio Redist Install",64
+	
+    End if
+End If
+
+'**************************************************************
+if NOT isSilent then shell.Popup "Building OCR environment finished.",0,"Information",64
+
+Set fso   = nothing
+Set env   = nothing
+Set shell = nothing
+Set exec  = nothing
+
+</script>
+</job>
