@@ -7625,6 +7625,8 @@ public abstract class SeleniumPlus {
 		}
 		
 		/**
+		 * Send email via a mail server, which should be configured by user in the .INI file.<br>
+		 * This method will not verify the validation of the recipients address.<br>
 		 * 
 		 * @param from - Sender's email address.
 		 * @param to - Receiver's email. Multiple emails allowed by semi-column(";");
@@ -7638,9 +7640,16 @@ public abstract class SeleniumPlus {
 		 * 
 		 * Prereq:
 		 * in test.ini setup following
-		 * [SAFS_DRIVER]
-		 * SMTP="mail server"
-		 * PORT=25
+		 *   [SAFS_DRIVERCOMMANDS]
+		 *   OUT_MAILSERVER="mail server"
+		 *   OUT_MAILSERVERPORT=25|465|587
+		 *   OUT_MAILSERVERPROTOCOL=SMTP|SMTPS|TLS
+		 *   OUT_MAILUSER=user.name@mail.com
+		 *   OUT_MAILPASS=*******
+		 *   
+		 *   [SAFS_DRIVER]
+		 *   SMTP="mail server" (deprecated, replaced by OUT_MAILSERVER)
+		 *   PORT=25            (deprecated, replaced by OUT_MAILSERVERPORT)
 		 * 
 		 * Misc.SendMail("Sender@email.com", "Recipient1@email.com;@Recipient2@email.com", "Subject line", "Email message", 
 		 * "Attachment 1 filename; Attachment 2 filename");
@@ -7652,7 +7661,6 @@ public abstract class SeleniumPlus {
 		 * }
 		 * </pre>
 		 */
-		
 		public static boolean SendMail(String from, String to, String subject, String message, String... attachment){
 			return command(DDDriverCommands.SENDEMAIL_KEYWORD, combineParams(attachment, from, to, subject, message));
 		}

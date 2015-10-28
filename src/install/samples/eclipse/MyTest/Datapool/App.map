@@ -1,14 +1,10 @@
 [ApplicationConstants]
-URL=http://...
-userid=myuserid
+AutoItTestMap="App.map"
+CalculatorApp="Calc"
+CalcEXE="calc.exe"
 
-[MainWin]
-MainWin=<recognition string>
-AnyComp1=<recognition string>
-AnotherComp2=<recognition string>
+[SAFS Monitor]
+SAFS Monitor=":AUTOIT:title=SAFS Monitor"
 
-[AnotherWin]
-AnotherWin=<recognition string>
-SomeComp1=<recognition string>
-AnotherComp2=<recognition string>
-   
+[Calculator]
+Calculator=":AUTOIT:title=Calculator"
