@@ -482,6 +482,7 @@ public class JSAFSDriver extends DefaultDriver {
 	protected void setGlobalTestRecordHelper(AbstractCommand command, String separator, String record){
 		testRecordHelper = this.initTestRecordData(null);
 		testRecordHelper.setSeparator(separator);
+		testRecordHelper.setRecordType(command.getTestRecordID());
 		
 		String testRecord = null;
 		if(record==null){
@@ -1118,7 +1119,7 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 	 * The driver must be {@link #shutdown()} when testing is completed. 
 	 * <p>
 	 * Invokes:<br/>
-	 * {@link #validateRootConfigureParameters()}<br/>
+	 * {@link #validateRootConfigureParameters(boolean)}<br/>
 	 * {@link #validateLogParameters()}<br/>
 	 * {@link #initializeRuntimeInterface()}<br/>
 	 * {@link #launchSAFSMonitor()}<br/>
@@ -1131,7 +1132,7 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 	public void run(){
 		try{
 		    System.out.println("Validating Root Configure Parameters...");
-		    validateRootConfigureParameters();
+		    validateRootConfigureParameters(true);
 		    System.out.println("Validating Test Parameters...");
 		    validateTestParameters();
 		    System.out.println("Validating Log Parameters...");
