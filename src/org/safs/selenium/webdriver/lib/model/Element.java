@@ -2,6 +2,13 @@
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
+/**
+ * History:
+ * 
+ *  May 30, 2014    (Lei Wang) Initial release.
+ *  Oct 15, 2014    (Lei Wang) Add 'visible' property.
+ *  Oct 29, 2015    (Lei Wang) Modify updateFields(): Trim the property 'label', the leading/ending spaces will be ignored.
+ */
 package org.safs.selenium.webdriver.lib.model;
 
 import org.openqa.selenium.WebElement;
@@ -10,10 +17,6 @@ import org.safs.tools.stringutils.StringUtilities;
 /**
  * It represents originally sap.ui.core.Element<br>
  * 
- * History:<br>
- * 
- *  <br>   May 30, 2014    (Lei Wang) Initial release.
- *  <br>   Oct 15, 2014    (Lei Wang) Add 'visible' property.
  */
 public class Element extends DefaultRefreshable{
 	/**'id' used to find the element on the page*/
@@ -44,8 +47,12 @@ public class Element extends DefaultRefreshable{
 	/**clickableWebElement represents the WebElement that is clickable. It may be different than 
 	 * webelement, which contain the element's properties.*/
 	protected WebElement clickableWebElement = null;
-	
+	/**
+	 * The property {@link #label} is text that is shown on the component.<br>
+	 * If the text containing leading/ending spaces, then it will be trimmed and stored in this property.<br>
+	 */
 	protected String label = null;
+	
 	protected String iconURL = null;
 	protected boolean disabled = false;
 	protected boolean selected = false;
@@ -64,6 +71,8 @@ public class Element extends DefaultRefreshable{
 		super.updateFields();
 
 		label = _getLabel();
+		//Trim the label if it contains leading/ending spaces
+		if(label!=null) label = StringUtilities.TWhitespace(label);
 		
 		if(map!=null){
 			id = getAttribute(PROPERTY_ID);
@@ -83,6 +92,9 @@ public class Element extends DefaultRefreshable{
 		}
 	}
 
+	/**
+	 * It is used to retrieve the text value shown on the web component from the embedded object.<br>
+	 */
 	protected String _getLabel(){
 		String text = null;
 		try{

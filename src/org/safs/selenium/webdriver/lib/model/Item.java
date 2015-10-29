@@ -2,18 +2,22 @@
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
+/**
+ * History:
+ * 
+ *  Apr 24, 2014    (Lei Wang) Initial release.
+ *  Oct 29, 2015    (Lei Wang) Modify updateFields(): Trim the property 'value', the leading/ending spaces will be ignored.
+ */
 package org.safs.selenium.webdriver.lib.model;
 
 import org.safs.selenium.webdriver.lib.Component;
+import org.safs.tools.stringutils.StringUtilities;
 
 /**
  * This provides a uniformed Item object to represent the item<br> 
  * within a container such as TabControl or ListView etc.<br>
  * It represents originally sap.ui.core.Item<br>
- * 
- * History:<br>
- * 
- *  <br>   Apr 24, 2014    (Lei Wang) Initial release.
+ *
  */
 public class Item extends Element{
 	
@@ -49,8 +53,10 @@ public class Item extends Element{
 			selected = webelement.isSelected();
 			value = getAttribute(Component.ATTRIBUTE_VALUE);
 			try{ index = Integer.parseInt(getAttribute(Component.ATTRIBUTE_INDEX)); }catch(Exception e){}
-			
 		}
+		
+		//Trim the value if it contains leading/ending space
+		if(value!=null) value = StringUtilities.TWhitespace(value);
 	}
 	
 	public int getIndex(){
