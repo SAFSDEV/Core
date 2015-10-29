@@ -9,6 +9,7 @@
  *  JAN 15, 2014    (Lei Wang) Update to support Dojo combo box (FilteringSelect, ComboBox, and Select)
  *  SEP 02, 2014    (LeiWang) Update to support sap.m.Select, sap.m.ComboBox
  *  OCT 16, 2015    (Lei Wang) Refector to create IOperable object properly.
+ *  OCT 29, 2015    (Lei Wang) Modify HtmlSelect.setSelected(): refresh after selection.
  */
 package org.safs.selenium.webdriver.lib;
 
@@ -952,6 +953,8 @@ public class ComboBox extends Component{
 		protected void setSelected(Object option) {
 			if (!isSelected(option)) {
 				selectOption(option);
+				//After selection, the combo-box may be redrawn and become stale, refresh it.
+				refresh(true);
 			}
 		}
 
