@@ -4,13 +4,8 @@
 
 package org.safs.selenium.webdriver;
 
-import java.util.*;
-
 import org.openqa.selenium.WebElement;
-import org.safs.*;
-import org.safs.tools.drivers.ConfigureInterface;
-
-import com.thoughtworks.selenium.Selenium;
+import org.safs.TestRecordHelper;
 
 /**
  * Extends TestRecordHelper, which holds key data used by the LocalServer Selenium Engine.
