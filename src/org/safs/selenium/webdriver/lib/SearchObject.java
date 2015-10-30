@@ -29,6 +29,8 @@ package org.safs.selenium.webdriver.lib;
  *  <br>  JAN 05, 2015    (LeiWang) Modify executeScript(): get javascript debug messages and write to debug log.
  *  <br>  JUL 23, 2015    (LeiWang) Add js_getGlobalVariable(), js_setGlobalVariable()
  *                                  modify js_getGlobalBoolVariable(), js_setGlobalBoolVariable().
+ *  <br>  OCT 30, 2015    (Lei Wang)  Move method isVisible(), isDisplayed and isStale() to this class from WDLibrary.
+ *                                  Add method highlightThenClear(). Modify highlight(WebElement): check stale.
  */
 import java.lang.reflect.Constructor;
 import java.net.URL;
@@ -41,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.Vector;
+import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
@@ -59,10 +62,12 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.safs.GuiObjectRecognition;
 import org.safs.GuiObjectVector;
 import org.safs.IndependantLog;
+import org.safs.Processor;
 import org.safs.SAFSException;
 import org.safs.StringUtils;
 import org.safs.selenium.util.JSException;
 import org.safs.selenium.util.JavaScriptFunctions;
+import org.safs.selenium.webdriver.SeleniumPlus.WDTimeOut;
 import org.safs.selenium.webdriver.WebDriverGUIUtilities;
 import org.safs.selenium.webdriver.lib.RS.XPATH;
 import org.safs.selenium.webdriver.lib.RemoteDriver.SessionInfo;
@@ -2204,6 +2209,23 @@ public class SearchObject {
 
 	/**
 	 * Highlight the webelement by drawing a red rectangle around it.<br>
+	 * @param webelement WebElement, the web element to highlight.
+	 * @param duration	int, how long in millisecond the red rectangle will stay.
+	 * @return boolean, true if the element is highlighted and then cleaned.
+	 * @see #highlight(WebElement)
+	 * @see #clearHighlight()
+	 */
+	public static boolean highlightThenClear(WebElement webelement, int duration){
+		if(WDLibrary.highlight(webelement)){
+			StringUtilities.sleep(duration);
+			return WDLibrary.clearHighlight();				
+		}else{
+			return false;
+		}
+	}
+	
+	/**
+	 * Highlight the webelement by drawing a red rectangle around it.<br>
 	 * <p>
 	 * @param idOrNameOrXpath	String, the id or name or xpath of web element to highlight.
 	 * @return boolean, true if the element is highlighted.
@@ -2227,29 +2249,36 @@ public class SearchObject {
 			}
 		}
 	}
-
+	
 	/**
 	 * Highlight the webelement by drawing a red rectangle around it.<br>
+	 * To clean the red rectangle, please call {@link #clearHighlight()}.<br>
 	 * @param webelement	WebElement, the web element to highlight.
 	 * @return boolean, true if the element is highlighted.
+	 * @see #clearHighlight()
 	 */
 	public static boolean highlight(WebElement webelement){
 		String debugmsg = StringUtils.debugmsg(SearchObject.class, "highlight");
 
-		if(webelement==null || !webelement.isDisplayed()){
-			IndependantLog.error(debugmsg+"webelement is null or invisible, cannot be highlighted.");
-			return false;
-		}else{
-			try {
-				StringBuffer scriptCommand = new StringBuffer();
-				scriptCommand.append(JavaScriptFunctions.highlight2());
-				scriptCommand.append("highlight2(arguments[0]);");
-				WDLibrary.executeScript(scriptCommand.toString(), webelement);
-				return true;
-			} catch (SeleniumPlusException e) {
-				IndependantLog.error(debugmsg+" Failed.", e);
+		try {
+			if(!isDisplayed(webelement)){
+				IndependantLog.error(debugmsg+"webelement is not visible, cannot be highlighted.");
 				return false;
 			}
+		} catch (SeleniumPlusException e) {
+			IndependantLog.error(debugmsg+" met exception during checking element's visibility.", e);
+			return false;
+		}
+		
+		try {
+			StringBuffer scriptCommand = new StringBuffer();
+			scriptCommand.append(JavaScriptFunctions.highlight2());
+			scriptCommand.append("highlight2(arguments[0]);");
+			WDLibrary.executeScript(scriptCommand.toString(), webelement);
+			return true;
+		} catch (SeleniumPlusException e) {
+			IndependantLog.error(debugmsg+" Failed.", e);
+			return false;
 		}
 	}
 
@@ -2278,6 +2307,94 @@ public class SearchObject {
 		} catch (SeleniumPlusException e) {
 			IndependantLog.error(debugmsg+" Failed.", e);
 			return false;
+		}
+	}
+
+	/**
+	 * Get the visibility of the webelement.<br>
+	 * Try Selenium's API isDisplayed() firstly, if it is false then try to test value of attribute 'visibility'.<br>
+	 * @param element WebElement
+	 * @return true if the webelement is visible
+	 * @throws SeleniumPlusException if the WebElement is null
+	 * @see #isDisplayed(WebElement)
+	 */
+	public static boolean isVisible(WebElement element) throws SeleniumPlusException{
+		String debugmsg = StringUtils.debugmsg(false);
+		boolean visible = false;
+
+		checkNotNull(element);
+
+		try{
+			WDTimeOut.implicitlyWait(0, TimeUnit.SECONDS);
+			visible = element.isDisplayed();
+		}catch(StaleElementReferenceException se){
+			//If the webelement is stale, we should consider it as invisible.
+			return false;
+		}catch(Exception e){
+			IndependantLog.warn(debugmsg+" Met "+StringUtils.debugmsg(e));
+		}finally{
+			WDTimeOut.implicitlyWait(Processor.getSecsWaitForComponent(), TimeUnit.SECONDS);
+		}
+
+		if(!visible){
+			try {
+				//if element is still invisible, we will check the value of attribute 'visibility'
+				//if the value is not 'hidden', we consider the element is visible;
+				//BUT, if isDisplayed() return false, the calling of Selenium's
+				//API click() will throw org.openqa.selenium.ElementNotVisibleException, maybe calling
+				//other APIs will throw also ElementNotVisibleException, this is the risk.
+				String visibility = WDLibrary.getProperty(element, Component.ATTRIBUTE_VISIBILITY);
+				IndependantLog.debug(debugmsg+"visibility is '"+visibility+"'");
+				visible = !Component.VALUE_VISIBILITY_HIDDEN.equalsIgnoreCase(visibility);
+			} catch (SeleniumPlusException e) {
+				IndependantLog.warn(debugmsg+"Fail to check property '"+Component.ATTRIBUTE_VISIBILITY+"'");
+			}
+		}
+
+		return visible;
+	}
+
+	/**
+	 * Check if the webelement is displayed (Selenium's API isDisplayed()).<br>
+	 * @param element WebElement, the element to check.
+	 * @return true if the webelement is visible
+	 * @throws SeleniumPlusException if the WebElement is null or is stale
+	 * @see #isVisible(WebElement)
+	 */
+	public static boolean isDisplayed(WebElement element) throws SeleniumPlusException{
+		checkNotNull(element);
+		try{
+			WDTimeOut.implicitlyWait(0, TimeUnit.SECONDS);
+			return element.isDisplayed();
+		}catch(StaleElementReferenceException se){
+			throw new SeleniumPlusException("weblement is stale.");
+		}catch(Exception e){
+			throw new SeleniumPlusException(StringUtils.debugmsg(e));
+		}finally{
+			WDTimeOut.implicitlyWait(Processor.getSecsWaitForComponent(), TimeUnit.SECONDS);
+		}
+	}
+
+	/**
+	 * Test if a WebElement is stale(DOM element is deleted or is repaint or disappear).
+	 * @param element WebElement, the WebElement to detect.
+	 * @return boolean true if the WebElement is stale.
+	 * @throws SeleniumPlusException if the element is null.
+	 */
+	public static boolean isStale(WebElement element) throws SeleniumPlusException{
+		checkNotNull(element);
+		try{
+			//WebDriver will not throw StaleElementReferenceException until the 'implicit timeout' is reached.
+			//We don't want to waste that time, so just set 'implicit timeout' to 0 and don't wait.
+			WDTimeOut.implicitlyWait(0, TimeUnit.SECONDS);
+			element.isDisplayed();
+			return false;
+		}catch(StaleElementReferenceException sere){
+			return true;
+		}catch(Exception e){
+			throw new SeleniumPlusException(StringUtils.debugmsg(e));
+		}finally{
+			WDTimeOut.implicitlyWait(Processor.getSecsWaitForComponent(), TimeUnit.SECONDS);
 		}
 	}
 

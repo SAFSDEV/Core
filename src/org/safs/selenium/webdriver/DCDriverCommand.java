@@ -1041,6 +1041,10 @@ holdloop:		while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 								compName, seconds);
 				standardFailureMessage(msg, testRecordData.getInputRecord());
 				return;
+			}else{
+				WebElement winObject = ((WDTestRecordHelper) testRecordData).getWindowTestObject();
+				WebElement compObject = ((WDTestRecordHelper) testRecordData).getCompTestObject();
+				WebDriverGUIUtilities.highlightThenClear((compObject==null? winObject:compObject), 1000);
 			}
 			testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);			
 			log.logMessage(testRecordData.getFac(), 
@@ -1099,7 +1103,8 @@ holdloop:		while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 					if(exist){
 						try{
 							WebElement e = ((WDTestRecordHelper) wdgu.getTestRecordData()).getCompTestObject();
-							try{ 
+							try{
+								WebDriverGUIUtilities.highlightThenClear(e, 1000);
 								isDisplayed = WDLibrary.isDisplayed(e);
 								Log.info("............................. "+winCompName +" is Displayed = "+ isDisplayed);
 							}

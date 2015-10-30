@@ -37,6 +37,7 @@ package org.safs.selenium.webdriver.lib;
 *  <br>	  AUG 08, 2015    (Dharmesh) Added delayWaitReady for WaitOnClick.
 *  <br>   SEP 07, 2015    (Lei Wang) Add method getElementOffsetScreenLocation().
 *  <br>   OCT 12, 2015    (Lei Wang) Modify method getProperty(): get property by native SAP method.
+*  <br>   OCT 30, 2015    (Lei Wang) Move method isVisible(), isDisplayed and isStale() to SearchObject class.
 */
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -1670,7 +1671,6 @@ public class WDLibrary extends SearchObject {
 	 * @param height int, height in pixels
 	 * @throws SeleniumPlusException
 	 */
-
 	public static void resizeBrowserWindow(int width, int height) throws SeleniumPlusException{
 
 		try{
@@ -1747,94 +1747,6 @@ public class WDLibrary extends SearchObject {
 
 		} catch (Exception e){
 			throw new SeleniumPlusException("Failed to align to bottom of browser. Met "+StringUtils.debugmsg(e));
-		}
-	}
-
-	/**
-	 * Get the visibility of the webelement.<br>
-	 * Try Selenium's API isDisplayed() firstly, if it is false then try to test value of attribute 'visibility'.<br>
-	 * @param element WebElement
-	 * @return true if the webelement is visible
-	 * @throws SeleniumPlusException if the WebElement is null
-	 * @see #isDisplayed(WebElement)
-	 */
-	public static boolean isVisible(WebElement element) throws SeleniumPlusException{
-		String debugmsg = StringUtils.debugmsg(false);
-		boolean visible = false;
-
-		checkNotNull(element);
-
-		try{
-			WDTimeOut.implicitlyWait(0, TimeUnit.SECONDS);
-			visible = element.isDisplayed();
-		}catch(StaleElementReferenceException se){
-			//If the webelement is stale, we should consider it as invisible.
-			return false;
-		}catch(Exception e){
-			IndependantLog.warn(debugmsg+" Met "+StringUtils.debugmsg(e));
-		}finally{
-			WDTimeOut.implicitlyWait(Processor.getSecsWaitForComponent(), TimeUnit.SECONDS);
-		}
-
-		if(!visible){
-			try {
-				//if element is still invisible, we will check the value of attribute 'visibility'
-				//if the value is not 'hidden', we consider the element is visible;
-				//BUT, if isDisplayed() return false, the calling of Selenium's
-				//API click() will throw org.openqa.selenium.ElementNotVisibleException, maybe calling
-				//other APIs will throw also ElementNotVisibleException, this is the risk.
-				String visibility = WDLibrary.getProperty(element, Component.ATTRIBUTE_VISIBILITY);
-				IndependantLog.debug(debugmsg+"visibility is '"+visibility+"'");
-				visible = !Component.VALUE_VISIBILITY_HIDDEN.equalsIgnoreCase(visibility);
-			} catch (SeleniumPlusException e) {
-				IndependantLog.warn(debugmsg+"Fail to check property '"+Component.ATTRIBUTE_VISIBILITY+"'");
-			}
-		}
-
-		return visible;
-	}
-
-	/**
-	 * Check if the webelement is displayed (Selenium's API isDisplayed()).<br>
-	 * @param element WebElement, the element to check.
-	 * @return true if the webelement is visible
-	 * @throws SeleniumPlusException if the WebElement is null or is stale
-	 * @see #isVisible(WebElement)
-	 */
-	public static boolean isDisplayed(WebElement element) throws SeleniumPlusException{
-		checkNotNull(element);
-		try{
-			WDTimeOut.implicitlyWait(0, TimeUnit.SECONDS);
-			return element.isDisplayed();
-		}catch(StaleElementReferenceException se){
-			throw new SeleniumPlusException("weblement is stale.");
-		}catch(Exception e){
-			throw new SeleniumPlusException(StringUtils.debugmsg(e));
-		}finally{
-			WDTimeOut.implicitlyWait(Processor.getSecsWaitForComponent(), TimeUnit.SECONDS);
-		}
-	}
-
-	/**
-	 * Test if a WebElement is stale(DOM element is deleted or is repaint or disappear).
-	 * @param element WebElement, the WebElement to detect.
-	 * @return boolean true if the WebElement is stale.
-	 * @throws SeleniumPlusException if the element is null.
-	 */
-	public static boolean isStale(WebElement element) throws SeleniumPlusException{
-		checkNotNull(element);
-		try{
-			//WebDriver will not throw StaleElementReferenceException until the 'implicit timeout' is reached.
-			//We don't want to waste that time, so just set 'implicit timeout' to 0 and don't wait.
-			WDTimeOut.implicitlyWait(0, TimeUnit.SECONDS);
-			element.isDisplayed();
-			return false;
-		}catch(StaleElementReferenceException sere){
-			return true;
-		}catch(Exception e){
-			throw new SeleniumPlusException(StringUtils.debugmsg(e));
-		}finally{
-			WDTimeOut.implicitlyWait(Processor.getSecsWaitForComponent(), TimeUnit.SECONDS);
 		}
 	}
 
@@ -2127,6 +2039,8 @@ public class WDLibrary extends SearchObject {
 	/**
 	 * Highlight Element / object
 	 * @param element to be highlighted
+	 * 
+	 * @deprecated it is replaced by {@link #highlight(WebElement)}.
 	 */
 	public static void highlightElement(WebElement element) throws SeleniumPlusException{
 

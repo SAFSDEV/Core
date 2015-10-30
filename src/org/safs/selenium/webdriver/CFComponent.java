@@ -13,6 +13,7 @@
  *   <br>   MAY 18, 2015    (Lei Wang) Add refresh(): Try to refresh a stale WebElement.
  *   <br>   JUL 24, 2015    (Lei Wang) Add refresh(boolean): call it in localProcess to refresh WebElement if it is stale.
  *   <br>   SEP 07, 2015    (Lei Wang) Add method dragTo().
+ *   <br>   OCT 30, 2015    (Lei Wang) Modify exist(): highlight component for keyword GUIDESOEXIST etc.
  */
 package org.safs.selenium.webdriver;
 
@@ -146,8 +147,6 @@ public class CFComponent extends ComponentFunction{
 					Log.info(debugmsg +" returning SCRIPT_NOT_EXECUTED assuming AutoIt Testing...");  
 					return;  
 				}  
-
-
 			}
 
 			if(compObject==null){
@@ -222,7 +221,7 @@ public class CFComponent extends ComponentFunction{
 			Log.debug(debugmsg+"'"+action+"' has been processed\n with testrecorddata"+testRecordData+"\n with params "+params);
 		}
 
-		//If 'Hightlight' has been turned on, then clean highlight the componet after action
+		//If 'Highlight' has been turned on, then clean highlight the component after action
 		if(WebDriverGUIUtilities.HIGHLIGHT){
 			StringUtilities.sleep(1000);
 			WDLibrary.clearHighlight();
@@ -792,6 +791,8 @@ public class CFComponent extends ComponentFunction{
 		if(compObject==null){
 			IndependantLog.warn(debugmsg+ windowName+":"+compName+" does not exist.");
 			return false;
+		}else{
+			if(WebDriverGUIUtilities.HIGHLIGHT) WDLibrary.highlight(compObject);			
 		}
 		
 		return WDLibrary.isVisible(compObject);
