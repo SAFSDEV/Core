@@ -24,6 +24,7 @@ package org.safs.selenium.webdriver;
  *                                   Add methods to handle/test standalone server, grid server like isXXXRunning(), canConnectXXX(), waitXXXRunning() etc.
  *  <br>   JUL 14, 2015	   (LeiWang) Modify isTypeMatched(): try getCompType() firstly and make it more reliable.
  *  <br>   JUL 14, 2015	   (CANAGL) Modify class/type mappings to autmatically trim the class Type setting of any spaces and tabs.
+ *  <br>   OCT 30, 2015	   (LeiWang) Modify waitForPropertyStatus(): highlight component.
  **/
 
 import java.io.BufferedReader;
@@ -38,7 +39,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.MissingResourceException;
 import java.util.Properties;
@@ -60,7 +60,6 @@ import org.safs.STAFHelper;
 import org.safs.StringUtils;
 import org.safs.TestRecordData;
 import org.safs.Tree;
-import org.safs.autoit.AutoIt;
 import org.safs.autoit.AutoItRs;
 import org.safs.image.ImageUtils;
 import org.safs.jvmagent.AgentClassLoader;
@@ -666,6 +665,10 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		}
 	}
 	
+	public static void highlightThenClear(WebElement webelement, int duration){
+		if(HIGHLIGHT) WDLibrary.highlightThenClear(webelement, duration);
+	}
+	
 	/**
 	 * Wait for the property matching/gone with the expected value.
 	 * <p> 
@@ -692,6 +695,12 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		long delay = 1000;
 		boolean done = false;		
 		
+		try {
+			element = WDLibrary.getObject(trdata.getCompGuiId());
+			highlightThenClear(element, 1000);			
+		} catch (Exception e) { 
+			IndependantLog.debug("WDGU: property: fail to highlight component.", e);
+		}
 		
 		while (!done) {
 			// get property value		
