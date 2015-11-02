@@ -822,7 +822,6 @@ holdloop:		while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 
 		}else{
 			//Start the selenium server on the remote machine
-			Log.info(debugmsg+" attempting to (re)start Server remotely at "+ host+":"+port);
 			String launchServerCommand = " java "+RemoteDriver.class.getName();
 			
 			//pass parameters such as "port number", "JVM options", "rmiServer option", "server role" to start server on remote machine
@@ -833,17 +832,18 @@ holdloop:		while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 				if(!StringUtils.isQuoted(param)) param = StringUtils.quote(param);
 				launchServerCommand += " "+param;
 			}
-			Log.info(debugmsg+" attempting to (re)start Server remotely with command \n"+ launchServerCommand);
+			Log.info(debugmsg+" attempting to (re)start Server remotely at "+ host+":"+port+", with command \n"+ launchServerCommand);
 
 			String outputFile = "c:"+File.separator+"stafhandle_launch_RemoteDriver_standardoutput.txt";
 			String commandWithOutput = launchServerCommand + " STDOUT "+outputFile+" STDERRTOSTDOUT ";//Append STAF parameter 'STDOUT' and 'STDERRTOSTDOUT'
+			IndependantLog.debug(debugmsg+" RemoteServer launching, the console message will be in file '"+outputFile+"' on machine '"+host+"'");
 			
 			try {
 				//Try to start by STAFHandle, which requires STAF enabled in configuration file
 				//[STAF]
 				//NOSTAF=False
+				IndependantLog.debug(debugmsg+" Try to launch RemoteServer remotely by STAFHandle.");
 				STAFResult rc = testRecordData.getSTAFHelper().startProcess(host, commandWithOutput, null);
-				IndependantLog.debug(debugmsg+" STAFHandle launch RemoteServer, console message will be in file '"+outputFile+"' on machine '"+host+"'");
 				IndependantLog.debug(debugmsg+" STAFHandle launch RemoteServer, returned RC: "+rc.rc+" and result: "+rc.result);
 				serverStarted = (rc.rc==STAFResult.Ok);
 				if(!serverStarted) IndependantLog.warn(debugmsg+" STAFHandle launch RemoteServer Failed!");
@@ -854,12 +854,12 @@ holdloop:		while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 			if(!serverStarted){
 				Process process = null;
 				ProcessCapture console = null;
-				//try to launch the server on remote machine by launching directly a "staf machine process start command ..." command 
 				try {
+					//try to launch the server on remote machine by launching directly a "staf machine process start command ..." command 
+					IndependantLog.debug(debugmsg+" Try to launch RemoteServer remotely by STAF process service.");
 					String stafCommand = "staf "+host+" process start command "+commandWithOutput;
 					IndependantLog.debug(debugmsg+" Runtime exec STAF command: "+stafCommand);
 					process = Runtime.getRuntime().exec(stafCommand);
-					IndependantLog.debug(debugmsg+" Runtime exec STAF launch RemoteServer, console message will be in file '"+outputFile+"' on machine '"+host+"'");
 					console = new ProcessCapture(process, null, true, false);
 					try{ console.thread.join();}catch(InterruptedException x){;}
 					@SuppressWarnings("unchecked")
