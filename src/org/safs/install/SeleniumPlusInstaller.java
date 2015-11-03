@@ -690,7 +690,13 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 			pctProgress += pctIncrement;
 			progresser.setProgress(pctProgress);
 			progresser.setProgressMessage("Deleting assets at "+ seleniumdir);
-			FileUtilities.deleteDirectoryRecursively(seleniumdir, false);
+			
+			File aFile = new CaseInsensitiveFile(seleniumdir).toFile();
+			File[] files = aFile.listFiles();
+			for (int i=0; i<files.length; i++){
+				if(!isSelPlusProject(files[i]))
+					FileUtilities.deleteDirectoryRecursively(files[i].getAbsolutePath(), false);
+			}			
 			pctProgress += pctIncrement;
 			progresser.setProgress(pctProgress);
 			progresser.setProgressMessage("Removing Environment "+ SELENIUMDIREnv);
@@ -733,5 +739,22 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 	@Override
 	public void onReceiveDebug(String message) {
 		System.out.println(message);
+	}	
+	
+	/** 
+	 * Check if SeleniumPlus project or not
+	 * @param directory
+	 * @return -- true or false
+	 */
+	public static boolean isSelPlusProject(File directory) {		
+		String[] files = directory.list();
+		if (files != null) {
+			for(int i=0; i<files.length; i++){
+				if(files[i].equalsIgnoreCase(".project")){
+					return true;
+				}
+			}		
+		}
+		return false;
 	}
 }
