@@ -1,37 +1,25 @@
 package org.safs.tools.engines;
 
+import java.io.File;
+
 import org.safs.Log;
 import org.safs.SAFSException;
 import org.safs.TestRecordHelper;
 import org.safs.selenium.SeleniumJavaHook;
+import org.safs.selenium.webdriver.WebDriverGUIUtilities;
 import org.safs.tools.CaseInsensitiveFile;
 import org.safs.tools.consoles.ProcessConsole;
 import org.safs.tools.drivers.DriverConstant;
 import org.safs.tools.drivers.DriverInterface;
 
 /**
- * A wrapper to the Selenium SAFS engine--the "Selenium" engine.
+ * A wrapper to the Selenium SAFS engine--the "Selenium 2.0 WebDriver" engine.
  * This engine can only be used if you have a valid install of Selenium (http://www.openqa.org/selenium/)
- * <p>
- * <ul>
- * Selenium support is fairly extensive, but there are some known issues with using SAFS/Selenium for testing of web clients.
- * <p>
- * <ul>
- * <li><b>Pages with Frames are not currently supported.</b><br/>
- * Frames may even crash the SAFS/Selenium engine causing testing to cease.
- * <p>
- * <li><b>Child browser windows or popup windows are not currently supported.</b><br/>
- * Child browser windows or popup windows may confuse SAFS/Selenium.
- * <p>
- * <li>Selenium intercepts browser Alerts and MessageBoxes and these are not yet testable with SAFS/Selenium at this time.
- * </ul>
- * </ul>
  * <p>
  * The default SAFSDRIVER Tool-Independent Driver (TID) does not provide for any 
  * command-line options to configure the Engine.  All configuration information must 
  * be provided in config files.  By default, these are SAFSTID.INI files. 
  * <p>
- * See {@link <a href="../../selenium/SeleniumJavaHook.html">SAFS Selenium Hook</a>} for config options of Selenium1.0
  * See {@link <a href="../../selenium/webdriver/SeleniumHook.html">SAFS Selenium Hook</a>} for config options of Selenium2.0
  * <p>
  * Also see 
@@ -40,6 +28,7 @@ import org.safs.tools.drivers.DriverInterface;
  * </ul>
  * @author PHSABO AUG 14, 2006
  * @author Carl Nagle APR 18, 2008 Primarily updating documentation.
+ * @author Carl Nagle NOV 03, 2015 More complete conversion to Selenium 2.0 WebDriver usage.
  */
 public class SAFSSELENIUM extends GenericEngine {
 
@@ -72,35 +61,6 @@ public class SAFSSELENIUM extends GenericEngine {
 		launchInterface(driver);
 	}
 
-	/* return necessary jars delimited with ';' for RJ JVM as Bootclasspath
-	 */
-	private String getExtJarsForBootcp(){
-		// jars needed for supporting html document analyse, only for Selenium1.0 
-		String extjars[] = {
-				"jaxen-1.1.1.jar", "dom4j-2.0.0-ALPHA-2.jar"	
-		};
-    	String safsdir = System.getenv("SAFSDIR");
-    	if(safsdir==null){
-			Log.error(ENGINE_NAME +" PROJECTPATH SAFSDIR could not be deduced.");
-			return null;
-    	}
-    	StringBuffer bootclasspath = new StringBuffer();
-		for (int i = 0; i<extjars.length; i++) {
-			CaseInsensitiveFile afile = new CaseInsensitiveFile(safsdir +"/lib/" +extjars[i]);
-		   	if(! afile.isFile()){
-				Log.warn(ENGINE_NAME +" could NOT locate file '" + extjars[i] + "' under lib folder.");
-				afile = new CaseInsensitiveFile(safsdir +"/libs/" +extjars[i]);
-		   	}
-		   	if(! afile.isFile()){
-		   		Log.error(ENGINE_NAME +" could NOT locate file '" + extjars[i] + "' under libs folder.");
-		   	}
-		   	if(afile.exists() && afile.isFile()){
-		   		bootclasspath.append(afile.getAbsolutePath()+";");
-		   	}
-		}
-		return bootclasspath.toString();
-	}
-	
 	/**
 	 * Extracts configuration information and launches SELENIUM in a new process.
 	 * <p>
@@ -134,23 +94,22 @@ public class SAFSSELENIUM extends GenericEngine {
 					
 					String tempstr = null;
 					
+					boolean isSAFS = WebDriverGUIUtilities.isSAFS();
+					
 					// JVM	
-				    String jvm = "java";				    
+				    String jvm = isSAFS ? 
+				        	System.getenv("SAFSDIR") + File.separator + "jre" + File.separator + "bin" + File.separator +"java":
+				        	System.getenv("SELENIUM_PLUS") + File.separator + "Java"+ File.separator + "jre" + File.separator + "bin" + File.separator +"java";
 				    tempstr   = config.getNamedValue(DriverConstant.SECTION_SAFS_SELENIUM, 
 				         		      "JVM");
 				    if (tempstr != null) jvm=tempstr;
 				    array = jvm +" ";
 				    
-			    	// XBOOTCLASSPATH 
+			    	// XBOOTCLASSPATH -- not used by Selenium 2.0  -- previous JARs are not even delivered anymore 
 				    // separate RJ JVM needs some jars to be in CLASSPATH, append them to end of bootstrap classpath. 
 				    tempstr   = config.getNamedValue(DriverConstant.SECTION_SAFS_SELENIUM, XBOOTCLASSPATH_OPTION);
 				    if(tempstr != null){
 			    		array += "-Xbootclasspath/a:" + makeQuotedString(tempstr) + " ";	
-				    }else{
-				    	tempstr = getExtJarsForBootcp();
-				    	if (tempstr!=null && !tempstr.isEmpty()) {
-				    		array += "-Xbootclasspath/a:" + makeQuotedString(tempstr) + " ";	
-				    	}
 				    }
 				    
 					// CLASSPATH	
