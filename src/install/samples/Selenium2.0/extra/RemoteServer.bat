@@ -1,12 +1,9 @@
 TITLE Remote Server
-@echo off
-set SAFSLIB=%SAFSDIR%\lib
-
-pushd %SAFSLIB%
-setlocal enableDelayedExpansion
 set max=0
-for /f "tokens=1* delims=-.0" %%A in ('dir /b /a-d selenium-server-standalone*.jar') do if %%B gtr !max! set max=%%B
+for /f "tokens=1* delims=-.0" %%A in ('dir /b /a-d %SAFSDIR%\lib\selenium-server-standalone*.jar') do if %%B gtr !max! set max=%%B
 set SELENIUM_SERVER_JAR_LOC=%SAFSDIR%\lib\selenium-%max%
-popd
+set EXECUTE=%SAFSDIR%/jre/Java64/jre/bin/java
+set SE2BIN=%SAFSDIR%/samples/Selenium2.0/extra
+set CLASSPATH=%SAFSDIR%\lib\safsselenium.jar;%SAFSDIR%\lib\%SELENIUM_SERVER_JAR_LOC%
 
-"%SAFSDIR%\jre\bin\java.exe" -Xms512m -Xmx1g -jar "%SELENIUM_SERVER_JAR_LOC%" -Dwebdriver.chrome.driver="%SAFSLIB%\chromedriver.exe" -Dwebdriver.ie.driver="%SAFSLIB%\IEDriverServer.exe" -timeout=20 -browserTimeout=60
+"%EXECUTE%" -Xms512m -Xmx2g -cp %CLASSPATH% org.safs.selenium.util.SeleniumServerRunner -jar "%SELENIUM_SERVER_JAR_LOC%" -Dwebdriver.chrome.driver="%SE2BIN%/chromedriver.exe" -Dwebdriver.ie.driver="%SE2BIN%/IEDriverServer.exe" -timeout=20 -browserTimeout=60
