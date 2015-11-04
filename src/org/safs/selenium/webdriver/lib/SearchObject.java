@@ -570,15 +570,17 @@ public class SearchObject {
 			Hashtable<String, Object> windowProperties = new Hashtable<String, Object>();
 			try{
 				//getSize() is not supported by "chromedriver" for "android chrome"
-				windowProperties.put(PROPERTY_HEIGHT, window.getSize().height);
-				windowProperties.put(PROPERTY_WIDTH, window.getSize().width);
+				Dimension d = window.getSize();
+				windowProperties.put(PROPERTY_HEIGHT, d.height);
+				windowProperties.put(PROPERTY_WIDTH, d.width);
 			}catch(Throwable th){
 				IndependantLog.warn(debugmsg + getThrowableMessages(th));
 			}
 			try{
 				//getPosition() is not supported by "chromedriver" for "android chrome"
-				windowProperties.put(PROPERTY_LOCATION_X, window.getPosition().x);
-				windowProperties.put(PROPERTY_LOCATION_Y, window.getPosition().y);
+				Point p = window.getPosition();
+				windowProperties.put(PROPERTY_LOCATION_X, p.x);
+				windowProperties.put(PROPERTY_LOCATION_Y, p.y);
 			}catch(Throwable th){
 				IndependantLog.warn(debugmsg + getThrowableMessages(th));
 			}
@@ -2761,6 +2763,7 @@ public class SearchObject {
 			return object;
 
 		}catch(JSException jse){
+			IndependantLog.debug(debugmsg+ getThrowableMessages(jse));
 			throw jse;
 		}catch(Throwable th){
 			// Carl Nagle: this is getting caught AFTER the attempt to return object; above is initiated!?
@@ -2768,6 +2771,7 @@ public class SearchObject {
 			throw new SeleniumPlusException(debugmsg, th);
 		}finally{
 			//Try to get the array of debug messages during the execution of 'javascript code'
+			IndependantLog.debug(debugmsg+ "retrieving debug messages...");
 			if(JavaScriptFunctions.jsDebugLogEnable){
 				List<?> debugmessages = js_getJSDebugArray();
 				for(Object msg:debugmessages){
@@ -2784,6 +2788,7 @@ public class SearchObject {
 	public static JavascriptExecutor getJS() throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(false);
 		if(lastJS==null && (lastUsedWD instanceof JavascriptExecutor)){
+			IndependantLog.debug(debugmsg+"javascript executor is last Used WebDriver.");
 			lastJS = (JavascriptExecutor) lastUsedWD;
 		}
 		if(lastJS==null){
