@@ -31,8 +31,7 @@ import org.safs.tools.drivers.DriverConstant.SeleniumConfigConstant;
 
 /**
  * This class is our STAF-enabled JavaHook (Selenium WebDriver) for the "SAFS/Selenium" Engine.
- * This is the class that registers with STAF and responds to the STAF-based 
- * SAFS Engine protocol defined at http://sourceforge.net/docman/display_doc.php?docid=17505&group_id=56751 
+ * This is the class that registers with STAF and responds to the STAF-based SAFS Engine protocol. 
  * <p>
  * The STAF name predefined for this Selenium Engine is "SAFS/Selenium".
  * <p>
@@ -61,7 +60,7 @@ import org.safs.tools.drivers.DriverConstant.SeleniumConfigConstant;
  * At least one INI file path must be specified or the engine will abort due to insufficient 
  * configuration information being provided.
  * <p>
- * The configuration file(s) must minimally provide the following information:
+ * The configuration file(s) can provide default target browser information:
  * <ul><p>
  * <li>BROWSER=&lt;Selenium browser id> Ex: BROWSER="explorer" or BROWSER="chrome" or BROWSER="firefox"
  * </ul>
@@ -81,7 +80,7 @@ import org.safs.tools.drivers.DriverConstant.SeleniumConfigConstant;
  * Assuming everything is properly CLASSPATHed and the config file(s) have proper settings 
  * then the Engine can then be launched with:
  * <ul><p>
- * java -Dsafs.config.paths=&lt;paths> org.safs.selenium.webdriver.SeleniumHook
+ * %SAFSDIR%/jre/bin/java -Dsafs.config.paths=&lt;paths> org.safs.selenium.webdriver.SeleniumHook
  * </ul>
  * <p>
  * 
@@ -578,8 +577,14 @@ public class SeleniumHook extends JavaHook {
 	 * Assuming everything is properly CLASSPATHed, the default SAFS/Selenium Engine can be 
 	 * launched simply with:
 	 * <ul>
-	 * java org.safs.selenium.SeleniumHook
+	 * %SAFSDEV%/jre/bin/java org.safs.selenium.SeleniumHook
 	 * </ul>
+	 * However, more than likely additional command-line parameters and INI config file settings would be used.
+	 * <p>
+	 * @param args --Typically, there are no Class-specific command-line args.  
+	 * <p>
+	 * These are different than the JVM Arguments passed to the JVM invocation preceding the classname on the command-line.
+	 * <p>
 	 */
 	public static void main (String[] args) {
 		Log.ENABLED = true;
