@@ -23,8 +23,9 @@ package org.safs.selenium.webdriver;
  *  <br>   JUN 29, 2015	   (LeiWang) Modify startRemoteServer(): handle selenium grid (hub+node). Output standard out/err message to console.
  *                                   Add methods to handle/test standalone server, grid server like isXXXRunning(), canConnectXXX(), waitXXXRunning() etc.
  *  <br>   JUL 14, 2015	   (LeiWang) Modify isTypeMatched(): try getCompType() firstly and make it more reliable.
- *  <br>   JUL 14, 2015	   (CANAGL) Modify class/type mappings to autmatically trim the class Type setting of any spaces and tabs.
+ *  <br>   JUL 14, 2015	   (CANAGL) Modify class/type mappings to automatically trim the class Type setting of any spaces and tabs.
  *  <br>   OCT 30, 2015	   (LeiWang) Modify waitForPropertyStatus(): highlight component.
+ *  <br>   NOV 02, 2015	   (CANAGL) startRemoteServer on SAFS supporting jre/Java64/jre/bin 64-bit JVM.
  **/
 
 import java.io.BufferedReader;
@@ -1077,6 +1078,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	 * "-role role" (role is the role name of the server, it can be hub or node)
 	 * <pre>
 	 * @return boolean, true if the server has been successfully started
+	 * @author CANAGL 2015.11.02 Add support for new SAFS\jre\Java64\jre\bin
 	 */
 	public static boolean startRemoteServer(String projectdir, String... extraParams){
 		String debugmsg = StringUtils.debugmsg(false);
@@ -1085,7 +1087,6 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		String libs = null;
 		String javaroot = null;
 		String whois = null;
-		
 		IndependantLog.debug(debugmsg+" projectdir="+projectdir+" extraParams="+Arrays.toString(extraParams));
 		
 		if(isSeleniumPlus()){
@@ -1094,11 +1095,17 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 			libs = "libs";
 			javaroot = "Java64/jre/bin";
 			whois = "SeleniumPlus";
-		}else{
+		}else{ //assume running from SAFS\lib
 			seleniumdir = System.getenv("SAFSDIR");
 			server = "samples/Selenium2.0/extra";		
 			libs = "lib";
-			javaroot = "jre/bin";
+			javaroot = "jre/Java64/jre/bin";
+			File rootdir = new CaseInsensitiveFile(seleniumdir, javaroot).toFile();
+			if(!rootdir.isDirectory()){
+				Log.debug(debugmsg+" cannot deduce expected Java64 Installation Directory: "+ javaroot);
+				javaroot = "jre/bin";
+				Log.debug(debugmsg+" trying older 32-bit Java Installation Directory: "+ javaroot);
+			}
 			whois = "SAFS";
 		}
 		if(seleniumdir == null || seleniumdir.length()==0){
