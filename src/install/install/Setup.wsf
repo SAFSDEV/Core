@@ -63,7 +63,7 @@ if Len(stafdir) = 0 then
    WScript.Quit
 end if
 
-cmd = q & ".\jre\bin\java.exe"& q & " -cp .\lib\safsinstall.jar org.safs.install.SilentInstaller -safs "& q & safsdir & q
+cmd = q & ".\jre\bin\java.exe"& q & " -cp .\install\lib\safsinstall.jar org.safs.install.SilentInstaller -safs "& q & safsdir & q
 
 'use previous install SAFS and STAF directories if existing
 '==========================================================
