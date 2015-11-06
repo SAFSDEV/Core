@@ -17,7 +17,7 @@
 <div class=b1>
 <center>
 <h1>What's New in SAFS</h1>
-<h2>Updated: 2015.10.26</h2>
+<h2>Updated: 2015.11.06</h2>
 <small>Since:<b> 2012.08.07 </b></small>
 <h2>---  All active <b>"development"</b> is now at <a href="https://github.com/SAFSDEV" target="_blank" title="Link to SAFSDEV Organization on GitHub">SAFSDEV on GitHub</a>  ---</h2>
 <b>(Releases/Updates and other Binaries will be available on both GitHub and SourceForge)</b>
@@ -124,6 +124,137 @@ As you can see below, SAFS is undergoing a very rapid pace of development in man
 <table width="100%" align=center border=1 cellpadding=4 rules=rows>
 
 <th>DATE<th>AFFECTED<th>NEW STUFF<th>FIXES<th>DEPENDENCIES
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.11.06 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->
+<td><!--FIXED--->Se+ ShiftClick
+<td><!--DEPEND-->Se+ JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fixed SeleniumPlus ShiftClick to use coordinate Point and left mouse button explicitly.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.11.05 </b>
+<td rowspan=2><!--AFFECT-->Core
+<td><!--NEW----->
+<td><!--FIXED--->Core Java32
+<td><!--DEPEND-->Core Release
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fixed Core SAFS installer to reference juniversalchardet and JNA in JAR Manifest.<br>
+This allows us to remove these 2 JAR files out of /lib/ext in the future.
+<li>Provide for safsinstall JAR and 2 JAR dependencies into installer /lib directory.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.11.04 </b>
+<td rowspan=2><!--AFFECT-->Core
+<td><!--NEW----->
+<td><!--FIXED--->Core Selenium
+<td><!--DEPEND-->Core JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fixed SAFS Core Selenium2.0 release:<ul>
+    <li>RemoteServer launcher to use SeleniumServerRunner with RMI and Xmx2g.
+    <li>Launch Selenium 2.0 Engine with the proper 32-bit version of embedded Java.
+    <li>Launch Remote Selenium Server with embedded 64-bit Java JVM.
+    <li>Move Selenium WebDriver Drivers into Selenium 2.0 /extra/ directory.
+    <li>Remove deprecated BROWSER_REMOTE INI setting for SAFS_SELENIUM.
+    <li>Modify Core Selenium Engine launcher to properly set CLASSPATH to be inherited by Selenium Server Launcher.
+    </ul>
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.11.03 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->
+<td><!--FIXED--->Se+ Uninstall
+<td><!--DEPEND-->Se+ JARs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fixed a SeleniumPlus Uninstall to keep Eclispe projects that might have been created/added in the installation directory.  Do not delete them.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.11.02 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->
+<td><!--FIXED--->Se+ Release<br>Se+ DriverCommands
+<td><!--DEPEND-->Se+ Release
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Added SeleniumPlus missing and outdated install assets for Selenium Server with RMI.
+<li>Updated Selenium chromedriver in the release to be the latest.
+<li>Fixed SeleniumPlus DriverCommand log messages for clarity.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.10.30 </b>
+<td rowspan=2><!--AFFECT-->Core<br>Se+
+<td><!--NEW----->Core ReleaseNotes
+<td><!--FIXED--->Core Sample<br>Core HIGHLIGHT
+<td><!--DEPEND-->Core Release<br>Core JARs<br>Se+ JARs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Added reference links in SAFS Release Notes to UsingJSAFSAutoConfiguration documentation.
+<li>Updated SAFS Core Selenium 2.0 Sample BAT script to always seek "latest" Selenium Server JAR.
+<li>Fixed SAFS/SePlus Driver Commands to properly perform component HIGHLIGHT if enabled.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.10.29 </b>
+<td rowspan=2><!--AFFECT-->Core
+<td><!--NEW----->Core Release
+<td><!--FIXED--->Core Samples<br>Se+ Sample<br>Se+ ComboBox
+<td><!--DEPEND-->Core Release<br>Core Samples<br>Se+ PlugIn<br>Se+ JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Update the upcoming SAFS Release and Program Group Labelling and ReleaseNotes linking.
+<li>Fixed the SAFS Core Eclipse JSAFS Sample AppMap.order filename.
+<li>Udate and publish UsingJSAFSAutoConfiguration doc with more info and screenshots.
+<li>Fixed the SeleniumPlus SAMPLE project to use the latest provided selenium-server-standalone JAR file.
+<li>Fixed SeleniumPlus ComboBox support to refresh WebElement after a selection has been made.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.10.28 </b>
+<td rowspan=2><!--AFFECT-->Se+<br>Core
+<td><!--NEW----->Core Build<br>Se+ Updates
+<td><!--FIXED--->Se+ Text
+<td><!--DEPEND-->Core Build<br>Se+ PlugIn<br>Se+ JARs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Created and provide external public FTP Server (ftp.cjncreations.com) for Jenkins builds.
+<li>Create and provide for OPTIONAL Private FTP Server housing vendor-specific licensed commercial dependencies.
+<li>Updated documentation for setting up the developer's build environment.
+<li>Updated SeleniumPlus PlugIn to default to the new GitHub UpdateSite instead of the old (and much slower with timeouts) SourceForge update site.
+<li>Fixed certain SeleniumPlus label and value comparisons to remove leading and trailing whitespace.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.10.27 </b>
+<td rowspan=2><!--AFFECT-->Core
+<td><!--NEW----->Core JSAFS
+<td><!--FIXED--->
+<td><!--DEPEND-->Core JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Exposed SetApplicationMap, LaunchApplication, and CloseApplication in Core JSAFS Runner.
+<li>Added Core JSAFS Runner support to autoinject RuntimeDataInterface into RuntimeDataAware classes.
+<li>Modified the SAFS Eclipse JSAFS Sample to mimic AutoIt keywords test.
+</ul>
 
 <tr class=b1>
 <td rowspan=2><!--DATE----><b> 2015.10.23 </b>
