@@ -403,7 +403,7 @@ public class CFComponent extends ComponentFunction{
 			} else if (action.equalsIgnoreCase(CTRLRIGHTCLICK)) {
 				WDLibrary.click(compObject, point, Keys.CONTROL, WDLibrary.MOUSE_BUTTON_RIGHT);
 			} else if (action.equalsIgnoreCase(SHIFTCLICK)) {
-				WDLibrary.click(compObject, Keys.SHIFT);
+				WDLibrary.click(compObject, point, Keys.SHIFT, WDLibrary.MOUSE_BUTTON_LEFT);
 			}
 			long timeConsumed = System.currentTimeMillis()-begin;
 			IndependantLog.debug("it took "+timeConsumed+" milliseconds or "+(timeConsumed/1000)+" seconds to perform "+action);
