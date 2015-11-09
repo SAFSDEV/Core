@@ -1,31 +1,27 @@
+/**
+ * History:
+ * NOV 09, 2015	(sbjlwa) Modify run(): avoid the problem of occupy CPU too much.
+ * 
+ */
 package org.safs.tools.consoles;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintStream;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.CharBuffer;
-import java.util.ArrayList;
-import java.util.Vector;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.text.DefaultCaret;
-import javax.swing.text.JTextComponent;
-
-import org.safs.selenium.util.SeleniumServerRunner;
 
 /**
  * Provides a JFrame console as the main application to be run.
@@ -75,6 +71,14 @@ public abstract class JavaJVMConsole extends JFrame implements Runnable{
 	 * If outputToConsole is true, the 'execution message' will also be printed to STANDARD out/err.<br>
 	 */
 	protected boolean outputToConsole = false;
+
+	/** The default time (in milliseconds) to sleep before the out/err output-stream is ready*/
+	public static final int PAUSE_BEFORE_OUTPUT_READY = 100;
+	/**
+	 * This field represents the time (in milliseconds) to sleep before the out/err output-stream is ready.<br>
+	 * The default value is 100 milliseconds.<br>
+	 */
+	protected int pauseBeforeReady = PAUSE_BEFORE_OUTPUT_READY;
 	
 	/**
 	 * Limit the number of text lines kept and displayed to the numberOfRows in the textarea.
@@ -193,6 +197,21 @@ public abstract class JavaJVMConsole extends JFrame implements Runnable{
     	}
     }    
     
+    /**
+     * @return int, The time (in milliseconds) to sleep before the out/err output-stream is ready.<br> 
+     * @see #run()
+     */
+	public int getPauseBeforeReady() {
+		return pauseBeforeReady;
+	}
+	/**
+	 * @param pauseBeforeReady int, The time (in milliseconds) to sleep before the out/err output-stream is ready.<br>
+	 * @see #run()
+	 */
+	public void setPauseBeforeReady(int pauseBeforeReady) {
+		this.pauseBeforeReady = pauseBeforeReady;
+	}
+
 	/**
 	 * Continuously monitors the jvm out and err streams routing them to the local JFrame display. 
 	 * Will run indefinitely until the JVM exits unless a subclass sets the "shutdown" field to true.
@@ -220,6 +239,9 @@ public abstract class JavaJVMConsole extends JFrame implements Runnable{
 
 			String message = null;
 			while(!shutdown){
+				if(!err.ready() && !out.ready()){
+					try{ Thread.sleep(pauseBeforeReady);} catch(Exception e){ /*We don't really care about*/ }
+				}
 				if (err.ready()) {
 					message = err.readLine();
 					displayLine(message);
