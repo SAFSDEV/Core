@@ -1564,11 +1564,12 @@ public abstract class SeleniumPlus {
 	
 	/**
 	 * Click on any visible component. 
-	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericObjectFunctionsReference.htm#detail_Click">Detailed Reference</a>
+	 * <p>See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_Click">Detailed Reference</a>
 	 * @param comp -- Component (from App Map) to Click
 	 * @param params optional
 	 * <ul>
-	 * <b>params[0] X,Y coordination</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
+	 * <b>params[0] X,Y coordinate</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
+	 * <b>For SE+</b>, params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
 	 * </ul>
 	 * @return true if successfully executed, false otherwise.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
@@ -1576,15 +1577,16 @@ public abstract class SeleniumPlus {
 	 * <pre>
 	 * {@code
 	 * 1) boolean success = Click(Map.Google.Apps);//Click at the center
-	 * 2) boolean success = Click(Map.Google.Apps,"20,20");//Click at the coordination (20,20)
-	 * 3) boolean success = Click(Map.Google.Apps,"AppMapSubkey");//Click at the coordination defined by entry "AppMapSubkey" in App Map.
+	 * 2) boolean success = Click(Map.Google.Apps,"20,20");//Click at the coordinate (20,20)
+	 * 3) boolean success = Click(Map.Google.Apps,"20%,30%"); // Click at the coordinate: its X value equals 20% width of component, its Y value equals 30% height of component.
+	 * 4) boolean success = Click(Map.Google.Apps,"AppMapSubkey");//Click at the coordinate defined by entry "AppMapSubkey" in App Map.
 	 *  // one of the above and then,
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
 	 * }
 	 * 
 	 * "AppMapSubkey" is expected to be an AppMap entry in an "Apps" section in the App Map.
-	 * See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericObjectFunctionsReference.htm#detail_Click">Detailed Reference</a>
+	 * See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_Click">Detailed Reference</a>
 	 * </pre>	 
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
@@ -1596,11 +1598,12 @@ public abstract class SeleniumPlus {
 	
 	/**
 	 * Control-Click on any visible component. 
-	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericObjectFunctionsReference.htm#detail_CtrlClick">Detailed Reference</a>
+	 * <p>See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_CtrlClick">Detailed Reference</a>
 	 * @param comp -- Component (from App Map) to Click
 	 * @param params optional
 	 * <ul>
-	 * <b>params[0] X,Y coordination</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
+	 * <b>params[0] X,Y coordinate</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
+	 * <b>For SE+</b>, params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
 	 * </ul>
 	 * @return true if successfully executed, false otherwise.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
@@ -1608,8 +1611,9 @@ public abstract class SeleniumPlus {
 	 * <pre>
 	 * {@code
 	 * 1) boolean success = CtrlClick(Map.Google.Apps);//Control-Click at the center
-	 * 2) boolean success = CtrlClick(Map.Google.Apps,"20,20");//Control-Click at the coordination (20,20)
-	 * 3) boolean success = CtrlClick(Map.Google.Apps,"AppMapSubkey");//Control-Click at the coordination defined by entry "AppMapSubkey" in App Map.
+	 * 2) boolean success = CtrlClick(Map.Google.Apps,"20,20");//Control-Click at the coordinate (20,20)
+	 * 3) boolean success = CtrlClick(Map.Google.Apps,"20%,30%"); // Control-Click at the coordinate: its X value equals 20% width of component, its Y value equals 30% height of component.
+	 * 4) boolean success = CtrlClick(Map.Google.Apps,"AppMapSubkey");//Control-Click at the coordinate defined by entry "AppMapSubkey" in App Map.
 	 *  // one of the above and then,
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
@@ -1626,11 +1630,12 @@ public abstract class SeleniumPlus {
 	
 	/**
 	 * Control-Right-Click on any visible component. 
-	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericObjectFunctionsReference.htm#detail_CtrlRightClick">Detailed Reference</a>
+	 * <p>See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_CtrlRightClick">Detailed Reference</a>
 	 * @param comp -- Component (from App Map) to Click
 	 * @param params optional
 	 * <ul>
-	 * <b>params[0] X,Y coordination</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
+	 * <b>params[0] X,Y coordinate</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
+	 * <b>For SE+</b>, params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
 	 * </ul>
 	 * @return true if successfully executed, false otherwise.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
@@ -1638,8 +1643,9 @@ public abstract class SeleniumPlus {
 	 * <pre>
 	 * {@code
 	 * 1) boolean success = CtrlRightClick(Map.Google.Apps);//Control-Right-Click at the center
-	 * 2) boolean success = CtrlRightClick(Map.Google.Apps,"20,20");//Control-Right-Click at the coordination (20,20)
-	 * 3) boolean success = CtrlRightClick(Map.Google.Apps,"AppMapSubkey");//Control-Right-Click at the coordination defined by entry "AppMapSubkey" in App Map.
+	 * 2) boolean success = CtrlRightClick(Map.Google.Apps,"20,20");//Control-Right-Click at the coordinate (20,20)
+	 * 3) boolean success = CtrlRightClick(Map.Google.Apps,"20%,30%"); // Control-Right-Click at the coordinate: its X value equals 20% width of component, its Y value equals 30% height of component.
+	 * 4) boolean success = CtrlRightClick(Map.Google.Apps,"AppMapSubkey");//Control-Right-Click at the coordinate defined by entry "AppMapSubkey" in App Map.
 	 *  // one of the above and then,
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
@@ -1656,11 +1662,12 @@ public abstract class SeleniumPlus {
 	
 	/**
 	 * Double-Click on any visible component. 
-	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericObjectFunctionsReference.htm#detail_DoubleClick">Detailed Reference</a>
+	 * <p>See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_DoubleClick">Detailed Reference</a>
 	 * @param comp -- Component (from App Map) to Click
 	 * @param params optional
 	 * <ul>
-	 * <b>params[0] X,Y coordination</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
+	 * <b>params[0] X,Y coordinate</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
+	 * <b>For SE+,</b> params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
 	 * </ul>
 	 * @return true if successfully executed, false otherwise.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
@@ -1668,8 +1675,9 @@ public abstract class SeleniumPlus {
 	 * <pre>
 	 * {@code
 	 * 1) boolean success = DoubleClick(Map.Google.Apps);//Double-Click at the center
-	 * 2) boolean success = DoubleClick(Map.Google.Apps,"20,20");//Double-Click at the coordination (20,20)
-	 * 3) boolean success = DoubleClick(Map.Google.Apps,"AppMapSubkey");//Double-Click at the coordination defined by entry "AppMapSubkey" in App Map.
+	 * 2) boolean success = DoubleClick(Map.Google.Apps,"20,20");//Double-Click at the coordinate (20,20)
+	 * 3) boolean success = DoubleClick(Map.Google.Apps,"20%,30%"); // Double-Click at the coordinate: its X value equals 20% width of component, its Y value equals 30% height of component.
+	 * 4) boolean success = DoubleClick(Map.Google.Apps,"AppMapSubkey");//Double-Click at the coordinate defined by entry "AppMapSubkey" in App Map.
 	 *  // one of the above and then,
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
@@ -1686,11 +1694,12 @@ public abstract class SeleniumPlus {
 
 	/**
 	 * Right-Click on any visible component. 
-	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericObjectFunctionsReference.htm#detail_RightClick">Detailed Reference</a>
+	 * <p>See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_RightClick">Detailed Reference</a>
 	 * @param comp -- Component (from App Map) to Click
 	 * @param params optional
 	 * <ul>
-	 * <b>params[0] X,Y coordination</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
+	 * <b>params[0] X,Y coordinate</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
+	 * <b>For SE+</b>, params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
 	 * </ul>
 	 * @return true if successfully executed, false otherwise.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
@@ -1698,8 +1707,9 @@ public abstract class SeleniumPlus {
 	 * <pre>
 	 * {@code
 	 * 1) boolean success = RightClick(Map.Google.Apps);//Right-Click at the center
-	 * 2) boolean success = RightClick(Map.Google.Apps,"20,20");//Right-Click at the coordination (20,20)
-	 * 3) boolean success = RightClick(Map.Google.Apps,"AppMapSubkey");//Right-Click at the coordination defined by entry "AppMapSubkey" in App Map.
+	 * 2) boolean success = RightClick(Map.Google.Apps,"20,20");//Right-Click at the coordinate (20,20)
+	 * 3) boolean success = RightClick(Map.Google.Apps,"20%,30%"); // Right-Click at the coordinate: its X value equals 20% width of component, its Y value equals 30% height of component.
+	 * 4) boolean success = RightClick(Map.Google.Apps,"AppMapSubkey");//Right-Click at the coordinate defined by entry "AppMapSubkey" in App Map.
 	 *  // one of the above and then,
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
@@ -1899,11 +1909,12 @@ public abstract class SeleniumPlus {
 	
 	/**
 	 * Shift-Click on any visible component. 
-	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericObjectFunctionsReference.htm#detail_ShiftClick">Detailed Reference</a>
+	 * <p>See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_ShiftClick">Detailed Reference</a>
 	 * @param comp -- Component (from App Map) to Click
 	 * @param params optional
 	 * <ul>
-	 * <b>params[0] X,Y coordination</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
+	 * <b>params[0] X,Y coordinate</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
+	 * <b>For SE+</b>, params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
 	 * </ul>
 	 * @return true if successfully executed, false otherwise.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
@@ -1912,7 +1923,8 @@ public abstract class SeleniumPlus {
 	 * {@code
 	 * 1) boolean success = ShiftClick(Map.Google.Apps);//Shift-Click at the center
 	 * 2) boolean success = ShiftClick(Map.Google.Apps,"20,20");//Shift-Click at the coordination (20,20)
-	 * 3) boolean success = ShiftClick(Map.Google.Apps,"AppMapSubkey");//Shift-Click at the coordination defined by entry "AppMapSubkey" in App Map.
+	 * 3) boolean success = ShiftClick(Map.Google.Apps,"20%,30%"); // Shift-Click at the coordinate: its X value equals 20% width of component, its Y value equals 30% height of component.
+	 * 4) boolean success = ShiftClick(Map.Google.Apps,"AppMapSubkey");//Shift-Click at the coordination defined by entry "AppMapSubkey" in App Map.
 	 *  // one of the above and then,
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful

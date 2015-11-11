@@ -57,6 +57,7 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.openqa.selenium.WebElement;
 import org.safs.ComponentFunction.Window;
 import org.safs.sockets.DebugListener;
 import org.safs.text.FileUtilities;
@@ -1383,8 +1384,161 @@ public class StringUtils{
       return null;
     }
   }
+  
+  /**
+	* Convert percentage format coordinate String pair, String[], into java.awt.Point. 
+	* The width and height of component object are necessary for percentage format converting.
+	* 
+	* @param percentageFormatCoordsPair String[],
+	* @param compObject WebElement,
+	* @return
+	*/
+  public static java.awt.Point convertPercentageFormatCoord(String[] percentageFormatCoordsPair, WebElement compObject) {
+	  if(percentageFormatCoordsPair == null || percentageFormatCoordsPair.length != 2) {
+		  Log.debug( "bad coords format: "+ Arrays.asList(percentageFormatCoordsPair));
+		  return null;
+	  }
+		
+	  try {
+		  // Convert the percentage parameter into float type.
+		  float xF = StringUtils.convertPercentageString(percentageFormatCoordsPair[0]);
+		  float yF = StringUtils.convertPercentageString(percentageFormatCoordsPair[1]);
+		  
+		  // If the coordination value is between zero to one, it will be treated as percentage format;
+		  // otherwise, the casting int format of coordination value will be used directly.
+		  int x = (xF > 0 && xF < 1) ? (int) (xF * compObject.getSize().width) : (int) xF;
+		  int y = (yF > 0 && yF < 1) ? (int) (yF * compObject.getSize().height) : (int) yF;
+		  
+		  Log.debug("converted coords: x: " + x + ", y: " + y);		  
+		  if(x < 0 || y < 0) Log.warn("Coordinate contains negative value!");
+		  return new java.awt.Point(x, y);
+	  } catch (Exception e) {
+		  Log.debug( "bad coords format: "+ Arrays.asList(percentageFormatCoordsPair) + ", " + e);
+		  return null;
+	  }
+  }
+  
+  /**
+   * Convert percentage format String number into float. 
+   * @param _num String, the percentage format String number need to be converted
+   * @return float,
+   */
+  public static float convertPercentageString(String _num) {
+	  try {
+		  // If it is number format, convert it directly.
+		  return Float.parseFloat(_num);
+	  } catch(NumberFormatException nfe) {
+		  int perIndex = _num.indexOf(StringUtils.PERCENTAGE);
+		  		  
+		  if(perIndex >= 0 && perIndex == (_num.length() - 1)) {
+			  // Deal with percentage format.
+			  return 0.01F * Float.parseFloat(_num.substring(0, perIndex).trim());
+		  } else {
+			  Log.debug("Can't parse 1 parameter with percentage format: " + _num);
+			  throw nfe;
+		  }		  
+	  }
+  }
 
+  /**
+   * Convert coordinates string of the formats:
+   * <ul>
+   * <li>"x;y"
+   * <li>"x,y"
+   * <li>"x y"
+   * <li>"Coords=x;y"
+   * <li>"Coords=x,y"
+   * <li>"Coords=x y"
+   * </ul> 
+   * into a coordinate string pair: String[].
+   * 
+   * @param   coords String, x;y or x,y or Coords=x;y  or Coords=x,y
+   * @return  Point if successfull, null otherwise
+   */
+  public static String[] extractCoordStringPair(String coords) {
+	// CANAGL OCT 21, 2005 This function previously did NOT support the 
+  	// "Coords=" prefix and used to decrement 1 for all provided values.
+  	// It also did not accept coords of x or y < 0.  And it allowed the 
+  	// y value to be left off.
+  	// The routine has been modified to leave the provided values "as-is" 
+  	// and to support the "Coords=" prefix.  The y value
+	try {
+		String ncoords = new String(coords);
+		
+		// Strip string from beginning to '=' mark.
+		int coordsindex = coords.indexOf(EQUAL);
+		if(coordsindex > 0) ncoords = ncoords.substring(coordsindex+1);
+		ncoords=ncoords.trim();
+		Log.info("working with coords: "+ coords +" prefix stripped to: "+ncoords);
+		
+		// Extract parameter by delimiter ';' or ','. 
+		int sindex = ncoords.indexOf(";");
+		if (sindex < 0) sindex = ncoords.indexOf(",");
+		boolean isspace = false;
+		if(sindex < 0){
+			sindex = ncoords.indexOf(" ");
+			isspace = (sindex > 0);
+		}
+		if (sindex < 0){
+    		Log.debug("invalid coords: "+ ncoords +"; no separator detected.");
+			return null;
+		}
+		
+		// properly handles case where coordsindex = -1 (not found)
+	    String xS = null;
+		String yS = null;
+		if(isspace){
+    		Log.info("converting space-delimited coords: "+ ncoords);
+			StringTokenizer toker = new StringTokenizer(ncoords, " ");
+			if(toker.countTokens() < 2) {
+        		Log.debug("invalid space-delimited coords: "+ ncoords);
+				return null;
+			}
+			xS = toker.nextToken();
+			yS = toker.nextToken();
+		}else{
+			xS = ncoords.substring(0, sindex).trim();
+			yS = ncoords.substring(sindex+1).trim();
+		}
+		if ((xS.length()==0)||(yS.length()==0)){
+    		Log.debug("invalid coordinate substrings  "+ xS +","+ yS);
+			return null; // assumption
+		}
 
+		Log.info("x: "+xS);
+		Log.info("y: "+yS);
+		
+		return new String[]{xS, yS}; 
+	} catch(Exception ee) {
+  		Log.debug( "bad coords format: "+ coords, ee);
+  		return null;
+	}
+  }
+  
+  /**
+   * Convert the String[] format coordinate into java.awt.Point format.
+   * @param coordsPair String[], the String pair coordinate need to be converted.
+   * @return java.awt.Point format coordinate.
+   */
+  public static java.awt.Point convertStringPairCoordsToPoint(String[] coordsPair) {
+	  if(coordsPair == null || coordsPair.length != 2) {
+		  Log.debug( "bad coords format: '" + Arrays.asList(coordsPair) + "'.");
+		  return null;
+	  }
+	  
+	  try {
+		  int y = (int) Float.parseFloat(coordsPair[1]);
+		  int x = (int) Float.parseFloat(coordsPair[0]);
+		  
+		  Log.debug("converted coords: x: "+x+", y: "+y);
+		  if(x < 0 || y < 0) Log.warn("Coordinate contains negative value!");
+		  return new java.awt.Point(x, y);
+	  } catch (Exception ee) {
+		  Log.debug( "bad coords format: '" + Arrays.asList(coordsPair) + "', ", ee);
+		  return null;
+	  }
+  }
+  
     /** 
      * Convert coordinates string of the formats:
      * <ul>
@@ -1407,65 +1561,7 @@ public class StringUtils{
      * @author CANAGL MAR 23, 2010 added space delimiter support 
      **/
     public static java.awt.Point convertCoords(String coords) {
-    	// CANAGL OCT 21, 2005 This function previously did NOT support the 
-    	// "Coords=" prefix and used to decrement 1 for all provided values.
-    	// It also did not accept coords of x or y < 0.  And it allowed the 
-    	// y value to be left off.
-    	// The routine has been modified to leave the provided values "as-is" 
-    	// and to support the "Coords=" prefix.  The y value
-	    try {
-	    	String ncoords = new String(coords);
-    		int coordsindex = coords.indexOf(EQUAL);
-    		if(coordsindex > 0) ncoords = ncoords.substring(coordsindex+1);
-    		ncoords=ncoords.trim();
-      		Log.info("working with coords: "+ coords +" prefix stripped to: "+ncoords);
-    		
-    		int sindex = ncoords.indexOf(";");
-      		if (sindex < 0) sindex = ncoords.indexOf(",");
-      		boolean isspace = false;
-      		if(sindex < 0){
-      			sindex = ncoords.indexOf(" ");
-      			isspace = (sindex > 0);
-	    	}
-      		if (sindex < 0){
-          		Log.debug("invalid coords: "+ ncoords +"; no separator detected.");
-      			return null;
-      		}
-
-			// properly handles case where coordsindex = -1 (not found)
-		    String xS = null;
-      		String yS = null;
-      		if(isspace){
-          		Log.info("converting space-delimited coords: "+ ncoords);
-      			StringTokenizer toker = new StringTokenizer(ncoords, " ");
-      			if(toker.countTokens() < 2) {
-              		Log.debug("invalid space-delimited coords: "+ ncoords);
-      				return null;
-      			}
-      			xS = toker.nextToken();
-      			yS = toker.nextToken();
-      		}else{
-      			xS = ncoords.substring(0, sindex).trim();
-      			yS = ncoords.substring(sindex+1).trim();
-      		}
-      		if ((xS.length()==0)||(yS.length()==0)){
-          		Log.debug("invalid coordinate substrings  "+ xS +","+ yS);
-      			return null; // assumption
-      		}
-
-      		Log.info("x: "+xS);
-      		Log.info("y: "+yS);
-
-      		int y = (int) Float.parseFloat(yS);
-      		int x = (int) Float.parseFloat(xS);
-      		
-      		Log.debug("converted coords: x: "+x+", y: "+y);
-        	return new java.awt.Point(x, y);
-
-	    } catch (Exception ee) {
-      		Log.debug( "bad coords format: "+ coords, ee);
-      		return null;
-    	}
+    	return convertStringPairCoordsToPoint(extractCoordStringPair(coords));
     }
 
 

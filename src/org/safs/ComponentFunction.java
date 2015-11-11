@@ -38,6 +38,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -46,6 +47,7 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.openqa.selenium.WebElement;
 import org.safs.android.auto.lib.Console;
 import org.safs.image.ImageUtils;
 import org.safs.model.commands.DDDriverCommands;
@@ -519,40 +521,99 @@ public abstract class ComponentFunction extends Processor{
 		return StringUtils.convertNum(num);
 	}
 
-
 	/**
 	 * <br>
-	 * <em>Purpose:</em> check 'iterator' for coords, either an appmap ref, or x;y notation
+	 * <em>Purpose:</em> Extend the functionality of checkForCoord() to deal with different coordinate formats, 
+	 * like percentage format, by using one more parameter: component object; 
+	 * check 'iterator' for coords, either an AppMap ref, or (x;y) notation. 
 	 * 
 	 * @param iterator Iterator,
-	 * @return java.awt.Point, null if iterator hasn't another element
+	 * @param compObject WebElement, the web component you're dealing with. 
+	 * @return java.awt.Point, null if iterator doesn't have another element
 	 **/
-	protected java.awt.Point checkForCoord(Iterator iterator) {
+	protected java.awt.Point checkForCoord(Iterator iterator, WebElement compObject) {
 		// see if there is another parameter, the coords(x;y) or app map reference.
-		if (iterator!=null && iterator.hasNext()) return checkForCoord((String) iterator.next());
+		if (iterator!=null && iterator.hasNext()) return checkForCoord((String) iterator.next(), compObject);
 
 		return null;
 	}
 
 	/**
-	 * Purpose: Convert a string coordination to java.awt.Point
+	 * <br>
+	 * <em>Purpose:</em> check 'iterator' for coords, either an AppMap ref, or (x;y) notation
 	 * 
-	 * @param coord String, is either an appmap ref, or x;y notation
+	 * @param iterator Iterator,
+	 * @return java.awt.Point, null if iterator doesn't have another element
+	 **/
+	protected java.awt.Point checkForCoord(Iterator iterator) {
+		return checkForCoord(iterator, null);
+	}
+	
+	/**
+	 * Purpose: Extend the original functionality of checkForCoord() to deal with different coordinate formats, 
+	 * like percentage format, by using one more parameter: component object; convert a string coordination to java.awt.Point.
+	 * 
+	 * @param coord String, either an AppMap ref, or (x;y) notation
+	 * @param compObject WebElement, the web component you're dealing with.
 	 * @return java.awt.Point, null if coord is null or empty
 	 **/
-	protected java.awt.Point checkForCoord(String coord) {
+	protected java.awt.Point checkForCoord(String coord, WebElement compObject) {
+		String[] coordsPair = null;
 		java.awt.Point point = null;
+		
 		// see if there is another parameter, the coords or app map reference.
 		if (coord != null) { // row;col
 			Log.info("...checking for coord: " + coord);
 			if (!coord.trim().equals("")) {
-				//Treate the coord as a reference and try to get the coordination from the Map file
-				point = lookupAppMapCoordReference(coord);
-				//If we can not find the coord from the Map file, try to convert it to Point.
-				if (point == null)  point = convertCoords(coord);
+				//Treate the coord as a reference and try to get the coordination String pair from the Map file.
+				coordsPair = _lookupAppMapCoordReference(coord);
+				//If we can not find the coord from the Map file, try to convert it to coordinate String pair.
+				if (coordsPair == null)  coordsPair = _convertCoords(coord);
 			}
 		}
+		
+		if(coordsPair != null && coordsPair.length == 2) {
+			if (compObject != null) {
+				point = StringUtils.convertPercentageFormatCoord(coordsPair, compObject);
+			} else {
+				// Using coordinate value directly.
+				return StringUtils.convertStringPairCoordsToPoint(coordsPair);
+			}
+		} else {
+			Log.debug( "bad coords format: "+ Arrays.asList(coordsPair));
+      		return null;
+		}
+		
 		return point;
+	}
+
+	/**
+	 * Purpose: Convert a string coordination to java.awt.Point
+	 * 
+	 * @param coord String, is either an AppMap ref, or (x;y) notation
+	 * @return java.awt.Point, null if coord is null or empty
+	 **/
+	protected java.awt.Point checkForCoord(String coord) {
+		return checkForCoord(coord, null);
+	}
+	
+	/**
+	 * Purpose: Return String pair, String[], version of convertCoords() method.
+	 * Convert coordinates string of the formats:
+	 * <ul>
+	 * <li>"x;y"
+	 * <li>"x,y"
+	 * <li>"x y"
+	 * <li>"Coords=x;y"
+	 * <li>"Coords=x,y"
+	 * <li>"Coords=x y"
+	 * </ul> 
+	 * into a String[] object.
+	 * @param coords, String x;y or x,y or Coords=x;y  or Coords=x,y
+	 * @return String[], coordinate String pair if successfull, null otherwise.
+	 */
+	public String[] _convertCoords(String coords) {
+		return StringUtils.extractCoordStringPair(coords);
 	}
 
 	/** 
@@ -574,7 +635,7 @@ public abstract class ComponentFunction extends Processor{
 	 * @return  Point if successfull, null otherwise
 	 **/
 	public java.awt.Point convertCoords(String coords) {
-		return StringUtils.convertCoords(coords);
+		return StringUtils.convertStringPairCoordsToPoint(_convertCoords(coords));
 	}
 
 	/** 
@@ -633,22 +694,34 @@ public abstract class ComponentFunction extends Processor{
 		}
 		return lookup;
 	}
-
+	
 	/** 
-	 * lookupAppMapCoordReference: uses 'convertCoords'
-	 * after the call to 'lookupAppMapReference'.
+	 * _lookupAppMapCoordReference: return String pair, String[], version of lookupAppMapCoordReference() method.
+	 * Uses '_convertCoords()' after the call to 'lookupAppMapReference()'.
 	 * @param referenceName, String, the reference name passed on to
 	 *         method 'lookupAppMapReference' to lookup the coordinate string 
-	 *         from an AppMap. Then that value is passed on to convertCoords. 
-	 * @return Point if successfull, null otherwise (if alpha chars instead
-	 *          of digits are encountered; or if row or col less than one)
+	 *         from an AppMap. Then that value is passed on to '_convertCoords()'. 
+	 * @return String[], coordinate String pair if successfull, null otherwise.
 	 **/
-	protected java.awt.Point lookupAppMapCoordReference(String referenceName) {
+	protected String[] _lookupAppMapCoordReference(String referenceName) {
 		String lookup = lookupAppMapReference(referenceName);
 		if( lookup == null) return null;
 
 		Log.debug("calling convertCoords: ("+lookup+")");
-		return convertCoords(lookup);
+		return _convertCoords(lookup);
+	}
+
+	/** 
+	 * lookupAppMapCoordReference: uses '_lookupAppMapCoordReference()' to
+	 * get coordinate String pair, then convert it to Point format.
+	 * @param referenceName, String, the reference name passed on to
+	 *         method 'lookupAppMapReference' to lookup the coordinate string 
+	 *         from an AppMap. 
+	 * @return Point if successfull, null otherwise (if alpha chars instead
+	 *          of digits are encountered; or if row or col less than one)
+	 **/
+	protected java.awt.Point lookupAppMapCoordReference(String referenceName) {
+		return StringUtils.convertStringPairCoordsToPoint(_lookupAppMapCoordReference(referenceName));
 	}
 
 	/** 

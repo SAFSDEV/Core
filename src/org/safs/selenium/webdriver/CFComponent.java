@@ -385,7 +385,7 @@ public class CFComponent extends ComponentFunction{
 
 		try{
 
-			java.awt.Point point = checkForCoord(iterator);
+			java.awt.Point point = checkForCoord(iterator, compObject);
 			long begin = System.currentTimeMillis();
 			if (action.equalsIgnoreCase(CLICK) ||
 					action.equalsIgnoreCase(COMPONENTCLICK)) {
