@@ -514,7 +514,7 @@ public abstract class ComponentFunction extends Processor{
 	 * <br><em>Assumptions:</em>  all exceptions are handled.
 	 * @param                     numStr, String 
 	 * (indexed from 1, 1 will be subtracted from the number before returned)
-	 * @return                    Integer if successfull, null otherwise (if alpha chars instead
+	 * @return                    Integer if successful, null otherwise (if alpha chars instead
 	 * of digits are encountered; or if number is less than one)
 	 **/
 	public Integer convertNum (String num) {
@@ -523,7 +523,7 @@ public abstract class ComponentFunction extends Processor{
 
 	/**
 	 * <br>
-	 * <em>Purpose:</em> Extend the functionality of checkForCoord() to deal with different coordinate formats, 
+	 * <em>Purpose:</em> Extend the functionality of original 'checkForCoord()' to deal with different coordinate formats,
 	 * like percentage format, by using one more parameter: component object; 
 	 * check 'iterator' for coords, either an AppMap ref, or (x;y) notation. 
 	 * 
@@ -550,8 +550,8 @@ public abstract class ComponentFunction extends Processor{
 	}
 	
 	/**
-	 * Purpose: Extend the original functionality of checkForCoord() to deal with different coordinate formats, 
-	 * like percentage format, by using one more parameter: component object; convert a string coordination to java.awt.Point.
+	 * Purpose: Extend the functionality of original 'checkForCoord()' to deal with different coordinate formats, 
+	 * like percentage format, by using one more parameter: component object; convert a string coordinate to java.awt.Point.
 	 * 
 	 * @param coord String, either an AppMap ref, or (x;y) notation
 	 * @param compObject WebElement, the web component you're dealing with.
@@ -565,7 +565,7 @@ public abstract class ComponentFunction extends Processor{
 		if (coord != null) { // row;col
 			Log.info("...checking for coord: " + coord);
 			if (!coord.trim().equals("")) {
-				//Treate the coord as a reference and try to get the coordination String pair from the Map file.
+				//Treate the coord as a reference and try to get the coordinate String pair from the Map file.
 				coordsPair = _lookupAppMapCoordReference(coord);
 				//If we can not find the coord from the Map file, try to convert it to coordinate String pair.
 				if (coordsPair == null)  coordsPair = _convertCoords(coord);
@@ -588,7 +588,7 @@ public abstract class ComponentFunction extends Processor{
 	}
 
 	/**
-	 * Purpose: Convert a string coordination to java.awt.Point
+	 * Purpose: Convert a string coordinate to java.awt.Point
 	 * 
 	 * @param coord String, is either an AppMap ref, or (x;y) notation
 	 * @return java.awt.Point, null if coord is null or empty
@@ -610,7 +610,7 @@ public abstract class ComponentFunction extends Processor{
 	 * </ul> 
 	 * into a String[] object.
 	 * @param coords, String x;y or x,y or Coords=x;y  or Coords=x,y
-	 * @return String[], coordinate String pair if successfull, null otherwise.
+	 * @return String[], coordinate String pair if successful, null otherwise.
 	 */
 	public String[] _convertCoords(String coords) {
 		return StringUtils.extractCoordStringPair(coords);
@@ -632,7 +632,7 @@ public abstract class ComponentFunction extends Processor{
 	 * as Row and Col values as is done in org.safs.rational.CFTable
 	 * 
 	 * @param   coords, String x;y or x,y or Coords=x;y  or Coords=x,y
-	 * @return  Point if successfull, null otherwise
+	 * @return  java.awt.Point if successful, null otherwise
 	 **/
 	public java.awt.Point convertCoords(String coords) {
 		return StringUtils.convertStringPairCoordsToPoint(_convertCoords(coords));
@@ -651,7 +651,7 @@ public abstract class ComponentFunction extends Processor{
 	 * into a java.awt.Polygon object.
 	 * 
 	 * @param   coords, String x1;y1;x2;y2 or x1,y1,x2,y2 or Coords=x1;y1;x2;y2  or Coords=x1,y1,x2,y2
-	 * @return  Polygon if successfull, null otherwise
+	 * @return  Polygon if successful, null otherwise
 	 **/
 	public java.awt.Polygon convertLine(String coords) {
 		return StringUtils.convertLine(coords);
@@ -670,7 +670,7 @@ public abstract class ComponentFunction extends Processor{
 	 * into a org.safs.ComponentFunction.Window object.
 	 * 
 	 * @param   windowPosition String, window's position-size-status string; or a map reference for window's status string. 
-	 * @return  org.safs.ComponentFunction.Window if successfull, null otherwise
+	 * @return  org.safs.ComponentFunction.Window if successful, null otherwise
 	 **/
 	public Window convertWindowPosition(String windowPosition){
 		String position = windowPosition;
@@ -701,7 +701,7 @@ public abstract class ComponentFunction extends Processor{
 	 * @param referenceName, String, the reference name passed on to
 	 *         method 'lookupAppMapReference' to lookup the coordinate string 
 	 *         from an AppMap. Then that value is passed on to '_convertCoords()'. 
-	 * @return String[], coordinate String pair if successfull, null otherwise.
+	 * @return String[], coordinate String pair if successful, null otherwise.
 	 **/
 	protected String[] _lookupAppMapCoordReference(String referenceName) {
 		String lookup = lookupAppMapReference(referenceName);
@@ -717,7 +717,7 @@ public abstract class ComponentFunction extends Processor{
 	 * @param referenceName, String, the reference name passed on to
 	 *         method 'lookupAppMapReference' to lookup the coordinate string 
 	 *         from an AppMap. 
-	 * @return Point if successfull, null otherwise (if alpha chars instead
+	 * @return java.awt.Point if successful, null otherwise (if alpha chars instead
 	 *          of digits are encountered; or if row or col less than one)
 	 **/
 	protected java.awt.Point lookupAppMapCoordReference(String referenceName) {
@@ -730,7 +730,7 @@ public abstract class ComponentFunction extends Processor{
 	 * @param referenceName, String, the reference name passed on to
 	 *         method 'lookupAppMapReference' to lookup the Line string 
 	 *         from an AppMap. Then that value is passed on to convertLine. 
-	 * @return Polygon if successfull, null otherwise (if alpha chars instead
+	 * @return Polygon if successful, null otherwise (if alpha chars instead
 	 *          of digits are encountered; or if less than 2 points are detected.)
 	 **/
 	protected java.awt.Polygon lookupAppMapLineReference(String referenceName) {
@@ -746,7 +746,7 @@ public abstract class ComponentFunction extends Processor{
 	 * @param                     referenceName, String, the reference name passed on to
 	 * method 'lookupAppMapReference' to lookup the number string from an AppMap. Then that
 	 * value is passed on to convertNum. 
-	 * @return                    Integer if successfull, null otherwise (if alpha chars instead
+	 * @return                    Integer if successful, null otherwise (if alpha chars instead
 	 * of digits are encountered; or if index is less than one)
 	 **/
 	protected Integer lookupAppMapNumReference(String referenceName) {
@@ -2472,7 +2472,7 @@ public abstract class ComponentFunction extends Processor{
 	 * <em>Purpose:</em> Response for HOVERMOUSE; called by componentProcess() to hover mouse.<br>
 	 * <pre>
 	 * Parameters:
-	 * CoordinationMapKey String, The offset from 'Uper-Left corner' of component, 
+	 * CoordinateMapKey String, The offset from 'Uper-Left corner' of component, 
 	 *                            such as "20;40", or a mapKey defined under "ComponentName" or "ApplicationConstants" in map file.
 	 * HoverTime int, milliseconds to hover
 	 * support different format of test record:
@@ -2492,7 +2492,7 @@ public abstract class ComponentFunction extends Processor{
 		int milliseconds = 2000;//default is 2000 milli seconds to hover
 
 		testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
-		//optional parameter 'coordination'
+		//optional parameter 'coordinate'
 		if(iterator.hasNext()){
 			String param1 = iterator.next();
 			pointRelativeToComponent = checkForCoord(param1);
