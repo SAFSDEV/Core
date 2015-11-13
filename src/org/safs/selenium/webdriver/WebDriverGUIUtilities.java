@@ -1217,7 +1217,6 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 			cp = " -cp "+ cp;
 			
 			String cmdline = javaexe +" "+jvmOptions + cp +" org.safs.selenium.util.SeleniumServerRunner "+ 
-						     "-jar "+ jarfile.getAbsolutePath() +
 					         " -Dwebdriver.log.file=\""+consoledir+File.separator+"webdriver.console\""+
 					         " -Dwebdriver.firefox.logfile=\""+consoledir+File.separator+"firefox.console\""+
 					         " -Dwebdriver.safari.logfile=\""+consoledir+File.separator+"safari.console\""+
@@ -1230,8 +1229,6 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 			
 			//The other parameter will be passed directly to "org.safs.selenium.util.SeleniumServerRunner"
 			for(String parameter: extraParamsList) cmdline += " "+parameter;
-			//Should we redirect out/err? maybe not, they are useful message.
-//			cmdline += " -timeout=20 -browserTimeout=60 > nul 2>&1";
 			cmdline += " -timeout=20 -browserTimeout=60 "+SeleniumServerRunner.PARAM_OUTPUTCONSOLE;
 			
 			final String fcmd = cmdline;
@@ -1240,8 +1237,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 			
 			Process process = null;
 			process = Runtime.getRuntime().exec(fcmd,null,workdir);
-			console = new ProcessCapture(process, null, true, true);
-//			try{ console.thread.join();}catch(InterruptedException x){;}
+			console = new ProcessCapture(process, SeleniumServerRunner.TITLE , true, false/*will not write out/err message to debug log, it is already in SeleniumServerRunner*/);
 			//Do we need to wait longer to get more information???
 			if(isNode){
 				waitSeleniumNodeRunning(SeleniumConfigConstant.DEFAULT_SELENIUM_HOST, nodePort);
@@ -1264,9 +1260,8 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		}catch(Exception x){
 			Log.debug(debugmsg+" failed to launch Selenium Server due to "+x.getClass().getName()+": "+x.getMessage(), x);
 			return false;
-		}finally{
-			if(console!=null) console.shutdown();							
 		}
+		
 		return true;
 	}
 
