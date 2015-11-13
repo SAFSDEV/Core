@@ -25,7 +25,7 @@ import org.safs.tools.consoles.GenericProcessCapture;
  */
 public class GenericProcessMonitor {
 
-	static final String winproclist = "tasklist.exe";
+	static final String winproclist = "tasklist.exe /v";
 	static final String winprockill = "taskkill.exe /f ";
 	static final String winpidoption = "/pid ";
 	static final String winimgoption = "/im ";
