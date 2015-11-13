@@ -1585,6 +1585,8 @@ public abstract class SeleniumPlus {
 	 * String info = prevResults.getStatusInfo(); // if useful
 	 * }
 	 * 
+	 * Pay attention: If you use percentage format in SE+, you'd better use 'Misc.Expressions(false);' first.
+	 * 
 	 * "AppMapSubkey" is expected to be an AppMap entry in an "Apps" section in the App Map.
 	 * See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_Click">Detailed Reference</a>
 	 * </pre>	 
@@ -1619,6 +1621,8 @@ public abstract class SeleniumPlus {
 	 * String info = prevResults.getStatusInfo(); // if useful
 	 * }
 	 * 
+	 * Pay attention: If you use percentage format in SE+, you'd better use 'Misc.Expressions(false);' first.
+	 * 
 	 * </pre>	 
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
@@ -1650,6 +1654,8 @@ public abstract class SeleniumPlus {
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
 	 * }
+	 * 
+	 * Pay attention: If you use percentage format in SE+, you'd better use 'Misc.Expressions(false);' first.
 	 * 
 	 * </pre>	 
 	 * @see #prevResults
@@ -1683,6 +1689,8 @@ public abstract class SeleniumPlus {
 	 * String info = prevResults.getStatusInfo(); // if useful
 	 * }
 	 * 
+	 * Pay attention: If you use percentage format in SE+, you'd better use 'Misc.Expressions(false);' first.
+	 * 
 	 * </pre>	 
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
@@ -1714,6 +1722,8 @@ public abstract class SeleniumPlus {
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
 	 * }
+	 * 
+	 * Pay attention: If you use percentage format in SE+, you'd better use 'Misc.Expressions(false);' first.
 	 * 
 	 * </pre>	 
 	 * @see #prevResults
@@ -1929,6 +1939,8 @@ public abstract class SeleniumPlus {
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
 	 * }
+	 * 
+	 * Pay attention: If you use percentage format in SE+, you'd better use 'Misc.Expressions(false);' first.
 	 * 
 	 * </pre>	 
 	 * @see #prevResults
