@@ -3,11 +3,8 @@
  **/
 package org.safs.tools.consoles;
 
-import java.io.*;
-import java.lang.Process;
 import java.util.Vector;
 
-import org.safs.tools.CaseInsensitiveFile;
 import org.safs.tools.GenericProcessMonitor;
 
 /**
