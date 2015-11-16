@@ -1,6 +1,11 @@
 /** Copyright (C) SAS Institute All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
+/**
+ * History:
+ * NOV 16, 2015	(LEIWANG) Set the thread as daemon so that it will not block the main thread if it has to stay there running.
+ * 
+ */
 package org.safs.tools.consoles;
 
 import java.util.Vector;
@@ -135,6 +140,7 @@ public class GenericProcessCapture extends GenericProcessConsole{
 			if(showOutStream)debug("GenericProcessCapture "+ process +" initializing...");
 			if(autostart){
 				thread = new Thread(this);
+				thread.setDaemon(true);
 				thread.start();
 			}
 		}
