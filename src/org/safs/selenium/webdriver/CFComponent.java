@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -375,6 +376,76 @@ public class CFComponent extends ComponentFunction{
 	 */
 	protected void _minimize() throws SeleniumPlusException{
 		WDLibrary.minimizeBrowserWindow();	
+	}
+	
+	/**
+	 * <br>
+	 * <em>Purpose:</em> Extend the functionality of 'checkForCoord()' in superclass to deal with different coordinate formats,
+	 * like percentage format, by using one more parameter: component object; 
+	 * check 'iterator' for coords, either an AppMap ref, or (x;y) notation. 
+	 * 
+	 * @param iterator Iterator,
+	 * @param compObject WebElement, the web component you're dealing with. 
+	 * @return java.awt.Point, null if iterator doesn't have another element
+	 **/
+	protected java.awt.Point checkForCoord(Iterator iterator, WebElement compObject) {
+		// see if there is another parameter, the coords(x;y) or app map reference.
+		if (iterator!=null && iterator.hasNext()) return checkForCoord((String) iterator.next(), compObject);
+
+		return null;
+	}
+	
+	/**
+	 * Purpose: Extend the functionality of 'checkForCoord()' in superclass to deal with different coordinate formats, 
+	 * like percentage format, by using one more parameter: component object; convert a string coordinate to java.awt.Point.
+	 * 
+	 * @param coord String, either an AppMap ref, or (x;y) notation
+	 * @param compObject WebElement, the web component you're dealing with.
+	 * @return java.awt.Point, null if coord is null or empty
+	 **/
+	protected java.awt.Point checkForCoord(String coord, WebElement compObject) {
+		String[] coordsPair = null;
+		java.awt.Point point = null;
+		
+		// see if there is another parameter, the coords or app map reference.
+		if (coord != null) { // row;col
+			Log.info("...checking for coord: " + coord);
+			if (!coord.trim().equals("")) {
+				//Treate the coord as a reference and try to get the coordinate String pair from the Map file.
+				coordsPair = _lookupAppMapCoordReference(coord);
+				//If we can not find the coord from the Map file, try to convert it to coordinate String pair.
+				if (coordsPair == null)  coordsPair = StringUtils.extractCoordStringPair(coord);
+			}
+		}
+		
+		if(coordsPair != null && coordsPair.length == 2) {
+			if (compObject != null) {
+				point = StringUtils.convertPercentageFormatCoord(coordsPair, compObject);
+			} else {
+				// Using coordinate value directly.
+				return StringUtils.convertStringPairCoordsToPoint(coordsPair);
+			}
+		} else {
+			Log.debug( "bad coords format: "+ Arrays.asList(coordsPair));
+      		return null;
+		}
+		
+		return point;
+	}
+	
+	/** 
+	 * _lookupAppMapCoordReference: return String pair, String[], version of lookupAppMapCoordReference() method in superclass.
+	 * @param referenceName, String, the reference name passed on to
+	 *         method 'lookupAppMapReference' to lookup the coordinate string 
+	 *         from an AppMap. 
+	 * @return String[], coordinate String pair if successful, null otherwise.
+	 **/
+	protected String[] _lookupAppMapCoordReference(String referenceName) {
+		String lookup = lookupAppMapReference(referenceName);
+		if( lookup == null) return null;
+
+		Log.debug("calling convertCoords: ("+lookup+")");
+		return StringUtils.extractCoordStringPair(lookup);
 	}
 
 	/** <br><em>Purpose:</em> componentClick
