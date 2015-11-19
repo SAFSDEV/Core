@@ -5,25 +5,10 @@
 
 package org.safs.selenium.util;
 
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
-import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
-
-import javax.swing.JFrame;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 
 import org.safs.tools.consoles.JavaJVMConsole;
 
@@ -96,6 +81,8 @@ public class SeleniumServerRunner extends JavaJVMConsole{
 	protected static boolean isRMIServer = false;
 	protected static String rmiServerClassname = null;
 
+	/** "Selenium Server", The title will be shown. */
+	public static final String TITLE = "Selenium Server";
 	/** 'safs.rmi.server' */
 	public static final String PROPERTY_RMISERVER = "safs.rmi.server";
 	
@@ -112,11 +99,11 @@ public class SeleniumServerRunner extends JavaJVMConsole{
 	
 	private SeleniumServerRunner(){
 		super();
-		setTitle("Selenium Server");
+		setTitle(TITLE);
 	}
 	private SeleniumServerRunner(boolean outputToConsole){
 		super(outputToConsole);
-		setTitle("Selenium Server");
+		setTitle(TITLE);
 	}
 
     protected static String[] processArgs(String[] args) throws IOException{
@@ -206,10 +193,9 @@ public class SeleniumServerRunner extends JavaJVMConsole{
 	 */
 	public static void main(String[] args) {
 		String[] passArgs = new String[0];
-		SeleniumServerRunner console;
 		try{
 			passArgs = processArgs(args);
-			console = new SeleniumServerRunner(outputToConsole);
+			SeleniumServerRunner console = new SeleniumServerRunner(outputToConsole);
 			launchRMIServer();
 			Class aclass = Class.forName("org.openqa.grid.selenium.GridLauncher");
 			Method main = aclass.getMethod("main", String[].class);
