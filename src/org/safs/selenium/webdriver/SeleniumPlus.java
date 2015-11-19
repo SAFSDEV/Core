@@ -2338,8 +2338,16 @@ public abstract class SeleniumPlus {
 	 * @throws SeleniumPlusException
 	 */
 	public static WebElement getObject(org.safs.model.Component component) throws SeleniumPlusException{
-		String rs = Misc.GetAppMapValue(component, "", "false");
-		return WDLibrary.getObject(rs);
+		
+		if (component.getParent() == null) {
+			String prs = Misc.GetAppMapValue(component, "", "false");
+			return WDLibrary.getObject(prs);
+		} else {
+			String prs = Misc.GetAppMapValue(component.getParent(), "", "false");
+			WebElement pel = WDLibrary.getObject(prs);
+			String crs = Misc.GetAppMapValue(component, "", "false");
+			return WDLibrary.getObject(pel,crs);
+		}		
 	}
 	
 	/**
