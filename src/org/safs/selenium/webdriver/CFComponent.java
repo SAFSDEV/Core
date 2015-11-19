@@ -769,6 +769,7 @@ public class CFComponent extends ComponentFunction{
 		String debugmsg = StringUtils.debugmsg(false);
 		WebElement component = (compObject!=null? compObject:winObject);
 		try {
+			
 			org.openqa.selenium.Point p = component.getLocation();
 			org.openqa.selenium.Dimension dim = component.getSize();
 			return  new Rectangle(p.x, p.y, dim.getWidth(), dim.getHeight());
