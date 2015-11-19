@@ -12,7 +12,7 @@ package org.safs.selenium.webdriver.lib;
  *  <br>  JAN 16, 2014    (DHARMESH) Added WebDriver() for end user.
  *  <br>  MAR 10, 2014    (SBJLWA) Handle frames for HTML Application, Get browser window information by javascript.
  *  <br>  MAR 27, 2014    (SBJLWA) Add ability to search by XPATH and CSS.
- *  <br>  APR 14, 2014    (SBJLWA) Add ability to listener to a javascript event. Rename some funcitons.
+ *  <br>  APR 14, 2014    (SBJLWA) Add ability to listener to a javascript event. Rename some functions.
  *  <br>  AUG 12, 2014    (SBJLWA) Modify method getObject(): return null if no webelement can be found.
  *  <br>  AUG 27, 2014    (LeiWang) Modify method getObject(): Get element inside a frame if no FrameRS
  *                                      is preceding RS of a child in map file; we consider that the child is
@@ -31,6 +31,7 @@ package org.safs.selenium.webdriver.lib;
  *                                  modify js_getGlobalBoolVariable(), js_setGlobalBoolVariable().
  *  <br>  OCT 30, 2015    (SBJLWA)  Move method isVisible(), isDisplayed and isStale() to this class from WDLibrary.
  *                                  Add method highlightThenClear(). Modify highlight(WebElement): check stale.
+ *  <br>  NOV 12, 2015    (SBJLWA)  Modify method getObject(): continue to search component on the new page even 'lastFrame' is stale.
  */
 import java.lang.reflect.Constructor;
 import java.net.URL;
@@ -92,7 +93,7 @@ import com.thoughtworks.selenium.SeleniumException;
  *     (note: parent/child elements separated by ";\;" )
  *     (note: FRAMEINDEX is NOT ready for using )
  *     (note: If there is no frame-expression in a RS, the last visited frame 
- *            will be the frame where to find component. By default, the last viisited
+ *            will be the frame where to find component. By default, the last visited
  *            frame is the main frame (the topmost html Document).
  *            And that is why if we specify frame for a window, then their children
  *            doesn't need to specify the frame information anymore. For example:
@@ -233,7 +234,7 @@ public class SearchObject {
 	}
 	
 	/**FRAMEINDEX, it should be placed in front of normal tokens like ID, CLASS, NAME etc. if exist.
-	 *  NOT recommanded to use. Use FRAMEID OR FRAMENAME Instead.*/
+	 *  NOT recommended to use. Use FRAMEID OR FRAMENAME Instead.*/
 	public static final String SEARCH_CRITERIA_FRAMEINDEX 	= "FRAMEINDEX";
 	/**FRAMEID, it should be placed in front of normal tokens like ID, CLASS, NAME etc. if exist.*/
 	public static final String SEARCH_CRITERIA_FRAMEID 		= "FRAMEID";
@@ -1215,7 +1216,7 @@ public class SearchObject {
 	/**
 	 * To detect if the page has changed or not.<br>
 	 * For example, if user click on a link, or a Log-Out menu item, the page may probably change.<br>
-	 * The current implementation is not garantee!<br>
+	 * The current implementation is not guarantee!<br>
 	 * @return boolean, if the page has changed.
 	 */
 	public static boolean pageHasChanged(){
@@ -1224,7 +1225,7 @@ public class SearchObject {
 
 		try{
 			//TODO Does "url change" mean the page has changed??? 
-			//Not engough, there are some cases, url changed, but page doesn't. we need another way to detect.
+			//Not enough, there are some cases, url changed, but page doesn't. we need another way to detect.
 			//TODO we need to wait the page completely-loaded so that we can get the new url.
 			StringUtilities.sleep(2000);
 			url = getWebDriver().getCurrentUrl();
@@ -1372,11 +1373,22 @@ public class SearchObject {
 			}
 		}catch(Exception e){
 			if(e instanceof StaleElementReferenceException && pageHasChanged()){
-				IndependantLog.error(debugmsg+" using frames as parent, page has changed! reset the lastFrame to null. Stop searching!");
+				IndependantLog.warn(debugmsg+" swtiching to the previous frame 'lastFrame' failed! The page has changed! Reset the 'lastFrame' to null.");
 				lastFrame = null;
-				return null;
+				//LeiWang: S1215754
+				//if we click a link within a FRAME, as the link is in a FRAME, so the field 'lastFrame' will be assigned after clicking the link.
+				//then the link will lead us to a second page, when we try to find something on that page, firstly we try to switch to 'lastFrame' and 
+				//get a StaleElementReferenceException (as we are in the second page, there is no such frame of the first page)
+				//but we still want our program to find the web-element on the second page, so we will just set 'lastFrame' to null and let program continue.
+//				[FirstPage]
+//				FirstPage="FRAMEID=iframeResult"
+//				Link="xpath=/html/body/a"
+//
+//				[SecondPage]
+//				SecondPage="xpath=/html"
+//				return null;
 			}else{
-				IndependantLog.warn(debugmsg+" using frames as parent, met exception "+StringUtils.debugmsg(e));
+				IndependantLog.warn(debugmsg+" swtiching to the previous frame 'lastFrame' failed! Met exception "+StringUtils.debugmsg(e));
 			}
 		}
 
@@ -1396,7 +1408,7 @@ public class SearchObject {
 		//  [Window]
 		//  Window="FrameId=xxx"
 		//  Child="FrameId=xxx;\;Id=xxx"
-		//If 'recongnition string' contains only frame information, rsWithoutFrames will be empty, and this method will
+		//If 'recognition string' contains only frame information, rsWithoutFrames will be empty, and this method will
 		//return null (ClassCastException from WebDriver to WebElement); to avoid this set "xpath=/html" as the default object
 		if(rsWithoutFrames.isEmpty()) rsWithoutFrames.add(RS.xpath(XPATH.html()));
 
@@ -2288,7 +2300,7 @@ public class SearchObject {
 	 * clear the previous highlight of a webelement.<br>
 	 * <b>Note:</b>The webelement should be highlighted by {@link #highlight(String)}<br>
 	 * or {@link #highlight(WebElement)}, normally you don't need to call this method<br>
-	 * to clear the highlight if you want to highlight element one by one continously, as <br>
+	 * to clear the highlight if you want to highlight element one by one continuously, as <br>
 	 * the previous highlighted element will be automatically cleared before next element<br>
 	 * is highlighted.<br>
 	 *
@@ -2406,7 +2418,7 @@ public class SearchObject {
 	protected static Map<String, GenericJSEventListener> jsEventListenerMap = new HashMap<String, GenericJSEventListener>();
 	/**
 	 * A map containing pairs of (listenerID, PollingRunnable). The PollingRunnable will check a javascript<br>
-	 * variable in a loop, when the variable is true, it will invoke the listener accroding to the listenerID.<br>
+	 * variable in a loop, when the variable is true, it will invoke the listener according to the listenerID.<br>
 	 */
 	protected static Map<String, PollingRunnable> jsEventListenerWaitingThreadMap = new HashMap<String, PollingRunnable>();
 
@@ -2581,7 +2593,7 @@ public class SearchObject {
 			}else{//For HTML Standard element
 				script = JavaScriptFunctions.addGenericEventListener(true, listenerID);
 				script += " addGenericEventListener(arguments[0],arguments[1],arguments[2]);";
-				//Do we need to add a caputuring listener?
+				//Do we need to add a capturing listener?
 				//				SearchObject.executeJavaScriptOnWebElement(script, element, eventName, true);
 				SearchObject.executeJavaScriptOnWebElement(script, element, eventName, false);
 			}
@@ -2653,7 +2665,7 @@ public class SearchObject {
 				}else{//For HTML Standard element
 					script = JavaScriptFunctions.removeGenericEventListener(true, listenerID);
 					script += " removeGenericEventListener(arguments[0],arguments[1],arguments[2]);";
-					//If we have added a caputuring listener.
+					//If we have added a capturing listener.
 					//					SearchObject.executeJavaScriptOnWebElement(script, element, eventName, true);
 					SearchObject.executeJavaScriptOnWebElement(script, element, eventName, false);
 				}
@@ -2782,7 +2794,7 @@ public class SearchObject {
 	}
 
 	/**
-	 * @return JavascriptExecutor, the lastest valid JavaSc
+	 * @return JavascriptExecutor, the latest valid JavaSc
 	 * @throws SeleniumPlusException
 	 */
 	public static JavascriptExecutor getJS() throws SeleniumPlusException{
@@ -3449,7 +3461,7 @@ public class SearchObject {
 	}
 
 	/*******************************************************
-	 * Inner class to handle DOJO-specific funtionality.   *
+	 * Inner class to handle DOJO-specific functionality.   *
 	 *******************************************************/
 	public static final class DOJO{
 

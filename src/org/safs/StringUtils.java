@@ -1363,7 +1363,7 @@ public class StringUtils{
    * <br><em>Assumptions:</em>  all exceptions are handled.
    * @param                     numStr, String 
    * (indexed from 1, 1 will be subtracted from the number before returned)
-   * @return                    Integer if successfull, null otherwise (if alpha chars instead
+   * @return                    Integer if successful, null otherwise (if alpha chars instead
    * of digits are encountered; or if number is less than one)
    **/
   public static Integer convertNum (String num) {
@@ -1391,7 +1391,7 @@ public class StringUtils{
 	* 
 	* @param percentageFormatCoordsPair String[],
 	* @param compObject WebElement,
-	* @return
+	* @return java.awt.Point,
 	*/
   public static java.awt.Point convertPercentageFormatCoord(String[] percentageFormatCoordsPair, WebElement compObject) {
 	  if(percentageFormatCoordsPair == null || percentageFormatCoordsPair.length != 2) {
@@ -1403,9 +1403,9 @@ public class StringUtils{
 		  // Convert the percentage parameter into float type.
 		  float xF = StringUtils.convertPercentageString(percentageFormatCoordsPair[0]);
 		  float yF = StringUtils.convertPercentageString(percentageFormatCoordsPair[1]);
-		  
-		  // If the coordination value is between zero to one, it will be treated as percentage format;
-		  // otherwise, the casting int format of coordination value will be used directly.
+
+		  // If the coordinate value is between zero to one, it will be treated as percentage format;
+		  // otherwise, the casting int format of coordinate value will be used directly.
 		  int x = (xF > 0 && xF < 1) ? (int) (xF * compObject.getSize().width) : (int) xF;
 		  int y = (yF > 0 && yF < 1) ? (int) (yF * compObject.getSize().height) : (int) yF;
 		  
@@ -1441,7 +1441,7 @@ public class StringUtils{
   }
 
   /**
-   * Convert coordinates string of the formats:
+   * Extract coordinate String pair, String[], from coordinate string formats:
    * <ul>
    * <li>"x;y"
    * <li>"x,y"
@@ -1450,12 +1450,15 @@ public class StringUtils{
    * <li>"Coords=x,y"
    * <li>"Coords=x y"
    * </ul> 
-   * into a coordinate string pair: String[].
    * 
    * @param   coords String, x;y or x,y or Coords=x;y  or Coords=x,y
-   * @return  Point if successfull, null otherwise
+   * @return  String[], String pair if successful, null otherwise
    */
   public static String[] extractCoordStringPair(String coords) {
+	/**
+	 * @author SCNTAX NOV 12, 2015 This part is moved from the original 'convertCoords()' method.
+	 * 							   Keep the comments here for reference.
+	 */
 	// CANAGL OCT 21, 2005 This function previously did NOT support the 
   	// "Coords=" prefix and used to decrement 1 for all provided values.
   	// It also did not accept coords of x or y < 0.  And it allowed the 
@@ -1519,6 +1522,7 @@ public class StringUtils{
    * Convert the String[] format coordinate into java.awt.Point format.
    * @param coordsPair String[], the String pair coordinate need to be converted.
    * @return java.awt.Point format coordinate.
+   * @author SCNTAX NOV 12, 2015 This part is moved from original 'convertCoords()'.
    */
   public static java.awt.Point convertStringPairCoordsToPoint(String[] coordsPair) {
 	  if(coordsPair == null || coordsPair.length != 2) {
@@ -1540,7 +1544,7 @@ public class StringUtils{
   }
   
     /** 
-     * Convert coordinates string of the formats:
+     * Convert coordinates string formats:
      * <ul>
      * <li>"x;y"
 	 * <li>"x,y"
@@ -1555,10 +1559,11 @@ public class StringUtils{
      * as Row and Col values as is done in org.safs.rational.CFTable
      * 
      * @param   coords String, x;y or x,y or Coords=x;y  or Coords=x,y
-     * @return  Point if successfull, null otherwise
+     * @return  java.awt.Point if successful, null otherwise
      * @author CANAGL OCT 21, 2005 modified to work as required for 
      *                              keywords as documented.
      * @author CANAGL MAR 23, 2010 added space delimiter support 
+     * @author SCNTAX MOV 12, 2015 This method has been split into 'extractCoordStringPair()' and 'convertStringPairCoordsToPoint()' methods.
      **/
     public static java.awt.Point convertCoords(String coords) {
     	return convertStringPairCoordsToPoint(extractCoordStringPair(coords));
@@ -1711,7 +1716,7 @@ public class StringUtils{
      * into a org.safs.ComponentFunction.Window object.
      * 
      * @param   windowPosition String, window's position-size-status string
-     * @return  org.safs.ComponentFunction.Window if successfull, null otherwise
+     * @return  org.safs.ComponentFunction.Window if successful, null otherwise
      **/
     public static Window convertWindowPosition(String windowPosition) {
     	try {
