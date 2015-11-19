@@ -4,12 +4,14 @@
  **/
 package org.safs.selenium.util;
 /**
- * Oct 15, 2014    (LeiWang) Add field 'target' as the event-receiver.
- * Mar 23, 2015    (LeiWang) Modify waitForClick(): wait the click event ready if we detect the event-fired.
- * Mar 31, 2015    (LeiWang) Modify getEventListener(): once received 'mousedown', set the global variable immediately
+ * History:
+ * OCT 15, 2014    (LeiWang) Add field 'target' as the event-receiver.
+ * MAR 23, 2015    (LeiWang) Modify waitForClick(): wait the click event ready if we detect the event-fired.
+ * MAR 31, 2015    (LeiWang) Modify getEventListener(): once received 'mousedown', set the global variable immediately
  *                                  Modify onEventFired(): Add debug information to show where the click happened.
- * Jun 04, 2015    (LeiWang) Modify run(): if the target webelement is stale, we consider click as success.
- * Jun 25, 2015    (LeiWang) Modify onEventFired(): ignore event's information to save time.
+ * JUN 04, 2015    (LeiWang) Modify run(): if the target webelement is stale, we consider click as success.
+ * JUN 25, 2015    (LeiWang) Modify onEventFired(): ignore event's information to save time.
+ * NOV 18, 2015    (LeiWang) Provide a way to disable the DocumentClickCapture.
  */
 import java.util.Date;
 
@@ -92,6 +94,33 @@ public class DocumentClickCapture implements Runnable{
 	
 	/** true, will not retrieve event's information.*/
 	public static final boolean DEFAULT_IGNORE_EVENT_INFORMATION = true;
+	
+	/**
+	 * This field could be used to turn on/off the DocumentClickCapture.<br>
+	 * This field will ONLY affect the new instance of DocumentClickCapture. For example:<br>
+	 * <pre>
+	 * DocumentClickCapture.ENABLE_CLICK_CAPTURE = true;
+	 * DocumentClickCapture captureA = new DocumentClickCapture(true, target);
+	 * 
+	 * DocumentClickCapture.ENABLE_CLICK_CAPTURE = false;
+	 * DocumentClickCapture captureB = new DocumentClickCapture(true, target);
+	 * DocumentClickCapture captureC = new DocumentClickCapture(true, target);
+	 * 
+	 * captureA is enabled; while captureB and captureC will be disabled.
+	 * </pre>
+	 */
+	public static boolean ENABLE_CLICK_CAPTURE = true;
+	/**
+	 * Represent if this 'click capture' is enabled.<br>
+	 * This filed will be set in constructor {@link #DocumentClickCapture()} according to static field {@link #ENABLE_CLICK_CAPTURE}.<br>
+	 * <br>
+	 * If disabled, then we will not capture click event.<br>
+	 * 
+	 * @see #startListening()
+	 * @see #waitForClick(long)
+	 */
+	private boolean enabled = true;
+	
 	/**
 	 * After event happened, we can retrieve event's information  and assign them to {@link #mouseEvent}.<br>
 	 * If this field is false, the program will retrieve the information, which will spend some time <br>
@@ -179,6 +208,8 @@ public class DocumentClickCapture implements Runnable{
 		EVENT_BUTTON        = listenerID+"_button";
 		EVENT_RELATEDTARGET = listenerID+"_relatedTarget";
 		
+		//According the the static filed 'ENABLE_CLICK_CAPTURE' to enable or disable this click capture.
+		enabled = ENABLE_CLICK_CAPTURE;
 	}
 
 	/**
@@ -270,6 +301,12 @@ public class DocumentClickCapture implements Runnable{
 	 */
 	public void startListening()throws SeleniumPlusException{
 		String debugmsg = "DocumentClickCapture.startListening ";
+		
+		if(!enabled){
+			IndependantLog.debug(debugmsg+" DocumentClickCapture has been disabled.");
+			return;
+		}
+		
 	    if(notListening){
 	    	IndependantLog.info(debugmsg+" not Listening: injecting Listeners.");
 			mouseEvent = null;
@@ -304,6 +341,12 @@ public class DocumentClickCapture implements Runnable{
 	                                                          InterruptedException,
 	                                                          SeleniumPlusException{
 		String debugmsg = "DocumentClickCapture.waitForClick ";
+		
+		if(!enabled){
+			IndependantLog.debug(debugmsg+" DocumentClickCapture has been disabled! Return a void MouseEvent.");
+			return new MouseEvent(null);
+		}
+		
 		if(secondsTimeout < 1) throw new IllegalArgumentException(debugmsg +"secondsTimeout must be greater than 0.");
 		startListening();
 		long curTime = System.currentTimeMillis();

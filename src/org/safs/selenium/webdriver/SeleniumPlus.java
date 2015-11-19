@@ -95,6 +95,7 @@ import org.safs.model.commands.TreeViewFunctions;
 import org.safs.model.commands.WindowFunctions;
 import org.safs.model.components.GenericObject;
 import org.safs.model.tools.EmbeddedHookDriverRunner;
+import org.safs.selenium.util.DocumentClickCapture;
 import org.safs.selenium.webdriver.lib.SelectBrowser;
 import org.safs.selenium.webdriver.lib.SeleniumPlusException;
 import org.safs.selenium.webdriver.lib.WDLibrary;
@@ -1146,7 +1147,7 @@ public abstract class SeleniumPlus {
 		 * @param comp Component, (from App Map) to verify property.
 		 * @param property String, attribute or CSS property.
 		 * @param containedValue String, property value to be verified.
-		 * @param caseSensitive boolean, if the comparaison is case-sensitive or not.
+		 * @param caseSensitive boolean, if the comparison is case-sensitive or not.
 		 * @return true on success.
 		 * @example	 
 		 * <pre>
@@ -1585,6 +1586,8 @@ public abstract class SeleniumPlus {
 	 * String info = prevResults.getStatusInfo(); // if useful
 	 * }
 	 * 
+	 * Pay attention: If you use percentage format in SE+, you'd better use 'Misc.Expressions(false);' first.
+	 * 
 	 * "AppMapSubkey" is expected to be an AppMap entry in an "Apps" section in the App Map.
 	 * See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_Click">Detailed Reference</a>
 	 * </pre>	 
@@ -1619,6 +1622,8 @@ public abstract class SeleniumPlus {
 	 * String info = prevResults.getStatusInfo(); // if useful
 	 * }
 	 * 
+	 * Pay attention: If you use percentage format in SE+, you'd better use 'Misc.Expressions(false);' first.
+	 * 
 	 * </pre>	 
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
@@ -1650,6 +1655,8 @@ public abstract class SeleniumPlus {
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
 	 * }
+	 * 
+	 * Pay attention: If you use percentage format in SE+, you'd better use 'Misc.Expressions(false);' first.
 	 * 
 	 * </pre>	 
 	 * @see #prevResults
@@ -1683,6 +1690,8 @@ public abstract class SeleniumPlus {
 	 * String info = prevResults.getStatusInfo(); // if useful
 	 * }
 	 * 
+	 * Pay attention: If you use percentage format in SE+, you'd better use 'Misc.Expressions(false);' first.
+	 * 
 	 * </pre>	 
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
@@ -1714,6 +1723,8 @@ public abstract class SeleniumPlus {
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
 	 * }
+	 * 
+	 * Pay attention: If you use percentage format in SE+, you'd better use 'Misc.Expressions(false);' first.
 	 * 
 	 * </pre>	 
 	 * @see #prevResults
@@ -1929,6 +1940,8 @@ public abstract class SeleniumPlus {
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
 	 * }
+	 * 
+	 * Pay attention: If you use percentage format in SE+, you'd better use 'Misc.Expressions(false);' first.
 	 * 
 	 * </pre>	 
 	 * @see #prevResults
@@ -3708,7 +3721,7 @@ public abstract class SeleniumPlus {
 	 * <pre>
 	 * By default, all parameters will be processed as an expression (math and string). As the parameter
 	 * treepath may contain separator "->", for example "Root->Child1->GrandChild", it will be evaluated 
-	 * and 0 will be returned as parameter, this is not expeced by user. To avoid the evaluation of
+	 * and 0 will be returned as parameter, this is not expected by user. To avoid the evaluation of
 	 * expression, PLEASE CALL
 	 * 
 	 * {@code
@@ -7860,6 +7873,31 @@ public abstract class SeleniumPlus {
 		 */
 		public static boolean VerifyURLToFile(String url, String file, String...optionals){
 			return command(DDDriverCommands.VERIFYURLTOFILE_KEYWORD, combineParams(optionals, url, file));
+		}
+		
+		/**
+		 * Turn on/off 'click capture'.<br>
+		 * <b>Note:</b> Calling this will not write success/failure message into the test log.
+		 * <p>
+		 * To make sure that 'click' action happens, we use 'ClickCapture' to monitor 'click event' of the target component.
+		 * But sometimes for some reason, even click does happen, the 'ClickCapture' cannot receive the 'click event' and this will
+		 * cause different kinds of troubles. At this situation, to avoid this problem 'click capture' could be turned off.<br>
+		 * Later, we could always to turn on 'click capture' to guarantee that click happens.
+		 * </p>
+		 * 
+		 * @param on boolean, if true then the 'click capture' will be turned on; otherwise turned off.
+		 * @return boolean, true if succeed.
+		 */
+		public static boolean SetClickCapture(boolean on){
+			try{
+				//TODO we could provide driver command 'SetClickCapture' for traditional SAFS users later.
+				DocumentClickCapture.ENABLE_CLICK_CAPTURE = on;
+				IndependantLog.debug(StringUtils.debugmsg(false)+" Set ClickCapture to "+on);
+				return true;
+			}catch(Exception e){
+				IndependantLog.error(StringUtils.debugmsg(false)+" Fail to Set ClickCapture, due to "+StringUtils.debugmsg(e));
+				return false;
+			}
 		}
 	}
 
