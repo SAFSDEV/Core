@@ -18,6 +18,8 @@ package org.safs.selenium.webdriver;
  *   <br>   JUN 29, 2015	(LeiWang) Modify startWebBrowser(): launch selenium server remotely.
  *                                    Add launchSeleniumServers(): start selenium standalone or grid automatically.
  *   <br>   JUL 24, 2015	(LeiWang) Add sendHttpGetRequest(): handle keyword like GetURL, SaveURLToFile, VerifyURLContent, VerifyURLToFile.
+ *   <br>   NOV 20, 2015	(LeiWang) Use java AtomicBoolean to replace my AtomicReady class.
+ *                                    Modify method sendHttpGetRequest(): set the thread (executing AJAX request) as daemon.
  */
 
 import java.io.File;
@@ -28,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -150,23 +153,6 @@ public class DCDriverCommand extends DriverCommand {
 	public static final String SUFFIX_VARIABLE_STATUS_TEXT 	= ".statusText"; 
 	public static final String SUFFIX_VARIABLE_XML 			= ".xml"; 
 	
-	private static class AtomicReady{
-		private boolean ready = false;
-
-		public AtomicReady(boolean ready) {
-			super();
-			this.ready = ready;
-		}
-		
-		public synchronized boolean isReady() {
-			return ready;
-		}
-		public synchronized void setReady(boolean ready) {
-			this.ready = ready;
-		}
-		
-	}
-	
 	protected void sendHttpGetRequest(){
 		testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );
 		if ( params.size() < 2 ) {
@@ -216,7 +202,7 @@ public class DCDriverCommand extends DriverCommand {
 		}
 		
 		final Map<String, Object> resultMap = new HashMap<String, Object>();
-		final AtomicReady resultReady = new AtomicReady(false);
+		final AtomicBoolean resultReady = new AtomicBoolean(false);
 		try {
 			Thread threadGetUrl = new Thread(new Runnable(){
 				public void run() {
@@ -225,16 +211,18 @@ public class DCDriverCommand extends DriverCommand {
 						for(String key:results.keySet()){
 							resultMap.put(key, results.get(key));
 						}
-						resultReady.setReady(true);
+						resultReady.set(true);
 					} catch (Throwable e) {
 						IndependantLog.error(debugmsg+" AJAX.getURL Thread: Met "+StringUtils.debugmsg(e));
 					}
 				}
 			});
+			//Set as daemon, we don't want this thread to block the termination of the main thread.
+			threadGetUrl.setDaemon(true);
 			threadGetUrl.start();
 			//Wait for the sub thread to terminate
 			threadGetUrl.join(timeout*1000);
-			if(!resultReady.isReady()){
+			if(!resultReady.get()){
 				throw new SeleniumPlusException("Cannot get result ready from url '"+url+"'");
 			}
 			
