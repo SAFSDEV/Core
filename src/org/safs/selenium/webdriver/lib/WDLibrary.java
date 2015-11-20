@@ -88,6 +88,7 @@ import org.safs.Processor;
 import org.safs.StringUtils;
 import org.safs.image.ImageUtils;
 import org.safs.natives.NativeWrapper;
+import org.safs.net.IHttpRequest.Key;
 import org.safs.net.XMLHttpRequest;
 import org.safs.robot.Robot;
 import org.safs.selenium.util.DocumentClickCapture;
@@ -2580,5 +2581,86 @@ public class WDLibrary extends SearchObject {
 			return String.valueOf(js_getGlobalVariable(VARIABLE_STATUS_TEXT));
 		}
 	}
+	
+	public static class AtomicReady{
+		private boolean ready = false;
 
+		public AtomicReady(boolean ready) {
+			super();
+			this.ready = ready;
+		}
+		
+		public synchronized boolean isReady() {
+			return ready;
+		}
+		public synchronized void setReady(boolean ready) {
+			this.ready = ready;
+		}
+	}
+
+	/**
+	 * <b>Before running this test, the Selenium Sever should have already started</b> (it can be launched by "java org.safs.selenium.webdriver.lib.RemoteDriver" ).<br>
+	 * 
+	 * @see RemoteDriver#main(String[])
+	 */
+	private static void test_ajax_call(String browser){
+		final String debugmsg = StringUtils.debugmsg(false);
+		String url = "http://www.thomas-bayer.com/";
+		String ID = "thomas";
+		int timeout = 10;
+		boolean isRemote = true;
+		
+		final String ajaxRequestURL = "http://www.thomas-bayer.com/sqlrest/";
+		final Map<String, String> headers = new HashMap<String, String>();
+		final Map<String, Object> resultMap = new HashMap<String, Object>();
+		final AtomicReady resultReady = new AtomicReady(false);
+		//Open the URL by Selenium, on which page the AJAX request will be sent out
+		try {
+			System.out.println(debugmsg+" launching page '"+url+"' in browser '"+browser+"'.");
+			WDLibrary.startBrowser(browser, url, ID, timeout, isRemote);
+
+			Thread threadGetUrl = new Thread(new Runnable(){
+				public void run() {
+					try {
+						Map<String, Object> results = WDLibrary.AJAX.getURL(ajaxRequestURL, headers);
+						for(String key:results.keySet()){
+							resultMap.put(key, results.get(key));
+						}
+						resultReady.setReady(true);
+					} catch (Throwable e) {
+						System.err.println(debugmsg+" AJAX.getURL Thread: Met "+StringUtils.debugmsg(e));
+					}
+				}
+			});
+			threadGetUrl.start();
+			System.out.println(debugmsg+"Waitting for the response from ajax request.");
+			threadGetUrl.join(10*1000);
+			if(!resultReady.isReady()){
+				System.err.println("Cannot get result ready from url '"+ajaxRequestURL+"'");
+			}else{
+				String content = String.valueOf(resultMap.get(Key.RESPONSE_TEXT.value()));
+				System.out.println(debugmsg+" Got http response\n"+content);
+			}
+		}catch(Exception e){
+			System.err.println(debugmsg+" Met "+StringUtils.debugmsg(e));
+		}finally{
+			WDLibrary.stopBrowser(ID);
+			System.out.println(debugmsg+" page '"+ID+"' has been stopped.\n");
+		}
+	}
+	
+	/**
+	 * Before running this method, please read java doc of {@link #test_ajax_call(String)}
+	 * @param args
+	 */
+	public static void main(String[] args){
+		
+		String[] browsers = {SelectBrowser.BROWSER_NAME_CHROME, 
+				             SelectBrowser.BROWSER_NAME_IE, 
+				             SelectBrowser.BROWSER_NAME_FIREFOX};
+		for(String browser:browsers){
+			test_ajax_call(browser);
+		}
+
+	}
 }
