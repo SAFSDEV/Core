@@ -37,6 +37,8 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 	public static final String ATTRIBUTE_CLASS = "class";
 	/**'value' a standard html attribute*/
 	public static final String ATTRIBUTE_VALUE = "value";
+	/**'text' a common html attribute*/
+	public static final String ATTRIBUTE_TEXT = "text";
 	/**'multiple' a html attribute*/
 	public static final String ATTRIBUTE_MULTIPLE = "multiple";
 	/**'index' a html attribute*/
