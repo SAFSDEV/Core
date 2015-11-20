@@ -146,14 +146,16 @@ public class EditBox extends Component {
 	protected String getValue(){
 		String debugmsg = StringUtils.debugmsg(false);
 		String value = null;
-
 		try {
 			value = WDLibrary.getProperty(webelement, ATTRIBUTE_VALUE);
 		} catch (SeleniumPlusException e) {
-			String msg = "Failed, caused by " + StringUtils.debugmsg(e);
-			IndependantLog.warn(debugmsg + msg);
+			try{
+				// some EditBox's have a 'text' property and don't necessarily have a 'value' property.				
+				value = WDLibrary.getProperty(webelement, ATTRIBUTE_TEXT);
+			} catch (SeleniumPlusException e2) {
+				IndependantLog.warn(debugmsg + "failure caused by "+ StringUtils.debugmsg(e) +"; and "+ StringUtils.debugmsg(e2));
+			}
 		}
-
 		return value;
 	}
 	
