@@ -26,6 +26,7 @@ package org.safs.selenium.webdriver;
  *  <br>   JUL 14, 2015	   (Carl Nagle) Modify class/type mappings to automatically trim the class Type setting of any spaces and tabs.
  *  <br>   OCT 30, 2015	   (LeiWang) Modify waitForPropertyStatus(): highlight component.
  *  <br>   NOV 02, 2015	   (Carl Nagle) startRemoteServer on SAFS supporting jre/Java64/jre/bin 64-bit JVM.
+ *  <br>   NOV 23, 2015	   (LeiWang) Modify waitForObject(): refresh the window object if it becomes stale during the searching of component object.
  **/
 
 import java.io.BufferedReader;
@@ -474,13 +475,15 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	 * @throws SAFSException if other problem occurs<br>
 	 *                       such as Map is not registered, or windowName/compName cannot be found in map.<br>
 	 * @see org.safs.DDGUIUtilities#waitForObject(String,String,String,long)
+	 * @see #waitCompObject(WebElement, String, String, String, String, long)
+	 * @see #waitWinObject(String, String, long)
 	 */
 	public int waitForObject (String appMapName, String windowName, String compName, long secTimeout)
 	                           throws SAFSObjectNotFoundException, SAFSException{
 		
 		ApplicationMap map = null;
 		WDTestRecordHelper trdata = (WDTestRecordHelper) this.trdata;
-			    
+
 	    try{
 	    	Log.info("WDGU: Looking for "+windowName+"."+compName+" using AppMap:"+appMapName);
 	    	map = getAppMap(appMapName);
@@ -552,34 +555,13 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	    		Log.info( "WDGU returning. Assuming Image-Based Testing for "+trdata.getCommand());				
 				return 0;
             }
-            
-			boolean done = false;
-			long endtime = System.currentTimeMillis()+(secTimeout * 1000);
-			long delay = 1000;
 
 			//Try to get the Window TestObject dynamically
-			if(winObj==null){
-	    		done = false;
-	    		endtime = System.currentTimeMillis() + (secTimeout * 1000);
-				while(!done){
-					setWDTimeout(secTimeout);
-					winObj = SearchObject.getObject(winRec);
-					resetWDTimeout();
-					
-					//Set the winObj to the map cache
-					if(winObj!=null) {
-						done = true;
-						map.setParentObject(windowName, winObj);
-					}else{
-						done = System.currentTimeMillis() > (endtime - delay);
-						if(!done) try{Thread.sleep(delay);}catch(Exception x){}
-					}
-				}
-			}
-
-			if(winObj==null){
-				throw new SAFSObjectNotFoundException("Could not find matching object for Window "+ windowName);
-			}
+            if(winObj==null){
+            	winObj = waitWinObject(windowName, winRec, secTimeout);
+            	Log.debug("WDGU: Store the window object into the map cache with key '"+windowName+"' in section ["+windowName+"]");
+            	map.setParentObject(windowName, winObj);
+            }
 					
 	    	//these may not be needed if seeking parent window only	    	
 	    	String compRec = null;
@@ -618,33 +600,16 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	    	
 	    	//Try to get the Component TestObject dynamically
 	    	if(compObj==null){
-	    		Log.debug("WDGU:Trying "+windowName+"."+compName+" using AppMap:"+appMapName);
-	    		done = false;
-	    		endtime = System.currentTimeMillis() + (secTimeout * 1000);
-				while(!done){
-		    		setWDTimeout(secTimeout);
-		    		compObj = SearchObject.getObject(winObj,compRec);
-		    		resetWDTimeout();
-					//Set the winObj to the map cache
-					if(compObj!=null) {
-						done = true;
-						map.setChildObject(windowName, compName, compObj);
-					}else{
-						done = System.currentTimeMillis() > (endtime - delay);
-						if(!done) try{Thread.sleep(delay);}catch(Exception x){}
-					}
-				}
+	    		compObj = waitCompObject(winObj, windowName, winRec, compName, compRec, secTimeout);
+	    		Log.debug("WDGU: Store the component object into the map cache with key '"+compName+"' in section ["+windowName+"]");
+	    		map.setChildObject(windowName, compName, compObj);
 	    	}
-
-	    	if(compObj==null){
-				throw new SAFSObjectNotFoundException("Could not find matching object for Component '"+ windowName +":"+ compName +"'");
-			}else{ //is done
-	    		trdata.setCompGuiId(compRec);
-	    		trdata.setWindowGuiId(winRec);
-	    		trdata.setCompTestObject(compObj);
-	    		trdata.setWindowTestObject(winObj);		
-	    		trdata.setCompType(getCompType(compObj));
-	    	}
+	    	//Set the test-record with window, component information
+	    	trdata.setCompGuiId(compRec);
+	    	trdata.setWindowGuiId(winRec);
+	    	trdata.setCompTestObject(compObj);
+	    	trdata.setWindowTestObject(winObj);		
+	    	trdata.setCompType(getCompType(compObj));
 	    
 			Log.info( "WDGU Matched: "+ compObj.toString());
 			
@@ -664,6 +629,100 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 				IndependantLog.error("WDGU: Fail to reset WebDriver timeout. Met "+StringUtils.debugmsg(th));
 			}
 		}
+	}
+	
+	/**
+	 * Wait a window object within a timeout. If not found, a SAFSObjectNotFoundException will be thrown out.<br>
+	 * This method will be called in {@link #waitForObject(String, String, String, long)}.<br>
+	 * 
+	 * @param windowName 	String, the window's name
+	 * @param winRec 		String, the window's recognition string
+	 * @param secTimeout	long, the time (in seconds) to wait for a window
+	 * @return WebElement the window object.
+	 * @throws SAFSObjectNotFoundException if the window object could not  be found.
+	 */
+	private WebElement waitWinObject(String windowName, String winRec, long secTimeout) throws SAFSObjectNotFoundException{
+		String debugmsg = StringUtils.debugmsg(false);
+		WebElement winObj = null;
+				
+		boolean done = false;
+		long endtime = System.currentTimeMillis()+(secTimeout * 1000);
+		long delay = 1000;
+
+		Log.debug(debugmsg+" Waitting '"+windowName+"' ... ");
+		while(!done){
+			setWDTimeout(secTimeout);
+			winObj = SearchObject.getObject(winRec);
+			resetWDTimeout();
+
+			if(winObj!=null) {
+				done = true;
+			}else{
+				done = System.currentTimeMillis() > (endtime - delay);
+				if(!done) try{Thread.sleep(delay);}catch(Exception x){}
+			}
+		}
+
+		if(winObj==null){
+			throw new SAFSObjectNotFoundException("Could not find matching object for Window "+ windowName);
+		}
+
+		return winObj;
+	}
+
+	/**
+	 * Wait a component object within a timeout. If not found, a SAFSObjectNotFoundException will be thrown out.<br>
+	 * If the window object becomes stale during searching component object, we will try to get a fresh window object.<br>
+	 * This method will be called in {@link #waitForObject(String, String, String, long)}.<br>
+	 * 
+	 * @param winObj		WebElement, the window object.
+	 * @param windowName 	String, the window's name
+	 * @param winRec 		String, the window's recognition string
+	 * @param compName		String, the component's name
+	 * @param compRec		String, the component's recognition string
+	 * @param secTimeout	long, the time (in seconds) to wait for a component
+	 * @return WebElement the component object.
+	 * @throws SAFSObjectNotFoundException if the component object could not be found, 
+	 *                                     or the window object becomes stale and could not be refreshed.
+	 */
+	private WebElement waitCompObject(WebElement winObj, String windowName, String winRec, String compName, String compRec, long secTimeout) throws SAFSObjectNotFoundException{
+		String debugmsg = StringUtils.debugmsg(false);
+		WebElement compObj = null;
+		
+		boolean done = false;
+		long endtime = System.currentTimeMillis()+(secTimeout * 1000);
+		long delay = 1000;
+		
+		Log.debug(debugmsg+" Waitting '"+windowName+"."+compName+"' ... ");
+		while(!done){
+			setWDTimeout(secTimeout);
+			compObj = SearchObject.getObject(winObj,compRec);
+			resetWDTimeout();
+
+			if(compObj!=null) {
+				done = true;
+			}else{
+				done = System.currentTimeMillis() > (endtime - delay);
+				if(!done){
+					try {
+						if(winObj==null || WDLibrary.isStale(winObj)){
+							Log.debug(debugmsg+" the window "+windowName+" is stale, trying to get a refreshed one.");
+							winObj = waitWinObject(windowName, winRec, secTimeout);
+						}
+					} catch (SeleniumPlusException e) {
+						//could not get refreshed window, should we continue to wait component?
+						Log.debug(debugmsg+" fail to get refreshed window '"+windowName+"' due to "+StringUtils.debugmsg(e));
+					}
+					try{ Thread.sleep(delay); }catch(Exception x){}
+				}
+			}
+		}
+
+    	if(compObj==null){
+			throw new SAFSObjectNotFoundException("Could not find matching object for Component '"+ windowName +":"+ compName +"'");
+		}
+		
+		return compObj;
 	}
 	
 	public static void highlightThenClear(WebElement webelement, int duration){
