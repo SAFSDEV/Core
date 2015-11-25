@@ -15,6 +15,7 @@ package org.safs.selenium.util;
  */
 import java.util.Date;
 
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.safs.IndependantLog;
 import org.safs.StringUtils;
@@ -456,20 +457,29 @@ public class DocumentClickCapture implements Runnable{
 				}
 				
 				if(eventfired){
-					if(jsGone||targetGone){
-						mouseEvent = new MouseEvent(listenerID);
+					try{
+						if(jsGone||targetGone){
+							mouseEvent = new MouseEvent(listenerID);
+							setReady(true);
+						}else{						
+							IndependantLog.debug(debugmsg+ listenerID+ " event has been fired.");
+							onEventFired(); 
+						}
+						setRunning(false);
+						//reset the global variable
+						if(!jsGone) {
+							IndependantLog.debug(debugmsg+ listenerID+ " resetting global javascript variable.");
+							SearchObject.js_setGlobalBoolVariable(listenerID, false); 
+						}else{
+							IndependantLog.debug(debugmsg+ listenerID+ " javascript variable GONE and will not be reset.");
+						}
+					}catch(Throwable t){
+						IndependantLog.debug(debugmsg+ " ignoring "+ t.getClass().getName()+". "+ listenerID+ " target may now be invalid!");
+						if(mouseEvent == null){
+							mouseEvent = new MouseEvent(listenerID);
+						}
+						setRunning(false);
 						setReady(true);
-					}else{						
-						IndependantLog.debug(debugmsg+ listenerID+ " event has been fired.");
-						onEventFired();
-					}
-					setRunning(false);
-					//reset the global variable
-					if(!jsGone) {
-						IndependantLog.debug(debugmsg+ listenerID+ " resetting global javascript variable.");
-						SearchObject.js_setGlobalBoolVariable(listenerID, false);
-					}else{
-						IndependantLog.debug(debugmsg+ listenerID+ " javascript variable GONE and will not be reset.");
 					}
 				}else{
 					try { Thread.sleep(LISTENER_LOOP_DELAY); } catch (InterruptedException ignore) { }
