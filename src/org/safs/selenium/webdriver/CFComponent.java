@@ -42,6 +42,7 @@ import org.safs.ComponentFunction;
 import org.safs.IndependantLog;
 import org.safs.Log;
 import org.safs.SAFSException;
+import org.safs.SAFSParamException;
 import org.safs.StatusCodes;
 import org.safs.StringUtils;
 import org.safs.autoit.AutoItRs;
@@ -953,11 +954,13 @@ public class CFComponent extends ComponentFunction{
 			String toWindow = (String)iterator.next();
 			String toComponent = (String)iterator.next();
 			
-			IndependantLog.debug("Original component is '"+windowName+":"+compName+"'");
-			IndependantLog.debug("Before getting '"+toWindow+":"+toComponent+"', TestRecordData: "+testRecordData);
-			//BE CAREFUL!!! This calling (wdUtils.getTestObject) may change the testRecordData object!!!
+			IndependantLog.debug(debugmsg+"Source component is '"+windowName+":"+compName+"'");
+			IndependantLog.debug(debugmsg+"Before getting target component '"+toWindow+":"+toComponent+"',"
+					+ "\n TestRecordData: winrec="+testRecordData.getWindowGuiId()+"; comprec="+testRecordData.getCompGuiId());
+			//BE CAREFUL!!! This calling (wdUtils.getTestObject) may change the testRecordData object, which will contain information of the target component!!! 
 			WebElement toElement = wdUtils.getTestObject(mapname, toWindow, toComponent, true);
-			IndependantLog.debug("After getting '"+toWindow+":"+toComponent+"', TestRecordData: "+testRecordData);
+			IndependantLog.debug(debugmsg+"After getting target component '"+toWindow+":"+toComponent+"',"
+					+ "\n TestRecordData: winrec="+testRecordData.getWindowGuiId()+"; comprec="+testRecordData.getCompGuiId());
 			
 			//offset
 			String offset = "50%, 50%, 50%, 50%";
@@ -967,6 +970,10 @@ public class CFComponent extends ComponentFunction{
 			}
 			IndependantLog.debug(debugmsg+" offset is "+offset);
 			String[] offsetArray = StringUtils.convertCoordsToArray(offset, 4);
+			
+			if(offsetArray==null){
+				throw new SAFSParamException(" Offset '"+offset+"' is not valid! The valid examples could be '20%,10%,%50,%60', '30,55,70,80', or even '20%,10%,70,80'.");
+			}
 			
 			Point p1 = WDLibrary.getElementOffsetScreenLocation(compObject, offsetArray[0], offsetArray[1]);
 			Point p2 = WDLibrary.getElementOffsetScreenLocation(toElement, offsetArray[2], offsetArray[3]);
@@ -984,9 +991,10 @@ public class CFComponent extends ComponentFunction{
 					PASSED_MESSAGE);	    
 			
 		} catch (Exception e) {
-			Log.debug(debugmsg+StringUtils.debugmsg(e));
+			String errorMsg = "Met "+StringUtils.debugmsg(e);
+			IndependantLog.error(debugmsg+errorMsg);
 			testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
-			componentFailureMessage(e.getMessage());
+			componentFailureMessage(errorMsg);
 		}       
 	}
 }
