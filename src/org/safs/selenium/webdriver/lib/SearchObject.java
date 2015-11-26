@@ -32,6 +32,7 @@ package org.safs.selenium.webdriver.lib;
  *  <br>  OCT 30, 2015    (SBJLWA)  Move method isVisible(), isDisplayed and isStale() to this class from WDLibrary.
  *                                  Add method highlightThenClear(). Modify highlight(WebElement): check stale.
  *  <br>  NOV 12, 2015    (SBJLWA)  Modify method getObject(): continue to search component on the new page even 'lastFrame' is stale.
+ *  <br>  NOV 26, 2015    (SBJLWA)  Modify method getObject(): reset 'lastFrame' to null if exception is thrown out during switch of frame.
  */
 import java.lang.reflect.Constructor;
 import java.net.URL;
@@ -1373,8 +1374,7 @@ public class SearchObject {
 			}
 		}catch(Exception e){
 			if(e instanceof StaleElementReferenceException && pageHasChanged()){
-				IndependantLog.warn(debugmsg+" swtiching to the previous frame 'lastFrame' failed! The page has changed! Reset the 'lastFrame' to null.");
-				lastFrame = null;
+				IndependantLog.warn(debugmsg+" swtiching to the previous frame 'lastFrame' failed! The page has changed!");
 				//LeiWang: S1215754
 				//if we click a link within a FRAME, as the link is in a FRAME, so the field 'lastFrame' will be assigned after clicking the link.
 				//then the link will lead us to a second page, when we try to find something on that page, firstly we try to switch to 'lastFrame' and 
@@ -1390,6 +1390,11 @@ public class SearchObject {
 			}else{
 				IndependantLog.warn(debugmsg+" swtiching to the previous frame 'lastFrame' failed! Met exception "+StringUtils.debugmsg(e));
 			}
+			//LeiWang: S1215778
+			//If we fail to switch to 'lastFrame', which perhaps means that it is not useful anymore
+			//we should reset it to null, otherwise it will cause errors, such as calculate the element's screen location
+			IndependantLog.debug(debugmsg+" 'lastFrame' is not useful anymore, reset it to null.");
+			lastFrame = null;
 		}
 
 		//3. SBJLWA, FIX http://sww.sas.com/cgi-bin/quick_browse?defectid=S1138290
