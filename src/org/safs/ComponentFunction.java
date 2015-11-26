@@ -29,6 +29,7 @@ package org.safs;
  *   <br>   JAN 12, 2015    (Lei Wang) Modify some methods issueXXX(): Make comment and code consistent.
  *                                   Modify some methods to give more detail (line number, file name) if keyword fails.
  *   <br>   SEP 07, 2015    (Lei Wang) Handle DragTo. Correct a typo, change method preformDrag to performDrag.
+ *   <br>   NOV 26, 2015    (Lei Wang) Modify methods checkForCoord() so that percentage coordinate will be accepted.
  */
 import java.awt.AWTException;
 import java.awt.Dimension;
@@ -38,6 +39,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -518,40 +520,65 @@ public abstract class ComponentFunction extends Processor{
 	public Integer convertNum (String num) {
 		return StringUtils.convertNum(num);
 	}
-
-
+	
 	/**
 	 * <br>
-	 * <em>Purpose:</em> check 'iterator' for coords, either an appmap ref, or x;y notation
+	 * <em>Purpose:</em> check 'iterator' for coords, either a map reference, or x;y notation
+	 * and convert it into Point.
 	 * 
-	 * @param iterator Iterator,
-	 * @return java.awt.Point, null if iterator hasn't another element
+	 * The 'coords' could be provided in 2 formats:<br>
+	 * It could be <b>number, such as "12, 15", "5, 10"</b>.
+	 * Or it could be in <b>percentage format, such as "30%, 45%", "0.25, 0.8"</b>. With this 
+	 * format, the method {@link #getComponentRectangle()} should be provided in subclass, component's width and 
+	 * height are necessary to calculate the coordinate.<br>
+	 *  
+	 * @param iterator Iterator, whose next element is the coords parameter or map-reference
+	 * @return java.awt.Point, null if iterator doesn't have another element
+	 * @see #checkForCoord(String)
+	 * @see #getComponentRectangle()
 	 **/
-	protected java.awt.Point checkForCoord(Iterator iterator) {
-		// see if there is another parameter, the coords(x;y) or app map reference.
+	protected java.awt.Point checkForCoord(Iterator<String> iterator) {
 		if (iterator!=null && iterator.hasNext()) return checkForCoord((String) iterator.next());
 
 		return null;
 	}
-
+	
 	/**
-	 * Purpose: Convert a string coordination to java.awt.Point
+	 * <em>Purpose:</em> check for coords, either a map reference, or x;y notation
+	 * and convert it into Point.
 	 * 
-	 * @param coord String, is either an appmap ref, or x;y notation
-	 * @return java.awt.Point, null if coord is null or empty
+	 * The 'coords' could be provided in 2 formats:<br>
+	 * It could be <b>number, such as "12, 15", "5, 10"</b>.
+	 * Or it could be in <b>percentage format, such as "30%, 45%", "0.25, 0.8"</b>. With this 
+	 * format, the method {@link #getComponentRectangle()} should be provided in subclass, component's width and 
+	 * height are necessary to calculate the coordinate.<br>
+	 * 
+	 * @param coordinate String, either an AppMap reference, or (x;y) notation
+	 * @return java.awt.Point, null if coordinate is null or empty
+	 * 
+	 * @see #getComponentRectangle()
 	 **/
-	protected java.awt.Point checkForCoord(String coord) {
+	protected java.awt.Point checkForCoord(String coordinate) {
+		String debugmsg = StringUtils.debugmsg(false);
+		String[] coordsPair = null;
 		java.awt.Point point = null;
-		// see if there is another parameter, the coords or app map reference.
-		if (coord != null) { // row;col
-			Log.info("...checking for coord: " + coord);
-			if (!coord.trim().equals("")) {
-				//Treate the coord as a reference and try to get the coordination from the Map file
-				point = lookupAppMapCoordReference(coord);
-				//If we can not find the coord from the Map file, try to convert it to Point.
-				if (point == null)  point = convertCoords(coord);
-			}
+		
+		Log.info(debugmsg+ "checking for coordinate: " + coordinate);
+		if(!StringUtils.isValid(coordinate)){
+			IndependantLog.warn(StringUtils.debugmsg(false)+"The passed in parameter '"+coordinate+"' is not valid");
+			return null;
 		}
+		//Treat the parameter coordinate as a reference and try to get the coordinate String from the Map file.
+		String lookup = lookupAppMapReference(coordinate);
+		//If we can not find the value for 'coordinate' from the Map file, we use it directly as coordinate String.
+		if( lookup == null) lookup = coordinate;
+		//convert the coordinate string "x, y" into an array [x, y]
+		coordsPair = StringUtils.convertCoordsToArray(lookup, 2);
+		IndependantLog.debug(debugmsg+" the coordinate has been converted to array '"+Arrays.toString(coordsPair)+"'.");
+		//convert the coordinate array [x, y] based on the component's rectangle
+		point = StringUtils.convertCoords(coordsPair, getComponentRectangle());
+		IndependantLog.debug(debugmsg+" the final coordinate is '"+point+"'.");
+
 		return point;
 	}
 
@@ -1238,7 +1265,6 @@ public abstract class ComponentFunction extends Processor{
 	 * @see org.safs.tools.stringutils.StringUtilities#convertBool(Object)
 	 */
 	public static boolean getUUIDBoolean(String parameter)throws Exception{
-		boolean doUUID = true;
 		String flag = parameter.trim().toUpperCase();
 		flag = flag.replace(" ","");
 		if(flag.length() > 5){
@@ -1292,7 +1318,7 @@ public abstract class ComponentFunction extends Processor{
 		// we still need to capture the ACTUAL even when benchmark is missing!
 		// this way we can use the Actual to become the benchmark.
 		if(!benchFile.exists()||!benchFile.isFile()||!benchFile.canRead()){
-			Log.warn(action +" benchmark file "+ benchFile.getAbsolutePath() +" does not appear to be valid.");
+			Log.warn(debugmsg+action +" benchmark file "+ benchFile.getAbsolutePath() +" does not appear to be valid.");
 			missingBench = true;
 		//	this.issueParameterValueFailure("BenchmarkFile="+fn.getAbsolutePath());
 		//	return;
@@ -1304,7 +1330,7 @@ public abstract class ComponentFunction extends Processor{
 		try{
 			imageRect = deduceImageRect(stemp);
 		}catch(SAFSException e){
-			Log.info(action +" image subarea does not appear to be valid: "+ e.getMessage());
+			Log.info(debugmsg+action +" image subarea does not appear to be valid: "+ e.getMessage());
 			issueParameterValueFailure("SubArea "+e.getMessage());
 			return;
 		}
@@ -1314,7 +1340,7 @@ public abstract class ComponentFunction extends Processor{
 			try{
 				percentBitsTolerance = Integer.decode((String) iterator.next());
 			}catch(Exception e){
-				Log.info(action +" percentBitsTolerance does not appear to be valid: "+ e.getMessage());
+				Log.info(debugmsg+action +" percentBitsTolerance does not appear to be valid: "+ e.getMessage());
 			}
 		}
 		if(iterator.hasNext()) try{ doUUID = getUUIDBoolean(iterator.next());}catch(Exception ignore){}
@@ -1346,13 +1372,13 @@ public abstract class ComponentFunction extends Processor{
 			String test  = null; 
 			try{ bench = StringUtils.readBinaryFile(benchFile.getAbsolutePath()).toString();}
 			catch(IOException io){
-				Log.warn(action +" failed to load benchmark file "+benchFile.getAbsolutePath());
+				Log.warn(debugmsg+action +" failed to load benchmark file "+benchFile.getAbsolutePath());
 				bench = null;
 				//don't throw Exception, we need to save the current GUI snapshot to test file
 			}
 			try{ test  = StringUtils.readBinaryFile(tmpFile.getAbsolutePath()).toString();}
 			catch(IOException io){
-				Log.error(action +" failed to load gui snapshot file "+tmpFile.getAbsolutePath());
+				Log.error(debugmsg+action +" failed to load gui snapshot file "+tmpFile.getAbsolutePath());
 				throw new SAFSException(io.getMessage());
 			}
 
@@ -1360,13 +1386,13 @@ public abstract class ComponentFunction extends Processor{
 			BufferedImage diffimg = null;
 			if(bench != null && test != null){
 				//Compare two binary-strings
-				Log.info("comparing the binary content of 2 images ...");
-				Log.info("benchcontents.length: "+bench.length());
-				Log.info("testcontents.length: "+test.length());
+				Log.info(debugmsg+"comparing the binary content of 2 images ...");
+				Log.info(debugmsg+"benchcontents.length: "+bench.length());
+				Log.info(debugmsg+"testcontents.length: "+test.length());
 				verified = bench.equals(test);
 				if(!verified){
 					//Compare two buffered-images
-					Log.info("comparing each bits of 2 images ...");
+					Log.info(debugmsg+"comparing each bits of 2 images ...");
 					BufferedImage benchimg = ImageUtils.getStoredImage(benchFile.getAbsolutePath());
 					if(filteredAreas!=null) benchimg = ImageUtils.filterImage(benchimg, filteredAreas, warnings);
 					
@@ -1374,7 +1400,7 @@ public abstract class ComponentFunction extends Processor{
 					if(!verified){
 						try{ diffimg = ImageUtils.createDiffImage(buffimg, benchimg);}
 						catch(Exception x){
-							Log.info(action +" failed to create Diff Image due to: "+x.getClass().getName()+", "+ x.getMessage());
+							Log.info(debugmsg+action +" failed to create Diff Image due to: "+x.getClass().getName()+", "+ x.getMessage());
 						}
 					}
 				}
@@ -1897,8 +1923,6 @@ public abstract class ComponentFunction extends Processor{
 			boolean multiline = false;
 			boolean isMissing = false;
 			String missingMessage = null;
-			String rawline = null;
-			String normline = null;
 			Collection<?> benchContents = null;
 			benchFile = getAbsolutFileName(filename, STAFHelper.SAFS_VAR_BENCHDIRECTORY);
 			Collection<String> actualContents = captureObjectData();
@@ -2307,8 +2331,8 @@ public abstract class ComponentFunction extends Processor{
 				if(!contents.isEmpty()){
 					String value = contents.iterator().next();
 					String normval = StringUtils.normalizeLineBreaks(value);
-					if(value.contains("\n")){
-						Map<String,String> props = new HashMap();
+					if(normval.contains("\n")){
+						Map<String,String> props = new HashMap<String,String>();
 						props.put(prop, value);
 						StringUtils.writeEncodingProperties(filename, props, encoding);
 					}else{
@@ -3096,6 +3120,7 @@ public abstract class ComponentFunction extends Processor{
 		IndependantLog.warn(debugmsg+"Not supported yet. Sub class '"+getClass()+"' SHOULD override me!");
 		return null;
 	}
+
 	/**
 	 * Get BufferedImage within a rectangle.<br>
 	 * The rectangle may be absolute on screen, Or it may be relative to a browser or something.<br>

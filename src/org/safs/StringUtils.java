@@ -25,10 +25,14 @@ package org.safs;
  *                                      Modify deduceUnusedSeparatorString(): avoid NullPointerException.
  * <br>     JUL 08,2015     (Lei Wang) 	Add some constant. Add method urlEncode().
  * <br>     SEP 07,2015     (Lei Wang) 	Move some content from method convertLine() to a new method convertCoordsToArray().
+ * <br>     NOV 24,2015     (Lei Wang) 	Remove the dependency of WebElement.
+ *                                      Deprecate method extractCoordStringPair(), use convertCoordsToArray() instead.
+ *                                      Delete some methods, rename some methods to make this class clearer.
  *                                      
  **/
 import java.awt.Point;
 import java.awt.Polygon;
+import java.awt.Rectangle;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -57,7 +61,6 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.openqa.selenium.WebElement;
 import org.safs.ComponentFunction.Window;
 import org.safs.sockets.DebugListener;
 import org.safs.text.FileUtilities;
@@ -1386,55 +1389,27 @@ public class StringUtils{
   }
   
   /**
-	* Convert percentage format coordinate String pair, String[], into java.awt.Point. 
-	* The width and height of component object are necessary for percentage format converting.
-	* 
-	* @param percentageFormatCoordsPair String[],
-	* @param compObject WebElement,
-	* @return java.awt.Point,
-	*/
-  public static java.awt.Point convertPercentageFormatCoord(String[] percentageFormatCoordsPair, WebElement compObject) {
-	  if(percentageFormatCoordsPair == null || percentageFormatCoordsPair.length != 2) {
-		  Log.debug( "bad coords format: "+ Arrays.asList(percentageFormatCoordsPair));
-		  return null;
-	  }
-		
-	  try {
-		  // Convert the percentage parameter into float type.
-		  float xF = StringUtils.convertPercentageString(percentageFormatCoordsPair[0]);
-		  float yF = StringUtils.convertPercentageString(percentageFormatCoordsPair[1]);
-
-		  // If the coordinate value is between zero to one, it will be treated as percentage format;
-		  // otherwise, the casting int format of coordinate value will be used directly.
-		  int x = (xF > 0 && xF < 1) ? (int) (xF * compObject.getSize().width) : (int) xF;
-		  int y = (yF > 0 && yF < 1) ? (int) (yF * compObject.getSize().height) : (int) yF;
-		  
-		  Log.debug("converted coords: x: " + x + ", y: " + y);		  
-		  if(x < 0 || y < 0) Log.warn("Coordinate contains negative value!");
-		  return new java.awt.Point(x, y);
-	  } catch (Exception e) {
-		  Log.debug( "bad coords format: "+ Arrays.asList(percentageFormatCoordsPair) + ", " + e);
-		  return null;
-	  }
-  }
-  
-  /**
-   * Convert percentage format String number into float. 
-   * @param _num String, the percentage format String number need to be converted
-   * @return float,
+   * Convert s String float number (such as 35%, 0.68, 23, 5.4 etc.) into float. 
+   * @param floatNumber String, the String float number need to be converted
+   * @return float, the converted float number.
+   * <br>
+   * NumberFormatException will be thrown out if the parameter is not valid. 
    */
-  public static float convertPercentageString(String _num) {
+  public static float parseFloat(String floatNumber) {
+	  if(!isValid(floatNumber)){
+		  throw new NumberFormatException("The parameter '"+floatNumber+"' is not valid!");
+	  }
 	  try {
+		  floatNumber = floatNumber.trim();
 		  // If it is number format, convert it directly.
-		  return Float.parseFloat(_num);
+		  return Float.parseFloat(floatNumber);
 	  } catch(NumberFormatException nfe) {
-		  int perIndex = _num.indexOf(StringUtils.PERCENTAGE);
+		  int perIndex = floatNumber.indexOf(StringUtils.PERCENTAGE);
 		  		  
-		  if(perIndex >= 0 && perIndex == (_num.length() - 1)) {
-			  // Deal with percentage format.
-			  return 0.01F * Float.parseFloat(_num.substring(0, perIndex).trim());
+		  if(perIndex >= 0 && perIndex == (floatNumber.length()-1)) {
+			  return 0.01F * Float.parseFloat(floatNumber.substring(0, perIndex).trim());
 		  } else {
-			  Log.debug("Can't parse 1 parameter with percentage format: " + _num);
+			  Log.warn("Cannot parse '" + floatNumber+"', whose format might be invalid.");
 			  throw nfe;
 		  }		  
 	  }
@@ -1453,18 +1428,18 @@ public class StringUtils{
    * 
    * @param   coords String, x;y or x,y or Coords=x;y  or Coords=x,y
    * @return  String[], String pair if successful, null otherwise
+   * @deprecated call {@link #convertCoordsToArray(String, int)}, which is more generic.
    */
   public static String[] extractCoordStringPair(String coords) {
-	/**
-	 * @author Tao Xie NOV 12, 2015 This part is moved from the original 'convertCoords()' method.
-	 * 							   Keep the comments here for reference.
-	 */
 	// Carl Nagle OCT 21, 2005 This function previously did NOT support the 
   	// "Coords=" prefix and used to decrement 1 for all provided values.
   	// It also did not accept coords of x or y < 0.  And it allowed the 
   	// y value to be left off.
   	// The routine has been modified to leave the provided values "as-is" 
   	// and to support the "Coords=" prefix.  The y value
+	  
+	//Tao Xie NOV 12, 2015 Moved from the original 'convertCoords(String)' method.
+	// 					  Keep the comments here for reference.
 	try {
 		String ncoords = new String(coords);
 		
@@ -1518,31 +1493,72 @@ public class StringUtils{
 	}
   }
   
+  /** '5', the default x coordinate in pixel.*/
+  public static final int DEFAULT_X_COORDINATE = 5;
+  /** '5', the default y coordinate in pixel.*/
+  public static final int DEFAULT_Y_COORDINATE = 5;
+  
   /**
-   * Convert the String[] format coordinate into java.awt.Point format.
-   * @param coordsPair String[], the String pair coordinate need to be converted.
-   * @return java.awt.Point format coordinate.
-   * @author Tao Xie NOV 12, 2015 This part is moved from original 'convertCoords()'.
+   * Convert the coordinate (given by array of String) into java.awt.Point format.<br>
+   * <p>
+   * The 'coordinate' could be provided in 2 formats:<br>
+   * It could be <b>number, such as [12, 15], [5, 10]</b>. With this format
+   * the second parameter 'compRect' is not needed (could be provided as null).<br>
+   * Or it could be in <b>percentage format, such as [30%, 45%], [0.25, 0.8]</b>. With this 
+   * format, the second parameter 'compRect' SHOULD be provided, and the width and 
+   * height of component rectangle are necessary.<br>
+   * 
+   * @param coordsPair String[], the 2 dimension array representing the [x,y] coordinate.<br>
+   * @param compRect Rectangle, it represents the component relative to which the coordinate will be calculated.<br>
+   *                            Only the width and height will be counted, the rectangle x,y position will not be used.<br>
+   * @return java.awt.Point, the converted coordinate relative to the component
    */
-  public static java.awt.Point convertStringPairCoordsToPoint(String[] coordsPair) {
+  public static java.awt.Point convertCoords(String[] coordsPair, Rectangle compRect) {
+	  String debugmsg = StringUtils.debugmsg(false);
+	  
 	  if(coordsPair == null || coordsPair.length != 2) {
-		  Log.debug( "bad coords format: '" + Arrays.asList(coordsPair) + "'.");
+		  Log.error(debugmsg + "bad coords format: "+ Arrays.toString(coordsPair));
 		  return null;
 	  }
-	  
+
 	  try {
-		  int y = (int) Float.parseFloat(coordsPair[1]);
-		  int x = (int) Float.parseFloat(coordsPair[0]);
+		  Log.debug(debugmsg+" converting coordinate "+Arrays.toString(coordsPair)+" to Point, component rectangle is "+compRect);
 		  
-		  Log.debug("converted coords: x: "+x+", y: "+y);
-		  if(x < 0 || y < 0) Log.warn("Coordinate contains negative value!");
+		  int x = DEFAULT_X_COORDINATE;
+		  int y = DEFAULT_Y_COORDINATE;
+
+		  // Convert the coordinate parameter into float
+		  float xF = parseFloat(coordsPair[0]);
+		  float yF = parseFloat(coordsPair[1]);
+		  //If the compRect is not null, we might provide a percentage for the coordinate
+		  if(compRect!=null){
+			  // If the coordinate value is between zero to one, it will be treated as percentage format;
+			  // otherwise, the casting int format of coordinate value will be used directly.
+			  x = (0<xF && xF<1) ? (int) (xF * compRect.getSize().width) : (int) xF;
+			  y = (0<yF && yF<1) ? (int) (yF * compRect.getSize().height) : (int) yF;
+		  }else{
+			  x = (int) xF;
+			  y = (int) yF;
+		  }
+
+		  Log.debug(debugmsg+"converted coords: x: " + x + ", y: " + y);		  
+		  if(x < 0 || y < 0) Log.warn(debugmsg+"Coordinate contains negative value!");
 		  return new java.awt.Point(x, y);
-	  } catch (Exception ee) {
-		  Log.debug( "bad coords format: '" + Arrays.asList(coordsPair) + "', ", ee);
+	  } catch (Exception e) {
+		  Log.error(debugmsg+ "bad coords format: "+ Arrays.toString(coordsPair) + ", " + e);
 		  return null;
 	  }
   }
   
+  /**
+   * Convert the coordinate (given by array of String) into java.awt.Point format.<br>
+   * @param coordsPair String[], a 2 dimension array containing [x,y] to be converted.
+   * @return java.awt.Point coordinate if successful, null otherwise
+   */
+  public static java.awt.Point convertCoords(String[] coordsPair) {
+	  return convertCoords(coordsPair, null);
+  }
+
     /** 
      * Convert coordinates string formats:
      * <ul>
@@ -1556,19 +1572,22 @@ public class StringUtils{
 	 * into a java.awt.Point object.
 	 * <p>
      * Subclasses may override to convert alternative values, such 
-     * as Row and Col values as is done in org.safs.rational.CFTable
+     * as Row and Column values as is done in org.safs.rational.CFTable
      * 
      * @param   coords String, x;y or x,y or Coords=x;y  or Coords=x,y
      * @return  java.awt.Point if successful, null otherwise
-     * @author Carl Nagle OCT 21, 2005 modified to work as required for 
-     *                              keywords as documented.
-     * @author Carl Nagle MAR 23, 2010 added space delimiter support 
-     * @author Tao Xie MOV 12, 2015 This method has been split into 'extractCoordStringPair()' and 'convertStringPairCoordsToPoint()' methods.
+     * @author Carl Nagle OCT 21, 2005 modified to work as required for keywords as documented.
+     * @author Carl Nagle MAR 23, 2010 added space delimiter support
+     * @author Tao Xie NOV 12, 2015 This method has been split into {@link #extractCoordStringPair(String)} and {@link #convertCoords(String[], Rectangle)} methods.
+     * @author Lei Wang NOV 24, 2015 Call {@link #convertCoordsToArray(String, int)} instead of {@link #extractCoordStringPair(String)}.
+     * 
+     * @see #extractCoordStringPair(String)
+     * @see #convertCoords(String[])
+     * @see #convertCoordsToArray(String, int)
      **/
     public static java.awt.Point convertCoords(String coords) {
-    	return convertStringPairCoordsToPoint(extractCoordStringPair(coords));
+    	return convertCoords(convertCoordsToArray(coords, 2));
     }
-
 
     /** 
      * Convert 2-point Line coordinates string of the formats:
@@ -1625,25 +1644,27 @@ public class StringUtils{
      * @return  String[] an array of coordinates if successful, null otherwise.
      **/
     public static String[] convertCoordsToArray(String coords, int length) {
+    	String debugmsg = debugmsg(false);
+    	
     	try {
     		String[] coordsArray = new String[length];
     		
-    		String ncoords = new String(coords);
+    		String ncoords = new String(coords.trim());
     		int coordsindex = coords.indexOf(EQUAL);
     		if(coordsindex > 0) ncoords = ncoords.substring(coordsindex+1);
     		ncoords=ncoords.trim();
-    		Log.info("working with coods: "+ coords +" prefix stripped to: "+ncoords);
+    		Log.info(debugmsg+"working with coods: "+ coords +" prefix stripped to: "+ncoords);
     		
     		String sep = parseSeparator(ncoords);
     		if (sep == null){
-    			Log.error("invalid coods: "+ ncoords +".");
+    			Log.error(debugmsg+"invalid coods: "+ ncoords +".");
     			return null;
     		}
-    		// properly handles case where coordsindex = -1 (not found)
-    		Log.info("converting coods: "+ ncoords);
+
+    		Log.info(debugmsg+"converting coods: "+ ncoords);
     		StringTokenizer toker = new StringTokenizer(ncoords, sep);
     		if(toker.countTokens() < length) {
-    			Log.error("invalid coods present: "+ ncoords);
+    			Log.error(debugmsg+"invalid coods present: "+ ncoords);
     			return null;
     		}
     		//Put the token into the array
@@ -1653,17 +1674,17 @@ public class StringUtils{
     		for(int i=0; i<coordsArray.length; i++){
     			coord = coordsArray[i];
     			if(coord==null || coord.isEmpty()){
-    				Log.error("invalid coods substrings  "+ Arrays.toString(coordsArray));    				
-    				return null; // assumption
+    				Log.error(debugmsg+"invalid coods substrings  "+ Arrays.toString(coordsArray));    				
+    				return null;
     			}
-    			Log.info("coord "+i+": "+coord);
+    			Log.info(debugmsg+"coord "+i+": "+coord);
     		}
     		
     		return coordsArray;
     	} catch (Exception ee) {
-    		Log.debug( "bad coods format: "+ coords, ee);
+    		Log.debug(debugmsg+"bad coods format: "+ coords, ee);
     		return null;
-    	}
+    	}    	
     }
     
     /**
@@ -2754,6 +2775,37 @@ public class StringUtils{
 		debug(urlEncode("name=Mickey Mouse&pass=!he*@$&email=mickey.mouse@disney.com\\/"));
 	}
 	
+	/**
+	 * Test {@link #convertCoordsToArray(String, int)} and {@link #extractCoordStringPair(String)}. It seems that
+	 * {@link #convertCoordsToArray(String, int)} is more tolerable.
+	 * @param showDetail
+	 */
+	private static void test_convertCoords(boolean showDetail){
+		String[] badCoordinatesArray = {null, "", " ", "23," , ",23, , 56", ";;23"};
+		String[] goodCoordinatesArray = { "23, 56", "23;56", "23 56", "  23   56  ", ";23 ; 56; ", ",23, 56, , ,"};
+		String[] resultArray = null;
+		
+		System.out.println("\n===================== Convert badCoordinatesArray =====================");
+		for(String coordinates: badCoordinatesArray){
+			resultArray = extractCoordStringPair(coordinates);
+			if(showDetail) System.out.println("'"+coordinates+"' has been converted to array "+Arrays.toString(resultArray));
+			if(resultArray!=null) System.err.println("Test Bad Coordinate: conversion by method extractCoordStringPair() for '"+coordinates+"' is wrong!");
+			resultArray = convertCoordsToArray(coordinates, 2);
+			if(showDetail) System.out.println("'"+coordinates+"' has been converted to array "+Arrays.toString(resultArray));
+			if(resultArray!=null) System.err.println("Test Bad Coordinate: conversion by method convertCoordsToArray() for '"+coordinates+"' is wrong!");
+		}
+		
+		System.out.println("\n====================== Convert goodCoordinatesArray ========================");
+		for(String coordinates: goodCoordinatesArray){
+			resultArray = extractCoordStringPair(coordinates);
+			if(showDetail)  System.out.println("'"+coordinates+"' has been converted to array "+Arrays.toString(resultArray));
+			if(resultArray==null) System.err.println("Test Good Coordinate: conversion by method extractCoordStringPair() for '"+coordinates+"' is wrong!");
+			if(showDetail)  resultArray = convertCoordsToArray(coordinates, 2);
+			System.out.println("'"+coordinates+"' has been converted to array "+Arrays.toString(resultArray));			
+			if(resultArray==null) System.err.println("Test Good Coordinate: conversion by method convertCoordsToArray() for '"+coordinates+"' is wrong!");
+		}
+	}
+	
 	private static void debug(String message){
 		System.out.println(message);
 	}
@@ -2779,6 +2831,7 @@ public class StringUtils{
 		test_replaceJVMOptionValue();
 		test_urlEncode();
 		test_convertLine();
+		test_convertCoords(true);
 		
 	}
 	
