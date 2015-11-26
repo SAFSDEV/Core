@@ -15,6 +15,7 @@
  *   <br>   SEP 07, 2015    (Lei Wang) Add method dragTo().
  *   <br>   OCT 30, 2015    (Lei Wang) Modify exist(): highlight component for keyword GUIDESOEXIST etc.
  *   <br>   NOV 26, 2015    (Lei Wang) Remove checkForCoord() and _lookupAppMapCoordReference(), their functionality will be provided by super class.
+ *   <br>   NOV 26, 2015    (Lei Wang) Modify method getComponentRectangle(): include the frame's location for a webelement.
  */
 package org.safs.selenium.webdriver;
 
@@ -764,13 +765,18 @@ public class CFComponent extends ComponentFunction{
 		}
 	}
 	
-	/** @return Rectangle, the rectangle relative the browser. */
-	//if this return 'absolute rectangle on screen', we SHOULD remove overrided method getRectangleImage() 
+	/** @return Rectangle, the rectangle relative to the browser. 
+	 * 
+	 * If this return 'absolute rectangle on screen', we SHOULD remove override method {@link #getRectangleImage(Rectangle)}.<br>
+	 * But we need to be careful, Robot will be used to get image, we have to implement RMI to get image if the <br>
+	 * browser is running on a remote machine.<br>
+	 */
 	protected Rectangle getComponentRectangle(){
 		String debugmsg = StringUtils.debugmsg(false);
 		WebElement component = (compObject!=null? compObject:winObject);
 		try {
-			org.openqa.selenium.Point p = component.getLocation();
+			//Get component's location relative to the browser
+			Point p = WDLibrary.getLocation(component);
 			org.openqa.selenium.Dimension dim = component.getSize();
 			return  new Rectangle(p.x, p.y, dim.getWidth(), dim.getHeight());
 		} catch (Exception e) {
