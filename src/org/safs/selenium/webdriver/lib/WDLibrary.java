@@ -39,6 +39,7 @@ package org.safs.selenium.webdriver.lib;
 *  <br>   OCT 12, 2015    (Lei Wang) Modify method getProperty(): get property by native SAP method.
 *  <br>   OCT 30, 2015    (Lei Wang) Move method isVisible(), isDisplayed and isStale() to SearchObject class.
 *  <br>   NOV 20, 2015    (Lei Wang) Add a unit test for "WDLibrary.AJAX.getURL".
+*  <br>   NOV 26, 2015    (Lei Wang) Move some content from getScreenLocation() to getLocation().
 */
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -509,32 +510,20 @@ public class WDLibrary extends SearchObject {
 	public static void doubleClick(WebElement clickable, Point offset) throws SeleniumPlusException{
 		doubleClick(clickable, offset, null, MOUSE_BUTTON_LEFT);
 	}
-
+	
 	/**
-	 * Get the absolute coordination on the screen of the webelement object.<br>
-	 * Hope Selenium will give this function one day!
-	 *
-	 * @param webelement WebElement, a selenium webelement object
-	 * @return Point, the absolute coordination on the screen of the webelement object.
+	 * Get the web-element's location relative to the browser. If the web-element is inside frames, 
+	 * the frame's location will also be added.
+	 * @param webelement WebElement, the element to get location
+	 * @return Point, the element's location inside a browser
 	 * @throws SeleniumPlusException
 	 */
-	public static Point getScreenLocation(WebElement webelement)throws SeleniumPlusException{
-		String debugmsg = StringUtils.debugmsg(WDLibrary.class, "getScreenLocation");
+	public static Point getLocation(WebElement webelement) throws SeleniumPlusException{
+		String debugmsg = StringUtils.debugmsg(false);
 
-//		try{
-//			System.out.println("Before ........."+Robot.getMouseLocation());
-//			Actions action = new Actions(getWebDriver());
-////			action.moveToElement(webelement, 0, 0);
-//			action.moveByOffset(webelement.getLocation().x, webelement.getLocation().y).perform();
-//			System.out.println("After ........."+Robot.getMouseLocation());
-////			return Robot.getMouseLocation();
-//		}catch(Exception e){
-//
-//		}
-
-		try {
+		try{
 			//1. Get the element's location relative to the frame
-            Coordinates c = ((RemoteWebElement)webelement).getCoordinates();
+			Coordinates c = ((RemoteWebElement)webelement).getCoordinates();
 			org.openqa.selenium.Point p;
 			org.openqa.selenium.Point screen;
 			try{ 
@@ -564,29 +553,60 @@ public class WDLibrary extends SearchObject {
 						&& lastBrowserWindow.getPageXOffset() == 0
 						&& (lastBrowserWindow.getWidth() > lastBrowserWindow.getClientWidth())) {
 					int diff = Math.round(lastBrowserWindow.getWidth()- lastBrowserWindow.getClientWidth())/2;
-					IndependantLog.debug(debugmsg
-							+ "detecting potential client area LOCATION offset problem of "+ diff +" pixels");
+					IndependantLog.debug(debugmsg + "detecting potential client area LOCATION offset problem of "+ diff +" pixels");
 					if (diff < 12) {
 						p.x += diff;
 						p.y += diff;
-						IndependantLog.debug(debugmsg
-										+ "added lastBrowserWindow suspected location offset error, new tentative PAGE location ("
-										+ p.x + "," 
-										+ p.y + ")");
+						IndependantLog.debug(debugmsg + "added lastBrowserWindow suspected location offset error, new tentative PAGE location ("
+								+ p.x + "," 
+								+ p.y + ")");
 					}
 				}
 			}
-			//3. Add the browser client area's location (relative to the browser's window): different according to browser
+			return new Point(p.x, p.y);
+		}catch (Exception e){
+			IndependantLog.error(debugmsg, e);
+			throw new SeleniumPlusException("getLocation failed: "+StringUtils.debugmsg(e));
+		}
+	}
+
+	/**
+	 * Get the absolute coordination on the screen of the webelement object.<br>
+	 * Hope Selenium will give this function one day!
+	 *
+	 * @param webelement WebElement, a selenium webelement object
+	 * @return Point, the absolute coordination on the screen of the webelement object.
+	 * @throws SeleniumPlusException
+	 */
+	public static Point getScreenLocation(WebElement webelement)throws SeleniumPlusException{
+		String debugmsg = StringUtils.debugmsg(WDLibrary.class, "getScreenLocation");
+
+//		try{
+//			System.out.println("Before ........."+Robot.getMouseLocation());
+//			Actions action = new Actions(getWebDriver());
+////			action.moveToElement(webelement, 0, 0);
+//			action.moveByOffset(webelement.getLocation().x, webelement.getLocation().y).perform();
+//			System.out.println("After ........."+Robot.getMouseLocation());
+////			return Robot.getMouseLocation();
+//		}catch(Exception e){
+//
+//		}
+
+		try {
+			//1. Get the element's location relative to the browser
+			Point p = getLocation(webelement);
+			
+			//2. Add the browser client area's location (relative to the browser's window): different according to browser
 			p.x += lastBrowserWindow.getClientX();
 			p.y += lastBrowserWindow.getClientY();
 			//IndependantLog.debug(debugmsg+"added lastBrowserWindow ClientXY offsets, new tentative PAGE location ("+p.x+","+p.y+")");
 
-			//4. Add the browser window's location (relative to the screen)
+			//3. Add the browser window's location (relative to the screen)
 			p.x += lastBrowserWindow.getX();
 			p.y += lastBrowserWindow.getY();
 			//IndependantLog.debug(debugmsg+"added lastBrowserWindow XY offsets, new tentative SCREEN location ("+p.x+","+p.y+")");
 
-			//5. minus scrollbar offset
+			//4. minus scrollbar offset
 			p.x -= lastBrowserWindow.getPageXOffset();
 			p.y -= lastBrowserWindow.getPageYOffset();
 			//IndependantLog.debug(debugmsg+"added lastBrowserWindow PageXY offsets, new tentative SCREEN location ("+p.x+","+p.y+")");
@@ -597,7 +617,7 @@ public class WDLibrary extends SearchObject {
 			}
 			IndependantLog.debug(debugmsg+"The Left-Upper corner's SCREEN coordinate is ("+p.x+","+p.y+")");
 
-			return new Point(p.x, p.y);
+			return p;
 		} catch (Throwable th){
 			IndependantLog.error(debugmsg, th);
 			throw new SeleniumPlusException("getScreenLocation failed: "+StringUtils.debugmsg(th));
