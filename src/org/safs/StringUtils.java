@@ -1404,10 +1404,11 @@ public class StringUtils{
 		  // If it is number format, convert it directly.
 		  return Float.parseFloat(floatNumber);
 	  } catch(NumberFormatException nfe) {
-		  int perIndex = floatNumber.indexOf(StringUtils.PERCENTAGE);
-		  		  
-		  if(perIndex >= 0 && perIndex == (floatNumber.length()-1)) {
-			  return 0.01F * Float.parseFloat(floatNumber.substring(0, perIndex).trim());
+		  int index = floatNumber.indexOf(StringUtils.PERCENTAGE);
+
+		  //Check that the percentage symbol % is the last character
+		  if(index==(floatNumber.length()-1)) {
+			  return 0.01F * Float.parseFloat(floatNumber.substring(0, index));
 		  } else {
 			  Log.warn("Cannot parse '" + floatNumber+"', whose format might be invalid.");
 			  throw nfe;
@@ -2785,24 +2786,74 @@ public class StringUtils{
 		String[] goodCoordinatesArray = { "23, 56", "23;56", "23 56", "  23   56  ", ";23 ; 56; ", ",23, 56, , ,"};
 		String[] resultArray = null;
 		
-		System.out.println("\n===================== Convert badCoordinatesArray =====================");
+		System.out.println("\n========================== "+debugmsg(false)+" ============================");
+		int unexpected = 0;
+		
+		System.out.println("\n----------------------------------------------> Convert badCoordinatesArray: ");
 		for(String coordinates: badCoordinatesArray){
 			resultArray = extractCoordStringPair(coordinates);
-			if(showDetail) System.out.println("'"+coordinates+"' has been converted to array "+Arrays.toString(resultArray));
-			if(resultArray!=null) System.err.println("Test Bad Coordinate: conversion by method extractCoordStringPair() for '"+coordinates+"' is wrong!");
+			if(showDetail) System.out.println("extractCoordStringPair(): '"+coordinates+"' has been converted to array "+Arrays.toString(resultArray));
+			if(resultArray!=null){
+				//we don't care too much about the error of deprecated method
+				System.out.println("extractCoordStringPair(): Conversion for '"+coordinates+"' is wrong!");
+			}
+			
 			resultArray = convertCoordsToArray(coordinates, 2);
-			if(showDetail) System.out.println("'"+coordinates+"' has been converted to array "+Arrays.toString(resultArray));
-			if(resultArray!=null) System.err.println("Test Bad Coordinate: conversion by method convertCoordsToArray() for '"+coordinates+"' is wrong!");
+			if(showDetail) System.out.println("convertCoordsToArray(): '"+coordinates+"' has been converted to array "+Arrays.toString(resultArray));
+			if(resultArray!=null){
+				System.err.println("convertCoordsToArray(): Conversion for '"+coordinates+"' is wrong!");
+				unexpected++;
+			}
 		}
 		
-		System.out.println("\n====================== Convert goodCoordinatesArray ========================");
+		System.out.println("\n----------------------------------------------> Convert goodCoordinatesArray: ");
 		for(String coordinates: goodCoordinatesArray){
 			resultArray = extractCoordStringPair(coordinates);
-			if(showDetail)  System.out.println("'"+coordinates+"' has been converted to array "+Arrays.toString(resultArray));
-			if(resultArray==null) System.err.println("Test Good Coordinate: conversion by method extractCoordStringPair() for '"+coordinates+"' is wrong!");
+			if(showDetail)  System.out.println("extractCoordStringPair(): '"+coordinates+"' has been converted to array "+Arrays.toString(resultArray));
+			if(resultArray==null){
+				//we don't care too much about the error of deprecated method
+				System.out.println("extractCoordStringPair(): conversion for '"+coordinates+"' is wrong!");
+			}
+			
 			if(showDetail)  resultArray = convertCoordsToArray(coordinates, 2);
-			System.out.println("'"+coordinates+"' has been converted to array "+Arrays.toString(resultArray));			
-			if(resultArray==null) System.err.println("Test Good Coordinate: conversion by method convertCoordsToArray() for '"+coordinates+"' is wrong!");
+			System.out.println("convertCoordsToArray(): '"+coordinates+"' has been converted to array "+Arrays.toString(resultArray));			
+			if(resultArray==null){
+				System.err.println("convertCoordsToArray(): conversion for '"+coordinates+"' is wrong!");
+				unexpected++;
+			}
+		}
+		
+		if(unexpected>0){
+			System.err.println(debugmsg(false)+"XXXXXXXXXXXXXXXXXXXXXXX We met "+unexpected+" UNEXPECTED errors.");
+		}
+	}
+	
+	private static void test_parseFloat(){
+		String[] goodFloatNumber = {"23.5", " 23% ", " 0.36 ", "12.3", " 45 ", "  12.5  % ", "12.3 %"};
+		String[] badFloatNumber = {"%%", " % ", " ", " 12. 3", " %5 ", "%", null};
+		
+		System.out.println("\n========================== "+debugmsg(false)+" ============================");
+		int unexpected = 0;
+		
+		for(String number:goodFloatNumber){
+			try{
+				System.out.println("Converting '"+number+"' to float "+parseFloat(number));
+			}catch(Exception e){
+				System.err.println("Fail to convert '"+number+"' to float, met "+debugmsg(e));
+				unexpected++;
+			}
+		}
+		for(String number:badFloatNumber){
+			try{
+				System.err.println("Converting '"+number+"' to float "+parseFloat(number));
+				unexpected++;
+			}catch(Exception e){
+				System.out.println("Fail to convert '"+number+"' to float, met "+debugmsg(e));
+			}
+		}
+		
+		if(unexpected>0){
+			System.err.println(debugmsg(false)+"XXXXXXXXXXXXXXXXXXXXXXX We met "+unexpected+" UNEXPECTED errors.");
 		}
 	}
 	
@@ -2832,6 +2883,7 @@ public class StringUtils{
 		test_urlEncode();
 		test_convertLine();
 		test_convertCoords(true);
+		test_parseFloat();
 		
 	}
 	
