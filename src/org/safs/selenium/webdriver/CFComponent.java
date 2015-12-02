@@ -776,7 +776,7 @@ public class CFComponent extends ComponentFunction{
 		WebElement component = (compObject!=null? compObject:winObject);
 		try {
 			//Get component's location relative to the browser
-			Point p = WDLibrary.getLocation(component);
+			Point p = WDLibrary.getLocation(component, false);
 			org.openqa.selenium.Dimension dim = component.getSize();
 			return  new Rectangle(p.x, p.y, dim.getWidth(), dim.getHeight());
 		} catch (Exception e) {
