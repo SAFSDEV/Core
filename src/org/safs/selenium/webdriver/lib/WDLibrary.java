@@ -40,6 +40,7 @@ package org.safs.selenium.webdriver.lib;
 *  <br>   OCT 30, 2015    (SBJLWA) Move method isVisible(), isDisplayed and isStale() to SearchObject class.
 *  <br>   NOV 20, 2015    (SBJLWA) Add a unit test for "WDLibrary.AJAX.getURL".
 *  <br>   NOV 26, 2015    (SBJLWA) Move some content from getScreenLocation() to getLocation().
+*  <br>   DEC 02, 2015    (SBJLWA) Modify getLocation(): modify to get more accurate location.
 */
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -510,36 +511,53 @@ public class WDLibrary extends SearchObject {
 	public static void doubleClick(WebElement clickable, Point offset) throws SeleniumPlusException{
 		doubleClick(clickable, offset, null, MOUSE_BUTTON_LEFT);
 	}
-	
+
 	/**
 	 * Get the web-element's location relative to the browser. If the web-element is inside frames, 
-	 * the frame's location will also be added.
+	 * the frame's location will also be added.<br>
+	 * <b>Note: </b>The location got by this method might be slightly shifted. To get more accurate
+	 *             location, please call {@link #getLocation(WebElement, boolean)} with 2th parameter
+	 *             given as false.<br>
+	 * 
 	 * @param webelement WebElement, the element to get location
 	 * @return Point, the element's location inside a browser
 	 * @throws SeleniumPlusException
+	 * @see {@link #getLocation(WebElement, boolean)}
 	 */
 	public static Point getLocation(WebElement webelement) throws SeleniumPlusException{
+		return getLocation(webelement, true);
+	}
+	
+	/**
+	 * Get the web-element's location relative to the browser. If the web-element is inside frames, 
+	 * the frame's location will also be added.<br>
+	 * <b>Note: </b>If the 2th parameter is given false, you might get a more accurate location.<br>
+	 * @param webelement WebElement, the element to get location
+	 * @param useOnPageFirstly boolean, There are 2 ways to get element's location relative to the page:
+	 *                                  one is {@link Coordinates#onPage()}, the other is {@link WebElement#getLocation()}.
+	 *                                  it seems that the 2th method ({@link WebElement#getLocation()}) is more accurate.
+	 *                                  But historically, we called {@link Coordinates#onPage()} in first place.<br>
+	 *                                  If this parameter is true, {@link Coordinates#onPage()} will be used firstly as before.<br>
+	 *                                  Otherwise, {@link WebElement#getLocation()} will be used directly<br>
+	 * 
+	 * @return Point, the element's location inside a browser
+	 * @throws SeleniumPlusException
+	 */
+	public static Point getLocation(WebElement webelement, boolean useOnPageFirstly) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(false);
 
 		try{
 			//1. Get the element's location relative to the frame
-			Coordinates c = ((RemoteWebElement)webelement).getCoordinates();
-			org.openqa.selenium.Point p;
-			org.openqa.selenium.Point screen;
-			try{ 
-				screen = c.onScreen();
-				IndependantLog.debug(debugmsg+"Selenium reports the WebElement SCREEN location as ("+screen.x+","+screen.y+")");
+			org.openqa.selenium.Point p=null;
+			if(useOnPageFirstly){
+				try{
+					Coordinates c = ((RemoteWebElement)webelement).getCoordinates();
+					p = c.onPage();
+				}catch(UnsupportedOperationException x){
+					IndependantLog.debug(debugmsg+"Selenium reports coordinates.onPage() is NOT yet supported.");
+				}
 			}
-			catch(UnsupportedOperationException x){
-				IndependantLog.debug(debugmsg+"Selenium reports coordinates.onScreen() is NOT yet supported.");
-			}
-			try{
-				p = c.onPage();
-			}
-			catch(UnsupportedOperationException x){
-				IndependantLog.debug(debugmsg+"Selenium reports coordinates.onPage() is NOT yet supported.");
-				p = webelement.getLocation();
-			}
+			if(p==null) p = webelement.getLocation();
 			IndependantLog.debug(debugmsg+"Selenium reports the WebElement PAGE location as ("+p.x+","+p.y+")");
 
 			//2. Add the frame's location (relative to the the browser client area)
@@ -548,10 +566,10 @@ public class WDLibrary extends SearchObject {
 				p.y += lastFrame.getLocation().y;
 				//IndependantLog.debug(debugmsg+"added lastFrame offsets, new tentative PAGE location ("+p.x+","+p.y+")");
 			}else{
-				if (lastBrowserWindow.getClientX() == 0
-						&& lastBrowserWindow.getBorderWidth() == 0
-						&& lastBrowserWindow.getPageXOffset() == 0
-						&& (lastBrowserWindow.getWidth() > lastBrowserWindow.getClientWidth())) {
+				if (lastBrowserWindow.getClientX()==0 &&
+				    lastBrowserWindow.getBorderWidth()==0 && 
+					lastBrowserWindow.getPageXOffset()==0 && 
+					lastBrowserWindow.getWidth()>lastBrowserWindow.getClientWidth() ) {
 					int diff = Math.round(lastBrowserWindow.getWidth()- lastBrowserWindow.getClientWidth())/2;
 					IndependantLog.debug(debugmsg + "detecting potential client area LOCATION offset problem of "+ diff +" pixels");
 					if (diff < 12) {
@@ -582,16 +600,27 @@ public class WDLibrary extends SearchObject {
 		String debugmsg = StringUtils.debugmsg(WDLibrary.class, "getScreenLocation");
 
 //		try{
-//			System.out.println("Before ........."+Robot.getMouseLocation());
+//			IndependantLog.debug(debugmsg+"Before move mouse ........."+Robot.getMouseLocation());
 //			Actions action = new Actions(getWebDriver());
-////			action.moveToElement(webelement, 0, 0);
+//			action.moveToElement(webelement, 0, 0);
 //			action.moveByOffset(webelement.getLocation().x, webelement.getLocation().y).perform();
-//			System.out.println("After ........."+Robot.getMouseLocation());
-////			return Robot.getMouseLocation();
+//			IndependantLog.debug(debugmsg+"After move mouse ........."+Robot.getMouseLocation());
+//			return Robot.getMouseLocation();
 //		}catch(Exception e){
-//
+//			IndependantLog.warn(debugmsg+" by hovering mouse failed, due to "+StringUtils.debugmsg(e));
 //		}
 
+		try{ 
+			Coordinates c = ((RemoteWebElement)webelement).getCoordinates();
+			org.openqa.selenium.Point screen = c.onScreen();
+			IndependantLog.debug(debugmsg+"Selenium reports the WebElement SCREEN location as ("+screen.x+","+screen.y+")");
+			return new Point(screen.x, screen.y);
+		}catch(UnsupportedOperationException x){
+			IndependantLog.warn(debugmsg+"Selenium reports coordinates.onScreen() is NOT yet supported.");
+		}catch (Exception th){
+			IndependantLog.warn(debugmsg+" by Coordinates.onScreen() failed, due to "+StringUtils.debugmsg(th));
+		}
+		
 		try {
 			//1. Get the element's location relative to the browser
 			Point p = getLocation(webelement);
