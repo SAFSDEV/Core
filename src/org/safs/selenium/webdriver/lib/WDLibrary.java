@@ -41,6 +41,7 @@ package org.safs.selenium.webdriver.lib;
 *  <br>   NOV 20, 2015    (SBJLWA) Add a unit test for "WDLibrary.AJAX.getURL".
 *  <br>   NOV 26, 2015    (SBJLWA) Move some content from getScreenLocation() to getLocation().
 *  <br>   DEC 02, 2015    (SBJLWA) Modify getLocation(): modify to get more accurate location.
+*  <br>   DEC 03, 2015    (SBJLWA) Move "code of fixing browser client area offset problem" from getLocation() to getScreenLocation().
 */
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -529,7 +530,7 @@ public class WDLibrary extends SearchObject {
 	}
 	
 	/**
-	 * Get the web-element's location relative to the browser. If the web-element is inside frames, 
+	 * Get the web-element's location relative to the browser client area. If the web-element is inside frames, 
 	 * the frame's location will also be added.<br>
 	 * <b>Note: </b>If the 2th parameter is given false, you might get a more accurate location.<br>
 	 * @param webelement WebElement, the element to get location
@@ -540,7 +541,7 @@ public class WDLibrary extends SearchObject {
 	 *                                  If this parameter is true, {@link Coordinates#onPage()} will be used firstly as before.<br>
 	 *                                  Otherwise, {@link WebElement#getLocation()} will be used directly<br>
 	 * 
-	 * @return Point, the element's location inside a browser
+	 * @return Point, the element's location relative to the browser client area
 	 * @throws SeleniumPlusException
 	 */
 	public static Point getLocation(WebElement webelement, boolean useOnPageFirstly) throws SeleniumPlusException{
@@ -557,7 +558,7 @@ public class WDLibrary extends SearchObject {
 					IndependantLog.debug(debugmsg+"Selenium reports coordinates.onPage() is NOT yet supported.");
 				}
 			}
-			if(p==null) p = webelement.getLocation();
+			if(p==null) p = webelement.getLocation();			
 			IndependantLog.debug(debugmsg+"Selenium reports the WebElement PAGE location as ("+p.x+","+p.y+")");
 
 			//2. Add the frame's location (relative to the the browser client area)
@@ -565,22 +566,8 @@ public class WDLibrary extends SearchObject {
 				p.x += lastFrame.getLocation().x;
 				p.y += lastFrame.getLocation().y;
 				//IndependantLog.debug(debugmsg+"added lastFrame offsets, new tentative PAGE location ("+p.x+","+p.y+")");
-			}else{
-				if (lastBrowserWindow.getClientX()==0 &&
-				    lastBrowserWindow.getBorderWidth()==0 && 
-					lastBrowserWindow.getPageXOffset()==0 && 
-					lastBrowserWindow.getWidth()>lastBrowserWindow.getClientWidth() ) {
-					int diff = Math.round(lastBrowserWindow.getWidth()- lastBrowserWindow.getClientWidth())/2;
-					IndependantLog.debug(debugmsg + "detecting potential client area LOCATION offset problem of "+ diff +" pixels");
-					if (diff < 12) {
-						p.x += diff;
-						p.y += diff;
-						IndependantLog.debug(debugmsg + "added lastBrowserWindow suspected location offset error, new tentative PAGE location ("
-								+ p.x + "," 
-								+ p.y + ")");
-					}
-				}
 			}
+			
 			return new Point(p.x, p.y);
 		}catch (Exception e){
 			IndependantLog.error(debugmsg, e);
@@ -629,7 +616,22 @@ public class WDLibrary extends SearchObject {
 			p.x += lastBrowserWindow.getClientX();
 			p.y += lastBrowserWindow.getClientY();
 			//IndependantLog.debug(debugmsg+"added lastBrowserWindow ClientXY offsets, new tentative PAGE location ("+p.x+","+p.y+")");
-
+			//Try to detect the client area LOCATION offset problem and fix it.
+			if (lastBrowserWindow.getClientX()==0 &&
+				lastBrowserWindow.getBorderWidth()==0 && 
+				lastBrowserWindow.getPageXOffset()==0 && 
+				lastBrowserWindow.getWidth()>lastBrowserWindow.getClientWidth() ) {
+				int diff = Math.round(lastBrowserWindow.getWidth()- lastBrowserWindow.getClientWidth())/2;
+				IndependantLog.debug(debugmsg + "detecting potential client area LOCATION offset problem of "+ diff +" pixels");
+				if (diff < 12) {
+					p.x += diff;
+					p.y += diff;
+					IndependantLog.debug(debugmsg + "added lastBrowserWindow suspected location offset error, new tentative PAGE location ("
+							+ p.x + "," 
+							+ p.y + ")");
+				}
+			}
+			
 			//3. Add the browser window's location (relative to the screen)
 			p.x += lastBrowserWindow.getX();
 			p.y += lastBrowserWindow.getY();
