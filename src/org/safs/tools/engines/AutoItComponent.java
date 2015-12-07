@@ -254,7 +254,7 @@ public class AutoItComponent extends GenericEngine {
 					AutoItX it = AutoIt.AutoItObject();
 					if (!it.winExists(ars.getWindowsRS())){
 						testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );	 
-						this.issueErrorPerformingAction("failed due to the windows didn't found");
+						this.issueErrorPerformingAction("Failed due to not finding the window");
 						return;
 					}
 					it.winActivate(ars.getWindowsRS());
@@ -278,7 +278,7 @@ public class AutoItComponent extends GenericEngine {
 					
 					if (!it.winExists(ars.getWindowsRS())){
 						testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );	 
-						this.issueErrorPerformingActionOnX("Click","Failed due to the windows didn't found");
+						this.issueErrorPerformingActionOnX("Click","Failed due to not finding the window");
 						return;
 					}
 					
@@ -328,7 +328,7 @@ public class AutoItComponent extends GenericEngine {
 				
 				if (!it.winExists(ars.getWindowsRS())){
 					testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );	 
-					this.issueErrorPerformingActionOnX("SetText","Failed due to the windows didn't found");					
+					this.issueErrorPerformingActionOnX("SetText","Failed due to not finding the window");					
 					return;
 				}
 				
