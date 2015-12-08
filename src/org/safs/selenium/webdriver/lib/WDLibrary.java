@@ -557,17 +557,20 @@ public class WDLibrary extends SearchObject {
 				}catch(UnsupportedOperationException x){
 					IndependantLog.debug(debugmsg+"Selenium reports coordinates.onPage() is NOT yet supported.");
 				}
+				catch(Throwable t){
+					IndependantLog.debug(debugmsg+"ignoring "+ StringUtils.debugmsg(t));
+				}
 			}
 			if(p==null) p = webelement.getLocation();			
-			IndependantLog.debug(debugmsg+"Selenium reports the WebElement PAGE location as ("+p.x+","+p.y+")");
+			IndependantLog.debug(debugmsg+"Selenium reports the WebElement 'CLIENT AREA' location as ("+p.x+","+p.y+")");
 
 			//2. Add the frame's location (relative to the the browser client area)
 			if(lastFrame!=null){
 				p.x += lastFrame.getLocation().x;
 				p.y += lastFrame.getLocation().y;
-				//IndependantLog.debug(debugmsg+"added lastFrame offsets, new tentative PAGE location ("+p.x+","+p.y+")");
+				//IndependantLog.debug(debugmsg+"added lastFrame offsets, new tentative 'CLIENT AREA' location ("+p.x+","+p.y+")");
 			}
-			
+
 			return new Point(p.x, p.y);
 		}catch (Exception e){
 			IndependantLog.error(debugmsg, e);
@@ -577,7 +580,7 @@ public class WDLibrary extends SearchObject {
 
 	/**
 	 * Get the absolute coordination on the screen of the webelement object.<br>
-	 * Hope Selenium will give this function one day!
+	 * Hope Selenium will give this function one day!<br>
 	 *
 	 * @param webelement WebElement, a selenium webelement object
 	 * @return Point, the absolute coordination on the screen of the webelement object.
@@ -586,49 +589,46 @@ public class WDLibrary extends SearchObject {
 	public static Point getScreenLocation(WebElement webelement)throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(WDLibrary.class, "getScreenLocation");
 
-//		try{
-//			IndependantLog.debug(debugmsg+"Before move mouse ........."+Robot.getMouseLocation());
-//			Actions action = new Actions(getWebDriver());
-//			action.moveToElement(webelement, 0, 0);
-//			action.moveByOffset(webelement.getLocation().x, webelement.getLocation().y).perform();
-//			IndependantLog.debug(debugmsg+"After move mouse ........."+Robot.getMouseLocation());
-//			return Robot.getMouseLocation();
-//		}catch(Exception e){
-//			IndependantLog.warn(debugmsg+" by hovering mouse failed, due to "+StringUtils.debugmsg(e));
-//		}
-
+		Point p = null;
 		try{ 
-			Coordinates c = ((RemoteWebElement)webelement).getCoordinates();
-			org.openqa.selenium.Point screen = c.onScreen();
-			IndependantLog.debug(debugmsg+"Selenium reports the WebElement SCREEN location as ("+screen.x+","+screen.y+")");
-			return new Point(screen.x, screen.y);
-		}catch(UnsupportedOperationException x){
-			IndependantLog.warn(debugmsg+"Selenium reports coordinates.onScreen() is NOT yet supported.");
-		}catch (Exception th){
-			IndependantLog.warn(debugmsg+" by Coordinates.onScreen() failed, due to "+StringUtils.debugmsg(th));
-		}
-		
-		try {
-			//1. Get the element's location relative to the browser
-			Point p = getLocation(webelement);
+			try{ 
+				Coordinates c = ((RemoteWebElement)webelement).getCoordinates();
+				org.openqa.selenium.Point screen = c.onScreen();
+				IndependantLog.debug(debugmsg+"Selenium reports the WebElement SCREEN location as ("+screen.x+","+screen.y+")");
+			}
+			catch(UnsupportedOperationException x){
+				IndependantLog.debug(debugmsg+"Selenium reports coordinates.onScreen() is NOT yet supported.");
+			}
+			catch(Throwable t){
+				IndependantLog.debug(debugmsg+"ignoring "+ StringUtils.debugmsg(t));
+			}
 			
-			//2. Add the browser client area's location (relative to the browser's window): different according to browser
+			//1. Get the element's location relative to the browser client area
+			p = getLocation(webelement);
+			
+			//2. Add the browser client area's location (relative to the browser's window), which is different according to browser
 			p.x += lastBrowserWindow.getClientX();
 			p.y += lastBrowserWindow.getClientY();
-			//IndependantLog.debug(debugmsg+"added lastBrowserWindow ClientXY offsets, new tentative PAGE location ("+p.x+","+p.y+")");
-			//Try to detect the client area LOCATION offset problem and fix it.
-			if (lastBrowserWindow.getClientX()==0 &&
-				lastBrowserWindow.getBorderWidth()==0 && 
-				lastBrowserWindow.getPageXOffset()==0 && 
-				lastBrowserWindow.getWidth()>lastBrowserWindow.getClientWidth() ) {
-				int diff = Math.round(lastBrowserWindow.getWidth()- lastBrowserWindow.getClientWidth())/2;
-				IndependantLog.debug(debugmsg + "detecting potential client area LOCATION offset problem of "+ diff +" pixels");
-				if (diff < 12) {
-					p.x += diff;
-					p.y += diff;
-					IndependantLog.debug(debugmsg + "added lastBrowserWindow suspected location offset error, new tentative PAGE location ("
-							+ p.x + "," 
-							+ p.y + ")");
+			IndependantLog.debug(debugmsg+"added lastBrowserWindow ClientXY offsets, new tentative PAGE location ("+p.x+","+p.y+")");
+			
+			//2.1 Fix “client area LOCATION offset problem”
+			if(lastFrame==null){
+				//LEIWANG: I think that “client area LOCATION offset problem” is not related to the lastFrame.
+				//Even the lastFrame is not null, that problem might exist too and we should try to fix it.
+				//TODO remove the condition "if(lastFrame==null)" in future
+				if (lastBrowserWindow.getClientX()==0 &&
+					lastBrowserWindow.getBorderWidth()==0 && 
+					lastBrowserWindow.getPageXOffset()==0 && 
+					lastBrowserWindow.getWidth()>lastBrowserWindow.getClientWidth() ) {
+					int diff = Math.round(lastBrowserWindow.getWidth()- lastBrowserWindow.getClientWidth())/2;
+					IndependantLog.debug(debugmsg + "detecting potential client area LOCATION offset problem of "+ diff +" pixels");
+					if (diff < 12) {
+						p.x += diff;
+						p.y += diff;
+						IndependantLog.debug(debugmsg + "added lastBrowserWindow suspected location offset error, new tentative PAGE location ("
+								+ p.x + "," 
+								+ p.y + ")");
+					}
 				}
 			}
 			
