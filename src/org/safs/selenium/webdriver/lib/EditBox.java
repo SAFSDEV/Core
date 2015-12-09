@@ -12,7 +12,8 @@
  *  SEP 18, 2015    (Lei Wang) Move the functionality of waitReactOnBrowser() to Robot.
  *                           Modify inputEditBoxChars/Keys(): turn on the 'waitReaction' for inputkeys and inputchars.
  *  OCT 13, 2015    (Lei Wang) Modify clearEditBox(): make it robust, call Robot to clear finally.
- *  OCT 16, 2015    (Lei Wang) Refector to create IOperable object properly.
+ *  OCT 16, 2015    (Lei Wang) Refactor to create IOperable object properly.
+ *  DEC 09, 2015    (Lei Wang) Modify verifyEditBox(): do not throw exception when verification fails.
  */
 package org.safs.selenium.webdriver.lib;
 
@@ -165,7 +166,7 @@ public class EditBox extends Component {
 	 * @param keys String, the string to be compared to during verification.
 	 * @return		If verification is passed, return true; otherwise, return false.
 	 */
-	public boolean verifyEditBox(String keys) throws SeleniumPlusException {
+	public boolean verifyEditBox(String keys){
 		String debugmsg = getClass().getName() + ".verifyEditBox(): ";		
 		boolean passVerification = false;		
 		String contents = getValue();
@@ -176,7 +177,6 @@ public class EditBox extends Component {
 			passVerification = false;
 			String msg = "EditBox verify errors: property:'" + contents + "'" + " does NOT equal to " + " value:'" + keys + "'";
 			IndependantLog.debug(debugmsg + msg);
-			throw new SeleniumPlusException(msg);
 		}
 		
 		return passVerification;
