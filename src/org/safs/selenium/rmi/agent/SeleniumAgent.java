@@ -6,9 +6,11 @@
  * Developer History:
  * <br> Carl Nagle  MAY 29, 2015  Add support for remoteSetKeyDelay
  * <br> Lei Wang  SEP 18, 2015  Add support for setWaitReaction
+ * <br> Lei Wang  DEC 10, 2015  Add support for clipboard related methods.
  */
 package org.safs.selenium.rmi.agent;
 
+import java.awt.datatransfer.DataFlavor;
 import java.rmi.RemoteException;
 import java.rmi.ServerException;
 import java.rmi.registry.LocateRegistry;
@@ -187,7 +189,7 @@ public class SeleniumAgent extends RemoteRoot implements SeleniumRMIAgent{
 	 */
 	public void remoteClick(int screen_x, int screen_y, int mouseButtonNumber, int nclicks) throws ServerException, Exception{
 		//Robot.click(location.x, location.y, mouseButtonNumber, 1);
-		String s = separator;
+		String s = separator;		
 		server.runCommand(s+ SeleniumServer.CMD_CLICK +s+ 
 		                     String.valueOf(screen_x) +s+
 		                     String.valueOf(screen_y) +s+
@@ -303,6 +305,35 @@ public class SeleniumAgent extends RemoteRoot implements SeleniumRMIAgent{
 	public void remoteTypeChars(String keys) throws ServerException, Exception{
 		String s = separator;
 		server.runCommand(s+ SeleniumServer.CMD_TYPECHARS +s+ keys); 
+	}
+	
+	/**
+	 * Clear the clipboard on the machine where the RMI server is running.
+	 * @throws ServerException if the command did not execute successfully
+	 * @throws Exception for other problems
+	 */
+	public void clearClipboard() throws ServerException, Exception{
+		server.execute(SeleniumServer.CMD_CLIPBOARD_CLEAR, (Object)null); 
+	}
+	/**
+	 * Set content to the clipboard on the machine where the RMI server is running.
+	 * @param content String, the string content to set to clipboard
+	 * @throws ServerException if the command did not execute successfully
+	 * @throws Exception for other problems
+	 */
+	public void setClipboard(String content) throws ServerException, Exception{
+		server.execute(SeleniumServer.CMD_CLIPBOARD_SET, content); 
+	}
+	
+	/**
+	 * Get content of the clipboard on the machine where the RMI server is running.
+	 * @param dataFlavor DataFlavor, the data flavor for the content in clipboard
+	 * @return Object, the content of the clipboard
+	 * @throws ServerException if the command did not execute successfully
+	 * @throws Exception for other problems
+	 */
+	public Object getClipboard(DataFlavor dataFlavor) throws ServerException, Exception{
+		return server.execute(SeleniumServer.CMD_CLIPBOARD_GET, dataFlavor); 
 	}
 	
 	/**
