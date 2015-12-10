@@ -14,19 +14,15 @@
  */
 package org.safs.selenium.webdriver;
 
-import java.awt.datatransfer.DataFlavor;
-
 import org.openqa.selenium.WebElement;
 import org.safs.IndependantLog;
 import org.safs.StatusCodes;
 import org.safs.StringUtils;
 import org.safs.model.commands.EditBoxFunctions;
-import org.safs.robot.Robot;
 import org.safs.selenium.webdriver.lib.EditBox;
 import org.safs.selenium.webdriver.lib.SeleniumPlusException;
 import org.safs.text.FAILKEYS;
 import org.safs.text.GENKEYS;
-import org.safs.tools.stringutils.StringUtilities;
 
 /**
  * Handle the keywords related to 'EditBox', such as SetTextValue, SetTextCharacters etc.
@@ -128,8 +124,6 @@ public class CFEditBox extends CFComponent {
 					setText(isCharacter, text);
 					//we MAY need to slow down, so that we can get all text from edit-box after setting.
 					verified = editbox.verifyEditBox(text);
-					//Double check the text in EditBox
-					if(!verified) verified = doubleCheckVerification(text); 
 				}
 				
 				if (verified) {
@@ -177,35 +171,4 @@ public class CFEditBox extends CFComponent {
 		}
 	}
 
-	/**
-	 * Copy the edit-box's value to clipboard and compare the clipboard's value with the text we try to input.<br>
-	 * Note: This only works on local machine.<br>
-	 * @param text String, the text to verify with.
-	 * @return boolean, true if the edit-box's value equals the text to input.
-	 */
-	protected boolean doubleCheckVerification(String text){
-		String debugmsg = StringUtils.debugmsg(false);
-		
-		try {
-			IndependantLog.debug(debugmsg+" copy content to clipboard, and compare clipboard's content with the text we want to input.");
-			//TODO Cut the content to set to the clip-board, we need to get this work on remote machine thru RMI
-			Robot.clearClipboard();
-			StringUtilities.sleep(100);
-			editbox.inputKeys("^a");
-			editbox.inputKeys("^c");
-			//We MUST wait a while before the clip-board is set correctly.
-			Thread.sleep(1000);
-			//TODO Get the content from the clip-board, we need to get this work on remote machine thru RMI
-			String result = (String) Robot.getClipboard(DataFlavor.stringFlavor);
-			
-			if(text.equals(result)){
-				IndependantLog.debug(debugmsg+"======================================================== THEY ARE EQUAL!!!");
-				return true;
-			}
-		} catch (Exception e) {
-			IndependantLog.debug(debugmsg+"Fail. due to "+StringUtils.debugmsg(e));
-		}
-		
-		return false;
-	}
 }
