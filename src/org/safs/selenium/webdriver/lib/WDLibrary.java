@@ -42,9 +42,11 @@ package org.safs.selenium.webdriver.lib;
 *  <br>   NOV 26, 2015    (SBJLWA) Move some content from getScreenLocation() to getLocation().
 *  <br>   DEC 02, 2015    (SBJLWA) Modify getLocation(): modify to get more accurate location.
 *  <br>   DEC 03, 2015    (SBJLWA) Move "code of fixing browser client area offset problem" from getLocation() to getScreenLocation().
+*  <br>   DEC 10, 2015    (SBJLWA) Add methods to handle clipboard on local machine or on RMI server machine.
 */
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.datatransfer.DataFlavor;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
@@ -1214,6 +1216,90 @@ public class WDLibrary extends SearchObject {
 			}
 		} catch (Exception e) {
 			throw new SeleniumPlusException("Unable to successfully complete InputCharacters due to "+ e.getMessage());
+		}
+	}
+	
+	/**
+	 * Clear the clipboard on local machine or on machine where the RMI server is running.
+	 * @throws SeleniumPlusException
+	 */
+	public static void clearClipboard() throws SeleniumPlusException{
+		String debugmsg = StringUtils.debugmsg(false);
+		
+		try{
+			RemoteDriver wd = null;
+			try{ wd = (RemoteDriver) getWebDriver();}catch(Exception x){}
+			if(wd == null || wd.isLocalServer()){
+				IndependantLog.info(debugmsg+" clear local clipboard by Robot.");
+				Robot.clearClipboard();
+			}else {
+				try{
+					IndependantLog.info(debugmsg+" clear clipboard on RMI Server");
+					wd.rmiAgent.clearClipboard();
+				}catch(Exception e){
+					IndependantLog.error(debugmsg+" Fail to clear RMI Server clipboard due to "+StringUtils.debugmsg(e));
+					throw e;
+				}
+			}
+		} catch (Exception e) {
+			throw new SeleniumPlusException("Unable to successfully complete ClearClipboard due to "+ e.getMessage());
+		}
+	}
+	
+	/**
+	 * Set content to the clipboard on local machine or on machine where the RMI server is running.
+	 * @param content String, the content to set to clipboard
+	 * @throws SeleniumPlusException
+	 */
+	public static void setClipboard(String content) throws SeleniumPlusException{
+		String debugmsg = StringUtils.debugmsg(false);
+		
+		try{
+			RemoteDriver wd = null;
+			try{ wd = (RemoteDriver) getWebDriver();}catch(Exception x){}
+			if(wd == null || wd.isLocalServer()){
+				IndependantLog.info(debugmsg+" set '"+content+"' to local clipboard by Robot.");
+				Robot.setClipboard(content);
+			}else {
+				try{
+					IndependantLog.info(debugmsg+" set '"+content+"' to clipboard on RMI Server");
+					wd.rmiAgent.setClipboard(content);
+				}catch(Exception e){
+					IndependantLog.error(debugmsg+" Fail to set '"+content+"' to RMI Server clipboard due to "+StringUtils.debugmsg(e));
+					throw e;
+				}
+			}
+		} catch (Exception e) {
+			throw new SeleniumPlusException("Unable to successfully complete SetClipboard due to "+ e.getMessage());
+		}
+	}
+	
+	/**
+	 * Get the content from the clipboard on local machine or on machine where the RMI server is running.
+	 * @param dataFlavor DataFlavor, the data flavor for the content in clipboard
+	 * @return Object, the content of the clipboard
+	 * @throws SeleniumPlusException
+	 */
+	public static Object getClipboard(DataFlavor dataFlavor) throws SeleniumPlusException{
+		String debugmsg = StringUtils.debugmsg(false);
+		
+		try{
+			RemoteDriver wd = null;
+			try{ wd = (RemoteDriver) getWebDriver();}catch(Exception x){}
+			if(wd == null || wd.isLocalServer()){
+				IndependantLog.info(debugmsg+" get content from local clipboard by Robot.");
+				return Robot.getClipboard(dataFlavor);
+			}else {
+				try{
+					IndependantLog.info(debugmsg+" get content from clipboard on RMI Server");
+					return wd.rmiAgent.getClipboard(dataFlavor);
+				}catch(Exception e){
+					IndependantLog.error(debugmsg+" Fail to get content from RMI Server clipboard due to "+StringUtils.debugmsg(e));
+					throw e;
+				}
+			}
+		} catch (Exception e) {
+			throw new SeleniumPlusException("Unable to successfully complete GetClipboard due to "+ e.getMessage());
 		}
 	}
 
@@ -2563,6 +2649,9 @@ public class WDLibrary extends SearchObject {
 		@SuppressWarnings({ "unchecked" })
 		public Map<String, Object> execute(HttpCommand command, String url, boolean async, Map<String, String> headers, String data) throws SeleniumPlusException {
 			if(!StringUtils.isValid(url)) throw new SeleniumPlusException("The request url is null or is empty!");
+			
+			checkBrowserCompability();
+			
 			String debugmsg = StringUtils.debugmsg(false);
 
 			String parameters = ""+(data==null?"":"with data '"+data+"'")+((headers==null||headers.isEmpty())?"":" with request headers "+headers);
@@ -2597,6 +2686,31 @@ public class WDLibrary extends SearchObject {
 				return null;
 			}
 		}
+		
+		protected void checkBrowserCompability() throws SeleniumPlusException{
+			String debugmsg = StringUtils.debugmsg(false);
+			WebDriver driver = getWebDriver();
+			
+			if(driver==null){
+				IndependantLog.warn(debugmsg + "The static WebDriver is null!");
+			}else if(driver instanceof RemoteDriver){
+//				RemoteDriver rd = (RemoteDriver) driver;
+//				String browserName = rd.getBrowserName();
+//				String browserVersion = rd.getBrowserVersion();
+//				String driverVersion = rd.getDriverVersion();
+//				
+//				IndependantLog.warn(debugmsg + "You are using browser "+browserName+", version is "+browserVersion+".\n The Selenium Driver version is "+driverVersion);
+//				
+//				if(SelectBrowser.BROWSER_NAME_FIREFOX.equalsIgnoreCase(browserName)){
+//					if("42.0".equalsIgnoreCase(browserVersion) && "2.47.1".equals(driverVersion)){
+//						throw new SeleniumPlusException("Compability problem for browser '"+browserName+"' "+browserVersion);
+//					}
+//				}
+			}else{
+				IndependantLog.warn(debugmsg + " Did not check the browser compability!");
+			}
+		}
+		
 		/**
 		 * Get javascript global variable {@link #VARIABLE_READY_STATE}.
 		 */
@@ -2705,12 +2819,13 @@ public class WDLibrary extends SearchObject {
 	 */
 	public static void main(String[] args){
 		
-		String[] browsers = {SelectBrowser.BROWSER_NAME_CHROME, 
+		String[] browsers = {
+				             SelectBrowser.BROWSER_NAME_CHROME, 
 				             SelectBrowser.BROWSER_NAME_IE, 
-				             SelectBrowser.BROWSER_NAME_FIREFOX};
+				             SelectBrowser.BROWSER_NAME_FIREFOX
+				             };
 		for(String browser:browsers){
 			test_ajax_call(browser);
 		}
-
 	}
 }
