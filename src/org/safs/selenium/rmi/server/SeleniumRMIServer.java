@@ -2,10 +2,14 @@
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
-
+/**
+ * Developer History:
+ * <br> SBJLWA  DEC 10, 2015  Add method execute(): to handle parameters separately.
+ */
 package org.safs.selenium.rmi.server;
 
-import java.rmi.*;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 
 import org.safs.selenium.rmi.agent.SeleniumRMIAgent;
 
@@ -93,5 +97,19 @@ public interface SeleniumRMIServer extends Remote {
      * @return Object of a type expected by the Client implementation calling this method.
      */
     public Object runCommand(Object command) throws RemoteException, Exception;
+    
+    /**
+     * Called by an RMI Agent.
+     * This is a "do anything" function that the Server and Clients have a private contract 
+     * to implement.  It essentially allows a Client/Server implementation to pass anything 
+     * back and forth and act according to their shared designs.
+     * <p>
+     * The parameters should be Serializable.<br>
+     * 
+     * @param command Object of a type expected by the Server implementation for this method.
+     * @param parameters Object... of a type expected by the Server implementation for this method.
+     * @return Object of a type expected by the Client implementation calling this method.
+     */
+    public Object execute(Object command, Object... parameters) throws RemoteException, Exception;
     
 }

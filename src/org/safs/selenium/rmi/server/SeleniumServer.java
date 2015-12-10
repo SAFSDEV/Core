@@ -6,10 +6,12 @@
  * Developer History:
  * <br> CANAGL  MAY 29, 2015  Add support for setMillisBetweenKeystrokes
  * <br> SBJLWA  SEP 18, 2015  Add support for setWaitReaction
+ * <br> SBJLWA  DEC 10, 2015  Add support for clipboard related methods.
  */
 package org.safs.selenium.rmi.server;
 
 import java.awt.AWTException;
+import java.awt.datatransfer.DataFlavor;
 import java.rmi.RemoteException;
 import java.rmi.ServerException;
 import java.rmi.server.ObjID;
@@ -67,6 +69,9 @@ public class SeleniumServer extends RemoteRoot implements SeleniumRMIServer{
 	public static final String CMD_TYPECHARS 			= "TYPE-CHARS";
 	public static final String CMD_SET_KEY_DELAY 		= "SET-KEY-DELAY";
 	public static final String CMD_SET_WAIT_REACTION 	= "SET-WAIT-REACTION";
+	public static final String CMD_CLIPBOARD_CLEAR 		= "CLIPBOARD_CLEAR";
+	public static final String CMD_CLIPBOARD_SET 		= "CLIPBOARD_SET";
+	public static final String CMD_CLIPBOARD_GET 		= "CLIPBOARD_GET";
 	
 	private Hashtable agents = new Hashtable();
 	
@@ -192,7 +197,7 @@ public class SeleniumServer extends RemoteRoot implements SeleniumRMIServer{
 	 * field[4] int numClicks    (default 1)
 	 * </pre>
 	 * @return An empty String on success.
-	 * @throws ServerRuntimeException 
+	 * @throws ServerException 
 	 * @see Robot#clickWithKeyPress(int, int, int, int, int)
 	 */
 	protected Object clickWithKeyPress(String[] params) throws ServerException{	
@@ -228,7 +233,7 @@ public class SeleniumServer extends RemoteRoot implements SeleniumRMIServer{
 	 * field[0] int keyCode
 	 * </pre>
 	 * @return An empty String on success.
-	 * @throws ServerRuntimeException if fail
+	 * @throws ServerException if fail
 	 * @see Robot#keyPress(int)
 	 */
 	protected Object keyPress(String[] params) throws ServerException{		
@@ -249,7 +254,7 @@ public class SeleniumServer extends RemoteRoot implements SeleniumRMIServer{
 	 * field[0] int keyCode
 	 * </pre>
 	 * @return An empty String on success.
-	 * @throws ServerRuntimeException if fail
+	 * @throws ServerException if fail
 	 * @see Robot#keyRelease(int)
 	 */
 	protected Object keyRelease(String[] params) throws ServerException{		
@@ -270,7 +275,7 @@ public class SeleniumServer extends RemoteRoot implements SeleniumRMIServer{
 	 * field[0] int, the wheel amount to scroll.
 	 * </pre>
 	 * @return An empty String on success.
-	 * @throws ServerRuntimeException if fail
+	 * @throws ServerException if fail
 	 * @see Robot#mouseWheel(int)
 	 */
 	protected Object mouseWheel(String[] params) throws ServerException{		
@@ -384,27 +389,99 @@ public class SeleniumServer extends RemoteRoot implements SeleniumRMIServer{
 		}
 		return new String();
 	}
+	
+	/**
+	 * Clear the clipboard.
+	 * @return A Boolean(true) on success.
+	 * @throws ServerException 
+	 * @see Robot#clearClipboard()
+	 */
+	protected Boolean clearClipboard() throws ServerException{
+		try{			
+			IndependantLog.info(remoteType +" performing Robot.clearClipboard.");
+			Robot.clearClipboard();
+			return new Boolean(true);
+		}catch(Exception any){
+			String msg = remoteType +" Robot.clearClipboard "+any.getClass().getName()+", "+ any.getMessage();
+			IndependantLog.warn(msg);
+			throw new ServerException(msg, any);
+		}
+	}
+	
+	/**
+	 * Set string content to clipboard.
+	 * @param params Object...
+	 * <pre>
+	 * field[0] String content string to set to clipboard.
+	 * </pre>
+	 * @return A Boolean(true) on success.
+	 * @throws ServerException 
+	 * @see {@link Robot#setClipboard(String)}
+	 */
+	protected Boolean setClipboard(Object... params) throws ServerException{
+		IndependantLog.info(remoteType +" performing Robot.setClipboard.");
+		if(params==null || params.length<1 || !(params[0] instanceof String)){
+			throw new ServerException(remoteType+" Parameter is not valid. Please provide a String as parameter.");
+		}
+		
+		try{			
+			Robot.setClipboard(params[0].toString());
+			return new Boolean(true);
+		}catch(Exception any){
+			String msg = remoteType +" Robot.setClipboard "+any.getClass().getName()+", "+ any.getMessage();
+			IndependantLog.warn(msg);
+			throw new ServerException(msg, any);
+		}
+	}
+	
+	/**
+	 * Get clipboard's content.
+	 * @param params Object...
+	 * <pre>
+	 * field[0] DataFlavor the type of the content to get from clipboard
+	 * </pre>
+	 * @return Object, the content of the clipboard
+	 * @throws ServerException 
+	 * @see {@link Robot#getClipboard(DataFlavor)}
+	 */
+	protected Object getClipboard(Object... params) throws ServerException{
+		IndependantLog.info(remoteType +" performing Robot.getClipboard.");
+		if(params==null || params.length<1 || !(params[0] instanceof DataFlavor)){
+			throw new ServerException(remoteType+" Parameter is not valid. Please provide a DataFlavor as parameter.");
+		}
+		
+		try{			
+			return Robot.getClipboard((DataFlavor)params[0]);
+		}catch(Exception any){
+			String msg = remoteType +" Robot.getClipboard "+any.getClass().getName()+", "+ any.getMessage();
+			IndependantLog.warn(msg);
+			throw new ServerException(msg, any);
+		}
+	}
 
 	/**
-	 * @param command -- usually a String.
+	 * @param commandAndParameters -- usually a String.
 	 * <p>
-	 * String commands interpretted as:
+	 * String commandAndParameters interpreted as:
 	 * <pre>
 	 * char[0] field separator for all subsequent fields
 	 * field[1] -- command
 	 * field[2-N] -- command parameters
+	 * </pre>
 	 * @return determined by individual commands. Usually a String. 
 	 * @throws ServerException if an error occurs or the requested command is not supported.
 	 */
 	@Override
-	public Object runCommand(Object command) throws RemoteException, Exception {
-		System.out.println("SeleniumRMIServer received "+ command.toString());
-		IndependantLog.info(remoteType +"runCommand received "+ command.toString());
+	public Object runCommand(Object commandAndParameters) throws RemoteException, Exception {
+		if(commandAndParameters==null) throw new ServerException(remoteType +" The passed in command is null!");
+		
+		System.out.println("SeleniumRMIServer received "+ commandAndParameters.toString());
+		IndependantLog.info(remoteType +"runCommand received "+ commandAndParameters.toString());
 		String action = null;
-		if(command instanceof String){
+		if(commandAndParameters instanceof String){
 			String[] params = null;
 			try{
-				String cmd = (String)command;
+				String cmd = (String)commandAndParameters;
 				String sep = cmd.substring(0,1);
 				cmd = cmd.substring(1);
 				String[] fields = cmd.split(sep);
@@ -416,6 +493,7 @@ public class SeleniumServer extends RemoteRoot implements SeleniumRMIServer{
 				IndependantLog.warn(msg);
 				throw new ServerException(msg, x);
 			}
+			
 			if(CMD_CLICK.equalsIgnoreCase(action)) return click(params);
 			if(CMD_CLICK_WITH_KEY.equalsIgnoreCase(action)) return clickWithKeyPress(params);
 			if(CMD_TYPEKEYS.equalsIgnoreCase(action)) return typeKeys(params);
@@ -425,8 +503,44 @@ public class SeleniumServer extends RemoteRoot implements SeleniumRMIServer{
 			if(CMD_MOUSEWHEEL.equalsIgnoreCase(action)) return mouseWheel(params);
 			if(CMD_SET_KEY_DELAY.equalsIgnoreCase(action)) return setMillisBetweenKeystrokes(params);
 			if(CMD_SET_WAIT_REACTION.equalsIgnoreCase(action)) return setWaitReaction(params);
+			
+			IndependantLog.warn(remoteType +" does not support command "+ action);
+			
+		}else{
+			IndependantLog.warn(remoteType +" the command's type '"+commandAndParameters.getClass().getSimpleName()+"' is not supported");
+			
 		}
-		IndependantLog.warn(remoteType +" does not support command "+ action);
+		
+		throw new ServerException(remoteType +" Unsupported commmand type or parameters.");
+	}
+	
+	/**
+	 * @param command -- usually a String representing the action's name 
+	 * @param parameters Object..., serializable parameters
+	 * 
+	 * @return determined by individual commands. 
+	 * @throws ServerException if an error occurs or the requested command is not supported.
+	 */
+	@Override
+	public Object execute(Object command, Object... parameters) throws RemoteException, Exception {
+		if(command==null) throw new ServerException(remoteType +" The passed in command is null!");
+		
+		System.out.println("SeleniumRMIServer received "+ command.toString());
+		IndependantLog.info(remoteType +"runCommand received "+ command.toString());
+		
+		if(command instanceof String){
+			String action = command.toString();
+			
+			if(CMD_CLIPBOARD_CLEAR.equalsIgnoreCase(action)) return clearClipboard();
+			if(CMD_CLIPBOARD_SET.equalsIgnoreCase(action)) return setClipboard(parameters);
+			if(CMD_CLIPBOARD_GET.equalsIgnoreCase(action)) return getClipboard(parameters);
+			
+			IndependantLog.warn(remoteType +" does not support command "+ action);
+			
+		}else{
+			IndependantLog.warn(remoteType +" the command's type '"+command.getClass().getSimpleName()+"' is not supported");
+		}
+		
 		throw new ServerException(remoteType +" Unsupported commmand type or parameters.");
 	}
 }
