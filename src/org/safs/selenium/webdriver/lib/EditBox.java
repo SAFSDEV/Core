@@ -17,6 +17,8 @@
  */
 package org.safs.selenium.webdriver.lib;
 
+import java.awt.datatransfer.DataFlavor;
+
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -163,22 +165,51 @@ public class EditBox extends Component {
 	/**
 	 * <em>Purpose:</em> Compare the contents of EditBox to the original keys,<br>
 	 * If they are same, return true; Otherwise, return false. <br>
-	 * @param keys String, the string to be compared to during verification.
+	 * @param expectedText String, the string to be compared to during verification.
 	 * @return		If verification is passed, return true; otherwise, return false.
 	 */
-	public boolean verifyEditBox(String keys){
-		String debugmsg = getClass().getName() + ".verifyEditBox(): ";		
-		boolean passVerification = false;		
+	public boolean verifyEditBox(String expectedText){
+		String debugmsg = getClass().getName() + ".verifyEditBox(): ";
+		boolean pass = false;		
 		String contents = getValue();
 		
-		if(keys.equals(contents)) {
-			passVerification = true;
-		} else {
-			passVerification = false;
-			String msg = "EditBox verify errors: property:'" + contents + "'" + " does NOT equal to " + " value:'" + keys + "'";
+		pass = expectedText.equals(contents);
+		
+		if(!pass){
+			String msg = "EditBox verify errors: property:\n'" + contents + "'" + " does NOT equal to " + " expected value:\n'" + expectedText + "'.";
 			IndependantLog.debug(debugmsg + msg);
+			pass = doubleCheckVerification(expectedText);
 		}
 		
-		return passVerification;
+		return pass;
+	}
+	
+	/**
+	 * Copy the edit-box's value to clipboard and compare the clipboard's value with the text we try to input.<br>
+	 * @param expectedText String, the text to verify with.
+	 * @return boolean, true if the edit-box's value equals the text to input.
+	 */
+	protected boolean doubleCheckVerification(String expectedText){
+		String debugmsg = StringUtils.debugmsg(false);
+		
+		try {
+			IndependantLog.debug(debugmsg+" copy editbox's value to clipboard, and compare clipboard's content with the text we want to input.");
+			//Copy the editbox's value so that it will be saved to the clipboard
+			WDLibrary.clearClipboard();
+			try{ Thread.sleep(100);} catch(Exception ignore){}
+			inputKeys("^a^c{END}");//Ctrl+A, Ctrl+C, {End}
+			//We MUST wait a while before the clip-board is set correctly.
+			try{ Thread.sleep(1000);} catch(Exception ignore){}
+			//Get the content from the clip-board
+			String result = (String) WDLibrary.getClipboard(DataFlavor.stringFlavor);
+			IndependantLog.debug(debugmsg+" From RMI server, got clipboard's content \n'"+result+"' =? (expected value) \n'"+expectedText+"'");
+
+			return expectedText.equals(result);
+
+		} catch (Exception e) {
+			IndependantLog.debug(debugmsg+"Fail. due to "+StringUtils.debugmsg(e));
+		}
+		
+		return false;
 	}
 }
