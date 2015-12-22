@@ -2043,6 +2043,7 @@ public class SearchObject {
 		});
 		long ct = System.currentTimeMillis();
 		long et = ct + msTimeout;
+		js_result = null;
 		js_code = js;
 		t.setDaemon(true);
 		t.start();
