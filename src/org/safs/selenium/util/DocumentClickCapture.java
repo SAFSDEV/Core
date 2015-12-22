@@ -12,10 +12,10 @@ package org.safs.selenium.util;
  * JUN 04, 2015    (LeiWang) Modify run(): if the target webelement is stale, we consider click as success.
  * JUN 25, 2015    (LeiWang) Modify onEventFired(): ignore event's information to save time.
  * NOV 18, 2015    (LeiWang) Provide a way to disable the DocumentClickCapture.
- * DEC 21, 2015    (LeiWang) Reset javascript global variable before adding or removing listeners.
  */
 import java.util.Date;
 
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.safs.IndependantLog;
 import org.safs.StringUtils;
@@ -520,6 +520,8 @@ public class DocumentClickCapture implements Runnable{
 	                                       "        evt.stopPropagation();\n";
 
 		return "\n" +
+			   "window."+ listenerID +"=false;\n"+
+	           "window."+ listenerError +"='';\n"+
   	           "window."+ listenerFunction +"={\n"+
 		       "    handleEvent: function (evt) {\n"+
 			   "        switch(evt.type) {\n"+
@@ -558,16 +560,6 @@ public class DocumentClickCapture implements Runnable{
 			   "    }\n"+
 		       "};\n";
 	}
-	
-	/**
-	 * Reset the global variables for EventListener.<br>
-	 * @return String, the the javascript to reset global variables.
-	 */
-	private String resetEventListenerGlobalVariables(){
-		return 	"\n" +
-				"window."+ listenerID +"=false;\n"+
-				"window."+ listenerError +"='';\n";
-	}
 
 	/**
 	 * @return true if the browser already has the listener object injected into the window object.
@@ -588,7 +580,6 @@ public class DocumentClickCapture implements Runnable{
 	
 	/**
 	 * Attach event-listeners to a target.<br>
-	 * Note: It is better to {@link #resetEventListenerGlobalVariables()} before calling this method.<br> 
 	 * @param domelement (<b>Javascript</b>) Object, the dom-element to attach the event-listeners.
 	 * @see #addEventListeners()
 	 */	
@@ -602,16 +593,15 @@ public class DocumentClickCapture implements Runnable{
 		scriptCommand.append("  }else{\n");
 		scriptCommand.append("    target = window.document;\n");
 		scriptCommand.append("  }\n");
-		scriptCommand.append("  try{target.addEventListener('mouseup', window."+listenerFunction+", true);}catch(err){window."+ listenerError +" += err;}\n");
-		scriptCommand.append("  try{target.addEventListener('mousedown', window."+listenerFunction+", true);}catch(err){window."+ listenerError +" += err;}\n");
-		scriptCommand.append("  try{target.addEventListener('click', window."+listenerFunction+", true);}catch(err){window."+ listenerError +" += err;}\n");
+		scriptCommand.append("  try{target.addEventListener('mouseup', window."+listenerFunction+", true);}catch(err){}\n");
+		scriptCommand.append("  try{target.addEventListener('mousedown', window."+listenerFunction+", true);}catch(err){}\n");
+		scriptCommand.append("  try{target.addEventListener('click', window."+listenerFunction+", true);}catch(err){}\n");
 		scriptCommand.append("};\n");
 		return scriptCommand.toString();
 	}
 	
 	/**
 	 * Remove the attached event-listeners from a target.<br>
-	 * Note: It is better to {@link #resetEventListenerGlobalVariables()} before calling this method.<br>
 	 * @param domelement (<b>Javascript</b>) Object, the dom-element to detach the event-listeners.
 	 * @see #removeEventListeners()
 	 */	
@@ -643,8 +633,7 @@ public class DocumentClickCapture implements Runnable{
 		try {
 			// only add the EventListener object the first time
 			// except for FireFox.  It does not retain them?
-			String listener = resetEventListenerGlobalVariables(); 
-			listener +=	isSet() ? "" : getEventListener();
+			String listener = isSet() ? "" : getEventListener();
 			String script = listener + _addEventListeners()+" _addEventListeners(arguments[0]);";
 			SearchObject.executeScript(script, target);
 			notListening = false;
@@ -669,8 +658,7 @@ public class DocumentClickCapture implements Runnable{
 		try{ 
 			// listenerSent will be true when/if addEventListeners sets it
 			// if it was not set there, then we need to send it each time (Firefox?).
-			String listener = resetEventListenerGlobalVariables(); 
-			listener +=	isSet() ? "" : getEventListener();
+			String listener = isSet() ? "" : getEventListener();
 			notListening = true;
 			String script = listener + _removeEventListeners()+" _removeEventListeners(arguments[0]);";;
 			SearchObject.executeScript(script, target);
