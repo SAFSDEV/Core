@@ -2030,6 +2030,38 @@ public class SearchObject {
 			throw new IllegalStateException("did NOT return Boolean value!");
 		}
 	}
+	
+	private static Object js_result = null;
+	private static String js_code = null;
+	protected static Object js_executeWithTimeout(String js, long msTimeout)throws SeleniumPlusException, InterruptedException{
+		boolean done = false;
+		Thread t = new Thread(new Runnable(){
+			public void run() {
+				try{js_result = getJS().executeScript(js_code);}
+				catch(SeleniumPlusException x){throw new RuntimeException(x);}
+			}
+		});
+		long ct = System.currentTimeMillis();
+		long et = ct + msTimeout;
+		js_result = null;
+		js_code = js;
+		t.setDaemon(true);
+		t.start();
+		do{
+			done = !t.isAlive();
+			if(!done){
+				ct = System.currentTimeMillis();
+				if(ct > et){
+					throw new InterruptedException("SearchObject.js_executeWithTimeout Timeout has been reached.");
+				}
+			}
+			if(t.isAlive()){
+				Thread.sleep(5);
+			}
+		}while(!done && (js_result == null));
+		return js_result;
+	}
+	
 	/**
 	 * Get the value of a javascript global variable.
 	 * @param variable String, the name of the global variable.
@@ -2044,7 +2076,9 @@ public class SearchObject {
 				IndependantLog.error(debugmsg+" parameter variable is not valid!");
 				return null;
 			}
-			result = getJS().executeScript(JavaScriptFunctions.getGlobalVariable(variable));
+			// TODO CANAGL
+			//result = getJS().executeScript(JavaScriptFunctions.getGlobalVariable(variable));
+			result = js_executeWithTimeout(JavaScriptFunctions.getGlobalVariable(variable), 1000);
 			if(result==null){
 				IndependantLog.error(debugmsg+"The js returned result is null.");
 			}
