@@ -1,6 +1,13 @@
 /** Copyright (C) (SAS) All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
+
+/**
+ * Logs for developers, not published to API DOC.
+ *
+ * History:
+ * DEC 23, 2015 SBJLWA Modify value of some constant like 'CLASSNAMENN' to lower-case.
+ */
 package org.safs.autoit;
 
 import org.safs.IndependantLog;
@@ -53,12 +60,10 @@ public class AutoItRs {
 	public final static String TEXT = "text=";
 	/** "instance" */    //Component INSTANCE
 	public final static String INSTANCE = "instance=";
-	/** "classnameNN" */   //Component CLASSNAMENN
-	public final static String CLASSNAMENN = "ClassnameNN=";
-	/** "Name" */        //Component NAME
-	public final static String NAME = "Name=";
-	
-	
+	/** "classnamenn" */   //Component CLASSNAMENN
+	public final static String CLASSNAMENN = "classnamenn=";
+	/** "name" */        //Component NAME
+	public final static String NAME = "name=";
 	
 	private String winRs;
 	private String compRs;
@@ -99,47 +104,43 @@ public class AutoItRs {
 			cleanCompRs = "";
 		}
 		
+		String lowercaseStr = null;
+		String value = null;
 		// Window Recognition
 		String[] sWinRs = cleanWinRs.split(AUTOIT_DELIMITER);
-		for (String string : sWinRs) {
-			if((string.toLowerCase().startsWith(TITLE))||
-			   (string.toLowerCase().startsWith(CAPTION))){
-				try { title = string.split("=")[1];}		
+		for (String winrs : sWinRs) {
+			lowercaseStr = winrs.toLowerCase();
+			if(lowercaseStr.startsWith(TITLE)||
+			   lowercaseStr.startsWith(CAPTION)){
+				try { title = winrs.split("=")[1];}		
 				catch(IndexOutOfBoundsException x){;}
 			}
 		}
 		
 		// Component/Control Recognition
 		String[] sCompRs = cleanCompRs.split(AUTOIT_DELIMITER);
-		for (String string : sCompRs) {
-			if((string.toLowerCase().startsWith(TITLE))||
-			    (string.toLowerCase().startsWith(CAPTION))){
-				try { compTitle = string.split("=")[1];}		
-				catch(IndexOutOfBoundsException x){;}
-			}
-			if(string.toLowerCase().startsWith(TEXT)){
-				try{ text = string.split("=")[1];}
- 			    catch(IndexOutOfBoundsException x){;}
-			}
-			if(string.toLowerCase().startsWith(ID)){
-			   	try{ id = string.split("=")[1]; }
- 			    catch(IndexOutOfBoundsException x){;}
-			}
-			if(string.toLowerCase().startsWith(CLASSNAMENN)){
-			   	try{ classnamenn = string.split("=")[1]; }
- 			    catch(IndexOutOfBoundsException x){;}
-			}
-			if(string.toLowerCase().startsWith(CLASS)){
-			   	try{ classname = string.split("=")[1]; }
- 			    catch(IndexOutOfBoundsException x){;}
-			}
-			if(string.toLowerCase().startsWith(NAME)){
-			   	try{ name = string.split("=")[1]; }
- 			    catch(IndexOutOfBoundsException x){;}
-			}
-			if(string.toLowerCase().startsWith(INSTANCE)){
-			   	try{ instance = string.split("=")[1]; }
- 			    catch(IndexOutOfBoundsException x){;}
+		for (String comprs : sCompRs) {
+			lowercaseStr = comprs.toLowerCase();
+			try { value = comprs.split("=")[1];}		
+			catch(IndexOutOfBoundsException x){;}
+			
+			if(lowercaseStr.startsWith(TITLE)||
+			   lowercaseStr.startsWith(CAPTION)){
+				compTitle = value;
+			}else if(lowercaseStr.startsWith(TEXT)){
+				text = value;
+			}else if(lowercaseStr.startsWith(ID)){
+			   	id = value;
+			}else if(lowercaseStr.startsWith(CLASSNAMENN)){
+			   	classnamenn = value;
+			}else if(lowercaseStr.startsWith(CLASS)){
+			   	classname = value;
+			}else if(lowercaseStr.startsWith(NAME)){
+			   	name = value;
+			}else if(lowercaseStr.startsWith(INSTANCE)){
+			   	instance = value;
+			}else{
+				IndependantLog.warn("Unknown recogniztion string '"+comprs+"'");
 			}
 		}	
 	}
