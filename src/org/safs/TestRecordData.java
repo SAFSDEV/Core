@@ -305,6 +305,19 @@ public abstract class TestRecordData implements java.io.Serializable {
   public String getCompName () {return compName;}
   public void setCompName (String compName) {this.compName = compName;}
 
+  /**
+   * Return the windowName+componentName.<br>
+   * 
+   * @return String, windowName+":"+componentName. <br>
+   *                 null if windowName is null. <br>
+   *                 windowName+":"+windowName if componentName is null. <br>
+   */
+  public String getWinCompName(){
+	  if(windowName==null) return null;
+	  if(compName==null) return windowName+":"+windowName;
+	  return windowName+":"+compName;
+  }
+  
   /** <br><em>Purpose:</em> accessor method(s)
    **/
   public String getCompGuiId () throws SAFSException {return compGuiId;}
