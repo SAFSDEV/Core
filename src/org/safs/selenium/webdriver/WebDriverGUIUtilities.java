@@ -27,6 +27,7 @@ package org.safs.selenium.webdriver;
  *  <br>   OCT 30, 2015	   (LeiWang) Modify waitForPropertyStatus(): highlight component.
  *  <br>   NOV 02, 2015	   (CANAGL) startRemoteServer on SAFS supporting jre/Java64/jre/bin 64-bit JVM.
  *  <br>   NOV 23, 2015	   (LeiWang) Modify waitForObject(): refresh the window object if it becomes stale during the searching of component object.
+ *  <br>   DEC 24, 2015	   (LeiWang) Add methods to read content from url like "http://host:port/wd/hub/static"
  **/
 
 import java.io.BufferedReader;
@@ -1591,6 +1592,12 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	public static final String URL_PATH_GRID_CONSOLE 	= "/grid/console";
 	/** "/wd/hub" the path to visit HTTP standalone-server or grid-node */
 	public static final String URL_PATH_HUB 			= "/wd/hub";
+	
+	/** 
+	 * "/wd/hub/static" the path to get information about the running standalone-server or grid-node 
+	 * This is a NON-valid url, and the information is supposed to get from the error-stream.
+	 */
+	public static final String URL_PATH_HUB_STATIC		= "/wd/hub/static";
 	/**
 	 * @param host String, the name of host where "grid hub" server runs
 	 * @param port String, the port number on which "grid hub" server runs
@@ -1600,12 +1607,30 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		return canConnectHttpURL(host, port, URL_PATH_GRID_CONSOLE);
 	}
 	/**
+	 * This method will read from the connection to url {@link #URL_PATH_GRID_CONSOLE}.<br>
+	 * @param host String, the host name
+	 * @param port String, the port number
+	 * @return String, the content read from the connection.
+	 */
+	public static String readGridURL(String host, String port){
+		return readHttpURL(host, port, URL_PATH_GRID_CONSOLE);
+	}
+	/**
 	 * @param host String, the name of host where "standalone server"/"grid node" runs
 	 * @param port String, the port number on which "standalone server"/"grid node" runs
 	 * @return boolean, true if the "standalone server"/"grid node" is available
 	 */
 	public static boolean canConnectHubURL(String host, String port){
 		return canConnectHttpURL(host, port, URL_PATH_HUB);
+	}
+	/**
+	 * This method is supposed to read from the connection to a NON-valid url {@link #URL_PATH_HUB_STATIC}. It will read from error stream.<br>
+	 * @param host String, the host name
+	 * @param port String, the port number
+	 * @return String, the information about the running standalone server or grid-node.
+	 */
+	public static String readHubStaticURL(String host, String port){
+		return readHttpURL(host, port, URL_PATH_HUB_STATIC);
 	}
 	
 	/**
@@ -1642,6 +1667,23 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		} catch (MalformedURLException e) {
 			IndependantLog.error(debugmsg+" URL '"+url+"' is not correct."+StringUtils.debugmsg(e));
 			return false;
+		}	
+	}
+	/**
+	 * @param host String, the host name
+	 * @param port String, the port number where "HTTP server" runs
+	 * @param path String, the path on "HTTP server" to access, like "/wd/hub/static", "/grid/console" etc.
+	 * @return String, the content read from connection "http://host:port+path"
+	 */
+	private static String readHttpURL(String host, String port, String path){
+		String debugmsg = StringUtils.debugmsg(false);
+		
+		String url = "http://"+host+":"+ port +path;
+		try {
+			return NetUtilities.readHttpURL(new URL(url), "UTF-8", timeoutForHttpConnection);
+		} catch (MalformedURLException e) {
+			IndependantLog.error(debugmsg+" URL '"+url+"' is not correct."+StringUtils.debugmsg(e));
+			return null;
 		}	
 	}
 	
