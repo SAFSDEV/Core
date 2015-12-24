@@ -11,6 +11,7 @@ package org.safs.selenium.webdriver.lib;
 *  <br>	  MAR 17, 2015    (LeiWang) Store Capabilities's chrome custom data info to session file.
 *  <br>   JUN 29, 2015	  (LeiWang) Get the RMI Server from the selenium-grid-node machine.
 *                                   Add main(): as a entry point for starting Remote Server (standalone or grid).
+*  <br>   DEC 24, 2015	  (LeiWang) Add methods to get browser's name, version, and selenium-server's version etc.
 */
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,7 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.json.JSONObject;
 import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriverException;
@@ -42,6 +45,7 @@ import org.safs.selenium.rmi.agent.SeleniumAgent;
 import org.safs.selenium.util.GridInfoExtractor;
 import org.safs.selenium.webdriver.WebDriverGUIUtilities;
 import org.safs.tools.drivers.DriverConstant.SeleniumConfigConstant;
+import org.safs.tools.stringutils.StringUtilities;
 import org.seleniumhq.jetty7.util.ajax.JSON;
 
 import com.google.common.collect.ImmutableMap;
@@ -126,6 +130,132 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 	}
 	
 	/**
+	 * @return String, the name of the browser where test is running. Or null if something wrong happens.
+	 */
+	public String getBrowserName(){
+		String debugmsg = StringUtils.debugmsg(false);
+		try{
+			String name = getCapabilities().getBrowserName();
+			IndependantLog.debug(debugmsg+name);
+			return name;
+		}catch(Exception e){
+			IndependantLog.error(debugmsg+" Met "+StringUtils.debugmsg(e));
+			try{
+				JavascriptExecutor js = (JavascriptExecutor) this;
+				String useragent = (String)js.executeScript("return navigator.userAgent;");
+				IndependantLog.debug("useragent is '"+useragent+"'");
+			}catch(Exception e1){
+				IndependantLog.error(debugmsg+" Met "+StringUtils.debugmsg(e1));
+			}
+			return null;
+		}
+	}
+	
+	/**
+	 * @return String, the version of the browser where test is running. Or null if something wrong happens.
+	 */
+	public String getBrowserVersion(){
+		String debugmsg = StringUtils.debugmsg(false);
+		try{			
+			String version = getCapabilities().getVersion().toString();
+			IndependantLog.debug(debugmsg+version);
+			return version;
+		}catch(Exception e){
+			IndependantLog.error(debugmsg+" Met "+StringUtils.debugmsg(e));
+			try{
+				JavascriptExecutor js = (JavascriptExecutor) this;
+				String useragent = (String)js.executeScript("return navigator.userAgent;");
+				IndependantLog.debug("useragent is '"+useragent+"'");
+			}catch(Exception e1){
+				IndependantLog.error(debugmsg+" Met "+StringUtils.debugmsg(e1));
+			}
+			return null;
+		}
+	}
+	
+	/**
+	 * @return String, the name of the platform where the browser is running. Or null if something wrong happens.
+	 */
+	public String getPlatform(){
+		String debugmsg = StringUtils.debugmsg(false);
+		try{			
+			String platform = getCapabilities().getPlatform().toString();
+			IndependantLog.debug(debugmsg+platform);
+			return platform;
+		}catch(Exception e){
+			IndependantLog.error(debugmsg+" Met "+StringUtils.debugmsg(e));
+			try{
+				JavascriptExecutor js = (JavascriptExecutor) this;
+				String useragent = (String)js.executeScript("return navigator.userAgent;");
+				IndependantLog.debug("useragent is '"+useragent+"'");
+			}catch(Exception e1){
+				IndependantLog.error(debugmsg+" Met "+StringUtils.debugmsg(e1));
+			}
+			return null;
+		}
+	}
+	
+	/**
+	 * @return String, the version of 'selenium server' with which the test is running. Or null if something wrong happens.
+	 */
+	public String getDriverVersion(){
+		String debugmsg = StringUtils.debugmsg(false);
+		String hostname = null;
+		String port = null;
+		String version = null;
+		
+		if(isGrid ){
+			//according to the session id, get the node hostname and port
+			SessionId id = getSessionId(); 
+			String[] node  = GridInfoExtractor.getHostNameAndPort(remote_hostname, remote_port, id);
+			IndependantLog.debug(debugmsg+"connected to grid NODE, host="+node[0]+"; port="+node[1]);
+			hostname = node[0];
+			port = node[1];
+		}else{
+			hostname = remote_hostname;
+			port = String.valueOf(remote_port);
+		}
+		
+		String result = WebDriverGUIUtilities.readHubStaticURL(hostname, port);
+		//result from error stream, it is something like following:
+//		{"sessionId":null,
+//			"status":13,
+//			"state":"unhandled error",
+//			"value":{
+//			   "message":"GET /static/resource\nBuild info: version: '2.48.2', revision: '41bccdd', time: '2015-10-09 19:59:12'\nSystem info: host: 'xxx', ip: '172.27.17.89', os.name: 'Windows 7', os.arch: 'x86', os.version: '6.1', java.version: '1.7.0_45'\nDriver info: driver.version: unknown",
+//			   "suppressed":[],
+//			   "localizedMessage":"GET /static/resource\nBuild info: version: '2.48.2', revision: '41bccdd', time: '2015-10-09 19:59:12'\nSystem info: host: 'xxx', ip: '172.27.17.89', os.name: 'Windows 7', os.arch: 'x86', os.version: '6.1', java.version: '1.7.0_45'\nDriver info: driver.version: unknown","buildInformation":null,"cause":null,"systemInformation":"System info: host: 'xxx', ip: '172.27.17.89', os.name: 'Windows 7', os.arch: 'x86', os.version: '6.1', java.version: '1.7.0_45'","supportUrl":null,"class":"org.openqa.selenium.UnsupportedCommandException",
+//			   "additionalInformation":"\nDriver info: driver.version: unknown",
+//			   "hCode":19885966,
+//		       "stackTrace":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]
+//		     },
+//			 "class":"org.openqa.selenium.remote.Response",
+//			 "hCode":17632485}
+		IndependantLog.debug(debugmsg+"Selenium Driver Information:\n"+result);
+		try {
+			JSONObject hubInformaiton = new JSONObject(result);
+			String token = "version:";
+//			"message":"GET /static/resource\nBuild info: version: '2.48.2', revision: '41bccdd', time: '2015-10-09 19:59:12'\nSystem info: host: 'xxx', ip: '172.27.17.89', os.name: 'Windows 7', os.arch: 'x86', os.version: '6.1', java.version: '1.7.0_45'\nDriver info: driver.version: unknown",
+			version = hubInformaiton.getJSONObject("value").getString("message");
+			int index = version.indexOf(token);
+			if(index>-1){
+				version = version.substring(index+token.length());
+				index = version.indexOf(",");
+				if(index>-1){
+					version = version.substring(0, index);
+				}
+				version = StringUtilities.removeSingleQuotes(version.trim());
+			}
+			
+			IndependantLog.debug(debugmsg+version);
+		} catch (Exception e) {
+			IndependantLog.error(debugmsg+" Met "+StringUtils.debugmsg(e));
+		}
+		
+		return version;
+	}
+	
+	/**
 	 * Connect to a remote selenium standalone server.<br>
 	 * We will also parse the URL to attempt to connect to a SAFS Selenium RMI Server on RMI-SERVER-HOST.<br>
 	 * The RMI-SERVER-HOST can be:<br>
@@ -154,7 +284,7 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 		if(isGrid ){
 			SessionId id = getSessionId(); 
 			String[] node  = GridInfoExtractor.getHostNameAndPort(remote_hostname, remote_port, id);
-			IndependantLog.debug(StringUtils.debugmsg(false)+"connect to grid NODE, host="+node[0]+"; port="+node[1]);
+			IndependantLog.debug(StringUtils.debugmsg(false)+"connected to grid NODE, host="+node[0]+"; port="+node[1]);
 			rmi_hostname = node[0];
 		}
 		
