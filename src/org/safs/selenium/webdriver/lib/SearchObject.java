@@ -33,6 +33,7 @@ package org.safs.selenium.webdriver.lib;
  *                                  Add method highlightThenClear(). Modify highlight(WebElement): check stale.
  *  <br>  NOV 12, 2015    (Lei Wang)  Modify method getObject(): continue to search component on the new page even 'lastFrame' is stale.
  *  <br>  NOV 26, 2015    (Lei Wang)  Modify method getObject(): reset 'lastFrame' to null if exception is thrown out during switch of frame.
+ *  <br>  DEC 25, 2015    (Lei Wang)  Modify getObjectByText() and getObjectByTitle(): try to get partial, case-insensitive matched element.
  */
 import java.lang.reflect.Constructor;
 import java.net.URL;
@@ -1528,12 +1529,7 @@ public class SearchObject {
 		return result;
 	}
 
-	protected static SearchContext getObjectByText(SearchContext wel,String text){
-		String debugmsg = StringUtils.debugmsg(false);
-		IndependantLog.debug(debugmsg +"using '"+ text+"'");
-
-		//		String xpath = XPATH_RELATIVE_MATCHING_ALL_START+"text()[starts-with(.,'" + text +"')]"+XPATH_END;
-		String xpath = XPATH.fromText(text, true, true);
+	protected static List<WebElement> findElements(SearchContext wel, String xpath){
 		List<WebElement> preMatches = null;
 		try{ preMatches = wel.findElements(By.xpath(xpath));}
 		catch(InvalidSelectorException x){
@@ -1544,12 +1540,78 @@ public class SearchObject {
 				throw x;
 			}
 		}
-		for (WebElement item : preMatches) {
-			if (item.getText().equals(text)) {
-				return (SearchContext)item;
-			}
+		return preMatches;
+	}
+	
+	protected static SearchContext getObjectByText(SearchContext wel,String text){
+		String debugmsg = StringUtils.debugmsg(false);
+		IndependantLog.debug(debugmsg +"using '"+ text+"'");
+
+		String xpath = XPATH.fromText(text, true, true);
+		List<WebElement> preMatches = findElements(wel, xpath);
+		
+		List<WebElementWarpper> elements = new ArrayList<WebElementWarpper>();
+		for(WebElement item : preMatches) elements.add(new WebElementWarpper(item, item.getText()));
+		
+		return getMatchedObject(elements, text);
+	}
+	
+	protected static SearchContext getObjectByTitle(SearchContext wel, String value){
+		String debugmsg = StringUtils.debugmsg(false);
+		IndependantLog.debug(debugmsg +"using '"+ value+"'");
+		String attribute = SEARCH_CRITERIA_TITLE.toLowerCase();
+
+		String xpath = XPATH.fromAttribute(attribute, value, true, true);
+		List<WebElement> preMatches = findElements(wel, xpath);
+
+		List<WebElementWarpper> elements = new ArrayList<WebElementWarpper>();
+		for(WebElement item : preMatches) elements.add(new WebElementWarpper(item, item.getAttribute(attribute)));
+		
+		return getMatchedObject(elements, value);
+	}
+	
+	/**
+	 * @param elements List<WebElementWarpper>, contains WebElement to match
+	 * @param value String, the value to match with
+	 * @return SearchContext, the matched object
+	 */
+	protected static SearchContext getMatchedObject(List<WebElementWarpper> elements, String value){
+		//try to find the exact matched item
+		for(WebElementWarpper element: elements){
+			if(element.value.equals(value)) return element.element;
 		}
+		//try to find the matched item ignoring case
+		for(WebElementWarpper element: elements){
+			if(element.value.equalsIgnoreCase(value)) return element.element;
+		}
+		//try to find the partial matched item
+		for(WebElementWarpper element: elements){
+			if(element.value.contains(value)) return element.element;
+		}
+		//try to find the partial matched item ignoring case
+		for(WebElementWarpper element: elements){
+			if(element.value.toLowerCase().contains(value.toLowerCase())) return element.element;
+		}
+		//finally, return the first element if it exists
+		if(elements.size()>0) return elements.get(0).element;
+		
 		return null;
+	}
+	
+	/**
+	 * This class contains 2 fields, one is WebElement, the other is value.<br>
+	 * The field value is a string, used to match. It can be assigned by WebElement.getText(),<br>
+	 * WebElement.getAttribute("title") or some other text value of the WebElement, which can<br>
+	 * be used to match with a text value.<br>
+	 *@see SearchObject#getMatchedObject(List, String)
+	 */
+	private static class WebElementWarpper{
+		public WebElement element = null;
+		public String value = null;
+		public WebElementWarpper(WebElement element, String value){
+			this.element = element;
+			this.value = value;
+		}
 	}
 
 	/**
@@ -1731,22 +1793,6 @@ public class SearchObject {
 			IndependantLog.error(debugmsg+" itemContainer is not WebElement, cannot handle.");
 		}
 
-		return null;
-	}
-
-	protected static SearchContext getObjectByTitle(SearchContext wel, String value){
-		String debugmsg = StringUtils.debugmsg(false);
-		IndependantLog.debug(debugmsg +"using '"+ value+"'");
-
-		//		String xpath = XPATH.RELATIVE_MATCHING_ALL_START+"@title='" + value +"'"+XPATH.END;
-		String xpath = XPATH.fromAttribute("title", value, true, true);
-		List<WebElement> preMatches = wel.findElements(By.xpath(xpath));
-
-		for (WebElement item : preMatches) {
-			if (item.getAttribute("title").equalsIgnoreCase(value)) {
-				return (SearchContext)item;
-			}
-		}
 		return null;
 	}
 
