@@ -8,6 +8,7 @@ package org.safs.install;
  *    JUL 03, 2015	(LeiWang)	Modify prepareTempSourceDirectory(): Move the download and unzip functionality out of this method.
  *                                                                   Call these functionalities in downloader thread directly, wait for unzip done before updateDiretory.
  *    JUL 15, 2015	(LeiWang)	Modify processArgs(): Catch Throwable to avoid infinite loop waiting.
+ *    JAN 04, 2016	(LeiWang)	Add '-q' for quiet mode so that no dialog will prompt for confirmation.
  **/
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -59,10 +60,11 @@ import org.safs.text.FileUtilities;
  * <p>
  * Command-line options:
  * <p><code><big><ul><table>
- * <tr><td style="vertical-align: top;white-space:nowrap;">"-prompt:titlebar" <td>(alternate prompt titlebar msg)<br>
+ * <tr><td style="vertical-align: top;white-space:nowrap;">-q           <td>(quiet mode, no prompt dialog), it should be put before other argument if present"
+ * <tr><td style="vertical-align: top;white-space:nowrap;">"-prompt:titlebar" <td>(alternate prompt title bar message)<br>
  * This parameter should appear before other parameters (at this time) 
  * <tr ><td style="vertical-align: top;white-space:nowrap;">-b:backupdir <td>**(backup dir for replaced files)
- * <tr><td style="vertical-align: top;white-space:nowrap;">-s:sourcedir <td>* (source dir containing newer files, or an http URL to a ZIP)<br>
+ * <tr><td style="vertical-align: top;white-space:nowrap;">-s:sourcedir <td>* (source dir containing newer files, or an HTTP URL to a ZIP)<br>
  * Supports HTTP URL to a ZIP file that would be downloaded and extracted into a temporary directory 
  * to be used as the sourcedir for the update.<br>
  * Note: Any spaces in the URL should be retained as spaces--not URLEncoded.<br>
@@ -70,7 +72,8 @@ import org.safs.text.FileUtilities;
  * <span  style="white-space:nowrap;">Ex: -s:http://sourceforge.net/projects/safsdev/files/SAFS Updates/SAFS.LIB Updates/SAFS.LIB.UPDATE.LATEST.ZIP</span>
  * <tr><td style="vertical-align: top;white-space:nowrap;">-t:targetdir <td>* (target dir receiving newer files)
  * <tr><td style="vertical-align: top;white-space:nowrap;">-f           <td>(force w/o prompting for each file)
- * <tr><td style="vertical-align: top;white-space:nowrap;">-r           <td>(recurse into subdirectories)
+ * <tr><td style="vertical-align: top;white-space:nowrap;">-r           <td>(recurse into sub-directories)
+ * <tr><td style="vertical-align: top;white-space:nowrap;">-a           <td>(file of all types will be copy, default false)"
  * <tr><td style="vertical-align: top;white-space:nowrap;">-nob         <td>(no file backups required)
  * <tr><td> &nbsp;&nbsp; <td> &nbsp;&nbsp;   
  * <tr><td><td>*  - required parameter.
@@ -97,6 +100,7 @@ public class LibraryUpdate {
 	public static final String ARG_PREFIX_R = "-r";
 	public static final String ARG_PREFIX_F = "-f";
 	public static final String ARG_PREFIX_A = "-a";
+	public static final String ARG_PREFIX_Q = "-q";
     
     // do not attempt to copy/replace files older than this date
     public static final long OLDEST_DATE = Date.parse("01 Aug 2012");
@@ -107,6 +111,8 @@ public class LibraryUpdate {
 	String prompt = "SAFS Library Update "+ _VERSION_;
 	boolean recurse = false;
 	boolean force = false;
+	/** quiet mode, if true then no dialog will prompt for confirmation, default is  'false'.*/
+	boolean quiet = false;
 	boolean dobackup = true;
 	boolean allfilecopy = false;
 	/** Gets set TRUE if the user cancelled the update from a dialog prompt. */
@@ -189,27 +195,28 @@ public class LibraryUpdate {
 
 					progressor.setProgressInfo(progress+=10, "Evaluating URL Source: "+ sarg);
 					
-					message = "Preparing to download a library update.\n\n"
-						       + "Source: "+ sarg +"\n"
-					           + "\nThis may take a few minutes.\n"
-					           + "\nDo you wish to proceed?\n";
-					
-					Object[] options = {
-						"Proceed with Download", 
-						"Exit without Download"
-					};
-					int selected = JOptionPane.showOptionDialog(null, 
-							message, 
-							prompt, 
-							JOptionPane.YES_NO_OPTION,
-							JOptionPane.QUESTION_MESSAGE,
-							null,
-							options,
-							options[1]);
-					if(selected == JOptionPane.CLOSED_OPTION || selected ==1){
-						progressor.setProgressMessage("Download cancelled by User.");
-						canceled = true;
-						return false;
+					if(!quiet){
+						message = "Preparing to download a library update.\n\n"
+								+ "Source: "+ sarg +"\n"
+								+ "\nThis may take a few minutes.\n"
+								+ "\nDo you wish to proceed?\n";
+						Object[] options = {
+								"Proceed with Download", 
+								"Exit without Download"
+						};
+						int selected = JOptionPane.showOptionDialog(null, 
+								message, 
+								prompt, 
+								JOptionPane.YES_NO_OPTION,
+								JOptionPane.QUESTION_MESSAGE,
+								null,
+								options,
+								options[1]);
+						if(selected == JOptionPane.CLOSED_OPTION || selected ==1){
+							progressor.setProgressMessage("Download cancelled by User.");
+							canceled = true;
+							return false;
+						}
 					}
 					
 					Thread downloader = new Thread(new Runnable(){
@@ -268,7 +275,7 @@ public class LibraryUpdate {
 							progressor.setProgressMessage(canceledMSG);
 							message+= "\n"+ canceledMSG +"\n";
 						}
-						JOptionPane.showMessageDialog(null, message, prompt, JOptionPane.ERROR_MESSAGE);
+						if(!quiet) JOptionPane.showMessageDialog(null, message, prompt, JOptionPane.ERROR_MESSAGE);
 						return false;
 					}
 					progressor.setProgressInfo(progress, "Download complete. Evaluating content...");
@@ -292,7 +299,7 @@ public class LibraryUpdate {
 							progressor.setProgressMessage(canceledMSG);
 							message+= "\n"+ canceledMSG +"\n";
 						}
-						JOptionPane.showMessageDialog(null, message, prompt, JOptionPane.ERROR_MESSAGE);
+						if(!quiet) JOptionPane.showMessageDialog(null, message, prompt, JOptionPane.ERROR_MESSAGE);
 						return false;
 					}
 					progressor.setProgressInfo(progress, "Unzipping is done");
@@ -340,35 +347,42 @@ public class LibraryUpdate {
 				allfilecopy = true;
 				progressor.setProgressInfo(progress+=10, "All files type copy: "+ allfilecopy);
 			}
+			else if(arg.startsWith(ARG_PREFIX_Q)){
+				quiet = true;
+				progressor.setProgressInfo(progress+=1, "Quiet Mode: "+ quiet);
+			}
 		}
 		progressor.setProgressInfo(progress+=10, "Preparing to perform the update...");
 		if ((targetdir != null && targetdir.canWrite()) && 
 		   (sourcedir != null && sourcedir.canRead())  && 
 		   (!dobackup || (backupdir != null && backupdir.canWrite()))){
-			message = "Preparing to perform a library update.\n\n"
-					       + "Source: "+ sourcedir +"\n"
-					       + "Target: "+ targetdir +"\n"
-					       + "Recurse: "+ recurse +"\n"
-					       + "Backup: "+ dobackup +"\n";
-			if(dobackup) message += "Backups: "+ backupdir +"\n";
-			message += "\nDo you wish to proceed?\n";
 			
-			Object[] options = {
-				"Proceed with Update", 
-				"Exit without Update"
-			};
-			int selected = JOptionPane.showOptionDialog(null, 
-					message, 
-					prompt, 
-					JOptionPane.YES_NO_OPTION,
-					JOptionPane.QUESTION_MESSAGE,
-					null,
-					options,
-					options[1]);
-			if(selected == JOptionPane.CLOSED_OPTION || selected ==1){
-				progressor.setProgressMessage("User has cancelled the update.");
-				canceled = true;
-				return false;
+			if(!quiet){
+				message = "Preparing to perform a library update.\n\n"
+						+ "Source: "+ sourcedir +"\n"
+						+ "Target: "+ targetdir +"\n"
+						+ "Recurse: "+ recurse +"\n"
+						+ "Backup: "+ dobackup +"\n";
+				if(dobackup) message += "Backups: "+ backupdir +"\n";
+				message += "\nDo you wish to proceed?\n";
+				
+				Object[] options = {
+						"Proceed with Update", 
+						"Exit without Update"
+				};
+				int selected = JOptionPane.showOptionDialog(null, 
+						message, 
+						prompt, 
+						JOptionPane.YES_NO_OPTION,
+						JOptionPane.QUESTION_MESSAGE,
+						null,
+						options,
+						options[1]);
+				if(selected == JOptionPane.CLOSED_OPTION || selected ==1){
+					progressor.setProgressMessage("User has cancelled the update.");
+					canceled = true;
+					return false;
+				}
 			}
 			
 			progressor.setProgressMessage("Updating...");
@@ -384,6 +398,7 @@ public class LibraryUpdate {
 			   + "\n"
 			   + "Command-line arguments: \n"
 			   + "\n"
+			   + "   -a                (quiet mode, no prompt dialog), it should be put before other argument if present\n"
 			   + "   -b:backupdir    **(backup dir for replaced files)\n"
 			   + "   -s:sourcedir    * (source dir containing newer files)\n"
 			   + "   -t:targetdir    * (target dir receiving newer files)\n"
@@ -391,7 +406,7 @@ public class LibraryUpdate {
 			   + "   -f                (force w/o prompting for each file)\n"
 			   + "   -r                (recurse into subdirectories)\n"
 			   + "   -nob              (no file backups required)\n\n"
-			   + "   -a				   (all files type will be copy, default false)\n\n"
+			   + "   -a				   (file of all types will be copy, default false)\n\n"
 			   + "*  - required parameter.\n"
 			   + "** - only required if -nob not provided.\n\n";
 	
@@ -512,7 +527,7 @@ public class LibraryUpdate {
 				if(targetfile.exists()){
 					if(targetfile.lastModified() >= file.lastModified()) continue;
 				}
-				if(!force){
+				if(!force && !quiet){
 					sourceinfo = "Source: "+ file.getAbsolutePath()+ "\n"
 							   + "TimeStamp: "+ date.format(new Date(file.lastModified()));
 					if (file.lastModified() > targetfile.lastModified())
@@ -663,16 +678,21 @@ public class LibraryUpdate {
 			if(fout != null)try{ fout.close();}catch(Exception ignore){}
 		}
 	}
+
+	public boolean isQuiet(){
+		return quiet;
+	}
 	
 	/**
 	 * The main entry point for the application when invoked via the command-line.
 	 * @param args 
 	 * Command-line options:
 	 * <p><code><big><ul><table>
-	 * <tr><td style="vertical-align: top;white-space:nowrap;">"-prompt:titlebar" <td>(alternate prompt titlebar msg)<br>
+	 * <tr><td style="vertical-align: top;white-space:nowrap;">-q           <td>(quiet mode, no prompt dialog), it should be put before other argument if present"
+	 * <tr><td style="vertical-align: top;white-space:nowrap;">"-prompt:titlebar" <td>(alternate prompt title bar message)<br>
 	 * This parameter should appear before other parameters (at this time) 
 	 * <tr ><td style="vertical-align: top;white-space:nowrap;">-b:backupdir <td>**(backup dir for replaced files)
-	 * <tr><td style="vertical-align: top;white-space:nowrap;">-s:sourcedir <td>* (source dir containing newer files, or an http URL to a ZIP)<br>
+	 * <tr><td style="vertical-align: top;white-space:nowrap;">-s:sourcedir <td>* (source dir containing newer files, or an HTTP URL to a ZIP)<br>
 	 * Supports HTTP URL to a ZIP file that would be downloaded and extracted into a temporary directory 
 	 * to be used as the sourcedir for the update.<br>
 	 * Note: Any spaces in the URL should be retained as spaces--not URLEncoded.<br>
@@ -680,7 +700,8 @@ public class LibraryUpdate {
 	 * <span  style="white-space:nowrap;">Ex: -s:http://sourceforge.net/projects/safsdev/files/SAFS Updates/SAFS.LIB Updates/SAFS.LIB.UPDATE.LATEST.ZIP</span>
 	 * <tr><td style="vertical-align: top;white-space:nowrap;">-t:targetdir <td>* (target dir receiving newer files)
 	 * <tr><td style="vertical-align: top;white-space:nowrap;">-f           <td>(force w/o prompting for each file)
-	 * <tr><td style="vertical-align: top;white-space:nowrap;">-r           <td>(recurse into subdirectories)
+	 * <tr><td style="vertical-align: top;white-space:nowrap;">-r           <td>(recurse into sub-directories)
+	 * <tr><td style="vertical-align: top;white-space:nowrap;">-a           <td>(file of all types will be copy, default false)"
 	 * <tr><td style="vertical-align: top;white-space:nowrap;">-nob         <td>(no file backups required)
 	 * <tr><td> &nbsp;&nbsp; <td> &nbsp;&nbsp;   
 	 * <tr><td><td>*  - required parameter.
@@ -702,26 +723,26 @@ public class LibraryUpdate {
 					String message = "Please provide all *required* parameters.";
 					updater.console.println(message);
 					help(updater.console);
-					JOptionPane.showMessageDialog(null, message +"\n"+ updater.help_string, updater.prompt, JOptionPane.WARNING_MESSAGE);
+					if(!updater.isQuiet()) JOptionPane.showMessageDialog(null, message +"\n"+ updater.help_string, updater.prompt, JOptionPane.WARNING_MESSAGE);
 					exitcode = -1;
 				}else{
 					String message = "\nNo Download or Update will be attempted.";
 					updater.console.println(message);
-					JOptionPane.showMessageDialog(null, message, updater.prompt, JOptionPane.INFORMATION_MESSAGE);
+					if(!updater.isQuiet()) JOptionPane.showMessageDialog(null, message, updater.prompt, JOptionPane.INFORMATION_MESSAGE);
 					exitcode = -1;
 				}
 			}else{
 				String message = "Modified "+ updater.modifiedFiles +", creating "+ updater.backupFiles +" backups.";
 				updater.progressor.setProgressInfo(100,message);
 				updater.console.println("\n"+message);
-				JOptionPane.showMessageDialog(null, message, updater.prompt, JOptionPane.INFORMATION_MESSAGE);
+				if(!updater.isQuiet())  JOptionPane.showMessageDialog(null, message, updater.prompt, JOptionPane.INFORMATION_MESSAGE);
 				exitcode = updater.modifiedFiles;
 			}
 		}catch(Exception x){
 			updater.errors.println(x.getMessage());
 			help(updater.errors);
 			updater.progressor.setProgressInfo(100,x.getMessage());
-			JOptionPane.showMessageDialog(null, x.getMessage()+"\n"+ updater.help_string, updater.prompt, JOptionPane.ERROR_MESSAGE);
+			if(!updater.isQuiet())  JOptionPane.showMessageDialog(null, x.getMessage()+"\n"+ updater.help_string, updater.prompt, JOptionPane.ERROR_MESSAGE);
 			exitcode = -2;
 		}
 		try{ 
