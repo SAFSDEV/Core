@@ -734,7 +734,6 @@ public class LibraryUpdate {
 			}else{
 				String message = "Modified "+ updater.modifiedFiles +", creating "+ updater.backupFiles +" backups.";
 				updater.progressor.setProgressInfo(100,message);
-				updater.console.println("\n"+message);
 				if(!updater.isQuiet())  JOptionPane.showMessageDialog(null, message, updater.prompt, JOptionPane.INFORMATION_MESSAGE);
 				exitcode = updater.modifiedFiles;
 			}
