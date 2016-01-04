@@ -3,16 +3,11 @@
  **/
 package org.safs.autoit;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
-import java.util.HashMap;
 import java.util.Vector;
 
 import org.safs.IndependantLog;
-import org.safs.SAFSException;
 import org.safs.SAFSProcessorInitializationException;
-import org.safs.image.ImageUtils;
 import org.safs.tools.consoles.ProcessCapture;
 import org.safs.tools.drivers.DriverConstant;
 

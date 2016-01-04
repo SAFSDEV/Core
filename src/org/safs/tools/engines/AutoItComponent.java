@@ -1,48 +1,34 @@
 /** Copyright (C) SAS Institute All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
+
+/**
+ * Logs for developers, not published to API DOC.
+ *
+ * History:
+ * SEP 30, 2015 Carl Nagle CFComponent return NOT_EXECUTED if RS is empty, missing, or not AutoIt RS. 
+ * DEC 23, 2015 Lei Wang Add method activate(): focus both window and component.
+ *                     Modify process(): Wait for window and component's existence and focus before execution.
+ */
 package org.safs.tools.engines;
 
-import java.awt.AWTException;
-import java.awt.Rectangle;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.StringTokenizer;
 
 import org.safs.ComponentFunction;
-import org.safs.IndependantLog;
 import org.safs.Log;
 import org.safs.Processor;
-import org.safs.RSA;
 import org.safs.SAFSException;
-import org.safs.STAFHelper;
 import org.safs.StatusCodes;
 import org.safs.StringUtils;
 import org.safs.TestRecordHelper;
-import org.safs.TestStepProcessor;
 import org.safs.autoit.AutoIt;
 import org.safs.autoit.AutoItRs;
-import org.safs.image.ImageUtils;
 import org.safs.logging.AbstractLogFacility;
 import org.safs.logging.LogUtilities;
-import org.safs.model.commands.DriverCommands;
 import org.safs.model.commands.EditBoxFunctions;
-import org.safs.model.commands.GenericMasterFunctions;
-import org.safs.text.FAILStrings;
-import org.safs.text.FileUtilities;
-import org.safs.text.GENStrings;
-import org.safs.tools.CaseInsensitiveFile;
 import org.safs.tools.drivers.DriverConstant;
 import org.safs.tools.drivers.DriverInterface;
-import org.safs.tools.engines.GenericEngine;
-import org.safs.tools.ocr.OCREngine;
-import org.safs.tools.stringutils.StringUtilities;
 
 import autoitx4java.AutoItX;
 
@@ -53,7 +39,6 @@ import autoitx4java.AutoItX;
  * various org.safs.tools Interfaces to talk with the rest of the framework (as made
  * available via the DriverInterface configuration).
  * @author Dharmesh Patel
- * <br> SEP 30, 2015 Carl Nagle CFComponent return NOT_EXECUTED if RS is empty, missing, or not AutoIt RS. 
  */
 public class AutoItComponent extends GenericEngine {
 
@@ -76,7 +61,7 @@ public class AutoItComponent extends GenericEngine {
 	       
 	// END: LOCALLY SUPPORTED COMMANDS
 
-	ComponentFunction cf;
+	ComponentFunction cf = null;
 	
 	/**
 	 * Constructor for AUTOITComponent
@@ -203,18 +188,29 @@ public class AutoItComponent extends GenericEngine {
 	 * @author Carl Nagle
 	 ******************************************************/
 	class CFComponent extends org.safs.ComponentFunction {
+		/**
+		 * The AutoIt instance got by AutoIt.AutoItObject().<br>
+		 * This instance may be shared by multiple threads.<br>
+		 */
+		protected AutoItX it = null;
+		/** '1', the default timeout in seconds to wait the window become focused. */
+		protected int DEFAULT_TIMEOUT_WAIT_WIN_FOCUSED = 1;
 		
 		CFComponent (){
-			super();			
+			super();
+			try{
+				it = AutoIt.AutoItObject();
+			}catch(Exception e){
+				Log.error(StringUtils.debugmsg(false)+" Fail to get AutoIt Instance, due to "+StringUtils.debugmsg(e));
+			}
 		}	
-		
 		
 		/**
 		 * Process the record present in the provided testRecordData.
 		 */
 		public void process(){
-			String debugmsg = "AutoItComponent$CFComponent.process() "+ action +": ";
 			updateFromTestRecordData();
+			String debugmsg = "AutoItComponent$CFComponent.process() "+ action +": ";
 			
 			String winrec = null;
 			String comprec = null;
@@ -237,6 +233,20 @@ public class AutoItComponent extends GenericEngine {
 			// prepare Autoit RS
 			AutoItRs rs = new AutoItRs(winrec,comprec);
 			
+			//Wait the window to exist
+			if(!it.winWait(rs.getWindowsRS(), "", secsWaitForWindow)){
+				testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );	 
+				this.issueErrorPerformingAction("Failed due to not finding the window");
+				return;
+			}
+			//Wait the window to be active, if not then try to activate it.
+			if(!it.winWaitActive(rs.getWindowsRS(), "", DEFAULT_TIMEOUT_WAIT_WIN_FOCUSED)){
+				Log.debug(debugmsg+" try to set focus to '"+testRecordData.getWinCompName()+"'");
+				if(!activate(rs)){
+					Log.warn(debugmsg+" '"+testRecordData.getWinCompName()+"' is not focused!");
+				}
+			}
+			
 			if ( action.equalsIgnoreCase( COMMAND_CLICK )){		                
 				click(rs);	                
 			} else if ( action.equalsIgnoreCase( COMMAND_SETFOCUS )) {
@@ -245,26 +255,42 @@ public class AutoItComponent extends GenericEngine {
 				setText(rs);
 			}
 		}
-						
+		
+		/**
+		 * Try to set focus to the window and component.
+		 * @param rs AutoItRs, the object representing the component
+		 * @return boolean, true if the window and component are focused.
+		 */
+		protected boolean activate(AutoItRs rs){
+			boolean success = true;
+			try {
+				it.winActivate(rs.getWindowsRS());
+				if(it.getError()==1) success = false;
+
+				if(testRecordData.targetIsComponent()){
+					success = it.controlFocus(rs.getWindowsRS(), "", rs.getComponentRS());
+				}
+			} catch (Exception x) {
+				success = false;
+				Log.debug(StringUtils.debugmsg(false)+" Met "+StringUtils.debugmsg(x));
+			}
+			return success;
+		}
 		
 		/** setfoucs **/
 		protected void setFocus(AutoItRs ars){
 			testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );	 
 			try {
-					AutoItX it = AutoIt.AutoItObject();
-					if (!it.winExists(ars.getWindowsRS())){
-						testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );	 
-						this.issueErrorPerformingAction("Failed due to not finding the window");
-						return;
-					}
-					it.winActivate(ars.getWindowsRS());
-					
+				if(activate(ars)){
 					testRecordData.setStatusCode(StatusCodes.OK);
 					// log success message and status
 					String altText = windowName +":"+ compName + " "+ action +" successful.";
 					String msg = genericText.convert("success3", altText, windowName, compName, action);
 					log.logMessage(testRecordData.getFac(),msg, PASSED_MESSAGE);
-					
+				}else{
+					issueErrorPerformingActionOnX(testRecordData.getWinCompName(), "AUTOIT fails with error "+it.getError());
+				}
+
 			} catch (Exception x) {
 				this.issueErrorPerformingAction(x.getClass().getSimpleName()+": "+ x.getMessage());
 			}		
@@ -274,27 +300,20 @@ public class AutoItComponent extends GenericEngine {
 		protected void click(AutoItRs ars){
 			testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );	 
 			try {
-					AutoItX it = AutoIt.AutoItObject();
-					
-					if (!it.winExists(ars.getWindowsRS())){
-						testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );	 
-						this.issueErrorPerformingActionOnX("Click","Failed due to not finding the window");
-						return;
-					}
-					
-					boolean rc = it.controlClick(ars.getWindowsRS(), "", ars.getComponentRS());
-						
-					if (rc){
-						testRecordData.setStatusCode(StatusCodes.OK);
-						// log success message and status
-						String altText = windowName +":"+ compName + " "+ action +" successful.";
-						String msg = genericText.convert("success3", altText, windowName, compName, action);
-						log.logMessage(testRecordData.getFac(),msg, PASSED_MESSAGE);
-					} else {
-						testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );	 
-						this.issueErrorPerformingAction("Failed with rc= " + it.getError());	
-					}
-					
+
+				boolean rc = it.controlClick(ars.getWindowsRS(), "", ars.getComponentRS());
+
+				if (rc){
+					testRecordData.setStatusCode(StatusCodes.OK);
+					// log success message and status
+					String altText = windowName +":"+ compName + " "+ action +" successful.";
+					String msg = genericText.convert("success3", altText, windowName, compName, action);
+					log.logMessage(testRecordData.getFac(),msg, PASSED_MESSAGE);
+				} else {
+					testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );	 
+					this.issueErrorPerformingAction("Failed with rc= " + it.getError());	
+				}
+
 			} catch (Exception x) {
 				this.issueErrorPerformingAction(x.getClass().getSimpleName()+": "+ x.getMessage());
 			}		
@@ -323,15 +342,6 @@ public class AutoItComponent extends GenericEngine {
 			
 		   	Log.info(debugmsg + " processing: "+ text);
 		   	try{
-
-		   		AutoItX it = AutoIt.AutoItObject();
-				
-				if (!it.winExists(ars.getWindowsRS())){
-					testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );	 
-					this.issueErrorPerformingActionOnX("SetText","Failed due to not finding the window");					
-					return;
-				}
-				
 				boolean rc = it.ControlSetText(ars.getWindowsRS(), "", ars.getComponentRS(), text);
 				if (rc) {
 			   	testRecordData.setStatusCode(StatusCodes.OK);
