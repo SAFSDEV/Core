@@ -255,5 +255,29 @@ public class TestRecordHelper extends TestRecordData {
 		
 		return mixedRsUsed;
 	}
+	
+	/**
+	 * @return boolean, true if this record contains a window to handle.
+	 * @throws SAFSException if the window's name is null.
+	 */
+	public boolean targetIsWindow() throws SAFSException{
+		return !targetIsComponent();
+	}
+	
+	/**
+	 * @return boolean, true if this record contains a component to handle.
+	 * @throws SAFSException if the window's name is null.
+	 */
+	public boolean targetIsComponent() throws SAFSException{
+		String winname = getWindowName();
+		String compname = getCompName();
+		
+		if(winname==null){
+			throw new SAFSException("The window's name is null!");
+		}
+		
+		return !winname.equals(compname);
+	}
+
 }
 
