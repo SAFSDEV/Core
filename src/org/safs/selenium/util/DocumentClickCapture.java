@@ -354,7 +354,9 @@ public class DocumentClickCapture implements Runnable{
 		long endTime = curTime + (1000*secondsTimeout);
 		IndependantLog.info(debugmsg+" waiting for event fired signal.");
 		while((curTime < endTime)&& isRunning() && !isEventFired()){
-			try{Thread.sleep(delayWaitReady);}catch(InterruptedException ignore){}
+			try{Thread.sleep(delayWaitReady);}catch(InterruptedException ignore){
+				IndependantLog.warn(debugmsg+" carelessly ignoring Sleep InterruptedException!?");
+			}
 			curTime = System.currentTimeMillis();
 		}
 		if(isEventFired()){
@@ -453,7 +455,7 @@ public class DocumentClickCapture implements Runnable{
 						targetGone = true;						
 					}
 				}catch(SeleniumPlusException se){
-					IndependantLog.warn(StringUtils.debugmsg(se));
+					IndependantLog.warn(debugmsg + StringUtils.debugmsg(se));
 				}
 				
 				if(eventfired){
