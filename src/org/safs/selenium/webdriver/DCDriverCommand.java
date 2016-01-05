@@ -168,7 +168,7 @@ public class DCDriverCommand extends DriverCommand {
 			WDLibrary.checkKnownIssue(command);
 		} catch (SeleniumPlusException e) {
 			testRecordData.setStatusCode( StatusCodes.SCRIPT_NOT_EXECUTED );
-			log.logMessage(testRecordData.getFac(), command+" NOT executed." , e.getMessage(), GENERIC_MESSAGE);
+			log.logMessage(testRecordData.getFac(), command+" NOT executed." , e.getMessage(), WARNING_MESSAGE);
 			return;
 		}
 		
