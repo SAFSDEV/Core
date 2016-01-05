@@ -34,6 +34,7 @@ package org.safs.selenium.webdriver.lib;
  *  <br>  NOV 12, 2015    (Lei Wang)  Modify method getObject(): continue to search component on the new page even 'lastFrame' is stale.
  *  <br>  NOV 26, 2015    (Lei Wang)  Modify method getObject(): reset 'lastFrame' to null if exception is thrown out during switch of frame.
  *  <br>  DEC 25, 2015    (Lei Wang)  Modify getObjectByText() and getObjectByTitle(): try to get partial, case-insensitive matched element.
+ *  <br>  JAN 05, 2015    (Lei Wang)  Modify getObjectByQualifier() etc.: support one qualifier with "Contains", such as TextContains=, TitleContains=.
  */
 import java.lang.reflect.Constructor;
 import java.net.URL;
@@ -1543,54 +1544,58 @@ public class SearchObject {
 		return preMatches;
 	}
 	
-	protected static SearchContext getObjectByText(SearchContext wel,String text){
+	protected static SearchContext getObjectByText(SearchContext wel,String text, boolean partialMatch){
 		String debugmsg = StringUtils.debugmsg(false);
-		IndependantLog.debug(debugmsg +"using '"+ text+"'");
+		IndependantLog.debug(debugmsg +"using '"+ text+"', partialMatch="+partialMatch);
 
-		String xpath = XPATH.fromText(text, true, true);
+		String xpath = XPATH.fromText(text, partialMatch, true);
 		List<WebElement> preMatches = findElements(wel, xpath);
 		
 		List<WebElementWarpper> elements = new ArrayList<WebElementWarpper>();
 		for(WebElement item : preMatches) elements.add(new WebElementWarpper(item, item.getText()));
 		
-		return getMatchedObject(elements, text);
+		return getMatchedObject(elements, text, partialMatch);
 	}
 	
-	protected static SearchContext getObjectByTitle(SearchContext wel, String value){
+	protected static SearchContext getObjectByTitle(SearchContext wel, String value, boolean partialMatch){
 		String debugmsg = StringUtils.debugmsg(false);
-		IndependantLog.debug(debugmsg +"using '"+ value+"'");
+		IndependantLog.debug(debugmsg +"using '"+ value+"', partialMatch="+partialMatch);
 		String attribute = SEARCH_CRITERIA_TITLE.toLowerCase();
 
-		String xpath = XPATH.fromAttribute(attribute, value, true, true);
+		String xpath = XPATH.fromAttribute(attribute, value, partialMatch, true);
 		List<WebElement> preMatches = findElements(wel, xpath);
 
 		List<WebElementWarpper> elements = new ArrayList<WebElementWarpper>();
 		for(WebElement item : preMatches) elements.add(new WebElementWarpper(item, item.getAttribute(attribute)));
 		
-		return getMatchedObject(elements, value);
+		return getMatchedObject(elements, value, partialMatch);
 	}
 	
 	/**
 	 * @param elements List<WebElementWarpper>, contains WebElement to match
 	 * @param value String, the value to match with
+	 * @param partialMatch boolean, if we try to find the partial matched item
 	 * @return SearchContext, the matched object
 	 */
-	protected static SearchContext getMatchedObject(List<WebElementWarpper> elements, String value){
-		//try to find the exact matched item
-		for(WebElementWarpper element: elements){
-			if(element.value.equals(value)) return element.element;
-		}
-		//try to find the matched item ignoring case
-		for(WebElementWarpper element: elements){
-			if(element.value.equalsIgnoreCase(value)) return element.element;
-		}
-		//try to find the partial matched item
-		for(WebElementWarpper element: elements){
-			if(element.value.contains(value)) return element.element;
-		}
-		//try to find the partial matched item ignoring case
-		for(WebElementWarpper element: elements){
-			if(element.value.toLowerCase().contains(value.toLowerCase())) return element.element;
+	protected static SearchContext getMatchedObject(List<WebElementWarpper> elements, String value, boolean partialMatch){
+		if(partialMatch){
+			//try to find the partial matched item
+			for(WebElementWarpper element: elements){
+				if(element.value.contains(value)) return element.element;
+			}
+			//try to find the partial matched item ignoring case
+			for(WebElementWarpper element: elements){
+				if(element.value.toLowerCase().contains(value.toLowerCase())) return element.element;
+			}
+		}else{
+			//try to find the exact matched item
+			for(WebElementWarpper element: elements){
+				if(element.value.equals(value)) return element.element;
+			}
+			//try to find the exact matched item ignoring case
+			for(WebElementWarpper element: elements){
+				if(element.value.equalsIgnoreCase(value)) return element.element;
+			}
 		}
 		//finally, return the first element if it exists
 		if(elements.size()>0) return elements.get(0).element;
@@ -1628,31 +1633,62 @@ public class SearchObject {
 	 */
 	protected static SearchContext getObjectByQualifier(SearchContext sc, String qualifier, String value) throws SeleniumPlusException{
 		SearchContext result = null;
+		String qualifierUC = null;
+		
+		if(qualifier==null){
+			throw new SeleniumPlusException("ignore null qualifier.");
+		}else{
+			qualifierUC = qualifier.toUpperCase();
+		}
+		
 		try{
-			if(SEARCH_CRITERIA_XPATH.equalsIgnoreCase(qualifier)){
+	
+			if(SEARCH_CRITERIA_XPATH.equals(qualifierUC)){
 				result = sc.findElement(By.xpath(value));
-			}else if(SEARCH_CRITERIA_CSS.equalsIgnoreCase(qualifier)){
+				
+			}else if(SEARCH_CRITERIA_CSS.equals(qualifierUC)){
 				result = sc.findElement(By.cssSelector(value));
-			}else if(SEARCH_CRITERIA_ID.equalsIgnoreCase(qualifier)){
-				result = sc.findElement(By.id(value));
-			}else if(SEARCH_CRITERIA_CLASS.equalsIgnoreCase(qualifier)){
-				result = sc.findElement(By.className(value));
-			}else if(SEARCH_CRITERIA_NAME.equalsIgnoreCase(qualifier)){
-				result = sc.findElement(By.name(value));
-			}else if(SEARCH_CRITERIA_LINK.equalsIgnoreCase(qualifier)){
-				result = sc.findElement(By.linkText(value));
-			}else if(SEARCH_CRITERIA_PARTIALLINK.equalsIgnoreCase(qualifier)){
-				result = sc.findElement(By.partialLinkText(value));
-			}else if(SEARCH_CRITERIA_TAG.equalsIgnoreCase(qualifier)){
+				
+			}else if(SEARCH_CRITERIA_TAG.equals(qualifierUC)){
 				result = sc.findElement(By.tagName(value));
-			}else if(SEARCH_CRITERIA_TEXT.equalsIgnoreCase(qualifier)){
-				result = getObjectByText(sc, value);
-			}else if(SEARCH_CRITERIA_TITLE.equalsIgnoreCase(qualifier)){
-				result = getObjectByTitle(sc, value);
-			}else if(SEARCH_CRITERIA_IFRAMEID.equalsIgnoreCase(qualifier)){
-				result = sc.findElement(By.xpath("//iframe[@id='"+value+"']"));
+				
 			}else{
-				throw new SeleniumPlusException("ignore unknown qualifier '"+qualifier+"', value='"+value+"'");
+				boolean partialMatch = qualifierUC.endsWith(SEARCH_CRITERIA_CONTAINS_SUFFIX);
+				
+				//The following qualifiers will support suffix "Contains":
+				//idContains, classContains, nameContains, linkContains, textContains, titleContains, iframeidContains
+				if(SEARCH_CRITERIA_ID.equals(qualifierUC)){
+					result = sc.findElement(By.id(value));
+					
+				}else if(SEARCH_CRITERIA_CLASS.equals(qualifierUC)){
+					result = sc.findElement(By.className(value));
+					
+				}else if(SEARCH_CRITERIA_NAME.equals(qualifierUC)){
+					result = sc.findElement(By.name(value));
+					
+				}else if(SEARCH_CRITERIA_LINK.equals(qualifierUC)){
+					result = sc.findElement(By.linkText(value));
+					
+				}else if(SEARCH_CRITERIA_PARTIALLINK.equals(qualifierUC)||
+						(SEARCH_CRITERIA_LINK+SEARCH_CRITERIA_CONTAINS_SUFFIX).equals(qualifierUC)){
+					result = sc.findElement(By.partialLinkText(value));
+					
+				}else if(qualifierUC.startsWith(SEARCH_CRITERIA_TEXT)){
+					result = getObjectByText(sc, value, partialMatch);
+					
+				}else if(qualifierUC.startsWith(SEARCH_CRITERIA_TITLE)){
+					result = getObjectByTitle(sc, value, partialMatch);
+					
+				}else if(qualifierUC.startsWith(SEARCH_CRITERIA_IFRAMEID)){
+					result = sc.findElement(By.xpath("//iframe["+XPATH.condition("id", value, partialMatch)+"]"));
+					
+				}else if(partialMatch){
+					//idContains, classContains, nameContains will be supported here.
+					result = sc.findElement(By.xpath(XPATH.RELATIVE_MATCHING_ALL_START+XPATH.conditionContains(qualifier, value)+XPATH.END));
+					
+				}else{
+					throw new SeleniumPlusException("ignore unknown qualifier '"+qualifierUC+"', value='"+value+"'");
+				}
 			}
 		}catch(Exception e){
 			if(e instanceof SeleniumPlusException) throw (SeleniumPlusException) e;
@@ -1734,11 +1770,16 @@ public class SearchObject {
 						if(xpathCondition!=null) xpathStr += xpathCondition;
 
 					}else if (SEARCH_CRITERIA_TEXT.equalsIgnoreCase(property)){
+						xpathCondition = XPATH.conditionForText(value, false);
+						if(xpathCondition!=null) xpathStr += xpathCondition;
+
+					}else if ((SEARCH_CRITERIA_TEXT+SEARCH_CRITERIA_CONTAINS_SUFFIX).equalsIgnoreCase(property)){
 						xpathCondition = XPATH.conditionForText(value, true);
 						if(xpathCondition!=null) xpathStr += xpathCondition;
 
 					}// try to generically handle any <something>Contains property values not handled above
 					else if (property.toUpperCase().endsWith(SEARCH_CRITERIA_CONTAINS_SUFFIX)){
+						//TextContains should be handled differently to get the xpath
 						xpathStr += XPATH.conditionContains(property, value);
 					}else{
 						xpathStr += XPATH.condition(property, value, false);
