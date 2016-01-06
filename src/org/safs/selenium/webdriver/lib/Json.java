@@ -5,6 +5,7 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openqa.selenium.remote.JsonException;
 import org.openqa.selenium.remote.JsonToBeanConverter;
 import org.safs.IndependantLog;
 import org.safs.StringUtils;
@@ -94,7 +95,7 @@ public class Json {
 	/**
 	 * Read a JSON data file with UTF-8 encoding, and convert the data into a Java Map and return it.<br>
 	 * @param file String, the absolute JSON file.
-	 * @return Map, the JSON data as a Map
+	 * @return Map, the JSON data as a Map; null if something wrong happened.
 	 */
 	public static Map<?, ?> readJSONFileUTF8(String file){
 		return readJSONFile(file, StringUtils.KEY_UTF8_CHARSET);
@@ -103,16 +104,35 @@ public class Json {
 	 * Read a JSON data file, and convert the data into a Java Map and return it.<br>
 	 * @param file String, the absolute JSON file.
 	 * @param encoding String, the JSON file encoding.
-	 * @return Map, the JSON data as a Map
+	 * @return Map, the JSON data as a Map; null if something wrong happened.
 	 */
 	public static Map<?, ?> readJSONFile(String file, String encoding){
 		try {
-			JsonToBeanConverter converter = new JsonToBeanConverter();
-			Map<?, ?> jsonMap = converter.convert(Map.class, FileUtilities.readStringFromEncodingFile(file, encoding));
-			return jsonMap;
+			return convert(Map.class, FileUtilities.readStringFromEncodingFile(file, encoding));
 		} catch (Exception e) {
 			IndependantLog.error("Fail to get JSON data as a Map.", e);
 			return null;
 		}
-	}	
+	}
+	
+	/**
+	 * Convert 'json object' to a certain type.
+	 * @param clazz Class<T>, the expected type to which the json object will be converted.
+	 * @param jsonData Object, the json data object.
+	 * @return T, the converted 'json object'; null if something wrong happened.
+	 */
+	public static <T> T convert(Class<T> clazz, Object jsonData){
+		try {
+			if(clazz==null || jsonData==null){
+				IndependantLog.error(StringUtils.debugmsg(false)+" converted-clazz or jsonData is null.");
+				return null;
+			}
+			JsonToBeanConverter converter = new JsonToBeanConverter();
+			return converter.convert(clazz, jsonData);
+		} catch (JsonException e) {
+			IndependantLog.error(StringUtils.debugmsg(false)+"Fail to get convert JSON data to "+clazz.getSimpleName(), e);
+			throw null;
+		}
+	}
+	
 }

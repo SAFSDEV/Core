@@ -43,6 +43,8 @@ package org.safs.selenium.webdriver.lib;
 *  <br>   DEC 02, 2015    (SBJLWA) Modify getLocation(): modify to get more accurate location.
 *  <br>   DEC 03, 2015    (SBJLWA) Move "code of fixing browser client area offset problem" from getLocation() to getScreenLocation().
 *  <br>   DEC 10, 2015    (SBJLWA) Add methods to handle clipboard on local machine or on RMI server machine.
+*  <br>   DEC 24, 2015    (SBJLWA) Add methods to get browser's name, version, and selenium-server's version etc.
+*                                  Add method checkKnownIssue().
 */
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -94,6 +96,7 @@ import org.safs.IndependantLog;
 import org.safs.Processor;
 import org.safs.StringUtils;
 import org.safs.image.ImageUtils;
+import org.safs.model.commands.DDDriverCommands;
 import org.safs.natives.NativeWrapper;
 import org.safs.net.IHttpRequest.Key;
 import org.safs.net.XMLHttpRequest;
@@ -2650,8 +2653,6 @@ public class WDLibrary extends SearchObject {
 		public Map<String, Object> execute(HttpCommand command, String url, boolean async, Map<String, String> headers, String data) throws SeleniumPlusException {
 			if(!StringUtils.isValid(url)) throw new SeleniumPlusException("The request url is null or is empty!");
 			
-			checkBrowserCompability();
-			
 			String debugmsg = StringUtils.debugmsg(false);
 
 			String parameters = ""+(data==null?"":"with data '"+data+"'")+((headers==null||headers.isEmpty())?"":" with request headers "+headers);
@@ -2684,30 +2685,6 @@ public class WDLibrary extends SearchObject {
 			}else{
 				IndependantLog.warn(debugmsg+" the returned result is not a Map! Need modify source code to parse it!");
 				return null;
-			}
-		}
-		
-		protected void checkBrowserCompability() throws SeleniumPlusException{
-			String debugmsg = StringUtils.debugmsg(false);
-			WebDriver driver = getWebDriver();
-			
-			if(driver==null){
-				IndependantLog.warn(debugmsg + "The static WebDriver is null!");
-			}else if(driver instanceof RemoteDriver){
-//				RemoteDriver rd = (RemoteDriver) driver;
-//				String browserName = rd.getBrowserName();
-//				String browserVersion = rd.getBrowserVersion();
-//				String driverVersion = rd.getDriverVersion();
-//				
-//				IndependantLog.warn(debugmsg + "You are using browser "+browserName+", version is "+browserVersion+".\n The Selenium Driver version is "+driverVersion);
-//				
-//				if(SelectBrowser.BROWSER_NAME_FIREFOX.equalsIgnoreCase(browserName)){
-//					if("42.0".equalsIgnoreCase(browserVersion) && "2.47.1".equals(driverVersion)){
-//						throw new SeleniumPlusException("Compability problem for browser '"+browserName+"' "+browserVersion);
-//					}
-//				}
-			}else{
-				IndependantLog.warn(debugmsg + " Did not check the browser compability!");
 			}
 		}
 		
@@ -2750,6 +2727,73 @@ public class WDLibrary extends SearchObject {
 	}
 
 	/**
+	 * @return String, the name of the browser where test is running. Or null if something wrong happens.
+	 */
+	public static String getBrowserName(){
+		WebDriver wd = WDLibrary.getWebDriver();
+		if(wd instanceof RemoteDriver){
+			return ((RemoteDriver) wd).getBrowserName();
+		}
+		return null;
+	}
+	
+	/**
+	 * @return String, the version of the browser where test is running. Or null if something wrong happens.
+	 */
+	public static String getBrowserVersion(){
+		WebDriver wd = WDLibrary.getWebDriver();
+		if(wd instanceof RemoteDriver){
+			return ((RemoteDriver) wd).getBrowserVersion();
+		}
+		return null;
+	}
+	
+	/**
+	 * @return String, the name of the platform where the browser is running. Or null if something wrong happens.
+	 */
+	public static String getPlatform(){
+		WebDriver wd = WDLibrary.getWebDriver();
+		if(wd instanceof RemoteDriver){
+			return ((RemoteDriver) wd).getPlatform();
+		}
+		return null;
+	}
+	
+	/**
+	 * @return String, the version of 'selenium server' with which the test is running. Or null if something wrong happens.
+	 */
+	public static String getDriverVersion(){
+		WebDriver wd = WDLibrary.getWebDriver();
+		if(wd instanceof RemoteDriver){
+			return ((RemoteDriver) wd).getDriverVersion();
+		}
+		return null;
+	}
+
+	/**
+	 * Check some known issue for a certain keyword.<br>
+	 * @param keyword String, the keyword to check for, such like "GetURL"
+	 * @throws SeleniumPlusException will be thrown out if a known issue is checked.
+	 */
+	public static void checkKnownIssue(String keyword) throws SeleniumPlusException{
+
+		if(DDDriverCommands.GETURL_KEYWORD.equalsIgnoreCase(keyword) ||
+		   DDDriverCommands.SAVEURLTOFILE_KEYWORD.equalsIgnoreCase(keyword) ||		
+		   DDDriverCommands.VERIFYURLCONTENT_KEYWORD.equalsIgnoreCase(keyword) ||		
+		   DDDriverCommands.VERIFYURLTOFILE_KEYWORD.equalsIgnoreCase(keyword)){
+			//Check the known issue with selenium-standalone2.47.1 and Firefox 42.0
+			//These keywords will be skipped for FireFox until we find the reason why 'AJAX execution is stuck with FireFox'.
+			if(SelectBrowser.BROWSER_NAME_FIREFOX.equalsIgnoreCase(getBrowserName())
+//				&& "42.0".equals(getBrowserVersion())
+//				&& "2.47.1".equals(getDriverVersion())
+				){
+//				throw new SeleniumPlusException("For keyword '"+keyword+"': known issue with selenium-standalone2.47.1 and Firefox ");
+				throw new SeleniumPlusException("For keyword '"+keyword+"': execution stuck : known issue with Firefox!");
+			}
+		}
+	}
+	
+	/**
 	 * <b>Before running this test, the Selenium Sever should have already started</b> (it can be launched by "java org.safs.selenium.webdriver.lib.RemoteDriver" ).<br>
 	 * 
 	 * @see RemoteDriver#main(String[])
@@ -2770,6 +2814,8 @@ public class WDLibrary extends SearchObject {
 			System.out.println(debugmsg+" launching page '"+url+"' in browser '"+browser+"'.");
 			WDLibrary.startBrowser(browser, url, ID, timeout, isRemote);
 
+			checkKnownIssue(DDDriverCommands.GETURL_KEYWORD);
+			
 			Thread threadGetUrl = new Thread(new Runnable(){
 				public void run() {
 					try {

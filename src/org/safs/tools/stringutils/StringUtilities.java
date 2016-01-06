@@ -27,6 +27,7 @@ import org.safs.tools.CaseInsensitiveFile;
  * <br>	JUL 25, 2013	(SBJLWA)    Remove dependency on org.safs.Log and org.safs.text.FAILStrings so that this class can be generally used.
  * <br>	MAR 11, 2014	(SBJLWA)    Add methods to get string, number, boolean from a map according to a key.
  * <br>	NOV 18, 2014	(SBJLWA)    Modify DATE_FORMAT_AM_PM_DATE_TIME: add "AM PM" suffix.
+ * <br>	DEC 24, 2015	(SBJLWA)    Add method removeSingleQuotes().
  */
 public abstract class StringUtilities {
 	
@@ -897,6 +898,20 @@ public abstract class StringUtilities {
 	public static String removeDoubleQuotes(String original){
 		original = removePrefix(original, "\"");
 		original = removeSuffix(original, "\"");
+		return original;
+	}
+	
+	/**
+	 * Remove any leading and\or trailing single quotes.  
+	 * <p>Example:<p>
+	 * original = 'c:\file.txt' (with quotes)
+	 * the result will be 'c:\file.txt'  (no quotes at all)
+	 * @param original
+	 * @return
+	 */
+	public static String removeSingleQuotes(String original){
+		original = removePrefix(original, "'");
+		original = removeSuffix(original, "'");
 		return original;
 	}
 	
