@@ -128,7 +128,7 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 	public RemoteDriver(DesiredCapabilities capabilities){				
 		super(capabilities);		
 	}
-	
+
 	/**
 	 * @return String, the name of the browser where test is running. Or null if something wrong happens.
 	 */
@@ -224,7 +224,7 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 //			"value":{
 //			   "message":"GET /static/resource\nBuild info: version: '2.48.2', revision: '41bccdd', time: '2015-10-09 19:59:12'\nSystem info: host: 'xxx', ip: '172.27.17.89', os.name: 'Windows 7', os.arch: 'x86', os.version: '6.1', java.version: '1.7.0_45'\nDriver info: driver.version: unknown",
 //			   "suppressed":[],
-//			   "localizedMessage":"GET /static/resource\nBuild info: version: '2.48.2', revision: '41bccdd', time: '2015-10-09 19:59:12'\nSystem info: host: 'xxx', ip: '172.27.17.89', os.name: 'Windows 7', os.arch: 'x86', os.version: '6.1', java.version: '1.7.0_45'\nDriver info: driver.version: unknown","buildInformation":null,"cause":null,"systemInformation":"System info: host: 'xxx', ip: '172.27.17.89', os.name: 'Windows 7', os.arch: 'x86', os.version: '6.1', java.version: '1.7.0_45'","supportUrl":null,"class":"org.openqa.selenium.UnsupportedCommandException",
+//			   "localizedMessage":"GET /static/resource\nBuild info: version: '2.48.2', revision: '41bccdd', time: '2015-10-09 19:59:12'\nSystem info: host: 'xxx', ip: '172.27.17.89', os.name: 'Windows 7', os.arch: 'x86', os.version: '6.1', java.version: '1.7.0_45'\nDriver info: driver.version: unknown","buildInformation":null,"cause":null,"systemInformation":"System info: host: 'xxx', ip: '172.27.17.89', os.name: 'Windows 7', os.arch: 'x86', os.version: '6.1', java.version: '1.7.0_45'","supportUrl":null,"class":"...(line truncated)...
 //			   "additionalInformation":"\nDriver info: driver.version: unknown",
 //			   "hCode":19885966,
 //		       "stackTrace":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]
@@ -254,7 +254,7 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 		
 		return version;
 	}
-	
+		
 	/**
 	 * Connect to a remote selenium standalone server.<br>
 	 * We will also parse the URL to attempt to connect to a SAFS Selenium RMI Server on RMI-SERVER-HOST.<br>
@@ -416,11 +416,12 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 	@Override
     protected Response execute(String driverCommand, Map<String, ?> parameters) {
     	Response response = super.execute(driverCommand, parameters);
-    	if(response.getValue() instanceof java.lang.String){
+    	final String debugmsg = "RemoteDriver.execute ";
+    	if((response != null) && (response.getValue() instanceof java.lang.String)){
     		String v = (String) response.getValue();
     		v = v.trim();
     		if(v.startsWith("{") && v.endsWith("}")){
-        		IndependantLog.info("RemoteDriver attempting to convert uncertain JSON Response to Map Response: "+ v);
+        		IndependantLog.info(debugmsg + driverCommand +" attempting to convert uncertain JSON Response to Map Response: "+ v);
 	    		v = v.replace("-1.#IND", "0");
 	    		v = v.replace("{'", "{\"");
 	    		v = v.replace("':", "\":");
@@ -430,7 +431,7 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
         		try{ 
         			Object nv = JSON.parse(v);
         			if(nv instanceof Map){
-    	        		IndependantLog.info("RemoteDriver JSON Map conversion SUCCESSFUL: "+ nv.toString());
+    	        		IndependantLog.info(debugmsg + driverCommand +" JSON Map conversion SUCCESSFUL: "+ nv.toString());
     	        		Map<?, ?> m = (Map<?, ?>) nv;
     	        		final String SESSIONID = "sessionid";
     	        		final String STATUS = "status";
@@ -439,17 +440,23 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
     	        			if(key.toString().equalsIgnoreCase(SESSIONID)) response.setSessionId(m.get(key).toString());
     	        			try{if(key.toString().equalsIgnoreCase(STATUS)) response.setStatus(((Number)m.get(key)).intValue());}
     	        			catch(Exception x){
-    	    	        		IndependantLog.info("RemoteDriver STATUS conversion "+ x.getClass().getName()+", "+x.getMessage());
+    	    	        		IndependantLog.info(debugmsg + driverCommand +" STATUS conversion "+ x.getClass().getName()+", "+x.getMessage());
     	    	        	}
             				if(key.toString().equalsIgnoreCase(VALUE)) response.setValue(m.get(key));
     	        		}
         			}else{
-    	        		IndependantLog.info("RemoteDriver JSON conversion WAS NOT successful.");
+    	        		IndependantLog.info(debugmsg + driverCommand +" JSON conversion WAS NOT successful.");
         			}
         		}catch(Throwable t){
-        			IndependantLog.debug("RemoteDriver ignoring JSON problem\n", t);
+        			IndependantLog.debug(debugmsg + driverCommand +" ignoring JSON problem\n", t);
 	    		}
     		}
+    	}else{
+			if(response == null) {
+				IndependantLog.debug(debugmsg + driverCommand +" failed to get any type of response.");
+			}else{
+				// DEBUG IndependantLog.debug(debugmsg + driverCommand +" received a "+ response.getClass().getSimpleName()+" response.");				
+			}
     	}
     	return response;
     }

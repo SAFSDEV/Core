@@ -95,7 +95,7 @@ import com.thoughtworks.selenium.SeleniumException;
  *
  *     (note: parent/child elements separated by ";\;" )
  *     (note: FRAMEINDEX is NOT ready for using )
- *     (note: If there is no frame-expression in a RS, the last visited frame 
+ *     (note: If there is no frame-expression in a RS, the last visited frame
  *            will be the frame where to find component. By default, the last visited
  *            frame is the main frame (the topmost html Document).
  *            And that is why if we specify frame for a window, then their children
@@ -103,7 +103,7 @@ import com.thoughtworks.selenium.SeleniumException;
  *            [HelpPopup]
  *            HelpPopup="FRAMEID=VisualAnalyticsHubLogon_iframe;\;id=__popover8-popover"
  *            BtnHelpCenter="id=__item23"
- *            
+ *
  *            BtnHelpCenter is supposed to be found in frame 'VisualAnalyticsHubLogon_iframe'
  *      )
  *     </pre></ul>
@@ -225,17 +225,17 @@ public class SearchObject {
 		return lastFrame;
 	}
 	/**
-	 * <b style="color:red">Note: User should be very careful when calling this method, 
+	 * <b style="color:red">Note: User should be very careful when calling this method,
 	 * it will change the whole searching context!!!</b><br>
 	 * Set the frame object where the current GUI-component locate.
-	 * If a null value is set, then there is no frame to switch and 
+	 * If a null value is set, then there is no frame to switch and
 	 * object will be searched in default document (webdriver.switchTo().defaultContent()).
 	 * @see #getObject(SearchContext, String)
 	 */
 	public static void setLastFrame(FrameElement lastFrame) {
 		SearchObject.lastFrame = lastFrame;
 	}
-	
+
 	/**FRAMEINDEX, it should be placed in front of normal tokens like ID, CLASS, NAME etc. if exist.
 	 *  NOT recommended to use. Use FRAMEID OR FRAMENAME Instead.*/
 	public static final String SEARCH_CRITERIA_FRAMEINDEX 	= "FRAMEINDEX";
@@ -290,8 +290,8 @@ public class SearchObject {
 	public static final String SEARCH_CRITERIA_TAG	 		= "TAG";
 
 	/** "CONTAINS" */
-	public static final String SEARCH_CRITERIA_CONTAINS_SUFFIX	 		= "CONTAINS";	
-	
+	public static final String SEARCH_CRITERIA_CONTAINS_SUFFIX	 		= "CONTAINS";
+
 	/**DOJO*/
 	public static final String DOMAIN_DOJO         = "DOJO";
 	public static final String DOMAIN_SAP          = "SAP";
@@ -322,10 +322,10 @@ public class SearchObject {
 
 	/**The last visited URL,*/
 	public static String lastVisitedURL = null;
-	
+
 	/**The last visited browser window*/
 	public static BrowserWindow lastBrowserWindow;
-	
+
 	public static class BrowserWindow{
 		/**'height'*/
 		public static final String PROPERTY_HEIGHT = "height";
@@ -361,7 +361,7 @@ public class SearchObject {
 		private Object object = null;
 		/* convenient reference to wrapped object*/
 		private Map map = null;
-		
+
 		private Window window = null;
 
 		private float height;
@@ -382,54 +382,54 @@ public class SearchObject {
 			map = (Map) browserInfoMap;
 			Object rc = null;
 			IndependantLog.info("BrowserWindow set map processing: "+ browserInfoMap.getClass().getName());
-			
+
 			try{ window = (Window) map.get(PROPERTY_DRIVER_WINDOW);}catch(Exception ex){
 				IndependantLog.info("BrowserWindow set map ignoring set Window: "+ ex.getClass().getName()+": "+ ex.getMessage());
 			}
-			try{ height = StringUtilities.getFloat(map, PROPERTY_HEIGHT); } catch (Exception ex) {	
+			try{ height = StringUtilities.getFloat(map, PROPERTY_HEIGHT); } catch (Exception ex) {
 				IndependantLog.info("BrowserWindow set: height not set in Map...attempting fix.");
 				if(window != null) {
 					height = window.getSize().height;
 					map.put(PROPERTY_HEIGHT, new Float(height));
 					IndependantLog.info("BrowserWindow set: height set to "+height);
 				}else{
-  				    IndependantLog.info("BrowserWindow set: height was NOT fixed.");				    	
+  				    IndependantLog.info("BrowserWindow set: height was NOT fixed.");
 				}
 				//consider document.parentWindow.screen.height
 			}
-			try{ width = StringUtilities.getFloat(map, PROPERTY_WIDTH); } catch (Exception ex) {	
+			try{ width = StringUtilities.getFloat(map, PROPERTY_WIDTH); } catch (Exception ex) {
 				IndependantLog.info("BrowserWindow set: width not set in Map...attempting fix.");
 				if(window != null) {
 					width = window.getSize().width;
 					map.put(PROPERTY_WIDTH, new Float(width));
 					IndependantLog.info("BrowserWindow set: width set to "+width);
 				}else{
-  				    IndependantLog.info("BrowserWindow set: width was NOT fixed.");				    	
+  				    IndependantLog.info("BrowserWindow set: width was NOT fixed.");
 				}
 				//consider document.parentWindow.screen.width
 			}
-			try{ x = StringUtilities.getFloat(map, PROPERTY_LOCATION_X); } catch (Exception ex) {	
+			try{ x = StringUtilities.getFloat(map, PROPERTY_LOCATION_X); } catch (Exception ex) {
 				IndependantLog.info("BrowserWindow set: x not set in Map...attempting fix.");
 				if(window != null) {
 					x = window.getPosition().x;
 					map.put(PROPERTY_LOCATION_X, new Float(x));
 					IndependantLog.info("BrowserWindow set: x set to "+x);
 				}else{
-  				    IndependantLog.info("BrowserWindow set: x was NOT fixed.");				    	
-				}				
+  				    IndependantLog.info("BrowserWindow set: x was NOT fixed.");
+				}
 				// consider document.parentWindow.screenLeft
 			}
-			try{ y = StringUtilities.getFloat(map, PROPERTY_LOCATION_Y); } catch (Exception ex) {	
+			try{ y = StringUtilities.getFloat(map, PROPERTY_LOCATION_Y); } catch (Exception ex) {
 				IndependantLog.info("BrowserWindow set: y not set in Map...attempting fix.");
 				if(window != null) {
 					y = window.getPosition().y;
 					map.put(PROPERTY_LOCATION_Y, new Float(y));
 					IndependantLog.info("BrowserWindow set: y set to "+y);
 				}else{
-  				    IndependantLog.info("BrowserWindow set: y was NOT fixed.");				    	
+  				    IndependantLog.info("BrowserWindow set: y was NOT fixed.");
 				}
 			}
-			try{ clientX = StringUtilities.getFloat(map, PROPERTY_CLIENT_LOCATION_X); } catch (Exception ex) {	
+			try{ clientX = StringUtilities.getFloat(map, PROPERTY_CLIENT_LOCATION_X); } catch (Exception ex) {
 			    IndependantLog.info("BrowserWindow set: clientX not set in Map...attempting fix.");
 				// consider document.parentWindow.screenLeft
 				try{ rc=null;
@@ -439,7 +439,7 @@ public class SearchObject {
 						map.put(PROPERTY_CLIENT_LOCATION_X, new Float(clientX));
 						IndependantLog.info("BrowserWindow set: clientX set to "+clientX);
 				    }else{
-	  				    IndependantLog.info("BrowserWindow set: clientX was NOT fixed.");				    	
+	  				    IndependantLog.info("BrowserWindow set: clientX was NOT fixed.");
 				    }
 				}
 				catch(Exception ex2){
@@ -447,9 +447,9 @@ public class SearchObject {
 					// DOJO alternatives?
 				}
 			}
-			try{ clientY = StringUtilities.getFloat(map, PROPERTY_CLIENT_LOCATION_Y); } catch (Exception ex) {	
+			try{ clientY = StringUtilities.getFloat(map, PROPERTY_CLIENT_LOCATION_Y); } catch (Exception ex) {
 			    IndependantLog.info("BrowserWindow set: clientY not set in Map...attempting fix...");
-				// consider document.parentWindow.screenTop				
+				// consider document.parentWindow.screenTop
 				try{ rc=null;
 				    rc = WDLibrary.executeScript("return document.parentWindow.screenTop;");
 				    if(rc instanceof Number) {
@@ -457,7 +457,7 @@ public class SearchObject {
 						map.put(PROPERTY_CLIENT_LOCATION_Y, new Float(clientY));
 						IndependantLog.info("BrowserWindow set: clientY set to "+clientY);
 				    }else{
-	  				    IndependantLog.info("BrowserWindow set: clientY was NOT fixed.");				    	
+	  				    IndependantLog.info("BrowserWindow set: clientY was NOT fixed.");
 				    }
 				}
 				catch(Exception ex2){
@@ -465,7 +465,7 @@ public class SearchObject {
 					// DOJO alternatives?
 				}
 			}
-			try{ borderWidth = StringUtilities.getFloat(map, PROPERTY_BORDER_WIDTH); } catch (Exception ex) {	
+			try{ borderWidth = StringUtilities.getFloat(map, PROPERTY_BORDER_WIDTH); } catch (Exception ex) {
 				IndependantLog.info("BrowserWindow set: borderWidth not set in Map...attempting fix.");
 				// try to get it from CSS settings?
 				// clientX - x ?
@@ -482,21 +482,21 @@ public class SearchObject {
 				// try to get it from CSS settings?
 				// height - clientHeight - headerHeight
 			}
-			try{ headerHeight = StringUtilities.getFloat(map, PROPERTY_HEADER_HEIGHT); } catch (Exception ex) {	
+			try{ headerHeight = StringUtilities.getFloat(map, PROPERTY_HEADER_HEIGHT); } catch (Exception ex) {
 				IndependantLog.info("BrowserWindow set: headerHeight not set in Map...attempting fix...");
 				headerHeight = clientY - y;
-				// height - clientHeight - borderWidth ?				
+				// height - clientHeight - borderWidth ?
 				map.put(PROPERTY_HEADER_HEIGHT, new Float(headerHeight));
 				IndependantLog.info("BrowserWindow set: headerHeight to "+headerHeight);
 			}
-			try{ clientWidth = StringUtilities.getFloat(map, PROPERTY_CLIENT_WIDTH); } catch (Exception ex) {	
+			try{ clientWidth = StringUtilities.getFloat(map, PROPERTY_CLIENT_WIDTH); } catch (Exception ex) {
 				IndependantLog.info("BrowserWindow set: clientWidth not set in Map...attempting fix...");
 				// width - (borderWidth*2) ?
-				clientWidth = width - (borderWidth * 2); 
+				clientWidth = width - (borderWidth * 2);
 				map.put(PROPERTY_CLIENT_WIDTH, new Float(clientWidth));
 				IndependantLog.info("BrowserWindow set: clientWidth set to "+ clientWidth);
 			}
-			try{ clientHeight = StringUtilities.getFloat(map, PROPERTY_CLIENT_HEIGHT); } catch (Exception ex) {	
+			try{ clientHeight = StringUtilities.getFloat(map, PROPERTY_CLIENT_HEIGHT); } catch (Exception ex) {
 				IndependantLog.info("BrowserWindow set: clientHeight not set in Map...attempting fix.");
 				// height - headerHeight - borderWidth ?
 				clientHeight = height - headerHeight - borderWidth;  //can be wrong if bottom border != side borders
@@ -505,11 +505,11 @@ public class SearchObject {
 			}
 			try{ pageXOffset = StringUtilities.getFloat(map, PROPERTY_PAGE_X_OFFSET); } catch (SAFSException ex) {	}
 			try{ pageYOffset = StringUtilities.getFloat(map, PROPERTY_PAGE_Y_OFFSET); } catch (SAFSException ex) {	}
-			try{ maximized = StringUtilities.getBoolean(map, PROPERTY_MAXIMIZED); } catch (SAFSException ex) {	
-				
+			try{ maximized = StringUtilities.getBoolean(map, PROPERTY_MAXIMIZED); } catch (SAFSException ex) {
+
 			}
 		}
-		
+
 		/**
 		 * The embedded Mapped object does or does NOT contain a real value for a particular Property?
 		 * @param propertyName
@@ -866,7 +866,7 @@ public class SearchObject {
 			if (host == null || host.isEmpty()) host = SelectBrowser.DEFAULT_SELENIUM_HOST;
 			String port = System.getProperty(SelectBrowser.SYSTEM_PROPERTY_SELENIUM_PORT);
 			if (port == null || port.isEmpty()) port = SelectBrowser.DEFAULT_SELENIUM_PORT;
-			
+
 			List<SessionInfo> list = null;
 			try {
 				list = RemoteDriver.getSessionsFromFile();
@@ -993,7 +993,7 @@ public class SearchObject {
 	public static boolean containTagRS(String rs){
 		if(rs==null) return false;
 		String uprs = rs.toUpperCase().replaceAll(" ", "");
-		if(uprs.startsWith(SEARCH_CRITERIA_TAG + assignSeparator) || 
+		if(uprs.startsWith(SEARCH_CRITERIA_TAG + assignSeparator) ||
 		   uprs.contains(qulifierSeparator + SEARCH_CRITERIA_TAG + assignSeparator)){
 			return true;
 		}else{
@@ -1027,7 +1027,7 @@ public class SearchObject {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * @param recognitionString String
 	 * @return boolean, true if the RS is a kind of frame-RS
@@ -1079,12 +1079,12 @@ public class SearchObject {
 		WebElement frame = _getSwitchFrame(webdriver, frameRS);
 		return _switchFrame(webdriver, frame);
 	}
-	
+
 	private static WebElement _getSwitchFrame(WebDriver  webdriver, String frameRS){
 		String debugmsg = StringUtils.debugmsg(false);
-		
+
 		if(webdriver==null || frameRS==null) return null;
-		
+
 		WebElement frame = null;
 		String[] tokens = StringUtils.getTokenArray(frameRS, assignSeparator, escapeChar);
 		if(tokens==null || tokens.length<2){
@@ -1094,7 +1094,7 @@ public class SearchObject {
 		String searchCreteria = tokens[0].trim().toUpperCase();
 		String value = tokens[1];
 //		TargetLocator targetLocator = webdriver.switchTo();
-		
+
 		if(searchCreteria.equals(SEARCH_CRITERIA_FRAMEID)){
 			frame = webdriver.findElement(By.id(value));
 
@@ -1129,14 +1129,14 @@ public class SearchObject {
 //			targetLocator.frame(frame);
 //			IndependantLog.debug(debugmsg+" switch to frame by '"+value+"'");
 //		}
-		
+
 		return frame;
 	}
-	
+
 	private static boolean _switchFrame(WebDriver  webdriver, WebElement frame){
 		if(webdriver==null || frame==null) return false;
 		String debugmsg = StringUtils.debugmsg(false);
-		
+
 		try{
 			webdriver.switchTo().frame(frame);
 			IndependantLog.debug(debugmsg+" switched to frame '"+frame+"'");
@@ -1146,11 +1146,11 @@ public class SearchObject {
 			return false;
 		}
 	}
-	
-	/** 
+
+	/**
 	 * Example: tag=span;propertycontains=innerHTML:some value
-	 * 
-	 * @param RS -- Full MultiAttribute qualifier RS. (Does not have to be a single qualifier assignment segment.)  
+	 *
+	 * @param RS -- Full MultiAttribute qualifier RS. (Does not have to be a single qualifier assignment segment.)
 	 * The algorithm does NOT assume the TAG qualifier is first in the RS.
 	 * @return the value associated with any TAG= qualifier setting, or null if it does not exist.
 	 * @throws SeleniumException
@@ -1159,7 +1159,7 @@ public class SearchObject {
 		if (RS == null || RS.length() < 5) return null;
 		String rc = null;
 		String[] st = StringUtils.getTokenArray(RS, qulifierSeparator, escapeChar);
-		
+
 		for(int i=0;i< st.length;i++){
 			if(st[i].toUpperCase().startsWith(SEARCH_CRITERIA_TAG)){
 				try{
@@ -1180,7 +1180,7 @@ public class SearchObject {
 		}
 		return rc;
 	}
-	
+
 	/**
 	 * Split a string by separator {@link #assignSeparator}, and return the result.<br>
 	 * If the RS contains multiple {@link #assignSeparator}, this method will ONLY<br>
@@ -1227,7 +1227,7 @@ public class SearchObject {
 		boolean changed = false;
 
 		try{
-			//TODO Does "url change" mean the page has changed??? 
+			//TODO Does "url change" mean the page has changed???
 			//Not enough, there are some cases, url changed, but page doesn't. we need another way to detect.
 			//TODO we need to wait the page completely-loaded so that we can get the new url.
 			StringUtilities.sleep(2000);
@@ -1240,7 +1240,7 @@ public class SearchObject {
 
 		return changed;
 	}
-		
+
 	/**
 	 * Primary entry point to seek a WebElement based on a provided recognition string.
 	 * We support multiple types of recognition strings
@@ -1275,7 +1275,7 @@ public class SearchObject {
 		//1. Handle the Frames Recognition String
 		try{
 			WebDriver  webdriver = getWebDriver();
-			lastVisitedURL = webdriver.getCurrentUrl();			
+			lastVisitedURL = webdriver.getCurrentUrl();
 			targetLocator = webdriver.switchTo();
 			//very IMPORTANT step: Switch back to the top window or first frame
 			targetLocator.defaultContent();
@@ -1310,7 +1310,7 @@ public class SearchObject {
 						webdriver = reconnectLastWebDriver();
 
 						lastVisitedURL = webdriver.getCurrentUrl();
-						
+
 						targetLocator = webdriver.switchTo();
 						targetLocator.defaultContent();
 						retried = true;
@@ -1321,7 +1321,7 @@ public class SearchObject {
 					}
 				}
 			}
-			
+
 			//reset the frame before searching the frame element if it exists.
 			FrameElement frameElement = null;
 			WebElement frame = null;
@@ -1341,11 +1341,11 @@ public class SearchObject {
 						//Can we use frame as SearchContext for child frame? FrameID=parentFrame;\;FrameID=childFrame
 						//NO, frame WebElement can NOT be used as SearchContext, will cause Exception
 						//We should always use webdriver as the SearchContext to find frame WebElement
-						
+
 						//don't break, if there is frame in frame, as FRAMENAME=parent;\\;FRAMENAME=child
 						//break;
 					}
-					
+
 				}else{
 					//IndependantLog.warn(debugmsg+" store normal recognition string '"+rst+"' for further processing.");
 					rsWithoutFrames.add(rst);
@@ -1379,7 +1379,7 @@ public class SearchObject {
 				IndependantLog.warn(debugmsg+" swtiching to the previous frame 'lastFrame' failed! The page has changed!");
 				//LeiWang: S1215754
 				//if we click a link within a FRAME, as the link is in a FRAME, so the field 'lastFrame' will be assigned after clicking the link.
-				//then the link will lead us to a second page, when we try to find something on that page, firstly we try to switch to 'lastFrame' and 
+				//then the link will lead us to a second page, when we try to find something on that page, firstly we try to switch to 'lastFrame' and
 				//get a StaleElementReferenceException (as we are in the second page, there is no such frame of the first page)
 				//but we still want our program to find the web-element on the second page, so we will just set 'lastFrame' to null and let program continue.
 //				[FirstPage]
@@ -1403,8 +1403,8 @@ public class SearchObject {
 		//Error 1: Map doesn't contain a window definition (under a frame)
 		//  [Window]
 		//  Child="FrameId=xxx;\;Id=xxx"
-		//If we are going to FIND element under certain FRAME, 
-		//and the parent is "[[RemoteDriver.... ] ->  xpath: /html]", which maybe the default parent "xpath=/html" without any FRAME; 
+		//If we are going to FIND element under certain FRAME,
+		//and the parent is "[[RemoteDriver.... ] ->  xpath: /html]", which maybe the default parent "xpath=/html" without any FRAME;
 		//the webelement to find is in a Frame, StaleElementReferenceException will be thrown out.
 		//To avoid this, we need to modify the SearchContext to the "default-webdriver"
 		if(haveSwichedFrame && XPATH.isRootHtml(wel)){
@@ -1495,7 +1495,7 @@ public class SearchObject {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Find the Nth frame webelement in the search context.<br>
 	 * @param sc SearchContext, the search context, SHOULD be WebDriver
@@ -1543,20 +1543,20 @@ public class SearchObject {
 		}
 		return preMatches;
 	}
-	
+
 	protected static SearchContext getObjectByText(SearchContext wel,String text, boolean partialMatch){
 		String debugmsg = StringUtils.debugmsg(false);
 		IndependantLog.debug(debugmsg +"using '"+ text+"', partialMatch="+partialMatch);
 
 		String xpath = XPATH.fromText(text, partialMatch, true);
 		List<WebElement> preMatches = findElements(wel, xpath);
-		
+
 		List<WebElementWarpper> elements = new ArrayList<WebElementWarpper>();
 		for(WebElement item : preMatches) elements.add(new WebElementWarpper(item, item.getText()));
-		
+
 		return getMatchedObject(elements, text, partialMatch);
 	}
-	
+
 	protected static SearchContext getObjectByTitle(SearchContext wel, String value, boolean partialMatch){
 		String debugmsg = StringUtils.debugmsg(false);
 		IndependantLog.debug(debugmsg +"using '"+ value+"', partialMatch="+partialMatch);
@@ -1567,10 +1567,10 @@ public class SearchObject {
 
 		List<WebElementWarpper> elements = new ArrayList<WebElementWarpper>();
 		for(WebElement item : preMatches) elements.add(new WebElementWarpper(item, item.getAttribute(attribute)));
-		
+
 		return getMatchedObject(elements, value, partialMatch);
 	}
-	
+
 	/**
 	 * @param elements List<WebElementWarpper>, contains WebElement to match
 	 * @param value String, the value to match with
@@ -1599,10 +1599,10 @@ public class SearchObject {
 		}
 		//finally, return the first element if it exists
 		if(elements.size()>0) return elements.get(0).element;
-		
+
 		return null;
 	}
-	
+
 	/**
 	 * This class contains 2 fields, one is WebElement, the other is value.<br>
 	 * The field value is a string, used to match. It can be assigned by WebElement.getText(),<br>
@@ -1634,58 +1634,58 @@ public class SearchObject {
 	protected static SearchContext getObjectByQualifier(SearchContext sc, String qualifier, String value) throws SeleniumPlusException{
 		SearchContext result = null;
 		String qualifierUC = null;
-		
+
 		if(qualifier==null){
 			throw new SeleniumPlusException("ignore null qualifier.");
 		}else{
 			qualifierUC = qualifier.toUpperCase();
 		}
-		
+
 		try{
-	
+
 			if(SEARCH_CRITERIA_XPATH.equals(qualifierUC)){
 				result = sc.findElement(By.xpath(value));
-				
+
 			}else if(SEARCH_CRITERIA_CSS.equals(qualifierUC)){
 				result = sc.findElement(By.cssSelector(value));
-				
+
 			}else if(SEARCH_CRITERIA_TAG.equals(qualifierUC)){
 				result = sc.findElement(By.tagName(value));
-				
+
 			}else{
 				boolean partialMatch = qualifierUC.endsWith(SEARCH_CRITERIA_CONTAINS_SUFFIX);
-				
+
 				//The following qualifiers will support suffix "Contains":
 				//idContains, classContains, nameContains, linkContains, textContains, titleContains, iframeidContains
 				if(SEARCH_CRITERIA_ID.equals(qualifierUC)){
 					result = sc.findElement(By.id(value));
-					
+
 				}else if(SEARCH_CRITERIA_CLASS.equals(qualifierUC)){
 					result = sc.findElement(By.className(value));
-					
+
 				}else if(SEARCH_CRITERIA_NAME.equals(qualifierUC)){
 					result = sc.findElement(By.name(value));
-					
+
 				}else if(SEARCH_CRITERIA_LINK.equals(qualifierUC)){
 					result = sc.findElement(By.linkText(value));
-					
+
 				}else if(SEARCH_CRITERIA_PARTIALLINK.equals(qualifierUC)||
 						(SEARCH_CRITERIA_LINK+SEARCH_CRITERIA_CONTAINS_SUFFIX).equals(qualifierUC)){
 					result = sc.findElement(By.partialLinkText(value));
-					
+
 				}else if(qualifierUC.startsWith(SEARCH_CRITERIA_TEXT)){
 					result = getObjectByText(sc, value, partialMatch);
-					
+
 				}else if(qualifierUC.startsWith(SEARCH_CRITERIA_TITLE)){
 					result = getObjectByTitle(sc, value, partialMatch);
-					
+
 				}else if(qualifierUC.startsWith(SEARCH_CRITERIA_IFRAMEID)){
 					result = sc.findElement(By.xpath("//iframe["+XPATH.condition("id", value, partialMatch)+"]"));
-					
+
 				}else if(partialMatch){
 					//idContains, classContains, nameContains will be supported here.
 					result = sc.findElement(By.xpath(XPATH.RELATIVE_MATCHING_ALL_START+XPATH.conditionContains(qualifier, value)+XPATH.END));
-					
+
 				}else{
 					throw new SeleniumPlusException("ignore unknown qualifier '"+qualifierUC+"', value='"+value+"'");
 				}
@@ -1720,15 +1720,15 @@ public class SearchObject {
 
 		int count = 0;
 		String[] st = StringUtils.getTokenArray(RS, qulifierSeparator, escapeChar);
-				
+
 		HashMap<String, String> qualifiers = new HashMap<String, String>();
 
-		// 
+		//
 		// It does NOT look like we currently handle "qual=value;\;qual=value" syntax
 		//
-		
+
 		try{
-			String xpathStr = (!containTagRS(RS)) ? 
+			String xpathStr = (!containTagRS(RS)) ?
 					          XPATH.RELATIVE_MATCHING_ALL_START :
 	                          XPATH.RELATIVE_MATCHING_TAG_START(getTagQualifierValue(RS));
 
@@ -1746,12 +1746,12 @@ public class SearchObject {
 				if(SEARCH_CRITERIA_TAG.equalsIgnoreCase(property)){
 					continue;
 				}
-				
+
 				if(isPASM){
 					//all are properties
 					xpathStr += XPATH.condition(property, value, false);
-				}else{					
-					//handle some 'reserved qualifiers'					
+				}else{
+					//handle some 'reserved qualifiers'
 					if(  SEARCH_CRITERIA_ITEMINDEX.equalsIgnoreCase(property)
 							|| SEARCH_CRITERIA_PATH.equalsIgnoreCase(property)
 							|| SEARCH_CRITERIA_INDEX.equalsIgnoreCase(property)
@@ -2099,7 +2099,7 @@ public class SearchObject {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Get the boolean value of a javascript global variable.
 	 * @param variable String, the name of the global variable.
@@ -2108,7 +2108,7 @@ public class SearchObject {
 	 * @see #js_getGlobalVariable(String)
 	 */
 	public static boolean js_getGlobalBoolVariable(String variable) throws IllegalStateException{
-		String debugmsg = StringUtils.debugmsg(SearchObject.class, "js_getGlobalBoolVariable");		
+		String debugmsg = StringUtils.debugmsg(SearchObject.class, "js_getGlobalBoolVariable");
 		Object result = js_getGlobalVariable(variable);
 		if(result instanceof Boolean){
 			return ((Boolean) result).booleanValue();
@@ -2117,38 +2117,28 @@ public class SearchObject {
 			throw new IllegalStateException("did NOT return Boolean value!");
 		}
 	}
-	
+
 	private static Object js_result = null;
 	private static String js_code = null;
 	protected static Object js_executeWithTimeout(String js, long msTimeout)throws SeleniumPlusException, InterruptedException{
-		boolean done = false;
 		Thread t = new Thread(new Runnable(){
 			public void run() {
 				try{js_result = getJS().executeScript(js_code);}
 				catch(SeleniumPlusException x){throw new RuntimeException(x);}
 			}
 		});
-		long ct = System.currentTimeMillis();
-		long et = ct + msTimeout;
 		js_result = null;
 		js_code = js;
 		t.setDaemon(true);
 		t.start();
-		do{
-			done = !t.isAlive();
-			if(!done){
-				ct = System.currentTimeMillis();
-				if(ct > et){
-					throw new InterruptedException("SearchObject.js_executeWithTimeout Timeout has been reached.");
-				}
-			}
-			if(t.isAlive()){
-				Thread.sleep(5);
-			}
-		}while(!done && (js_result == null));
+		try{
+			t.join(msTimeout);
+		}catch(InterruptedException x){
+			throw new InterruptedException("SearchObject.js_executeWithTimeout Timeout has been reached.");
+		}
 		return js_result;
 	}
-	
+
 	/**
 	 * Get the value of a javascript global variable.
 	 * @param variable String, the name of the global variable.
@@ -2234,7 +2224,7 @@ public class SearchObject {
 			throw new SeleniumPlusException(debugmsg, th);
 		}
 	}
-	
+
 	/**
 	 * Get the possible debug messages during executing a snippet of javascript.
 	 * @return
@@ -2259,7 +2249,7 @@ public class SearchObject {
 			throw new SeleniumPlusException(debugmsg, th);
 		}
 	}
-	
+
 	/**
 	 * Initialize the global variable {@link JavaScriptFunctions#SAFS_JAVASCRIPT_GLOBAL_ERROR_CODE_VAR},<br>
 	 * set it value to {@link JavaScriptFunctions#ERROR_CODE_NOT_SET}. <br>
@@ -2358,12 +2348,12 @@ public class SearchObject {
 	public static boolean highlightThenClear(WebElement webelement, int duration){
 		if(WDLibrary.highlight(webelement)){
 			StringUtilities.sleep(duration);
-			return WDLibrary.clearHighlight();				
+			return WDLibrary.clearHighlight();
 		}else{
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Highlight the webelement by drawing a red rectangle around it.<br>
 	 * <p>
@@ -2389,7 +2379,7 @@ public class SearchObject {
 			}
 		}
 	}
-	
+
 	/**
 	 * Highlight the webelement by drawing a red rectangle around it.<br>
 	 * To clean the red rectangle, please call {@link #clearHighlight()}.<br>
@@ -2409,7 +2399,7 @@ public class SearchObject {
 			IndependantLog.error(debugmsg+" met exception during checking element's visibility.", e);
 			return false;
 		}
-		
+
 		try {
 			StringBuffer scriptCommand = new StringBuffer();
 			scriptCommand.append(JavaScriptFunctions.highlight2());
@@ -2515,6 +2505,9 @@ public class SearchObject {
 		}
 	}
 
+	private static boolean __isStale = false;
+	private static Throwable __isStaleException = null;
+	private static WebElement __isStaleElement = null;
 	/**
 	 * Test if a WebElement is stale(DOM element is deleted or is repaint or disappear).
 	 * @param element WebElement, the WebElement to detect.
@@ -2522,20 +2515,36 @@ public class SearchObject {
 	 * @throws SeleniumPlusException if the element is null.
 	 */
 	public static boolean isStale(WebElement element) throws SeleniumPlusException{
+		__isStaleElement = element;
 		checkNotNull(element);
-		try{
-			//WebDriver will not throw StaleElementReferenceException until the 'implicit timeout' is reached.
-			//We don't want to waste that time, so just set 'implicit timeout' to 0 and don't wait.
-			WDTimeOut.implicitlyWait(0, TimeUnit.SECONDS);
-			element.isDisplayed();
-			return false;
-		}catch(StaleElementReferenceException sere){
-			return true;
-		}catch(Exception e){
-			throw new SeleniumPlusException(StringUtils.debugmsg(e));
-		}finally{
-			WDTimeOut.implicitlyWait(Processor.getSecsWaitForComponent(), TimeUnit.SECONDS);
+		__isStale = false;
+		__isStaleException = null;
+		Thread t = new Thread(new Runnable(){
+			public void run(){
+				try{
+					//WebDriver will not throw StaleElementReferenceException until the 'implicit timeout' is reached.
+					//We don't want to waste that time, so just set 'implicit timeout' to 0 and don't wait.
+					WDTimeOut.implicitlyWait(0, TimeUnit.SECONDS);
+					__isStaleElement.isDisplayed();
+					__isStale = false;
+				}catch(StaleElementReferenceException sere){
+					__isStale = true;
+				}catch(Throwable e){
+					__isStaleException = e;
+				}finally{
+					WDTimeOut.implicitlyWait(Processor.getSecsWaitForComponent(), TimeUnit.SECONDS);
+				}
+			}
+		});
+		t.setDaemon(true);
+		t.start();
+		try{ t.join(600);}
+		catch(InterruptedException x){
+			IndependantLog.debug("SearchObject.isStale() execute wait Interrupted?");
+			__isStaleException = x; //Carl Nagle -- Evaluate if we want this Exception thrown below
 		}
+		if(__isStaleException instanceof Throwable) throw new SeleniumPlusException("SearchObject.isStale() "+ StringUtils.debugmsg(__isStaleException));
+		return __isStale;
 	}
 
 	/**
@@ -2871,23 +2880,23 @@ public class SearchObject {
 			js_cleanError();
 			//Append the JS method 'throw_error()'
 			script = JavaScriptFunctions.throw_error()+script;
-			
+
 			//Reset the global debug message array
 			if(JavaScriptFunctions.jsDebugLogEnable) js_initJSDebugArray();
 			//Append the JS method 'debug()'
 			script = JavaScriptFunctions.debug()+script;
-			
+
 			if(JavaScriptFunctions.DEBUG_OUTPUT_JAVASCRIPT_FUNCTIONS){
 				IndependantLog.debug(debugmsg+"Executing js \n[\n"+script);
 			}
-			
+
 			Object object = synch? lastJS.executeScript(script, args) : lastJS.executeAsyncScript(script, args);
 			if(object!=null){
 				IndependantLog.debug(debugmsg+" Javascript returned "+object.getClass().getName()+": "+ object.toString());
 			}else{
 				IndependantLog.debug(debugmsg+" Javascript returned null.");
 			}
-			
+
 			//Only check the 'jsErrorCode' for sync execution. For async execution, we don't even know if the execution finish or not.
 			if(synch){
 				int errorcode = js_getErrorCode();
@@ -2897,7 +2906,7 @@ public class SearchObject {
 					throw JSException.instance(error, errorcode);
 				}
 			}
-			
+
 			return object;
 
 		}catch(JSException jse){
@@ -2936,7 +2945,7 @@ public class SearchObject {
 			IndependantLog.debug(debugmsg+"javascript executor is obsolete.");
 			refreshJSExecutor();
 		}
-		
+
 		return lastJS;
 	}
 	/**
@@ -3272,7 +3281,7 @@ public class SearchObject {
 			(attTITLE != null && attTITLE.length()> 0) ? "[@title='"+attTITLE+"']" :
 				(attCLASS != null && attCLASS.length()> 0) ? "[@class='"+attCLASS+"']" :
 					"";
-		if( att.length()==0 ){ 
+		if( att.length()==0 ){
 		    attID = element.getAttribute("name");
 		    if(attID!=null && attID.length()>0)
 		    	att = "[@name='"+ attID +"']";
@@ -3309,7 +3318,7 @@ public class SearchObject {
 		String att = "";
 		if(i > 0){
 			tag = framexpath.substring(0, i);
-			try{ 
+			try{
 				att = framexpath.split("@")[1];
 				String[] parts = att.split("=");
 				att = parts[0];
@@ -3338,7 +3347,7 @@ public class SearchObject {
 			boolean isSAPUI5 = false;
 
 			isSAPUI5 = checkCSSClassName(element, CSS_CLASS_SAP_PREFIX, CSS_CLASS_SEPARATOR);
-			
+
 			if(!isSAPUI5){
 				IndependantLog.warn(getDescription(element)+", its css-class is not considered as a SAP OPENUI5 component, try get native class name.");
 				try{
@@ -3601,12 +3610,12 @@ public class SearchObject {
 		 * Dojo libraries not present in the browser will not have keys in the Map.<br>
 		 * Values of these keys are usually "dojo", "dijit", and "dojox"; respectively.
 		 * If Dojo is not running in the browser, the returned Map will be null.<br>
-		 * If there is a Dojo djConfig.scopeMap in the browser, the values returned will be 
+		 * If there is a Dojo djConfig.scopeMap in the browser, the values returned will be
 		 * whatever the mapped values are. Example: "dojo"="mappedDojo", "dijit"="mappedDijit", etc..
 		 * @return Map of dojo reference scopeMappings, or null if Dojo is not running in the browser.
 		 */
 		public static Map getDojoScopemap(){
-			
+
 			String script = JavaScriptFunctions.DOJO.getDojoScopemap()+"return getDojoScopemap();\n";
 			Map result = null;
 			try{ result = (Map)WDLibrary.executeScript(script);}catch(Exception ignore){}
@@ -3632,7 +3641,7 @@ public class SearchObject {
 			}
 			return result;
 		}
-		
+
 		/**
 		 * To test if the WebElement represents a Dojo.Dijit component.<br>
 		 * @param element
@@ -3647,7 +3656,7 @@ public class SearchObject {
 			//TODO Does attribute 'widgetid' must exist?
 			//if attribute 'widgetid' exists, then we consider it as a dijit object.
 			if(isdijit) isdijit &= (element.getAttribute(Component.ATTRIBUTE_WIDGETID)!=null);
-			
+
 			//Lei, for future use; For now, to save time, just comment it.
 			//if checkCSSClassName() cannot detect the domain, we can use following codes.
 			/*
@@ -3656,13 +3665,13 @@ public class SearchObject {
 				try{
 					String clazz = WDLibrary.DOJO.getDojoClassName(element);
 					if(clazz.startsWith(CSS_CLASS_DOJO_DIJIT_PREFIX)) isdijit = true;
-					
+
 				}catch(Exception e){
 					IndependantLog.warn("fail get dojo native class name, due to "+StringUtils.debugmsg(e));
 				}
 			}
 			*/
-			
+
 			if(!isdijit){
 				IndependantLog.debug(getDescription(element)+" will not be considered as a dijit component.");
 			}
@@ -3820,7 +3829,7 @@ public class SearchObject {
 			jsScript.append(JavaScriptFunctions.DOJO.dojo_objectIsInstanceof(true));
 			String varClassArray = JavaScriptFunctions.initializeJSArray(jsScript, false, "  ", 0, supportedClassNames);
 			jsScript.append("  return dojo_objectIsInstanceof(arguments[0],"+varClassArray+");\n");
-			
+
 			try {
 				Object obj = executeJavaScriptOnWebElement(jsScript.toString(), element);
 				if(obj instanceof Boolean) return ((Boolean)obj).booleanValue();
@@ -3978,13 +3987,13 @@ public class SearchObject {
 
 			return classNames.toArray(new String[0]);// cssClassName, input-type ,tagName
 		}
-		
+
 		public static String getHTMLClassName(WebElement element){
 			String[] classes = html_getClassName(element);
 			if(classes != null && classes.length > 0) return classes[0];
 			return TAG_HTML; // default?
 		}
-		
+
 		/**
 		 * Create a generic HTML(5) recognition string we would use to find this element again.
 		 * Currently this stub only returns {@link #SEARCH_CRITERIA_XPATH}
