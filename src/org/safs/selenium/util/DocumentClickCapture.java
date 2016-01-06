@@ -459,6 +459,7 @@ public class DocumentClickCapture implements Runnable{
 				}
 				
 				if(eventfired){
+					IndependantLog.debug(debugmsg + "detecting and handling eventfired as true...");
 					try{
 						if(jsGone||targetGone){
 							mouseEvent = new MouseEvent(listenerID);
@@ -484,6 +485,7 @@ public class DocumentClickCapture implements Runnable{
 						setReady(true);
 					}
 				}else{
+					IndependantLog.debug(debugmsg + "event not yet fired...relooping.");
 					try { Thread.sleep(LISTENER_LOOP_DELAY); } catch (InterruptedException ignore) { }
 				}
 			} catch (Throwable e) {
