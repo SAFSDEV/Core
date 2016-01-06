@@ -9,11 +9,17 @@
  *
  * History:
  * Jul 10, 2015    (sbjlwa) Initial release.
+ * Dec 24, 2015    (sbjlwa) Add method readHttpURL().
  */
 package org.safs.net;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.InetAddress;
+import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 
 import org.safs.IndependantLog;
 import org.safs.SAFSException;
@@ -159,6 +165,54 @@ public class NetUtilities {
 		if(hostName!=null) hostName = hostName.trim();
 		
 		return hostName;
+	}
+	
+	/**
+	 * Read from url connection.<br>
+	 * If the HTTP response code is 200, then the content is read from standard out stream.<br>
+	 * Otherwise, the content is read from the standard error stream.<br>
+	 * 
+	 * @param url URL, the url from where to read content
+	 * @param encoding String, the encoding used to read the URL, such as "utf-8"
+	 * @param timeout int, the connect timeout in milliseconds 
+	 * @return String the content read from url connection.
+	 */
+	public static String readHttpURL(URL url, String encoding, int timeout){
+		String debugmsg = StringUtils.debugmsg(false);
+		boolean debug = false;
+		
+		HttpURLConnection con = null;
+		BufferedReader br = null;
+		try{
+			con = (HttpURLConnection) url.openConnection();
+			con.setConnectTimeout(timeout);
+			if(debug){
+				IndependantLog.debug(debugmsg+"request properties: "+con.getRequestProperties());
+				IndependantLog.debug(debugmsg+"respond code: "+con.getResponseCode());
+				IndependantLog.debug(debugmsg+"respond message: "+con.getResponseMessage());
+				IndependantLog.debug(debugmsg+"content length: "+con.getContentLengthLong());
+			}
+			
+			if(con.getResponseCode()==HttpURLConnection.HTTP_OK){
+				IndependantLog.debug(debugmsg+"Succeed to connect to URL '"+url+"', reading from stdout stream ... ");
+				br = new BufferedReader(new InputStreamReader(con.getInputStream(), Charset.forName(encoding)), 1024);
+			}else{
+				IndependantLog.error(debugmsg+"Fail to connect to URL '"+url+"', reading from stderr stream ... ");
+				br = new BufferedReader(new InputStreamReader(con.getErrorStream(), Charset.forName(encoding)), 1024);
+			}
+			
+			StringBuffer sb = new StringBuffer();
+			String temp = null;
+			while((temp=br.readLine())!=null) sb.append(temp);				
+			return sb.toString();
+			
+		}catch(Exception e){
+			IndependantLog.error(debugmsg+StringUtils.debugmsg(e));
+		}finally{
+			try{if(br!=null) br.close(); }catch(Exception x){}
+			try{if(con!=null) con.disconnect();}catch(Exception x){}
+		}
+		return null;
 	}
 	
 	/**
