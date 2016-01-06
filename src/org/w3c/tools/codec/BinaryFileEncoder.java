@@ -12,10 +12,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
-import java.nio.file.*;
-
-import sun.management.FileSystem;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
 /**
  * Standalone Java program capable of creating a Base64Encoded output file (main args[1]) suitable 

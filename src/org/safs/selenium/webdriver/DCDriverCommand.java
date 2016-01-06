@@ -20,6 +20,7 @@ package org.safs.selenium.webdriver;
  *   <br>   JUL 24, 2015	(LeiWang) Add sendHttpGetRequest(): handle keyword like GetURL, SaveURLToFile, VerifyURLContent, VerifyURLToFile.
  *   <br>   NOV 20, 2015	(LeiWang) Use java AtomicBoolean to replace my AtomicReady class.
  *                                    Modify method sendHttpGetRequest(): set the thread (executing AJAX request) as daemon.
+ *   <br>   DEC 24, 2015	(LeiWang) Modify method sendHttpGetRequest(): check known issue 'ajax execution stuck with firefox'.
  */
 
 import java.io.File;
@@ -160,6 +161,16 @@ public class DCDriverCommand extends DriverCommand {
 			return;
 		}
 		final String debugmsg = StringUtils.debugmsg(false);
+		
+		//Check the known issue with selenium-standalone2.47.1 and Firefox 42.0
+		//It seems that stuck happen with previous firefox too :-(
+		try {
+			WDLibrary.checkKnownIssue(command);
+		} catch (SeleniumPlusException e) {
+			testRecordData.setStatusCode( StatusCodes.SCRIPT_NOT_EXECUTED );
+			log.logMessage(testRecordData.getFac(), command+" NOT executed." , e.getMessage(), WARNING_MESSAGE);
+			return;
+		}
 		
 		final String url = iterator.next();//The first is URL
 		IndependantLog.debug(debugmsg+" parameters: url="+url);
