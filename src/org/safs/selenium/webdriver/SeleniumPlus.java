@@ -52,6 +52,7 @@ package org.safs.selenium.webdriver;
  *  <br>   AUG 20, 2015    (CANAGL) Document -Dtestdesigner.debuglogname support in main().
  *  <br>   SEP 07, 2015    (SBJLWA) Add method DragTo(): parameter 'offset' will also support pixel format; 
  *                                                       optional parameter 'FromSubItem' and 'ToSubItem' are not supported yet.
+ *  <br>   JAN 07, 2016    (CANAGL) Make System.exit() optional and allowExit=false, by default.
  */
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
@@ -2573,11 +2574,14 @@ public abstract class SeleniumPlus {
 	
 	/** 
 	 * {@link #exitCode} is used to exit JVM from the method main(). The default value is 0. <br>
-	 * If could be set by the subclass, for example, with the number of un-expected failures after all test.<br> 
+	 * If could be set by the subclass, for example, with the number of UNEXPECTED failures after all test.<br> 
 	 */
-	protected int exitCode = 0;
-	public void setExitCode(int exitCode){ this.exitCode = exitCode; }
-	public int getExitCode(){ return this.exitCode; }
+	protected static int exitCode = 0;
+	protected static boolean allowExit = false;
+	public static void setExitCode(int rcCode){ exitCode = rcCode; }
+	public static int getExitCode(){ return exitCode; }
+	public static void setAllowExit(boolean allow){ allowExit = allow; }
+	public static boolean getAllowExit() {return allowExit; }
 	
 	/**
 	 * This is the method to start the automatic test. User may override this method, for example, to<br>
@@ -10221,6 +10225,6 @@ public abstract class SeleniumPlus {
 		}
 		if(!_isSPC) PrintTestSuiteSummary(test.getClass().getSimpleName());
 		Runner.shutdown();
-		System.exit(test.exitCode);
+		if(getAllowExit()) System.exit(exitCode);
 	}
 }
