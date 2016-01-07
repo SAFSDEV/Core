@@ -2571,6 +2571,14 @@ public abstract class SeleniumPlus {
 	 * This must be an "instance" method because subclasses cannot Override static superclass methods. */
 	public abstract void runTest() throws Throwable;
 	
+	/** 
+	 * {@link #exitCode} is used to exit JVM from the method main(). The default value is 0. <br>
+	 * If could be set by the subclass, for example, with the number of un-expected failures after all test.<br> 
+	 */
+	protected int exitCode = 0;
+	public void setExitCode(int exitCode){ this.exitCode = exitCode; }
+	public int getExitCode(){ return this.exitCode; }
+	
 	/**
 	 * This is the method to start the automatic test. User may override this method, for example, to<br>
 	 * provide the "auto.run.classname" as following.<br>
@@ -10213,5 +10221,6 @@ public abstract class SeleniumPlus {
 		}
 		if(!_isSPC) PrintTestSuiteSummary(test.getClass().getSimpleName());
 		Runner.shutdown();
+		System.exit(test.exitCode);
 	}
 }
