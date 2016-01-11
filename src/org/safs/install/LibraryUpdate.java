@@ -398,7 +398,7 @@ public class LibraryUpdate {
 			   + "\n"
 			   + "Command-line arguments: \n"
 			   + "\n"
-			   + "   -a                (quiet mode, no prompt dialog), it should be put before other argument if present\n"
+			   + "   -q                (quiet mode, no prompt dialog), it should be put before other argument if present\n"
 			   + "   -b:backupdir    **(backup dir for replaced files)\n"
 			   + "   -s:sourcedir    * (source dir containing newer files)\n"
 			   + "   -t:targetdir    * (target dir receiving newer files)\n"
