@@ -14,6 +14,10 @@ Option Explicit
 '*     
 '*            Unique substring of command-line used to launch the process.
 '*            (We don't want to kill the wrong process, right?)
+'*
+'*     -commandignorecase
+'*     
+'*            Ignore the command's case during the comparison with process's CommandLine
 '*    
 '*     -noprompt
 '*
@@ -22,6 +26,7 @@ Option Explicit
 '* Author: Carl Nagle
 '* Original Release: SEP 24, 2013
 '*           Update: SEP 23, 2014 Carl Nagle Fix -noprompt when used as last argument
+'*           Update: JAN 13, 2016 Lei Wang Add option -commandignorecase
 '*
 '* Copyright (C) SAS Institute
 '* General Public License: http://www.opensource.org/licenses/gpl-license.php
@@ -29,13 +34,14 @@ Option Explicit
 
 Dim WshShell, objWMIService, objProcess, colProcess, objLoc
 Dim process, command, title
-Dim prompt, arg, args, lcarg, cr, returncode
+Dim prompt, arg, args, lcarg, cr, returncode, commandignorecase
 
 title = "SAFS Process Killer"
 process = "java.exe"
 command = "com.ibm.staf.service.STAFServiceHelper"
 cr = chr(13)  'carriage return
 prompt = True
+commandignorecase = False
 
 Dim i
 Set WshShell = WScript.CreateObject("WScript.Shell")
@@ -56,6 +62,8 @@ For i = 0 to args.Count -1
         if ( i < args.Count -1) then
             command = args(i+1)
         end if
+    elseif (lcarg = "-commandignorecase") then
+        commandignorecase = True
     elseif (lcarg = "-noprompt") then
         prompt = False
     end if    
@@ -89,7 +97,11 @@ Set objWMIService = GetObject("winmgmts:\\.\root\cimv2")
 Set colProcess = objWMIService.ExecQuery _
     ("Select * from Win32_Process WHERE Name = '"& process &"'")
 For Each objProcess in colProcess
-    i = InStr(objProcess.CommandLine, command) 
+	if commandignorecase then
+		i = InStr(LCase(objProcess.CommandLine), LCase(command))
+	else
+		i = InStr(objProcess.CommandLine, command)
+	end if
     if i > 0 then
         if (prompt = True) then
             msg = "Found process: "& objProcess.Name & cr & cr
