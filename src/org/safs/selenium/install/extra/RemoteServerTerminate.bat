@@ -18,3 +18,6 @@ cscript "%SELENIUM_PLUS%\extra\ProcessKiller.vbs" -process java.exe -command sel
 cscript "%SELENIUM_PLUS%\extra\ProcessKiller.vbs" -process cmd.exe -command RemoteServer.bat -noprompt
 
 cscript "%SELENIUM_PLUS%\extra\ProcessKiller.vbs" -process wscript.exe -command RemoteServerInstall.vbs -noprompt
+
+REM kill any chromedriver.exe left behind after automation test
+cscript "%SELENIUM_PLUS%\extra\ProcessKiller.vbs" -process "chromedriver.exe" -command "%SELENIUM_PLUS%\extra\chromedriver.exe"  -commandIgnoreCase -noprompt
