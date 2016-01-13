@@ -235,8 +235,10 @@ public class AutoItComponent extends GenericEngine {
 			
 			//Wait the window to exist
 			if(!it.winWait(rs.getWindowsRS(), "", secsWaitForWindow)){
+				String errormsg = "Failed due to not finding the window '"+windowName+"'";
+				Log.debug(debugmsg+" Failed  '"+errormsg);
 				testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );	 
-				this.issueErrorPerformingAction("Failed due to not finding the window");
+				this.issueErrorPerformingAction(errormsg);
 				return;
 			}
 			//Wait the window to be active, if not then try to activate it.
@@ -262,26 +264,35 @@ public class AutoItComponent extends GenericEngine {
 		 * @return boolean, true if the window and component are focused.
 		 */
 		protected boolean activate(AutoItRs rs){
+			String debugmsg = StringUtils.debugmsg(false);
 			boolean success = true;
 			try {
 				it.winActivate(rs.getWindowsRS());
-				if(it.getError()==1) success = false;
+				if(it.getError()==1){
+					success = false;
+					Log.debug(debugmsg+" failed to activate window '"+windowName+"'.");
+				}
 
-				if(testRecordData.targetIsComponent()){
+				if(success && testRecordData.targetIsComponent()){
 					success = it.controlFocus(rs.getWindowsRS(), "", rs.getComponentRS());
+					if(!success) Log.debug(debugmsg+" failed to activate component '"+compName+"'.");
 				}
 			} catch (Exception x) {
 				success = false;
-				Log.debug(StringUtils.debugmsg(false)+" Met "+StringUtils.debugmsg(x));
+				Log.debug(debugmsg+" Met "+StringUtils.debugmsg(x));
 			}
 			return success;
 		}
 		
 		/** setfoucs **/
 		protected void setFocus(AutoItRs ars){
+			String debugmsg = StringUtils.debugmsg(false);
+			
 			testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );	 
 			try {
+				Log.debug(debugmsg+" trying to activate '"+testRecordData.getWinCompName()+"'.");
 				if(activate(ars)){
+					Log.debug(debugmsg+" '"+testRecordData.getWinCompName()+"' has been successfully focused.");
 					testRecordData.setStatusCode(StatusCodes.OK);
 					// log success message and status
 					String altText = windowName +":"+ compName + " "+ action +" successful.";
@@ -362,4 +373,3 @@ public class AutoItComponent extends GenericEngine {
 	
 	}
 }
-
