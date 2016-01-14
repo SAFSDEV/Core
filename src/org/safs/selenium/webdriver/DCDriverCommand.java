@@ -724,7 +724,7 @@ holdloop:		while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 		if(isGrid){//Grid: hub + nodes
 			//Need also to start the nodes, if some nodes fail to launch we just log a warning instead of throwing exception.
 			//prepare parameter to register node, something like "-role node -hub http://hubhost:hubport/grid/register"
-			role = " "+OPTION_ROLE+" "+ROLE_HUB+" "+OPTION_HUB+" "+hubRegisterUrl;
+			role = " "+OPTION_ROLE+" "+ROLE_NODE+" "+OPTION_HUB+" "+hubRegisterUrl;
 			List<GridNode> nodes = WebDriverGUIUtilities.getGridNodes(nodesInfo);
 			String nodehost = null;
 			String nodeport = null;
