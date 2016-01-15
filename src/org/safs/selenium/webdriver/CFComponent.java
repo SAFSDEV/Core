@@ -60,6 +60,7 @@ import org.safs.selenium.webdriver.lib.model.Element;
 import org.safs.selenium.webdriver.lib.model.HierarchicalElement;
 import org.safs.selenium.webdriver.lib.model.IHierarchicalSelectable;
 import org.safs.selenium.webdriver.lib.model.ISelectable;
+import org.safs.text.FAILKEYS;
 import org.safs.text.FileUtilities;
 import org.safs.text.GENKEYS;
 import org.safs.text.GENStrings;
@@ -85,9 +86,23 @@ public class CFComponent extends ComponentFunction{
 	
 	/**A cache, which stores a pair(WebElement, Component)*/
 	protected static Map<WebElement, Component> libComponentCache = new HashMap<WebElement, Component>();
+	
+	/** 5, the default maximum time to retry enter text if verification fails.*/
+    public static int DEFAULT_MAX_RETRY_ENTER = 5;
+    
+    /** The maximum time to retry 'enter the text' into Component box if the verification fails. */
+	private int maxRetry = DEFAULT_MAX_RETRY_ENTER;
 
 	public CFComponent(){
 		super();
+	}
+
+	/**
+	 * @param maxRetry int, the max times to retry 'enter the text' into Component box if the verification fails.
+	 * 
+	 */
+	public void setMaxRetry(int maxRetry) {
+		this.maxRetry = maxRetry;
 	}
 
 	public void process() {
@@ -930,5 +945,101 @@ public class CFComponent extends ComponentFunction{
 			testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
 			componentFailureMessage(errorMsg);
 		}       
+	}
+	
+	/**
+	 * Set the text of Component box.
+	 * 
+	 * @param libName String,         the concrete Component name of class, which calls 'doSetText()' method, 
+	 * 						          like 'EditBox', 'ComboBox'.
+	 * @param isCharacter boolean, 	  if true, the text'll be treated as plain text, without special key dealing; <br>
+	 * 							      if false, the text'll be treated as special keys.
+	 * @param needVerify boolean, 	  if true, verify if the text has been correctly entered.(But if the text contains special keys, 
+	 * 										   i.e. isCharacter is false, there's no verification.)
+	 * 								  if false, no verification. 
+	 */
+	protected void doSetText(String libName, boolean isCharacter, boolean needVerify) {
+		String dbg = StringUtils.debugmsg(false);
+		String msg = "";
+		
+		if(params.size() < 1) {
+			issueParameterCountFailure();
+			return;
+		}
+		
+		iterator = params.iterator();
+		String text = iterator.next();
+		IndependantLog.debug(dbg + "isCharacter="+isCharacter+", needVerify=" + needVerify + " proceeding with TEXT parameter '" + text + "'");
+		if(needVerify){
+			//For SetTextValue, If there're special keys, no verification.
+			if(!isCharacter && StringUtils.containsSepcialKeys(text)){
+				IndependantLog.debug(dbg+"Input text contains special keys, ignoring verification.");
+				needVerify = false;
+			}
+		}
+		
+		try {
+			setText(libName, isCharacter, text);
+
+			if (needVerify) {
+				IndependantLog.info("Verifying the " + libName + " ...");
+				boolean verified = libComponent.verifyComponentBox(libName, text);
+				int count = 0;
+				
+				//If verification fails, then try to reenter text.
+				while(!verified && (count++<maxRetry)){
+					IndependantLog.debug(dbg+" retry to enter '"+text+"'");
+					setText(libName, isCharacter, text);
+					//we MAY need to slow down, so that we can get all text from component-box after setting.
+					verified = libComponent.verifyComponentBox(libName, text);
+				}
+				
+				if (verified) {
+					testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
+					msg = genericText.convert(GENKEYS.SUCCESS_2,
+							action + " '"+ "verifying" + "' successful",
+							action,
+							"verifying");
+					log.logMessage(testRecordData.getFac(), msg, PASSED_MESSAGE);
+				} else {
+					testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
+					msg = failedText.convert(FAILKEYS.ERROR_PERFORMING_2,
+										"Error performing '" + "verification" + "' on " + action,
+										"verification",
+										action);
+					standardFailureMessage(msg, testRecordData.getInputRecord());
+				}
+			}else{
+				//If we don't need to verify, we just set status as OK.
+				testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
+				msg = genericText.convert(GENKEYS.SUCCESS_3, 
+						                  windowName +":"+ compName + " "+ action +" successful.",
+						                  windowName, compName, action);
+				log.logMessage(testRecordData.getFac(), msg, PASSED_MESSAGE);	
+			}
+		} catch(SeleniumPlusException spe) {
+			IndependantLog.error(dbg + " failed due to: " + spe.getMessage());
+			issueActionOnXFailure(compName, spe.getMessage());
+		}
+	}
+	
+	/**
+	 * Clear the content of Component box first, and then enter the text into it.
+	 * 
+	 * @param libName String,         the concrete Component name of class, which calls 'setText()' method, 
+	 * 						          like 'EditBox', 'ComboBox'.
+	 * @param isCharacter boolean, 	  if true, the text'll be treated as plain text, without special key dealing; <br>
+	 * 							      if false, the text'll be treated as special keys.
+	 * @param text String,			  the content to be entered into Component box.
+	 * 
+	 * @throws SeleniumPlusException
+	 */
+	protected void setText(String libName, boolean isCharacter, String text) throws SeleniumPlusException{
+		libComponent.clearComponentBox(libName);
+		if(isCharacter){
+			libComponent.inputComponentBoxChars(libName, text);
+		}else{
+			libComponent.inputComponentBoxKeys(libName, text);
+		}
 	}
 }
