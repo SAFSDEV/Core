@@ -11,13 +11,19 @@
  */
 package org.safs.selenium.webdriver.lib;
 
+import java.awt.datatransfer.DataFlavor;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.safs.IndependantLog;
 import org.safs.StringUtils;
+import org.safs.robot.Robot;
 import org.safs.selenium.webdriver.lib.model.DefaultRefreshable;
 import org.safs.selenium.webdriver.lib.model.Element;
 import org.safs.selenium.webdriver.lib.model.IOperable;
@@ -358,5 +364,208 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 	 */
 	public Element getMatchedElement(TextMatchingCriterion criterion) throws SeleniumPlusException {
 		return null;
+	}
+	
+	/**
+	 * <em>Purpose:</em> Remove the content from Component Box, like Edit Box, Combo box.<br>
+	 * 
+	 * @param libName String,         the concrete Component name of class, which calls 'clearComponentBox()' method,
+	 * 						          like 'EditBox', 'ComboBox'.
+	 * 
+	 */
+	public void clearComponentBox(String libName) throws SeleniumPlusException{
+		String debugmsg = getClass().getName() + ".clearComponentBox(): ";
+		
+		try {
+			try{
+				// chrome and ie are failing element.clear
+				webelement.clear();
+			}catch (StaleElementReferenceException sere){
+				IndependantLog.warn(debugmsg + "Met " + StringUtils.debugmsg(sere));			
+				//fresh the element and clear again.
+				refresh(false);
+				webelement.clear();
+			}
+			//Selenium API clear() will sometimes redraw the Web Element on the page,
+			//which will cause StaleElementReferenceException, we need to refresh it if stale
+			refresh(true);
+		} catch (NoSuchElementException msee) {
+			IndependantLog.debug(debugmsg + "NoSuchElementException --Object not found.");
+			throw new SeleniumPlusException(libName + " object not found");
+
+		} catch (Exception e){
+			IndependantLog.debug(debugmsg + "Met " + StringUtils.debugmsg(e));
+			try{
+				refresh(true);
+				webelement.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.DELETE);
+			}catch(Exception x){
+				IndependantLog.debug(debugmsg + "Met " + StringUtils.debugmsg(x));
+				try{
+					refresh(true);
+					Actions delete = new Actions(WDLibrary.getWebDriver());
+					delete.sendKeys(webelement, Keys.chord(Keys.CONTROL, "a"), Keys.DELETE);
+					delete.perform();
+				}catch(Exception ex){
+					IndependantLog.warn(debugmsg + libName + " clear action failed, Met " + StringUtils.debugmsg(ex));
+				}
+			}
+		}finally{
+			IndependantLog.debug(debugmsg + "Finally use SAFS Robot to clear again.");
+			WDLibrary.inputKeys(webelement, "^a{Delete}");
+		}
+	}
+	
+	/**
+	 * <em>Purpose:</em> Set the text as the content of Component Box. <br>
+	 * 					 This method will not deal with special keys as  + --> ShiftKey  ^ --> CtrlKey. <br>
+	 * 					 All text will be treated as literal characters. <br>
+	 * 
+	 * For example: the special key "^(v)" will just be treated as literal "^(v)" without any interpretations. <br>
+	 * 
+	 * @param libName String,         the concrete Component name of class, which calls 'inputComponentBoxChars()' method,
+	 * 						          like 'EditBox', 'ComboBox'.
+	 * @param text String,			  the content to be entered into Component box.
+	 * 
+	 */
+	public void inputComponentBoxChars(String libName, String text) throws SeleniumPlusException {
+		String debugmsg = getClass().getName() + ".inputComponentBoxChars(): ";
+				
+		try {
+			WDLibrary.setWaitReaction(true);
+			try {
+				WDLibrary.inputChars(webelement, text);
+			} catch (SeleniumPlusException sere) {
+				String msg = libName + " enter action failed" + "(input value = " + text + "): caused by " + StringUtils.debugmsg(sere);
+				IndependantLog.debug(debugmsg + msg);
+				
+				//fresh the element and input characters again
+				refresh(false);
+				WDLibrary.inputChars(webelement, text);
+			}
+		} catch (Exception e) {
+			String msg = libName + " enter action failed" + "(input value = " + text + "): caused by " + StringUtils.debugmsg(e);
+			IndependantLog.debug(debugmsg + msg);
+			throw new SeleniumPlusException(msg);
+		}finally{
+			WDLibrary.setWaitReaction(Robot.DEFAULT_WAIT_REACTION);
+		}
+	}
+	
+	/**
+	 * <em>Purpose:</em> Set the text as the content of Component Box. <br>
+	 * 					 This method will deal with special keys. <br>
+	 * 					 For example: if the text is "^(v)", the content will be interpreted as "Ctrl + v", <br>
+	 * 					 which means PASTE the contents of clipboard. <br>
+	 * 
+	 * @param libName String,         the concrete Component name of class, which calls 'inputComponentBoxKeys()' method,
+	 * 						          like 'EditBox', 'ComboBox'.
+	 * @param text String,			  the content to be entered into Component box.
+	 * 
+	 */
+	public void inputComponentBoxKeys(String libName, String text) throws SeleniumPlusException {
+		String debugmsg = getClass().getName() + ".inputComponentBoxKeys(): ";
+				
+		try {
+			WDLibrary.setWaitReaction(true);
+			try {
+				WDLibrary.inputKeys(webelement, text);
+			} catch (SeleniumPlusException sere) {
+				String msg = libName + " enter action failed" + "(input value = " + text + "): caused by " + StringUtils.debugmsg(sere);
+				IndependantLog.debug(debugmsg + msg);
+				//fresh the element and input keys again
+				refresh(false);
+				WDLibrary.inputKeys(webelement, text);
+			}
+		} catch (Exception e) {
+			String msg = libName + " enter action failed" + "(input value = " + text + "): caused by " + StringUtils.debugmsg(e);
+			IndependantLog.debug(debugmsg + msg);
+			throw new SeleniumPlusException(msg);
+		}finally{
+			WDLibrary.setWaitReaction(Robot.DEFAULT_WAIT_REACTION);
+		}
+	}
+	
+	/**
+	 * Get the contents of Component Box, like Edit Box, Combo Box.
+	 * 
+	 * @return String, the content of Component Box
+	 */
+	protected String getValue(){
+		String debugmsg = StringUtils.debugmsg(false);
+		String value = null;
+		try {
+			value = WDLibrary.getProperty(webelement, ATTRIBUTE_VALUE);
+		} catch (SeleniumPlusException e) {
+			try{
+				// some component box's have a 'text' property and don't necessarily have a 'value' property.				
+				value = WDLibrary.getProperty(webelement, ATTRIBUTE_TEXT);
+			} catch (SeleniumPlusException e2) {
+				IndependantLog.warn(debugmsg + "failure caused by "+ StringUtils.debugmsg(e) +"; and "+ StringUtils.debugmsg(e2));
+			}
+		}
+		return value;
+	}
+	
+	/**
+	 * Copy the Component box's value to clipboard and compare the clipboard's value with the text we try to input.<br>
+	 * 
+	 * @param libName String,         the concrete Component name of class, which calls 'doubleCheckVerification()' method,
+	 * 						          like 'EditBox', 'ComboBox'.
+	 * @param expectedText String,	  the text to verify with.
+	 * 
+	 * @return boolean, true if the component-box's value equals the text to input.
+	 * 
+	 */
+	protected boolean doubleCheckVerification(String libName, String expectedText){
+		String debugmsg = StringUtils.debugmsg(false);
+		
+		try {
+			IndependantLog.debug(debugmsg + " copy " + libName + "'s value to clipboard, and compare clipboard's content with the text we want to input.");
+			
+			//Copy the component box's value so that it will be saved to the clipboard.
+			WDLibrary.clearClipboard();
+			try{ Thread.sleep(100);} catch(Exception ignore){}
+			
+			inputKeys("^a^c{END}");	// Ctrl+A, Ctrl+C, {End}
+			
+			//We MUST wait a while before the clip-board is set correctly.
+			try{ Thread.sleep(1000);} catch(Exception ignore){}
+			
+			//Get the content from the clipboard
+			String result = (String) WDLibrary.getClipboard(DataFlavor.stringFlavor);
+			IndependantLog.debug(debugmsg + " From RMI server, got clipboard's content \n'" + result + "' =? (expected value) \n'" + expectedText + "'");
+
+			return expectedText.equals(result);
+		} catch (Exception e) {
+			IndependantLog.debug(debugmsg + "Fail. due to " + StringUtils.debugmsg(e));
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * <em>Purpose:</em> Compare the contents of Component box to the original text.<br>
+	 * 					 If they are same, return true; otherwise, return false. <br>
+	 * 
+	 * @param libName String,         the concrete Component name of class, which calls 'verifyComponentBox()' method,
+	 * 						          like 'EditBox', 'ComboBox'.
+	 * @param expectedText String,	  the text to to be compared to during verification.
+	 * 
+	 * @return true if verification passes; false otherwise.
+	 */
+	public boolean verifyComponentBox(String libName, String expectedText){
+		String debugmsg = getClass().getName() + ".verifyComponentBox(): ";
+		boolean pass = false;		
+		String contents = getValue();
+		
+		pass = expectedText.equals(contents);
+		
+		if(!pass){
+			String msg = libName + "Box verify errors: property:\n'" + contents + "'" + " does NOT equal to " + " expected value:\n'" + expectedText + "'.";
+			IndependantLog.debug(debugmsg + msg);
+			pass = doubleCheckVerification(libName, expectedText);
+		}
+		
+		return pass;
 	}
 }
