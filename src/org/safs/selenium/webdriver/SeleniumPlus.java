@@ -2862,6 +2862,7 @@ public abstract class SeleniumPlus {
 		public static boolean VerifySelected(org.safs.model.Component combobox, String item){
 			return action(combobox, ComboBoxFunctions.VERIFYSELECTED_KEYWORD, item);
 		}
+		
 		/**
 		 * Hide the combo box list.
 		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ComboBoxFunctionsReference.htm#detail_HideList">Detailed Reference</a>
@@ -2880,6 +2881,7 @@ public abstract class SeleniumPlus {
 		public static boolean HideList(org.safs.model.Component combobox){
 			return action(combobox, ComboBoxFunctions.HIDELIST_KEYWORD);
 		}
+		
 		/**
 		 * Show the combo box list.
 		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ComboBoxFunctionsReference.htm#detail_ShowList">Detailed Reference</a>
@@ -2898,6 +2900,7 @@ public abstract class SeleniumPlus {
 		public static boolean ShowList(org.safs.model.Component combobox){
 			return action(combobox, ComboBoxFunctions.SHOWLIST_KEYWORD);
 		}
+		
 		/**
 		 * Capture all items in Combo Box to a file.
 		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ComboBoxFunctionsReference.htm#detail_CaptureItemsToFile">Detailed Reference</a>
@@ -2923,6 +2926,32 @@ public abstract class SeleniumPlus {
 		 */
 		public static boolean CaptureItemsToFile(org.safs.model.Component combobox, String filename, String... params){
 			return action(combobox, ComboBoxFunctions.CAPTUREITEMSTOFILE_KEYWORD, combineParams(params, filename));
+		}
+		
+		/**
+		 * Set text value in Combo box.
+		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=ComboBoxFunctions&cmd=SetTextValue">Detailed Reference</a>
+		 * 
+		 * @param combobox org.safs.model.Component, 	the Combo box Component get from App map file.
+		 * @param value String, 					 	the value of content, which is entered into Combo box.
+		 * 
+		 * @return true,	if successful.
+		 * 		   false,	otherwise.
+		 * 
+		 * @example
+		 * <pre>
+		 * {@code
+		 *         boolean success = ComboBox.SetTextValue(Map.Google.Combobox1,"Some Text");
+		 *         boolean success = ComboBox.SetTextValue(Map.Google.Combobox1,"Some Text with special keys +(abcd)");		 
+		 * } 
+		 * </pre>
+		 * 
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 */
+		public static boolean SetTextValue(org.safs.model.Component combobox, String value){
+			return action(combobox, ComboBoxFunctions.SETTEXTVALUE_KEYWORD, value);
 		}
 	}
 	
