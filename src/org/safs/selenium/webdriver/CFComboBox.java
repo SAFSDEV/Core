@@ -31,6 +31,9 @@ import org.safs.tools.CaseInsensitiveFile;
  *  <br>   JAN 16, 2014    (Lei Wang) Add keywords support.
  */
 public class CFComboBox extends CFComponent {
+	
+	/** "ComboBox" */
+	public static final String LIBRARY_NAME = CFComboBox.class.getSimpleName().substring("CF".length());
 
 	public static final String CAPTUREITEMSTOFILE	= "CaptureItemsToFile";
 	public static final String HIDELIST	= "HideList";
@@ -47,7 +50,7 @@ public class CFComboBox extends CFComponent {
 	public static final String SETUNVERIFIEDTEXTVALUE	= "SetUnverifiedTextValue";
 	
 	ComboBox combobox;
-	
+			
 	public CFComboBox() {
 		super();
 	}
@@ -79,7 +82,8 @@ public class CFComboBox extends CFComponent {
 				   action.equalsIgnoreCase(SELECTPARTIALMATCH)||
 				   action.equalsIgnoreCase(SELECTUNVERIFIED)||
 				   action.equalsIgnoreCase(VERIFYSELECTED)||
-				   action.equalsIgnoreCase(CAPTUREITEMSTOFILE)){
+				   action.equalsIgnoreCase(CAPTUREITEMSTOFILE)||
+				   action.equalsIgnoreCase(SETTEXTVALUE)){
 					
 					if (params.size() < 1) {
 						testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
@@ -230,6 +234,8 @@ public class CFComboBox extends CFComponent {
 				} else if(action.equalsIgnoreCase(CAPTUREITEMSTOFILE)){
 					captureItemsToFile(param1, param2);
 					
+				} else if(action.equalsIgnoreCase(SETTEXTVALUE)){
+					doSetText(LIBRARY_NAME, false, true);
 				}
 			}
 			catch(SAFSException e){
