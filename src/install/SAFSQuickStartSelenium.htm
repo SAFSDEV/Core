@@ -29,15 +29,23 @@
 	width: 600px;
 	height: 400px;
 	display: block;
-	margin-left: auto;
-    margin-right: auto;
+	margin-left:auto;
+    margin-right:auto;
+}
+.critical{
+    font-weight:bold;
+    background:lightgray;
+    color:crimson;
+}
+.simpleheading{
+    font-weight:bold;
 }
 </style>
 </head>
 <body><a name="_top"/>
 <center><H1>SAFS Selenium Quick Start<br>
 for Windows</H1>
-<small>Updated: 2015.10.09</small></center>
+<small>Updated: 2016.01.19</small></center>
 <hr>
 <b>Authors:</b>
 <ul>Lei Wang, Carl Nagle
@@ -69,19 +77,17 @@ See the online version of this doc <a href="http://safsdev.sourceforge.net/selen
 	<p><ul>
 		<li><b>SAFS for Windows</b>
 		<p><ol>
+			Windows 7<br>
+			Chrome (chromedriver.exe)<br>
+			IE (IEDriverServer.exe and MicrosoftWebDriver.exe)<br>
+			FireFox 33 (minimum)<br>
+			<span class='critical'>(Firefox 43 and later not yet supported out-of-the-box due to SAFS issues with Selenium Server 2.48.x JAR dependencies)</span><br>
+			<p>
 			<li><a href="https://github.com/SAFSDEV/Core/releases" target="_blank"
 			    title="SAFS Win Release on GitHub">Latest SAFS <b>Release</b> for Windows</a>
-				<ul>
-					<li>Windows 7
-					<li>FireFox 33, or later
-				</ul>
 			<p>
 			<li><a href="https://github.com/SAFSDEV/UpdateSite/releases/tag/safs"
 			    target="_blank" title="SAFS Win Updates on GitHub">Latest SAFS <b>Update</b> for Windows</a>
-				<ul>
-					<li>Windows 7
-					<li>FireFox 33, or later
-				</ul>
 		</ol>
 	</ul>
 	<p>
@@ -91,7 +97,7 @@ See the online version of this doc <a href="http://safsdev.sourceforge.net/selen
 	<p>
 	Next, verify that the following 3rd-party jars (among others) are in folder C:\<b>SAFS\lib</b>:
 	<ul>
-		<li>selenium-server-standalone-2.47.1.jar (or later)
+		<li>selenium-server-standalone-2.47.1.jar
 		<li>SeInterpreter.jar
 		<li>safsselenium.jar
 	</ul>
@@ -101,7 +107,7 @@ See the online version of this doc <a href="http://safsdev.sourceforge.net/selen
 	<p><ul>
 		<li><b>%STAFDIR%</b>\bin\JSTAF.jar
 		<li>%SAFSDIR%\lib\safsselenium.jar
-		<li>%SAFSDIR%\lib\selenium-server-standalone-2.47.1.jar (or later)
+		<li>%SAFSDIR%\lib\selenium-server-standalone-2.47.1.jar
 	</ul>
 </ol>
 
@@ -116,8 +122,8 @@ See the online version of this doc <a href="http://safsdev.sourceforge.net/selen
 <p>
 <ul>The test script, "SAFS Selenium sample", intends to:
     <p><ol>
-    <li>Open an IE/FireFox browser to Google
-    <li>Verify the existence of some components
+    <li>Open an IE/FireFox/Chrome browser to Google
+    <li>Verify the existence of some Login/Search components
     <li>Input some characters on a Google search window
     <li>Click the "Search" button to get the results
     <li>Close the browser and exit.
@@ -157,7 +163,12 @@ This folder is the ProjectRoot defined in the section SAFS_PROJECT of <a href="#
 <p>This is a <a
 href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#configfile">
 configuration file</a> that contains various information, which tells SAFS where and how to
-load user's test scripts, what engine to use, and the configuration about the engine etc.</p>
+load user's test scripts, what engine to use, and the configuration about the engine etc..
+<p>
+Normally, only advanced users would ever go in and change any of these settings.
+<p>
+However, settings flagged as <span class='critical'>CRITICAL</span> will likely have to changed for your environment.<br>
+Note that '#' or ';' can be used to make a line an ignored COMMENT.
 <p>
 ------------------------------------------------------------------
 <pre>
@@ -176,10 +187,14 @@ CycleLogMode="TEXTLOG|XMLLOG|CONSOLELOG"
 
 [SAFS_SELENIUM]
 AUTOLAUNCH=TRUE
-GATEWAYHOST=your.gateway
-GATEWAYPORT=80
+<span class='critical'>GATEWAYHOST=your.gateway.com
+GATEWAYPORT=80</span>
 HOOK=org.safs.selenium.webdriver.SeleniumHook
 BROWSER="firefox"
+
+# SETUP to connect to Optional Remote Selenium Standalone Server
+# <span class='critical'>SELENIUMHOST=host.domain.com</span>
+# <span class='critical'>SELENIUMPORT=4444</span>
 
 [SAFS_ENGINES]
 First=org.safs.tools.engines.SAFSSELENIUM
@@ -188,18 +203,35 @@ First=org.safs.tools.engines.SAFSSELENIUM
 <br>
 <b>Note:</b>
 <ul>
-<li>About gateway<br>
-	If you need a gateway to access internet, please modify the folloing 2 settings:
+<li><span class='simpleheading'>About GATEWAY</span>
+    <p>
+	If you need a <b>Gateway to Access the Internet</b>, please modify the folloing 2 settings:
 	<ul>
 	<li>GATEWAYHOST=your.gateway
 	<li>GATEWAYPORT=80
 	</ul>
-	If you do not use a gateway, please add semi-colon ; before these 2 settings to make them comments.
+	<p>
+	If you do not use a gateway, please add semi-colon '#' before these 2 settings to make them comments.
 	<ul>
-	<li>;GATEWAYHOST=no.gateway
-	<li>;GATEWAYPORT=80
+	<li># GATEWAYHOST=no.gateway
+	<li># GATEWAYPORT=80
+	</ul>
+<p>
+<li><span class='simpleheading'>About SELENIUMHOST</span>
+    <p>
+	If you intend to connect to a <b>Remote Standalone Selenium Server</b>:
+	<ul>
+	<li>SELENIUMHOST=remotehost.domain.com
+	<li>SELENIUMPORT=80
+	</ul>
+	<p>
+	If you do not use this, please add semi-colon '#' before these 2 settings to make them comments.
+	<ul>
+	<li># SELENIUMHOST=no.remotehost
+	<li># SELENIUMPORT=80
 	</ul>
 </ul>
+<p>
 <li><b>testSele.bat</b>
 <p>
 After setting the %CLASSPATH%, there is only one command line as shown below. <a
@@ -239,8 +271,7 @@ Strings</a> of the GUI components of Google Search page.
 			Refer to:
 			<ul>
 			<li><a href="http://safsdev.sourceforge.net/doc/org/safs/selenium/webdriver/lib/SearchObject.html" target="_blank" title="SAFS Selenium Recognition Strings Info">SAFS Selenium Recognition Strings</a>
-			<li><a href="http://docs.seleniumhq.org/docs/appendix_locating_techniques.jsp">Selenium Object Locating Technique</a>
-			<li><a href="Xpath_Css_selenium_Locators_table_1_0_2.pdf">XPATH CSS Locators Table</a>
+			<li><a href="http://safsdev.sourceforge.net/sqabasic2000/Xpath_Css_selenium_Locators_table_1_0_2.pdf">Selenium's XPATH CSS Locators Table</a>
 			</ul>
 			<p>
 			<li>How to specify Recognition String?
