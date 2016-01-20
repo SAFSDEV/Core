@@ -72,21 +72,23 @@ public class RFTInstaller extends InstallerImpl {
 		if(safsdir == null || safsdir.length()==0) {
 			progresser.setProgressMessage("RFTInstaller SAFSDIR directory appears invalid: "+safsdir);
 			return false;
+		}else{
+			progresser.setProgressMessage("RFTInstaller SAFSDIR directory appears to be: "+safsdir);
 		}
 		
-		String safsrational_jar = safsdir + safsrational_ft_jar;
-		String safsrational_enabler = safsdir + safsrational_ft_enabler_jar;
-		
-		jar = new CaseInsensitiveFile(safsrational_jar).toFile();
+		jar = new CaseInsensitiveFile(safsdir, safsrational_ft_jar).toFile();
 		if(!jar.isFile()) {
 			progresser.setProgressMessage("RFTInstaller safsrational_ft.jar installation directory invalid: "+jar.getAbsolutePath());
 			return false;
 		}
-		jar = new CaseInsensitiveFile(safsrational_ft_jar).toFile();
+		String safsrational_jar = jar.getAbsolutePath();
+		
+		jar = new CaseInsensitiveFile(safsdir, safsrational_ft_enabler_jar).toFile();
 		if(!jar.isFile()) {
 			progresser.setProgressMessage("RFTInstaller safsrational_ft_enabler.jar installation directory invalid: "+jar.getAbsolutePath());
 			return false;
 		}
+		String safsrational_enabler = jar.getAbsolutePath();
 		
 		String rc = appendSystemEnvironment("CLASSPATH", rationalftjar, null);
 		if(rc == null){
