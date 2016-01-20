@@ -97,6 +97,14 @@ import java.util.Enumeration;
  * <li>System getProperty Variable name: IBM.RATIONAL.RFT.ECLIPSE.DIR
  * </ol>
  * <p>
+ * Some 8.x versions of RFT (perhaps all?) still contain their own Java 1.6 JDK.  
+ * For runtime execution with SAFS we now use Java 1.7. at bundles in directory SAFS\jre.  
+ * <p>
+ * If RFT will not launch 
+ * successfully using our default launch algorithms pointing to what we think is 
+ * the right JDK/JRE, the user may have to provide this JVM parameter to point to a 
+ * JDK/JRE that will work for their case.
+ * <p>
  * <dt><b>JVMARGS</b>
  * <p>
  * <dd>Any JVM options to pass to the Java JVM as part of its invocation.
@@ -162,6 +170,7 @@ import java.util.Enumeration;
  * @author CANAGL AUG 14, 2009 Support for JVM Args during AutoLaunch.
  * @author JunwuMa FEB 26 2010 Added XBOOTCLASSPATH for JVM searching JAI/JAI Imageio during AutoLaunch.  
  * @author JunwuMa APR 02 2010 Removed clibwrapper_jiio.jar from XBOOTCLASSPATH.
+ * @author CANAGL JAN 20, 2016 Fixes for launching RFT with SAFS JRE.
  */
 public class SAFSROBOTJ extends GenericEngine {
 
@@ -231,6 +240,7 @@ public class SAFSROBOTJ extends GenericEngine {
 	 * 
 	 * @author CANAGL AUG 26, 2005 Added support for PLAYBACK and HOOKSCRIPT along with HOOK
 	 * @author CANAGL JAN 14, 2008 Added support RFT V7 and deducing settings.
+	 * @author CANAGL JAN 20, 2016 Added support for SAFSDIR embedded JRE usage.
 	 * @see GenericEngine#launchInterface(Object)
 	 */
 	public void launchInterface(Object configInfo){
@@ -271,8 +281,22 @@ public class SAFSROBOTJ extends GenericEngine {
 							return;
 				    	}
 				    	jvm=makeQuotedPath(tempstr, true);
-				    //try to derive
-				    }else{
+				    //try to derive from SAFS
+				    }
+				    if(tempstr == null){
+			    		tempstr = System.getenv("SAFSDIR");
+			    		if(tempstr != null){
+					    	CaseInsensitiveFile afile = new CaseInsensitiveFile(tempstr +"/jre/bin/java.exe");
+					    	if(afile.isFile()){
+								Log.info(ENGINE_NAME +" SAFSDIR embedded JRE detected at "+ afile.getCanonicalPath());
+								jvm=makeQuotedPath(afile.getCanonicalPath(), true);
+					    	}else{
+								Log.warn(ENGINE_NAME +" SAFSDIR embedded JRE was not detected at "+ afile.getCanonicalPath());
+								tempstr = null;
+					    	}
+			    		}
+				    }
+				    if(tempstr == null){			    		
 			    		tempstr = System.getenv("IBM_RATIONAL_RFT_ECLIPSE_DIR");
 			    		if (tempstr == null) tempstr = System.getProperty("IBM_RATIONAL_RFT_ECLIPSE_DIR");
 			    		if (tempstr == null) tempstr = System.getProperty("IBM.RATIONAL.RFT.ECLIPSE.DIR");
