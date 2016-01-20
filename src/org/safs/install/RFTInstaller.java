@@ -35,7 +35,9 @@ public class RFTInstaller extends InstallerImpl {
 	public boolean install(String... args) {
 
 		String rationalftdir;
+		progresser.setProgressMessage("RFTInstaller Cleaning System Environment of possibly old SAFS RFT JAR files...");
 		cleanSystemEnvironment();
+		progresser.setProgressMessage("RFTInstaller Cleaning System Environment for RFT complete.");
 		rationalftdir = getRegistryValue(wow6432key + RATIONAL_TEST_8_KEY, RFT_INSTALL_DIRECTORY);
 		if(rationalftdir == null ||
 		   rationalftdir.length()==0) 
@@ -46,31 +48,58 @@ public class RFTInstaller extends InstallerImpl {
 		   rationalftdir = getEnvValue(IBM_RFT_INSTALL_BIN_ENV);
 
 		// cannot deduce that RFT is installed
-		if(rationalftdir == null || rationalftdir.length()==0) return false;
+		if(rationalftdir == null || rationalftdir.length()==0){ 
+			progresser.setProgressMessage("RFTInstaller did not detect IBM Rational Functional Tester installation assets.");
+			return false;
+		}
 		
 		File dir = new CaseInsensitiveFile(rationalftdir).toFile();
-		if(! dir.isDirectory()) {
+		if(dir.isDirectory()) {
+			progresser.setProgressMessage("RFTInstaller IBM Rational Functional Tester installation directory: "+dir.getAbsolutePath());
+		}else{
+			progresser.setProgressMessage("RFTInstaller IBM Rational Functional Tester installation directory invalid: "+dir.getAbsolutePath());
 			return false;
 		}
 		
 		String rationalftjar = rationalftdir + rational_ft_jar;
 		File jar = new CaseInsensitiveFile(rationalftjar).toFile();
-		if(! jar.isFile()) return false;
+		if(! jar.isFile()) {
+			progresser.setProgressMessage("RFTInstaller rational_ft.jar installation directory invalid: "+jar.getAbsolutePath());
+			return false;
+		}
 		
 		String safsdir = getEnvValue(SAFSInstaller.SAFSDIREnv);
-		if(safsdir == null || safsdir.length()==0) return false;
+		if(safsdir == null || safsdir.length()==0) {
+			progresser.setProgressMessage("RFTInstaller SAFSDIR directory appears invalid: "+safsdir);
+			return false;
+		}
 		
 		String safsrational_jar = safsdir + safsrational_ft_jar;
 		String safsrational_enabler = safsdir + safsrational_ft_enabler_jar;
 		
 		jar = new CaseInsensitiveFile(safsrational_jar).toFile();
-		if(!jar.isFile()) return false;
+		if(!jar.isFile()) {
+			progresser.setProgressMessage("RFTInstaller safsrational_ft.jar installation directory invalid: "+jar.getAbsolutePath());
+			return false;
+		}
 		jar = new CaseInsensitiveFile(safsrational_ft_jar).toFile();
-		if(!jar.isFile()) return false;
+		if(!jar.isFile()) {
+			progresser.setProgressMessage("RFTInstaller safsrational_ft_enabler.jar installation directory invalid: "+jar.getAbsolutePath());
+			return false;
+		}
 		
-		appendSystemEnvironment("CLASSPATH", rationalftjar, null);
-		appendSystemEnvironment("CLASSPATH", safsrational_jar, null);
-		appendSystemEnvironment("CLASSPATH", safsrational_enabler, null);
+		String rc = appendSystemEnvironment("CLASSPATH", rationalftjar, null);
+		if(rc == null){
+			progresser.setProgressMessage("RFTInstaller rational_ft_enabler.jar was NOT successfully added to CLASSPATH!");
+		}
+		rc = appendSystemEnvironment("CLASSPATH", safsrational_jar, null);
+		if(rc == null){
+			progresser.setProgressMessage("RFTInstaller safsrational_ft.jar was NOT successfully added to CLASSPATH!");
+		}
+		rc = appendSystemEnvironment("CLASSPATH", safsrational_enabler, null);
+		if(rc == null){
+			progresser.setProgressMessage("RFTInstaller safsrational_ft_enabler.jar was NOT successfully added to CLASSPATH!");
+		}
 		
 		return true;
 	}
