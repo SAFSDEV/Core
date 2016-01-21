@@ -88,7 +88,7 @@ createShortcut shell, safsDocProgramDir, file, "Command Keyword Reference", ""
 file = installdir & "\WhatsNewInSAFS.htm"
 createShortcut shell, safsDocProgramDir, file, "Whats New In SAFS", ""
 
-file = "http://safsdev.sourceforge.net/sqabasic2000/SAFSWINReleaseNotes2016.01.08.htm"
+file = "http://safsdev.sourceforge.net/sqabasic2000/SAFSWinReleaseNotesRedirect.htm"
 createShortcut shell, safsDocProgramDir, file, "Release Notes", ""
 
 Set shell = nothing
