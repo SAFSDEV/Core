@@ -6,7 +6,7 @@
 <p>
 <hr>
 Author: Carl Nagle<br>
-UPDATED: June 06, 2013<br>
+UPDATED: 2016.01.21<br>
 <br>
 Copyright (C) SAS Institute<br>
 <a href="http://www.opensource.org/licenses/gpl-license.php" target="reference">General Public License</a>: http://www.opensource.org/licenses/gpl-license.php<br>
@@ -21,6 +21,27 @@ These instructions assume the tester has already installed SAFS with SAFS servic
 if STAF and associated services are not properly installed.</b></center>
 <p>
 
+<hr>
+<p>
+<li><h3>A working SAFS JSAFS Example</h3>
+<p>
+New SAFS installations contain a working JSAFS example that also demonstrates the usage of optional AutoConfiguration and execution.  <br>
+It is recommended you first start with this example to get a feel for JSAFS Project configuration.
+<p>
+See <a href="http://safsdev.sourceforge.net/sqabasic2000/UsingJSAFSAutoConfiguration.htm" target="_blank" title="JSAFS AutoConfiguration and Execution Documentation" >JSAFS AutoConfiguration and Execution</a> for more details regarding a working JSAFS example.
+<p>
+To start a JSAFS Project from scratch, see below.
+<p>
+
+<hr>
+<li><h3>The Java Project</h3>
+<p>
+If you are not enhancing an existing Java Project, then you will need to create a new empty Java Project before proceeding below.
+<p>
+Please note that SAFS JSAFS expects an execution environment of <b>32-bit Java 7</b>, or higher.<br>
+SAFS installs an "embedded" JRE for this purpose in <b>%SAFSDIR%\jre</b>.<br>
+This JRE or a comparable 32-bit JRE should always be used to execute SAFS tests.
+
 <p><hr>
 <a name="safsjava"/>
 <small>
@@ -30,7 +51,7 @@ if STAF and associated services are not properly installed.</b></center>
 </small>
 <li><h3>Add SAFS Java Dependencies</h3>
 <p>
-In order to take advantage of JSAFS, the developer will need to add the following Java Archive dependencies to their Java development project:
+In order to take advantage of JSAFS, the developer will need to add the following Java Archive dependencies to their Java development project.<br>
 <p>
 <ul>
 <li>JAR file from the STAF install directory, typically in \STAF\bin
@@ -56,7 +77,8 @@ You should provide this <b>JavaDoc location</b> when adding the SAFS JAR files t
 </small><p>
 <li><h3>New SAFS Project</h3>
 <p>
-For each different test project or product we recommend you create a new and separate SAFS project.
+For each different test project or product we recommend you create a new and separate <b>SAFS</b> project.<br>
+This is an expected directory structure specific for SAFS execution that is independent of Java.
 <p>
 On Windows, copy the following script:
 <ul><p>\SAFS\bin\<b>SetupSAFSProject.VBS</b></ul>
@@ -131,7 +153,8 @@ Let's put some initial code after the "run()" method to do some simple (but impo
     </b></code>
 </ul>
 <p>
-There is also <a href="http://safsdev.sourceforge.net/sqabasic2000/jsafs_advanced_example.txt" alt="JSAFSDriver Example Code" title="JSAFSDriver Example Code" target="_blank">this simple example</a> of some of the API usage for JSAFS.
+There is also <a href="http://safsdev.sourceforge.net/sqabasic2000/jsafs_advanced_example.txt" alt="JSAFSDriver Example Code" title="JSAFSDriver Example Code" target="_blank">this simple example</a> of some of the API usage for JSAFS.<br>
+However, this is just for example reference and assumes the SAFS/RobotJ engine using IBM Rational Functional Tester is setup and properly configured for testing.
 
 <p><li>"shutdown" the JSAFSDriver instance when finished with all testing.
 <p><ul><b>jsafs.shutdown();</b></ul>
@@ -150,6 +173,9 @@ There is also <a href="http://safsdev.sourceforge.net/sqabasic2000/jsafs_advance
 <p>
 Below is the minimum config information needed in the INI file to use JSAFS with the default Driver Commands and SAFS Services NOT needing one of the add-on SAFS Engines like Functional Tester, Test Complete, or Robotium RemoteControl:
 <p><ul><pre><b>
+[SAFS_DRIVER]
+DriverRoot="C:\SAFS"
+
 [SAFS_PROJECT]
 ProjectRoot="c:\pathTo\my\new\SAFSProject\directory"
 
@@ -157,19 +183,48 @@ ProjectRoot="c:\pathTo\my\new\SAFSProject\directory"
 CycleLogName="MyJSAFSLog"
 CycleLogMode="TEXTLOG XMLLOG"
 
+;optional
 [SAFS_ENGINES]
 First=org.safs.tools.engines.SAFSDRIVERCOMMANDS
+
 </b></pre></ul>
 <p>
 This minimum configuration tells JSAFSDriver where to find any additional SAFS configuration information--like safstid.ini--and where the SAFS Project directory structure is located.
 <p>
 The SAFS_TEST section tells JSAFSDriver the root name to use for the SAFS Logs, and whether it should create TEXT logs, or XML logs, or both.
 <p>
-The SAFS_ENGINE section tells JSAFSDriver to go ahead and use the generic SDC SAFS Engine to provide many SAFS Driver Commands. &nbsp;Since it is the only add-on engine in use at this time, it is listed as the "First" engine to try. &nbsp;If any other engine is added later, like the SAFSROBOTJ (RFT), SAFSTC (TestComplete), or SAFSDROID (Android); then the SDC engine would be listed as "Second".
+The SAFS_ENGINE section tells JSAFSDriver to go ahead and use the generic SDC SAFS Engine to provide many SAFS Driver Commands. &nbsp;Since it is the only add-on engine in use at this time, it is listed as the "First" engine to try. &nbsp;If any other engine is added later, like the SAFSROBOTJ (RFT), SAFSTC (TestComplete), or SAFSDROID (Android); then the SDC engine would be listed as "Second", or not at all in some cases.
 <p>
-The config file can have any name and is usually placed in the root directory for your new SAFS project.
+The config file can have any name and is usually placed in the root directory for your new SAFS project.<br>
+That is normally the Parent directory of the Datapool directory of the SAFS Project.
+
 <p>
 The path to this config file is passed to the JSAFSDriver instance as the System Property "<b>safs.project.config</b>" as specified in the section above.
+
+<p><hr>
+<small><a href="#top">Back to Top</a>,&nbsp;
+<a href="#safsjava">Java Jars</a>,&nbsp;
+<a href="#safsproject">SAFS Projects</a>,&nbsp;
+<a href="#usingjsafs">Using JSAFS</a>
+<a name="usingdebug"/>
+</small><p>
+<p>
+<li><h3>Using the SAFS Debug Log:</h3>
+<p>
+Invariably, you will run into cases where you need more information--debug information.<br>
+SAFS provides a Debug Log capability so that you can find out much more detailed information about what occurred during a running test.
+<p>
+Refer to this basic <a href="http://safsdev.sourceforge.net/doc/org/safs/Log.html" target="_blank" title="org.safs.Log JavaDoc">Debug Log JavaDoc</a>.
+<p>
+If you used the SetupProject.VBS as recommended above when creating your project, then you should have helper scripts for this in your SAFS Project:
+<p><ol><b>
+<li>SAFSDebugStartup.bat
+<li>SAFSDebugShutdown.bat
+</b></ol>
+<p>
+These are already configured to startup STAF as necessary before starting the Debug Log.<br>
+Remember, the Debug Log must be shutdown before it can be viewed.
+
 <p><hr>
 <small><a href="#top">Back to Top</a>,&nbsp;
 <a href="#safsjava">Java Jars</a>,&nbsp;
