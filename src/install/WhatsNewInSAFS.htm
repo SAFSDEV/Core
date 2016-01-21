@@ -17,7 +17,7 @@
 <div class=b1>
 <center>
 <h1>What's New in SAFS</h1>
-<h2>Updated: 2015.11.06</h2>
+<h2>Updated: 2016.01.21</h2>
 <small>Since:<b> 2012.08.07 </b></small>
 <h2>---  All active <b>"development"</b> is now at <a href="https://github.com/SAFSDEV" target="_blank" title="Link to SAFSDEV Organization on GitHub">SAFSDEV on GitHub</a>  ---</h2>
 <b>(Releases/Updates and other Binaries will be available on both GitHub and SourceForge)</b>
@@ -124,6 +124,339 @@ As you can see below, SAFS is undergoing a very rapid pace of development in man
 <table width="100%" align=center border=1 cellpadding=4 rules=rows>
 
 <th>DATE<th>AFFECTED<th>NEW STUFF<th>FIXES<th>DEPENDENCIES
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2016.01.21 </b>
+<td rowspan=2><!--AFFECT-->Core<br>Se+<br>RFT<br>JSAFS
+<td><!--NEW----->
+<td><!--FIXED--->RFT Install<br>Core Release
+<td><!--DEPEND-->Core JARs<br>Core RELEASE
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fixed Core SAFS/RobotJ support to launch with the new embedded SAFS JRE.
+<li>Completed widespread updates to SAFS Win Release assets and documentation.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2016.01.15 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->Se+ EditBox<br>Se+ ComboBox
+<td><!--FIXED--->Se+ RemoteServer
+<td><!--DEPEND-->Se+ JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fixed an error in specifying a -role in SeleniumPlus DCDriverCommand when starting a Selenium Server Node.
+<li>Added SeleniumPlus EditBox support for more Keywords and better verification.
+<li>Added SeleniumPlus ComboBox support for SetTextValue.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2016.01.12 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->Se+ RemoteServer
+<td><!--FIXED--->Se+ REGRESSION<br>Se+ Click
+<td><!--DEPEND-->Se+ REGRESSION<br>Se+ JARs<br>Se+ EXTRA
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Enhance SeleniumPlus REGRESSION of SendMail to use Google Account application tokens instead of passwords.
+<li>Fixed more SeleniumPlus Click Listener issues during page transitions.
+<li>Added SeleniumPlus RemoteServerTerminate.BAT support for possibly killing orphaned chromedriver.exes when a local Selenium Server is shutdown.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2016.01.07 </b>
+<td rowspan=2><!--AFFECT-->Se+<br>Core
+<td><!--NEW----->Se+ REGRESSION<br>Core XMLTransformer
+<td><!--FIXED--->
+<td><!--DEPEND-->Se+ JARs<br>Se+ REGRESSION<br>Core JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Add SeleniumPlus support for exiting JVM with a status code.
+<li>Add SeleniumPlus REGRESSION support to exit with UNEXPECTED failure counts.
+<li>Add SeleniumPlus REGRESSION runAutomation.BAT support to use the test exit code.
+<li>Add failuresummary.xsl support to SeleniumPlus REGRESSION test for reporting.
+<li>Added Core XMLTransformer support for post-test XML Log transforms.
+<li>Modify SeleniumPlus REGRESSION to perform XML Log Transforms for post-test reports.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2016.01.05 </b>
+<td rowspan=2><!--AFFECT-->Se+<br>Core
+<td><!--NEW----->Se+ Search<br>Core IBT
+<td><!--FIXED--->Se+ REGRESSION
+<td><!--DEPEND-->Se+ JARs<br>Se+ REGRESSION
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Add more support for SeleniumPlus partial matching ('Contains') in RS qualifiers.
+<li>Modify the SeleniumPlus REGRESSION tests for Google usage and changes.
+<li>Added more Image-Based Testing images in the SeleniumPlus IBT REGRESSION test.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2016.01.04 </b>
+<td rowspan=2><!--AFFECT-->Core<br>Se+
+<td><!--NEW----->Core LibraryUpdate
+<td><!--FIXED--->
+<td><!--DEPEND-->Core JARs<br>Se+ JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Add a -q quiet mode to Core LibraryUpdate functionality for automated non-interactive updates.<br>
+Also removed redundant console messages from the class.
+<li>Enhanced SeleniumPlus to use this new quiet mode update mechanism.
+<li>Enhance SeleniumPlus to log a WARNING when known FireFox AJAX issues are encountered.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.12.30 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->
+<td><!--FIXED--->Se+ JSON
+<td><!--DEPEND-->Se+ JARs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Working to provide a SeleniumPlus JSON fix for the upcoming selenium-server 2.48.2 which breaks us.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.12.25 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->Se+ Search
+<td><!--FIXED--->Se+ FireFox
+<td><!--DEPEND-->Se+ JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Bypass certain AJAX functions in SeleniumPlus for FireFox since Firefox can't handle them yet.
+<li>Start supporting partial match in SeleniumPlus for text and title RS qualifiers.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.12.23 </b>
+<td rowspan=2><!--AFFECT-->Se+<br>AIT
+<td><!--NEW----->Se+ REGRESSION<br>AIT REGRESSION<br>Core TestRecordHelper
+<td><!--FIXED--->Se+ JavaScript
+<td><!--DEPEND-->Se+ REGRESSION<br>Se+ JARs<br>Core JARs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Note in SeleniumPlus REGRESSION that IE Driver has a screenshot bug that is not fixed in Selenium.
+<li>Add AutoIt Engine regression tests to the SeleniumPlus REGRESSION suite.
+<li>Fix some Selenium JavaScriptExecutor lockups happening during page transitions.
+<li>Enhanced Core TestRecordHelper support with some convenience routines exploited by AutoIt Engine.
+<li>Enhance AutoIt Engine to activaet both Window and Component when ready, if appropriate.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.12.18 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->
+<td><!--FIXED--->Se+ PlugIn
+<td><!--DEPEND-->Se+ PlugIn
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fix the SeleniumPlus Eclipse PlugIn for JNA classpath issues.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.12.10 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->Se+ RMI
+<td><!--FIXED--->
+<td><!--DEPEND-->Se+ JARs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Added SeleniumPlus Clipboard support on Remote Selenium Server machines using RMI.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.12.09 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->
+<td><!--FIXED--->Se+ EditBox<br>Se+ Location
+<td><!--DEPEND-->Se+ JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Enhanced SeleniumPlus EditBox verification processing for some commands.
+<li>Added in some SeleniumPlus backward compatibility for some WebElement location calculations.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.12.07 </b>
+<td rowspan=2><!--AFFECT-->AIT
+<td><!--NEW----->
+<td><!--FIXED--->AIT Log
+<td><!--DEPEND-->Core JARs<br>Se+ JARs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Enhanced some AutoIt Engine logging.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.12.03 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->
+<td><!--FIXED--->Se+ Location
+<td><!--DEPEND-->Se+ JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Improved the accuracy of SeleniumPlus WebElement locations.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.11.26 </b>
+<td rowspan=2><!--AFFECT-->Core<br>Se+
+<td><!--NEW----->
+<td><!--FIXED--->Core Click<br>Core Strings<br>Se+ Location<br>Se+ Search
+<td><!--DEPEND-->Core JARs<br>Se+ JARs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Refactored Core and SeleniumPlus Click support for percentage coordinates.
+<li>Enhanced Core StringUtils parseFloat along with adding a unit test.
+<li>Fixed SeleniumPlus getComponentRectangle to properly include FRAME offsets.
+<li>Fixed SeleniumPlus frame switching as needed during element searches.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.11.25 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->
+<td><!--FIXED--->Se+ DRAG<br>Se+ Click
+<td><!--DEPEND-->Se+ JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fix SeleniumPlus Component drags to validate input offset parameter.
+<li>Fix SeleniumPlus ClickCapture Listeners StaleElementReferenceExceptions to prevent double-clicks.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.11.23 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->
+<td><!--FIXED--->Se+ Search
+<td><!--DEPEND-->Se+ JARs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Enhance SeleniumPlus waitForObject to refresh Window objects as they become stale during Component searches.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.11.20 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->
+<td><!--FIXED--->Se+ AJAX<br>Se+ EditBox
+<td><!--DEPEND-->Se+ JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fix SeleniumPlus AJAX requests with AtomicBooleans and daemon threads.
+<li>Enhance SeleniumPlus EditBox Components to seek 'text' properties if 'value' is not present.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.11.19 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->Se+ GetObject
+<td><!--FIXED--->Se+ REGRESSION
+<td><!--DEPEND-->Se+ JARs<br>Se+ REGRESSION
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Add SeleniumPlus getObject support to find Window and then find Component, as needed.
+<li>Modify SeleniumPlus REGRESSION to support internal test pages, where needed.
+<li>Modify SeleniumPlus inputKeys/Chars to better handle keystrokes using delayBetweenKeystrokes.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.11.18 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->Se+ Click<br>Se+ REGRESSION
+<td><!--FIXED--->
+<td><!--DEPEND-->Se+ JARs<br>Se+ REGRESSION
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>SeleniumPlus API added to disable DocumentClickCapture Click Listeners, if needed.
+<li>Added SeleniumPlus REGRESSION regressionsummary.xsl for REGRESSION Summary HTML Reports.
+<li>SeleniumPlus REGRESSION runAutomation.bat updated to always compile the regression project.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.11.17 </b>
+<td rowspan=2><!--AFFECT-->Core
+<td><!--NEW----->Core Console
+<td><!--FIXED--->
+<td><!--DEPEND-->Core JARs<br>Se+ JARs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Added more interactive features to Core JavaJVMConsole for saving and searching content.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.11.13 </b>
+<td rowspan=2><!--AFFECT-->Core<br>Se+
+<td><!--NEW----->
+<td><!--FIXED--->Core Processes<br>Se+ REGRESSION
+<td><!--DEPEND-->Core JARs<br>Se+ JARs<br>Se+ REGRESSION
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fixed Core Process Monitors to process standard in/out for as long as Selenium Server is running.
+<li>Fixed SeleniumPlus REGRESSION runAutoamtion.bat to use the "latest" selenium-standalone-server JAR file.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.11.11 </b>
+<td rowspan=2><!--AFFECT-->Core<br>Se+
+<td><!--NEW----->Core Click<br>Se+ REGRESSION
+<td><!--FIXED--->
+<td><!--DEPEND-->Core JARs<br>Se+ JARs<br>Se+ REGRESSION
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Added Core and SeleniumPlus optional percent format for Click command coordinate expressions.
+<li>Added support and regression test for SeleniumPlus to open links in new TAB or WINDOW and switch to it.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2015.11.09 </b>
+<td rowspan=2><!--AFFECT-->Core<br>Se+
+<td><!--NEW----->
+<td><!--FIXED--->Core Consoles
+<td><!--DEPEND-->Core JARs<br>Se+ JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fixed Core JavaJVMConsole to be less CPU-intensive.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2015.11.08 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->
+<td><!--FIXED--->Se+ RMI<br>Se+ Server
+<td><!--DEPEND-->Se+ EXTRA
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fixed SeleniumPlus RemoteServerWithRMI.BAT for corrected CLASSPATH.
+<li>Fixed SeleniumPlus RemoteServer.BAT for full path to executable command.
+</ul>
 
 <tr class=b2>
 <td rowspan=2><!--DATE----><b> 2015.11.06 </b>
