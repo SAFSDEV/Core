@@ -45,7 +45,7 @@
 <body><a name="_top"/>
 <center><H1>SAFS Selenium Quick Start<br>
 for Windows</H1>
-<small>Updated: 2016.01.19</small></center>
+<small>Updated: 2016.01.21</small></center>
 <hr>
 <b>Authors:</b>
 <ul>Lei Wang, Carl Nagle
@@ -102,13 +102,15 @@ See the online version of this doc <a href="http://safsdev.sourceforge.net/selen
 		<li>safsselenium.jar
 	</ul>
 	<p>
-	Finally, make sure that these jars are added to environment variable 'CLASSPATH':<br>
+	Finally, you could make sure that these jars are added to environment variable 'CLASSPATH':<br>
 	(Make sure any earlier versions of the selenium-server-standalone JAR(s) are removed from the CLASSPATH:)
 	<p><ul>
 		<li><b>%STAFDIR%</b>\bin\JSTAF.jar
 		<li>%SAFSDIR%\lib\safsselenium.jar
 		<li>%SAFSDIR%\lib\selenium-server-standalone-2.47.1.jar
 	</ul>
+	<p>
+	However, note that most tests are launched from BAT files that will override any CLASSPATH environment variable setting.
 </ol>
 
 <p><hr>
@@ -123,7 +125,6 @@ See the online version of this doc <a href="http://safsdev.sourceforge.net/selen
 <ul>The test script, "SAFS Selenium sample", intends to:
     <p><ol>
     <li>Open an IE/FireFox/Chrome browser to Google
-    <li>Verify the existence of some Login/Search components
     <li>Input some characters on a Google search window
     <li>Click the "Search" button to get the results
     <li>Close the browser and exit.
@@ -159,11 +160,13 @@ This folder is the ProjectRoot defined in the section SAFS_PROJECT of <a href="#
 <p>
 
 <a name="configfile"/>
-<li><b>SafsDevTest.ini</b>
-<p>This is a <a
+<li><b>SafsDevTest.ini</b> and the default <b>test.ini</b>:
+<p>These are <a
 href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#configfile">
-configuration file</a> that contains various information, which tells SAFS where and how to
+configuration files</a> that contain information which tells SAFS where and how to
 load user's test scripts, what engine to use, and the configuration about the engine etc..
+<p>
+<b>test.ini</b> is the default that will be sought if no INI file is specified in command-line parameters.
 <p>
 Normally, only advanced users would ever go in and change any of these settings.
 <p>
@@ -243,10 +246,12 @@ Command Line</a> takes SafsDevTest.ini as its project configuration file, launch
 
 <li><b>runSE2ProcessContainer.bat</b>
 <p>
-After setting the %CLASSPATH%, there is only one command line as sown below. It takes (initially missing) se2processcontainer.ini as its project configuration file and launches
+After setting the %CLASSPATH%, there is only one command line as shown below. It takes (<b>initially missing</b>) se2processcontainer.ini as its project configuration file and launches
 the WebDriver Process Container:
 <p>
-<ul><b>%SAFSDIR%</b>\jre\bin\java -Dsafs.project.config=se2processcontainer.ini <b>org.safs.selenium.spc.WDSPC</b></ul>
+<ul><b>"%EXECUTE%" -Dsafs.project.config="se2processcontainer.ini" -cp "%CLASSPATH%" org.safs.selenium.spc.WDSPC</b></ul>
+<p>
+Because the se2processcontainer.ini is initially missing, the Process Container should resort to the <b>test.ini</b> file for initial configuration.
 <p>
 
 <li><b>SafsDevTest.CDD, KeywordHtmlTest.STD, SeleniumEditBoxTest.SDD</b>
