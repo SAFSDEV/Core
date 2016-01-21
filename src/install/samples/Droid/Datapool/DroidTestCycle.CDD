@@ -3,5 +3,9 @@
 ;
 C, LaunchApplication
 
-C, SetVariableValues, ^SAFS_DRIVER_CONTROL="PAUSE"
+; PAUSES test execution until user hits "Run" on SAFS Monitor
+;C, SetVariableValues, ^SAFS_DRIVER_CONTROL="PAUSE"
+
+C, Pause, 3
+
 C, CloseApplication
