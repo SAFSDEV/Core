@@ -1353,15 +1353,25 @@ public abstract class ComponentFunction extends Processor{
 			filteredAreas = parseFilteredAreasParam(filteredAreas, warnings);
 		}
 
+		String warnMsg = null;
+		
 		//capture component image to file
 		//since our call to getSubAreaRectangle() has already confirmed that imageRect is
 		//contained in compRect, we can assume that imageRect is also contained in the parent window
 		//(compRect was retrieved from parent window)
 		try {
 			BufferedImage buffimg = getRectangleImage(imageRect);
-			if(filteredAreas!=null) buffimg = ImageUtils.filterImage(buffimg, filteredAreas, warnings);
+			
+			try{
+				if(filteredAreas!=null) buffimg = ImageUtils.filterImage(buffimg, filteredAreas, warnings);
+			}catch(SAFSException e){
+				warnMsg = "Component Image Not Filtered due to "+ e.getMessage();
+				Log.warn(warnMsg);
+				issueErrorPerformingActionUsing(filteredAreas, warnMsg);
+				return;
+			}
 
-			//Save the BufferedImage to a temporaire file with the same suffix as bench image file 
+			//Save the BufferedImage to a temporary file with the same suffix as bench image file 
 			File tmpFile = File.createTempFile("image",benchsuffix);
             boolean tmpFileDelete = true;
             
@@ -1394,7 +1404,14 @@ public abstract class ComponentFunction extends Processor{
 					//Compare two buffered-images
 					Log.info(debugmsg+"comparing each bits of 2 images ...");
 					BufferedImage benchimg = ImageUtils.getStoredImage(benchFile.getAbsolutePath());
-					if(filteredAreas!=null) benchimg = ImageUtils.filterImage(benchimg, filteredAreas, warnings);
+					try{
+						if(filteredAreas!=null) benchimg = ImageUtils.filterImage(benchimg, filteredAreas, warnings);
+					}catch(SAFSException e){
+						warnMsg = "Benchmark Image Not Filtered due to "+ e.getMessage();
+						Log.warn(warnMsg);
+						issueErrorPerformingActionUsing(filteredAreas, warnMsg);
+						return;
+					}
 					
 					verified = ImageUtils.compareImage(buffimg, benchimg, percentBitsTolerance);
 					if(!verified){

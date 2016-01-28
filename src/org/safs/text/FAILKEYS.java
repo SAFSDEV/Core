@@ -42,9 +42,9 @@ public class FAILKEYS{
 	public static final String COULD_NOT_SET_VARS							= "could_not_set_vars";
 	/** Delimiter '%1%' was not found */
 	public static final String DELIMITER_NOT_FOUND							= "delimiter_not_found";
-	/** %1% error. */
+	/** Error performing %1%. */
 	public static final String ERROR_PERFORMING_1							= "error_performing_1";
-	/** %1% on %2% error. */
+	/** Error performing %1% on %2%. */
 	public static final String ERROR_PERFORMING_2							= "error_performing_2";
 	/** %1% using %2% finished with a negative result. */
 	public static final String EXECUTED_USING_NEGATIVERESULT				= "executed_using_negativeresult";
@@ -66,7 +66,7 @@ public class FAILKEYS{
 	public static final String FAILURE_4									= "failure4";
 	/** Unable to perform %3% on %2% in %1%. %4% %5% */
 	public static final String FAILURE_5									= "failure5";
-	/** Error at line %1% in %2% : %3% */
+	/** Error at line %1% in file %2% : %3% */
 	public static final String FAILURE_DETAIL								= "failureDetail";
 	/** Error opening or reading or writing file '%1%' */
 	public static final String FILE_ERROR									= "file_error";
@@ -94,7 +94,7 @@ public class FAILKEYS{
 	public static final String INVALID_INDEX_FORMAT							= "invalid_index_format";
 	/** Invalid or Missing %1% in table %2% at line %3%. */
 	public static final String INVALID_MISSING								= "invalid_missing";
-	/** Unable to perform %3% on %2% in %1% at line %4%. */
+	/** Unable to perform %3% on %2% in %1% line %4%. */
 	public static final String LINEFAIL_4									= "linefail4";
 	/** Can not find method. */
 	public static final String METHOD_NOT_FOUND								= "method.not.found";
@@ -174,6 +174,8 @@ public class FAILKEYS{
 	public static final String STANDARD_ERROR								= "standard_err";
 	/** %1% warning in table %2% at line %3%. */
 	public static final String STANDARD_WARNING								= "standard_warn";
+	/** Subarea (%1%) not found in area (%2%). */
+	public static final String SUBAREA_NOT_FOUND_IN__2						= "subarea_not_found_in_2";
 	/** Substring '%1%' not found in '%2%'. */
 	public static final String SUBSTRING_NOT_FOUND_2						= "substring_not_found_2";
 	/** Support for %1% not found! */
@@ -190,9 +192,9 @@ public class FAILKEYS{
 	public static final String UNABLE_TO_TRANSFER							= "unable_to_transfer";
 	/** Unexpected object: NOT an instance of '%1%' that can be handled. */
 	public static final String UNEXPECTED_OBJECT							= "unexpected_object";
-	/** Unknown %1% "%2%" in %3% at line %4% */
+	/** Unknown %1% "%2%" in filename %3% at line %4% */
 	public static final String UNKNOWNDETAIL								= "unknownDetail";
-	/** Unknown RECORD TYPE, SCRIPT NAME, or COMMAND in %1% at line %2% */
+	/** Unknown RECORD TYPE, SCRIPT NAME, or COMMAND in filename %1% at line %2% */
 	public static final String UNKNOWN_RECORD								= "unknown_record";
 
 }

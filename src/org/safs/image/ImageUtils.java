@@ -62,6 +62,8 @@ import org.safs.tools.CaseInsensitiveFile;
 import org.safs.tools.ocr.OCREngine;
 import org.safs.tools.stringutils.StringUtilities;
 
+import sun.util.logging.resources.logging;
+
 /**
  * Utility functions for processing or manipulating Images stored in the File system 
  * or captured from the Screen.
@@ -574,16 +576,23 @@ public class ImageUtils {
     		//log.logMessage(testRecordData.getFac(), "subRect is " + subRect.toString());
     		
     		//if SubRect's x,y is not contained in compRect, invalid
-    		if (! compRect.contains(dx1, dy1))
+    		if (! compRect.contains(dx1, dy1)){
+    			IndependantLog.warn("IU.getSubAreaRectangle subarea location "+ dx1 +", "+ dy1 +" is outside the bounds of the target Rectangle.");
     			return null;
+    		}
     		
     		//validate subRect is already contained in compRect
-    		if (compRect.contains(subRect))
+    		if (compRect.contains(subRect)){
     			//return newly created subRect
     			return subRect;
-    		else
+    		}else{
     			//subRect doesn't fit in compRect, return new clipped Rectangle
-    			return getClippedSubAreaRectangle(compRect, subRect);
+    			Rectangle t = getClippedSubAreaRectangle(compRect, subRect);
+    			if(t==null){
+        			IndependantLog.warn("IU.getSubAreaRectangle clipped subarea ("+dx1+","+dy1+" x "+subRect.width+","+subRect.height+") is outside the bounds of the target Rectangle.");
+    			}
+    			return t;
+    		}
     	}
     	catch (Exception e) {
     		Log.error(methodName +": Exception", e);
@@ -3829,7 +3838,7 @@ outer:  for(screeny = starty; (screeny<imageMaxScreenY && !matched) ;screeny++){
 	 * @param filteredAreas String, a set of area delimited by space, such as "0,0,10,10 40;40;5%;5%"
 	 * @param warnings List<String>, out, a List instance provided to contain the possible warnings during execution.
 	 * @return
-	 * @throws SAFSException
+	 * @throws SAFSException passed along from {@link #convertAreas(Rectangle, String, List)}.
 	 */
 	public static BufferedImage filterImage(BufferedImage image, String filteredAreas, List<String> warnings) throws SAFSException{
 		String debugmsg = StringUtils.debugmsg(false);
@@ -3861,11 +3870,24 @@ outer:  for(screeny = starty; (screeny<imageMaxScreenY && !matched) ;screeny++){
 	 * @param areas String, a set of area delimited by space, such as "0,0,10,10 40;40;5%;5%"
 	 * @param warnings List<String>, out, a List instance provided to contain the possible warnings during execution.
 	 * @return
-	 * @throws SAFSException 
+	 * @throws SAFSException if the basedRect is null or if any of the provided areas are completely outside the bounds of basedRect.
 	 */
 	public static Rectangle[] convertAreas(Rectangle basedRect, String areas, List<String> warnings) throws SAFSException{
 
 		String debugmsg = StringUtils.debugmsg(false);
+		String warnMsg = null;
+		
+		// abort with error if target basedRect is null
+		if(basedRect == null){
+			warnMsg = FAILStrings.convert(FAILStrings.SUBAREA_NOT_FOUND_IN__2, 
+					"Subarea ("+areas+") not found in area (null).",
+					areas, "null");
+			IndependantLog.warn(debugmsg+warnMsg);
+			if(warnings!=null) warnings.add(warnMsg);
+			throw new SAFSException(warnMsg); 
+		}
+		
+		String recarea = basedRect.x+","+basedRect.y+","+basedRect.width+","+basedRect.height;		
 		String subAreas = normalizeSubAreas(areas);
 
 		//isolate separate sets of coordinates
@@ -3874,22 +3896,26 @@ outer:  for(screeny = starty; (screeny<imageMaxScreenY && !matched) ;screeny++){
 
 		Rectangle[] rects = new Rectangle[arrayOfAreas.length];
 		int errcount = 0;
-		String warnMsg = null;
 		for(int j = 0; j < arrayOfAreas.length; j++){
 			//This check if a rectangle is valid, and clips it if it doesn't fit within the image.
 			//Returns null if the rectangle is invalid (and sends a warning).
 			rects[j] = getSubAreaRectangle(basedRect,arrayOfAreas[j]);
 			if(rects[j]==null){
 				errcount++;
-				warnMsg = FAILStrings.convert(FAILStrings.IGNORE_BAD_PARAM, 
-						"ConvertAreas ignoring invalid parameter 'AREA="+ arrayOfAreas[j]+"'.", 
-						"ConvertAreas", arrayOfAreas[j]);
+				warnMsg = FAILStrings.convert(FAILStrings.SUBAREA_NOT_FOUND_IN__2, 
+						"Subarea ("+arrayOfAreas[j]+") not found in area ("+ recarea +").",
+						arrayOfAreas[j], recarea);
 				IndependantLog.warn(debugmsg+warnMsg);
 				if(warnings!=null) warnings.add(warnMsg);
 			}
 		}
 		
-		if(errcount==rects.length) throw new SAFSException("Wrong Parameter, "+ComponentFunction.PARAM_FILTER+"="+ areas); 
+		if(errcount==rects.length) {
+			warnMsg = FAILStrings.convert(FAILStrings.SUBAREA_NOT_FOUND_IN__2, 
+					"Subarea ("+areas+") not found in area ("+ recarea +").",
+					areas, recarea);
+			throw new SAFSException(warnMsg); 
+		}
 
 		return rects;
 	}
