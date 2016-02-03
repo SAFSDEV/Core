@@ -2,21 +2,27 @@
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
+/**
+ * 
+ * History:
+ * 
+ *  Jun 25, 2014    (sbjlwa) Initial release.
+ *  OCT 29, 2014    (sbjlwa) Move some XPATH related codes from SearchObject to here.
+ *  FEB 03, 2016    (sbjlwa) Modify conditionXXX(): to avoid the InvalidSelectorException 
+ *                           caused by apostrophe existing in the text/value.
+ */
 package org.safs.selenium.webdriver.lib;
+
+import java.util.List;
 
 import org.openqa.selenium.SearchContext;
 import org.safs.IndependantLog;
 import org.safs.StringUtils;
 
 /**
- * A convinient class to create xpath, cssSelector to create a By searching criterion for Selenium to find WebElement.<br>
+ * A convenient class to create xpath, cssSelector to create a By searching criterion for Selenium to find WebElement.<br>
  * It also provides "Recognition String" such as "xpath=xxx", "css=xxx", "id=xxx" etc. for SearchObject to find WebElement.<br>
  * 
- * <br>
- * History:<br>
- * 
- *  <br>   Jun 25, 2014    (sbjlwa) Initial release.
- *  <br>   OCT 29, 2014    (sbjlwa) Move some XPATH related codes from SearchObject to here.
  */
 public class RS{
 	
@@ -103,10 +109,11 @@ public class RS{
 				IndependantLog.warn(StringUtils.debugmsg(false)+"property or value is null, not valid!");
 			}
 
+			String normalizedText = quote(value);
 			if(partialMatch){
-				return " contains(@"+attribute+",'"+value+"')";
+				return " contains(@"+attribute+", "+normalizedText+")";
 			}else{
-				return " @"+attribute+"='"+value+"'";
+				return " @"+attribute+"="+normalizedText;
 			}
 		}
 		
@@ -120,12 +127,14 @@ public class RS{
 			if(attribute==null || value==null){
 				IndependantLog.warn(StringUtils.debugmsg(false)+"property or value is null, not valid!");
 			}
+			
+			String normalizedText = quote(value);
 			int i = attribute.toUpperCase().indexOf(SearchObject.SEARCH_CRITERIA_CONTAINS_SUFFIX);
 			if(i<1){
 				IndependantLog.warn(StringUtils.debugmsg(false)+"<property>Contains name is NOT valid!");
-				return " contains(@"+attribute+",'"+value+"')";
+				return " contains(@"+attribute+", "+normalizedText+")";
 			}
-			return " contains(@"+attribute.substring(0, i)+",'"+value+"')";
+			return " contains(@"+attribute.substring(0, i)+", "+normalizedText+")";
 		}
 		
 		/**
@@ -138,11 +147,48 @@ public class RS{
 				IndependantLog.warn(StringUtils.debugmsg(false)+"text value is null, not valid!");
 			}
 			
+			String normalizedText = quote(text);
 			if(partialMatch){
-				return " contains(text(), '" + text +"')";// ']' removed.  Causing ']]' for text=someText
+				return " contains(text(), "+normalizedText+")";
 			}else{
-				return " text()='"+text+"'";
+				return " text()="+normalizedText;
 			}
+		}
+		
+		/**
+		 * Add single quote around the text (such as 'text'), and it will be used in XPATH for searching a web element in DOM.<br>
+		 * If the text (such as Tom's) contains single quote, we cannot simply quote the text with single quote, which will cause the error;<br>
+		 * instead we will use the function concat() to connect each part of the text, such as concat('Tom', "'", 's').<br>
+		 * 
+		 * @param text String, the text of the web element.
+		 * @return String, the quoted text; or a string combined by function concat().
+		 */
+		protected static String quote(String text){
+			String normalized = "'" + text +"'";
+			
+			//if text contains single quote, we should not simply quote it with single quote.
+			//we will use the function concat()
+			if(text!=null){
+				int singleQuoteIndex = text.indexOf(StringUtils.QUOTE);
+				if(singleQuoteIndex>-1){
+					normalized="concat(";
+					
+					List<String> tokens = StringUtils.getTokenList(text, StringUtils.QUOTE);
+					String singleQuoteParam = ", "+StringUtils.DOUBLE_QUOTE+StringUtils.QUOTE+StringUtils.DOUBLE_QUOTE + ", ";// , "'", 
+					
+					for(String token:tokens){
+						normalized += StringUtils.QUOTE+token+StringUtils.QUOTE;// 'some string'
+						normalized += singleQuoteParam;// , "'", 
+					}
+					
+					int index = normalized.lastIndexOf(singleQuoteParam);
+					normalized = normalized.substring(0, index);
+					
+					normalized += ")";
+				}				
+			}
+			
+			return normalized;
 		}
 		
 		public static boolean isRootHtml(SearchContext sc){
@@ -197,4 +243,46 @@ public class RS{
 		return SearchObject.SEARCH_CRITERIA_XPATH+SearchObject.assignSeparator+xpath;
 	}
 
+	private static void testNormalizeSingleQuote(){
+		String text = "hello";
+		String expected = "'hello'";
+		String actual = XPATH.quote(text);
+		
+		if(!expected.equals(actual)){
+			System.err.println("We expect: "+expected+" | But actual: "+actual);
+		}else{
+			System.out.println(actual);
+		}
+		
+		text = "hello\"work";
+		expected = "'hello\"work'";
+		actual = XPATH.quote(text);
+		if(!expected.equals(actual)){
+			System.err.println("We expect: "+expected+" | But actual: "+actual);
+		}else{
+			System.out.println(actual);
+		}
+		
+		text = " hello ' world ";
+		expected = "concat(' hello ', \"'\", ' world ')";
+		actual = XPATH.quote(text);
+		if(!expected.equals(actual)){
+			System.err.println("We expect: "+expected+" | But actual: "+actual);
+		}else{
+			System.out.println(actual);
+		}
+		
+		text = "hello'e ll' word";
+		expected = "concat('hello', \"'\", 'e ll', \"'\", ' word')";
+		actual = XPATH.quote(text);
+		if(!expected.equals(actual)){
+			System.err.println("We expect: "+expected+" | But actual: "+actual);
+		}else{
+			System.out.println(actual);
+		}
+	}
+	
+	public static void main(String[] args){
+		testNormalizeSingleQuote();
+	}
 }
