@@ -45,6 +45,7 @@ package org.safs.selenium.webdriver.lib;
 *  <br>   DEC 10, 2015    (Lei Wang) Add methods to handle clipboard on local machine or on RMI server machine.
 *  <br>   DEC 24, 2015    (Lei Wang) Add methods to get browser's name, version, and selenium-server's version etc.
 *                                  Add method checkKnownIssue().
+*  <br>   FEB 05, 2016    (Lei Wang) Add method killChromeDriver().
 */
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -63,6 +64,7 @@ import java.rmi.ServerException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.TimeUnit;
@@ -94,6 +96,7 @@ import org.openqa.selenium.remote.RemoteWebElement;
 import org.openqa.selenium.safari.SafariDriver;
 import org.safs.IndependantLog;
 import org.safs.Processor;
+import org.safs.SAFSException;
 import org.safs.StringUtils;
 import org.safs.image.ImageUtils;
 import org.safs.model.commands.DDDriverCommands;
@@ -112,6 +115,9 @@ import org.safs.selenium.webdriver.lib.interpreter.WDTestRunFactory;
 import org.safs.text.FileUtilities;
 import org.safs.text.INIFileReader;
 import org.safs.tools.CaseInsensitiveFile;
+import org.safs.tools.GenericProcessMonitor;
+import org.safs.tools.GenericProcessMonitor.ProcessInfo;
+import org.safs.tools.GenericProcessMonitor.WQLSearchCondition;
 import org.safs.tools.input.CreateUnicodeMap;
 import org.safs.tools.input.InputKeysParser;
 import org.safs.tools.input.RobotKeyEvent;
@@ -1825,6 +1831,23 @@ public class WDLibrary extends SearchObject {
 	}
 
 	/**
+	 * Kill the process 'chromedriver.exe'.
+	 * @param host String, the host name on which the process 'chromedriver.exe' will be killed.
+	 * @return List<ProcessInfo>, a list containing the killed process's id and kill-execution-RC.
+	 * @throws SAFSException
+	 */
+	public static List<ProcessInfo> killChromeDriver(String host) throws SAFSException{
+		//wmic process where " commandline like '%d:\\seleniumplus\\extra\\chromedriver.exe%' and name = 'chromedriver.exe' "
+		String wmiSearchCondition = GenericProcessMonitor.wqlCondition("commandline", "\\extra\\chromedriver.exe", true, false);
+		
+		wmiSearchCondition += " and "+ GenericProcessMonitor.wqlCondition("name", "chromedriver.exe", false, false);
+		
+		WQLSearchCondition condition = new WQLSearchCondition(wmiSearchCondition);
+		
+		return GenericProcessMonitor.shutdownProcess(host, condition);
+	}
+	
+	/**
 	 * scroll browser window by x and/or y number of pixels.
 	 * Only works if the associated scrollbar(s) are actually visible.
 	 * Synonymous to Javascript window.scrollBy(x,y).
@@ -2859,12 +2882,7 @@ public class WDLibrary extends SearchObject {
 		}
 	}
 	
-	/**
-	 * Before running this method, please read java doc of {@link #test_ajax_call(String)}
-	 * @param args
-	 */
-	public static void main(String[] args){
-		
+	private static void test_ajax_call(){
 		String[] browsers = {
 				             SelectBrowser.BROWSER_NAME_CHROME, 
 				             SelectBrowser.BROWSER_NAME_IE, 
@@ -2872,6 +2890,38 @@ public class WDLibrary extends SearchObject {
 				             };
 		for(String browser:browsers){
 			test_ajax_call(browser);
+		}		
+	}
+	
+	/**
+	 * Before calling this method, we could start chromedriver.exe firstly.
+	 */
+	private static void test_kill_chromedirver(){
+		try {
+			String host = "";
+			List<ProcessInfo> killedList = killChromeDriver(host);
+			for(ProcessInfo p:killedList){
+				System.out.println("on host "+host+", process "+p.getId()+" has been terminated. The return code is "+p.getWmiTerminateRC());
+			}
+			
+			host = "***REMOVED***";
+			killedList = killChromeDriver(host);
+			for(ProcessInfo p:killedList){
+				System.out.println("on host "+host+", process "+p.getId()+" has been terminated. The return code is "+p.getWmiTerminateRC());
+			}
+			
+		} catch (SAFSException e) {
+			e.printStackTrace();
 		}
+		
+	}
+	
+	/**
+	 * Before running this method, please read java doc of {@link #test_ajax_call(String)}
+	 * @param args
+	 */
+	public static void main(String[] args){
+		test_ajax_call();
+		test_kill_chromedirver();
 	}
 }
