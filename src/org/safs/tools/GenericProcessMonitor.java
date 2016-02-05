@@ -4,12 +4,24 @@
  * Copyright (C) SAS Institute
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
+/**
+ * History:
+ * 
+ * FEB 05, 2016    (Lei Wang) Add methods to kill processes by Windows command "wmic".
+ * 
+ */
 package org.safs.tools;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Locale;
 
+import org.safs.IndependantLog;
+import org.safs.SAFSException;
+import org.safs.StringUtils;
+import org.safs.net.NetUtilities;
 import org.safs.tools.consoles.GenericProcessCapture;
 
 /**
@@ -29,7 +41,10 @@ public class GenericProcessMonitor {
 	static final String winprockill = "taskkill.exe /f ";
 	static final String winpidoption = "/pid ";
 	static final String winimgoption = "/im ";
-
+	static final String winwmic = "wmic ";
+	static final String winwmic_nodeoption = "/node:";
+	static final String winwmic_cmdprocess = "process";
+	
 	static final String unxproclist = "ps -f";
 	static final String unxprockillpid = "kill -9 ";
 	static final String unxprockillimg = "killall ";
@@ -115,7 +130,7 @@ public class GenericProcessMonitor {
 		boolean success = false;
 		String cmd = null;
 		try{
-			cmd = osFamilyName.equals(OS_FAMILY_WINDOWS) ? winproclist : unxproclist;
+			cmd = isWindowsOS() ? winproclist : unxproclist;
 			Process proc = Runtime.getRuntime().exec(cmd);
 			console = getProcessCapture(proc);
 			Thread athread = new Thread(console);
@@ -156,6 +171,180 @@ public class GenericProcessMonitor {
 		}
 		return success;
 	}
+
+	/**
+	 * To generate <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/aa394054(v=vs.85).aspx">WQL</a> search condition for "wmic".<br>
+	 * The condition is to search according a key's string value, we use "=" or "like" to compare.<br>
+	 * <b>Note:</b><br>
+	 * 1. It could be concatenated by operator "and", "or", "not" etc. refer to <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/aa394606(v=vs.85).aspx">WQL Keywords</a><br>
+	 * 2. A group of conditions should be wrapped by parenthesis, such as ((condition1 or condition2) and condition3).<br>
+	 * 3. Finally the group of conditions should be wrapped by double-quote, such as "((condition1 or condition2) and condition3)", before feed the where clause.<br>
+	 * 
+	 * @param key			String, the key to match, for example, for command 'process', the key could be CommandLine, Name, ProcessId etc.
+	 * @param value			String, the value to match
+	 * @param partialMatch	boolean, if the match is partial.
+	 * @param caseSensitive	boolean, if the match is case sensitive.<br>
+	 *                               NOT USED YET. It seems that command 'wmic' handles condition case-insensitively.<br>
+	 * @return String, the search condition.
+	 */
+	public static String wqlCondition(String key, String value, boolean partialMatch, boolean caseSensitive/* not used, all case-insensitive*/){
+		String debugmsg = StringUtils.debugmsg(false);
+		String condition = "";
+		
+		if(!StringUtils.isValid(key)){
+			IndependantLog.error(debugmsg+" the key is not valid.");
+			return condition;
+		}
+		if(!StringUtils.isValid(value)){
+			IndependantLog.error(debugmsg+" the value is not valid.");
+			return condition;
+		}
+		
+		value = wqlNormalizeValue(value);
+		
+		if(partialMatch){
+			condition = key+" like '%"+value+"%' ";
+		}else{
+			condition = key+" = '"+value+"' ";
+		}
+		
+		IndependantLog.debug(debugmsg+" got condition: "+condition);
+		
+		return condition.toString();
+	}
+	
+	/**
+	 * Escape character back-slash(\), double-quote(") and single-quote(').<br>
+	 * @param value	String, the value to match for a certain key.
+	 * @return String the normalized value.
+	 */
+	private static String wqlNormalizeValue(String value){
+		if(!StringUtils.isValid(value)){
+			IndependantLog.error(StringUtils.debugmsg(false)+" the value "+value+" is not valid.");
+			return value;
+		}
+		//escape character back-slash(\), double-quote(") and single-quote('). 
+		if(value.contains(StringUtils.BACK_SLASH)) value = value.replaceAll("\\\\", "\\\\\\\\");// replace \ by \\
+		if(value.contains(StringUtils.QUOTE)) value = value.replaceAll(StringUtils.QUOTE, "\\'");// replace ' by \'
+		if(value.contains(StringUtils.DOUBLE_QUOTE)) value = value.replaceAll(StringUtils.DOUBLE_QUOTE, "\\\"");// replace " by \"
+
+		return value;
+	}
+	
+	public static class WQLSearchCondition{
+		//The condition used in command wmic's where clause, such as
+		//commandline like '%d:\\seleniumplus\\extra\\chromedriver.exe%' and name = 'chromedriver.exe' 
+		private String condition = null;
+		
+		public WQLSearchCondition(String condition){
+			this.condition = condition;
+		}
+		
+		public String toString(){			
+			if(!StringUtils.isValid(condition)){
+				IndependantLog.error(StringUtils.debugmsg(false)+" the value "+condition+" is not valid.");
+				return condition;
+			}
+			
+			//Wrap the WQL condition with double-quote
+			String normalizedCondition = condition.trim();
+
+			if(!(normalizedCondition.startsWith(StringUtils.DOUBLE_QUOTE) && normalizedCondition.endsWith(StringUtils.DOUBLE_QUOTE))){
+				normalizedCondition = StringUtils.quote(normalizedCondition);
+			}
+			
+			return normalizedCondition;
+		}
+	}
+	
+	public static class ProcessInfo{
+		String id = null;
+		int wmiTerminateRC = Integer.MIN_VALUE;
+		
+		public String getId() {
+			return id;
+		}
+		public int getWmiTerminateRC() {
+			return wmiTerminateRC;
+		}
+
+	}
+	
+	/**
+	 * Attempt to forcefully kill processes on a certain host according to a WQL search condition.<br>
+	 * On Windows we are using wmic.exe. It is only supported on Windows.<br>
+	 * 
+	 * @param host	String, the host name where to kill processes
+	 * @param condition	WQLSearchCondition, the WQL search condition to find processes
+	 * @return	List<ProcessInfo>, a list of killed processes
+	 * @throws SAFSException
+	 */
+	public static List<ProcessInfo> shutdownProcess(String host, WQLSearchCondition condition) throws SAFSException{
+		String debugmsg = StringUtils.debugmsg(false);
+		GenericProcessCapture console = null;
+		boolean success = false;
+		String cmd = null;
+		
+		if(!isWindowsOS()) throw new SAFSException(osFamilyName+" has NOT been supported yet.");
+		
+		try{
+			cmd = winwmic;
+			//If this host is a remote machine, then add the "/node" option
+			if(!(host==null || host.trim().isEmpty() || NetUtilities.isLocalHost(host))){
+				cmd += " "+winwmic_nodeoption+host+" ";
+			}
+			cmd += " "+winwmic_cmdprocess+" ";
+			cmd += " where "+condition+" call terminate";
+
+			IndependantLog.debug(debugmsg+" executing command: "+cmd);
+			
+			Process proc = Runtime.getRuntime().exec(cmd);
+			console = getProcessCapture(proc);
+			Thread athread = new Thread(console);
+			athread.start();
+			athread.join();
+			success = (console.getExitValue()==0);
+		}catch(Exception x){
+			// something else was wrong with the underlying process
+			IndependantLog.error(debugmsg+" executing "+cmd +", met "+ StringUtils.debugmsg(x));
+		}
+		
+		List<ProcessInfo> processList = new ArrayList<ProcessInfo>();
+		
+		//Analyze the output to store the killed processes information into a list
+		if(success){
+			int pidindex = 0;
+
+			String line = null;
+			Enumeration<String> reader = console.getData().elements();
+			ProcessInfo processInfo = new ProcessInfo();
+			boolean found = false;
+			while((reader.hasMoreElements())){
+				line = reader.nextElement();
+				pidindex = line.indexOf("Win32_Process.Handle=");
+				if(pidindex > 0){
+					found = true;
+					try{
+						processInfo.id = line.substring(line.indexOf("\"")+1, line.lastIndexOf("\"")).trim();
+						processList.add(processInfo);
+					}catch(Exception x){/*ignore*/}
+				}
+				if(found){
+					if(line.indexOf("ReturnValue")>-1){
+						try{
+							String rc = line.substring(line.indexOf("=")+1, line.indexOf(";")).trim();
+							processInfo.wmiTerminateRC = Integer.parseInt(rc);
+						}catch(Exception e){}
+						//reinitialized for next process
+						found = false;
+						processInfo = new ProcessInfo();
+					}
+				}
+			}
+		}
+		
+		return processList;
+	}
 	
 	/** 
 	 * Attempt to forcefully kill a given process by name or PID. 
@@ -182,7 +371,7 @@ public class GenericProcessMonitor {
 		boolean success = false;
 		boolean run = false;
 		try{
-			cmd = osFamilyName.equals(OS_FAMILY_WINDOWS) ? wincmd : unxcmd;
+			cmd = isWindowsOS() ? wincmd : unxcmd;
 			Process proc = Runtime.getRuntime().exec(cmd);
 			console = getProcessCapture(proc);
 			Thread athread = new Thread(console);
@@ -192,9 +381,13 @@ public class GenericProcessMonitor {
 			run = true;
 		}catch(Exception x){
 			// something else was wrong with the underlying process
-			debug(cmd +", "+ x.getClass().getSimpleName()+": "+ x.getMessage());
+			IndependantLog.error(cmd +", "+ x.getClass().getSimpleName()+": "+ x.getMessage());
 		}
 		if (!run) throw new IOException("ShutdownProcess command did not execute properly using : "+ cmd);
 		return success;
 	 }
+	
+	public static boolean isWindowsOS(){
+		return osFamilyName.equals(OS_FAMILY_WINDOWS);
+	}
 }
