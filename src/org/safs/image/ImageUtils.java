@@ -107,6 +107,7 @@ import sun.util.logging.resources.logging;
  *                                  Add class SubArea: user write string subarea may contain "error", such as "0, 0, 50%, 60%", "0;0;50;90;"
  *                                  these are correct for human-being, but can not be accepted by our program. Use SubArea will reduce error.
  * <br>	DEC 12, 2014	(LeiWang) 	Move filterImage (cover certain area with black) functinality from DCDriverFileCommands to here.
+ * <br> FEB 18, 2016    (Carl Nagle)    Support Comp search of whole screen when WinRec is ImageRect or SearchRect.
  */
 public class ImageUtils {
 
@@ -196,20 +197,20 @@ public class ImageUtils {
 	 */
 	public static final String MOD_IMAGETEXT		= "ImageText";
 	/** 
-	 *  "ImageRect=" or "ImageRectangle=", a new image mode to define a top Window only.
-	 *  For now, it is generated internally by RJ engine side (@see org.safs.rational.CFTIDComponent).
-	 *  
+	 *  "ImageRect=", "SearchRect", "ImageRectangle=", or "SearchRectangle" support a new image mode to define a 
+	 *  top Window only.
+	 *  <p>
 	 *  A traditional IBT-defined top window is like "Image=<path>", then IBT will try to find the location
 	 *  of this top window on the screen. The location is represented by a Rectangle(x,y,width,height).
 	 *  In IBT we call this location as Anchor, from where we will continue to find component location.
-	 *  
+	 *  <p>
 	 *  Now we can profit from a special Engine (ex. RJ) to get the top window object, this object can give us it's
 	 *  location on the screen, then we can create a new RS like "ImageRect=x,y,width,height" and send it back to 
 	 *  IBT (@see org.safs.tools.engines.TIDComponent), IBT can deduce the Anchor from this RS directly.
-	 *  
+	 *  <p>
 	 *  It will be a great complement for a special Engine in case that the engine can't find some components.
 	 *  Take RFT as example, 
-	 *  
+	 *  <p><pre>
 	 *   Examples:
 	 *   Recognition Strings:
 	 *   topWin="Type=JavaWindow;Caption={Swing*}"
@@ -225,12 +226,17 @@ public class ImageUtils {
 	 *   	record to IBT.
 	 *   3. IBT will parse RS "ImageRect=x,y,w,h" and get the Anchor, and it will find the component location
 	 *   	within that Anchor, and perform the action Click on that location.
-	 *   
+	 *   </pre><p>
 	 *   If this feature is used with feature "ImageText=", that will be great. We don't need to store ANY one
 	 *   image.
+	 *   <p>
+	 *   We can also support this just by allowing an IBT Window Recognition string in the appmap to contain ImageRect 
+	 *   or SearchRect recognition information without specifying any real images.
 	 */	
 	public static final String MOD_IMAGE_RECT		= "ImageRect";
 	public static final String MOD_IMAGE_RECTANGLE	= "ImageRectangle";
+	public static final String MOD_SEARCH_RECT		= "SearchRect";
+	public static final String MOD_SEARCH_RECTANGLE	= "SearchRectangle";
 
 	private static FileFilter imageFileFilter = null;
 	static Toolkit toolkit = null;
@@ -1948,14 +1954,19 @@ outer:  for(screeny = starty; (screeny<imageMaxScreenY && !matched) ;screeny++){
 		}else if (imagetype.equalsIgnoreCase(MOD_IMAGE_RECT)){
 			return modifier.equalsIgnoreCase(MOD_IMAGE_RECT) |
 			       modifier.equalsIgnoreCase(MOD_IMAGE_RECTANGLE);
+
+		}else if (imagetype.equalsIgnoreCase(MOD_SEARCH_RECT)){
+			return modifier.equalsIgnoreCase(MOD_SEARCH_RECT) |
+			       modifier.equalsIgnoreCase(MOD_SEARCH_RECTANGLE);
 		}
 		return false;
 	}
 	
 	/**
-	 * Attempt to extract the Image=path; portion of an Image-Based Testing recognition string.
+	 * Attempt to extract the Image=path; portion of an Image-Based Testing recognition string.<br>  
+	 * This can also be an ImageRect or SearchRect "path".
 	 *  
-	 * @param imagex should be either MOD_IMAGE, MOD_IMAGEW, MOD_IMAGEH, or MOD_IMAGE_RECT
+	 * @param imagex should be either MOD_IMAGE, MOD_IMAGEW, MOD_IMAGEH, MOD_IMAGE_RECT, MODE_SEARCH_RECT
 	 * @param recognition String [] of recognition modifiers.  should not be null;
 	 * @return path found or null. path.length() will be > 0 or we will return null.
 	 */
@@ -2595,7 +2606,10 @@ outer:  for(screeny = starty; (screeny<imageMaxScreenY && !matched) ;screeny++){
 		return result;
 	}
 	
-	static final String[] _imagerec = {"image=",";hotspot=",";hs=",";searchrect=",
+	static final String[] _imagerec_alone={"image=", "imagerect=","imagerectangle=",
+		                                    "searchrect=", "searchrectangle="};
+	
+	static final String[] _imagerec = {";hotspot=",";hs=",";searchrect=",
 								      ";sr=",";imager=",";imagew=",";imageb=",";imageh=","imagetext=",
 								      ";imageright=",";imagewidth=",";imagebottom=",";imageheight=",
 								      "imagerect=","imagerectangle="};	
@@ -2607,8 +2621,11 @@ outer:  for(screeny = starty; (screeny<imageMaxScreenY && !matched) ;screeny++){
 	public static boolean isImageBasedRecognition(String recognition){
 		try{
 			String lcrec = recognition.toLowerCase();
-			if(lcrec.startsWith(_imagerec[0])) return true;
-			for(int i = 1; i < _imagerec.length;i++){
+			
+			for(int i=0; i < _imagerec_alone.length; i++){
+				if(lcrec.startsWith(_imagerec_alone[i])) return true;
+			}			
+			for(int i=0; i < _imagerec.length;i++){
 				if(lcrec.indexOf(_imagerec[i]) > -1) return true;
 			}
 		}catch(Exception x) {}
@@ -2939,7 +2956,7 @@ outer:  for(screeny = starty; (screeny<imageMaxScreenY && !matched) ;screeny++){
 	 * Window:Comp app map recognition strings or null.
 	 * @throws IOException if we cannot open or read specified files
 	 * @throws AWTException if we cannot use the java.awt.Robot
-	 * @throws SAFSException if we cannot extract get data from TestRecordHelper or STAF
+	 * @throws SAFSException if we cannot extract valid data from TestRecordHelper or STAF
 	 */
 	public static Rectangle findComponentRectangle(TestRecordHelper trd, long timeout)
 							throws IOException, AWTException, SAFSException
@@ -2954,29 +2971,57 @@ outer:  for(screeny = starty; (screeny<imageMaxScreenY && !matched) ;screeny++){
 		String compname = trd.getCompName();
 		String mapname = trd.getAppMapName();
         String winrec = trd.getWindowGuiId();
+        
+        
         if (winrec==null) {
         	winrec = staf.getAppMapItem(mapname, winname, winname);
         	if(winrec!=null)trd.setWindowGuiId(winrec);
         }
-        if (winrec==null) throw new SAFSException("WindowGUIID"); // errors and status already handled
+
+        // TODO Carl Nagle support CompRec is Whole Screen search
         String winimagetype = MOD_IMAGE;
-        String[] winmodifiers = winrec.split(MOD_SEP);        
-        String winimagepath = extractImagePath(MOD_IMAGE, winmodifiers);
+        String[] winmodifiers = null;;        
+        String winimagepath = null;
         String winimagerectangle = null;
         int winnthindex = 0;
         
-        if(winimagepath==null){
-        	//We may use ImageRect= to supply the top win's rectangle directly
-        	winimagerectangle = extractImagePath(ImageUtils.MOD_IMAGE_RECT,winmodifiers);
-        	Log.debug(debugmsg+" Got window image rectangle "+winimagerectangle);
-        	if(winimagerectangle==null) return null;
-        	winimagetype = MOD_IMAGE_RECT;
-        }else{
-        	//Index= only applicable for Images, not ImageRect
-            winnthindex = USE_PER_IMAGE_MODIFIERS ?
-            		      extractImageIndex(MOD_IMAGE, winmodifiers):
-            		      extractImageIndex(winmodifiers); // will be > 0
+        boolean skipWinImageSearch = (winrec == null);
+        
+        //if (winrec==null) throw new SAFSException("WindowGUIID"); // errors and status already handled
+        if (!skipWinImageSearch){
+        	winmodifiers = winrec.split(MOD_SEP);        
+        	winimagepath = extractImagePath(MOD_IMAGE, winmodifiers);
+            
+        	// if no valid Image specified, check for a win search rectangle instead.
+        	if(winimagepath==null){
+            	//We may use ImageRect= or SearchRect= to supply the top win's rectangle directly
+            	winimagerectangle = extractImagePath(ImageUtils.MOD_IMAGE_RECT,winmodifiers);
+            	if(winimagerectangle==null) 
+            		winimagerectangle = extractImagePath(ImageUtils.MOD_IMAGE_RECTANGLE,winmodifiers);            	
+            	
+            	if(winimagerectangle==null) {
+                	winimagerectangle = extractImagePath(ImageUtils.MOD_SEARCH_RECT,winmodifiers);
+            		if(winimagerectangle == null)
+                    	winimagerectangle = extractImagePath(ImageUtils.MOD_SEARCH_RECTANGLE,winmodifiers);
+            		if (winimagerectangle == null) {
+                    	Log.debug(debugmsg+" Valid window image/rectangle could not be deduced from Window Recognition: "+ winrec);
+            			throw new SAFSException("WindowGUIID/Recognition");
+            		}
+            	}
+        		winimagetype = MOD_IMAGE_RECT;
+            	Log.debug(debugmsg+" Got window image rectangle "+winimagerectangle);
+            }else{
+            	//Index= only applicable for Images, not ImageRect
+                winnthindex = USE_PER_IMAGE_MODIFIERS ?
+                		      extractImageIndex(MOD_IMAGE, winmodifiers):
+                		      extractImageIndex(winmodifiers); // will be > 0
+            }
+        }else{ // need to default winimagerectangle as whole screen
+    		winimagetype = MOD_IMAGE_RECT;
+    		winmodifiers = new String[0]; // cannot be null when seeking winsearchRec below
+        	Log.debug(debugmsg+" Forcing window image rectangle to be entire screen.");
         }
+        
 
         Rectangle winsearchRec = extractSearchRect(winimagetype, winmodifiers); // can be null
         Log.info("IU Win Image SearchRec:"+ winsearchRec);
