@@ -8,7 +8,8 @@
 <small>Originated: Sept 09, 2008<br/>
 Updated: Oct 27, 2010 -- Update on OCR and PerImageModifiers.<br/>
 Updated: Dec 13, 2013 -- Update on new Fuzzy Matching.<br/>
-<p>
+Updated: Feb 19, 2016 -- Update on Whole Screen ImageRect and SearchRect.<br/>
+<hr>
 Contents: <a href="#walkthru">Walk-Thru</a>, <a href="#syntax">Syntax</a>, <a href="#perimagemodifiers">PerImageModifiers</a>, <a href="#images">Images</a>, <a href="#fuzzymatching">FuzzyMatching</a>, <a href="#commands">Commands</a>, <a href="#more">more...</a>
 </small>
 <p>
@@ -241,6 +242,54 @@ Modified rectangle for the component search is: <b>x=250, y=195, w=160, h=330</b
 <p>
 Notice how the LeftSideItem will be sought to the left of the original "window" and not inside it.
 <p>
+
+
+<dt>
+<h2>Whole Screen Child Searches</h2>
+<p><dd>
+It is now possible to search for "child" component images without specifying a parent "window" anchor.
+Instead, the Window item should be specified as a user-defined search rectangle--which can be the whole screen or any subarea of the screen.
+<p>
+The Window item mapping specifying a search rectangle can use any of the following equivalents:
+<p><ul>
+    <li><b>SearchRect</b>=
+    <li>SearchRectangle=
+    <li><b>ImageRect</b>=
+    <li>ImageRectangle=
+</ul>
+<p>
+Sample: <p><ul><pre>
+<b>[IExplorer]</b>
+IExplorer="SearchRect=0,0,1024,768"       or
+IExplorer="SearchRectangle=0,0,1024,768"  or
+IExplorer="ImageRect=0,0,1024,768"
+</pre><p>
+</ul>
+<p>
+The X, Y, W, and H entries can optionally be specified as a percentage of the screen:
+<p>
+Sample: <p><ul><pre>
+<b>[IExplorer]</b>
+IExplorer="SearchRect=0,0,50%,25%"       (top-left of screen)
+IExplorer="ImageRect=50%,50%,100%,100%"  (bottom-right of screen)
+IExplorer="ImageRect=0,0,100%,100%"      (the whole screen)
+</pre><p>
+</ul>
+<p>
+A simple example to find target images anywhere on the screen:
+<p><ul><pre>
+<b>[AWindow]</b>
+AWindow="SearchRect=0,0,100%,100%"
+AnImage="Image=&lt;imagePath>"
+AnotherImage="Image=&lt;imagePath>"
+AComponent="Image=&lt;imagePath>"
+AnotherComponent="Image=&lt;imagePath>"
+</pre><p>
+</ul>
+<p>
+
+
+
 <dt>
 <hr><a name="perimagemodifiers"/>
 <small><a href="#top">Top</a>, <a href="#walkthru">Walk-Thru</a>, <a href="#syntax">Syntax</a>, <a href="#images">Images</a>, <a href="#fuzzymatching">FuzzyMatching</a>, <a href="#commands">Commands</a>, <a href="#more">more...</a></small>
