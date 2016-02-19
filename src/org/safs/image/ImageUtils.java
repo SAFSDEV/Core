@@ -57,6 +57,7 @@ import org.safs.SAFSException;
 import org.safs.STAFHelper;
 import org.safs.StringUtils;
 import org.safs.TestRecordHelper;
+import org.safs.robot.Robot;
 import org.safs.text.FAILStrings;
 import org.safs.tools.CaseInsensitiveFile;
 import org.safs.tools.ocr.OCREngine;
@@ -2978,17 +2979,14 @@ outer:  for(screeny = starty; (screeny<imageMaxScreenY && !matched) ;screeny++){
         	if(winrec!=null)trd.setWindowGuiId(winrec);
         }
 
-        // TODO Carl Nagle support CompRec is Whole Screen search
+        // support CompRec is Whole Screen search
         String winimagetype = MOD_IMAGE;
         String[] winmodifiers = null;;        
         String winimagepath = null;
         String winimagerectangle = null;
         int winnthindex = 0;
         
-        boolean skipWinImageSearch = (winrec == null);
-        
-        //if (winrec==null) throw new SAFSException("WindowGUIID"); // errors and status already handled
-        if (!skipWinImageSearch){
+        if (!(winrec==null)){
         	winmodifiers = winrec.split(MOD_SEP);        
         	winimagepath = extractImagePath(MOD_IMAGE, winmodifiers);
             
@@ -3018,12 +3016,21 @@ outer:  for(screeny = starty; (screeny<imageMaxScreenY && !matched) ;screeny++){
             }
         }else{ // need to default winimagerectangle as whole screen
     		winimagetype = MOD_IMAGE_RECT;
-    		winmodifiers = new String[0]; // cannot be null when seeking winsearchRec below
+    		winimagerectangle="0,0,"+ Robot.SCREENSZIE.width +
+    				          ","   + Robot.SCREENSZIE.height;
+    		winmodifiers = new String[]{"ImageRect="+winimagerectangle}; // cannot be null when seeking winsearchRec below
         	Log.debug(debugmsg+" Forcing window image rectangle to be entire screen.");
         }
         
-
-        Rectangle winsearchRec = extractSearchRect(winimagetype, winmodifiers); // can be null
+        // support % of screen
+        if(winimagerectangle != null && (winimagerectangle.contains("%"))){
+    		Rectangle sub = getSubAreaRectangle(new Rectangle(0,0,Robot.SCREENSZIE.width,Robot.SCREENSZIE.height), 
+    				                            winimagerectangle);    		
+    		winimagerectangle= sub.x+","+ sub.y +","+ sub.width +","+ sub.height;
+    		winmodifiers = new String[]{"ImageRect="+winimagerectangle}; // cannot be null when seeking winsearchRec below
+        }
+        
+        Rectangle winsearchRec = extractSearchRect(winimagetype, winmodifiers); // result can be null
         Log.info("IU Win Image SearchRec:"+ winsearchRec);
         
         Rectangle anchor = null;
