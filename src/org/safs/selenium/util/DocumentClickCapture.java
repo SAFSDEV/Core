@@ -12,10 +12,10 @@ package org.safs.selenium.util;
  * JUN 04, 2015    (LeiWang) Modify run(): if the target webelement is stale, we consider click as success.
  * JUN 25, 2015    (LeiWang) Modify onEventFired(): ignore event's information to save time.
  * NOV 18, 2015    (LeiWang) Provide a way to disable the DocumentClickCapture.
+ * FEB 22, 2016    (LeiWang) Modify to avoid setting the click listener the second time if the first listener is consumed.
  */
 import java.util.Date;
 
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.safs.IndependantLog;
 import org.safs.StringUtils;
@@ -176,6 +176,13 @@ public class DocumentClickCapture implements Runnable{
 	private boolean propogate = false;
 	private boolean notListening = true;
 	
+	/**
+	 * If {@link #startListening()} is called, then this field will be set to true so that<br>
+	 * {@link #waitForClick(long)} will not call {@link #startListeningInternal()} to start<br>
+	 * a new listener.<br>
+	 */
+	private boolean listenerStartedFromOutside = false;
+	
 	/** 
 	 * The element is expected to receive the click event.<br>
 	 * If this field is null, the DOM's document is the receiver.<br>
@@ -294,14 +301,50 @@ public class DocumentClickCapture implements Runnable{
 	}
 	
 	/**
+	 * Inject the Document level event listeners if they are not already injected.<br>
+	 * Does nothing if the listeners are already injected.<br>
+	 * 
+	 * Set {@link #listenerStartedFromOutside} to true so that {@link #waitForClick(long)}<br>
+	 * will not call {@link #startListeningInternal()} to start the listener again. The purpose is<br>
+	 * to avoid the situation below:<br>
+	 * 
+	 * <p><pre><code>
+	 * DocumentClickCapture listener = new DocumentClickCapture();
+	 * try{
+	 * 
+	 *     //Start the listener
+	 *     listener.startListening();
+	 *     
+	 *     //do click action;
+	 *     //This click happens very quickly, and the listener detects it and resets 'notListening' to true!!!
+	 *     
+	 *     MouseEvent event = listener.waitForClick(timeout_in_seconds);
+	 *     //as 'notListening' is true, waitForClick will start a the listener again, but it 
+	 *     //will FAIL to detect 'click' action, which has already happened.
+	 *     
+	 * }catch(Exception x){
+	 *     // handle them here
+	 * }
+	 * </code></pre>
+	 * 
+	 * @throws SeleniumPlusException
+	 * @see {@link #startListeningInternal()}
+	 * @see #waitForClick(long)
+	 */
+	public void startListening()throws SeleniumPlusException{
+		listenerStartedFromOutside = true;
+		startListeningInternal();
+	}
+	
+	/**
 	 * Inject the Document level event listeners if they are not already injected.
 	 * Does nothing if the listeners are already injected.
 	 * @param secondsTimeout
 	 * @throws SeleniumPlusException
 	 * @see #addEventListeners()
 	 */
-	public void startListening()throws SeleniumPlusException{
-		String debugmsg = "DocumentClickCapture.startListening ";
+	private void startListeningInternal()throws SeleniumPlusException{
+		String debugmsg = "DocumentClickCapture.startListeningInternal ";
 		
 		if(!enabled){
 			IndependantLog.debug(debugmsg+" DocumentClickCapture has been disabled.");
@@ -326,6 +369,7 @@ public class DocumentClickCapture implements Runnable{
 	 */
 	public void stopListening(){
     	IndependantLog.info("DocumentClickCapture.stopListening attempting to stop Listeners.");
+    	listenerStartedFromOutside = false;
 		setRunning(false);
 	}
 	
@@ -336,7 +380,7 @@ public class DocumentClickCapture implements Runnable{
 	 * @throws InterruptedException if timeout has been reached.
 	 * @throws IllegalArgumentException if secondsTimeout is < 1.
 	 * @throws SeleniumPlusException if we could not add or remove eventListeners in the browser.
-	 * @see #startListening(long) 
+	 * @see #startListeningInternal() 
 	 */
 	public MouseEvent waitForClick(long secondsTimeout)throws IllegalArgumentException, 
 	                                                          InterruptedException,
@@ -349,7 +393,8 @@ public class DocumentClickCapture implements Runnable{
 		}
 		
 		if(secondsTimeout < 1) throw new IllegalArgumentException(debugmsg +"secondsTimeout must be greater than 0.");
-		startListening();
+		if(!listenerStartedFromOutside) startListeningInternal();
+		
 		long curTime = System.currentTimeMillis();
 		long endTime = curTime + (1000*secondsTimeout);
 		IndependantLog.info(debugmsg+" waiting for event fired signal.");
