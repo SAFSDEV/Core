@@ -25,6 +25,8 @@ import org.safs.tools.stringutils.StringUtilities;
  *  <br>   Jun 12, 2014    (sbjlwa) Initial release.
  *  <br>   Nov 05, 2014    (sbjlwa) Modify refresh(): if the 'id' is not null and we cannot get object by id, then stop searching.
  *                                                    if we cannot get fresh-webelement, we will not update fields like id, tagname etc.
+ *  <br>   FEB 25, 2016    (SBJLWA) Modify refresh(): log a warning message instead of throwing out an Exception if we cannot get webelement by id.
+ *                                  Modify searchWebElement(): Use WebDriver as SearchContext to find the object, if it cannot be found with given SearchContext.
  */
 public class DefaultRefreshable implements IRefreshable {
 	
@@ -289,8 +291,9 @@ public class DefaultRefreshable implements IRefreshable {
 				if(freshWebElement==null && getId()!=null && !getId().trim().isEmpty()){
 					recognitionString=RS.id(getId());
 					freshWebElement = searchWebElement(getSearchContext(), recognitionString);
-					//if we cannot find webelement by id, NO need to try other ways, just waste time.
-					if(freshWebElement==null) throw new SeleniumPlusException("cannot find webelement by id '"+getId()+"'");
+					//In the real test (S1234426), the webelement's id will change at runtime, no so reliable!
+					//if we cannot find webelement by id, just log a warning message.
+					if(freshWebElement==null) IndependantLog.warn(debugmsg+"cannot find webelement by id '"+getId()+"'");
 				}
 
 				if(freshWebElement==null && getCssClass()!=null){
@@ -319,7 +322,8 @@ public class DefaultRefreshable implements IRefreshable {
 		
 		try{
 			if(sc!=null) temp = SearchObject.getObject(sc, recognitionString);
-			else         temp = SearchObject.getObject(recognitionString);
+			//Use WebDriver as SearchContext to find the object, if it cannot be found with given SearchContext
+			if(temp==null) temp = SearchObject.getObject(recognitionString);
 		}catch(Throwable th){
 			IndependantLog.debug(debugmsg+"Cannot get webelement by rs "+recognitionString, th);
 		}
