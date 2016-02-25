@@ -16,6 +16,7 @@
  *   <br>   OCT 30, 2015    (Lei Wang) Modify exist(): highlight component for keyword GUIDESOEXIST etc.
  *   <br>   NOV 26, 2015    (Lei Wang) Remove checkForCoord() and _lookupAppMapCoordReference(), their functionality will be provided by super class.
  *   <br>   NOV 26, 2015    (Lei Wang) Modify method getComponentRectangle(): include the frame's location for a webelement.
+ *   <br>   FEB 25, 2016    (Lei Wang) Modify localProcess(): Set 'SearchContext' and 'RecognitionString' to libComponent for refreshing.
  */
 package org.safs.selenium.webdriver;
 
@@ -245,7 +246,7 @@ public class CFComponent extends ComponentFunction{
 			WDLibrary.clearHighlight();
 		}
 	}
-
+	
 	/**
 	 * Handle the cache for component-library.<br>
 	 * In this class CFComponent, component-library is not required for some keywords like Maximize, Minimize etc.<br>
@@ -276,6 +277,12 @@ public class CFComponent extends ComponentFunction{
 				if(!libComponentCache.containsKey(compObject)){
 					IndependantLog.debug("CFComponent.localProcess contains NO CACHED library for this WebElement.");
 					libComponent = newLibComponent(compObject);
+					//Set the winObject as search context and compRS as 'recognition string' for refreshing
+					libComponent.setSearchContext(winObject);
+					String compRS = testRecordData.getCompGuiId();
+					if(compRS!=null) libComponent.setPossibleRecognitionStrings(new String[]{compRS});
+					else IndependantLog.warn(debugmsg+" Recognition String for "+compName+" is null. It cannot be used to refresh webelement!");
+					
 					WDLibrary.checkNotNull(libComponent);
 					libComponentCache.put(compObject, libComponent);
 				}else{
