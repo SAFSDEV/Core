@@ -245,6 +245,17 @@ public class DocumentClickCapture implements Runnable{
 	}
 	
 	/**
+	 * Enable or disable the ClickCapture.<br>
+	 * It must be called before calling {@link #startListening()}.<br>
+	 * @param enabled
+	 * @see #startListening()
+	 * @see #waitForClick(long)
+	 */
+	public void setEnabled(boolean enabled){
+		this.enabled = enabled;
+	}
+	
+	/**
 	 * History:
 	 * <pre>
 	 * Jun 25, 2015 (LeiWang) Retrieve event's information will spend some time, if the event happens on a remote machine, it will take much longer.
