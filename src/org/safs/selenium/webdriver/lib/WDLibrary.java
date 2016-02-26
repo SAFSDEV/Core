@@ -46,6 +46,7 @@ package org.safs.selenium.webdriver.lib;
 *  <br>   DEC 24, 2015    (SBJLWA) Add methods to get browser's name, version, and selenium-server's version etc.
 *                                  Add method checkKnownIssue().
 *  <br>   FEB 05, 2016    (SBJLWA) Add method killChromeDriver().
+*  <br>   FEB 26, 2016    (SBJLWA) Modify cilck(), doubleClick(): if the offset is out of element's boundary, disable the click listener.
 */
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -267,10 +268,48 @@ public class WDLibrary extends SearchObject {
 	}
 
 	/**
+	 * Check if the point is inside of the boundary of WebElement.<br>
+	 * @param element	WebElement,	The element to get boundary to check with. 
+	 * @param p			Point,	The point to check.
+	 * @return boolean, true if the point is inside of the boundary of WebElement
+	 */
+	public static boolean inside(WebElement element, Point p){
+		if(p==null) return true;
+		
+		Dimension dimension = element.getSize();
+		Rectangle rect = new Rectangle(0, 0, dimension.width, dimension.height);
+		
+		return rect.contains(p);
+	}
+	
+	/**
+	 * Disable the DocumentClickCapture, if click offset is outside of the WebElement's boundary.<br>
+	 * @param clickable	WebElement, The element to click.
+	 * @param offset	Point, The offset relative to the WebElement to click at.
+	 * @param listener	DocumentClickCapture, The click listener to capture the click event.
+	 */
+	private static void checkOffset(WebElement clickable, Point offset, DocumentClickCapture listener){
+		String debugmsg = StringUtils.debugmsg(false);
+		
+		if(clickable==null || offset==null || listener==null){
+			//We have nothing to check, or have no listener to disable
+			return;
+		}
+		
+		if(!inside(clickable, offset)){
+			IndependantLog.warn(debugmsg+"Disable the DocumentClickCapture, the click point "+offset+" is outside of the WebElement "+clickable.getSize());
+			listener.setEnabled(false);
+		}
+	}
+	
+	/**
 	 * Click the WebElement at a certain coordination with a special key pressed.<br>
 	 * Firstly it will try to get webelement's location and use Robot to click. At the same<br>
 	 * time, it will listen to a 'javascript mouse down' event to find out if the click really<br>
 	 * happened; If not, it will try to use Selenium's API to do the work.<br>
+	 * If the click point is outside of the boundary of the WebElement, which means we are going<br>
+	 * to click on the sibling component. At this situation, our click-listener will never receive<br>
+	 * the click event, we will turn off the click-listener.<br>
 	 *
 	 * @param clickable 	WebElement, the WebElement to click on
 	 * @param offset		Point, the coordination relative to this WebElement to click at.<br>
@@ -289,10 +328,13 @@ public class WDLibrary extends SearchObject {
 		RemoteDriver rd = (wd instanceof RemoteDriver)? (RemoteDriver) wd : null;
 		try{new Actions(wd).moveToElement(clickable).perform();}
 		catch(Throwable t){
-			IndependantLog.error("Ignoring Selenium Robot Click 'moveToElement' action failure caused by "+ t.getClass().getName());
+			IndependantLog.error(debugmsg+"Ignoring Selenium Robot Click 'moveToElement' action failure caused by "+ t.getClass().getName());
 		}
-		DocumentClickCapture listener = new DocumentClickCapture(true, clickable);
+		
 		MouseEvent event = null;
+		DocumentClickCapture listener = new DocumentClickCapture(true, clickable);
+		checkOffset(clickable, offset, listener);
+		
 		try {
 			//2. Perform the click action by Robot
 			Point location = getScreenLocation(clickable);
@@ -414,6 +456,9 @@ public class WDLibrary extends SearchObject {
 	 * Firstly it will try to get webelement's location and use Robot to double click. At the same<br>
 	 * time, it will listen to a 'javascript mouse down' event to find out if the double click really<br>
 	 * happened; If not, it will try to use Selenium's API to do the work.<br>
+	 * If the click point is outside of the boundary of the WebElement, which means we are going<br>
+	 * to click on the sibling component. At this situation, our click-listener will never receive<br>
+	 * the click event, we will turn off the click-listener.<br>
 	 *
 	 * @param clickable 	WebElement, the WebElement to click on
 	 * @param offset		Point, the coordination relative to this WebElement to click at.<br>
@@ -428,8 +473,11 @@ public class WDLibrary extends SearchObject {
 		String debugmsg = StringUtils.debugmsg(WDLibrary.class, "doubleClick");
 
 		checkBeforeOperation(clickable, true);
-		DocumentClickCapture listener = new DocumentClickCapture(true, clickable);
+		
 		MouseEvent event = null;
+		DocumentClickCapture listener = new DocumentClickCapture(true, clickable);
+		checkOffset(clickable, offset, listener);
+		
 		try {
 			//2. Perform the click action by Robot
 			Point location = getScreenLocation(clickable);
