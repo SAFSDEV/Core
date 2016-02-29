@@ -13,6 +13,7 @@ package org.safs.selenium.util;
  * JUN 25, 2015    (LeiWang) Modify onEventFired(): ignore event's information to save time.
  * NOV 18, 2015    (LeiWang) Provide a way to disable the DocumentClickCapture.
  * FEB 22, 2016    (LeiWang) Modify to avoid setting the click listener the second time if the first listener is consumed.
+ * FEB 29, 2016    (LeiWang) Modify to provide the ability to force receiving click-event by html-document.
  */
 import java.util.Date;
 
@@ -121,6 +122,16 @@ public class DocumentClickCapture implements Runnable{
 	 * @see #waitForClick(long)
 	 */
 	private boolean enabled = true;
+	
+	/**
+	 * Normally the click-action will happen on a specific component, so our click-listener will capture only the click-event on that component.<br>
+	 * But sometimes, it is intentional that we want to click something that is just above, or below, or just outside the bounds of the component we have found.<br>
+	 * With this situation, we could never receive the click-event by the specific component, so we will enlarge the listening-area, that is we will<br>
+	 * use the document as the click-event-receiver.<br>
+	 * 
+	 * <b>Note:</b> This should be set before calling {@link #startListeningInternal()} or {@link #startListening()}.
+	 */
+	private boolean enlargeListeningArea = false;
 	
 	/**
 	 * After event happened, we can retrieve event's information  and assign them to {@link #mouseEvent}.<br>
@@ -255,6 +266,26 @@ public class DocumentClickCapture implements Runnable{
 		this.enabled = enabled;
 	}
 	
+	/**
+	 * If true, we will use the document as the click-event-receiver.<br>
+	 * If false, we will use the specific component as the click-event-receiver.<br>
+	 * @return boolean
+	 * @see #enlargeListeningArea
+	 */
+	public boolean isEnlargeListeningArea() {
+		return enlargeListeningArea;
+	}
+
+	/**
+	 * This should be called before calling {@link #startListening()} or {@link #startListeningInternal()}, if we want<br>
+	 * {@link #enlargeListeningArea} works as expected.<br>
+	 * @param enlargeListeningArea
+	 * @see #enlargeListeningArea
+	 */
+	public void setEnlargeListeningArea(boolean enlargeListeningArea) {
+		this.enlargeListeningArea = enlargeListeningArea;
+	}
+
 	/**
 	 * History:
 	 * <pre>
@@ -648,11 +679,15 @@ public class DocumentClickCapture implements Runnable{
 		
 		scriptCommand.append("function _addEventListeners(domelement){\n");
 		scriptCommand.append("  var target=null;\n");
-		scriptCommand.append("  if(domelement!=undefined){\n");
-		scriptCommand.append("    target = domelement;\n");
-		scriptCommand.append("  }else{\n");
-		scriptCommand.append("    target = window.document;\n");
-		scriptCommand.append("  }\n");
+		if(enlargeListeningArea){
+			scriptCommand.append("  target = window.document;\n");			
+		}else{
+			scriptCommand.append("  if(domelement!=undefined){\n");
+			scriptCommand.append("    target = domelement;\n");
+			scriptCommand.append("  }else{\n");
+			scriptCommand.append("    target = window.document;\n");
+			scriptCommand.append("  }\n");			
+		}
 		scriptCommand.append("  try{target.addEventListener('mouseup', window."+listenerFunction+", true);}catch(err){}\n");
 		scriptCommand.append("  try{target.addEventListener('mousedown', window."+listenerFunction+", true);}catch(err){}\n");
 		scriptCommand.append("  try{target.addEventListener('click', window."+listenerFunction+", true);}catch(err){}\n");
@@ -670,11 +705,15 @@ public class DocumentClickCapture implements Runnable{
 		
 		scriptCommand.append("function _removeEventListeners(domelement){\n");
 		scriptCommand.append("  var target=null;\n");
-		scriptCommand.append("  if(domelement!=undefined){\n");
-		scriptCommand.append("    target = domelement;\n");
-		scriptCommand.append("  }else{\n");
-		scriptCommand.append("    target = window.document;\n");
-		scriptCommand.append("  }\n");
+		if(enlargeListeningArea){
+			scriptCommand.append("  target = window.document;\n");
+		}else{
+			scriptCommand.append("  if(domelement!=undefined){\n");
+			scriptCommand.append("    target = domelement;\n");
+			scriptCommand.append("  }else{\n");
+			scriptCommand.append("    target = window.document;\n");
+			scriptCommand.append("  }\n");
+		}
 		scriptCommand.append("  window.listenerError='';\n");
 		scriptCommand.append("  try{target.removeEventListener('mouseup', window."+listenerFunction+", true);}catch(err){window."+ listenerError +" += err;}\n");
 		scriptCommand.append("  try{target.removeEventListener('mousedown', window."+listenerFunction+", true);}catch(err){window."+ listenerError +" += err;}\n");
