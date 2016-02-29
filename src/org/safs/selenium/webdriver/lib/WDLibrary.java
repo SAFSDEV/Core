@@ -47,6 +47,7 @@ package org.safs.selenium.webdriver.lib;
 *                                  Add method checkKnownIssue().
 *  <br>   FEB 05, 2016    (Lei Wang) Add method killChromeDriver().
 *  <br>   FEB 26, 2016    (Lei Wang) Modify cilck(), doubleClick(): if the offset is out of element's boundary, disable the click listener.
+*  <br>   FEB 29, 2016    (Lei Wang) Modify checkOffset(): if the offset is out of element's boundary, use the whole document as click event receiver.
 */
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -283,7 +284,7 @@ public class WDLibrary extends SearchObject {
 	}
 	
 	/**
-	 * Disable the DocumentClickCapture, if click offset is outside of the WebElement's boundary.<br>
+	 * Enlarge the listening area of DocumentClickCapture, if click offset is outside of the WebElement's boundary.<br>
 	 * @param clickable	WebElement, The element to click.
 	 * @param offset	Point, The offset relative to the WebElement to click at.
 	 * @param listener	DocumentClickCapture, The click listener to capture the click event.
@@ -297,8 +298,8 @@ public class WDLibrary extends SearchObject {
 		}
 		
 		if(!inside(clickable, offset)){
-			IndependantLog.warn(debugmsg+"Disable the DocumentClickCapture, the click point "+offset+" is outside of the WebElement "+clickable.getSize());
-			listener.setEnabled(false);
+			IndependantLog.warn(debugmsg+"Enlarge the listening area of DocumentClickCapture, the click point "+offset+" is outside of the WebElement "+clickable.getSize());
+			listener.setEnlargeListeningArea(true);
 		}
 	}
 	
