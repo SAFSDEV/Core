@@ -48,6 +48,9 @@ package org.safs.selenium.webdriver.lib;
 *  <br>   FEB 05, 2016    (Lei Wang) Add method killChromeDriver().
 *  <br>   FEB 26, 2016    (Lei Wang) Modify cilck(), doubleClick(): if the offset is out of element's boundary, disable the click listener.
 *  <br>   FEB 29, 2016    (Lei Wang) Modify checkOffset(): if the offset is out of element's boundary, use the whole document as click event receiver.
+*  <br>   MAR 02, 2016    (Lei Wang) Add clickUnverified(), closeAlert().
+*                                  Add class RBT: To encapsulate the local Robot and Robot RMI agent.
+*                                  Modify click() and doubleClick(): use RBT to do the click action.
 */
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -76,6 +79,7 @@ import javax.imageio.ImageIO;
 
 import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
@@ -96,6 +100,8 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.openqa.selenium.safari.SafariDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.safs.IndependantLog;
 import org.safs.Processor;
 import org.safs.SAFSException;
@@ -345,23 +351,8 @@ public class WDLibrary extends SearchObject {
 				location.translate(d.width/2, d.height/2);
 			}
 			listener.startListening();
-			if(rd==null || rd.isLocalServer()){
-				if(specialKey==null){
-					Robot.click(location.x, location.y, mouseButtonNumber, 1);
-				}else{
-					Robot.clickWithKeyPress(location.x, location.y, mouseButtonNumber, toJavaKeyCode(specialKey), 1);
-				}
-			} // handle remote selenium
-			else{
-				if(rd.rmiAgent != null){
-					if(specialKey==null){
-						rd.rmiAgent.remoteClick(location.x, location.y, mouseButtonNumber, 1);
-					}else{
-						rd.rmiAgent.remoteClick(location.x, location.y, toJavaKeyCode(specialKey), 1);
-					}
-				}else
-					throw new ServerException("RMI Agent is not available.");
-			}
+			RBT.click(rd, location, specialKey, mouseButtonNumber, 1);
+			
 			//3. Wait for the 'click' event, check if the 'mousedown' event really happened.
 			// Carl Nagle -- FIREFOX PROBLEM: A link that takes you to a new page (like the Google SignIn link) will
 			// trigger the default action and apparently will NOT allow us to detect the Click occurred.
@@ -464,7 +455,7 @@ public class WDLibrary extends SearchObject {
 	 * @param clickable 	WebElement, the WebElement to click on
 	 * @param offset		Point, the coordination relative to this WebElement to click at.<br>
 	 * 							   if the offset is null, then click at the center.
-	 * @param specialKey	Keys, the special key to presse during the click
+	 * @param specialKey	Keys, the special key to press during the click
 	 * @param mouseButtonNumber int, the mouse-button-number representing right, middle, or left button.
 	 * 								 it can be {@link #MOUSE_BUTTON_LEFT}<br>
 	 * 								 {@link #MOUSE_BUTTON_MIDDLE} and {@link #MOUSE_BUTTON_RIGHT} NOT supported yet.
@@ -485,11 +476,7 @@ public class WDLibrary extends SearchObject {
 			if(offset!=null) location.translate(offset.x, offset.y);
 			else	location.translate(clickable.getSize().width/2, clickable.getSize().height/2);
 			listener.startListening();
-			if(specialKey==null){
-				Robot.click(location.x, location.y, mouseButtonNumber, 2);
-			}else{
-				Robot.clickWithKeyPress(location.x, location.y, mouseButtonNumber, toJavaKeyCode(specialKey), 2);
-			}
+			RBT.click(location, specialKey, mouseButtonNumber, 2);
 
 			//3. Wait for the 'click' event, check if the 'mousedown' event really happened.
 			event = listener.waitForClick(timeoutWaitClick);
@@ -2866,6 +2853,113 @@ public class WDLibrary extends SearchObject {
 	}
 	
 	/**
+	 * Click a component with an offset. This API will not verify that the click does happen.<br>
+	 * If you want to make sure of that, please call {@link #click(WebElement, Point)} instead.<br>
+	 * <br>
+	 * Sometimes we want to click without verification, for example, to show an Alert.<br> 
+	 * With presence of Alert, any call to Selenium API will throw out UnhandledAlertException<br>
+	 * and close the Alert automatically. Our API {@link #click(WebElement, Point)} will call<br>
+	 * Selenium API for verification, so it is unable to open the Alert successfully.<br>  
+	 * 
+	 * @param component WebElement, the component to click
+	 * @param offset Point, the offset (relative to component) to click at
+	 * @return boolean true if succeed.
+	 * @see #click(WebElement, Point)
+	 */
+	public static boolean clickUnverified(WebElement component, Point offset){
+		String debugmsg = StringUtils.debugmsg(false);
+		
+		try {
+			IndependantLog.debug(debugmsg+" click with parameter componet:"+component+", offset:"+offset);
+			//Create a combined actions according to the parameters
+			Actions actions = new Actions(getWebDriver());
+
+			if(offset!=null) actions.moveToElement(component, offset.x, offset.y);
+			else actions.moveToElement(component);
+
+			IndependantLog.debug(debugmsg+" Try Selenium API to click.");
+			actions.click().perform();
+			
+			return true;
+		} catch (Exception e) {
+			IndependantLog.warn(debugmsg+" Failed with Selenium API, met "+StringUtils.debugmsg(e)+". Try Robot click.");
+			
+			try {
+				Point p = WDLibrary.getScreenLocation(component);
+
+				if(offset!=null) p.translate(offset.x, offset.y);
+				else p.translate(component.getSize().width/2, component.getSize().height/2);
+				
+				RBT.click(p, null, WDLibrary.MOUSE_BUTTON_LEFT, 1);
+				
+				return true;
+			} catch (Exception e1) {
+				IndependantLog.error(debugmsg+" Failed with Robot click!");
+			}
+			return false;
+		}
+	}
+	
+	/**
+	 * The timeout in seconds to wait for the alert's presence before closing it.<br>
+	 * The default value is 2 seconds.<br>
+	 */
+	public static int TIMEOUT_FOR_ALERT_PRESENCE_IN_SECONDS = 2;
+	
+	/**
+	 * Close the Alert-Modal-Dialog associated with a certain browser identified by ID.<br>
+	 * It will get the cached webdriver according to the browser's id, and close the 'alert' through that webdriver.<br>
+	 * <b>Note:</b>This API will NOT change the current WebDriver. {@link #getWebDriver()} will still return the same object.<br>
+	 * 
+	 * @param accept boolean, if true then accept (click OK) the alert; otherwise dismiss (click Cancel) the alert.
+	 * @param optionals String
+	 * <ul>
+	 * <b>optionals[0] timeoutWaitAlertPresence</b> int, timeout in seconds to wait for the presence of Alert.
+	 *                                                   If not provided, default is 2 seconds.<br>
+	 * <b>optionals[1] browserID</b> String, the ID to get the browser on which the 'alert' will be closed.
+	 *                                       If not provided, the current browser will be used.<br>
+	 * </ul>
+	 * @throws SeleniumPlusException, if WebDriver cannot be got according to the parameter browserID.<br>
+	 *                                if Alert is not present with timeout.<br>
+	 */
+	public static void closeAlert(boolean accept, String... optionals) throws SeleniumPlusException{
+		String debugmsg = StringUtils.debugmsg(false);
+		String browserID = null;
+		int timeout = TIMEOUT_FOR_ALERT_PRESENCE_IN_SECONDS;
+		
+		if(optionals!=null && optionals.length>0){
+			if(StringUtils.isValid(optionals[0])){
+				try{ timeout = Integer.parseInt(optionals[0]); }catch(NumberFormatException e){ timeout = TIMEOUT_FOR_ALERT_PRESENCE_IN_SECONDS; }
+			}
+			if(optionals.length>1 && StringUtils.isValid(optionals[1])) browserID=optionals[1];
+		}
+		WebDriver webdriver = getWebDriver(browserID);
+
+		if(webdriver==null){
+			throw new SeleniumPlusException("cannot get webdriver according to id '"+browserID+"'",SeleniumPlusException.CODE_OBJECT_IS_NULL);
+		}
+		
+		try{
+			WebDriverWait wait = new WebDriverWait(webdriver, timeout);
+			Alert alert = wait.until(ExpectedConditions.alertIsPresent());
+			
+			if(accept){
+				//clicks on the “Ok” button
+				//webdriver.switchTo().alert().accept();
+				alert.accept();
+			}else{
+				//clicks on the “Cancel” button
+				//webdriver.switchTo().alert().dismiss();
+				alert.dismiss();
+			}
+		}catch(Exception e){
+			String message = "Fail to "+(accept?"accept":"dismiss")+" alert dialog associated with browser '"+browserID+"'";
+			IndependantLog.error(debugmsg+message+" due to "+StringUtils.debugmsg(e));
+			throw new SeleniumPlusException(message);
+		}
+	}
+	
+	/**
 	 * <b>Before running this test, the Selenium Sever should have already started</b> (it can be launched by "java org.safs.selenium.webdriver.lib.RemoteDriver" ).<br>
 	 * 
 	 * @see RemoteDriver#main(String[])
@@ -2962,7 +3056,63 @@ public class WDLibrary extends SearchObject {
 		} catch (SAFSException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * This class represents a Robot, which can do work locally (thru local org.safs.robot.Robot) or remotely (thru a RMI agent).<br>
+	 * 
+	 * @author Lei Wang
+	 * 
+	 */
+	public static class RBT{
+		/**
+		 * Use Robot to click locally or remotely (through RMI).
+		 * Use the current WebDriver as a RemoteDriver to provide an RMI agent.
+		 * 
+		 * @param location	Point, The screen location to click at.
+		 * @param specialKey	Keys, The selenium Keys value, representing the key (such as Ctrl, Alt) pressed during mouse click.
+		 * @param mouseButtonNumber	int, Representing the mouse button to click, such as {@link WDLibrary#MOUSE_BUTTON_LEFT}.
+		 * @param nclicks	int, How many times to click mouse.
+		 * 
+		 * @throws Exception
+		 */
+		protected static void click(Point location, Keys specialKey, int mouseButtonNumber, int nclicks) throws Exception{
+			WebDriver wd = getWebDriver();
+			RemoteDriver rd = (wd instanceof RemoteDriver)? (RemoteDriver) wd : null;
+			click(rd, location, specialKey, mouseButtonNumber, nclicks);
+		}
 		
+		/**
+		 * Use Robot to click locally or remotely (through RMI).
+		 * 
+		 * @param rd	RemoteDriver, The Remote Driver with an RMI agent.
+		 * @param location	Point, The screen location to click at.
+		 * @param specialKey	Keys, The selenium Keys value, representing the key (such as Ctrl, Alt) pressed during mouse click.
+		 * @param mouseButtonNumber	int, Representing the mouse button to click, such as {@link WDLibrary#MOUSE_BUTTON_LEFT}.
+		 * @param nclicks	int, How many times to click mouse.
+		 * 
+		 * @throws Exception
+		 */
+		public static void click(RemoteDriver rd, Point location, Keys specialKey, int mouseButtonNumber, int nclicks) throws Exception{
+			if(rd==null || rd.isLocalServer()){
+				if(specialKey==null){
+					org.safs.robot.Robot.click(location.x, location.y, mouseButtonNumber, nclicks);
+				}else{
+					org.safs.robot.Robot.clickWithKeyPress(location.x, location.y, mouseButtonNumber, toJavaKeyCode(specialKey), nclicks);
+				}
+			} 
+			else{// handle remote selenium
+				if(rd.rmiAgent != null){
+					if(specialKey==null){
+						rd.rmiAgent.remoteClick(location.x, location.y, mouseButtonNumber, nclicks);
+					}else{
+						rd.rmiAgent.remoteClick(location.x, location.y, toJavaKeyCode(specialKey), nclicks);
+					}
+				}else{
+					throw new ServerException("RMI Agent is not available.");
+				}
+			}
+		}
 	}
 	
 	/**
