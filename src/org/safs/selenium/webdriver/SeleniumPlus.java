@@ -53,7 +53,9 @@ package org.safs.selenium.webdriver;
  *  <br>   SEP 07, 2015    (SBJLWA) Add method DragTo(): parameter 'offset' will also support pixel format; 
  *                                                       optional parameter 'FromSubItem' and 'ToSubItem' are not supported yet.
  *  <br>   JAN 07, 2016    (CANAGL) Make System.exit() optional and allowExit=false, by default.
+ *  <br>   MAR 02, 2016    (SBJLWA) Add Misc.AlertAccept(), Misc.AlertDismiss() and ClickUnverified().
  */
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -1598,6 +1600,40 @@ public abstract class SeleniumPlus {
 	 */
 	public static boolean Click(org.safs.model.Component comp, String... params){
 		return action(comp, GenericObjectFunctions.CLICK_KEYWORD, replaceSeparator(params));
+	}
+	
+	/**
+	 * Click on any visible component without verification.<br>
+	 * This API will not guarantee that the click does happen, it simply clicks. If user wants<br>
+	 * to make sure of that, he can call {@link #Click(org.safs.model.Component, String...)} instead.<br>
+	 * <br>
+	 * @param comp -- Component (from App Map) to Click
+	 * @param offset Point, the offset relative to the component to click
+	 * @return true if successfully executed, false otherwise.<p>
+	 * @example	 
+	 * <pre>
+	 * {@code
+	 * 1) boolean success = ClickUnverified(Map.Google.Apps);//Click at the center
+	 * 2) boolean success = ClickUnverified(Map.Google.Apps, new Point("20,20"));//Click at the coordinate (20,20)
+	 * }
+	 * 
+	 * </pre>	 
+	 * @see #Click(org.safs.model.Component, String...)
+	 */
+	public static boolean ClickUnverified(org.safs.model.Component comp, Point offset){
+		boolean success = false;
+		try {
+			WebElement we = getObject(comp);
+			success = WDLibrary.clickUnverified(we, offset);
+		} catch (SeleniumPlusException e) {
+			IndependantLog.error(StringUtils.debugmsg(false)+" failed, due to "+StringUtils.debugmsg(e));
+			success = false;
+		}
+		
+		if(success) Logging.LogTestSuccess("ClickUnverified Succeeded on "+comp.getParentName()+":"+comp.getName()+" at "+offset);
+		else Logging.LogTestFailure("ClickUnverified Failed on "+comp.getParentName()+":"+comp.getName()+" at "+offset);
+		
+		return success;
 	}
 	
 	/**
@@ -7937,6 +7973,70 @@ public abstract class SeleniumPlus {
 				return true;
 			}catch(Exception e){
 				IndependantLog.error(StringUtils.debugmsg(false)+" Fail to Set ClickCapture, due to "+StringUtils.debugmsg(e));
+				return false;
+			}
+		}
+		
+		/**
+		 * Accept (Clicking OK button) the Alert Dialog associated with a browser.<br>
+		 * This command will wait 2 seconds by default for the presence of Alert.<br>
+		 * @param optionals String
+		 * <ul>
+		 * <b>optionals[0] timeoutWaitAlertPresence</b> int, timeout in seconds to wait for the presence of Alert.
+		 *                                                   If not provided, default is 2 seconds.<br>
+		 * <b>optionals[0] browserID</b> String, the ID to get the browser on which the 'alert' will be closed.
+		 *                                       If not provided, the current browser will be used.<br>
+		 * </ul>
+		 * @example
+		 * <pre>
+		 * {@code
+		 * 1) boolean success = AlertAccept();//Close Alert (belongs to current browser) by clicking the OK button
+		 * 2) boolean success = AlertAccept("5");//Close Alert (belongs to current browser) by clicking the OK button, 
+		 *                                       //before that it will wait 5 seconds for the presence of the Alert
+		 * 3) boolean success = AlertAccept("5", "browser-id");//Close Alert (belongs to browser identified by "browser-id") by clicking the OK button, 
+		 *                                                     //before that it will wait 5 seconds for the presence of the Alert
+		 * }
+		 * @see SeleniumPlus#StartWebBrowser(String, String, String...)
+		 */
+		public static boolean AlertAccept(String... optionals){
+			try{
+				WDLibrary.closeAlert(true, optionals);
+				Logging.LogTestSuccess("AlertAccept Succeeded.");
+				return true;
+			}catch(Exception e){
+				Logging.LogTestFailure("AlertAccept Failed.");
+				return false;
+			}
+		}
+		
+		/**
+		 * Dismiss (Clicking Cancel button) the Alert Dialog associated with a browser.<br>
+		 * This command will wait 2 seconds by default for the presence of Alert.<br>
+		 * @param optionals String
+		 * <ul>
+		 * <b>optionals[0] timeoutWaitAlertPresence</b> int, timeout in seconds to wait for the presence of Alert.
+		 *                                                   If not provided, default is 2 seconds.<br>
+		 * <b>optionals[0] browserID</b> String, the ID to get the browser on which the 'alert' will be closed.
+		 *                                       If not provided, the current browser will be used.<br>
+		 * </ul>
+		 * @example
+		 * <pre>
+		 * {@code
+		 * 1) boolean success = AlertAccept();//Close Alert (belongs to current browser) by clicking the Cancel button
+		 * 2) boolean success = AlertAccept("5");//Close Alert (belongs to current browser) by clicking the Cancel button, 
+		 *                                       //before that it will wait 5 seconds for the presence of the Alert
+		 * 3) boolean success = AlertAccept("5", "browser-id");//Close Alert (belongs to browser identified by "browser-id") by clicking the Cancel button, 
+		 *                                                     //before that it will wait 5 seconds for the presence of the Alert
+		 * }
+		 * @see SeleniumPlus#StartWebBrowser(String, String, String...)
+		 */
+		public static boolean AlertDismiss(String... optionals){
+			try{
+				WDLibrary.closeAlert(false, optionals);
+				Logging.LogTestSuccess("AlertDismiss Succeeded.");
+				return true;
+			}catch(Exception e){
+				Logging.LogTestFailure("AlertDismiss Failed.");
 				return false;
 			}
 		}
