@@ -1623,6 +1623,7 @@ public abstract class SeleniumPlus {
 	public static boolean ClickUnverified(org.safs.model.Component comp, Point offset){
 		boolean success = false;
 		try {
+			//TODO we could provide component command 'ClickUnverified' for traditional SAFS users later.
 			WebElement we = getObject(comp);
 			success = WDLibrary.clickUnverified(we, offset);
 		} catch (SeleniumPlusException e) {
@@ -8000,6 +8001,7 @@ public abstract class SeleniumPlus {
 		 */
 		public static boolean AlertAccept(String... optionals){
 			try{
+				//TODO we could provide driver command 'AlertAccept' for traditional SAFS users later.
 				WDLibrary.closeAlert(true, optionals);
 				Logging.LogTestSuccess("AlertAccept Succeeded.");
 				return true;
@@ -8032,6 +8034,7 @@ public abstract class SeleniumPlus {
 		 */
 		public static boolean AlertDismiss(String... optionals){
 			try{
+				//TODO we could provide driver command 'AlertDismiss' for traditional SAFS users later.
 				WDLibrary.closeAlert(false, optionals);
 				Logging.LogTestSuccess("AlertDismiss Succeeded.");
 				return true;
