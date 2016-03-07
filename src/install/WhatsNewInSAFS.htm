@@ -17,7 +17,7 @@
 <div class=b1>
 <center>
 <h1>What's New in SAFS</h1>
-<h2>Updated: 2016.01.28</h2>
+<h2>Updated: 2016.03.07/h2>
 <small>Since:<b> 2016.02.05 </b></small>
 <h2>---  All active <b>"development"</b> is now at <a href="https://github.com/SAFSDEV" target="_blank" title="Link to SAFSDEV Organization on GitHub">SAFSDEV on GitHub</a>  ---</h2>
 <b>(Releases/Updates and other Binaries will be available on both GitHub and SourceForge)</b>
@@ -104,8 +104,8 @@ As you can see below, SAFS is undergoing a very rapid pace of development in man
 
 <div style="display:none">
 
-<!-- This is the piece below to copy and paste for new entries.
-     Don't forget to rename "b1" to "b2" and vice-versa.   -->
+<!-- EDITOR: This is the piece below to copy and paste for new entries.
+     Don't forget to rename "b1" to "b2" on the copy as needed to alternate colored entries.   -->
 
 <tr class=b1>
 <td rowspan=2><!--DATE----><b> </b>
@@ -119,11 +119,143 @@ As you can see below, SAFS is undergoing a very rapid pace of development in man
 <li>
 </ul>
 
+<!-- EDITOR: End of block to copy and edit below. -->
+
 </div>
 
 <table width="100%" align=center border=1 cellpadding=4 rules=rows>
 
 <th>DATE<th>AFFECTED<th>NEW STUFF<th>FIXES<th>DEPENDENCIES
+
+<!-- EDITOR: Copy editable block from above to immediately below and edit appropriately. -->
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2016.03.07 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->Se+ StartWebBrowser<br>Se+ V2.52.0
+<td><!--FIXED--->Se+ REGRESSION
+<td><!--DEPEND-->Se+ REGRESSION<br>Se+ JARs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fix the SeleniumPlus REGRESSION test to ignore case on font-family name comparisons.
+<li>Fix the SeleniumPlus REGRESSION test making keyboard input of "0" more robust across all browsers.
+<li>Allow SeleniumPlus to support a browser config file as a StartWebBrowswer parameter.
+<li>Fix code and dependencies in SeleniumPlus to support latest selenium-server 2.52.0.JAR.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2016.03.04 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->
+<td><!--FIXED--->Se+ SAMPLE<br>Se+ REGRESSION
+<td><!--DEPEND-->Se+ PlugIn<br>Se+ SAMPLE<br>Se+ REGRESSION
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fixed the SeleniumPlus SAMPLE project to use the latest version of Goole's login process which changed in 2015.
+<li>Fixed some SeleniumPlus REGRESSION issues to make REGRESSION more robust across all browsers.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2016.03.02 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->Se+ Alerts<br>Se+ REGRESSION
+<td><!--FIXED--->
+<td><!--DEPEND-->Se+ JARs<br>Se+ REGRESSION
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Added SeleniumPlus support of AlertAccept, AlertDismiss, and ClickUnverified commands.
+<li>Added SeleniumPlus REGRESSION tests for AlertAccept, AlertDismiss, and ClickUnverified commands.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2016.02.29 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->Se+ HTML Fit (SelRunner)
+<td><!--FIXED--->Se+ ClickListeners
+<td><!--DEPEND-->Se+ JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Change SeleniumPlus Click Listeners to listen at the Document level if the click coords are outside the element boundaries.
+<li>Initial push of SeleniumPlus code to support the execution of Selenium HTML Fit tests via SeInterpreter.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2016.02.26 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->
+<td><!--FIXED--->Se+ ClickListeners
+<td><!--DEPEND-->Se+ JARs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Disable SeleniumPlus Click Listeners when the Click is intended to go outside element boundaries.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2016.02.25 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->
+<td><!--FIXED--->Se+ Refresh
+<td><!--DEPEND-->Se+ JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fixed SeleniumPlus Component model to use WebDriver when previous SearchContext component is NOT found during an attempt to refresh WebElement references.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2016.02.24 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->
+<td><!--FIXED--->Se+ REGRESSION
+<td><!--DEPEND-->Se+ REGRESSION
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fixed SeleniumPlus REGRESSION project Image-based tests for active and inactive SwingApp titlebars.
+<li>Updated SeleniumPlus REGRESSION GenericMasterTests to make test failure logging clearer to avoid failure count confusion.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2016.02.22 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->
+<td><!--FIXED--->Se+ ClickListeners
+<td><!--DEPEND-->Se+ JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fix certain SeleniumPlus Click listening issues to prevent "clicks twice" scenarios.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2016.02.19 </b>
+<td rowspan=2><!--AFFECT-->Core<br>Se+
+<td><!--NEW----->Core IBT<br>Se+ IBT
+<td><!--FIXED--->
+<td><!--DEPEND-->Core JARs<br>Se+ JARs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Support Image-based recognition strings ImageRect= and SearchRect= to include support for "percentage of screen": ex: ImageRect=0,0,100%,100%; and not just absolute numbers.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2016.02.18 </b>
+<td rowspan=2><!--AFFECT-->Core<br>Se+
+<td><!--NEW----->Core IBT<br>Se+ IBT
+<td><!--FIXED--->
+<td><!--DEPEND-->Core JARs<br>Se+ JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Support Image-based recognition strings ImageRect= and SearchRect= for Windows defining an area to search without requiring a Window Image to match.
+</ul>
+
 
 <tr class=b1>
 <td rowspan=2><!--DATE----><b> 2016.02.05 </b>
