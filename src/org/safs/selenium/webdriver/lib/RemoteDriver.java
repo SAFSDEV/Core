@@ -12,6 +12,8 @@ package org.safs.selenium.webdriver.lib;
 *  <br>   JUN 29, 2015	  (LeiWang) Get the RMI Server from the selenium-grid-node machine.
 *                                   Add main(): as a entry point for starting Remote Server (standalone or grid).
 *  <br>   DEC 24, 2015	  (LeiWang) Add methods to get browser's name, version, and selenium-server's version etc.
+*  <br>   FEB 29, 2016	  (LeiWang) Remove the import of org.seleniumhq.jetty7.util.ajax.JSON
+*  <br>   MAR 07, 2016	  (LeiWang) Handle firefox preference.
 */
 import java.io.File;
 import java.io.FileInputStream;
@@ -46,14 +48,13 @@ import org.safs.selenium.util.GridInfoExtractor;
 import org.safs.selenium.webdriver.WebDriverGUIUtilities;
 import org.safs.tools.drivers.DriverConstant.SeleniumConfigConstant;
 import org.safs.tools.stringutils.StringUtilities;
-import org.seleniumhq.jetty7.util.ajax.JSON;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 /**
- * Handle the Session information (serverhost, browsername, sessionid, firefoxProfile, chrome-user-data-dir, chrome-profile-dir, chrome-preference).<br>
+ * Handle the Session information (serverhost, browsername, sessionid, firefoxProfile, chrome-user-data-dir, chrome-profile-dir, chrome-preference, chromeExcludedOptions, firefoxPreference).<br>
  * Handle a SeleniumRMIAgent, if enabled, to communicate with a remote SAFS Selenium RMI Server.<br>
  * 
  */
@@ -98,7 +99,7 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 	 * currently, it contains 
 	 * serverHostname +SPLITTER+ browserName +SPLITTER+ sessionid + SPLITTER+ firefoxProfile
 	 * + SPLITTER+ chromeUserDataDir + SPLITTER+ chromeProfileDir + SPLITTER+ chromePreference
-	 * + SPLITTER+ chromeExcludedOptions
+	 * + SPLITTER+ chromeExcludedOptions + SPLITTER+ firefoxPreference
 	 * <br>
 	 */
 	private static String sessionContent = null;
@@ -356,7 +357,7 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 		      Capabilities requiredCapabilities){
 		
 		String ID = (String) desiredCapabilities.getCapability(CAPABILITY_ID);
-		Boolean oreconn = (Boolean) desiredCapabilities.getCapability(CAPABILITY_RECONNECT);
+		Boolean reconnect = (Boolean) desiredCapabilities.getCapability(CAPABILITY_RECONNECT);
 		String browserName = desiredCapabilities.getBrowserName();
 		String remoteserver = (String) desiredCapabilities.getCapability(CAPABILITY_REMOTESERVER);
 		if(remote_hostname == null) remote_hostname = remoteserver; //might still be null
@@ -376,7 +377,7 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 			}						
 		} catch (Exception e1) {}		
 			
-		if (oreconn.booleanValue()){
+		if (reconnect.booleanValue()){
 		    SessionInfo sid = null;
 			try {						
 				sid = retrieveSessionInfoFromFile(ID);				
@@ -429,7 +430,7 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 	    		v = v.replace("',", "\",");
 	    		v = v.replace(",'", ",\"");	    		
         		try{ 
-        			Object nv = JSON.parse(v);
+        			Object nv = Json.convert(Map.class, v);
         			if(nv instanceof Map){
     	        		IndependantLog.info(debugmsg + driverCommand +" JSON Map conversion SUCCESSFUL: "+ nv.toString());
     	        		Map<?, ?> m = (Map<?, ?>) nv;
@@ -502,10 +503,12 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 			String chromePreference = getString(desiredCapabilities, SelectBrowser.KEY_CHROME_PREFERENCE);
 			//get chrome excluded options from capabilities, it is comma-separated string
 			String chromeExcludeOptions = getString(desiredCapabilities, SelectBrowser.KEY_CHROME_EXCLUDE_OPTIONS);
+			//get firefox preference from capabilities
+			String firefoxPreference = getString(desiredCapabilities, SelectBrowser.KEY_FIREFOX_PROFILE_PREFERENCE);
 
 			//create the session-content used for reconnection
 			sessionContent = serverHostname +SPLITTER+ browserName +SPLITTER+ sessionid + SPLITTER+ firefoxProfile
-					+ SPLITTER+ chromeUserDataDir+ SPLITTER+ chromeProfileDir+ SPLITTER+ chromePreference+ SPLITTER+ chromeExcludeOptions; 
+					+ SPLITTER+ chromeUserDataDir+ SPLITTER+ chromeProfileDir+ SPLITTER+ chromePreference+ SPLITTER+ chromeExcludeOptions + SPLITTER + firefoxPreference; 
 			prop.put(Id, sessionContent); 
 			prop.put(LAST_SESSION_KEY, Id); 
 
@@ -790,6 +793,7 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 				try{if(!sessionInfos[5].isEmpty()) extraParameters.put(SelectBrowser.KEY_CHROME_PROFILE_DIR, sessionInfos[5]);}catch(Exception e){}
 				try{if(!sessionInfos[6].isEmpty()) extraParameters.put(SelectBrowser.KEY_CHROME_PREFERENCE, sessionInfos[6]);}catch(Exception e){}
 				try{if(!sessionInfos[7].isEmpty()) extraParameters.put(SelectBrowser.KEY_CHROME_EXCLUDE_OPTIONS, sessionInfos[7]);}catch(Exception e){}
+				try{if(!sessionInfos[8].isEmpty()) extraParameters.put(SelectBrowser.KEY_FIREFOX_PROFILE_PREFERENCE, sessionInfos[8]);}catch(Exception e){}
 				
 			}catch(Exception e){
 				IndependantLog.error("Fail to initialize SessionInfo due to "+StringUtils.debugmsg(e));
