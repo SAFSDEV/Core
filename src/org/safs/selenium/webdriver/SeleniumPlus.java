@@ -54,6 +54,7 @@ package org.safs.selenium.webdriver;
  *                                                       optional parameter 'FromSubItem' and 'ToSubItem' are not supported yet.
  *  <br>   JAN 07, 2016    (Carl Nagle) Make System.exit() optional and allowExit=false, by default.
  *  <br>   MAR 02, 2016    (Lei Wang) Add Misc.AlertAccept(), Misc.AlertDismiss() and ClickUnverified().
+ *  <br>   MAR 07, 2016    (Lei Wang) Add example for StartWebBrowser() with preference settings for "chrome" and "firefox".
  */
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -305,6 +306,16 @@ public abstract class SeleniumPlus {
 	 *                                                        SelectBrowser.KEY_FIREFOX_PROFILE, 
 	 *                                                        "myprofile"
 	 *                                                        });
+	 *  
+	 * //Start firefox browser with some preference to set. 
+	 * String absolutePreferenceFile = "c:\\firefoxPref.json.dat";//A json file containing chrome preferences, like { "intl.accept_languages":"zh-cn", "accessibility.accesskeycausesactivation":false, "browser.download.folderList":2 }
+	 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
+	 *                                                        SelectBrowser.BROWSER_NAME_FIREFOX, 
+	 *                                                        "10", 
+	 *                                                        "true", 
+	 *                                                        quote(SelectBrowser.KEY_FIREFOX_PROFILE_PREFERENCE), 
+	 *                                                        quote(absolutePreferenceFile)
+	 *                                                        });
 	 *                                                        
 	 * //Start chrome browser with default data pool (chrome://version/, see "Profile Path") , and using the last-used user. 
 	 * String datapool = "C:\\Users\\xxx\\AppData\\Local\\Google\\Chrome\\User Data";
@@ -352,6 +363,15 @@ public abstract class SeleniumPlus {
 	 *                                                        "true", 
 	 *                                                        quote(SelectBrowser.KEY_CHROME_EXCLUDE_OPTIONS), 
 	 *                                                        quote(optionsToExclude)
+	 *                                                        });
+	 * //Start chrome browser with some preference to set. 
+	 * String absolutePreferenceFile = "c:\\chromePref.json.dat";//A json file containing chrome preferences, like { "lang":"zh-cn", "download.default_directory":"C:\\SeleniumPlus\\libs" }
+	 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
+	 *                                                        SelectBrowser.BROWSER_NAME_CHROME, 
+	 *                                                        "10", 
+	 *                                                        "true", 
+	 *                                                        quote(SelectBrowser.KEY_CHROME_PREFERENCE), 
+	 *                                                        quote(absolutePreferenceFile)
 	 *                                                        });
 	 * </pre>	 
 	 * @see #prevResults
