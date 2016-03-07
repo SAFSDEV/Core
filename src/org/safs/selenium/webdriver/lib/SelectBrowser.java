@@ -17,6 +17,7 @@ package org.safs.selenium.webdriver.lib;
 *  <br>   SEP 04, 2014    (LeiWang) Handle FireFox's profile.
 *  <br>   MAR 17, 2015    (LeiWang) Handle Chrome's custom data, profile.
 *  <br>   APR 08, 2015    (LeiWang) Modify to turn off Chrome's starting options.
+*  <br>   MAR 07, 2016    (LeiWang) Handle preference setting for "chrome" and "firefox".
 */
 
 import java.io.File;
@@ -59,8 +60,14 @@ public class SelectBrowser {
 	/** 'FirefoxProfile' the key for firefox profile name/filename string; 
 	 * The value is something like "myprofile" or "&lt;AbsolutePath>/ppc2784x.default" */
 	public static final String KEY_FIREFOX_PROFILE = "FirefoxProfile";//Name Or FilePath
+
+	/** 'firefox.perference' the key for firefox preference file, which contains json data, 
+	 * such as { "intl.accept_languages":"zh-cn", "accessibility.accesskeycausesactivation":false, "browser.download.folderList":2 }<br>
+	 * <b>Note: Be careful when creating the json data file, do NOT quote boolean or integer value.</b>*/
+	public static final String KEY_FIREFOX_PROFILE_PREFERENCE = "firefox.perference";//Firefox Preference file
 	
-	/** <b>NOT USED YET</b>, 'prefs' the key for chrome preference file*/
+	/** 'prefs' the key for chrome preference file, which contains json data, 
+	 * such as { "lang":"zh-cn", "download.default_directory":"C:\\SeleniumPlus\\libs" } */
 	public static final String KEY_CHROME_PREFERENCE = "prefs";//Chrome Preference file
 	
 	/**'user-data-dir' the parameter name for chrome options, a general custom data settings.<br>
@@ -238,6 +245,7 @@ public class SelectBrowser {
 	 * @return DesiredCapabilities
 	 */
 	public static DesiredCapabilities getDesiredCapabilities(String browserName, Map<String,Object> extraParameters) {
+		String debugmsg = StringUtils.debugmsg(false);
 		DesiredCapabilities caps = null;
 		
 		if (browserName.equals(BROWSER_NAME_IE)) {
@@ -285,20 +293,38 @@ public class SelectBrowser {
 				caps.setCapability(CapabilityType.PROXY, proxy);
 			}
 			
-			//2. Add firefox profile setting to Capabilities, if it exists 
-			Object firefoxProfile = extraParameters.get(KEY_FIREFOX_PROFILE);
-			if(firefoxProfile!=null && firefoxProfile instanceof String){
-				//Can be profile's name or profile's file name
-				String profileNameOrPath = firefoxProfile.toString();
-				IndependantLog.debug("Try to Set firefox profile '"+profileNameOrPath+"' to Capabilities.");
+			//2 Add firefox profile setting to Capabilities.
+			if(BROWSER_NAME_FIREFOX.equals(browserName) ){
+				//2.1 Add firefox profile setting to Capabilities, if it exists
+				FirefoxProfile firefoxProfile = null;
+				Object firefoxProfileParam = extraParameters.get(KEY_FIREFOX_PROFILE);
+				if(firefoxProfileParam!=null && firefoxProfileParam instanceof String){
+					//Can be profile's name or profile's file name
+					String profileNameOrPath = firefoxProfileParam.toString();
+					IndependantLog.debug(debugmsg+"Try to Set firefox profile '"+profileNameOrPath+"' to Capabilities.");
 
-				FirefoxProfile profile = getFirefoxProfile(profileNameOrPath);
+					firefoxProfile = getFirefoxProfile(profileNameOrPath);
+
+					if(firefoxProfile!=null){
+						caps.setCapability(KEY_FIREFOX_PROFILE, profileNameOrPath);//used to store in session file
+					}else{
+						IndependantLog.error(debugmsg+" Fail to set firefox profile to Capabilities.");
+					}
+				}
+				//2.2 Add firefox profile preferences to Capabilities, if it exists
+				Object prefsFileParam = extraParameters.get(KEY_FIREFOX_PROFILE_PREFERENCE);
+				if(prefsFileParam!=null && prefsFileParam instanceof String){
+					String preferenceFile = prefsFileParam.toString();
+					IndependantLog.debug(debugmsg+"Try to Set firefox preference file '"+preferenceFile+"' to Firefox Profile.");
+					caps.setCapability(KEY_FIREFOX_PROFILE_PREFERENCE, preferenceFile);//used to store in session file
+					
+					Map<?, ?> firefoxPreference = Json.readJSONFileUTF8(preferenceFile);
+					if(firefoxProfile==null) firefoxProfile = new FirefoxProfile();
+					addFireFoxPreference(firefoxProfile, firefoxPreference);
+				}
 				
-				if(profile!=null){
-					caps.setCapability(KEY_FIREFOX_PROFILE, profileNameOrPath);//used to store in session file
-					caps.setCapability(FirefoxDriver.PROFILE, profile);
-				}else{
-					IndependantLog.error(" Fail to set firefox profile to Capabilities.");
+				if(firefoxProfile!=null){
+					caps.setCapability(FirefoxDriver.PROFILE, firefoxProfile);
 				}
 			}
 
@@ -335,7 +361,7 @@ public class SelectBrowser {
 			IndependantLog.debug(debugmsg+" caps is null or there are no browser specific parametes to set.");
 			return;
 		}
-			
+		
 		try{
 			//Get the general data setting directory, it is for all users
 			String chromeUserDataDir = StringUtilities.getString(extraParameters, KEY_CHROME_USER_DATA_DIR);
@@ -361,13 +387,16 @@ public class SelectBrowser {
 			IndependantLog.warn(debugmsg+"Fail to Set chrome profile directory to ChromeOptions.");
 		}
 		try{
-			//TODO Get user preference file, this doesn't work yet
+			//Get user preference file, and set it to capacities
 			String preferenceFile = StringUtilities.getString(extraParameters, KEY_CHROME_PREFERENCE);
 			IndependantLog.debug(debugmsg+"Try to Set chrome preference file '"+preferenceFile+"' to ChromeOptions.");
+			Map<?, ?> chromePreference = Json.readJSONFileUTF8(preferenceFile);
 			if(options==null) options = new ChromeOptions();
-			Map<?, ?> chormePreference = Json.readJSONFileUTF8(preferenceFile);
 			caps.setCapability(KEY_CHROME_PREFERENCE, preferenceFile);//used to store in session file
-			options.setExperimentalOption(KEY_CHROME_PREFERENCE, chormePreference);
+			//The API setExperimentalOption() doesn't work, so Call addChromePreference() to fix this problem.
+			//options.setExperimentalOption(KEY_CHROME_PREFERENCE, chromePreference);//TODO Hope this API setExperimentalOption could work
+			addChromePreference(options, chromePreference);
+			
 		}catch(Exception e){
 			IndependantLog.warn(debugmsg+"Fail to Set chrome preference file to ChromeOptions.");
 		}
@@ -393,6 +422,60 @@ public class SelectBrowser {
 		}
 		
 		if(options!=null) caps.setCapability(ChromeOptions.CAPABILITY, options);
+	}
+	
+	/**
+	 * Set chrome preference to chrome options.<br>
+	 * This method intends to fix the problem of ChromeOptions.setExperimentalOption().<br>
+	 * Once ChromeOptions.setExperimentalOption("prefs", preferenceMap) works as expected, we can remove this method.<br>
+	 * 
+	 * @param options ChromeOptions, the chrome options object.
+	 * @param chromePreference Map, the chrome preference to set.
+	 */
+	private static void addChromePreference(ChromeOptions options, Map<?, ?> chromePreference){
+		
+		try{
+			//options.addArguments("--lang=zh-cn");
+			//options.addArguments("--download.default_directory=D:\\SeleniumPlus\\libs");
+			
+			String[] keys = chromePreference.keySet().toArray(new String[0]);
+			for(String key:keys){
+				options.addArguments("--"+key.trim()+"="+chromePreference.get(key));
+			}
+		}catch(Exception e){
+			IndependantLog.error(StringUtils.debugmsg(false)+" failed, due to "+StringUtils.debugmsg(e));
+		}
+	}
+	
+	/**
+	 * Set firefox preference to firefox Profile.<br>
+	 * 
+	 * @param firefoxProfile FirefoxProfile, the firefox Profile object.
+	 * @param firefoxPreference Map, the firefox preference to set.
+	 */
+	private static void addFireFoxPreference(FirefoxProfile firefoxProfile, Map<?, ?> firefoxPreference){
+		
+		try{
+			//profile.setPreference("media.navigator.permission.disabled", true); boolean
+			//profile.setPreference(“browser.download.folderList”,2); int
+			//profile.setPreference( “intl.accept_languages”, “en-us” ); String
+			
+			String[] keys = firefoxPreference.keySet().toArray(new String[0]);
+			Object value = null;
+			for(String key:keys){
+				value = firefoxPreference.get(key);
+				if(value instanceof Boolean){
+					firefoxProfile.setPreference(key, ((Boolean)value).booleanValue());
+				}else if(value instanceof Number){
+					firefoxProfile.setPreference(key, ((Number)value).intValue());					
+				}else{
+					firefoxProfile.setPreference(key, value.toString());					
+				}
+			}
+			
+		}catch(Exception e){
+			IndependantLog.error(StringUtils.debugmsg(false)+" failed set preference to firefox profile, due to "+StringUtils.debugmsg(e));
+		}
 	}
 
 	/**
