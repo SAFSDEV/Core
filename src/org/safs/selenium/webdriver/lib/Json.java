@@ -135,4 +135,16 @@ public class Json {
 		}
 	}
 	
+	public static void main(String[] args){
+		//Test Json.convert();
+		//In the version later than selenium-server-standalone-2.47.1.jar, selenium has removed org.seleniumhq.jetty7.util.ajax.JSON
+		//so we use other API (JsonToBeanConverter) to convert json data.
+		String v = "{\"id\":\"{972ce4c6-7e08-4474-a285-3208198ce6fd}\",\"syncGUID\":\"jzmbFbDykcBZ\",\"location\":\"app-global\",\"version\":\"44.0.2\",\"type\":\"theme\",\"internalName\":\"classic/1.0\",\"updateURL\":null,\"updateKey\":null,\"optionsURL\":null,\"optionsType\":null,\"aboutURL\":null,\"icons\":{\"32\":\"icon.png\",\"48\":\"icon.png\"},\"iconURL\":null,\"icon64URL\":null,\"defaultLocale\":{\"name\":\"Default\",\"description\":\"The default theme.\",\"creator\":\"Mozilla\",\"homepageURL\":null,\"contributors\":[\"Mozilla Contributors\"]},\"visible\":true,\"active\":true,\"userDisabled\":false,\"appDisabled\":false,\"descriptor\":\"C:\\Program Files (x86)\\Mozilla Firefox\\browser\\extensions\\{972ce4c6-7e08-4474-a285-3208198ce6fd}\",\"installDate\":1455896567960,\"updateDate\":1455896567960,\"applyBackgroundUpdates\":1,\"skinnable\":true,\"size\":24172,\"sourceURI\":null,\"releaseNotesURI\":null,\"softDisabled\":false,\"foreignInstall\":false,\"hasBinaryComponents\":false,\"strictCompatibility\":true,\"locales\":[],\"targetApplications\":[{\"id\":\"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}\",\"minVersion\":\"44.0.2\",\"maxVersion\":\"44.0.2\"}],\"targetPlatforms\":[]}";
+//		Object nv = org.seleniumhq.jetty7.util.ajax.JSON.parse(v);
+		Object nv = Json.convert(Map.class, v);
+		if(nv instanceof Map){
+			System.out.println(nv);
+		}
+	}
+	
 }
