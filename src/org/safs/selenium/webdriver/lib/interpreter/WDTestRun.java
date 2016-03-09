@@ -30,13 +30,22 @@ import com.sebuilder.interpreter.webdriverfactory.WebDriverFactory;
 
 /**
  * The primary purpose of this class is to extend the TestRun support to include Step peeking, skipping, 
- * and Retry of specific Script Steps.  It also provides WDLocator instances using enhanced SearchObject 
- * search algorithms.
+ * and Retry of specific Script Steps.
+ * <p>
+ * We also provide WDLocator instances using enhanced SearchObject search algorithms.
+ * <p>
+ * We've added the ability for embedded variable references in Scripts [ex: ${var}] to be handled sought 
+ * in SAFSVARS if they are not found in the local variable Map.
+ *    
  * @author Carl Nagle
  * <br>JUL 28, 2015 Tao Xie Added SwitchToFrame and SwitchToFrameIndex support
+ * <br>MAR 01, 2016 Carl Nagle Added Support for SAFSVARS variable lookups if local Map has no reference.
  */
 public class WDTestRun extends TestRun {
 
+	public static final String VARREF_START = "${";
+	public static final String VARREF_END   = "}";
+	
 	public WDTestRun(Script script, int implicitlyWaitDriverTimeout,
 			int pageLoadDriverTimeout, Map<String, String> initialVars) {
 		super(script, implicitlyWaitDriverTimeout, pageLoadDriverTimeout, initialVars);
@@ -91,11 +100,50 @@ public class WDTestRun extends TestRun {
 	public WDTestRun(Script script) {
 		super(script);
 	}
+
+	/**
+	 * Process any ${var} references.
+	 * Lookup potential variable values stored in the local Map and if not present there, 
+	 * see if it is available via SAFSVARS.
+	 * @param value
+	 * @return value with embedded variable references replaced.
+	 * @see WebDriverGUIUtilities#_LASTINSTANCE
+	 * @see STAFHelper#getVariable(String)
+	 */
+	protected String replaceVariableReferences(String value){		
+		int start = -1;
+		int end   = -1;
+		do{
+		   start = value.indexOf(VARREF_START);
+		   if(start > end){
+			   // there must be a var name between the braces
+			   end = value.indexOf(VARREF_END, start + VARREF_START.length() +1);
+			   if(end > start){
+				   String key = value.substring(start+VARREF_START.length(), end);				   
+				   String val = null;
+				   getLog().debug("WDTestRun seeking embedded variable reference '"+ key+"'.");
+				   try{ 
+					   if(vars().containsKey(key)){
+						   val = vars().get(key);
+					   }else{
+						   val = WebDriverGUIUtilities._LASTINSTANCE.getSTAFHelper().getVariable(key);
+					   }
+				   }catch(Exception ignore){}
+				   value = val == null ? 
+						   value       : 
+						   value.replace(VARREF_START + key + VARREF_END, val);
+				   getLog().debug("WDTestRun replacing variable reference '"+ key+"' as '"+ value +"'.");
+			   }
+		   }
+		}while(start > -1 && end > start);		
+		return value;
+	}
 	
 	/**
 	 * Fetches a Locator parameter from the current step.
 	 * @param paramName The parameter's name.
-	 * @return The parameter's value.
+	 * @return The Locator with any variable references in its value replaced.
+	 * @see #replaceVariableReferences(String)
 	 */
 	@Override
 	public Locator locator(String paramName) {
@@ -109,13 +157,25 @@ public class WDTestRun extends TestRun {
 			try{ getLog().info("Locator Type: "+ l.type);}catch(Exception x){}
 			try{ getLog().info("Locator Value: "+ l.value);}catch(Exception x){}
 		}
-		// This kind of variable substitution makes for short code, but it's inefficient.
-		for (Map.Entry<String, String> v : vars().entrySet()) {
-			l.value = l.value.replace("${" + v.getKey() + "}", v.getValue());
-		}
+		l.value = replaceVariableReferences(l.value);
 		return l;
 	}
+
+	/**
+	 * @return the value of the current Step's named string parameter with any variable references replaced.
+	 * @see #replaceVariableReferences(String)
+	 */
+	@Override
+	public String string(String paramName) {
+		String s = currentStep().stringParams.get(paramName);
+		if (s == null) {
+			throw new RuntimeException("Missing parameter \"" + paramName + "\" at step #" +
+					(stepIndex + 1) + ".");
+		}
+		return replaceVariableReferences(s);
+	}
 	
+
 	/** 
 	 * Retrieve the next Step that would be executed by this TestRun without incrementing the 
 	 * stepIndex counter.
