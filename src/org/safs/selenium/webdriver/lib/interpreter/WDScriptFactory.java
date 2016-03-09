@@ -1,0 +1,225 @@
+/** 
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: http://www.opensource.org/licenses/gpl-license.php
+ **/
+package org.safs.selenium.webdriver.lib.interpreter;
+
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.apache.commons.io.input.ReaderInputStream;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
+import org.safs.IndependantLog;
+import org.safs.selenium.webdriver.lib.interpreter.selrunner.SRUtilities;
+import org.safs.selenium.webdriver.lib.interpreter.selrunner.SRunnerType;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import com.sebuilder.interpreter.Script;
+import com.sebuilder.interpreter.Step;
+import com.sebuilder.interpreter.factory.DataSourceFactory;
+import com.sebuilder.interpreter.factory.ScriptFactory;
+import com.sebuilder.interpreter.factory.StepTypeFactory;
+
+/**
+ * Support the creation of Scripts from both JSON and HTML Fit Tables.
+ * @author Carl Nagle
+ */
+public class WDScriptFactory extends ScriptFactory {
+
+	protected StepTypeFactory stepTypeFactory = new StepTypeFactory();
+	protected WDTestRunFactory testRunFactory = new WDTestRunFactory();
+	protected DataSourceFactory dataSourceFactory = new DataSourceFactory();
+
+	/** "org.safs.selenium.webdriver.lib.interpreter.selrunner.steptype" */
+	public static String SRSTEPTYPE_PACKAGE = "org.safs.selenium.webdriver.lib.interpreter.selrunner.steptype";
+	
+	/* SeRunner HTML Table Tags of Interest */
+	public static String SR_TABLE_TBODY = "tbody";
+	public static String SR_TABLE_TR    = "tr";
+	public static String SR_TABLE_TD    = "td";
+	
+	/**
+	 * @param script -- One of two possible formats:<br>
+	 * A JSON string describing a script or suite, or an HTML Fit Table format.
+	 * @param sourceFile Optionally. the file the script was loaded from.
+	 * @return A Script object, ready to run.
+	 * @throws IOException If anything goes wrong with interpreting the script, or
+	 * with any Readers.
+	 */
+	@Override
+	public List<Script> parse(String script, File sourceFile) throws IOException {
+		String message = "WDScriptFactory.parse(String)";
+		try{
+			return parse(new JSONObject(new JSONTokener(script)), sourceFile);
+		}catch(Exception x){
+			message += ", "+ x.getClass().getSimpleName()+" "+ x.getMessage();
+			try{
+				return parse(getDocumentBuilder().parse(new ByteArrayInputStream(script.getBytes("UTF-8"))), sourceFile, stepTypeFactory);
+			}catch(Exception x2){
+				message += ", " + x2.getClass().getSimpleName()+" "+ x2.getMessage();
+				throw new IOException(message);
+			}
+		}
+	}
+
+	/**
+	 * Parse a XML/HTML Fit Table Document into a Script object. 
+	 * @param d the Document object parsed from the HTML source File.
+	 * @param f the File the HTML file was sourced from.
+	 * @param stepTypeFactory
+	 * @return Script to run
+	 * @throws IOException
+	 */
+	public List<Script> parse(Document d, File f, StepTypeFactory stepTypeFactory) throws IOException {
+		String debugmsg = "WDScriptFactory.parse(Document) ";
+		NodeList table = d.getElementsByTagName(SR_TABLE_TBODY);
+		if(table == null || table.getLength()==0) throw new IOException("Unsupported HTML table format missing 'tbody'!");
+		
+		NodeList stepsA = table.item(0).getChildNodes();
+		ArrayList<Node> rows = new ArrayList<Node>();
+		for(int i=0;i<stepsA.getLength();i++){
+			Node n = stepsA.item(i);
+			if(n.getNodeName().equalsIgnoreCase(SR_TABLE_TR)) {
+				rows.add(n);
+			}
+		}
+		
+		if(rows.isEmpty())throw new IOException("Unsupported HTML table format missing children of 'tbody'!");
+		
+		IndependantLog.info(debugmsg +"found "+ rows.size()+" ROWS of FIT data to process...");
+		
+		ArrayList<Script> scripts = new ArrayList<Script>();
+		Script script = new Script();
+		if (f != null) {
+			script.name = f.getPath();
+		}
+		scripts.add(script);
+		for(int i=0; i< rows.size(); i++){
+			Node step0 = rows.get(i);
+			IndependantLog.info(debugmsg +"processing nodeName "+ step0.getNodeName()+"...");
+			NodeList cells = step0.getChildNodes();				
+			ArrayList<Node> cols = new ArrayList<Node>();
+			for(int c = 0;c< cells.getLength();c++){
+				Node cn = cells.item(c);
+				if(cn.getNodeName().equalsIgnoreCase(SR_TABLE_TD)) cols.add(cn);
+			}
+			IndependantLog.info(debugmsg +"found "+ cols.size()+" COLS of FIT data to process...");
+			
+			if(cols.size()==0) continue;
+			
+			String[] params = new String[cols.size()];
+			
+			for(int c=0;c < cols.size();c++){
+				params[c] = "";
+				Node cell = cols.get(c);
+				IndependantLog.info(debugmsg +"processing nodeName "+ cell.getNodeName()+"...");
+				NodeList text = cell.getChildNodes();
+				IndependantLog.info(debugmsg +"found "+ text.getLength()+" nodes of data in cell...");
+				for(int t=0; t<text.getLength(); t++){
+					Node t0 = text.item(t);							
+					IndependantLog.info(debugmsg +"processing nodeName:"+ t0.getNodeName()+", nodeType:"+ t0.getNodeType()+", nodeValue:"+ t0.getNodeValue()+"...");
+					if(t0.getNodeType()==Node.TEXT_NODE){
+						params[c] = params[c].concat(t0.getNodeValue());
+					}
+				}
+			}
+			// params[0] = action;
+			// params[1] = locator, other param, or empty; 
+			// params[2] = other param, or empty.
+			
+			stepTypeFactory.setSecondaryPackage(SRSTEPTYPE_PACKAGE);				
+			Step step = new Step(stepTypeFactory.getStepTypeOfName(params[0]));
+			
+			script.steps.add(step);
+			
+			if(step.type instanceof SRunnerType){
+				((SRunnerType)step.type).processParams(step, params);
+			}else{
+				// handle default StepTypes here (like Pause)
+				if("Pause".equalsIgnoreCase(step.type.getClass().getSimpleName())){
+					step.stringParams.put("waitTime", params[1]);
+				}
+			}
+		}		
+		return scripts;
+	}
+		
+	/**
+	 * @param reader A Reader pointing to one of 2 possible script formats:<br>
+	 * a JSON stream describing a script or suite, or an HTML Fit Table.
+	 * @param sourceFile Optionally. the file the script was loaded from.
+	 * @return A list of scripts, ready to run.
+	 * @throws IOException If anything goes wrong with interpreting the script, or
+	 * with the Reader.
+	 */
+	public List<Script> parse(Reader reader, File sourceFile) throws IOException{
+		String message = "WDScriptFactory.parse(Reader)";
+		try{ 
+			return parse(new JSONObject(new JSONTokener(reader)), sourceFile);
+		}catch(Exception x){
+			message += ", "+ x.getClass().getSimpleName()+" "+ x.getMessage();
+			try{reader.close();}catch(Exception rc){}
+			try{
+				reader = getUTF8Reader(sourceFile);
+				return parse(getDocumentBuilder().parse(new ReaderInputStream(reader)), sourceFile, stepTypeFactory);
+			}catch(Exception px){
+				message += ", "+ px.getClass().getSimpleName()+" "+ px.getMessage();				
+				throw new IOException(message);
+			}finally{
+				try{ reader.close();}catch(Exception fx){}
+			}
+		}
+	}
+	
+	/**
+	 * @return DocumentBuilder if one can successfully be created.
+	 * @throws ParserConfigurationException
+	 */
+	protected DocumentBuilder getDocumentBuilder() throws ParserConfigurationException{
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		return dbf.newDocumentBuilder();
+	}
+	
+	/**
+	 * @param sourceFile
+	 * @return BufferedReader opened with UTF-8 encoding.
+	 * @throws IOException
+	 */
+	protected BufferedReader getUTF8Reader(File sourceFile) throws IOException{
+		return new BufferedReader(new InputStreamReader(new FileInputStream(sourceFile), "UTF-8"));		
+	}
+	
+	/**
+	 * @param f A File pointing to a JSON file describing a script or suite.
+	 * @return A list of scripts, ready to run.
+	 * @throws IOException If anything goes wrong with interpreting the JSON, or
+	 * with the Reader.
+	 * @throws JSONException If the JSON can't be parsed.
+	 */
+	public List<Script> parse(File f) throws IOException{
+		BufferedReader r = null;
+		try {
+			return parse(r = getUTF8Reader(f), f);
+		} finally {
+			try { r.close(); } catch (Exception e) {}
+		}
+	}	
+}
