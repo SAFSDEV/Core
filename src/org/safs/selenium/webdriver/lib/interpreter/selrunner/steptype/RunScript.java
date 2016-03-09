@@ -16,7 +16,7 @@ public class RunScript implements StepType, SRunnerType {
 
 	@Override
 	public boolean run(TestRun ctx) {
-		String result = ctx.driver().executeScript(ctx.string(SCRIPT_PARAM)).toString();
+		ctx.driver().executeScript(ctx.string(SCRIPT_PARAM));
 		// what can we do with result?
 		return true;
 	}

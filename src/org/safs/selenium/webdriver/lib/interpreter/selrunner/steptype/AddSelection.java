@@ -13,10 +13,10 @@ import com.sebuilder.interpreter.TestRun;
 public class AddSelection extends Select {
 
 	@Override
-	protected boolean performClick(TestRun ctx, WebElement e){
+	protected boolean performSelect(WebElement select, WebElement option, TestRun ctx){
 		Actions actions = new Actions(ctx.driver());
 		actions.keyDown(Keys.CONTROL)
-		    .click(e)
+		    .click(option)
 		    .keyUp(Keys.CONTROL)
 		    .build()
 		    .perform();
