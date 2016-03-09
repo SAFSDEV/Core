@@ -119,6 +119,7 @@ import org.safs.selenium.webdriver.CFComponent;
 import org.safs.selenium.webdriver.CFEditBox;
 import org.safs.selenium.webdriver.SeleniumPlus.WDTimeOut;
 import org.safs.selenium.webdriver.WebDriverGUIUtilities;
+import org.safs.selenium.webdriver.lib.interpreter.WDScriptFactory;
 import org.safs.selenium.webdriver.lib.interpreter.WDTestRunFactory;
 import org.safs.text.FileUtilities;
 import org.safs.text.INIFileReader;
@@ -133,6 +134,7 @@ import org.safs.tools.stringutils.StringUtilities;
 
 import com.sebuilder.interpreter.Script;
 import com.sebuilder.interpreter.factory.ScriptFactory;
+import com.sebuilder.interpreter.factory.StepTypeFactory;
 import com.sebuilder.interpreter.webdriverfactory.WebDriverFactory;
 
 /**
@@ -2337,13 +2339,13 @@ public class WDLibrary extends SearchObject {
 
 		File source = new CaseInsensitiveFile(path).toFile();
 		BufferedReader reader = FileUtilities.getUTF8BufferedFileReader(source.getAbsolutePath());
-		ScriptFactory factory = new ScriptFactory();
+		WDScriptFactory factory = new WDScriptFactory();
+		StepTypeFactory stepTypes = new StepTypeFactory();
+		stepTypes.setSecondaryPackage(factory.SRSTEPTYPE_PACKAGE);
+		factory.setStepTypeFactory(stepTypes);
 		try{ return factory.parse(reader, source).get(0);}
-		catch(JSONException x){
-			throw new FileNotFoundException("JSON File format appears to be invalid for "+path);
-		}
 		catch(IOException x){
-			throw new FileNotFoundException("IOException reading or processing "+path);
+			throw new FileNotFoundException("IOException reading or processing "+path +", "+x.getMessage());
 		}
 	}
 
@@ -2944,11 +2946,11 @@ public class WDLibrary extends SearchObject {
 			Alert alert = wait.until(ExpectedConditions.alertIsPresent());
 			
 			if(accept){
-				//clicks on the “Ok” button
+				//clicks on the OK button
 				//webdriver.switchTo().alert().accept();
 				alert.accept();
 			}else{
-				//clicks on the “Cancel” button
+				//clicks on the Cancel button
 				//webdriver.switchTo().alert().dismiss();
 				alert.dismiss();
 			}
@@ -3056,6 +3058,7 @@ public class WDLibrary extends SearchObject {
 		} catch (SAFSException e) {
 			e.printStackTrace();
 		}
+		
 	}
 	
 	/**
@@ -3114,7 +3117,7 @@ public class WDLibrary extends SearchObject {
 			}
 		}
 	}
-	
+
 	/**
 	 * Before running this method, please read java doc of {@link #test_ajax_call(String)}
 	 * @param args
