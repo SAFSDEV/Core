@@ -69,6 +69,7 @@ public class CFComboBox extends CFComponent {
 			String detail = "";
 			String label = "";
 			Iterator<?> iterator = null;
+			boolean originalRefreshStatus = false;
 			
 			try{
 				super.localProcess();
@@ -96,6 +97,11 @@ public class CFComboBox extends CFComponent {
 				if(iterator.hasNext()){
 					if(param1.isEmpty()) param1 = (String)iterator.next();
 					else param2 = (String) iterator.next();
+				}
+				
+				originalRefreshStatus = combobox.getForceRefresh();
+				if(!param2.isEmpty()){
+					combobox.setForceRefresh(Boolean.parseBoolean(param2));
 				}
 				
 				if(action.equalsIgnoreCase(SELECT)){
@@ -244,6 +250,9 @@ public class CFComboBox extends CFComponent {
 				msg = getStandardErrorMessage(windowName +":"+ compName +" "+ action);
 				detail = "Met Exception "+e.getMessage();
 				log.logMessage(testRecordData.getFac(),msg, detail, FAILED_MESSAGE);
+			}
+			finally {
+				combobox.setForceRefresh(originalRefreshStatus);
 			}
 		}
 	}
