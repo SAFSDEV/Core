@@ -972,11 +972,12 @@ public class ComboBox extends Component{
 				WebElement preWebElement = webelement();
 				selectOption(option);
 				
-				int repeatTimes = MAX_REFRESH_TIMES;
+				int repeatTimes = 0;
 				// If force refreshing, the implicit assumption is the web element 'id' is dynamic, otherwise
 				// we don't need to refresh. Thus, we can deduce that the web element we're dealing must change.
 				// So we need to keep refresh until the previous web element is not equal to current web element.
-				while(_forceRefresh && (preWebElement.equals(webelement())) && (repeatTimes-- > 0)){
+				while(_forceRefresh && (preWebElement.equals(webelement())) && (repeatTimes++ < MAX_REFRESH_TIMES)){
+					IndependantLog.debug("Force web page refreshing, refresh repeating times: '" + repeatTimes + "'");
 					refresh(false);
 					try { Thread.sleep(1000); } catch (InterruptedException ignore) {}
 				}
