@@ -54,6 +54,23 @@ public class ComboBox extends Component{
 	//https://dojotoolkit.org/documentation/tutorials/1.9/selects/demo/Select.php
 	public static final String CLASS_DOJO_SELECT =  DojoSelect_Select.CLASS_DOJO_SELECT;
 	
+	public static final int DEFAULT_MAX_REFRESH_TIMES = 3;
+	public static int MAX_REFRESH_TIMES = DEFAULT_MAX_REFRESH_TIMES;
+	
+	// Determine if need to force refreshing: true,  force refreshing after selecting items,
+    //										  false, not force refreshing
+	// Set it as 'false' by default, because mostly the 'id' of web element is not dynamic, which doesn't need refresh.
+	private static boolean _forceRefresh = false; 
+	
+	
+	public boolean getForceRefresh() {
+		return _forceRefresh;
+	}
+
+	public void setForceRefresh(boolean forceRefresh) {
+		_forceRefresh = forceRefresh;
+	}
+
 	Selectable select = null;
 	
 	/**
@@ -952,9 +969,17 @@ public class ComboBox extends Component{
 		
 		protected void setSelected(Object option) {
 			if (!isSelected(option)) {
+				WebElement preWebElement = webelement();
 				selectOption(option);
-				//After selection, the combo-box may be redrawn and become stale, refresh it.
-				refresh(true);
+				
+				int repeatTimes = MAX_REFRESH_TIMES;
+				// If force refreshing, the implicit assumption is the web element 'id' is dynamic, otherwise
+				// we don't need to refresh. Thus, we can deduce that the web element we're dealing must change.
+				// So we need to keep refresh until the previous web element is not equal to current web element.
+				while(_forceRefresh && (preWebElement.equals(webelement())) && (repeatTimes-- > 0)){
+					refresh(false);
+					try { Thread.sleep(1000); } catch (InterruptedException ignore) {}
+				}
 			}
 		}
 
