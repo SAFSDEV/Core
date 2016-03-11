@@ -2836,7 +2836,7 @@ public abstract class SeleniumPlus {
 		 * <pre>
 		 * {@code
 		 * boolean success = ComboBox.Select(Map.Google.Combobox1, "ItemText");
-		 * boolean success = ComboBox.Select(Map.Google.Combobox1, "ItemText", "true");			 
+		 * boolean success = ComboBox.Select(Map.Google.Combobox1, "ItemText", "true"); // force refreshing when dealing dynamic 'id' ComboBox			 
 		 * }
 		 * </pre>	
 		 * @see #prevResults
@@ -2863,7 +2863,7 @@ public abstract class SeleniumPlus {
 		 * <pre>
 		 * {@code
 		 * boolean success = ComboBox.SelectUnverified(Map.Google.Combobox1, "ItemText");		 
-		 * boolean success = ComboBox.SelectUnverified(Map.Google.Combobox1, "ItemText", "true");
+		 * boolean success = ComboBox.SelectUnverified(Map.Google.Combobox1, "ItemText", "true"); // force refreshing when dealing dynamic 'id' ComboBox
 		 * }
 		 * </pre>	
 		 * @see #prevResults
@@ -2890,7 +2890,7 @@ public abstract class SeleniumPlus {
 		 * <pre>
 		 * {@code
 		 * boolean success = ComboBox.SelectPartialMatch(Map.Google.Combobox1, "substring");
-		 * boolean success = ComboBox.SelectPartialMatch(Map.Google.Combobox1, "substring", "true");		 
+		 * boolean success = ComboBox.SelectPartialMatch(Map.Google.Combobox1, "substring", "true"); // force refreshing when dealing dynamic 'id' ComboBox	 
 		 * }
 		 * </pre>	
 		 * @see #prevResults
@@ -2906,19 +2906,25 @@ public abstract class SeleniumPlus {
 		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ComboBoxFunctionsReference.htm#detail_SelectIndex">Detailed Reference</a>
 		 * @param combobox Component (from App Map) to Select item from.
 		 * @param index -- the 1-based item index to select.<br>
+		 * @param extraParams optional
+		 * <ul>
+		 * <b>extraParams[0] forceRefresh</b> String, determine if force refreshing after selection. It is usually used when the 'id' of ComboBox is dynamic.<br>
+		 * 									 true,  force refreshing <br>
+		 * 									 false, not force refreshing <br>
 		 * @return true if successful, false otherwise.
 		 * @example	 
 		 * <pre>
 		 * {@code
 		 * boolean success = ComboBox.SelectIndex(Map.Google.Combobox1, 3);		 
+		 * boolean success = ComboBox.SelectIndex(Map.Google.Combobox1, 3, "true"); // force refreshing when dealing dynamic 'id' ComboBox 
 		 * }
 		 * </pre>	
 		 * @see #prevResults
 		 * @see org.safs.TestRecordHelper#getStatusCode()
 		 * @see org.safs.TestRecordHelper#getStatusInfo()
 		 */
-		public static boolean SelectIndex(org.safs.model.Component combobox, int index){
-			return action(combobox, ComboBoxFunctions.SELECTINDEX_KEYWORD, String.valueOf(index));
+		public static boolean SelectIndex(org.safs.model.Component combobox, int index, String... extraParams){
+			return action(combobox, ComboBoxFunctions.SELECTINDEX_KEYWORD, combineParams(extraParams, String.valueOf(index)));
 		}
 		
 		/**
