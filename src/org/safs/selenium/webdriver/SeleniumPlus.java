@@ -2825,19 +2825,26 @@ public abstract class SeleniumPlus {
 		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ComboBoxFunctionsReference.htm#detail_Select">Detailed Reference</a>
 		 * @param combobox Component (from App Map) to Select item from.
 		 * @param itemtext -- The combo box option to select.<br>
+		 * @param extraParams optional
+		 * <ul>
+		 * <b>extraParams[0] forceRefresh</b> String, determine if force refreshing after selection. It is usually used when the 'id' of ComboBox is dynamic.<br>
+		 * 									 true,  force refreshing <br>
+		 * 									 false, not force refreshing <br>
+		 * </ul>
 		 * @return true if successful, false otherwise.
 		 * @example	 
 		 * <pre>
 		 * {@code
-		 * boolean success = ComboBox.Select(Map.Google.Combobox1, "ItemText");		 
+		 * boolean success = ComboBox.Select(Map.Google.Combobox1, "ItemText");
+		 * boolean success = ComboBox.Select(Map.Google.Combobox1, "ItemText", "true");			 
 		 * }
 		 * </pre>	
 		 * @see #prevResults
 		 * @see org.safs.TestRecordHelper#getStatusCode()
 		 * @see org.safs.TestRecordHelper#getStatusInfo()
 		 */
-		public static boolean Select(org.safs.model.Component combobox, String itemtext){
-			return action(combobox, ComboBoxFunctions.SELECT_KEYWORD, itemtext);
+		public static boolean Select(org.safs.model.Component combobox, String itemtext, String... extraParams){
+			return action(combobox, ComboBoxFunctions.SELECT_KEYWORD, combineParams(extraParams, itemtext));
 		}
 		
 		/**
@@ -2845,19 +2852,26 @@ public abstract class SeleniumPlus {
 		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ComboBoxFunctionsReference.htm#detail_SelectUnverified">Detailed Reference</a>
 		 * @param combobox Component (from App Map) to Select item from.
 		 * @param itemtext -- The combo box option to select.<br>
+		 * @param extraParams optional
+		 * <ul>
+		 * <b>extraParams[0] forceRefresh</b> String, determine if force refreshing after selection. It is usually used when the 'id' of ComboBox is dynamic.<br>
+		 * 									 true,  force refreshing <br>
+		 * 									 false, not force refreshing <br>
+		 * </ul>
 		 * @return true if successful, false otherwise.
 		 * @example	 
 		 * <pre>
 		 * {@code
 		 * boolean success = ComboBox.SelectUnverified(Map.Google.Combobox1, "ItemText");		 
+		 * boolean success = ComboBox.SelectUnverified(Map.Google.Combobox1, "ItemText", "true");
 		 * }
 		 * </pre>	
 		 * @see #prevResults
 		 * @see org.safs.TestRecordHelper#getStatusCode()
 		 * @see org.safs.TestRecordHelper#getStatusInfo()
 		 */
-		public static boolean SelectUnverified(org.safs.model.Component combobox, String itemtext){
-			return action(combobox, ComboBoxFunctions.SELECTUNVERIFIED_KEYWORD, itemtext);
+		public static boolean SelectUnverified(org.safs.model.Component combobox, String itemtext, String... extraParams){
+			return action(combobox, ComboBoxFunctions.SELECTUNVERIFIED_KEYWORD, combineParams(extraParams, itemtext));
 		}
 		
 		/**
@@ -2865,19 +2879,26 @@ public abstract class SeleniumPlus {
 		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ComboBoxFunctionsReference.htm#detail_SelectPartialMatch">Detailed Reference</a>
 		 * @param combobox Component (from App Map) to Select item from.
 		 * @param itemtext -- The combo box option to select, given as a substring of the option. Case Sensitive.<br>
+		 * @param extraParams optional
+		 * <ul>
+		 * <b>extraParams[0] forceRefresh</b> String, determine if force refreshing after selection. It is usually used when the 'id' of ComboBox is dynamic.<br>
+		 * 									 true,  force refreshing <br>
+		 * 									 false, not force refreshing <br>
+		 * </ul>
 		 * @return true if successful, false otherwise.
 		 * @example	 
 		 * <pre>
 		 * {@code
-		 * boolean success = ComboBox.SelectPartialMatch(Map.Google.Combobox1, "substring");		 
+		 * boolean success = ComboBox.SelectPartialMatch(Map.Google.Combobox1, "substring");
+		 * boolean success = ComboBox.SelectPartialMatch(Map.Google.Combobox1, "substring", "true");		 
 		 * }
 		 * </pre>	
 		 * @see #prevResults
 		 * @see org.safs.TestRecordHelper#getStatusCode()
 		 * @see org.safs.TestRecordHelper#getStatusInfo()
 		 */
-		public static boolean SelectPartialMatch(org.safs.model.Component combobox, String itemtext){
-			return action(combobox, ComboBoxFunctions.SELECTPARTIALMATCH_KEYWORD, itemtext);
+		public static boolean SelectPartialMatch(org.safs.model.Component combobox, String itemtext, String... extraParams){
+			return action(combobox, ComboBoxFunctions.SELECTPARTIALMATCH_KEYWORD, combineParams(extraParams, itemtext));
 		}
 		
 		/**
