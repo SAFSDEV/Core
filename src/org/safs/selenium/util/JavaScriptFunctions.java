@@ -32,6 +32,7 @@ package org.safs.selenium.util;
  *  <br>   FEB 05, 2015    (Lei Wang) Modify parse_sap_m_ListItemBase(): Try property 'title' at last, and log debug message if no text is set.
  *  <br>   JUL 23, 2015    (Lei Wang) Add sendHttpRequest(): send HTTP request by AJAX.
  *  <br>   OCT 12, 2015    (Lei Wang) Add sap_getProperty(): get value of a property for a SAP object.
+ *  <br>   MAR 14, 2016    (Lei Wang) Modify debug(): log debug message to browser's console.
  *                                  
  */
 import java.util.ArrayList;
@@ -137,9 +138,14 @@ import org.safs.text.FileUtilities;
 public class JavaScriptFunctions {
 	/**Used to turn on/off the output of javascript functions to debug log.*/
 	public static boolean DEBUG_OUTPUT_JAVASCRIPT_FUNCTIONS = false;
-	/**Used to enable/disable debug message output of execution of javascript.*/
+	/**Used to enable/disable debug message output of execution of javascript.<br>
+	 * The default value is false.<br>*/
 	public static boolean jsDebugLogEnable = false;
 	public static void setJsDebugLogEnable(boolean enable){ jsDebugLogEnable = enable; }
+	/**Normally the debug message will be wrote to a file. We can set this field to true
+	 * so that the debug message will also be output to browser's console.<br>
+	 * The default value is false.<br>*/
+	public static boolean logToBrowserConsole = false;
 	
 	/**
 	 * @return the string code of SAFSgetElementFromXpath(xpath) defined in user-extension.js
@@ -698,7 +704,12 @@ public class JavaScriptFunctions {
 		if(jsDebugLogEnable){
 			scriptCommand.append("  var currentdate = new Date();\n");
 			scriptCommand.append("  var "+currenttimeVar+" = 'JS Log time '+ currentdate.getHours() + ':' + currentdate.getMinutes() + ':' + currentdate.getSeconds() + '.'+currentdate.getMilliseconds()+'# ';\n");
+			scriptCommand.append("  //add the debug message to global array variable, which will be output to debug log file.\n");
 			scriptCommand.append("  "+addToJSDebugArray(currenttimeVar+"+"+msgVar));
+			if(logToBrowserConsole){
+				scriptCommand.append("  //output the debug message to the browser's console\n");
+				scriptCommand.append("  try{console.log("+msgVar+");}catch(err){}\n");
+			}
 		}
 		scriptCommand.append("}\n");
 		
@@ -5210,6 +5221,7 @@ public class JavaScriptFunctions {
 	public static void main(String[] args){
 		System.out.println(JavaScriptFunctions.getAllFunctions());
 		try {
+			JavaScriptFunctions.jsDebugLogEnable = true;
 			FileUtilities.writeStringToUTF8File("SeleniumPlus.js", JavaScriptFunctions.getAllFunctions());
 		} catch (Exception e) {
 			e.printStackTrace();
