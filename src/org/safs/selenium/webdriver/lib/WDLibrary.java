@@ -51,6 +51,7 @@ package org.safs.selenium.webdriver.lib;
 *  <br>   MAR 02, 2016    (Lei Wang) Add clickUnverified(), closeAlert().
 *                                  Add class RBT: To encapsulate the local Robot and Robot RMI agent.
 *                                  Modify click() and doubleClick(): use RBT to do the click action.
+*  <br>   MAR 14, 2016    (Lei Wang) Add isAlertPresent(), waitAlert().
 */
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -78,7 +79,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.imageio.ImageIO;
 
 import org.apache.commons.io.FileUtils;
-import org.json.JSONException;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.JavascriptExecutor;
@@ -133,7 +133,6 @@ import org.safs.tools.input.RobotKeyEvent;
 import org.safs.tools.stringutils.StringUtilities;
 
 import com.sebuilder.interpreter.Script;
-import com.sebuilder.interpreter.factory.ScriptFactory;
 import com.sebuilder.interpreter.factory.StepTypeFactory;
 import com.sebuilder.interpreter.webdriverfactory.WebDriverFactory;
 
@@ -156,13 +155,32 @@ public class WDLibrary extends SearchObject {
 
     /** 2 seconds to wait for a click action finished on page. */
 	public static final int DEFAULT_TIMEOUT_WAIT_CLICK = 2;//seconds
+	
+	/**
+	 * The timeout in seconds to wait for the alert's presence.<br>
+	 * The default value is 2 seconds.<br>
+	 */
+	public static final int DEFAULT_TIMEOUT_WAIT_ALERT = 2;//seconds
 
-	/** time (in seconds) to wait for a click action finished on page. */
-	public static int timeoutWaitClick = DEFAULT_TIMEOUT_WAIT_CLICK;//seconds
+	/** 0, means no waiting. */
+	public static final int TIMEOUT_NOWAIT = 0;
+	/** -1, means wait for ever */
+	public static final int TIMEOUT_WAIT_FOREVER = -1;
 
     /** 10 seconds to wait for a Robot click action finished on page. */
 	public static final int DEFAULT_TIMEOUT_WAIT_ROBOT_CLICK = 10;//seconds
+	
+	/** time (in seconds) to wait for a click action finished on page. */
+	public static int timeoutWaitClick = DEFAULT_TIMEOUT_WAIT_CLICK;//seconds
 
+	/** time (in seconds) to wait for an Alert appear on page. */
+	public static int timeoutWaitAlert = DEFAULT_TIMEOUT_WAIT_ALERT;//seconds
+	
+	/** time (in seconds) to check if an Alert is present on page before clicking.
+	 * The default value is set to {@link #TIMEOUT_NOWAIT}, means we check immediately
+	 * without waiting for presence of Alert. */
+	public static int timeoutCheckAlertForClick = TIMEOUT_NOWAIT;//seconds
+	
 	/** time (in seconds) to wait for a Robot click action finished on page. */
 	public static int timeoutWaitRobotClick = DEFAULT_TIMEOUT_WAIT_ROBOT_CLICK;//seconds
 	
@@ -2903,12 +2921,6 @@ public class WDLibrary extends SearchObject {
 	}
 	
 	/**
-	 * The timeout in seconds to wait for the alert's presence before closing it.<br>
-	 * The default value is 2 seconds.<br>
-	 */
-	public static int TIMEOUT_FOR_ALERT_PRESENCE_IN_SECONDS = 2;
-	
-	/**
 	 * Close the Alert-Modal-Dialog associated with a certain browser identified by ID.<br>
 	 * It will get the cached webdriver according to the browser's id, and close the 'alert' through that webdriver.<br>
 	 * <b>Note:</b>This API will NOT change the current WebDriver. {@link #getWebDriver()} will still return the same object.<br>
@@ -2927,14 +2939,90 @@ public class WDLibrary extends SearchObject {
 	public static void closeAlert(boolean accept, String... optionals) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(false);
 		String browserID = null;
-		int timeout = TIMEOUT_FOR_ALERT_PRESENCE_IN_SECONDS;
+		
+		if(optionals!=null && optionals.length>0){
+			if(optionals.length>1 && StringUtils.isValid(optionals[1])) browserID=optionals[1];
+		}
+		
+		try{
+			Alert alert = waitAlert(optionals);
+			
+			if(accept){
+				alert.accept();//“OK” button
+			}else{
+				alert.dismiss();//“Cancel” button
+			}
+		}catch(Exception e){
+			String message = "Fail to "+(accept?"accept":"dismiss")+" alert dialog associated with "+(browserID==null? "current browser.":"browser '"+browserID+"'.");
+			IndependantLog.error(debugmsg+message+" due to "+StringUtils.debugmsg(e));
+			throw new SeleniumPlusException(message);
+		}
+	}
+	
+	/**
+	 * 
+	 * Test the presence of Alert-Modal-Dialog associated with a certain browser identified by ID.<br>
+	 * It will get the cached webdriver according to the browser's id, and get the 'alert' through that webdriver.<br>
+	 * <b>Note:</b>This API will NOT change the current WebDriver. {@link #getWebDriver()} will still return the same object.<br>
+	 * 
+	 * @param optionals String...
+	 * <ul>
+	 * <b>optionals[0] timeoutWaitAlertPresence</b> int, timeout in seconds to wait for the presence of Alert.
+	 *                                                   If not provided, default is 2 seconds.<br>
+	 *                                                   If it is provided as {@link #TIMEOUT_NOWAIT}, this method will try to get Alert without waiting.<br>
+	 * <b>optionals[1] browserID</b> String, the ID to get the browser on which the 'alert' will be closed.
+	 *                                       If not provided, the current browser will be used.<br>
+	 * </ul>
+	 * @return boolean, true if the Alert is present.
+	 * @throws SeleniumPlusException if the WebDriver is null
+	 * @see #waitAlert(String...)
+	 */
+	public static boolean isAlertPresent(String... optionals) throws SeleniumPlusException{
+		String debugmsg = "WDLibrary.isAlertPresent(): ";
+		try {
+			if(waitAlert(optionals)!=null){
+				return true;
+			}else{
+				IndependantLog.debug(debugmsg+"Failed to wait for the Alert. A null object was returned.");
+			}
+		} catch (SeleniumPlusException e) {
+			IndependantLog.warn(debugmsg+"Failed to wait for the Alert. Met "+StringUtils.debugmsg(e));
+			//If we didn't get the webdriver, then we will throw the exception out.
+			if(SeleniumPlusException.CODE_OBJECT_IS_NULL.equals(e.getCode())) throw e;
+		}
+		return false;
+	}
+	
+	/**
+	 * Wait for the presence of Alert-Modal-Dialog associated with a certain browser identified by ID.<br>
+	 * It will get the cached webdriver according to the browser's id, and get the 'alert' through that webdriver.<br>
+	 * <b>Note:</b>This API will NOT change the current WebDriver. {@link #getWebDriver()} will still return the same object.<br>
+	 * 
+	 * @param optionals String...
+	 * <ul>
+	 * <b>optionals[0] timeoutWaitAlertPresence</b> int, timeout in seconds to wait for the presence of Alert.
+	 *                                                   If not provided, default is 2 seconds.<br>
+	 *                                                   If it is provided as {@link #TIMEOUT_NOWAIT}, this method will try to get Alert without waiting.<br>
+	 * <b>optionals[1] browserID</b> String, the ID to get the browser on which the 'alert' will be closed.
+	 *                                       If not provided, the current browser will be used.<br>
+	 * </ul>
+	 * @return Alert, the current Alert on browser; it could be null if it is not present within timeout.
+	 * @throws SeleniumPlusException, if WebDriver cannot be got according to the parameter browserID.<br>
+	 *                                if Alert is not present within timeout.<br>
+	 */
+	private static Alert waitAlert(String... optionals) throws SeleniumPlusException{
+		String debugmsg = StringUtils.debugmsg(false);
+		String browserID = null;
+		int timeout = timeoutWaitAlert;
+		Alert alert = null;
 		
 		if(optionals!=null && optionals.length>0){
 			if(StringUtils.isValid(optionals[0])){
-				try{ timeout = Integer.parseInt(optionals[0]); }catch(NumberFormatException e){ timeout = TIMEOUT_FOR_ALERT_PRESENCE_IN_SECONDS; }
+				try{ timeout = Integer.parseInt(optionals[0]); }catch(NumberFormatException e){}
 			}
 			if(optionals.length>1 && StringUtils.isValid(optionals[1])) browserID=optionals[1];
 		}
+		
 		WebDriver webdriver = getWebDriver(browserID);
 
 		if(webdriver==null){
@@ -2942,21 +3030,17 @@ public class WDLibrary extends SearchObject {
 		}
 		
 		try{
-			WebDriverWait wait = new WebDriverWait(webdriver, timeout);
-			Alert alert = wait.until(ExpectedConditions.alertIsPresent());
-			
-			if(accept){
-				//clicks on the OK button
-				//webdriver.switchTo().alert().accept();
-				alert.accept();
+			if(timeout==TIMEOUT_NOWAIT){
+				alert = webdriver.switchTo().alert();//NoAlertPresentException
 			}else{
-				//clicks on the Cancel button
-				//webdriver.switchTo().alert().dismiss();
-				alert.dismiss();
+				WebDriverWait wait = new WebDriverWait(webdriver, timeout);
+				alert = wait.until(ExpectedConditions.alertIsPresent());//TimeoutException
 			}
+			
+			return alert;
 		}catch(Exception e){
-			String message = "Fail to "+(accept?"accept":"dismiss")+" alert dialog associated with browser '"+browserID+"'";
-			IndependantLog.error(debugmsg+message+" due to "+StringUtils.debugmsg(e));
+			String message = "Fail to get alert dialog associated with "+(browserID==null? "current browser.":"browser '"+browserID+"'.");
+			IndependantLog.warn(debugmsg+message+" due to "+StringUtils.debugmsg(e));
 			throw new SeleniumPlusException(message);
 		}
 	}

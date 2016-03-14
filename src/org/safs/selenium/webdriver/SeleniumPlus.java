@@ -55,6 +55,7 @@ package org.safs.selenium.webdriver;
  *  <br>   JAN 07, 2016    (Carl Nagle) Make System.exit() optional and allowExit=false, by default.
  *  <br>   MAR 02, 2016    (Lei Wang) Add Misc.AlertAccept(), Misc.AlertDismiss() and ClickUnverified().
  *  <br>   MAR 07, 2016    (Lei Wang) Add example for StartWebBrowser() with preference settings for "chrome" and "firefox".
+ *  <br>   MAR 14, 2016    (Lei Wang) Add IsAlertPresent().
  */
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -8022,6 +8023,41 @@ public abstract class SeleniumPlus {
 			}catch(Exception e){
 				IndependantLog.error(StringUtils.debugmsg(false)+" Fail to Set ClickCapture, due to "+StringUtils.debugmsg(e));
 				return false;
+			}
+		}
+
+		/**
+		 * Test the presence of an Alert Dialog associated with a browser.<br>
+		 * This command will wait 2 seconds by default for the presence of Alert.<br>
+		 * @param optionals String
+		 * <ul>
+		 * <b>optionals[0] timeoutWaitAlertPresence</b> int, timeout in seconds to wait for the presence of Alert.
+		 *                                                   If not provided, default is 2 seconds.<br>
+		 * <b>optionals[0] browserID</b> String, the ID to get the browser on which the 'alert' will be closed.
+		 *                                       If not provided, the current browser will be used.<br>
+		 * </ul>
+		 * @return boolean if the Alert exist
+		 * @throws SeleniumPlusException if there is any un-expected error.
+		 * @example
+		 * <pre>
+		 * {@code
+		 * 1) boolean success = IsAlertPresent();//Test the presence of Alert (belongs to current browser) with 2 seconds timeout.
+		 * 2) boolean success = IsAlertPresent("0");//Test the presence of Alert (belongs to current browser) immediately 
+		 * 3) boolean success = IsAlertPresent("5", "browser-id");//Test the presence of Alert (belongs to browser identified by "browser-id"), 
+		 *                                                        //before that it will wait 5 seconds for the presence of the Alert
+		 * }
+		 * @see SeleniumPlus#StartWebBrowser(String, String, String...)
+		 */
+		public static boolean IsAlertPresent(String... optionals) throws SeleniumPlusException{
+			try{
+				//TODO we could provide driver command 'IsAlertPresent' for traditional SAFS users later.
+				boolean success = WDLibrary.isAlertPresent(optionals);
+				Logging.LogTestSuccess("IsAlertPresent Succeeded.");
+				return success;
+			}catch(Exception e){
+				Logging.LogTestFailure("IsAlertPresent Failed.");
+				if(e instanceof SeleniumPlusException) throw e;
+				throw new SeleniumPlusException("IsAlertPresent Failed.", e);
 			}
 		}
 		
