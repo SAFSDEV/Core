@@ -14,6 +14,7 @@ package org.safs.selenium.util;
  * NOV 18, 2015    (LeiWang) Provide a way to disable the DocumentClickCapture.
  * FEB 22, 2016    (LeiWang) Modify to avoid setting the click listener the second time if the first listener is consumed.
  * FEB 29, 2016    (LeiWang) Modify to provide the ability to force receiving click-event by html-document.
+ * MAR 14, 2016    (LeiWang) Log debug message for adding/removing/execution of click-listeners.
  */
 import java.util.Date;
 
@@ -96,6 +97,17 @@ public class DocumentClickCapture implements Runnable{
 	
 	/** true, will not retrieve event's information.*/
 	public static final boolean DEFAULT_IGNORE_EVENT_INFORMATION = true;
+	
+	/**
+	 * Return the boolean value to decide if the javascript debug message will be output.<br>
+	 * The debug message will be output to:<br>
+	 * 1. The normal debug log file, by {@link JavaScriptFunctions#debug()}.<br>
+	 * 2. The browser's console message by javascript API console.log().<br>
+	 * 
+	 * @return boolean, If it is true, program will output debug message to debug log file and browser's console.
+	 * @see JavaScriptFunctions#jsDebugLogEnable
+	 */
+	private static boolean debug(){ return JavaScriptFunctions.jsDebugLogEnable;}
 	
 	/**
 	 * This field could be used to turn on/off the DocumentClickCapture.<br>
@@ -615,6 +627,7 @@ public class DocumentClickCapture implements Runnable{
 	           "window."+ listenerError +"='';\n"+
   	           "window."+ listenerFunction +"={\n"+
 		       "    handleEvent: function (evt) {\n"+
+	 (debug()? "        try{console.log('============================    '+evt.type+' happened.  =========================');}catch(err){}\n" : "") +
 			   "        switch(evt.type) {\n"+
 			   "            case 'mouseup':\n"+
 			   "                break;// ignore \n"+
@@ -643,6 +656,7 @@ public class DocumentClickCapture implements Runnable{
 			   "                try{window."+ EVENT_ALTKEY +"=evt.altKey;}catch(err){}\n"+
 			   "                try{window."+ EVENT_METAKEY +"=evt.metaKey;}catch(err){}\n"+
 			   "                try{window."+ EVENT_BUTTON +"=evt.button;}catch(err){}\n"+
+     (debug()? "                try{console.log('===================================   set window."+listenerID+" to ture   ===========================');}catch(err){}\n" : "")+
 			   "                break;// ignore \n"+
 			   "            case 'click':\n"+
 			   "                break;// ignore \n"+
@@ -670,11 +684,22 @@ public class DocumentClickCapture implements Runnable{
 	}
 	
 	/**
+	 * Used to hold the component's original border style so that after highlight we can set
+	 * the component's border style back to normal.
+	 * 
+	 * @see #_addEventListeners()
+	 * @see #_removeEventListeners()
+	 */
+	private static final String GLOBAL_VAR_BORDER_STYLE = "window.global.safs.var.borderStyle";
+	
+	/**
 	 * Attach event-listeners to a target.<br>
 	 * @param domelement (<b>Javascript</b>) Object, the dom-element to attach the event-listeners.
 	 * @see #addEventListeners()
 	 */	
 	String _addEventListeners(){
+		String debugmsg = StringUtils.debugmsg(false);
+		
 		StringBuffer scriptCommand = new StringBuffer();
 		
 		scriptCommand.append("function _addEventListeners(domelement){\n");
@@ -688,6 +713,13 @@ public class DocumentClickCapture implements Runnable{
 			scriptCommand.append("    target = window.document;\n");
 			scriptCommand.append("  }\n");			
 		}
+		if(debug()){
+			scriptCommand.append("  debug(' "+debugmsg+" adding listener "+listenerID+" to ');\n");
+			scriptCommand.append("  debug(target);\n");
+			scriptCommand.append("  "+GLOBAL_VAR_BORDER_STYLE+"=target.style.border;\n");
+			scriptCommand.append("  target.style.border='3px dashed red';\n");
+		}
+		
 		scriptCommand.append("  try{target.addEventListener('mouseup', window."+listenerFunction+", true);}catch(err){}\n");
 		scriptCommand.append("  try{target.addEventListener('mousedown', window."+listenerFunction+", true);}catch(err){}\n");
 		scriptCommand.append("  try{target.addEventListener('click', window."+listenerFunction+", true);}catch(err){}\n");
@@ -701,6 +733,7 @@ public class DocumentClickCapture implements Runnable{
 	 * @see #removeEventListeners()
 	 */	
 	String _removeEventListeners(){
+		String debugmsg = StringUtils.debugmsg(false);
 		StringBuffer scriptCommand = new StringBuffer();
 		
 		scriptCommand.append("function _removeEventListeners(domelement){\n");
@@ -714,6 +747,12 @@ public class DocumentClickCapture implements Runnable{
 			scriptCommand.append("    target = window.document;\n");
 			scriptCommand.append("  }\n");
 		}
+		if(debug()){
+			scriptCommand.append("  debug(' "+debugmsg+" removing listener "+listenerID+" from ');\n");
+			scriptCommand.append("  debug(target);\n");
+			scriptCommand.append("  target.style.border="+GLOBAL_VAR_BORDER_STYLE+";\n");
+		}
+		
 		scriptCommand.append("  window.listenerError='';\n");
 		scriptCommand.append("  try{target.removeEventListener('mouseup', window."+listenerFunction+", true);}catch(err){window."+ listenerError +" += err;}\n");
 		scriptCommand.append("  try{target.removeEventListener('mousedown', window."+listenerFunction+", true);}catch(err){window."+ listenerError +" += err;}\n");
