@@ -8052,7 +8052,11 @@ public abstract class SeleniumPlus {
 			try{
 				//TODO we could provide driver command 'IsAlertPresent' for traditional SAFS users later.
 				boolean success = WDLibrary.isAlertPresent(optionals);
-				Logging.LogTestSuccess("IsAlertPresent Succeeded.");
+				if(success){
+					Logging.LogTestSuccess("An Alert dialog was present.");
+				}else{
+					Logging.LogTestSuccess("No Alert dialog was present.");
+				}
 				return success;
 			}catch(Exception e){
 				Logging.LogTestFailure("IsAlertPresent Failed.");
