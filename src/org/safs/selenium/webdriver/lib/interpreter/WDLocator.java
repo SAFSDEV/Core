@@ -4,6 +4,7 @@
  **/
 package org.safs.selenium.webdriver.lib.interpreter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.openqa.selenium.By;
@@ -63,6 +64,10 @@ public class WDLocator extends Locator {
 		return WDType.ofName(wdtype.name()).find(value, ctx);
 	}
 	
+	/**
+	 * @param ctx
+	 * @return true if element was NOT found in 2 second timeout period.
+	 */	
 	public boolean findElementNotPresent(TestRun ctx) {
 		try{WebDriverGUIUtilities._LASTINSTANCE.setWDTimeout(2);}catch(Exception x){
 			ctx.log().debug("WDLocator.findElementNotPresent unable to change WebDriver timeouts!");
@@ -83,6 +88,39 @@ public class WDLocator extends Locator {
 	}
 	
 	public enum WDType {
+		MAP {
+			@Override
+			public WebElement find(String value, TestRun ctx) {
+				String rs = new String(value);
+				if(ctx instanceof WDTestRun){
+					rs = ((WDTestRun)ctx).replaceVariableReferences(value);
+				}
+				if(null != frameInfo)
+					return SearchObject.getObject(ctx.driver(), frameInfo + rs);
+				return SearchObject.getObject(ctx.driver(), rs);
+			}
+			@Override
+			public List<WebElement> findElements(String value, TestRun ctx) {
+				String rs = new String(value);
+				if(ctx instanceof WDTestRun){
+					rs = ((WDTestRun)ctx).replaceVariableReferences(value);
+				}
+				if(null != frameInfo)
+					return SearchObject.getObjects(ctx.driver(), frameInfo + rs);
+				return SearchObject.getObjects(ctx.driver(),rs);
+			}
+			@Override
+			public boolean findElementNotPresent(String value, TestRun ctx) {
+				String rs = new String(value);
+				if(ctx instanceof WDTestRun){
+					rs = ((WDTestRun)ctx).replaceVariableReferences(value);
+				}
+				if(null != frameInfo)
+					return SearchObject.getObject(ctx.driver(), frameInfo + rs) == null;
+
+				return SearchObject.getObject(ctx.driver(), rs) == null;
+			}
+		},
 		ID {
 			@Override
 			public WebElement find(String value, TestRun ctx) {
