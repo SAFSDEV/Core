@@ -8,8 +8,10 @@ import java.util.List;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.safs.selenium.util.JavaScriptFunctions;
 import org.safs.selenium.webdriver.lib.ComboBox;
 import org.safs.selenium.webdriver.lib.SearchObject;
+import org.safs.selenium.webdriver.lib.SeleniumPlusException;
 import org.safs.selenium.webdriver.lib.WDLibrary;
 import org.safs.selenium.webdriver.lib.interpreter.WDLocator.WDType;
 import org.safs.selenium.webdriver.lib.interpreter.selrunner.SRUtilities;
@@ -39,6 +41,8 @@ public class Select implements StepType, SRunnerType {
 		if(es == null || es.isEmpty()) {
 			ctx.log().error("Select did not find any matching SELECT WebElements to evaluate.");
 			return false;
+		}else{
+			ctx.log().info("Select found "+ es.size()+" matching SELECT WebElements to evaluate.");			
 		}
 		
 		String param = ctx.string(ITEM_PARAM);
@@ -77,27 +81,51 @@ public class Select implements StepType, SRunnerType {
 		WebElement option = null;
 		String curval = null;
 		for(int i=0; i<es.size();i++){
+			ctx.log().info("Select processing SELECT Element "+ i +" for child OPTION "+ param);
 			select = es.get(i); // next SELECT
 			List<WebElement> ws = select.findElements(By.tagName("option"));
-			if(ws==null||ws.size()==0)continue;
+			if(ws==null||ws.size()==0){
+				ctx.log().info("Select found no child OPTIONs for SELECT Element "+ i);
+				continue;
+			}
 			try{
-				option = wdtype.find(val, ws);
-				if(option instanceof WebElement) return performSelect(select, option, ctx);
+				option = wdtype.find(val, ws, ctx);
+				if(option instanceof WebElement) {
+					return performSelect(select, option, ctx);
+				}
 			}catch(Exception x){
 				ctx.log().debug("Select matching ignoring "+ x.getClass().getSimpleName()+", "+ x.getMessage());
 			}
 		}
-		ctx.log().error("Select did not find any OPTIONs matching '"+ param +"'.");
+		ctx.log().error("Select did not find any OPTION matching '"+ param +"'.");
 		return false;
 	}
 	
 	protected boolean performSelect(WebElement select, WebElement option, TestRun ctx){
+		Object rc = null;
 		try{
-			
+			rc = WDLibrary.executeScript("function selectListItem(select, option){\n"+
+		                            "  select.selectedIndex = -1;\n"+
+		                            "  option.selected = 'selected';\n"+
+		                            "  for(var i=0;i < select.options.length; i++){\n"+
+					                "    if(select.options[i].selected) {\n"+
+		                            "      debug('OPTION index '+ i +' selected, matching '+ select.options[i].text);\n"+
+		                            "      select.selectedIndex = i;\n"+
+					                "      break;\n"+
+					                "    }\n"+
+		                            "  }\n"+
+		                            "  return select.selectedIndex;\n"+
+		                            "}\n"+
+					                "return selectListItem(arguments[0],arguments[1]);", new Object[]{select,option});			
 		}
 		catch(Exception x){
 			ctx.log().error("Select Option select "+ x.getClass().getSimpleName()+", "+ x.getMessage());
 			return false;
+		}
+		if(rc instanceof Number){
+			ctx.log().info("Select returned numeric selectedIndex of "+ ((Number)rc).longValue());
+		}else{
+			ctx.log().info("Select did NOT return a numeric selectedIndex!");
 		}
 		return true;
 	}
@@ -105,7 +133,7 @@ public class Select implements StepType, SRunnerType {
 	public enum WDType {
 		ID {
 			@Override
-			public WebElement find(String value,  List<WebElement> options) {
+			public WebElement find(String value,  List<WebElement> options, TestRun ctx) {
 				for(int i=0;i<options.size();i++){
 					WebElement e = options.get(i);
 					if(value.equals(e.getAttribute("id"))) return e;
@@ -115,34 +143,60 @@ public class Select implements StepType, SRunnerType {
 		},
 		LABEL {
 			@Override
-			public WebElement find(String value,  List<WebElement> options) {
+			public WebElement find(String value,  List<WebElement> options, TestRun ctx) {
 				String regexp = null;
 				String text = null;
 				WebElement e = null;
 				boolean isRegExp = value.toLowerCase().startsWith(REGEXP_PREFIX);
 				if(isRegExp){
 					try{ 
-						regexp = value.substring(REGEXP_PREFIX.length());
+						regexp = value.substring(REGEXP_PREFIX.length()).trim();
+						ctx.log().info("Select extracted Regular Expression: '"+ regexp +"'");
 					}
-					catch(Exception x){
+					catch(Exception x){						
+						ctx.log().error("Select Regular Expression "+ x.getClass().getSimpleName()+", "+ x.getMessage());
 						return null;
 					}
-				}
+				}				
+				ctx.log().info("Select has "+ options.size() + " OPTIONs.");
 				for(int i=0;i<options.size();i++){
 					text = null;
 					e = options.get(i);
 					text = e.getText();
+					ctx.log().info("Select OPTION "+ i +" text: '"+ text +"'");
 					if(text == null|| text.length()==0) continue;
 					if(isRegExp){
-						if(text.matches(regexp)) return e;
-					}else if(value.equals(text)) return e;
+						if(text.matches(regexp)) {
+							ctx.log().info("Select RegExp is matching on text: '"+ text +"'");
+							return e;
+						}
+						String tr = text.trim();
+						if(tr.matches(regexp)) {
+							ctx.log().info("Select RegExp is matching on text: '"+ text +"'");
+							return e;
+						}
+						if(tr.length()==0 && " ".matches(regexp)){
+							ctx.log().info("Select RegExp is matching on text: '"+ text +"'");
+							return e;
+						}
+					}else {
+						if(value.equals(text)) {					
+							ctx.log().info("Select has matched on text: '"+ text +"'");
+							return e;
+						}
+						if(value.equals(text.trim())) {					
+							ctx.log().info("Select has matched on text: '"+ text.trim() +"'");
+							return e;
+						}
+					}
 				}
+				ctx.log().info("Select did not find an OPTION match for text: '"+ value +"'");
 				return null;
 			}
 		},
 		VALUE {
 			@Override
-			public WebElement find(String value, List<WebElement> options) {
+			public WebElement find(String value, List<WebElement> options, TestRun ctx) {
 				for(int i=0;i<options.size();i++){
 					WebElement e = options.get(i);
 					if(value.equals(e.getAttribute("value"))) return e;					
@@ -152,7 +206,7 @@ public class Select implements StepType, SRunnerType {
 		},
 		INDEX {
 			@Override
-			public WebElement find(String value,  List<WebElement> options) {
+			public WebElement find(String value,  List<WebElement> options, TestRun ctx) {
 				try{
 					return options.get(Integer.parseInt(value));
 				}catch(Exception x){}
@@ -160,7 +214,7 @@ public class Select implements StepType, SRunnerType {
 			}
 		};
 				
-		public abstract WebElement find(String value, List<WebElement> options);
+		public abstract WebElement find(String value, List<WebElement> options, TestRun ctx);
 		
 		@Override
 		public String toString() {

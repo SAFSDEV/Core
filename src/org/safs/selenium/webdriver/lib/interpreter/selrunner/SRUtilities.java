@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.safs.selenium.webdriver.lib.interpreter.WDLocator;
 import org.safs.selenium.webdriver.lib.interpreter.WDTestRunFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -52,6 +53,6 @@ public class SRUtilities {
 					"SRUtilities did not successfully process Locator parameter for StepType "+
 			        step.type.getClass().getSimpleName() +" using parameter "+ rs);
 		
-		step.locatorParams.put("locator", new Locator(type, value));
+		step.locatorParams.put("locator", new WDLocator(type, value));
 	}
 }
