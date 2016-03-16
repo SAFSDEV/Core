@@ -14,6 +14,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +33,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.sebuilder.interpreter.Getter;
 import com.sebuilder.interpreter.Script;
 import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.factory.DataSourceFactory;
@@ -153,10 +155,24 @@ public class WDScriptFactory extends ScriptFactory {
 			if(step.type instanceof SRunnerType){
 				((SRunnerType)step.type).processParams(step, params);
 			}else{
+				// check for Steps that are implied (WaitFor, Verify, Assert, Store, etc..)and contain us as Getters
+				try{
+					Field[] fields = step.type.getClass().getFields();
+					for(int g=0;g<fields.length;g++){
+						Field field = fields[g];
+						if(field.getType().isAssignableFrom(Getter.class)){
+							Getter getter = (Getter) field.get(step.type);
+							if(getter instanceof SRunnerType){
+								((SRunnerType)getter).processParams(step, params);
+							}
+						}
+					}
+				}catch(IllegalAccessException ignore){}
+				
 				// handle default StepTypes here (like Pause)
 				if("Pause".equalsIgnoreCase(step.type.getClass().getSimpleName())){
 					step.stringParams.put("waitTime", params[1]);
-				}
+				} 
 			}
 		}		
 		return scripts;

@@ -45,6 +45,7 @@ public class WDTestRun extends TestRun {
 
 	public static final String VARREF_START = "${";
 	public static final String VARREF_END   = "}";
+	public static final String MAPREF_PREFIX   = "map:";
 	
 	public WDTestRun(Script script, int implicitlyWaitDriverTimeout,
 			int pageLoadDriverTimeout, Map<String, String> initialVars) {
@@ -103,14 +104,21 @@ public class WDTestRun extends TestRun {
 
 	/**
 	 * Process any ${var} references.
-	 * Lookup potential variable values stored in the local Map and if not present there, 
-	 * see if it is available via SAFSVARS.
+	 * Lookup potential variable values stored in the local Java Map object and, if not present there, 
+	 * see if it is available via SAFSVARS or SAFSMAPS.
+	 * <p>
+     * Valid possible App Map Reference formats:
+     * <p><pre>
+     *   ${Map:ConstantName}              (default App Map)
+     *   ${Map:WindowName:CompName}       (default App Map)
+     *   ${Map:mapID:WindowName:CompName}
+     *   </pre><p>
 	 * @param value
 	 * @return value with embedded variable references replaced.
 	 * @see WebDriverGUIUtilities#_LASTINSTANCE
 	 * @see STAFHelper#getVariable(String)
 	 */
-	protected String replaceVariableReferences(String value){		
+	public String replaceVariableReferences(String value){		
 		int start = -1;
 		int end   = -1;
 		do{
@@ -126,7 +134,37 @@ public class WDTestRun extends TestRun {
 					   if(vars().containsKey(key)){
 						   val = vars().get(key);
 					   }else{
-						   val = WebDriverGUIUtilities._LASTINSTANCE.getSTAFHelper().getVariable(key);
+						   // Valid possible App Map References:
+						   // ${Map:ConstantName}          (default App Map)
+						   // ${Map:WindowName:CompName} (default App Map)
+						   // ${Map:mapID:WindowName:CompName}
+						   if(key.toLowerCase().startsWith(MAPREF_PREFIX)){
+							   String map = key.substring(MAPREF_PREFIX.length());
+							   String win = null;
+							   String comp = null;
+							   int col = map.lastIndexOf(':');
+							   if(col < 0){ 
+								   //only a COMP (or constant) name is provided
+								   comp = map;
+								   map = null;
+							   }else{
+								   // extract explicit comp name
+								   comp = map.substring(col+1);
+								   map = map.substring(0, col);
+								   col = map.lastIndexOf(':');
+								   if(col < 0){
+									   win = map;
+									   map = null;
+								   }else{
+									   win = map.substring(col+1);
+									   map = map.substring(0, col);
+								   }
+							   }
+							   // lookup App Map Reference mapid and winname may be null
+							   val = WebDriverGUIUtilities._LASTINSTANCE.getSTAFHelper().getAppMapItem(map, win, comp);
+						   }else{
+							   val = WebDriverGUIUtilities._LASTINSTANCE.getSTAFHelper().getVariable(key);
+						   }
 					   }
 				   }catch(Exception ignore){}
 				   value = val == null ? 

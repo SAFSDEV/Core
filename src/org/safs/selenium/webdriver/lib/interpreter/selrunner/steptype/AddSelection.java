@@ -7,6 +7,7 @@ package org.safs.selenium.webdriver.lib.interpreter.selrunner.steptype;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
+import org.safs.selenium.webdriver.lib.WDLibrary;
 
 import com.sebuilder.interpreter.TestRun;
 
@@ -14,12 +15,13 @@ public class AddSelection extends Select {
 
 	@Override
 	protected boolean performSelect(WebElement select, WebElement option, TestRun ctx){
-		Actions actions = new Actions(ctx.driver());
-		actions.keyDown(Keys.CONTROL)
-		    .click(option)
-		    .keyUp(Keys.CONTROL)
-		    .build()
-		    .perform();
+		try{
+			WDLibrary.executeScript("arguments[0].selected=true;", new Object[]{option});			
+		}
+		catch(Exception x){
+			ctx.log().error("Select Option select "+ x.getClass().getSimpleName()+", "+ x.getMessage());
+			return false;
+		}
 		return true;
 	}
 }

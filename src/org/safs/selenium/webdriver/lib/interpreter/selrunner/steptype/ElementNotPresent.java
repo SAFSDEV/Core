@@ -10,6 +10,7 @@ import org.safs.selenium.webdriver.lib.interpreter.selrunner.SRunnerType;
 
 import com.sebuilder.interpreter.Getter;
 import com.sebuilder.interpreter.Step;
+import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.steptype.ElementPresent;
 
@@ -17,13 +18,7 @@ public class ElementNotPresent implements Getter, SRunnerType {
 
 	@Override
 	public String get(TestRun ctx) {
-		try{
-			return "" + ((WDLocator)ctx.locator("locator")).findElementNotPresent(ctx);
-		}
-		catch(Exception x){
-			ctx.log().debug("ElementNotPresent ignoring "+x.getClass().getSimpleName()+","+x.getMessage());
-		}
-		return String.valueOf(true);
+		return String.valueOf(((WDLocator)ctx.currentStep().locatorParams.get("locator")).findElementNotPresent(ctx));
 	}
 
 	@Override
