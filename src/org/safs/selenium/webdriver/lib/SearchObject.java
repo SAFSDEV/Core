@@ -35,6 +35,7 @@ package org.safs.selenium.webdriver.lib;
  *  <br>  NOV 26, 2015    (Lei Wang)  Modify method getObject(): reset 'lastFrame' to null if exception is thrown out during switch of frame.
  *  <br>  DEC 25, 2015    (Lei Wang)  Modify getObjectByText() and getObjectByTitle(): try to get partial, case-insensitive matched element.
  *  <br>  JAN 05, 2015    (Lei Wang)  Modify getObjectByQualifier() etc.: support one qualifier with "Contains", such as TextContains=, TitleContains=.
+ *  <br>  MAR 17, 2016    (Carl Nagle)  Modified to support getObjects returning multiple matches.
  */
 import java.lang.reflect.Constructor;
 import java.net.URL;
@@ -1241,34 +1242,33 @@ public class SearchObject {
 		return changed;
 	}
 
-	/**
-	 * Primary entry point to seek a WebElement based on a provided recognition string.
-	 * We support multiple types of recognition strings
-	 * @param sc SearchContext, could be the WebDriver or a parent WebElement context.
-	 * @param recognitionString String, The recognition string used to identify the sought element.
-	 * @return WebElement found or null if not found.
+	public static class SwitchFramesResults{
+	    boolean haveSwitchedFrames = false;
+	    List<String> rsWithoutFrames = new ArrayList<String>();
+	    public SwitchFramesResults setSwitchedFrames(boolean switched){
+	    	haveSwitchedFrames = switched;
+	    	return this;
+	    }
+	    public SwitchFramesResults setRsWithoutFrames(List<String> withoutFrames){
+	    	rsWithoutFrames = withoutFrames;
+	    	return this;
+	    }
+	}
+	
+	/** 
+	 * Before doing any component search, we make sure we are in the correct frame.  
+	 * Frame information may or may not be within the provided recognition string.
+	 * @param recognitionString
 	 */
-	public static WebElement getObject(SearchContext sc, String recognitionString){
-
-		String debugmsg = StringUtils.debugmsg(SearchObject.class, "getObject");
-		IndependantLog.debug(debugmsg +"using SearchContext="+sc+" to find RS='"+ recognitionString+"'");
-
-		if(sc==null){
-			IndependantLog.error("SearchContext is null, cannot continue search!!!");
-			return null;
-		}
-
-		SearchContext wel = sc;
-
+	protected static SwitchFramesResults _switchFrames(String recognitionString){
+		String debugmsg = StringUtils.debugmsg(SearchObject.class, "_swithcFrames");
+		
 		String[] st = StringUtils.getTokenArray(recognitionString, childSeparator, escapeChar);
 		/* rsWithoutFrames: Recognition String may contain some Frame-RS, after handling the
 		 * frames, these Frame-RS are no longer useful, so they will be removed and the rest
 		 * RS will be kept in the list rsWithoutFrames
 		 */
 		List<String> rsWithoutFrames = new ArrayList<String>();
-		String[] tokens = null;
-		String searchCreteria = null;
-		String value = null;
 		TargetLocator targetLocator = null;
 		boolean haveSwichedFrame = false;
 
@@ -1376,7 +1376,7 @@ public class SearchObject {
 			}
 		}catch(Exception e){
 			if(e instanceof StaleElementReferenceException && pageHasChanged()){
-				IndependantLog.warn(debugmsg+" swtiching to the previous frame 'lastFrame' failed! The page has changed!");
+				IndependantLog.warn(debugmsg+" switching to the previous frame 'lastFrame' failed! The page has changed!");
 				//LeiWang: S1215754
 				//if we click a link within a FRAME, as the link is in a FRAME, so the field 'lastFrame' will be assigned after clicking the link.
 				//then the link will lead us to a second page, when we try to find something on that page, firstly we try to switch to 'lastFrame' and
@@ -1390,7 +1390,7 @@ public class SearchObject {
 //				SecondPage="xpath=/html"
 //				return null;
 			}else{
-				IndependantLog.warn(debugmsg+" swtiching to the previous frame 'lastFrame' failed! Met exception "+StringUtils.debugmsg(e));
+				IndependantLog.warn(debugmsg+" switching to the previous frame 'lastFrame' failed! Met exception "+StringUtils.debugmsg(e));
 			}
 			//LeiWang: S1215778
 			//If we fail to switch to 'lastFrame', which perhaps means that it is not useful anymore
@@ -1398,6 +1398,29 @@ public class SearchObject {
 			IndependantLog.debug(debugmsg+" 'lastFrame' is not useful anymore, reset it to null.");
 			lastFrame = null;
 		}
+		return new SwitchFramesResults().setRsWithoutFrames(rsWithoutFrames).setSwitchedFrames(haveSwichedFrame);
+	}
+	
+	/**
+	 * Primary entry point to seek a WebElement based on a provided recognition string.
+	 * We support multiple types of recognition strings
+	 * @param sc SearchContext, could be the WebDriver or a parent WebElement context.
+	 * @param recognitionString String, The recognition string used to identify the sought element.
+	 * @return WebElement found or null if not found.
+	 */
+	public static WebElement getObject(SearchContext sc, String recognitionString){
+
+		String debugmsg = StringUtils.debugmsg(SearchObject.class, "getObject");
+		IndependantLog.debug(debugmsg +"using SearchContext="+sc+" to find RS='"+ recognitionString+"'");
+
+		if(sc==null){
+			IndependantLog.error("SearchContext is null, cannot continue search!!!");
+			return null;
+		}
+
+		SwitchFramesResults sfr =_switchFrames(recognitionString);
+		
+		SearchContext wel = sc;
 
 		//3. Lei Wang, FIX http://***REMOVED***/***REMOVED***?defectid=S1138290
 		//Error 1: Map doesn't contain a window definition (under a frame)
@@ -1407,7 +1430,7 @@ public class SearchObject {
 		//and the parent is "[[RemoteDriver.... ] ->  xpath: /html]", which maybe the default parent "xpath=/html" without any FRAME;
 		//the webelement to find is in a Frame, StaleElementReferenceException will be thrown out.
 		//To avoid this, we need to modify the SearchContext to the "default-webdriver"
-		if(haveSwichedFrame && XPATH.isRootHtml(wel)){
+		if(sfr.haveSwitchedFrames && XPATH.isRootHtml(wel)){
 			wel = getWebDriver();
 			IndependantLog.debug(debugmsg+"Replace default SearchContext '/html' by WebDriver.");
 		}
@@ -1417,14 +1440,15 @@ public class SearchObject {
 		//  Child="FrameId=xxx;\;Id=xxx"
 		//If 'recognition string' contains only frame information, rsWithoutFrames will be empty, and this method will
 		//return null (ClassCastException from WebDriver to WebElement); to avoid this set "xpath=/html" as the default object
-		if(rsWithoutFrames.isEmpty()) rsWithoutFrames.add(RS.xpath(XPATH.html()));
+		if(sfr.rsWithoutFrames.isEmpty()) sfr.rsWithoutFrames.add(RS.xpath(XPATH.html()));
 
 		//4. Search the target element within a frame (if exist) level by level, by handling the normal RS
-		st = rsWithoutFrames.toArray(new String[0]);//The normal RS without the frame-RS
+		String[] st = sfr.rsWithoutFrames.toArray(new String[0]);//The normal RS without the frame-RS
 		String[] firstQualifierPair = null;
 		List<String> prefixes = new ArrayList<String>();
 		boolean isPASM = false;
-
+		String searchCriteria = null;
+		String value = null;
 		for (String rst : st) {
 			try{
 				prefixes.clear();
@@ -1433,21 +1457,21 @@ public class SearchObject {
 
 				//rst MUST be in format "xxx=yyy", otherwise it is considered as invalid
 				firstQualifierPair = getFirstQualifierPair(rst);
-				searchCreteria = firstQualifierPair[0];
+				searchCriteria = firstQualifierPair[0];
 				value = firstQualifierPair[1];
 
-				IndependantLog.debug(debugmsg+"qualifier='"+searchCreteria+"' value='"+value+"' isPASM="+isPASM);
+				IndependantLog.debug(debugmsg+"qualifier='"+searchCriteria+"' value='"+value+"' isPASM="+isPASM);
 
-				if ( SEARCH_CRITERIA_TYPE.equalsIgnoreCase(searchCreteria)){
+				if ( SEARCH_CRITERIA_TYPE.equalsIgnoreCase(searchCriteria)){
 					wel = getObjectForDomain(wel, rst, isPASM);
 
-				}else if(SEARCH_CRITERIA_XPATH.equalsIgnoreCase(searchCreteria)){
+				}else if(SEARCH_CRITERIA_XPATH.equalsIgnoreCase(searchCriteria)){
 					IndependantLog.debug(debugmsg+" searching xpath '"+value+"'");
-					wel = getObjectByQualifier(wel, searchCreteria, value);
+					wel = getObjectByQualifier(wel, searchCriteria, value);
 
-				}else if(SEARCH_CRITERIA_CSS.equalsIgnoreCase(searchCreteria)){
+				}else if(SEARCH_CRITERIA_CSS.equalsIgnoreCase(searchCriteria)){
 					IndependantLog.debug(debugmsg+" searching css'"+value+"'");
-					wel = getObjectByQualifier(wel, searchCreteria, value);
+					wel = getObjectByQualifier(wel, searchCriteria, value);
 
 				}else if (rst.contains(qulifierSeparator)){//Multiple Attributes and Qualifiers
 					wel = getObjectByMultiAttributes(wel, rst, isPASM);
@@ -1455,7 +1479,7 @@ public class SearchObject {
 				} else {
 					try{
 						//Only ONE qualifier pair, qualifier=value
-						tokens = StringUtils.getTokenArray(rst, assignSeparator, escapeChar);
+						String[] tokens = StringUtils.getTokenArray(rst, assignSeparator, escapeChar);
 						wel = getObjectByQualifier(wel, tokens[0], tokens[1]);
 					}catch(SeleniumPlusException se){
 						IndependantLog.warn(debugmsg+se.getMessage());
@@ -1483,6 +1507,133 @@ public class SearchObject {
 			//RemoteDriver cannot be cast to WebElement
 			return null;
 		}
+	}
+
+	/**
+	 * Primary entry point to seek all WebElements matching a provided recognition string.
+	 * We support multiple types of recognition strings
+	 * @param sc SearchContext, could be the WebDriver or a parent WebElement context.
+	 * @param recognitionString String, The recognition string used to identify the matching elements.
+	 * @return List&lt;WebElement> with 0 or more WebElement entries.
+	 */
+	public static List<WebElement> getObjects(SearchContext sc, String recognitionString){
+
+		String debugmsg = StringUtils.debugmsg(SearchObject.class, "getObjects");
+		IndependantLog.debug(debugmsg +"using SearchContext="+sc+" to find RS='"+ recognitionString+"'");
+
+		List<WebElement> list = new ArrayList<WebElement>();
+
+		if(sc==null){
+			IndependantLog.error("SearchContext is null, cannot continue search!!!");
+			return list;
+		}
+		
+		SearchContext wel = sc;		
+		SwitchFramesResults sfr =_switchFrames(recognitionString);
+		
+		//3. Lei Wang, FIX http://***REMOVED***/***REMOVED***?defectid=S1138290
+		//Error 1: Map doesn't contain a window definition (under a frame)
+		//  [Window]
+		//  Child="FrameId=xxx;\;Id=xxx"
+		//If we are going to FIND element under certain FRAME,
+		//and the parent is "[[RemoteDriver.... ] ->  xpath: /html]", which maybe the default parent "xpath=/html" without any FRAME;
+		//the webelement to find is in a Frame, StaleElementReferenceException will be thrown out.
+		//To avoid this, we need to modify the SearchContext to the "default-webdriver"
+		if(sfr.haveSwitchedFrames && XPATH.isRootHtml(wel)){
+			wel = getWebDriver();
+			IndependantLog.debug(debugmsg+"Replace default SearchContext '/html' by WebDriver.");
+		}
+		//Error 2: Window definition ONLY has information about FRAME, no child information
+		//  [Window]
+		//  Window="FrameId=xxx"
+		//  Child="FrameId=xxx;\;Id=xxx"
+		//If 'recognition string' contains only frame information, rsWithoutFrames will be empty, and this method will
+		//return null (ClassCastException from WebDriver to WebElement); to avoid this set "xpath=/html" as the default object
+		if(sfr.rsWithoutFrames.isEmpty()) sfr.rsWithoutFrames.add(RS.xpath(XPATH.html()));
+
+		//4. Search the target element within a frame (if exist) level by level, by handling the normal RS
+		String[] st = sfr.rsWithoutFrames.toArray(new String[0]);//The normal RS without the frame-RS
+		String[] firstQualifierPair = null;
+		List<String> prefixes = new ArrayList<String>();
+		boolean isPASM = false;
+		String searchCriteria = null;
+		String value = null;
+		String rst = null;
+		boolean isLastRS = false;
+		for (int i=0;i<st.length;i++) {
+			try{				
+				prefixes.clear();
+				rst = GuiObjectVector.removeRStringPrefixes(rst, prefixes);
+				isPASM = GuiObjectVector.isPASMMode(prefixes);
+
+				//rst MUST be in format "xxx=yyy", otherwise it is considered as invalid
+				firstQualifierPair = getFirstQualifierPair(rst);
+				searchCriteria = firstQualifierPair[0];
+				value = firstQualifierPair[1];
+				isLastRS = (i == st.length-1);
+				
+				IndependantLog.debug(debugmsg+"qualifier='"+searchCriteria+"' value='"+value+"' isPASM="+isPASM);
+
+				if ( SEARCH_CRITERIA_TYPE.equalsIgnoreCase(searchCriteria)){
+					if(isLastRS){
+						list = getObjectsForDomain(wel, rst, isPASM);
+					}else{
+						wel = getObjectForDomain(wel, rst, isPASM);
+					}
+				}else if(SEARCH_CRITERIA_XPATH.equalsIgnoreCase(searchCriteria)){
+					IndependantLog.debug(debugmsg+" searching xpath '"+value+"'");
+					if(isLastRS){
+					    list = getObjectsByQualifier(wel, searchCriteria, value);
+					}else{
+					    wel = getObjectByQualifier(wel, searchCriteria, value);
+					}
+				}else if(SEARCH_CRITERIA_CSS.equalsIgnoreCase(searchCriteria)){
+					IndependantLog.debug(debugmsg+" searching css'"+value+"'");
+					if(isLastRS){
+					    list = getObjectsByQualifier(wel, searchCriteria, value);
+					}else{
+					    wel = getObjectByQualifier(wel, searchCriteria, value);
+					}
+				}else if (rst.contains(qulifierSeparator)){//Multiple Attributes and Qualifiers
+					if(isLastRS){
+						list = getObjectsByMultiAttributes(wel, rst, isPASM);
+					}else{
+						wel = getObjectByMultiAttributes(wel, rst, isPASM);
+					}
+				} else {
+					try{
+						//Only ONE qualifier pair, qualifier=value
+						String[] tokens = StringUtils.getTokenArray(rst, assignSeparator, escapeChar);
+						if(isLastRS){
+							list = getObjectsByQualifier(wel, tokens[0], tokens[1]);
+						}else{
+							wel = getObjectByQualifier(wel, tokens[0], tokens[1]);
+						}
+					}catch(SeleniumPlusException se){
+						IndependantLog.warn(debugmsg+se.getMessage());
+						continue;
+					}
+				}
+			}catch(NoSuchElementException nse){
+				wel=null;
+				IndependantLog.debug(debugmsg+" NoSuchElementException for '"+ rst +"'.");
+			}catch(Throwable t){
+				//wel is NOT null, it keeps the original value.
+				//Do we permit to continue the search? Maybe we should stop.
+				wel = null;
+				IndependantLog.debug(debugmsg+" Met Exception "+StringUtils.debugmsg(t));
+			}
+
+			if(isLastRS){
+				if(list.isEmpty()){
+					IndependantLog.error(debugmsg+" cannot find child with RS '"+rst+"'");
+				}
+			}else if(wel == null){
+				IndependantLog.error(debugmsg+" cannot find child with RS '"+rst+"'");
+				break;
+			}
+		}
+		return list;
 	}
 
 	public static boolean isFrameWebElement(WebElement frameTag){
@@ -1557,6 +1708,20 @@ public class SearchObject {
 		return getMatchedObject(elements, text, partialMatch);
 	}
 
+	/** @return 0 or more matched elements */
+	protected static List<WebElement> getObjectsByText(SearchContext wel,String text, boolean partialMatch){
+		String debugmsg = StringUtils.debugmsg(false);
+		IndependantLog.debug(debugmsg +"using '"+ text+"', partialMatch="+partialMatch);
+
+		String xpath = XPATH.fromText(text, partialMatch, true);
+		List<WebElement> preMatches = findElements(wel, xpath);
+
+		List<WebElementWarpper> elements = new ArrayList<WebElementWarpper>();
+		for(WebElement item : preMatches) elements.add(new WebElementWarpper(item, item.getText()));
+
+		return getMatchedObjects(elements, text, partialMatch);
+	}
+
 	protected static SearchContext getObjectByTitle(SearchContext wel, String value, boolean partialMatch){
 		String debugmsg = StringUtils.debugmsg(false);
 		IndependantLog.debug(debugmsg +"using '"+ value+"', partialMatch="+partialMatch);
@@ -1571,8 +1736,23 @@ public class SearchObject {
 		return getMatchedObject(elements, value, partialMatch);
 	}
 
+	/** @return 0 or more matched elements */
+	protected static List<WebElement> getObjectsByTitle(SearchContext wel, String value, boolean partialMatch){
+		String debugmsg = StringUtils.debugmsg(false);
+		IndependantLog.debug(debugmsg +"using '"+ value+"', partialMatch="+partialMatch);
+		String attribute = SEARCH_CRITERIA_TITLE.toLowerCase();
+
+		String xpath = XPATH.fromAttribute(attribute, value, partialMatch, true);
+		List<WebElement> preMatches = findElements(wel, xpath);
+
+		List<WebElementWarpper> elements = new ArrayList<WebElementWarpper>();
+		for(WebElement item : preMatches) elements.add(new WebElementWarpper(item, item.getAttribute(attribute)));
+
+		return getMatchedObjects(elements, value, partialMatch);
+	}
+
 	/**
-	 * @param elements List<WebElementWarpper>, contains WebElement to match
+	 * @param elements List&lt;WebElementWarpper>, contains WebElement to match
 	 * @param value String, the value to match with
 	 * @param partialMatch boolean, if we try to find the partial matched item
 	 * @return SearchContext, the matched object
@@ -1601,6 +1781,33 @@ public class SearchObject {
 		if(elements.size()>0) return elements.get(0).element;
 
 		return null;
+	}
+
+	/**
+	 * @param elements List&lt;WebElementWarpper>, contains WebElements to match
+	 * @param value String, the value to match with
+	 * @param partialMatch boolean, if we try to find the partial matched item
+	 * @return List&lt;WebElement> 0 or more matched WebElements.
+	 */
+	protected static List<WebElement> getMatchedObjects(List<WebElementWarpper> elements, String value, boolean partialMatch){
+		List<WebElement> list = new ArrayList<WebElement>();
+		if(partialMatch){
+			//try to find the partial matched item
+			for(WebElementWarpper element: elements){
+				if(element.value.contains(value) || element.value.toLowerCase().contains(value.toLowerCase())) {
+					list.add( element.element);
+				}
+			}
+		}else{
+			//try to find the exact matched items
+			for(WebElementWarpper element: elements){
+				if(element.value.equals(value) || element.value.equalsIgnoreCase(value)) {
+					list.add(element.element);
+				}
+			}
+		}
+		//finally, return the list of 0 or more matched objects
+		return list;
 	}
 
 	/**
@@ -1651,7 +1858,6 @@ public class SearchObject {
 
 			}else if(SEARCH_CRITERIA_TAG.equals(qualifierUC)){
 				result = sc.findElement(By.tagName(value));
-
 			}else{
 				boolean partialMatch = qualifierUC.endsWith(SEARCH_CRITERIA_CONTAINS_SUFFIX);
 
@@ -1685,6 +1891,83 @@ public class SearchObject {
 				}else if(partialMatch){
 					//idContains, classContains, nameContains will be supported here.
 					result = sc.findElement(By.xpath(XPATH.RELATIVE_MATCHING_ALL_START+XPATH.conditionContains(qualifier, value)+XPATH.END));
+
+				}else{
+					throw new SeleniumPlusException("ignore unknown qualifier '"+qualifierUC+"', value='"+value+"'");
+				}
+			}
+		}catch(Exception e){
+			if(e instanceof SeleniumPlusException) throw (SeleniumPlusException) e;
+			IndependantLog.error(StringUtils.debugmsg(false)+" met "+StringUtils.debugmsg(e));
+		}
+
+		return result;
+	}
+
+	/**
+	 * According to pair(qualifier, value), find all matching WebElements.<br>
+	 * Some qualifiers like "ID", can determine the WebElement uniquely and result<br>
+	 * only one WebElement; Other qualifiers may result in several WebElements.<br>
+	 *
+	 * @param sc SearchContext, the search context, it is normally a WebElement.
+	 * @param qualifier String, the qualifier like xpath, css, id, name, link etc.
+	 * @param value String, the value of a qualifier.
+	 * @return List&lt;WebElement> 0 or more
+	 * @throws SeleniumPlusException
+	 */
+	protected static List<WebElement> getObjectsByQualifier(SearchContext sc, String qualifier, String value) throws SeleniumPlusException{
+		List<WebElement> result = new ArrayList<WebElement>();;
+		String qualifierUC = null;
+
+		if(qualifier==null){
+			throw new SeleniumPlusException("ignore null qualifier.");
+		}else{
+			qualifierUC = qualifier.toUpperCase();
+		}
+
+		try{
+
+			if(SEARCH_CRITERIA_XPATH.equals(qualifierUC)){
+				result = sc.findElements(By.xpath(value));
+
+			}else if(SEARCH_CRITERIA_CSS.equals(qualifierUC)){
+				result = sc.findElements(By.cssSelector(value));
+
+			}else if(SEARCH_CRITERIA_TAG.equals(qualifierUC)){
+				result = sc.findElements(By.tagName(value));
+			}else{
+				boolean partialMatch = qualifierUC.endsWith(SEARCH_CRITERIA_CONTAINS_SUFFIX);
+
+				//The following qualifiers will support suffix "Contains":
+				//idContains, classContains, nameContains, linkContains, textContains, titleContains, iframeidContains
+				if(SEARCH_CRITERIA_ID.equals(qualifierUC)){
+					result = sc.findElements(By.id(value));
+
+				}else if(SEARCH_CRITERIA_CLASS.equals(qualifierUC)){
+					result = sc.findElements(By.className(value));
+
+				}else if(SEARCH_CRITERIA_NAME.equals(qualifierUC)){
+					result = sc.findElements(By.name(value));
+
+				}else if(SEARCH_CRITERIA_LINK.equals(qualifierUC)){
+					result = sc.findElements(By.linkText(value));
+
+				}else if(SEARCH_CRITERIA_PARTIALLINK.equals(qualifierUC)||
+						(SEARCH_CRITERIA_LINK+SEARCH_CRITERIA_CONTAINS_SUFFIX).equals(qualifierUC)){
+					result = sc.findElements(By.partialLinkText(value));
+
+				}else if(qualifierUC.startsWith(SEARCH_CRITERIA_TEXT)){
+					result = getObjectsByText(sc, value, partialMatch);
+
+				}else if(qualifierUC.startsWith(SEARCH_CRITERIA_TITLE)){
+					result = getObjectsByTitle(sc, value, partialMatch);
+
+				}else if(qualifierUC.startsWith(SEARCH_CRITERIA_IFRAMEID)){
+					result = sc.findElements(By.xpath("//iframe["+XPATH.condition("id", value, partialMatch)+"]"));
+
+				}else if(partialMatch){
+					//idContains, classContains, nameContains will be supported here.
+					result = sc.findElements(By.xpath(XPATH.RELATIVE_MATCHING_ALL_START+XPATH.conditionContains(qualifier, value)+XPATH.END));
 
 				}else{
 					throw new SeleniumPlusException("ignore unknown qualifier '"+qualifierUC+"', value='"+value+"'");
@@ -1804,6 +2087,111 @@ public class SearchObject {
 	}
 
 	/**
+	 * <pre>
+	 * Builds an XPath search string using multiple attributes provided in the recognition string
+	 * then performs a findElements(By.xpath(string));
+	 * If the recognition string contains special attributes, How to tell them from normal attributes???
+	 *
+	 * </pre>
+	 * @param sc SearchContext, the search context
+	 * @param RS String, the recognition string
+	 * @param isPASM boolean, if true, each part of 'recognition string' will be treated as property.<br>
+	 *                        if false, some reserved words will be treated as qualifiers, but not properties.<br>
+	 *                        the reserved words are {@link #SEARCH_CRITERIA_ITEMINDEX}, {@link #SEARCH_CRITERIA_PATH} etc.<br>
+	 * @return List&lt;WebElement> with 0 or more matching elements.
+	 */
+	protected static List<WebElement> getObjectsByMultiAttributes(SearchContext sc, String RS, boolean isPASM){
+
+		List<WebElement> list = new ArrayList<WebElement>();
+		String debugmsg = StringUtils.debugmsg(SearchObject.class, "getObjectByMultiAttri");
+		IndependantLog.debug(debugmsg +"using recognition string: "+ RS);
+
+		int count = 0;
+		String[] st = StringUtils.getTokenArray(RS, qulifierSeparator, escapeChar);
+
+		HashMap<String, String> qualifiers = new HashMap<String, String>();
+
+		//
+		// It does NOT look like we currently handle "qual=value;\;qual=value" syntax
+		//
+
+		try{
+			String xpathStr = (!containTagRS(RS)) ?
+					          XPATH.RELATIVE_MATCHING_ALL_START :
+	                          XPATH.RELATIVE_MATCHING_TAG_START(getTagQualifierValue(RS));
+
+			String[] props = null;
+			String property = null;
+			String value = null;
+			String xpathCondition = null;
+			for (String prop: st){
+				props = StringUtils.getTokenArray(prop, assignSeparator, escapeChar);
+				++count;
+				property = props[0];
+				value = props[1];
+
+				// skip TAG if encountered. We already handled it.
+				if(SEARCH_CRITERIA_TAG.equalsIgnoreCase(property)){
+					continue;
+				}
+
+				if(isPASM){
+					//all are properties
+					xpathStr += XPATH.condition(property, value, false);
+				}else{
+					//handle some 'reserved qualifiers'
+					if(  SEARCH_CRITERIA_ITEMINDEX.equalsIgnoreCase(property)
+							|| SEARCH_CRITERIA_PATH.equalsIgnoreCase(property)
+							|| SEARCH_CRITERIA_INDEX.equalsIgnoreCase(property)
+							){
+						qualifiers.put(property.toUpperCase(), value);
+						continue;
+
+					}else if (SEARCH_CRITERIA_PROPERTY.equalsIgnoreCase(property)){
+						IndependantLog.debug(debugmsg +"add search condition '"+value+"'");
+						xpathCondition = getXpathCondition(value, false);
+						if(xpathCondition!=null) xpathStr += xpathCondition;
+
+					}else if (SEARCH_CRITERIA_PROPERTY_CONTAINS.equalsIgnoreCase(property)){
+						IndependantLog.debug(debugmsg +"add search condition '"+value+"'");
+						xpathCondition = getXpathCondition(value, true);
+						if(xpathCondition!=null) xpathStr += xpathCondition;
+
+					}else if (SEARCH_CRITERIA_TEXT.equalsIgnoreCase(property)){
+						xpathCondition = XPATH.conditionForText(value, false);
+						if(xpathCondition!=null) xpathStr += xpathCondition;
+
+					}else if ((SEARCH_CRITERIA_TEXT+SEARCH_CRITERIA_CONTAINS_SUFFIX).equalsIgnoreCase(property)){
+						xpathCondition = XPATH.conditionForText(value, true);
+						if(xpathCondition!=null) xpathStr += xpathCondition;
+
+					}// try to generically handle any <something>Contains property values not handled above
+					else if (property.toUpperCase().endsWith(SEARCH_CRITERIA_CONTAINS_SUFFIX)){
+						//TextContains should be handled differently to get the xpath
+						xpathStr += XPATH.conditionContains(property, value);
+					}else{
+						xpathStr += XPATH.condition(property, value, false);
+					}
+				}
+
+				if (st.length != count) xpathStr += " "+XPATH.AND+" ";
+			}
+			//Remove the last "and", if there is no search-condition after that "and"
+			if(xpathStr.trim().endsWith(XPATH.AND)){
+				xpathStr = xpathStr.substring(0, xpathStr.lastIndexOf(XPATH.AND));
+			}
+			xpathStr += XPATH.END;
+
+			list = getObjectsByXpathAndQualifiers(sc, xpathStr, qualifiers);
+
+		}catch(Throwable t){
+			IndependantLog.debug(debugmsg +"recognition string parsing error: "+ t.getClass().getSimpleName()+": "+t.getMessage());
+		}
+
+		return list;
+	}
+
+	/**
 	 * According to TextMatchingCriterion to get the sub item within a container WebElement.
 	 * @param itemContainer WebElement, the container WebElement, like list, menu etc.
 	 * @param criterion TextMatchingCriterion, holding the searching condition
@@ -1891,8 +2279,80 @@ public class SearchObject {
 	}
 
 	/**
+	 * According to xpath and qualifiers to find matching WebElements.<br>
+	 * While returning a List, it is likely the List will have only 1 matching item.
+	 * @param sc SearchContext, the search context, it is normally a WebElement.
+	 * @param xpathStr String, the xpath used to find matching WebElements
+	 * @param qualifiers HashMap<String, String>, qualifiers and their values used to find matching WebElement subItems.
+	 * @return List&lt;WebElement> 0 or more WebElements.
+	 */
+	protected static List<WebElement> getObjectsByXpathAndQualifiers(SearchContext sc, String xpathStr,
+			HashMap<String, String> qualifiers){
+		List<WebElement> list = new ArrayList<WebElement>();
+		WebElement obj = null;
+		String debugmsg = StringUtils.debugmsg(false);
+
+		try{
+			//Handle the qualifiers like "Index", "ItemIndex", "Path" etc.
+			//"Index" has the most priority, will be handled firstly
+			//Find the WebElement according to xpath, and the possible qualifier 'Index'
+			String xpath = String.format(xpathStr);
+			IndependantLog.debug(debugmsg+" handling xpath '"+xpath+"'");
+			IndependantLog.debug(debugmsg+" qualifiers are: "+qualifiers);
+			List<WebElement> preMatches = new ArrayList<WebElement>();
+			if(qualifiers.containsKey(SEARCH_CRITERIA_INDEX)){
+				preMatches = sc.findElements(By.xpath(xpath));
+				int matchindex = StringUtilities.parseIndex(qualifiers.get(SEARCH_CRITERIA_INDEX));//1-based
+				String typeInSAFS = qualifiers.containsKey(SEARCH_CRITERIA_TYPE)?qualifiers.get(SEARCH_CRITERIA_TYPE):null;
+				IndependantLog.debug(debugmsg+" handling index='"+matchindex+"' type='"+typeInSAFS+"'");
+				obj = getNthWebElement(preMatches, matchindex, typeInSAFS);
+				preMatches.clear();
+				if(obj != null) {
+					preMatches.add(obj);
+				}
+			}else{
+				preMatches = sc.findElements(By.xpath(xpath));
+			}
+			
+			if(preMatches.isEmpty()) return list; // return empty list
+			
+			//Handle the other qualifiers "ItemIndex", "Path"
+			if(!qualifiers.isEmpty()){
+				for(int i=0;i<preMatches.size();i++){
+					obj = preMatches.get(i);
+					TextMatchingCriterion criterion = null;
+					if(qualifiers.containsKey(SEARCH_CRITERIA_ITEMINDEX)){
+						String itemIndex = qualifiers.get(SEARCH_CRITERIA_ITEMINDEX);//0-based
+						IndependantLog.debug(debugmsg+" handling ItemIndex='"+itemIndex+"'");
+						criterion = new TextMatchingCriterion(Integer.parseInt(itemIndex));
+	
+					}else if(qualifiers.containsKey(SEARCH_CRITERIA_PATH)){
+						String path = qualifiers.get(SEARCH_CRITERIA_PATH);
+						//TODO HANDLE the pathIndex "4->2->3", "Path=A->B;PathIndex=3->2"
+						//TODO HANDLE the Index in Path "4->A->D", "Path=4->A->D"
+						IndependantLog.debug(debugmsg+" handling Path='"+path+"'");
+						criterion = new TextMatchingCriterion(path, false, (String)null);
+					}
+					if(criterion != null){
+						// TODO would like this to potentially return a List of matched SubItems.
+						obj = getSubItem(obj, criterion);
+						if(obj != null){
+							list.add(obj);
+						}
+					}
+				}
+			}else{
+				list = preMatches;
+			}
+		}catch(Exception e){
+			IndependantLog.error(debugmsg+" met "+StringUtils.debugmsg(e));
+		}
+		return list;
+	}
+
+	/**
 	 * Find the Nth matched WebElement in a list.<br>
-	 * @param preMatches List<WebElement>, a list of WebElment from where to find a matched Element
+	 * @param preMatches List&lt;WebElement>, a list of WebElment from where to find a matched Element
 	 * @param matchindex int, the expected index, 1-based
 	 * @param typeInSAFS String, the expected type, like "Button", "List", "CheckBox". If null, match all elements.
 	 * @return WebElement, the Nth matched WebElement. null if not found.
@@ -1961,7 +2421,7 @@ public class SearchObject {
 				criteria = null;
 				value = null;
 				i = prop.indexOf(assignSeparator);
-				if (i > -1){
+				if (i > 0){
 					criteria = prop.substring(0, i);
 					if(prop.length()> i) value = prop.substring(i+1);
 				}else{
@@ -2040,6 +2500,119 @@ public class SearchObject {
 		if(obj == null)
 			IndependantLog.debug(debugmsg +"did not find any matching elements.");
 		return obj;
+	}
+
+	/**
+	 * Alternate search for special framework elements like Dojo or SAP OpenUI5 components.
+	 * @param sc SearchContext, the search context
+	 * @param RS String, the recognition string
+	 * @param isPropertyAllMode boolean, if true, each part of 'recognition string' will be treated as property.<br>
+	 *                                   if false, some reserved words will be treated as qualifiers, but not properties.<br>
+	 *                                   the reserved words are {@link #SEARCH_CRITERIA_ITEMINDEX}, {@link #SEARCH_CRITERIA_PATH} etc.<br>
+	 * @return List&lt;WebElement> 0 or more matching WebElements.
+	 */
+	protected static List<WebElement> getObjectsForDomain(SearchContext sc, String RS, boolean isPropertyAllMode){
+		//search the target element within a frame (if exist) level by level
+		
+		List<WebElement> list = new ArrayList<WebElement>();
+		WebElement obj = null;
+		String debugmsg = StringUtils.debugmsg(false);
+		IndependantLog.debug(debugmsg +"processing recognition fragment: "+ RS);
+		String[] tokens = StringUtils.getTokenArray(RS, qulifierSeparator, escapeChar);
+		String xpathStr = XPATH.RELATIVE_MATCHING_ALL_START+XPATH.TRUE_CONDITION;
+		boolean isDojo = false;
+		boolean isSAP = false;
+
+		HashMap<String, String> qualifiers = new HashMap<String, String>();
+		String xpathCondition = null;
+
+		try{
+			String criteria = null;
+			String value = null;
+			int i = -1;
+			for (String prop: tokens){
+				criteria = null;
+				value = null;
+				i = prop.indexOf(assignSeparator);
+				if (i > 0){
+					criteria = prop.substring(0, i);
+					if(prop.length()> i) value = prop.substring(i+1);
+				}else{
+					IndependantLog.warn(debugmsg+" RS '"+prop+"' doesn't contain '='. Just ignore it.");
+					continue;
+				}
+
+				if (SEARCH_CRITERIA_TYPE.equalsIgnoreCase(criteria)){
+					if (value.toUpperCase().startsWith(DOMAIN_DOJO)){
+						// current DOJO always uses DIV as the high-level widget element
+						xpathStr = XPATH.RELATIVE_MATCHING_DIV_START+XPATH.TRUE_CONDITION; // DOJO components all DIVs ?
+						isDojo = true;
+					}else if (value.toUpperCase().startsWith(DOMAIN_SAP)){
+						xpathStr = XPATH.RELATIVE_MATCHING_ALL_START+XPATH.TRUE_CONDITION; // any element?
+						isSAP = true;
+					}
+					qualifiers.put(SEARCH_CRITERIA_TYPE, value);
+
+				}else{
+					if(isPropertyAllMode){
+						//all are treated as component's properties
+						IndependantLog.debug(debugmsg +"add search condition @"+criteria+"='"+value+"'");
+						xpathStr += " "+XPATH.AND+XPATH.condition(criteria, value, false);
+					}else{
+						//handle some 'reserved qualifiers'
+						if (SEARCH_CRITERIA_ID.equalsIgnoreCase(criteria)){
+							xpathStr += isDojo ?
+									" and (starts-with(@id,'"+value+"') or "+
+									"(substring(@id, string-length(@id) - string-length('"+value+"')+1)='"+value+"'))"
+									: /* SAP */ " and @id='"+ value+"'";
+
+						}else if (SEARCH_CRITERIA_NAME.equalsIgnoreCase(criteria)){
+							xpathStr += isDojo ? /* TODO: do dojo names concat like their ids do? need to check. */
+									" and (starts-with(@name,'"+value+"') or "+
+									"(substring(@name, string-length(@name) - string-length('"+value+"')+1)='"+value+"'))"
+									: /* SAP */ " and @name='"+ value+"'";
+
+						}else if (SEARCH_CRITERIA_TITLE.equalsIgnoreCase(criteria)){
+							xpathStr += " and @title='"+ value+"'";
+
+						}else if (SEARCH_CRITERIA_TEXT.equalsIgnoreCase(criteria)){
+							xpathStr += " and .='"+value+"'";
+
+						}else if (SEARCH_CRITERIA_INDEX.equalsIgnoreCase(criteria)
+								||SEARCH_CRITERIA_PATH.equalsIgnoreCase(criteria)
+								||SEARCH_CRITERIA_ITEMINDEX.equalsIgnoreCase(criteria)
+								){
+							qualifiers.put(criteria.toUpperCase(), value);
+
+						}else if (SEARCH_CRITERIA_PROPERTY.equalsIgnoreCase(criteria)){
+							IndependantLog.debug(debugmsg +"add search condition '"+value+"'");
+							xpathCondition = getXpathCondition(value, false);
+							if(xpathCondition!=null) xpathStr += " "+XPATH.AND+xpathCondition;
+
+						}else if (SEARCH_CRITERIA_PROPERTY_CONTAINS.equalsIgnoreCase(criteria)){
+							IndependantLog.debug(debugmsg +"add search condition '"+value+"'");
+							xpathCondition = getXpathCondition(value, true);
+							if(xpathCondition!=null) xpathStr += " "+XPATH.AND+xpathCondition;
+
+						}else{
+							//the others will be simply considered as properties
+							IndependantLog.debug(debugmsg +"add search condition @"+criteria+"='"+value+"'");
+							xpathStr += " "+XPATH.AND+XPATH.condition(criteria, value, false);
+						}
+					}//end if isPropertyAllMode
+				}//end if SEARCH_CRITERIA_TYPE
+			}//end for tokens
+
+			xpathStr += XPATH.END;
+
+			list = getObjectsByXpathAndQualifiers(sc, xpathStr, qualifiers);
+
+		}catch(Throwable t){
+			IndependantLog.debug(debugmsg +"recognition string parsing error: "+ t.getClass().getSimpleName()+": "+t.getMessage());
+		}
+		if(list == null || list.isEmpty())
+			IndependantLog.debug(debugmsg +"did not find any matching elements.");
+		return list;
 	}
 
 	/**
