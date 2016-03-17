@@ -102,32 +102,13 @@ public class Select implements StepType, SRunnerType {
 	}
 	
 	protected boolean performSelect(WebElement select, WebElement option, TestRun ctx){
-		Object rc = null;
 		try{
-			rc = WDLibrary.executeScript("function selectListItem(select, option){\n"+
-		                            "  select.selectedIndex = -1;\n"+
-		                            "  option.selected = 'selected';\n"+
-		                            "  for(var i=0;i < select.options.length; i++){\n"+
-					                "    if(select.options[i].selected) {\n"+
-		                            "      debug('OPTION index '+ i +' selected, matching '+ select.options[i].text);\n"+
-		                            "      select.selectedIndex = i;\n"+
-					                "      break;\n"+
-					                "    }\n"+
-		                            "  }\n"+
-		                            "  return select.selectedIndex;\n"+
-		                            "}\n"+
-					                "return selectListItem(arguments[0],arguments[1]);", new Object[]{select,option});			
-		}
-		catch(Exception x){
-			ctx.log().error("Select Option select "+ x.getClass().getSimpleName()+", "+ x.getMessage());
+			option.click();
+			return true;
+		}catch(Exception x){
+			ctx.log().error("Select Option.click "+ x.getClass().getSimpleName()+", "+ x.getMessage());
 			return false;
 		}
-		if(rc instanceof Number){
-			ctx.log().info("Select returned numeric selectedIndex of "+ ((Number)rc).longValue());
-		}else{
-			ctx.log().info("Select did NOT return a numeric selectedIndex!");
-		}
-		return true;
 	}
 	
 	public enum WDType {
