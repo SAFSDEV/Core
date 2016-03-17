@@ -16,12 +16,19 @@ public class AddSelection extends Select {
 	@Override
 	protected boolean performSelect(WebElement select, WebElement option, TestRun ctx){
 		try{
-			WDLibrary.executeScript("arguments[0].selected=true;", new Object[]{option});			
-		}
-		catch(Exception x){
-			ctx.log().error("Select Option select "+ x.getClass().getSimpleName()+", "+ x.getMessage());
+			Actions action = new Actions(ctx.driver());
+			action.keyDown(Keys.CONTROL);
+			action.perform();
+			
+			option.click();
+			
+			action = new Actions(ctx.driver());
+			action.keyUp(Keys.CONTROL);
+			action.perform();
+			return true;
+		}catch(Exception x){
+			ctx.log().error("Select Option CTRL+click "+ x.getClass().getSimpleName()+", "+ x.getMessage());
 			return false;
 		}
-		return true;
 	}
 }
