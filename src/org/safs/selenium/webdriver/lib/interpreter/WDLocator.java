@@ -69,7 +69,7 @@ public class WDLocator extends Locator {
 	 * @return true if element was NOT found in 2 second timeout period.
 	 */	
 	public boolean findElementNotPresent(TestRun ctx) {
-		try{WebDriverGUIUtilities._LASTINSTANCE.setWDTimeout(2);}catch(Exception x){
+		try{WebDriverGUIUtilities._LASTINSTANCE.setWDTimeout(1);}catch(Exception x){
 			ctx.log().debug("WDLocator.findElementNotPresent unable to change WebDriver timeouts!");
 		}
 		boolean b = false;
