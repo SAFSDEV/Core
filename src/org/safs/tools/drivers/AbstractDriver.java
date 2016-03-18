@@ -491,7 +491,7 @@ public abstract class AbstractDriver implements DriverInterface{
 	                                 ( DriverConstant.PROPERTY_SAFS_CONFIG_LOCATOR, 
 	                                   DriverConstant.DEFAULT_CONFIGURE_LOCATOR));
 		
-		// check for existence of project config
+		// check for existence of driver config
 		driverConfigPath = getParameterValue(DriverConstant.PROPERTY_SAFS_DRIVER_CONFIG);
 		
 		// check for existence of project config
@@ -630,7 +630,7 @@ public abstract class AbstractDriver implements DriverInterface{
 		// check for embedded %VARIABLE_NAME% at beginning of path
 		projectRootDir = processEmbeddedVariable(projectRootDir);
 
-		// if we have no projectroot, see if we can get it from config
+		// if we have no driverroot, see if we can get it from config
 		if ((driverRootDir.length()==0)&&(configInfo != null)) {
 			driverRootDir = configInfo.getNamedValue(
 										DriverConstant.SECTION_SAFS_DRIVER, 
