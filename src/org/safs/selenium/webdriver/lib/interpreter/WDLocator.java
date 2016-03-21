@@ -7,6 +7,8 @@ package org.safs.selenium.webdriver.lib.interpreter;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.safs.selenium.webdriver.WebDriverGUIUtilities;
@@ -25,7 +27,7 @@ public class WDLocator extends Locator {
 
 	public WDType wdtype;
 	private static String frameInfo = "";
-	
+
 	/**
 	 * @param l
 	 */
@@ -43,6 +45,18 @@ public class WDLocator extends Locator {
 		wdtype = WDType.ofName(type.name());
 	}
 	
+	/**
+	 * @param type
+	 * @param value
+	 */
+	public WDLocator(String type, String value) {
+		try{ this.type = Type.ofName(type);}
+		catch(Exception ignore){}
+		wdtype = WDType.ofName(type);
+		this.value = value;
+	}
+
+	
 	public static void setFrameInfo(String _frameInfo) {
 		frameInfo = _frameInfo;
 	}
@@ -50,18 +64,18 @@ public class WDLocator extends Locator {
 	public static String getFrameInfo() {
 		return frameInfo;
 	}
-	
-	/**
-	 * @param type
-	 * @param value
-	 */
-	public WDLocator(String type, String value) {
-		super(type, value);
-		wdtype = WDType.ofName(type);
-	}
 
+	@Override
+	public JSONObject toJSON() throws JSONException {
+		JSONObject o = new JSONObject();
+		o.put("type", wdtype.toString());
+		o.put("value", value);
+		return o;
+	}
+	
+	@Override
 	public WebElement find(TestRun ctx) {
-		return WDType.ofName(wdtype.name()).find(value, ctx);
+		return wdtype.find(value, ctx);
 	}
 	
 	/**
@@ -73,7 +87,7 @@ public class WDLocator extends Locator {
 			ctx.log().debug("WDLocator.findElementNotPresent unable to change WebDriver timeouts!");
 		}
 		boolean b = false;
-		try{ b = WDType.ofName(wdtype.name()).findElementNotPresent(value, ctx);}catch(Exception x){
+		try{ b = wdtype.findElementNotPresent(value, ctx);}catch(Exception x){
 			ctx.log().debug("WDLocator.findElementNotPresent ignoring "+
 		                    x.getClass().getSimpleName()+", "+x.getMessage());
 		}
@@ -83,8 +97,9 @@ public class WDLocator extends Locator {
 		return b;		
 	}
 	
+	@Override
 	public List<WebElement> findElements(TestRun ctx) {
-		return WDType.ofName(wdtype.name()).findElements(value, ctx);
+		return wdtype.findElements(value, ctx);
 	}
 	
 	public enum WDType {
@@ -155,6 +170,20 @@ public class WDLocator extends Locator {
 				String rs = frameInfo == null ? "" : frameInfo ;
 				rs += "name="+value;
 				return SearchObject.getObject(ctx.driver(), rs) == null;
+			}
+		},
+		LINK {
+			@Override
+			public WebElement find(String value, TestRun ctx) {
+				return ctx.driver().findElementByLinkText(value);
+			}
+			@Override
+			public List<WebElement> findElements(String value, TestRun ctx) {
+				return ctx.driver().findElementsByLinkText(value);
+			}
+			@Override
+			public boolean findElementNotPresent(String value, TestRun ctx) {
+				return ctx.driver().findElementByLinkText(value)==null;
 			}
 		},
 		LINK_TEXT {
