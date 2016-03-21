@@ -38,7 +38,7 @@ public class WDClickElement extends ClickElement {
 			//RemoteWebDriver driver = ctx.driver();			
 			//driver.switchTo().window(driver.getWindowHandle());
 			
-			WebElement e = ctx.locator("locator").find(ctx);
+			WebElement e = ctx.currentStep().locatorParams.get("locator").find(ctx);
 			if(e == null){
 				ctx.getLog().info("WDClick locator did NOT find the expected WebElement!");
 				return false;

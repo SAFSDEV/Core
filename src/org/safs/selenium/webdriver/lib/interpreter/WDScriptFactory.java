@@ -34,6 +34,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.sebuilder.interpreter.Getter;
+import com.sebuilder.interpreter.Locator;
 import com.sebuilder.interpreter.Script;
 import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.factory.DataSourceFactory;
@@ -51,12 +52,21 @@ public class WDScriptFactory extends ScriptFactory {
 	protected DataSourceFactory dataSourceFactory = new DataSourceFactory();
 
 	/** "org.safs.selenium.webdriver.lib.interpreter.selrunner.steptype" */
-	public static String SRSTEPTYPE_PACKAGE = "org.safs.selenium.webdriver.lib.interpreter.selrunner.steptype";
+	public static final String SRSTEPTYPE_PACKAGE = "org.safs.selenium.webdriver.lib.interpreter.selrunner.steptype";
 	
 	/* SeRunner HTML Table Tags of Interest */
-	public static String SR_TABLE_TBODY = "tbody";
-	public static String SR_TABLE_TR    = "tr";
-	public static String SR_TABLE_TD    = "td";
+	public static final String SR_TABLE_TBODY = "tbody";
+	public static final String SR_TABLE_TR    = "tr";
+	public static final String SR_TABLE_TD    = "td";
+
+	public static final String LOCATOR_PARAM     = "locator";
+	public static final String TEXT_PARAM     = "text";
+	public static final String VARIABLE_PARAM = "variable";
+	public static final String WAITTIME_PARAM = "waitTime";
+
+	public static final String ANDWAIT_CLASS  = "AndWait";
+	public static final String PAUSE_CLASS    = "Pause";
+	public static final String STORE_CLASS    = "Store";
 	
 	/**
 	 * @param script -- One of two possible formats:<br>
@@ -148,15 +158,24 @@ public class WDScriptFactory extends ScriptFactory {
 			// params[2] = other param, or empty.
 			
 			stepTypeFactory.setSecondaryPackage(SRSTEPTYPE_PACKAGE);				
-			Step step = new Step(stepTypeFactory.getStepTypeOfName(params[0]));
-			
+			Step step = null;
+			try{
+				step = new Step(stepTypeFactory.getStepTypeOfName(params[0]));			
+			}catch(Throwable x){
+				if(params[0].endsWith(ANDWAIT_CLASS)){
+					//AndWait support should be implicit in WebDriver?
+					step = new Step(stepTypeFactory.getStepTypeOfName(params[0].substring(0, params[0].length() - ANDWAIT_CLASS.length())));
+				}else{
+					throw x;
+				}
+			}
 			script.steps.add(step);
-			
 			if(step.type instanceof SRunnerType){
 				((SRunnerType)step.type).processParams(step, params);
 			}else{
 				// check for Steps that are implied (WaitFor, Verify, Assert, Store, etc..)and contain us as Getters
-				try{
+				boolean hadGetter = false;
+				try{					
 					Field[] fields = step.type.getClass().getFields();
 					for(int g=0;g<fields.length;g++){
 						Field field = fields[g];
@@ -164,19 +183,57 @@ public class WDScriptFactory extends ScriptFactory {
 							Getter getter = (Getter) field.get(step.type);
 							if(getter instanceof SRunnerType){
 								((SRunnerType)getter).processParams(step, params);
+								hadGetter = true;
+							}else{
+								String newClass = stepTypeFactory.getSecondaryPackage() + "." + getter.getClass().getSimpleName();
+								try {
+									Class c = Class.forName(newClass);
+									getter = (Getter) c.newInstance();
+									((SRunnerType)getter).processParams(step, params);
+									field.setAccessible(true);
+									field.set(step.type, getter);
+									hadGetter = true;
+								} catch (ClassNotFoundException cnfe) {
+										throw new RuntimeException("No SelRunner Getter '" + newClass + "' implementation found!");
+								} catch (InstantiationException ix){
+									throw new RuntimeException("SelRunner Getter '" + newClass + "' could not be instantiated!");
+								} catch (ClassCastException ix){
+									throw new RuntimeException("SelRunner Getter '"+ newClass +"' must implement the SRunnerType Interface.");
+								} catch (IllegalArgumentException ix){
+									throw new RuntimeException("SelRunner Getter '" + newClass + "' could not be set into "+step.type.getClass().getName()+"!");
+								}								
 							}
 						}
 					}
-				}catch(IllegalAccessException ignore){}
-				
-				// handle default StepTypes here (like Pause)
-				if("Pause".equalsIgnoreCase(step.type.getClass().getSimpleName())){
-					step.stringParams.put("waitTime", params[1]);
-				} 
+					if(! hadGetter) processNativeStep(step, params);
+				}catch(IllegalAccessException ignore){
+					throw new RuntimeException("SelRunner SRunnerType for Step or Getter cannot be acquired for "+ step.type.getClass().getName()+"!");
+				}								
 			}
 		}		
 		return scripts;
 	}
+
+    protected void processNativeStep(Step step, String[] params){
+    	String stepName = step.type.getClass().getSimpleName();
+    	
+//    	Locator loc = step.locatorParams.get("locator");
+//    	if(loc != null && !(loc instanceof WDLocator)){
+//    		step.locatorParams.put(LOCATOR_PARAM, new WDLocator(loc));
+//    	}
+//    	
+		//              handle default SeInterpreter StepTypes here (like Pause)
+		if( PAUSE_CLASS.equalsIgnoreCase(stepName)){
+			step.stringParams.put(WAITTIME_PARAM, params[1]);
+		}
+		else 
+		if( STORE_CLASS.equalsIgnoreCase(stepName)){
+			step.stringParams.put(TEXT_PARAM, params[1]);
+			step.stringParams.put(VARIABLE_PARAM, params[2]);
+		}else{
+			throw new RuntimeException("Native SeInterpreter StepType '"+ stepName +" is not yet supported!");
+		}
+    }
 		
 	/**
 	 * @param reader A Reader pointing to one of 2 possible script formats:<br>

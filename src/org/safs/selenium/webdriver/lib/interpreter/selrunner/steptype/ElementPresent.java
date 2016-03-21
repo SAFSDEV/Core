@@ -13,17 +13,8 @@ import com.sebuilder.interpreter.Locator;
 import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
-import com.sebuilder.interpreter.steptype.ElementPresent;
 
-public class ElementNotPresent implements Getter, SRunnerType {
-
-	@Override
-	public String get(TestRun ctx) {
-		Locator l = ctx.currentStep().locatorParams.get("locator");
-		WDLocator wdl = (l instanceof WDLocator) ? (WDLocator)l : new WDLocator(l.type,l.value);
-		if(!(l instanceof WDLocator)) ctx.currentStep().locatorParams.put("locator", wdl);
-		return String.valueOf(wdl.findElementNotPresent(ctx));
-	}
+public class ElementPresent extends com.sebuilder.interpreter.steptype.ElementPresent implements SRunnerType {
 
 	@Override
 	public void processParams(Step step, String[] params) {
@@ -33,10 +24,5 @@ public class ElementNotPresent implements Getter, SRunnerType {
 				step.stringParams.put("variable", params[2]);
 			}
 		}catch(Throwable ignore){}
-	}
-
-	@Override
-	public String cmpParamName() {
-		return null;
 	}
 }

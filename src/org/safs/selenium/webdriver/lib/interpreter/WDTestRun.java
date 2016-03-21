@@ -24,6 +24,7 @@ import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.Verify;
 import com.sebuilder.interpreter.steptype.ClickElement;
 import com.sebuilder.interpreter.steptype.Get;
+import com.sebuilder.interpreter.steptype.Store;
 import com.sebuilder.interpreter.steptype.SwitchToFrame;
 import com.sebuilder.interpreter.steptype.SwitchToFrameByIndex;
 import com.sebuilder.interpreter.webdriverfactory.WebDriverFactory;
@@ -305,7 +306,11 @@ public class WDTestRun extends TestRun {
 				type = new WDSwitchToFrame();
 			} else if (type instanceof SwitchToFrameByIndex) {
 				type = new WDSwitchToFrameByIndex();
-			}			
+			} else if (type instanceof Store){
+				String varname = this.string("variable");
+				String text = this.string("text");
+				WebDriverGUIUtilities._LASTINSTANCE.getSTAFHelper().setVariable(varname, text);
+			}
 			return type.run(this);
 		} catch (Exception e) {
 			throw new RuntimeException(currentStep() + " failed.", e);
