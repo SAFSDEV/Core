@@ -1162,11 +1162,11 @@ For accurate coordinate calculations of components the Status Bar in Internet Ex
 <div id="startwebbrowser" style="display: none;">
 <h2>About Profile and Preferences</h2>
 The Profile/Preferences is used to control the browser's looks, behaviors etc.
-Normally, SeleniumPlus will start browser with a new default profile, which means any preferences user sets manually will not be kept, this default profile is volatile.
-If user wants to start browser with these preferences, SeleniumPlus provides 2 ways.
+Normally, SeleniumPlus will start browser with a new default profile, which means any preferences user sets manually will not be kept, this default profile is temporary.
+If user wants to start browser with some specific preferences, SeleniumPlus provides 2 ways.
 <ol>
     <li>Start web browser with <a href="#startwebbrowser_profile">persistent custom profile</a>.
-    <li>Start web browser with <a href="startwebbrowser_preferences">default profile and set the preference at runtime</a>.
+    <li>Start web browser with <a href="#startwebbrowser_preferences">default profile and set the preference at runtime</a>.
 </ol>
 
 <h2 id="startwebbrowser_profile">Using custom profile</h2>
@@ -1175,13 +1175,13 @@ If user wants to start browser with these preferences, SeleniumPlus provides 2 w
 	   <ul>
 	   <li>Prepare the profile
             <ol>
-                <li>Run "firefox.exe -ProfileManager -no-remote" in Windows Start "Search" input box.
-                <li>Create custom profile "myprofile" and <a href="https://support.mozilla.org/en-US/kb/profile-manager-create-and-remove-firefox-profiles">configure custom setting</a>
+                <li>Run "<b>firefox.exe -ProfileManager -no-remote</b>" in Windows Start "Search" input box.
+                <li>Create custom profile "<b>myprofile</b>" and <a href="https://support.mozilla.org/en-US/kb/profile-manager-create-and-remove-firefox-profiles">configure custom setting</a>
                     <br><img src="images/firefox_create_profile.png"/>
            </ol>
         <li>Examples:<br>
             <ol>
-                <li>Start Firefox with the custom profile "myprofile"
+                <li>Start Firefox with the custom profile "<b>myprofile</b>"
                     <div class="CodeBox">
 <pre class="LineNumbers">
 1
@@ -1201,19 +1201,25 @@ StartWebBrowser(URL, ID, SelectBrowser.BROWSER_NAME_FIREFOX, "30", "true", Selec
         <ul>
         <li>Prepare the profile
             <ol>
-                <li><a href="http://www.chromium.org/developers/creating-and-using-profiles">Create custom data pool</a> by running "chrome.exe --user-data-dir=c:\chrome_custom_data".
+                <li><a href="http://www.chromium.org/developers/creating-and-using-profiles">Create custom data pool</a> by running "<b>chrome.exe --user-data-dir=c:\chrome_custom_data</b>".
                     This command will start up a chrome browser and a new folder c:\chrome_custom_data will be created.
-                    Under that folder there is a sub folder Default, which is for the default user. 
+                    Under that folder there is a sub folder <b>Default</b>, which is for the default user. 
                 <li>Create multiple users, then under folder c:\chrome_custom_data, there will be sub folder "Profile 1", "Profile 2" etc. for those new added users.<br>
                     <ul>
-                    <li>Open chrome settings <br><img src="images/chrome_open_settings.png"/>
-                    <li>Add new person <br><img src="images/chrome_add_person.png">
+                    <li>Open chrome settings: click the button <img src="images/chrome_customize_control_button.png"/> to show a pop-up menu, and then click the item "Settings".<br>
+                        <img src="images/chrome_open_settings.png"/>
+                    <li>Add new person: click the button "Add person..." <br>
+                        <img src="images/chrome_add_person.png">
                     </ul>
+                <li>Modify chrome settings (chrome://settings/ or chrome://flags/) manually, and the new settings will be kept in this custom profile.
+                    As this chrome is started by "<b>chrome.exe --user-data-dir=c:\chrome_custom_data</b>", these settings will be kept for the <b>Default</b> user.<br>
+                    If we want to change the settings for another user, we need to start chrome with the option <b>profile-directory</b>, for example,
+                    chrome.exe --user-data-dir=c:\chrome_custom_data <b>--profile-directory="Profile 1"</b>, and then modify the chrome settings manually.<br>
                 <p>
             </ol>
         <li>Examples:<br>
             <ol>
-                <li>Start Chrome with the custom data pool "c:\chrome_custom_data" and default user
+                <li>Start Chrome with the custom data pool "c:\chrome_custom_data" and <b>Default</b> user
                     <div class="CodeBox">
 <pre class="LineNumbers">
 1
@@ -1225,7 +1231,7 @@ StartWebBrowser(URL, ID, SelectBrowser.BROWSER_NAME_CHROME, "30", "true", quote(
 </pre>
                     </div>
                 <p>
-                <li>Start Chrome with the custom data pool "c:\chrome_custom_data" and the second user.
+                <li>Start Chrome with the custom data pool "c:\chrome_custom_data" and the second user "<b>Profile 1</b>".
                     <div class="CodeBox">
 <pre class="LineNumbers">
 1
@@ -1234,7 +1240,7 @@ StartWebBrowser(URL, ID, SelectBrowser.BROWSER_NAME_CHROME, "30", "true", quote(
 </pre>
 <pre class="SourceCode">
 String datapool = "c:\\chrome_custom_data";
-String user = "Profile 2";
+String user = "Profile 1";
 StartWebBrowser(URL, ID, SelectBrowser.BROWSER_NAME_CHROME, "30", "true", quote(SelectBrowser.<b>KEY_CHROME_USER_DATA_DIR</b>), datapool, quote(SelectBrowser.<b>KEY_CHROME_PROFILE_DIR</b>), user);
 </pre>
                     </div>
