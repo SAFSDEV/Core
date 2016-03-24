@@ -546,6 +546,7 @@ public class SelectBrowser {
 	 * @see #KEY_PROXY_BYPASS_ADDRESS
 	 * @see #KEY_PROXY_SETTING
 	 * @see #KEY_FIREFOX_PROFILE
+	 * @see #KEY_FIREFOX_PROFILE_PREFERENCE
 	 * @see #KEY_CHROME_PREFERENCE
 	 * @see #KEY_CHROME_USER_DATA_DIR
 	 * @see #KEY_CHROME_PROFILE_DIR
@@ -557,6 +558,7 @@ public class SelectBrowser {
 		keys.add(KEY_PROXY_SETTING);
 		keys.add(KEY_PROXY_BYPASS_ADDRESS);
 		keys.add(KEY_FIREFOX_PROFILE);
+		keys.add(KEY_FIREFOX_PROFILE_PREFERENCE);
 		keys.add(KEY_CHROME_PREFERENCE);
 		keys.add(KEY_CHROME_USER_DATA_DIR);
 		keys.add(KEY_CHROME_PROFILE_DIR);
