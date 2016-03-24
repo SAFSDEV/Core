@@ -20,4 +20,4 @@ cscript "%SELENIUM_PLUS%\extra\ProcessKiller.vbs" -process cmd.exe -command Remo
 cscript "%SELENIUM_PLUS%\extra\ProcessKiller.vbs" -process wscript.exe -command RemoteServerInstall.vbs -noprompt
 
 REM kill any chromedriver.exe left behind after automation test
-cscript "%SELENIUM_PLUS%\extra\ProcessKiller.vbs" -process "chromedriver.exe" -command "%SELENIUM_PLUS%\extra\chromedriver.exe"  -commandIgnoreCase -noprompt
+cscript "%SELENIUM_PLUS%\extra\ProcessKiller.vbs" -process "chromedriver.exe" -command "%SELENIUM_PLUS%\extra\chromedriver.exe"  -commandIgnoreCase -killall -noprompt
