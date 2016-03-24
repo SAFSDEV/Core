@@ -1163,7 +1163,7 @@ For accurate coordinate calculations of components the Status Bar in Internet Ex
 <h2>About Profile and Preferences</h2>
 The Profile/Preferences is used to control the browser's looks, behaviors etc.
 Normally, SeleniumPlus will start browser with a new default profile, which means any preferences user sets manually will not be kept, this default profile is temporary.
-If user wants to start browser with some specific preferences, SeleniumPlus provides 2 ways.
+If user wants to start browser with some specific settings, SeleniumPlus provides 2 ways.
 <ol>
     <li>Start web browser with <a href="#startwebbrowser_profile">persistent custom profile</a>.
     <li>Start web browser with default profile and <a href="#startwebbrowser_preferences">set the preferences at runtime</a>.
@@ -1196,8 +1196,8 @@ StartWebBrowser(URL, ID, SelectBrowser.BROWSER_NAME_FIREFOX, "30", "true", Selec
         </ul><p>
 	<li><h3>Start Chrome</h3>
         Chrome's profile is a little different from Firefox's. There is a "user data pool" and under that "data pool" there are multiple users.
-        Among these users, there is a default user. SeleniumPlus can start browser with a "user data pool" and a certain "user". If the "user" is
-        not specified, then the default user will be used.<p>
+        Among these users, there is a <b>Default</b> user. SeleniumPlus can start browser with a "user data pool" and a certain "user". If the "user" is
+        not specified, then the <b>Last Active</b> user will be used.<p>
         <ul>
         <li>Prepare the profile
             <ol>
@@ -1211,15 +1211,18 @@ StartWebBrowser(URL, ID, SelectBrowser.BROWSER_NAME_FIREFOX, "30", "true", Selec
                     <li>Add new person: click the button "Add person..." <br>
                         <img src="images/chrome_add_person.png">
                     </ul>
-                <li>Modify chrome settings (chrome://settings/ or chrome://flags/) manually, and the new settings will be kept in this custom profile.
-                    As this chrome is started by "<b>chrome.exe --user-data-dir=c:\chrome_custom_data</b>", these settings will be kept for the <b>Default</b> user.<br>
+                <li>Modify chrome settings (chrome://settings/ or chrome://flags/) manually, and the new settings will be kept in this custom profile for <b>current active user</b>.
+                    As this chrome is started the first time by "<b>chrome.exe --user-data-dir=c:\chrome_custom_data</b>", the current active user will be <b>Default</b> user. Refer to
+                    the following snapshot, the <b>Default</b> user is "Person 1" marked with <b>(current)</b>, which means it is active. Later, with more users added, the active user could be anyone.
+                    <br>
+                    <img src="images/current_active_user.png"><br>
                     If we want to change the settings for another user, we need to start chrome with the option <b>profile-directory</b>, for example,
-                    chrome.exe --user-data-dir=c:\chrome_custom_data <b>--profile-directory="Profile 1"</b>, and then modify the chrome settings manually.<br>
+                    run <b>chrome.exe --user-data-dir=c:\chrome_custom_data <font color="red">--profile-directory</font>="Profile 1"</b>, and then modify the chrome settings manually for him.<br>
                 <p>
             </ol>
         <li>Examples:<br>
             <ol>
-                <li>Start Chrome with the custom data pool "c:\chrome_custom_data" and <b>Default</b> user
+                <li>Start Chrome with the custom data pool "c:\chrome_custom_data" and <b>Last Active</b> user, the <b>Last Active</b> could be "Default User" or any other one. 
                     <div class="CodeBox">
 <pre class="LineNumbers">
 1
@@ -1228,6 +1231,20 @@ StartWebBrowser(URL, ID, SelectBrowser.BROWSER_NAME_FIREFOX, "30", "true", Selec
 <pre class="SourceCode">
 String datapool = "c:\\chrome_custom_data";
 StartWebBrowser(URL, ID, SelectBrowser.BROWSER_NAME_CHROME, "30", "true", quote(SelectBrowser.<b>KEY_CHROME_USER_DATA_DIR</b>), datapool);
+</pre>
+                    </div>
+                <p>
+                <li>Start Chrome with the custom data pool "c:\chrome_custom_data" and <b>Default</b> user
+                    <div class="CodeBox">
+<pre class="LineNumbers">
+1
+2
+3
+</pre>
+<pre class="SourceCode">
+String datapool = "c:\\chrome_custom_data";
+String user = "Default";
+StartWebBrowser(URL, ID, SelectBrowser.BROWSER_NAME_CHROME, "30", "true", quote(SelectBrowser.<b>KEY_CHROME_USER_DATA_DIR</b>), datapool, quote(SelectBrowser.<b>KEY_CHROME_PROFILE_DIR</b>), user);
 </pre>
                     </div>
                 <p>
