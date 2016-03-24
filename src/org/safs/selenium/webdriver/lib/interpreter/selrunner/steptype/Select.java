@@ -14,6 +14,7 @@ import org.safs.selenium.webdriver.lib.SearchObject;
 import org.safs.selenium.webdriver.lib.SeleniumPlusException;
 import org.safs.selenium.webdriver.lib.WDLibrary;
 import org.safs.selenium.webdriver.lib.interpreter.WDLocator.WDType;
+import org.safs.selenium.webdriver.lib.interpreter.WDScriptFactory;
 import org.safs.selenium.webdriver.lib.interpreter.selrunner.SRUtilities;
 import org.safs.selenium.webdriver.lib.interpreter.selrunner.SRunnerType;
 
@@ -24,11 +25,10 @@ import com.sebuilder.interpreter.steptype.SetElementSelected;
 
 public class Select implements StepType, SRunnerType {
 
-	public static final String ITEM_PARAM = "item";
 	@Override
 	public void processParams(Step step, String[] params) {
 		SRUtilities.setLocatorParam(step, params[1]);
-		step.stringParams.put(ITEM_PARAM, params[2]);
+		step.stringParams.put(WDScriptFactory.ITEM_PARAM, params[2]);
 	}
 
 	static final String REGEXP_PREFIX = "regexp:";
@@ -37,7 +37,7 @@ public class Select implements StepType, SRunnerType {
 	public boolean run(TestRun ctx) {
 		
 		// select locator
-		List<WebElement> es = ctx.locator("locator").findElements(ctx);
+		List<WebElement> es = ctx.locator(WDScriptFactory.LOCATOR_PARAM).findElements(ctx);
 		if(es == null || es.isEmpty()) {
 			ctx.log().error("Select did not find any matching SELECT WebElements to evaluate.");
 			return false;
@@ -45,7 +45,7 @@ public class Select implements StepType, SRunnerType {
 			ctx.log().info("Select found "+ es.size()+" matching SELECT WebElements to evaluate.");			
 		}
 		
-		String param = ctx.string(ITEM_PARAM);
+		String param = ctx.string(WDScriptFactory.ITEM_PARAM);
 		if(param == null || param.length()==0) {
 			ctx.log().error("Select was provided no OPTION to match.");
 			return false;
@@ -117,7 +117,7 @@ public class Select implements StepType, SRunnerType {
 			public WebElement find(String value,  List<WebElement> options, TestRun ctx) {
 				for(int i=0;i<options.size();i++){
 					WebElement e = options.get(i);
-					if(value.equals(e.getAttribute("id"))) return e;
+					if(value.equals(e.getAttribute(WDScriptFactory.ID_LOCATORTYPE))) return e;
 				}
 				return null;
 			}
@@ -180,7 +180,7 @@ public class Select implements StepType, SRunnerType {
 			public WebElement find(String value, List<WebElement> options, TestRun ctx) {
 				for(int i=0;i<options.size();i++){
 					WebElement e = options.get(i);
-					if(value.equals(e.getAttribute("value"))) return e;					
+					if(value.equals(e.getAttribute(WDScriptFactory.VALUE_LOCATORTYPE))) return e;					
 				}
 				return null;
 			}

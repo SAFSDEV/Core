@@ -10,7 +10,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.safs.IndependantLog;
+import org.safs.StringUtils;
 import org.safs.selenium.webdriver.lib.interpreter.WDLocator;
+import org.safs.selenium.webdriver.lib.interpreter.WDScriptFactory;
 import org.safs.selenium.webdriver.lib.interpreter.WDTestRunFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -30,11 +33,12 @@ import com.sebuilder.interpreter.factory.StepTypeFactory;
 public class SRUtilities {
 
 	public static void setLocatorParam(Step step, String rs){
+		String debugmsg = StringUtils.debugmsg(false);
 		String type = null;
 		String value = null;
 		
 		if(rs.startsWith("//")){
-			type = "xpath";
+			type = WDScriptFactory.XPATH_LOCATORTYPE;
 			value = rs;
 		}else{
 			if(rs.contains("=")){
@@ -42,8 +46,8 @@ public class SRUtilities {
 				type = rs.substring(0,i).trim();				
 				value = rs.substring(i+1).trim();
 				
-				if("css".equalsIgnoreCase(type)){
-					type="css selector";
+				if(WDScriptFactory.CSS_LOCATORTYPE.equalsIgnoreCase(type)){
+					type=WDScriptFactory.CSSSELECTOR_LOCATORTYPE;
 				}
 			}
 		}
@@ -53,6 +57,12 @@ public class SRUtilities {
 					"SRUtilities did not successfully process Locator parameter for StepType "+
 			        step.type.getClass().getSimpleName() +" using parameter "+ rs);
 		
-		step.locatorParams.put("locator", new WDLocator(type, value));
+		try{
+			IndependantLog.info(debugmsg+ step.type.getClass().getName()+" to receive WDLocator Type '"+type+"' with value '"+value+"'.");
+			step.locatorParams.put(WDScriptFactory.LOCATOR_PARAM, new WDLocator(type, value));
+		}catch(Throwable t){
+			IndependantLog.debug(debugmsg+ step.type.getClass().getName()+" "+ t.getClass().getSimpleName()+", "+ t.getMessage());
+			throw t;
+		}
 	}
 }
