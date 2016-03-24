@@ -1137,10 +1137,10 @@ public class WDLibrary extends SearchObject {
 		try {
 			RemoteDriver wd = null;
 			try{ wd = (RemoteDriver) getWebDriver();}catch(Exception x){}
-			if(wd == null || wd.isLocalServer()){
-				IndependantLog.info(debugmsg+" sending '"+String.valueOf(millisDelay)+"' to local Robot.");
-				Robot.setMillisBetweenKeystrokes(millisDelay);
-			}else {
+			// change local to match remote for local getMillisBetweenKeystrokes
+			IndependantLog.info(debugmsg+" sending '"+String.valueOf(millisDelay)+"' to local Robot.");
+			Robot.setMillisBetweenKeystrokes(millisDelay);
+			if(wd != null && !wd.isLocalServer()){
 				try{
 					IndependantLog.info(debugmsg+" sending RMI Agent SetKeyDelay '"+String.valueOf(millisDelay)+"' to RMI Server");
 					wd.rmiAgent.remoteSetKeyDelay(millisDelay);
@@ -1151,6 +1151,18 @@ public class WDLibrary extends SearchObject {
 		} catch (Exception e) {
 			throw new SeleniumPlusException("Unable to successfully complete setDelayBetweenKeystrokes due to "+ e.getMessage(), e);
 		}
+	}
+	
+	/**
+	 * Gets the current delay in milliseconds between Robot keystrokes for both local and remote servers.
+	 * @throws SeleniumPlusException if we are unable to process the keystrokes successfully.
+	 * @see org.safs.robot.Robot#setMillisBetweenKeystrokes(int)
+	 **/
+	public static int getDelayBetweenKeystrokes() throws SeleniumPlusException{
+		int d = Robot.getMillisBetweenKeystrokes();
+		// should be the same for local and remote
+		IndependantLog.info("WDLibrary.getDelayBetweenKeystrokes returning  '"+String.valueOf(d)+"' from Robot.");
+		return d;
 	}
 	
 	/**
