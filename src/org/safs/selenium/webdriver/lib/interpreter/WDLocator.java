@@ -175,7 +175,9 @@ public class WDLocator extends Locator {
 		LINK {
 			@Override
 			public WebElement find(String value, TestRun ctx) {
-				return ctx.driver().findElementByLinkText(value);
+				if(null != frameInfo)
+					return SearchObject.getObject(ctx.driver(), frameInfo + "xpath=.//a[normalize-space(text())='"+ value +"']");
+				return SearchObject.getObject(ctx.driver(), "xpath=.//a[normalize-space(text())='"+ value +"']");
 			}
 			@Override
 			public List<WebElement> findElements(String value, TestRun ctx) {
@@ -183,13 +185,17 @@ public class WDLocator extends Locator {
 			}
 			@Override
 			public boolean findElementNotPresent(String value, TestRun ctx) {
-				return ctx.driver().findElementByLinkText(value)==null;
+				if(null != frameInfo)
+					return SearchObject.getObject(ctx.driver(), frameInfo + "xpath=.//a[normalize-space(text())='"+ value +"']")==null;
+				return SearchObject.getObject(ctx.driver(), "xpath=.//a[normalize-space(text())='"+ value +"']")==null;
 			}
 		},
 		LINK_TEXT {
 			@Override
 			public WebElement find(String value, TestRun ctx) {
-				return ctx.driver().findElementByLinkText(value);
+				if(null != frameInfo)
+					return SearchObject.getObject(ctx.driver(), frameInfo + "xpath=.//a[normalize-space(text())='"+ value +"']");
+				return SearchObject.getObject(ctx.driver(), "xpath=.//a[normalize-space(text())='"+ value +"']");
 			}
 			@Override
 			public List<WebElement> findElements(String value, TestRun ctx) {
@@ -197,7 +203,9 @@ public class WDLocator extends Locator {
 			}
 			@Override
 			public boolean findElementNotPresent(String value, TestRun ctx) {
-				return ctx.driver().findElementByLinkText(value)==null;
+				if(null != frameInfo)
+					return SearchObject.getObject(ctx.driver(), frameInfo + "xpath=.//a[normalize-space(text())='"+ value +"']")==null;
+				return SearchObject.getObject(ctx.driver(), "xpath=.//a[normalize-space(text())='"+ value +"']")==null;
 			}
 		},
 		CSS_SELECTOR {

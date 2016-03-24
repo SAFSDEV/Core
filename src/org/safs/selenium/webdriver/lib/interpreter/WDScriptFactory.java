@@ -59,11 +59,22 @@ public class WDScriptFactory extends ScriptFactory {
 	public static final String SR_TABLE_TR    = "tr";
 	public static final String SR_TABLE_TD    = "td";
 
-	public static final String LOCATOR_PARAM     = "locator";
+	public static final String LOCATOR_PARAM  = "locator";
 	public static final String TEXT_PARAM     = "text";
+	public static final String ITEM_PARAM     = "item";
 	public static final String VARIABLE_PARAM = "variable";
 	public static final String WAITTIME_PARAM = "waitTime";
 
+	public static final String XPATH_LOCATORTYPE = "xpath";
+	public static final String MAP_LOCATORTYPE = "map";
+	public static final String LINK_LOCATORTYPE = "link";
+	public static final String LINKTEXT_LOCATORTYPE = "link text";
+	public static final String NAME_LOCATORTYPE = "name";
+	public static final String ID_LOCATORTYPE = "id";
+	public static final String VALUE_LOCATORTYPE = "value";
+	public static final String CSS_LOCATORTYPE = "css";
+	public static final String CSSSELECTOR_LOCATORTYPE = "css selector";
+	
 	public static final String ANDWAIT_CLASS  = "AndWait";
 	public static final String PAUSE_CLASS    = "Pause";
 	public static final String STORE_CLASS    = "Store";
@@ -163,16 +174,20 @@ public class WDScriptFactory extends ScriptFactory {
 				step = new Step(stepTypeFactory.getStepTypeOfName(params[0]));			
 			}catch(Throwable x){
 				if(params[0].endsWith(ANDWAIT_CLASS)){
+					IndependantLog.info(debugmsg +"stripping 'unecessary' AndWait class suffix fro "+ params[0] +"...");
 					//AndWait support should be implicit in WebDriver?
 					step = new Step(stepTypeFactory.getStepTypeOfName(params[0].substring(0, params[0].length() - ANDWAIT_CLASS.length())));
 				}else{
+					IndependantLog.debug(debugmsg +"rethrowing "+ x.getClass().getSimpleName()+"...");
 					throw x;
 				}
 			}
 			script.steps.add(step);
 			if(step.type instanceof SRunnerType){
+				IndependantLog.info(debugmsg +"Step Type "+ step.type.getClass().getName()+" processing params as a SRunnerType...");
 				((SRunnerType)step.type).processParams(step, params);
 			}else{
+				IndependantLog.info(debugmsg +"Step Type "+ step.type.getClass().getName()+" is NOT a SRunnerType.  Seeking Getter...");
 				// check for Steps that are implied (WaitFor, Verify, Assert, Store, etc..)and contain us as Getters
 				boolean hadGetter = false;
 				try{					
@@ -182,17 +197,23 @@ public class WDScriptFactory extends ScriptFactory {
 						if(field.getType().isAssignableFrom(Getter.class)){
 							Getter getter = (Getter) field.get(step.type);
 							if(getter instanceof SRunnerType){
+								IndependantLog.info(debugmsg +"Getter "+ getter.getClass().getName()+" processing params as a SRunnerType...");
 								((SRunnerType)getter).processParams(step, params);
 								hadGetter = true;
+								IndependantLog.info(debugmsg +"Getter "+ getter.getClass().getSimpleName() +" has successfully processed params as a SRunnerType...");
 							}else{
+								IndependantLog.info(debugmsg +"Getter "+ getter.getClass().getName()+" is NOT a SRunnerType. Seeking alternative...");
 								String newClass = stepTypeFactory.getSecondaryPackage() + "." + getter.getClass().getSimpleName();
 								try {
 									Class c = Class.forName(newClass);
 									getter = (Getter) c.newInstance();
-									((SRunnerType)getter).processParams(step, params);
+									//make sure we are "fixing" the Step with the right new Getter instance.
+									// this persists for all future calls for this Step name (like "verifyText")
 									field.setAccessible(true);
 									field.set(step.type, getter);
+									((SRunnerType)getter).processParams(step, params);
 									hadGetter = true;
+									IndependantLog.info(debugmsg +"Getter "+ newClass+" has successfully processed params as a SRunnerType...");
 								} catch (ClassNotFoundException cnfe) {
 										throw new RuntimeException("No SelRunner Getter '" + newClass + "' implementation found!");
 								} catch (InstantiationException ix){
@@ -205,8 +226,14 @@ public class WDScriptFactory extends ScriptFactory {
 							}
 						}
 					}
-					if(! hadGetter) processNativeStep(step, params);
+					if(! hadGetter) {
+						IndependantLog.info(debugmsg +"Step Type "+ step.type.getClass().getName()+" processing as a simple, native (non-SRunnerType)...");
+						processNativeStep(step, params);
+					}else{
+						
+					}
 				}catch(IllegalAccessException ignore){
+					IndependantLog.info("SelRunner SRunnerType for Step or Getter cannot be acquired for "+ step.type.getClass().getName()+"!");
 					throw new RuntimeException("SelRunner SRunnerType for Step or Getter cannot be acquired for "+ step.type.getClass().getName()+"!");
 				}								
 			}
@@ -231,6 +258,7 @@ public class WDScriptFactory extends ScriptFactory {
 			step.stringParams.put(TEXT_PARAM, params[1]);
 			step.stringParams.put(VARIABLE_PARAM, params[2]);
 		}else{
+			IndependantLog.debug("WDScriptFactory.processNativeStep "+ step.type.getClass().getName()+" is not yet supported.");
 			throw new RuntimeException("Native SeInterpreter StepType '"+ stepName +" is not yet supported!");
 		}
     }

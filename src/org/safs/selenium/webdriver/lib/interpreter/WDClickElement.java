@@ -26,18 +26,6 @@ public class WDClickElement extends ClickElement {
 	public boolean run(TestRun ctx){
 		ctx.getLog().debug("WDClick executing custom Find and Click via WDLibrary.");
 		try{
-			// original
-			//ctx.locator("locator").find(ctx).click();
-			
-			// safs enhanced -- working well if window does NOT have focus?  Not sure?
-			//WDLibrary.click(ctx.locator("locator").find(ctx));
-			
-			//String script = JavaScriptFunctions.createMouseEvent("mouseover");
-			//WDLibrary.executeJavaScriptOnWebElement(script, e);
-			
-			//RemoteWebDriver driver = ctx.driver();			
-			//driver.switchTo().window(driver.getWindowHandle());
-			
 			WebElement e = ctx.currentStep().locatorParams.get("locator").find(ctx);
 			if(e == null){
 				ctx.getLog().info("WDClick locator did NOT find the expected WebElement!");

@@ -4,6 +4,9 @@
  **/
 package org.safs.selenium.webdriver.lib.interpreter;
 
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,10 +14,12 @@ import org.apache.commons.logging.Log;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.safs.STAFHelper;
+import org.safs.StringUtils;
 import org.safs.selenium.webdriver.WebDriverGUIUtilities;
 import org.safs.selenium.webdriver.lib.RemoteDriver;
 import org.safs.selenium.webdriver.lib.SelectBrowser;
 import org.safs.selenium.webdriver.lib.WDLibrary;
+import org.safs.tools.stringutils.StringUtilities;
 
 import com.sebuilder.interpreter.Locator;
 import com.sebuilder.interpreter.Script;
@@ -186,16 +191,24 @@ public class WDTestRun extends TestRun {
 	 */
 	@Override
 	public Locator locator(String paramName) {
-		Locator l = new WDLocator(currentStep().locatorParams.get(paramName));
+		if(paramName == null)
+			throw new RuntimeException("WDTestRun.locator() paramName is null!");		
+		Step step = currentStep();
+		if(step == null)
+			throw new RuntimeException("WDTestRun.locator() currentStep() #" +
+					(stepIndex + 1) + " is coming back null!");		
+		Locator loc = step.locatorParams.get(paramName);
+		if(loc == null)
+			throw new RuntimeException("WDTestRun.locator() step.locatorParams is coming back null!");
+
+		WDLocator l = (loc instanceof WDLocator ) ?
+				      (WDLocator)loc              :
+				      new WDLocator(loc.type.name(), loc.value);
+	    step.locatorParams.put(paramName, l);
 		getLog().info("");
-		if (l == null) {
-			throw new RuntimeException("Missing parameter \"" + paramName + "\" at step #" +
-					(stepIndex + 1) + ".");
-		}else{
-			try{ getLog().info("Locator class: "+ l.getClass().getName());}catch(Exception x){}
-			try{ getLog().info("Locator Type: "+ l.type);}catch(Exception x){}
-			try{ getLog().info("Locator Value: "+ l.value);}catch(Exception x){}
-		}
+		try{ getLog().info("Locator class: "+ l.getClass().getName());}catch(Exception x){}
+		try{ getLog().info("Locator Type: "+ l.wdtype);}catch(Exception x){}
+		try{ getLog().info("Locator Value: "+ l.value);}catch(Exception x){}
 		l.value = replaceVariableReferences(l.value);
 		return l;
 	}
@@ -312,8 +325,12 @@ public class WDTestRun extends TestRun {
 				WebDriverGUIUtilities._LASTINSTANCE.getSTAFHelper().setVariable(varname, text);
 			}
 			return type.run(this);
-		} catch (Exception e) {
-			throw new RuntimeException(currentStep() + " failed.", e);
+		} catch (Throwable e) {
+			
+			this.log().debug("WDTestRun.runStep() "+ e.getClass().getName()+": "+ e.getMessage(),e); 
+			RuntimeException t = new RuntimeException(currentStep() + " failed.", e);
+			t.fillInStackTrace();
+			throw t;
 		}
 	}
 	
@@ -344,7 +361,6 @@ public class WDTestRun extends TestRun {
 			// In all other cases, we throw an exception to stop the run.
 			RuntimeException e = new RuntimeException(currentStep() + " failed.");
 			e.fillInStackTrace();
-			getLog().fatal(e);
 			throw e; // continue?
 		} else {
 			return true;
