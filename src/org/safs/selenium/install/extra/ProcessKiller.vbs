@@ -19,6 +19,10 @@ Option Explicit
 '*     
 '*            Ignore the command's case during the comparison with process's CommandLine
 '*    
+'*     -killall
+'*     
+'*            loop to kill ALL processes matching the command, not just the first one.
+'*
 '*     -noprompt
 '*
 '*            No prompt.  Silent execution.
@@ -27,13 +31,14 @@ Option Explicit
 '* Original Release: SEP 24, 2013
 '*           Update: SEP 23, 2014 Carl Nagle Fix -noprompt when used as last argument
 '*           Update: JAN 13, 2016 Lei Wang Add option -commandignorecase
+'*           Update: MAR 24, 2016 Carl Nagle Add option -killall
 '*
 '* Copyright (C) SAS Institute
 '* General Public License: http://www.opensource.org/licenses/gpl-license.php
 '******************************************************************************
 
 Dim WshShell, objWMIService, objProcess, colProcess, objLoc
-Dim process, command, title
+Dim process, command, title, killall
 Dim prompt, arg, args, lcarg, cr, returncode, commandignorecase
 
 title = "SAFS Process Killer"
@@ -42,6 +47,7 @@ command = "com.ibm.staf.service.STAFServiceHelper"
 cr = chr(13)  'carriage return
 prompt = True
 commandignorecase = False
+killall = False
 
 Dim i
 Set WshShell = WScript.CreateObject("WScript.Shell")
@@ -64,6 +70,8 @@ For i = 0 to args.Count -1
         end if
     elseif (lcarg = "-commandignorecase") then
         commandignorecase = True
+    elseif (lcarg = "-killall") then
+        killall = True
     elseif (lcarg = "-noprompt") then
         prompt = False
     end if    
@@ -81,7 +89,11 @@ If (prompt = True) Then
    msg = msg &"-process <processName>"& cr
    msg = msg &"Default: java.exe"& cr & cr
    msg = msg &"-command <cmdLine substring>"& cr
-   msg = msg &"Default: com.ibm.staf.service.STAFServiceHelper"& cr
+   msg = msg &"Default: com.ibm.staf.service.STAFServiceHelper"& cr & cr
+   msg = msg &"-commandignorecase "& cr
+   msg = msg &"Ignore case when matching the -command process."& cr & cr
+   msg = msg &"-killall "& cr
+   msg = msg &"Loop/Kill ALL processes matching the command. "& cr
    msg = msg &"---------------------------------------------------------------------"& cr & cr
    msg = msg &"Click YES to proceed;  NO to Cancel"
    returncode = WshShell.Popup(msg, 0, title, 36) 
@@ -115,7 +127,9 @@ For Each objProcess in colProcess
             End If
         end if
         ObjProcess.Terminate()
-        WScript.Quit
+        if(killall = False) then 
+            WScript.Quit
+        end if
     end if	    
 Next	
 
