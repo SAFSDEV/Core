@@ -405,6 +405,7 @@ holdloop:		while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 						break holdloop;
 					// SHUTDOWN
 					}else if (driverStatus.equalsIgnoreCase(JavaHook.SHUTDOWN_RECORD)){
+						Log.resume();
 						Log.info(debugmsg+" processing USER SHUTDOWN REQUEST...");
 						success = false;
 						stepping = false;
@@ -419,7 +420,9 @@ holdloop:		while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 						retryStep = false;
 						setVariable(DriverInterface.DRIVER_CONTROL_VAR, JavaHook.PAUSE_EXECUTION);
 					}else{
+						Log.resume();
 						Log.info(debugmsg+" unknown or invalid SAFS_DRIVER_CONTROL status. ReSet to RUNNING!");
+						Log.suspend();
 						setVariable(DriverInterface.DRIVER_CONTROL_VAR, JavaHook.RUNNING_EXECUTION);
 						stepping = false;
 						break holdloop;
@@ -471,6 +474,7 @@ holdloop:		while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 		}catch(Throwable t){
 			Log.resume();
 			String p2 = t.getClass().getSimpleName()+": "+ t.getMessage();
+			Log.debug(p2, t);
 			issueErrorPerformingAction(
 					FAILStrings.convert(FAILStrings.SCRIPT_ERROR,
 							    "Script '"+ actual.getAbsolutePath()+"' error: "+p2, 
