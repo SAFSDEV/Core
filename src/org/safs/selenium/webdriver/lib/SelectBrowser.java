@@ -18,6 +18,7 @@ package org.safs.selenium.webdriver.lib;
 *  <br>   MAR 17, 2015    (LeiWang) Handle Chrome's custom data, profile.
 *  <br>   APR 08, 2015    (LeiWang) Modify to turn off Chrome's starting options.
 *  <br>   MAR 07, 2016    (LeiWang) Handle preference setting for "chrome" and "firefox".
+*  <br>   MAR 23, 2016    (LeiWang) Modify setChromeCapabilities(): handle "command line options" and "preferences" for "chrome".
 */
 
 import java.io.File;
@@ -66,9 +67,24 @@ public class SelectBrowser {
 	 * <b>Note: Be careful when creating the json data file, do NOT quote boolean or integer value.</b>*/
 	public static final String KEY_FIREFOX_PROFILE_PREFERENCE = "firefox.perference";//Firefox Preference file
 	
-	/** 'prefs' the key for chrome preference file, which contains json data, 
-	 * such as { "lang":"zh-cn", "download.default_directory":"C:\\SeleniumPlus\\libs" } */
-	public static final String KEY_CHROME_PREFERENCE = "prefs";//Chrome Preference file
+	/** 'chrome.perference' the key for chrome command-line-options/preferences file, which contains 
+	 * <ol>
+	 * <li><b>command-line-options</b> json data, such as { "lang":"zh-cn", "disable-download-notification":"" }, 
+	 *     refer to <a href="http://peter.sh/experiments/chromium-command-line-switches/">detail options</a>
+	 * <li><b>preferences</b> json data, it is indicated by a special key {@link #KEY_CHROME_PREFERENCE_JSON_KEY}, 
+	 *     such as { "<b>seplus.chrome.preference.json.key</b>": { "intl.accept_languages":"zh-cn", intl.charset_default:"utf-8" } }, 
+	 *     refer to <a href="https://src.chromium.org/viewvc/chrome/trunk/src/chrome/common/pref_names.cc">detail preferences</a>
+	 * <ol>
+	 */
+	public static final String KEY_CHROME_PREFERENCE = "chrome.perference";//"Chrome Command Line Options" and "Chrome Preferences" file
+	
+	/** 'seplus.chrome.preference.json.key' the key for chrome preferences, which points to json data, 
+	 * such as { "intl.accept_languages":"zh-cn", intl.charset_default:"utf-8" }, 
+	 * refer to <a href="https://src.chromium.org/viewvc/chrome/trunk/src/chrome/common/pref_names.cc">detail preferences</a>*/
+	public static final String KEY_CHROME_PREFERENCE_JSON_KEY = "seplus.chrome.preference.json.key";//Chrome Preferences
+	
+	/** 'prefs' the key used to set chrome Experimental Option. Used internally. */
+	private static final String KEY_CHROME_PREFS = "prefs";//setExperimentalOption
 	
 	/**'user-data-dir' the parameter name for chrome options, a general custom data settings.<br>
 	 * The value is specified in <a href="http://peter.sh/experiments/chromium-command-line-switches">chrome options</a><br>
@@ -386,16 +402,32 @@ public class SelectBrowser {
 		}catch(Exception e){
 			IndependantLog.warn(debugmsg+"Fail to Set chrome profile directory to ChromeOptions.");
 		}
+		
 		try{
-			//Get user preference file, and set it to capacities
-			String preferenceFile = StringUtilities.getString(extraParameters, KEY_CHROME_PREFERENCE);
-			IndependantLog.debug(debugmsg+"Try to Set chrome preference file '"+preferenceFile+"' to ChromeOptions.");
-			Map<?, ?> chromePreference = Json.readJSONFileUTF8(preferenceFile);
+			//Get user command-line-options/preferences file (it contains command-line-options and/or preferences), and set them to ChromeOptions
+			String commandLineOptions_preferenceFile = StringUtilities.getString(extraParameters, KEY_CHROME_PREFERENCE);
+			IndependantLog.debug(debugmsg+"Try to Set chrome command-line-options/preferences file '"+commandLineOptions_preferenceFile+"' to ChromeOptions.");
+			Map<?, ?> commandLineOptions = Json.readJSONFileUTF8(commandLineOptions_preferenceFile);
 			if(options==null) options = new ChromeOptions();
-			caps.setCapability(KEY_CHROME_PREFERENCE, preferenceFile);//used to store in session file
-			//The API setExperimentalOption() doesn't work, so Call addChromePreference() to fix this problem.
-			//options.setExperimentalOption(KEY_CHROME_PREFERENCE, chromePreference);//TODO Hope this API setExperimentalOption could work
-			addChromePreference(options, chromePreference);
+			caps.setCapability(KEY_CHROME_PREFERENCE, commandLineOptions_preferenceFile);//used to store in session file
+			
+			//Set Chrome Preferences
+			if(commandLineOptions.containsKey(KEY_CHROME_PREFERENCE_JSON_KEY)){
+				Map<?, ?> preferences = null;
+				try{
+					preferences = (Map<?, ?>) commandLineOptions.get(KEY_CHROME_PREFERENCE_JSON_KEY);
+					IndependantLog.debug(debugmsg+"Setting preferences "+ preferences +" to ChromeOptions.");
+					options.setExperimentalOption(KEY_CHROME_PREFS, preferences);
+				}catch(Exception e){
+					IndependantLog.warn(debugmsg+"Failed to Set chrome preferences to ChromeOptions, due to "+StringUtils.debugmsg(e));
+				}
+				//remove the preferences from the Map object chromeCommandLineOptions, then the map will only contain "command line options".
+				commandLineOptions.remove(KEY_CHROME_PREFERENCE_JSON_KEY);
+			}
+			
+			//Set Chrome Command Line Options
+			IndependantLog.debug(debugmsg+"Setting command line options "+ commandLineOptions +" to ChromeOptions.");
+			addChromeCommandLineOptions(options, commandLineOptions);
 			
 		}catch(Exception e){
 			IndependantLog.warn(debugmsg+"Fail to Set chrome preference file to ChromeOptions.");
@@ -425,22 +457,23 @@ public class SelectBrowser {
 	}
 	
 	/**
-	 * Set chrome preference to chrome options.<br>
-	 * This method intends to fix the problem of ChromeOptions.setExperimentalOption().<br>
-	 * Once ChromeOptions.setExperimentalOption("prefs", preferenceMap) works as expected, we can remove this method.<br>
+	 * Set <a href="http://peter.sh/experiments/chromium-command-line-switches/">chrome command line options</a> to ChromeOptions object.<br>
 	 * 
 	 * @param options ChromeOptions, the chrome options object.
-	 * @param chromePreference Map, the chrome preference to set.
+	 * @param commandLineOptions Map, the chrome preference to set.
 	 */
-	private static void addChromePreference(ChromeOptions options, Map<?, ?> chromePreference){
+	private static void addChromeCommandLineOptions(ChromeOptions options, Map<?, ?> commandLineOptions){
 		
 		try{
 			//options.addArguments("--lang=zh-cn");
-			//options.addArguments("--download.default_directory=D:\\SeleniumPlus\\libs");
+			//options.addArguments("--start-maximized");
+			//options.addArguments("--disable-logging");
 			
-			String[] keys = chromePreference.keySet().toArray(new String[0]);
+			String[] keys = commandLineOptions.keySet().toArray(new String[0]);
 			for(String key:keys){
-				options.addArguments("--"+key.trim()+"="+chromePreference.get(key));
+				//If the value is empty like options.addArguments("--disable-logging"), remove the "="?
+				//It seems that it still work even with "=", options.addArguments("--disable-logging=")
+				options.addArguments("--"+key.trim()+"="+commandLineOptions.get(key));
 			}
 		}catch(Exception e){
 			IndependantLog.error(StringUtils.debugmsg(false)+" failed, due to "+StringUtils.debugmsg(e));
