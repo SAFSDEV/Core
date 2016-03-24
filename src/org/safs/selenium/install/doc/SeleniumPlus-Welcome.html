@@ -1166,10 +1166,10 @@ Normally, SeleniumPlus will start browser with a new default profile, which mean
 If user wants to start browser with some specific preferences, SeleniumPlus provides 2 ways.
 <ol>
     <li>Start web browser with <a href="#startwebbrowser_profile">persistent custom profile</a>.
-    <li>Start web browser with <a href="#startwebbrowser_preferences">default profile and set the preference at runtime</a>.
+    <li>Start web browser with default profile and <a href="#startwebbrowser_preferences">set the preferences at runtime</a>.
 </ol>
 
-<h2 id="startwebbrowser_profile">Using custom profile</h2>
+<h3 id="startwebbrowser_profile">Using custom profile</h3>
 <ol>
 	<li><h3>Start Firefox</h3>
 	   <ul>
@@ -1195,7 +1195,7 @@ StartWebBrowser(URL, ID, SelectBrowser.BROWSER_NAME_FIREFOX, "30", "true", Selec
             </ol>
         </ul><p>
 	<li><h3>Start Chrome</h3>
-        Chrome's profile is a little different than Firefox's. There is a "user data pool" and under that "data pool" there are multiple users.
+        Chrome's profile is a little different from Firefox's. There is a "user data pool" and under that "data pool" there are multiple users.
         Among these users, there is a default user. SeleniumPlus can start browser with a "user data pool" and a certain "user". If the "user" is
         not specified, then the default user will be used.<p>
         <ul>
@@ -1250,8 +1250,89 @@ StartWebBrowser(URL, ID, SelectBrowser.BROWSER_NAME_CHROME, "30", "true", quote(
 
 </ol>
 
-<h2 id="startwebbrowser_preferences">Using preferences</h2>
-    Updating ...
+<h3 id="startwebbrowser_preferences">Using preferences</h3>
+<ol>
+    <li><h3>Start Firefox</h3>
+       <ul>
+       <li>Prepare the json data file
+            <ol>
+                <li>Create a new json data file, for example c:\Pref.json.dat
+                <li>Write the preferences into this json file, for example,
+<pre>
+{
+    #The line begins with # is considered as comment
+    #The <b>preference</b> is given as key:value, <b>there are 3 kinds of value: string, boolean and integer</b>.
+    #The string value is quoted with double-quote, while boolean and integer are not quoted.
+    "intl.accept_languages":"zh-cn",
+    "accessibility.accesskeycausesactivation":false,
+    "browser.download.folderList":2
+}
+</pre>
+           </ol>
+        <li>Examples:<br>
+            <ol>
+                <li>Start Firefox with the custom preferences data file "<b>c:\Pref.json.dat</b>"
+                    <div class="CodeBox">
+<pre class="LineNumbers">
+1
+2
+</pre>
+<pre class="SourceCode">
+String preferenceDataFile = "c:\\Pref.json.dat";
+StartWebBrowser(URL, ID, SelectBrowser.BROWSER_NAME_FIREFOX, "30", "true", SelectBrowser.<b>KEY_FIREFOX_PROFILE_PREFERENCE</b>, preferenceDataFile);
+</pre>
+                    </div> 
+            </ol>
+        </ul><p>
+    <li><h3>Start Chrome</h3>
+        Chrome's json data file is a little different from Firefox's. There are 2 kinds of settings: 
+        <a href="http://peter.sh/experiments/chromium-command-line-switches/"><b>command line options</b></a> and 
+        <a href="https://src.chromium.org/viewvc/chrome/trunk/src/chrome/common/pref_names.cc"><b>chrome preferences</b></a>.<br>
+        The <b>command line options</b> will be defined normally as key : value pair in the json file, while <b>chrome preferences</b>
+        will be defined as value of key "<b>seplus.chrome.preference.json.key</b>".
+        <p>
+        <ul>
+        <li>Prepare the json data file
+            <ol>
+                <li>Create a new json data file, for example c:\Pref.json.dat
+                <li>Write the preferences and/or command-line-options into this json file, for example,
+<pre>
+{
+    #The line begins with # is considered as comment
+    #Define <b>command-line-options</b> as key:value
+    "lang":"en",
+    #If the command-line-options doesn't need a value, then provide an empty value as key:""
+    "start-maximized":"",
+    #"disable-smooth-scrolling":"",
+
+    #Define <b>preferences</b> as value of key "seplus.chrome.preference.json.key"
+    "<b>seplus.chrome.preference.json.key</b>":
+    {
+        #The preferences are given as key:value
+        "intl.accept_languages" :"zh-CN-pseudo",
+        "intl.charset_default"  :"utf-8"
+    }
+}
+</pre>
+           </ol>
+        <li>Examples:<br>
+            <ol>
+                <li>Start Chrome with the custom preferences data file "<b>c:\Pref.json.dat</b>"
+                    <div class="CodeBox">
+<pre class="LineNumbers">
+1
+2
+</pre>
+<pre class="SourceCode">
+String preferenceDataFile = "c:\\Pref.json.dat";
+StartWebBrowser(URL, ID, SelectBrowser.BROWSER_NAME_CHROME, "30", "true", quote(SelectBrowser.<b>KEY_CHROME_PREFERENCE</b>), preferenceDataFile);
+</pre>
+                    </div>
+                <p>
+            </ol>
+        </ul>
+
+</ol>
     <p>
 <hr>
 </div>
