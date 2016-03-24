@@ -56,6 +56,7 @@ package org.safs.selenium.webdriver;
  *  <br>   MAR 02, 2016    (SBJLWA) Add Misc.AlertAccept(), Misc.AlertDismiss() and ClickUnverified().
  *  <br>   MAR 07, 2016    (SBJLWA) Add example for StartWebBrowser() with preference settings for "chrome" and "firefox".
  *  <br>   MAR 14, 2016    (SBJLWA) Add IsAlertPresent().
+ *  <br>   MAR 24, 2016    (SBJLWA) Modify comments for StartWebBrowser(): adjust examples and add links to specify "custom profile" and "preferences".
  */
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -280,7 +281,6 @@ public abstract class SeleniumPlus {
 	 * The key can be one of:
 	 * <p><ul>
 	 * {@link SelectBrowser#getExtraParameterKeys()}<br>
-	 * {@link SelectBrowser#KEY_FIREFOX_PROFILE}<br>
 	 * </ul><p>
 	 * params[3] extra parameter key1<br>
 	 * params[4] extra parameter value for key1<br>
@@ -298,6 +298,11 @@ public abstract class SeleniumPlus {
 	 * StartWebBrowser("http://www.google.com", "GoogleMain");
 	 * StartWebBrowser("http://www.google.com", "GoogleMain", SelectBrowser.BROWSER_NAME_CHROME);
 	 * StartWebBrowser("http://www.google.com", "GoogleMain", SelectBrowser.BROWSER_NAME_IE, "10");
+	 * 
+	 * <b>
+	 * The following gives some examples to start web browser with "custom profile" and "preferences".
+	 * For the detail explanation of starting browser with "custom profile" and/or "preferences", please visit the section "<font color="red">Start Browser</font>" at <a href="http://safsdev.sourceforge.net/selenium/doc/SeleniumPlus-Welcome.html">Selenium Welcome Document</a>. 
+	 * </b>
 	 * 
 	 * //Start firefox browser with custom profile "myprofile" ( <a href="https://support.mozilla.org/en-US/kb/profile-manager-create-and-remove-firefox-profiles">Create custom profile</a>)
 	 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
@@ -328,6 +333,7 @@ public abstract class SeleniumPlus {
 	 *                                                        datapool
 	 *                                                        });
 	 * //Start chrome browser with default data pool (chrome://version/, see "Profile Path") , and using the default user. 
+	 * String datapool = "C:\\Users\\xxx\\AppData\\Local\\Google\\Chrome\\User Data";
 	 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
 	 *                                                        SelectBrowser.BROWSER_NAME_CHROME, 
 	 *                                                        "10", 
@@ -365,8 +371,8 @@ public abstract class SeleniumPlus {
 	 *                                                        quote(SelectBrowser.KEY_CHROME_EXCLUDE_OPTIONS), 
 	 *                                                        quote(optionsToExclude)
 	 *                                                        });
-	 * //Start chrome browser with some preference to set. 
-	 * String absolutePreferenceFile = "c:\\chromePref.json.dat";//A json file containing chrome preferences, like { "lang":"zh-cn", "download.default_directory":"C:\\SeleniumPlus\\libs" }
+	 * //Start chrome browser with some chrome-command-line-options/preferences to set. 
+	 * String absolutePreferenceFile = "c:\\chromePref.json.dat";//A json file containing chrome command-line-options/preferences, like { "lang":"zh-cn", "start-maximized":"",  "<b>seplus.chrome.preference.json.key</b>":{ "intl.accept_languages":"zh-CN-pseudo", "intl.charset_default"  :"utf-8"} }
 	 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
 	 *                                                        SelectBrowser.BROWSER_NAME_CHROME, 
 	 *                                                        "10", 
