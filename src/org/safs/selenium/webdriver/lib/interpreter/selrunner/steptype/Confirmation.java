@@ -1,5 +1,8 @@
 package org.safs.selenium.webdriver.lib.interpreter.selrunner.steptype;
 
+import org.openqa.selenium.Alert;
+import org.openqa.selenium.NoAlertPresentException;
+import org.openqa.selenium.WebElement;
 import org.safs.selenium.webdriver.lib.SearchObject;
 import org.safs.selenium.webdriver.lib.WDLibrary;
 import org.safs.selenium.webdriver.lib.interpreter.selrunner.SRUtilities;
@@ -25,9 +28,15 @@ public class Confirmation implements Getter, SRunnerType {
 
 	@Override
 	public String get(TestRun ctx) {
-		try{ return ctx.driver().switchTo().alert().getText(); }
-		catch(Throwable ignnore){}
-		return null;
+		try{
+			Alert alert = ctx.driver().switchTo().alert();
+			String text = alert.getText();
+			ctx.log().info("Step Confirmation.getText() received: "+ text);
+			return text;
+		}catch(NoAlertPresentException anp){
+			ctx.log().debug("Step Confirmation found no active Alert Dialog.");
+			throw (RuntimeException) new RuntimeException("Step Confirmation found no active Alert Dialog.",anp).fillInStackTrace();
+		}
 	}
 
 	@Override

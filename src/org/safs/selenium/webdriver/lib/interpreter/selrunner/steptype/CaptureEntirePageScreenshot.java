@@ -31,7 +31,9 @@ public class CaptureEntirePageScreenshot implements StepType, SRunnerType {
 	public boolean run(TestRun ctx) {
 		String debugmsg = StringUtils.debugmsg(false);
 		try{
-			File target = new File(ctx.string("file"));
+			String tf = ctx.string("file");
+			ctx.log().info(debugmsg +"File parameter: "+ tf);
+			File target = new File(tf);
 			if(! target.isAbsolute()){
 				ctx.log().error(debugmsg +"Filepath parameter must be absolute: "+ target.getPath());
 				return false;
