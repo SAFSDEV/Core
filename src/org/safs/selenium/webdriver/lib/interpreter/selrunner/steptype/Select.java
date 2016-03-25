@@ -17,6 +17,7 @@ import org.safs.selenium.webdriver.lib.interpreter.WDLocator.WDType;
 import org.safs.selenium.webdriver.lib.interpreter.WDScriptFactory;
 import org.safs.selenium.webdriver.lib.interpreter.selrunner.SRUtilities;
 import org.safs.selenium.webdriver.lib.interpreter.selrunner.SRunnerType;
+import org.safs.text.Comparator;
 
 import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.StepType;
@@ -125,53 +126,51 @@ public class Select implements StepType, SRunnerType {
 		LABEL {
 			@Override
 			public WebElement find(String value,  List<WebElement> options, TestRun ctx) {
-				String regexp = null;
 				String text = null;
 				WebElement e = null;
-				boolean isRegExp = value.toLowerCase().startsWith(REGEXP_PREFIX);
-				if(isRegExp){
-					try{ 
-						regexp = value.substring(REGEXP_PREFIX.length()).trim();
-						ctx.log().info("Select extracted Regular Expression: '"+ regexp +"'");
-					}
-					catch(Exception x){						
-						ctx.log().error("Select Regular Expression "+ x.getClass().getSimpleName()+", "+ x.getMessage());
-						return null;
-					}
-				}				
+				String real = SRUtilities.stripStringMatchPatternPrefix(value);
+				boolean isGlob = SRUtilities.isGlobMatchPattern(value)&& SRUtilities.containsGlobMatchWildcards(real);
+				boolean isRegexp = SRUtilities.isRegexpMatchPattern(value);
+				boolean isRegexpi = SRUtilities.isRegexpiMatchPattern(value);
+				boolean isExact = SRUtilities.isExactMatchPattern(value) ||
+						          (! isGlob && !isRegexp && !isRegexpi);
+				ctx.log().info("Select has match pattern '"+ value +"' for text matching '"+real+"'");
 				ctx.log().info("Select has "+ options.size() + " OPTIONs.");
 				for(int i=0;i<options.size();i++){
 					text = null;
 					e = options.get(i);
-					text = e.getText();
+					text = WDLibrary.getText(e);
 					ctx.log().info("Select OPTION "+ i +" text: '"+ text +"'");
 					if(text == null|| text.length()==0) continue;
-					if(isRegExp){
-						if(text.matches(regexp)) {
-							ctx.log().info("Select RegExp is matching on text: '"+ text +"'");
-							return e;
+					if(isExact){
+						if(Comparator.isExactMatch(text,  real) ||
+						   Comparator.isExactMatch(text.trim(), real)){
+						       ctx.log().info("Select exact match on text: '"+ text +"'");
+						       return e;
 						}
-						String tr = text.trim();
-						if(tr.matches(regexp)) {
-							ctx.log().info("Select RegExp is matching on text: '"+ text +"'");
-							return e;
+					}else if(isRegexp){
+						if( Comparator.isRegexpMatch(text, real) ||
+							Comparator.isRegexpMatch(text.trim(), real)||
+							(text.trim().length()==0 && " ".matches(real))){
+							    ctx.log().info("Select regexp match on text: '"+ text +"'");
+							    return e;
 						}
-						if(tr.length()==0 && " ".matches(regexp)){
-							ctx.log().info("Select RegExp is matching on text: '"+ text +"'");
-							return e;
+					}else if(isRegexpi){
+						if( Comparator.isRegexpiMatch(text, real)||
+							Comparator.isRegexpiMatch(text.trim(), real)||
+							(text.trim().length()==0 && " ".matches(real))){
+						        ctx.log().info("Select regexpi match on text: '"+ text +"'");
+						        return e;
 						}
-					}else {
-						if(value.equals(text)) {					
-							ctx.log().info("Select has matched on text: '"+ text +"'");
-							return e;
-						}
-						if(value.equals(text.trim())) {					
-							ctx.log().info("Select has matched on text: '"+ text.trim() +"'");
-							return e;
+					}else if(isGlob){
+						if( Comparator.isGlobMatch(text, real)||
+							Comparator.isGlobMatch(text.trim(), real)){
+						        ctx.log().info("Select glob match on text: '"+ text +"'");
+						        return e;
 						}
 					}
 				}
-				ctx.log().info("Select did not find an OPTION match for text: '"+ value +"'");
+				ctx.log().info("Select did not find an OPTION match for text: '"+ real +"'");
 				return null;
 			}
 		},
