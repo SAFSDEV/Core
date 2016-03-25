@@ -67,7 +67,10 @@ public class Robot {
 	private static java.awt.Robot robot = null;
 	private static InputKeysParser keysparser = null;
 	
-	private static int millisBetweenKeystrokes = 1;
+	/** 1 */
+	public static final int DEFAULT_MILLIS_BETWEEN_KEYSTROKES = 1;
+
+	private static int millisBetweenKeystrokes = DEFAULT_MILLIS_BETWEEN_KEYSTROKES;
 	
 	/** 800 */
 	public static final int DEFAULT_MILLIS_BETWEEN_MOUSE_RELEASE = 800;
@@ -139,6 +142,17 @@ public class Robot {
 	public static void setMillisBetweenKeystrokes(int msBetween){
 		millisBetweenKeystrokes = msBetween >= 0 ? msBetween : millisBetweenKeystrokes;
 	}
+	
+	/**
+	 * Get the current delay in milliseconds between Robot key events.
+	 * @see #inputKeys(String)
+	 * @see #inputChars(String)
+	 * @see #doEvents(java.awt.Robot, Vector, int)
+	 */
+	public static int getMillisBetweenKeystrokes(){
+		return millisBetweenKeystrokes;
+	}
+	
 	/**
 	 * Set the offset from the start point for dragging. The object will be firstly
 	 * dragged to the position (startPoint+dragStartPointOffset)
