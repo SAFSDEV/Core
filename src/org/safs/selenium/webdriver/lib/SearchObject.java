@@ -76,6 +76,7 @@ import org.safs.selenium.webdriver.SeleniumPlus.WDTimeOut;
 import org.safs.selenium.webdriver.WebDriverGUIUtilities;
 import org.safs.selenium.webdriver.lib.RS.XPATH;
 import org.safs.selenium.webdriver.lib.RemoteDriver.SessionInfo;
+import org.safs.selenium.webdriver.lib.interpreter.selrunner.SRUtilities;
 import org.safs.selenium.webdriver.lib.model.Element;
 import org.safs.selenium.webdriver.lib.model.TextMatchingCriterion;
 import org.safs.tools.stringutils.StringUtilities;
@@ -168,6 +169,8 @@ public class SearchObject {
 	private static Hashtable<String, WebDriver> webDrivers = new Hashtable<String, WebDriver>();
 	private static Vector<String> webDriverStack = new Vector<String>();
 
+	public static final String[] TEXT_VALUE_ATTRIBUTES = {"value","text","placeholder"};
+	
 	/**
 	 * The Selenium 'WebDriver' currently used to manipulate the browser.
 	 */
@@ -2652,6 +2655,26 @@ public class SearchObject {
 		return result;
 	}
 
+	/**
+	 * Attempts to retrieve a text value for the WebElement.
+	 * This is by combining webelement.getText() and our own getValue() and returning whichever gets 
+	 * us a text value.
+	 * @param webelement
+	 * @return
+	 */
+	public static String getText(WebElement webelement){
+		String debugmsg = StringUtils.debugmsg(SearchObject.class, "getText");
+		String tt = webelement.getText();
+		String t = tt == null ? "" : tt;
+		Object ov = getValue(webelement, TEXT_VALUE_ATTRIBUTES);
+		String v = ov == null ? "" : ov.toString();	
+		IndependantLog.info(debugmsg+"received: "+ t);
+		IndependantLog.info(debugmsg+"received: "+ v);
+		String rc = t.length() > 0 ? t: v;
+		IndependantLog.info(debugmsg+"returning: "+ rc);
+		return rc;		
+	}
+	
 	/**
 	 * Get a value from the WebElement according to the attributes.<br>
 	 * @param webelement WebElement, the WebElement to get value of an attribute.<br>
