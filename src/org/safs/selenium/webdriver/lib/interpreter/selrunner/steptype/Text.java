@@ -19,6 +19,7 @@ import com.sebuilder.interpreter.TestRun;
 
 public class Text extends com.sebuilder.interpreter.steptype.Text implements SRunnerType {
 
+
 	@Override
 	public void processParams(Step step, String[] params) {
 		SRUtilities.setLocatorParam(step, params[1]);
@@ -42,14 +43,6 @@ public class Text extends com.sebuilder.interpreter.steptype.Text implements SRu
 		}else{
 			ctx.log().debug("Step Text found the WebElement.");
 		}
-		String tt = e.getText();
-		String t = tt == null ? "" : tt;
-		Object ov = WDLibrary.getValue(e, new String[]{"value","text","placeholder"});
-		String v = ov == null ? "" : ov.toString();	
-		ctx.log().debug("Step Text getText() received: "+ t);
-		ctx.log().debug("Step Text getValu() received: "+ v);
-		String rc = t.length() > 0 ? t: v;
-		ctx.log().debug("Step Text.getText() returning: "+ rc);
-		return rc;
+		return WDLibrary.getText(e);
 	}
 }
