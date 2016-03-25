@@ -14,6 +14,8 @@ import org.openqa.selenium.WebElement;
 import org.safs.selenium.webdriver.WebDriverGUIUtilities;
 import org.safs.selenium.webdriver.lib.SearchObject;
 import org.safs.selenium.webdriver.lib.WDLibrary;
+import org.safs.selenium.webdriver.lib.interpreter.selrunner.SRUtilities;
+import org.safs.text.Comparator;
 
 import com.sebuilder.interpreter.Locator;
 import com.sebuilder.interpreter.TestRun;
@@ -175,37 +177,223 @@ public class WDLocator extends Locator {
 		LINK {
 			@Override
 			public WebElement find(String value, TestRun ctx) {
-				if(null != frameInfo)
-					return SearchObject.getObject(ctx.driver(), frameInfo + "xpath=.//a[normalize-space(text())='"+ value +"']");
-				return SearchObject.getObject(ctx.driver(), "xpath=.//a[normalize-space(text())='"+ value +"']");
+				String real = SRUtilities.stripStringMatchPatternPrefix(value);
+				String xpath = (null != frameInfo) ? frameInfo : "";
+				xpath += "xpath=.//a";
+				
+				// exact match
+				if( (SRUtilities.isGlobMatchPattern(value) && 
+					!SRUtilities.containsGlobMatchWildcards(real)) ||
+					 SRUtilities.isExactMatchPattern(value)){
+					xpath += "[normalize-space(text())='"+ real +"']";
+					return SearchObject.getObject(ctx.driver(), xpath);
+				}else{
+					// regexp match
+				    if(SRUtilities.isRegexpMatchPattern(value)){
+						xpath += "[matches(normalize-space(text()),'"+ real +"')]";						
+						return SearchObject.getObject(ctx.driver(), xpath);
+				    }
+				    // regexpi (case-insensitive)
+				    else if(SRUtilities.isRegexpiMatchPattern(value)){
+						xpath += "[matches(normalize-space(text()),'"+ real +"','i')]";				    	
+						return SearchObject.getObject(ctx.driver(), xpath);
+				    } 
+				    // glob match (yuk!)
+				    else {
+				       List<WebElement> list =ctx.getDriver().findElementsByTagName("a");
+				       for(int i=0;i<list.size();i++){
+				    	   String text = WDLibrary.getText(list.get(i));
+				    	   if(Comparator.isGlobMatch(text, real)){
+				    		   return list.get(i);
+				    	   }
+				       }
+				       return null;
+				    }
+				}
 			}
 			@Override
 			public List<WebElement> findElements(String value, TestRun ctx) {
-				return ctx.driver().findElementsByLinkText(value);
+				String real = SRUtilities.stripStringMatchPatternPrefix(value);
+				String xpath = (null != frameInfo) ? frameInfo : "";
+				xpath += "xpath=.//a";
+				
+				// exact match
+				if( (SRUtilities.isGlobMatchPattern(value) && 
+					!SRUtilities.containsGlobMatchWildcards(real)) ||
+					 SRUtilities.isExactMatchPattern(value)){
+					xpath += "[normalize-space(text())='"+ real +"']";
+					return SearchObject.getObjects(ctx.driver(), xpath);
+				}else{
+					// regexp match
+				    if(SRUtilities.isRegexpMatchPattern(value)){
+						xpath += "[matches(normalize-space(text()),'"+ real +"')]";						
+						return SearchObject.getObjects(ctx.driver(), xpath);
+				    }
+				    // regexpi (case-insensitive)
+				    else if(SRUtilities.isRegexpiMatchPattern(value)){
+						xpath += "[matches(normalize-space(text()),'"+ real +"','i')]";				    	
+						return SearchObject.getObjects(ctx.driver(), xpath);
+				    } 
+				    // glob match (yuk!)
+				    else {
+				       ArrayList<WebElement> matches = new ArrayList<WebElement>();
+				       List<WebElement> list =ctx.getDriver().findElementsByTagName("a");
+				       for(int i=0;i<list.size();i++){
+				    	   String text = WDLibrary.getText(list.get(i));
+				    	   if(Comparator.isGlobMatch(text, real)){
+				    		   matches.add(list.get(i));
+				    	   }
+				       }
+				       return matches;
+				    }
+				}
 			}
 			@Override
 			public boolean findElementNotPresent(String value, TestRun ctx) {
-				if(null != frameInfo)
-					return SearchObject.getObject(ctx.driver(), frameInfo + "xpath=.//a[normalize-space(text())='"+ value +"']")==null;
-				return SearchObject.getObject(ctx.driver(), "xpath=.//a[normalize-space(text())='"+ value +"']")==null;
+				String real = SRUtilities.stripStringMatchPatternPrefix(value);
+				String xpath = (null != frameInfo) ? frameInfo : "";
+				xpath += "xpath=.//a";
+				
+				// exact match
+				if( (SRUtilities.isGlobMatchPattern(value) && 
+					!SRUtilities.containsGlobMatchWildcards(real)) ||
+					 SRUtilities.isExactMatchPattern(value)){
+					xpath += "[normalize-space(text())='"+ real +"']";
+					return SearchObject.getObject(ctx.driver(), xpath)==null;
+				}else{
+					// regexp match
+				    if(SRUtilities.isRegexpMatchPattern(value)){
+						xpath += "[matches(normalize-space(text()),'"+ real +"')]";						
+						return SearchObject.getObject(ctx.driver(), xpath)==null;
+				    }
+				    // regexpi (case-insensitive)
+				    else if(SRUtilities.isRegexpiMatchPattern(value)){
+						xpath += "[matches(normalize-space(text()),'"+ real +"','i')]";				    	
+						return SearchObject.getObject(ctx.driver(), xpath)==null;
+				    } 
+				    // glob match (yuk!)
+				    else {
+				       List<WebElement> list =ctx.getDriver().findElementsByTagName("a");
+				       for(int i=0;i<list.size();i++){
+				    	   String text = WDLibrary.getText(list.get(i));
+				    	   if(Comparator.isGlobMatch(text, real)){
+				    		   return false;
+				    	   }
+				       }
+				       return true;
+				    }
+				}
 			}
 		},
 		LINK_TEXT {
 			@Override
 			public WebElement find(String value, TestRun ctx) {
-				if(null != frameInfo)
-					return SearchObject.getObject(ctx.driver(), frameInfo + "xpath=.//a[normalize-space(text())='"+ value +"']");
-				return SearchObject.getObject(ctx.driver(), "xpath=.//a[normalize-space(text())='"+ value +"']");
+				String real = SRUtilities.stripStringMatchPatternPrefix(value);
+				String xpath = (null != frameInfo) ? frameInfo : "";
+				xpath += "xpath=.//a";
+				
+				// exact match
+				if( (SRUtilities.isGlobMatchPattern(value) && 
+					!SRUtilities.containsGlobMatchWildcards(real)) ||
+					 SRUtilities.isExactMatchPattern(value)){
+					xpath += "[normalize-space(text())='"+ real +"']";
+					return SearchObject.getObject(ctx.driver(), xpath);
+				}else{
+					// regexp match
+				    if(SRUtilities.isRegexpMatchPattern(value)){
+						xpath += "[matches(normalize-space(text()),'"+ real +"')]";						
+						return SearchObject.getObject(ctx.driver(), xpath);
+				    }
+				    // regexpi (case-insensitive)
+				    else if(SRUtilities.isRegexpiMatchPattern(value)){
+						xpath += "[matches(normalize-space(text()),'"+ real +"','i')]";				    	
+						return SearchObject.getObject(ctx.driver(), xpath);
+				    } 
+				    // glob match (yuk!)
+				    else {
+				       List<WebElement> list =ctx.getDriver().findElementsByTagName("a");
+				       for(int i=0;i<list.size();i++){
+				    	   String text = WDLibrary.getText(list.get(i));
+				    	   if(Comparator.isGlobMatch(text, real)){
+				    		   return list.get(i);
+				    	   }
+				       }
+				       return null;
+				    }
+				}
 			}
 			@Override
 			public List<WebElement> findElements(String value, TestRun ctx) {
-				return ctx.driver().findElementsByLinkText(value);
+				String real = SRUtilities.stripStringMatchPatternPrefix(value);
+				String xpath = (null != frameInfo) ? frameInfo : "";
+				xpath += "xpath=.//a";
+				
+				// exact match
+				if( (SRUtilities.isGlobMatchPattern(value) && 
+					!SRUtilities.containsGlobMatchWildcards(real)) ||
+					 SRUtilities.isExactMatchPattern(value)){
+					xpath += "[normalize-space(text())='"+ real +"']";
+					return SearchObject.getObjects(ctx.driver(), xpath);
+				}else{
+					// regexp match
+				    if(SRUtilities.isRegexpMatchPattern(value)){
+						xpath += "[matches(normalize-space(text()),'"+ real +"')]";						
+						return SearchObject.getObjects(ctx.driver(), xpath);
+				    }
+				    // regexpi (case-insensitive)
+				    else if(SRUtilities.isRegexpiMatchPattern(value)){
+						xpath += "[matches(normalize-space(text()),'"+ real +"','i')]";				    	
+						return SearchObject.getObjects(ctx.driver(), xpath);
+				    } 
+				    // glob match (yuk!)
+				    else {
+				       ArrayList<WebElement> matches = new ArrayList<WebElement>();
+				       List<WebElement> list =ctx.getDriver().findElementsByTagName("a");
+				       for(int i=0;i<list.size();i++){
+				    	   String text = WDLibrary.getText(list.get(i));
+				    	   if(Comparator.isGlobMatch(text, real)){
+				    		   matches.add(list.get(i));
+				    	   }
+				       }
+				       return matches;
+				    }
+				}
 			}
 			@Override
 			public boolean findElementNotPresent(String value, TestRun ctx) {
-				if(null != frameInfo)
-					return SearchObject.getObject(ctx.driver(), frameInfo + "xpath=.//a[normalize-space(text())='"+ value +"']")==null;
-				return SearchObject.getObject(ctx.driver(), "xpath=.//a[normalize-space(text())='"+ value +"']")==null;
+				String real = SRUtilities.stripStringMatchPatternPrefix(value);
+				String xpath = (null != frameInfo) ? frameInfo : "";
+				xpath += "xpath=.//a";
+				
+				// exact match
+				if( (SRUtilities.isGlobMatchPattern(value) && 
+					!SRUtilities.containsGlobMatchWildcards(real)) ||
+					 SRUtilities.isExactMatchPattern(value)){
+					xpath += "[normalize-space(text())='"+ real +"']";
+					return SearchObject.getObject(ctx.driver(), xpath)==null;
+				}else{
+					// regexp match
+				    if(SRUtilities.isRegexpMatchPattern(value)){
+						xpath += "[matches(normalize-space(text()),'"+ real +"')]";						
+						return SearchObject.getObject(ctx.driver(), xpath)==null;
+				    }
+				    // regexpi (case-insensitive)
+				    else if(SRUtilities.isRegexpiMatchPattern(value)){
+						xpath += "[matches(normalize-space(text()),'"+ real +"','i')]";				    	
+						return SearchObject.getObject(ctx.driver(), xpath)==null;
+				    } 
+				    // glob match (yuk!)
+				    else {
+				       List<WebElement> list =ctx.getDriver().findElementsByTagName("a");
+				       for(int i=0;i<list.size();i++){
+				    	   String text = WDLibrary.getText(list.get(i));
+				    	   if(Comparator.isGlobMatch(text, real)){
+				    		   return false;
+				    	   }
+				       }
+				       return true;
+				    }
+				}
 			}
 		},
 		CSS_SELECTOR {
@@ -256,6 +444,7 @@ public class WDLocator extends Locator {
 		
 		public static WDType ofName(String name) {
 			return WDType.valueOf(name.toUpperCase().replace(" ", "_"));
-		}
+		}		
+		
 	}	
 }
