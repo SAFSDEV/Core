@@ -52,6 +52,7 @@ package org.safs.selenium.webdriver.lib;
 *                                  Add class RBT: To encapsulate the local Robot and Robot RMI agent.
 *                                  Modify click() and doubleClick(): use RBT to do the click action.
 *  <br>   MAR 14, 2016    (Lei Wang) Add isAlertPresent(), waitAlert().
+*  <br>   MAR 29, 2016    (Lei Wang) Modify click() and doubleClick(): detect "Alert" after clicking.
 */
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -370,8 +371,9 @@ public class WDLibrary extends SearchObject {
 				Dimension d = clickable.getSize();
 				location.translate(d.width/2, d.height/2);
 			}
-			listener.startListening();
+			listener.addListeners(false);
 			RBT.click(rd, location, specialKey, mouseButtonNumber, 1);
+			listener.startListening();
 			
 			//3. Wait for the 'click' event, check if the 'mousedown' event really happened.
 			// Carl Nagle -- FIREFOX PROBLEM: A link that takes you to a new page (like the Google SignIn link) will
@@ -417,7 +419,7 @@ public class WDLibrary extends SearchObject {
 				IndependantLog.debug(debugmsg+"click with key '"+specialKey+"', mousebutton='"+mouseButtonNumber+"'");
 
 				//Perform the actions
-				listener.startListening();
+				listener.addListeners(false);
 				try{
 					//if the Robot click worked, but was not detected. If we clicked a link, original page has
 					//disappeared, so the link doesn't exist neither, the WebElement is stale. WebDriver will
@@ -425,6 +427,7 @@ public class WDLibrary extends SearchObject {
 					//But we don't want to waste that time, so just set 'implicit timeout' to 0 and don't wait.
 					WDTimeOut.setImplicitlyWait(0, TimeUnit.SECONDS);
 					actions.build().perform();
+					listener.startListening();
 					
 					// Dharmesh: Not report waitForClick failure due to listener event not capture 
 					// if click coordination out of component size or background. 
@@ -495,8 +498,9 @@ public class WDLibrary extends SearchObject {
 			Point location = getScreenLocation(clickable);
 			if(offset!=null) location.translate(offset.x, offset.y);
 			else	location.translate(clickable.getSize().width/2, clickable.getSize().height/2);
-			listener.startListening();
+			listener.addListeners(false);
 			RBT.click(location, specialKey, mouseButtonNumber, 2);
+			listener.startListening();
 
 			//3. Wait for the 'click' event, check if the 'mousedown' event really happened.
 			event = listener.waitForClick(timeoutWaitClick);
@@ -529,11 +533,12 @@ public class WDLibrary extends SearchObject {
 				IndependantLog.debug(debugmsg+"doubleclick with key '"+specialKey+"', mousebutton='"+mouseButtonNumber+"'");
 
 				//Perform the actions
-				listener.startListening();
+				listener.addListeners(false);
 				try{
 					//unfortunately, if the Robot click worked, but was not detected, we have to wait the full
 					//WebDriver implied timeout period for the perform() failure to occur.
 					actions.build().perform();
+					listener.startListening();
 					event = listener.waitForClick(timeoutWaitClick);
 					if(event != null)
 						IndependantLog.debug(debugmsg+"doubleclick has been peformed.");
@@ -2970,7 +2975,7 @@ public class WDLibrary extends SearchObject {
 			throw new SeleniumPlusException(message);
 		}
 	}
-	
+
 	/**
 	 * 
 	 * Test the presence of Alert-Modal-Dialog associated with a certain browser identified by ID.<br>
