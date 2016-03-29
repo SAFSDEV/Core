@@ -15,6 +15,8 @@ package org.safs.selenium.util;
  * FEB 22, 2016    (LeiWang) Modify to avoid setting the click listener the second time if the first listener is consumed.
  * FEB 29, 2016    (LeiWang) Modify to provide the ability to force receiving click-event by html-document.
  * MAR 14, 2016    (LeiWang) Log debug message for adding/removing/execution of click-listeners.
+ * MAR 29, 2016    (LeiWang) Refactor to "add listener" and "start polling thread" separately, and detect the JS "Alert"
+ * 							 before start "polling thread" to listen.
  */
 import java.util.Date;
 
@@ -141,7 +143,7 @@ public class DocumentClickCapture implements Runnable{
 	 * With this situation, we could never receive the click-event by the specific component, so we will enlarge the listening-area, that is we will<br>
 	 * use the document as the click-event-receiver.<br>
 	 * 
-	 * <b>Note:</b> This should be set before calling {@link #startListeningInternal()} or {@link #startListening()}.
+	 * <b>Note:</b> This should be set before calling {@link #startListening()}.
 	 */
 	private boolean enlargeListeningArea = false;
 	
@@ -201,10 +203,10 @@ public class DocumentClickCapture implements Runnable{
 	
 	/**
 	 * If {@link #startListening()} is called, then this field will be set to true so that<br>
-	 * {@link #waitForClick(long)} will not call {@link #startListeningInternal()} to start<br>
+	 * {@link #waitForClick(long)} will not call {@link #addListeners(boolean)} to start<br>
 	 * a new listener.<br>
 	 */
-	private boolean listenerStartedFromOutside = false;
+	private boolean listenerStarted = false;
 	
 	/** 
 	 * The element is expected to receive the click event.<br>
@@ -289,7 +291,7 @@ public class DocumentClickCapture implements Runnable{
 	}
 
 	/**
-	 * This should be called before calling {@link #startListening()} or {@link #startListeningInternal()}, if we want<br>
+	 * This should be called before calling {@link #startListening()}, if we want<br>
 	 * {@link #enlargeListeningArea} works as expected.<br>
 	 * @param enlargeListeningArea
 	 * @see #enlargeListeningArea
@@ -353,52 +355,61 @@ public class DocumentClickCapture implements Runnable{
 		IndependantLog.debug(debugmsg+" setting ready to true.");
 		setReady(true);
 	}
-	
+		
 	/**
+	 * 
 	 * Inject the Document level event listeners if they are not already injected.<br>
 	 * Does nothing if the listeners are already injected.<br>
 	 * 
-	 * Set {@link #listenerStartedFromOutside} to true so that {@link #waitForClick(long)}<br>
-	 * will not call {@link #startListeningInternal()} to start the listener again. The purpose is<br>
-	 * to avoid the situation below:<br>
-	 * 
-	 * <p><pre><code>
+	 * This method will also start the polling thread to watch the javascript variable used to monitor 'click event'<br>
+	 * if it is called with parameter true. The example code is listed below: <br>
+	 * <pre><code>
 	 * DocumentClickCapture listener = new DocumentClickCapture();
 	 * try{
 	 * 
-	 *     //Start the listener
-	 *     listener.startListening();
+	 *     //Add the listener and start the polling thread automatically.
+	 *     listener.addListeners(true);
 	 *     
 	 *     //do click action;
-	 *     //This click happens very quickly, and the listener detects it and resets 'notListening' to true!!!
+	 *     ...
 	 *     
 	 *     MouseEvent event = listener.waitForClick(timeout_in_seconds);
-	 *     //as 'notListening' is true, waitForClick will start a the listener again, but it 
-	 *     //will FAIL to detect 'click' action, which has already happened.
 	 *     
 	 * }catch(Exception x){
 	 *     // handle them here
 	 * }
 	 * </code></pre>
 	 * 
+	 * If the click action may cause JS "Alert" pops up, we should call this methods with parameter false<br>
+	 * and start the polling thread by calling {@link #startListening()} later. The example code is listed below: <br>
+	 * <pre><code>
+	 * DocumentClickCapture listener = new DocumentClickCapture();
+	 * try{
+	 * 
+	 *     //Add the listener
+	 *     listener.addListeners(false);
+	 *     
+	 *     //do click action;
+	 *     ...
+	 *     //Start listening
+	 *     listener.startListening();
+	 *     
+	 *     MouseEvent event = listener.waitForClick(timeout_in_seconds);
+	 *     
+	 * }catch(Exception x){
+	 *     // handle them here
+	 * }
+	 * </code></pre>
+	 * 
+	 * @param startListening boolean, If true, start polling thread automatically; 
+	 *                                otherwise, will not start it and user needs to start it by calling {@link #startListening()}.
+	 * 
 	 * @throws SeleniumPlusException
-	 * @see {@link #startListeningInternal()}
 	 * @see #waitForClick(long)
-	 */
-	public void startListening()throws SeleniumPlusException{
-		listenerStartedFromOutside = true;
-		startListeningInternal();
-	}
-	
-	/**
-	 * Inject the Document level event listeners if they are not already injected.
-	 * Does nothing if the listeners are already injected.
-	 * @param secondsTimeout
-	 * @throws SeleniumPlusException
 	 * @see #addEventListeners()
 	 */
-	private void startListeningInternal()throws SeleniumPlusException{
-		String debugmsg = "DocumentClickCapture.startListeningInternal ";
+	public void addListeners(boolean startListening) throws SeleniumPlusException{
+		String debugmsg = "DocumentClickCapture.addListeners ";
 		
 		if(!enabled){
 			IndependantLog.debug(debugmsg+" DocumentClickCapture has been disabled.");
@@ -411,10 +422,64 @@ public class DocumentClickCapture implements Runnable{
 			setReady(false);
 			setEventFired(false);
 			addEventListeners(); // can throw SeleniumPlusException
+			listenerStarted = false;
+			if(startListening) startListening();
 			try{Thread.sleep(100);}catch(Exception ignore){}
 	    }else{
 	    	IndependantLog.info(debugmsg+" already listening: NOT injecting Listeners.");
 	    }
+	}
+	
+	/**
+	 * Start the polling thread to watch the javascript variable used to monitor 'click event'.<br>
+	 * Before starting the polling thread, this listener will be disabled if the JavaScript "Alert" is present.<br>
+	 * This method should be called after calling {@link #addListeners(boolean)} (<b>addListeners() is called with false</b>).<br>
+	 * The following is an example:<br>
+	 * 
+	 * <pre><code>
+	 * DocumentClickCapture listener = new DocumentClickCapture();
+	 * try{
+	 * 
+	 *     //Add the listener
+	 *     listener.addListeners(<b>false</b>);
+	 *     
+	 *     //do click action;
+	 *     ...
+	 *     //Start listening
+	 *     listener.startListening();
+	 *     
+	 *     MouseEvent event = listener.waitForClick(timeout_in_seconds);
+	 *     
+	 * }catch(Exception x){
+	 *     // handle them here
+	 * }
+	 * </code></pre>
+	 * 
+	 * 
+	 * @see #addListeners(boolean)
+	 */
+	public void startListening(){
+		String debugmsg = StringUtils.debugmsg(false);
+		
+		try {
+			//If the JavaScript "Alert", "Confirm" or "Prompt" is present, the polling thread will throw
+			//exception and cannot detect the click event, so we will disable this listener at the first time and
+			//the polling thread will not be started.
+			if(WDLibrary.isAlertPresent(Integer.toString(WDLibrary.timeoutCheckAlertForClick))) enabled = false;
+		} catch (SeleniumPlusException e) {
+			IndependantLog.warn(debugmsg+" failed to check the presence of Alert, due to "+StringUtils.debugmsg(e));
+		}
+		
+		if(enabled){
+			//set listenerStarted to true so that the method {@link #waitForClick(long)} will
+			//not add&start a new click-listener.
+			listenerStarted = true;
+			Thread pollingThread = new Thread(this);			
+			pollingThread.setDaemon(true);//so that it will not block the whole program
+			pollingThread.start();
+		}else{
+			IndependantLog.warn(debugmsg+" DocumentClickCapture has been disabled, we will not start the polling thread.");
+		}
 	}
 	
 	/**
@@ -423,7 +488,7 @@ public class DocumentClickCapture implements Runnable{
 	 */
 	public void stopListening(){
     	IndependantLog.info("DocumentClickCapture.stopListening attempting to stop Listeners.");
-    	listenerStartedFromOutside = false;
+    	listenerStarted = false;
 		setRunning(false);
 	}
 	
@@ -434,7 +499,7 @@ public class DocumentClickCapture implements Runnable{
 	 * @throws InterruptedException if timeout has been reached.
 	 * @throws IllegalArgumentException if secondsTimeout is < 1.
 	 * @throws SeleniumPlusException if we could not add or remove eventListeners in the browser.
-	 * @see #startListeningInternal() 
+	 * @see #addListeners(boolean) 
 	 */
 	public MouseEvent waitForClick(long secondsTimeout)throws IllegalArgumentException, 
 	                                                          InterruptedException,
@@ -447,7 +512,16 @@ public class DocumentClickCapture implements Runnable{
 		}
 		
 		if(secondsTimeout < 1) throw new IllegalArgumentException(debugmsg +"secondsTimeout must be greater than 0.");
-		if(!listenerStartedFromOutside) startListeningInternal();
+		//If we have not started the listener, then add new listener and start listening.
+		//This situation should be for ProcessContainer.
+		if(!listenerStarted) addListeners(true);
+		
+		//wait for the polling thread to be running at the most for 1000 milliseconds
+		synchronized(this){
+			long timeoutForRunning = 1000;//milliseconds
+			long end = System.currentTimeMillis()+timeoutForRunning;
+			while(!isRunning() && System.currentTimeMillis()<end) wait(timeoutForRunning);
+		}
 		
 		long curTime = System.currentTimeMillis();
 		long endTime = curTime + (1000*secondsTimeout);
@@ -493,6 +567,8 @@ public class DocumentClickCapture implements Runnable{
 	}
 	private synchronized void setRunning(boolean keepRunning) {
 		this.keepRunning = keepRunning;
+		this.notifyAll();
+		//IndependantLog.debug("DocumentClickCapture.setRunning(): notify all with "+keepRunning);
 	}		
 	private synchronized boolean isReady() {
 		return eventReady;
@@ -775,9 +851,6 @@ public class DocumentClickCapture implements Runnable{
 			String script = listener + _addEventListeners()+" _addEventListeners(arguments[0]);";
 			SearchObject.executeScript(script, target);
 			notListening = false;
-			Thread pollingThread = new Thread(this);			
-			pollingThread.setDaemon(true);//so that it will not block the whole program
-			pollingThread.start();
 			
 		} catch (SeleniumPlusException e1) {
 			IndependantLog.error(debugmsg+" failed to add EventListeners.", e1);
