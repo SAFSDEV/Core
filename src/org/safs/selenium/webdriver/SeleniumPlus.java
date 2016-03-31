@@ -1643,7 +1643,7 @@ public abstract class SeleniumPlus {
 	 * <pre>
 	 * {@code
 	 * 1) boolean success = ClickUnverified(Map.Google.Apps);//Click at the center
-	 * 2) boolean success = ClickUnverified(Map.Google.Apps, new Point("20,20"));//Click at the coordinate (20,20)
+	 * 2) boolean success = ClickUnverified(Map.Google.Apps, new Point(20,20));//Click at the coordinate (20,20)
 	 * }
 	 * 
 	 * </pre>	 
