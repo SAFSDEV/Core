@@ -57,6 +57,7 @@ package org.safs.selenium.webdriver;
  *  <br>   MAR 07, 2016    (Lei Wang) Add example for StartWebBrowser() with preference settings for "chrome" and "firefox".
  *  <br>   MAR 14, 2016    (Lei Wang) Add IsAlertPresent().
  *  <br>   MAR 24, 2016    (Lei Wang) Modify comments for StartWebBrowser(): adjust examples and add links to specify "custom profile" and "preferences".
+ *  <br>   MAR 31, 2016    (Lei Wang) Add IsComponentExists(), OnGUIXXXBlockID().
  */
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -90,6 +91,7 @@ import org.safs.model.commands.DDDriverFileCommands;
 import org.safs.model.commands.DDDriverFlowCommands;
 import org.safs.model.commands.DDDriverLogCommands;
 import org.safs.model.commands.DDDriverStringCommands;
+import org.safs.model.commands.DriverCommands;
 import org.safs.model.commands.EditBoxFunctions;
 import org.safs.model.commands.GenericMasterFunctions;
 import org.safs.model.commands.GenericObjectFunctions;
@@ -7564,6 +7566,85 @@ public abstract class SeleniumPlus {
 
 			return command(DDDriverCommands.WAITFORGUI_KEYWORD, combineParams(optionals, winName, compName));
 		}
+		
+		/**
+		 * Test if a Window or Component exists within a timeout.
+		 * @param component Component, The component to check
+		 * @param optionals
+		 * <ul>
+		 * <b>optionals[0] timeout</b> int, timeout in seconds. Default is 15 seconds.
+		 * </ul>
+		 * @return true if exist, false otherwise.<p>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode
+		 * @see org.safs.TestRecordHelper#getStatusInfo
+		 * <p>
+		 * @example
+		 * <pre>
+		 * {@code
+		 * //check if Basc_Button becomes valid within 15 seconds.
+		 * Misc.IsComponentExists(Map.SAPDemoPage.Basc_Button);
+		 * //check if Basc_Button becomes valid within 2 seconds.
+		 * Misc.IsComponentExists(Map.SAPDemoPage.Basc_Button, "2");
+		 * }
+		 * </pre>
+		 */
+		public static boolean IsComponentExists(org.safs.model.Component component, String...optionals){
+			String blockid = OnGUIExistsGotoBlockID(component, FAKE_BLOCKID, optionals);
+			return StringUtils.isValid(blockid);
+		}
+		
+		private static final String FAKE_BLOCKID = "FAKE_BLOCKID";
+		//TODO Not exposed yet
+		/**
+		 * @param component Component, The component to check
+		 * @param blockid String, the blockid to branch
+		 * @param optionals
+		 * <ul>
+		 * <b>optionals[0] timeout</b> int, timeout in seconds. Default is 15 seconds.
+		 * </ul>
+		 * @return String, the BLOCKID to branch.<br>
+		 *                 void string "" if it does not branch.<br>
+		 *                 null if there is something wrong.<br>
+		 */
+		static String OnGUIExistsGotoBlockID(org.safs.model.Component component, String blockid, String...optionals){
+			String winName = component.getParentName();
+			String compName = component.getName();
+			if(winName==null) winName=compName;
+			
+			if(command(DriverCommands.ONGUIEXISTSGOTOBLOCKID_KEYWORD, combineParams(optionals, blockid, winName, compName))){
+				return prevResults.getStatusInfo();
+			}else{
+				IndependantLog.error(StringUtils.debugmsg(false)+" failed.");
+				return null;
+			}
+		}
+
+		//TODO Not exposed yet
+		/**
+		 * @param component Component, The component to check
+		 * @param blockid String, the blockid to branch
+		 * @param optionals
+		 * <ul>
+		 * <b>optionals[0] timeout</b> int, timeout in seconds. Default is 15 seconds.
+		 * </ul>
+		 * @return String, the BLOCKID to branch.<br>
+		 *                 void string "" if it does not branch.<br>
+		 *                 null if there is something wrong.<br>
+		 */
+		static String OnGUINotExistGotoBlockID(org.safs.model.Component component, String blockid, String...optionals){
+			String winName = component.getParentName();
+			String compName = component.getName();
+			if(winName==null) winName=compName;
+			
+			if(command(DriverCommands.ONGUINOTEXISTGOTOBLOCKID_KEYWORD, combineParams(optionals, blockid, winName, compName))){
+				return prevResults.getStatusInfo();
+			}else{
+				IndependantLog.error(StringUtils.debugmsg(false)+" failed.");
+				return null;
+			}
+		}
+		
 		/**
 		 * Wait for a Window or Component to become invalid.
 		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_WaitForGUIGone">Detailed Reference</a><p>
