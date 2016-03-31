@@ -58,6 +58,7 @@ package org.safs.selenium.webdriver;
  *  <br>   MAR 14, 2016    (SBJLWA) Add IsAlertPresent().
  *  <br>   MAR 24, 2016    (SBJLWA) Modify comments for StartWebBrowser(): adjust examples and add links to specify "custom profile" and "preferences".
  *  <br>   MAR 31, 2016    (SBJLWA) Add IsComponentExists(), OnGUIXXXBlockID().
+ *                                  Modify testStatusCode(): the status code BRANCH_TO_BLOCKID will be considered successful execution.
  */
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -2711,6 +2712,7 @@ public abstract class SeleniumPlus {
 		
 		int rc = testRecord.getStatusCode();
 		if(rc==StatusCodes.NO_SCRIPT_FAILURE) return true;
+		if(rc==StatusCodes.BRANCH_TO_BLOCKID) return true;
 		if(rc==StatusCodes.SCRIPT_NOT_EXECUTED){
 			IndependantLog.warn(debumsg+command+" is not executed!"+testRecord.getStatusInfo());
 		}else if(rc==StatusCodes.SCRIPT_WARNING){
