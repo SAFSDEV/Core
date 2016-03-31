@@ -1122,8 +1122,7 @@ holdloop:		while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 							compName +" found within timeout "+ seconds, 
 							compName, seconds);
 //					//set statuscode and statusinfo fields so driver will know to branch
-//					testRecordData.setStatusCode(StatusCodes.BRANCH_TO_BLOCKID);
-					testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
+					testRecordData.setStatusCode(StatusCodes.BRANCH_TO_BLOCKID);
 					testRecordData.setStatusInfo(blockName);
 				}
 				else {
@@ -1148,8 +1147,7 @@ holdloop:		while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 							compName +" does not exist", 
 							compName);
 //					//set statuscode and statusinfo fields so driver will know to branch
-//					testRecordData.setStatusCode(StatusCodes.BRANCH_TO_BLOCKID);
-					testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
+					testRecordData.setStatusCode(StatusCodes.BRANCH_TO_BLOCKID);
 					testRecordData.setStatusInfo(blockName); 
 				}
 				else {
