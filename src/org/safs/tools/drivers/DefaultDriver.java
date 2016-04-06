@@ -450,7 +450,7 @@ public abstract class DefaultDriver extends AbstractDriver {
 			Log.info("Driver Delay 'secsWaitForComponent' set to "+ Processor.getSecsWaitForComponent());
 			
 			// check for settings of "NumLock" on/off
-			Log.info("Checking for Command-Line setting '-Dsafs.test.numLockOn'...");
+			Log.info("Checking for Command-Line setting '-Dsafs.test.numlockon'...");
 			String numLockSetting = getParameterValue(DriverConstant.PROPERTY_SAFS_TEST_NUMLOCKON);
 			if (numLockSetting.length() == 0) {
 				Log.info("Checking for alternative NumLock Setting 'SAFS_TEST':'numLockOn'...");
