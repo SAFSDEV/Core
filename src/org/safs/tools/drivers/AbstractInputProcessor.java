@@ -84,6 +84,16 @@ public abstract class AbstractInputProcessor implements DriverInterface {
 	public void setMillisBetweenRecords(int millisBetweenRecords) { driver.setMillisBetweenRecords(millisBetweenRecords);}
 	
 	/**
+	 * @see DriverInterface#getNumLockOn()
+	 */
+	public boolean getNumLockOn() { return driver.getNumLockOn();}
+	
+	/**
+	 * @see DriverInterface#setNumLockOn()
+	 */
+	public void setNumLockOn(boolean numLockOnValue) { driver.setNumLockOn(numLockOnValue); }
+	
+	/**
 	 * @see DriverInterface#isExitSuite()
 	 */
 	public boolean isExitSuite() { return driver.isExitSuite(); }

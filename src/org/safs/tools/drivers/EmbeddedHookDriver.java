@@ -496,6 +496,7 @@ public class EmbeddedHookDriver extends JavaHook {
 		    jsafs.initializeMiscConfigInfo();
 		    jsafs.initializeRuntimeEngines();
 		    jsafs.openTestLogs();
+		    jsafs.executeNumLockSetting();
 			jsafs.statuscounter = jsafs.statuscounts instanceof StatusCounter ? (StatusCounter)jsafs.statuscounts: new StatusCounter();
 			jsafs.counterInfo = jsafs.counterInfo == null ? 
 					new UniqueStringCounterInfo(jsafs.cycleLog.getStringID(), DriverConstant.DRIVER_CYCLE_TESTLEVEL):

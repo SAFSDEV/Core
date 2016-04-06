@@ -380,6 +380,10 @@ public class DriverConstant extends JavaConstant{
     /** "safs.test.secswaitforcomponent" <br>
 	 * JVM command line: -Dsafs.test.secswaitforcomponent=0-N **/
 	public static final String PROPERTY_SAFS_TEST_SECSWAITFORCOMPONENT ="safs.test.secswaitforcomponent";
+	
+	/** "safs.test.numLockOn" <br>
+	 * JVM command line: -Dsafs.test.numLockOn=TRUE|FALSE **/
+	public static final String PROPERTY_SAFS_TEST_NUMLOCKON ="safs.test.numlockon";
 
     /** "safs.log.level" <br>
 	 * JVM command line: -Dsafs.log.level=ERROR|WARN|PASS|GENERIC|INDEX|INFO|DEBUG **/

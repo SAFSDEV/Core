@@ -3,6 +3,8 @@
  **/
 package org.safs.tools.drivers;
 
+import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
 import java.io.File;
 
 import org.safs.Log;
@@ -53,6 +55,9 @@ public abstract class AbstractDriver implements DriverInterface{
 	/** {@link org.safs.tools.status.StatusCounter} */
 	protected StatusInterface         statuscounts = new StatusCounter();
 	protected int            millisBetweenRecords  = 0;
+	
+	protected static final boolean DEFAULT_NUMLOCK_STATUS = Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_NUM_LOCK);
+	protected boolean numLockOn = DEFAULT_NUMLOCK_STATUS;
 	
 	/** 
 	 * CYCLE shared flow control info used by all Driver/InputProcessors. 
@@ -144,6 +149,15 @@ public abstract class AbstractDriver implements DriverInterface{
 	 */
 	public void setMillisBetweenRecords(int millisBetween) { millisBetweenRecords = millisBetween;}
 	
+	/**
+	 * @see DriverInterface#getNumLockOn()
+	 */
+	public boolean getNumLockOn() {	return numLockOn; }
+
+	/**
+	 * @see DriverInterface#setNumLockOn()
+	 */
+	public void setNumLockOn(boolean numLockOnValue) { numLockOn = numLockOnValue; }
 	
 	/**
 	 * @see DriverInterface#isPerTableFlowControl()
