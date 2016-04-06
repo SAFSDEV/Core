@@ -15,6 +15,7 @@ package org.safs.text;
  *                                  Modify FileAttributeFilter: distinguish Windows and other OS for attribute 'archive'.
  * <br>	DEC 09, 2014	(CANAGL)    Refactored deduceFile routines into here from GenericEngine and Processor.
  * <br>	FEB 04, 2015	(SBJLWA)    Modify getBufferedFileReader(): deduce the file encoding if no encoding is provided.
+ * <br>	APR 06, 2016	(CANAGL)    Support FileAttribute.ALLFILES Type to specify all non-VOLUMELABEL files at a location.
  *
  *********************************************************************************************/
 
@@ -1219,6 +1220,7 @@ public class FileUtilities
 
 	/**
 	 * To model the file attribute.
+      * <br> APR 06, 2016	(CANAGL)    Support FileAttribute.ALLFILES Type to specify all non-VOLUMELABEL files at a location.
 	 */
 	public static class FileAttribute{
 		/**
@@ -1232,7 +1234,8 @@ public class FileUtilities
 			SYSTEMFILE((byte)4),
 			VOLUMELABEL((byte)8),
 			DIRECTORY((byte)16),
-			ARCHIVEFILE((byte)32);
+			ARCHIVEFILE((byte)32),
+			ALLFILES((byte)55); //everything but VOLUMELABEL. If VOLUMELABEL present, no others count.
 
 			private final byte value;
 			Type(byte value){this.value=value;}
