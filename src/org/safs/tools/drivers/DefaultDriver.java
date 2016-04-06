@@ -3,6 +3,8 @@
  **/
 package org.safs.tools.drivers;
 
+import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.Enumeration;
 import java.util.ListIterator;
@@ -446,6 +448,26 @@ public abstract class DefaultDriver extends AbstractDriver {
 	    		}
 	    	}
 			Log.info("Driver Delay 'secsWaitForComponent' set to "+ Processor.getSecsWaitForComponent());
+			
+			// check for settings of "NumLock" on/off
+			Log.info("Checking for Command-Line setting '-Dsafs.test.numLockOn'...");
+			String numLockSetting = getParameterValue(DriverConstant.PROPERTY_SAFS_TEST_NUMLOCKON);
+			if (numLockSetting.length() == 0) {
+				Log.info("Checking for alternative NumLock Setting 'SAFS_TEST':'numLockOn'...");
+				// check for a configuration file setting
+				numLockSetting = configInfo.getNamedValue(DriverConstant.SECTION_SAFS_TEST, "numLockOn");
+				if(numLockSetting == null) numLockSetting = "";
+			}
+			numLockSetting = StringUtils.getTrimmedUnquotedStr(numLockSetting);
+			if(numLockSetting.length() > 0){
+				try {
+					boolean numLockSettingValue = Boolean.parseBoolean(numLockSetting);
+					setNumLockOn(numLockSettingValue);
+				} catch (Exception e) {
+					Log.info("Driver IGNORING invalid numLockOn setting "+ numLockSetting);
+				}
+			}
+			Log.info("'NumLockOn' status set to "+ getNumLockOn());
 			
 			Log.info("Test to execute: '"+ testName +"' using "+ testLevel.toUpperCase() +" DRIVER." );
 		}
@@ -892,6 +914,13 @@ public abstract class DefaultDriver extends AbstractDriver {
 		cycleLog=null;
 		suiteLog=null;
 		stepLog=null;
+	}
+	
+	/**
+	 * Set 'NumLock' based on the value of 'numLock'.
+	 */
+	protected void executeNumLockSetting(){
+		Toolkit.getDefaultToolkit().setLockingKeyState(KeyEvent.VK_NUM_LOCK, getNumLockOn());
 	}
 	
 	/** shutdown any engines started with initializeRuntimeEngines() **/

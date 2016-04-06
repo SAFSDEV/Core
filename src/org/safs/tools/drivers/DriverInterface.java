@@ -112,5 +112,8 @@ public interface DriverInterface extends PathInterface {
 		
 	public int getMillisBetweenRecords();
 	public void setMillisBetweenRecords(int millisBetweenRecords);	
+	
+	public boolean getNumLockOn();
+	public void setNumLockOn(boolean numLockOnValue);
 }
 
