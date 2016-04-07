@@ -1,23 +1,27 @@
 package org.safs.selenium;
-
+/**
+ * Logs for developers, not published to API DOC.
+ * History:<br>
+ *   <br>   JUL 05, 2011    (LeiWang) Update method setFocus().
+ *   <br>   APR 07, 2016    (Lei Wang) Refactor to handle OnGUIExistsGotoBlockID/OnGUINotExistGotoBlockID in super class DriverCommand
+ */
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 
 import org.openqa.selenium.server.RemoteControlConfiguration;
 import org.safs.DDGUIUtilities;
 import org.safs.DriverCommand;
+import org.safs.IndependantLog;
 import org.safs.Log;
 import org.safs.SAFSException;
 import org.safs.StatusCodes;
+import org.safs.StringUtils;
 import org.safs.TestRecordHelper;
 import org.safs.text.FAILStrings;
 import org.safs.tools.drivers.DriverConstant;
 
 import com.thoughtworks.selenium.DefaultSelenium;
 import com.thoughtworks.selenium.Selenium;
-/**
- *   <br>   JUL 05, 2011    (LeiWang) Update method setFocus().
- */
+
 public class DCDriverCommand extends DriverCommand {
 	public static final String CLEARAPPMAPCACHE         = "ClearAppMapCache";
 	public static final String STARTWEBBROWSER          = "StartWebBrowser";
@@ -30,39 +34,41 @@ public class DCDriverCommand extends DriverCommand {
 	
 	public static final String DEFAULT_BROWSER = "*piiexplore";
 	
+	/**A convenient GUIUtilities*/
+	protected SeleniumGUIUtilities sgu = null;
+	
 	//STestRecordHelper testRecordData;
 	public DCDriverCommand() {
 		super();
 	}
 
-	public void process() {
-		// first interpret the fields of the test record and put them into the
-		// appropriate fields of testRecordData
-		try{ setParams(interpretFields());}		
-        catch(SAFSException sx){
-        	Log.debug("Selenium DCDriverCommand parsing error:"+ sx.getMessage(), sx);
-        }
-		//called script MUST set StepDriverTestInfo.statuscode accordingly.
-		//this is one way we make sure the script executed and a script 
-		//command failure was not encountered prematurely.
-		testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
-      
-		String cmd = testRecordData.getCommand();
-		if(cmd.equalsIgnoreCase(STARTWEBBROWSER)){
+	/** 
+	 * Convert the general GUIUtilities to a specific one.
+	 **/
+	protected void init() throws SAFSException{
+		super.init();
+		try{
+			sgu = (SeleniumGUIUtilities) utils;			
+		}catch(Exception e){
+			String msg = " Met Exception "+StringUtils.debugmsg(e);
+			IndependantLog.error(StringUtils.debugmsg(false)+msg);
+			throw new SAFSException("Failed to convert GUIUtilities, "+msg);
+		}
+	}
+
+	protected void commandProcess() {
+		String dbg = getClass().getName()+".commandProcess ";
+    	Log.info(dbg+"processing: "+ command);
+    	
+		if(command.equalsIgnoreCase(STARTWEBBROWSER)){
 			startWebBrowser();
-		} else if(cmd.equalsIgnoreCase(WAITFORGUI)|| cmd.equalsIgnoreCase(WAITFORWEBPAGE)){
+		} else if(command.equalsIgnoreCase(WAITFORGUI)|| command.equalsIgnoreCase(WAITFORWEBPAGE)){
 			waitForGui();
-		} else if(cmd.equalsIgnoreCase(SETCONTEXT) || cmd.equalsIgnoreCase(SETFOCUS)){
+		} else if(command.equalsIgnoreCase(SETCONTEXT) || command.equalsIgnoreCase(SETFOCUS)){
 			setFocus();
-		} else if(cmd.equalsIgnoreCase(ONGUIEXISTSGOTOBLOCKID)){
-			onGUIGotoCommands(true);
-		} else if(cmd.equalsIgnoreCase(ONGUINOTEXISTGOTOBLOCKID)){
-			onGUIGotoCommands(false);
-		} else if(cmd.equalsIgnoreCase(CLEARAPPMAPCACHE)){
+		} else if(command.equalsIgnoreCase(CLEARAPPMAPCACHE)){
 			clearAppMapCache();
-		} else {		
-			super.process();
-		}		
+		}
 	}
 	
 	private void clearAppMapCache(){
@@ -96,7 +102,6 @@ public class DCDriverCommand extends DriverCommand {
 		boolean focused = false;
 		String winCompString = (window.equalsIgnoreCase(component))? window:window+":"+component;
 		
-		SeleniumGUIUtilities sgu = (SeleniumGUIUtilities) testRecordData.getDDGUtils();
 		Selenium sel = SApplicationMap.getSelenium(window);
 		//SApplicationMap.getSelenium(window).selectWindow(null);
 		
@@ -254,88 +259,29 @@ public class DCDriverCommand extends DriverCommand {
 			standardFailureMessage(msg, "SAFSException:"+ semsg);
 		}
 	}
-	
-	/** <br><em>Purpose:</em> OnGUI(Not)Exist(s)GotoBlockID
-	 * e.g. C, OnGUIExistsGotoBlockID, BlockID, Window, Component[, Timeout]
-	 * 
-	 * @author phsabo	1.25.2007	Created
-	 * 
-	 * This method first determines if branching should occur based on whether or not the GUI is found. Then,
-	 * it sets the TestRecordData status to BRANCH_TO_BLOCKID so that the driver knows to attempt a branch when
-	 * control returns to the driver.  This method ustilizes the TestRecordData field statusinfo to store the 
-	 * name of the blockID.
-	 **/
-	private void onGUIGotoCommands (boolean exists) {
-		//validate number of params
-		if (params.size() < 3) {
-			issueParameterCountFailure();
-			return;
-		}
 
-		String methodName = "onGUIGotoCommands";
-		String command = testRecordData.getCommand();
-		String table = testRecordData.getFilename();
-		String recordnum = String.valueOf(testRecordData.getLineNumber());
-
-		// get params
-		Iterator iterator = params.iterator();
-		String blockName  = (String) iterator.next();
-		String windowName = (String) iterator.next();
-		String compName   = (String) iterator.next();
-		int timeout = 15;	// default timeout
-		String seconds = String.valueOf(timeout);
-		int secii;
-		try { // optional timeout param
-			seconds = (String)iterator.next();
-		}
-		catch (NoSuchElementException nse) {
-			//exception is okay, timeout is optional parameter
-			Log.info (methodName +": Optional timeout value not specified;" +
-					" using default " + seconds + " seconds instead.");
-			log.logMessage(testRecordData.getFac(),
-				genericText.convert("default_missing_param",
-							command +" optional parameter '"+ "TIMEOUT" +"' set to '"+ seconds +"'.",
-							command, "TIMEOUT", seconds),
-				GENERIC_MESSAGE);
-		}
-		// create timeout value
-		try {
-			secii = Integer.parseInt(seconds);
-		}
-		catch (NumberFormatException nfe) {
-			//exception is okay, use default timeout value instead
-			secii = timeout;
-			seconds = String.valueOf(secii);
-			Log.info (methodName +": Optional timeout value not a number;" +
-					" using default " + seconds + " seconds instead.");
-			log.logMessage(testRecordData.getFac(),
-				genericText.convert("default_bad_param",
-						command +" invalid optional parameter '"+ "TIMEOUT" +"' set to '"+ seconds +"'.",
-						command, "TIMEOUT", seconds),
-				GENERIC_MESSAGE);
-		}
-		Log.info(".."+command+": window:"+windowName+", component:"+compName+", seconds:"+seconds);
+	protected boolean checkGUIExistence(boolean expectedExist, String mapNam, String window, String component, int timeoutInSeconds) throws SAFSException{
+		String debugmsg = StringUtils.debugmsg(false);
+		//search within timeout value
+		long msecTimeout = timeoutInSeconds * 1000;
+		long ms0 = System.currentTimeMillis();
+		long ms1 = ms0 + msecTimeout;
+		Log.info("..begin search for GUI: "+ window + ":" + component +" ms0: "+ms0+", timeout: "+ms1);
 
 		try {
 			//clear appmapcache to start fresh search
-			SGuiObject tobj = (SGuiObject) localClearAppMapCache(windowName, compName);
+			SGuiObject tobj = (SGuiObject) localClearAppMapCache(window, component);
 
-			//search within timeout value
-			long msecTimeout = secii * 1000;
-			long ms0 = System.currentTimeMillis();
-			long ms1 = ms0 + msecTimeout;
-			Log.info("..begin search for GUI: "+ windowName + ":" + compName +" ms0: "+ms0+", timeout: "+ms1);
 			int j=0;
-			boolean match = false;
+			boolean satisfied = false;
 			for(; ; j++) { // try several times
 				if (tobj != null) {
 					//if match, break loop, success!					
-					SeleniumGUIUtilities sgu = (SeleniumGUIUtilities) testRecordData.getDDGUtils();
-					Selenium sel = SApplicationMap.getSelenium(windowName);
+					Selenium sel = SApplicationMap.getSelenium(window);
 					sgu.selectWindow(sel, tobj.getWindowId(), 1);
 					try{
-						if (sel.isElementPresent(tobj.getLocator()) == exists) {					
-							match= true;
+						if (sel.isElementPresent(tobj.getLocator()) == expectedExist) {					
+							satisfied= true;
 							break;
 						}
 					}catch(RuntimeException rx){
@@ -345,63 +291,15 @@ public class DCDriverCommand extends DriverCommand {
 				long msn = System.currentTimeMillis();
 				if (msn > ms1) break;
 				delay(100);
-				Log.info("..search for GUI: "+ windowName + ":" + compName +" looping... " + command + "... : msn: "+msn+", j: "+j);
+				Log.info("..search for GUI: "+ window + ":" + component +" looping... : msn: "+msn+", j: "+j);
 				//clear appmapcache again to start fresh search
-				tobj = (SGuiObject) localClearAppMapCache(windowName, compName);
+				tobj = (SGuiObject) localClearAppMapCache(window, component);
 			}
-
-			String msg;
-			//onguiexists...
-			if (exists) {
-				if (match) {
-					msg = genericText.convert("found_timeout", compName +" was found within timeout "+ seconds,
-												compName, seconds);
-					msg += ". "+ genericText.convert("branching",  
-						command +" attempting branch to "+ blockName +".", command, blockName);
-					//set statuscode and statusinfo fields so driver will know to branch
-					testRecordData.setStatusCode(StatusCodes.BRANCH_TO_BLOCKID);
-					testRecordData.setStatusInfo(blockName);
-				}
-				else {
-					//we were searching for gui, since it wasn't found, don't branch
-					msg = genericText.convert("not_found_timeout", compName +" was not found within timeout "+ seconds,
-												compName, seconds);
-					msg += ". "+ genericText.convert("not_branching",  
-						command +" did not branch to "+ blockName +".", command, blockName);
-					testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
-				}
-			}
-			//onguinotexist...
-			else {
-				if (tobj == null) {
-					//we were searching for no gui, since it wasn't found, branch
-					msg = genericText.convert("not_found_timeout", compName +" was not found within timeout "+ seconds,
-												compName, seconds);
-					msg += ". "+ genericText.convert("branching",  
-						command +" attempting branch to "+ blockName +".", command, blockName);
-					//set statuscode and statusinfo fields so driver will know to branch
-					testRecordData.setStatusCode(StatusCodes.BRANCH_TO_BLOCKID);
-					testRecordData.setStatusInfo(blockName);	
-				}
-				else {
-					//we were searching for no gui, since it was found, don't branch
-					msg = genericText.convert("found_timeout", compName +" was found within timeout "+ seconds,
-												compName, seconds);
-					msg += ". "+ genericText.convert("not_branching",  
-						command +" did not branch to "+ blockName +".", command, blockName);
-					testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
-				}
-			}
-			log.logMessage(testRecordData.getFac(), msg, GENERIC_MESSAGE);  
-		}
-		catch (Exception e) {
-			//e.printStackTrace();
-			testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
-			String msg = e.getMessage();
-			if (msg.length()==0) msg = e.getClass().getName();
-			standardFailureMessage(failedText.convert("failure1", 
-								   "Unable to perform "+ command, command), 
-								   "SAFSException:"+ msg);
+			
+			return satisfied;
+		}catch (Exception e) {
+			Log.error(debugmsg +" failed : Met Exception", e);
+			throw new SAFSException(e.getMessage());
 		}
 	}
 	
