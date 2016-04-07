@@ -1,51 +1,9 @@
 /** Copyright (C) (MSA, Inc) All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
-
-package org.safs.rational;
-
-import java.awt.MouseInfo;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-
-import org.safs.DDGUIUtilities;
-import org.safs.Domains;
-import org.safs.DriverCommand;
-import org.safs.Log;
-import org.safs.SAFSException;
-import org.safs.SAFSObjectNotFoundException;
-import org.safs.STAFHelper;
-import org.safs.StatusCodes;
-import org.safs.TestRecordHelper;
-import org.safs.image.ImageUtils;
-import org.safs.logging.LogUtilities;
-import org.safs.rational.win.CFWinMenuBar;
-import org.safs.text.FAILStrings;
-import org.safs.text.GENStrings;
-import org.safs.tools.engines.TIDDriverCommands;
-
-import com.rational.test.ft.PropertyNotFoundException;
-import com.rational.test.ft.object.interfaces.GuiSubitemTestObject;
-import com.rational.test.ft.object.interfaces.GuiTestObject;
-import com.rational.test.ft.object.interfaces.ProcessTestObject;
-import com.rational.test.ft.object.interfaces.RootTestObject;
-import com.rational.test.ft.object.interfaces.TestObject;
-import com.rational.test.ft.script.IOptionName;
-import com.rational.test.ft.script.RationalTestScript;
-import com.rational.test.ft.script.RunException;
-
-
 /**
- * <br><em>Purpose:</em> DCDriverCommand, process a default generic driver command
- * <br><em>Lifetime:</em> instantiated by DriverCommandProcessor
- * im
- * <p>
- * @author  Doug Bauman
- * @since   JUN 14, 2003
- *
+ * Logs for developers, not published to API DOC.
+ * History:<br>
  *   <br>   Aug 25, 2003    (DBauman) Original Release
  *   <br>   Carl Nagle, SEP 16, 20003 Enabled the use of new LogUtilities
  *   <br>   Nov 14, 2003    (DBauman) adding commands:<br>
@@ -69,9 +27,57 @@ import com.rational.test.ft.script.RunException;
  *                                                               process it. Only WaitForGUI, WaitForGUIGone, OnGUIExistsGotoBlockID and 
  *                                                               OnGUINotExistGotoBlockID will be affected as the other GUI-related keywords
  *                                                               are not supported in TIDXXXCommands (Driver, Log, Flow, Counter etc.)
- **/
+ *   <br>   APR 07, 2016    (SBJLWA) Refactor to handle OnGUIExistsGotoBlockID/OnGUINotExistGotoBlockID in super class DriverCommand
+ */
+package org.safs.rational;
+
+import java.awt.MouseInfo;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
+import org.safs.DDGUIUtilities;
+import org.safs.Domains;
+import org.safs.DriverCommand;
+import org.safs.IndependantLog;
+import org.safs.Log;
+import org.safs.SAFSException;
+import org.safs.SAFSObjectNotFoundException;
+import org.safs.STAFHelper;
+import org.safs.StatusCodes;
+import org.safs.StringUtils;
+import org.safs.TestRecordHelper;
+import org.safs.image.ImageUtils;
+import org.safs.logging.LogUtilities;
+import org.safs.rational.win.CFWinMenuBar;
+import org.safs.text.FAILStrings;
+import org.safs.text.GENStrings;
+import org.safs.tools.engines.TIDDriverCommands;
+
+import com.rational.test.ft.PropertyNotFoundException;
+import com.rational.test.ft.object.interfaces.GuiSubitemTestObject;
+import com.rational.test.ft.object.interfaces.GuiTestObject;
+import com.rational.test.ft.object.interfaces.ProcessTestObject;
+import com.rational.test.ft.object.interfaces.RootTestObject;
+import com.rational.test.ft.object.interfaces.TestObject;
+import com.rational.test.ft.script.IOptionName;
+import com.rational.test.ft.script.RationalTestScript;
+import com.rational.test.ft.script.RunException;
+
+
+/**
+ * <br><em>Purpose:</em> DCDriverCommand, process a default generic driver command
+ * <br><em>Lifetime:</em> instantiated by DriverCommandProcessor
+ * <p>
+ * @author  Doug Bauman
+ * @since   JUN 14, 2003
+ *
+ */
 public class DCDriverCommand extends DriverCommand {
 
+	
   public static final String CALLSCRIPT                    = "CallScript";
   public static final String WAITFORGUI                    = "WaitForGUI";
   public static final String WAITFORGUIGONE                = "WaitForGUIGone";
@@ -102,13 +108,31 @@ public class DCDriverCommand extends DriverCommand {
   public static final String GET_SECS_BEFORE_MOUSE_DOWN	 		= "GetSecsBeforeMouseDown";//DELAY_BEFORE_MOUSE_DOWN
   public static final String SET_SECS_BEFORE_MOUSE_UP	 		= "SetSecsBeforeMouseUp";//DELAY_BEFORE_MOUSE_UP
   public static final String SET_SECS_BEFORE_MOUSE_DOWN	 		= "SetSecsBeforeMouseDown";//DELAY_BEFORE_MOUSE_DOWN
-  
+
+  /**A convenient GUIUtilities*/
+  protected RDDGUIUtilities rgu = null;
+
   /** <br><em>Purpose:</em> constructor, calls super
    **/
   public DCDriverCommand () {
     super();
   }
 
+  /** 
+   * Convert the general GUIUtilities to a specific one.
+   **/
+  protected void init() throws SAFSException{
+	  super.init();
+
+	  try{
+		  rgu = (RDDGUIUtilities) utils;			
+	  }catch(Exception e){
+		  String msg = " Met Exception "+StringUtils.debugmsg(e);
+		  IndependantLog.error(StringUtils.debugmsg(false)+msg);
+		  throw new SAFSException("Failed to convert GUIUtilities, "+msg);
+	  }
+  }
+  
   /** <br><em>Purpose:</em> process: process the testRecordData
    ** <br>This is a driver command processor.
    * <br><em>Side Effects:</em> {@link #testRecordData} statusCode is set
@@ -117,32 +141,20 @@ public class DCDriverCommand extends DriverCommand {
    * <br><em>State Read:</em>   {@link #testRecordData}, {@link #params}
    * <br><em>Assumptions:</em>  none
    **/
-  public void process() {
+  public void commandProcess() {
     try {
-      String cmd = testRecordData.getCommand();
       
       //For those keywords supported in both TID and RJ engines, we should test if the
       //RS is in Mixed-Mode, if yes, we should change the parent's RS to IBT-format RS
       //and re-send the TestRecord to the TID engine,who will do the real work
-      if(cmd.equalsIgnoreCase(WAITFORGUI) ||
-         cmd.equalsIgnoreCase(WAITFORGUIGONE) ||
-         cmd.equalsIgnoreCase(ONGUINOTEXISTGOTOBLOCKID) ||
-         cmd.equalsIgnoreCase(ONGUIEXISTSGOTOBLOCKID)){
-    	  Iterator iter = params.iterator();
-    	  if(cmd.equalsIgnoreCase(ONGUIEXISTSGOTOBLOCKID) ||
-    		 cmd.equalsIgnoreCase(ONGUINOTEXISTGOTOBLOCKID)){
-    		  //Skip the field BlockId in TestRecord
-    		  iter.next();
-    	  }
-    	  testRecordData.setWindowName((String)iter.next());
-    	  testRecordData.setCompName((String)iter.next());
+      if(command.equalsIgnoreCase(WAITFORGUI) ||
+         command.equalsIgnoreCase(WAITFORGUIGONE)){
 
     	  //If we use Mixed-Mode for RS, we should modify its parent RS to IBT-format
 	      if(testRecordData.isMixedRsUsed()){
-	    	  RDDGUIUtilities utils = (RDDGUIUtilities) ((TestRecordHelper)testRecordData).getDDGUtils();
 	    	  String windowName = testRecordData.getWindowName();
 	    	  //Find top window test object through RJ engine
-	    	  GuiTestObject windowGuiObject = (GuiTestObject) utils.getTestObject(testRecordData.getAppMapName(), windowName,windowName);
+	    	  GuiTestObject windowGuiObject = (GuiTestObject) rgu.getTestObject(testRecordData.getAppMapName(), windowName,windowName);
 	    	  if(windowGuiObject!=null){
 	    		  Rectangle windowRect = windowGuiObject.getClippedScreenRectangle();
 	    		  if(windowRect!=null){
@@ -175,42 +187,39 @@ public class DCDriverCommand extends DriverCommand {
 	      }
       }
 
-      if (cmd.equalsIgnoreCase(CALLSCRIPT))                         { callScript();                  } 
-      else if (cmd.equalsIgnoreCase( WAITFORGUI))                   { waitForGui();                 } 
-      else if (cmd.equalsIgnoreCase( WAITFORGUIGONE))               { waitForGuiGone();             } 
-      else if (cmd.equalsIgnoreCase( CLEARAPPMAPCACHE))             { clearAppMapCache();           } 
-      else if (cmd.equalsIgnoreCase( CLOSEAPPLICATION))             { application(false);          } 
-      else if (cmd.equalsIgnoreCase( LAUNCHAPPLICATION))            { application(true);           } 
-      else if (cmd.equalsIgnoreCase( WAITFORPROPERTYVALUE))         { waitForPropertyValue(false); } 
-      else if (cmd.equalsIgnoreCase( WAITFORPROPERTYVALUEGONE))     { waitForPropertyValue(true);  } 
-      else if (cmd.equalsIgnoreCase( WAITFORWEBPAGE))               { waitForWebPage();             } 
-      else if (cmd.equalsIgnoreCase( SETCONTEXT) ||
-      		    cmd.equalsIgnoreCase( SETFOCUS))                     { setFocus();                   } 
-      else if (cmd.equalsIgnoreCase( CAPTUREMOUSEPOSITIONONSCREEN)) { captureMousePositionOnScreen();} 
-      else if (cmd.equalsIgnoreCase( ONGUIEXISTSGOTOBLOCKID))       { onGUIGotoCommands(true);      } 
-      else if (cmd.equalsIgnoreCase( ONGUINOTEXISTGOTOBLOCKID))     { onGUIGotoCommands(false);     } 
-      else if (cmd.equalsIgnoreCase( ONMENUITEMCONTAINSSTATEGOTOBLOCKID)){ OnMenuItemContainsStateGotoCommand();     } 
-      else if (cmd.equalsIgnoreCase( ENABLE_DOMAIN))                { enableDomain(true);           } 
-      else if (cmd.equalsIgnoreCase( DISABLE_DOMAIN))               { enableDomain(false);          } 
-      else if (cmd.equalsIgnoreCase(SET_SECS_SEEK_COMPONENT) ||
-    		   cmd.equalsIgnoreCase(SET_SECS_DELAY_RETRY_COMPONENT) ||
-    		   cmd.equalsIgnoreCase(SET_SECS_BEFORE_MOUSE_UP)||
-    		   cmd.equalsIgnoreCase(SET_SECS_BEFORE_MOUSE_DOWN)||
-    		   cmd.equalsIgnoreCase(SET_SECS_AFTER_WIN_ACTIVE)){
+      if (command.equalsIgnoreCase(CALLSCRIPT))                         { callScript();                  } 
+      else if (command.equalsIgnoreCase( WAITFORGUI))                   { waitForGui();                 } 
+      else if (command.equalsIgnoreCase( WAITFORGUIGONE))               { waitForGuiGone();             } 
+      else if (command.equalsIgnoreCase( CLEARAPPMAPCACHE))             { clearAppMapCache();           } 
+      else if (command.equalsIgnoreCase( CLOSEAPPLICATION))             { application(false);          } 
+      else if (command.equalsIgnoreCase( LAUNCHAPPLICATION))            { application(true);           } 
+      else if (command.equalsIgnoreCase( WAITFORPROPERTYVALUE))         { waitForPropertyValue(false); } 
+      else if (command.equalsIgnoreCase( WAITFORPROPERTYVALUEGONE))     { waitForPropertyValue(true);  } 
+      else if (command.equalsIgnoreCase( WAITFORWEBPAGE))               { waitForWebPage();             } 
+      else if (command.equalsIgnoreCase( SETCONTEXT) ||
+      		    command.equalsIgnoreCase( SETFOCUS))                     { setFocus();                   } 
+      else if (command.equalsIgnoreCase( CAPTUREMOUSEPOSITIONONSCREEN)) { captureMousePositionOnScreen();} 
+      else if (command.equalsIgnoreCase( ONMENUITEMCONTAINSSTATEGOTOBLOCKID)){ OnMenuItemContainsStateGotoCommand();     } 
+      else if (command.equalsIgnoreCase( ENABLE_DOMAIN))                { enableDomain(true);           } 
+      else if (command.equalsIgnoreCase( DISABLE_DOMAIN))               { enableDomain(false);          } 
+      else if (command.equalsIgnoreCase(SET_SECS_SEEK_COMPONENT) ||
+    		   command.equalsIgnoreCase(SET_SECS_DELAY_RETRY_COMPONENT) ||
+    		   command.equalsIgnoreCase(SET_SECS_BEFORE_MOUSE_UP)||
+    		   command.equalsIgnoreCase(SET_SECS_BEFORE_MOUSE_DOWN)||
+    		   command.equalsIgnoreCase(SET_SECS_AFTER_WIN_ACTIVE)){
     	  setScriptOptions();
-      }else if (cmd.equalsIgnoreCase(GET_SECS_SEEK_COMPONENT) ||
-   		   		cmd.equalsIgnoreCase(GET_SECS_DELAY_RETRY_COMPONENT) ||
-   		     	cmd.equalsIgnoreCase(GET_SECS_BEFORE_MOUSE_UP)||
- 		        cmd.equalsIgnoreCase(GET_SECS_BEFORE_MOUSE_DOWN)||
-   		   		cmd.equalsIgnoreCase(GET_SECS_AFTER_WIN_ACTIVE)){
+      }else if (command.equalsIgnoreCase(GET_SECS_SEEK_COMPONENT) ||
+   		   		command.equalsIgnoreCase(GET_SECS_DELAY_RETRY_COMPONENT) ||
+   		     	command.equalsIgnoreCase(GET_SECS_BEFORE_MOUSE_UP)||
+ 		        command.equalsIgnoreCase(GET_SECS_BEFORE_MOUSE_DOWN)||
+   		   		command.equalsIgnoreCase(GET_SECS_AFTER_WIN_ACTIVE)){
     	  getScriptOptions();
-      }else if (cmd.equalsIgnoreCase(SCROLLWHEEL)){
+      }else if (command.equalsIgnoreCase(SCROLLWHEEL)){
     	  scrollWheel(); 	  
       }else {
         setRecordProcessed(false);
       }
     } catch (SAFSException ex) {
-      //ex.printStackTrace();
       testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
       log.logMessage(testRecordData.getFac(),
                      "SAFSException: "+ex.getMessage(),
@@ -564,8 +573,7 @@ public class DCDriverCommand extends DriverCommand {
         catch(Exception x){
         	Log.debug("DCDC.localClearAppMapCache ignoring "+x.getClass().getSimpleName()+" "+ x.getMessage());
         }
-    DDGUIUtilities utils = ((TestRecordHelper)testRecordData).getDDGUtils();
-    utils.clearAllAppMapCaches();
+    rgu.clearAllAppMapCaches();
   }
 
   /** clear the cache of the test objects maintained by the appmap class
@@ -809,8 +817,7 @@ public class DCDriverCommand extends DriverCommand {
     Log.info("............................"+command+": window:"+windowName+", component:"+compName +", timeout:"+itimeout);
     TestObject tempobj = null;
     GuiTestObject tobj = null;
-    RDDGUIUtilities utils = (RDDGUIUtilities)((TestRecordHelper)testRecordData).getDDGUtils();
-    Script script = utils.getScript();
+    Script script = rgu.getScript();
     //give a new refreshing web browser an initial time to "activate"
     Double wait_before = (Double)script.getOption(IOptionName.DELAY_AFTER_WINDOW_ACTIVATE);
     script.sleep(wait_before.doubleValue());
@@ -826,7 +833,7 @@ public class DCDriverCommand extends DriverCommand {
     	tobj = null;
 	    if (windowName.length()> 0){
 	        try{
-	        	tempobj = utils.getTestObject(testRecordData.getAppMapName(),windowName, compName, true);
+	        	tempobj = rgu.getTestObject(testRecordData.getAppMapName(),windowName, compName, true);
 	        	tobj = new GuiTestObject(tempobj);
 	        }
 	        catch(Exception x){
@@ -1004,180 +1011,79 @@ public class DCDriverCommand extends DriverCommand {
       return;
     }
   
-  /** <br><em>Purpose:</em> OnGUI(Not)Exist(s)GotoBlockID
-   * e.g. C, OnGUIExistsGotoBlockID, BlockID, Window, Component[, Timeout]
-   * 
-   * @author bolawl	11.15.2005	Created (RJL) 
-   * 
-   * This method first determines if branching should occur based on whether or not the GUI is found. Then,
-   * it sets the TestRecordData status to BRANCH_TO_BLOCKID so that the driver knows to attempt a branch when
-   * control returns to the driver.  This method ustilizes the TestRecordData field statusinfo to store the 
-   * name of the blockID.
-   **/
-  private void onGUIGotoCommands (boolean exists) {
-  	String methodName = "onGUIGotoCommands";
-  	String command = testRecordData.getCommand();
-  	//String table = testRecordData.getFilename();
-  	//String recordnum = String.valueOf(testRecordData.getLineNumber());
-  	
-  	//validate number of params
-    if (params.size() < 3) {
-    	this.issueParameterCountFailure("BlockID, WindowID, ComponentID");
-        return;
-    }
+  protected boolean checkGUIExistence(boolean expectedExist, String mapNam, String window, String component, int timeoutInSeconds) throws SAFSException{
+	  String debugmsg = StringUtils.debugmsg(false);
+	  long msecTimeout = timeoutInSeconds * 1000;
+	  long ms0 = System.currentTimeMillis();
+	  long ms1 = ms0 + msecTimeout;
+	  Log.info(debugmsg+"..begin search : ms0: "+ms0+",   timeout: "+ms1);
+	  try {
+		  //clear appmapcache to start fresh search
+		  TestObject tempobj = null;
+		  GuiTestObject tobj = null;
+		  try{
+			  localClearAppMapCache();
+			  tempobj = (TestObject) localGetTestObject(window, component);
+		  }catch(Exception x){
+			  Log.info(debugmsg+" ignoring "+ x.getClass().getSimpleName());  
+		  }
+		  if(tempobj != null) {
+			  try{ tobj = RDDGUIUtilities.getGuiTestObject(tempobj);}
+			  catch(Exception x){
+				  Log.info(debugmsg+" ignoring "+ x.getClass().getSimpleName());  
+			  }
+		  }
 
-    // get params
-    Iterator iterator = params.iterator();
-    String blockName  = (String) iterator.next();
-    String windowName = (String) iterator.next();
-    String compName   = (String) iterator.next();
-    int timeout = 15;	// default timeout
-    String seconds = String.valueOf(timeout);
-    int secii;
-    try { // optional timeout param
-      seconds = (String)iterator.next();
-    }
-    catch (NoSuchElementException nse) {
-		//exception is okay, timeout is optional parameter
-    	Log.info (methodName +":"+ nse);
-		Log.info (methodName +": Optional timeout value not specified;" +
-				  " using default " + seconds + " seconds instead.");
-      }
-    // create timeout value
-    try {
-    	Float seci = new Float(seconds);
-        secii = seci.intValue();
-    }catch (Exception nfe) {
-    	//exception is okay, use default timeout value instead
-    	secii = timeout;
-    	Log.info (methodName +":"+ nfe);
-    	Log.info (methodName +": Optional timeout value likely not a number;" +
-				  " using default " + seconds + " seconds instead.");
-    }
-    Log.info(".."+command+": window:"+windowName+", component:"+compName+", seconds:"+seconds);
-    
-    long msecTimeout = secii * 1000;
-    long ms0 = System.currentTimeMillis();
-    long ms1 = ms0 + msecTimeout;
-    Log.info("..begin search : ms0: "+ms0+",   timeout: "+ms1);
-    try {
-      //clear appmapcache to start fresh search
-      TestObject tempobj = null;
-      GuiTestObject tobj = null;
-      try{
-    	localClearAppMapCache();
-    	tempobj = (TestObject) localGetTestObject(windowName, compName);
-      }catch(Exception x){
-    	Log.info("DCDC."+ command +" ignoring "+ x.getClass().getSimpleName());  
-      }
-      if(tempobj != null) {
-    	try{ tobj = RDDGUIUtilities.getGuiTestObject(tempobj);}
-    	catch(Exception x){
-           Log.info("DCDC."+ command +" ignoring "+ x.getClass().getSimpleName());  
-    	}
-      }
-      
-      //search within timeout value
-      long msn = 0;
-      double retry_seconds = ((Double)Script.getOption(IOptionName.WAIT_FOR_EXISTENCE_DELAY_BETWEEN_RETRIES)).doubleValue();
-      int j=0;
-      Object rval = null;
-      boolean match = false;
-      Script script = ((RTestRecordData)testRecordData).getScript();      
-      for(; !match ; j++) { // try several times
-        if (tobj != null) {
-          //if match, break loop, success!
-          //PROBLEM: RFT isShowing is NOT reliable! Gives wrong answer sometimes!
-          if (tobj.isShowing() == exists) {
-              match= true;
-              break;
-          }
-        }// if it wasn't found AND we are waiting for it to go away
-        else if (!exists){
-        	match = true;
-        	break;
-        }
-        msn = System.currentTimeMillis();
-        if (msn > ms1) break;
-        script.sleep(retry_seconds);
-        Log.info("..trying again... "+ command +" "+ windowName +":"+ compName +" ... : msn: "+msn+", j: "+j);
-        //clear appmapcache again to start fresh search
-        tempobj = null;
-        try{
-        	localClearAppMapCache();
-        	tempobj = (TestObject) localGetTestObject(windowName, compName); }
-        catch(Exception x){
-      	  Log.info("DCDC."+ command +" ignoring "+ x.getClass().getSimpleName());  
-        }
-        if (tempobj != null) {
-        	try{ tobj = RDDGUIUtilities.getGuiTestObject(tempobj);}
-        	catch(Exception x){
-          	  Log.info("DCDC."+ command +" ignoring "+ x.getClass().getSimpleName());  
-        	}
-        }
-        else{
-        	tobj = null;
-        }
-      }
-      
-      String msg;
-      //onguiexists...
-      if (exists) {
-      	if (match) {
-      		//we were searching for gui, since it was found, attempt branch
-      		msg = GENStrings.convert(GENStrings.BRANCHING, 
-      				command +" attempting branch to "+ blockName +".", 
-      				command, blockName);
-      		msg += "  "+ GENStrings.convert(GENStrings.FOUND_TIMEOUT, 
-      				compName +" found within timeout "+ String.valueOf(secii), 
-      				compName, String.valueOf(secii));
-      		//set statuscode and statusinfo fields so driver will know to branch
-      		testRecordData.setStatusCode(StatusCodes.BRANCH_TO_BLOCKID);
-      		testRecordData.setStatusInfo(blockName);
-      	}
-      	else {
-      		//we were searching for gui, since it wasn't found, don't branch
-      		msg = GENStrings.convert(GENStrings.NOT_BRANCHING, 
-      				command +" not branching to "+ blockName +".", 
-      				command, blockName);
-      		msg += "  "+ FAILStrings.convert(FAILStrings.NOT_FOUND_TIMEOUT, 
-      				compName +" not found within timeout "+ String.valueOf(secii), 
-      				compName, String.valueOf(secii));
-      		testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
-      	}
-      }
-      //onguinotexist...
-      else {
-      	if (match) {
-      		//we were searching for no gui, since it wasn't found, branch
-      		msg = GENStrings.convert(GENStrings.BRANCHING, 
-      				command +" attempting branch to "+ blockName +".", 
-      				command, blockName);
-      		msg += "  "+ GENStrings.convert(GENStrings.NOT_EXIST, 
-      				compName +" does not exist", 
-      				compName);
-      		//set statuscode and statusinfo fields so driver will know to branch
-      		testRecordData.setStatusCode(StatusCodes.BRANCH_TO_BLOCKID);
-      		testRecordData.setStatusInfo(blockName);	
-      	}
-      	else {
-      		//we were searching for no gui, since it was found, don't branch
-      		msg = GENStrings.convert(GENStrings.NOT_BRANCHING, 
-      				command +" not branching to "+ blockName +".", 
-      				command, blockName);
-      		msg += "  "+ GENStrings.convert(GENStrings.EXISTS, 
-      				compName +" exists", 
-      				compName);
-      		testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
-      	}
-      }
-    log.logMessage(testRecordData.getFac(), msg, GENERIC_MESSAGE);  
-    }
-    catch (Exception e) {
-    	Log.error(methodName +": Exception", e);
-    	this.issueErrorPerformingAction(e.getMessage());
-    }
+		  //search within timeout value
+		  long msn = 0;
+		  double retry_seconds = ((Double)Script.getOption(IOptionName.WAIT_FOR_EXISTENCE_DELAY_BETWEEN_RETRIES)).doubleValue();
+		  int j=0;
+		  boolean satisfied = false;
+		  Script script = ((RTestRecordData)testRecordData).getScript();      
+		  for(; !satisfied ; j++) { // try several times
+			  if (tobj != null) {
+				  //if match, break loop, success!
+				  //PROBLEM: RFT isShowing is NOT reliable! Gives wrong answer sometimes!
+				  if (tobj.isShowing() == expectedExist) {
+					  satisfied= true;
+					  break;
+				  }
+			  }// if it wasn't found AND we are waiting for it to go away
+			  else if (!expectedExist){
+				  satisfied = true;
+				  break;
+			  }
+			  msn = System.currentTimeMillis();
+			  if (msn > ms1) break;
+			  script.sleep(retry_seconds);
+			  Log.info(debugmsg+"..trying again... "+ window +":"+ component +" ... : msn: "+msn+", j: "+j);
+			  //clear appmapcache again to start fresh search
+			  tempobj = null;
+			  try{
+				  localClearAppMapCache();
+				  tempobj = (TestObject) localGetTestObject(window, component); }
+			  catch(Exception x){
+				  Log.info(debugmsg+" ignoring "+ x.getClass().getSimpleName());  
+			  }
+			  if (tempobj != null) {
+				  try{ tobj = RDDGUIUtilities.getGuiTestObject(tempobj);}
+				  catch(Exception x){
+					  Log.info(debugmsg+" ignoring "+ x.getClass().getSimpleName());  
+				  }
+			  }
+			  else{
+				  tobj = null;
+			  }
+		  }
+		  
+		  return satisfied;
+	  }
+	  catch (Exception e) {
+		  Log.error(debugmsg +" failed : Met Exception", e);
+		  throw new SAFSException(e.getMessage());
+	  }
   }
+
     /**
      * Used to enable or disable a particular test domain.
      * At the time of this writing valid domains were:

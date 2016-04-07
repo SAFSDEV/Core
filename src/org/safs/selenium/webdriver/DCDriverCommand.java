@@ -4,6 +4,8 @@
  **/
 package org.safs.selenium.webdriver;
 /**
+ * Logs for developers, not published to API DOC.
+ * History:<br>
  *   <br>   JUL 05, 2011    (LeiWang) Update method setFocus().
  *   <br>   JAN 16, 2014    (DHARMESH) Update Start/Stop Browser call.
  *   <br>   FEB 02, 2014	(DHARMESH) Add Resize and Maximize WebBrowser window KW. 
@@ -23,6 +25,7 @@ package org.safs.selenium.webdriver;
  *   <br>   DEC 24, 2015	(LeiWang) Modify method sendHttpGetRequest(): check known issue 'ajax execution stuck with firefox'.
  *   <br>   MAR 31, 2016	(LeiWang) Add onGUIGotoCommands(): implement OnGUIExistsGotoBlockID/OnGUINotExistGotoBlockID, 
  *                                    I did nothing but set the BLOCKID to test-record's status-info.
+ *   <br>   APR 07, 2016    (SBJLWA) Refactor to handle OnGUIExistsGotoBlockID/OnGUINotExistGotoBlockID in super class DriverCommand
  */
 
 import java.io.File;
@@ -85,17 +88,8 @@ public class DCDriverCommand extends DriverCommand {
 	
 	public static final int DEFAULT_GET_URL_TIMEOUT = 120;//in seconds
 	
-	/**
-	 * The current command keyword being executed.
-	 */
-	protected String command = null;
-	/**A convinient GUIUtilities*/
+	/**A convenient GUIUtilities*/
 	protected WebDriverGUIUtilities wdgu = null;
-	
-	/**
-	 * Used to iterate over any params provided for a command.
-	 */
-	protected Iterator<String> iterator = null;
 	
 	//STestRecordHelper testRecordData;
 	public DCDriverCommand() {
@@ -103,11 +97,18 @@ public class DCDriverCommand extends DriverCommand {
 	}
 
 	/** 
-	 * This superclass implementation does absolutely nothing.
-	 * Subclasses should implement this to provide their new or overriding functionality. 
+	 * Convert the general GUIUtilities to a specific one.
 	 **/
-	protected void localProcess() {
+	protected void init() throws SAFSException{
+		super.init();
 		
+		try{
+			wdgu = (WebDriverGUIUtilities) utils;			
+		}catch(Exception e){
+			String msg = " Met Exception "+StringUtils.debugmsg(e);
+			IndependantLog.error(StringUtils.debugmsg(false)+msg);
+			throw new SAFSException("Failed to convert GUIUtilities, "+msg);
+		}
 	}
 
 	protected void commandProcess() {
@@ -128,10 +129,6 @@ public class DCDriverCommand extends DriverCommand {
 		}else if(command.equalsIgnoreCase(DDDriverCommands.SETCONTEXT_KEYWORD) || 
 				  command.equalsIgnoreCase(DDDriverCommands.SETFOCUS_KEYWORD)){
 			setFocus();
-		} else if(command.equalsIgnoreCase(DDDriverFlowCommands.ONGUIEXISTSGOTOBLOCKID_KEYWORD)){
-			onGUIGotoCommands(true);
-		} else if(command.equalsIgnoreCase(DDDriverFlowCommands.ONGUINOTEXISTGOTOBLOCKID_KEYWORD)){
-			onGUIGotoCommands(false);
 		} else if(command.equalsIgnoreCase(DDDriverCommands.CLEARAPPMAPCACHE_KEYWORD)){
 			clearAppMapCache();
 		} else if(command.equalsIgnoreCase(DDDriverCommands.HIGHLIGHT_KEYWORD)){
@@ -308,32 +305,6 @@ public class DCDriverCommand extends DriverCommand {
 		catch (Exception e) {
 			testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
 			this.issueErrorPerformingAction(StringUtils.debugmsg(e));
-		}
-	}
-	
-	public void process() {
-		String dbg = getClass().getName()+".process ";
-		// first interpret the fields of the test record and put them into the
-		// appropriate fields of testRecordData		
-		try{ setParams(interpretFields());}		
-        catch(SAFSException sx){
-        	Log.debug(dbg+"parsing error:"+ sx.getMessage(), sx);
-        }
-		//called script MUST set StepDriverTestInfo.statuscode accordingly.
-		//this is one way we make sure the script executed and a script 
-		//command failure was not encountered prematurely.
-		testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
-		wdgu = (WebDriverGUIUtilities) testRecordData.getDDGUtils();
-      
-		command = testRecordData.getCommand();
-		iterator = params.iterator();
-		
-		localProcess();
-		if(testRecordData.getStatusCode()==StatusCodes.SCRIPT_NOT_EXECUTED){
-			commandProcess();
-		}
-		if(testRecordData.getStatusCode()==StatusCodes.SCRIPT_NOT_EXECUTED){
-			super.process();
 		}
 	}
 	
@@ -1070,103 +1041,31 @@ holdloop:		while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 			standardFailureMessage(msg, "");
 		}
 	}
-	
-	private void onGUIGotoCommands(boolean expectedExist) {
-		if (params.size() < 3) {
-			issueParameterCountFailure();
-			return;
-		}
-		String debugmsg = StringUtils.debugmsg(false);
-		Iterator iterator = params.iterator();
-		String DEFAULT_TIMEOUT = "15";
-		
-		String blockName = (String) iterator.next();
-		String windowName = (String) iterator.next();
-		String compName = (String) iterator.next();
-		String command = testRecordData.getCommand().toLowerCase();
-		String seconds = null;
 
-		int secii = 0;
-		try { // optional param, timeout
-			seconds = (String)iterator.next();
-			secii = Integer.parseInt(seconds);
-		} catch (Exception e) {
-			seconds = DEFAULT_TIMEOUT;
-			secii = Integer.parseInt(seconds);
-		}
-		IndependantLog.debug(debugmsg+" optional parameter '"+ "TIMEOUT" +"' set to '"+ seconds +"'.");
-		
-		if (secii < 0) secii = 0;
-		Log.info(debugmsg +command+": blockid: "+blockName+", window:"+windowName+", component:"+compName+", seconds:"+seconds);
-		String msg = "";
-		try {
-			// wait for the window/component
-			boolean exist = false;
-			try{ exist = (wdgu.waitForObject(testRecordData.getAppMapName(),windowName, compName, secii)==0);}
-			catch(SAFSObjectNotFoundException sonf){ /*ignore*/}
-			//if it exists, then highlight it
-			if (exist){
-				WebElement winObject = ((WDTestRecordHelper) testRecordData).getWindowTestObject();
-				WebElement compObject = ((WDTestRecordHelper) testRecordData).getCompTestObject();
-				WebDriverGUIUtilities.highlightThenClear((compObject==null? winObject:compObject), 1000);
-			}
-			
-			//onguiexists...
-			if (expectedExist) {
-				if (exist) {
-					//we were searching for gui, since it was found, attempt branch
-					msg = GENStrings.convert(GENStrings.BRANCHING, 
-							command +" attempting branch to "+ blockName +".", 
-							command, blockName);
-					msg += "  "+ GENStrings.convert(GENStrings.FOUND_TIMEOUT, 
-							compName +" found within timeout "+ seconds, 
-							compName, seconds);
-//					//set statuscode and statusinfo fields so driver will know to branch
-					testRecordData.setStatusCode(StatusCodes.BRANCH_TO_BLOCKID);
-					testRecordData.setStatusInfo(blockName);
-				}
-				else {
-					//we were searching for gui, since it wasn't found, don't branch
-					msg = GENStrings.convert(GENStrings.NOT_BRANCHING, 
-							command +" not branching to "+ blockName +".", 
-							command, blockName);
-					msg += "  "+ FAILStrings.convert(FAILStrings.NOT_FOUND_TIMEOUT, 
-							compName +" not found within timeout "+ seconds, 
-							compName, seconds);
-					testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
-				}
-			}
-			//onguinotexist...
-			else {
-				if (exist) {
-					//we were searching for no gui, since it wasn't found, branch
-					msg = GENStrings.convert(GENStrings.BRANCHING, 
-							command +" attempting branch to "+ blockName +".", 
-							command, blockName);
-					msg += "  "+ GENStrings.convert(GENStrings.NOT_EXIST, 
-							compName +" does not exist", 
-							compName);
-//					//set statuscode and statusinfo fields so driver will know to branch
-					testRecordData.setStatusCode(StatusCodes.BRANCH_TO_BLOCKID);
-					testRecordData.setStatusInfo(blockName); 
-				}
-				else {
-					//we were searching for no gui, since it was found, don't branch
-					msg = GENStrings.convert(GENStrings.NOT_BRANCHING, 
-							command +" not branching to "+ blockName +".", 
-							command, blockName);
-					msg += "  "+ GENStrings.convert(GENStrings.EXISTS, 
-							compName +" exists", 
-							compName);
-					testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
-				}
-			}
-			
-			log.logMessage(testRecordData.getFac(), msg, GENERIC_MESSAGE); 
-		} catch (SAFSException se) {
-	    	IndependantLog.error(debugmsg +command+" failed. Met Exception", se);
-	    	issueErrorPerformingAction(se.getMessage());
-		}
+	protected boolean checkGUIExistence(boolean expectedExist, String mapNam, String window, String component, int timeoutInSeconds) throws SAFSException{
+		  boolean exist;
+		  
+		  if(expectedExist){//Expect the component to be present
+			  exist = false;
+			  try{ exist = (wdgu.waitForObject(mapNam, window, component, timeoutInSeconds)==0);}
+			  catch(SAFSObjectNotFoundException sonf){ /*ignore*/}			  
+		  }
+		  else{//Expect the component to be not present
+			  exist = true;
+			  long endTime = System.currentTimeMillis()+timeoutInSeconds*1000;
+			  while(exist && (System.currentTimeMillis()<endTime)){
+				  try{ exist = (wdgu.waitForObject(mapNam, window, component, 0)==0);}
+				  catch(SAFSObjectNotFoundException sonf){ exist=false; }	 
+			  }
+		  }
+		  
+		  //if it exists, then highlight it and clear the highlight
+		  if (exist){
+			  WebElement winObject = ((WDTestRecordHelper) testRecordData).getWindowTestObject();
+			  WebElement compObject = ((WDTestRecordHelper) testRecordData).getCompTestObject();
+			  WebDriverGUIUtilities.highlightThenClear((compObject==null? winObject:compObject), 1000);
+		  }
+		  return (expectedExist==exist);
 	}
 	
 	private void waitForGuiGone(){
