@@ -7597,19 +7597,22 @@ public abstract class SeleniumPlus {
 		}
 		
 		private static final String FAKE_BLOCKID = "FAKE_BLOCKID";
-		//TODO Not exposed yet
 		/**
+		 * Goto the named block in the current table if a GUI component exists.
+		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/DDDriverFlowCommandsReference.htm#detail_OnGUIExistsGotoBlockID">Detailed Reference</a><p>
+		 * <b>Note: SeleniumPlus user does not call this API directly.</b> If it is called, the return code could be used to tell if the component exist or not.<br>
 		 * @param component Component, The component to check
-		 * @param blockid String, the blockid to branch
+		 * @param blockid String, the BLOCKID to branch
 		 * @param optionals
 		 * <ul>
 		 * <b>optionals[0] timeout</b> int, timeout in seconds. Default is 15 seconds.
 		 * </ul>
-		 * @return String, the BLOCKID to branch.<br>
+		 * @return String, the BLOCKID if it does branch<br>
 		 *                 void string "" if it does not branch.<br>
 		 *                 null if there is something wrong.<br>
+		 * @see Misc#IsComponentExists(org.safs.model.Component, String...)
 		 */
-		static String OnGUIExistsGotoBlockID(org.safs.model.Component component, String blockid, String...optionals){
+		public static String OnGUIExistsGotoBlockID(org.safs.model.Component component, String blockid, String...optionals){
 			String winName = component.getParentName();
 			String compName = component.getName();
 			if(winName==null) winName=compName;
@@ -7622,19 +7625,21 @@ public abstract class SeleniumPlus {
 			}
 		}
 
-		//TODO Not exposed yet
 		/**
+		 * Goto the named block in the current table if a GUI component does not exist.
+		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/DDDriverFlowCommandsReference.htm#detail_OnGUINotExistGotoBlockID">Detailed Reference</a><p>
+		 * <b>Note: SeleniumPlus user does not call this API directly.</b> If it is called, the return code could be used to tell if the component exist or not.<br>
 		 * @param component Component, The component to check
-		 * @param blockid String, the blockid to branch
+		 * @param blockid String, the BLOCKID to branch
 		 * @param optionals
 		 * <ul>
 		 * <b>optionals[0] timeout</b> int, timeout in seconds. Default is 15 seconds.
 		 * </ul>
-		 * @return String, the BLOCKID to branch.<br>
+		 * @return String, the BLOCKID if it does branch<br>
 		 *                 void string "" if it does not branch.<br>
 		 *                 null if there is something wrong.<br>
 		 */
-		static String OnGUINotExistGotoBlockID(org.safs.model.Component component, String blockid, String...optionals){
+		public static String OnGUINotExistGotoBlockID(org.safs.model.Component component, String blockid, String...optionals){
 			String winName = component.getParentName();
 			String compName = component.getName();
 			if(winName==null) winName=compName;
