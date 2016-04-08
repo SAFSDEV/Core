@@ -415,13 +415,12 @@ public abstract class DriverCommand extends Processor {
 		  return;
 	  }
 	  String debugmsg = StringUtils.debugmsg(false);
-	  Iterator iterator = params.iterator();
+	  iterator = params.iterator();
 	  String DEFAULT_TIMEOUT = "15";
 
 	  String blockName = (String) iterator.next();
 	  String windowName = (String) iterator.next();
 	  String compName = (String) iterator.next();
-	  String command = testRecordData.getCommand().toLowerCase();
 	  String seconds = null;
 
 	  int timeoutInSeconds = 0;
@@ -429,6 +428,7 @@ public abstract class DriverCommand extends Processor {
 		  seconds = (String)iterator.next();
 		  timeoutInSeconds = Integer.parseInt(seconds);
 	  } catch (Exception e) {
+		  IndependantLog.warn("Failed to convert timeout parameter '"+seconds+"' to integer, it is probably wrong. Met "+StringUtils.debugmsg(e));
 		  seconds = DEFAULT_TIMEOUT;
 		  timeoutInSeconds = Integer.parseInt(seconds);
 	  }
