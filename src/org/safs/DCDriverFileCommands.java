@@ -437,17 +437,18 @@ public class DCDriverFileCommands extends DriverCommand {
 		// file is relative to Datapool directory
  		try{
 			datapooldir = getVariable(STAFHelper.SAFS_VAR_DATAPOOLDIRECTORY);
-			fullFilePath = datapooldir + filename ;
-			testFile = new CaseInsensitiveFile(datapooldir, filename).toFile() ;
  		}catch(SAFSException x){
- 		}finally{
-			if(datapooldir==null || datapooldir.length()==0){
-	 			this.issueActionOnXFailure(fullFilePath, FAILStrings.convert(FAILStrings.SOMETHING_NOT_FOUND, 
-							STAFHelper.SAFS_VAR_DATAPOOLDIRECTORY +" was not found.",
-							STAFHelper.SAFS_VAR_DATAPOOLDIRECTORY));
-  			    return;
-			}
+ 			IndependantLog.error(StringUtils.debugmsg(false)+" Failed to get datapool directory, due to "+StringUtils.debugmsg(x));
  		}
+ 		if(datapooldir==null || datapooldir.length()==0){
+ 			this.issueActionOnXFailure(fullFilePath, FAILStrings.convert(FAILStrings.SOMETHING_NOT_FOUND, 
+ 					STAFHelper.SAFS_VAR_DATAPOOLDIRECTORY +" was not found.",
+ 					STAFHelper.SAFS_VAR_DATAPOOLDIRECTORY));
+ 			return;
+ 		}
+ 		
+ 		testFile = new CaseInsensitiveFile(datapooldir, filename).toFile() ;
+ 		fullFilePath = datapooldir + filename;
 	}
 
 	if( ! testFile.exists() ) {
@@ -992,14 +993,14 @@ public class DCDriverFileCommands extends DriverCommand {
     	  try{
     		  datadir = getVariable(STAFHelper.SAFS_VAR_DATAPOOLDIRECTORY);
     	  }catch(SAFSException x){
-    	  }finally{
-    		  if (datadir==null || datadir.length()==0){
-    			  this.issueActionOnXFailure(filename, 
-    				   FAILStrings.convert(FAILStrings.SOMETHING_NOT_FOUND, 
-    						   STAFHelper.SAFS_VAR_DATAPOOLDIRECTORY +" was not found", 
-    						   STAFHelper.SAFS_VAR_DATAPOOLDIRECTORY));
-    			  return;
-    		  }
+    		  IndependantLog.error(StringUtils.debugmsg(false)+" Failed to get datapool directory, due to "+StringUtils.debugmsg(x));
+    	  }
+    	  if (datadir==null || datadir.length()==0){
+    		  this.issueActionOnXFailure(filename, 
+    				  FAILStrings.convert(FAILStrings.SOMETHING_NOT_FOUND, 
+    						  STAFHelper.SAFS_VAR_DATAPOOLDIRECTORY +" was not found", 
+    						  STAFHelper.SAFS_VAR_DATAPOOLDIRECTORY));
+    		  return;
     	  }
     	  afile = new CaseInsensitiveFile(datadir, filename).toFile();
     	  fullPath = datadir + filename;
@@ -1188,16 +1189,10 @@ public class DCDriverFileCommands extends DriverCommand {
           return;
       }
       
-      // get optional param delDir (true or anything else for false)
-      String delStr = new String("");
+      // get optional parameter delDir (true or anything else for false)
       boolean delDir = false;
-      try {
-      	delStr = (String) iterator.next();
-      	if (delStr.equalsIgnoreCase("true"))
-      		delDir = true;
-	  }
-	  catch (Throwable t) { }
-	  Log.info(".............................delDir: " + delDir);
+      if(iterator.hasNext()) delDir = StringUtilities.convertBool(iterator.next());
+      Log.info(".............................delDir: " + delDir);
 
 	  // only process a directory
       if (!adir.isDirectory()) {
@@ -1371,7 +1366,7 @@ public class DCDriverFileCommands extends DriverCommand {
     	  this.issueParameterCountFailure("FromDirectoryName, ToDirectoryName, Pattern, FilterMode");
           return;
       }
-      Iterator iterator = params.iterator();
+      iterator = params.iterator();
       Log.info(".............................params: " + params);
      
       // get source dirname
@@ -1456,11 +1451,8 @@ public class DCDriverFileCommands extends DriverCommand {
       DynamicFilenameFilter fileFilter = new DynamicFilenameFilter(filepattern);
       
       // get optional filterMode (default is "WILDCARD")
-      String filterMode = new String("WILDCARD");
-      try {
-      	filterMode = (String) iterator.next();
-      }
-	  catch (Throwable t) { }
+      String filterMode = "WILDCARD";
+      if(iterator.hasNext()) filterMode = (String) iterator.next();
 	  
 	  // for supporting format like "C,CopyMatchingFiles,sourcedir,targDir,regex,"
 	  // using default filterMode instead if there is nothing in field filterMode. See S0547177. 
