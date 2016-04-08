@@ -8231,10 +8231,10 @@ public abstract class SeleniumPlus {
 		}
 		
 		/**
-		 * Set the 'Check Alert Timeout' back to default value.
+		 * Get the current 'Check Alert Timeout' value.
 		 */
-		public static void SetCheckAlertTimeoutDefault(){
-			SetCheckAlertTimeout(WDLibrary.DEFAULT_TIMEOUT_CHECK_ALERT_FOR_CLICK);
+		public static int GetCheckAlertTimeout(){
+			return WDLibrary.getTimeoutCheckAlertForClick();
 		}
 	}
 
