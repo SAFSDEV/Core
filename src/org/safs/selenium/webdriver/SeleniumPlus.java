@@ -8219,6 +8219,23 @@ public abstract class SeleniumPlus {
 				return false;
 			}
 		}
+		
+		/**
+		 * Set the 'Check Alert Timeout'. Usually, it is used to expand the time to wait for
+		 * the 'Alert Box' to pop up. By default, the 'Check Alert Timeout' is 0.
+		 * @param seconds int, the value of time to set.
+		 */
+		public static void SetCheckAlertTimeout(int seconds){
+			IndependantLog.info("Set 'Check Alert Timeout as: '" + seconds);
+			WDLibrary.setTimeoutCheckAlertForClick(seconds);
+		}
+		
+		/**
+		 * Set the 'Check Alert Timeout' back to default value.
+		 */
+		public static void SetCheckAlertTimeoutDefault(){
+			SetCheckAlertTimeout(WDLibrary.DEFAULT_TIMEOUT_CHECK_ALERT_FOR_CLICK);
+		}
 	}
 
 	/**
