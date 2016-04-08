@@ -8222,7 +8222,7 @@ public abstract class SeleniumPlus {
 		
 		/**
 		 * Set the 'Check Alert Timeout'. Usually, it is used to expand the time to wait for
-		 * the 'Alert Box' to pop up. By default, the 'Check Alert Timeout' is 0.
+		 * the 'Alert Box' popping up. By default, the 'Check Alert Timeout' is 0.
 		 * @param seconds int, the value of time to set.
 		 */
 		public static void SetCheckAlertTimeout(int seconds){
