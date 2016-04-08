@@ -164,7 +164,7 @@ public class WDLibrary extends SearchObject {
 	public static final int DEFAULT_TIMEOUT_WAIT_ALERT = 2;//seconds
 
 	/** 0, means no waiting. */
-	public static final int TIMEOUT_NOWAIT = 0;
+	public static final int DEFAULT_TIMEOUT_CHECK_ALERT_FOR_CLICK = 0;
 	/** -1, means wait for ever */
 	public static final int TIMEOUT_WAIT_FOREVER = -1;
 
@@ -178,15 +178,25 @@ public class WDLibrary extends SearchObject {
 	public static int timeoutWaitAlert = DEFAULT_TIMEOUT_WAIT_ALERT;//seconds
 	
 	/** time (in seconds) to check if an Alert is present on page before clicking.
-	 * The default value is set to {@link #TIMEOUT_NOWAIT}, means we check immediately
+	 * The default value is set to {@link #DEFAULT_TIMEOUT_CHECK_ALERT_FOR_CLICK}, means we check immediately
 	 * without waiting for presence of Alert. */
-	public static int timeoutCheckAlertForClick = TIMEOUT_NOWAIT;//seconds
+	public static int timeoutCheckAlertForClick = DEFAULT_TIMEOUT_CHECK_ALERT_FOR_CLICK;//seconds
 	
+
 	/** time (in seconds) to wait for a Robot click action finished on page. */
 	public static int timeoutWaitRobotClick = DEFAULT_TIMEOUT_WAIT_ROBOT_CLICK;//seconds
 	
 	static protected InputKeysParser keysparser = null;
 
+
+	public static int getTimeoutCheckAlertForClick() {
+		return timeoutCheckAlertForClick;
+	}
+	
+	public static void setTimeoutCheckAlertForClick(int timeoutCheckAlertForClick) {
+		WDLibrary.timeoutCheckAlertForClick = timeoutCheckAlertForClick;
+	}
+	
 	/**
      * Default true.
      * Set to true if we want an Exception to be thrown when we perform a Click and attempt to verify through event
@@ -2986,7 +2996,7 @@ public class WDLibrary extends SearchObject {
 	 * <ul>
 	 * <b>optionals[0] timeoutWaitAlertPresence</b> int, timeout in seconds to wait for the presence of Alert.
 	 *                                                   If not provided, default is 2 seconds.<br>
-	 *                                                   If it is provided as {@link #TIMEOUT_NOWAIT}, this method will try to get Alert without waiting.<br>
+	 *                                                   If it is provided as {@link #DEFAULT_TIMEOUT_CHECK_ALERT_FOR_CLICK}, this method will try to get Alert without waiting.<br>
 	 * <b>optionals[1] browserID</b> String, the ID to get the browser on which the 'alert' will be closed.
 	 *                                       If not provided, the current browser will be used.<br>
 	 * </ul>
@@ -3019,7 +3029,7 @@ public class WDLibrary extends SearchObject {
 	 * <ul>
 	 * <b>optionals[0] timeoutWaitAlertPresence</b> int, timeout in seconds to wait for the presence of Alert.
 	 *                                                   If not provided, default is 2 seconds.<br>
-	 *                                                   If it is provided as {@link #TIMEOUT_NOWAIT}, this method will try to get Alert without waiting.<br>
+	 *                                                   If it is provided as {@link #DEFAULT_TIMEOUT_CHECK_ALERT_FOR_CLICK}, this method will try to get Alert without waiting.<br>
 	 * <b>optionals[1] browserID</b> String, the ID to get the browser on which the 'alert' will be closed.
 	 *                                       If not provided, the current browser will be used.<br>
 	 * </ul>
@@ -3047,7 +3057,7 @@ public class WDLibrary extends SearchObject {
 		}
 		
 		try{
-			if(timeout==TIMEOUT_NOWAIT){
+			if(timeout==DEFAULT_TIMEOUT_CHECK_ALERT_FOR_CLICK){
 				alert = webdriver.switchTo().alert();//NoAlertPresentException
 			}else{
 				WebDriverWait wait = new WebDriverWait(webdriver, timeout);
