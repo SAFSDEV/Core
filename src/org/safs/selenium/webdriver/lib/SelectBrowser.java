@@ -267,7 +267,8 @@ public class SelectBrowser {
 		if (browserName.equals(BROWSER_NAME_IE)) {
 			System.setProperty(SYSTEM_PROPERTY_WEBDRIVER_IE, "IEDriverServer.exe");
 			caps = DesiredCapabilities.internetExplorer();
-			caps.setCapability("nativeEvents", false);
+			caps.setCapability("nativeEvents", true);
+			caps.setCapability("requireWindowFocus", true);
 			//caps.setCapability("browserName", BROWSER_NAME_IE);
 		} else if (browserName.equals(BROWSER_NAME_CHROME)) {
 			System.setProperty(SYSTEM_PROPERTY_WEBDRIVER_CHROME, "chromedriver.exe");
