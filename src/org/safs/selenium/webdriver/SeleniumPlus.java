@@ -59,6 +59,7 @@ package org.safs.selenium.webdriver;
  *  <br>   MAR 24, 2016    (SBJLWA) Modify comments for StartWebBrowser(): adjust examples and add links to specify "custom profile" and "preferences".
  *  <br>   MAR 31, 2016    (SBJLWA) Add IsComponentExists(), OnGUIXXXBlockID().
  *                                  Modify testStatusCode(): the status code BRANCH_TO_BLOCKID will be considered successful execution.
+ *  <br>   APR 19, 2016    (SBJLWA) Modify comments/examples for Click() CtrlClick() ShiftClick() etc.: Handle the optional parameter 'autoscroll'.
  */
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -1602,8 +1603,10 @@ public abstract class SeleniumPlus {
 	 * @param comp -- Component (from App Map) to Click
 	 * @param params optional
 	 * <ul>
-	 * <b>params[0] X,Y coordinate</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
+	 * <li><b>params[0] X,Y coordinate</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
 	 * <b>For SE+</b>, params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
+	 * <li><b>params[1] autocroll boolean</b> if the component will be scrolled into view automatically before clicking.
+	 *                                        if not provided, the default value is true.
 	 * </ul>
 	 * @return true if successfully executed, false otherwise.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
@@ -1614,6 +1617,7 @@ public abstract class SeleniumPlus {
 	 * 2) boolean success = Click(Map.Google.Apps,"20,20");//Click at the coordinate (20,20)
 	 * 3) boolean success = Click(Map.Google.Apps,"20%,30%"); // Click at the coordinate: its X value equals 20% width of component, its Y value equals 30% height of component.
 	 * 4) boolean success = Click(Map.Google.Apps,"AppMapSubkey");//Click at the coordinate defined by entry "AppMapSubkey" in App Map.
+	 * 5) boolean success = Click(Map.Google.Apps,"20,20", "false");//Click at the coordinate (20,20), and web-element will not be scrolled into view automatically
 	 *  // one of the above and then,
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
@@ -1673,8 +1677,10 @@ public abstract class SeleniumPlus {
 	 * @param comp -- Component (from App Map) to Click
 	 * @param params optional
 	 * <ul>
-	 * <b>params[0] X,Y coordinate</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
+	 * <li><b>params[0] X,Y coordinate</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
 	 * <b>For SE+</b>, params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
+	 * <li><b>params[1] autocroll boolean</b> if the component will be scrolled into view automatically before clicking.
+	 *                                        if not provided, the default value is true.
 	 * </ul>
 	 * @return true if successfully executed, false otherwise.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
@@ -1685,6 +1691,7 @@ public abstract class SeleniumPlus {
 	 * 2) boolean success = CtrlClick(Map.Google.Apps,"20,20");//Control-Click at the coordinate (20,20)
 	 * 3) boolean success = CtrlClick(Map.Google.Apps,"20%,30%"); // Control-Click at the coordinate: its X value equals 20% width of component, its Y value equals 30% height of component.
 	 * 4) boolean success = CtrlClick(Map.Google.Apps,"AppMapSubkey");//Control-Click at the coordinate defined by entry "AppMapSubkey" in App Map.
+	 * 5) boolean success = CtrlClick(Map.Google.Apps,"20,20", "false");//Control-Click at the coordinate (20,20) and web-element will not be scrolled into view automatically
 	 *  // one of the above and then,
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
@@ -1707,8 +1714,10 @@ public abstract class SeleniumPlus {
 	 * @param comp -- Component (from App Map) to Click
 	 * @param params optional
 	 * <ul>
-	 * <b>params[0] X,Y coordinate</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
+	 * <li><b>params[0] X,Y coordinate</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
 	 * <b>For SE+</b>, params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
+	 * <li><b>params[1] autocroll boolean</b> if the component will be scrolled into view automatically before clicking.
+	 *                                        if not provided, the default value is true.
 	 * </ul>
 	 * @return true if successfully executed, false otherwise.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
@@ -1719,6 +1728,7 @@ public abstract class SeleniumPlus {
 	 * 2) boolean success = CtrlRightClick(Map.Google.Apps,"20,20");//Control-Right-Click at the coordinate (20,20)
 	 * 3) boolean success = CtrlRightClick(Map.Google.Apps,"20%,30%"); // Control-Right-Click at the coordinate: its X value equals 20% width of component, its Y value equals 30% height of component.
 	 * 4) boolean success = CtrlRightClick(Map.Google.Apps,"AppMapSubkey");//Control-Right-Click at the coordinate defined by entry "AppMapSubkey" in App Map.
+	 * 5) boolean success = CtrlRightClick(Map.Google.Apps,"20,20", "false");//Control-Right-Click at the coordinate (20,20) and web-element will not be scrolled into view automatically
 	 *  // one of the above and then,
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
@@ -1741,8 +1751,10 @@ public abstract class SeleniumPlus {
 	 * @param comp -- Component (from App Map) to Click
 	 * @param params optional
 	 * <ul>
-	 * <b>params[0] X,Y coordinate</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
+	 * <li><b>params[0] X,Y coordinate</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
 	 * <b>For SE+,</b> params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
+	 * <li><b>params[1] autocroll boolean</b> if the component will be scrolled into view automatically before clicking.
+	 *                                        if not provided, the default value is true.
 	 * </ul>
 	 * @return true if successfully executed, false otherwise.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
@@ -1753,6 +1765,7 @@ public abstract class SeleniumPlus {
 	 * 2) boolean success = DoubleClick(Map.Google.Apps,"20,20");//Double-Click at the coordinate (20,20)
 	 * 3) boolean success = DoubleClick(Map.Google.Apps,"20%,30%"); // Double-Click at the coordinate: its X value equals 20% width of component, its Y value equals 30% height of component.
 	 * 4) boolean success = DoubleClick(Map.Google.Apps,"AppMapSubkey");//Double-Click at the coordinate defined by entry "AppMapSubkey" in App Map.
+	 * 5) boolean success = DoubleClick(Map.Google.Apps,"20,20", "false");//Double-Click at the coordinate (20,20) and web-element will not be scrolled into view automatically
 	 *  // one of the above and then,
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
@@ -1775,8 +1788,10 @@ public abstract class SeleniumPlus {
 	 * @param comp -- Component (from App Map) to Click
 	 * @param params optional
 	 * <ul>
-	 * <b>params[0] X,Y coordinate</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
+	 * <li><b>params[0] X,Y coordinate</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
 	 * <b>For SE+</b>, params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
+	 * <li><b>params[1] autocroll boolean</b> if the component will be scrolled into view automatically before clicking.
+	 *                                        if not provided, the default value is true.
 	 * </ul>
 	 * @return true if successfully executed, false otherwise.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
@@ -1787,6 +1802,7 @@ public abstract class SeleniumPlus {
 	 * 2) boolean success = RightClick(Map.Google.Apps,"20,20");//Right-Click at the coordinate (20,20)
 	 * 3) boolean success = RightClick(Map.Google.Apps,"20%,30%"); // Right-Click at the coordinate: its X value equals 20% width of component, its Y value equals 30% height of component.
 	 * 4) boolean success = RightClick(Map.Google.Apps,"AppMapSubkey");//Right-Click at the coordinate defined by entry "AppMapSubkey" in App Map.
+	 * 5) boolean success = RightClick(Map.Google.Apps,"20,20", "false");//Right-Click at the coordinate (20,20) and web-element will not be scrolled into view automatically
 	 *  // one of the above and then,
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
@@ -1992,8 +2008,10 @@ public abstract class SeleniumPlus {
 	 * @param comp -- Component (from App Map) to Click
 	 * @param params optional
 	 * <ul>
-	 * <b>params[0] X,Y coordinate</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
+	 * <li><b>params[0] X,Y coordinate</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
 	 * <b>For SE+</b>, params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
+	 * <li><b>params[1] autocroll boolean</b> if the component will be scrolled into view automatically before clicking.
+	 *                                        if not provided, the default value is true.
 	 * </ul>
 	 * @return true if successfully executed, false otherwise.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
@@ -2004,6 +2022,7 @@ public abstract class SeleniumPlus {
 	 * 2) boolean success = ShiftClick(Map.Google.Apps,"20,20");//Shift-Click at the coordination (20,20)
 	 * 3) boolean success = ShiftClick(Map.Google.Apps,"20%,30%"); // Shift-Click at the coordinate: its X value equals 20% width of component, its Y value equals 30% height of component.
 	 * 4) boolean success = ShiftClick(Map.Google.Apps,"AppMapSubkey");//Shift-Click at the coordination defined by entry "AppMapSubkey" in App Map.
+	 * 5) boolean success = ShiftClick(Map.Google.Apps,"20,20", "false");//Shift-Click at the coordination (20,20) and web-element will not be scrolled into view automatically
 	 *  // one of the above and then,
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful

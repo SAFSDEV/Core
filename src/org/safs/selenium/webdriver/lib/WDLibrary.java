@@ -53,6 +53,7 @@ package org.safs.selenium.webdriver.lib;
 *                                  Modify click() and doubleClick(): use RBT to do the click action.
 *  <br>   MAR 14, 2016    (SBJLWA) Add isAlertPresent(), waitAlert().
 *  <br>   MAR 29, 2016    (SBJLWA) Modify click() and doubleClick(): detect "Alert" after clicking.
+*  <br>   APR 19, 2016    (SBJLWA) Modify click() doubleClick() etc.: Handle the optional parameter 'autoscroll'.
 */
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -245,14 +246,22 @@ public class WDLibrary extends SearchObject {
 	/**
 	 * Click(Mouse Left Button) - Click on WebElement or WebDriver object at the center
 	 * @param clickable WebElement, as WebElement obj
+	 * @param optional String[], the optional parameters
+	 * <ul>
+	 * <li> optional[0] autoscroll boolean, if the component will be scrolled into view automatically before clicking.
+	 *                                      if not provided, the default value is true.
+	 * </ul>
 	 * @throws SeleniumPlusException
 	 */
-	public static void click(WebElement clickable) throws SeleniumPlusException{
+	public static void click(WebElement clickable, String... optional) throws SeleniumPlusException{
 		checkBeforeOperation(clickable, true);
 		try {
-			try{new Actions(WDLibrary.getWebDriver()).moveToElement(clickable).perform();}
-			catch(Throwable t){
-				IndependantLog.error("Ignoring Selenium Click 'moveToElement' action failure caused by "+ t.getClass().getName());
+			boolean autoscroll = parseAutoScroll(optional);
+			if(autoscroll){
+				try{new Actions(WDLibrary.getWebDriver()).moveToElement(clickable).perform();}
+				catch(Throwable t){
+					IndependantLog.error("Ignoring Selenium Click 'moveToElement' action failure caused by "+ t.getClass().getName());
+				}				
 			}
 			clickable.click();
 		}catch (Throwable th){
@@ -264,45 +273,70 @@ public class WDLibrary extends SearchObject {
 	 * Click(Mouse Left Button) the WebElement at center with a special key pressed.
 	 * @param clickable 	WebElement, the WebElement to click on
 	 * @param specialKey	Keys, the special key to presse during the click
+	 * @param optional String[], the optional parameters
+	 * <ul>
+	 * <li> optional[0] autoscroll boolean, if the component will be scrolled into view automatically before clicking.
+	 *                                      if not provided, the default value is true.
+	 * </ul>
 	 * @throws SeleniumPlusException
 	 */
-	public static void click(WebElement clickable, Keys specialKey) throws SeleniumPlusException{
-		click(clickable, null, specialKey, MOUSE_BUTTON_LEFT);
+	public static void click(WebElement clickable, Keys specialKey, String... optional) throws SeleniumPlusException{
+		click(clickable, null, specialKey, MOUSE_BUTTON_LEFT, optional);
 	}
 	/**
 	 * Click(Mouse Left Button) the WebElement at a certain coordination.
 	 * @param clickable 	WebElement, the WebElement to click on
 	 * @param offset		Point, the coordination relative to this WebElement to click at
+	 * @param optional String[], the optional parameters
+	 * <ul>
+	 * <li> optional[0] autoscroll boolean, if the component will be scrolled into view automatically before clicking.
+	 *                                      if not provided, the default value is true.
+	 * </ul>
 	 * @throws SeleniumPlusException
 	 */
-	public static void click(WebElement clickable, Point offset) throws SeleniumPlusException{
-		click(clickable, offset, null, MOUSE_BUTTON_LEFT);
+	public static void click(WebElement clickable, Point offset, String... optional) throws SeleniumPlusException{
+		click(clickable, offset, null, MOUSE_BUTTON_LEFT, optional);
 	}
 	/**
 	 * Click(Mouse Right Button) - Click on WebElement or WebDriver object at the center
 	 * @param clickable WebElement, as WebElement obj
+	 * @param optional String[], the optional parameters
+	 * <ul>
+	 * <li> optional[0] autoscroll boolean, if the component will be scrolled into view automatically before clicking.
+	 *                                      if not provided, the default value is true.
+	 * </ul>
 	 * @throws SeleniumPlusException
 	 */
-	public static void rightclick(WebElement clickable) throws SeleniumPlusException{
-		click(clickable, null, null, MOUSE_BUTTON_RIGHT);
+	public static void rightclick(WebElement clickable, String... optional) throws SeleniumPlusException{
+		click(clickable, null, null, MOUSE_BUTTON_RIGHT, optional);
 	}
 	/**
 	 * Click(Mouse Right Button) the WebElement at center with a special key pressed.
 	 * @param clickable 	WebElement, the WebElement to click on
 	 * @param specialKey	Keys, the special key to presse during the click
+	 * @param optional String[], the optional parameters
+	 * <ul>
+	 * <li> optional[0] autoscroll boolean, if the component will be scrolled into view automatically before clicking.
+	 *                                      if not provided, the default value is true.
+	 * </ul>
 	 * @throws SeleniumPlusException
 	 */
-	public static void rightclick(WebElement clickable, Keys specialKey) throws SeleniumPlusException{
-		click(clickable, null, specialKey, MOUSE_BUTTON_RIGHT);
+	public static void rightclick(WebElement clickable, Keys specialKey, String... optional) throws SeleniumPlusException{
+		click(clickable, null, specialKey, MOUSE_BUTTON_RIGHT, optional);
 	}
 	/**
 	 * Click(Mouse Right Button) the WebElement at a certain coordination.
 	 * @param clickable 	WebElement, the WebElement to click on
 	 * @param offset		Point, the coordination relative to this WebElement to click at
+	 * @param optional String[], the optional parameters
+	 * <ul>
+	 * <li> optional[0] autoscroll boolean, if the component will be scrolled into view automatically before clicking.
+	 *                                      if not provided, the default value is true.
+	 * </ul>
 	 * @throws SeleniumPlusException
 	 */
-	public static void rightclick(WebElement clickable, Point offset) throws SeleniumPlusException{
-		click(clickable, offset, null, MOUSE_BUTTON_RIGHT);
+	public static void rightclick(WebElement clickable, Point offset, String... optional) throws SeleniumPlusException{
+		click(clickable, offset, null, MOUSE_BUTTON_RIGHT, optional);
 	}
 
 	/**
@@ -341,6 +375,32 @@ public class WDLibrary extends SearchObject {
 	}
 	
 	/**
+	 * 'true', the default value for scrolling the web-element into view automatically before performing click ation on it.
+	 */
+	public static final boolean DEFAUT_AUTOSCROLL = true;
+	
+	/**
+	 * parse the optional parameter to get the value of 'autoscroll'.
+	 * @see #click(WebElement, String...)
+	 * @see #click(WebElement, Point, Keys, int, String...)
+	 * @see #doubleClick(WebElement, Point, Keys, int, String...)
+	 * @see #clickUnverified(WebElement, Point, String...)
+	 */
+	private static boolean parseAutoScroll(String... optional){
+		boolean autoscroll = DEFAUT_AUTOSCROLL;
+		
+		if(optional!=null && optional.length>0 && optional[0]!=null){
+			try{
+				autoscroll = Boolean.parseBoolean(optional[0]);
+			}catch(Exception e){
+				IndependantLog.warn(StringUtils.debugmsg(false)+" Ignoring invalid parameter 'autoscroll' "+optional[0]+", met "+StringUtils.debugmsg(e));
+			}
+		}
+		
+		return autoscroll;
+	}
+	
+	/**
 	 * Click the WebElement at a certain coordination with a special key pressed.<br>
 	 * Firstly it will try to get webelement's location and use Robot to click. At the same<br>
 	 * time, it will listen to a 'javascript mouse down' event to find out if the click really<br>
@@ -356,17 +416,26 @@ public class WDLibrary extends SearchObject {
 	 * @param mouseButtonNumber int, the mouse-button-number representing right, middle, or left button.
 	 * 								 it can be {@link #MOUSE_BUTTON_LEFT} or {@link #MOUSE_BUTTON_RIGHT}.<br>
 	 * 								 {@link #MOUSE_BUTTON_MIDDLE} NOT supported yet.
+	 * @param optional String[], the optional parameters
+	 * <ul>
+	 * <li> optional[0] autoscroll boolean, if the component will be scrolled into view automatically before clicking.
+	 *                                      if not provided, the default value is true.
+	 * </ul>
 	 * @throws SeleniumPlusException
 	 */
-	public static void click(WebElement clickable, Point offset, Keys specialKey, int mouseButtonNumber) throws SeleniumPlusException{
+	public static void click(WebElement clickable, Point offset, Keys specialKey, int mouseButtonNumber, String... optional) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(WDLibrary.class, "click");
 
 		checkBeforeOperation(clickable, true);
 		WebDriver wd = WDLibrary.getWebDriver();
 		RemoteDriver rd = (wd instanceof RemoteDriver)? (RemoteDriver) wd : null;
-		try{new Actions(wd).moveToElement(clickable).perform();}
-		catch(Throwable t){
-			IndependantLog.error(debugmsg+"Ignoring Selenium Robot Click 'moveToElement' action failure caused by "+ t.getClass().getName());
+		boolean autoscroll = parseAutoScroll(optional);
+		
+		if(autoscroll){
+			try{new Actions(wd).moveToElement(clickable).perform();}
+			catch(Throwable t){
+				IndependantLog.error(debugmsg+"Ignoring Selenium Robot Click 'moveToElement' action failure caused by "+ t.getClass().getName());
+			}			
 		}
 		
 		MouseEvent event = null;
@@ -413,8 +482,10 @@ public class WDLibrary extends SearchObject {
 				//Create a combined actions according to the parameters
 				Actions actions = new Actions(getWebDriver());
 
-				if(offset!=null) actions.moveToElement(clickable, offset.x, offset.y);
-				else actions.moveToElement(clickable);
+				if(autoscroll){
+					if(offset!=null) actions.moveToElement(clickable, offset.x, offset.y);
+					else actions.moveToElement(clickable);
+				}
 
 				if(specialKey!=null) actions.keyDown(specialKey);
 				if(isRightMouseButton(mouseButtonNumber)) actions.contextClick();
@@ -492,9 +563,14 @@ public class WDLibrary extends SearchObject {
 	 * @param mouseButtonNumber int, the mouse-button-number representing right, middle, or left button.
 	 * 								 it can be {@link #MOUSE_BUTTON_LEFT}<br>
 	 * 								 {@link #MOUSE_BUTTON_MIDDLE} and {@link #MOUSE_BUTTON_RIGHT} NOT supported yet.
+	 * @param optional String[], the optional parameters
+	 * <ul>
+	 * <li> optional[0] autoscroll boolean, if the component will be scrolled into view automatically before clicking.
+	 *                                      if not provided, the default value is true.
+	 * </ul>
 	 * @throws SeleniumPlusException
 	 */
-	public static void doubleClick(WebElement clickable, Point offset, Keys specialKey, int mouseButtonNumber) throws SeleniumPlusException{
+	public static void doubleClick(WebElement clickable, Point offset, Keys specialKey, int mouseButtonNumber, String... optional) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(WDLibrary.class, "doubleClick");
 
 		checkBeforeOperation(clickable, true);
@@ -502,6 +578,7 @@ public class WDLibrary extends SearchObject {
 		MouseEvent event = null;
 		DocumentClickCapture listener = new DocumentClickCapture(true, clickable);
 		checkOffset(clickable, offset, listener);
+		boolean autoscroll = parseAutoScroll(optional);
 		
 		try {
 			//2. Perform the click action by Robot
@@ -528,8 +605,10 @@ public class WDLibrary extends SearchObject {
 				//Create a combined actions according to the parameters
 				Actions actions = new Actions(WDLibrary.getWebDriver());
 
-				if(offset!=null) actions.moveToElement(clickable, offset.x, offset.y);
-				else actions.moveToElement(clickable);
+				if(autoscroll){
+					if(offset!=null) actions.moveToElement(clickable, offset.x, offset.y);
+					else actions.moveToElement(clickable);					
+				}
 
 				if(specialKey!=null) actions.keyDown(specialKey);
 				if(isLeftMouseButton(mouseButtonNumber)) actions.doubleClick();
@@ -571,28 +650,43 @@ public class WDLibrary extends SearchObject {
 	/**
 	 * Double-Click(Mouse Left Button) the WebElement at the center.
 	 * @param clickable 	WebElement, the WebElement to click on
+	 * @param optional String[], the optional parameters
+	 * <ul>
+	 * <li> optional[0] autoscroll boolean, if the component will be scrolled into view automatically before clicking.
+	 *                                      if not provided, the default value is true.
+	 * </ul>
 	 * @throws SeleniumPlusException
 	 */
-	public static void doubleClick(WebElement clickable) throws SeleniumPlusException{
-		doubleClick(clickable, null, null, MOUSE_BUTTON_LEFT);
+	public static void doubleClick(WebElement clickable, String... optional) throws SeleniumPlusException{
+		doubleClick(clickable, null, null, MOUSE_BUTTON_LEFT, optional);
 	}
 	/**
 	 * Double-Click(Mouse Left Button) the WebElement at the center with a special key pressed.
 	 * @param clickable 	WebElement, the WebElement to click on
 	 * @param specialKey	Keys, the special key to presse during the click
+	 * @param optional String[], the optional parameters
+	 * <ul>
+	 * <li> optional[0] autoscroll boolean, if the component will be scrolled into view automatically before clicking.
+	 *                                      if not provided, the default value is true.
+	 * </ul>
 	 * @throws SeleniumPlusException
 	 */
-	public static void doubleClick(WebElement clickable, Keys specialKey) throws SeleniumPlusException{
-		doubleClick(clickable, null, specialKey, MOUSE_BUTTON_LEFT);
+	public static void doubleClick(WebElement clickable, Keys specialKey, String... optional) throws SeleniumPlusException{
+		doubleClick(clickable, null, specialKey, MOUSE_BUTTON_LEFT, optional);
 	}
 	/**
 	 * Double-Click(Mouse Left Button) the WebElement at a certain coordination.
 	 * @param clickable 	WebElement, the WebElement to click on
 	 * @param offset		Point, the coordination relative to this WebElement to click at
+	 * @param optional String[], the optional parameters
+	 * <ul>
+	 * <li> optional[0] autoscroll boolean, if the component will be scrolled into view automatically before clicking.
+	 *                                      if not provided, the default value is true.
+	 * </ul>
 	 * @throws SeleniumPlusException
 	 */
-	public static void doubleClick(WebElement clickable, Point offset) throws SeleniumPlusException{
-		doubleClick(clickable, offset, null, MOUSE_BUTTON_LEFT);
+	public static void doubleClick(WebElement clickable, Point offset, String... optional) throws SeleniumPlusException{
+		doubleClick(clickable, offset, null, MOUSE_BUTTON_LEFT, optional);
 	}
 
 	/**
@@ -2910,10 +3004,15 @@ public class WDLibrary extends SearchObject {
 	 * 
 	 * @param component WebElement, the component to click
 	 * @param offset Point, the offset (relative to component) to click at
+	 * @param optional String[], the optional parameters
+	 * <ul>
+	 * <li> optional[0] autoscroll boolean, if the component will be scrolled into view automatically before clicking.
+	 *                                      if not provided, the default value is true.
+	 * </ul>
 	 * @return boolean true if succeed.
 	 * @see #click(WebElement, Point)
 	 */
-	public static boolean clickUnverified(WebElement component, Point offset){
+	public static boolean clickUnverified(WebElement component, Point offset, String... optional){
 		String debugmsg = StringUtils.debugmsg(false);
 		
 		try {
@@ -2921,9 +3020,11 @@ public class WDLibrary extends SearchObject {
 			//Create a combined actions according to the parameters
 			Actions actions = new Actions(getWebDriver());
 
-			if(offset!=null) actions.moveToElement(component, offset.x, offset.y);
-			else actions.moveToElement(component);
-
+			boolean autoscroll = parseAutoScroll(optional);
+			if(autoscroll){
+				if(offset!=null) actions.moveToElement(component, offset.x, offset.y);
+				else actions.moveToElement(component);
+			}
 			IndependantLog.debug(debugmsg+" Try Selenium API to click.");
 			actions.click().perform();
 			
