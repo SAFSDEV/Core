@@ -17,6 +17,7 @@
  *   <br>   NOV 26, 2015    (Lei Wang) Remove checkForCoord() and _lookupAppMapCoordReference(), their functionality will be provided by super class.
  *   <br>   NOV 26, 2015    (Lei Wang) Modify method getComponentRectangle(): include the frame's location for a webelement.
  *   <br>   FEB 25, 2016    (Lei Wang) Modify localProcess(): Set 'SearchContext' and 'RecognitionString' to libComponent for refreshing.
+ *   <br>   APR 19, 2016    (Lei Wang) Modify componentClick(): Handle the optional parameter 'autoscroll'.
  */
 package org.safs.selenium.webdriver;
 
@@ -410,24 +411,27 @@ public class CFComponent extends ComponentFunction{
 
 		try{
 			java.awt.Point point = checkForCoord(iterator);
+			String autoscroll = null;
+			if(iterator.hasNext()) autoscroll = iterator.next();
+			
 			long begin = System.currentTimeMillis();
 			if (action.equalsIgnoreCase(CLICK) ||
 					action.equalsIgnoreCase(COMPONENTCLICK)) {
 				if (point==null) {
-					WDLibrary.click(compObject);
+					WDLibrary.click(compObject, autoscroll);
 				}else{
-					WDLibrary.click(compObject, point);
+					WDLibrary.click(compObject, point, autoscroll);
 				}
 			} else if (action.equalsIgnoreCase(DOUBLECLICK)) {
-				WDLibrary.doubleClick(compObject, point);
+				WDLibrary.doubleClick(compObject, point, autoscroll);
 			} else if (action.equalsIgnoreCase(RIGHTCLICK)) {
-				WDLibrary.rightclick(compObject, point);
+				WDLibrary.rightclick(compObject, point, autoscroll);
 			} else if (action.equalsIgnoreCase(CTRLCLICK)) {
-				WDLibrary.click(compObject, point, Keys.CONTROL, WDLibrary.MOUSE_BUTTON_LEFT);
+				WDLibrary.click(compObject, point, Keys.CONTROL, WDLibrary.MOUSE_BUTTON_LEFT, autoscroll);
 			} else if (action.equalsIgnoreCase(CTRLRIGHTCLICK)) {
-				WDLibrary.click(compObject, point, Keys.CONTROL, WDLibrary.MOUSE_BUTTON_RIGHT);
+				WDLibrary.click(compObject, point, Keys.CONTROL, WDLibrary.MOUSE_BUTTON_RIGHT, autoscroll);
 			} else if (action.equalsIgnoreCase(SHIFTCLICK)) {
-				WDLibrary.click(compObject, point, Keys.SHIFT, WDLibrary.MOUSE_BUTTON_LEFT);
+				WDLibrary.click(compObject, point, Keys.SHIFT, WDLibrary.MOUSE_BUTTON_LEFT, autoscroll);
 			}
 			long timeConsumed = System.currentTimeMillis()-begin;
 			IndependantLog.debug("it took "+timeConsumed+" milliseconds or "+(timeConsumed/1000)+" seconds to perform "+action);
