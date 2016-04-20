@@ -110,6 +110,7 @@ public class SelectBrowser {
 	 */
 	public static final String KEY_CHROME_EXCLUDE_OPTIONS = "excludeSwitches";
 	
+	public static String dismissUnexpectedAlertsIEValue = null;
 	
 	/**'http.proxyHost'*/
 	public static final String SYSTEM_PROPERTY_PROXY_HOST = StringUtils.SYSTEM_PROPERTY_PROXY_HOST;
@@ -269,6 +270,9 @@ public class SelectBrowser {
 			caps = DesiredCapabilities.internetExplorer();
 			caps.setCapability("nativeEvents", true);
 			caps.setCapability("requireWindowFocus", true);
+			if(dismissUnexpectedAlertsIEValue != null){
+				caps.setCapability("unexpectedAlertBehaviour", dismissUnexpectedAlertsIEValue);				
+			}
 			//caps.setCapability("browserName", BROWSER_NAME_IE);
 		} else if (browserName.equals(BROWSER_NAME_CHROME)) {
 			System.setProperty(SYSTEM_PROPERTY_WEBDRIVER_CHROME, "chromedriver.exe");

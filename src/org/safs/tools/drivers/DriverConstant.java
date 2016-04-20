@@ -385,6 +385,12 @@ public class DriverConstant extends JavaConstant{
 	 * JVM command line: -Dsafs.test.numlockon=TRUE|FALSE **/
 	public static final String PROPERTY_SAFS_TEST_NUMLOCKON ="safs.test.numlockon";
 
+	/**
+	 * "safs.selenium.dismissunexpectedalerts" <br>
+	 * JVM command line: -Dsafs.selenium.dismissunexpectedalerts=TRUE|FALSE|ON|OFF
+	 */
+	public static final String PROERTY_SAFS_SELENIUM_DISMISSUNEXPECTEDALERTS = "safs.selenium.dismissunexpectedalerts";
+
     /** "safs.log.level" <br>
 	 * JVM command line: -Dsafs.log.level=ERROR|WARN|PASS|GENERIC|INDEX|INFO|DEBUG **/
 	public static final String PROPERTY_SAFS_LOG_LEVEL ="safs.log.level";
