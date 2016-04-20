@@ -2720,6 +2720,9 @@ public class SearchObject {
 		Thread t = new Thread(new Runnable(){
 			public void run() {
 				try{js_result = getJS().executeScript(js_code);}
+				catch(org.openqa.selenium.UnhandledAlertException x){ 
+					IndependantLog.warn(StringUtils.debugmsg(SearchObject.class, "js_executeWithTimeout") + " UnhandledAlertException: " + x); 
+				}
 				catch(SeleniumPlusException x){throw new RuntimeException(x);}
 			}
 		});
