@@ -469,6 +469,33 @@ public abstract class DefaultDriver extends AbstractDriver {
 			}
 			Log.info("'NumLockOn' status set to "+ getNumLockOn());
 			
+			// check for settings of 'DismissUnexpectedAlerts'
+			Log.info("Checking for Command-Line setting '-Dsafs.selenium.dismissunexpectedalerts'");
+			String dismissUnexpectedAlertsSetting = getParameterValue(DriverConstant.PROERTY_SAFS_SELENIUM_DISMISSUNEXPECTEDALERTS);
+			if(dismissUnexpectedAlertsSetting.length() == 0){
+				Log.info("Checking for alternative 'DismissUnexpectedAlerts' setting 'SAFS_SELENIUM':'DismissUnexpectedAlerts'...");
+				// check for a configuration file setting
+				dismissUnexpectedAlertsSetting = configInfo.getNamedValue(DriverConstant.SECTION_SAFS_SELENIUM, "DismissUnexpectedAlerts");
+				if (dismissUnexpectedAlertsSetting == null) dismissUnexpectedAlertsSetting = "";
+			}
+			dismissUnexpectedAlertsSetting = StringUtils.getTrimmedUnquotedStr(dismissUnexpectedAlertsSetting);
+			if(dismissUnexpectedAlertsSetting.length() > 0){
+				String duaValue = dismissUnexpectedAlertsSetting;
+				if(duaValue.equalsIgnoreCase("on")){
+					duaValue = "true";					
+				} else if(duaValue.equalsIgnoreCase("off")){
+					duaValue = "false";
+				}
+				try{
+					boolean dismissUnexpectedAlertsValue = Boolean.parseBoolean(duaValue);
+					setDismissUnexpectedAlerts(dismissUnexpectedAlertsValue);
+				} catch(Exception e){
+					Log.info("Driver IGNORING invalid 'DismissUnexpectedAlerts' setting " + dismissUnexpectedAlertsSetting);
+				}				
+			}
+			Log.info("'DismissUnexpectedAlerts' status set to " + getDismissUnexpectedAlerts());			
+			
+			
 			Log.info("Test to execute: '"+ testName +"' using "+ testLevel.toUpperCase() +" DRIVER." );
 		}
 		catch(NullPointerException npe){

@@ -59,6 +59,9 @@ public abstract class AbstractDriver implements DriverInterface{
 	protected static final boolean DEFAULT_NUMLOCK_STATUS = Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_NUM_LOCK);
 	protected boolean numLockOn = DEFAULT_NUMLOCK_STATUS;
 	
+	protected static final boolean DEFAULT_DISMISS_UNEXPECTED_ALERTS_STATUS = false;
+	protected boolean dismissUnexpectedAlerts = DEFAULT_DISMISS_UNEXPECTED_ALERTS_STATUS;
+	
 	/** 
 	 * CYCLE shared flow control info used by all Driver/InputProcessors. 
 	 * This may be overridden by local flowcontrol info defined for each separate 
@@ -213,6 +216,15 @@ public abstract class AbstractDriver implements DriverInterface{
 	 * @see DriverInterface#getLogsInterface()
 	 */
 	public LogsInterface getLogsInterface() { return logs; }
+
+	public boolean getDismissUnexpectedAlerts() {
+		return dismissUnexpectedAlerts;
+	}
+
+	public void setDismissUnexpectedAlerts(boolean dismissUnexpectedAlerts) {
+		this.dismissUnexpectedAlerts = dismissUnexpectedAlerts;
+	}
+	
 
 	/**
 	 * Attempts to return an interface to the core framework through one of the existing interfaces.
