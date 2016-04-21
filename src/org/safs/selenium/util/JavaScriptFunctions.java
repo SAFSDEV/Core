@@ -1478,7 +1478,7 @@ public class JavaScriptFunctions {
 		scriptCommand.append( appendPropertyMap("scrollWidth",     "domNode", "pMap"));
 		scriptCommand.append( appendPropertyMap("style",           "domNode", "pMap"));
 		scriptCommand.append( appendPropertyMap("tabIndex",        "domNode", "pMap"));
-//		scriptCommand.append( appendPropertyMap("tagName",         "domNode", "pMap")); // causes getHtmlProperties to fail
+		scriptCommand.append( appendPropertyMap("tagName",         "domNode", "pMap"));
 		scriptCommand.append( appendPropertyMap("textContent",     "domNode", "pMap"));
 		scriptCommand.append( appendPropertyMap("title",           "domNode", "pMap"));		
 		scriptCommand.append( appendPropertyFunctionMap("hasAttributes",     "domNode", "pMap"));
