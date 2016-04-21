@@ -2790,8 +2790,6 @@ public class WDLibrary extends SearchObject {
 				else IndependantLog.debug(debugmsg+"returned properties object is "+null);
 			}
 
-			map.put("tagName", element.getTagName());
-
 		} catch(Exception ignore) {
 			IndependantLog.debug(debugmsg+"Htmlproperties, met "+StringUtils.debugmsg(ignore));
 		}
