@@ -3,8 +3,6 @@
  **/
 package org.safs.tools.drivers;
 
-import java.awt.Toolkit;
-import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.Enumeration;
 import java.util.ListIterator;
@@ -17,7 +15,6 @@ import org.safs.StringUtils;
 import org.safs.image.ImageUtils;
 import org.safs.text.CaseInsensitiveHashtable;
 import org.safs.text.FAILStrings;
-import org.safs.tools.CaseInsensitiveFile;
 import org.safs.tools.ConfigurableToolsInterface;
 import org.safs.tools.GenericToolsInterface;
 import org.safs.tools.MainClass;
@@ -455,18 +452,11 @@ public abstract class DefaultDriver extends AbstractDriver {
 			if (numLockSetting.length() == 0) {
 				Log.info("Checking for alternative NumLock Setting 'SAFS_TEST':'numLockOn'...");
 				// check for a configuration file setting
-				numLockSetting = configInfo.getNamedValue(DriverConstant.SECTION_SAFS_TEST, "numLockOn");
+				numLockSetting = configInfo.getNamedValue(DriverConstant.SECTION_SAFS_TEST, DriverConstant.SECTION_SAFS_TEST_NUMLOCKON);
 				if(numLockSetting == null) numLockSetting = "";
 			}
 			numLockSetting = StringUtils.getTrimmedUnquotedStr(numLockSetting);
-			if(numLockSetting.length() > 0){
-				try {
-					boolean numLockSettingValue = Boolean.parseBoolean(numLockSetting);
-					setNumLockOn(numLockSettingValue);
-				} catch (Exception e) {
-					Log.info("Driver IGNORING invalid numLockOn setting "+ numLockSetting);
-				}
-			}
+			if(numLockSetting.length()>0) setNumLockOn(StringUtilities.convertBool(numLockSetting));
 			Log.info("'NumLockOn' status set to "+ getNumLockOn());
 			
 			// check for settings of 'DismissUnexpectedAlerts'
@@ -475,26 +465,12 @@ public abstract class DefaultDriver extends AbstractDriver {
 			if(dismissUnexpectedAlertsSetting.length() == 0){
 				Log.info("Checking for alternative 'DismissUnexpectedAlerts' setting 'SAFS_TEST':'DismissUnexpectedAlerts'...");
 				// check for a configuration file setting
-				dismissUnexpectedAlertsSetting = configInfo.getNamedValue(DriverConstant.SECTION_SAFS_TEST, "DismissUnexpectedAlerts");
+				dismissUnexpectedAlertsSetting = configInfo.getNamedValue(DriverConstant.SECTION_SAFS_TEST, DriverConstant.SECTION_SAFS_TEST_DISMISSUNEXPECTEDALERTS);
 				if (dismissUnexpectedAlertsSetting == null) dismissUnexpectedAlertsSetting = "";
 			}
 			dismissUnexpectedAlertsSetting = StringUtils.getTrimmedUnquotedStr(dismissUnexpectedAlertsSetting);
-			if(dismissUnexpectedAlertsSetting.length() > 0){
-				String duaValue = dismissUnexpectedAlertsSetting;
-				if(duaValue.equalsIgnoreCase("on")){
-					duaValue = "true";					
-				} else if(duaValue.equalsIgnoreCase("off")){
-					duaValue = "false";
-				}
-				try{
-					boolean dismissUnexpectedAlertsValue = Boolean.parseBoolean(duaValue);
-					setDismissUnexpectedAlerts(dismissUnexpectedAlertsValue);
-				} catch(Exception e){
-					Log.info("Driver IGNORING invalid 'DismissUnexpectedAlerts' setting " + dismissUnexpectedAlertsSetting);
-				}				
-			}
+			if(dismissUnexpectedAlertsSetting.length()>0) setDismissUnexpectedAlerts(StringUtilities.convertBool(dismissUnexpectedAlertsSetting));				
 			Log.info("'DismissUnexpectedAlerts' status set to " + getDismissUnexpectedAlerts());			
-			
 			
 			Log.info("Test to execute: '"+ testName +"' using "+ testLevel.toUpperCase() +" DRIVER." );
 		}
@@ -941,13 +917,6 @@ public abstract class DefaultDriver extends AbstractDriver {
 		cycleLog=null;
 		suiteLog=null;
 		stepLog=null;
-	}
-	
-	/**
-	 * Set 'NumLock' based on the value of 'numLock'.
-	 */
-	protected void executeNumLockSetting(){
-		Toolkit.getDefaultToolkit().setLockingKeyState(KeyEvent.VK_NUM_LOCK, getNumLockOn());
 	}
 	
 	/** shutdown any engines started with initializeRuntimeEngines() **/
