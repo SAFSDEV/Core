@@ -700,7 +700,9 @@ public abstract class StringUtilities {
 						(boolStr.equalsIgnoreCase("-1")))
 					return true;
 			}
-		}catch(Exception ex){;}
+		}catch(Exception ex){
+			IndependantLog.warn("cannot convert "+bool+" to a boolean, Met "+StringUtils.debugmsg(ex));
+		}
 		return false;
 	}
 	

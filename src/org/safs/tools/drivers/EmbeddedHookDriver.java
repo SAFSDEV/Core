@@ -11,17 +11,12 @@ import org.safs.Log;
 import org.safs.ProcessRequest;
 import org.safs.Processor;
 import org.safs.SAFSException;
-import org.safs.SAFSProcessorInitializationException;
-import org.safs.SAFSRuntimeException;
 import org.safs.SAFSSTAFRegistrationException;
 import org.safs.STAFHelper;
 import org.safs.SingletonSTAFHelper;
 import org.safs.TestRecordHelper;
 import org.safs.logging.LogUtilities;
 import org.safs.staf.STAFProcessHelpers;
-import org.safs.staf.service.InfoInterface;
-import org.safs.staf.service.sem.EmbeddedSemService;
-import org.safs.tools.consoles.SAFSMonitorFrame;
 import org.safs.tools.counters.UniqueStringCounterInfo;
 import org.safs.tools.status.StatusCounter;
 import org.safs.tools.stringutils.StringUtilities;
@@ -496,7 +491,6 @@ public class EmbeddedHookDriver extends JavaHook {
 		    jsafs.initializeMiscConfigInfo();
 		    jsafs.initializeRuntimeEngines();
 		    jsafs.openTestLogs();
-		    jsafs.executeNumLockSetting();
 			jsafs.statuscounter = jsafs.statuscounts instanceof StatusCounter ? (StatusCounter)jsafs.statuscounts: new StatusCounter();
 			jsafs.counterInfo = jsafs.counterInfo == null ? 
 					new UniqueStringCounterInfo(jsafs.cycleLog.getStringID(), DriverConstant.DRIVER_CYCLE_TESTLEVEL):

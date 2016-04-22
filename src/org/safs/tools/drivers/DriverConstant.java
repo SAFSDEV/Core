@@ -8,6 +8,9 @@ package org.safs.tools.drivers;
  * APR 07, 2015    (Lei Wang) Add static class SeleniumConfigConstant.
  * SEP 24, 2015    (Lei Wang) Add static class MailConstant.
  */
+import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
+
 import org.safs.JavaConstant;
 import org.safs.StringUtils;
 import org.safs.logging.AbstractLogFacility;
@@ -381,16 +384,26 @@ public class DriverConstant extends JavaConstant{
 	 * JVM command line: -Dsafs.test.secswaitforcomponent=0-N **/
 	public static final String PROPERTY_SAFS_TEST_SECSWAITFORCOMPONENT ="safs.test.secswaitforcomponent";
 	
-	/** "safs.test.numLockOn" <br>
+	/** the default value of the number lock, it is the current number lock status. */
+	public static final boolean DEFAULT_NUMLOCK_STATUS = Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_NUM_LOCK);
+	/** "safs.test.numLockon" <br>
 	 * JVM command line: -Dsafs.test.numlockon=TRUE|FALSE **/
 	public static final String PROPERTY_SAFS_TEST_NUMLOCKON ="safs.test.numlockon";
-
-	/**
-	 * "safs.test.dismiss_unexpected_alerts" <br>
-	 * JVM command line: -Dsafs.test.dismiss_unexpected_alerts=TRUE|FALSE|ON|OFF
-	 */
+	/** "numLockOn" option under section
+	 * [SAFS_TEST]
+	 * numLockOn=TRUE|FALSE */
+	public static final String SECTION_SAFS_TEST_NUMLOCKON ="numLockOn";
+	
+	/** 'false' the default value for dismiss unexpected alert dialog */
+	public static final boolean DEFAULT_DISMISS_UNEXPECTED_ALERTS_STATUS = false;
+	/** "safs.test.dismiss_unexpected_alerts" <br>
+	 * JVM command line: -Dsafs.test.dismiss_unexpected_alerts=TRUE|FALSE|ON|OFF */
 	public static final String PROERTY_SAFS_TEST_DISMISSUNEXPECTEDALERTS = "safs.test.dismiss_unexpected_alerts";
-
+	/** "DismissUnexpectedAlerts" option under section
+	 * [SAFS_TEST]
+	 * DismissUnexpectedAlerts=TRUE|FALSE|ON|OFF */
+	public static final String SECTION_SAFS_TEST_DISMISSUNEXPECTEDALERTS ="DismissUnexpectedAlerts";
+	
     /** "safs.log.level" <br>
 	 * JVM command line: -Dsafs.log.level=ERROR|WARN|PASS|GENERIC|INDEX|INFO|DEBUG **/
 	public static final String PROPERTY_SAFS_LOG_LEVEL ="safs.log.level";
