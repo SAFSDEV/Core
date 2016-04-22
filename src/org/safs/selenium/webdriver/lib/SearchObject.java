@@ -76,7 +76,6 @@ import org.safs.selenium.webdriver.SeleniumPlus.WDTimeOut;
 import org.safs.selenium.webdriver.WebDriverGUIUtilities;
 import org.safs.selenium.webdriver.lib.RS.XPATH;
 import org.safs.selenium.webdriver.lib.RemoteDriver.SessionInfo;
-import org.safs.selenium.webdriver.lib.interpreter.selrunner.SRUtilities;
 import org.safs.selenium.webdriver.lib.model.Element;
 import org.safs.selenium.webdriver.lib.model.TextMatchingCriterion;
 import org.safs.tools.stringutils.StringUtilities;
@@ -184,7 +183,7 @@ public class SearchObject {
 	 * The frame object where the current GUI-component locate. If there is no frame, its value should be null.
 	 * @see #getObject(SearchContext, String)
 	 */
-	public static FrameElement lastFrame;
+	protected static FrameElement lastFrame = null;
 	protected static class FrameElement{
 		FrameElement parentFrame;
 		/**
@@ -325,10 +324,12 @@ public class SearchObject {
 	};
 
 	/**The last visited URL,*/
-	public static String lastVisitedURL = null;
+	protected static String lastVisitedURL = null;
+	public static String getLastVisitedURL(){ return lastVisitedURL;}
 
 	/**The last visited browser window*/
-	public static BrowserWindow lastBrowserWindow;
+	protected static BrowserWindow lastBrowserWindow = null;
+	public static BrowserWindow getLastBrowserWindow(){ return lastBrowserWindow;}
 
 	public static class BrowserWindow{
 		/**'height'*/
