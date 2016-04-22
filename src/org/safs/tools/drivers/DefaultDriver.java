@@ -470,12 +470,12 @@ public abstract class DefaultDriver extends AbstractDriver {
 			Log.info("'NumLockOn' status set to "+ getNumLockOn());
 			
 			// check for settings of 'DismissUnexpectedAlerts'
-			Log.info("Checking for Command-Line setting '-Dsafs.selenium.dismissunexpectedalerts'");
-			String dismissUnexpectedAlertsSetting = getParameterValue(DriverConstant.PROERTY_SAFS_SELENIUM_DISMISSUNEXPECTEDALERTS);
+			Log.info("Checking for Command-Line setting '-Dsafs.test.dismiss_unexpected_alerts'");
+			String dismissUnexpectedAlertsSetting = getParameterValue(DriverConstant.PROERTY_SAFS_TEST_DISMISSUNEXPECTEDALERTS);
 			if(dismissUnexpectedAlertsSetting.length() == 0){
-				Log.info("Checking for alternative 'DismissUnexpectedAlerts' setting 'SAFS_SELENIUM':'DismissUnexpectedAlerts'...");
+				Log.info("Checking for alternative 'DismissUnexpectedAlerts' setting 'SAFS_TEST':'DismissUnexpectedAlerts'...");
 				// check for a configuration file setting
-				dismissUnexpectedAlertsSetting = configInfo.getNamedValue(DriverConstant.SECTION_SAFS_SELENIUM, "DismissUnexpectedAlerts");
+				dismissUnexpectedAlertsSetting = configInfo.getNamedValue(DriverConstant.SECTION_SAFS_TEST, "DismissUnexpectedAlerts");
 				if (dismissUnexpectedAlertsSetting == null) dismissUnexpectedAlertsSetting = "";
 			}
 			dismissUnexpectedAlertsSetting = StringUtils.getTrimmedUnquotedStr(dismissUnexpectedAlertsSetting);
