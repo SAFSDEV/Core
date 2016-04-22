@@ -3,25 +3,25 @@
  **/
 package org.safs.tools.drivers;
 
-import java.awt.Toolkit;
-import java.awt.event.KeyEvent;
 import java.io.File;
 
 import org.safs.Log;
 import org.safs.STAFHelper;
 import org.safs.StatusCodes;
+import org.safs.Utils;
 import org.safs.tools.CaseInsensitiveFile;
 import org.safs.tools.CoreInterface;
 import org.safs.tools.GenericToolsInterface;
+import org.safs.tools.counters.CountersInterface;
 import org.safs.tools.engines.AutoItComponent;
 import org.safs.tools.engines.EngineInterface;
 import org.safs.tools.input.InputInterface;
 import org.safs.tools.input.MapsInterface;
-import org.safs.tools.vars.VarsInterface;
 import org.safs.tools.logs.LogsInterface;
-import org.safs.tools.counters.CountersInterface;
-import org.safs.tools.status.*;
-import org.safs.tools.stacks.StacksInterface;
+import org.safs.tools.status.StatusCounter;
+import org.safs.tools.status.StatusCounterInterface;
+import org.safs.tools.status.StatusInterface;
+import org.safs.tools.vars.VarsInterface;
 
 /**
  * The root, abstract implementation of our tool-independent Driver.
@@ -56,11 +56,10 @@ public abstract class AbstractDriver implements DriverInterface{
 	protected StatusInterface         statuscounts = new StatusCounter();
 	protected int            millisBetweenRecords  = 0;
 	
-	protected static final boolean DEFAULT_NUMLOCK_STATUS = Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_NUM_LOCK);
-	protected boolean numLockOn = DEFAULT_NUMLOCK_STATUS;
-	
-	protected static final boolean DEFAULT_DISMISS_UNEXPECTED_ALERTS_STATUS = false;
-	protected boolean dismissUnexpectedAlerts = DEFAULT_DISMISS_UNEXPECTED_ALERTS_STATUS;
+	/** If the number lock should be on or off. */
+	protected boolean numLockOn = DriverConstant.DEFAULT_NUMLOCK_STATUS;
+	/** If the 'alert dialog' should be dismissed automatically or not. */
+	protected boolean dismissUnexpectedAlerts = DriverConstant.DEFAULT_DISMISS_UNEXPECTED_ALERTS_STATUS;
 	
 	/** 
 	 * CYCLE shared flow control info used by all Driver/InputProcessors. 
@@ -158,9 +157,14 @@ public abstract class AbstractDriver implements DriverInterface{
 	public boolean getNumLockOn() {	return numLockOn; }
 
 	/**
+	 * This method will set the value of field {@link #numLockOn} 
+	 * <b>and will also set the keyboard's 'NumLock' on/off.</b>
 	 * @see DriverInterface#setNumLockOn()
 	 */
-	public void setNumLockOn(boolean numLockOnValue) { numLockOn = numLockOnValue; }
+	public void setNumLockOn(boolean numLockOnValue) { 
+		numLockOn = numLockOnValue;
+		Utils.setNumLock(numLockOn);
+	}
 	
 	/**
 	 * @see DriverInterface#isPerTableFlowControl()
