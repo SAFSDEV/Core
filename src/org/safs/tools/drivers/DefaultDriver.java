@@ -459,18 +459,18 @@ public abstract class DefaultDriver extends AbstractDriver {
 			if(numLockSetting.length()>0) setNumLockOn(StringUtilities.convertBool(numLockSetting));
 			Log.info("'NumLockOn' status set to "+ getNumLockOn());
 			
-			// check for settings of 'UnexpectedAlertBehaviour'
-			Log.info("Checking for Command-Line setting '-Dsafs.test.unexpected_alert_behaviour'");
-			String unexpectedAlertBehaviourSetting = getParameterValue(DriverConstant.PROERTY_SAFS_TEST_UNEXPECTEDALERTBEHAVIOUR);
-			if(unexpectedAlertBehaviourSetting.length() == 0){
-				Log.info("Checking for alternative 'UnexpectedAlertBehaviour' setting 'SAFS_TEST':'UnexpectedAlertBehaviour'...");
+			// check for settings of 'DismissUnexpectedAlerts'
+			Log.info("Checking for Command-Line setting '-Dsafs.test.dismiss_unexpected_alerts'");
+			String dismissUnexpectedAlertsSetting = getParameterValue(DriverConstant.PROERTY_SAFS_TEST_DISMISSUNEXPECTEDALERTS);
+			if(dismissUnexpectedAlertsSetting.length() == 0){
+				Log.info("Checking for alternative 'DismissUnexpectedAlerts' setting 'SAFS_TEST':'DismissUnexpectedAlerts'...");
 				// check for a configuration file setting
-				unexpectedAlertBehaviourSetting = configInfo.getNamedValue(DriverConstant.SECTION_SAFS_TEST, DriverConstant.SECTION_SAFS_TEST_UNEXPECTEDALERTBEHAVIOUR);
-				if (unexpectedAlertBehaviourSetting == null) unexpectedAlertBehaviourSetting = "";
+				dismissUnexpectedAlertsSetting = configInfo.getNamedValue(DriverConstant.SECTION_SAFS_TEST, DriverConstant.SECTION_SAFS_TEST_DISMISSUNEXPECTEDALERTS);
+				if (dismissUnexpectedAlertsSetting == null) dismissUnexpectedAlertsSetting = "";
 			}
-			unexpectedAlertBehaviourSetting = StringUtils.getTrimmedUnquotedStr(unexpectedAlertBehaviourSetting);
-			if(unexpectedAlertBehaviourSetting.length() > 0) setUnexpectedAlertBehaviour(unexpectedAlertBehaviourSetting);				
-			Log.info("'UnexpectedAlertBehaviour' status set to " + getUnexpectedAlertBehaviour());			
+			dismissUnexpectedAlertsSetting = StringUtils.getTrimmedUnquotedStr(dismissUnexpectedAlertsSetting);
+			if(dismissUnexpectedAlertsSetting.length()>0) setDismissUnexpectedAlerts(StringUtilities.convertBool(dismissUnexpectedAlertsSetting));				
+			Log.info("'DismissUnexpectedAlerts' status set to " + getDismissUnexpectedAlerts());			
 			
 			Log.info("Test to execute: '"+ testName +"' using "+ testLevel.toUpperCase() +" DRIVER." );
 		}
