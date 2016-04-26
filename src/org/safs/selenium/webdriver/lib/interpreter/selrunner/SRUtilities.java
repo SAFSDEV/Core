@@ -14,6 +14,7 @@ import org.safs.IndependantLog;
 import org.safs.StringUtils;
 import org.safs.selenium.webdriver.lib.interpreter.WDLocator;
 import org.safs.selenium.webdriver.lib.interpreter.WDScriptFactory;
+import org.safs.selenium.webdriver.lib.interpreter.WDTestRun;
 import org.safs.selenium.webdriver.lib.interpreter.WDTestRunFactory;
 import org.safs.text.Comparator;
 import org.w3c.dom.Document;
@@ -51,6 +52,9 @@ public class SRUtilities {
 		if(rs.startsWith(xp)){
 			type = WDScriptFactory.XPATH_LOCATORTYPE;
 			value = rs;
+		}else if(rs.startsWith(WDTestRun.VARREF_START)){
+			type = WDScriptFactory.MAP_LOCATORTYPE;
+			value = rs;
 		}else{
 			if(rs.contains(eq)){
 				int i = rs.indexOf(eq);
@@ -59,6 +63,8 @@ public class SRUtilities {
 				
 				if(WDScriptFactory.CSS_LOCATORTYPE.equalsIgnoreCase(type)){
 					type=WDScriptFactory.CSSSELECTOR_LOCATORTYPE;
+				}else if(WDScriptFactory.XPATH_LOCATORTYPE.equalsIgnoreCase(type)){
+					type=WDScriptFactory.XPATH_LOCATORTYPE;
 				}
 			}
 		}
