@@ -271,7 +271,6 @@ public class SelectBrowser {
 			caps.setCapability("nativeEvents", true);
 			caps.setCapability("requireWindowFocus", true);
 			if(unexpectedAlertBehaviourValue != null){
-System.out.println("[Terence] --- unexpectedAlertBehaviourValue = " + unexpectedAlertBehaviourValue);
 				caps.setCapability("unexpectedAlertBehaviour", unexpectedAlertBehaviourValue);				
 			}
 			//caps.setCapability("browserName", BROWSER_NAME_IE);
