@@ -2525,7 +2525,7 @@ public class StringUtils{
 		}
 		//Finally if the value is valid, set it to the system properties
 		if(isValid(value)){
-			Log.debug(debugmsg+" Set value '"+value+"' to property '"+property+"'");
+			Log.debug(debugmsg+" Set value '"+value+"' to system property '"+property+"'.");
 			System.setProperty(property, value);
 		}
 
