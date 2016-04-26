@@ -56,8 +56,6 @@ public abstract class AbstractDriver implements DriverInterface{
 	protected StatusInterface         statuscounts = new StatusCounter();
 	protected int            millisBetweenRecords  = 0;
 	
-	/** If the number lock should be on or off. */
-	protected boolean numLockOn = DriverConstant.DEFAULT_NUMLOCK_STATUS;
 	/** If the 'alert dialog' should be dismissed automatically or not. */
 	protected boolean dismissUnexpectedAlerts = DriverConstant.DEFAULT_DISMISS_UNEXPECTED_ALERTS_STATUS;
 	
@@ -150,21 +148,6 @@ public abstract class AbstractDriver implements DriverInterface{
 	 * @see DriverInterface#setMillisBetweenRecords(int)
 	 */
 	public void setMillisBetweenRecords(int millisBetween) { millisBetweenRecords = millisBetween;}
-	
-	/**
-	 * @see DriverInterface#getNumLockOn()
-	 */
-	public boolean getNumLockOn() {	return numLockOn; }
-
-	/**
-	 * This method will set the value of field {@link #numLockOn} 
-	 * <b>and will also set the keyboard's 'NumLock' on/off.</b>
-	 * @see DriverInterface#setNumLockOn()
-	 */
-	public void setNumLockOn(boolean numLockOnValue) { 
-		numLockOn = numLockOnValue;
-		Utils.setNumLock(numLockOn);
-	}
 	
 	/**
 	 * @see DriverInterface#isPerTableFlowControl()
