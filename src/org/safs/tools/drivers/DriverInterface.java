@@ -111,9 +111,6 @@ public interface DriverInterface extends PathInterface {
 	public long setLogsDir(String absolute_path);
 		
 	public int getMillisBetweenRecords();
-	public void setMillisBetweenRecords(int millisBetweenRecords);	
-	
-	public boolean getNumLockOn();
-	public void setNumLockOn(boolean numLockOnValue);
+	public void setMillisBetweenRecords(int millisBetweenRecords);
 }
 
