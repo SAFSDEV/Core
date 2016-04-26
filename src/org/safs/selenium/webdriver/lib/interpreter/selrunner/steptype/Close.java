@@ -12,15 +12,13 @@ import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
 
 /**
- * Requires a "url" parameter.<br>
- * Supports an 2nd optional "browserid" parameter which can be used to reference the specific browser instance 
- * in other commands, like Close.
+ * Supports an optional "browserid" parameter which can be used to reference the specific browser instance 
+ * to close.  Generally, it is the same browserid that would be used in the Open command.
  * @author Carl Nagle
- * @see Close
+ * @see Open
  */
-public class Open implements StepType, SRunnerType {
+public class Close implements StepType, SRunnerType {
 
-	public static String URL_PARAM = "url";
 	public static String BROWSERID_PARAM = "browserid";
 	
 	/* (non-Javadoc)
@@ -29,28 +27,26 @@ public class Open implements StepType, SRunnerType {
 	@Override
 	public boolean run(TestRun ctx) {
 		String bid = ctx.string(BROWSERID_PARAM);
-		String url = ctx.string(URL_PARAM);		
-		if(bid != null && bid.length()>0){
-			try{
-				WDLibrary.startBrowser(null, url, bid, 90, true);
-				return true;
-			}catch(Exception x){
-				ctx.log().error("");
-				return false;
-			}
-		}else{
-			ctx.getDriver().get(url);
+		if(bid == null || bid.length()==0){
+			bid = WDLibrary.getIDForWebDriver(ctx.getDriver());
 		}
-		return true;
+		try{
+			WDLibrary.stopBrowser(bid);
+			return true;
+		}catch(Exception x){
+			ctx.log().error("");
+			return false;
+		}
 	}
 
 	/**
-	 * Requires params[1] "url" and has optional params[2] "browserid"
+	 * Optional params[1] "browserid"
 	 */
 	@Override
 	public void processParams(Step step, String[] params) {
-		step.stringParams.put(URL_PARAM, params[1]);
-		if(params.length>2)step.stringParams.put(BROWSERID_PARAM, params[2]);
+		try{
+			step.stringParams.put(BROWSERID_PARAM, params[1]);
+		}catch(Exception ignore){}
 	}
 
 }

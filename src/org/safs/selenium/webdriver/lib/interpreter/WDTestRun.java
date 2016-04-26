@@ -13,6 +13,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.safs.SAFSException;
 import org.safs.STAFHelper;
 import org.safs.StringUtils;
 import org.safs.selenium.webdriver.WebDriverGUIUtilities;
@@ -109,6 +110,27 @@ public class WDTestRun extends TestRun {
 	}
 
 	/**
+	 * @param map name of app map.  may be null.
+	 * @param win name of app map section.  may be null.
+	 * @param item item in app map from specified or default app map section.
+	 * @return String value or null if no value exists.
+	 */
+	public static String getAppMapItem(String map, String win, String item){
+		return WebDriverGUIUtilities._LASTINSTANCE.getSTAFHelper().getAppMapItem(map, win, item);
+	}
+	
+	/**
+	 * @param varName variable value to retrieve
+	 * @return String value or null if no value exists.
+	 */
+	public static String getVariableValue(String varName){
+		try {
+			return WebDriverGUIUtilities._LASTINSTANCE.getSTAFHelper().getVariable(varName);
+		} catch (SAFSException e) {}
+		return null;
+	}
+	
+	/**
 	 * Process any ${var} references.
 	 * Lookup potential variable values stored in the local Java Map object and, if not present there, 
 	 * see if it is available via SAFSVARS or SAFSMAPS.
@@ -167,9 +189,9 @@ public class WDTestRun extends TestRun {
 								   }
 							   }
 							   // lookup App Map Reference mapid and winname may be null
-							   val = WebDriverGUIUtilities._LASTINSTANCE.getSTAFHelper().getAppMapItem(map, win, comp);
+							   val = getAppMapItem(map, win, comp);
 						   }else{
-							   val = WebDriverGUIUtilities._LASTINSTANCE.getSTAFHelper().getVariable(key);
+							   val = getVariableValue(key);
 						   }
 					   }
 				   }catch(Exception ignore){}
