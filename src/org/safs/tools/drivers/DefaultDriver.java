@@ -447,12 +447,11 @@ public abstract class DefaultDriver extends AbstractDriver {
 	    	}
 			Log.info("Driver Delay 'secsWaitForComponent' set to "+ Processor.getSecsWaitForComponent());
 			
-			// check for settings of "NumLock" on/off
+			//check for 'number lock' TODO Maybe we can move the following code to org.safs.DefaultHookConfig. Can we? Do we still need it in driver?
 			Log.info("Checking for Command-Line setting '-Dsafs.test.numlockon'...");
 			String numLockSetting = getParameterValue(DriverConstant.PROPERTY_SAFS_TEST_NUMLOCKON);
 			if (numLockSetting.length() == 0) {
-				Log.info("Checking for alternative NumLock Setting 'SAFS_TEST':'numLockOn'...");
-				// check for a configuration file setting
+				Log.info("Checking for alternative configuration setting 'SAFS_TEST':'numLockOn'...");
 				numLockSetting = configInfo.getNamedValue(DriverConstant.SECTION_SAFS_TEST, DriverConstant.SECTION_SAFS_TEST_NUMLOCKON);
 				if(numLockSetting == null) numLockSetting = "";
 			}
@@ -464,18 +463,10 @@ public abstract class DefaultDriver extends AbstractDriver {
 				Log.info("set 'NumLock' to "+ numLockSetting+"; The original 'NumLock' is "+DriverConstant.DEFAULT_NUMLOCK_STATUS);
 			}
 			
-			// check for settings of 'DismissUnexpectedAlerts'
-			Log.info("Checking for Command-Line setting '-Dsafs.test.dismiss_unexpected_alerts'");
-			String dismissUnexpectedAlertsSetting = getParameterValue(DriverConstant.PROERTY_SAFS_TEST_DISMISSUNEXPECTEDALERTS);
-			if(dismissUnexpectedAlertsSetting.length() == 0){
-				Log.info("Checking for alternative 'DismissUnexpectedAlerts' setting 'SAFS_TEST':'DismissUnexpectedAlerts'...");
-				// check for a configuration file setting
-				dismissUnexpectedAlertsSetting = configInfo.getNamedValue(DriverConstant.SECTION_SAFS_TEST, DriverConstant.SECTION_SAFS_TEST_DISMISSUNEXPECTEDALERTS);
-				if (dismissUnexpectedAlertsSetting == null) dismissUnexpectedAlertsSetting = "";
-			}
-			dismissUnexpectedAlertsSetting = StringUtils.getTrimmedUnquotedStr(dismissUnexpectedAlertsSetting);
-			if(dismissUnexpectedAlertsSetting.length()>0) setDismissUnexpectedAlerts(StringUtilities.convertBool(dismissUnexpectedAlertsSetting));				
-			Log.info("'DismissUnexpectedAlerts' status set to " + getDismissUnexpectedAlerts());			
+			//check for 'UnexpectedAlertBehaviour'. TODO Maybe we can remove the following code, as org.safs.DefaultHookConfig has done this. Do we still need it in driver?
+			String unexpectedAlertBehaviour = StringUtils.getSystemProperty(DriverConstant.PROERTY_SAFS_TEST_UNEXPECTEDALERTBEHAVIOUR, 
+					configInfo, DriverConstant.SECTION_SAFS_TEST, DriverConstant.SECTION_SAFS_TEST_UNEXPECTEDALERTBEHAVIOUR, DriverConstant.DEFAULT_UNEXPECTED_ALERT_BEHAVIOUR);				
+			Log.info("'UnexpectedAlertBehaviour' set to " + unexpectedAlertBehaviour);			
 			
 			Log.info("Test to execute: '"+ testName +"' using "+ testLevel.toUpperCase() +" DRIVER." );
 		}

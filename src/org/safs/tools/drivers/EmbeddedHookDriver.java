@@ -3,7 +3,14 @@
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
 package org.safs.tools.drivers;
-
+/**
+ * History for developer:
+ * 
+ * JAN 29, 2014    (Lei Wang) Expose embedded driver's ConfigureInterface object.
+ * APR 26, 2016    (Lei Wang) Modify start(): Profit the configuration settings ability in JavaHook.
+ *                          Add initConfigPaths(): Try to use the existing Configuration of the embedded driver.
+ * 
+ */
 import org.safs.DCGUIUtilities;
 import org.safs.DDGUIUtilities;
 import org.safs.JavaHook;
@@ -40,9 +47,6 @@ import org.safs.tools.stringutils.StringUtilities;
  * If neither is provided, the engine will look for a "test.ini" file in the startup 
  * working directory and also initially assume that might also be the Project Root directory.
  * @author Carl Nagle
- * History:<br>
- * 
- *  <br>   JAN 29, 2014    (Lei Wang) Expose embedded driver's ConfigureInterface object.
  */
 public class EmbeddedHookDriver extends JavaHook {
 
@@ -430,10 +434,19 @@ public class EmbeddedHookDriver extends JavaHook {
 	  	}
 		if(helper instanceof STAFHelper && helper.isInitialized()) Log.setHelper(helper);
 	  }
-	  
+
+      /** Override the superclass's method, try to use the existing Configuration of the embedded driver.
+       * If the existing Configuration is null, then call method of superclass. */
+      protected void initConfigPaths(){
+    	  ConfigureInterface config = config();
+    	  if(config!=null) TestRecordHelper.setConfig(config);
+    	  else super.initConfigPaths();
+      }
+      
       @Override
       public void start(){
     	  if(log==null) log = getLogUtilities();
+    	  checkConfiguration();
     	  super.start();
       }
 
