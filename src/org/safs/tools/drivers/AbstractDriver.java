@@ -8,7 +8,6 @@ import java.io.File;
 import org.safs.Log;
 import org.safs.STAFHelper;
 import org.safs.StatusCodes;
-import org.safs.Utils;
 import org.safs.tools.CaseInsensitiveFile;
 import org.safs.tools.CoreInterface;
 import org.safs.tools.GenericToolsInterface;
@@ -55,9 +54,6 @@ public abstract class AbstractDriver implements DriverInterface{
 	/** {@link org.safs.tools.status.StatusCounter} */
 	protected StatusInterface         statuscounts = new StatusCounter();
 	protected int            millisBetweenRecords  = 0;
-	
-	/** If the 'alert dialog' should be dismissed automatically or not. */
-	protected boolean dismissUnexpectedAlerts = DriverConstant.DEFAULT_DISMISS_UNEXPECTED_ALERTS_STATUS;
 	
 	/** 
 	 * CYCLE shared flow control info used by all Driver/InputProcessors. 
@@ -203,15 +199,6 @@ public abstract class AbstractDriver implements DriverInterface{
 	 * @see DriverInterface#getLogsInterface()
 	 */
 	public LogsInterface getLogsInterface() { return logs; }
-
-	public boolean getDismissUnexpectedAlerts() {
-		return dismissUnexpectedAlerts;
-	}
-
-	public void setDismissUnexpectedAlerts(boolean dismissUnexpectedAlerts) {
-		this.dismissUnexpectedAlerts = dismissUnexpectedAlerts;
-	}
-	
 
 	/**
 	 * Attempts to return an interface to the core framework through one of the existing interfaces.
