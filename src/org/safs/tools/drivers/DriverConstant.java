@@ -394,15 +394,17 @@ public class DriverConstant extends JavaConstant{
 	 * numLockOn=TRUE|FALSE */
 	public static final String SECTION_SAFS_TEST_NUMLOCKON ="numLockOn";
 	
-	/** 'false' the default value for dismiss unexpected alert dialog */
-	public static final boolean DEFAULT_DISMISS_UNEXPECTED_ALERTS_STATUS = false;
-	/** "safs.test.dismiss_unexpected_alerts" <br>
-	 * JVM command line: -Dsafs.test.dismiss_unexpected_alerts=TRUE|FALSE|ON|OFF */
-	public static final String PROERTY_SAFS_TEST_DISMISSUNEXPECTEDALERTS = "safs.test.dismiss_unexpected_alerts";
-	/** "DismissUnexpectedAlerts" option under section
+	/** use 'ignore' as the default value of unexpected alert behaviour */
+	public static final String DEFAULT_UNEXPECTED_ALERT_BEHAVIOUR = "ignore";
+	
+	/** "safs.test.unexpected_alert_behaviour" <br>
+	 * JVM command line: -Dsafs.test.unexpected_alert_behaviour=Accept|Dismiss|Ignore */
+	public static final String PROERTY_SAFS_TEST_UNEXPECTEDALERTBEHAVIOUR = "safs.test.unexpected_alert_behaviour";
+	
+	/** "UnexpectedAlertBehaviour" option under section
 	 * [SAFS_TEST]
-	 * DismissUnexpectedAlerts=TRUE|FALSE|ON|OFF */
-	public static final String SECTION_SAFS_TEST_DISMISSUNEXPECTEDALERTS ="DismissUnexpectedAlerts";
+	 * UnexpectedAlertBehaviour=Accept|Dismiss|Ignore */
+	public static final String SECTION_SAFS_TEST_UNEXPECTEDALERTBEHAVIOUR ="UnexpectedAlertBehaviour";
 	
     /** "safs.log.level" <br>
 	 * JVM command line: -Dsafs.log.level=ERROR|WARN|PASS|GENERIC|INDEX|INFO|DEBUG **/
