@@ -112,6 +112,7 @@ public class WDLocator extends Locator {
 				if(ctx instanceof WDTestRun){
 					rs = ((WDTestRun)ctx).replaceVariableReferences(value);
 				}
+				if(rs.startsWith("//")) rs = "xpath="+ rs;
 				if(null != frameInfo)
 					return SearchObject.getObject(ctx.driver(), frameInfo + rs);
 				return SearchObject.getObject(ctx.driver(), rs);
@@ -122,6 +123,7 @@ public class WDLocator extends Locator {
 				if(ctx instanceof WDTestRun){
 					rs = ((WDTestRun)ctx).replaceVariableReferences(value);
 				}
+				if(rs.startsWith("//")) rs = "xpath="+ rs;
 				if(null != frameInfo)
 					return SearchObject.getObjects(ctx.driver(), frameInfo + rs);
 				return SearchObject.getObjects(ctx.driver(),rs);
@@ -132,6 +134,7 @@ public class WDLocator extends Locator {
 				if(ctx instanceof WDTestRun){
 					rs = ((WDTestRun)ctx).replaceVariableReferences(value);
 				}
+				if(rs.startsWith("//")) rs = "xpath="+ rs;
 				if(null != frameInfo)
 					return SearchObject.getObject(ctx.driver(), frameInfo + rs) == null;
 
