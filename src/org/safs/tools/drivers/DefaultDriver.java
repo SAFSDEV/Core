@@ -12,6 +12,7 @@ import org.safs.JavaHook;
 import org.safs.Log;
 import org.safs.Processor;
 import org.safs.StringUtils;
+import org.safs.Utils;
 import org.safs.image.ImageUtils;
 import org.safs.text.CaseInsensitiveHashtable;
 import org.safs.text.FAILStrings;
@@ -456,8 +457,12 @@ public abstract class DefaultDriver extends AbstractDriver {
 				if(numLockSetting == null) numLockSetting = "";
 			}
 			numLockSetting = StringUtils.getTrimmedUnquotedStr(numLockSetting);
-			if(numLockSetting.length()>0) setNumLockOn(StringUtilities.convertBool(numLockSetting));
-			Log.info("'NumLockOn' status set to "+ getNumLockOn());
+			if(numLockSetting.length()>0){
+				//Set the keyboard's 'NumLock' on/off.
+				//TODO Need to work remotely on RMI server.
+				Utils.setNumLock(StringUtilities.convertBool(numLockSetting));
+				Log.info("set 'NumLock' to "+ numLockSetting+"; The original 'NumLock' is "+DriverConstant.DEFAULT_NUMLOCK_STATUS);
+			}
 			
 			// check for settings of 'DismissUnexpectedAlerts'
 			Log.info("Checking for Command-Line setting '-Dsafs.test.dismiss_unexpected_alerts'");
