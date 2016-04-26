@@ -7,18 +7,20 @@ package org.safs.selenium.webdriver.lib;
 /**
 * History:<br>
 * 
-*  <br>   NOV 18, 2013    (DHARMESH) Initial release.
-*  <br>   NOV 18, 2013    (CANAGL) Modified to allow us to change capabilities in one place for any kind of webdriver instantiated.
-*  <br>   DEC 27, 2013    (sbjlwa) Modify code to permit start browser with more parameters, such as proxy setting.
-*  <br>   JAN 28, 2014    (sbjlwa) Modify code to get proxy setting from system properties.
-*  <br>   FEB 19, 2014    (DHARMESH) Fixed local browser support.
-*  <br>	  APR 15, 2014 	  (DHARMESH) Fixed IE click issue to disable nativeEvents to false.
-*  <br>   AUG 29, 2014    (DHARMESH) Add selenium grid host and port support.
-*  <br>   SEP 04, 2014    (LeiWang) Handle FireFox's profile.
-*  <br>   MAR 17, 2015    (LeiWang) Handle Chrome's custom data, profile.
-*  <br>   APR 08, 2015    (LeiWang) Modify to turn off Chrome's starting options.
-*  <br>   MAR 07, 2016    (LeiWang) Handle preference setting for "chrome" and "firefox".
-*  <br>   MAR 23, 2016    (LeiWang) Modify setChromeCapabilities(): handle "command line options" and "preferences" for "chrome".
+*  NOV 18, 2013    (DHARMESH) Initial release.
+*  NOV 18, 2013    (CANAGL) Modified to allow us to change capabilities in one place for any kind of webdriver instantiated.
+*  DEC 27, 2013    (sbjlwa) Modify code to permit start browser with more parameters, such as proxy setting.
+*  JAN 28, 2014    (sbjlwa) Modify code to get proxy setting from system properties.
+*  FEB 19, 2014    (DHARMESH) Fixed local browser support.
+*  APR 15, 2014	   (DHARMESH) Fixed IE click issue to disable nativeEvents to false.
+*  AUG 29, 2014    (DHARMESH) Add selenium grid host and port support.
+*  SEP 04, 2014    (LeiWang) Handle FireFox's profile.
+*  MAR 17, 2015    (LeiWang) Handle Chrome's custom data, profile.
+*  APR 08, 2015    (LeiWang) Modify to turn off Chrome's starting options.
+*  MAR 07, 2016    (LeiWang) Handle preference setting for "chrome" and "firefox".
+*  MAR 23, 2016    (LeiWang) Modify setChromeCapabilities(): handle "command line options" and "preferences" for "chrome".
+*  APR 26, 2016    (LeiWang) Modify getDesiredCapabilities(): Get value of 'unexpectedAlertBehaviour' from Processor and 'System property'
+*                                                             and set it for all browsers.
 */
 
 import java.io.File;
@@ -38,7 +40,9 @@ import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.safs.IndependantLog;
+import org.safs.Processor;
 import org.safs.StringUtils;
+import org.safs.tools.drivers.DriverConstant;
 import org.safs.tools.drivers.DriverConstant.SeleniumConfigConstant;
 import org.safs.tools.stringutils.StringUtilities;
 
@@ -109,9 +113,7 @@ public class SelectBrowser {
 	 *             Use SeleniumPlus.quote("disable-component-update") to keep its value.
 	 */
 	public static final String KEY_CHROME_EXCLUDE_OPTIONS = "excludeSwitches";
-	
-	public static String dismissUnexpectedAlertsIEValue = null;
-	
+
 	/**'http.proxyHost'*/
 	public static final String SYSTEM_PROPERTY_PROXY_HOST = StringUtils.SYSTEM_PROPERTY_PROXY_HOST;
 	/**'http.proxyPort'*/
@@ -270,9 +272,6 @@ public class SelectBrowser {
 			caps = DesiredCapabilities.internetExplorer();
 			caps.setCapability("nativeEvents", true);
 			caps.setCapability("requireWindowFocus", true);
-			if(dismissUnexpectedAlertsIEValue != null){
-				caps.setCapability("unexpectedAlertBehaviour", dismissUnexpectedAlertsIEValue);				
-			}
 			//caps.setCapability("browserName", BROWSER_NAME_IE);
 		} else if (browserName.equals(BROWSER_NAME_CHROME)) {
 			System.setProperty(SYSTEM_PROPERTY_WEBDRIVER_CHROME, "chromedriver.exe");
@@ -288,15 +287,22 @@ public class SelectBrowser {
 			ChromeOptions chromeOptions = new ChromeOptions();
 			chromeOptions.setExperimentalOption("androidPackage", "com.android.chrome");
 			caps.setCapability(ChromeOptions.CAPABILITY, chromeOptions);
-			caps.setCapability("browserName", BROWSER_NAME_CHROME);
+			caps.setCapability(CapabilityType.BROWSER_NAME, BROWSER_NAME_CHROME);
 		} else if (browserName.equals(BROWSER_NAME_IPAD_SIMULATOR_SAFARI)) {
 			caps = new DesiredCapabilities();
 			caps.setCapability("device", "ipad");
 			caps.setCapability("simulator", "true");
-			caps.setCapability("browserName", "safari");
+			caps.setCapability(CapabilityType.BROWSER_NAME, "safari");
 		} else { // default browser always
 			caps = DesiredCapabilities.firefox();
-			caps.setCapability("browserName", BROWSER_NAME_FIREFOX);
+			caps.setCapability(CapabilityType.BROWSER_NAME, BROWSER_NAME_FIREFOX);
+		}
+		
+		String unexpectedAlertBehaviour = Processor.getUnexpectedAlertBehaviour();
+		if(unexpectedAlertBehaviour==null) unexpectedAlertBehaviour = System.getProperty(DriverConstant.PROERTY_SAFS_TEST_UNEXPECTEDALERTBEHAVIOUR);
+		if(unexpectedAlertBehaviour!=null){
+			IndependantLog.debug(debugmsg+" Set '"+unexpectedAlertBehaviour+"' to '"+CapabilityType.UNEXPECTED_ALERT_BEHAVIOUR+"'.");
+			caps.setCapability(CapabilityType.UNEXPECTED_ALERT_BEHAVIOUR, unexpectedAlertBehaviour);
 		}
 		
 		if(extraParameters!=null && !extraParameters.isEmpty()){
