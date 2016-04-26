@@ -86,19 +86,15 @@ public class EmbeddedSeleniumHookDriver extends EmbeddedHookDriver {
 	}
 	
 	/**
-	 * (TerenceXie) APR 20, 2016	Set the 'DismissUnexpectedAlerts' value based on command-line or INI file. 
+	 * (TerenceXie) APR 20, 2016	Set the 'UnexpectedAlertBehaviour' value based on command-line or INI file. 
 	 */
-	protected void executeDismissUnexpectedAlerts(){
-		if(jsafs().getDismissUnexpectedAlerts()){
-			SelectBrowser.dismissUnexpectedAlertsIEValue = "accept";
-		} else {
-			SelectBrowser.dismissUnexpectedAlertsIEValue = "ignore";
-		}
+	protected void setUnexpectedAlertBehaviour(){
+		SelectBrowser.unexpectedAlertBehaviourValue = jsafs().getUnexpectedAlertBehaviour();
 	}
 	
 	public void start(){
 		SeleniumHook.setSystemProperties(config());		
-		executeDismissUnexpectedAlerts();
+		setUnexpectedAlertBehaviour();
 		super.start();
 	}
 	

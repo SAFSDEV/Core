@@ -110,7 +110,7 @@ public class SelectBrowser {
 	 */
 	public static final String KEY_CHROME_EXCLUDE_OPTIONS = "excludeSwitches";
 	
-	public static String dismissUnexpectedAlertsIEValue = null;
+	public static String unexpectedAlertBehaviourValue = null;
 	
 	/**'http.proxyHost'*/
 	public static final String SYSTEM_PROPERTY_PROXY_HOST = StringUtils.SYSTEM_PROPERTY_PROXY_HOST;
@@ -270,8 +270,9 @@ public class SelectBrowser {
 			caps = DesiredCapabilities.internetExplorer();
 			caps.setCapability("nativeEvents", true);
 			caps.setCapability("requireWindowFocus", true);
-			if(dismissUnexpectedAlertsIEValue != null){
-				caps.setCapability("unexpectedAlertBehaviour", dismissUnexpectedAlertsIEValue);				
+			if(unexpectedAlertBehaviourValue != null){
+System.out.println("[Terence] --- unexpectedAlertBehaviourValue = " + unexpectedAlertBehaviourValue);
+				caps.setCapability("unexpectedAlertBehaviour", unexpectedAlertBehaviourValue);				
 			}
 			//caps.setCapability("browserName", BROWSER_NAME_IE);
 		} else if (browserName.equals(BROWSER_NAME_CHROME)) {
