@@ -58,8 +58,8 @@ public abstract class AbstractDriver implements DriverInterface{
 	
 	/** If the number lock should be on or off. */
 	protected boolean numLockOn = DriverConstant.DEFAULT_NUMLOCK_STATUS;
-	/** If the 'alert dialog' should be ignored automatically or not. */
-	protected String unexpectedAlertBehaviour = DriverConstant.DEFAULT_UNEXPECTED_ALERT_BEHAVIOUR;
+	/** If the 'alert dialog' should be dismissed automatically or not. */
+	protected boolean dismissUnexpectedAlerts = DriverConstant.DEFAULT_DISMISS_UNEXPECTED_ALERTS_STATUS;
 	
 	/** 
 	 * CYCLE shared flow control info used by all Driver/InputProcessors. 
@@ -221,12 +221,12 @@ public abstract class AbstractDriver implements DriverInterface{
 	 */
 	public LogsInterface getLogsInterface() { return logs; }
 
-	public String getUnexpectedAlertBehaviour() {
-		return unexpectedAlertBehaviour;
+	public boolean getDismissUnexpectedAlerts() {
+		return dismissUnexpectedAlerts;
 	}
 
-	public void setUnexpectedAlertBehaviour(String unexpectedAlertBehaviour) {
-		this.unexpectedAlertBehaviour = unexpectedAlertBehaviour;
+	public void setDismissUnexpectedAlerts(boolean dismissUnexpectedAlerts) {
+		this.dismissUnexpectedAlerts = dismissUnexpectedAlerts;
 	}
 	
 
