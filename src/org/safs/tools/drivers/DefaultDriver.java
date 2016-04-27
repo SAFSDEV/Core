@@ -8,6 +8,7 @@ import java.util.Enumeration;
 import java.util.ListIterator;
 import java.util.Vector;
 
+import org.safs.DefaultHookConfig;
 import org.safs.JavaHook;
 import org.safs.Log;
 import org.safs.Processor;
@@ -447,26 +448,17 @@ public abstract class DefaultDriver extends AbstractDriver {
 	    	}
 			Log.info("Driver Delay 'secsWaitForComponent' set to "+ Processor.getSecsWaitForComponent());
 			
-			//check for 'number lock' TODO Maybe we can move the following code to org.safs.DefaultHookConfig. Can we? Do we still need it in driver?
-			Log.info("Checking for Command-Line setting '-Dsafs.test.numlockon'...");
+			//check for settings such as 'NumberLock', 'UnexpectedAlertBehaviour' at engine side.
+			DefaultHookConfig.check(configInfo);
+
+			//Get value of system property 'safs.test.numlockon'
 			String numLockSetting = getParameterValue(DriverConstant.PROPERTY_SAFS_TEST_NUMLOCKON);
-			if (numLockSetting.length() == 0) {
-				Log.info("Checking for alternative configuration setting 'SAFS_TEST':'numLockOn'...");
-				numLockSetting = configInfo.getNamedValue(DriverConstant.SECTION_SAFS_TEST, DriverConstant.SECTION_SAFS_TEST_NUMLOCKON);
-				if(numLockSetting == null) numLockSetting = "";
-			}
-			numLockSetting = StringUtils.getTrimmedUnquotedStr(numLockSetting);
 			if(numLockSetting.length()>0){
 				//Set the keyboard's 'NumLock' on/off.
 				//TODO Need to work remotely on RMI server.
 				Utils.setNumLock(StringUtilities.convertBool(numLockSetting));
-				Log.info("set 'NumLock' to "+ numLockSetting+"; The original 'NumLock' is "+DriverConstant.DEFAULT_NUMLOCK_STATUS);
+				Log.info("set KeyBoard 'NumLock' to "+ numLockSetting+"; The original 'NumLock' is "+DriverConstant.DEFAULT_NUMLOCK_STATUS);
 			}
-			
-			//check for 'UnexpectedAlertBehaviour'. TODO Maybe we can remove the following code, as org.safs.DefaultHookConfig has done this. Do we still need it in driver?
-			String unexpectedAlertBehaviour = StringUtils.getSystemProperty(DriverConstant.PROERTY_SAFS_TEST_UNEXPECTEDALERTBEHAVIOUR, 
-					configInfo, DriverConstant.SECTION_SAFS_TEST, DriverConstant.SECTION_SAFS_TEST_UNEXPECTEDALERTBEHAVIOUR, DriverConstant.DEFAULT_UNEXPECTED_ALERT_BEHAVIOUR);				
-			Log.info("'UnexpectedAlertBehaviour' set to " + unexpectedAlertBehaviour);			
 			
 			Log.info("Test to execute: '"+ testName +"' using "+ testLevel.toUpperCase() +" DRIVER." );
 		}
