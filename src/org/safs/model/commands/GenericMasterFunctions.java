@@ -1914,6 +1914,7 @@ public class GenericMasterFunctions {
     <P/><UL>
         <LI>SAFS TIDComponent</LI>
         <LI>Google Android</LI>
+        <LI>OpenQA Selenium</LI>
     </UL>
 
      @param winname  Optional:NO
@@ -2020,6 +2021,7 @@ public class GenericMasterFunctions {
     <P/><UL>
         <LI>SAFS TIDComponent</LI>
         <LI>Google Android</LI>
+        <LI>OpenQA Selenium</LI>
     </UL>
 
      @param winname  Optional:NO

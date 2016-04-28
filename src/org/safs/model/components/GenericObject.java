@@ -157,6 +157,9 @@ public class GenericObject extends GenericMaster {
                 We can also click on any part of an object, or any point relative to an object 
                 based on a provided x,y coordinate or other component-specific parameters.  
                 
+                For SE+, the coordinate can be percentage format, like "20%,30%". This percentage format 
+                indicates the point (20% width of component, 30% height of component) relative to the object.
+                
                 The object to be clicked is first given context and then a click is 
                 generated at the coordinates.  Thus, a subitem or object can be 
                 referenced by name even though it is only recognized via coordinates.
@@ -172,6 +175,11 @@ public class GenericObject extends GenericMaster {
                 (4) t MainWindow MainWindow  Click "50,200"
                 (5) t MainWindow MainWindow  Click "Coords=50,200"
                 
+                For SE+, the Data Table records can be:
+                
+                (6) t MainWindow MainWindow  Click "50%,20%"
+                (7) t MainWindow MainWindow  Click "50,20%"
+                
                 #2 above will contain an AnObject="3,10" entry in the MainWindow section 
                 of the Application Map to click at x=3, y=10 in the MainWindow.
                 
@@ -183,6 +191,11 @@ public class GenericObject extends GenericMaster {
                 
                 #4 and #5 above show using literal text instead of an App Map entry to specify 
                 where to click relative to the item.
+                
+                #6 and #7 above show using percentage format in SE+. #6 will click at position, 
+                where the X value equals 50% width of component, its Y value equals 20% height of component, 
+                relative to the object. #7 will click at position, where the X value equals 50, 
+                its Y value equals 20% height of component, relative to the object.
                 
                 Rational Robot no longer requires the AppMapSubKey be provided and will 
                 attempt to use the string as literal text if no AppMapSubKey is found in 
@@ -231,10 +244,13 @@ public class GenericObject extends GenericMaster {
      @param appMapSubkey  Optional:YES 
                 (Optional)Name of the AppMap subkey to lookup or the literal text to use for the click.
               
+     @param autoScroll  Optional:YES 
+                (Optional) True|False. If the component will be scrolled into view automatically before clicking. The default value is true.
+              
      **********/
-    public ComponentFunction click(String appMapSubkey ) {
+    public ComponentFunction click(String appMapSubkey, String autoScroll ) {
 
-        return GenericObjectFunctions.click(getWindow().getName(), getName(), appMapSubkey);
+        return GenericObjectFunctions.click(getWindow().getName(), getName(), appMapSubkey, autoScroll);
     }
 
     /*********** <pre> 
@@ -244,6 +260,9 @@ public class GenericObject extends GenericMaster {
                 By default, clicks on the center of the component.
                 We can also click on any part of an object, or any point relative to an object 
                 based on a provided x,y coordinate or other component-specific parameters.  
+                
+                For SE+, the coordinate can be percentage format, like "20%,30%". This percentage format 
+                indicates the point (20% width of component, 30% height of component) relative to the object.
                 
                 The object to be clicked is first given context and then a click is 
                 generated at the coordinates.  Thus, a subitem or object can be 
@@ -260,6 +279,11 @@ public class GenericObject extends GenericMaster {
                 (4) t MainWindow MainWindow  Click "50,200"
                 (5) t MainWindow MainWindow  Click "Coords=50,200"
                 
+                For SE+, the Data Table records can be:
+                
+                (6) t MainWindow MainWindow  Click "50%,20%"
+                (7) t MainWindow MainWindow  Click "50,20%"
+                
                 #2 above will contain an AnObject="3,10" entry in the MainWindow section 
                 of the Application Map to click at x=3, y=10 in the MainWindow.
                 
@@ -271,6 +295,11 @@ public class GenericObject extends GenericMaster {
                 
                 #4 and #5 above show using literal text instead of an App Map entry to specify 
                 where to click relative to the item.
+                
+                #6 and #7 above show using percentage format in SE+. #6 will click at position, 
+                where the X value equals 50% width of component, its Y value equals 20% height of component, 
+                relative to the object. #7 will click at position, where the X value equals 50, 
+                its Y value equals 20% height of component, relative to the object.
                 
                 Rational Robot no longer requires the AppMapSubKey be provided and will 
                 attempt to use the string as literal text if no AppMapSubKey is found in 
@@ -321,12 +350,238 @@ public class GenericObject extends GenericMaster {
      @param appMapSubkey  Optional:YES 
                 (Optional)Name of the AppMap subkey to lookup or the literal text to use for the click.
               
+     @param autoScroll  Optional:YES 
+                (Optional) True|False. If the component will be scrolled into view automatically before clicking. The default value is true.
+              
      **********/
-    public void click(StepTestTable table, String appMapSubkey ) {
+    public void click(StepTestTable table, String appMapSubkey, String autoScroll ) {
 
         if ( table == null ) throw new IllegalArgumentException ( "click.table = null");
 
-        table.add( GenericObjectFunctions.click(getWindow().getName(), getName(), appMapSubkey));
+        table.add( GenericObjectFunctions.click(getWindow().getName(), getName(), appMapSubkey, autoScroll));
+    }
+
+    /*********** <pre> 
+                A single click on an object.
+              
+                
+                By default, clicks on the center of the component.
+                We can also click on any part of an object, or any point relative to an object 
+                based on a provided x,y coordinate or other component-specific parameters.  
+                
+                For SE+, the coordinate can be percentage format, like "20%,30%". This percentage format 
+                indicates the point (20% width of component, 30% height of component) relative to the object.
+                
+                The object to be clicked is first given context and then a click is 
+                generated at the coordinates.  Thus, a subitem or object can be 
+                referenced by name even though it is only recognized via coordinates.
+                
+                The coordinate lookup is done with the component name of the record AND 
+                Field #5 or by providing the literal text of the coordinates, where supported.
+                
+                Typical Data Table records:
+                
+                (1) t MainWindow MainWindow  Click
+                (2) t MainWindow MainWindow  Click AnObject
+                (3) t MainWindow FolderTree  Click Node1
+                (4) t MainWindow MainWindow  Click "50,200"
+                (5) t MainWindow MainWindow  Click "Coords=50,200"
+                
+                For SE+, the Data Table records can be:
+                
+                (6) t MainWindow MainWindow  Click "50%,20%"
+                (7) t MainWindow MainWindow  Click "50,20%"
+                
+                #2 above will contain an AnObject="3,10" entry in the MainWindow section 
+                of the Application Map to click at x=3, y=10 in the MainWindow.
+                
+                #3 above will contain a FolderTree entry in the MainWindow section with 
+                normal recognition information for it.  FolderTree will also have it's
+                own section in the Application Map in which there will be an entry like 
+                Node1="15,30".  This will tell Robot to locate the FolderTree Generic 
+                object and click at the coordinates specified by the reference.
+                
+                #4 and #5 above show using literal text instead of an App Map entry to specify 
+                where to click relative to the item.
+                
+                #6 and #7 above show using percentage format in SE+. #6 will click at position, 
+                where the X value equals 50% width of component, its Y value equals 20% height of component, 
+                relative to the object. #7 will click at position, where the X value equals 50, 
+                its Y value equals 20% height of component, relative to the object.
+                
+                Rational Robot no longer requires the AppMapSubKey be provided and will 
+                attempt to use the string as literal text if no AppMapSubKey is found in 
+                the current App Map.  Robot also no longer assumes the AppMapSubKey value 
+                or the literal value is presenting coordinate information.  This allows 
+                components that can accept parameters other than coordinates, like table 
+                row/col values or ImageMap areas to be specified.
+                
+                If the value is deduced to contain coordinates, but is not prefixed with 
+                "Coords=" text, then Robot will add the prefix.  Otherwise, the text value 
+                will remain unmodified.
+                
+		        This is the direction we expect all tools to follow going forward.
+		        
+		        Engines should also attempt to support coordinates separated by alternate separators.  
+		        The most common separators that should be supported would be:
+		        
+		        "," (comma) Example: "50,200"
+		        ";" (semi-colon) Example: "50;200"
+		        " " (space) Example: "50 200"
+		        
+		        
+		        Note: the TID supports this command using 
+		        Image-Based Testing 
+		        techniques and App Map entries as well as literal text coordinates.
+		        
+		        For IOS: Any optional coordinates MUST be specified as an integer number between 
+		        0-100.  0 represents the extreme left (or top), while 100 represents the extreme 
+		        right (or bottom). IOS does not use absolute coordinates, but relative coordinates 
+		        representing a percentage of the element width or height.
+		        
+                  </pre>    
+    Supporting Engines:
+    <P/><UL>
+    <LI>Google Android</LI>
+    <LI>Rational Robot</LI>
+    <LI>Rational RobotJ</LI>
+    <LI>Apple IOS</LI>
+    <LI>SAFS TIDComponent</LI>
+    <LI>Mercury Interactive WinRunner</LI>
+    <LI>Automated QA TestComplete</LI>
+    <LI>Abbot Abbot</LI>
+    <LI>OpenQA Selenium</LI>
+    <LI>OpenQA Selenium</LI>
+    </UL>
+
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>         appMapSubkey -- Optional:YES 
+                (Optional)Name of the AppMap subkey to lookup or the literal text to use for the click.
+              <BR/>         autoScroll -- Optional:YES 
+                (Optional) True|False. If the component will be scrolled into view automatically before clicking. The default value is true.
+              
+    </UL>
+
+     **********/
+    public ComponentFunction click(String[] parameters ) {
+
+        if ( parameters == null ) throw new IllegalArgumentException ( "click.parameters = null");
+        return GenericObjectFunctions.click(getWindow().getName(), getName(), parameters);
+    }
+
+    /*********** <pre> 
+                A single click on an object.
+              
+                
+                By default, clicks on the center of the component.
+                We can also click on any part of an object, or any point relative to an object 
+                based on a provided x,y coordinate or other component-specific parameters.  
+                
+                For SE+, the coordinate can be percentage format, like "20%,30%". This percentage format 
+                indicates the point (20% width of component, 30% height of component) relative to the object.
+                
+                The object to be clicked is first given context and then a click is 
+                generated at the coordinates.  Thus, a subitem or object can be 
+                referenced by name even though it is only recognized via coordinates.
+                
+                The coordinate lookup is done with the component name of the record AND 
+                Field #5 or by providing the literal text of the coordinates, where supported.
+                
+                Typical Data Table records:
+                
+                (1) t MainWindow MainWindow  Click
+                (2) t MainWindow MainWindow  Click AnObject
+                (3) t MainWindow FolderTree  Click Node1
+                (4) t MainWindow MainWindow  Click "50,200"
+                (5) t MainWindow MainWindow  Click "Coords=50,200"
+                
+                For SE+, the Data Table records can be:
+                
+                (6) t MainWindow MainWindow  Click "50%,20%"
+                (7) t MainWindow MainWindow  Click "50,20%"
+                
+                #2 above will contain an AnObject="3,10" entry in the MainWindow section 
+                of the Application Map to click at x=3, y=10 in the MainWindow.
+                
+                #3 above will contain a FolderTree entry in the MainWindow section with 
+                normal recognition information for it.  FolderTree will also have it's
+                own section in the Application Map in which there will be an entry like 
+                Node1="15,30".  This will tell Robot to locate the FolderTree Generic 
+                object and click at the coordinates specified by the reference.
+                
+                #4 and #5 above show using literal text instead of an App Map entry to specify 
+                where to click relative to the item.
+                
+                #6 and #7 above show using percentage format in SE+. #6 will click at position, 
+                where the X value equals 50% width of component, its Y value equals 20% height of component, 
+                relative to the object. #7 will click at position, where the X value equals 50, 
+                its Y value equals 20% height of component, relative to the object.
+                
+                Rational Robot no longer requires the AppMapSubKey be provided and will 
+                attempt to use the string as literal text if no AppMapSubKey is found in 
+                the current App Map.  Robot also no longer assumes the AppMapSubKey value 
+                or the literal value is presenting coordinate information.  This allows 
+                components that can accept parameters other than coordinates, like table 
+                row/col values or ImageMap areas to be specified.
+                
+                If the value is deduced to contain coordinates, but is not prefixed with 
+                "Coords=" text, then Robot will add the prefix.  Otherwise, the text value 
+                will remain unmodified.
+                
+		        This is the direction we expect all tools to follow going forward.
+		        
+		        Engines should also attempt to support coordinates separated by alternate separators.  
+		        The most common separators that should be supported would be:
+		        
+		        "," (comma) Example: "50,200"
+		        ";" (semi-colon) Example: "50;200"
+		        " " (space) Example: "50 200"
+		        
+		        
+		        Note: the TID supports this command using 
+		        Image-Based Testing 
+		        techniques and App Map entries as well as literal text coordinates.
+		        
+		        For IOS: Any optional coordinates MUST be specified as an integer number between 
+		        0-100.  0 represents the extreme left (or top), while 100 represents the extreme 
+		        right (or bottom). IOS does not use absolute coordinates, but relative coordinates 
+		        representing a percentage of the element width or height.
+		        
+                  </pre>    
+    Supporting Engines:
+    <P/><UL>
+    <LI>Google Android</LI>
+    <LI>Rational Robot</LI>
+    <LI>Rational RobotJ</LI>
+    <LI>Apple IOS</LI>
+    <LI>SAFS TIDComponent</LI>
+    <LI>Mercury Interactive WinRunner</LI>
+    <LI>Automated QA TestComplete</LI>
+    <LI>Abbot Abbot</LI>
+    <LI>OpenQA Selenium</LI>
+    <LI>OpenQA Selenium</LI>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>         appMapSubkey -- Optional:YES 
+                (Optional)Name of the AppMap subkey to lookup or the literal text to use for the click.
+              <BR/>         autoScroll -- Optional:YES 
+                (Optional) True|False. If the component will be scrolled into view automatically before clicking. The default value is true.
+              
+    </UL>
+
+     **********/
+    public void click(StepTestTable table, String[] parameters ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "click.table = null");
+        if ( parameters == null ) throw new IllegalArgumentException ( "click.parameters = null");
+        table.add( GenericObjectFunctions.click(getWindow().getName(), getName(), parameters));
     }
 
     /*********** <pre> 
@@ -1267,7 +1522,9 @@ public class GenericObject extends GenericMaster {
                 (3) t MainWindow  ToolItem  CtrlClick PrintTool
                 
                 #2 above will contain an AnObject="3,10" entry in the MainWindow section
-                of the Application Map to CTRL-click at x=3, y=10 in the MainWindow.
+                of the Application Map to CTRL-click at x=3, y=10 in the MainWindow. For SE+, the 
+                coordinate can be percentage format, like "20%,30%". This percentage format indicates 
+                the point (20% width of component, 30% height of component) relative to the object.
                 
                 #3 above will contain a ToolItem entry in the MainWindow section with
                 normal recognition information for it .  ToolItem will also have it's
@@ -1298,10 +1555,13 @@ public class GenericObject extends GenericMaster {
      @param appMapSubkey  Optional:YES
                 (Optional) Name of the AppMap subkey to lookup and use for the CTRL-click.
               
+     @param autoScroll  Optional:YES 
+                (Optional) True|False. If the component will be scrolled into view automatically before clicking. The default value is true.
+              
      **********/
-    public ComponentFunction ctrlClick(String appMapSubkey ) {
+    public ComponentFunction ctrlClick(String appMapSubkey, String autoScroll ) {
 
-        return GenericObjectFunctions.ctrlClick(getWindow().getName(), getName(), appMapSubkey);
+        return GenericObjectFunctions.ctrlClick(getWindow().getName(), getName(), appMapSubkey, autoScroll);
     }
 
     /*********** <pre>
@@ -1324,7 +1584,9 @@ public class GenericObject extends GenericMaster {
                 (3) t MainWindow  ToolItem  CtrlClick PrintTool
                 
                 #2 above will contain an AnObject="3,10" entry in the MainWindow section
-                of the Application Map to CTRL-click at x=3, y=10 in the MainWindow.
+                of the Application Map to CTRL-click at x=3, y=10 in the MainWindow. For SE+, the 
+                coordinate can be percentage format, like "20%,30%". This percentage format indicates 
+                the point (20% width of component, 30% height of component) relative to the object.
                 
                 #3 above will contain a ToolItem entry in the MainWindow section with
                 normal recognition information for it .  ToolItem will also have it's
@@ -1357,12 +1619,154 @@ public class GenericObject extends GenericMaster {
      @param appMapSubkey  Optional:YES
                 (Optional) Name of the AppMap subkey to lookup and use for the CTRL-click.
               
+     @param autoScroll  Optional:YES 
+                (Optional) True|False. If the component will be scrolled into view automatically before clicking. The default value is true.
+              
      **********/
-    public void ctrlClick(StepTestTable table, String appMapSubkey ) {
+    public void ctrlClick(StepTestTable table, String appMapSubkey, String autoScroll ) {
 
         if ( table == null ) throw new IllegalArgumentException ( "ctrlClick.table = null");
 
-        table.add( GenericObjectFunctions.ctrlClick(getWindow().getName(), getName(), appMapSubkey));
+        table.add( GenericObjectFunctions.ctrlClick(getWindow().getName(), getName(), appMapSubkey, autoScroll));
+    }
+
+    /*********** <pre>
+                A CTRL-click on an object.
+              
+                By default we should click the center of the object.
+                We can also CTRL-click on any part of an object based on a stored x,y
+                coordinate.  The object containing the coordinate is first given
+                context and then a CTRL-click is generated at the coordinate.  Thus, an item
+                or object can be referenced by name even though it is only recognized
+                via coordinates.
+                
+                The coordinate lookup is done with the component name of the record AND
+                Field #5.
+                
+                Typical Data Table records:
+                
+                (1) t MainWindow MainWindow CtrlClick
+                (2) t MainWindow MainWindow CtrlClick AnObject
+                (3) t MainWindow  ToolItem  CtrlClick PrintTool
+                
+                #2 above will contain an AnObject="3,10" entry in the MainWindow section
+                of the Application Map to CTRL-click at x=3, y=10 in the MainWindow. For SE+, the 
+                coordinate can be percentage format, like "20%,30%". This percentage format indicates 
+                the point (20% width of component, 30% height of component) relative to the object.
+                
+                #3 above will contain a ToolItem entry in the MainWindow section with
+                normal recognition information for it .  ToolItem will also have it's
+                own section in the Application Map in which there will be an entry like
+                PrintTool="15,30".  This will tell Robot to locate the PrintTool Window
+                object and CTRL-click at the coordinates specified by the reference.
+				
+				Engines should also attempt to support coordinates separated by alternate separators.  
+				The most common separators that should be supported would be:
+				
+				"," (comma) Example: "50,200"
+				";" (semi-colon) Example: "50;200"
+				" " (space) Example: "50 200"
+				
+				
+                  </pre>    
+    Supporting Engines:
+    <P/><UL>
+    <LI>Rational Robot</LI>
+    <LI>Rational RobotJ</LI>
+    <LI>Mercury Interactive WinRunner</LI>
+    <LI>SAFS TIDComponent</LI>
+    <LI>Automated QA TestComplete</LI>
+    <LI>Abbot Abbot</LI>
+    <LI>OpenQA Selenium</LI>
+    <LI>OpenQA Selenium</LI>
+    </UL>
+
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>         appMapSubkey -- Optional:YES
+                (Optional) Name of the AppMap subkey to lookup and use for the CTRL-click.
+              <BR/>         autoScroll -- Optional:YES 
+                (Optional) True|False. If the component will be scrolled into view automatically before clicking. The default value is true.
+              
+    </UL>
+
+     **********/
+    public ComponentFunction ctrlClick(String[] parameters ) {
+
+        if ( parameters == null ) throw new IllegalArgumentException ( "ctrlClick.parameters = null");
+        return GenericObjectFunctions.ctrlClick(getWindow().getName(), getName(), parameters);
+    }
+
+    /*********** <pre>
+                A CTRL-click on an object.
+              
+                By default we should click the center of the object.
+                We can also CTRL-click on any part of an object based on a stored x,y
+                coordinate.  The object containing the coordinate is first given
+                context and then a CTRL-click is generated at the coordinate.  Thus, an item
+                or object can be referenced by name even though it is only recognized
+                via coordinates.
+                
+                The coordinate lookup is done with the component name of the record AND
+                Field #5.
+                
+                Typical Data Table records:
+                
+                (1) t MainWindow MainWindow CtrlClick
+                (2) t MainWindow MainWindow CtrlClick AnObject
+                (3) t MainWindow  ToolItem  CtrlClick PrintTool
+                
+                #2 above will contain an AnObject="3,10" entry in the MainWindow section
+                of the Application Map to CTRL-click at x=3, y=10 in the MainWindow. For SE+, the 
+                coordinate can be percentage format, like "20%,30%". This percentage format indicates 
+                the point (20% width of component, 30% height of component) relative to the object.
+                
+                #3 above will contain a ToolItem entry in the MainWindow section with
+                normal recognition information for it .  ToolItem will also have it's
+                own section in the Application Map in which there will be an entry like
+                PrintTool="15,30".  This will tell Robot to locate the PrintTool Window
+                object and CTRL-click at the coordinates specified by the reference.
+				
+				Engines should also attempt to support coordinates separated by alternate separators.  
+				The most common separators that should be supported would be:
+				
+				"," (comma) Example: "50,200"
+				";" (semi-colon) Example: "50;200"
+				" " (space) Example: "50 200"
+				
+				
+                  </pre>    
+    Supporting Engines:
+    <P/><UL>
+    <LI>Rational Robot</LI>
+    <LI>Rational RobotJ</LI>
+    <LI>Mercury Interactive WinRunner</LI>
+    <LI>SAFS TIDComponent</LI>
+    <LI>Automated QA TestComplete</LI>
+    <LI>Abbot Abbot</LI>
+    <LI>OpenQA Selenium</LI>
+    <LI>OpenQA Selenium</LI>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>         appMapSubkey -- Optional:YES
+                (Optional) Name of the AppMap subkey to lookup and use for the CTRL-click.
+              <BR/>         autoScroll -- Optional:YES 
+                (Optional) True|False. If the component will be scrolled into view automatically before clicking. The default value is true.
+              
+    </UL>
+
+     **********/
+    public void ctrlClick(StepTestTable table, String[] parameters ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "ctrlClick.table = null");
+        if ( parameters == null ) throw new IllegalArgumentException ( "ctrlClick.parameters = null");
+        table.add( GenericObjectFunctions.ctrlClick(getWindow().getName(), getName(), parameters));
     }
 
     /*********** <pre> 
@@ -1517,7 +1921,9 @@ public class GenericObject extends GenericMaster {
                 (3) t MainWindow  ToolItem  CtrlRightClick PrintTool
                 
                 #2 above will contain an AnObject="3,10" entry in the MainWindow section
-                of the Application Map to CTRL-click at x=3, y=10 in the MainWindow.
+                of the Application Map to CTRL-click at x=3, y=10 in the MainWindow. For SE+, the 
+                coordinate can be percentage format, like "20%,30%". This percentage format indicates 
+                the point (20% width of component, 30% height of component) relative to the object.
                 
                 #3 above will contain a ToolItem entry in the MainWindow section with
                 normal recognition information for it .  ToolItem will also have it's
@@ -1536,10 +1942,13 @@ public class GenericObject extends GenericMaster {
      @param appMapSubkey  Optional:YES
                 (Optional) Name of the AppMap subkey to lookup and use for the CTRL-Right-Click.
               
+     @param autoScroll  Optional:YES 
+                (Optional) True|False. If the component will be scrolled into view automatically before clicking. The default value is true.
+              
      **********/
-    public ComponentFunction ctrlRightClick(String appMapSubkey ) {
+    public ComponentFunction ctrlRightClick(String appMapSubkey, String autoScroll ) {
 
-        return GenericObjectFunctions.ctrlRightClick(getWindow().getName(), getName(), appMapSubkey);
+        return GenericObjectFunctions.ctrlRightClick(getWindow().getName(), getName(), appMapSubkey, autoScroll);
     }
 
     /*********** <pre>
@@ -1562,7 +1971,9 @@ public class GenericObject extends GenericMaster {
                 (3) t MainWindow  ToolItem  CtrlRightClick PrintTool
                 
                 #2 above will contain an AnObject="3,10" entry in the MainWindow section
-                of the Application Map to CTRL-click at x=3, y=10 in the MainWindow.
+                of the Application Map to CTRL-click at x=3, y=10 in the MainWindow. For SE+, the 
+                coordinate can be percentage format, like "20%,30%". This percentage format indicates 
+                the point (20% width of component, 30% height of component) relative to the object.
                 
                 #3 above will contain a ToolItem entry in the MainWindow section with
                 normal recognition information for it .  ToolItem will also have it's
@@ -1583,12 +1994,130 @@ public class GenericObject extends GenericMaster {
      @param appMapSubkey  Optional:YES
                 (Optional) Name of the AppMap subkey to lookup and use for the CTRL-Right-Click.
               
+     @param autoScroll  Optional:YES 
+                (Optional) True|False. If the component will be scrolled into view automatically before clicking. The default value is true.
+              
      **********/
-    public void ctrlRightClick(StepTestTable table, String appMapSubkey ) {
+    public void ctrlRightClick(StepTestTable table, String appMapSubkey, String autoScroll ) {
 
         if ( table == null ) throw new IllegalArgumentException ( "ctrlRightClick.table = null");
 
-        table.add( GenericObjectFunctions.ctrlRightClick(getWindow().getName(), getName(), appMapSubkey));
+        table.add( GenericObjectFunctions.ctrlRightClick(getWindow().getName(), getName(), appMapSubkey, autoScroll));
+    }
+
+    /*********** <pre>
+                A CTRL-Right click on an object.
+              
+                By default we should click the center of the object.
+                We can also CTRL-Right-Click on any part of an object based on a stored x,y
+                coordinate.  The object containing the coordinate is first given
+                context and then a CTRL-Right-Click is generated at the coordinate.  Thus, an item
+                or object can be referenced by name even though it is only recognized
+                via coordinates.
+                
+                The coordinate lookup is done with the component name of the record AND
+                Field #5.
+                
+                Typical Data Table records:
+                
+                (1) t MainWindow MainWindow CtrlRightClick
+                (2) t MainWindow MainWindow CtrlRightClick AnObject
+                (3) t MainWindow  ToolItem  CtrlRightClick PrintTool
+                
+                #2 above will contain an AnObject="3,10" entry in the MainWindow section
+                of the Application Map to CTRL-click at x=3, y=10 in the MainWindow. For SE+, the 
+                coordinate can be percentage format, like "20%,30%". This percentage format indicates 
+                the point (20% width of component, 30% height of component) relative to the object.
+                
+                #3 above will contain a ToolItem entry in the MainWindow section with
+                normal recognition information for it .  ToolItem will also have it's
+                own section in the Application Map in which there will be an entry like
+                PrintTool="15,30".  This will tell Robot to locate the PrintTool Window
+                object and CTRL-Right-Click at the coordinates specified by the reference.
+                  </pre>    
+    Supporting Engines:
+    <P/><UL>
+    <LI>Rational Robot</LI>
+    <LI>SAFS TIDComponent</LI>
+    <LI>Rational RobotJ</LI>
+    <LI>OpenQA Selenium</LI>
+    <LI>OpenQA Selenium</LI>
+    </UL>
+
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>         appMapSubkey -- Optional:YES
+                (Optional) Name of the AppMap subkey to lookup and use for the CTRL-Right-Click.
+              <BR/>         autoScroll -- Optional:YES 
+                (Optional) True|False. If the component will be scrolled into view automatically before clicking. The default value is true.
+              
+    </UL>
+
+     **********/
+    public ComponentFunction ctrlRightClick(String[] parameters ) {
+
+        if ( parameters == null ) throw new IllegalArgumentException ( "ctrlRightClick.parameters = null");
+        return GenericObjectFunctions.ctrlRightClick(getWindow().getName(), getName(), parameters);
+    }
+
+    /*********** <pre>
+                A CTRL-Right click on an object.
+              
+                By default we should click the center of the object.
+                We can also CTRL-Right-Click on any part of an object based on a stored x,y
+                coordinate.  The object containing the coordinate is first given
+                context and then a CTRL-Right-Click is generated at the coordinate.  Thus, an item
+                or object can be referenced by name even though it is only recognized
+                via coordinates.
+                
+                The coordinate lookup is done with the component name of the record AND
+                Field #5.
+                
+                Typical Data Table records:
+                
+                (1) t MainWindow MainWindow CtrlRightClick
+                (2) t MainWindow MainWindow CtrlRightClick AnObject
+                (3) t MainWindow  ToolItem  CtrlRightClick PrintTool
+                
+                #2 above will contain an AnObject="3,10" entry in the MainWindow section
+                of the Application Map to CTRL-click at x=3, y=10 in the MainWindow. For SE+, the 
+                coordinate can be percentage format, like "20%,30%". This percentage format indicates 
+                the point (20% width of component, 30% height of component) relative to the object.
+                
+                #3 above will contain a ToolItem entry in the MainWindow section with
+                normal recognition information for it .  ToolItem will also have it's
+                own section in the Application Map in which there will be an entry like
+                PrintTool="15,30".  This will tell Robot to locate the PrintTool Window
+                object and CTRL-Right-Click at the coordinates specified by the reference.
+                  </pre>    
+    Supporting Engines:
+    <P/><UL>
+    <LI>Rational Robot</LI>
+    <LI>SAFS TIDComponent</LI>
+    <LI>Rational RobotJ</LI>
+    <LI>OpenQA Selenium</LI>
+    <LI>OpenQA Selenium</LI>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>         appMapSubkey -- Optional:YES
+                (Optional) Name of the AppMap subkey to lookup and use for the CTRL-Right-Click.
+              <BR/>         autoScroll -- Optional:YES 
+                (Optional) True|False. If the component will be scrolled into view automatically before clicking. The default value is true.
+              
+    </UL>
+
+     **********/
+    public void ctrlRightClick(StepTestTable table, String[] parameters ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "ctrlRightClick.table = null");
+        if ( parameters == null ) throw new IllegalArgumentException ( "ctrlRightClick.parameters = null");
+        table.add( GenericObjectFunctions.ctrlRightClick(getWindow().getName(), getName(), parameters));
     }
 
     /*********** <pre> 
@@ -1743,7 +2272,9 @@ public class GenericObject extends GenericMaster {
                 (3) t MainWindow FolderTree DoubleClick Node1
                 
                 #2 above will contain an AnObject="3,10" entry in the MainWindow section 
-                of the Application Map to double click at x=3, y=10 in the MainWindow.
+                of the Application Map to double click at x=3, y=10 in the MainWindow. For SE+, the coordinate 
+                can be percentage format, like "20%,30%". This percentage format indicates 
+                the point (20% width of component, 30% height of component) relative to the object.
                 
                 #3 above will contain a FolderTree entry in the MainWindow section with 
                 normal recognition information for it .  FolderTree will also have it's
@@ -1784,10 +2315,13 @@ public class GenericObject extends GenericMaster {
      @param appMapSubkey  Optional:YES 
                 (Optional) Name of the AppMap subkey to lookup or the literal text to use for the double click.
               
+     @param autoScroll  Optional:YES 
+                (Optional) True|False. If the component will be scrolled into view automatically before clicking. The default value is true.
+              
      **********/
-    public ComponentFunction doubleClick(String appMapSubkey ) {
+    public ComponentFunction doubleClick(String appMapSubkey, String autoScroll ) {
 
-        return GenericObjectFunctions.doubleClick(getWindow().getName(), getName(), appMapSubkey);
+        return GenericObjectFunctions.doubleClick(getWindow().getName(), getName(), appMapSubkey, autoScroll);
     }
 
     /*********** <pre> 
@@ -1810,7 +2344,9 @@ public class GenericObject extends GenericMaster {
                 (3) t MainWindow FolderTree DoubleClick Node1
                 
                 #2 above will contain an AnObject="3,10" entry in the MainWindow section 
-                of the Application Map to double click at x=3, y=10 in the MainWindow.
+                of the Application Map to double click at x=3, y=10 in the MainWindow. For SE+, the coordinate 
+                can be percentage format, like "20%,30%". This percentage format indicates 
+                the point (20% width of component, 30% height of component) relative to the object.
                 
                 #3 above will contain a FolderTree entry in the MainWindow section with 
                 normal recognition information for it .  FolderTree will also have it's
@@ -1853,12 +2389,174 @@ public class GenericObject extends GenericMaster {
      @param appMapSubkey  Optional:YES 
                 (Optional) Name of the AppMap subkey to lookup or the literal text to use for the double click.
               
+     @param autoScroll  Optional:YES 
+                (Optional) True|False. If the component will be scrolled into view automatically before clicking. The default value is true.
+              
      **********/
-    public void doubleClick(StepTestTable table, String appMapSubkey ) {
+    public void doubleClick(StepTestTable table, String appMapSubkey, String autoScroll ) {
 
         if ( table == null ) throw new IllegalArgumentException ( "doubleClick.table = null");
 
-        table.add( GenericObjectFunctions.doubleClick(getWindow().getName(), getName(), appMapSubkey));
+        table.add( GenericObjectFunctions.doubleClick(getWindow().getName(), getName(), appMapSubkey, autoScroll));
+    }
+
+    /*********** <pre> 
+                A double click on an object.
+               
+                By default we should click the center of the object.
+                We can also double click on any part of an object based on a stored 
+                x,y coordinate.  The object containing the coordinate is first given 
+                context and then a double click is generated at the coordinate.  Thus, 
+                an item or object can be referenced by name even though it is only 
+                recognized via coordinates.
+                
+                The coordinate lookup is done with the component name of the record AND 
+                Field #5.
+                
+                Typical Data Table records:
+                
+                (1) t MainWindow MainWindow DoubleClick
+                (2) t MainWindow MainWindow DoubleClick AnObject
+                (3) t MainWindow FolderTree DoubleClick Node1
+                
+                #2 above will contain an AnObject="3,10" entry in the MainWindow section 
+                of the Application Map to double click at x=3, y=10 in the MainWindow. For SE+, the coordinate 
+                can be percentage format, like "20%,30%". This percentage format indicates 
+                the point (20% width of component, 30% height of component) relative to the object.
+                
+                #3 above will contain a FolderTree entry in the MainWindow section with 
+                normal recognition information for it .  FolderTree will also have it's
+                own section in the Application Map in which there will be an entry like 
+                Node1="15,30".  This will tell Robot to locate the FolderTree 
+                object and double click at the coordinates specified by the reference.
+  		        
+		        Engines should also attempt to support coordinates separated by alternate separators.  
+		        The most common separators that should be supported would be:
+		        
+				"," (comma) Example: "50,200"
+				";" (semi-colon) Example: "50;200"
+				" " (space) Example: "50 200"
+		        
+		        
+		        Note: the TID supports this command using 
+		        Image-Based Testing 
+		        techniques and App Map entries as well as literal text coordinates.
+		        
+		        For IOS: Any optional coordinates MUST be specified as an integer number between 
+		        0-100.  0 represents the extreme left (or top), while 100 represents the extreme 
+		        right (or bottom). IOS does not use absolute coordinates, but relative coordinates 
+		        representing a percentage of the element width or height.
+		        
+                  </pre>    
+    Supporting Engines:
+    <P/><UL>
+    <LI>Rational Robot</LI>
+    <LI>Rational RobotJ</LI>
+    <LI>Apple IOS</LI>
+    <LI>SAFS TIDComponent</LI>
+    <LI>Automated QA TestComplete</LI>
+    <LI>Mercury Interactive WinRunner</LI>
+    <LI>Abbot Abbot</LI>
+    <LI>OpenQA Selenium</LI>
+    <LI>OpenQA Selenium</LI>
+    </UL>
+
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>         appMapSubkey -- Optional:YES 
+                (Optional) Name of the AppMap subkey to lookup or the literal text to use for the double click.
+              <BR/>         autoScroll -- Optional:YES 
+                (Optional) True|False. If the component will be scrolled into view automatically before clicking. The default value is true.
+              
+    </UL>
+
+     **********/
+    public ComponentFunction doubleClick(String[] parameters ) {
+
+        if ( parameters == null ) throw new IllegalArgumentException ( "doubleClick.parameters = null");
+        return GenericObjectFunctions.doubleClick(getWindow().getName(), getName(), parameters);
+    }
+
+    /*********** <pre> 
+                A double click on an object.
+               
+                By default we should click the center of the object.
+                We can also double click on any part of an object based on a stored 
+                x,y coordinate.  The object containing the coordinate is first given 
+                context and then a double click is generated at the coordinate.  Thus, 
+                an item or object can be referenced by name even though it is only 
+                recognized via coordinates.
+                
+                The coordinate lookup is done with the component name of the record AND 
+                Field #5.
+                
+                Typical Data Table records:
+                
+                (1) t MainWindow MainWindow DoubleClick
+                (2) t MainWindow MainWindow DoubleClick AnObject
+                (3) t MainWindow FolderTree DoubleClick Node1
+                
+                #2 above will contain an AnObject="3,10" entry in the MainWindow section 
+                of the Application Map to double click at x=3, y=10 in the MainWindow. For SE+, the coordinate 
+                can be percentage format, like "20%,30%". This percentage format indicates 
+                the point (20% width of component, 30% height of component) relative to the object.
+                
+                #3 above will contain a FolderTree entry in the MainWindow section with 
+                normal recognition information for it .  FolderTree will also have it's
+                own section in the Application Map in which there will be an entry like 
+                Node1="15,30".  This will tell Robot to locate the FolderTree 
+                object and double click at the coordinates specified by the reference.
+  		        
+		        Engines should also attempt to support coordinates separated by alternate separators.  
+		        The most common separators that should be supported would be:
+		        
+				"," (comma) Example: "50,200"
+				";" (semi-colon) Example: "50;200"
+				" " (space) Example: "50 200"
+		        
+		        
+		        Note: the TID supports this command using 
+		        Image-Based Testing 
+		        techniques and App Map entries as well as literal text coordinates.
+		        
+		        For IOS: Any optional coordinates MUST be specified as an integer number between 
+		        0-100.  0 represents the extreme left (or top), while 100 represents the extreme 
+		        right (or bottom). IOS does not use absolute coordinates, but relative coordinates 
+		        representing a percentage of the element width or height.
+		        
+                  </pre>    
+    Supporting Engines:
+    <P/><UL>
+    <LI>Rational Robot</LI>
+    <LI>Rational RobotJ</LI>
+    <LI>Apple IOS</LI>
+    <LI>SAFS TIDComponent</LI>
+    <LI>Automated QA TestComplete</LI>
+    <LI>Mercury Interactive WinRunner</LI>
+    <LI>Abbot Abbot</LI>
+    <LI>OpenQA Selenium</LI>
+    <LI>OpenQA Selenium</LI>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>         appMapSubkey -- Optional:YES 
+                (Optional) Name of the AppMap subkey to lookup or the literal text to use for the double click.
+              <BR/>         autoScroll -- Optional:YES 
+                (Optional) True|False. If the component will be scrolled into view automatically before clicking. The default value is true.
+              
+    </UL>
+
+     **********/
+    public void doubleClick(StepTestTable table, String[] parameters ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "doubleClick.table = null");
+        if ( parameters == null ) throw new IllegalArgumentException ( "doubleClick.parameters = null");
+        table.add( GenericObjectFunctions.doubleClick(getWindow().getName(), getName(), parameters));
     }
 
     /*********** <pre> 
@@ -2129,7 +2827,7 @@ public class GenericObject extends GenericMaster {
 
     /*********** <pre> 
                   A left mouse drag is performed from one object to another object based on the offsets values.
-                 
+                
                   Drag will be performed from component (from-component) to another to-component. Offsets value are the drag object select location. The location (drag and release) calucate by X and Y percentage cordination. DragTo also supports sub item of component and  sub item of to-component.
                   
                    The coordination specify by offsets value. First two values are for from-component and another are for to-component.
@@ -2140,11 +2838,11 @@ public class GenericObject extends GenericMaster {
 	T, WINDOW,COMPONENT, DRAGTO, ToWINDOW,ToCOMPONENT,"50%,50%,50%,50%"
 	Where first 50%,50% are COMPONENT or their subitem's X and Y location
 	and second 50%,50% are ToCOMPONENT or their subitem's X and Y location.
-		   	                 
-                            
+		             
                     </pre>    Supporting Engines:
     <P/><UL>
     <LI>Automated QA TestComplete</LI>
+    <LI>OpenQA Selenium</LI>
     </UL>
 
      @param toWindow  Optional:NO 
@@ -2173,7 +2871,7 @@ public class GenericObject extends GenericMaster {
 
     /*********** <pre> 
                   A left mouse drag is performed from one object to another object based on the offsets values.
-                 
+                
                   Drag will be performed from component (from-component) to another to-component. Offsets value are the drag object select location. The location (drag and release) calucate by X and Y percentage cordination. DragTo also supports sub item of component and  sub item of to-component.
                   
                    The coordination specify by offsets value. First two values are for from-component and another are for to-component.
@@ -2184,11 +2882,11 @@ public class GenericObject extends GenericMaster {
 	T, WINDOW,COMPONENT, DRAGTO, ToWINDOW,ToCOMPONENT,"50%,50%,50%,50%"
 	Where first 50%,50% are COMPONENT or their subitem's X and Y location
 	and second 50%,50% are ToCOMPONENT or their subitem's X and Y location.
-		   	                 
-                            
+		             
                     </pre>    Supporting Engines:
     <P/><UL>
     <LI>Automated QA TestComplete</LI>
+    <LI>OpenQA Selenium</LI>
     </UL>
 
      @param table  Optional:NO
@@ -2221,7 +2919,7 @@ public class GenericObject extends GenericMaster {
 
     /*********** <pre> 
                   A left mouse drag is performed from one object to another object based on the offsets values.
-                 
+                
                   Drag will be performed from component (from-component) to another to-component. Offsets value are the drag object select location. The location (drag and release) calucate by X and Y percentage cordination. DragTo also supports sub item of component and  sub item of to-component.
                   
                    The coordination specify by offsets value. First two values are for from-component and another are for to-component.
@@ -2232,12 +2930,12 @@ public class GenericObject extends GenericMaster {
 	T, WINDOW,COMPONENT, DRAGTO, ToWINDOW,ToCOMPONENT,"50%,50%,50%,50%"
 	Where first 50%,50% are COMPONENT or their subitem's X and Y location
 	and second 50%,50% are ToCOMPONENT or their subitem's X and Y location.
-		   	                 
-                            
+		             
                     </pre>    
     Supporting Engines:
     <P/><UL>
     <LI>Automated QA TestComplete</LI>
+    <LI>OpenQA Selenium</LI>
     </UL>
 
      @param parameters  Optional:NO
@@ -2266,7 +2964,7 @@ public class GenericObject extends GenericMaster {
 
     /*********** <pre> 
                   A left mouse drag is performed from one object to another object based on the offsets values.
-                 
+                
                   Drag will be performed from component (from-component) to another to-component. Offsets value are the drag object select location. The location (drag and release) calucate by X and Y percentage cordination. DragTo also supports sub item of component and  sub item of to-component.
                   
                    The coordination specify by offsets value. First two values are for from-component and another are for to-component.
@@ -2277,12 +2975,12 @@ public class GenericObject extends GenericMaster {
 	T, WINDOW,COMPONENT, DRAGTO, ToWINDOW,ToCOMPONENT,"50%,50%,50%,50%"
 	Where first 50%,50% are COMPONENT or their subitem's X and Y location
 	and second 50%,50% are ToCOMPONENT or their subitem's X and Y location.
-		   	                 
-                            
+		             
                     </pre>    
     Supporting Engines:
     <P/><UL>
     <LI>Automated QA TestComplete</LI>
+    <LI>OpenQA Selenium</LI>
     </UL>
 
      @param table  Optional:NO
@@ -3425,7 +4123,9 @@ public class GenericObject extends GenericMaster {
                 (3) t MainWindow  ToolItem  RightClick PrintTool
                 
                 #2 above will contain an AnObject="3,10" entry in the MainWindow section 
-                of the Application Map to right click at x=3, y=10 in the MainWindow.
+                of the Application Map to right click at x=3, y=10 in the MainWindow. For SE+, the 
+                coordinate can be percentage format, like "20%,30%". This percentage format indicates 
+                the point (20% width of component, 30% height of component) relative to the object.
                 
                 #3 above will contain a ToolItem entry in the MainWindow section with 
                 normal recognition information for it .  ToolItem will also have it's
@@ -3460,10 +4160,13 @@ public class GenericObject extends GenericMaster {
      @param appMapSubkey  Optional:YES 
                 (Optional) Name of the AppMap subkey to lookup or the literal text to use for the right click.
               
+     @param autoScroll  Optional:YES 
+                (Optional) True|False. If the component will be scrolled into view automatically before clicking. The default value is true.
+              
      **********/
-    public ComponentFunction rightClick(String appMapSubkey ) {
+    public ComponentFunction rightClick(String appMapSubkey, String autoScroll ) {
 
-        return GenericObjectFunctions.rightClick(getWindow().getName(), getName(), appMapSubkey);
+        return GenericObjectFunctions.rightClick(getWindow().getName(), getName(), appMapSubkey, autoScroll);
     }
 
     /*********** <pre> 
@@ -3486,7 +4189,9 @@ public class GenericObject extends GenericMaster {
                 (3) t MainWindow  ToolItem  RightClick PrintTool
                 
                 #2 above will contain an AnObject="3,10" entry in the MainWindow section 
-                of the Application Map to right click at x=3, y=10 in the MainWindow.
+                of the Application Map to right click at x=3, y=10 in the MainWindow. For SE+, the 
+                coordinate can be percentage format, like "20%,30%". This percentage format indicates 
+                the point (20% width of component, 30% height of component) relative to the object.
                 
                 #3 above will contain a ToolItem entry in the MainWindow section with 
                 normal recognition information for it .  ToolItem will also have it's
@@ -3523,12 +4228,162 @@ public class GenericObject extends GenericMaster {
      @param appMapSubkey  Optional:YES 
                 (Optional) Name of the AppMap subkey to lookup or the literal text to use for the right click.
               
+     @param autoScroll  Optional:YES 
+                (Optional) True|False. If the component will be scrolled into view automatically before clicking. The default value is true.
+              
      **********/
-    public void rightClick(StepTestTable table, String appMapSubkey ) {
+    public void rightClick(StepTestTable table, String appMapSubkey, String autoScroll ) {
 
         if ( table == null ) throw new IllegalArgumentException ( "rightClick.table = null");
 
-        table.add( GenericObjectFunctions.rightClick(getWindow().getName(), getName(), appMapSubkey));
+        table.add( GenericObjectFunctions.rightClick(getWindow().getName(), getName(), appMapSubkey, autoScroll));
+    }
+
+    /*********** <pre> 
+                A right click on an object.
+               
+                By default we should click on the center of the object.
+                We can also right click on any part of an object based on a stored x,y 
+                coordinate.  The object containing the coordinate is first given 
+                context and then a right click is generated at the coordinate.  Thus, an item 
+                or object can be referenced by name even though it is only recognized
+                via coordinates.
+                
+                The coordinate lookup is done with the component name of the record AND 
+                Field #5.
+                
+                Typical Data Table records:
+                 
+                (1) t MainWindow MainWindow RightClick 
+                (2) t MainWindow MainWindow RightClick AnObject
+                (3) t MainWindow  ToolItem  RightClick PrintTool
+                
+                #2 above will contain an AnObject="3,10" entry in the MainWindow section 
+                of the Application Map to right click at x=3, y=10 in the MainWindow. For SE+, the 
+                coordinate can be percentage format, like "20%,30%". This percentage format indicates 
+                the point (20% width of component, 30% height of component) relative to the object.
+                
+                #3 above will contain a ToolItem entry in the MainWindow section with 
+                normal recognition information for it .  ToolItem will also have it's
+                own section in the Application Map in which there will be an entry like 
+                PrintTool="15,30".  This will tell Robot to locate the PrintTool Window 
+                object and right click at the coordinates specified by the reference.
+		
+		Engines should also attempt to support coordinates separated by alternate separators.  
+		The most common separators that should be supported would be:
+		
+				"," (comma) Example: "50,200"
+				";" (semi-colon) Example: "50;200"
+				" " (space) Example: "50 200"
+		
+		
+		Note: the TID supports this command using 
+		Image-Based Testing 
+		techniques and App Map entries as well as literal text coordinates.
+		
+                  </pre>    
+    Supporting Engines:
+    <P/><UL>
+    <LI>Rational Robot</LI>
+    <LI>Rational RobotJ</LI>
+    <LI>SAFS TIDComponent</LI>
+    <LI>Automated QA TestComplete</LI>
+    <LI>Mercury Interactive WinRunner</LI>
+    <LI>Abbot Abbot</LI>
+    <LI>OpenQA Selenium</LI>
+    <LI>OpenQA Selenium</LI>
+    </UL>
+
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>         appMapSubkey -- Optional:YES 
+                (Optional) Name of the AppMap subkey to lookup or the literal text to use for the right click.
+              <BR/>         autoScroll -- Optional:YES 
+                (Optional) True|False. If the component will be scrolled into view automatically before clicking. The default value is true.
+              
+    </UL>
+
+     **********/
+    public ComponentFunction rightClick(String[] parameters ) {
+
+        if ( parameters == null ) throw new IllegalArgumentException ( "rightClick.parameters = null");
+        return GenericObjectFunctions.rightClick(getWindow().getName(), getName(), parameters);
+    }
+
+    /*********** <pre> 
+                A right click on an object.
+               
+                By default we should click on the center of the object.
+                We can also right click on any part of an object based on a stored x,y 
+                coordinate.  The object containing the coordinate is first given 
+                context and then a right click is generated at the coordinate.  Thus, an item 
+                or object can be referenced by name even though it is only recognized
+                via coordinates.
+                
+                The coordinate lookup is done with the component name of the record AND 
+                Field #5.
+                
+                Typical Data Table records:
+                 
+                (1) t MainWindow MainWindow RightClick 
+                (2) t MainWindow MainWindow RightClick AnObject
+                (3) t MainWindow  ToolItem  RightClick PrintTool
+                
+                #2 above will contain an AnObject="3,10" entry in the MainWindow section 
+                of the Application Map to right click at x=3, y=10 in the MainWindow. For SE+, the 
+                coordinate can be percentage format, like "20%,30%". This percentage format indicates 
+                the point (20% width of component, 30% height of component) relative to the object.
+                
+                #3 above will contain a ToolItem entry in the MainWindow section with 
+                normal recognition information for it .  ToolItem will also have it's
+                own section in the Application Map in which there will be an entry like 
+                PrintTool="15,30".  This will tell Robot to locate the PrintTool Window 
+                object and right click at the coordinates specified by the reference.
+		
+		Engines should also attempt to support coordinates separated by alternate separators.  
+		The most common separators that should be supported would be:
+		
+				"," (comma) Example: "50,200"
+				";" (semi-colon) Example: "50;200"
+				" " (space) Example: "50 200"
+		
+		
+		Note: the TID supports this command using 
+		Image-Based Testing 
+		techniques and App Map entries as well as literal text coordinates.
+		
+                  </pre>    
+    Supporting Engines:
+    <P/><UL>
+    <LI>Rational Robot</LI>
+    <LI>Rational RobotJ</LI>
+    <LI>SAFS TIDComponent</LI>
+    <LI>Automated QA TestComplete</LI>
+    <LI>Mercury Interactive WinRunner</LI>
+    <LI>Abbot Abbot</LI>
+    <LI>OpenQA Selenium</LI>
+    <LI>OpenQA Selenium</LI>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>         appMapSubkey -- Optional:YES 
+                (Optional) Name of the AppMap subkey to lookup or the literal text to use for the right click.
+              <BR/>         autoScroll -- Optional:YES 
+                (Optional) True|False. If the component will be scrolled into view automatically before clicking. The default value is true.
+              
+    </UL>
+
+     **********/
+    public void rightClick(StepTestTable table, String[] parameters ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "rightClick.table = null");
+        if ( parameters == null ) throw new IllegalArgumentException ( "rightClick.parameters = null");
+        table.add( GenericObjectFunctions.rightClick(getWindow().getName(), getName(), parameters));
     }
 
     /*********** <pre> 
@@ -3891,7 +4746,9 @@ public class GenericObject extends GenericMaster {
                 (3) t MainWindow  ToolItem  ShiftClick PrintTool
                 
                 #2 above will contain an AnObject="3,10" entry in the MainWindow section
-                of the Application Map to SHIFT click at x=3, y=10 in the MainWindow.
+                of the Application Map to SHIFT click at x=3, y=10 in the MainWindow. For SE+, the 
+                coordinate can be percentage format, like "20%,30%". This percentage format indicates 
+                the point (20% width of component, 30% height of component) relative to the object.
                 
                 #3 above will contain a ToolItem entry in the MainWindow section with
                 normal recognition information for it .  ToolItem will also have it's
@@ -3922,10 +4779,13 @@ public class GenericObject extends GenericMaster {
      @param appMapSubkey  Optional:YES
                 (Optional) Name of the AppMap subkey to lookup and use for the SHIFT click.
               
+     @param autoScroll  Optional:YES 
+                (Optional) True|False. If the component will be scrolled into view automatically before clicking. The default value is true.
+              
      **********/
-    public ComponentFunction shiftClick(String appMapSubkey ) {
+    public ComponentFunction shiftClick(String appMapSubkey, String autoScroll ) {
 
-        return GenericObjectFunctions.shiftClick(getWindow().getName(), getName(), appMapSubkey);
+        return GenericObjectFunctions.shiftClick(getWindow().getName(), getName(), appMapSubkey, autoScroll);
     }
 
     /*********** <pre>
@@ -3948,7 +4808,9 @@ public class GenericObject extends GenericMaster {
                 (3) t MainWindow  ToolItem  ShiftClick PrintTool
                 
                 #2 above will contain an AnObject="3,10" entry in the MainWindow section
-                of the Application Map to SHIFT click at x=3, y=10 in the MainWindow.
+                of the Application Map to SHIFT click at x=3, y=10 in the MainWindow. For SE+, the 
+                coordinate can be percentage format, like "20%,30%". This percentage format indicates 
+                the point (20% width of component, 30% height of component) relative to the object.
                 
                 #3 above will contain a ToolItem entry in the MainWindow section with
                 normal recognition information for it .  ToolItem will also have it's
@@ -3981,12 +4843,154 @@ public class GenericObject extends GenericMaster {
      @param appMapSubkey  Optional:YES
                 (Optional) Name of the AppMap subkey to lookup and use for the SHIFT click.
               
+     @param autoScroll  Optional:YES 
+                (Optional) True|False. If the component will be scrolled into view automatically before clicking. The default value is true.
+              
      **********/
-    public void shiftClick(StepTestTable table, String appMapSubkey ) {
+    public void shiftClick(StepTestTable table, String appMapSubkey, String autoScroll ) {
 
         if ( table == null ) throw new IllegalArgumentException ( "shiftClick.table = null");
 
-        table.add( GenericObjectFunctions.shiftClick(getWindow().getName(), getName(), appMapSubkey));
+        table.add( GenericObjectFunctions.shiftClick(getWindow().getName(), getName(), appMapSubkey, autoScroll));
+    }
+
+    /*********** <pre>
+                A SHIFT click on an object.
+              
+                By default we should click on the center of the object.
+                We can SHIFT click on any part of an object based on a stored x,y
+                coordinate.  The object containing the coordinate is first given
+                context and then a SHIFT click is generated at the coordinate.  Thus, an item
+                or object can be referenced by name even though it is only recognized
+                via coordinates.
+                
+                The coordinate lookup is done with the component name of the record AND
+                Field #5.
+                
+                Typical Data Table records:
+                
+                (1) t MainWindow MainWindow ShiftClick 
+                (2) t MainWindow MainWindow ShiftClick AnObject
+                (3) t MainWindow  ToolItem  ShiftClick PrintTool
+                
+                #2 above will contain an AnObject="3,10" entry in the MainWindow section
+                of the Application Map to SHIFT click at x=3, y=10 in the MainWindow. For SE+, the 
+                coordinate can be percentage format, like "20%,30%". This percentage format indicates 
+                the point (20% width of component, 30% height of component) relative to the object.
+                
+                #3 above will contain a ToolItem entry in the MainWindow section with
+                normal recognition information for it .  ToolItem will also have it's
+                own section in the Application Map in which there will be an entry like
+                PrintTool="15,30".  This will tell Robot to locate the PrintTool Window
+                object and SHIFT click at the coordinates specified by the reference.
+				
+				Engines should also attempt to support coordinates separated by alternate separators.  
+				The most common separators that should be supported would be:
+				
+				"," (comma) Example: "50,200"
+				";" (semi-colon) Example: "50;200"
+				" " (space) Example: "50 200"
+				
+				
+                  </pre>    
+    Supporting Engines:
+    <P/><UL>
+    <LI>Rational Robot</LI>
+    <LI>Rational RobotJ</LI>
+    <LI>SAFS TIDComponent</LI>
+    <LI>Automated QA TestComplete</LI>
+    <LI>Mercury Interactive WinRunner</LI>
+    <LI>Abbot Abbot</LI>
+    <LI>OpenQA Selenium</LI>
+    <LI>OpenQA Selenium</LI>
+    </UL>
+
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>         appMapSubkey -- Optional:YES
+                (Optional) Name of the AppMap subkey to lookup and use for the SHIFT click.
+              <BR/>         autoScroll -- Optional:YES 
+                (Optional) True|False. If the component will be scrolled into view automatically before clicking. The default value is true.
+              
+    </UL>
+
+     **********/
+    public ComponentFunction shiftClick(String[] parameters ) {
+
+        if ( parameters == null ) throw new IllegalArgumentException ( "shiftClick.parameters = null");
+        return GenericObjectFunctions.shiftClick(getWindow().getName(), getName(), parameters);
+    }
+
+    /*********** <pre>
+                A SHIFT click on an object.
+              
+                By default we should click on the center of the object.
+                We can SHIFT click on any part of an object based on a stored x,y
+                coordinate.  The object containing the coordinate is first given
+                context and then a SHIFT click is generated at the coordinate.  Thus, an item
+                or object can be referenced by name even though it is only recognized
+                via coordinates.
+                
+                The coordinate lookup is done with the component name of the record AND
+                Field #5.
+                
+                Typical Data Table records:
+                
+                (1) t MainWindow MainWindow ShiftClick 
+                (2) t MainWindow MainWindow ShiftClick AnObject
+                (3) t MainWindow  ToolItem  ShiftClick PrintTool
+                
+                #2 above will contain an AnObject="3,10" entry in the MainWindow section
+                of the Application Map to SHIFT click at x=3, y=10 in the MainWindow. For SE+, the 
+                coordinate can be percentage format, like "20%,30%". This percentage format indicates 
+                the point (20% width of component, 30% height of component) relative to the object.
+                
+                #3 above will contain a ToolItem entry in the MainWindow section with
+                normal recognition information for it .  ToolItem will also have it's
+                own section in the Application Map in which there will be an entry like
+                PrintTool="15,30".  This will tell Robot to locate the PrintTool Window
+                object and SHIFT click at the coordinates specified by the reference.
+				
+				Engines should also attempt to support coordinates separated by alternate separators.  
+				The most common separators that should be supported would be:
+				
+				"," (comma) Example: "50,200"
+				";" (semi-colon) Example: "50;200"
+				" " (space) Example: "50 200"
+				
+				
+                  </pre>    
+    Supporting Engines:
+    <P/><UL>
+    <LI>Rational Robot</LI>
+    <LI>Rational RobotJ</LI>
+    <LI>SAFS TIDComponent</LI>
+    <LI>Automated QA TestComplete</LI>
+    <LI>Mercury Interactive WinRunner</LI>
+    <LI>Abbot Abbot</LI>
+    <LI>OpenQA Selenium</LI>
+    <LI>OpenQA Selenium</LI>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>         appMapSubkey -- Optional:YES
+                (Optional) Name of the AppMap subkey to lookup and use for the SHIFT click.
+              <BR/>         autoScroll -- Optional:YES 
+                (Optional) True|False. If the component will be scrolled into view automatically before clicking. The default value is true.
+              
+    </UL>
+
+     **********/
+    public void shiftClick(StepTestTable table, String[] parameters ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "shiftClick.table = null");
+        if ( parameters == null ) throw new IllegalArgumentException ( "shiftClick.parameters = null");
+        table.add( GenericObjectFunctions.shiftClick(getWindow().getName(), getName(), parameters));
     }
 
     /*********** <pre> 
