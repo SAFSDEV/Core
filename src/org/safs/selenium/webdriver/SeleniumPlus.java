@@ -2932,6 +2932,33 @@ public abstract class SeleniumPlus {
 		}
 		
 		/**
+		 * Select an item in Combo Box using a partial substring match, no verification of the 'selected item' will be attempted.
+		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ComboBoxFunctionsReference.htm#detail_SelectUnverifiedPartialMatch">Detailed Reference</a>
+		 * @param combobox Component (from App Map) to Select item from.
+		 * @param itemtext -- The combo box option to select, given as a substring of the option. Case Sensitive.<br>
+		 * @param extraParams optional
+		 * <ul>
+		 * <b>extraParams[0] forceRefresh</b> String, determine if force refreshing after selection. It is usually used when the 'id' of ComboBox is dynamic.<br>
+		 * 									 true,  force refreshing <br>
+		 * 									 false, not force refreshing <br>
+		 * </ul>
+		 * @return true if successful, false otherwise.
+		 * @example	 
+		 * <pre>
+		 * {@code
+		 * boolean success = ComboBox.SelectUnverifiedPartialMatch(Map.Google.Combobox1, "PartialItemText");		 
+		 * boolean success = ComboBox.SelectUnverifiedPartialMatch(Map.Google.Combobox1, "PartialItemText", "true"); // force refreshing when dealing dynamic 'id' ComboBox
+		 * }
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 */
+		public static boolean SelectUnverifiedPartialMatch(org.safs.model.Component combobox, String itemtext, String... extraParams){
+			return action(combobox, ComboBoxFunctions.SELECTUNVERIFIEDPARTIALMATCH_KEYWORD, combineParams(extraParams, itemtext));
+		}
+		
+		/**
 		 * Select an item in Combo Box by index.
 		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ComboBoxFunctionsReference.htm#detail_SelectIndex">Detailed Reference</a>
 		 * @param combobox Component (from App Map) to Select item from.
