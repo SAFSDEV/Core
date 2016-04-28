@@ -2479,7 +2479,7 @@ public class StringUtils{
 	 *   keep the value in the System-Properties (don't override by the value from ConfigureInterface).
 	 * Otherwise, 
 	 *   if the System-Properties does NOT contain the 'property', then get the value from the ConfigureInterface, 
-	 *   if the value is null or empty, assign the 'deafult value' if it is provided. Finally set this value to System-Properties.
+	 *   if the value is null or empty, assign the 'default value' if it is provided. Finally set this value to System-Properties.
 	 * </pre>
 	 * 
 	 * @param property String, The property name in System-Properties.
@@ -2495,29 +2495,39 @@ public class StringUtils{
 
 		try{
 			//First, try to get the value from the system properties
+			Log.info("Checking for Command-Line setting '-D"+property+"'");
 			value = System.getProperty(property);
 			if(isValid(value)) return value;
 		}catch(Exception e){
-			Log.error(debugmsg+" fail to get value for property '"+property+"'."+StringUtils.debugmsg(e));
+			Log.error(debugmsg+" fail to get value for property '"+property+"'. "+StringUtils.debugmsg(e));
 		}
 
 		//If not found, try to get the value from the configuration. And set it to system properties.
 		try{
-			if(!isValid(value)) value = config.getNamedValue(section, key);
+			if(!isValid(value)){
+				Log.info("Checking for alternative configuration setting '"+section+"':'"+key+"'...");
+				value = config.getNamedValue(section, key);
+			}
 		}catch(Exception e){
-			Log.error(debugmsg+" fail to set value '"+value+"' to property '"+property+"'."+StringUtils.debugmsg(e));
+			Log.error(debugmsg+" fail to get configuration setting '"+section+"':'"+key+"'. "+StringUtils.debugmsg(e));
 		}
 
 		//If not found, assign the default value if the default value is provided.
 		try{
 			if(!isValid(value) && defaultValue!=null){
-				if(defaultValue.length>0) value = defaultValue[0];
+				if(defaultValue.length>0){
+					Log.info("Use the default value '"+defaultValue[0]+"'. ");
+					value = defaultValue[0];
+				}
 			}
 		}catch(Exception e){
-			Log.error(debugmsg+" fail to set defaul value to property '"+property+"'."+StringUtils.debugmsg(e));
+			Log.error(debugmsg+" fail to get defaul value. "+StringUtils.debugmsg(e));
 		}
-		//Finally if the value is ok, set it to the system properties
-		if(isValid(value)) System.setProperty(property, value);
+		//Finally if the value is valid, set it to the system properties
+		if(isValid(value)){
+			Log.debug(debugmsg+" Set value '"+value+"' to system property '"+property+"'.");
+			System.setProperty(property, value);
+		}
 
 		return value;
 	}
