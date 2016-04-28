@@ -3003,6 +3003,7 @@ public class GenericMaster extends UIComponent {
     <P/><UL>
     <LI>SAFS TIDComponent</LI>
     <LI>Google Android</LI>
+    <LI>OpenQA Selenium</LI>
     </UL>
 
      @param textValue  Optional:NO
@@ -3029,6 +3030,7 @@ public class GenericMaster extends UIComponent {
     <P/><UL>
     <LI>SAFS TIDComponent</LI>
     <LI>Google Android</LI>
+    <LI>OpenQA Selenium</LI>
     </UL>
 
      @param table  Optional:NO
@@ -3168,6 +3170,7 @@ public class GenericMaster extends UIComponent {
     <P/><UL>
     <LI>SAFS TIDComponent</LI>
     <LI>Google Android</LI>
+    <LI>OpenQA Selenium</LI>
     </UL>
 
      @param textValue  Optional:NO
@@ -3192,6 +3195,7 @@ public class GenericMaster extends UIComponent {
     <P/><UL>
     <LI>SAFS TIDComponent</LI>
     <LI>Google Android</LI>
+    <LI>OpenQA Selenium</LI>
     </UL>
 
      @param table  Optional:NO

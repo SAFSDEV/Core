@@ -10715,6 +10715,7 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
         <LI>SAFS TIDDriverCommands</LI>
         <LI>Mercury Interactive WinRunner</LI>
         <LI>OpenQA Selenium</LI>
+        <LI>OpenQA Selenium</LI>
         <LI>Automated QA TestComplete</LI>
     </UL>
 
@@ -10757,6 +10758,7 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
         <LI>SAFS TIDDriverCommands</LI>
         <LI>Mercury Interactive WinRunner</LI>
         <LI>OpenQA Selenium</LI>
+        <LI>OpenQA Selenium</LI>
         <LI>Automated QA TestComplete</LI>
     </UL>
 
@@ -10794,6 +10796,7 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
         <LI>Rational RobotJ</LI>
         <LI>SAFS TIDDriverCommands</LI>
         <LI>Mercury Interactive WinRunner</LI>
+        <LI>OpenQA Selenium</LI>
         <LI>OpenQA Selenium</LI>
         <LI>Automated QA TestComplete</LI>
     </UL>
@@ -10836,6 +10839,7 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
         <LI>Rational RobotJ</LI>
         <LI>SAFS TIDDriverCommands</LI>
         <LI>Mercury Interactive WinRunner</LI>
+        <LI>OpenQA Selenium</LI>
         <LI>OpenQA Selenium</LI>
         <LI>Automated QA TestComplete</LI>
     </UL>
