@@ -59,6 +59,8 @@ public class ComboBoxFunctions {
     static public final String SELECTPARTIALMATCH_KEYWORD = "SelectPartialMatch";
     /** "SelectUnverified" */
     static public final String SELECTUNVERIFIED_KEYWORD = "SelectUnverified";
+    /** "SelectUnverifiedPartialMatch" */
+    static public final String SELECTUNVERIFIEDPARTIALMATCH_KEYWORD = "SelectUnverifiedPartialMatch";
     /** "SetTextValue" */
     static public final String SETTEXTVALUE_KEYWORD = "SetTextValue";
     /** "SetUnverifiedTextValue" */
@@ -70,10 +72,10 @@ public class ComboBoxFunctions {
 
 
     /*********** <pre>
-                Capture Items To a File specified (if not abs, then to test dir)
-               
-                Capture Items To a File specified (if not abs, then to test dir)
-                  </pre>    Supporting Engines:
+					Capture Items To a File specified (if not abs, then to test dir)
+				
+					Capture Items To a File specified (if not abs, then to test dir)
+				    </pre>    Supporting Engines:
     <P/><UL>
         <LI>Rational RobotJ</LI>
         <LI>Google Android</LI>
@@ -85,15 +87,15 @@ public class ComboBoxFunctions {
             The name of the window to act upon.
      @param compname  Optional:NO
             The name of the component to act upon.
-     @param fileName  Optional:NO 
-                 File name (if not absolute, then to test dir)
-              
+     @param fileName  Optional:NO
+							File name (if not absolute, then to test dir)
+						
      @param fileEncoding  Optional:YES  DefaultVal:
-             Specify a character encoding to be used when saving data to a file.
-			 If it is not specified, the system default file encoding will be used.
-             The encoding should be a valid string supported by Java; if it is not valid,
-             the system default file encoding will be used instead.
-            
+							Specify a character encoding to be used when saving data to a file.
+							If it is not specified, the system default file encoding will be used.
+							The encoding should be a valid string supported by Java; if it is
+							not valid, the system default file encoding will be used instead.
+						
      **********/
     static public ComponentFunction captureItemsToFile (String winname, String compname, String fileName, String fileEncoding) {
 
@@ -109,10 +111,10 @@ public class ComboBoxFunctions {
 
 
     /*********** <pre>
-                Capture Items To a File specified (if not abs, then to test dir)
-               
-                Capture Items To a File specified (if not abs, then to test dir)
-                  </pre>    
+					Capture Items To a File specified (if not abs, then to test dir)
+				
+					Capture Items To a File specified (if not abs, then to test dir)
+				    </pre>    
     Supporting Engines:
     <P/><UL>
         <LI>Rational RobotJ</LI>
@@ -128,14 +130,14 @@ public class ComboBoxFunctions {
      @param parameters  Optional:NO
             An array containing the following parameters:
     <UL>
-<BR/>        fileName -- Optional:NO 
-                 File name (if not absolute, then to test dir)
-              <BR/>        fileEncoding -- Optional:YES  DefaultVal:
-             Specify a character encoding to be used when saving data to a file.
-			 If it is not specified, the system default file encoding will be used.
-             The encoding should be a valid string supported by Java; if it is not valid,
-             the system default file encoding will be used instead.
-            
+<BR/>        fileName -- Optional:NO
+							File name (if not absolute, then to test dir)
+						<BR/>        fileEncoding -- Optional:YES  DefaultVal:
+							Specify a character encoding to be used when saving data to a file.
+							If it is not specified, the system default file encoding will be used.
+							The encoding should be a valid string supported by Java; if it is
+							not valid, the system default file encoding will be used instead.
+						
     </UL>
 
      **********/
@@ -150,25 +152,30 @@ public class ComboBoxFunctions {
     }
 
 
-    /*********** <pre> 
-                 Attempts to perform a standard Click on the ComboBox
-               
-                Attempts to perform a standard Click on the ComboBox.  If the combobox 
-                list is not exposed then this will expose the list of items.  If the
-                list is already exposed, then this will close the list. 
-                  
-                It must be noted that when you expose the list in a ComboBox, it is no 
-                longer a ComboBox.  It typically converts to a ComboListBox.  This may 
-                not be an issue on controls that Robot can recognize with a NAME= method. 
-                
-                However, if the control is recognized by ObjectIndex or some other means 
-                then the original ComboBox may no longer be found on the screen. 
-                With this scenario, you need to reference the ComboBox and the ComboListBox
-                in the application map (and associated data files) as two separate items.
-                
-                To avoid these potential problems, use the COMBOBOX 'SELECT' command 
-                to actually open the list and select the item all with a single command.
-                  </pre>    Supporting Engines:
+    /*********** <pre>
+					Attempts to perform a standard Click on the ComboBox
+				
+					Attempts to perform a standard Click on the ComboBox. If
+						the combobox list is not exposed then this will expose the list of items. 
+						If the list is already exposed, then this will close the list.
+					
+					
+						It must be noted that when you expose the list in a ComboBox, it is
+						no longer a ComboBox. It typically converts to a ComboListBox. This may
+						not be an issue on controls that Robot can recognize with a NAME=method.
+					
+					
+						However, if the control is recognized by ObjectIndex or some other means
+						then the original ComboBox may no longer be found on the screen.
+						With this scenario, you need to reference the ComboBox and the
+						ComboListBox in the application map (and associated data files) as two separate
+						items.
+					
+					
+						To avoid these potential problems, use the COMBOBOX 'SELECT' command
+						to actually open the list and select the item all with a single command.
+					
+				    </pre>    Supporting Engines:
     <P/><UL>
         <LI>Mercury Interactive WinRunner</LI>
         <LI>AutomatedQA TestComplete</LI>
@@ -189,13 +196,13 @@ public class ComboBoxFunctions {
     }
 
 
-    /*********** <pre> 
-                 Hide the combo box list (equivalent to an ESC or two ESCs).
-               
-                hide the list. This would only be necessary in cases
-                 where the state of the combo box is not known ahead
-                 of time.
-                  </pre>    Supporting Engines:
+    /*********** <pre>
+					Hide the combo box list (equivalent to an ESC or two ESCs).
+				
+					hide the list. This would only be necessary in cases
+						where the state of the combo box is not known ahead of time.
+					
+				    </pre>    Supporting Engines:
     <P/><UL>
         <LI>Rational RobotJ</LI>
         <LI>OpenQA Selenium</LI>
@@ -216,24 +223,27 @@ public class ComboBoxFunctions {
     }
 
 
-    /*********** <pre> 
-                 Select an item by its text value from a combobox.
-               
-                Select an item by its text value from a combobox.  
-                This method combines the initial Click required to expose the list 
-                of items and then the subsequent selection of a text item from the list.
-                
-                The routine will first attempt to see if the item exists in the list 
-                and should provide a warning if it cannot find the item or cannot 
-                read the list of items.  The routine will then attempt the selection.
-                
-                After the selection is attempted, the routine tries to verify that the 
-                list has the specified item as the selected item.  A warning will be 
-                issued if the routine cannot read the list.  A failure will be issued 
-                if the routine CAN read the list and determines that the specified 
-                item is NOT the currently selected item.
-                Note: RobotJ also uses identical keyword SelectTextItem
-                  </pre>    Supporting Engines:
+    /*********** <pre>
+					Select an item by its text value from a combobox.
+				
+					Select an item by its text value from a combobox.
+						This method combines the initial Click required to expose the list
+						of items and then the subsequent selection of a text item from the list.
+					
+					
+						The routine will first attempt to see if the item exists in the list
+						and should provide a warning if it cannot find the item or cannot
+						read the list of items. The routine will then attempt the selection.
+					
+					
+						After the selection is attempted, the routine tries to verify that the
+						list has the specified item as the selected item. A warning will be
+						issued if the routine cannot read the list. A failure will be issued
+						if the routine CAN read the list and determines that the specified
+						item is NOT the currently selected item.
+					
+					Note: RobotJ also uses identical keyword SelectTextItem
+				    </pre>    Supporting Engines:
     <P/><UL>
         <LI>Rational Robot</LI>
         <LI>Rational RobotJ</LI>
@@ -248,11 +258,14 @@ public class ComboBoxFunctions {
             The name of the window to act upon.
      @param compname  Optional:NO
             The name of the component to act upon.
-     @param textValue  Optional:NO 
-                 The case-sensitive item in the drop down list to select.
-              
+     @param textValue  Optional:NO
+							The case-sensitive item in the drop down list to select.
+						
+     @param forceRefresh  Optional:Yes
+							Force refreshing to update stale element after selection.
+						
      **********/
-    static public ComponentFunction select (String winname, String compname, String textValue) {
+    static public ComponentFunction select (String winname, String compname, String textValue, String forceRefresh) {
 
         if ( winname == null ) throw new IllegalArgumentException ( "select.winname = null");
         if ( compname == null ) throw new IllegalArgumentException ( "select.compname = null");
@@ -260,20 +273,33 @@ public class ComboBoxFunctions {
         if ( textValue == null ) throw new IllegalArgumentException ( "select.textValue = null");
         ComponentFunction cf = new ComponentFunction(SELECT_KEYWORD, winname, compname);
         cf.addParameter(textValue);
+        cf.addParameter(forceRefresh);
         return cf;
     }
 
 
-    /*********** <pre> 
-                 Select an item by its index from a combobox.
-               
-                Select an item by its index from a combobox.  
-                This method combines the initial Click required to expose the list 
-                of items and then the subsequent selection of the item from the list.
-                The routine will first attempt to see if the index exists in the list 
-                and should provide a warning if it cannot find the item or cannot 
-                read the list of items.  The routine will then attempt the selection.
-                  </pre>    Supporting Engines:
+    /*********** <pre>
+					Select an item by its text value from a combobox.
+				
+					Select an item by its text value from a combobox.
+						This method combines the initial Click required to expose the list
+						of items and then the subsequent selection of a text item from the list.
+					
+					
+						The routine will first attempt to see if the item exists in the list
+						and should provide a warning if it cannot find the item or cannot
+						read the list of items. The routine will then attempt the selection.
+					
+					
+						After the selection is attempted, the routine tries to verify that the
+						list has the specified item as the selected item. A warning will be
+						issued if the routine cannot read the list. A failure will be issued
+						if the routine CAN read the list and determines that the specified
+						item is NOT the currently selected item.
+					
+					Note: RobotJ also uses identical keyword SelectTextItem
+				    </pre>    
+    Supporting Engines:
     <P/><UL>
         <LI>Rational Robot</LI>
         <LI>Rational RobotJ</LI>
@@ -288,11 +314,62 @@ public class ComboBoxFunctions {
             The name of the window to act upon.
      @param compname  Optional:NO
             The name of the component to act upon.
-     @param indexValue  Optional:NO 
-                 The item index in the drop down list to select.
-              
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>        textValue -- Optional:NO
+							The case-sensitive item in the drop down list to select.
+						<BR/>        forceRefresh -- Optional:Yes
+							Force refreshing to update stale element after selection.
+						
+    </UL>
+
      **********/
-    static public ComponentFunction selectIndex (String winname, String compname, String indexValue) {
+    static public ComponentFunction select(String winname, String compname, String[] parameters) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "select.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "select.compname = null");
+        if ( parameters == null ) throw new IllegalArgumentException ( "select.parameters = null");
+        ComponentFunction cf = new ComponentFunction(SELECT_KEYWORD, winname, compname);
+        cf.addParameters(parameters);
+        return cf;
+    }
+
+
+    /*********** <pre>
+					Select an item by its index from a combobox.
+				
+					Select an item by its index from a combobox.
+					This method combines the initial Click required to expose the list
+					of items and then the subsequent selection of the item from the list.
+					
+					The routine will first attempt to see if the index exists in the list
+					and should provide a warning if it cannot find the item or cannot
+					read the list of items. The routine will then attempt the selection.
+					
+				    </pre>    Supporting Engines:
+    <P/><UL>
+        <LI>Rational Robot</LI>
+        <LI>Rational RobotJ</LI>
+        <LI>Mercury Interactive WinRunner</LI>
+        <LI>OpenQA Selenium</LI>
+        <LI>AutomatedQA TestComplete</LI>
+        <LI>Google Android</LI>
+        <LI>OpenQA Selenium</LI>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     @param indexValue  Optional:NO
+							The item index in the drop down list to select.
+						
+     @param forceRefresh  Optional:Yes
+							Force refreshing to update stale element after selection.
+						
+     **********/
+    static public ComponentFunction selectIndex (String winname, String compname, String indexValue, String forceRefresh) {
 
         if ( winname == null ) throw new IllegalArgumentException ( "selectIndex.winname = null");
         if ( compname == null ) throw new IllegalArgumentException ( "selectIndex.compname = null");
@@ -300,27 +377,24 @@ public class ComboBoxFunctions {
         if ( indexValue == null ) throw new IllegalArgumentException ( "selectIndex.indexValue = null");
         ComponentFunction cf = new ComponentFunction(SELECTINDEX_KEYWORD, winname, compname);
         cf.addParameter(indexValue);
+        cf.addParameter(forceRefresh);
         return cf;
     }
 
 
-    /*********** <pre> 
-                 Select an item via a partial text match in a combobox.
-               
-                Select an item via a partial text match in a combobox.
-                This method combines the initial Click required to expose the list 
-                of items and then the subsequent selection of a text item from the list.
-                
-                The routine will first attempt to see if the item exists in the list 
-                and should provide a warning if it cannot find the item or cannot 
-                read the list of items.  The routine will then attempt the selection.
-                
-                After the selection is attempted, the routine tries to verify that the 
-                list has the specified item as the selected item.  A warning will be 
-                issued if the routine cannot read the list.  A failure will be issued 
-                if the routine CAN read the list and determines that the specified 
-                item is NOT the currently selected item.
-                  </pre>    Supporting Engines:
+    /*********** <pre>
+					Select an item by its index from a combobox.
+				
+					Select an item by its index from a combobox.
+					This method combines the initial Click required to expose the list
+					of items and then the subsequent selection of the item from the list.
+					
+					The routine will first attempt to see if the index exists in the list
+					and should provide a warning if it cannot find the item or cannot
+					read the list of items. The routine will then attempt the selection.
+					
+				    </pre>    
+    Supporting Engines:
     <P/><UL>
         <LI>Rational Robot</LI>
         <LI>Rational RobotJ</LI>
@@ -335,11 +409,71 @@ public class ComboBoxFunctions {
             The name of the window to act upon.
      @param compname  Optional:NO
             The name of the component to act upon.
-     @param textValue  Optional:NO 
-                 The case-sensitive substring of an item in the drop down list to select.
-              
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>        indexValue -- Optional:NO
+							The item index in the drop down list to select.
+						<BR/>        forceRefresh -- Optional:Yes
+							Force refreshing to update stale element after selection.
+						
+    </UL>
+
      **********/
-    static public ComponentFunction selectPartialMatch (String winname, String compname, String textValue) {
+    static public ComponentFunction selectIndex(String winname, String compname, String[] parameters) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "selectIndex.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "selectIndex.compname = null");
+        if ( parameters == null ) throw new IllegalArgumentException ( "selectIndex.parameters = null");
+        ComponentFunction cf = new ComponentFunction(SELECTINDEX_KEYWORD, winname, compname);
+        cf.addParameters(parameters);
+        return cf;
+    }
+
+
+    /*********** <pre>
+					Select an item via a partial text match in a combobox.
+				
+					Select an item via a partial text match in a combobox.
+						This method combines the initial Click required to expose the list
+						of items and then the subsequent selection of a text item from the
+						list.
+					
+					
+						The routine will first attempt to see if the item exists in the list
+						and should provide a warning if it cannot find the item or cannot
+						read the list of items. The routine will then attempt the selection.
+					
+					
+						After the selection is attempted, the routine tries to verify that the
+						list has the specified item as the selected item. A warning will be
+						issued if the routine cannot read the list. A failure will be issued
+						if the routine CAN read the list and determines that the specified
+						item is NOT the currently selected item.
+					
+				    </pre>    Supporting Engines:
+    <P/><UL>
+        <LI>Rational Robot</LI>
+        <LI>Rational RobotJ</LI>
+        <LI>Mercury Interactive WinRunner</LI>
+        <LI>OpenQA Selenium</LI>
+        <LI>AutomatedQA TestComplete</LI>
+        <LI>Google Android</LI>
+        <LI>OpenQA Selenium</LI>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     @param textValue  Optional:NO
+							The case-sensitive substring of an item in the drop down list to select.
+						
+     @param forceRefresh  Optional:Yes
+							Force refreshing to update stale element after selection.
+						
+     **********/
+    static public ComponentFunction selectPartialMatch (String winname, String compname, String textValue, String forceRefresh) {
 
         if ( winname == null ) throw new IllegalArgumentException ( "selectPartialMatch.winname = null");
         if ( compname == null ) throw new IllegalArgumentException ( "selectPartialMatch.compname = null");
@@ -347,23 +481,33 @@ public class ComboBoxFunctions {
         if ( textValue == null ) throw new IllegalArgumentException ( "selectPartialMatch.textValue = null");
         ComponentFunction cf = new ComponentFunction(SELECTPARTIALMATCH_KEYWORD, winname, compname);
         cf.addParameter(textValue);
+        cf.addParameter(forceRefresh);
         return cf;
     }
 
 
-    /*********** <pre> 
-                 Select an item by its text value from a combobox without verifying the selection.
-               
-                Select an item by its text value from a combobox without verifying the selection.  
-                This method combines the initial Click required to expose the list 
-                of items and then the subsequent selection of a text item from the list.
-                
-                The routine will simply take the specified text and attemp the selection.
-                it will not verify the existence of the item before the attemp, nor
-                will it verify the item is actually selected after the
-                attemp.
-                Note: RobotJ also uses identical keyword SelectUnverifiedTextItem
-                  </pre>    Supporting Engines:
+    /*********** <pre>
+					Select an item via a partial text match in a combobox.
+				
+					Select an item via a partial text match in a combobox.
+						This method combines the initial Click required to expose the list
+						of items and then the subsequent selection of a text item from the
+						list.
+					
+					
+						The routine will first attempt to see if the item exists in the list
+						and should provide a warning if it cannot find the item or cannot
+						read the list of items. The routine will then attempt the selection.
+					
+					
+						After the selection is attempted, the routine tries to verify that the
+						list has the specified item as the selected item. A warning will be
+						issued if the routine cannot read the list. A failure will be issued
+						if the routine CAN read the list and determines that the specified
+						item is NOT the currently selected item.
+					
+				    </pre>    
+    Supporting Engines:
     <P/><UL>
         <LI>Rational Robot</LI>
         <LI>Rational RobotJ</LI>
@@ -378,11 +522,69 @@ public class ComboBoxFunctions {
             The name of the window to act upon.
      @param compname  Optional:NO
             The name of the component to act upon.
-     @param textValue  Optional:NO 
-                 The case-sensitive item in the drop down list to select.
-              
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>        textValue -- Optional:NO
+							The case-sensitive substring of an item in the drop down list to select.
+						<BR/>        forceRefresh -- Optional:Yes
+							Force refreshing to update stale element after selection.
+						
+    </UL>
+
      **********/
-    static public ComponentFunction selectUnverified (String winname, String compname, String textValue) {
+    static public ComponentFunction selectPartialMatch(String winname, String compname, String[] parameters) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "selectPartialMatch.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "selectPartialMatch.compname = null");
+        if ( parameters == null ) throw new IllegalArgumentException ( "selectPartialMatch.parameters = null");
+        ComponentFunction cf = new ComponentFunction(SELECTPARTIALMATCH_KEYWORD, winname, compname);
+        cf.addParameters(parameters);
+        return cf;
+    }
+
+
+    /*********** <pre>
+					Select an item by its text value from a combobox without verifying the
+					selection.
+				
+					Select an item by its text value from a combobox without
+						verifying the selection.
+						This method combines the initial Click required to expose the list
+						of items and then the subsequent selection of a text item from the list.
+					
+					
+						The routine will simply take the specified text and attempt the
+						selection.
+						it will not verify the existence of the item before the attempt, nor
+						will it verify the item is actually selected after the
+						attempt.
+					
+					Note: RobotJ also uses identical keyword SelectUnverifiedTextItem
+					
+				    </pre>    Supporting Engines:
+    <P/><UL>
+        <LI>Rational Robot</LI>
+        <LI>Rational RobotJ</LI>
+        <LI>Mercury Interactive WinRunner</LI>
+        <LI>OpenQA Selenium</LI>
+        <LI>AutomatedQA TestComplete</LI>
+        <LI>Google Android</LI>
+        <LI>OpenQA Selenium</LI>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     @param textValue  Optional:NO
+							The case-sensitive item in the drop down list to select.
+						
+     @param forceRefresh  Optional:Yes
+							Force refreshing to update stale element after selection.
+						
+     **********/
+    static public ComponentFunction selectUnverified (String winname, String compname, String textValue, String forceRefresh) {
 
         if ( winname == null ) throw new IllegalArgumentException ( "selectUnverified.winname = null");
         if ( compname == null ) throw new IllegalArgumentException ( "selectUnverified.compname = null");
@@ -390,39 +592,190 @@ public class ComboBoxFunctions {
         if ( textValue == null ) throw new IllegalArgumentException ( "selectUnverified.textValue = null");
         ComponentFunction cf = new ComponentFunction(SELECTUNVERIFIED_KEYWORD, winname, compname);
         cf.addParameter(textValue);
+        cf.addParameter(forceRefresh);
         return cf;
     }
 
 
-    /*********** <pre> 
-            Set the text of the combobox
-               
-                This action sets the text of the combobox.  This version allows the use 
-                of special character combinations and substrings to identify specific 
-                keyboard keys.  These are the same special characters and interpretation 
-                used for Robot's InputKeys command and the Windows Scripting Host.
-                
-                ~^+%{( are primarily the characters that induce special processing.
-                
-                The routine verifies we can read the text property, sets the text value 
-                and will verify that the property has been set to that value *IF* none 
-                of the special characters exist in the provided text value.  If those 
-                special characters exist, then no post-set verification will occur.
-                  </pre>    Supporting Engines:
+    /*********** <pre>
+					Select an item by its text value from a combobox without verifying the
+					selection.
+				
+					Select an item by its text value from a combobox without
+						verifying the selection.
+						This method combines the initial Click required to expose the list
+						of items and then the subsequent selection of a text item from the list.
+					
+					
+						The routine will simply take the specified text and attempt the
+						selection.
+						it will not verify the existence of the item before the attempt, nor
+						will it verify the item is actually selected after the
+						attempt.
+					
+					Note: RobotJ also uses identical keyword SelectUnverifiedTextItem
+					
+				    </pre>    
+    Supporting Engines:
     <P/><UL>
         <LI>Rational Robot</LI>
         <LI>Rational RobotJ</LI>
         <LI>Mercury Interactive WinRunner</LI>
+        <LI>OpenQA Selenium</LI>
         <LI>AutomatedQA TestComplete</LI>
+        <LI>Google Android</LI>
+        <LI>OpenQA Selenium</LI>
     </UL>
 
      @param winname  Optional:NO
             The name of the window to act upon.
      @param compname  Optional:NO
             The name of the component to act upon.
-     @param textValue  Optional:YES  DefaultVal: 
-             The text that will be typed into the ComboBox.
-              
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>        textValue -- Optional:NO
+							The case-sensitive item in the drop down list to select.
+						<BR/>        forceRefresh -- Optional:Yes
+							Force refreshing to update stale element after selection.
+						
+    </UL>
+
+     **********/
+    static public ComponentFunction selectUnverified(String winname, String compname, String[] parameters) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "selectUnverified.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "selectUnverified.compname = null");
+        if ( parameters == null ) throw new IllegalArgumentException ( "selectUnverified.parameters = null");
+        ComponentFunction cf = new ComponentFunction(SELECTUNVERIFIED_KEYWORD, winname, compname);
+        cf.addParameters(parameters);
+        return cf;
+    }
+
+
+    /*********** <pre>
+					Select an item via a partial text match in a combobox without verification.
+				
+					Select an item via a partial text match in a combobox without verification.
+						This method combines the initial Click required to expose the list
+						of items and then the subsequent selection of a text item from the list.
+					
+					
+						The routine will first attempt to see if the item exists in the list
+						and should provide a warning if it cannot find the item or
+						cannot read the list of items. The routine will then attempt the selection.
+					
+					
+						The routine will not verify the selected-item matches the partial-text.
+					
+				    </pre>    Supporting Engines:
+    <P/><UL>
+        <LI>OpenQA Selenium</LI>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     @param textValue  Optional:NO
+							The case-sensitive substring of an item in the drop down list to select.
+						
+     @param forceRefresh  Optional:Yes
+							Force refreshing to update stale element after selection.
+						
+     **********/
+    static public ComponentFunction selectUnverifiedPartialMatch (String winname, String compname, String textValue, String forceRefresh) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "selectUnverifiedPartialMatch.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "selectUnverifiedPartialMatch.compname = null");
+
+        if ( textValue == null ) throw new IllegalArgumentException ( "selectUnverifiedPartialMatch.textValue = null");
+        ComponentFunction cf = new ComponentFunction(SELECTUNVERIFIEDPARTIALMATCH_KEYWORD, winname, compname);
+        cf.addParameter(textValue);
+        cf.addParameter(forceRefresh);
+        return cf;
+    }
+
+
+    /*********** <pre>
+					Select an item via a partial text match in a combobox without verification.
+				
+					Select an item via a partial text match in a combobox without verification.
+						This method combines the initial Click required to expose the list
+						of items and then the subsequent selection of a text item from the list.
+					
+					
+						The routine will first attempt to see if the item exists in the list
+						and should provide a warning if it cannot find the item or
+						cannot read the list of items. The routine will then attempt the selection.
+					
+					
+						The routine will not verify the selected-item matches the partial-text.
+					
+				    </pre>    
+    Supporting Engines:
+    <P/><UL>
+        <LI>OpenQA Selenium</LI>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>        textValue -- Optional:NO
+							The case-sensitive substring of an item in the drop down list to select.
+						<BR/>        forceRefresh -- Optional:Yes
+							Force refreshing to update stale element after selection.
+						
+    </UL>
+
+     **********/
+    static public ComponentFunction selectUnverifiedPartialMatch(String winname, String compname, String[] parameters) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "selectUnverifiedPartialMatch.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "selectUnverifiedPartialMatch.compname = null");
+        if ( parameters == null ) throw new IllegalArgumentException ( "selectUnverifiedPartialMatch.parameters = null");
+        ComponentFunction cf = new ComponentFunction(SELECTUNVERIFIEDPARTIALMATCH_KEYWORD, winname, compname);
+        cf.addParameters(parameters);
+        return cf;
+    }
+
+
+    /*********** <pre>
+					Set the text of the combobox
+				
+					This action sets the text of the combobox. This version allows
+						the use of special character combinations and substrings to identify
+						specific keyboard keys. These are the same special characters and interpretation
+						used for Robot's InputKeys command and the Windows Scripting Host.
+					
+					
+						~^+%{( are primarily the characters that induce special processing.
+					
+						The routine verifies we can read the text property, sets the text value
+						and will verify that the property has been set to that value *IF* none
+						of the special characters exist in the provided text value. If those
+						special characters exist, then no post-set verification will occur.
+					
+				    </pre>    Supporting Engines:
+    <P/><UL>
+        <LI>Rational Robot</LI>
+        <LI>Rational RobotJ</LI>
+        <LI>Mercury Interactive WinRunner</LI>
+        <LI>AutomatedQA TestComplete</LI>
+        <LI>OpenQA Selenium</LI>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     @param textValue  Optional:YES  DefaultVal:
+							The text that will be typed into the ComboBox.
+						
      **********/
     static public ComponentFunction setTextValue (String winname, String compname, String textValue) {
 
@@ -435,20 +788,22 @@ public class ComboBoxFunctions {
     }
 
 
-    /*********** <pre> 
-            Set the text of the combobox without verification
-               
-                This action sets the text of the combobox.  This version allows the use 
-                of special character combinations and substrings to identify specific 
-                keyboard keys.  These are the same special characters and interpretation 
-                used for Robot's InputKeys command and the Windows Scripting Host.
-                
-                ~^+%{( are primarily the characters that induce special processing.
-                
-                The routine verifies we can read the text property, sets the text value 
-                but does not verify that the property has been set to that value whether or not
-                any of the special characters exist in the provided text value.
-                  </pre>    Supporting Engines:
+    /*********** <pre>
+					Set the text of the combobox without verification
+				
+					This action sets the text of the combobox. This version allows
+						the use of special character combinations and substrings to identify
+						specific keyboard keys. These are the same special characters and interpretation
+						used for Robot's InputKeys command and the Windows Scripting Host.
+					
+					
+						~^+%{( are primarily the characters that induce special processing.
+					
+						The routine verifies we can read the text property, sets the text value
+						but does not verify that the property has been set to that value
+						whether or not any of the special characters exist in the provided text value.
+					
+				    </pre>    Supporting Engines:
     <P/><UL>
         <LI>Rational Robot</LI>
         <LI>Rational RobotJ</LI>
@@ -459,9 +814,9 @@ public class ComboBoxFunctions {
             The name of the window to act upon.
      @param compname  Optional:NO
             The name of the component to act upon.
-     @param textValue  Optional:YES  DefaultVal: 
-             The text that will be typed into the ComboBox.
-              
+     @param textValue  Optional:YES  DefaultVal:
+							The text that will be typed into the ComboBox.
+						
      **********/
     static public ComponentFunction setUnverifiedTextValue (String winname, String compname, String textValue) {
 
@@ -474,14 +829,15 @@ public class ComboBoxFunctions {
     }
 
 
-    /*********** <pre> 
-                 Show the combo box list (expose it).
-               
-                show the list so that the next step can be a click
-                 on an item. This would only be necessary in cases
-                 where the state of the combo box is not known ahead
-                 of time.
-                  </pre>    Supporting Engines:
+    /*********** <pre>
+					Show the combo box list (expose it).
+				
+					show the list so that the next step can be a click
+						on an item. This would only be necessary in cases
+						where the state of the combo box is not known ahead
+						of time.
+					
+				    </pre>    Supporting Engines:
     <P/><UL>
         <LI>Rational RobotJ</LI>
         <LI>OpenQA Selenium</LI>
@@ -502,11 +858,11 @@ public class ComboBoxFunctions {
     }
 
 
-    /*********** <pre> 
-                 Verify Selected item is equal to specified parameter
-               
-                Verify Selected item is equal to specified parameter
-                  </pre>    Supporting Engines:
+    /*********** <pre>
+					Verify Selected item is equal to specified parameter
+				
+					Verify Selected item is equal to specified parameter
+				    </pre>    Supporting Engines:
     <P/><UL>
         <LI>Rational RobotJ</LI>
         <LI>AutomatedQA TestComplete</LI>
@@ -518,9 +874,9 @@ public class ComboBoxFunctions {
             The name of the window to act upon.
      @param compname  Optional:NO
             The name of the component to act upon.
-     @param textValue  Optional:NO 
-                 The case-sensitive substring to compare.
-              
+     @param textValue  Optional:NO
+							The case-sensitive substring to compare.
+						
      **********/
     static public ComponentFunction verifySelected (String winname, String compname, String textValue) {
 

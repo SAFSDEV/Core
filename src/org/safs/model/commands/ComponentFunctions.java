@@ -51,9 +51,9 @@ public class ComponentFunctions {
     /*************************************************************
      static reference to ComboBoxFunctions.class 
 
-      
-              Actions for working with ComboBox objects
-           
+     
+				Actions for working with ComboBox objects
+			
 
      
 
