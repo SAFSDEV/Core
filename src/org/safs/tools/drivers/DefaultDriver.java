@@ -8,6 +8,7 @@ import java.util.Enumeration;
 import java.util.ListIterator;
 import java.util.Vector;
 
+import org.safs.DefaultHookConfig;
 import org.safs.JavaHook;
 import org.safs.Log;
 import org.safs.Processor;
@@ -447,35 +448,17 @@ public abstract class DefaultDriver extends AbstractDriver {
 	    	}
 			Log.info("Driver Delay 'secsWaitForComponent' set to "+ Processor.getSecsWaitForComponent());
 			
-			// check for settings of "NumLock" on/off
-			Log.info("Checking for Command-Line setting '-Dsafs.test.numlockon'...");
+			//check for settings such as 'NumberLock', 'UnexpectedAlertBehaviour' at engine side.
+			DefaultHookConfig.check(configInfo);
+
+			//Get value of system property 'safs.test.numlockon'
 			String numLockSetting = getParameterValue(DriverConstant.PROPERTY_SAFS_TEST_NUMLOCKON);
-			if (numLockSetting.length() == 0) {
-				Log.info("Checking for alternative NumLock Setting 'SAFS_TEST':'numLockOn'...");
-				// check for a configuration file setting
-				numLockSetting = configInfo.getNamedValue(DriverConstant.SECTION_SAFS_TEST, DriverConstant.SECTION_SAFS_TEST_NUMLOCKON);
-				if(numLockSetting == null) numLockSetting = "";
-			}
-			numLockSetting = StringUtils.getTrimmedUnquotedStr(numLockSetting);
 			if(numLockSetting.length()>0){
 				//Set the keyboard's 'NumLock' on/off.
 				//TODO Need to work remotely on RMI server.
 				Utils.setNumLock(StringUtilities.convertBool(numLockSetting));
-				Log.info("set 'NumLock' to "+ numLockSetting+"; The original 'NumLock' is "+DriverConstant.DEFAULT_NUMLOCK_STATUS);
+				Log.info("set KeyBoard 'NumLock' to "+ numLockSetting+"; The original 'NumLock' is "+DriverConstant.DEFAULT_NUMLOCK_STATUS);
 			}
-			
-			// check for settings of 'DismissUnexpectedAlerts'
-			Log.info("Checking for Command-Line setting '-Dsafs.test.dismiss_unexpected_alerts'");
-			String dismissUnexpectedAlertsSetting = getParameterValue(DriverConstant.PROERTY_SAFS_TEST_DISMISSUNEXPECTEDALERTS);
-			if(dismissUnexpectedAlertsSetting.length() == 0){
-				Log.info("Checking for alternative 'DismissUnexpectedAlerts' setting 'SAFS_TEST':'DismissUnexpectedAlerts'...");
-				// check for a configuration file setting
-				dismissUnexpectedAlertsSetting = configInfo.getNamedValue(DriverConstant.SECTION_SAFS_TEST, DriverConstant.SECTION_SAFS_TEST_DISMISSUNEXPECTEDALERTS);
-				if (dismissUnexpectedAlertsSetting == null) dismissUnexpectedAlertsSetting = "";
-			}
-			dismissUnexpectedAlertsSetting = StringUtils.getTrimmedUnquotedStr(dismissUnexpectedAlertsSetting);
-			if(dismissUnexpectedAlertsSetting.length()>0) setDismissUnexpectedAlerts(StringUtilities.convertBool(dismissUnexpectedAlertsSetting));				
-			Log.info("'DismissUnexpectedAlerts' status set to " + getDismissUnexpectedAlerts());			
 			
 			Log.info("Test to execute: '"+ testName +"' using "+ testLevel.toUpperCase() +" DRIVER." );
 		}
