@@ -16,6 +16,7 @@ import org.safs.SAFSException;
 import org.safs.STAFHelper;
 import org.safs.StatusCodes;
 import org.safs.StringUtils;
+import org.safs.model.commands.ComboBoxFunctions;
 import org.safs.selenium.webdriver.lib.ComboBox;
 import org.safs.selenium.webdriver.lib.ComboBoxException;
 import org.safs.selenium.webdriver.lib.SeleniumPlusException;
@@ -35,19 +36,19 @@ public class CFComboBox extends CFComponent {
 	/** "ComboBox" */
 	public static final String LIBRARY_NAME = CFComboBox.class.getSimpleName().substring("CF".length());
 
-	public static final String CAPTUREITEMSTOFILE	= "CaptureItemsToFile";
-	public static final String HIDELIST	= "HideList";
-	public static final String SHOWLIST	= "ShowList";
-	
-	public static final String SELECT	= "Select";
-	public static final String SELECTINDEX	= "SelectIndex";
-	public static final String SELECTPARTIALMATCH	= "SelectPartialMatch";
-	public static final String SELECTUNVERIFIED	= "SelectUnverified";
-	public static final String VERIFYSELECTED	= "VerifySelected";
+//	public static final String CAPTUREITEMSTOFILE	= ComboBoxFunctions.CAPTUREITEMSTOFILE_KEYWORD;
+//	public static final String HIDELIST	= ComboBoxFunctions.HIDELIST_KEYWORD;
+//	public static final String SHOWLIST	= ComboBoxFunctions.SHOWLIST_KEYWORD;
+//	
+//	public static final String SELECT	= ComboBoxFunctions.SELECT_KEYWORD;
+//	public static final String SELECTINDEX	= ComboBoxFunctions.SELECTINDEX_KEYWORD;
+//	public static final String SELECTPARTIALMATCH	= ComboBoxFunctions.SELECTPARTIALMATCH_KEYWORD;
+//	public static final String SELECTUNVERIFIED	= ComboBoxFunctions.SELECTUNVERIFIED_KEYWORD;
+//	public static final String VERIFYSELECTED	= ComboBoxFunctions.VERIFYSELECTED_KEYWORD;
 
 	//The following 2 keywords are not supported for now. Html combo-box doesn't accept setting value.
-	public static final String SETTEXTVALUE	= "SetTextValue";
-	public static final String SETUNVERIFIEDTEXTVALUE	= "SetUnverifiedTextValue";
+//	public static final String SETTEXTVALUE	= ComboBoxFunctions.SETTEXTVALUE_KEYWORD;
+//	public static final String SETUNVERIFIEDTEXTVALUE	= ComboBoxFunctions.SETUNVERIFIEDTEXTVALUE_KEYWORD;
 	
 	ComboBox combobox;
 			
@@ -78,13 +79,14 @@ public class CFComboBox extends CFComponent {
 				Log.debug(debugmsg+" processing command '"+action+"' with parameters "+params);
 				iterator = params.iterator();
 				
-				if(action.equalsIgnoreCase(SELECT)||
-				   action.equalsIgnoreCase(SELECTINDEX)||
-				   action.equalsIgnoreCase(SELECTPARTIALMATCH)||
-				   action.equalsIgnoreCase(SELECTUNVERIFIED)||
-				   action.equalsIgnoreCase(VERIFYSELECTED)||
-				   action.equalsIgnoreCase(CAPTUREITEMSTOFILE)||
-				   action.equalsIgnoreCase(SETTEXTVALUE)){
+				if(action.equalsIgnoreCase(ComboBoxFunctions.SELECT_KEYWORD)||
+				   action.equalsIgnoreCase(ComboBoxFunctions.SELECTINDEX_KEYWORD)||
+				   action.equalsIgnoreCase(ComboBoxFunctions.SELECTPARTIALMATCH_KEYWORD)||
+				   action.equalsIgnoreCase(ComboBoxFunctions.SELECTUNVERIFIEDPARTIALMATCH_KEYWORD)||
+				   action.equalsIgnoreCase(ComboBoxFunctions.SELECTUNVERIFIED_KEYWORD)||
+				   action.equalsIgnoreCase(ComboBoxFunctions.VERIFYSELECTED_KEYWORD)||
+				   action.equalsIgnoreCase(ComboBoxFunctions.CAPTUREITEMSTOFILE_KEYWORD)||
+				   action.equalsIgnoreCase(ComboBoxFunctions.SETTEXTVALUE_KEYWORD)){
 					
 					if (params.size() < 1) {
 						testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
@@ -104,7 +106,7 @@ public class CFComboBox extends CFComponent {
 					combobox.setForceRefresh(Boolean.parseBoolean(param2));
 				}
 				
-				if(action.equalsIgnoreCase(SELECT)){
+				if(action.equalsIgnoreCase(ComboBoxFunctions.SELECT_KEYWORD)){
 					try{
 						combobox.select(param1, true, false, true);
 
@@ -124,7 +126,7 @@ public class CFComboBox extends CFComponent {
 						log.logMessage(testRecordData.getFac(), msg, detail, FAILED_MESSAGE);
 					}
 					
-				}else if(action.equalsIgnoreCase(SELECTINDEX)){
+				}else if(action.equalsIgnoreCase(ComboBoxFunctions.SELECTINDEX_KEYWORD)){
 					int offset = 0;
 					try{ 
 						offset = Integer.parseInt(param1);
@@ -172,7 +174,7 @@ public class CFComboBox extends CFComponent {
 						log.logMessage(testRecordData.getFac(), msg, detail, FAILED_MESSAGE);
 					}
 					
-				} else if(action.equalsIgnoreCase(SELECTPARTIALMATCH)){
+				} else if(action.equalsIgnoreCase(ComboBoxFunctions.SELECTPARTIALMATCH_KEYWORD)){
 					try{
 						List<String> list = combobox.select(param1, true, true, true);
 
@@ -194,14 +196,21 @@ public class CFComboBox extends CFComponent {
 						log.logMessage(testRecordData.getFac(), msg, detail, FAILED_MESSAGE);
 					}
 
-				} else if(action.equalsIgnoreCase(SELECTUNVERIFIED)){
+				}else if(action.equalsIgnoreCase(ComboBoxFunctions.SELECTUNVERIFIED_KEYWORD)){
 					combobox.select(param1, false, false, true);
 					testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
 					msg = genericText.convert(GENKEYS.SUCCESS_3A, windowName+":"+compName+" "+action+" successful using "+param1,
 							                  windowName, compName, action, param1);
 					log.logMessage(testRecordData.getFac(), msg, PASSED_MESSAGE);
 					
-				} else if(action.equalsIgnoreCase(VERIFYSELECTED)){
+				} else if(action.equalsIgnoreCase(ComboBoxFunctions.SELECTUNVERIFIEDPARTIALMATCH_KEYWORD)){
+					combobox.select(param1, false, true, true);
+					testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
+					msg = genericText.convert(GENKEYS.SUCCESS_3A, windowName+":"+compName+" "+action+" successful using "+param1,
+							                  windowName, compName, action, param1);
+					log.logMessage(testRecordData.getFac(), msg, PASSED_MESSAGE);
+					
+				} else if(action.equalsIgnoreCase(ComboBoxFunctions.VERIFYSELECTED_KEYWORD)){
 					try{
 						List<String> list = combobox.verifySelected(param1);
 
@@ -223,24 +232,24 @@ public class CFComboBox extends CFComponent {
 						log.logMessage(testRecordData.getFac(), msg, detail, FAILED_MESSAGE);
 					}
 
-				} else if(action.equalsIgnoreCase(HIDELIST)){
+				} else if(action.equalsIgnoreCase(ComboBoxFunctions.HIDELIST_KEYWORD)){
 					combobox.hidePopup();
 					testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
 					msg = genericText.convert(GENKEYS.SUCCESS_3, windowName+":"+compName+" "+action+" successful.", 
 							                  windowName, compName, action);
 					log.logMessage(testRecordData.getFac(),msg, PASSED_MESSAGE);
 					
-				} else if(action.equalsIgnoreCase(SHOWLIST)){
+				} else if(action.equalsIgnoreCase(ComboBoxFunctions.SHOWLIST_KEYWORD)){
 					combobox.showPopup();
 					testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
 					msg = genericText.convert(GENKEYS.SUCCESS_3, windowName+":"+compName+" "+action+" successful.", 
 							                  windowName, compName, action);
 					log.logMessage(testRecordData.getFac(),msg, PASSED_MESSAGE);
 					
-				} else if(action.equalsIgnoreCase(CAPTUREITEMSTOFILE)){
+				} else if(action.equalsIgnoreCase(ComboBoxFunctions.CAPTUREITEMSTOFILE_KEYWORD)){
 					captureItemsToFile(param1, param2);
 					
-				} else if(action.equalsIgnoreCase(SETTEXTVALUE)){
+				} else if(action.equalsIgnoreCase(ComboBoxFunctions.SETTEXTVALUE_KEYWORD)){
 					doSetText(LIBRARY_NAME, false, true);
 				}
 			}
