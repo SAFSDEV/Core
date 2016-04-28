@@ -2,20 +2,20 @@
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
+/**
+ * History for developer:
+ * APR 25, 2016    (Lei Wang) Remove start() and executeDismissUnexpectedAlerts(): Profit the configuration settings ability in JavaHook.
+ */
 package org.safs.selenium.webdriver;
 
 import org.safs.DCTestRecordHelper;
 import org.safs.DDGUIUtilities;
-import org.safs.Log;
 import org.safs.JavaHook;
 import org.safs.Processor;
-import org.safs.StringUtils;
 import org.safs.TestRecordHelper;
 import org.safs.logging.ApacheLogUtilities;
 import org.safs.logging.LogUtilities;
-import org.safs.selenium.webdriver.lib.SelectBrowser;
-import org.safs.tools.drivers.ConfigureInterface;
-import org.safs.tools.drivers.DriverConstant;
+import org.safs.selenium.SeleniumHookConfig;
 import org.safs.tools.drivers.EmbeddedHookDriver;
 
 /**
@@ -84,22 +84,9 @@ public class EmbeddedSeleniumHookDriver extends EmbeddedHookDriver {
 		}
 		return utils;
 	}
-	
-	/**
-	 * (TerenceXie) APR 20, 2016	Set the 'DismissUnexpectedAlerts' value based on command-line or INI file. 
-	 */
-	protected void executeDismissUnexpectedAlerts(){
-		if(jsafs().getDismissUnexpectedAlerts()){
-			SelectBrowser.dismissUnexpectedAlertsIEValue = "accept";
-		} else {
-			SelectBrowser.dismissUnexpectedAlertsIEValue = "ignore";
-		}
-	}
-	
-	public void start(){
-		SeleniumHook.setSystemProperties(config());		
-		executeDismissUnexpectedAlerts();
-		super.start();
+
+	protected void instantiateHookConfig(){
+		hookconfig = new SeleniumHookConfig(TestRecordHelper.getConfig());
 	}
 	
 	@Override

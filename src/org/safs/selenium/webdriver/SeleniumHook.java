@@ -5,28 +5,25 @@
 
 package org.safs.selenium.webdriver;
 /**
- *   <br>   APR 08, 2015    (Lei Wang) Modify method setSystemProperties(): Call StringUtils.getSystemProperty to handle configuration values
- *                                   and set them to system properties.
+ * History for developer:
+ * APR 08, 2015    (Lei Wang) Modify method setSystemProperties(): Call StringUtils.getSystemProperty to handle configuration values
+ *                          and set them to system properties.
+ * APR 25, 2016    (Lei Wang) Modify start() etc.: Profit the configuration settings ability in JavaHook.
  */
 
-import java.io.File;
-
 import org.safs.DDGUIUtilities;
-import org.safs.IndependantLog;
 import org.safs.JavaHook;
 import org.safs.Log;
 import org.safs.ProcessRequest;
 import org.safs.Processor;
 import org.safs.SAFSException;
 import org.safs.STAFHelper;
-import org.safs.StringUtils;
 import org.safs.TestRecordHelper;
 import org.safs.logging.ApacheLogUtilities;
 import org.safs.logging.LogUtilities;
+import org.safs.selenium.SeleniumHookConfig;
 import org.safs.selenium.webdriver.lib.SelectBrowser;
-import org.safs.tools.drivers.ConfigureFile;
 import org.safs.tools.drivers.ConfigureInterface;
-import org.safs.tools.drivers.DriverConstant;
 import org.safs.tools.drivers.DriverConstant.SeleniumConfigConstant;
 
 /**
@@ -431,83 +428,20 @@ public class SeleniumHook extends JavaHook {
 	 * <li> {@link SeleniumConfigConstant#SELENIUMSERVER_JVM_OPTIONS}
 	 * <li> {@link SeleniumConfigConstant#SELENIUMSERVER_JVM}
 	 * </ul>
-	 * This method will be shared by EmbeddedSeleniumHookDriver.<br>
 	 * @param config ConfigureInterface, containing the configuration initial parameters
-	 * @see EmbeddedSeleniumHookDriver#start()
+	 * @deprecated Call {@link SeleniumHookConfig#setSystemProperties(ConfigureInterface)} instead.
 	 */
 	public static void setSystemProperties(ConfigureInterface config){
-		try{
-			//Set browserName
-			StringUtils.getSystemProperty(SelectBrowser.SYSTEM_PROPERTY_BROWSER_NAME, 
-					config, DriverConstant.SECTION_SAFS_SELENIUM, SelectBrowser.SYSTEM_PROPERTY_BROWSER_NAME);
-
-			//Set browserRemote
-			StringUtils.getSystemProperty(SelectBrowser.SYSTEM_PROPERTY_BROWSER_REMOTE, 
-					config, DriverConstant.SECTION_SAFS_SELENIUM, SelectBrowser.SYSTEM_PROPERTY_BROWSER_REMOTE);
-
-			//Set SELENIUM "remote server/grid" host and port
-			StringUtils.getSystemProperty(SelectBrowser.SYSTEM_PROPERTY_SELENIUM_HOST, 
-					config, DriverConstant.SECTION_SAFS_SELENIUM, SeleniumConfigConstant.SELENIUMHOST,
-					SeleniumConfigConstant.DEFAULT_SELENIUM_HOST);
-			StringUtils.getSystemProperty(SelectBrowser.SYSTEM_PROPERTY_SELENIUM_PORT,
-					config, DriverConstant.SECTION_SAFS_SELENIUM, SeleniumConfigConstant.SELENIUMPORT,
-					SeleniumConfigConstant.DEFAULT_SELENIUM_PORT);
-			StringUtils.getSystemProperty(SelectBrowser.SYSTEM_PROPERTY_SELENIUM_NODE,
-					config, DriverConstant.SECTION_SAFS_SELENIUM, SeleniumConfigConstant.SELENIUMNODE);
-
-			//Set The real Internet gateway (host, port and bypass-address)
-			StringUtils.getSystemProperty(SelectBrowser.SYSTEM_PROPERTY_PROXY_HOST,
-					config, DriverConstant.SECTION_SAFS_SELENIUM, DriverConstant.GATEWAYHOST);
-			StringUtils.getSystemProperty(SelectBrowser.SYSTEM_PROPERTY_PROXY_PORT,
-					config, DriverConstant.SECTION_SAFS_SELENIUM, DriverConstant.GATEWAYPORT);
-			StringUtils.getSystemProperty(SelectBrowser.SYSTEM_PROPERTY_PROXY_BYPASS,
-					config, DriverConstant.SECTION_SAFS_SELENIUM, DriverConstant.PROXY_BYPASS_ADDRESS);
-
-			//Set maximum/minimum memory to use for SELENIUM server
-			StringUtils.getSystemProperty(SeleniumConfigConstant.SELENIUMSERVER_JVM_Xmx,
-					config, DriverConstant.SECTION_SAFS_SELENIUM, SeleniumConfigConstant.SELENIUMSERVER_JVM_Xmx);
-			StringUtils.getSystemProperty(SeleniumConfigConstant.SELENIUMSERVER_JVM_Xms,
-					config, DriverConstant.SECTION_SAFS_SELENIUM, SeleniumConfigConstant.SELENIUMSERVER_JVM_Xms);
-			//Set JVM Options for SELENIUM server
-			StringUtils.getSystemProperty(SeleniumConfigConstant.SELENIUMSERVER_JVM_OPTIONS,
-					config, DriverConstant.SECTION_SAFS_SELENIUM, SeleniumConfigConstant.SELENIUMSERVER_JVM_OPTIONS);
-			//Set JVM for SELENIUM server
-			StringUtils.getSystemProperty(SeleniumConfigConstant.SELENIUMSERVER_JVM,
-					config, DriverConstant.SECTION_SAFS_SELENIUM, SeleniumConfigConstant.SELENIUMSERVER_JVM);
-			
-		}catch(Exception e){
-			IndependantLog.warn(StringUtils.debugmsg(false)+" Fail. Met "+StringUtils.debugmsg(e));
-		}
+		SeleniumHookConfig.setSystemProperties(config);
+	}
+	
+	protected void instantiateHookConfig(){
+		hookconfig = new SeleniumHookConfig(TestRecordHelper.getConfig());
 	}
 	
 	public void start(){
-		String path = System.getProperty("safs.config.paths");
-		String [] paths = new String[0];
-		if(path != null){
-			paths = path.split(File.pathSeparator);
-		} else {
-			String msg = "SAFS configuration paths are not set.  Aborting.";
-			Log.error(msg);
-			System.err.println(msg);
-			return;
-		}
-
-		ConfigureInterface config = null;
-		for(int i = 0; i < paths.length; i++){
-			File f = new File(paths[i]);
-			if(f.exists()){
-				if(config == null){
-					config = new ConfigureFile(f);
-				} else {
-					config.addConfigureInterface(new ConfigureFile(f));
-				}
-			}
-
-		}
-//		data.setConfig(config);
-		TestRecordHelper.setConfig(config);
-		setSystemProperties(config);
-
+		checkConfiguration();
+		
 		try{				
 			helper.setSTAFVariable(SAFS_SELENIUM_SERVER_BOOTUP_READY, "true");
 		}catch(Exception e){

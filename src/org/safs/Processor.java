@@ -1006,6 +1006,18 @@ public abstract class Processor implements RuntimeDataInterface{
   protected static boolean RFSMCache;
   public static void setRFSMCache(boolean enable){RFSMCache = enable;}
   public static boolean isRFSMCache(){return RFSMCache;}
+
+  /** How to handle the 'alert dialog' if it is visible unexpectedly, it could be set as 'accept' or 'dismiss' or 'ignore' */
+  protected static String unexpectedAlertBehaviour = DriverConstant.DEFAULT_UNEXPECTED_ALERT_BEHAVIOUR;
+  /** Get how the 'alert dialog' will be handled if it is visible unexpectedly. 
+   * @return String, 'accept' or 'dismiss' or 'ignore'*/
+  public static String getUnexpectedAlertBehaviour() {
+	  return unexpectedAlertBehaviour;
+  }
+  /** Set how to handle the 'alert dialog' if it is visible unexpectedly, it could be set as 'accept' or 'dismiss' or 'ignore' */
+  public static void setUnexpectedAlertBehaviour(String behaviour) {
+	  unexpectedAlertBehaviour = behaviour;
+  }
   
   /**
    * Deduce the absolute full path test-relative file.

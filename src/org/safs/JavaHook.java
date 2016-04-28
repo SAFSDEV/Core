@@ -2,23 +2,31 @@
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
-
+/**
+ * 	History for developer:
+ *   <br>   NOV 09, 2003    (Carl Nagle) Original Release
+ *   <br>   NOV 11, 2003    (Carl Nagle) Fixed bug: give TestRecordHelper the STAFHelper it needs.
+ *   <br>   DEC 08, 2004    (Carl Nagle) Added support for evaluateRuntimeExceptions
+ *   <br>   JAN 21, 2005    (Carl Nagle) Added support for semaphoreRoot and disabling System.exit.
+ *   <br>   AUG 01, 2007    (Carl Nagle) Added support for hook_shutdown() for subclasses to add 
+ *                                   shutdown activities.
+ *   <br>	SEP 28, 2010   	(JunwuMa) Add status STEP_RETRY and STEPPING_RETRY for SAFSVARS variable 
+ *                                   'SAFS_DRIVER_CONTROL' about step retry feature.
+ *   <br>	APR 26, 2016	(Lei Wang) Provide the ability to get configuration settings for Hook. 
+ */
 package org.safs;
 
-//import org.safs.rational.RTestRecordData;
-import org.safs.staf.*;
+import java.io.File;
+import java.util.Locale;
+
+import org.safs.logging.AbstractLogFacility;
+import org.safs.logging.LogUtilities;
+import org.safs.staf.STAFProcessHelpers;
 import org.safs.tools.CaseInsensitiveFile;
-import org.safs.tools.consoles.SAFSMonitorFrame;
 import org.safs.tools.drivers.ConfigureFile;
 import org.safs.tools.drivers.ConfigureInterface;
 import org.safs.tools.drivers.DriverConstant;
 import org.safs.tools.drivers.DriverInterface;
-import org.safs.tools.stringutils.StringUtilities;
-import org.safs.logging.*;
-import java.io.*;
-import java.util.*;
-
-import com.ibm.staf.STAFResult;
 
 /**
  * Generic Java Hook for tool-independent SAFS Engines.
@@ -50,16 +58,8 @@ import com.ibm.staf.STAFResult;
  * 
  * @author Carl Nagle, SAS Institute
  * @since   NOV 09, 2003
- *   <br>   NOV 09, 2003    (Carl Nagle) Original Release
- *   <br>   NOV 11, 2003    (Carl Nagle) Fixed bug: give TestRecordHelper the STAFHelper it needs.
- *   <br>   DEC 08, 2004    (Carl Nagle) Added support for evaluateRuntimeExceptions
- *   <br>   JAN 21, 2005    (Carl Nagle) Added support for semaphoreRoot and disabling System.exit.
- *   <br>   AUG 01, 2007    (Carl Nagle) Added support for hook_shutdown() for subclasses to add 
- *                                   shutdown activities.
- *   <br>	SEP 28, 2010   (JunwuMa) Add status STEP_RETRY and STEPPING_RETRY for SAFSVARS variable 
- *                                   'SAFS_DRIVER_CONTROL' about step retry feature.                                
  **/
-public abstract class JavaHook {
+public abstract class JavaHook implements HookConfig{
 
   /** "SHUTDOWN_HOOK" **/
   public static final String SHUTDOWN_RECORD    = "SHUTDOWN_HOOK";
@@ -119,6 +119,10 @@ public abstract class JavaHook {
    * Proceed with normal testing
    */
   public static final long REQUEST_PROCEED_TESTING = 0;
+  
+  /**Used to get settings from ConfigureInterface. 
+   * @see #instantiateHookConfig()*/
+  protected HookConfig hookconfig = null;
   
   /** 
    * The name of the process this hook supports. 
@@ -411,7 +415,8 @@ public abstract class JavaHook {
 			paths = path.split(File.pathSeparator);
 		} else {
 			String msg = "SAFS -Dsafs.config.paths is not available for this instance.";
-			Log.info(msg);
+			Log.warn(msg);
+			System.out.println(msg);
 			return;
 		}
 		
@@ -426,7 +431,26 @@ public abstract class JavaHook {
 				}
 			}			
 		}
-		data.setConfig(config);	  
+		TestRecordHelper.setConfig(config);
+  }
+  
+  /** Instantiate the HookConfig, used to get settings from ConfigureInterface. <br>
+   * Custom Hooks may override this method to provide their own HookConfig.<br> 
+   * <b>Note: This should be called after {@link #initConfigPaths()}. </b>
+   * @see #initConfigPaths() */
+  protected void instantiateHookConfig(){
+	  hookconfig = new DefaultHookConfig(TestRecordHelper.getConfig());
+  }
+  
+  /**
+   * Call {@link #initConfigPaths()} to initialize the ConfigureInterface instance.<br>
+   * Call {@link #instantiateHookConfig()} to initialize the HookConfig instance.<br>
+   * Call {@link HookConfig#checkConfiguration()} to check configuration settings for Hook.<br>
+   */
+  public void checkConfiguration(){
+	  initConfigPaths();
+	  instantiateHookConfig();
+	  hookconfig.checkConfiguration();
   }
 
   /**
