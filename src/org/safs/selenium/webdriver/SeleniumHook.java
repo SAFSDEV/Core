@@ -431,6 +431,7 @@ public class SeleniumHook extends JavaHook {
 	 * @param config ConfigureInterface, containing the configuration initial parameters
 	 * @deprecated Call {@link SeleniumHookConfig#setSystemProperties(ConfigureInterface)} instead.
 	 */
+	@Deprecated
 	public static void setSystemProperties(ConfigureInterface config){
 		SeleniumHookConfig.setSystemProperties(config);
 	}
