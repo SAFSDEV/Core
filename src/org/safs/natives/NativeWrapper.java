@@ -1,11 +1,25 @@
 /** Copyright (C) SAS Institute, Inc. All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
+/**
+ * History for developer:
+ * CANAGL  Jun 03, 2009  Added GetProcessUIResourceCount<br>
+ * CANAGL  Aug 07, 2009  Added GetProcessFileName <br>
+ * CANAGL  SEP 14, 2009  Refactored with WIN classes. <br>
+ * CANAGL  DEC 15, 2009  Added GetRegistryKeyValue and  DoesRegistryKeyExists routines.<br> 
+ * JunwuMa JUL 23, 2010  Updated to get GetRegistryKeyValue support Win7.<br>
+ * SBJLWA  NOV 18, 2011  Add method getFileTime() and convertFileTimeToJavaTime()<br>
+ * CANAGL  OCT 29, 2013  Added SetRegistryKeyValue and SetSystemEnvironmentVariable routines.<br>
+ * DHARMESH4  FEB 19, 2014  Added runAsyncExec call.<br>  
+ * DHARMESH4  AUG 17, 2015  Added setForgroundWindow call<br>  
+ * SBJLWA  MAY 03, 2016  Modify GetProcessFileName(), _processLastError() and add isMemoryValid(): Upgrade the dependency JNA to 4.2.2.
+ */
 package org.safs.natives;
 
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -15,6 +29,7 @@ import java.util.Vector;
 import java.util.regex.Pattern;
 
 import org.safs.IndependantLog;
+import org.safs.SAFSException;
 import org.safs.StringUtils;
 import org.safs.android.auto.lib.Console;
 import org.safs.android.auto.lib.Process2;
@@ -45,15 +60,6 @@ import com.sun.jna.Pointer;
  * <p>
  * SAFS is now delivered with the core JNA.ZIP(JAR).  Other JNA support libraries may be added as needed. 
  * @author canagl
- * @author CANAGL  Jun 03, 2009  Added GetProcessUIResourceCount<br>
- *         CANAGL  Aug 07, 2009  Added GetProcessFileName <br>
- *         CANAGL  SEP 14, 2009  Refactored with WIN classes. <br>
- *         CANAGL  DEC 15, 2009  Added GetRegistryKeyValue and  DoesRegistryKeyExists routines.<br> 
- *         JunwuMa JUL 23, 2010  Updated to get GetRegistryKeyValue support Win7.<br>
- *         (SBJLWA)NOV 18, 2011  Add method getFileTime() and convertFileTimeToJavaTime()<br>
- *         CANAGL  OCT 29, 2013  Added SetRegistryKeyValue and SetSystemEnvironmentVariable routines.<br>
- *         DHARMESH4  FEB 19, 2014  Added runAsyncExec call.<br>  
- *         DHARMESH4  AUG 17, 2015  Added setForgroundWindow call<br>  
  * @since 2009.02.03
  */
 public class NativeWrapper {
@@ -1013,6 +1019,51 @@ public class NativeWrapper {
 	}
 	
 	/**
+	 * The method 'isValid()' existed in old JNA, then it was deprecated and then deleted in newer JNA.<br>
+	 * To get our code works with old JNA and new JNA, use java reflection to call method.<br>
+	 * 
+	 * @param memory com.sun.jna.Memory
+	 * @return boolean, true if the memory is valid.
+	 *                  false if the memory is invalid, .
+	 * @throws SAFSException the memory is null or some other errors happen.
+	 */
+	private static boolean isMemoryValid(Memory memory) throws SAFSException{
+		String debugmsg = StringUtils.debugmsg(false);
+		Method isMemoryValidMethod = null;
+		Class<? extends Memory> clazz = null;
+		String method = "valid";
+		
+		if(memory==null){
+			String msg = "The parameter memory is null!";
+			IndependantLog.error(debugmsg+msg);
+			throw new SAFSException(msg);
+		}
+		clazz = memory.getClass();
+		
+		try {
+			isMemoryValidMethod = clazz.getMethod(method);
+		} catch (Exception e) {
+			IndependantLog.warn(debugmsg+"Cannot find the method '"+method+"' for class '"+clazz.getName()+"', due to "+StringUtils.debugmsg(e));
+			try {
+				method = "isValid";//existed in old JNA, then it is deprecated and then deleted in newer JNA.
+				isMemoryValidMethod = clazz.getMethod(method);
+			} catch (Exception e1) {
+				IndependantLog.error(debugmsg+"Cannot find the method '"+method+"' for class '"+clazz.getName()+"', due to "+StringUtils.debugmsg(e));
+			}
+		}
+		
+		try {
+			Object bool = isMemoryValidMethod.invoke(memory);
+			IndependantLog.debug(debugmsg+"Memory valid return "+bool);
+			return StringUtilities.convertBool(bool);
+		} catch (Exception e) {
+			String msg = "Failed to test the validity of Memory, due to "+StringUtils.debugmsg(e);
+			IndependantLog.error(debugmsg+msg);
+			throw new SAFSException(msg);
+		}
+	}
+	
+	/**
 	 * Retrieves last error via GetLastError and also attempts to debug log the error code 
 	 * and any system message for the error code. 
 	 * @return last error code encountered or 0
@@ -1030,12 +1081,16 @@ public class NativeWrapper {
 				int dwFlags = 0x00001000 | // FORMAT_MESSAGE_FROM_SYSTEM
 				              0x00000200 ; // FORMAT_MESSAGE_IGNORE_INSERTS
 				Memory lpBuffer = new Memory(nSize);
-				if(lpBuffer.isValid()) lpBuffer.clear();
-				size = Kernel32.INSTANCE.FormatMessageA(dwFlags, null, error, 0, lpBuffer, nSize, null);
-				if(size <= 0){
-					IndependantLog.debug("FormatErrorMessage did not retrieve a useful message for error: "+ error);
-				}else{
-					IndependantLog.debug("Error: "+ error +": "+ lpBuffer.getString(0));
+				try {
+					if(isMemoryValid(lpBuffer)) lpBuffer.clear();
+					size = Kernel32.INSTANCE.FormatMessageA(dwFlags, null, error, 0, lpBuffer, nSize, null);
+					if(size <= 0){
+						IndependantLog.warn("_processLastError did not retrieve a useful message for error: "+ error);
+					}else{
+						IndependantLog.debug("Error: "+ error +": "+ lpBuffer.getString(0));
+					}
+				} catch (SAFSException e) {
+					IndependantLog.warn("_processLastError did not retrieve a useful message for error: "+ error+" , due to "+StringUtils.debugmsg(e));
 				}
 				lpBuffer = null;
 			}
@@ -1355,7 +1410,7 @@ public class NativeWrapper {
 				int size = 0;
 				int plen = 4096;
 				Memory lpFileName = new Memory(plen);
-				if(lpFileName.isValid()){
+				if(isMemoryValid(lpFileName)){
 					lpFileName.clear();
 				}else{
 					IndependantLog.debug("NativeWrapper.getProcessFileName could not allocate memory for filename buffer!");
@@ -1890,9 +1945,9 @@ public class NativeWrapper {
 	 * To test {@link #getFileTime(String, Date, Date, Date)}, call as following:<br>
 	 * {@code java java org.safs.natives.NativeWrapper -fileforgettime fullPathFileName > outputFile.txt}<br>
 	 * @param args String[], <br>
-	 *             If {@link #ARG_DEBUG} is present, then show debug message on console<br>
+	 *             If {@link IndependantLog#ARG_DEBUG} is present, then show debug message on console<br>
 	 *             if {@link #ARG_FILE_FOR_GETTIME} followed by a full path file name such as "c:\temp\myfile.txt", then {@link #test_getFileTime(String[])}<br>
-	 *             if {@link IndependantLog#ARG_DEBUG} followed by host name such as machine.domain.com, then {@link #test_getHostIp(String[])}<br>
+	 *             if {@link #ARG_HOSTNAME} followed by host name such as machine.domain.com, then {@link #test_getHostIp(String[])}<br>
 	 */
 	public static void main(String[] args){
 		

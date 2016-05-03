@@ -1,3 +1,10 @@
+/**
+ * History for develper:
+ * CANAGL  		Jun 04, 2009  Added GetGuiResources API interface.  
+ * JunwuMa 		Oct 21, 2010  Adding API interfaces for using low-level Mouse/Keyboard callback hooks. 
+ * dharmesh4 	Aug 12, 2015 Added ShowWindow/SetForgebackground User32 Interface method.
+ * SBJLWA 		MAY 03, 2016  Upgrade the dependency JNA to 4.2.2.
+ */
 package org.safs.natives.win32;
 
 import java.util.Vector;
@@ -5,8 +12,6 @@ import java.util.Vector;
 import com.sun.jna.Native;
 import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
-import com.sun.jna.Structure;
-import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.win32.StdCallLibrary;
 import com.sun.jna.win32.W32APIOptions;
 /**
@@ -14,9 +19,6 @@ import com.sun.jna.win32.W32APIOptions;
  * <p>
  * <a href="http://jna.dev.java.net" target="_blank">JNA Home Page</a>
  * @author canagl
- * @author CANAGL  Jun 04, 2009  Added GetGuiResources API interface.  
- * @author JunwuMa Oct 21, 2010  Adding API interfaces for using low-level Mouse/Keyboard callback hooks. 
- * @author dharmesh4 Aug 12, 2015 Added ShowWindow/SetForgebackground User32 Interface method.
  * @since 2009.02.03
  * @see org.safs.natives.NativeWrapper
  */
@@ -157,7 +159,7 @@ public interface User32 extends W32APIOptions, StdCallLibrary {
 	 * The POINT structure defines the x- and y- coordinates of a point. Used for MSG.
 	 * <p>
 	 */
-	public class POINT extends Structure {
+	public class POINT extends DefaultStructure {
 		public NativeLong x;
         public NativeLong y;  //should be NativeLong for matching Long
 	}
@@ -174,7 +176,7 @@ public interface User32 extends W32APIOptions, StdCallLibrary {
 	 * <p>Contains message information from a thread's message queue.<p> 
 	 *
 	 */
-	public class MSG extends Structure {
+	public class MSG extends DefaultStructure {
 		public NativeLong  hwnd;   
 		public int   message; 
 		public NativeLong wParam;  
@@ -193,7 +195,7 @@ public interface User32 extends W32APIOptions, StdCallLibrary {
   	 *		ULONG_PTR dwExtraInfo;
 	 *	} MOUSEHOOKSTRUCT, *PMOUSEHOOKSTRUCT, *LPMOUSEHOOKSTRUCT;
 	 */
-    public class MOUSEHOOKSTRUCT extends Structure {
+    public class MOUSEHOOKSTRUCT extends DefaultStructure {
         public POINT pt;
         public NativeLong hwnd; //HWND public NativeLong hwnd; //HWND
         public int wHitTestCode;
@@ -210,7 +212,7 @@ public interface User32 extends W32APIOptions, StdCallLibrary {
 	 *	} MSLLHOOKSTRUCT, *PMSLLHOOKSTRUCT, *LPMSLLHOOKSTRUCT;
 	 *
      */
-    public class MSLLHOOKSTRUCT extends Structure {
+    public class MSLLHOOKSTRUCT extends DefaultStructure {
         public POINT pt;
         public int mouseData; //HWND public NativeLong hwnd; //HWND
         public int flags;
@@ -229,7 +231,7 @@ public interface User32 extends W32APIOptions, StdCallLibrary {
 	 * } KBDLLHOOKSTRUCT, *PKBDLLHOOKSTRUCT, *LPKBDLLHOOKSTRUCT;
 	 *
 	 */
-	public class KBDLLHOOKSTRUCT extends Structure {
+	public class KBDLLHOOKSTRUCT extends DefaultStructure {
         public int vkCode;
         public int scanCode;
         public int flags;
@@ -237,7 +239,7 @@ public interface User32 extends W32APIOptions, StdCallLibrary {
         public Pointer dwExtraInfo;
     }
 
-    public class CWPSTRUCT extends Structure {
+    public class CWPSTRUCT extends DefaultStructure {
 		public NativeLong lParam;
 		public NativeLong wParam;  
 		public int   message; 
