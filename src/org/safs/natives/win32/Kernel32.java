@@ -1,8 +1,14 @@
+/**
+ * History for developer:
+ * JunwuMa  Oct 21, 2010  Add GetModuleHandleA API interface.
+ * Lei Wang 	Nov 18, 2011  Add API interface: CreateFile and GetFileTime
+ *                        Add structure FileTime and SecurityAttribute
+ * Lei Wang 	MAY 03, 2016  Upgrade the dependency JNA to 4.2.2.
+ */
 package org.safs.natives.win32;
 
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
-import com.sun.jna.Structure;
 import com.sun.jna.win32.StdCallLibrary;
 
 /**
@@ -10,10 +16,6 @@ import com.sun.jna.win32.StdCallLibrary;
  * <p>
  * <a href="http://jna.dev.java.net" target="_blank">JNA Home Page</a>
  * @author Carl Nagle
- * @author JunwuMa  Oct 21, 2010  Add GetModuleHandleA API interface.
- * <br>    (Lei Wang) Nov 18, 2011  Add API interface: CreateFile and GetFileTime
- *                                Add structure FileTime and SecurityAttribute
- * 
  * @since 2009.06.03
  * @see org.safs.natives.NativeWrapper
  */
@@ -502,7 +504,7 @@ public interface Kernel32 extends StdCallLibrary {
 	 *   BOOL   bInheritHandle;
 	 * } SECURITY_ATTRIBUTES, *PSECURITY_ATTRIBUTES, *LPSECURITY_ATTRIBUTES;
 	 */
-	public class SecurityAttribute extends Structure{
+	public class SecurityAttribute extends DefaultStructure{
 		public int nLength;
 		public Pointer lpSecurityDescriptor;
 		public boolean bInheritHandle;
@@ -561,7 +563,7 @@ public interface Kernel32 extends StdCallLibrary {
 	 * 1, 000, 000 nanoseconds = 1 millisecond
 	 *</pre>
 	 */
-	public class FileTime extends Structure{
+	public class FileTime extends DefaultStructure{
 		public int dwLowDateTime;
 		public int dwHighDateTime;
 	}
