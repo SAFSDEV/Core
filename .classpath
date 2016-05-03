@@ -3,7 +3,7 @@
 	<classpathentry excluding="install/*|org/safs/selenium/install/*" kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/SAFS-Android-Remote-Control"/>
-	<classpathentry kind="var" path="SAFS_BUILD/libs/jna-4.2.2.jar" sourcepath="/SAFS_BUILD/libs/jna-4.2.2.zip"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/jna-4.2.2.jar"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/jna-platform-4.2.2.jar"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/org.json.jar"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/cuke/cucumber-core-1.1.3.jar"/>
