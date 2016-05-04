@@ -36,6 +36,7 @@ package org.safs.selenium.webdriver.lib;
  *  <br>  DEC 25, 2015    (SBJLWA)  Modify getObjectByText() and getObjectByTitle(): try to get partial, case-insensitive matched element.
  *  <br>  JAN 05, 2015    (SBJLWA)  Modify getObjectByQualifier() etc.: support one qualifier with "Contains", such as TextContains=, TitleContains=.
  *  <br>  MAR 17, 2016    (CANAGL)  Modified to support getObjects returning multiple matches.
+ *  <br>  MAY 04, 2016    (SBJLWA)  Modified js_getErrorXXX(): call {@link #js_executeWithTimeout(String, long)} to avoid JavaScriptExecutor locking problem.
  */
 import java.lang.reflect.Constructor;
 import java.net.URL;
@@ -2886,7 +2887,8 @@ public class SearchObject {
 	public static int js_getErrorCode() throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(SearchObject.class, "js_getErrorCode");
 		try {
-			Object object = getJS().executeScript(JavaScriptFunctions.getJSErrorCode());
+//			Object object = getJS().executeScript(JavaScriptFunctions.getJSErrorCode());
+			Object object = js_executeWithTimeout(JavaScriptFunctions.getJSErrorCode(), 1000);
 //			IndependantLog.debug(debugmsg+"returned "+object);
 			return ((Long) object).intValue();
 		} catch (SeleniumPlusException e) {
@@ -2914,8 +2916,8 @@ public class SearchObject {
 	public static Object js_getErrorObject() throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(false);
 		try {
-			Object object = getJS().executeScript(JavaScriptFunctions.getJSErrorObject());
-//			IndependantLog.debug(debugmsg+"returned "+object);
+//			Object object = getJS().executeScript(JavaScriptFunctions.getJSErrorObject());
+			Object object = js_executeWithTimeout(JavaScriptFunctions.getJSErrorObject(), 5000/*give 5 seconds, the error object may be big and takes more time to return*/);
 			return object;
 		} catch (SeleniumPlusException e) {
 			throw e;
@@ -3472,7 +3474,7 @@ public class SearchObject {
 	 * @throws SeleniumPlusException if there is no appropriate JavascriptExecutor to use.
 	 */
 	public static Object executeScript(boolean synch, String script, Object... args) throws SeleniumPlusException{
-		String debugmsg = StringUtils.debugmsg(SearchObject.class, "executeJavaScript");
+		String debugmsg = StringUtils.debugmsg(false);
 		getJS();
 
 		try{
@@ -3506,6 +3508,8 @@ public class SearchObject {
 					throw JSException.instance(error, errorcode);
 				}
 			}
+			
+			IndependantLog.debug(debugmsg+" Javascript execution succeed. It is returning result ...");
 
 			return object;
 
