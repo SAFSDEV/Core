@@ -16,6 +16,7 @@
  * SEP 17, 2014  Carl Nagle     Fixing SAFS Crashes due to incomplete initialization.
  * JUN 09, 2015  DHARMESH4  Added result email support.
  * SEP 24, 2015  LeiWang	Modify sendEMail(): get more parameters from configuration file to initialize Mailer.
+ * MAY 05, 2016 (LeiWang) 	Fix the disorder problem of attachment.
  */
 package org.safs.tools.engines;
 
@@ -27,7 +28,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.mail.Message;
 import javax.mail.internet.ParseException;
@@ -1040,8 +1043,8 @@ public class TIDDriverCommands extends GenericEngine {
 		  String attachment = "";
 		  Mailer mailer;
 		  List<String> recipientsTo = new ArrayList<String>();
-		  HashMap<Message.RecipientType,List<String>> recipients = new HashMap<Message.RecipientType,List<String>>();
-		  HashMap<String,String> attachments_alias = new HashMap<String,String>();
+		  Map<Message.RecipientType,List<String>> recipients = new HashMap<Message.RecipientType,List<String>>();
+		  Map<String,String> attachments_alias = new LinkedHashMap<String,String>();
 		  MimeType msg_type = MimeType.html; // default support
 
 		  //Get configuration parameters for initialize a Mailer
@@ -1147,7 +1150,7 @@ public class TIDDriverCommands extends GenericEngine {
 			  // set sender
 			  mailer.setSender(from);
 
-			  // set tos
+			  // set recipients
 			  Mailer.handleRecipients(tos, recipientsTo);
 			  recipients.put(Message.RecipientType.TO, recipientsTo);
 			 
