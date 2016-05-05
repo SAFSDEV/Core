@@ -5,9 +5,10 @@
 /**
  * History for developers:
  * 
- * JUN,15 2015 Added SendMail call for and misc fixes.
- * SEP,23 2015 (LeiWang) Add method send(): get transport from session so that "properties", "authentication" will be taken into account.
- *                       Modify other send() methods: throw out the Exception if there is something wrong.
+ * JUN 15, 2015 			Added SendMail call for and misc fixes.
+ * SEP 23, 2015 (LeiWang) 	Add method send(): get transport from session so that "properties", "authentication" will be taken into account.
+ *                       	Modify other send() methods: throw out the Exception if there is something wrong.
+ * MAY 05, 2016 (LeiWang) 	Fix the disorder problem of attachment.
  * 
  */
 package org.safs.tools.mail;
@@ -16,7 +17,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -218,6 +221,9 @@ public class Mailer {
 		case TLS:
 			props.put("mail.smtp.starttls.enable", true);
 			break;
+		default:
+			IndependantLog.warn(StringUtils.debugmsg(false)+"Unhandled protocol "+protocol);
+			break;
 		}
 	}
 	
@@ -285,7 +291,7 @@ public class Mailer {
 	/**
 	 * Prepare the MimeMessage for sending.
 	 * 
-	 * @param type_recipients , HashMap<Message.RecipientType, List<String>>
+	 * @param type_recipients , Map<Message.RecipientType, List<String>>
 	 * @param subject , String, the mail's subject
 	 * @return
 	 * @see #send(List, String, String)
@@ -294,16 +300,16 @@ public class Mailer {
 	 *  
 	 * @throws Exception
 	 */
-	protected MimeMessage prepareMimeMessage(HashMap<Message.RecipientType, List<String>> type_recipients, String subject) throws Exception{
+	protected MimeMessage prepareMimeMessage(Map<Message.RecipientType, List<String>> type_recipients, String subject) throws Exception{
 		if(session==null) throw new Exception("The mail Session is null!");
 		return Mailer.prepareMimeMessage(session, type_recipients, sender, subject);
 	}
 	protected static MimeMessage prepareMimeMessage(Session session, List<String> recipients, String from, String subject) throws Exception{
-		HashMap<Message.RecipientType, List<String>> type_recipients = new HashMap<Message.RecipientType, List<String>>();
+		Map<Message.RecipientType, List<String>> type_recipients = new HashMap<Message.RecipientType, List<String>>();
 		type_recipients.put(Message.RecipientType.TO, recipients);
 		return Mailer.prepareMimeMessage(session, type_recipients, from, subject);
 	}
-	protected static MimeMessage prepareMimeMessage(Session session, HashMap<Message.RecipientType, List<String>> type_recipients, String from, String subject) throws Exception{
+	protected static MimeMessage prepareMimeMessage(Session session, Map<Message.RecipientType, List<String>> type_recipients, String from, String subject) throws Exception{
 		String debugmsg = Mailer.class+".prepareMimeMessage(): ";
 		MimeMessage message = new MimeMessage(session);
 		
@@ -462,8 +468,8 @@ public class Mailer {
 	public void send(List<String> recipients, String subject, Object body, MimeType type,
 			List<String/*full path file name*/> attachments) throws SAFSException{
 		
-		HashMap<Integer/*the message order*/, MimeContent> contents = new HashMap<Integer, MimeContent>();
-		HashMap<String/*full path file name*/,String/*alias*/> attchments_alias = new HashMap<String,String>();
+		Map<Integer/*the message order*/, MimeContent> contents = new HashMap<Integer, MimeContent>();
+		Map<String/*full path file name*/,String/*alias*/> attchments_alias = new HashMap<String,String>();
 		
 		contents.put(new Integer(0), new MimeContent(body,type));
 		if(attachments!=null){
@@ -482,13 +488,13 @@ public class Mailer {
 	 * @param subject , String, the mail's subject
 	 * @param body , Object, the object to mail.
 	 * @param type , the MimeType of the mail body.
-	 * @param attchments_alias , HashMap<String//full path file name,String//alias>
+	 * @param attchments_alias , Map<String//full path file name,String//alias>
 	 * @throws SAFSException if there is something wrong
 	 */	
 	public void send(List<String> recipients, String subject, Object body, MimeType type,
-			HashMap<String/*full path file name*/,String/*alias*/> attchments_alias) throws SAFSException{
+			Map<String/*full path file name*/,String/*alias*/> attchments_alias) throws SAFSException{
 		
-		HashMap<Integer/*the message order*/, MimeContent> contents = new HashMap<Integer, MimeContent>();
+		Map<Integer/*the message order*/, MimeContent> contents = new HashMap<Integer, MimeContent>();
 		contents.put(new Integer(0), new MimeContent(body,type));
 		
 		send(recipients, subject, contents, attchments_alias);
@@ -500,15 +506,15 @@ public class Mailer {
 	 * 
 	 * @param recipients , List<String>, a list of recipients
 	 * @param subject , String, the mail's subject
-	 * @param contents , HashMap<Integer//message order, MimeContent>
+	 * @param contents , Map<Integer//message order, MimeContent>
 	 *                   only the first element will be sent as main message, other will be sent as attachment.
-	 * @param attchments_alias , HashMap<String//full path file name,String//alias>
+	 * @param attchments_alias , Map<String//full path file name,String//alias>
 	 * @throws SAFSException if there is something wrong
 	 */
 	public void send(List<String> recipients, String subject, 
-			HashMap<Integer/*the message order*/, MimeContent> contents,
-			HashMap<String/*full path file name*/,String/*alias*/> attchments_alias) throws SAFSException{
-		HashMap<Message.RecipientType, List<String>> type_recipients = new HashMap<Message.RecipientType, List<String>>();
+			Map<Integer/*the message order*/, MimeContent> contents,
+			Map<String/*full path file name*/,String/*alias*/> attchments_alias) throws SAFSException{
+		Map<Message.RecipientType, List<String>> type_recipients = new HashMap<Message.RecipientType, List<String>>();
 		type_recipients.put(Message.RecipientType.TO, recipients);
 		send(type_recipients, subject, contents, attchments_alias);
 	}
@@ -517,16 +523,16 @@ public class Mailer {
 	 * Mail a set of objects, the content's type is defined by MimeType.<br>
 	 * It will also send attachments provided by the last parameter 'attchments_alias'.<br>
 	 * 
-	 * @param type_recipients , HashMap<Message.RecipientType, List<String>>, a map of recipients(to, cc, bcc)
+	 * @param type_recipients , Map<Message.RecipientType, List<String>>, a map of recipients(to, cc, bcc)
 	 * @param subject , String, the mail's subject
-	 * @param contents , HashMap<Integer//message order, MimeContent>, 
+	 * @param contents , Map<Integer//message order, MimeContent>, 
 	 *                   only the first element will be sent as main message, other will be sent as attachment.
-	 * @param attchments_alias , HashMap<String//full path file name,String//alias>
+	 * @param attchments_alias , Map<String//full path file name,String//alias>
 	 * @throws SAFSException if there is something wrong
 	 */
-	public void send(HashMap<Message.RecipientType, List<String>> type_recipients, String subject, 
-			HashMap<Integer/*the message order*/, MimeContent> contents,
-			HashMap<String/*full path file name*/,String/*alias*/> attchments_alias) throws SAFSException{
+	public void send(Map<Message.RecipientType, List<String>> type_recipients, String subject, 
+			Map<Integer/*the message order*/, MimeContent> contents,
+			Map<String/*full path file name*/,String/*alias*/> attchments_alias) throws SAFSException{
 		String debugmsg = StringUtils.debugmsg(false);
 		
 		try {
@@ -620,9 +626,12 @@ public class Mailer {
 	/**
 	 * 
 	 * @param attachments ,String , semi-colon separated string, example c:\folder\file.txt=alias.txt;d:\directory\compress.zip=compress.zip.unzipme
-	 * @param attachments_alias (out), HashMap<String,String>, map containing a pair(filename, alias)
+	 * @param attachments_alias (<b>out</b>), Map<String,String>, map containing a pair(filename, alias)<br>
+	 *                                        User needs instantiate a new Map and pass it in as a parameter.<br>
+	 *                                        If a <b>HashMap</b> instance is passed in, the <b>attachments</b> will be attached in <b>disorder</b>.<br>
+	 *                                        If a <b>LinkedHashMap</b> instance is passed in, the <b>attachments</b> will be attached in <b>original order</b>.<br>
 	 */
-	public static void handleAttachments(String attachments, HashMap<String,String> attachments_alias){
+	public static void handleAttachments(String attachments, Map<String,String> attachments_alias){
 		try{
 			String[] tokens = attachments.split(SEPARATOR_SEMI_COLON);
 			String attachment = null;
@@ -650,11 +659,11 @@ public class Mailer {
 	 * 
 	 * @param message , String, the message to send
 	 * @param msg_type , MimeType, the message type
-	 * @param contents (out), HashMap<Integer, MimeContent>, the HashMap to hold message to send.
+	 * @param contents (out), Map<Integer, MimeContent>, the Map to hold message to send.
 	 *                        only the first element will be sent as main message, other will be sent as attachment.
 	 * 
 	 */
-	public static void addMessag(String message, MimeType msg_type, HashMap<Integer, MimeContent> contents){
+	public static void addMessag(String message, MimeType msg_type, Map<Integer, MimeContent> contents){
 		try{
 			if(message==null){
 				IndependantLog.debug("The message is null, cannot send it.");
@@ -673,8 +682,8 @@ public class Mailer {
 		List<String> recipientsTo = new ArrayList<String>();
 		List<String> recipientsCc = new ArrayList<String>();
 		List<String> recipientsBcc = new ArrayList<String>();
-		HashMap<Message.RecipientType,List<String>> recipients = new HashMap<Message.RecipientType,List<String>>();
-		HashMap<String,String> attachments_alias = new HashMap<String,String>();
+		Map<Message.RecipientType,List<String>> recipients = new HashMap<Message.RecipientType,List<String>>();
+		Map<String,String> attachments_alias = new LinkedHashMap<String,String>();
 		
 		String host = null;
 		String portStr = null;
@@ -920,7 +929,7 @@ public class Mailer {
 			handleAttachments(attach, attachments_alias);
 			
 			//Handle message header, message footer, message content and its type
-			HashMap<Integer/*the message order*/, MimeContent> contents = new HashMap<Integer/*the message order*/, MimeContent>();
+			Map<Integer/*the message order*/, MimeContent> contents = new HashMap<Integer/*the message order*/, MimeContent>();
 			String newline = "\r\n";
 			if(MimeType.txt.contentType.equalsIgnoreCase(msg_type.contentType)){
 				newline = "\r\n";
