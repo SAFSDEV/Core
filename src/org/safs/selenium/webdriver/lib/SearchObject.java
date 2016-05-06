@@ -37,6 +37,8 @@ package org.safs.selenium.webdriver.lib;
  *  <br>  JAN 05, 2015    (SBJLWA)  Modify getObjectByQualifier() etc.: support one qualifier with "Contains", such as TextContains=, TitleContains=.
  *  <br>  MAR 17, 2016    (CANAGL)  Modified to support getObjects returning multiple matches.
  *  <br>  MAY 04, 2016    (SBJLWA)  Modified js_getErrorXXX(): call {@link #js_executeWithTimeout(String, long)} to avoid JavaScriptExecutor locking problem.
+ *  <br>  MAY 06, 2016    (SBJLWA)  Modified js_executeWithTimeout(): throw SeleniumPlusException if the timeout is not enough for javascript exection.
+ *                                  Modified js_getErrorCode(): enlarge the timeout to 5000 milliseconds.
  */
 import java.lang.reflect.Constructor;
 import java.net.URL;
@@ -2732,11 +2734,13 @@ public class SearchObject {
 		js_code = js;
 		t.setDaemon(true);
 		t.start();
-		try{
-			t.join(msTimeout);
-		}catch(InterruptedException x){
-			throw new InterruptedException("SearchObject.js_executeWithTimeout Timeout has been reached.");
+		t.join(msTimeout);
+		if(t.isAlive()){
+			String error = "Javascript execution timeout '"+msTimeout+"' millisecnods has been reached! Please use a larger timeout.";
+			IndependantLog.error("SearchObject.js_executeWithTimeout(): "+error);
+			throw new SeleniumPlusException(error);
 		}
+
 		return js_result;
 	}
 
@@ -2888,8 +2892,7 @@ public class SearchObject {
 		String debugmsg = StringUtils.debugmsg(SearchObject.class, "js_getErrorCode");
 		try {
 //			Object object = getJS().executeScript(JavaScriptFunctions.getJSErrorCode());
-			Object object = js_executeWithTimeout(JavaScriptFunctions.getJSErrorCode(), 1000);
-//			IndependantLog.debug(debugmsg+"returned "+object);
+			Object object = js_executeWithTimeout(JavaScriptFunctions.getJSErrorCode(), 5000/*give 5 seconds, it needs more time to get work done with Firefox*/);
 			return ((Long) object).intValue();
 		} catch (SeleniumPlusException e) {
 			throw e;
