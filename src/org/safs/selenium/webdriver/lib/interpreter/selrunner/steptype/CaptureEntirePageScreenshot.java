@@ -83,6 +83,10 @@ public class CaptureEntirePageScreenshot implements StepType, SRunnerType {
 					return false;
 				}
 			}
+			try{ Files.createParentDirs(target); }catch(IOException io){
+				ctx.log().debug(debugmsg + io.getMessage()+", attempted Files.createParentDirs...");
+				throw io;
+			}
 			Files.move(ctx.driver().getScreenshotAs(OutputType.FILE), target);
 			return target.isFile();
 		}catch(NullPointerException np){
