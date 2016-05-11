@@ -494,6 +494,7 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 		String debugmsg = StringUtils.debugmsg(false);
 		String value = null;
 		try {
+			refresh(true);
 			value = WDLibrary.getProperty(webelement, ATTRIBUTE_VALUE);
 		} catch (SeleniumPlusException e) {
 			try{
