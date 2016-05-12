@@ -104,6 +104,8 @@ public class Select implements StepType, SRunnerType {
 	
 	protected boolean performSelect(WebElement select, WebElement option, TestRun ctx){
 		try{
+			org.openqa.selenium.support.ui.Select list = new org.openqa.selenium.support.ui.Select(select);
+			if(list.isMultiple()) list.deselectAll();
 			option.click();
 			return true;
 		}catch(Exception x){
