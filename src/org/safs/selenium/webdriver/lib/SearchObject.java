@@ -1570,7 +1570,7 @@ public class SearchObject {
 		for (int i=0;i<st.length;i++) {
 			try{				
 				prefixes.clear();
-				rst = GuiObjectVector.removeRStringPrefixes(rst, prefixes);
+				rst = GuiObjectVector.removeRStringPrefixes(st[i], prefixes);
 				isPASM = GuiObjectVector.isPASMMode(prefixes);
 
 				//rst MUST be in format "xxx=yyy", otherwise it is considered as invalid
