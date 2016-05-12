@@ -2672,8 +2672,8 @@ public class SearchObject {
 		String t = tt == null ? "" : tt;
 		Object ov = getValue(webelement, TEXT_VALUE_ATTRIBUTES);
 		String v = ov == null ? "" : ov.toString();	
-		IndependantLog.info(debugmsg+"received: "+ t);
-		IndependantLog.info(debugmsg+"received: "+ v);
+		IndependantLog.info(debugmsg+"getText()  received: "+ t);
+		IndependantLog.info(debugmsg+"getValue() received: "+ v);
 		String rc = t.length() > 0 ? t: v;
 		IndependantLog.info(debugmsg+"returning: "+ rc);
 		return rc;		
