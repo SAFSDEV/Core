@@ -486,25 +486,14 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 	}
 	
 	/**
-	 * Get the contents of Component Box, like Edit Box, Combo Box.
+	 * Get the contents of Component Box, like Edit Box, Combo Box.<br>
 	 * 
 	 * @return String, the content of Component Box
 	 */
 	protected String getValue(){
-		String debugmsg = StringUtils.debugmsg(false);
-		String value = null;
-		try {
-			refresh(true);
-			value = WDLibrary.getProperty(webelement, ATTRIBUTE_VALUE);
-		} catch (SeleniumPlusException e) {
-			try{
-				// some component box's have a 'text' property and don't necessarily have a 'value' property.				
-				value = WDLibrary.getProperty(webelement, ATTRIBUTE_TEXT);
-			} catch (SeleniumPlusException e2) {
-				IndependantLog.warn(debugmsg + "failure caused by "+ StringUtils.debugmsg(e) +"; and "+ StringUtils.debugmsg(e2));
-			}
-		}
-		return value;
+		refresh(true);
+		Object result = WDLibrary.getValue(webelement, WDLibrary.TEXT_VALUE_ATTRIBUTES);
+		return result==null? "": result.toString();
 	}
 	
 	/**
