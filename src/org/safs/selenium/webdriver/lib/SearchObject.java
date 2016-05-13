@@ -37,7 +37,7 @@ package org.safs.selenium.webdriver.lib;
  *  <br>  JAN 05, 2015    (Lei Wang)  Modify getObjectByQualifier() etc.: support one qualifier with "Contains", such as TextContains=, TitleContains=.
  *  <br>  MAR 17, 2016    (Carl Nagle)  Modified to support getObjects returning multiple matches.
  *  <br>  MAY 04, 2016    (Lei Wang)  Modified js_getErrorXXX(): call {@link #js_executeWithTimeout(String, long)} to avoid JavaScriptExecutor locking problem.
- *  <br>  MAY 06, 2016    (Lei Wang)  Modified js_executeWithTimeout(): throw SeleniumPlusException if the timeout is not enough for javascript exection.
+ *  <br>  MAY 06, 2016    (Lei Wang)  Modified js_executeWithTimeout(): throw SeleniumPlusException if the timeout is not enough for javascript execution.
  *                                  Modified js_getErrorCode(): enlarge the timeout to 5000 milliseconds.
  */
 import java.lang.reflect.Constructor;
@@ -171,6 +171,9 @@ public class SearchObject {
 	private static Hashtable<String, WebDriver> webDrivers = new Hashtable<String, WebDriver>();
 	private static Vector<String> webDriverStack = new Vector<String>();
 
+	/** "value","text","placeholder". An array of attribute used as component's text content.<br>
+	 * @see #getValue(WebElement, String...)
+	 */
 	public static final String[] TEXT_VALUE_ATTRIBUTES = {"value","text","placeholder"};
 	
 	/**
@@ -2663,8 +2666,8 @@ public class SearchObject {
 	 * Attempts to retrieve a text value for the WebElement.
 	 * This is by combining webelement.getText() and our own getValue() and returning whichever gets 
 	 * us a text value.
-	 * @param webelement
-	 * @return
+	 * @param webelement WebElement, the web element to get text from.
+	 * @return String, the element's text content
 	 */
 	public static String getText(WebElement webelement){
 		String debugmsg = StringUtils.debugmsg(SearchObject.class, "getText");
@@ -2681,9 +2684,14 @@ public class SearchObject {
 	
 	/**
 	 * Get a value from the WebElement according to the attributes.<br>
+	 * The first non-null-value of the attributes will be returned, so the order<br>
+	 * of attributes may affect the result.<br>
+	 * 
 	 * @param webelement WebElement, the WebElement to get value of an attribute.<br>
 	 * @param attributes String..., an array of attribute to get value for.
-	 * @return Object the first no-null-value of the attributes; or null if all attributes have null value.
+	 * @return Object the first non-null-value of the attributes; or null if all attributes have null value.
+	 * 
+	 * @see #TEXT_VALUE_ATTRIBUTES
 	 */
 	public static Object getValue(WebElement webelement, String... attributes){
 		String debugmsg = StringUtils.debugmsg(SearchObject.class, "getValue");
@@ -2691,11 +2699,15 @@ public class SearchObject {
 
 		try{
 			for(String attribute: attributes){
-				result = webelement.getAttribute(attribute);
-				if(result!=null) break;
+				try{
+					result = WDLibrary.getProperty(webelement, attribute);
+					if(result!=null) break;
+				}catch(SeleniumPlusException e){
+					//IndependantLog.warn(debugmsg+" fail to get '"+attribute+"', due to "+StringUtils.debugmsg(e));
+				}
 			}
 		}catch(Throwable th){
-			IndependantLog.warn(debugmsg+ "cannot get a value, due to "+StringUtils.debugmsg(th));
+			IndependantLog.error(debugmsg+ "cannot get a value, due to "+StringUtils.debugmsg(th));
 		}
 		return result;
 	}
