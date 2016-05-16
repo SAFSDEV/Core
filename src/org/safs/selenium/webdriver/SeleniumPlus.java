@@ -64,11 +64,25 @@ package org.safs.selenium.webdriver;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
+import java.io.CharArrayWriter;
+import java.io.File;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import javax.script.Bindings;
+import javax.script.CompiledScript;
+import javax.script.ScriptContext;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+
+import org.codehaus.groovy.jsr223.GroovyCompiledScript;
+import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
+import org.junit.runner.JUnitCore;
+import org.junit.runner.Result;
+import org.junit.runner.notification.Failure;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Timeouts;
@@ -121,6 +135,7 @@ import org.safs.text.FileUtilities.Mode;
 import org.safs.text.FileUtilities.PatternFilterMode;
 import org.safs.text.FileUtilities.Placement;
 import org.safs.text.GENStrings;
+import org.safs.tools.CaseInsensitiveFile;
 import org.safs.tools.MainClass;
 import org.safs.tools.counters.CountStatusInterface;
 import org.safs.tools.counters.CountersInterface;
@@ -203,6 +218,12 @@ public abstract class SeleniumPlus {
 	 * @see EmbeddedHookDriverRunner#autorun(String[]) */
 	public static final String ARG_AUTORUN = "-autorun";
 	
+	/** "-script:" <br>
+	 * command-line argument to invoke a 3rd party script instead of a SeleniumPlus subclass.<br>
+	 * Example: -script:src/com/sas/spock/tests/SpockExperiment.groovy
+	 */
+	public static final String ARG_SCRIPT = "-script:";
+	
 	/**
 	 * "-class", the parameter to indicate the class name to run test automatically.<br>
 	 * Only when parameter {@link #ARG_AUTORUN} is present, this parameter will take effect.<br>
@@ -247,6 +268,7 @@ public abstract class SeleniumPlus {
 	private static boolean _autorunClassProvided = false;
 	
 	protected static boolean _isSPC = false;
+	protected static String _script = null;
 
 	/** 
 	 * Internal framework use only.
@@ -10457,8 +10479,9 @@ public abstract class SeleniumPlus {
 	
 	private static void _processArgs(String[] args){
 		for(String arg:args){
-			if(arg.equalsIgnoreCase(ARG_AUTORUN)) _autorun = true;
-			if(arg.startsWith(ARG_SAFSVAR)){
+			if(arg.equalsIgnoreCase(ARG_AUTORUN))            _autorun = true;
+			else if(arg.equalsIgnoreCase(ARG_AUTORUN_CLASS)) _autorunClassProvided = true;
+			else if(arg.startsWith(ARG_SAFSVAR)){
 				String msg = null;
 				try{
 					String varg = arg.substring(arg.indexOf(":")+1);//string before the first :
@@ -10479,8 +10502,20 @@ public abstract class SeleniumPlus {
 					System.out.println(msg);
 					IndependantLog.info(msg);
 				}
-			}else if(ARG_AUTORUN_CLASS.equalsIgnoreCase(arg)){
-				_autorunClassProvided = true;
+			}else if(arg.startsWith(ARG_SCRIPT)){
+				String msg = null;
+				try{
+					String varg = arg.substring(arg.indexOf(":")+1);//string before the first :
+					msg = "Command-Line script '"+ varg +"' detected.";
+					if(varg.length() > 0) _script = varg;
+					else throw new IllegalArgumentException("-script:path command-line argument malformed.");
+					System.out.println(msg);
+					IndependantLog.info(msg);
+				}catch(Throwable t){
+					msg = "SeleniumPlus command-line argument \""+ arg +"\" malformed and ignored.";
+					System.out.println(msg);
+					IndependantLog.info(msg);
+				}
 			}
 		}		
 	}
@@ -10555,11 +10590,12 @@ public abstract class SeleniumPlus {
 		if(theClass == null) theClass = MainClass.deduceMainClass();
 		System.out.println("Executing Java Main Class: "+ theClass);
 		SeleniumPlus test = null;		
-
+		ClassCastException cce = null;
 		try{ 
 			try{
 				test = (SeleniumPlus) Class.forName(theClass).newInstance();
 			}catch(ClassCastException ccx){
+				cce = ccx;
 				StackTraceElement[] stack = Thread.currentThread().getStackTrace();
 				int i=0;
 				do{
@@ -10573,11 +10609,17 @@ public abstract class SeleniumPlus {
 						System.out.println("Executing SeleniumPlus subclass: "+ theClass);
 						test = (SeleniumPlus) c.newInstance();
 					}
-				}while(test == null && i < stack.length);
-				if(test == null) throw ccx;
+				}while(test == null && i < stack.length);				
 			}
 			Runner.run();
 			if(args.length > 0) _processArgs(args);
+
+			// enable the ability to run 3rd party scripts like Spock/Groovy
+			if(test == null && _script == null) 
+				throw (cce != null) ? cce :
+				new ClassCastException(theClass + " is not a subclass of SeleniumPlus"+
+				                                  " and no alternative -script was provided.");
+			
 			if(!_isSPC) {
 				ArrayList<String> altPackages = new ArrayList<String>();
 				String modclass = "."+theClass;
@@ -10594,8 +10636,36 @@ public abstract class SeleniumPlus {
 				String[] adjustedArgs = args;
 				if(!_autorunClassProvided) adjustedArgs = combineParams(args, ARG_AUTORUN_CLASS, theClass);
 				test.autorun(adjustedArgs);
-			}else
+			}else if(_script==null){
 				test.runTest();
+			}else {
+				String badpath = "-script command-parameter did not provide a valid script path!";
+				if(_script.length() == 0){
+					// TODO
+					System.out.println(badpath+" No filepath.");
+				}else{
+					System.out.println("-script '"+ _script +"' will now execute.");
+
+					JUnitCore junit = new JUnitCore();
+					Result jresult = junit.run(Class.forName(_script));
+					
+					if(jresult == null){
+						System.out.println("JUnit execution returned a null Result.");
+					}else{
+						System.out.println(jresult.getRunCount()+ " tests run.");
+						System.out.println(jresult.getIgnoreCount()+" tests ignored.");
+						System.out.println(jresult.getFailureCount()+ " tests failed.");
+						System.out.println("Runtime: "+ jresult.getRunTime() +" milliseconds.");
+						List<Failure> failures = jresult.getFailures();
+						int i =1;
+						System.out.println("");
+						for(Failure failure:failures){
+							System.out.println("   "+ failure.toString());
+							System.out.println("");
+						}
+					}					
+				}
+			}
 		}catch(Throwable x){
 			x.printStackTrace(); 
 		}
