@@ -91,4 +91,13 @@ public class EmbeddedHookSTAFHelper extends STAFHelper {
 			long timeoutseconds) throws SAFSException {
 		_engineRun = false;
 	}
+	
+	@Override
+	public String getSTAFEnv(String env) {
+	    String result = super.getSTAFEnv(env);
+	    if(result == null){
+	    	try{ result = System.getenv(env); }catch(SecurityException ignore){}
+	    }
+	    return result;
+	}
 }
