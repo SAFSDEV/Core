@@ -1949,7 +1949,7 @@ public class STAFHelper implements CoreInterface{
   
 	/** 
 	 * getSTAFEnv
-	 * returns string value or an empty string
+	 * returns string value or an empty string. null if not successfully executed or found.
 	 */
 	public String getSTAFEnv(String env) {
 		String debugmsg = getClass().getName()+".getSTAFEnv(): ";
@@ -1968,6 +1968,8 @@ public class STAFHelper implements CoreInterface{
 			resultValue = result.result;
 		}else if (result.rc == STAFResult.VariableDoesNotExist){
 			Log.debug(debugmsg+" Can not get variable STAF/Env/"+env);
+		}else{
+			Log.debug(debugmsg+" failed. STAF Status Code: "+ result.rc);
 		}
 		return resultValue;
 	}
