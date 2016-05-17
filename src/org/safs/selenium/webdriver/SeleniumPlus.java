@@ -60,6 +60,7 @@ package org.safs.selenium.webdriver;
  *  <br>   MAR 31, 2016    (Lei Wang) Add IsComponentExists(), OnGUIXXXBlockID().
  *                                  Modify testStatusCode(): the status code BRANCH_TO_BLOCKID will be considered successful execution.
  *  <br>   APR 19, 2016    (Lei Wang) Modify comments/examples for Click() CtrlClick() ShiftClick() etc.: Handle the optional parameter 'autoscroll'.
+ *  <br>   MAY 17, 2016    (Carl Nagle) Add support for -junit:classname command-line parameter.
  */
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -204,11 +205,11 @@ public abstract class SeleniumPlus {
 	 * @see EmbeddedHookDriverRunner#autorun(String[]) */
 	public static final String ARG_AUTORUN = "-autorun";
 	
-	/** "-script:" <br>
-	 * command-line argument to invoke a 3rd party script instead of a SeleniumPlus subclass.<br>
-	 * Example: -script:src/com/sas/spock/tests/SpockExperiment.groovy
+	/** "-junit:" <br>
+	 * command-line argument to invoke a JUnit class instead of a SeleniumPlus subclass.<br>
+	 * Example: -junit:com.sas.spock.tests.SpockExperiment
 	 */
-	public static final String ARG_SCRIPT = "-script:";
+	public static final String ARG_JUNIT = "-junit:";
 	
 	/**
 	 * "-class", the parameter to indicate the class name to run test automatically.<br>
@@ -254,7 +255,7 @@ public abstract class SeleniumPlus {
 	private static boolean _autorunClassProvided = false;
 	
 	protected static boolean _isSPC = false;
-	protected static String _script = null;
+	protected static String _junit = null; //classname(s) to execute from -junit: command-line option
 
 	/** 
 	 * Internal framework use only.
@@ -10488,13 +10489,13 @@ public abstract class SeleniumPlus {
 					System.out.println(msg);
 					IndependantLog.info(msg);
 				}
-			}else if(arg.startsWith(ARG_SCRIPT)){
+			}else if(arg.startsWith(ARG_JUNIT)){
 				String msg = null;
 				try{
 					String varg = arg.substring(arg.indexOf(":")+1);//string before the first :
-					msg = "Command-Line script '"+ varg +"' detected.";
-					if(varg.length() > 0) _script = varg;
-					else throw new IllegalArgumentException("-script:path command-line argument malformed.");
+					msg = "Command-Line -junit '"+ varg +"' detected.";
+					if(varg.length() > 0) _junit = varg;
+					else throw new IllegalArgumentException("-junit:class argument malformed.");
 					System.out.println(msg);
 					IndependantLog.info(msg);
 				}catch(Throwable t){
@@ -10565,6 +10566,10 @@ public abstract class SeleniumPlus {
 	 * -autorunclass -- followed by the class that is requesting the automatic configuration and execution, only take effect when paraemter '-autorun' is present.
 	 * <ul>-autorunclass autorun.full.classname</ul>
 	 * <p>
+	 * -junit:classname -- perform a JUnit test instead of executing runTest() in the SeleniumPlus subclass.<br>
+	 * The normal SeleniumPlus bootstrap process and initialization is performed prior to executing the JUnit test.
+	 * <ul>-junit:com.sas.spock.tests.SpockExperiment</ul>
+	 * <p>
 	 * @see org.safs.model.annotations.AutoConfigureJSAFS
 	 * @see org.safs.model.annotations.JSAFSBefore
 	 * @see org.safs.model.annotations.JSAFSAfter
@@ -10601,10 +10606,10 @@ public abstract class SeleniumPlus {
 			if(args.length > 0) _processArgs(args);
 
 			// enable the ability to run 3rd party scripts like Spock/Groovy
-			if(test == null && _script == null) 
+			if(test == null && _junit == null) 
 				throw (cce != null) ? cce :
 				new ClassCastException(theClass + " is not a subclass of SeleniumPlus"+
-				                                  " and no alternative -script was provided.");
+				                                  " and no alternative -junit arg was provided.");
 			
 			if(!_isSPC) {
 				ArrayList<String> altPackages = new ArrayList<String>();
@@ -10622,20 +10627,20 @@ public abstract class SeleniumPlus {
 				String[] adjustedArgs = args;
 				if(!_autorunClassProvided) adjustedArgs = combineParams(args, ARG_AUTORUN_CLASS, theClass);
 				test.autorun(adjustedArgs);
-			}else if(_script==null){
+			}else if(_junit==null){
 				test.runTest();
 			}else {
-				String badpath = "-script command-parameter did not provide a valid script path!";
-				if(_script.length() == 0){
+				String badpath = "-junit command-parameter did not provide a valid classname!";
+				if(_junit.length() == 0){
 					// TODO
-					System.out.println(badpath+" No filepath.");
+					System.out.println(badpath+" No Class.");
 				}else{
 					try{
-						System.out.println("SeleniumPlus -script '"+ _script +"' will now execute.");
-						String result = DriverCommand.callJUnitScript(_script);
-						Logging.LogTestSuccess("SeleniumPlus Execute Script Succeed.", result);
+						System.out.println("SeleniumPlus JUnit '"+ _junit +"' will now execute.");
+						String result = DriverCommand.callJUnitScript(_junit);
+						Logging.LogTestSuccess("SeleniumPlus Execute JUnit Succeeded.", result);
 					}catch(SAFSException | ClassNotFoundException e){
-						Logging.LogTestFailure("SeleniumPlus Execute Script Failed.", StringUtils.debugmsg(e));
+						Logging.LogTestFailure("SeleniumPlus Execute JUnit Failed.", StringUtils.debugmsg(e));
 					}
 				}
 			}
