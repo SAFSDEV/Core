@@ -64,31 +64,18 @@ package org.safs.selenium.webdriver;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
-import java.io.CharArrayWriter;
-import java.io.File;
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import javax.script.Bindings;
-import javax.script.CompiledScript;
-import javax.script.ScriptContext;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-
-import org.codehaus.groovy.jsr223.GroovyCompiledScript;
-import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
-import org.junit.runner.JUnitCore;
-import org.junit.runner.Result;
-import org.junit.runner.notification.Failure;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Timeouts;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.SessionNotFoundException;
 import org.safs.ComponentFunction;
+import org.safs.DriverCommand;
 import org.safs.IndependantLog;
 import org.safs.JavaHook;
 import org.safs.Processor;
@@ -135,7 +122,6 @@ import org.safs.text.FileUtilities.Mode;
 import org.safs.text.FileUtilities.PatternFilterMode;
 import org.safs.text.FileUtilities.Placement;
 import org.safs.text.GENStrings;
-import org.safs.tools.CaseInsensitiveFile;
 import org.safs.tools.MainClass;
 import org.safs.tools.counters.CountStatusInterface;
 import org.safs.tools.counters.CountersInterface;
@@ -10644,26 +10630,13 @@ public abstract class SeleniumPlus {
 					// TODO
 					System.out.println(badpath+" No filepath.");
 				}else{
-					System.out.println("-script '"+ _script +"' will now execute.");
-
-					JUnitCore junit = new JUnitCore();
-					Result jresult = junit.run(Class.forName(_script));
-					
-					if(jresult == null){
-						System.out.println("JUnit execution returned a null Result.");
-					}else{
-						System.out.println(jresult.getRunCount()+ " tests run.");
-						System.out.println(jresult.getIgnoreCount()+" tests ignored.");
-						System.out.println(jresult.getFailureCount()+ " tests failed.");
-						System.out.println("Runtime: "+ jresult.getRunTime() +" milliseconds.");
-						List<Failure> failures = jresult.getFailures();
-						int i =1;
-						System.out.println("");
-						for(Failure failure:failures){
-							System.out.println("   "+ failure.toString());
-							System.out.println("");
-						}
-					}					
+					try{
+						System.out.println("SeleniumPlus -script '"+ _script +"' will now execute.");
+						String result = DriverCommand.callJUnitScript(_script);
+						Logging.LogTestSuccess("SeleniumPlus Execute Script Succeed.", result);
+					}catch(SAFSException | ClassNotFoundException e){
+						Logging.LogTestFailure("SeleniumPlus Execute Script Failed.", StringUtils.debugmsg(e));
+					}
 				}
 			}
 		}catch(Throwable x){
