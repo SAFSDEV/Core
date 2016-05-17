@@ -15,7 +15,11 @@ package org.safs;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
+import org.junit.runner.JUnitCore;
+import org.junit.runner.Result;
+import org.junit.runner.notification.Failure;
 import org.safs.model.commands.DDDriverFlowCommands;
 import org.safs.text.FAILStrings;
 import org.safs.text.GENStrings;
@@ -189,6 +193,70 @@ public abstract class DriverCommand extends Processor {
 		  onGUIGotoCommands(true);
 	  } else if(command.equalsIgnoreCase(DDDriverFlowCommands.ONGUINOTEXISTGOTOBLOCKID_KEYWORD)){
 		  onGUIGotoCommands(false);
+	  } else if(command.equalsIgnoreCase(DDDriverFlowCommands.CALLSCRIPT_KEYWORD)){
+		  callScript();
+	  }
+  }
+  
+  public static String callJUnitScript(String classname) throws ClassNotFoundException, SAFSException{
+	  String debugmsg = StringUtils.debugmsg(false);
+
+	  JUnitCore junit = new JUnitCore();
+	  Result jresult = junit.run(Class.forName(classname));
+
+	  if(jresult == null){
+		  String detail = "JUnit execution returned a null Result.";
+		  throw new SAFSException(detail);
+	  }else{
+		  StringBuffer sb = new StringBuffer();
+		  sb.append(jresult.getRunCount()+ " tests run.\n");
+		  sb.append(jresult.getIgnoreCount()+" tests ignored.\n");
+		  sb.append(jresult.getFailureCount()+ " tests failed.\n");
+		  sb.append("Runtime: "+ jresult.getRunTime() +" milliseconds.\n");
+		  List<Failure> failures = jresult.getFailures();
+		  sb.append("");
+		  for(Failure failure:failures){
+			  sb.append("   "+ failure.toString()+"\n");
+			  sb.append("\n");
+		  }
+		  IndependantLog.debug(debugmsg+" succeeded with result:\n "+sb.toString());
+		  return sb.toString();
+	  }   
+
+  }
+  
+  private void callScript(){
+	  if (params.size() < 1) {
+		  this.issueParameterCountFailure("ScriptName");
+		  return;
+	  }
+
+	  testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
+	  String debugmsg = StringUtils.debugmsg(false);
+
+	  Iterator iterator = params.iterator();
+	  String scriptName = (String) iterator.next();
+	  IndependantLog.info(debugmsg+"............................. handling [JUnit] script: "+scriptName);
+	  try {
+		  String result = callJUnitScript(scriptName);
+
+		  log.logMessage(testRecordData.getFac(),
+				  genericText.convert(TXT_SUCCESS_2,
+						  getTestRecordData().getCommand()+" "+ scriptName +" successful.",
+						  getTestRecordData().getCommand(), scriptName),
+						  GENERIC_MESSAGE,
+						  result);
+		  testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
+	  } catch (ClassNotFoundException e) {
+		  //This will not be considered as a failure, the script will be tried in a specific engine later. Just log a warning.
+		  IndependantLog.warn(debugmsg+"'"+scriptName+"' was not executed! Due to "+StringUtils.debugmsg(e));
+		  testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
+	  } catch (SAFSException e) {
+		  String detail = e.getMessage();
+		  String errmsg = FAILStrings.convert(FAILStrings.SCRIPT_ERROR, "Script '"+ scriptName +"' error: "+ detail, scriptName, detail);
+		  IndependantLog.error(debugmsg+errmsg);
+		  issueErrorPerformingAction(errmsg);
+		  testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
 	  }
   }
   
