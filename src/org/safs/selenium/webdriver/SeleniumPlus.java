@@ -76,7 +76,6 @@ import org.openqa.selenium.WebDriver.Timeouts;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.SessionNotFoundException;
 import org.safs.ComponentFunction;
-import org.safs.DriverCommand;
 import org.safs.IndependantLog;
 import org.safs.JavaHook;
 import org.safs.Processor;
@@ -10637,8 +10636,8 @@ public abstract class SeleniumPlus {
 				}else{
 					try{
 						System.out.println("SeleniumPlus JUnit '"+ _junit +"' will now execute.");
-						String result = DriverCommand.callJUnitScript(_junit);
-						Logging.LogTestSuccess("SeleniumPlus Execute JUnit Succeeded.", result);
+						//TODO Hard coded command "CallJUnit" will be replaced by constant
+						Runner.command("CallJUnit", _junit);
 					}catch(SAFSException | ClassNotFoundException e){
 						Logging.LogTestFailure("SeleniumPlus Execute JUnit Failed.", StringUtils.debugmsg(e));
 					}
