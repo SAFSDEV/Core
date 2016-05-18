@@ -12,6 +12,7 @@ import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 
 import org.safs.JavaConstant;
+import org.safs.StatusCodes;
 import org.safs.StringUtils;
 import org.safs.logging.AbstractLogFacility;
 
@@ -54,38 +55,38 @@ public class DriverConstant extends JavaConstant{
 	public static final String RECTYPE_S = "S";
 
 	/** "-2". A warning occurred.**/
-    public static final int STATUS_SCRIPT_WARNING           = -2;      //for scripts AND test tables
+    public static final int STATUS_SCRIPT_WARNING           = StatusCodes.SCRIPT_WARNING;      //for scripts AND test tables
 
 	/** "-1". No known error or warning occurred.**/
-    public static final int STATUS_NO_SCRIPT_FAILURE        = -1;      //for scripts AND test tables
+    public static final int STATUS_NO_SCRIPT_FAILURE        = StatusCodes.NO_SCRIPT_FAILURE;      //for scripts AND test tables
 
 	/** "0". An error occurred.**/
-    public static final int STATUS_GENERAL_SCRIPT_FAILURE   = 0;       //for scripts AND test tables
+    public static final int STATUS_GENERAL_SCRIPT_FAILURE   = StatusCodes.GENERAL_SCRIPT_FAILURE;       //for scripts AND test tables
 
 	/** "2". An IO (file/input) error occurred.**/
-    public static final int STATUS_INVALID_FILE_IO          = 2;
+    public static final int STATUS_INVALID_FILE_IO          = StatusCodes.INVALID_FILE_IO;
 
 	/** "4". No processing has occurred.
 	 * This generally means an engine or driver has not accepted responsibility 
 	 * for the record.  Noone has tried to execute it yet.
 	 */
-    public static final int STATUS_SCRIPT_NOT_EXECUTED      = 4;       //for scripts AND test tables
+    public static final int STATUS_SCRIPT_NOT_EXECUTED      = StatusCodes.SCRIPT_NOT_EXECUTED;       //for scripts AND test tables
 
 	/** "8". An  EXIT TABLE Driver Command flags premature termination.**/
-    public static final int STATUS_EXIT_TABLE_COMMAND       = 8;
+    public static final int STATUS_EXIT_TABLE_COMMAND       = StatusCodes.EXIT_TABLE_COMMAND;
 
 	/** "16". IGNORE this status code. 
 	 * Another process has handled 'stuff'.  
 	 * Generally, a Driver Command will have set this if it already handled all 
 	 * necessary activities like incrementing counters, etc...
 	 */
-    public static final int STATUS_IGNORE_RETURN_CODE       = 16;      //drivers ignore this one
+    public static final int STATUS_IGNORE_RETURN_CODE       = StatusCodes.IGNORE_RETURN_CODE;      //drivers ignore this one
 
     /** "256". BRANCH TO BLOCKID. 
 	 * Used by Driver Command to denote that branching is expected.
 	 * added 11.15.2005 (bolawl) RJL
 	 */
-    public static final int STATUS_BRANCH_TO_BLOCKID       = 256; 
+    public static final int STATUS_BRANCH_TO_BLOCKID       = StatusCodes.BRANCH_TO_BLOCKID; 
     
 	/** "5". User-Defined TEST FAILURE pre-logged. 
 	 * The driver should increment the appropriate counters.
