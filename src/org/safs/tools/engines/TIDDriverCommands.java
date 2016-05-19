@@ -18,6 +18,7 @@
  * SEP 24, 2015  LeiWang	Modify sendEMail(): get more parameters from configuration file to initialize Mailer.
  * MAY 05, 2016 (LeiWang) 	Fix the disorder problem of attachment.
  * MAY 18, 2016 (LeiWang) 	Implement the keyword 'CallJUnit'.
+ * MAY 19, 2016 (CANAGL) 	Enhance CallJUnit output and increment SAFS StatusCounters with JUnit results.
  */
 package org.safs.tools.engines;
 
@@ -55,6 +56,8 @@ import org.safs.staf.STAFProcessHelpers;
 import org.safs.text.FAILStrings;
 import org.safs.text.GENStrings;
 import org.safs.tools.CaseInsensitiveFile;
+import org.safs.tools.counters.CountersInterface;
+import org.safs.tools.counters.UniqueStringCounterInfo;
 import org.safs.tools.drivers.ConfigureInterface;
 import org.safs.tools.drivers.DriverConstant;
 import org.safs.tools.drivers.DriverConstant.MailConstant;
@@ -1195,7 +1198,7 @@ public class TIDDriverCommands extends GenericEngine {
 	   * @throws ClassNotFoundException if the 'JUnit test class' can be found.
 	   * @throws SAFSException if the 'JUnit execution' return null.
 	   */
-	  public static String callJUnit(String classname) throws ClassNotFoundException, SAFSException{
+	  private String callJUnit(String classname) throws ClassNotFoundException, SAFSException{
 		  String debugmsg = StringUtils.debugmsg(false);
 
 		  JUnitCore junit = new JUnitCore();
@@ -1203,28 +1206,46 @@ public class TIDDriverCommands extends GenericEngine {
 
 		  if(jresult == null){
 			  String detail = "JUnitCore executed '"+classname+"', and returned a null Result!";
+			  IndependantLog.debug(debugmsg+" failure: "+detail);
 			  throw new SAFSException(detail);
-		  }else{
-			  StringBuffer sb = new StringBuffer();
-			  sb.append(jresult.getRunCount()+ " tests run.\n");
-			  sb.append(jresult.getIgnoreCount()+" tests ignored.\n");
-			  sb.append(jresult.getFailureCount()+ " tests failed.\n");
-			  sb.append("Runtime: "+ jresult.getRunTime() +" milliseconds.\n");
-			  List<Failure> failures = jresult.getFailures();
-			  sb.append("");
-			  for(Failure failure:failures){
-				  sb.append("   "+ failure.toString()+"\n");
-				  sb.append("\n");
-			  }
-			  IndependantLog.debug(debugmsg+" succeeded with result:\n "+sb.toString());
-			  return sb.toString();
-		  }   
+		  }
+		  StringBuffer sb = new StringBuffer();
+		  sb.append(jresult.getRunCount()+ " tests run.\n");
+		  sb.append(jresult.getIgnoreCount()+" tests ignored.\n");
+		  sb.append(jresult.getFailureCount()+ " tests failed.\n");
+		  sb.append("Runtime: "+ jresult.getRunTime() +" milliseconds.\n");
+		  List<Failure> failures = jresult.getFailures();
+		  for(Failure failure:failures){
+			  sb.append("\n");
+			  sb.append("   "+ failure.toString()+"\n");
+		  }
+		  // increment our overall SAFS test status with equivalent JUnit test results.
+		  int testPassCount = jresult.getRunCount()-jresult.getIgnoreCount()-jresult.getFailureCount();
+		  for(int i=0;i < testPassCount;i++){
+		      driver.getCountersInterface().incrementAllCounters(
+				     new UniqueStringCounterInfo(null, testRecordData.getTestLevel()),
+				     CountersInterface.STATUS_TEST_PASS);
+		  }
+		  for(int i=0;i < jresult.getIgnoreCount();i++){
+		      driver.getCountersInterface().incrementAllCounters(
+				     new UniqueStringCounterInfo(null, testRecordData.getTestLevel()),
+				     CountersInterface.STATUS_SKIPPED_RECORD);
+		  }
+		  for(int i=0;i < jresult.getFailureCount();i++){
+		      driver.getCountersInterface().incrementAllCounters(
+				     new UniqueStringCounterInfo(null, testRecordData.getTestLevel()),
+				     CountersInterface.STATUS_TEST_FAILURE);
+		  }
+		  IndependantLog.debug(debugmsg+" completed with result:\n "+sb.toString());
+		  return sb.toString();		     
 	  }
 	  
 	  /**
 	   * Handle the CallJUnit Keyword.<br>
 	   * 
 	   * C, CallJUnit, package.p1.class;package.p2.class<br>
+	   * 
+	   * Supports classname separators sem-colon, colon, comma, and space.<br>
 	   * 
 	   * @return long, the execution status code.
 	   * @throws SAFSException if the 'JUnit execution' return null
@@ -1244,14 +1265,21 @@ public class TIDDriverCommands extends GenericEngine {
 		  }
 
 		  testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
-		  IndependantLog.info(debugmsg+"............................. handling [JUnit]: "+classnames);
+		  IndependantLog.info(debugmsg+"............................. handling CallJUnit: "+classnames);
 
 		  //CACHE TestRecordData. Within callJUnit() if we call some SAFS/SE+/JSAFS test, the field testRecordData
 		  //might get changed, we need to cache it. Then after calling of callJUnit(), we set it back.
 		  TestRecordData cachedData = new TestRecordHelper();
 		  testRecordData.copyData(cachedData);
 
-		  String[] clazzes = classnames.split(StringUtils.SEMI_COLON);
+		  String[] clazzes = null;
+		  if(classnames.contains(StringUtils.SEMI_COLON)) 
+			  clazzes = classnames.split(StringUtils.SEMI_COLON);
+		  else if(classnames.contains(StringUtils.COLON)) 
+			  clazzes = classnames.split(StringUtils.COLON);
+		  else if(classnames.contains(StringUtils.COMMA)) 
+			  clazzes = classnames.split(StringUtils.COMMA);
+		  else clazzes = classnames.split(StringUtils.SPACE);
 
 		  boolean withWarning = false;
 		  StringBuffer result = new StringBuffer();
@@ -1260,7 +1288,9 @@ public class TIDDriverCommands extends GenericEngine {
 				  IndependantLog.warn(debugmsg+" the class name '+clazz+' is not valid!");
 				  continue;
 			  }
-			  result.append("---------------------------------  '"+clazz+"' Execution Result: -----------------------------------\n");
+			  String message = genericText.convert("something_set", "'"+command+"' set to '"+clazz+"'", command, clazz);
+			  logMessage(message, null, AbstractLogFacility.START_PROCEDURE);
+			  result.append("\n---------------------------CallJUnit '"+clazz+"' Begin Results -----------------------------------\n");
 			  try {
 				  result.append(callJUnit(clazz));
 			  } catch (ClassNotFoundException e) {
@@ -1270,9 +1300,10 @@ public class TIDDriverCommands extends GenericEngine {
 				  IndependantLog.warn(debugmsg+msg);
 				  result.append(msg);
 			  } 
+			  result.append("---------------------------CallJUnit '"+clazz+"' End Results -----------------------------------\n");
 		  }
 
-		  //Set CACHED TestRecordData back.
+          //Set CACHED TestRecordData back.
 		  cachedData.copyData(testRecordData);
 		  command = testRecordData.getCommand();
 
@@ -1285,10 +1316,9 @@ public class TIDDriverCommands extends GenericEngine {
 			  return setTRDStatus(testRecordData, DriverConstant.STATUS_SCRIPT_WARNING);
 		  }else{
 			  String message = genericText.convert("success2", command+" '"+ classnames +"' successful.", command, classnames);
-			  logMessage(message, result.toString(), AbstractLogFacility.GENERIC_MESSAGE);
+			  logMessage(message, result.toString(), AbstractLogFacility.END_PROCEDURE);
 			  return setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
-		  }
-		  
+		  }		  
 	  }
 }
 
