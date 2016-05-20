@@ -666,7 +666,7 @@ public class ComboBoxFunctions {
 						cannot read the list of items. The routine will then attempt the selection.
 					
 					
-						The routine will not verify the selected-item matches the partial-text.
+						The routine will not verify the selected-item matches the parameter partial-text.
 					
 				    </pre>    Supporting Engines:
     <P/><UL>
@@ -710,7 +710,7 @@ public class ComboBoxFunctions {
 						cannot read the list of items. The routine will then attempt the selection.
 					
 					
-						The routine will not verify the selected-item matches the partial-text.
+						The routine will not verify the selected-item matches the parameter partial-text.
 					
 				    </pre>    
     Supporting Engines:
