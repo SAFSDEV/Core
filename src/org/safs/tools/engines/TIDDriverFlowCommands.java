@@ -1,9 +1,15 @@
 package org.safs.tools.engines;
 
+import org.junit.runner.JUnitCore;
+import org.junit.runner.Result;
+import org.junit.runner.notification.Failure;
+import org.safs.IndependantLog;
 import org.safs.Log;
 import org.safs.SAFSException;
 import org.safs.SAFSNullPointerException;
 import org.safs.StatusCodes;
+import org.safs.StringUtils;
+import org.safs.TestRecordData;
 import org.safs.TestRecordHelper;
 import org.safs.DCDriverFileCommands;
 import org.safs.image.ImageUtils;
@@ -13,6 +19,8 @@ import org.safs.text.FAILStrings;
 import org.safs.text.GENStrings;
 import org.safs.tools.UniqueStringID;
 import org.safs.tools.input.*;
+import org.safs.tools.counters.CountersInterface;
+import org.safs.tools.counters.UniqueStringCounterInfo;
 import org.safs.tools.drivers.*;
 import org.safs.tools.status.*;
 import org.safs.tools.stringutils.StringUtilities;
@@ -24,7 +32,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,10 +42,11 @@ import java.util.Map;
  * This DriverCommands engine does not assume the use of STAF. Instead, it uses the
  * various org.safs.tools Interfaces to talk with the rest of the framework (as made
  * available via the DriverInterface configuration).
- * @author CANAGL DEC 14, 2005 Refactored with DriverConfiguredSTAFInterface superclass
- *         JunwuMa May 5, 2008 Added OnInRangeGotoBlockID and OnNotInRangeGotoBlockID
- *         LeiWang AUG 23, 2010	Modify method cmdOnGuiExists(): assign the testRecord's windowGuiId to winrec.
- *         CANAGL SEP 17, 2014 Fixing SAFS Crashes due to incomplete initialization.
+ * @author CANAGL DEC 14, 2005 Refactored with DriverConfiguredSTAFInterface superclass<br>
+ *         JunwuMa May 5, 2008 Added OnInRangeGotoBlockID and OnNotInRangeGotoBlockID<br>
+ *         LeiWang AUG 23, 2010	Modify method cmdOnGuiExists(): assign the testRecord's windowGuiId to winrec.<br>
+ *         CANAGL SEP 17, 2014 Fixing SAFS Crashes due to incomplete initialization.<br>
+ *         CANAGL MAY 20, 2016 Added CallJUnit support (moved from TIDDriverCommands).<br>
  */
 public class TIDDriverFlowCommands extends GenericEngine {
 
@@ -64,6 +73,9 @@ public class TIDDriverFlowCommands extends GenericEngine {
 	/** "CallStep" */
 	static final String COMMAND_CALL_STEP                        = "CallStep";
 
+	/** "CallJUnit" */
+	static final String COMMAND_CALLJUNIT						 = "CallJUnit";
+	
 	/** "GotoBlockID" */
 	static final String COMMAND_GOTO_BLOCKID                     = "GotoBlockID";
 	
@@ -198,7 +210,10 @@ public class TIDDriverFlowCommands extends GenericEngine {
 		rtype = testRecordData.getRecordType();
 		Log.info("TIDFlow:processing \""+ command +"\".");
 
-        if (command.equalsIgnoreCase(COMMAND_EXIT_TABLE))   
+		if (command.equalsIgnoreCase(COMMAND_CALLJUNIT))
+		    {return callJUnit();}
+		
+		else if (command.equalsIgnoreCase(COMMAND_EXIT_TABLE))   
 		     {return cmdExitTable(testRecordData);}
 		     
 		else if(command.equalsIgnoreCase(COMMAND_EXIT_SUITE)) 
@@ -1167,5 +1182,134 @@ public class TIDDriverFlowCommands extends GenericEngine {
 			return setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
 		}
 	}
+	  /**
+	   * Execute a JUnit test.
+	   * @param classname	String, the 'JUnit test class' name to be executed.
+	   * @return String, the JUnit test result
+	   * @throws ClassNotFoundException if the 'JUnit test class' can be found.
+	   * @throws SAFSException if the 'JUnit execution' return null.
+	   */
+	  private String callJUnit(String classname) throws ClassNotFoundException, SAFSException{
+		  String debugmsg = StringUtils.debugmsg(false);
+
+		  JUnitCore junit = new JUnitCore();
+		  Result jresult = junit.run(Class.forName(classname));
+
+		  if(jresult == null){
+			  String detail = "JUnitCore executed '"+classname+"', and returned a null Result!";
+			  IndependantLog.debug(debugmsg+" failure: "+detail);
+			  throw new SAFSException(detail);
+		  }
+		  StringBuffer sb = new StringBuffer();
+		  sb.append(jresult.getRunCount()+ " tests run.\n");
+		  sb.append(jresult.getIgnoreCount()+" tests ignored.\n");
+		  sb.append(jresult.getFailureCount()+ " tests failed.\n");
+		  sb.append("Runtime: "+ jresult.getRunTime() +" milliseconds.\n");
+		  List<Failure> failures = jresult.getFailures();
+		  for(Failure failure:failures){
+			  sb.append("\n");
+			  sb.append("   "+ failure.toString()+"\n");
+		  }
+		  // increment our overall SAFS test status with equivalent JUnit test results.
+		  int testPassCount = jresult.getRunCount()-jresult.getIgnoreCount()-jresult.getFailureCount();
+		  for(int i=0;i < testPassCount;i++){
+		      driver.getCountersInterface().incrementAllCounters(
+				     new UniqueStringCounterInfo(null, testRecordData.getTestLevel()),
+				     CountersInterface.STATUS_TEST_PASS);
+		  }
+		  for(int i=0;i < jresult.getIgnoreCount();i++){
+		      driver.getCountersInterface().incrementAllCounters(
+				     new UniqueStringCounterInfo(null, testRecordData.getTestLevel()),
+				     CountersInterface.STATUS_SKIPPED_RECORD);
+		  }
+		  for(int i=0;i < jresult.getFailureCount();i++){
+		      driver.getCountersInterface().incrementAllCounters(
+				     new UniqueStringCounterInfo(null, testRecordData.getTestLevel()),
+				     CountersInterface.STATUS_TEST_FAILURE);
+		  }
+		  IndependantLog.debug(debugmsg+" completed with result:\n "+sb.toString());
+		  return sb.toString();		     
+	  }
+	  
+	  /**
+	   * Handle the CallJUnit Keyword.<br>
+	   * 
+	   * C, CallJUnit, package.p1.class;package.p2.class<br>
+	   * 
+	   * Supports classname separators sem-colon, colon, comma, and space.<br>
+	   * 
+	   * @return long, the execution status code.
+	   * @throws SAFSException if the 'JUnit execution' return null
+	   */
+	  private long callJUnit() {
+
+		  String debugmsg = StringUtils.debugmsg(false);
+		  String classnames = null;
+		  //get the JUnit test class names, it could be semi-colon separated string, like package.p1.class;package.p2.class;
+		  try{ classnames = testRecordData.getTrimmedUnquotedInputRecordToken(2);}
+		  catch(SAFSNullPointerException | IndexOutOfBoundsException e){;}
+
+		  if (!StringUtils.isValid(classnames)){
+			  message = failedText.convert("bad_param", "Invalid parameter value for ClassNames", "ClassNames");
+			  standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
+			  return setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
+		  }
+
+		  testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
+		  IndependantLog.info(debugmsg+"............................. handling CallJUnit: "+classnames);
+
+		  //CACHE TestRecordData. Within callJUnit() if we call some SAFS/SE+/JSAFS test, the field testRecordData
+		  //might get changed, we need to cache it. Then after calling of callJUnit(), we set it back.
+		  TestRecordData cachedData = new TestRecordHelper();
+		  testRecordData.copyData(cachedData);
+
+		  String[] clazzes = null;
+		  if(classnames.contains(StringUtils.SEMI_COLON)) 
+			  clazzes = classnames.split(StringUtils.SEMI_COLON);
+		  else if(classnames.contains(StringUtils.COLON)) 
+			  clazzes = classnames.split(StringUtils.COLON);
+		  else if(classnames.contains(StringUtils.COMMA)) 
+			  clazzes = classnames.split(StringUtils.COMMA);
+		  else clazzes = classnames.split(StringUtils.SPACE);
+
+		  boolean withWarning = false;
+		  StringBuffer result = new StringBuffer();
+		  for(String clazz:clazzes){
+			  if(!StringUtils.isValid(clazz)){
+				  IndependantLog.warn(debugmsg+" the class name '+clazz+' is not valid!");
+				  continue;
+			  }
+			  String message = genericText.convert("something_set", "'"+command+"' set to '"+clazz+"'", command, clazz);
+			  logMessage(message, null, AbstractLogFacility.START_PROCEDURE);
+			  result.append("\n---------------------------CallJUnit '"+clazz+"' Begin Results -----------------------------------\n");
+			  try {
+				  result.append(callJUnit(clazz));
+			  } catch (Exception e) {
+				  //This will be considered as a warning.
+				  withWarning = true;
+				  String msg = "'"+clazz+"' was not executed! Due to "+StringUtils.debugmsg(e);
+				  IndependantLog.warn(debugmsg+msg);
+				  result.append(msg);
+			  } 
+			  result.append("---------------------------CallJUnit '"+clazz+"' End Results -----------------------------------\n");
+		  }
+
+        //Set CACHED TestRecordData back.
+		  cachedData.copyData(testRecordData);
+		  command = testRecordData.getCommand();
+
+		  //Set the JUnit test result to the test record's status for future use.
+		  testRecordData.setStatusInfo(result.toString());
+
+		  if(withWarning){
+			  String message = genericText.convert("standard_warn", command+" warning in table "+testRecordData.getFilename()+" at line "+testRecordData.getLineNumber()+".", command, classnames);
+			  logMessage(message, result.toString(), AbstractLogFacility.WARNING_MESSAGE);
+			  return setTRDStatus(testRecordData, DriverConstant.STATUS_SCRIPT_WARNING);
+		  }else{
+			  String message = genericText.convert("success2", command+" '"+ classnames +"' successful.", command, classnames);
+			  logMessage(message, result.toString(), AbstractLogFacility.END_PROCEDURE);
+			  return setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
+		  }		  
+	  }	
 }
 
