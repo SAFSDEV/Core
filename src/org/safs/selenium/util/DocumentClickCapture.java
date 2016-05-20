@@ -880,7 +880,7 @@ public class DocumentClickCapture implements Runnable{
 		catch(Throwable x){
 			try{errmsg = SearchObject.executeScript("return window."+listenerError+";\n").toString();}
 			catch(Throwable t){}
-			IndependantLog.debug(debugmsg+" failed to remove EventListeners for "+listenerID+": "+errmsg);
+			IndependantLog.debug(debugmsg+" failed to remove EventListeners for "+listenerID+", JS Error: '"+errmsg+"', Java Exception: '"+StringUtils.debugmsg(x)+"'");
 		}
 	}	
 }
