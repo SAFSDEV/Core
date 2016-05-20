@@ -333,6 +333,8 @@ public class DriverCommands {
     static public final String WRITEFILECHARS_KEYWORD = "WriteFileChars";
     /** "CallCycle" */
     static public final String CALLCYCLE_KEYWORD = "CallCycle";
+    /** "CallJUnit" */
+    static public final String CALLJUNIT_KEYWORD = "CallJUnit";
     /** "CallScript" */
     static public final String CALLSCRIPT_KEYWORD = "CallScript";
     /** "CallStep" */
@@ -9854,6 +9856,34 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
         if ( parameters == null ) throw new IllegalArgumentException ( "callCycle.parameters = null");
         DriverCommand dc = new DriverCommand(CALLCYCLE_KEYWORD);
         dc.addParameters(parameters);
+        return dc;
+    }
+
+
+    /*********** <pre> 
+                 Invoke one or more JUnit tests using the provided Class name(s).
+               
+                 Because JUnit is a testing framework; test_record, test_passes, and test_failure counts within the status counters 
+                 will be updated when possible.
+                 
+                 If properly configured with SAFS RuntimeDataAwareness (dependency injection of SAFS Driver instances) the JUnit 
+                 test has full access to all SAFS services including SAFS App Map data and SAFS Variable storage.
+                 
+                 JUnit tests can be intermixed with other SAFS tests.
+                  </pre>    Supporting Engines:
+    <P/><UL>
+        <LI>SAFS TIDDriverFlowCommands</LI>
+    </UL>
+
+     @param className  Optional:NO 
+                 The name of one or more Classes to execute.
+              
+     **********/
+    static public DriverCommand callJUnit (String className) {
+
+        if ( className == null ) throw new IllegalArgumentException ( "callJUnit.className = null");
+        DriverCommand dc = new DriverCommand(CALLJUNIT_KEYWORD);
+        dc.addParameter(className);
         return dc;
     }
 
