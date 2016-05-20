@@ -10,6 +10,7 @@
  *  JAN 08, 2015    (Lei Wang) Support "sas.hc.ui.commons.pushmenu.PushMenu"
  *  JAN 29, 2015    (Lei Wang) Provide a way to go home for "sas.hc.ui.commons.pushmenu.PushMenu"
  *  OCT 16, 2015    (Lei Wang) Refector to create IOperable object properly.
+ *  MAY 20, 2016    (Lei Wang) Add SapSelectable_Menu.waitAndVerifyItemSelected(): override method to ignore the verification for SAPUI5 Menu.
  */
 package org.safs.selenium.webdriver.lib;
 
@@ -370,6 +371,25 @@ public class Menu extends Component implements IMenuSelectable{
 		protected boolean isShowOnPage(Element element) throws SeleniumPlusException {
 			return false;
 		}
+		
+		/**
+		 * <p>
+		 * As we have no way to know if a SAPUI5 MenuItem has been selected, refer to 
+		 * <a href="https://openui5.hana.ondemand.com/docs/api/symbols/sap.ui.unified.MenuItemBase.html">MenuItemBase API document</a>, 
+		 * so we will do nothing in {@link #verifyItemSelected(Element)}, which should be overrode if we know a way to verify
+		 * menu item selection for SAPUI5.
+		 * </p>
+		 * <p>
+		 * {@link AbstractSelectable#verifyItemSelected(Element)} will try to refresh the WebElment and then
+		 * call {@link #verifyItemSelected(Element)} to verify item's selection. As mentioned above, currently
+		 * {@link #verifyItemSelected(Element)} will do nothing, so it is a time-wasting to refresh the WebElement.
+		 * We just override {@link #waitAndVerifyItemSelected(Element)} to do nothing but log a debug message.
+		 * </p>
+		 */
+		protected void waitAndVerifyItemSelected(Element element) throws SeleniumPlusException {
+			IndependantLog.debug(StringUtils.debugmsg(false)+" will NOT refresh WebElement and NOT VERIFY if the item has been selected until we override the method AbstractMenuSelectable.verifyItemSelected()!");
+		}
+		
 	}//End of SapSelectable_Menu
 
 	public static class SAS_HC_PushMenu extends AbstractMenuSelectable{
