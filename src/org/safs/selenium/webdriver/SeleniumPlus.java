@@ -6510,6 +6510,35 @@ public abstract class SeleniumPlus {
 			return command(DDDriverCommands.ASSIGNCLIPBOARDVARIABLE_KEYWORD, varName);
 		}
 		
+		/**
+		 * Invoke one or more JUnit tests using the provided Class name(s).
+		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/DDDriverFlowCommandsReference.htm#detail_CallJUnit">Detailed Reference</a><p>
+		 * @param clazzes String, the JUnit class names separated by semi-colon, colon, comma, or space.
+		 * @return true if successfully executed with a successful result, false if the execution fails.<br>
+		 *         The JUnit test result will be stored in "status info" of #prevResults, call {@link org.safs.TestRecordHelper#getStatusInfo()} to get it.<br>
+		 * 
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode
+		 * @see org.safs.TestRecordHelper#getStatusInfo
+		 * 
+		 * @example
+		 * <pre>
+		 * {@code
+		 *  //Execute a JUnit Test "com.sas.spock.tests.SpockExperiment"
+		 *  boolean success = Misc.CallJUnit("com.sas.spock.tests.SpockExperiment");
+		 *  
+		 *  //Execute 2 JUnit Tests "com.sas.spock.tests.SpockExperiment and myapp.tests.AnOtherTest"
+		 *  boolean success = Misc.CallJUnit("com.sas.spock.tests.SpockExperiment;myapp.tests.AnOtherTest");
+		 * 
+		 *  //JUnitTestClasses is centrally stored in the App Map as "com.sas.spock.tests.SpockExperiment;myapp.tests.AnOtherTest"
+		 *  boolean success = Misc.CallScript(Map.JUnitTestClasses()); 
+		 * }
+		 * </pre>
+		 */
+		public static boolean CallJUnit(String clazzes){
+			return command(DDDriverFlowCommands.CALLJUNIT_KEYWORD, clazzes);
+		}
+		
 	    /***********  
         Execute a SeBuilder JSON script in the currently running WebDriver.
 		@param path -- full absolute path or project-relative path to an existing SeBuilder 
@@ -10636,8 +10665,7 @@ public abstract class SeleniumPlus {
 				}else{
 					try{
 						System.out.println("SeleniumPlus JUnit '"+ _junit +"' will now execute.");
-						//TODO Hard coded command "CallJUnit" will be replaced by constant
-						Runner.command("CallJUnit", _junit);
+						Runner.command(DDDriverFlowCommands.CALLJUNIT_KEYWORD, _junit);
 					}catch(SAFSException | ClassNotFoundException e){
 						Logging.LogTestFailure("SeleniumPlus Execute JUnit Failed.", StringUtils.debugmsg(e));
 					}
