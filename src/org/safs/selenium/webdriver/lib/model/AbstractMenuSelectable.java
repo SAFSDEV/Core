@@ -2,6 +2,14 @@
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
+/**
+ * 
+ * History:<br>
+ * 
+ *  <br>   JUN 23, 2014    (sbjlwa) Initial release.
+ *  <br>   MAY 23, 2016    (sbjlwa) Override method waitAndVerifyItemSelected() with empty implementation so that the post-verification
+ *                                  will be totally turned off for Menu.
+ */
 package org.safs.selenium.webdriver.lib.model;
 
 import org.safs.IndependantLog;
@@ -9,12 +17,7 @@ import org.safs.StringUtils;
 import org.safs.selenium.webdriver.lib.Component;
 import org.safs.selenium.webdriver.lib.SeleniumPlusException;
 
-/**
- * 
- * History:<br>
- * 
- *  <br>   Jun 23, 2014    (sbjlwa) Initial release.
- */
+
 public abstract class AbstractMenuSelectable extends AbstractHierarchicalSelectable implements IMenuSelectable{
 
 	/**
@@ -60,6 +63,27 @@ public abstract class AbstractMenuSelectable extends AbstractHierarchicalSelecta
 		return (MenuItem) element;
 	}
 	
+	/**
+	 * Override the method in super-class to turn off the post-verification, we just log a debug message.<br>
+	 * <p>
+	 * {@link AbstractSelectable#waitAndVerifyItemSelected(Element)} will try to refresh the WebElment and then
+	 * call {@link #verifyItemSelected(Element)} to verify item's selection. But currently
+	 * {@link #verifyItemSelected(Element)} will do nothing, so it is a time-wasting to refresh the WebElement.
+	 * We just override {@link #waitAndVerifyItemSelected(Element)} to do nothing but log a debug message.
+	 * </p>
+	 */
+	protected void waitAndVerifyItemSelected(Element element) throws SeleniumPlusException {
+		IndependantLog.debug(StringUtils.debugmsg(false)+" will NOT VERIFY if the item has been selected until we override the method AbstractMenuSelectable.verifyItemSelected()!");
+	}
+	
+	/**
+	 * <p>
+	 * As it is hard to know if a MenuItem has been selected, it is so transient.
+	 * For example, <a href="https://openui5.hana.ondemand.com/docs/api/symbols/sap.ui.unified.MenuItemBase.html">MenuItemBase API</a>
+	 * does NOT provide a way to get menu item selection status.
+	 * So we will do nothing in {@link #verifyItemSelected(Element)}, which could be overrode if we know a way to verify menu item selection.
+	 * </p>
+	 */
 	protected void verifyItemSelected(Element element) throws SeleniumPlusException {
 		//'selected' attribute is not possible to check for a menuitem.
 		String debugmsg = StringUtils.debugmsg(getClass(), "verifyItemSelected");
