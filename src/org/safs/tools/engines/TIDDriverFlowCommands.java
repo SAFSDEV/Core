@@ -1,31 +1,5 @@
 package org.safs.tools.engines;
 
-import org.junit.runner.JUnitCore;
-import org.junit.runner.Result;
-import org.junit.runner.notification.Failure;
-import org.safs.IndependantLog;
-import org.safs.Log;
-import org.safs.SAFSException;
-import org.safs.SAFSNullPointerException;
-import org.safs.StatusCodes;
-import org.safs.StringUtils;
-import org.safs.TestRecordData;
-import org.safs.TestRecordHelper;
-import org.safs.DCDriverFileCommands;
-import org.safs.image.ImageUtils;
-import org.safs.logging.AbstractLogFacility;
-import org.safs.natives.NativeWrapper;
-import org.safs.text.FAILStrings;
-import org.safs.text.GENStrings;
-import org.safs.tools.UniqueStringID;
-import org.safs.tools.input.*;
-import org.safs.tools.counters.CountersInterface;
-import org.safs.tools.counters.UniqueStringCounterInfo;
-import org.safs.tools.drivers.*;
-import org.safs.tools.status.*;
-import org.safs.tools.stringutils.StringUtilities;
-import org.safs.tools.CaseInsensitiveFile;
-
 import java.awt.AWTException;
 import java.awt.Rectangle;
 import java.io.File;
@@ -34,6 +8,40 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.List;
 import java.util.Map;
+
+import org.junit.runner.JUnitCore;
+import org.junit.runner.Result;
+import org.junit.runner.notification.Failure;
+import org.safs.DCDriverFileCommands;
+import org.safs.IndependantLog;
+import org.safs.Log;
+import org.safs.SAFSException;
+import org.safs.SAFSNullPointerException;
+import org.safs.StatusCodes;
+import org.safs.StringUtils;
+import org.safs.TestRecordData;
+import org.safs.TestRecordHelper;
+import org.safs.image.ImageUtils;
+import org.safs.logging.AbstractLogFacility;
+import org.safs.model.commands.DDDriverFlowCommands;
+import org.safs.natives.NativeWrapper;
+import org.safs.text.FAILStrings;
+import org.safs.text.GENStrings;
+import org.safs.tools.CaseInsensitiveFile;
+import org.safs.tools.UniqueStringID;
+import org.safs.tools.counters.CountersInterface;
+import org.safs.tools.counters.UniqueStringCounterInfo;
+import org.safs.tools.drivers.DriverConstant;
+import org.safs.tools.drivers.DriverInterface;
+import org.safs.tools.drivers.FlowControlInterface;
+import org.safs.tools.drivers.InputProcessor;
+import org.safs.tools.input.InputInterface;
+import org.safs.tools.input.InputRecordInterface;
+import org.safs.tools.input.UniqueStringFileInfo;
+import org.safs.tools.input.UniqueStringRecordID;
+import org.safs.tools.status.StatusCounterInterface;
+import org.safs.tools.status.StatusInterface;
+import org.safs.tools.stringutils.StringUtilities;
 
 /**
  * Provides local in-process support for DriverFlowCommands.  This class is 
@@ -56,103 +64,103 @@ public class TIDDriverFlowCommands extends GenericEngine {
 	// START: SUPPORTED DRIVER COMMANDS
 
 	/** "ExitTable" */
-	static final String COMMAND_EXIT_TABLE                       = "ExitTable";
+	static final String COMMAND_EXIT_TABLE                       = DDDriverFlowCommands.EXITTABLE_KEYWORD;
 
 	/** "ExitSuite" */
-	static final String COMMAND_EXIT_SUITE                       = "ExitSuite";
+	static final String COMMAND_EXIT_SUITE                       = DDDriverFlowCommands.EXITSUITE_KEYWORD;
 
 	/** "ExitCycle" */
-	static final String COMMAND_EXIT_CYCLE                       = "ExitCycle";
+	static final String COMMAND_EXIT_CYCLE                       = DDDriverFlowCommands.EXITCYCLE_KEYWORD;
 
 	/** "CallCycle" */
-	static final String COMMAND_CALL_CYCLE                       = "CallCycle";
+	static final String COMMAND_CALL_CYCLE                       = DDDriverFlowCommands.CALLCYCLE_KEYWORD;
 
 	/** "CallSuite" */
-	static final String COMMAND_CALL_SUITE                       = "CallSuite";
+	static final String COMMAND_CALL_SUITE                       = DDDriverFlowCommands.CALLSUITE_KEYWORD;
 
 	/** "CallStep" */
-	static final String COMMAND_CALL_STEP                        = "CallStep";
+	static final String COMMAND_CALL_STEP                        = DDDriverFlowCommands.CALLSTEP_KEYWORD;
 
 	/** "CallJUnit" */
-	static final String COMMAND_CALLJUNIT						 = "CallJUnit";
+	static final String COMMAND_CALLJUNIT						 = DDDriverFlowCommands.CALLJUNIT_KEYWORD;
 	
 	/** "GotoBlockID" */
-	static final String COMMAND_GOTO_BLOCKID                     = "GotoBlockID";
+	static final String COMMAND_GOTO_BLOCKID                     = DDDriverFlowCommands.GOTOBLOCKID_KEYWORD;
 	
 	/** "OnContainsGotoBlockID" */
-	static final String COMMAND_ON_CONTAINS_GOTO_BLOCKID         = "OnContainsGotoBlockID";
+	static final String COMMAND_ON_CONTAINS_GOTO_BLOCKID         = DDDriverFlowCommands.ONCONTAINSGOTOBLOCKID_KEYWORD;
 	
 	/** "OnNotContainsGotoBlockID" */
-	static final String COMMAND_ON_NOT_CONTAINS_GOTO_BLOCKID     = "OnNotContainsGotoBlockID";
+	static final String COMMAND_ON_NOT_CONTAINS_GOTO_BLOCKID     = DDDriverFlowCommands.ONNOTCONTAINSGOTOBLOCKID_KEYWORD;
 	
 	/** "OnEqualGotoBlockID" */
-	static final String COMMAND_ON_EQUAL_GOTO_BLOCKID            = "OnEqualGotoBlockID";
+	static final String COMMAND_ON_EQUAL_GOTO_BLOCKID            = DDDriverFlowCommands.ONEQUALGOTOBLOCKID_KEYWORD;
 	
 	/** "OnNotEqualGotoBlockID" */
-	static final String COMMAND_ON_NOT_EQUAL_GOTO_BLOCKID        = "OnNotEqualGotoBlockID";
+	static final String COMMAND_ON_NOT_EQUAL_GOTO_BLOCKID        = DDDriverFlowCommands.ONNOTEQUALGOTOBLOCKID_KEYWORD;
 	
 	/** "OnGreaterThanGotoBlockID" */
-	static final String COMMAND_ON_GREATER_THAN_GOTO_BLOCKID     = "OnGreaterThanGotoBlockID";
+	static final String COMMAND_ON_GREATER_THAN_GOTO_BLOCKID     = DDDriverFlowCommands.ONGREATERTHANGOTOBLOCKID_KEYWORD;
 	
 	/** "OnNotGreaterThanGotoBlockID" */
-	static final String COMMAND_ON_NOT_GREATER_THAN_GOTO_BLOCKID = "OnNotGreaterThanGotoBlockID";
+	static final String COMMAND_ON_NOT_GREATER_THAN_GOTO_BLOCKID = DDDriverFlowCommands.ONNOTGREATERTHANGOTOBLOCKID_KEYWORD;
 	
 	/** "OnLessThanGotoBlockID" */
-	static final String COMMAND_ON_LESS_THAN_GOTO_BLOCKID        = "OnLessThanGotoBlockID";
+	static final String COMMAND_ON_LESS_THAN_GOTO_BLOCKID        = DDDriverFlowCommands.ONLESSTHANGOTOBLOCKID_KEYWORD;
 	
 	/** "OnNotLessThanGotoBlockID" */
-	static final String COMMAND_ON_NOT_LESS_THAN_GOTO_BLOCKID    = "OnNotLessThanGotoBlockID";
+	static final String COMMAND_ON_NOT_LESS_THAN_GOTO_BLOCKID    = DDDriverFlowCommands.ONNOTLESSTHANGOTOBLOCKID_KEYWORD;
 	
 	/** "OnInRangeGotoBlockID" */	
-	static final String COMMAND_ON_IN_RANGE_GOTO_BLOCKID    	 = "OnInRangeGotoBlockID";
+	static final String COMMAND_ON_IN_RANGE_GOTO_BLOCKID    	 = DDDriverFlowCommands.ONINRANGEGOTOBLOCKID_KEYWORD;
 	
 	/** "OnNotInRangeGotoBlockID" */
-	static final String COMMAND_ON_NOT_IN_RANGE_GOTO_BLOCKID     = "OnNotInRangeGotoBlockID";	
+	static final String COMMAND_ON_NOT_IN_RANGE_GOTO_BLOCKID     = DDDriverFlowCommands.ONNOTINRANGEGOTOBLOCKID_KEYWORD;	
 	
 	/** "OnFileExistGotoBlockID" */
-	static final String COMMAND_ON_FILE_EXIST_GOTO_BLOCKID       = "OnFileExistGotoBlockID";
+	static final String COMMAND_ON_FILE_EXIST_GOTO_BLOCKID       = DDDriverFlowCommands.ONFILEEXISTGOTOBLOCKID_KEYWORD;
 
 	/** "OnFileNotExistGotoBlockID" */
-	static final String COMMAND_ON_FILE_NOT_EXIST_GOTO_BLOCKID   = "OnFileNotExistGotoBlockID";
+	static final String COMMAND_ON_FILE_NOT_EXIST_GOTO_BLOCKID   = DDDriverFlowCommands.ONFILENOTEXISTGOTOBLOCKID_KEYWORD;
 
 	/** "OnRegistryKeyExistGotoBlockID" */
-	static final String COMMAND_ON_REGISTRY_KEY_EXIST_GOTO_BLOCKID       = "OnRegistryKeyExistGotoBlockID";
+	static final String COMMAND_ON_REGISTRY_KEY_EXIST_GOTO_BLOCKID       = DDDriverFlowCommands.ONREGISTRYKEYEXISTGOTOBLOCKID_KEYWORD;
 
 	/** "OnRegistryKeyNotExistGotoBlockID" */
-	static final String COMMAND_ON_REGISTRY_KEY_NOT_EXIST_GOTO_BLOCKID   = "OnRegistryKeyNotExistGotoBlockID";
+	static final String COMMAND_ON_REGISTRY_KEY_NOT_EXIST_GOTO_BLOCKID   = DDDriverFlowCommands.ONREGISTRYKEYNOTEXISTGOTOBLOCKID_KEYWORD;
 
 	/** "OnDirectoryExistGotoBlockID" */
-	static final String COMMAND_ON_DIRECTORY_EXIST_GOTO_BLOCKID  = "OnDirectoryExistGotoBlockID";
+	static final String COMMAND_ON_DIRECTORY_EXIST_GOTO_BLOCKID  = DDDriverFlowCommands.OnDirectoryExistGotoBlockID_KEYWORD;
 
 	/** "OnDirectoryNotExistGotoBlockID" */
-	static final String COMMAND_ON_DIRECTORY_NOT_EXIST_GOTO_BLOCKID = "OnDirectoryNotExistGotoBlockID";
+	static final String COMMAND_ON_DIRECTORY_NOT_EXIST_GOTO_BLOCKID = DDDriverFlowCommands.ONDIRECTORYNOTEXISTGOTOBLOCKID_KEYWORD;
  
 	/** "OnGuiExistsGotoBlockID" */
-	static final String COMMAND_ONGUIEXISTS_GOTO_BLOCKID         = "OnGuiExistsGotoBlockID";
+	static final String COMMAND_ONGUIEXISTS_GOTO_BLOCKID         = DDDriverFlowCommands.ONGUIEXISTSGOTOBLOCKID_KEYWORD;
 	
 	/** "OnGuiNotExistGotoBlockID" */
-	static final String COMMAND_ONGUINOTEXIST_GOTO_BLOCKID       = "OnGuiNotExistGotoBlockID";
+	static final String COMMAND_ONGUINOTEXIST_GOTO_BLOCKID       = DDDriverFlowCommands.ONGUINOTEXISTGOTOBLOCKID_KEYWORD;
 	
 	/** Internal Driver Command: UseLocalFlowControl */
-	static final String COMMAND_USE_LOCAL_FLOW_CONTROL           = "UseLocalFlowControl";
+	static final String COMMAND_USE_LOCAL_FLOW_CONTROL           = DDDriverFlowCommands.USELOCALFLOWCONTROL_KEYWORD;
 
 	/** Internal Driver Command: SetExitTableBlock */
-	static final String COMMAND_SET_EXIT_TABLE_BLOCK             = "SetExitTableBlock";
+	static final String COMMAND_SET_EXIT_TABLE_BLOCK             = DDDriverFlowCommands.SETEXITTABLEBLOCK_KEYWORD;
 
 	/** Internal Driver Command: SetGeneralScriptFailureBlock */
-	static final String COMMAND_SET_GENERAL_SCRIPT_FAILURE_BLOCK = "SetGeneralScriptFailureBlock";
+	static final String COMMAND_SET_GENERAL_SCRIPT_FAILURE_BLOCK = DDDriverFlowCommands.SETGENERALSCRIPTFAILUREBLOCK_KEYWORD;
 
 	/** Internal Driver Command: SetInvalidFileIOBlock */
-	static final String COMMAND_SET_INVALID_FILE_IO_BLOCK        = "SetInvalidFileIOBlock";
+	static final String COMMAND_SET_INVALID_FILE_IO_BLOCK        = DDDriverFlowCommands.SETINVALIDFILEIOBLOCK_KEYWORD;
 
 	/** Internal Driver Command: SetNoScriptFailureBlock */
-	static final String COMMAND_SET_NO_SCRIPT_FAILURE_BLOCK      = "SetNoScriptFailureBlock";
+	static final String COMMAND_SET_NO_SCRIPT_FAILURE_BLOCK      = DDDriverFlowCommands.SETNOSCRIPTFAILUREBLOCK_KEYWORD;
 
 	/** Internal Driver Command: SetScriptNotExecutedBlock */
-	static final String COMMAND_SET_SCRIPT_NOT_EXECUTED_BLOCK    = "SetScriptNotExecutedBlock";
+	static final String COMMAND_SET_SCRIPT_NOT_EXECUTED_BLOCK    = DDDriverFlowCommands.SETSCRIPTNOTEXECUTEDBLOCK_KEYWORD;
 
 	/** Internal Driver Command: SetScriptWarningBlock */
-	static final String COMMAND_SET_SCRIPT_WARNING_BLOCK         = "SetScriptWarningBlock";
+	static final String COMMAND_SET_SCRIPT_WARNING_BLOCK         = DDDriverFlowCommands.SETSCRIPTWARNINGBLOCK_KEYWORD;
 
 	  
 	// shared string
@@ -211,67 +219,67 @@ public class TIDDriverFlowCommands extends GenericEngine {
 		Log.info("TIDFlow:processing \""+ command +"\".");
 
 		if (command.equalsIgnoreCase(COMMAND_CALLJUNIT))
-		    {return callJUnit();}
-		
+		{return callJUnit();}
+
 		else if (command.equalsIgnoreCase(COMMAND_EXIT_TABLE))   
-		     {return cmdExitTable(testRecordData);}
-		     
+		{return cmdExitTable(testRecordData);}
+
 		else if(command.equalsIgnoreCase(COMMAND_EXIT_SUITE)) 
-		     {return cmdExitSuite(testRecordData);}
+		{return cmdExitSuite(testRecordData);}
 
 		else if(command.equalsIgnoreCase(COMMAND_EXIT_CYCLE)) 
-		     {return cmdExitCycle(testRecordData);}
+		{return cmdExitCycle(testRecordData);}
 
 		else if((command.equalsIgnoreCase(COMMAND_CALL_STEP))  ||
-		        (command.equalsIgnoreCase(COMMAND_CALL_SUITE)) ||
-		        (command.equalsIgnoreCase(COMMAND_CALL_CYCLE)))
-		     {return cmdCallTable(testRecordData);}
+				(command.equalsIgnoreCase(COMMAND_CALL_SUITE)) ||
+				(command.equalsIgnoreCase(COMMAND_CALL_CYCLE)))
+		{return cmdCallTable(testRecordData);}
 
 		else if(command.equalsIgnoreCase(COMMAND_GOTO_BLOCKID)) 
-		     {return cmdGotoBlockID(testRecordData);}
+		{return cmdGotoBlockID(testRecordData);}
 
 		else if(command.equalsIgnoreCase(COMMAND_USE_LOCAL_FLOW_CONTROL)) 
-	     {return cmdUseLocalFlowControl(testRecordData);}
+		{return cmdUseLocalFlowControl(testRecordData);}
 
 		else if((command.equalsIgnoreCase(COMMAND_SET_EXIT_TABLE_BLOCK))             ||
-		        (command.equalsIgnoreCase(COMMAND_SET_GENERAL_SCRIPT_FAILURE_BLOCK)) ||
-		        (command.equalsIgnoreCase(COMMAND_SET_INVALID_FILE_IO_BLOCK))        ||
-		        (command.equalsIgnoreCase(COMMAND_SET_NO_SCRIPT_FAILURE_BLOCK))      ||
-		        (command.equalsIgnoreCase(COMMAND_SET_SCRIPT_NOT_EXECUTED_BLOCK))    ||
-		        (command.equalsIgnoreCase(COMMAND_SET_SCRIPT_WARNING_BLOCK)))
-		     {return cmdSetXXXBlock(testRecordData);}
+				(command.equalsIgnoreCase(COMMAND_SET_GENERAL_SCRIPT_FAILURE_BLOCK)) ||
+				(command.equalsIgnoreCase(COMMAND_SET_INVALID_FILE_IO_BLOCK))        ||
+				(command.equalsIgnoreCase(COMMAND_SET_NO_SCRIPT_FAILURE_BLOCK))      ||
+				(command.equalsIgnoreCase(COMMAND_SET_SCRIPT_NOT_EXECUTED_BLOCK))    ||
+				(command.equalsIgnoreCase(COMMAND_SET_SCRIPT_WARNING_BLOCK)))
+		{return cmdSetXXXBlock(testRecordData);}
 
 		else if((command.equalsIgnoreCase(COMMAND_ON_CONTAINS_GOTO_BLOCKID))        ||
-		        (command.equalsIgnoreCase(COMMAND_ON_NOT_CONTAINS_GOTO_BLOCKID))    ||
-		        (command.equalsIgnoreCase(COMMAND_ON_EQUAL_GOTO_BLOCKID))           ||
-		        (command.equalsIgnoreCase(COMMAND_ON_NOT_EQUAL_GOTO_BLOCKID))       ||
-		        (command.equalsIgnoreCase(COMMAND_ON_LESS_THAN_GOTO_BLOCKID))       ||
-		        (command.equalsIgnoreCase(COMMAND_ON_NOT_LESS_THAN_GOTO_BLOCKID))   ||
-		        (command.equalsIgnoreCase(COMMAND_ON_GREATER_THAN_GOTO_BLOCKID))    ||
-		        (command.equalsIgnoreCase(COMMAND_ON_NOT_GREATER_THAN_GOTO_BLOCKID)))
-		     {return cmdOnCompareTwoValues(testRecordData);}
+				(command.equalsIgnoreCase(COMMAND_ON_NOT_CONTAINS_GOTO_BLOCKID))    ||
+				(command.equalsIgnoreCase(COMMAND_ON_EQUAL_GOTO_BLOCKID))           ||
+				(command.equalsIgnoreCase(COMMAND_ON_NOT_EQUAL_GOTO_BLOCKID))       ||
+				(command.equalsIgnoreCase(COMMAND_ON_LESS_THAN_GOTO_BLOCKID))       ||
+				(command.equalsIgnoreCase(COMMAND_ON_NOT_LESS_THAN_GOTO_BLOCKID))   ||
+				(command.equalsIgnoreCase(COMMAND_ON_GREATER_THAN_GOTO_BLOCKID))    ||
+				(command.equalsIgnoreCase(COMMAND_ON_NOT_GREATER_THAN_GOTO_BLOCKID)))
+		{return cmdOnCompareTwoValues(testRecordData);}
 
 		else if(
-		         command.equalsIgnoreCase(COMMAND_ON_FILE_EXIST_GOTO_BLOCKID) ||
-		         command.equalsIgnoreCase(COMMAND_ON_FILE_NOT_EXIST_GOTO_BLOCKID) ||
-		         command.equalsIgnoreCase(COMMAND_ON_DIRECTORY_EXIST_GOTO_BLOCKID) ||
-		         command.equalsIgnoreCase(COMMAND_ON_DIRECTORY_NOT_EXIST_GOTO_BLOCKID)
-		
-		        ) {return cmdFilesystemExistGoto(testRecordData);}
+				command.equalsIgnoreCase(COMMAND_ON_FILE_EXIST_GOTO_BLOCKID) ||
+				command.equalsIgnoreCase(COMMAND_ON_FILE_NOT_EXIST_GOTO_BLOCKID) ||
+				command.equalsIgnoreCase(COMMAND_ON_DIRECTORY_EXIST_GOTO_BLOCKID) ||
+				command.equalsIgnoreCase(COMMAND_ON_DIRECTORY_NOT_EXIST_GOTO_BLOCKID)
+
+				) {return cmdFilesystemExistGoto(testRecordData);}
 		else if( 
-		         command.equalsIgnoreCase(COMMAND_ON_IN_RANGE_GOTO_BLOCKID) ||
-		         command.equalsIgnoreCase(COMMAND_ON_NOT_IN_RANGE_GOTO_BLOCKID)
-		        ) {return cmdOnValueInRangeGoto(testRecordData);}
+				command.equalsIgnoreCase(COMMAND_ON_IN_RANGE_GOTO_BLOCKID) ||
+				command.equalsIgnoreCase(COMMAND_ON_NOT_IN_RANGE_GOTO_BLOCKID)
+				) {return cmdOnValueInRangeGoto(testRecordData);}
 		else if( command.equalsIgnoreCase(COMMAND_ONGUIEXISTS_GOTO_BLOCKID)
-		        ) {return cmdOnGuiExists(testRecordData, true);}
+				) {return cmdOnGuiExists(testRecordData, true);}
 		else if( command.equalsIgnoreCase(COMMAND_ONGUINOTEXIST_GOTO_BLOCKID)
-		        ) {return cmdOnGuiExists(testRecordData, false);}
+				) {return cmdOnGuiExists(testRecordData, false);}
 		else if( command.equalsIgnoreCase(COMMAND_ON_REGISTRY_KEY_EXIST_GOTO_BLOCKID)
-		        ) {return cmdOnRegistryKeyExistGoto(testRecordData, true);}
+				) {return cmdOnRegistryKeyExistGoto(testRecordData, true);}
 		else if( command.equalsIgnoreCase(COMMAND_ON_REGISTRY_KEY_NOT_EXIST_GOTO_BLOCKID)
-		        ) {return cmdOnRegistryKeyExistGoto(testRecordData, false);
+				) {return cmdOnRegistryKeyExistGoto(testRecordData, false);
 		}
-		
+
 		return DriverConstant.STATUS_SCRIPT_NOT_EXECUTED;
 	}
 
@@ -1182,134 +1190,134 @@ public class TIDDriverFlowCommands extends GenericEngine {
 			return setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
 		}
 	}
-	  /**
-	   * Execute a JUnit test.
-	   * @param classname	String, the 'JUnit test class' name to be executed.
-	   * @return String, the JUnit test result
-	   * @throws ClassNotFoundException if the 'JUnit test class' can be found.
-	   * @throws SAFSException if the 'JUnit execution' return null.
-	   */
-	  private String callJUnit(String classname) throws ClassNotFoundException, SAFSException{
-		  String debugmsg = StringUtils.debugmsg(false);
+	/**
+	 * Execute a JUnit test.
+	 * @param classname	String, the 'JUnit test class' name to be executed.
+	 * @return String, the JUnit test result
+	 * @throws ClassNotFoundException if the 'JUnit test class' can be found.
+	 * @throws SAFSException if the 'JUnit execution' return null.
+	 */
+	private String callJUnit(String classname) throws ClassNotFoundException, SAFSException{
+		String debugmsg = StringUtils.debugmsg(false);
 
-		  JUnitCore junit = new JUnitCore();
-		  Result jresult = junit.run(Class.forName(classname));
+		JUnitCore junit = new JUnitCore();
+		Result jresult = junit.run(Class.forName(classname));
 
-		  if(jresult == null){
-			  String detail = "JUnitCore executed '"+classname+"', and returned a null Result!";
-			  IndependantLog.debug(debugmsg+" failure: "+detail);
-			  throw new SAFSException(detail);
-		  }
-		  StringBuffer sb = new StringBuffer();
-		  sb.append(jresult.getRunCount()+ " tests run.\n");
-		  sb.append(jresult.getIgnoreCount()+" tests ignored.\n");
-		  sb.append(jresult.getFailureCount()+ " tests failed.\n");
-		  sb.append("Runtime: "+ jresult.getRunTime() +" milliseconds.\n");
-		  List<Failure> failures = jresult.getFailures();
-		  for(Failure failure:failures){
-			  sb.append("\n");
-			  sb.append("   "+ failure.toString()+"\n");
-		  }
-		  // increment our overall SAFS test status with equivalent JUnit test results.
-		  int testPassCount = jresult.getRunCount()-jresult.getIgnoreCount()-jresult.getFailureCount();
-		  for(int i=0;i < testPassCount;i++){
-		      driver.getCountersInterface().incrementAllCounters(
-				     new UniqueStringCounterInfo(null, testRecordData.getTestLevel()),
-				     CountersInterface.STATUS_TEST_PASS);
-		  }
-		  for(int i=0;i < jresult.getIgnoreCount();i++){
-		      driver.getCountersInterface().incrementAllCounters(
-				     new UniqueStringCounterInfo(null, testRecordData.getTestLevel()),
-				     CountersInterface.STATUS_SKIPPED_RECORD);
-		  }
-		  for(int i=0;i < jresult.getFailureCount();i++){
-		      driver.getCountersInterface().incrementAllCounters(
-				     new UniqueStringCounterInfo(null, testRecordData.getTestLevel()),
-				     CountersInterface.STATUS_TEST_FAILURE);
-		  }
-		  IndependantLog.debug(debugmsg+" completed with result:\n "+sb.toString());
-		  return sb.toString();		     
-	  }
-	  
-	  /**
-	   * Handle the CallJUnit Keyword.<br>
-	   * 
-	   * C, CallJUnit, package.p1.class;package.p2.class<br>
-	   * 
-	   * Supports classname separators sem-colon, colon, comma, and space.<br>
-	   * 
-	   * @return long, the execution status code.
-	   * @throws SAFSException if the 'JUnit execution' return null
-	   */
-	  private long callJUnit() {
+		if(jresult == null){
+			String detail = "JUnitCore executed '"+classname+"', and returned a null Result!";
+			IndependantLog.debug(debugmsg+" failure: "+detail);
+			throw new SAFSException(detail);
+		}
+		StringBuffer sb = new StringBuffer();
+		sb.append(jresult.getRunCount()+ " tests run.\n");
+		sb.append(jresult.getIgnoreCount()+" tests ignored.\n");
+		sb.append(jresult.getFailureCount()+ " tests failed.\n");
+		sb.append("Runtime: "+ jresult.getRunTime() +" milliseconds.\n");
+		List<Failure> failures = jresult.getFailures();
+		for(Failure failure:failures){
+			sb.append("\n");
+			sb.append("   "+ failure.toString()+"\n");
+		}
+		// increment our overall SAFS test status with equivalent JUnit test results.
+		int testPassCount = jresult.getRunCount()-jresult.getIgnoreCount()-jresult.getFailureCount();
+		for(int i=0;i < testPassCount;i++){
+			driver.getCountersInterface().incrementAllCounters(
+					new UniqueStringCounterInfo(null, testRecordData.getTestLevel()),
+					CountersInterface.STATUS_TEST_PASS);
+		}
+		for(int i=0;i < jresult.getIgnoreCount();i++){
+			driver.getCountersInterface().incrementAllCounters(
+					new UniqueStringCounterInfo(null, testRecordData.getTestLevel()),
+					CountersInterface.STATUS_SKIPPED_RECORD);
+		}
+		for(int i=0;i < jresult.getFailureCount();i++){
+			driver.getCountersInterface().incrementAllCounters(
+					new UniqueStringCounterInfo(null, testRecordData.getTestLevel()),
+					CountersInterface.STATUS_TEST_FAILURE);
+		}
+		IndependantLog.debug(debugmsg+" completed with result:\n "+sb.toString());
+		return sb.toString();		     
+	}
 
-		  String debugmsg = StringUtils.debugmsg(false);
-		  String classnames = null;
-		  //get the JUnit test class names, it could be semi-colon separated string, like package.p1.class;package.p2.class;
-		  try{ classnames = testRecordData.getTrimmedUnquotedInputRecordToken(2);}
-		  catch(SAFSNullPointerException | IndexOutOfBoundsException e){;}
+	/**
+	 * Handle the CallJUnit Keyword.<br>
+	 * 
+	 * C, CallJUnit, package.p1.class;package.p2.class<br>
+	 * 
+	 * Supports classname separators sem-colon, colon, comma, and space.<br>
+	 * 
+	 * @return long, the execution status code.
+	 * @throws SAFSException if the 'JUnit execution' return null
+	 */
+	private long callJUnit() {
 
-		  if (!StringUtils.isValid(classnames)){
-			  message = failedText.convert("bad_param", "Invalid parameter value for ClassNames", "ClassNames");
-			  standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
-			  return setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
-		  }
+		String debugmsg = StringUtils.debugmsg(false);
+		String classnames = null;
+		//get the JUnit test class names, it could be semi-colon separated string, like package.p1.class;package.p2.class;
+		try{ classnames = testRecordData.getTrimmedUnquotedInputRecordToken(2);}
+		catch(SAFSNullPointerException | IndexOutOfBoundsException e){;}
 
-		  testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
-		  IndependantLog.info(debugmsg+"............................. handling CallJUnit: "+classnames);
+		if (!StringUtils.isValid(classnames)){
+			message = failedText.convert("bad_param", "Invalid parameter value for ClassNames", "ClassNames");
+			standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
+			return setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
+		}
 
-		  //CACHE TestRecordData. Within callJUnit() if we call some SAFS/SE+/JSAFS test, the field testRecordData
-		  //might get changed, we need to cache it. Then after calling of callJUnit(), we set it back.
-		  TestRecordData cachedData = new TestRecordHelper();
-		  testRecordData.copyData(cachedData);
+		testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
+		IndependantLog.info(debugmsg+"............................. handling CallJUnit: "+classnames);
 
-		  String[] clazzes = null;
-		  if(classnames.contains(StringUtils.SEMI_COLON)) 
-			  clazzes = classnames.split(StringUtils.SEMI_COLON);
-		  else if(classnames.contains(StringUtils.COLON)) 
-			  clazzes = classnames.split(StringUtils.COLON);
-		  else if(classnames.contains(StringUtils.COMMA)) 
-			  clazzes = classnames.split(StringUtils.COMMA);
-		  else clazzes = classnames.split(StringUtils.SPACE);
+		//CACHE TestRecordData. Within callJUnit() if we call some SAFS/SE+/JSAFS test, the field testRecordData
+		//might get changed, we need to cache it. Then after calling of callJUnit(), we set it back.
+		TestRecordData cachedData = new TestRecordHelper();
+		testRecordData.copyData(cachedData);
 
-		  boolean withWarning = false;
-		  StringBuffer result = new StringBuffer();
-		  for(String clazz:clazzes){
-			  if(!StringUtils.isValid(clazz)){
-				  IndependantLog.warn(debugmsg+" the class name '+clazz+' is not valid!");
-				  continue;
-			  }
-			  String message = genericText.convert("something_set", "'"+command+"' set to '"+clazz+"'", command, clazz);
-			  logMessage(message, null, AbstractLogFacility.START_PROCEDURE);
-			  result.append("\n---------------------------CallJUnit '"+clazz+"' Begin Results -----------------------------------\n");
-			  try {
-				  result.append(callJUnit(clazz));
-			  } catch (Exception e) {
-				  //This will be considered as a warning.
-				  withWarning = true;
-				  String msg = "'"+clazz+"' was not executed! Due to "+StringUtils.debugmsg(e);
-				  IndependantLog.warn(debugmsg+msg);
-				  result.append(msg);
-			  } 
-			  result.append("---------------------------CallJUnit '"+clazz+"' End Results -----------------------------------\n");
-		  }
+		String[] clazzes = null;
+		if(classnames.contains(StringUtils.SEMI_COLON)) 
+			clazzes = classnames.split(StringUtils.SEMI_COLON);
+		else if(classnames.contains(StringUtils.COLON)) 
+			clazzes = classnames.split(StringUtils.COLON);
+		else if(classnames.contains(StringUtils.COMMA)) 
+			clazzes = classnames.split(StringUtils.COMMA);
+		else clazzes = classnames.split(StringUtils.SPACE);
 
-        //Set CACHED TestRecordData back.
-		  cachedData.copyData(testRecordData);
-		  command = testRecordData.getCommand();
+		boolean withWarning = false;
+		StringBuffer result = new StringBuffer();
+		for(String clazz:clazzes){
+			if(!StringUtils.isValid(clazz)){
+				IndependantLog.warn(debugmsg+" the class name '+clazz+' is not valid!");
+				continue;
+			}
+			String message = genericText.convert("something_set", "'"+command+"' set to '"+clazz+"'", command, clazz);
+			logMessage(message, null, AbstractLogFacility.START_PROCEDURE);
+			result.append("\n---------------------------CallJUnit '"+clazz+"' Begin Results -----------------------------------\n");
+			try {
+				result.append(callJUnit(clazz));
+			} catch (Exception e) {
+				//This will be considered as a warning.
+				withWarning = true;
+				String msg = "'"+clazz+"' was not executed! Due to "+StringUtils.debugmsg(e);
+				IndependantLog.warn(debugmsg+msg);
+				result.append(msg);
+			} 
+			result.append("---------------------------CallJUnit '"+clazz+"' End Results -----------------------------------\n");
+		}
 
-		  //Set the JUnit test result to the test record's status for future use.
-		  testRecordData.setStatusInfo(result.toString());
+		//Set CACHED TestRecordData back.
+		cachedData.copyData(testRecordData);
+		command = testRecordData.getCommand();
 
-		  if(withWarning){
-			  String message = genericText.convert("standard_warn", command+" warning in table "+testRecordData.getFilename()+" at line "+testRecordData.getLineNumber()+".", command, classnames);
-			  logMessage(message, result.toString(), AbstractLogFacility.WARNING_MESSAGE);
-			  return setTRDStatus(testRecordData, DriverConstant.STATUS_SCRIPT_WARNING);
-		  }else{
-			  String message = genericText.convert("success2", command+" '"+ classnames +"' successful.", command, classnames);
-			  logMessage(message, result.toString(), AbstractLogFacility.END_PROCEDURE);
-			  return setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
-		  }		  
-	  }	
+		//Set the JUnit test result to the test record's status for future use.
+		testRecordData.setStatusInfo(result.toString());
+
+		if(withWarning){
+			String message = genericText.convert("standard_warn", command+" warning in table "+testRecordData.getFilename()+" at line "+testRecordData.getLineNumber()+".", command, classnames);
+			logMessage(message, result.toString(), AbstractLogFacility.WARNING_MESSAGE);
+			return setTRDStatus(testRecordData, DriverConstant.STATUS_SCRIPT_WARNING);
+		}else{
+			String message = genericText.convert("success2", command+" '"+ classnames +"' successful.", command, classnames);
+			logMessage(message, result.toString(), AbstractLogFacility.END_PROCEDURE);
+			return setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
+		}		  
+	}	
 }
 
