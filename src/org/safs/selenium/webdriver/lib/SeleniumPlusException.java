@@ -47,7 +47,7 @@ public class SeleniumPlusException extends SAFSException{
 	}
 	
 	public SeleniumPlusException(String message, Throwable th) {
-		this(message+"Embedded Throwable: "+th.getClass().getSimpleName()+":"+th.getMessage());
+		super(message+" Embedded Throwable: "+th.getClass().getSimpleName()+":"+th.getMessage(), th);
 	}
 	
 	public synchronized String getInfo() {

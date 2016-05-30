@@ -79,7 +79,11 @@ public class SAFSException extends Exception {
 	 * @param th
 	 */
 	public SAFSException (Throwable th) {
-		this("Embedded Throwalbe: "+th.getClass().getSimpleName()+":"+th.getMessage());
+		super("Embedded Throwalbe: "+th.getClass().getSimpleName()+":"+th.getMessage(), th);
+	}
+	
+	public SAFSException(String message, Throwable th) {
+		super(message, th);
 	}
 	
 	public String getCode() {
