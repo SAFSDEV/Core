@@ -820,7 +820,7 @@ public class SearchObject {
 	 * @return
 	 */
 	protected static WebDriver reconnectLastWebDriver(){
-		String debugmsg = StringUtils.debugmsg(SearchObject.class, "reconnectWebDriver");
+		String debugmsg = StringUtils.debugmsg(false);
 		String host = System.getProperty(SelectBrowser.SYSTEM_PROPERTY_SELENIUM_HOST);
 		if (host == null || host.isEmpty()) host = SelectBrowser.DEFAULT_SELENIUM_HOST;
 		String port = System.getProperty(SelectBrowser.SYSTEM_PROPERTY_SELENIUM_PORT);
@@ -850,6 +850,7 @@ public class SearchObject {
 				capabilities.setBrowserName(info.browser);
 				try{
 					// try to see if it is a valid session
+					IndependantLog.debug(debugmsg+" trying to connect remote server at 'http://" + host + ":" + port +"/wd/hub' ... "); 
 					result = new RemoteDriver(new URL("http://" + host + ":" + port +"/wd/hub"),capabilities);
 					// NOT changing anything about the existing sessions
 					//d.manage().window().setSize(d.manage().window().getSize());
@@ -1319,6 +1320,7 @@ public class SearchObject {
 						IndependantLog.debug(debugmsg +" retrying a new targetLocator WebDriver...");
 						webdriver = reconnectLastWebDriver();
 
+						IndependantLog.debug(debugmsg +" changing the last visited URL from '"+lastVisitedURL+"' to '"+webdriver.getCurrentUrl()+"'");
 						lastVisitedURL = webdriver.getCurrentUrl();
 
 						targetLocator = webdriver.switchTo();
@@ -4556,10 +4558,10 @@ public class SearchObject {
 	 */
 	protected static String getThrowableMessages(Throwable th){
 		StringBuffer buffer = new StringBuffer();
-		buffer.append(th.getClass().getSimpleName()+". ");
+		buffer.append(th.getClass().getSimpleName()+": "+th.getMessage()+". \n");
 		Throwable cause = th.getCause();
 		while(cause != null){
-			buffer.append("Caused by: "+ cause.getClass().getSimpleName()+". ");
+			buffer.append("Caused by: "+ cause.getClass().getSimpleName()+": "+th.getMessage()+". \n");
 			cause = cause.getCause();
 		}
 		return buffer.toString();
