@@ -1692,16 +1692,26 @@ public class TIDComponent extends GenericEngine {
 	            // now compare the two files
 	            Collection<String> benchcontents = new ArrayList<String>( );
 	            Collection<String> testcontents = new ArrayList<String>( );
+	            BufferedImage bimage = null;
+	            BufferedImage timage = null;
+	            BufferedImage diffimage = null;
 	            try {
 	                boolean success = false;
 	                if(isImage){
 	                	try{
-	                		BufferedImage bimage = ImageUtils.getStoredImage(benchfilename);
-	                		BufferedImage timage = ImageUtils.getStoredImage(testfilename);
+	                		bimage = ImageUtils.getStoredImage(benchfilename);
+	                		timage = ImageUtils.getStoredImage(testfilename);
 	                		success = ImageUtils.compareImage(bimage, timage, bitTolerance);
 	                	}catch(Exception x){
 	    		            Log.debug( ".....TIDComponent.process; VFTF IMAGE comparison failed due to "+
 	                	     x.getClass().getName()+", "+x.getMessage());
+	    		            if(bimage == null){
+	    		            	issueParameterValueFailure("BenchmarkFile: "+ benchfilename);
+	    		            	return;
+	    		            }else if(timage == null){
+	    		            	issueParameterValueFailure("ActualFile: "+ testfilename);
+	    		            	return;
+	    		            }
 	                	}
 	                }else if (text){
 	                    benchcontents = StringUtils.readfile( benchfilename );
@@ -1716,11 +1726,33 @@ public class TIDComponent extends GenericEngine {
 	                    Log.info(debugmsg+ "testcontents.length: " + test.length( ) );
 	                    success = benchcontents.equals( testcontents );
 	                }
-	                if ( !success ) {
-			            String alttext = passedText.convert("contents_do_not_match",
-	                        "contents of '"+ testfilename +"' did not match contents of '"+ benchfilename +"'",
-	                        testfilename,benchfilename);
-			            logMessage(action+" "+alttext, testRecordData.getInputRecord(), FAILED_MESSAGE);
+	                if ( !success ) {	             
+	                	if(isImage){	                		
+	                		File diffout = null;
+							try{ 
+								diffimage = ImageUtils.createDiffImage(timage, bimage);
+								diffout = deduceDiffFile(FileUtilities.deduceMatchingUUIDFilename(benchfilename));
+								ImageUtils.saveImageToFile(diffimage, diffout);
+							}catch(Exception x){
+								Log.info(debugmsg+action +" failed to create Diff Image due to: "+x.getClass().getName()+", "+ x.getMessage());
+							}
+							StringBuffer message = new StringBuffer();
+							message.append(GENStrings.convert(GENStrings.CONTENT_NOT_MATCHES_KEY,
+									"the content of '"+ testfilename +"' does not match the content of "+benchfilename,
+									testfilename,benchfilename));
+							//see_difference_file		: Please see difference in file '%1%'.
+							if(diffimage != null){
+								message.append(" "+ GENStrings.convert(GENStrings.SEE_DIFFERENCE_FILE,
+										"Please see difference in file '"+ diffout.getAbsolutePath() +"'.",
+										diffout.getAbsolutePath()));
+							}
+							issueErrorPerformingActionOnX(testfilename, message.toString());
+	                	}else{
+				            String alttext = passedText.convert("contents_do_not_match",
+		                        "contents of '"+ testfilename +"' did not match contents of '"+ benchfilename +"'",
+		                        testfilename,benchfilename);
+				            logMessage(action+" "+alttext, testRecordData.getInputRecord(), FAILED_MESSAGE);
+	                	}
 			        } else {
 			            // set status to ok
 			            testRecordData.setStatusCode(DriverConstant.STATUS_NO_SCRIPT_FAILURE);
