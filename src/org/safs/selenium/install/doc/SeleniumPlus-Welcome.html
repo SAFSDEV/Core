@@ -1191,7 +1191,7 @@ If user wants to start browser with some specific settings, SeleniumPlus provide
 String profile = "myprofile";
 StartWebBrowser(URL, ID, SelectBrowser.BROWSER_NAME_FIREFOX, "30", "true", SelectBrowser.<b>KEY_FIREFOX_PROFILE</b>, profile);
 </pre>
-                    </div> 
+                    </div>
             </ol>
         </ul><p>
 	<li><h3>Start Chrome</h3>
@@ -1203,7 +1203,7 @@ StartWebBrowser(URL, ID, SelectBrowser.BROWSER_NAME_FIREFOX, "30", "true", Selec
             <ol>
                 <li><a href="http://www.chromium.org/developers/creating-and-using-profiles">Create custom data pool</a> by running "<b>chrome.exe --user-data-dir=c:\chrome_custom_data</b>".
                     This command will start up a chrome browser and a new folder c:\chrome_custom_data will be created.
-                    Under that folder there is a sub folder <b>Default</b>, which is for the default user. 
+                    Under that folder there is a sub folder <b>Default</b>, which is for the default user.
                 <li>Create multiple users, then under folder c:\chrome_custom_data, there will be sub folder "Profile 1", "Profile 2" etc. for those new added users.<br>
                     <ul>
                     <li>Open chrome settings: click the button <img src="images/chrome_customize_control_button.png"/> to show a pop-up menu, and then click the item "Settings".<br>
@@ -1222,7 +1222,7 @@ StartWebBrowser(URL, ID, SelectBrowser.BROWSER_NAME_FIREFOX, "30", "true", Selec
             </ol>
         <li>Examples:<br>
             <ol>
-                <li>Start Chrome with the custom data pool "c:\chrome_custom_data" and <b>Last Active</b> user, the <b>Last Active</b> could be "Default User" or any other one. 
+                <li>Start Chrome with the custom data pool "c:\chrome_custom_data" and <b>Last Active</b> user, the <b>Last Active</b> could be "Default User" or any other one.
                     <div class="CodeBox">
 <pre class="LineNumbers">
 1
@@ -1298,12 +1298,12 @@ StartWebBrowser(URL, ID, SelectBrowser.BROWSER_NAME_CHROME, "30", "true", quote(
 String preferenceDataFile = "c:\\Pref.json.dat";
 StartWebBrowser(URL, ID, SelectBrowser.BROWSER_NAME_FIREFOX, "30", "true", SelectBrowser.<b>KEY_FIREFOX_PROFILE_PREFERENCE</b>, preferenceDataFile);
 </pre>
-                    </div> 
+                    </div>
             </ol>
         </ul><p>
     <li><h3>Start Chrome</h3>
-        Chrome's json data file is a little different from Firefox's. There are 2 kinds of settings: 
-        <a href="http://peter.sh/experiments/chromium-command-line-switches/"><b>command line options</b></a> and 
+        Chrome's json data file is a little different from Firefox's. There are 2 kinds of settings:
+        <a href="http://peter.sh/experiments/chromium-command-line-switches/"><b>command line options</b></a> and
         <a href="https://src.chromium.org/viewvc/chrome/trunk/src/chrome/common/pref_names.cc"><b>chrome preferences</b></a>.<br>
         The <b>command line options</b> will be defined normally as key : value pair in the json file, while <b>chrome preferences</b>
         will be defined as value of key "<b>seplus.chrome.preference.json.key</b>".
@@ -1361,7 +1361,7 @@ StartWebBrowser(URL, ID, SelectBrowser.BROWSER_NAME_CHROME, "30", "true", quote(
 <h2>Important References</h2>
 <p>
 <a href="http://safsdev.sourceforge.net/doc/org/safs/selenium/webdriver/SeleniumPlus.html" title="SeleniumPlus Class JavaDoc" alt="SeleniumPlus Class JavaDoc">SeleniumPlus Class JavaDoc</a><br>
-<a href="http://selenium.googlecode.com/git/docs/api/java/org/openqa/selenium/WebDriver.html" title="Selenium WebDriver API" alt="Selenium WebDriver API">Selenium WebDriver API</a><br>
+<a href="http://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/WebDriver.html" title="Selenium WebDriver API" alt="Selenium WebDriver API">Selenium WebDriver API</a><br>
 <p>
 <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php" title="SAFS Keyword Reference" alt="SAFS Keyword Reference">SAFS Keywords Reference</a><br>
 <a href="http://safsdev.sourceforge.net" title="SAFS SourceForge Home" alt="SAFS SourceForge Home">SAFS Homepage on SourceForge</a><br>
