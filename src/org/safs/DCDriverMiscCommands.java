@@ -426,7 +426,7 @@ public class DCDriverMiscCommands extends DriverCommand {
     String url = (webBrowser?(iterator.hasNext()?(String)iterator.next():""):"");
     String idname = (webBrowser?(iterator.hasNext()?(String)iterator.next():""):(String)iterator.next());
     int timeout = 5000;//millisecond
-    
+    STAFResult rc = null;
     String appname = null;
     if(webBrowser){
     	// attempt to locate a DDVariable (or ApplicationConstant) specifying a 
@@ -551,15 +551,14 @@ public class DCDriverMiscCommands extends DriverCommand {
     	Log.info("DCDC.LaunchApplication attempting launch of:"+ appname);    	
         Runtime rt = Runtime.getRuntime();
         Process p = null;
-        
         if (isWinBatch){
     		try{
     			STAFHelper staf = testRecordData.getSTAFHelper();
     			Log.info("DCDC.Launch BAT file thru STAF with workdir: " + workdir);
-    			staf.localStartProcess(appname, workdir);
+    			rc = staf.localStartProcess(appname, workdir);
      		}catch(Exception io){
-            	Log.debug("IOException occurred and unrecoverable: "+ io.getClass().getSimpleName()+" "+ io.getMessage());
-            	throw new IOException(io.getMessage());//caught below
+            	Log.debug("DCDC.Launch IOException occurred and unrecoverable: "+ io.getClass().getSimpleName()+" "+ io.getMessage(), io);
+            	throw new IOException(io.getMessage()+", Could not successfully run "+ appname, io);//caught below
     		}
         }else{
 	        try{
@@ -660,16 +659,22 @@ public class DCDriverMiscCommands extends DriverCommand {
     	}
         pMap.put(idname, p);
         
+        String pInfo = (rc == null) ? 
+        		        null : 
+        		        rc.rc == STAFResult.Ok ? 
+        		        null : 
+        		        rc.result;
+        
         if(thedir==null){
 	        log.logMessage(testRecordData.getFac(),
 	                genericText.convert(TXT_SUCCESS_3, 
 	                		_command+":"+idname +" '"+appname +"' successful.",
-	                        _command, idname, appname), GENERIC_MESSAGE);
+	                        _command, idname, appname), GENERIC_MESSAGE, pInfo);
         }else{
 	        log.logMessage(testRecordData.getFac(),
 	                genericText.convert(TXT_SUCCESS_3a, 
 	                		_command+":"+idname +" '"+appname +"' successful using '"+ thedir.getAbsolutePath() +"'",
-	                        _command, idname, appname, thedir.getAbsolutePath()), GENERIC_MESSAGE);
+	                        _command, idname, appname, thedir.getAbsolutePath()), GENERIC_MESSAGE, pInfo);
         }
         testRecordData.setStatusCode(StatusCodes.OK);
         return;
