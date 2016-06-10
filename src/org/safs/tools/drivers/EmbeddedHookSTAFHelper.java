@@ -217,7 +217,7 @@ public class EmbeddedHookSTAFHelper extends STAFHelper {
 					message.append(data.get(line) +lf);
     		    rc.result = message.toString();
 				if(exitValue!=0){
-	    			Log.debug(debugmsg+"Process may not have terminated successfully: "+ message.toString());
+	    			Log.debug(debugmsg+"Process may not have terminated within timeout: "+ message.toString());
 	    		    rc.rc = STAFResult.UnknownError;
 	    		    return rc;
 				}else{
@@ -228,6 +228,7 @@ public class EmbeddedHookSTAFHelper extends STAFHelper {
 			} catch (IllegalThreadStateException e) {
 				//if we got here, then the process is still running
 				//we will check it up to loopmax to be sure all is well
+    			Log.debug(debugmsg+"Process is still running...loop "+ loop);
 			} catch(Exception e2){
     			Log.debug(debugmsg+"IGNORING Process or Thread "+ 
     					  e2.getClass().getSimpleName()+"; "+e2.getMessage());
