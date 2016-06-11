@@ -11,9 +11,13 @@ package org.safs.tools.drivers;
  * <br>	Nov 14, 2014	(Carl Nagle) 	Added static getFirstNonSAFSStackTraceElement support.  
  * <br>                             TestRecordData now initialized with caller filename Class#method and linenumber.
  * <br>	Dec 17, 2014	(Lei Wang) 	Move codes from runXXXDirect() to processCommandDirect(): delay 'millisBetweenRecords' after execution.
- * <br>	JUN 11, 2015	(Lei Wang) 	Add method resolveExpression(): resolve expression as SAFS Variable Service, "DDVariable" will be always evaluated.
+ * <br>	JUN 11, 2015	(Lei Wang) 	Added method resolveExpression(): resolve expression as SAFS Variable Service, "DDVariable" will be always evaluated.
+ * <br>	JUN 11, 2016	(Lei Wang) 	Added pushTestRecord(), popTestRecord() and modified processCommand(), processCommandDirect(): handle the 
+ *                                  test-record overwritten problem when executing CallJUnit.
+ *                                    
  */
 import java.util.ListIterator;
+import java.util.Stack;
 
 import org.safs.IndependantLog;
 import org.safs.JavaHook;
@@ -64,6 +68,30 @@ public class JSAFSDriver extends DefaultDriver {
 	
 	public StatusCounter statuscounter = null;
 	public TestRecordHelper testRecordHelper = null;
+	/** 
+	 * The Stack to hold the 'test records' being processed. Such as
+	 * 
+	 *   |                |
+	 *   |  'LogMessage'  |
+	 *   |  'CallJUnit'   |
+	 *   |________________|
+	 *   
+	 * <p>
+	 * The field {@link #testRecordHelper} is a class field, it will be overwritten for a new keyword execution.
+	 * And we use ONE instance of {@link #JSAFSDriver(String)} to execute keyword.
+	 * It is OK for execution of sequential keyword such as 'LogMessage' 'Expressions', there is no overlap.
+	 * BUT for reentrant keyword as 'CallJUnit', inside JUnit test the keyword 'LogMessage' (even 'CallJUnit')
+	 * may be attempted, and the field {@link #testRecordHelper} (for 'CallJUnit') will be overwritten by that of
+	 * 'LogMessage', after execution of 'LogMessage', we come back to the execution of 'CallJUnit', but 
+	 * the {@link #testRecordHelper} has been changed, we need to get it back. We use a FILO (Stack) to store 
+	 * the {@link #testRecordHelper}, and try to retrieve the correct one from it.
+	 * </p>
+	 * @see #pushTestRecord()
+	 * @see #popTestRecord()
+	 * @see #processCommand(AbstractCommand, String)
+	 * @see #processCommandDirect(AbstractCommand, String)
+	 */
+	protected Stack<TestRecordHelper> testRecordStack = new Stack<TestRecordHelper>();
 	/**
 	 * The CounterInfo to send to incrementAllCounters.
 	 */
@@ -772,6 +800,7 @@ mainloop: while (true){
 	        //testRecord will contain the value of STAF variable "SAFS/Hook/inputrecord" when we 
 	        //retry the same step.
 			setGlobalTestRecordHelper(command, separator, testRecord);
+			pushTestRecord();
 						
 			if(command instanceof DriverCommand){
 				rc = processDriverCommand();
@@ -840,6 +869,8 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 			
 			System.gc();			
 			
+			popTestRecord();
+
 			if (driverStatus.equalsIgnoreCase(JavaHook.STEP_RETRY_EXECUTION)){
 				// update testrecord for retry
 				testRecord =  getVariable(testRecordHelper.getInstanceName() + STAFHelper.SAFS_VAR_INPUTRECORD);
@@ -914,6 +945,7 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 		
 		//prepare the "test record"
 		setGlobalTestRecordHelper(command, separator,null);
+		pushTestRecord();
 
 		//execute the "test record"
 		if(command instanceof DriverCommand){
@@ -928,6 +960,8 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 		delayBetweenRecords();
 		Log.debug(debugmsg+"the returned code="+rc);
 		
+		popTestRecord();
+
 		return testRecordHelper;
 	}
 	
@@ -963,11 +997,56 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 	 * {@link TestRecordHelper#getStatusInfo()}
 	 */
 	public TestRecordHelper runDriverCommand(DriverCommand command, String separator){
-		Log.info("routing DriverCommand with SAFS Monitor support = "+ useSAFSMonitor);
+		Log.info("routing DriverCommand '"+command.getCommandName()+"' with SAFS Monitor support = "+ useSAFSMonitor);
 		if(useSAFSMonitor){
 			return processCommand(command,separator);
 		}else{
 			return processCommandDirect(command, separator);
+		}
+	}
+
+	/**
+	 * <p>
+	 * Push the current test record into the Stack before the execution of a keyword.<br>
+	 * This should be called after the field {@link #testRecordHelper} is properly set, this is, 
+	 * after calling {@link #setGlobalTestRecordHelper(AbstractCommand, String, String)}.
+	 * </p>
+	 * @see #processCommand(AbstractCommand, String)
+	 * @see #processCommandDirect(AbstractCommand, String)
+	 * @see #popTestRecord()
+	 */
+	protected void pushTestRecord(){
+		//Push the test-record into the stack
+		IndependantLog.debug(StringUtils.debugmsg(false)+" push test record "+testRecordHelper+" into stack.");
+		testRecordStack.push(testRecordHelper);
+	}
+	
+	/**
+	 * Retrieve the Test-Record from the the Stack after the execution of a keyword.<br>
+	 * <p>
+	 * After execution of a keyword, pop the test record from Stack. If it is the same as 
+	 * current {@link #testRecordHelper}, then ignore it; otherwise reset the current
+	 * {@link #testRecordHelper} by it.
+	 * </p>
+	 * 
+	 * @see #processCommand(AbstractCommand, String)
+	 * @see #processCommandDirect(AbstractCommand, String)
+	 * @see #pushTestRecord()
+	 */
+	protected void popTestRecord(){
+		TestRecordHelper history = null;
+		String debugmsg = StringUtils.debugmsg(false);
+		
+		IndependantLog.debug(debugmsg+"Current test record: "+testRecordHelper);
+		if(testRecordStack.empty()){
+			IndependantLog.error(debugmsg+" the test-record stack is empty! Cannot reset.");
+		}else{
+			IndependantLog.debug(debugmsg+"Current test record stack: "+testRecordStack);
+			history = testRecordStack.pop();
+			if(!testRecordHelper.equals(history)){
+				IndependantLog.debug(debugmsg+"Reset current test record to: "+history);
+				testRecordHelper = history;
+			}
 		}
 	}
 	
@@ -1014,7 +1093,7 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 	 * {@link TestRecordHelper#getStatusInfo()}
 	 */
 	public TestRecordHelper runComponentFunction(ComponentFunction command, String separator){
-		Log.info("routing ComponentFunction with SAFS Monitor support = "+ useSAFSMonitor);
+		Log.info("routing ComponentFunction '"+command.getCommandName()+"' with SAFS Monitor support = "+ useSAFSMonitor);
 		if(useSAFSMonitor){
 			return processCommand(command,separator);
 		}else{
