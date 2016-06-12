@@ -17,7 +17,6 @@ package org.safs.tools.drivers;
  *                                    
  */
 import java.util.ListIterator;
-import java.util.Stack;
 
 import org.safs.IndependantLog;
 import org.safs.JavaHook;
@@ -26,6 +25,7 @@ import org.safs.SAFSException;
 import org.safs.STAFHelper;
 import org.safs.StatusCodes;
 import org.safs.StringUtils;
+import org.safs.TestRecordData;
 import org.safs.TestRecordHelper;
 import org.safs.logging.AbstractLogFacility;
 import org.safs.model.AbstractCommand;
@@ -35,6 +35,8 @@ import org.safs.model.commands.DDDriverCommands;
 import org.safs.model.commands.DriverCommands;
 import org.safs.staf.STAFProcessHelpers;
 import org.safs.text.GENStrings;
+import org.safs.tools.DefaultTestRecordStackable;
+import org.safs.tools.ITestRecordStackable;
 import org.safs.tools.UniqueStringID;
 import org.safs.tools.consoles.SAFSMonitorFrame;
 import org.safs.tools.counters.CountStatusInterface;
@@ -59,7 +61,7 @@ import org.safs.tools.status.StatusInterface;
  * <p>
  * <a href="http://safsdev.sourceforge.net/sqabasic2000/UsingJSAFS.htm#advancedruntime" target="_blank" alt="Using JSAFS Doc">Using JSAFS</a>.
  */
-public class JSAFSDriver extends DefaultDriver {
+public class JSAFSDriver extends DefaultDriver implements ITestRecordStackable{
 
 	public static final String ADVANCED_RUNTIME_ID = "JSAFS";
 	public static final String ADVANCED_RUNTIME_TABLE = "Advanced Runtime";
@@ -68,35 +70,13 @@ public class JSAFSDriver extends DefaultDriver {
 	
 	public StatusCounter statuscounter = null;
 	public TestRecordHelper testRecordHelper = null;
-	/** 
-	 * The Stack to hold the 'test records' being processed. Such as
-	 * 
-	 *   |                |
-	 *   |  'LogMessage'  |
-	 *   |  'CallJUnit'   |
-	 *   |________________|
-	 *   
-	 * <p>
-	 * The field {@link #testRecordHelper} is a class field, it will be overwritten for a new keyword execution.
-	 * And we use ONE instance of {@link #JSAFSDriver(String)} to execute keyword.
-	 * It is OK for execution of sequential keyword such as 'LogMessage' 'Expressions', there is no overlap.
-	 * BUT for reentrant keyword as 'CallJUnit', inside JUnit test the keyword 'LogMessage' (even 'CallJUnit')
-	 * may be attempted, and the field {@link #testRecordHelper} (for 'CallJUnit') will be overwritten by that of
-	 * 'LogMessage', after execution of 'LogMessage', we come back to the execution of 'CallJUnit', but 
-	 * the {@link #testRecordHelper} has been changed, we need to get it back. We use a FILO (Stack) to store 
-	 * the {@link #testRecordHelper}, and try to retrieve the correct one from it.
-	 * </p>
-	 * @see #pushTestRecord()
-	 * @see #popTestRecord()
-	 * @see #processCommand(AbstractCommand, String)
-	 * @see #processCommandDirect(AbstractCommand, String)
-	 */
-	protected Stack<TestRecordHelper> testRecordStack = new Stack<TestRecordHelper>();
+
 	/**
 	 * The CounterInfo to send to incrementAllCounters.
 	 */
 	public UniqueStringCounterInfo counterInfo = null;
 	
+	protected ITestRecordStackable testrecordStackable = new DefaultTestRecordStackable();
 
 	/**
 	 * When SAFS Monitor usage is enabled (useSAFSMonitor=true), and the JSAFSDriver has detected the test 
@@ -800,7 +780,7 @@ mainloop: while (true){
 	        //testRecord will contain the value of STAF variable "SAFS/Hook/inputrecord" when we 
 	        //retry the same step.
 			setGlobalTestRecordHelper(command, separator, testRecord);
-			pushTestRecord();
+			pushTestRecord(testRecordHelper);
 						
 			if(command instanceof DriverCommand){
 				rc = processDriverCommand();
@@ -945,7 +925,7 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 		
 		//prepare the "test record"
 		setGlobalTestRecordHelper(command, separator,null);
-		pushTestRecord();
+		pushTestRecord(testRecordHelper);
 
 		//execute the "test record"
 		if(command instanceof DriverCommand){
@@ -1005,50 +985,6 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 		}
 	}
 
-	/**
-	 * <p>
-	 * Push the current test record into the Stack before the execution of a keyword.<br>
-	 * This should be called after the field {@link #testRecordHelper} is properly set, this is, 
-	 * after calling {@link #setGlobalTestRecordHelper(AbstractCommand, String, String)}.
-	 * </p>
-	 * @see #processCommand(AbstractCommand, String)
-	 * @see #processCommandDirect(AbstractCommand, String)
-	 * @see #popTestRecord()
-	 */
-	protected void pushTestRecord(){
-		//Push the test-record into the stack
-		IndependantLog.debug(StringUtils.debugmsg(false)+" push test record "+testRecordHelper+" into stack.");
-		testRecordStack.push(testRecordHelper);
-	}
-	
-	/**
-	 * Retrieve the Test-Record from the the Stack after the execution of a keyword.<br>
-	 * <p>
-	 * After execution of a keyword, pop the test record from Stack. If it is the same as 
-	 * current {@link #testRecordHelper}, then ignore it; otherwise reset the current
-	 * {@link #testRecordHelper} by it.
-	 * </p>
-	 * 
-	 * @see #processCommand(AbstractCommand, String)
-	 * @see #processCommandDirect(AbstractCommand, String)
-	 * @see #pushTestRecord()
-	 */
-	protected void popTestRecord(){
-		TestRecordHelper history = null;
-		String debugmsg = StringUtils.debugmsg(false);
-		
-		IndependantLog.debug(debugmsg+"Current test record: "+testRecordHelper);
-		if(testRecordStack.empty()){
-			IndependantLog.error(debugmsg+" the test-record stack is empty! Cannot reset.");
-		}else{
-			IndependantLog.debug(debugmsg+"Current test record stack: "+testRecordStack);
-			history = testRecordStack.pop();
-			if(!testRecordHelper.equals(history)){
-				IndependantLog.debug(debugmsg+"Reset current test record to: "+history);
-				testRecordHelper = history;
-			}
-		}
-	}
 	
 	/**
 	 * Execute the desired DriverCommand using the default field separator for the record.
@@ -1418,5 +1354,24 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 		}
 		jsafs.shutdown();
 		log_self("Ended JSAFS Self-Test...");
+	}
+
+	public void pushTestRecord(TestRecordData trd) {
+		testrecordStackable.pushTestRecord(trd);		
+	}
+
+	public TestRecordData popTestRecord() {
+		String debugmsg = StringUtils.debugmsg(false);
+		IndependantLog.debug(debugmsg+"Current test record: "+DefaultTestRecordStackable.testRecordToString(testRecordHelper));
+		
+		TestRecordData history = testrecordStackable.popTestRecord();
+		
+		if(!testRecordHelper.equals(history)){
+			IndependantLog.debug(debugmsg+"Reset current test record to: "+history);
+			//The cast should be safe, as we push TestRecordHelper into the stack.
+			testRecordHelper = (TestRecordHelper) history;
+		}
+		
+		return history;
 	}
 }

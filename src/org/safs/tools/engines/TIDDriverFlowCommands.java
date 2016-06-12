@@ -8,6 +8,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
@@ -23,11 +24,14 @@ import org.safs.TestRecordData;
 import org.safs.TestRecordHelper;
 import org.safs.image.ImageUtils;
 import org.safs.logging.AbstractLogFacility;
+import org.safs.model.AbstractCommand;
 import org.safs.model.commands.DDDriverFlowCommands;
 import org.safs.natives.NativeWrapper;
 import org.safs.text.FAILStrings;
 import org.safs.text.GENStrings;
 import org.safs.tools.CaseInsensitiveFile;
+import org.safs.tools.DefaultTestRecordStackable;
+import org.safs.tools.ITestRecordStackable;
 import org.safs.tools.UniqueStringID;
 import org.safs.tools.counters.CountersInterface;
 import org.safs.tools.counters.UniqueStringCounterInfo;
@@ -35,6 +39,7 @@ import org.safs.tools.drivers.DriverConstant;
 import org.safs.tools.drivers.DriverInterface;
 import org.safs.tools.drivers.FlowControlInterface;
 import org.safs.tools.drivers.InputProcessor;
+import org.safs.tools.drivers.JSAFSDriver;
 import org.safs.tools.input.InputInterface;
 import org.safs.tools.input.InputRecordInterface;
 import org.safs.tools.input.UniqueStringFileInfo;
@@ -56,10 +61,12 @@ import org.safs.tools.stringutils.StringUtilities;
  *         CANAGL SEP 17, 2014 Fixing SAFS Crashes due to incomplete initialization.<br>
  *         CANAGL MAY 20, 2016 Added CallJUnit support (moved from TIDDriverCommands).<br>
  */
-public class TIDDriverFlowCommands extends GenericEngine {
+public class TIDDriverFlowCommands extends GenericEngine implements ITestRecordStackable{
 
 	/** "SAFS/TIDDriverFlowCommands" */
 	static final String ENGINE_NAME  = "SAFS/TIDDriverFlowCommands";
+	
+	protected ITestRecordStackable testrecordStackable = new DefaultTestRecordStackable();
 
 	// START: SUPPORTED DRIVER COMMANDS
 
@@ -1238,7 +1245,7 @@ public class TIDDriverFlowCommands extends GenericEngine {
 		IndependantLog.debug(debugmsg+" completed with result:\n "+sb.toString());
 		return sb.toString();		     
 	}
-
+	
 	/**
 	 * Handle the CallJUnit Keyword.<br>
 	 * 
@@ -1266,10 +1273,13 @@ public class TIDDriverFlowCommands extends GenericEngine {
 		testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
 		IndependantLog.info(debugmsg+"............................. handling CallJUnit: "+classnames);
 
+		IndependantLog.debug(debugmsg+" begin command '"+command+"' with Test Record "+DefaultTestRecordStackable.testRecordToString(testRecordData));
+		
 		//CACHE TestRecordData. Within callJUnit() if we call some SAFS/SE+/JSAFS test, the field testRecordData
 		//might get changed, we need to cache it. Then after calling of callJUnit(), we set it back.
-		TestRecordData cachedData = new TestRecordHelper();
-		testRecordData.copyData(cachedData);
+//		TestRecordData cachedData = new TestRecordHelper();
+//		testRecordData.copyData(cachedData);
+		pushTestRecord(testRecordData);
 
 		String[] clazzes = null;
 		if(classnames.contains(StringUtils.SEMI_COLON)) 
@@ -1303,11 +1313,14 @@ public class TIDDriverFlowCommands extends GenericEngine {
 		}
 
 		//Set CACHED TestRecordData back.
-		cachedData.copyData(testRecordData);
+//		cachedData.copyData(testRecordData);
+		popTestRecord();
 		command = testRecordData.getCommand();
 
 		//Set the JUnit test result to the test record's status for future use.
 		testRecordData.setStatusInfo(result.toString());
+		
+		IndependantLog.debug(debugmsg+" finished command '"+command+"' with Test Record "+DefaultTestRecordStackable.testRecordToString(testRecordData));
 
 		if(withWarning){
 			String message = genericText.convert("standard_warn", command+" warning in table "+testRecordData.getFilename()+" at line "+testRecordData.getLineNumber()+".", command, classnames);
@@ -1318,6 +1331,25 @@ public class TIDDriverFlowCommands extends GenericEngine {
 			logMessage(message, result.toString(), AbstractLogFacility.END_PROCEDURE);
 			return setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
 		}		  
-	}	
+	}
+	
+	public void pushTestRecord(TestRecordData trd) {
+		testrecordStackable.pushTestRecord(trd);
+	}
+
+	public TestRecordData popTestRecord() {
+		String debugmsg = StringUtils.debugmsg(false);
+		IndependantLog.debug(debugmsg+"Current test record: "+DefaultTestRecordStackable.testRecordToString(testRecordData));
+		
+		TestRecordData history = testrecordStackable.popTestRecord();
+		
+		if(!testRecordData.equals(history)){
+			IndependantLog.debug(debugmsg+"Reset current test record to: "+history);
+			//The cast should be safe, as we push TestRecordHelper into the stack.
+			testRecordData = (TestRecordHelper) history;
+		}
+		
+		return history;
+	}
 }
 
