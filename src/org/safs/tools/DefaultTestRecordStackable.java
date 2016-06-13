@@ -7,7 +7,7 @@
  * Logs for developers, not published to API DOC.
  *
  * History:
- * 2016年6月12日    (SBJLWA) Initial release.
+ * MAY 12, 2016    (SBJLWA) Initial release.
  */
 package org.safs.tools;
 
@@ -16,7 +16,6 @@ import java.util.Stack;
 import org.safs.IndependantLog;
 import org.safs.StringUtils;
 import org.safs.TestRecordData;
-import org.safs.model.AbstractCommand;
 
 /**
  * @author sbjlwa
@@ -25,26 +24,13 @@ import org.safs.model.AbstractCommand;
 public class DefaultTestRecordStackable implements ITestRecordStackable{
 	/** 
 	 * The Stack to hold the 'test records' being processed. Such as
-	 * 
-	 *   |                |
+	 * <pre>
 	 *   |  'LogMessage'  |
-	 *   |  'CallJUnit'   |
-	 *   |________________|
-	 *   
-	 * <p>
-	 * The field {@link #testRecordHelper} is a class field, it will be overwritten for a new keyword execution.
-	 * And we use ONE instance of {@link #JSAFSDriver(String)} to execute keyword.
-	 * It is OK for execution of sequential keyword such as 'LogMessage' 'Expressions', there is no overlap.
-	 * BUT for reentrant keyword as 'CallJUnit', inside JUnit test the keyword 'LogMessage' (even 'CallJUnit')
-	 * may be attempted, and the field {@link #testRecordHelper} (for 'CallJUnit') will be overwritten by that of
-	 * 'LogMessage', after execution of 'LogMessage', we come back to the execution of 'CallJUnit', but 
-	 * the {@link #testRecordHelper} has been changed, we need to get it back. We use a FILO (Stack) to store 
-	 * the {@link #testRecordHelper}, and try to retrieve the correct one from it.
-	 * </p>
-	 * @see #pushTestRecord()
+	 *   |__'CallJUnit'___|
+	 * </pre> 
+	 *
+	 * @see #pushTestRecord(TestRecordData)
 	 * @see #popTestRecord()
-	 * @see #processCommand(AbstractCommand, String)
-	 * @see #processCommandDirect(AbstractCommand, String)
 	 */
 	protected Stack<TestRecordData> testRecordStack = new Stack<TestRecordData>();
 
@@ -55,8 +41,6 @@ public class DefaultTestRecordStackable implements ITestRecordStackable{
 	 * </p>
 	 * 
 	 * @param trd TestRecordData, the test record to push into a stack
-	 * @see #processCommand(AbstractCommand, String)
-	 * @see #processCommandDirect(AbstractCommand, String)
 	 * @see #popTestRecord()
 	 */
 	public void pushTestRecord(TestRecordData trd){
@@ -66,16 +50,15 @@ public class DefaultTestRecordStackable implements ITestRecordStackable{
 	}
 	
 	/**
-	 * Retrieve the Test-Record from the the Stack after the execution of a keyword.<br>
+	 * Retrieve the Test-Record from the top of Stack after the execution of a keyword.<br>
 	 * <p>
-	 * After execution of a keyword, pop the test record from Stack. If it is the same as 
-	 * current {@link #testRecordHelper}, then ignore it; otherwise reset the current
-	 * {@link #testRecordHelper} by it.
+	 * After execution of a keyword, pop the test record from Stack and return is as the result.
+	 * In the sub class, we could choose to replace the class field 'Test Record' by that popped
+	 * from the stack.
 	 * </p>
 	 * 
-	 * @see #processCommand(AbstractCommand, String)
-	 * @see #processCommandDirect(AbstractCommand, String)
-	 * @see #pushTestRecord()
+	 * @see #pushTestRecord(TestRecordData)
+	 * @return TestRecordData, the 'Test Record' on top of the stack
 	 */
 	public TestRecordData popTestRecord(){
 		TestRecordData history = null;
