@@ -8,7 +8,6 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
@@ -24,7 +23,6 @@ import org.safs.TestRecordData;
 import org.safs.TestRecordHelper;
 import org.safs.image.ImageUtils;
 import org.safs.logging.AbstractLogFacility;
-import org.safs.model.AbstractCommand;
 import org.safs.model.commands.DDDriverFlowCommands;
 import org.safs.natives.NativeWrapper;
 import org.safs.text.FAILStrings;
@@ -39,7 +37,6 @@ import org.safs.tools.drivers.DriverConstant;
 import org.safs.tools.drivers.DriverInterface;
 import org.safs.tools.drivers.FlowControlInterface;
 import org.safs.tools.drivers.InputProcessor;
-import org.safs.tools.drivers.JSAFSDriver;
 import org.safs.tools.input.InputInterface;
 import org.safs.tools.input.InputRecordInterface;
 import org.safs.tools.input.UniqueStringFileInfo;
@@ -66,6 +63,7 @@ public class TIDDriverFlowCommands extends GenericEngine implements ITestRecordS
 	/** "SAFS/TIDDriverFlowCommands" */
 	static final String ENGINE_NAME  = "SAFS/TIDDriverFlowCommands";
 	
+	/** The ITestRecordStackable used to store 'Test Record' in a FILO. */
 	protected ITestRecordStackable testrecordStackable = new DefaultTestRecordStackable();
 
 	// START: SUPPORTED DRIVER COMMANDS
@@ -1243,7 +1241,7 @@ public class TIDDriverFlowCommands extends GenericEngine implements ITestRecordS
 					CountersInterface.STATUS_TEST_FAILURE);
 		}
 		IndependantLog.debug(debugmsg+" completed with result:\n "+sb.toString());
-		return sb.toString();		     
+		return sb.toString();
 	}
 	
 	/**
@@ -1275,10 +1273,8 @@ public class TIDDriverFlowCommands extends GenericEngine implements ITestRecordS
 
 		IndependantLog.debug(debugmsg+" begin command '"+command+"' with Test Record "+DefaultTestRecordStackable.testRecordToString(testRecordData));
 		
-		//CACHE TestRecordData. Within callJUnit() if we call some SAFS/SE+/JSAFS test, the field testRecordData
+		//CACHE TestRecordData. Within callJUnit() if we call some SAFS/SE+/JSAFS test, the class field testRecordData
 		//might get changed, we need to cache it. Then after calling of callJUnit(), we set it back.
-//		TestRecordData cachedData = new TestRecordHelper();
-//		testRecordData.copyData(cachedData);
 		pushTestRecord(testRecordData);
 
 		String[] clazzes = null;
@@ -1313,7 +1309,6 @@ public class TIDDriverFlowCommands extends GenericEngine implements ITestRecordS
 		}
 
 		//Set CACHED TestRecordData back.
-//		cachedData.copyData(testRecordData);
 		popTestRecord();
 		command = testRecordData.getCommand();
 
@@ -1333,10 +1328,31 @@ public class TIDDriverFlowCommands extends GenericEngine implements ITestRecordS
 		}		  
 	}
 	
+	/**
+	 * <p>
+	 * Push the current 'test record' into the Stack before the execution of a keyword.
+	 * This should be called after the 'test record' is properly set.
+	 * </p>
+	 * 
+	 * @param trd TestRecordData, the test record to push into a stack
+	 * @see #callJUnit()
+	 * @see #popTestRecord()
+	 */
 	public void pushTestRecord(TestRecordData trd) {
 		testrecordStackable.pushTestRecord(trd);
 	}
 
+	/**
+	 * Retrieve the Test-Record from the the Stack after the execution of a keyword.<br>
+	 * <p>
+	 * After execution of a keyword, pop the test record from Stack and return is as the result.
+	 * Replace the class field 'Test Record' by that popped from the stack if they are not same.
+	 * </p>
+	 * 
+	 * @see #callJUnit()
+	 * @see #pushTestRecord()
+	 * @return TestRecordData, the 'Test Record' on top of the stack
+	 */
 	public TestRecordData popTestRecord() {
 		String debugmsg = StringUtils.debugmsg(false);
 		IndependantLog.debug(debugmsg+"Current test record: "+DefaultTestRecordStackable.testRecordToString(testRecordData));
