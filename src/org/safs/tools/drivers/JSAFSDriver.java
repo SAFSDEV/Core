@@ -76,6 +76,7 @@ public class JSAFSDriver extends DefaultDriver implements ITestRecordStackable{
 	 */
 	public UniqueStringCounterInfo counterInfo = null;
 	
+	/** The ITestRecordStackable used to store 'Test Record' in a FILO. */
 	protected ITestRecordStackable testrecordStackable = new DefaultTestRecordStackable();
 
 	/**
@@ -1356,10 +1357,33 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 		log_self("Ended JSAFS Self-Test...");
 	}
 
+	/**
+	 * <p>
+	 * Push the current 'test record' into the Stack before the execution of a keyword.
+	 * This should be called after the 'test record' is properly set.
+	 * </p>
+	 * 
+	 * @param trd TestRecordData, the test record to push into a stack
+	 * @see #processCommand(AbstractCommand, String)
+	 * @see #processCommandDirect(AbstractCommand, String)
+	 * @see #popTestRecord()
+	 */
 	public void pushTestRecord(TestRecordData trd) {
 		testrecordStackable.pushTestRecord(trd);		
 	}
 
+	/**
+	 * Retrieve the Test-Record from the the Stack after the execution of a keyword.<br>
+	 * <p>
+	 * After execution of a keyword, pop the test record from Stack and return is as the result.
+	 * Replace the class field 'Test Record' by that popped from the stack if they are not same.
+	 * </p>
+	 * 
+	 * @see #processCommand(AbstractCommand, String)
+	 * @see #processCommandDirect(AbstractCommand, String)
+	 * @see #pushTestRecord()
+	 * @return TestRecordData, the 'Test Record' on top of the stack
+	 */
 	public TestRecordData popTestRecord() {
 		String debugmsg = StringUtils.debugmsg(false);
 		IndependantLog.debug(debugmsg+"Current test record: "+DefaultTestRecordStackable.testRecordToString(testRecordHelper));
