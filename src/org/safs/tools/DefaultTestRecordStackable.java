@@ -22,6 +22,13 @@ import org.safs.TestRecordData;
  *
  */
 public class DefaultTestRecordStackable implements ITestRecordStackable{
+	
+	/** 
+	 * The default value is 'false', so that some debug message will not show in debug log.
+	 * If we want more debug information about 'test record stack', we can set this field to true.
+	 */
+	public static boolean debug = false;
+	
 	/** 
 	 * The Stack to hold the 'test records' being processed. Such as
 	 * <pre>
@@ -45,7 +52,7 @@ public class DefaultTestRecordStackable implements ITestRecordStackable{
 	 */
 	public void pushTestRecord(TestRecordData trd){
 		//Push the test-record into the stack
-		IndependantLog.debug(StringUtils.debugmsg(false)+" push test record "+testRecordToString(trd)+" into stack.");
+		if(debug) IndependantLog.debug(StringUtils.debugmsg(false)+" push test record "+StringUtils.toStringWithAddress(trd)+" into stack.");
 		testRecordStack.push(trd);
 	}
 	
@@ -67,30 +74,10 @@ public class DefaultTestRecordStackable implements ITestRecordStackable{
 		if(testRecordStack.empty()){
 			IndependantLog.error(debugmsg+" the test-record stack is empty! Cannot reset.");
 		}else{
-			IndependantLog.debug(debugmsg+"Current test record stack: "+getStackInfo(testRecordStack));
+			if(debug) IndependantLog.debug(debugmsg+"Current test record stack: "+StringUtils.getStackInfo(testRecordStack));
 			history = testRecordStack.pop();
 		}
 		return history;
 	}
-	
-	public static String getMemoryAddress(Object object){
-		if(object==null) return null;
-		return "@"+Integer.toHexString(object.hashCode());
-	}
-	public static String testRecordToString(TestRecordData trd){
-		if(trd==null) return null;
-		return getMemoryAddress(trd) +":"+trd;
-	}
-	
-	public static String getStackInfo(Stack<TestRecordData> stack){
-		int size = stack.size();
-		TestRecordData trd = null;
-		StringBuffer sb = new StringBuffer();
-		for(int i=0;i<size;i++){
-			trd = stack.elementAt(i);
-			sb.append(testRecordToString(trd)+"\n");
-		}
-		
-		return sb.toString();
-	}
+
 }

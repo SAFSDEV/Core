@@ -2590,6 +2590,44 @@ public class StringUtils{
 		return sb.toString();
 	}
 
+	/**
+	 * Get the object's memory address according to the method hashCode().<br>
+	 * <b>Note:</b> The method hashCode() should not be overridden.
+	 * 
+	 * @param object Object, the object to get memory address for.
+	 * @return String, the memory address
+	 */
+	public static String getMemoryAddress(Object object){
+		if(object==null) return null;
+		return "@"+Integer.toHexString(object.hashCode());
+	}
+	
+	/**
+	 * @param object Object, the object to get string
+	 * @return String, the object's string format with memory address.
+	 */
+	public static String toStringWithAddress(Object object){
+		if(object==null) return null;
+		return getMemoryAddress(object) +" : "+object;
+	}
+	
+	/**
+	 * 
+	 * @param stack Stack, a stack holding some objects.
+	 * @return String, the string format of the stack,
+	 * @see #toStringWithAddress(Object)
+	 */
+	public static String getStackInfo(Stack<?> stack){
+		int size = stack.size();
+		Object object = null;
+		StringBuffer sb = new StringBuffer();
+		for(int i=0;i<size;i++){
+			object = stack.elementAt(i);
+			sb.append(toStringWithAddress(object)+"\n");
+		}
+		
+		return sb.toString();
+	}
 	
 	public static void test_replaceJVMOptionValue(){
 		String jvmOptions = JavaConstant.JVM_Xms+"128m   "+JavaConstant.JVM_Xmx+"1g";
