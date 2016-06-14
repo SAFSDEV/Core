@@ -1271,7 +1271,7 @@ public class TIDDriverFlowCommands extends GenericEngine implements ITestRecordS
 		testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
 		IndependantLog.info(debugmsg+"............................. handling CallJUnit: "+classnames);
 
-		IndependantLog.debug(debugmsg+" begin command '"+command+"' with Test Record "+DefaultTestRecordStackable.testRecordToString(testRecordData));
+		IndependantLog.debug(debugmsg+" begin command '"+command+"' with Test Record "+StringUtils.toStringWithAddress(testRecordData));
 		
 		//CACHE TestRecordData. Within callJUnit() if we call some SAFS/SE+/JSAFS test, the class field testRecordData
 		//might get changed, we need to cache it. Then after calling of callJUnit(), we set it back.
@@ -1315,7 +1315,7 @@ public class TIDDriverFlowCommands extends GenericEngine implements ITestRecordS
 		//Set the JUnit test result to the test record's status for future use.
 		testRecordData.setStatusInfo(result.toString());
 		
-		IndependantLog.debug(debugmsg+" finished command '"+command+"' with Test Record "+DefaultTestRecordStackable.testRecordToString(testRecordData));
+		IndependantLog.debug(debugmsg+" finished command '"+command+"' with Test Record "+StringUtils.toStringWithAddress(testRecordData));
 
 		if(withWarning){
 			String message = genericText.convert("standard_warn", command+" warning in table "+testRecordData.getFilename()+" at line "+testRecordData.getLineNumber()+".", command, classnames);
@@ -1355,12 +1355,14 @@ public class TIDDriverFlowCommands extends GenericEngine implements ITestRecordS
 	 */
 	public TestRecordData popTestRecord() {
 		String debugmsg = StringUtils.debugmsg(false);
-		IndependantLog.debug(debugmsg+"Current test record: "+DefaultTestRecordStackable.testRecordToString(testRecordData));
+		if(DefaultTestRecordStackable.debug)
+			IndependantLog.debug(debugmsg+"Current test record: "+StringUtils.toStringWithAddress(testRecordData));
 		
 		TestRecordData history = testrecordStackable.popTestRecord();
 		
 		if(!testRecordData.equals(history)){
-			IndependantLog.debug(debugmsg+"Reset current test record to: "+history);
+			if(DefaultTestRecordStackable.debug)
+				IndependantLog.debug(debugmsg+"Reset current test record to: "+StringUtils.toStringWithAddress(history));
 			//The cast should be safe, as we push TestRecordHelper into the stack.
 			testRecordData = (TestRecordHelper) history;
 		}
