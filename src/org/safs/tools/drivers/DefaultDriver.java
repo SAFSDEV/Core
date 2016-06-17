@@ -12,6 +12,8 @@ import org.safs.DefaultHookConfig;
 import org.safs.JavaHook;
 import org.safs.Log;
 import org.safs.Processor;
+import org.safs.STAFHelper;
+import org.safs.SingletonSTAFHelper;
 import org.safs.StringUtils;
 import org.safs.Utils;
 import org.safs.image.ImageUtils;
@@ -694,6 +696,7 @@ public abstract class DefaultDriver extends AbstractDriver {
 			((ConfigurableToolsInterface)status).launchInterface(this);	
 			
 			core = getCoreInterface();
+			if(core instanceof STAFHelper) SingletonSTAFHelper.setInitializedHelper((STAFHelper)core);
 			
 			String show = configInfo.getNamedValue(DriverConstant.SECTION_SAFS_DRIVER, DriverConstant.SHOW_MONITOR);
 			if(show !=null && show.length()> 0){
