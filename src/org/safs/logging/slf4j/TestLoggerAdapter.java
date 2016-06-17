@@ -1,3 +1,7 @@
+/** 
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: http://www.opensource.org/licenses/gpl-license.php
+ */
 package org.safs.logging.slf4j;
 
 import java.io.ByteArrayOutputStream;
@@ -12,6 +16,17 @@ import org.safs.logging.LogUtilities;
 import org.slf4j.helpers.MarkerIgnoringBase;
 import org.slf4j.helpers.MessageFormatter;
 
+/**
+ * SAFS Logger Adapter writing only to the SAFS Test Log only.
+ * <p>
+ * This Logger will be acquired if requesting the "TEST" logname from the SAFSLoggerFactory.
+ * <p>
+ * This Logger DOES require post-acquisition initialization.
+ * <p>
+ * @author Carl Nagle
+ * @see SAFSLoggerFactory#getLogger(String)
+ * @see SAFSLoggerFactory#initializeTestLoggerAdapter(org.slf4j.Logger, org.safs.tools.drivers.AbstractDriver)
+ */
 public class TestLoggerAdapter extends MarkerIgnoringBase {
 
 	static STAFHelper staf = SingletonSTAFHelper.getHelper();	
@@ -45,7 +60,10 @@ public class TestLoggerAdapter extends MarkerIgnoringBase {
 	}
 	
 	/**
-	 * @param safslog -- A fully and properly initialized LogUtilities instance able to talk with SAFSLOGS.
+	 * Usually set internally during initialization.
+	 * @param safslog -- The name of the SAFS Log to be used.  
+	 * This will be set during post-acquisition initialization from SAFSLoggerFactory.
+	 * @see SAFSLoggerFactory#initializeTestLoggerAdapter(org.slf4j.Logger, org.safs.tools.drivers.AbstractDriver) 
 	 */
 	public void setLogFacName(String facname){
 		TestLoggerAdapter.facname = facname;

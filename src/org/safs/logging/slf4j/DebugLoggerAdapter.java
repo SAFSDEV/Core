@@ -1,3 +1,7 @@
+/** 
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: http://www.opensource.org/licenses/gpl-license.php
+ */
 package org.safs.logging.slf4j;
 
 import java.io.ByteArrayOutputStream;
@@ -9,10 +13,18 @@ import org.safs.IndependantLog;
 import org.slf4j.helpers.MarkerIgnoringBase;
 import org.slf4j.helpers.MessageFormatter;
 
+/**
+ * SAFS Logger Adapter writing only to the SAFS Debug Log--if it is running/available.
+ * <p>
+ * This Logger will be acquired if requesting the "DEBUG" logname from the SAFSLoggerFactory.
+ * <p>
+ * This Logger does NOT require any post-acquisition initialization.
+ * <p>
+ * @author Carl Nagle
+ * @see SAFSLoggerFactory#getLogger(String)
+ */
 public class DebugLoggerAdapter extends MarkerIgnoringBase {
 
-//	static final STAFHelper staf = SingletonSTAFHelper.getHelper();
-//	static final LogUtilities log = new LogUtilities(staf);
 	static final IndependantLog log = new IndependantLog();
 	
 	protected static boolean debugEnabled = true;
