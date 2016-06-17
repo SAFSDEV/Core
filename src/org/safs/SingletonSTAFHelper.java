@@ -4,12 +4,6 @@
 
 package org.safs;
 
-import java.io.*;
-import java.util.*;
-
-import com.ibm.staf.*;
-import com.ibm.staf.wrapper.*;
-
 
 /**
  * <br><em>Purpose:</em> a wrapper class for the STAFHandle, includes some common

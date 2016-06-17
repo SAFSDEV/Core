@@ -47,6 +47,7 @@ public class LogUtilities extends org.safs.STAFRequester{
 	 * This is useful for subclasses like ApacheLogUtilities that bridge to our logging 
 	 * mechanism but do not provide a facname parameter in their APIs.*/
 	protected String lastNamedLogFacility = null;
+	
 	/**
 	 * Noop Constructor
 	 * User must provide an initialized STAFHelper via superclass
@@ -77,6 +78,12 @@ public class LogUtilities extends org.safs.STAFRequester{
 		setCopyLogClass(copyLogClass);
 	}
 
+	/** 
+	 * returns the name of the last used LogFacility for logging.<p> 
+	 * This is useful for subclasses like ApacheLogUtilities that bridge to our logging 
+	 * mechanism but do not provide a facname parameter in their APIs.*/
+	public String getLastNamedLogFacility(){ return lastNamedLogFacility;}
+	
 	/**
 	 * Set or Reset the flag to enable logging to org.safs.Log
 	 * This Log class is primarily used during development and debugging and is not
