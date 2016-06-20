@@ -41,6 +41,15 @@ public class DefaultTestRecordStackable implements ITestRecordStackable{
 	 */
 	protected Stack<TestRecordData> testRecordStack = new Stack<TestRecordData>();
 
+        /**
+         * Log a debug log message ONLY if debug log output is enabled.
+         * @param msg to be logged
+         * @see #debug
+         */
+        public static void debug(String msg){
+            if(debug) IndependantLog.debug(msg);
+        }
+        
 	/**
 	 * <p>
 	 * Push the current 'test record' into the Stack before the execution of a keyword.
@@ -52,7 +61,7 @@ public class DefaultTestRecordStackable implements ITestRecordStackable{
 	 */
 	public void pushTestRecord(TestRecordData trd){
 		//Push the test-record into the stack
-		if(debug) IndependantLog.debug(StringUtils.debugmsg(false)+" push test record "+StringUtils.toStringWithAddress(trd)+" into stack.");
+		debug(StringUtils.debugmsg(false)+" push test record "+StringUtils.toStringWithAddress(trd)+" into stack.");
 		testRecordStack.push(trd);
 	}
 	
@@ -74,7 +83,7 @@ public class DefaultTestRecordStackable implements ITestRecordStackable{
 		if(testRecordStack.empty()){
 			IndependantLog.error(debugmsg+" the test-record stack is empty! Cannot reset.");
 		}else{
-			if(debug) IndependantLog.debug(debugmsg+"Current test record stack: "+StringUtils.getStackInfo(testRecordStack));
+			debug(debugmsg+"Current test record stack: "+StringUtils.getStackInfo(testRecordStack));
 			history = testRecordStack.pop();
 		}
 		return history;
