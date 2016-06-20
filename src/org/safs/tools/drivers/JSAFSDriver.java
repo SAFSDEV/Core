@@ -11,7 +11,10 @@ package org.safs.tools.drivers;
  * <br>	Nov 14, 2014	(CANAGL) 	Added static getFirstNonSAFSStackTraceElement support.  
  * <br>                             TestRecordData now initialized with caller filename Class#method and linenumber.
  * <br>	Dec 17, 2014	(SBJLWA) 	Move codes from runXXXDirect() to processCommandDirect(): delay 'millisBetweenRecords' after execution.
- * <br>	JUN 11, 2015	(SBJLWA) 	Add method resolveExpression(): resolve expression as SAFS Variable Service, "DDVariable" will be always evaluated.
+ * <br>	JUN 11, 2015	(SBJLWA) 	Added method resolveExpression(): resolve expression as SAFS Variable Service, "DDVariable" will be always evaluated.
+ * <br>	JUN 11, 2016	(SBJLWA) 	Added pushTestRecord(), popTestRecord() and modified processCommand(), processCommandDirect(): handle the 
+ *                                  test-record overwritten problem when executing CallJUnit.
+ *                                    
  */
 import java.util.ListIterator;
 
@@ -22,6 +25,7 @@ import org.safs.SAFSException;
 import org.safs.STAFHelper;
 import org.safs.StatusCodes;
 import org.safs.StringUtils;
+import org.safs.TestRecordData;
 import org.safs.TestRecordHelper;
 import org.safs.logging.AbstractLogFacility;
 import org.safs.model.AbstractCommand;
@@ -31,6 +35,8 @@ import org.safs.model.commands.DDDriverCommands;
 import org.safs.model.commands.DriverCommands;
 import org.safs.staf.STAFProcessHelpers;
 import org.safs.text.GENStrings;
+import org.safs.tools.DefaultTestRecordStackable;
+import org.safs.tools.ITestRecordStackable;
 import org.safs.tools.UniqueStringID;
 import org.safs.tools.consoles.SAFSMonitorFrame;
 import org.safs.tools.counters.CountStatusInterface;
@@ -55,7 +61,7 @@ import org.safs.tools.status.StatusInterface;
  * <p>
  * <a href="http://safsdev.sourceforge.net/sqabasic2000/UsingJSAFS.htm#advancedruntime" target="_blank" alt="Using JSAFS Doc">Using JSAFS</a>.
  */
-public class JSAFSDriver extends DefaultDriver {
+public class JSAFSDriver extends DefaultDriver implements ITestRecordStackable{
 
 	public static final String ADVANCED_RUNTIME_ID = "JSAFS";
 	public static final String ADVANCED_RUNTIME_TABLE = "Advanced Runtime";
@@ -64,11 +70,14 @@ public class JSAFSDriver extends DefaultDriver {
 	
 	public StatusCounter statuscounter = null;
 	public TestRecordHelper testRecordHelper = null;
+
 	/**
 	 * The CounterInfo to send to incrementAllCounters.
 	 */
 	public UniqueStringCounterInfo counterInfo = null;
 	
+	/** The ITestRecordStackable used to store 'Test Record' in a FILO. */
+	protected ITestRecordStackable testrecordStackable = new DefaultTestRecordStackable();
 
 	/**
 	 * When SAFS Monitor usage is enabled (useSAFSMonitor=true), and the JSAFSDriver has detected the test 
@@ -772,6 +781,7 @@ mainloop: while (true){
 	        //testRecord will contain the value of STAF variable "SAFS/Hook/inputrecord" when we 
 	        //retry the same step.
 			setGlobalTestRecordHelper(command, separator, testRecord);
+			pushTestRecord(testRecordHelper);
 						
 			if(command instanceof DriverCommand){
 				rc = processDriverCommand();
@@ -840,6 +850,8 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 			
 			System.gc();			
 			
+			popTestRecord();
+
 			if (driverStatus.equalsIgnoreCase(JavaHook.STEP_RETRY_EXECUTION)){
 				// update testrecord for retry
 				testRecord =  getVariable(testRecordHelper.getInstanceName() + STAFHelper.SAFS_VAR_INPUTRECORD);
@@ -914,6 +926,7 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 		
 		//prepare the "test record"
 		setGlobalTestRecordHelper(command, separator,null);
+		pushTestRecord(testRecordHelper);
 
 		//execute the "test record"
 		if(command instanceof DriverCommand){
@@ -928,6 +941,8 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 		delayBetweenRecords();
 		Log.debug(debugmsg+"the returned code="+rc);
 		
+		popTestRecord();
+
 		return testRecordHelper;
 	}
 	
@@ -963,13 +978,14 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 	 * {@link TestRecordHelper#getStatusInfo()}
 	 */
 	public TestRecordHelper runDriverCommand(DriverCommand command, String separator){
-		Log.info("routing DriverCommand with SAFS Monitor support = "+ useSAFSMonitor);
+		Log.info("routing DriverCommand '"+command.getCommandName()+"' with SAFS Monitor support = "+ useSAFSMonitor);
 		if(useSAFSMonitor){
 			return processCommand(command,separator);
 		}else{
 			return processCommandDirect(command, separator);
 		}
 	}
+
 	
 	/**
 	 * Execute the desired DriverCommand using the default field separator for the record.
@@ -1014,7 +1030,7 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 	 * {@link TestRecordHelper#getStatusInfo()}
 	 */
 	public TestRecordHelper runComponentFunction(ComponentFunction command, String separator){
-		Log.info("routing ComponentFunction with SAFS Monitor support = "+ useSAFSMonitor);
+		Log.info("routing ComponentFunction '"+command.getCommandName()+"' with SAFS Monitor support = "+ useSAFSMonitor);
 		if(useSAFSMonitor){
 			return processCommand(command,separator);
 		}else{
@@ -1339,5 +1355,47 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 		}
 		jsafs.shutdown();
 		log_self("Ended JSAFS Self-Test...");
+	}
+
+	/**
+	 * <p>
+	 * Push the current 'test record' into the Stack before the execution of a keyword.
+	 * This should be called after the 'test record' is properly set.
+	 * </p>
+	 * 
+	 * @param trd TestRecordData, the test record to push into a stack
+	 * @see #processCommand(AbstractCommand, String)
+	 * @see #processCommandDirect(AbstractCommand, String)
+	 * @see #popTestRecord()
+	 */
+	public void pushTestRecord(TestRecordData trd) {
+		testrecordStackable.pushTestRecord(trd);		
+	}
+
+	/**
+	 * Retrieve the Test-Record from the the Stack after the execution of a keyword.<br>
+	 * <p>
+	 * After execution of a keyword, pop the test record from Stack and return is as the result.
+	 * Replace the class field 'Test Record' by that popped from the stack if they are not same.
+	 * </p>
+	 * 
+	 * @see #processCommand(AbstractCommand, String)
+	 * @see #processCommandDirect(AbstractCommand, String)
+	 * @see #pushTestRecord()
+	 * @return TestRecordData, the 'Test Record' on top of the stack
+	 */
+	public TestRecordData popTestRecord() {
+		String debugmsg = StringUtils.debugmsg(false);
+		DefaultTestRecordStackable.debug(debugmsg+"Current test record: "+StringUtils.toStringWithAddress(testRecordHelper));
+		
+		TestRecordData history = testrecordStackable.popTestRecord();
+		
+		if(!testRecordHelper.equals(history)){
+			DefaultTestRecordStackable.debug(debugmsg+"Reset current test record to: "+StringUtils.toStringWithAddress(history));
+			//The cast should be safe, as we push TestRecordHelper into the stack.
+			testRecordHelper = (TestRecordHelper) history;
+		}
+		
+		return history;
 	}
 }
