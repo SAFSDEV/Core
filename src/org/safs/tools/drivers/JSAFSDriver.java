@@ -1386,14 +1386,12 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 	 */
 	public TestRecordData popTestRecord() {
 		String debugmsg = StringUtils.debugmsg(false);
-		if(DefaultTestRecordStackable.debug)
-			IndependantLog.debug(debugmsg+"Current test record: "+StringUtils.toStringWithAddress(testRecordHelper));
+		DefaultTestRecordStackable.debug(debugmsg+"Current test record: "+StringUtils.toStringWithAddress(testRecordHelper));
 		
 		TestRecordData history = testrecordStackable.popTestRecord();
 		
 		if(!testRecordHelper.equals(history)){
-			if(DefaultTestRecordStackable.debug)
-				IndependantLog.debug(debugmsg+"Reset current test record to: "+StringUtils.toStringWithAddress(history));
+			DefaultTestRecordStackable.debug(debugmsg+"Reset current test record to: "+StringUtils.toStringWithAddress(history));
 			//The cast should be safe, as we push TestRecordHelper into the stack.
 			testRecordHelper = (TestRecordHelper) history;
 		}
