@@ -1355,14 +1355,12 @@ public class TIDDriverFlowCommands extends GenericEngine implements ITestRecordS
 	 */
 	public TestRecordData popTestRecord() {
 		String debugmsg = StringUtils.debugmsg(false);
-		if(DefaultTestRecordStackable.debug)
-			IndependantLog.debug(debugmsg+"Current test record: "+StringUtils.toStringWithAddress(testRecordData));
+		DefaultTestRecordStackable.debug(debugmsg+"Current test record: "+StringUtils.toStringWithAddress(testRecordData));
 		
 		TestRecordData history = testrecordStackable.popTestRecord();
 		
 		if(!testRecordData.equals(history)){
-			if(DefaultTestRecordStackable.debug)
-				IndependantLog.debug(debugmsg+"Reset current test record to: "+StringUtils.toStringWithAddress(history));
+			DefaultTestRecordStackable.debug(debugmsg+"Reset current test record to: "+StringUtils.toStringWithAddress(history));
 			//The cast should be safe, as we push TestRecordHelper into the stack.
 			testRecordData = (TestRecordHelper) history;
 		}
