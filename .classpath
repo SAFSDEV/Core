@@ -41,5 +41,6 @@
 	<classpathentry kind="var" path="SAFS_BUILD/libs/rft/com.ibm.rational.test.ft.clientbase_8.3.0.v20130117_1954.jar"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/autoit/AutoItX4Java.jar"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/autoit/jacob.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/slf4j-api-1.7.21.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
