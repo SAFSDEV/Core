@@ -486,7 +486,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		WDTestRecordHelper trdata = (WDTestRecordHelper) this.trdata;
 
 	    try{
-	    	Log.info("WDGU: Looking for "+windowName+"."+compName+" using AppMap:"+appMapName);
+	    	Log.info("WDGU: WFO Looking for "+windowName+"."+compName+" using AppMap:"+appMapName);
 	    	map = getAppMap(appMapName);
 
 		    if (map == null) {
@@ -520,7 +520,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		    		trdata.setCompTestObject(null);
 		    		trdata.setWindowTestObject(null);		
 		    		trdata.setCompType("Component");
-		    		Log.info( "WDGU assuming GUILess command: "+trdata.getCommand());				
+		    		Log.info( "WDGU: WFO assuming GUILess command: "+trdata.getCommand());				
 					return 0;
 	    		}else{
 	    			Log.warn("WDGU: WFO could NOT retrieve AppMap entry for Window '"+ windowName +"'. Verify it exists.");
@@ -529,7 +529,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	    	}
 	    	trdata.setWindowGuiId(winRec);
 	    	
-            Log.info("WDGU: winRec retrieved: "+ winRec);
+            Log.info("WDGU: WFO winRec retrieved: "+ winRec);
             WebElement winObj = null;
             //CACHE HANDLE
 //			if(!ignoreCache){
@@ -543,7 +543,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	    		trdata.setCompTestObject(null);
 	    		trdata.setWindowTestObject(null);		
 	    		trdata.setCompType("Component");
-	    		Log.info( "WDGU returning. Assuming AutoIt Testing for "+trdata.getCommand());				
+	    		Log.info( "WDGU: WFO returning. Assuming AutoIt Testing for "+trdata.getCommand());				
 				return 0;
             }
             
@@ -553,14 +553,14 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	    		trdata.setCompTestObject(null);
 	    		trdata.setWindowTestObject(null);		
 	    		trdata.setCompType("Component");
-	    		Log.info( "WDGU returning. Assuming Image-Based Testing for "+trdata.getCommand());				
+	    		Log.info( "WDGU: WFO returning. Assuming Image-Based Testing for "+trdata.getCommand());				
 				return 0;
             }
 
 			//Try to get the Window TestObject dynamically
             if(winObj==null){
             	winObj = waitWinObject(windowName, winRec, secTimeout);
-            	Log.debug("WDGU: Store the window object into the map cache with key '"+windowName+"' in section ["+windowName+"]");
+            	Log.debug("WDGU: WFO Store the window object into the map cache with key '"+windowName+"' in section ["+windowName+"]");
             	map.setParentObject(windowName, winObj);
             }
 					
@@ -578,7 +578,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		          Log.debug("WDGU: WFO could NOT retrieve AppMap entry for Component '"+ windowName +":"+ compName +"'. Verify it exists.");
 		          throw new SAFSException("WDGU: WFO could NOT retrieve AppMap entry for Component '"+ windowName +":"+ compName +"'. Verify it exists.");
 		        }
-	            Log.info("WDGU: compRec retrieved: "+ compRec);
+	            Log.info("WDGU: WFO compRec retrieved: "+ compRec);
 	            //CACHE HANDLE
 //		    	ignoreCache = ApplicationMap.isGUIIDDynamic(compRec);
 //		    	if(ignoreCache) compRec = ApplicationMap.extractTaggedGUIID(compRec);
@@ -588,8 +588,8 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	    		trdata.setWindowGuiId(winRec);
 	    		trdata.setWindowTestObject(winObj);
 	    		trdata.setCompTestObject(winObj);
-	    		trdata.setCompType(getCompType(winObj));
-				Log.info( "WDGU Matched: "+ winObj.toString());
+	    		trdata.setCompType(getCompType(winObj));  // winObj can still go Stale in here!
+				Log.info( "WDGU: WFO Matched: "+ winObj.toString());
 				return 0;	
 	    	}
 	    	  
@@ -602,7 +602,8 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	    	//Try to get the Component TestObject dynamically
 	    	if(compObj==null){
 	    		compObj = waitCompObject(winObj, windowName, winRec, compName, compRec, secTimeout);
-	    		Log.debug("WDGU: Store the component object into the map cache with key '"+compName+"' in section ["+windowName+"]");
+	    		Log.debug("WDGU: WFO Store the component object into the map cache with key '"+compName+"' in section ["+windowName+"]");
+            	map.setParentObject(windowName, winObj); // could have changed (StaleElementException handling)
 	    		map.setChildObject(windowName, compName, compObj);
 	    	}
 	    	//Set the test-record with window, component information
@@ -610,9 +611,8 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	    	trdata.setWindowGuiId(winRec);
 	    	trdata.setCompTestObject(compObj);
 	    	trdata.setWindowTestObject(winObj);		
-	    	trdata.setCompType(getCompType(compObj));
-	    
-			Log.info( "WDGU Matched: "+ compObj.toString());
+	    	trdata.setCompType(getCompType(compObj)); // compObj can still go Stale in here!	    
+			Log.info( "WDGU: WFO Matched: "+ compObj.toString());
 			
 			return 0;
 			
@@ -627,7 +627,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 			try{
 				resetWDTimeout();
 			}catch(Throwable th){
-				IndependantLog.error("WDGU: Fail to reset WebDriver timeout. Met "+StringUtils.debugmsg(th));
+				IndependantLog.error("WDGU: WFO Fail to reset WebDriver timeout. Met "+StringUtils.debugmsg(th));
 			}
 		}
 	}
@@ -693,29 +693,44 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		boolean done = false;
 		long endtime = System.currentTimeMillis()+(secTimeout * 1000);
 		long delay = 1000;
+		boolean isStale = false;
 		
 		Log.debug(debugmsg+" Waitting '"+windowName+"."+compName+"' ... ");
 		while(!done){
+			isStale = false;
 			setWDTimeout(secTimeout);
 			compObj = SearchObject.getObject(winObj,compRec);
 			resetWDTimeout();
 
 			if(compObj!=null) {
-				done = true;
+				try {
+					isStale = WDLibrary.isStale(compObj);
+					if(isStale) {
+						Log.debug(debugmsg+" the component "+compName+" appears to be Stale. Trying to get a refreshed one.");
+						compObj = null;
+					}else{
+						done = true;
+					}
+				} catch (SeleniumPlusException e) {
+					compObj = null;	
+					isStale = true;
+					Log.debug(debugmsg+" the component "+compName+" test for Stale Element returned "+ e.getClass().getSimpleName()+", "+ e.getMessage());
+				}
 			}else{
 				done = System.currentTimeMillis() > (endtime - delay);
-				if(!done){
-					try {
-						if(winObj==null || WDLibrary.isStale(winObj)){
-							Log.debug(debugmsg+" the window "+windowName+" is stale, trying to get a refreshed one.");
-							winObj = waitWinObject(windowName, winRec, secTimeout);
-						}
-					} catch (SeleniumPlusException e) {
-						//could not get refreshed window, should we continue to wait component?
-						Log.debug(debugmsg+" fail to get refreshed window '"+windowName+"' due to "+StringUtils.debugmsg(e));
+			}
+			if(!done || isStale){
+				try {
+					if(winObj==null || WDLibrary.isStale(winObj)){
+						Log.debug(debugmsg+" the window "+windowName+" is stale, trying to get a refreshed one.");
+						winObj = waitWinObject(windowName, winRec, secTimeout);
 					}
-					try{ Thread.sleep(delay); }catch(Exception x){}
+				} catch (SeleniumPlusException e) {
+					// could not get refreshed window, should we continue to wait component?
+					// Actually, the waitWinObject will throw SAFSObjectNotFoundException if not found.
+					Log.debug(debugmsg+" fail to get refreshed window '"+windowName+"' due to "+StringUtils.debugmsg(e));
 				}
+				try{ Thread.sleep(delay); }catch(Exception x){}
 			}
 		}
 
@@ -863,7 +878,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 			
 			Log.debug(debugmsg+"Mapping '"+clazz+"' to '"+type+"'");
 		}catch(Exception x){
-			Log.debug(debugmsg+" Met Exception.", x);
+			Log.debug(debugmsg+" IGNORING Exception.", x);
 		}
 		return (type == null) ? "Component": type;
 	}
