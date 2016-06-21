@@ -21,3 +21,6 @@ cscript "%SELENIUM_PLUS%\extra\ProcessKiller.vbs" -process wscript.exe -command 
 
 REM kill any chromedriver.exe left behind after automation test
 cscript "%SELENIUM_PLUS%\extra\ProcessKiller.vbs" -process "chromedriver.exe" -command "%SELENIUM_PLUS%\extra\chromedriver.exe"  -commandIgnoreCase -killall -noprompt
+
+REM kill any IEDriverServer.exe left behind after automation test
+cscript "%SELENIUM_PLUS%\extra\ProcessKiller.vbs" -process "IEDriverServer.exe" -command "%SELENIUM_PLUS%\extra\IEDriverServer.exe"  -commandIgnoreCase -killall -noprompt
