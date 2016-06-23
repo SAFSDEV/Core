@@ -1,6 +1,5 @@
 package org.safs.tools.engines;
 
-import org.safs.SAFSException;
 import org.safs.TestRecordHelper;
 import org.safs.tools.CaseInsensitiveFile;
 import org.safs.tools.drivers.DriverConstant;
@@ -8,12 +7,7 @@ import org.safs.tools.drivers.DriverInterface;
 import org.safs.tools.consoles.ProcessConsole;
 
 import org.safs.Log;
-import org.safs.STAFHelper;
-import org.safs.staf.STAFProcessHelpers;
-import com.ibm.staf.STAFResult;
-
 import java.io.*;
-import java.util.ArrayList;
 import java.util.Enumeration;
 
 /**
@@ -440,9 +434,11 @@ public class SAFSROBOTJ extends GenericEngine {
 								return;
 						   	}
 						   	projectpath += afile.getAbsolutePath() +";";
-					    	afile = new CaseInsensitiveFile(safsdir +"/lib/jna.zip");
-						   	if(! afile.isFile()){
-								Log.error(ENGINE_NAME +" PROJECTPATH to JNA.ZIP could not be validated.");
+					    	afile = new CaseInsensitiveFile(safsdir +"/lib/jna.zip");					    	
+						   	if(! afile.isFile()) afile = new CaseInsensitiveFile(safsdir +"/lib/jna-4.2.2.jar");
+						    if(! afile.isFile()) afile = new CaseInsensitiveFile(safsdir +"/lib/jna-platform-4.2.2.jar");
+						    if(! afile.isFile()){
+								Log.error(ENGINE_NAME +" PROJECTPATH to expected JNA support could not be validated.");
 								return;
 						   	}
 					    	projectpath += afile.getAbsolutePath() +";";
