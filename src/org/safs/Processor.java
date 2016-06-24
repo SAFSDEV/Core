@@ -29,6 +29,8 @@ import org.safs.logging.LogUtilities;
 import org.safs.text.FAILStrings;
 import org.safs.text.FileUtilities;
 import org.safs.tools.CaseInsensitiveFile;
+import org.safs.tools.DefaultTestRecordStackable;
+import org.safs.tools.ITestRecordStackable;
 import org.safs.tools.RuntimeDataInterface;
 import org.safs.tools.drivers.DriverConstant;
 
@@ -60,7 +62,7 @@ import org.safs.tools.drivers.DriverConstant;
  *   <br>   MAR 08, 2011 (DharmeshPatel) Added RFSMOnly support for RFSM search mode.
  *   <br>   JUL 22, 2013    (Lei Wang) Added methods deducexxxFile().
  **/
-public abstract class Processor implements RuntimeDataInterface{
+public abstract class Processor implements RuntimeDataInterface, ITestRecordStackable{
 
   /** "org.safs"
    * Default package for Processor subclasses used to execute test data.
@@ -71,6 +73,8 @@ public abstract class Processor implements RuntimeDataInterface{
   public static final String CASEINSENSITIVE_FLAG = "CASEINSENSITIVE";
   public static final String CASE_INSENSITIVE_FLAG = "CASE-INSENSITIVE";
   
+  /** The ITestRecordStackable used to store 'Test Record' in a FILO. */
+  protected ITestRecordStackable testrecordStackable = new DefaultTestRecordStackable();
 
   /**
    * Instance a given Processor from the provided classname.
@@ -1336,4 +1340,42 @@ public abstract class Processor implements RuntimeDataInterface{
       Log.error(e.getMessage(), e);
     }
   }
+  
+	/**
+	 * <p>
+	 * Push the current 'test record' into the Stack before the execution of a keyword.
+	 * This should be called after the 'test record' is properly set.
+	 * </p>
+	 * 
+	 * @param trd TestRecordData, the test record to push into a stack
+	 * @see #popTestRecord()
+	 */
+	public void pushTestRecord(TestRecordData trd) {
+		testrecordStackable.pushTestRecord(trd);		
+	}
+
+	/**
+	 * Retrieve the Test-Record from the the Stack after the execution of a keyword.<br>
+	 * <p>
+	 * After execution of a keyword, pop the test record from Stack and return is as the result.
+	 * Replace the class field 'Test Record' by that popped from the stack if they are not same.
+	 * </p>
+	 * 
+	 * @see #pushTestRecord()
+	 * @return TestRecordData, the 'Test Record' on top of the stack
+	 */
+	public TestRecordData popTestRecord() {
+		String debugmsg = StringUtils.debugmsg(false);
+		DefaultTestRecordStackable.debug(debugmsg+"Current test record: "+StringUtils.toStringWithAddress(testRecordData));
+		
+		TestRecordData history = testrecordStackable.popTestRecord();
+		
+		if(!testRecordData.equals(history)){
+			DefaultTestRecordStackable.debug(debugmsg+"Reset current test record to: "+StringUtils.toStringWithAddress(history));
+			//The cast should be safe, as we push TestRecordHelper into the stack.
+			testRecordData = (TestRecordHelper) history;
+		}
+		
+		return history;
+	}
 }

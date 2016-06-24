@@ -337,6 +337,9 @@ public class DCDriverCommand extends DriverCommand {
 		// actual should now be an absolute file path
 		String p1 = actual.getName();
 		try{
+			//Push the test-record-data into a stack, before executing the scripts
+			pushTestRecord(testRecordData);
+			
 			// load the Script and prepare to run it Step by Step
 			Script script = WDLibrary.getSeleniumBuilderScript(actual.getAbsolutePath());
 			// How does a script explicitly say it does or does NOT want to close the driver?
@@ -434,7 +437,12 @@ holdloop:		while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 					errorlist.add( p1 +": Step #"+ stepnumber +": "+ step.type.getClass().getSimpleName()+" "+ step.toString()+" was not successful.\n");
 				}
 			}// end of mainloop:
-			Log.resume(); 
+			Log.resume();
+			
+			//Pop the 'test-record-data' from the stack after 'scripts execution', and restore the 'test-record-data' if the
+			//'script execution' changed the shared class field 'test-record-data'.
+			popTestRecord();
+			
 			if(success) {
 				issueGenericSuccessUsing(actual.getAbsolutePath(), null);
 				return;
