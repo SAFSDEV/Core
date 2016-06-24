@@ -19,7 +19,6 @@ import org.safs.SAFSException;
 import org.safs.SAFSNullPointerException;
 import org.safs.StatusCodes;
 import org.safs.StringUtils;
-import org.safs.TestRecordData;
 import org.safs.TestRecordHelper;
 import org.safs.image.ImageUtils;
 import org.safs.logging.AbstractLogFacility;
@@ -28,8 +27,6 @@ import org.safs.natives.NativeWrapper;
 import org.safs.text.FAILStrings;
 import org.safs.text.GENStrings;
 import org.safs.tools.CaseInsensitiveFile;
-import org.safs.tools.DefaultTestRecordStackable;
-import org.safs.tools.ITestRecordStackable;
 import org.safs.tools.UniqueStringID;
 import org.safs.tools.counters.CountersInterface;
 import org.safs.tools.counters.UniqueStringCounterInfo;
@@ -58,13 +55,10 @@ import org.safs.tools.stringutils.StringUtilities;
  *         CANAGL SEP 17, 2014 Fixing SAFS Crashes due to incomplete initialization.<br>
  *         CANAGL MAY 20, 2016 Added CallJUnit support (moved from TIDDriverCommands).<br>
  */
-public class TIDDriverFlowCommands extends GenericEngine implements ITestRecordStackable{
+public class TIDDriverFlowCommands extends GenericEngine{
 
 	/** "SAFS/TIDDriverFlowCommands" */
 	static final String ENGINE_NAME  = "SAFS/TIDDriverFlowCommands";
-	
-	/** The ITestRecordStackable used to store 'Test Record' in a FILO. */
-	protected ITestRecordStackable testrecordStackable = new DefaultTestRecordStackable();
 
 	// START: SUPPORTED DRIVER COMMANDS
 
@@ -1327,45 +1321,6 @@ public class TIDDriverFlowCommands extends GenericEngine implements ITestRecordS
 			return setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
 		}		  
 	}
-	
-	/**
-	 * <p>
-	 * Push the current 'test record' into the Stack before the execution of a keyword.
-	 * This should be called after the 'test record' is properly set.
-	 * </p>
-	 * 
-	 * @param trd TestRecordData, the test record to push into a stack
-	 * @see #callJUnit()
-	 * @see #popTestRecord()
-	 */
-	public void pushTestRecord(TestRecordData trd) {
-		testrecordStackable.pushTestRecord(trd);
-	}
 
-	/**
-	 * Retrieve the Test-Record from the the Stack after the execution of a keyword.<br>
-	 * <p>
-	 * After execution of a keyword, pop the test record from Stack and return is as the result.
-	 * Replace the class field 'Test Record' by that popped from the stack if they are not same.
-	 * </p>
-	 * 
-	 * @see #callJUnit()
-	 * @see #pushTestRecord()
-	 * @return TestRecordData, the 'Test Record' on top of the stack
-	 */
-	public TestRecordData popTestRecord() {
-		String debugmsg = StringUtils.debugmsg(false);
-		DefaultTestRecordStackable.debug(debugmsg+"Current test record: "+StringUtils.toStringWithAddress(testRecordData));
-		
-		TestRecordData history = testrecordStackable.popTestRecord();
-		
-		if(!testRecordData.equals(history)){
-			DefaultTestRecordStackable.debug(debugmsg+"Reset current test record to: "+StringUtils.toStringWithAddress(history));
-			//The cast should be safe, as we push TestRecordHelper into the stack.
-			testRecordData = (TestRecordHelper) history;
-		}
-		
-		return history;
-	}
 }
 

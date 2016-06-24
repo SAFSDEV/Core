@@ -13,10 +13,11 @@ import org.safs.StringUtils;
 import org.safs.TestRecordData;
 import org.safs.TestRecordHelper;
 import org.safs.image.ImageUtils;
-import org.safs.text.FAILStrings;
 import org.safs.text.FileUtilities;
 import org.safs.tools.CaseInsensitiveFile;
+import org.safs.tools.DefaultTestRecordStackable;
 import org.safs.tools.GenericToolsInterface;
+import org.safs.tools.ITestRecordStackable;
 import org.safs.tools.RuntimeDataInterface;
 import org.safs.tools.consoles.GenericProcessConsole;
 import org.safs.tools.drivers.DriverConfiguredSTAFInterfaceClass;
@@ -36,7 +37,7 @@ import org.safs.tools.logs.UniqueStringMessageInfo;
  *                                 to deduce test/bench file name.                          
  *         
  */
-public class GenericEngine extends DriverConfiguredSTAFInterfaceClass implements EngineInterface, RuntimeDataInterface {
+public class GenericEngine extends DriverConfiguredSTAFInterfaceClass implements EngineInterface, RuntimeDataInterface, ITestRecordStackable {
 
 	/** The Java Process running the engine. **/
 	protected Process process = null;
@@ -49,6 +50,9 @@ public class GenericEngine extends DriverConfiguredSTAFInterfaceClass implements
 	 */
 	protected TestRecordHelper  testRecordData = null;
 
+	/** The ITestRecordStackable used to store 'Test Record' in a FILO. */
+	protected ITestRecordStackable testrecordStackable = new DefaultTestRecordStackable();
+	
 	/**
 	 * Constructor for GenericEngine
 	 */
@@ -425,6 +429,44 @@ public class GenericEngine extends DriverConfiguredSTAFInterfaceClass implements
 	public String getAppMapItem(String appMapId, String sectionName,
 			String itemName) throws SAFSException {
 		return getCoreInterface().getAppMapItem(appMapId, sectionName, itemName);
+	}
+	
+	/**
+	 * <p>
+	 * Push the current 'test record' into the Stack before the execution of a keyword.
+	 * This should be called after the 'test record' is properly set.
+	 * </p>
+	 * 
+	 * @param trd TestRecordData, the test record to push into a stack
+	 * @see #popTestRecord()
+	 */
+	public void pushTestRecord(TestRecordData trd) {
+		testrecordStackable.pushTestRecord(trd);
+	}
+
+	/**
+	 * Retrieve the Test-Record from the the Stack after the execution of a keyword.<br>
+	 * <p>
+	 * After execution of a keyword, pop the test record from Stack and return is as the result.
+	 * Replace the class field 'Test Record' by that popped from the stack if they are not same.
+	 * </p>
+	 * 
+	 * @see #pushTestRecord()
+	 * @return TestRecordData, the 'Test Record' on top of the stack
+	 */
+	public TestRecordData popTestRecord() {
+		String debugmsg = StringUtils.debugmsg(false);
+		DefaultTestRecordStackable.debug(debugmsg+"Current test record: "+StringUtils.toStringWithAddress(testRecordData));
+		
+		TestRecordData history = testrecordStackable.popTestRecord();
+		
+		if(!testRecordData.equals(history)){
+			DefaultTestRecordStackable.debug(debugmsg+"Reset current test record to: "+StringUtils.toStringWithAddress(history));
+			//The cast should be safe, as we push TestRecordHelper into the stack.
+			testRecordData = (TestRecordHelper) history;
+		}
+		
+		return history;
 	}
 }
 
