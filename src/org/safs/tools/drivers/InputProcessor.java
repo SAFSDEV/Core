@@ -13,6 +13,7 @@ import org.safs.StringUtils;
 import org.safs.TestRecordData;
 import org.safs.TestRecordHelper;
 import org.safs.logging.AbstractLogFacility;
+import org.safs.model.tools.Driver;
 import org.safs.staf.STAFProcessHelpers;
 import org.safs.text.FAILStrings;
 import org.safs.text.GENStrings;
@@ -60,11 +61,6 @@ public class InputProcessor extends AbstractInputProcessor {
 	 */
 	protected UniqueIDInterface logid = null;
 	
-	/**
-	 * The CounterInfo to send to incrementAllCounters.
-	 */
-	protected UniqueStringCounterInfo counterInfo = null;
-	
 	private boolean isCycle = false;
 	private boolean isSuite = false;
 	private boolean isStep  = false;
@@ -94,7 +90,7 @@ public class InputProcessor extends AbstractInputProcessor {
 	 * 
 	 * @see org.safs.logging.AbstractLogFacility 
 	 */
-	protected void logMessage(String msg, String msgdescription, int msgtype){
+	public void logMessage(String msg, String msgdescription, int msgtype){
 		UniqueStringMessageInfo msgInfo = new UniqueStringMessageInfo(
 											  (String)logid.getUniqueID(),
 											  msg, msgdescription, msgtype);
@@ -116,6 +112,14 @@ public class InputProcessor extends AbstractInputProcessor {
 	 */
 	public String getTestLevel() {
 		return sourceid.getTestLevel();
+	}
+	
+	/***************************************************************************
+	 * Overridden by specific SourceInterface we own.
+	 * @see SourceInterface#getDefaultSeparator()
+	 */
+	public String getDefaultSeparator() {
+		return sourceid.getDefaultSeparator();
 	}
 
 	/***************************************************************************
@@ -300,7 +304,7 @@ public class InputProcessor extends AbstractInputProcessor {
 	 * Process a Driver Command (C,CW,or CF) input record.
 	 * This is called internally by processTest as necessary.
 	 */
-	protected long processDriverCommand(TestRecordHelper trd){
+	public long processDriverCommand(TestRecordHelper trd){
 
 		String command = "";
 		String message = "";
@@ -505,7 +509,7 @@ public class InputProcessor extends AbstractInputProcessor {
 	 * Process a Test (T,TW,or TF) input record.
 	 * This is called internally by processTest as necessary.
 	 */
-	protected long processTestRecord(TestRecordHelper trd){
+	public long processTestRecord(TestRecordHelper trd){
 		
 		// if a STEP, call engines
 		if (isStep) return processComponentFunction(trd);
@@ -550,6 +554,7 @@ public class InputProcessor extends AbstractInputProcessor {
 		// run the test and add status info to existing status info
 		InputProcessor nextLevel = new InputProcessor(this, theSource, alog);
 		StatusInterface nextStatus = nextLevel.processTest();
+		Driver.setIDriver(this);
 		statusCounter.addStatus(nextStatus);
 		TestRecordData nltrd = nextLevel.getTestRecordData();
 		if ((nltrd.getStatusCode()==DriverConstant.STATUS_SCRIPT_NOT_EXECUTED)&&
@@ -597,6 +602,39 @@ public class InputProcessor extends AbstractInputProcessor {
 		return DriverConstant.STATUS_SCRIPT_NOT_EXECUTED;	                          	
 	}
 	
+	public TestRecordHelper initTestRecordData(String record, String separator){
+	    // initialize a new TestRecordData object
+		String trimdata = record.trim();
+	    testRecordData.reinit();
+	    testRecordData.setInputRecord(trimdata);
+	    testRecordData.setSeparator(separator);
+	    try{ 
+	    	String defaultMap = (String) getMapsInterface().getDefaultMap().getUniqueID();
+	    	testRecordData.setAppMapName(defaultMap);
+	    }
+	    catch(ClassCastException ccx){testRecordData.setAppMapName("null");}
+	    catch(NullPointerException npx){testRecordData.setAppMapName("null");}
+
+	    String rt = null;
+
+	    // extract field 1, the record type
+	    try{ 
+	    	rt = testRecordData.getTrimmedUnquotedInputRecordToken(0);
+	    	if (rt.length()==0)	return testRecordData;				
+	    }				
+	    catch(IndexOutOfBoundsException inx){ return testRecordData; }
+	    catch(SAFSNullPointerException npx) { return testRecordData; }			
+
+    	// start filling in the test record data			
+    	testRecordData.setRecordType(rt.toUpperCase()); 
+    	testRecordData.setTestLevel(sourceid.getTestLevel());
+    	testRecordData.setFilename(sourceid.getSourcePath(driver));
+    	testRecordData.setFac((String)logid.getUniqueID());
+    	testRecordData.setStatusCode(DriverConstant.STATUS_SCRIPT_NOT_EXECUTED);
+    	testRecordData.setStatusInfo("");
+    	
+    	return testRecordData;
+	}
 	
 	/***************************************************************************
 	 *  This is the one that actually opens and loops through our tests records!
@@ -622,6 +660,8 @@ public class InputProcessor extends AbstractInputProcessor {
 			counts.incrementAllCounters(counterInfo, counts.STATUS_TEST_FAILURE);
 			return statusCounter;
 		}
+		
+		Driver.setIDriver(this);
 		
 		logMessage(sourceinfo.getTestLevel() +" TABLE: "+ sourceinfo.getSourcePath(driver), 
 		           null, AbstractLogFacility.START_DATATABLE);
@@ -682,17 +722,8 @@ loopbody: {
 				}
 			}
 	    
-		    // initialize a new TestRecordData object
-		    testRecordData.reinit();
-		    testRecordData.setInputRecord(trimdata);
-		    testRecordData.setSeparator(sourceinfo.getDefaultSeparator());
-		    try{ 
-		    	String defaultMap = (String) maps.getDefaultMap().getUniqueID();
-		    	testRecordData.setAppMapName(defaultMap);
-		    }
-		    catch(ClassCastException ccx){testRecordData.setAppMapName("null");}
-		    catch(NullPointerException npx){testRecordData.setAppMapName("null");}
-	    	
+		    // initialize a new TestRecordData object with expressions already resolved
+			testRecordData = initTestRecordData(trimdata, sourceinfo.getDefaultSeparator());
 		    // extract field 1, the record type
 		    try{ 
 		    	rt = testRecordData.getTrimmedUnquotedInputRecordToken(0);
@@ -706,19 +737,8 @@ loopbody: {
 	    		inputerr=false;
 	    		break loopbody;
 	    	}
-
-	    	rt=rt.toUpperCase();
-	    	
-			
-	    	// start filling in the test record data			
-	    	testRecordData.setRecordType(rt); 
-	    	testRecordData.setTestLevel(sourceinfo.getTestLevel());
 	    	testRecordData.setFileID(sourceinfo.getStringID());
-	    	testRecordData.setFilename(sourceinfo.getSourcePath(driver));
 	    	testRecordData.setLineNumber(inputrecord.getRecordNumber());
-	    	testRecordData.setFac((String)logid.getUniqueID());
-	    	testRecordData.setStatusCode(DriverConstant.STATUS_SCRIPT_NOT_EXECUTED);
-	    	testRecordData.setStatusInfo("");
 
 	    	// set DDVariable for active test table like safsActiveCycle=
 	    	getVarsInterface().setValue(activeTableVar, sourceinfo.getFilename());
