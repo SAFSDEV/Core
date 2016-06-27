@@ -5,6 +5,7 @@ package org.safs.cukes;
 
 import java.util.List;
 
+import org.safs.model.tools.Driver;
 import org.safs.tools.drivers.JSAFSDriver;
 /**
  * Driver-enabled StepDriver allowing Cukes users to use SAFS services and engines 
@@ -67,6 +68,7 @@ public class StepDriver {
 	 */
 	protected static JSAFSDriver initJSAFS() {
 		System.out.println("StepDefinitions has enterd initJSAFS().");
+		Driver.setIDriver(_jsafs);
 		_our_driver = true;	
 		_jsafs.run();
 		_jsafs.systemExitOnShutdown = false;
@@ -97,6 +99,7 @@ public class StepDriver {
 	 */
 	protected static void shutdownJSAFS() throws Exception {
 		if(allowShutdown()){	
+			Driver.setIDriver(null);
 			jsafs().shutdown();
 		}else{
 			if(!_our_driver)

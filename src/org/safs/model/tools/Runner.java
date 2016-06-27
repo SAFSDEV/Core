@@ -4,25 +4,14 @@
  ******************************************************************************/ 
 package org.safs.model.tools;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Vector;
 
 import org.safs.StatusCodes;
 import org.safs.TestRecordHelper;
 import org.safs.logging.AbstractLogFacility;
 import org.safs.model.Component;
-import org.safs.model.Utils;
 import org.safs.model.annotations.AutoConfigureJSAFS;
 import org.safs.model.annotations.JSAFSConfiguredClassStore;
 import org.safs.model.annotations.Utilities;
@@ -31,12 +20,8 @@ import org.safs.model.commands.DDDriverCommands;
 import org.safs.model.commands.EditBoxFunctions;
 import org.safs.model.commands.GenericMasterFunctions;
 import org.safs.model.commands.GenericObjectFunctions;
-import org.safs.tools.counters.CountersInterface;
+import org.safs.tools.drivers.DriverInterface;
 import org.safs.tools.drivers.JSAFSDriver;
-import org.safs.tools.status.StatusCounterInterface;
-import org.safs.tools.status.StatusInfo;
-
-import org.safs.Log;
 
 /**
  * This Runner is an access point to a minimalist JSAFS Driver API.
@@ -45,7 +30,6 @@ import org.safs.Log;
 public class Runner implements JSAFSConfiguredClassStore{
 
 	private static Driver driver;
-	private static boolean initialized = false;
 	private static Vector callers = new Vector();
     private static Hashtable<String, Object> instances = new Hashtable<String,Object>(); 
 	private static void debug(String message){
@@ -95,9 +79,24 @@ public class Runner implements JSAFSConfiguredClassStore{
 		}
 		return driver;
 	}
-	/** retrieve access to the full JSAFS
-	 * Driver API, if needed. */
-	public static JSAFSDriver jsafs(){return driver().jsafs;}
+	/**
+	 * Primarily for backward compatibility. 
+	 * retrieve access to the full JSAFS Driver API, if needed and available.
+	 * @return JSAFSDriver.  Can be null if the runtime system is NOT using a JSAFSDriver.
+	 * @see #iDriver() 
+	 **/
+	public static JSAFSDriver jsafs(){
+		try{ return driver().jsafs(); }
+		catch(Exception np){ return null; }
+	}
+	
+	/** 
+	 * retrieve access to the the active DriverInterface, if needed and available.
+	 * @return DriverInterface.  Can be a JSAFSDriver or other DriverInterface. 
+	 **/
+	public static DriverInterface iDriver(){
+		return driver().iDriver();
+	}
 	
 	/**
 	 * When using JSAFS to automatically instantiate, configure, and execute tests 
@@ -126,8 +125,8 @@ public class Runner implements JSAFSConfiguredClassStore{
 	 * @see JSAFSDriver#logGENERIC(String, String)
 	 */
 	public static void logGENERIC(String message, String detail){
-	    jsafs().logGENERIC(message, detail);
-	    jsafs().incrementGeneralStatus(StatusCodes.NO_SCRIPT_FAILURE);
+	    iDriver().logMessage(message, detail, AbstractLogFacility.GENERIC_MESSAGE);
+	    iDriver().incrementGeneralStatus(StatusCodes.NO_SCRIPT_FAILURE);
 	}
 	
 	/**
@@ -139,8 +138,8 @@ public class Runner implements JSAFSConfiguredClassStore{
 	 * @see JSAFSDriver#logPASSED(String, String)
 	 */
 	public static void logPASSED(String message, String detail){
-	    jsafs().logPASSED(message, detail);
-	    jsafs().incrementTestStatus(StatusCodes.NO_SCRIPT_FAILURE);
+	    iDriver().logMessage(message, detail,AbstractLogFacility.PASSED_MESSAGE);
+	    iDriver().incrementTestStatus(StatusCodes.NO_SCRIPT_FAILURE);
 	}
 	
 	/**
@@ -152,8 +151,8 @@ public class Runner implements JSAFSConfiguredClassStore{
 	 * @see JSAFSDriver#logFAILED(String, String)
 	 */
 	public static void logFAILED(String message, String detail){
-	    jsafs().logFAILED(message, detail);
-	    jsafs().incrementTestStatus(StatusCodes.GENERAL_SCRIPT_FAILURE);
+	    iDriver().logMessage(message, detail, AbstractLogFacility.FAILED_MESSAGE);
+	    iDriver().incrementTestStatus(StatusCodes.GENERAL_SCRIPT_FAILURE);
 	}
 	
 	/**
@@ -223,9 +222,9 @@ public class Runner implements JSAFSConfiguredClassStore{
 	 */
 	public static TestRecordHelper action(String keyword, String child, String parent, String... params) throws Throwable{
 		TestRecordHelper rc = driver().runComponentFunction(keyword, child, parent, params );
-		jsafs().incrementTestStatus(rc.getStatusCode());
+		driver().iDriver().incrementTestStatus(rc.getStatusCode());
 		if(rc.getStatusCode()==StatusCodes.SCRIPT_NOT_EXECUTED){
-			jsafs().logMessage(child +" "+keyword.toUpperCase() +" did NOT execute!", 
+			iDriver().logMessage(child +" "+keyword.toUpperCase() +" did NOT execute!", 
 				    "Support for this action may not be available in this runtime environment.", 
 				    AbstractLogFacility.SKIPPED_TEST_MESSAGE);
 		}
@@ -271,9 +270,9 @@ public class Runner implements JSAFSConfiguredClassStore{
 	 */
 	public static TestRecordHelper command(String keyword, String... params) throws Throwable{
 		TestRecordHelper rc = driver().runDriverCommand(keyword, params );
-		jsafs().incrementGeneralStatus(rc.getStatusCode());
+		iDriver().incrementGeneralStatus(rc.getStatusCode());
 		if(rc.getStatusCode()==StatusCodes.SCRIPT_NOT_EXECUTED){
-			jsafs().logMessage(keyword.toUpperCase() +" did NOT execute!", 
+			iDriver().logMessage(keyword.toUpperCase() +" did NOT execute!", 
 				    "Support for this command may not be available in this runtime environment.", 
 				    AbstractLogFacility.SKIPPED_TEST_MESSAGE);
 		}
@@ -376,7 +375,7 @@ public class Runner implements JSAFSConfiguredClassStore{
 	 * @see #SetVariableValues(String...)
 	 */
 	public static void SetVariableValue(String varName, String varValue) throws Throwable{
-		jsafs().setVariable(varName, varValue);
+		iDriver().getCoreInterface().setVariable(varName, varValue);
 		logGENERIC("Variable "+ varName +" set to '"+ varValue +"'", null);
 	}
 	
@@ -389,7 +388,7 @@ public class Runner implements JSAFSConfiguredClassStore{
 	 * @see #SetVariableValues(String...)
 	 */
 	public static String GetVariableValue(String varName) throws Throwable {
-		String val = jsafs().getVariable(varName);
+		String val = iDriver().getCoreInterface().getVariable(varName);
 		logGENERIC("Variable "+ varName +" retrieved as '"+ val+"'", null);
 		return val;
 	}
@@ -403,7 +402,7 @@ public class Runner implements JSAFSConfiguredClassStore{
 	 * @return
 	 */
 	public static TestRecordHelper VerifyValues(String value1, String value2) throws Throwable{
-		return action("AnyWin", "AnyComp", "VerifyValues", new String[]{value1, value2});
+		return action("VerifyValues", "AnyComp", "AnyWin", new String[]{value1, value2});
 	}
 	
 	/** 
@@ -415,7 +414,7 @@ public class Runner implements JSAFSConfiguredClassStore{
 	 * @return
 	 */
 	public static TestRecordHelper VerifyValuesNotEqual(String value1, String value2) throws Throwable{
-		return action("AnyWin", "AnyComp", "VerifyValuesNotEqual", new String[]{value1, value2});
+		return action("VerifyValuesNotEqual", "AnyComp", "AnyWin", new String[]{value1, value2});
 	}
 	
 	/** 
@@ -427,7 +426,7 @@ public class Runner implements JSAFSConfiguredClassStore{
 	 * @return
 	 */
 	public static TestRecordHelper VerifyValueContains(String value, String substring) throws Throwable{
-		return action("AnyWin", "AnyComp", "VerifyValueContains", new String[]{value, substring});
+		return action("VerifyValueContains", "AnyComp", "AnyWin", new String[]{value, substring});
 	}
 	
 	/** 
@@ -439,7 +438,7 @@ public class Runner implements JSAFSConfiguredClassStore{
 	 * @return
 	 */
 	public static TestRecordHelper VerifyValueDoesNotContain(String value, String substring) throws Throwable{
-		return action("AnyWin", "AnyComp", "VerifyValueDoesNotContain", new String[]{value, substring});
+		return action("VerifyValueDoesNotContain", "AnyComp", "AnyWin", new String[]{value, substring});
 	}
 	
 	/** <pre>

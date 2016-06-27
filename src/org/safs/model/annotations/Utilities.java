@@ -534,7 +534,7 @@ public class Utilities {
 				if( object instanceof RuntimeDataAware && 
 						store instanceof Runner){
 						debug("AutoConfigure injecting the RuntimeDataInterface into Class instance "+ c.getName()+" ...");
-						((RuntimeDataAware)object).setRuntimeDataInterface((RuntimeDataInterface) ((Runner)store).jsafs().getCoreInterface());
+						((RuntimeDataAware)object).setRuntimeDataInterface((RuntimeDataInterface) ((Runner)store).driver().iDriver().getCoreInterface());
 				}
 				
 				//According to

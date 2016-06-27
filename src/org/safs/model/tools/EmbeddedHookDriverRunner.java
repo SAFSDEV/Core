@@ -187,7 +187,7 @@ public class EmbeddedHookDriverRunner implements JSAFSConfiguredClassStore{
 	
 	public TestRecordHelper action(String command, String window, String component, String... params) throws Throwable{
 		TestRecordHelper rc = driver.runComponentFunction(command, component, window, params);
-		jsafs().incrementTestStatus(rc.getStatusCode());
+		driver.iDriver().incrementTestStatus(rc.getStatusCode());
 		if(rc.getStatusCode()==StatusCodes.SCRIPT_NOT_EXECUTED){
 			jsafs().logMessage(component +" "+command.toUpperCase() +" did NOT execute!", 
 				    "Support for this action may not be available in this runtime environment.", 
@@ -198,7 +198,7 @@ public class EmbeddedHookDriverRunner implements JSAFSConfiguredClassStore{
 	
 	public TestRecordHelper command(String command, String... params) throws Throwable{
 		TestRecordHelper rc = driver.runDriverCommand(command, params);
-		jsafs().incrementTestStatus(rc.getStatusCode());
+		driver.iDriver().incrementTestStatus(rc.getStatusCode());
 		if(rc.getStatusCode()==StatusCodes.SCRIPT_NOT_EXECUTED){
 			jsafs().logMessage(command.toUpperCase() +" did NOT execute!", 
 				    "Support for this command may not be available in this runtime environment.", 
