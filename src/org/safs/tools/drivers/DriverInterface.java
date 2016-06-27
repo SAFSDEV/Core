@@ -112,5 +112,9 @@ public interface DriverInterface extends PathInterface {
 		
 	public int getMillisBetweenRecords();
 	public void setMillisBetweenRecords(int millisBetweenRecords);
+	
+	public void incrementTestStatus(int status);
+	public void incrementGeneralStatus(int status);
+	public void logMessage(String msg, String desc, int msgType);
 }
 

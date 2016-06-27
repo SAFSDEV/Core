@@ -4,23 +4,8 @@
  ******************************************************************************/ 
 package org.safs.model.tools;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.safs.StatusCodes;
-import org.safs.TestRecordHelper;
-import org.safs.model.AbstractCommand;
-import org.safs.model.ComponentFunction;
-import org.safs.model.DriverCommand;
-import org.safs.model.annotations.JSAFSBefore;
-import org.safs.model.annotations.AutoConfigureJSAFS;
-import org.safs.model.commands.DDDriverCommands;
-import org.safs.text.FileUtilities;
-import org.safs.tools.CaseInsensitiveFile;
-import org.safs.tools.drivers.DriverConstant;
+import org.safs.tools.drivers.DriverInterface;
+import org.safs.tools.drivers.InputProcessor;
 import org.safs.tools.drivers.JSAFSDriver;
 
 /**
@@ -33,12 +18,16 @@ import org.safs.tools.drivers.JSAFSDriver;
  */
 public class Driver extends AbstractDriver {
 	
-	static boolean running = false; 
+	public static boolean running = false; 
 
-	/** An available reference to the full-featured JSAFSDriver 
+	/** An available reference to the full-featured JSAFSDriver, if available.
 	 *  @see org.safs.tools.drivers.JSAFSDriver */
-	public static final JSAFSDriver jsafs = new JSAFSDriver("JSAFS");
+	private static JSAFSDriver jsafs = null;
 	
+	/** An available reference to the a running InputProcessor, if available 
+	 *  @see org.safs.tools.drivers.InputProcessor */
+	private static InputProcessor processor = null;
+		
 	/** 
 	 * Set to false to prevent JSAFS from shutting down on a call to shutdownJSAFS(). 
 	 * Default is true. JSAFS shutting down will NOT force a System exit on shutdown.
@@ -51,7 +40,29 @@ public class Driver extends AbstractDriver {
 		_instance = this;
 	}
 	
+	@Override
 	protected JSAFSDriver jsafs(){ return jsafs;}
+	@Override
+	protected InputProcessor processor() { return processor; }
+	
+	public static void setIDriver(DriverInterface iDriver){
+		if(iDriver == null){ // clear out references during shutdown
+			jsafs = null;
+			processor = null;
+			running = false;			
+		}else if(iDriver instanceof JSAFSDriver){
+			if(jsafs == null) jsafs = (JSAFSDriver)iDriver;
+		}else if(iDriver instanceof InputProcessor){
+			if(processor == null) processor = (InputProcessor)iDriver;
+			running = true;
+		}
+	}	
+	
+	public static DriverInterface getIDriver(){
+		if(jsafs instanceof JSAFSDriver) return jsafs;
+		if(processor instanceof InputProcessor) return processor;
+		return null;
+	}
 	
 	/**
 	 * Must be called at least once to initialize the internal JSAFSDriver.
@@ -65,13 +76,20 @@ public class Driver extends AbstractDriver {
 	 */
 	public void beforeAll(){
 		if(!running){
-			jsafs.run();
-			jsafs.systemExitOnShutdown = false;
-			jsafs.removeShutdownHook();
+			if((jsafs == null) && (processor == null))
+			    jsafs = new JSAFSDriver("JSAFS");
+			
+			if(jsafs instanceof JSAFSDriver){
+				if(jsafs.getCoreInterface()== null){
+					jsafs.run();
+					jsafs.systemExitOnShutdown = false;
+					jsafs.removeShutdownHook();
+					try{Thread.sleep(2000);}catch(Exception x){}
+					preloadAppMapExpressions();
+					preloadAppMaps();
+				}
+			}
 			running = true;
-			try{Thread.sleep(2000);}catch(Exception x){}
-			preloadAppMapExpressions();
-			preloadAppMaps();
 		}
 	}
 	
@@ -99,7 +117,7 @@ public class Driver extends AbstractDriver {
 	 */
 	public static void shutdownJSAFS() throws Exception {
 		if(allow_shutdown) {
-			jsafs.shutdown();	
+			if(jsafs instanceof JSAFSDriver) jsafs.shutdown();	
 			running = false;
 		}
 	}

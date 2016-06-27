@@ -1,8 +1,5 @@
 package org.safs.model.examples.advanced;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import javax.swing.JOptionPane;
 
 import org.safs.JavaHook;
@@ -14,8 +11,6 @@ import org.safs.model.commands.DDDriverCommands;
 import org.safs.model.commands.GenericMasterFunctions;
 import org.safs.text.FAILStrings;
 import org.safs.text.GENStrings;
-import org.safs.tools.UniqueStringID;
-import org.safs.tools.counters.CountersInterface;
 import org.safs.tools.drivers.AbstractDriver;
 import org.safs.tools.drivers.ConfigureInterface;
 import org.safs.tools.drivers.DefaultDriver;
@@ -26,13 +21,9 @@ import org.safs.tools.engines.SAFSROBOTJ;
 import org.safs.tools.engines.TIDComponent;
 import org.safs.tools.engines.TIDDriverCommands;
 import org.safs.tools.engines.SAFSDRIVERCOMMANDS;
-import org.safs.tools.input.InputInterface;
 import org.safs.tools.input.MapsInterface;
-import org.safs.tools.input.UniqueStringFileInfo;
 import org.safs.tools.input.UniqueStringItemInfo;
-import org.safs.tools.input.UniqueStringMapInfo;
 import org.safs.tools.logs.LogsInterface;
-import org.safs.tools.logs.UniqueStringMessageInfo;
 import org.safs.tools.vars.VarsInterface;
 import org.safs.tools.status.StatusCounter;
 import org.safs.tools.status.StatusInterface;
@@ -182,32 +173,6 @@ public class JSAFSAdvancedRuntime extends DefaultDriver {
 	protected void validateTestParameters(){
 		//test table data validation not required
 	}
-	
-	/**
-	 * Convenience routine to log different message types to the active log.
-	 *  
-	 * (We probably should "fix" the LogsInterface and the implementations 
-	 * to eliminate the need for this convenience routine!)
-	 *  
-	 * @param message String message
-	 * @param description String (optional) for more detailed info.  Can be null.
-	 * @param type int message type constant from AbstractLogFacility.
-	 * <p>  
-	 * Some Message Types:<br/>
-	 * <ul>
-	 * <li>{@link AbstractLogFacility#GENERIC_MESSAGE}
-	 * <li>{@link AbstractLogFacility#PASSED_MESSAGE}
-	 * <li>{@link AbstractLogFacility#FAILED_MESSAGE}
-	 * <li>{@link AbstractLogFacility#FAILED_OK_MESSAGE}
-	 * <li>{@link AbstractLogFacility#WARNING_MESSAGE}
-	 * <li>{@link AbstractLogFacility#WARNING_OK_MESSAGE}
-	 *</ul>
-	 *@see LogsInterface#logMessage(org.safs.tools.logs.UniqueMessageInterface) 
-	 */
-	protected void logMessage(String message, String description, int type){
-		logs.logMessage(new UniqueStringMessageInfo(cycleLog.getStringID(), message, description, type));
-	}
-	
 	
 	/**
 	 * Convienience (re)initializer for a TestRecordHelper.

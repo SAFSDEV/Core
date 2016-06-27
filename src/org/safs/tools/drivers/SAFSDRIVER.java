@@ -1,12 +1,8 @@
 package org.safs.tools.drivers;
 
+import org.safs.model.tools.Driver;
 import org.safs.tools.UniqueStringID;
-import org.safs.tools.counters.CountersInterface;
-import org.safs.tools.input.InputInterface;
-import org.safs.tools.input.MapsInterface;
 import org.safs.tools.input.UniqueStringFileInfo;
-import org.safs.tools.logs.LogsInterface;
-import org.safs.tools.vars.VarsInterface;
 import org.safs.tools.status.StatusInterface;
 
 /**
@@ -161,6 +157,7 @@ public class SAFSDRIVER extends DefaultDriver {
 		InputProcessor driver = new InputProcessor(this, sourceInfo, testid);
 		
 		StatusInterface statusinfo = driver.processTest();
+		Driver.setIDriver(null);
 		
 		return statusinfo;
 	}

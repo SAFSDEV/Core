@@ -4,13 +4,12 @@
 package org.safs.tools.drivers;
 
 import java.util.ListIterator;
-import java.util.Locale;
-import org.safs.GetText;
+import org.safs.StatusCodes;
 import org.safs.TestRecordData;
 import org.safs.TestRecordHelper;
 import org.safs.DCTestRecordHelper;
-import org.safs.tools.UniqueIDInterface;
 import org.safs.tools.counters.CountersInterface;
+import org.safs.tools.counters.UniqueStringCounterInfo;
 import org.safs.tools.engines.AutoItComponent;
 import org.safs.tools.engines.EngineInterface;
 import org.safs.tools.engines.TIDDriverCommands;
@@ -47,6 +46,8 @@ public abstract class AbstractInputProcessor implements DriverInterface {
 
 	/** Pass/Fail info for a single instance of an Input processor. **/
 	protected StatusCounter    statusCounter = new StatusCounter();
+	
+	protected UniqueStringCounterInfo counterInfo = null;
 	
 	/** Stores input record information for the driver and some engines. **/
 	protected TestRecordHelper testRecordData = new DCTestRecordHelper();
@@ -450,5 +451,74 @@ public abstract class AbstractInputProcessor implements DriverInterface {
 	 */
 	public long setRootVerifyDir(String absolute_path){
 		return driver.setRootVerifyDir(absolute_path);		
+	}
+	/**
+	 * Increment General (not Test) record counts.
+	 * @param status
+	 * @see StatusCodes
+	 */
+	public void incrementGeneralStatus(int status){
+		switch(status){		
+			case StatusCodes.OK:
+				statusCounter.incrementGeneralPasses();
+				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_GENERAL_PASS);
+				break;
+			case StatusCodes.INVALID_FILE_IO:
+				statusCounter.incrementIOFailures();
+				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_IO_FAILURE);
+				break;
+			case StatusCodes.GENERAL_SCRIPT_FAILURE:
+			case StatusCodes.WRONG_NUM_FIELDS:
+				statusCounter.incrementGeneralFailures();
+				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_GENERAL_FAILURE);
+				break;
+			case StatusCodes.SCRIPT_WARNING:
+				statusCounter.incrementGeneralWarnings();
+				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_GENERAL_WARNING);
+				break;
+			case StatusCodes.SCRIPT_NOT_EXECUTED:
+				statusCounter.incrementSkippedRecords();
+				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_SKIPPED_RECORD);
+				break;
+			default:
+				statusCounter.incrementGeneralPasses();
+				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_GENERAL_PASS);
+		}
+	}
+
+	/**
+	 * Increment Test Record counts.
+	 * @param status
+	 * @see StatusCodes
+	 */
+	public void incrementTestStatus(int status){
+		switch(status){		
+			case StatusCodes.OK:
+				statusCounter.incrementTestPasses();
+				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_TEST_PASS);
+				break;
+			case StatusCodes.INVALID_FILE_IO:
+				statusCounter.incrementTestIOFailures();
+				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_TEST_IO_FAILURE);
+				break;
+			case StatusCodes.GENERAL_SCRIPT_FAILURE:
+			case StatusCodes.WRONG_NUM_FIELDS:
+			case StatusCodes.NO_RECORD_TYPE_FIELD:
+			case StatusCodes.UNRECOGNIZED_RECORD_TYPE:
+				statusCounter.incrementTestFailures();
+				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_TEST_FAILURE);
+				break;
+			case StatusCodes.SCRIPT_WARNING:
+				statusCounter.incrementTestWarnings();
+				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_TEST_WARNING);
+				break;
+			case StatusCodes.SCRIPT_NOT_EXECUTED:
+				statusCounter.incrementSkippedRecords();
+				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_SKIPPED_RECORD);
+				break;
+			default:
+				statusCounter.incrementGeneralPasses();
+				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_GENERAL_PASS);
+		}
 	}
 }
