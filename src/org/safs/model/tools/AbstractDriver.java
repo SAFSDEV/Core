@@ -395,13 +395,16 @@ public abstract class AbstractDriver {
 		    trd = processor().initTestRecordData(
 		    		model.exportTestRecord(processor().getDefaultSeparator()), 
 		    		processor().getDefaultSeparator());
-		    processor().checkTestLevelForStepExecution();
-			trd.setCommand(command);
-			trd.setWindowName(parent);
-			trd.setCompName(child);
-			trd.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
-			long result = processor().processTestRecord(trd);
-			processor().resetTestLevel();
+		    try{
+			    processor().checkTestLevelForStepExecution();
+				trd.setCommand(command);
+				trd.setWindowName(parent);
+				trd.setCompName(child);
+				trd.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
+				long result = processor().processTestRecord(trd);
+		    }finally{
+				processor().resetTestLevel();		    	
+		    }
 			return trd;
 		}
 	}	
