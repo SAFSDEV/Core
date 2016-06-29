@@ -82,7 +82,45 @@ public class InputProcessor extends AbstractInputProcessor {
 		if (isSuite) activeTableVar = "safsActiveSuite";
 		if (isStep) activeTableVar = "safsActiveStep";
 	}
-
+	
+	/**
+	 * <p>
+	 * The current InputProcessor will be set to org.safs.model.tools.Driver, so that it can be used to execute 'test record'
+	 * within Java code. If the 'test record' is 'driver command', there is no problem; while if the 'test record' is 
+	 * 'component function' and the InputProcessor is NOT at Step level, the 'component function' will be treated as 'Switch Suite'/'Switch Step'
+	 * and fail. For example, if InputProcessor is at Cycle level, then "T, Window, Component, VerifyValues, a, b", will be treated to execute Window.STD suite file.
+	 * To avoid this situation, we need to set the field 'isStep' before executing 'component function'.
+	 * This function is for this purpose.
+	 * </p>
+	 * 
+	 * @return boolean, if the private filed {@link #isStep} has been changed.
+	 * 
+	 * @see #processTest()
+	 * @see #resetTestLevel()
+	 * @ee {@link #processTestRecord(TestRecordHelper)}
+	 * @see org.safs.model.tools.AbstractDriver#runComponentFunctionConverted(String, String, String, String...)
+	 */
+	public boolean checkTestLevelForStepExecution(){
+		if(!DriverConstant.DRIVER_STEP_TESTLEVEL.equalsIgnoreCase(getTestLevel())){
+			Log.debug("InputProcessor: Current Test Level is "+getTestLevel()+", 'Step Test Record' cannot be executed! Change private field 'isStep' to true.");
+			isStep = true;
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Reset those private fields about the 'test level'.
+	 * 
+	 * @see #checkTestLevelForStepExecution()
+	 * @see org.safs.model.tools.AbstractDriver#runComponentFunctionConverted(String, String, String, String...)
+	 */
+	public void resetTestLevel(){
+		isCycle = (sourceid.getTestLevel().equalsIgnoreCase(DriverConstant.DRIVER_CYCLE_TESTLEVEL));
+		isSuite = (sourceid.getTestLevel().equalsIgnoreCase(DriverConstant.DRIVER_SUITE_TESTLEVEL));
+		isStep = (sourceid.getTestLevel().equalsIgnoreCase(DriverConstant.DRIVER_STEP_TESTLEVEL));
+	}
+	
 	/***************************************************************************
 	 * Convenience routine for building the appropriate MessageInfo and logging
 	 * a message to our active log.  Consult the AbstractLogFacility for valid 
