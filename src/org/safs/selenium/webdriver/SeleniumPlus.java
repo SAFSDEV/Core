@@ -3370,7 +3370,7 @@ public abstract class SeleniumPlus {
 		
 		private static void incrementCounters(boolean wasSuccessful){
 			long status = wasSuccessful ? CountersInterface.STATUS_TEST_PASS : CountersInterface.STATUS_TEST_FAILURE;
-			Runner.jsafs().getCountersInterface().incrementAllCounters(new UniqueStringCounterInfo("STEP", "STEP"), status);
+			Runner.driver().iDriver().getCountersInterface().incrementAllCounters(new UniqueStringCounterInfo("STEP", "STEP"), status);
 		}
 		
 		/** 

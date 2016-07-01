@@ -23,7 +23,6 @@ import org.safs.JavaHook;
 import org.safs.Log;
 import org.safs.SAFSException;
 import org.safs.STAFHelper;
-import org.safs.StatusCodes;
 import org.safs.StringUtils;
 import org.safs.TestRecordData;
 import org.safs.TestRecordHelper;
@@ -33,6 +32,7 @@ import org.safs.model.ComponentFunction;
 import org.safs.model.DriverCommand;
 import org.safs.model.commands.DDDriverCommands;
 import org.safs.model.commands.DriverCommands;
+import org.safs.model.tools.Driver;
 import org.safs.staf.STAFProcessHelpers;
 import org.safs.text.GENStrings;
 import org.safs.tools.DefaultTestRecordStackable;
@@ -40,13 +40,10 @@ import org.safs.tools.ITestRecordStackable;
 import org.safs.tools.UniqueStringID;
 import org.safs.tools.consoles.SAFSMonitorFrame;
 import org.safs.tools.counters.CountStatusInterface;
-import org.safs.tools.counters.CountersInterface;
 import org.safs.tools.counters.UniqueStringCounterInfo;
 import org.safs.tools.engines.EngineInterface;
 import org.safs.tools.input.UniqueStringItemInfo;
 import org.safs.tools.input.UniqueStringMapInfo;
-import org.safs.tools.logs.LogsInterface;
-import org.safs.tools.logs.UniqueStringMessageInfo;
 import org.safs.tools.status.StatusCounter;
 import org.safs.tools.status.StatusInterface;
 
@@ -71,10 +68,10 @@ public class JSAFSDriver extends DefaultDriver implements ITestRecordStackable{
 	public StatusCounter statuscounter = null;
 	public TestRecordHelper testRecordHelper = null;
 
-	/**
-	 * The CounterInfo to send to incrementAllCounters.
-	 */
-	public UniqueStringCounterInfo counterInfo = null;
+//	/**
+//	 * The CounterInfo to send to incrementAllCounters.
+//	 */
+//	public UniqueStringCounterInfo counterInfo = null;
 	
 	/** The ITestRecordStackable used to store 'Test Record' in a FILO. */
 	protected ITestRecordStackable testrecordStackable = new DefaultTestRecordStackable();
@@ -148,32 +145,6 @@ public class JSAFSDriver extends DefaultDriver implements ITestRecordStackable{
 		this.automaticResolve = automaticResolve;
 	}
 	
-	/**
-	 * Routine to log different message types to the active SAFS log.
-	 *  
-	 * @param message String message
-	 * @param description String (optional) for more detailed info.  Can be null.
-	 * @param type int message type constant from AbstractLogFacility.
-	 * <p>  
-	 * Some Message Types:<br/>
-	 * <ul>
-	 * <li>{@link AbstractLogFacility#GENERIC_MESSAGE}
-	 * <li>{@link AbstractLogFacility#PASSED_MESSAGE}
-	 * <li>{@link AbstractLogFacility#FAILED_MESSAGE}
-	 * <li>{@link AbstractLogFacility#FAILED_OK_MESSAGE}
-	 * <li>{@link AbstractLogFacility#WARNING_MESSAGE}
-	 * <li>{@link AbstractLogFacility#WARNING_OK_MESSAGE}
-	 * </ul>
-	 * @see #logGENERIC(String, String)
-	 * @see #logPASSED(String, String)
-	 * @see #logFAILED(String, String)
-	 * @see #logWARNING(String, String)
-	 * @see LogsInterface#logMessage(org.safs.tools.logs.UniqueMessageInterface) 
-	 */
-	public void logMessage(String message, String description, int type){
-		logs.logMessage(new UniqueStringMessageInfo(cycleLog.getStringID(), message, description, type));
-	}
-
 	/**
 	 * Convenience routine to log GENERIC message to the active SAFS log.
 	 * <br>The routine uses the AbstractLogFacility.GENERIC_MESSAGE type.
@@ -601,76 +572,6 @@ public class JSAFSDriver extends DefaultDriver implements ITestRecordStackable{
 		return null;
 	}
 	
-	/**
-	 * Increment General (not Test) record counts.
-	 * @param status
-	 * @see StatusCodes
-	 */
-	public void incrementGeneralStatus(int status){
-		switch(status){		
-			case StatusCodes.OK:
-				statuscounter.incrementGeneralPasses();
-				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_GENERAL_PASS);
-				break;
-			case StatusCodes.INVALID_FILE_IO:
-				statuscounter.incrementIOFailures();
-				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_IO_FAILURE);
-				break;
-			case StatusCodes.GENERAL_SCRIPT_FAILURE:
-			case StatusCodes.WRONG_NUM_FIELDS:
-				statuscounter.incrementGeneralFailures();
-				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_GENERAL_FAILURE);
-				break;
-			case StatusCodes.SCRIPT_WARNING:
-				statuscounter.incrementGeneralWarnings();
-				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_GENERAL_WARNING);
-				break;
-			case StatusCodes.SCRIPT_NOT_EXECUTED:
-				statuscounter.incrementSkippedRecords();
-				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_SKIPPED_RECORD);
-				break;
-			default:
-				statuscounter.incrementGeneralPasses();
-				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_GENERAL_PASS);
-		}
-	}
-
-	/**
-	 * Increment Test Record counts.
-	 * @param status
-	 * @see StatusCodes
-	 */
-	public void incrementTestStatus(int status){
-		switch(status){		
-			case StatusCodes.OK:
-				statuscounter.incrementTestPasses();
-				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_TEST_PASS);
-				break;
-			case StatusCodes.INVALID_FILE_IO:
-				statuscounter.incrementTestIOFailures();
-				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_TEST_IO_FAILURE);
-				break;
-			case StatusCodes.GENERAL_SCRIPT_FAILURE:
-			case StatusCodes.WRONG_NUM_FIELDS:
-			case StatusCodes.NO_RECORD_TYPE_FIELD:
-			case StatusCodes.UNRECOGNIZED_RECORD_TYPE:
-				statuscounter.incrementTestFailures();
-				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_TEST_FAILURE);
-				break;
-			case StatusCodes.SCRIPT_WARNING:
-				statuscounter.incrementTestWarnings();
-				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_TEST_WARNING);
-				break;
-			case StatusCodes.SCRIPT_NOT_EXECUTED:
-				statuscounter.incrementSkippedRecords();
-				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_SKIPPED_RECORD);
-				break;
-			default:
-				statuscounter.incrementGeneralPasses();
-				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_GENERAL_PASS);
-		}
-	}
-
 	/**
 	 * Programmatically conform to user-initiated PAUSE, RUN, STEP, STEP RETRY input from SAFS Monitor.
 	 * <p>
@@ -1265,6 +1166,7 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 	public static void main(String[] args){
 		log_self("Commencing JSAFS Self-Test...");
 		JSAFSDriver jsafs = new JSAFSDriver("JSAFS");
+		Driver.setIDriver(jsafs);
 		String sep = ","; //default SAFS field separator
 		jsafs.run();
 		
@@ -1353,6 +1255,7 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 		}catch(SAFSException x){
 			log_self("SAFSMonitor User-Initiated STOP!");
 		}
+		Driver.setIDriver(null);
 		jsafs.shutdown();
 		log_self("Ended JSAFS Self-Test...");
 	}
