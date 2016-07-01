@@ -11,6 +11,7 @@ import org.safs.model.commands.GenericObjectFunctions;
 import org.safs.model.components.EditBox;
 import org.safs.model.components.PushButton;
 import org.safs.model.components.Window;
+import org.safs.model.tools.Driver;
 import org.safs.tools.drivers.DefaultDriver;
 import org.safs.tools.drivers.JSAFSDriver;
 import org.safs.Log;
@@ -115,6 +116,10 @@ public class EmbeddedJSAFSDriver {
 	 */
 	public JSAFSDriver jsafs = new JSAFSDriver("Driver");
 	
+	public EmbeddedJSAFSDriver(){
+		Driver.setIDriver(jsafs);
+	}
+	
 	/**
 	 * Possible main entry point for the test class.
 	 * The JVM should be instanced with required -D Property settings used by this example:
@@ -187,7 +192,6 @@ public class EmbeddedJSAFSDriver {
 	 * In this example this is the final call before JSAFSDriver and all of SAFS is shutdown.
 	 */
 	private void cleanupTests() {
-		// TODO Auto-generated method stub
-		
+		Driver.setIDriver(null);
 	}
 }

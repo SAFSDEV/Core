@@ -20,6 +20,8 @@ import org.safs.model.commands.DDDriverCommands;
 import org.safs.text.FileUtilities;
 import org.safs.tools.CaseInsensitiveFile;
 import org.safs.tools.drivers.DriverConstant;
+import org.safs.tools.drivers.DriverInterface;
+import org.safs.tools.drivers.InputProcessor;
 import org.safs.tools.drivers.JSAFSDriver;
 
 /**
@@ -71,7 +73,11 @@ public abstract class AbstractDriver {
 		boolean filesarg = false;
 		
 		try{ 
-			dir = jsafs().getDatapoolDir();
+			if(jsafs() != null) { dir = jsafs().getDatapoolDir(); }
+			else{
+				// TODO: Use InputProcessor if JSAFSDriver not present.
+				dir = processor().getDatapoolDir();
+			}
 			filename = DEFAULT_APPMAP_ORDER;
 			String jvmarg = null;
 			jvmarg = System.getProperty(APPMAP_ORDER_PROPERTY);
@@ -165,11 +171,35 @@ public abstract class AbstractDriver {
 	 * Otherwise this method will do nothing, just return the original expression string.
 	 */
 	protected String processExpression(String expression){
-		return jsafs().processExpression(expression);//Expression will turn off/on both "math" and "DDVariable"
-//		return jsafs().resolveExpression(expression);//Expression will turn off/on "math", while "DDVariable" will be kept all the time
+		if(jsafs() != null){ 
+			return jsafs().processExpression(expression);//Expression will turn off/on both "math" and "DDVariable" 
+			//return jsafs().resolveExpression(expression);//Expression will turn off/on "math", while "DDVariable" will be kept all the time
+		}else{
+			// TODO: Use InputProcessor if JSAFSDriver not present.
+			String sep = processor().getTestRecordData().getSeparator();
+			String exp = processor().getVarsInterface().resolveExpressions(expression, sep);
+			// LeiWang: should we always remove the wrapping double-quote? If the original expression is double-quoted, then we should not remove them.
+			return StringUtils.removeWrappingDoubleQuotes(exp);
+		}
 	}
-	
+
 	protected abstract JSAFSDriver jsafs();	
+	protected abstract InputProcessor processor();
+	
+	/**
+	 * @return DriverInterface currently being used.<br>
+	 * Could be a JSAFSDriver.  Could be an InputProcessor.<br>
+	 * Subclasses should override to support other DriverInterface instances not tracked in this superclass.  
+	 * Can be null if none are set.
+	 * @see #setIDriver(DriverInterface)
+	 * @see JSAFSDriver
+	 * @see InputProcessor
+	 */
+	public DriverInterface iDriver(){
+		if(jsafs() instanceof DriverInterface) return jsafs();
+		if(processor() instanceof DriverInterface) return processor();
+		return null;
+	}
 	
 	/**
 	 * Turn ON Expressions, AppMapChaining, and AppMapResolve.
@@ -278,17 +308,40 @@ public abstract class AbstractDriver {
 		if(parameters instanceof String[] && parameters.length > 0) 
 			model.addParameters(parameters);
 		
-		String sep = StringUtils.getUniqueSep(jsafs().SEPARATOR, command, parameters);
+		String sep = null;
+		try{
+			sep = StringUtils.getUniqueSep(jsafs().SEPARATOR, command, parameters);
+		}catch(NullPointerException np){
+			// TODO: Use InputProcessor if JSAFSDriver not present.
+			sep = StringUtils.getUniqueSep(processor().getDefaultSeparator(), command, parameters);
+		}
+		TestRecordHelper trd = null;
 		if(sep==null){
-			TestRecordHelper trd = jsafs().initTestRecordData(null);
-			trd.setRecordType(DriverConstant.RECTYPE_C);
+			if(jsafs() != null){ 
+				trd = jsafs().initTestRecordData(null);
+				trd.setRecordType(DriverConstant.RECTYPE_C);
+				trd.setSeparator(jsafs().SEPARATOR);
+				trd.setInputRecord(model.exportTestRecord(jsafs().SEPARATOR));
+			}else{
+			    trd = processor().initTestRecordData(
+			    		model.exportTestRecord(processor().getDefaultSeparator()), 
+			    		processor().getDefaultSeparator());
+			}
 			trd.setCommand(command);
-			trd.setInputRecord(model.exportTestRecord(jsafs().SEPARATOR));
 			trd.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
 			trd.setStatusInfo("Unable to dynamically deduce an acceptable unique SEPARATOR for this Command!");
 			return trd;
 		}
-		return jsafs().runDriverCommand(model, sep);
+		if(jsafs() != null)	return jsafs().runDriverCommand(model, sep);
+		else {
+		    trd = processor().initTestRecordData(
+		    		model.exportTestRecord(processor().getDefaultSeparator()), 
+		    		processor().getDefaultSeparator());
+			trd.setCommand(command);
+			trd.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
+			long result = processor().processDriverCommand(trd);
+			return trd;
+		}
 	}
 
 	/**
@@ -309,22 +362,50 @@ public abstract class AbstractDriver {
 	 */
 	public TestRecordHelper runComponentFunctionConverted(String command, String child, String parent, String... parameters)throws Throwable{
 		ComponentFunction model = new ComponentFunction(command, parent, child);
-		String sep = StringUtils.getUniqueSep(jsafs().SEPARATOR, command+child+parent, parameters);
+		String sep = null;
+		try{ sep = StringUtils.getUniqueSep(jsafs().SEPARATOR, command+child+parent, parameters);}
+		catch(NullPointerException np){
+			// TODO: Use InputProcessor if JSAFSDriver not present.
+			sep = StringUtils.getUniqueSep(processor().getDefaultSeparator(), command+child+parent, parameters);
+		}
 		if(parameters instanceof String[]&& parameters.length > 0) 
 			model.addParameters(parameters);
-		
+
+		TestRecordHelper trd = null;
 		if(sep==null){
-			TestRecordHelper trd = jsafs().initTestRecordData(null);
-			trd.setRecordType(DriverConstant.RECTYPE_T);
+			if(jsafs() instanceof JSAFSDriver){
+				trd = jsafs().initTestRecordData(null);
+				trd.setRecordType(DriverConstant.RECTYPE_T);
+				trd.setSeparator(jsafs().SEPARATOR);
+				trd.setInputRecord(model.exportTestRecord(jsafs().SEPARATOR));
+			}else{
+			    trd = processor().initTestRecordData(
+			    		model.exportTestRecord(processor().getDefaultSeparator()), 
+			    		processor().getDefaultSeparator());
+			}
 			trd.setCommand(command);
 			trd.setWindowName(parent);
 			trd.setCompName(child);
-			trd.setInputRecord(model.exportTestRecord(jsafs().SEPARATOR));
 			trd.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
 			trd.setStatusInfo("Unable to dynamically deduce an acceptable unique SEPARATOR for this Action!");
 			return trd;
 		}
-		return jsafs().runComponentFunction(model, sep);
-	}
-	
+		if(jsafs() != null)	return jsafs().runComponentFunction(model, sep);
+		else {
+		    trd = processor().initTestRecordData(
+		    		model.exportTestRecord(processor().getDefaultSeparator()), 
+		    		processor().getDefaultSeparator());
+		    try{
+			    processor().checkTestLevelForStepExecution();
+				trd.setCommand(command);
+				trd.setWindowName(parent);
+				trd.setCompName(child);
+				trd.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
+				long result = processor().processTestRecord(trd);
+		    }finally{
+				processor().resetTestLevel();		    	
+		    }
+			return trd;
+		}
+	}	
 }

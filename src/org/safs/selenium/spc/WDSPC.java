@@ -1,37 +1,18 @@
 package org.safs.selenium.spc;
 
-import java.awt.AWTException;
-import java.awt.Color;
-import java.awt.Rectangle;
-import java.awt.Robot;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Properties;
-
 import javax.imageio.ImageIO;
-import javax.swing.JOptionPane;
-
 import org.openqa.selenium.By;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.TargetLocator;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.server.RemoteControlConfiguration;
-import org.safs.IndependantLog;
 import org.safs.Log;
 import org.safs.SAFSException;
-import org.safs.StatusCodes;
-import org.safs.selenium.DocumentParser;
 import org.safs.selenium.SGuiObject;
-import org.safs.selenium.SeleniumGUIUtilities;
-import org.safs.selenium.SeleniumJavaHook;
-import org.safs.selenium.util.HtmlFrameComp;
-import org.safs.selenium.util.JavaScriptFunctions;
 import org.safs.selenium.webdriver.EmbeddedSeleniumHookDriver;
 import org.safs.selenium.webdriver.SeleniumHook;
 import org.safs.selenium.webdriver.SeleniumPlus;
@@ -41,13 +22,6 @@ import org.safs.selenium.webdriver.lib.RemoteDriver.SessionInfo;
 import org.safs.selenium.webdriver.lib.SearchObject;
 import org.safs.selenium.webdriver.lib.SeleniumPlusException;
 import org.safs.selenium.webdriver.lib.WDLibrary;
-import org.safs.text.GENKEYS;
-import org.safs.tools.drivers.EmbeddedHookDriver;
-
-import com.gargoylesoftware.htmlunit.util.StringUtils;
-import com.thoughtworks.selenium.DefaultSelenium;
-import com.thoughtworks.selenium.Selenium;
-import com.thoughtworks.selenium.SeleniumException;
 
 /**
  * 
@@ -131,7 +105,7 @@ public class WDSPC extends SeleniumPlus{
 			if(USE_REMOTE){
 				Log.info("WDSPC attempting to (re)start RemoteServer.");
 				//if(WebDriverGUIUtilities.startRemoteServer()){
-				if(WebDriverGUIUtilities.startRemoteServer(Runner.jsafs().getProjectRootDir())){
+				if(WebDriverGUIUtilities.startRemoteServer(Runner.driver().iDriver().getProjectRootDir())){
 					try{
 						WDLibrary.startBrowser(browser, url, id, BROWSER_TIMEOUT, USE_REMOTE, BROWSER_PARMS);
 					}catch(Throwable th2){

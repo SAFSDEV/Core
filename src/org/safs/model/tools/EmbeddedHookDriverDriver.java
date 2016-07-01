@@ -20,6 +20,7 @@ import org.safs.model.ComponentFunction;
 import org.safs.model.DriverCommand;
 import org.safs.tools.drivers.DriverConstant;
 import org.safs.tools.drivers.EmbeddedHookDriver;
+import org.safs.tools.drivers.InputProcessor;
 import org.safs.tools.drivers.JSAFSDriver;
 
 /**
@@ -63,7 +64,13 @@ public class EmbeddedHookDriverDriver extends AbstractDriver{
 		}
 	}
 
+	/** Provided by our internal EmbeddedHookDriver.
+	 * @see EmbeddedHookDriver */
+	@Override
 	protected JSAFSDriver jsafs(){ return driver.jsafs();}
+	/** Does not support storing or using an InputProcessor internally. */
+	@Override
+	protected InputProcessor processor(){ return null; }
 	
 	/**
 	 * Must be called at least once to initialize the internal Driver.
