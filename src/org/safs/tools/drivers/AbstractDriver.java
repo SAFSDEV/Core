@@ -12,11 +12,13 @@ import org.safs.tools.CaseInsensitiveFile;
 import org.safs.tools.CoreInterface;
 import org.safs.tools.GenericToolsInterface;
 import org.safs.tools.counters.CountersInterface;
+import org.safs.tools.counters.UniqueStringCounterInfo;
 import org.safs.tools.engines.AutoItComponent;
 import org.safs.tools.engines.EngineInterface;
 import org.safs.tools.input.InputInterface;
 import org.safs.tools.input.MapsInterface;
 import org.safs.tools.logs.LogsInterface;
+import org.safs.tools.logs.UniqueStringMessageInfo;
 import org.safs.tools.status.StatusCounter;
 import org.safs.tools.status.StatusCounterInterface;
 import org.safs.tools.status.StatusInterface;
@@ -53,6 +55,8 @@ public abstract class AbstractDriver implements DriverInterface{
 	protected EngineInterface          ipcommands  = null;
 	/** {@link org.safs.tools.status.StatusCounter} */
 	protected StatusInterface         statuscounts = new StatusCounter();
+	public UniqueStringCounterInfo counterInfo = null;
+	
 	protected int            millisBetweenRecords  = 0;
 	
 	/** 
@@ -251,6 +255,79 @@ public abstract class AbstractDriver implements DriverInterface{
 		try{ ((StatusCounterInterface)statuscounts).addStatus(incstatus);}
 		catch(Exception ex){;}
 		return statuscounts;	}	
+
+	/**
+	 * Increment General (not Test) record counts.
+	 * @param status
+	 * @see StatusCodes
+	 */
+	public void incrementGeneralStatus(int status){
+		if(counterInfo == null) counterInfo = new UniqueStringCounterInfo(getTestName(), getTestLevel());
+		switch(status){		
+			case StatusCodes.OK:
+				((StatusCounter) statuscounts).incrementGeneralPasses();
+				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_GENERAL_PASS);
+				break;
+			case StatusCodes.INVALID_FILE_IO:
+				((StatusCounter) statuscounts).incrementIOFailures();
+				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_IO_FAILURE);
+				break;
+			case StatusCodes.GENERAL_SCRIPT_FAILURE:
+			case StatusCodes.WRONG_NUM_FIELDS:
+				((StatusCounter) statuscounts).incrementGeneralFailures();
+				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_GENERAL_FAILURE);
+				break;
+			case StatusCodes.SCRIPT_WARNING:
+				((StatusCounter) statuscounts).incrementGeneralWarnings();
+				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_GENERAL_WARNING);
+				break;
+			case StatusCodes.SCRIPT_NOT_EXECUTED:
+				((StatusCounter) statuscounts).incrementSkippedRecords();
+				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_SKIPPED_RECORD);
+				break;
+			default:
+				((StatusCounter) statuscounts).incrementGeneralPasses();
+				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_GENERAL_PASS);
+		}
+	}
+
+	/**
+	 * Increment Test Record counts.
+	 * @param status
+	 * @see StatusCodes
+	 */
+	public void incrementTestStatus(int status){
+		if(counterInfo == null) counterInfo = new UniqueStringCounterInfo(getTestName(), getTestLevel());
+		switch(status){		
+			case StatusCodes.OK:
+				((StatusCounter) statuscounts).incrementTestPasses();
+				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_TEST_PASS);
+				break;
+			case StatusCodes.INVALID_FILE_IO:
+				((StatusCounter) statuscounts).incrementTestIOFailures();
+				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_TEST_IO_FAILURE);
+				break;
+			case StatusCodes.GENERAL_SCRIPT_FAILURE:
+			case StatusCodes.WRONG_NUM_FIELDS:
+			case StatusCodes.NO_RECORD_TYPE_FIELD:
+			case StatusCodes.UNRECOGNIZED_RECORD_TYPE:
+				((StatusCounter) statuscounts).incrementTestFailures();
+				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_TEST_FAILURE);
+				break;
+			case StatusCodes.SCRIPT_WARNING:
+				((StatusCounter) statuscounts).incrementTestWarnings();
+				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_TEST_WARNING);
+				break;
+			case StatusCodes.SCRIPT_NOT_EXECUTED:
+				((StatusCounter) statuscounts).incrementSkippedRecords();
+				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_SKIPPED_RECORD);
+				break;
+			default:
+				((StatusCounter) statuscounts).incrementGeneralPasses();
+				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_GENERAL_PASS);
+		}
+	}
+
 
 	/**
 	 * @see DriverInterface#getDriverName()
@@ -1023,5 +1100,38 @@ public abstract class AbstractDriver implements DriverInterface{
 	 * @see SAFSDRIVER#processTest()
 	 */
 	protected abstract StatusInterface processTest();
+	
+	/**
+	 * Routine to log different message types to the active SAFS log.
+	 *  
+	 * @param message String message
+	 * @param description String (optional) for more detailed info.  Can be null.
+	 * @param type int message type constant from AbstractLogFacility.
+	 * <p>  
+	 * Some Message Types:<br/>
+	 * <ul>
+	 * <li>{@link AbstractLogFacility#GENERIC_MESSAGE}
+	 * <li>{@link AbstractLogFacility#PASSED_MESSAGE}
+	 * <li>{@link AbstractLogFacility#FAILED_MESSAGE}
+	 * <li>{@link AbstractLogFacility#FAILED_OK_MESSAGE}
+	 * <li>{@link AbstractLogFacility#WARNING_MESSAGE}
+	 * <li>{@link AbstractLogFacility#WARNING_OK_MESSAGE}
+	 * </ul>
+	 * @see #logGENERIC(String, String)
+	 * @see #logPASSED(String, String)
+	 * @see #logFAILED(String, String)
+	 * @see #logWARNING(String, String)
+	 * @see LogsInterface#logMessage(org.safs.tools.logs.UniqueMessageInterface) 
+	 */
+	public void logMessage(String msg, String msgdescription, int msgtype){
+		String logname = cycleLogName != null ? cycleLogName :
+			             suiteLogName != null ? suiteLogName :
+			             stepLogName;
+		UniqueStringMessageInfo msgInfo = new UniqueStringMessageInfo(
+											  logname,
+											  msg, msgdescription, msgtype);
+											  
+		getLogsInterface().logMessage(msgInfo);
+	}
 }
 

@@ -23,6 +23,7 @@ import org.safs.STAFHelper;
 import org.safs.SingletonSTAFHelper;
 import org.safs.TestRecordHelper;
 import org.safs.logging.LogUtilities;
+import org.safs.model.tools.Driver;
 import org.safs.staf.STAFProcessHelpers;
 import org.safs.tools.counters.UniqueStringCounterInfo;
 import org.safs.tools.status.StatusCounter;
@@ -117,6 +118,7 @@ public class EmbeddedHookDriver extends JavaHook {
 	protected void initialize(){
 		hook = this;
 		jsafs = new JSAFSDriver(process_name);
+		Driver.setIDriver(jsafs);
 		jsafs.systemExitOnShutdown = false;
 		jsafs.removeShutdownHook();
 	}
@@ -549,6 +551,7 @@ public class EmbeddedHookDriver extends JavaHook {
 		  }
 		  Log.info("EmbeddedDriver shutting down embedded JSAFSDriver...");
 		  try{
+			  Driver.setIDriver(null);
 			  jsafs.shutdown();
 		  }catch(NullPointerException x){
 			  Log.debug("EmbeddedDriver JSAFS shutdown "+x.getClass().getSimpleName()+": "+x.getMessage(), x);
