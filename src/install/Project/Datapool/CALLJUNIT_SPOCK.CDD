@@ -1,0 +1,16 @@
+
+C	Expressions	ON
+
+C	LogMessage	"Current test is '" & ^safsActiveCycle & "'."
+
+C	AppMapChaining	ON
+C	AppMapResolve	ON
+
+C	SetApplicationMap	SPOCKApp.map
+C	SetApplicationMap	SPOCKApp_en.map
+
+C	BreakPoints	ON
+BP
+
+C	CallJunit	"com.sas.spock.safs.runner.tests.NoRuntimeDataAwarenessTest"
+C	CallJunit	"com.sas.spock.safs.runner.tests.CallJunitTest"
