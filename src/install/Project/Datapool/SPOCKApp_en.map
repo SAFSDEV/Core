@@ -1,0 +1,13 @@
+[ApplicationConstants]
+
+
+# Window and Component definitions are added below.
+# Example:
+# 
+# [WindowName]
+# Child1="recognition string"
+# Child2="recognition string"
+
+# Refer to the SearchObject link below for info on recognition string formats:
+# 
+# http://safsdev.sourceforge.net/doc/org/safs/selenium/webdriver/lib/SearchObject.html
