@@ -924,7 +924,7 @@ public class CFComponent extends ComponentFunction {
 		  TopLevelTestObject parent = ((RDDGUIUtilities)utils).getParentTestObject(obj1);
 		  parent.move(position);
 	  }catch(Exception e){
-		  String msg = "Fail to minimize window due to Exception "+e.getMessage();
+		  String msg = "Fail to set window to position "+position+", due to Exception "+e.getMessage();
 		  Log.error(debugmsg+msg);
 		  throw new SAFSException(msg);
 	  }
@@ -936,7 +936,7 @@ public class CFComponent extends ComponentFunction {
 		  TopLevelTestObject parent = ((RDDGUIUtilities)utils).getParentTestObject(obj1);
 		  parent.resize(size.width, size.height);
 	  }catch(Exception e){
-		  String msg = "Fail to minimize window due to Exception "+e.getMessage();
+		  String msg = "Fail to set window to size "+size+" ,due to Exception "+e.getMessage();
 		  Log.error(debugmsg+msg);
 		  throw new SAFSException(msg);
 	  }
