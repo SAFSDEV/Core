@@ -9,9 +9,12 @@
  * SEP 30, 2015 Carl Nagle CFComponent return NOT_EXECUTED if RS is empty, missing, or not AutoIt RS. 
  * DEC 23, 2015 Lei Wang Add method activate(): focus both window and component.
  *                     Modify process(): Wait for window and component's existence and focus before execution.
+ * JUL 12, 2016 Lei Wang Implement 'SetPosition' keyword.
  */
 package org.safs.tools.engines;
 
+import java.awt.Dimension;
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -26,7 +29,9 @@ import org.safs.autoit.AutoIt;
 import org.safs.autoit.AutoItRs;
 import org.safs.logging.AbstractLogFacility;
 import org.safs.logging.LogUtilities;
+import org.safs.model.commands.DriverCommands;
 import org.safs.model.commands.EditBoxFunctions;
+import org.safs.model.commands.GenericObjectFunctions;
 import org.safs.tools.drivers.DriverConstant;
 import org.safs.tools.drivers.DriverInterface;
 
@@ -51,10 +56,10 @@ public class AutoItComponent extends GenericEngine {
 	// START: LOCALLY SUPPORTED COMMANDS
 	
 	/** "SetFocus" */
-    static final String COMMAND_SETFOCUS		       = "SetFocus";       
+    static final String COMMAND_SETFOCUS		       = DriverCommands.SETFOCUS_KEYWORD;
 
 	/** "Click" */
-    static final String COMMAND_CLICK 			       = "Click";        
+    static final String COMMAND_CLICK 			       = GenericObjectFunctions.CLICK_KEYWORD;       
 
     /** "SetTextValue" */
     static public final String SETTEXTVALUE_KEYWORD = EditBoxFunctions.SETTEXTVALUE_KEYWORD;
@@ -195,6 +200,8 @@ public class AutoItComponent extends GenericEngine {
 		protected AutoItX it = null;
 		/** '1', the default timeout in seconds to wait the window become focused. */
 		protected int DEFAULT_TIMEOUT_WAIT_WIN_FOCUSED = 1;
+		/** AutoItRs, the object representing the component */
+		protected AutoItRs rs = null;
 		
 		CFComponent (){
 			super();
@@ -231,7 +238,7 @@ public class AutoItComponent extends GenericEngine {
 			Log.info(debugmsg + " win: "+ windowName +"; comp: "+ compName+"; with params: "+params);
 
 			// prepare Autoit RS
-			AutoItRs rs = new AutoItRs(winrec,comprec);
+			rs = new AutoItRs(winrec,comprec);
 			
 			//Wait the window to exist
 			if(!it.winWait(rs.getWindowsRS(), "", secsWaitForWindow)){
@@ -255,6 +262,12 @@ public class AutoItComponent extends GenericEngine {
 			    setFocus(rs);
 			} else if ( action.equalsIgnoreCase(SETTEXTVALUE_KEYWORD)) {
 				setText(rs);
+			}
+			
+			if (testRecordData.getStatusCode() == StatusCodes.SCRIPT_NOT_EXECUTED) {
+				componentProcess();//handle Generic keywords
+			} else {
+				Log.debug(debugmsg+"'"+action+"' has been processed\n with testrecorddata"+testRecordData+"\n with params "+params);
 			}
 		}
 		
@@ -369,6 +382,71 @@ public class AutoItComponent extends GenericEngine {
 		   	}catch(Exception x){
 		   		this.issueErrorPerformingAction(x.getClass().getSimpleName()+": "+ x.getMessage());
 		   	}
+		}
+		
+		/** <br><em>Purpose:</em> restore
+		 **/
+		protected void _restore() throws SAFSException{
+			String debugmsg = StringUtils.debugmsg(false);
+			try{
+//				it.winSetState(rs.getWindowsRS(), "", AutoItX.SW_RESTORE);
+				it.winSetState(rs.getWindowsRS(), "", AutoItX.SW_SHOWNORMAL);
+			}catch(Exception e){
+				String msg = "Fail to resotre window due to Exception "+e.getMessage();
+				Log.error(debugmsg+msg);
+				throw new SAFSException(msg);
+			}    
+		}
+
+		protected void _setPosition(Point position) throws SAFSException {
+			String debugmsg = StringUtils.debugmsg(false);
+			try{
+				it.winMove(rs.getWindowsRS(), "", position.x, position.y);
+			}catch(Exception e){
+				String msg = "Fail to set window to position "+position+", due to Exception "+e.getMessage();
+				Log.error(debugmsg+msg);
+				throw new SAFSException(msg);
+			}
+		}
+
+		protected void _setSize(Dimension size) throws SAFSException {
+			String debugmsg = StringUtils.debugmsg(false);
+			try{
+				int x = it.winGetPosX(rs.getWindowsRS(), "");
+				int y = it.winGetPosY(rs.getWindowsRS(), "");
+				
+				it.winMove(rs.getWindowsRS(), "", x, y, size.width, size.height);
+				
+			}catch(Exception e){
+				String msg = "Fail to set window to size "+size+" ,due to Exception "+e.getMessage();
+				Log.error(debugmsg+msg);
+				throw new SAFSException(msg);
+			}
+		}
+
+		/** <br><em>Purpose:</em> minimize
+		 **/
+		protected void _minimize() throws SAFSException{
+			String debugmsg = StringUtils.debugmsg(false);
+			try{
+				it.winSetState(rs.getWindowsRS(), "", AutoItX.SW_SHOWMINIMIZED);
+			}catch(Exception e){
+				String msg = "Fail to minimize window due to Exception "+e.getMessage();
+				Log.error(debugmsg+msg);
+				throw new SAFSException(msg);
+			}
+		}
+		/** <br><em>Purpose:</em> maximize
+		 **/
+		protected void _maximize() throws SAFSException{
+			String debugmsg = StringUtils.debugmsg(false);
+			try{
+				it.winSetState(rs.getWindowsRS(), "", AutoItX.SW_SHOWMAXIMIZED);
+			}catch(Exception e){
+				String msg = "Fail to maximize window due to Exception "+e.getMessage();
+				Log.error(debugmsg+msg);
+				throw new SAFSException(msg);
+			}
 		}
 	
 	}

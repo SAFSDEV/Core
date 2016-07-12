@@ -566,12 +566,22 @@ public abstract class SeleniumPlus {
 		}
 		
 		/**
-		 * Set status of current WebBrowser window
+		 * Set status of current WebBrowser window<br>
+		 * See <a href="http://safsdev.sourceforge.net/sqabasic2000/WindowFunctionsReference.htm#detail_SetPosition">Detailed Reference</a>
 		 * @param status String, window's status, it can be one of<br>
 		 * <ul>
 		 * <li>{@link org.safs.ComponentFunction.Window#MAXIMIZED}
 		 * <li>{@link org.safs.ComponentFunction.Window#MINIMIZED}
 		 * <li>{@link org.safs.ComponentFunction.Window#NORMAL}
+		 * <li>The status string "x,y,width,height;Status=Normal". For example, "0,0,640,480;Status=NORMAL" or "0,0,640,480;Status=MAXIMIZED"
+		 * <li>The map item represent the status string. For example, we define the status string 'preset' in map file as below:
+		 *     <pre>
+		 *     [Notepad]
+		 *     Notepad=":AUTOIT:title=Untitled - Notepad"
+		 *     preset="0,0,640,480;Status=NORMAL"
+		 *     </pre>
+		 *     The we could call {@code Window.SetPosition(Map.Notepad.Notepad, "preset");}
+		 * </li>
 		 * </ul>
 		 * @return true on success
 		 * @example	 
@@ -585,13 +595,20 @@ public abstract class SeleniumPlus {
 		 */
 		public static boolean SetPosition(org.safs.model.Component window, String status){
 			StringBuffer parameter = new StringBuffer();
-			String separator = StringUtils.generatePositionSepeartor(Runner.jsafs().getStepSeparator());
 			
-			parameter.append(Integer.toString(0)+separator);
-			parameter.append(Integer.toString(0)+separator);
-			parameter.append(Integer.toString(200)+separator);
-			parameter.append(Integer.toString(200)+separator);
-			parameter.append(status);
+			if(org.safs.ComponentFunction.Window.MAXIMIZED.equalsIgnoreCase(status) ||
+			   org.safs.ComponentFunction.Window.MINIMIZED.equalsIgnoreCase(status) ||
+			   org.safs.ComponentFunction.Window.NORMAL.equalsIgnoreCase(status)){
+				
+				String separator = StringUtils.generatePositionSepeartor(Runner.jsafs().getStepSeparator());
+				parameter.append(Integer.toString(0)+separator);
+				parameter.append(Integer.toString(0)+separator);
+				parameter.append(Integer.toString(200)+separator);
+				parameter.append(Integer.toString(200)+separator);
+				parameter.append(status);
+			}else{
+				parameter.append(status);
+			}
 			
 			return action(window, WindowFunctions.SETPOSITION_KEYWORD, parameter.toString());
 		}	
