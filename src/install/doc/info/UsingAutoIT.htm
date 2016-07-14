@@ -132,19 +132,17 @@ appmap following way</p>
 
 <p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;[Calculator]</p>
 
-<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;Calculator=":autoit:title=Calculator”</p>
+<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;Calculator=":autoit:title=Calculator"</p>
 
-<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;Num3=
-“class=Button;id=133”</p>
+<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;Num3="class=Button;id=133"</p>
 
 <p class=MsoNoSpacing style='text-indent:.5in'>&nbsp;</p>
 
 <p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;[Calculator]</p>
 
-<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;Calculator=":autoit:title=Calculator”</p>
+<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;Calculator=":autoit:title=Calculator"</p>
 
-<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;Num3=
-“id=133”</p>
+<p class=MsoNoSpacing style='margin-left:.25in'>&nbsp;Num3="id=133"</p>
 <p>
 <p class=MsoNoSpacing style='text-indent:.25in'>
 Consult this link for more info on <a href="http://safsdev.sourceforge.net/doc/org/safs/autoit/AutoItRs.html" target="_blank" title="SAFS AutoIt Recognition Strings">SAFS AutoIt Recognition Strings</a>.</p>
@@ -158,7 +156,22 @@ style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;
 <p class=MsoNoSpacing style='margin-left:.5in'><img
 id="Picture 6" src="AutoItInfo.jpg"></p>
 <p class=MsoNoSpacing style='margin-left:.5in'>&nbsp;</p>
+
 <p class=MsoNoSpacing style='margin-left:20.25pt;text-indent:-20.25pt'><b>4.</b><b><span
+style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>How to define AutoIT recognition string(RS) for window?</b></p>
+<p class=MsoNoSpacing style='margin-left:20.25pt'>
+  Currently, we <b>MUST use 'title'</b> to define a window. 
+  We can use part of the title, it must be the beginning part of the title.
+  For example, we have a Notepad window with title "Untitled - Notepad", we 
+  can define RS as Notepad=":AUTOIT:title=Untitled - Notepad" using the full title 
+  or Notepad=":AUTOIT:title=Untitled" using the beginning part of the title;
+  but we should not define RS as Notepad=":AUTOIT:title=Notepad" which uses the
+  ending part of the title.
+</p>
+<p class=MsoNoSpacing style='margin-left:.5in'>&nbsp;</p>
+
+<p class=MsoNoSpacing style='margin-left:20.25pt;text-indent:-20.25pt'><b>5.</b><b><span
 style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span>Is AutoIT not working?</b></p>
 <p class=MsoNoSpacing style='text-indent:.25in'>&nbsp;When AutoIt load, DLLs will be registered to the system. If AutoIT already installed to the system then uninstall AutoIT or DLLs.</p>
