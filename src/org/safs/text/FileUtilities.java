@@ -1168,7 +1168,8 @@ public class FileUtilities
 	public static enum Mode{
 		INPUT("Input"),
 		OUTPUT("Output"),
-		APPEND("Append");
+		APPEND("Append"),
+		APPENDRAW("AppendRaw");
 
 		public final String name;
 		Mode(String name){
