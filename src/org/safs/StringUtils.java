@@ -297,6 +297,25 @@ public class StringUtils{
 	return result;
   }
 
+  /** <br><em>Purpose:</em> read all contents of BufferedReader.<br>
+   * Does NOT strip out any content or line-endings.
+   * @param                     filename, String
+   * @return                    StringBuffer
+   **/
+  private static StringBuffer readRawBuffer(BufferedReader reader)throws IOException{
+	StringBuffer data = new StringBuffer();
+	char[] charbuff = new char[1024];
+	int read = 0;
+	do {
+		read = reader.read(charbuff);
+		if(read > 0){
+			data.append(charbuff, 0, read);
+		}
+	} while (read != -1);
+	reader.close();
+	return data;
+  }
+
   public static String PROPERTY_START = ":PROPERTY:";
   
   /** <br><em>Purpose:</em> read all contents of BufferedReader assuming the contents are in 
@@ -358,6 +377,18 @@ public class StringUtils{
   }
 
   /** 
+   * read file based on 'filename', returns StringBuffer of file contents.<br>  
+   * The file is assumed to be in the default System character encoding.
+   * @param                     filename, String
+   * @return                    StringBuffer
+   * @see FileUtilities#getSystemBufferedFileReader(String)
+   * @see #readRawBuffer(BufferedReader)
+   **/
+  public static  StringBuffer readRawFile(String filename) throws IOException {
+    return readRawBuffer(FileUtilities.getSystemBufferedFileReader(filename));
+  }
+
+  /** 
    * read file based on 'filename', returns collection of lines with no CR or
    * LF.  The file is assumed to be using UTF-8 character encoding.
    * @param                     filename, String
@@ -367,6 +398,18 @@ public class StringUtils{
    **/
   public static  Collection readUTF8file(String filename) throws IOException {	
 	return readBuffer(FileUtilities.getUTF8BufferedFileReader(filename));
+  }
+
+  /** 
+   * read file based on 'filename', returns StringBuffer of file contents.<br>  
+   * The file is assumed to be using UTF-8 character encoding.
+   * @param                     filename, String
+   * @return                    StringBuffer
+   * @see FileUtilities#getUTF8BufferedFileReader(String)
+   * @see #readRawBuffer(BufferedReader)
+   **/
+  public static  StringBuffer readRawUTF8File(String filename) throws IOException {	
+	return readRawBuffer(FileUtilities.getUTF8BufferedFileReader(filename));
   }
 
   /** 

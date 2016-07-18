@@ -2060,7 +2060,9 @@ public class DCDriverFileCommands extends DriverCommand {
           return;
         }
       } else if (readWrite.equalsIgnoreCase("write") &&
-                 (inOutApp.equalsIgnoreCase("output") || inOutApp.equalsIgnoreCase("append"))) {
+                 (inOutApp.equalsIgnoreCase("output") || 
+                  inOutApp.equalsIgnoreCase("append") || 
+                  inOutApp.equalsIgnoreCase("appendraw"))) {
       	Collection prePart = null;
       	Writer writer = null;
         if (inOutApp.equalsIgnoreCase("append")) {
@@ -2068,6 +2070,13 @@ public class DCDriverFileCommands extends DriverCommand {
 				prePart = StringUtils.readUTF8file(filename);
 			}else{			
           		prePart = StringUtils.readfile(filename);
+			}
+        }else if (inOutApp.equalsIgnoreCase("appendraw")) {
+			prePart = new ArrayList();
+			if (testRecordData.getCommand().equalsIgnoreCase(OPENUTF8FILE)){
+				prePart.add(StringUtils.readRawUTF8File(filename).toString());
+			}else{			
+          		prePart.add(StringUtils.readRawFile(filename).toString());
 			}
         }
         // need to handle creation of NEW file that does not exist
@@ -2077,7 +2086,12 @@ public class DCDriverFileCommands extends DriverCommand {
 			writer = new BufferedWriter(new FileWriter(new CaseInsensitiveFile(filename).toFile()));
 		}
         if (writer != null) {
-          if (inOutApp.equalsIgnoreCase("append")) {
+          if (inOutApp.equalsIgnoreCase("appendraw")) {
+            for(Iterator i= prePart.iterator(); i.hasNext(); ) {
+              String s = i.next().toString();
+              writer.write(s);
+            }
+          }else if (inOutApp.equalsIgnoreCase("append")) {
             for(Iterator i= prePart.iterator(); i.hasNext(); ) {
               String s = i.next().toString() + "\n";
               writer.write(s);
