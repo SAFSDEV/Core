@@ -11,6 +11,10 @@
 package org.safs.autoit;
 
 import org.safs.IndependantLog;
+import org.safs.SAFSException;
+import org.safs.StringUtils;
+
+import autoitx4java.AutoItX;
 
 /**
  * Class to handle recognition string parsing for the AutoIt engine.
@@ -77,8 +81,6 @@ public class AutoItRs {
 	private String classnamenn;
 	private String classname;
 	private String name;
-	
-	
 	
 	public AutoItRs(String winRS, String compRS){
 		this.winRs = winRS;
@@ -168,6 +170,27 @@ public class AutoItRs {
 	public String getWindowsRS(){
 		IndependantLog.debug("AutoItRS.getWindowsRS(): " + title);
 		return title;
+	}
+	
+	/**
+	 * If the window title is not complete, call this method to complete.
+	 * @param it The AutoIt instance.
+	 */
+	public void normalize(AutoItX it){
+		if(it!=null && StringUtils.isValid(title)){
+			title = it.winGetTitle(title);
+		}
+	}
+	
+	/**
+	 * @return boolean true if the recognition string represents a window.
+	 * @throws SAFSException if the window's recognition string is not valid.
+	 */
+	public boolean isWindow() throws SAFSException{
+		if(StringUtils.isValid(winRs)){
+			return winRs.equals(compRs);
+		}
+		throw new SAFSException("The window's recognition string is not valid!");
 	}
 	
 	/**
