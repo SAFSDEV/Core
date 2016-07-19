@@ -15,10 +15,12 @@ package org.safs.tools.engines;
 
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Collection;
 
 import org.safs.ComponentFunction;
+import org.safs.IndependantLog;
 import org.safs.Log;
 import org.safs.Processor;
 import org.safs.SAFSException;
@@ -449,5 +451,43 @@ public class AutoItComponent extends GenericEngine {
 			}
 		}
 	
+		protected Rectangle getComponentRectangle(){
+			return getComponentRectangleOnScreen();
+		}
+		
+		protected Rectangle getComponentRectangleOnScreen(){
+			String debugmsg = StringUtils.debugmsg(false);
+			Rectangle rectangle = null;
+			try{
+				int x = it.winGetPosX(rs.getWindowsRS(), "");
+				int y = it.winGetPosY(rs.getWindowsRS(), "");
+				int width = 0;
+				int height = 0;
+				
+				if(rs.isWindow()){
+					width = it.winGetPosWidth(rs.getWindowsRS(), "");
+					height = it.winGetPosHeight(rs.getWindowsRS(), "");
+				}else{
+					width = it.controlGetPosWidth(rs.getWindowsRS(), "", rs.getComponentRS());
+					height = it.controlGetPosHeight(rs.getWindowsRS(), "", rs.getComponentRS());
+					int controlX = it.controlGetPosX(rs.getWindowsRS(), "", rs.getComponentRS());
+					int controlY = it.controlGetPosY(rs.getWindowsRS(), "", rs.getComponentRS());
+					x += controlX;
+					y += controlY;
+					//controlX and controlY are the control's position relative to the window, BUT the 
+					//value returned seems not accurate, there are some pixel difference!
+					x +=7;// the controlX returned by AUTOIT is not correct, there is about 7 pixel difference. 
+					y +=50;// the controlY returned by AUTOIT is not correct, there is about 50 pixel difference.
+					it.controlFocus(rs.getWindowsRS(), "", rs.getComponentRS());
+				}
+				
+				rectangle = new Rectangle(x, y, width, height);
+			}catch(Exception e){
+				IndependantLog.warn(debugmsg+"Fail to get component rectangle on screen, due to "+StringUtils.debugmsg(e));
+			}
+			
+		    if(rectangle==null) IndependantLog.warn(debugmsg+"Fail to get bounds for "+ windowName+":"+compName +" on screen.");
+		    return rectangle;
+		}
 	}
 }
