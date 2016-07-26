@@ -8,6 +8,8 @@ call SetSAFSEnvironment.bat
 setlocal
 set ENGINE_NAME=%1
 
+echo Generating html documents for engine %ENGINE_NAME% ...
+
 msxsl %SAFSXML%\XSLDriverCommands.xml     %SAFSXSL%\XSLCoreReferenceLists.XSL engine=%ENGINE_NAME% -o %SAFSDOC%\%ENGINE_NAME%DriverCommandsList.htm
 msxsl %SAFSXML%\XSLComponentFunctions.xml %SAFSXSL%\XSLCoreReferenceLists.XSL engine=%ENGINE_NAME% -o %SAFSDOC%\%ENGINE_NAME%ComponentFunctionsList.htm
 msxsl %SAFSXML%\XSLEngineCommands.xml     %SAFSXSL%\XSLCoreReferenceLists.XSL engine=%ENGINE_NAME% -o %SAFSDOC%\%ENGINE_NAME%EngineCommandsList.htm
