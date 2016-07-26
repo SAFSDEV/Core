@@ -3,6 +3,8 @@
 
 call SetSAFSEnvironment.bat
 
+echo Generating SAFS reference documents...
+
 %SAFSBIN%\msxsl %SAFSXML%\XSLDriverCommands.xml     %SAFSXSL%\XSLDDEngineReference.XSL  -o %SAFSDOC%\DDEngineReference.htm
 %SAFSBIN%\msxsl %SAFSXML%\XSLDriverCommands.xml     %SAFSXSL%\XSLCoreReferenceLists.XSL -o %SAFSDOC%\DriverCommandsList.htm
 %SAFSBIN%\msxsl %SAFSXML%\XSLComponentFunctions.xml %SAFSXSL%\XSLCoreReferenceLists.XSL -o %SAFSDOC%\ComponentFunctionsList.htm
