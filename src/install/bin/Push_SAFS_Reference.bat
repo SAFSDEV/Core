@@ -5,8 +5,10 @@ REM Purpose:
 REM   This script is supposed to push/delete safs reference files
 REM   to/from sourceforge and github.
 REM Parameter:
-REM   RepoFullPath  the folder of git repository, where safs reference files reside.
-REM   Debug         whatever if provided then show the debug message
+REM   RepoFullPath  			the folder of git repository, where safs reference files reside.
+REM   SourceForgeUser  			the user name of sourceforge.
+REM   SourceFogetPrivateKey  	the fullpath holding the private key for sourceforge
+REM   Debug         			whatever if provided then show the debug message
 REM Prerequisite:
 REM 1. The GIT should have been installed and configured
 REM 2. The OS should be configured to be able to push/delete
@@ -15,9 +17,12 @@ REM ============================================================================
 
 SETLOCAL ENABLEDELAYEDEXPANSION
 SET GITHUB_IO_FOLDER=%1
-SET DEBUG=%2
+SET SF_USER=%2
+SET SF_PRIVATE_KEY=%3
+SET DEBUG=%4
 
 ECHO Push files under folder (github repository) at %GITHUB_IO_FOLDER%
+ECHO Current user is %USERNAME%
 
 PUSHD %GITHUB_IO_FOLDER%
 
@@ -43,17 +48,20 @@ FOR /f /F "usebackq tokens=1,2* " %%i IN (`git status --short`) DO (
     
     IF [!OPERATION!]==[ADD] (
         ECHO ... Pushing file %%j to sourceforge and to github.
-        pscp %%j lei_wang,safsdev@web.sourceforge.net:/home/groups/s/sa/safsdev/htdocs/sqabasic2000/
+        pscp -i %SF_PRIVATE_KEY% %%j %SF_USER%,safsdev@web.sourceforge.net:/home/groups/s/sa/safsdev/htdocs/sqabasic2000/
     )
     IF [!OPERATION!]==[DELETE] (
         ECHO ... Deleting file %%j from sourceforge and from github.
-        rem TODO Find a way to delete file from sourceforge pscp %%j lei_wang,safsdev@web.sourceforge.net:/home/groups/s/sa/safsdev/htdocs/sqabasic2000/
+        rem TODO Find a way to delete file from sourceforge pscp %%j %SF_USER%,safsdev@web.sourceforge.net:/home/groups/s/sa/safsdev/htdocs/sqabasic2000/
     )
 )
 
 REM Finally, we use 'git commit' and 'git push' to upload modified files to github
 git commit -m "Updated by script automatically."
-REM The OS should be configured correctly so that files can be pushed to remote automatically
+REM TODO The OS should be configured correctly so that files can be pushed to remote automatically
+git remote set-url origin git@github.com:SAFSDEV/safsdev.github.io.git
+git remote -v
+ECHO Push git commit to remote repository ...
 git push origin master
 
 POPD
