@@ -1,0 +1,4 @@
+cd /home/groups/s/sa/safsdev/htdocs/sqabasic2000/
+lcd doc.copy
+mput *
+bye
