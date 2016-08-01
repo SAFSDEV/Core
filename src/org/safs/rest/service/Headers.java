@@ -178,7 +178,7 @@ public class Headers {
 	 * @see #getTextHeaders()
 	 */
 	public static void setTextHeaders(Collection<String> _textHeaders) {
-		setHeadersForType(JSON_HEADERS, _textHeaders);
+		setHeadersForType(TEXT_HEADERS, _textHeaders);
 	}
 
 	/**
