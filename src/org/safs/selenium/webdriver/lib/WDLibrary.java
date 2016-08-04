@@ -1843,9 +1843,18 @@ public class WDLibrary extends SearchObject {
 			//Get sub image according to the rectangle
 			if(rectangle==null) return img;
 			else{
+				IndependantLog.debug(debugmsg+" the initial subarea is "+rectangle);
 				//If the rectangle is beyond the browser, throw exception
 				if(rectangle.x>=img.getWidth() || rectangle.y>=img.getHeight()){
 					throw new SeleniumPlusException("The component is totally outside of browser!");
+				}
+				if(rectangle.x<0){
+					IndependantLog.debug(debugmsg+" subarea x coordinate should NOT be negative, set it to 0.");
+					rectangle.x=0;
+				}
+				if(rectangle.y<0){
+					IndependantLog.debug(debugmsg+" subarea y coordinate should NOT be negative, set it to 0.");
+					rectangle.y=0;
 				}
 
 				//if the rectangle is larger than the captured browser image, then
