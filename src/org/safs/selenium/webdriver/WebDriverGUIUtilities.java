@@ -28,6 +28,7 @@ package org.safs.selenium.webdriver;
  *  <br>   NOV 02, 2015	   (Carl Nagle) startRemoteServer on SAFS supporting jre/Java64/jre/bin 64-bit JVM.
  *  <br>   NOV 23, 2015	   (LeiWang) Modify waitForObject(): refresh the window object if it becomes stale during the searching of component object.
  *  <br>   DEC 24, 2015	   (LeiWang) Add methods to read content from url like "http://host:port/wd/hub/static"
+ *  <br>   AUG 05, 2016	   (LeiWang) Modified waitForObject(): if RS is AutoIT or IBT, then return SCRIPT_NOT_EXECUTED (4).
  **/
 
 import java.io.BufferedReader;
@@ -60,6 +61,7 @@ import org.safs.Processor;
 import org.safs.SAFSException;
 import org.safs.SAFSObjectNotFoundException;
 import org.safs.STAFHelper;
+import org.safs.StatusCodes;
 import org.safs.StringUtils;
 import org.safs.TestRecordData;
 import org.safs.Tree;
@@ -471,7 +473,8 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	 * @param secTimeout the number of seconds allowed to located the object before a 
 	 * SAFSObjectNotFoundException is thrown.
 	 * 
-	 * @return 0 on success. throw SAFSObjectNotFoundException if not successful.
+	 * @return 0 on success.<br>
+	 *         {@link StatusCodes#SCRIPT_NOT_EXECUTED} if the recognition string is in AUTOIT/IBT format.<br>
 	 * @throws SAFSObjectNotFoundException if specified parent or child cannot be found.
 	 * @throws SAFSException if other problem occurs<br>
 	 *                       such as Map is not registered, or windowName/compName cannot be found in map.<br>
@@ -544,7 +547,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	    		trdata.setWindowTestObject(null);		
 	    		trdata.setCompType("Component");
 	    		Log.info( "WDGU: WFO returning. Assuming AutoIt Testing for "+trdata.getCommand());				
-				return 0;
+				return StatusCodes.SCRIPT_NOT_EXECUTED;
             }
             
             // check for possible Image-Based Testing recognition string
@@ -554,7 +557,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	    		trdata.setWindowTestObject(null);		
 	    		trdata.setCompType("Component");
 	    		Log.info( "WDGU: WFO returning. Assuming Image-Based Testing for "+trdata.getCommand());				
-				return 0;
+	    		return StatusCodes.SCRIPT_NOT_EXECUTED;
             }
 
 			//Try to get the Window TestObject dynamically

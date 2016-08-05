@@ -26,6 +26,7 @@ package org.safs.selenium.webdriver;
  *   <br>   MAR 31, 2016	(LeiWang) Add onGUIGotoCommands(): implement OnGUIExistsGotoBlockID/OnGUINotExistGotoBlockID, 
  *                                    I did nothing but set the BLOCKID to test-record's status-info.
  *   <br>   APR 07, 2016    (Lei Wang) Refactor to handle OnGUIExistsGotoBlockID/OnGUINotExistGotoBlockID in super class DriverCommand
+ *   <br>   AUT 05, 2016    (Lei Wang) Modified waitForGui/waitForGuiGone: if the RC is SCRIPT_NOT_EXECUTED (4) then stop handling here.
  */
 
 import java.io.File;
@@ -973,7 +974,7 @@ holdloop:		while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 			issueParameterCountFailure();
 			return;
 		}
-		Iterator iterator = params.iterator();
+		Iterator<?> iterator = params.iterator();
 		final String DEFAULT_SECONDS_STR = "15";
 		final String DEFAULT_WEBPAGE_STR = "30";
 		boolean isWeb = testRecordData.getCommand().equalsIgnoreCase(DDDriverCommands.WAITFORWEBPAGE_KEYWORD);
@@ -989,27 +990,11 @@ holdloop:		while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 			seconds = (String)iterator.next();
 			if (seconds.length()==0) seconds = DEFAULT_TIMEOUT;
 			secii = Integer.parseInt(seconds);
-			log.logMessage(testRecordData.getFac(),
-				genericText.convert("default_missing_param",
-							command +" optional parameter '"+ "TIMEOUT" +"' set to '"+ seconds +"'.",
-							command, "TIMEOUT", seconds),
-				GENERIC_MESSAGE);
-		} catch (NumberFormatException e) {
+			Log.debug(command +" optional parameter '"+ "TIMEOUT" +"' set to '"+ seconds +"'.");
+		}catch (Exception e) { 
+			Log.warn(command+" optional parameter timeout '"+seconds+"' is not valid: "+e.getMessage()+". Use the default timeout "+DEFAULT_TIMEOUT);
 			seconds = DEFAULT_TIMEOUT;
 			secii = Integer.parseInt(seconds);
-			log.logMessage(testRecordData.getFac(),
-				genericText.convert("default_bad_param",
-						command +" invalid optional parameter '"+ "TIMEOUT" +"' set to '"+ seconds +"'.",
-						command, "TIMEOUT", seconds),
-				GENERIC_MESSAGE);
-		} catch (Exception e) { 
-			seconds = DEFAULT_TIMEOUT;
-			secii = Integer.parseInt(seconds);
-			log.logMessage(testRecordData.getFac(),
-				genericText.convert("default_missing_param",
-						command +" optional parameter '"+ "TIMEOUT" +"' set to '"+ seconds +"'.",
-						command, "TIMEOUT", seconds),
-				GENERIC_MESSAGE);
 		}
 		if (secii < 0) secii = 0;
 		Log.info("............................."+command+": window:"+windowName+", component:"+compName+", seconds:"+seconds);
@@ -1018,17 +1003,21 @@ holdloop:		while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 			// wait for the window/component
 			int status = wdgu.waitForObject(testRecordData.getAppMapName(),windowName, compName, secii);
 			//if it cannot be found within timeout
-			if (status != 0) {
-				testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
-				msg = failedText.convert("not_found_timeout", 
-								compName +" was not found within timeout "+ seconds, 
-								compName, seconds);
-				standardFailureMessage(msg, testRecordData.getInputRecord());
-				return;
-			}else{
+			if (status == 0) {
 				WebElement winObject = ((WDTestRecordHelper) testRecordData).getWindowTestObject();
 				WebElement compObject = ((WDTestRecordHelper) testRecordData).getCompTestObject();
 				WebDriverGUIUtilities.highlightThenClear((compObject==null? winObject:compObject), 1000);
+			}else if(status==StatusCodes.SCRIPT_NOT_EXECUTED){
+				testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
+				Log.debug(command+" was not handled by Selenium WebDriver. It will be handled by other engine later.");
+				return;
+			}else{
+				testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
+				msg = failedText.convert("not_found_timeout", 
+						compName +" was not found within timeout "+ seconds, 
+						compName, seconds);
+				standardFailureMessage(msg, testRecordData.getInputRecord());
+				return;
 			}
 			testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);			
 			log.logMessage(testRecordData.getFac(), 
@@ -1101,6 +1090,7 @@ holdloop:		while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 		Log.info("............................. timeoutInMillis="+timeoutInMillis);
 		
 		String winCompName = windowName+":"+ compName;
+		int status = 0;
 		boolean exist = false;
 		boolean didExist = false;
 		boolean isDisplayed = false;
@@ -1109,7 +1099,15 @@ holdloop:		while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 			//wait for the GUI to show up: didExist = true
 			while(!didExist){
 				try{
-					exist = (wdgu.waitForObject(testRecordData.getAppMapName(),windowName, compName, 0)==0);
+					status = wdgu.waitForObject(testRecordData.getAppMapName(),windowName, compName, 0);
+					
+					if(status==StatusCodes.SCRIPT_NOT_EXECUTED){
+						testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
+						Log.debug(command+" was not handled by Selenium WebDriver. It will be handled by other engine later.");
+						return;
+					}
+					exist = (status==0);
+					
 					if(exist){
 						try{
 							WebElement e = ((WDTestRecordHelper) wdgu.getTestRecordData()).getCompTestObject();

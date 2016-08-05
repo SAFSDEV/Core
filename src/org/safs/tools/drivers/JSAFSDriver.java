@@ -14,6 +14,7 @@ package org.safs.tools.drivers;
  * <br>	JUN 11, 2015	(Lei Wang) 	Added method resolveExpression(): resolve expression as SAFS Variable Service, "DDVariable" will be always evaluated.
  * <br>	JUN 11, 2016	(Lei Wang) 	Added pushTestRecord(), popTestRecord() and modified processCommand(), processCommandDirect(): handle the 
  *                                  test-record overwritten problem when executing CallJUnit.
+ * <br>	AUG 05, 2016	(Lei Wang) 	Modified processDriverCommand: give AutoIT engine a chance to handle driver-command. 
  *                                    
  */
 import java.util.ListIterator;
@@ -501,7 +502,12 @@ public class JSAFSDriver extends DefaultDriver implements ITestRecordStackable{
 		long rc = DriverConstant.STATUS_SCRIPT_NOT_EXECUTED;
 		
 		//Try internal support for Driver Commands
-		rc = tidcommands.processRecord(testRecordHelper);
+		rc = getTIDDriverCommands().processRecord(testRecordHelper);
+		
+		// try Autoit support
+		if ((rc==DriverConstant.STATUS_SCRIPT_NOT_EXECUTED)&&
+				(! testRecordHelper.getStatusInfo().equalsIgnoreCase(JavaHook.SHUTDOWN_RECORD)))
+			rc = getAutoItComponentSupport().processRecord(testRecordHelper);
 		
 		// might add code to check for NOT_EXECUTED and try another Engine
 		// try preferred engines next
