@@ -42,6 +42,7 @@ import org.safs.tools.RuntimeDataInterface;
  * <br>SEP 25, 2015 Carl Nagle Added support for AutoConfigureJSAFS classes to identify external RuntimeDataAware classes.
  */
 public class Utilities {
+	static final String FILE_COLON_STRING = "file:";
 
 	static void debug(String message){
 		if (STAFProcessHelpers.hasSTAFHelpers()) Log.debug(message);
@@ -89,7 +90,7 @@ public class Utilities {
 					try{
 						strDirectory = URLDecoder.decode(filename, "UTF-8"); 
 						debug("getPackageResource processing decoded resource "+ strDirectory);
-						if (strDirectory.startsWith("file:") && strDirectory.contains("!")) { 
+						if (strDirectory.startsWith(FILE_COLON_STRING) && strDirectory.contains("!")) { 
 				        	debug("getPackageResource processing JAR file entry '"+ strDirectory +"'");
 							String [] split = strDirectory.split("!"); 
 							URL jar = new URL(split[0]); 
@@ -156,13 +157,14 @@ public class Utilities {
 	 * @throws IOException 
 	 * @throws MalformedURLException 
 	 **/ 
-	private static List<Class<?>> findClasses(File directory, String packageName, List<String> exclusions) 
+	private static List<Class<?>> findClasses(File directory, String packageName, List<String> exclusions, boolean hasFileColon) 
 			throws ClassNotFoundException,
 	               IOException,
 	               MalformedURLException { 
 		List<Class<?>> classes = new ArrayList<Class<?>>(); 
 		String strDirectory = directory.getPath();
-		if (strDirectory.startsWith("file:") && strDirectory.contains("!")) { 
+		if (hasFileColon && strDirectory.contains("!")) { 
+			strDirectory = FILE_COLON_STRING + strDirectory;
         	debug("AutoConfigure processing JAR file entry '"+ strDirectory +"'");
 			String [] split = strDirectory.split("!"); 
 			URL jar = new URL(split[0]); 
@@ -196,7 +198,7 @@ public class Utilities {
 			if (file.isDirectory()) { 
 				assert !fileName.contains("."); 
             	if(exclusions.contains(packageName +"."+ file.getName())) continue;
-				classes.addAll(findClasses(file, packageName + "." + fileName, exclusions)); 
+				classes.addAll(findClasses(file, packageName + "." + fileName, exclusions, false)); 
 			} 
 			else if (fileName.endsWith(".class") && !fileName.contains("$")) { 
             	debug("AutoConfigure attempting to add class URI '"+ file.getName() +"' to configurable classes.");
@@ -237,7 +239,34 @@ public class Utilities {
 	    assert loader != null;
 	    String path = packageName.replace('.', '/');
 	    Enumeration<URL> resources = null;	
-	    List<File> dirs = new ArrayList<File>();
+
+	    class FileColonsPair{
+	    	private File file = null;
+	    	private boolean hasColons = false;
+	    	
+	    	public FileColonsPair(File f, boolean b){
+	    		file = f;
+	    		hasColons = b;
+	    	}
+	    	public File getFile() {
+				return file;
+			}
+
+			public void setFile(File file) {
+				this.file = file;
+			}
+
+			public boolean isHasColons() {
+				return hasColons;
+			}
+
+			public void setHasColons(boolean hasColons) {
+				this.hasColons = hasColons;
+			}			
+	    }
+	    
+	    List<FileColonsPair> fileColonPairList = new ArrayList<FileColonsPair>();
+	    
 	    try{ resources = loader.getResources(path);}
 	    catch(IOException x){
 			debug("getPackageClasses IOException for "+ path);
@@ -249,18 +278,23 @@ public class Utilities {
 		    while (resources.hasMoreElements()) {
 		        resource = resources.nextElement();
 				fileName = resource.getFile();
+				boolean hasFileColon = false;
 				debug("getPackageClasses decoding resource "+ fileName);
 				try{
 					fileNameDecoded = URLDecoder.decode(fileName, "UTF-8"); 
-					dirs.add(new File(fileNameDecoded)); 
+					if(fileNameDecoded.startsWith(FILE_COLON_STRING)){
+						hasFileColon = true;
+						fileNameDecoded = fileNameDecoded.substring(FILE_COLON_STRING.length());
+					}
+					fileColonPairList.add(new FileColonsPair(new File(fileNameDecoded), hasFileColon)); 
 				}catch(UnsupportedEncodingException x){
 					debug("getPackageClasses UnsupportedEncodingException for "+ fileNameDecoded);
 				}
 		    }
 	    }
 	    ArrayList<Class<?>> classes = new ArrayList<Class<?>>();
-	    for (File directory : dirs) {
-	        try{ classes.addAll(findClasses(directory, packageName, exclusions)); }
+	    for (FileColonsPair fcp : fileColonPairList) {
+	        try{ classes.addAll(findClasses(fcp.getFile(), packageName, exclusions, fcp.isHasColons())); }
 	        catch(Exception nf){
 				debug("getPackageClasses "+ nf.getClass().getSimpleName()+" unable to retrieve SubPackage Classes associated with "+packageName);
 	        }
