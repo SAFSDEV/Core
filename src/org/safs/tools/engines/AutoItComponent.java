@@ -258,7 +258,7 @@ public class AutoItComponent extends GenericEngine {
 			if(testRecordData.targetIsComponent()){
 				controlHandle = it.controlGetHandle(rs.getWindowsRS(), "", rs.getComponentRS());
 				IndependantLog.debug(debugmsg+" waited control's handle is "+controlHandle);
-				if(StringUtils.isValid(controlHandle)){
+				if(windowHandleIsValid(controlHandle)){
 					found = true;
 				}else{
 					found = false;
@@ -275,6 +275,11 @@ public class AutoItComponent extends GenericEngine {
 		IndependantLog.debug(debugmsg+testRecordData.getWinCompName()+ " was "+ (found?"found.":"NOT found!"));
 		
 		return found;
+	}
+	
+	private boolean windowHandleIsValid(String handle){
+		//It seems that '0x00000000' is not a valid value.
+		return (StringUtils.isValid(handle) && !handle.equalsIgnoreCase("0x00000000"));
 	}
 	
 	/**************************  Handle Driver Commands **********************/
