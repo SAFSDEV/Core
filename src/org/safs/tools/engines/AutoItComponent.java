@@ -47,7 +47,8 @@ import org.safs.tools.drivers.DriverInterface;
 import autoitx4java.AutoItX;
 
 /**
- * Provides local in-process support for AutoIt Component Functions on Windows.
+ * Provides local in-process support Component Functions and Driver Commands
+ * by AutoIT engine on Windows.
  * <p>
  * This engine does not assume the use of STAF. Instead, it uses the
  * various org.safs.tools Interfaces to talk with the rest of the framework (as made
@@ -57,35 +58,27 @@ import autoitx4java.AutoItX;
 public class AutoItComponent extends GenericEngine {
 
 	/** "SAFS/AUTOITComponent" */
-	static final String ENGINE_NAME  = "SAFS/AUTOITComponent";
+	public static final String ENGINE_NAME  = "SAFS/AUTOITComponent";
 
 	/** "AUTOITComponent" */
-	static final String AUTOITCOMPONENT_ENGINE  = "AUTOITComponent";
+	public static final String AUTOITCOMPONENT_ENGINE  = "AUTOITComponent";
 
-	// START: LOCALLY SUPPORTED COMMANDS
-	
-	/** "SetFocus" */
-    static final String COMMAND_SETFOCUS		       = DriverCommands.SETFOCUS_KEYWORD;
-
-	/** "Click" */
-    static final String COMMAND_CLICK 			       = GenericObjectFunctions.CLICK_KEYWORD;       
-
-    /** "SetTextValue" */
-    static public final String SETTEXTVALUE_KEYWORD = EditBoxFunctions.SETTEXTVALUE_KEYWORD;
-	       
-	// END: LOCALLY SUPPORTED COMMANDS
-
-	ComponentFunction cf = null;
-	AutoItDriverCommand adc = null;
+	/** The special AutoIT Processor for handling Component Function keywords.*/
+    protected ComponentFunction cf = null;
+    /** The special AutoIT Processor for handling Driver Command keywords.*/
+    protected AutoItDriverCommand adc = null;
 	
 	/**
 	 * The AutoIt instance got by AutoIt.AutoItObject().<br>
 	 * This instance may be shared by multiple threads.<br>
+	 * 
+	 * @see #AutoItComponent()
 	 */
 	protected AutoItX it = null;
 	
 	/**
-	 * Constructor for AUTOITComponent
+	 * Constructor for AUTOITComponent.<br>
+	 * It will also initialize the shared AutoIT object.<br>
 	 */
 	public AutoItComponent() {
 		super();
@@ -246,6 +239,44 @@ public class AutoItComponent extends GenericEngine {
 		
 	}
 	
+	/**
+	 * Prerequisite: {@link #it} and {@link #testRecordData} should be initialized.
+	 * 
+	 * @param rs AutoItRs, the recognition string representing the AutoIT component.
+	 * @return	boolean, if the AutoIT component exists.
+	 * @throws SAFSException
+	 */
+	protected boolean waitForGUI(AutoItRs rs) throws SAFSException{
+		String debugmsg = StringUtils.debugmsg(false);
+		String controlHandle = null;
+		int errorCode = 0;
+		boolean found = false;
+		
+		IndependantLog.debug(debugmsg+" wait for "+testRecordData.getWinCompName());
+		
+		if(it.winWait(rs.getWindowsRS(), "", 1)){
+			if(testRecordData.targetIsComponent()){
+				controlHandle = it.controlGetHandle(rs.getWindowsRS(), "", rs.getComponentRS());
+				IndependantLog.debug(debugmsg+" waited control's handle is "+controlHandle);
+				if(StringUtils.isValid(controlHandle)){
+					found = true;
+				}else{
+					found = false;
+					errorCode = it.getError();
+					IndependantLog.debug(debugmsg+" wait control return error code "+errorCode);
+				}
+			}else{
+				found = true;
+			}
+		}else{
+			found = false;
+		}
+		
+		IndependantLog.debug(debugmsg+testRecordData.getWinCompName()+ " was "+ (found?"found.":"NOT found!"));
+		
+		return found;
+	}
+	
 	/**************************  Handle Driver Commands **********************/
 	class AutoItDriverCommand extends DriverCommand{
 		
@@ -348,7 +379,7 @@ public class AutoItComponent extends GenericEngine {
 				SimpleDateFormat time = new SimpleDateFormat("hh:mm:ss.SSS");
 				boolean notDone = true;
 				do{
-					found = it.winWait(rs.getWindowsRS(), "", 1);
+					found = waitForGUI(rs);
 					// evaluate our wait success
 					if (!found){
 						if(!waitforgui){  // waitforguiGone
@@ -460,11 +491,11 @@ public class AutoItComponent extends GenericEngine {
 				}
 			}
 			
-			if ( action.equalsIgnoreCase( COMMAND_CLICK )){		                
+			if ( action.equalsIgnoreCase( GenericObjectFunctions.CLICK_KEYWORD )){		                
 				click(rs);	                
-			} else if ( action.equalsIgnoreCase( COMMAND_SETFOCUS )) {
+			} else if ( action.equalsIgnoreCase( DriverCommands.SETFOCUS_KEYWORD )) {
 			    setFocus(rs);
-			} else if ( action.equalsIgnoreCase(SETTEXTVALUE_KEYWORD)) {
+			} else if ( action.equalsIgnoreCase(EditBoxFunctions.SETTEXTVALUE_KEYWORD)) {
 				setText(rs);
 			}
 			
