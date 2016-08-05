@@ -373,9 +373,15 @@ public class InputProcessor extends AbstractInputProcessor {
 		if (!PREFERRED_ENGINES_OVERRIDE ||
 		   (!hasEnginePreferences())){
 			// try important driver control commands first
-			Log.debug("InputProcessor trying TIDDriverCommands BEFORE preferred engines...");
+			Log.debug("InputProcessor.processDriverCommand trying TIDDriverCommands BEFORE preferred engines...");
 			try{ result = getTIDDriverCommands().processRecord(trd);}
 				 catch(NullPointerException x){;}
+			
+			Log.debug("InputProcessor.processDriverCommand trying AutoIT BEFORE preferred engines...");
+			// try AutoIt next if not executed
+			if ((result==DriverConstant.STATUS_SCRIPT_NOT_EXECUTED)&&
+				(! trd.getStatusInfo().equalsIgnoreCase(JavaHook.SHUTDOWN_RECORD)))
+				result =  getAutoItComponentSupport().processRecord(trd);
 		}
 
 		// try preferred engines 
@@ -506,8 +512,15 @@ public class InputProcessor extends AbstractInputProcessor {
 		if (!PREFERRED_ENGINES_OVERRIDE ||
 		   (!hasEnginePreferences())){
 			// try internal CF support
+			Log.debug("InputProcessor.processComponentFunction trying internal TIDComponent BEFORE preferred engines...");
 			try{ rc = getTIDGUIlessComponentSupport().processRecord(trd);}
 		    catch(NullPointerException x){;}
+			
+			// try AutoIt next if not executed
+			Log.debug("InputProcessor.processComponentFunction trying AutoIT BEFORE preferred engines...");
+			if ((rc==DriverConstant.STATUS_SCRIPT_NOT_EXECUTED)&&
+				(! trd.getStatusInfo().equalsIgnoreCase(JavaHook.SHUTDOWN_RECORD)))
+				rc =  this.getAutoItComponentSupport().processRecord(trd);
 		}
 		
 		// try preferred engines next

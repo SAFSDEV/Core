@@ -42,6 +42,8 @@ import org.safs.tools.engines.TIDComponent;
  *                                   moved from method process().
  *   <br>   SEP 26, 2014    (LeiWang)Rename method statusIsOK() to waitForObjectAndCheck():
  *                                   if object cannot be found and there are more engines to try, the give them a chance.
+ *   <br>   AUG 05, 2016    (LeiWang)Modified waitForObjectAndCheck(): if the waitForObject's rc is SCRIPT_NOT_EXECUTED (4), 
+ *                                   then set the testrecord's status to SCRIPT_NOT_EXECUTED.
  * 
  **/
 public class TestStepProcessor extends Processor {
@@ -471,6 +473,7 @@ public class TestStepProcessor extends Processor {
    * Wait for the window/component to occur, and check if window/component can be found or not.<br>
    * If the window/component can not be found:<br>
    *   if there are more engines available then log warning and set status-code to "NotExecuted".<br>
+   *   if the return-code of waitForObject() is 'SCRIPT_NOT_EXECUTED' then set status-code to "NotExecuted" so that more engine will be tried.<br>
    *   otherwise log error and set status-code to "Failure".<br>
    * 
    * @param isWindow		boolean  If true, the status is for window object; otherwise for component object.
@@ -479,7 +482,6 @@ public class TestStepProcessor extends Processor {
    * @see {@link #waitForObject(boolean)}
    */
   protected boolean waitForObjectAndCheck(boolean isWindow) throws SAFSException{
-	  boolean statusOk = true;
 	  String detail = null;
 	  String debugmsg = StringUtils.debugmsg(false);
 
@@ -489,36 +491,39 @@ public class TestStepProcessor extends Processor {
 	  Log.debug(debugmsg+" windowName: "+windowName+" componentName: "+componentName);
 	  //Wait for window/component
 	  int status = waitForObject(isWindow);
-      if (status != 0) {
-    	  Log.debug(debugmsg+" The status is NOT ok.");
-          //right now log a failure
-          //future would be to check for and try to clear unexpected dialog boxes etc. (MONITOR)
-    	  if(isWindow){
-    		  detail = FAILStrings.convert(FAILStrings.NOT_FOUND_TIMEOUT, 
-    				  					   windowName +" was not found within timeout "+ secsWaitForWindow, 
-    				  					   windowName, String.valueOf(secsWaitForWindow));
-    	  }else{
-    		  detail = FAILStrings.convert(FAILStrings.NOT_FOUND_TIMEOUT, 
-            							   componentName +" was not found within timeout "+ secsWaitForComponent, 
-            							   componentName, String.valueOf(secsWaitForComponent));
-    	  }
-    	  
-    	  String statusInfo = testRecordData.getStatusInfo();
-    	  if(statusInfo!=null && statusInfo.contains(DriverConstant.MORE_ENGINES)){
-    		  IndependantLog.warn(debugmsg+detail);
-    		  IndependantLog.debug(debugmsg+"Have more engines, set status=SCRIPT_NOT_EXECUTED to give other engine a chance... ");
-    		  //we need to set status of testrecord as 'NotExecuted'
-    		  testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
-//    		  componentWarningMessage(detail);
-    	  }else{
-    		  testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
-    		  componentFailureMessage(detail);
-    	  }
-          
-          statusOk = false;
-      }
+	  Log.debug(debugmsg+" waitForObject's status '"+status+"'=="+StatusCodes.SCRIPT_NOT_EXECUTED+"? If equal, then set the testrecord's status code to SCRIPT_NOT_EXECUTED.");
+
+	  if (status!=0) {
+		  if(StatusCodes.SCRIPT_NOT_EXECUTED==status){
+			  IndependantLog.debug(debugmsg+" suggests to handle GUI '"+windowName+":"+componentName+"' in another engine.");
+			  testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
+		  }else{
+			  //right now log a failure
+			  //future would be to check for and try to clear unexpected dialog boxes etc. (MONITOR)
+			  if(isWindow){
+				  detail = FAILStrings.convert(FAILStrings.NOT_FOUND_TIMEOUT, 
+						  windowName +" was not found within timeout "+ secsWaitForWindow, 
+						  windowName, String.valueOf(secsWaitForWindow));
+			  }else{
+				  detail = FAILStrings.convert(FAILStrings.NOT_FOUND_TIMEOUT, 
+						  componentName +" was not found within timeout "+ secsWaitForComponent, 
+						  componentName, String.valueOf(secsWaitForComponent));
+			  }
+
+			  String statusInfo = testRecordData.getStatusInfo();
+			  if(statusInfo!=null && statusInfo.contains(DriverConstant.MORE_ENGINES)){
+				  IndependantLog.warn(debugmsg+detail);
+				  IndependantLog.debug(debugmsg+"Have more engines, set status=SCRIPT_NOT_EXECUTED to give other engine a chance... ");
+				  //we need to set status of testrecord as 'NotExecuted'
+				  testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
+			  }else{
+				  testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
+				  componentFailureMessage(detail);
+			  }
+		  }
+	  }
 	  
-	  return statusOk;
+	  return (status==0);
   }
   
   /**

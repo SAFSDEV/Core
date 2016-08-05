@@ -772,7 +772,7 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
   /** Convenience routine for isSupportedRecordType to return true if
    * the Processor supports standard Driver Command records.
    **/
-  public boolean isDriverCommandRecord(String recordType){
+  public static boolean isDriverCommandRecord(String recordType){
   	if (recordType == null) return false;
   	String rt = recordType.toUpperCase();
   	if ((rt.equals(RECTYPE_DRIVER_COMMAND))  ||
@@ -784,7 +784,7 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
   /** Convenience routine for isSupportedRecordType to return true if
    * the Processor supports standard Component Function records.
    **/
-  public boolean isComponentFunctionRecord(String recordType){
+  public static boolean isComponentFunctionRecord(String recordType){
   	if (recordType == null) return false;
   	String rt = recordType.toUpperCase();
   	if ((rt.equals(RECTYPE_TEST_STEP))  ||
