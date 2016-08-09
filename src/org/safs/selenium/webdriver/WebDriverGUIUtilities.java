@@ -29,7 +29,7 @@ package org.safs.selenium.webdriver;
  *  <br>   NOV 23, 2015	   (LeiWang) Modify waitForObject(): refresh the window object if it becomes stale during the searching of component object.
  *  <br>   DEC 24, 2015	   (LeiWang) Add methods to read content from url like "http://host:port/wd/hub/static"
  *  <br>   AUG 05, 2016	   (LeiWang) Modified waitForObject(): if RS is AutoIT or IBT, then return SCRIPT_NOT_EXECUTED (4).
- *  <br>   AUG 09, 2016	   (LeiWang) Modified setWDTimeoutxxx()/resetWDTimeoutxxx(): Avoid a NullpointerException.
+ *  <br>   AUG 09, 2016	   (LeiWang) Modified setWDTimeoutxxx()/resetWDTimeoutxxx(): return a boolean value to tell if succeed.
  **/
 
 import java.io.BufferedReader;
@@ -998,8 +998,8 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		return tobj;
 	}
 	
-	private boolean timeout_lock = false;
-	private String timeout_lock_owner = null;
+	private static boolean timeout_lock = false;
+	private static String timeout_lock_owner = null;
 	
 	/**
 	 * Set the webdriver element search timeout.
