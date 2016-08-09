@@ -276,6 +276,12 @@ public class SelectBrowser {
 		} else if (browserName.equals(BROWSER_NAME_CHROME)) {
 			System.setProperty(SYSTEM_PROPERTY_WEBDRIVER_CHROME, "chromedriver.exe");
 			caps = DesiredCapabilities.chrome();
+			
+			// Disable extensions to avoid pop up 'Disable developer mode extensions' message.
+			ChromeOptions options = new ChromeOptions();
+			options.addArguments("--disable-extensions");			
+			caps.setCapability(ChromeOptions.CAPABILITY, options);
+			
 			//caps.setCapability("browserName", BROWSER_NAME_CHROME);
 		} else if (browserName.equals(BROWSER_NAME_EDGE)) {
 			System.setProperty(SYSTEM_PROPERTY_WEBDRIVER_EDGE, "MicrosoftWebDriver.exe");
