@@ -29,6 +29,7 @@ package org.safs.selenium.webdriver;
  *  <br>   NOV 23, 2015	   (LeiWang) Modify waitForObject(): refresh the window object if it becomes stale during the searching of component object.
  *  <br>   DEC 24, 2015	   (LeiWang) Add methods to read content from url like "http://host:port/wd/hub/static"
  *  <br>   AUG 05, 2016	   (LeiWang) Modified waitForObject(): if RS is AutoIT or IBT, then return SCRIPT_NOT_EXECUTED (4).
+ *  <br>   AUG 09, 2016	   (LeiWang) Modified setWDTimeoutxxx()/resetWDTimeoutxxx(): Avoid a NullpointerException.
  **/
 
 import java.io.BufferedReader;
@@ -655,7 +656,9 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 
 		Log.debug(debugmsg+" Waitting '"+windowName+"' ... ");
 		while(!done){
-			setWDTimeout(secTimeout);
+			if(!setWDTimeout(secTimeout)){
+				Log.warn(debugmsg+"Failed to set the timeout '"+secTimeout+"' to wait for '"+windowName+"'");
+			}
 			winObj = SearchObject.getObject(winRec);
 			resetWDTimeout();
 
@@ -701,7 +704,9 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		Log.debug(debugmsg+" Waitting '"+windowName+"."+compName+"' ... ");
 		while(!done){
 			isStale = false;
-			setWDTimeout(secTimeout);
+			if(!setWDTimeout(secTimeout)){
+				Log.warn(debugmsg+"Failed to set the timeout '"+secTimeout+"' to wait for '"+windowName+"."+compName+"'");
+			}
 			compObj = SearchObject.getObject(winObj,compRec);
 			resetWDTimeout();
 
@@ -993,25 +998,28 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		return tobj;
 	}
 	
-	private static boolean timeout_lock = false;
-	private static String timeout_lock_owner = null;
+	private boolean timeout_lock = false;
+	private String timeout_lock_owner = null;
 	
 	/**
 	 * Set the webdriver element search timeout.
 	 * Will only succeed if the setting is not locked, or the lock is owned by the caller.
 	 * @param timeout -- new timeout value in seconds.
+	 * @return boolean true if successfully set the timeout.
 	 * @see #setWDTimeoutLock()
 	 * @see #resetWDTimeout()
 	 * @see #resetWDTimeoutLock()
 	 */
-	public void setWDTimeout(long timeout){
+	public boolean setWDTimeout(long timeout){
 		StackTraceElement trace = Thread.currentThread().getStackTrace()[2];
 		String caller = trace.getClassName()+"."+trace.getMethodName();
-		if(! timeout_lock || timeout_lock_owner.equals(caller)) {
+		if(! timeout_lock || caller.equals(timeout_lock_owner)) {
 			SeleniumPlus.WebDriver().manage().timeouts().implicitlyWait(timeout, TimeUnit.SECONDS);
 	        Log.info("WDGU: Timeout set value  to '"+ timeout +"' by: "+ caller);
+	        return true;
 		}else{
 	        Log.info("WDGU: *** WDTimeout cannot be changed due to lock owned by: "+ timeout_lock_owner +" ***");
+	        return false;
 		}
 	}
 
@@ -1022,40 +1030,45 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	 * <p>
 	 * The call to SET and RESET the lock MUST occur within the same Method 
 	 * of the calling class.
-	 * @param timeout -- new timeout value in seconds.
+	 * @return boolean true if successfully set the timeout lock.
 	 * @see #setWDTimeout(long)
 	 * @see #resetWDTimeout()
 	 * @see #resetWDTimeoutLock()
 	 */
-	public void setWDTimeoutLock(){
+	public boolean setWDTimeoutLock(){
 		StackTraceElement trace = Thread.currentThread().getStackTrace()[2];
 		String caller = trace.getClassName()+"."+trace.getMethodName();
 		if(! timeout_lock){
 	        timeout_lock = true;
 			timeout_lock_owner = caller;
 	        Log.info("WDGU: *** Changes to WDTimeout have been temporarily locked by: "+ timeout_lock_owner +" ***");
+	        return true;
 		}else{
 	        Log.info("WDGU: *** WDTimeout Lock cannot be changed.  It is already owned by: "+ timeout_lock_owner +" ***");
+	        return false;
 		}        
 	}
 
 	/**
 	 * reset the the webdriver timout to the "default" setting of the the running Processor.
 	 * Will only succeed if the timer is not locked, or the lock is owned by the caller.
+	 * @return boolean true if successfully reset the timeout.
 	 * @see #setWDTimeoutLock()
 	 * @see #setWDTimeout(long)
 	 * @see #resetWDTimeoutLock()
 	 */
-	public void resetWDTimeout(){
+	public boolean resetWDTimeout(){
 		StackTraceElement trace = Thread.currentThread().getStackTrace()[2];
 		String caller = trace.getClassName()+"."+trace.getMethodName();
-		if(! timeout_lock || timeout_lock_owner.equals(caller)) {
+		if(! timeout_lock || caller.equals(timeout_lock_owner)) {
 			// use window timeout for reset
 			long timeout = Processor.getSecsWaitForWindow(); 
 			SeleniumPlus.WebDriver().manage().timeouts().implicitlyWait(timeout, TimeUnit.SECONDS);
 	        Log.info("WDGU: Reset timeout back  to '"+ timeout +"' by: "+caller);
+	        return true;
 		}else{
 	        Log.info("WDGU: *** Timeout changes cannot be changed due to lock by: "+ timeout_lock_owner +" ***");
+	        return false;
 		}
 	}
 	
@@ -1063,18 +1076,20 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	 * Resumes allowing changes to the WDTimeout.  This is primarily used in broad widespread processing 
 	 * like ProcessContainer that needs to prevent other smaller processes from changing the timeout 
 	 * value.
-	 * @param timeout -- new timeout value in seconds.
+	 * @return boolean true if successfully reset the timeout lock.
 	 * @see #setWDTimeoutLock()
 	 */
-	public void resetWDTimeoutLock(){
+	public boolean resetWDTimeoutLock(){
 		StackTraceElement trace = Thread.currentThread().getStackTrace()[2];
 		String caller = trace.getClassName()+"."+trace.getMethodName();
-		if(timeout_lock && timeout_lock_owner.equals(caller)){
+		if(timeout_lock && caller.equals(timeout_lock_owner)){
 	        timeout_lock_owner = null;
 	        timeout_lock = false;
 	        Log.info("WDGU: *** Changes to WDTimeout have been unlocked by: "+ caller +" ***");
+	        return true;
 		}else{
 	        Log.info("WDGU: *** Reset or possibly null WDTimeout Lock disallowed since lock is not owned by:"+ caller +" ***");
+	        return false;
 		}
 	}
 
