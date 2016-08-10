@@ -7,9 +7,11 @@ REM   to/from sourceforge and github.
 REM Parameter:
 REM   RepoFullPath              the folder of git repository, where safs reference files reside.
 REM   SourceForgeUser           the user name of sourceforge.
-REM   SourceFogetPrivateKey     the fullpath holding the private key for sourceforge
+REM   SourceFogetPrivateKey     the full-path holding the private key for sourceforge
 REM   FTP put script            the ftp script to upload files
 REM   FTP del script            the ftp script to delete files
+REM   GitHubKnownHost           the full-path holding the public key for github
+REM   GitHubPrivateKey          the full-path holding the private key for github
 REM   Debug                     whatever if provided then show the debug message
 REM Prerequisite:
 REM 1. The GIT should have been installed and configured
@@ -24,16 +26,17 @@ SET SF_USER=%2
 SET SF_PRIVATE_KEY=%3
 SET FTP_PUT_SCRIPT=%4
 SET FTP_DEL_SCRIPT=%5
-SET DEBUG=%6
+SET GIT_KNOWNHOSTS=%6
+SET GIT_PRIVATE_KEY=%7
+SET DEBUG=%8
 
 SET FOLDER_COPY=doc.copy
 SET FOLDER_DEL=doc.del
 
-ECHO Push SAFS Document files under folder (github repository) at %GITHUB_IO_FOLDER%
+ECHO Push SAFS Document files under folder "%GITHUB_IO_FOLDER%" (github repository)
 IF DEFINED DEBUG (
     ECHO The current environments are as below:
     SET
-    ECHO GITHUB_IO_FOLDER=%GITHUB_IO_FOLDER% FTP_PUT_SCRIPT=%FTP_PUT_SCRIPT% FTP_DEL_SCRIPT=%FTP_DEL_SCRIPT% DEBUG=%DEBUG%
 )
 ECHO Register the sourceforge host key so that sourceforge host will be trusted through the ssh protocol.
 REM Add blindly, it is not secure.
@@ -42,6 +45,18 @@ REM reg query HKEY_CURRENT_USER\Software\SimonTatham\PuTTY\SshHostKeys /v rsa2@2
 REM Add explicitly, it is secure.
 REG ADD HKEY_CURRENT_USER\Software\SimonTatham\PuTTY\SshHostKeys /v rsa2@22:web.sourceforge.net /t REG_SZ /f /d 0x23,0xdae89f1d96cd7b1c3a7176f2835267cc38ad2f956162cd04eb91e4fed2c03e67269b91ae886794a08fc1d1e512345b1bab3c20c2bb6d8e7cca30a8862cde425959a537521718601f2d8b10c0aeb002eee4605ce4a8fe2373073926bf543d1a4975820aef7ded4849b369be2a7393aaf22cca40a21ac5735eec58262f5e478d2a5ab45b7dc3fa2dfc21d2efc15402bde3dd1c1e9070a6fe384f7aa865300802fa35203496c5b770e584369131ad0d61a995ce65fc0f8eebb6605b10353795de807b35813d44792e1ece0cec257d5239f0d01ffda60d966be5d936626ae0424daece3d84b25c99c83db41783a610943927342af42bbebd1237889407d8f3b678b7
 
+ECHO Prepare SSH configuration files for user "%USERNAME%" to push to GIT automatically
+IF DEFINED DEBUG (
+    ECHO MKDIR "%USERPROFILE%\.ssh\"
+    ECHO COPY "%GIT_KNOWNHOSTS%" "%USERPROFILE%\.ssh\"
+    ECHO COPY "%GIT_PRIVATE_KEY%" "%USERPROFILE%\.ssh\"
+)
+REM It is very strange that I cannot see the folder "C:\Windows\system32\config\systemprofile\.ssh\" after the script makes directory.
+MKDIR "%USERPROFILE%\.ssh\"
+COPY "%GIT_KNOWNHOSTS%" "%USERPROFILE%\.ssh\"
+COPY "%GIT_PRIVATE_KEY%" "%USERPROFILE%\.ssh\"
+
+ECHO Change directory to the folder %GITHUB_IO_FOLDER%, which contains SAFS Reference html files
 PUSHD %GITHUB_IO_FOLDER%
 IF DEFINED DEBUG ECHO current working directory is %cd%
 
@@ -78,9 +93,9 @@ FOR /f /F "usebackq tokens=1,2* " %%i IN (`git status --short`) DO (
     )
 )
 
-ECHO Pushing files to sourceforge ...
+ECHO === Pushing files to sourceforge ...
 psftp -i %SF_PRIVATE_KEY% -b %FTP_PUT_SCRIPT% %SF_USER%,safsdev@web.sourceforge.net
-REM ECHO Deleting files from sourceforge ...
+REM ECHO === Deleting files from sourceforge ...
 REM psftp -i %SF_PRIVATE_KEY% -b %FTP_DEL_SCRIPT% %SF_USER%,safsdev@web.sourceforge.net
 
 RMDIR /S /Q %FOLDER_COPY%
@@ -88,10 +103,13 @@ RMDIR /S /Q %FOLDER_DEL%
 
 REM Finally, we use 'git commit' and 'git push' to upload modified files to github
 REM The OS should be configured correctly so that files can be pushed to remote automatically
+ECHO === Pushing files to github ...
+git config --global user.name "safsdev"
+git config --global user.email safsdev@yourCompany.com
 git commit -m "Updated by script automatically."
+REM The git repository remote url should be set the ssh url format
 git remote set-url origin git@github.com:SAFSDEV/safsdev.github.io.git
-git remote -v
-ECHO Push git commit to remote GIT repository ...
+ECHO Push committed files to git remote repository ...
 git push origin master
 
 POPD
