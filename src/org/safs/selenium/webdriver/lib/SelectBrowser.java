@@ -97,6 +97,7 @@ public class SelectBrowser {
 	 * @see #KEY_CHROME_PROFILE_DIR
 	 **/
 	public static final String KEY_CHROME_USER_DATA_DIR = "user-data-dir";
+	
 	/**'profile-directory' the parameter name for chrome options, a user-specific settings, it indicates a sub-folder under "user data directory".<br>
 	* The value is specified in <a href="http://peter.sh/experiments/chromium-command-line-switches">chrome options</a><br>
 	* <b>Note:</b> As this {@value #KEY_CHROME_PROFILE_DIR} contains minus, it could be interpreted as an arithmetic expression, 
@@ -104,6 +105,7 @@ public class SelectBrowser {
 	* @see #KEY_CHROME_USER_DATA_DIR
 	**/
 	public static final String KEY_CHROME_PROFILE_DIR = "profile-directory";
+	
 	/**
 	 * 'excludeSwitches' the experimental option name for chrome options, it is used to turn off chrome starting options.<br>
 	 * The value is separated-options to exclude, the separator can be comma(,) or semicolon(;) , <br>
@@ -113,6 +115,17 @@ public class SelectBrowser {
 	 *             Use SeleniumPlus.quote("disable-component-update") to keep its value.
 	 */
 	public static final String KEY_CHROME_EXCLUDE_OPTIONS = "excludeSwitches";
+	
+	/**
+	 * '--disable-extensions' is used to disable the use of Chrome extensions. Usually, we use it
+	 * as DEFAULT to avoid popping up 'Disable developer mode extensions' message.
+	 * 
+	 * In 'SeleniumPlus.StartWebBrowser()' or 'WDLibrary.startBrowser()', we can use 'false' value to cancel this default 'disable' setting.
+	 * E.g.
+	 *     WDLibrary.startBrowser(BrowserName, Url, Id, timeout, isRemote, quote(SelectBrowser.KEY_CHROME_DISABLE_EXTENSIONS), "false");
+	 * 
+	 */
+	public static final String KEY_CHROME_DISABLE_EXTENSIONS = "--disable-extensions";
 
 	/**'http.proxyHost'*/
 	public static final String SYSTEM_PROPERTY_PROXY_HOST = StringUtils.SYSTEM_PROPERTY_PROXY_HOST;
@@ -277,10 +290,11 @@ public class SelectBrowser {
 			System.setProperty(SYSTEM_PROPERTY_WEBDRIVER_CHROME, "chromedriver.exe");
 			caps = DesiredCapabilities.chrome();
 			
-			// Disable extensions to avoid pop up 'Disable developer mode extensions' message.
-			ChromeOptions options = new ChromeOptions();
-			options.addArguments("--disable-extensions");			
-			caps.setCapability(ChromeOptions.CAPABILITY, options);
+			// Disable extensions to avoid popping up 'Disable developer mode extensions' message by default.
+			if(!extraParameters.containsKey(KEY_CHROME_DISABLE_EXTENSIONS)) {
+				// Only execute if no user's setting
+				extraParameters.put(KEY_CHROME_DISABLE_EXTENSIONS, "true");					
+			}
 			
 			//caps.setCapability("browserName", BROWSER_NAME_CHROME);
 		} else if (browserName.equals(BROWSER_NAME_EDGE)) {
@@ -418,6 +432,18 @@ public class SelectBrowser {
 			}
 		}catch(Exception e){
 			IndependantLog.warn(debugmsg+"Fail to Set chrome profile directory to ChromeOptions.");
+		}		
+		
+		try {
+			// Parse '--disable-extensions' parameters to add into ChromeOptions
+			String disableExtensionsOptions = StringUtilities.getString(extraParameters, KEY_CHROME_DISABLE_EXTENSIONS);
+			IndependantLog.debug(debugmsg + "Try to disable Chrome extensions: '" + disableExtensionsOptions + "'.");
+			if(options == null) options = new ChromeOptions();
+			if(!disableExtensionsOptions.isEmpty() && disableExtensionsOptions.toLowerCase().equals("true")){
+				options.addArguments(KEY_CHROME_DISABLE_EXTENSIONS);
+			}
+		} catch(Exception e){
+			IndependantLog.warn(debugmsg + "Fail to set disable Chrome extensions for ChromeOptions.");
 		}
 		
 		try{
@@ -469,7 +495,6 @@ public class SelectBrowser {
 		}catch(Exception e){
 			IndependantLog.warn(debugmsg+"Fail to Set chrome excludeSwitches to ChromeOptions.");
 		}
-		
 		if(options!=null) caps.setCapability(ChromeOptions.CAPABILITY, options);
 	}
 	
