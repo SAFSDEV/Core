@@ -2111,6 +2111,7 @@ public class DDDriverCommands {
         <LI>Mercury Interactive WinRunner</LI>
         <LI>OpenQA Selenium</LI>
         <LI>AutomatedQA TestComplete</LI>
+        <LI>AUTOIT Team Autoit</LI>
     </UL>
 
      @param windowID  Optional:NO 
@@ -2141,6 +2142,7 @@ public class DDDriverCommands {
         <LI>Mercury Interactive WinRunner</LI>
         <LI>OpenQA Selenium</LI>
         <LI>AutomatedQA TestComplete</LI>
+        <LI>AUTOIT Team Autoit</LI>
     </UL>
 
      @param parameters  Optional:NO
@@ -3332,6 +3334,7 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
         <LI>OpenQA Selenium</LI>
         <LI>OpenQA Selenium</LI>
         <LI>AutomatedQA TestComplete</LI>
+        <LI>AUTOIT Team Autoit</LI>
     </UL>
 
      @param windowID  Optional:NO 
@@ -3374,6 +3377,7 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
         <LI>OpenQA Selenium</LI>
         <LI>OpenQA Selenium</LI>
         <LI>AutomatedQA TestComplete</LI>
+        <LI>AUTOIT Team Autoit</LI>
     </UL>
 
      @param parameters  Optional:NO
@@ -3414,6 +3418,7 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
         <LI>Mercury Interactive WinRunner</LI>
         <LI>AutomatedQA TestComplete</LI>
         <LI>OpenQA Selenium</LI>
+        <LI>AUTOIT Team Autoit</LI>
     </UL>
 
      @param windowID  Optional:NO 
@@ -3455,6 +3460,7 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
         <LI>Mercury Interactive WinRunner</LI>
         <LI>AutomatedQA TestComplete</LI>
         <LI>OpenQA Selenium</LI>
+        <LI>AUTOIT Team Autoit</LI>
     </UL>
 
      @param parameters  Optional:NO

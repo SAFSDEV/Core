@@ -272,6 +272,7 @@ public class GenericObjectFunctions {
         <LI>Abbot Abbot</LI>
         <LI>OpenQA Selenium</LI>
         <LI>OpenQA Selenium</LI>
+        <LI>AUTOIT Team Autoit</LI>
     </UL>
 
      @param winname  Optional:NO
@@ -388,6 +389,7 @@ public class GenericObjectFunctions {
         <LI>Abbot Abbot</LI>
         <LI>OpenQA Selenium</LI>
         <LI>OpenQA Selenium</LI>
+        <LI>AUTOIT Team Autoit</LI>
     </UL>
 
      @param winname  Optional:NO
