@@ -203,7 +203,7 @@ public class DDDriverFlowCommands {
                  JUnit tests can be intermixed with other SAFS tests.
                   </pre>    Supporting Engines:
     <P/><UL>
-        <LI>SAFS TIDDriverFlowCommands</LI>
+        <LI>SAFS TIDDriverCommands</LI>
     </UL>
 
      @param className  Optional:NO 
