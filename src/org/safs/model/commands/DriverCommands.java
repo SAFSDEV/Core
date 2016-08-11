@@ -2989,6 +2989,7 @@ public class DriverCommands {
         <LI>Mercury Interactive WinRunner</LI>
         <LI>OpenQA Selenium</LI>
         <LI>AutomatedQA TestComplete</LI>
+        <LI>AUTOIT Team Autoit</LI>
     </UL>
 
      @param windowID  Optional:NO 
@@ -3019,6 +3020,7 @@ public class DriverCommands {
         <LI>Mercury Interactive WinRunner</LI>
         <LI>OpenQA Selenium</LI>
         <LI>AutomatedQA TestComplete</LI>
+        <LI>AUTOIT Team Autoit</LI>
     </UL>
 
      @param parameters  Optional:NO
@@ -4210,6 +4212,7 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
         <LI>OpenQA Selenium</LI>
         <LI>OpenQA Selenium</LI>
         <LI>AutomatedQA TestComplete</LI>
+        <LI>AUTOIT Team Autoit</LI>
     </UL>
 
      @param windowID  Optional:NO 
@@ -4252,6 +4255,7 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
         <LI>OpenQA Selenium</LI>
         <LI>OpenQA Selenium</LI>
         <LI>AutomatedQA TestComplete</LI>
+        <LI>AUTOIT Team Autoit</LI>
     </UL>
 
      @param parameters  Optional:NO
@@ -4292,6 +4296,7 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
         <LI>Mercury Interactive WinRunner</LI>
         <LI>AutomatedQA TestComplete</LI>
         <LI>OpenQA Selenium</LI>
+        <LI>AUTOIT Team Autoit</LI>
     </UL>
 
      @param windowID  Optional:NO 
@@ -4333,6 +4338,7 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
         <LI>Mercury Interactive WinRunner</LI>
         <LI>AutomatedQA TestComplete</LI>
         <LI>OpenQA Selenium</LI>
+        <LI>AUTOIT Team Autoit</LI>
     </UL>
 
      @param parameters  Optional:NO
@@ -9026,11 +9032,12 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
 
     /*********** <pre>
           Open an existing file with the filename, mode and access provided.
-		  TID Note: Three ways to open a file:
+		  TID Note: Multiple ways to open a file:
 			
 				Mode=Input, Access=Read
 				Mode=Output, Access=Write
 				Mode=Append, Access=Write
+				Mode=AppendRaw, Access=Write
 				
             </pre>    Supporting Engines:
     <P/><UL>
@@ -9044,9 +9051,7 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
      @param fileName  Optional:NO
               The full path file name of the file to be opened.
             
-     @param mode  Optional:NO
-              Mode to be used to open the file, Input, Output or Append. Random and Binary not supported
-            
+     @param mode  Optional:NOMode to be used to open the file, Input, Output, Append, and AppendRaw.
      @param access  Optional:NO
               Access to be used to open the file. Read, Write or Read Write.
             
@@ -9075,11 +9080,12 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
 
     /*********** <pre>
           Open an existing file with the filename, mode and access provided.
-		  TID Note: Three ways to open a file:
+		  TID Note: Multiple ways to open a file:
 			
 				Mode=Input, Access=Read
 				Mode=Output, Access=Write
 				Mode=Append, Access=Write
+				Mode=AppendRaw, Access=Write
 				
             </pre>    
     Supporting Engines:
@@ -9096,9 +9102,7 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
     <UL>
 <BR/>        fileName -- Optional:NO
               The full path file name of the file to be opened.
-            <BR/>        mode -- Optional:NO
-              Mode to be used to open the file, Input, Output or Append. Random and Binary not supported
-            <BR/>        access -- Optional:NO
+            <BR/>        mode -- Optional:NOMode to be used to open the file, Input, Output, Append, and AppendRaw.<BR/>        access -- Optional:NO
               Access to be used to open the file. Read, Write or Read Write.
             <BR/>        fileNumberVariable -- Optional:NO
               DDE Variable name of the variable to store the file number.
@@ -9119,11 +9123,12 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
 
     /*********** <pre>
           Open an existing UTF-8 file with the filename, mode and access provided.
-	      TID Note: Three ways to open a file:
+	      TID Note: Multiple ways to open a file:
 			
 				Mode=Input, Access=Read
 				Mode=Output, Access=Write
 				Mode=Append, Access=Write
+				Mode=AppendRaw, Access=Write
 			
             </pre>    Supporting Engines:
     <P/><UL>
@@ -9136,9 +9141,7 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
      @param fileName  Optional:NO
               The full path file name of the UTF-8 file to be opened.
             
-     @param mode  Optional:NO
-              Mode to be used to open the UTF-8 file, Input, Output or Append. Random and Binary not supported
-            
+     @param mode  Optional:NOMode to be used to open the file, Input, Output, Append, and AppendRaw.
      @param access  Optional:NO
               Access to be used to open the UTF-8 file. Read, Write or Read Write.
             
@@ -9168,11 +9171,12 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
 
     /*********** <pre>
           Open an existing UTF-8 file with the filename, mode and access provided.
-	      TID Note: Three ways to open a file:
+	      TID Note: Multiple ways to open a file:
 			
 				Mode=Input, Access=Read
 				Mode=Output, Access=Write
 				Mode=Append, Access=Write
+				Mode=AppendRaw, Access=Write
 			
             </pre>    
     Supporting Engines:
@@ -9188,9 +9192,7 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
     <UL>
 <BR/>        fileName -- Optional:NO
               The full path file name of the UTF-8 file to be opened.
-            <BR/>        mode -- Optional:NO
-              Mode to be used to open the UTF-8 file, Input, Output or Append. Random and Binary not supported
-            <BR/>        access -- Optional:NO
+            <BR/>        mode -- Optional:NOMode to be used to open the file, Input, Output, Append, and AppendRaw.<BR/>        access -- Optional:NO
               Access to be used to open the UTF-8 file. Read, Write or Read Write.
             <BR/>        fileNumberVariable -- Optional:NO
               DDE Variable name of the variable to store the file number.
@@ -9872,7 +9874,7 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
                  JUnit tests can be intermixed with other SAFS tests.
                   </pre>    Supporting Engines:
     <P/><UL>
-        <LI>SAFS TIDDriverFlowCommands</LI>
+        <LI>SAFS TIDDriverCommands</LI>
     </UL>
 
      @param className  Optional:NO 
