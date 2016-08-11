@@ -159,6 +159,7 @@ public class EditBox extends GenericObject {
     <LI>OpenQA Selenium</LI>
     <LI>OpenQA Selenium</LI>
     <LI>Google Android</LI>
+    <LI>AUTOIT Team Autoit</LI>
     </UL>
 
      @param textValue  Optional:YES  DefaultVal: 
@@ -196,6 +197,7 @@ public class EditBox extends GenericObject {
     <LI>OpenQA Selenium</LI>
     <LI>OpenQA Selenium</LI>
     <LI>Google Android</LI>
+    <LI>AUTOIT Team Autoit</LI>
     </UL>
 
      @param table  Optional:NO

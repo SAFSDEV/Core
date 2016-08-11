@@ -120,6 +120,7 @@ public class EditBoxFunctions {
         <LI>OpenQA Selenium</LI>
         <LI>OpenQA Selenium</LI>
         <LI>Google Android</LI>
+        <LI>AUTOIT Team Autoit</LI>
     </UL>
 
      @param winname  Optional:NO
