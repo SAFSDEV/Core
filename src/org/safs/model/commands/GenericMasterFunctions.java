@@ -743,6 +743,7 @@ public class GenericMasterFunctions {
         <LI>OpenQA Selenium</LI>
         <LI>OpenQA Selenium</LI>
         <LI>Automated QA TestComplete</LI>
+        <LI>AUTOIT Team Autoit</LI>
     </UL>
 
      @param winname  Optional:NO
@@ -830,6 +831,7 @@ public class GenericMasterFunctions {
         <LI>OpenQA Selenium</LI>
         <LI>OpenQA Selenium</LI>
         <LI>Automated QA TestComplete</LI>
+        <LI>AUTOIT Team Autoit</LI>
     </UL>
 
      @param winname  Optional:NO

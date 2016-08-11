@@ -1006,6 +1006,7 @@ public class GenericMaster extends UIComponent {
     <LI>OpenQA Selenium</LI>
     <LI>OpenQA Selenium</LI>
     <LI>Automated QA TestComplete</LI>
+    <LI>AUTOIT Team Autoit</LI>
     </UL>
 
      @param outputFile  Optional:NO
@@ -1080,6 +1081,7 @@ public class GenericMaster extends UIComponent {
     <LI>OpenQA Selenium</LI>
     <LI>OpenQA Selenium</LI>
     <LI>Automated QA TestComplete</LI>
+    <LI>AUTOIT Team Autoit</LI>
     </UL>
 
      @param table  Optional:NO
@@ -1159,6 +1161,7 @@ public class GenericMaster extends UIComponent {
     <LI>OpenQA Selenium</LI>
     <LI>OpenQA Selenium</LI>
     <LI>Automated QA TestComplete</LI>
+    <LI>AUTOIT Team Autoit</LI>
     </UL>
 
      @param parameters  Optional:NO
@@ -1237,6 +1240,7 @@ public class GenericMaster extends UIComponent {
     <LI>OpenQA Selenium</LI>
     <LI>OpenQA Selenium</LI>
     <LI>Automated QA TestComplete</LI>
+    <LI>AUTOIT Team Autoit</LI>
     </UL>
 
      @param table  Optional:NO

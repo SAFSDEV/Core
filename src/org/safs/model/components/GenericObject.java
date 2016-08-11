@@ -239,6 +239,7 @@ public class GenericObject extends GenericMaster {
     <LI>Abbot Abbot</LI>
     <LI>OpenQA Selenium</LI>
     <LI>OpenQA Selenium</LI>
+    <LI>AUTOIT Team Autoit</LI>
     </UL>
 
      @param appMapSubkey  Optional:YES 
@@ -343,6 +344,7 @@ public class GenericObject extends GenericMaster {
     <LI>Abbot Abbot</LI>
     <LI>OpenQA Selenium</LI>
     <LI>OpenQA Selenium</LI>
+    <LI>AUTOIT Team Autoit</LI>
     </UL>
 
      @param table  Optional:NO
@@ -452,6 +454,7 @@ public class GenericObject extends GenericMaster {
     <LI>Abbot Abbot</LI>
     <LI>OpenQA Selenium</LI>
     <LI>OpenQA Selenium</LI>
+    <LI>AUTOIT Team Autoit</LI>
     </UL>
 
      @param parameters  Optional:NO
@@ -562,6 +565,7 @@ public class GenericObject extends GenericMaster {
     <LI>Abbot Abbot</LI>
     <LI>OpenQA Selenium</LI>
     <LI>OpenQA Selenium</LI>
+    <LI>AUTOIT Team Autoit</LI>
     </UL>
 
      @param table  Optional:NO
