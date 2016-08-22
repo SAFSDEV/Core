@@ -72,6 +72,9 @@ git add *.htm
 git add *.html
 git add *.js
 git add *.css
+git add *.jpg
+git add *.png
+git add *.gif
 
 REM Then, we use the 'git status' to get the modified files, which will be uploaded to sourceforge
 FOR /f /F "usebackq tokens=1,2* " %%i IN (`git status --short`) DO (
@@ -84,12 +87,10 @@ FOR /f /F "usebackq tokens=1,2* " %%i IN (`git status --short`) DO (
     IF [!OPERATION!]==[ADD] (
         ECHO ... Copying file %%j to folder '%FOLDER_COPY%'.
         COPY %%j %FOLDER_COPY%
-        rem pscp -i %SF_PRIVATE_KEY% %%j %SF_USER%,safsdev@web.sourceforge.net:/home/groups/s/sa/safsdev/htdocs/sqabasic2000/
     )
     IF [!OPERATION!]==[DELETE] (
         ECHO ... Copying file %%j to folder '%FOLDER_COPY%'.
         COPY %%j %FOLDER_DEL%
-        rem TODO Find a way to delete file from sourceforge pscp %%j %SF_USER%,safsdev@web.sourceforge.net:/home/groups/s/sa/safsdev/htdocs/sqabasic2000/
     )
 )
 
