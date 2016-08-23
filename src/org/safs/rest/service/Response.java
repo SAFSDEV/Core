@@ -5,6 +5,7 @@
 
 package org.safs.rest.service;
 
+import java.util.Map;
 
 /**
  * @author Carl Nagle
@@ -19,14 +20,22 @@ public class Response {
     int _status_code;
     String _reason_phrase;
     
-    String _general_header;
-    String _response_header;
     
-    String _message_body;    
+    Map<String,String> _headers;
 
-    String _entity_header;
+    String _message_body;
+
     long _entity_length;
     Object _entity_body;
+
+    String _content_type;
+
+	public String get_content_type() {
+		return _content_type;
+	}
+	public void set_content_type(String _content_type) {
+		this._content_type = _content_type;
+	}
 	/**
 	 * @return the _status_line
 	 */
@@ -76,28 +85,17 @@ public class Response {
 		this._reason_phrase = _reason_phrase;
 	}
 	/**
-	 * @return the _general_header
-	 */
-	public String get_general_header() {
-		return _general_header;
-	}
-	/**
-	 * @param _general_header the _general_header to set
-	 */
-	public void set_general_header(String _general_header) {
-		this._general_header = _general_header;
-	}
-	/**
 	 * @return the _response_header
 	 */
-	public String get_response_header() {
-		return _response_header;
+	public String get_headers() {
+		
+		return Headers.convertHeadersMapToMultiLineString(_headers);
 	}
 	/**
 	 * @param _response_header the _response_header to set
 	 */
-	public void set_response_header(String _response_header) {
-		this._response_header = _response_header;
+	void set_headers(Map<String,String> _header) {
+		this._headers = _header;
 	}
 	/**
 	 * @return the _message_body
@@ -110,18 +108,6 @@ public class Response {
 	 */
 	public void set_message_body(String _message_body) {
 		this._message_body = _message_body;
-	}
-	/**
-	 * @return the _entity_header
-	 */
-	public String get_entity_header() {
-		return _entity_header;
-	}
-	/**
-	 * @param _entity_header the _entity_header to set
-	 */
-	public void set_entity_header(String _entity_header) {
-		this._entity_header = _entity_header;
 	}
 	/**
 	 * @return the _entity_length

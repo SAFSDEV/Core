@@ -21,6 +21,7 @@ public class Service{
 	private String password;
 	private String authType;
 	
+	//TODO: add httpVersion
 	public Service(String serviceId){
 		this.serviceId = serviceId;
 	}

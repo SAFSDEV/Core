@@ -7,6 +7,7 @@ package org.safs.rest;
 import java.util.Collection;
 
 import org.safs.rest.service.Headers;
+import org.safs.rest.service.RESTImpl;
 import org.safs.rest.service.Response;
 import org.safs.rest.service.Service;
 import org.safs.rest.service.Services;
@@ -22,7 +23,9 @@ public class REST {
 	public static final String PUT_METHOD    = "PUT";
 	public static final String HEAD_METHOD   = "HEAD";
 	public static final String PATCH_METHOD  = "PATCH";
-		
+	
+	public static RESTImpl restImpl = new RESTImpl();
+	
 	/**
 	 * Start a named Service session with a specific web service.<br>
 	 * This doesn't actually make any type of Connection or call to the web service.
@@ -50,17 +53,25 @@ public class REST {
 		Services.deleteService(serviceId);
 	}
 
-	public static Response request(String serviceId, String requestMethod, String relativeURI, Collection<String> headers, Object body){
-		Response response = null;
-		// TODO
-		return response;
+	public static Response request(String serviceId, String requestMethod, String relativeURI, String headers, Object body){
+		
+		Response ret = null;
+		
+		try {
+			ret = restImpl.request(serviceId, requestMethod, relativeURI, headers, body);
+		}
+		catch(Exception ex) {
+			//TODO
+			throw new RuntimeException(ex);
+		}
+		return ret;
 	}
 	
 	public static class GET{
-		public static Response custom(String serviceId, String relativeURI, Collection<String> headers, Object body){
+		public static Response custom(String serviceId, String relativeURI, String headers, Object body){
 			return request(serviceId, GET_METHOD, relativeURI, headers, body);
 		}
-		
+				
 		public static Response text(String serviceId, String relativeURI, Object body){
 			return custom(serviceId, relativeURI, Headers.getTextHeaders(), body);
 		}
@@ -92,7 +103,7 @@ public class REST {
 		}
 	}
 	public static class HEAD{
-		public static Response custom(String serviceId, String relativeURI, Collection<String> headers, Object body){
+		public static Response custom(String serviceId, String relativeURI, String headers, Object body){
 			return request(serviceId, HEAD_METHOD, relativeURI, headers, body);
 		}
 		
@@ -127,7 +138,7 @@ public class REST {
 		}
 	}
 	public static class POST{
-		public static Response custom(String serviceId, String relativeURI, Collection<String> headers, Object body){
+		public static Response custom(String serviceId, String relativeURI, String headers, Object body){
 			return request(serviceId, POST_METHOD, relativeURI, headers, body);
 		}
 		
@@ -162,7 +173,7 @@ public class REST {
 		}
 	}
 	public static class PUT{
-		public static Response custom(String serviceId, String relativeURI, Collection<String> headers, Object body){
+		public static Response custom(String serviceId, String relativeURI, String headers, Object body){
 			return request(serviceId, PUT_METHOD, relativeURI, headers, body);
 		}
 		
@@ -197,7 +208,7 @@ public class REST {
 		}
 	}
 	public static class PATCH{
-		public static Response custom(String serviceId, String relativeURI, Collection<String> headers, Object body){
+		public static Response custom(String serviceId, String relativeURI, String headers, Object body){
 			return request(serviceId, PATCH_METHOD, relativeURI, headers, body);
 		}
 		
@@ -232,7 +243,7 @@ public class REST {
 		}
 	}
 	public static class DELETE{
-		public static Response custom(String serviceId, String relativeURI, Collection<String> headers, Object body){
+		public static Response custom(String serviceId, String relativeURI, String headers, Object body){
 			return request(serviceId, DELETE_METHOD, relativeURI, headers, body);
 		}
 		
