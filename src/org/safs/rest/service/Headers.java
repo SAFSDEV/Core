@@ -20,6 +20,7 @@ import org.apache.hc.core5.http.impl.io.SessionInputBufferImpl;
 import org.apache.hc.core5.http.message.BasicHeader;
 import org.apache.hc.core5.http.message.BasicLineParser;
 import org.apache.hc.core5.util.CharArrayBuffer;
+import org.safs.SAFSRuntimeException;
 import org.apache.hc.core5.http.message.HeaderGroup;
 
 
@@ -34,14 +35,14 @@ public class Headers {
 	private static Map<String, HeaderGroup> _headerMap = new HashMap<String, HeaderGroup>();
 	
 	// All map keys will be used as uppercase
-	public static final String BINARY_HEADERS = "BINARY";
-	public static final String JSON_HEADERS   = "JSON";
-	public static final String TEXT_HEADERS   = "TEXT";
-	public static final String XML_HEADERS    = "XML";
-	public static final String HTML_HEADERS   = "HTML";
-	public static final String IMAGE_HEADERS  = "IMAGE";
-	public static final String CSS_HEADERS    = "CSS";
-	public static final String SCRIPT_HEADERS = "SCRIPT";
+	public static final String BINARY_TYPE = "BINARY";
+	public static final String JSON_TYPE   = "JSON";
+	public static final String TEXT_TYPE   = "TEXT";
+	public static final String XML_TYPE    = "XML";
+	public static final String HTML_TYPE   = "HTML";
+	public static final String IMAGE_TYPE  = "IMAGE";
+	public static final String CSS_TYPE    = "CSS";
+	public static final String SCRIPT_TYPE = "SCRIPT";
 	
 	// Constants for default Content/Accept types
 	public static final String CONTENT_TYPE      = "Content-Type";
@@ -61,14 +62,14 @@ public class Headers {
 	
 	static {
 		defaultContentTypeMap = new HashMap<String, String>(8);
-		defaultContentTypeMap.put(BINARY_HEADERS, APPL_OCTET_STREAM);
-		defaultContentTypeMap.put(JSON_HEADERS,   APPL_JSON);
-		defaultContentTypeMap.put(TEXT_HEADERS,   TEXT_PLAIN);
-		defaultContentTypeMap.put(XML_HEADERS,    TEXT_XML);
-		defaultContentTypeMap.put(HTML_HEADERS,   TEXT_HTML);
-		defaultContentTypeMap.put(IMAGE_HEADERS,  IMAGE);
-		defaultContentTypeMap.put(CSS_HEADERS,    TEXT_CSS);
-		defaultContentTypeMap.put(SCRIPT_HEADERS, APPL_JAVASCRIPT);
+		defaultContentTypeMap.put(BINARY_TYPE, APPL_OCTET_STREAM);
+		defaultContentTypeMap.put(JSON_TYPE,   APPL_JSON);
+		defaultContentTypeMap.put(TEXT_TYPE,   TEXT_PLAIN);
+		defaultContentTypeMap.put(XML_TYPE,    TEXT_XML);
+		defaultContentTypeMap.put(HTML_TYPE,   TEXT_HTML);
+		defaultContentTypeMap.put(IMAGE_TYPE,  IMAGE);
+		defaultContentTypeMap.put(CSS_TYPE,    TEXT_CSS);
+		defaultContentTypeMap.put(SCRIPT_TYPE, APPL_JAVASCRIPT);
 	}
 	
 	
@@ -77,39 +78,38 @@ public class Headers {
 	 * as a multi-line String.
 	 * <p>
 	 * There are predefined request resource/request headers that can be retrieved and even changed.  
-	 * The user is also able to retrieve custom headers previously stored using a custom mapKey.
+	 * The user is also able to retrieve custom headers previously stored using a custom type.
 	 * <p>
 	 * Ex:<ul>
 	 * 
 	 * </ul>
-	 * @param mapKey
+	 * @param type
 	 * @return
 	 * @see #setHeadersForType(String,Collection)
 	 * @see #addHeaderForType(String, String)
 	 * @see #removeHeaderForType(String, String)
 	 */
-	public static String getHeadersForType(String mapKey){
+	public static String getHeadersForType(String type){
 	
-		HeaderGroup hg = getHeaderGroupForType(mapKey);
+		HeaderGroup hg = getHeaderGroupForType(type);
 		return convertHeaderGroupToMultiLineString(hg);
 	}
 	
 	/**
 	 * Returns the header group currently set for a defined resource/request 
 	 * type. If not set, then lazily sets defaults. 
-	 * @param mapKey
+	 * @param type
 	 * @return
 	 */
-	private static HeaderGroup getHeaderGroupForType(String mapKey) {
+	private static HeaderGroup getHeaderGroupForType(String type) {
 		
-		if (mapKey == null) {
-			// TODO - throw a RestException
-			return null;
+		if (type == null) {
+			throw new SAFSRuntimeException("type cannot be null!");
 		}
 		
-		HeaderGroup hg = _headerMap.get(mapKey.toUpperCase());
+		HeaderGroup hg = _headerMap.get(type.toUpperCase());
 		if (hg == null) {
-			String defContentType = defaultContentTypeMap.get(mapKey.toUpperCase());
+			String defContentType = defaultContentTypeMap.get(type.toUpperCase());
 			if (defContentType == null) {
 				// This would be the case for a "custom" type for which we do 
 				// not have default values...
@@ -120,8 +120,8 @@ public class Headers {
 					new BasicHeader(CONTENT_TYPE, defContentType),
 					new BasicHeader(ACCEPT, defContentType)
 				};
-				setHeadersForType(mapKey, defaultHeaders);
-				hg = _headerMap.get(mapKey.toUpperCase());
+				setHeadersForType(type, defaultHeaders);
+				hg = _headerMap.get(type.toUpperCase());
 			}
 		}
 		return hg;
@@ -130,9 +130,9 @@ public class Headers {
 	/**
 	 * Wholesale set/replace the headers multi-line String to be used for a 
 	 * predefined or custom resource/request type.
-	 * If the provided String is null then the headers mapped to the mapKey and 
-	 * the mapKey entry will be removed. 
-	 * @param mapKey
+	 * If the provided String is null then the headers mapped to the type and 
+	 * the type entry will be removed. 
+	 * @param type
 	 * @param headerStr Multi-line String containing the HTTP header(s)
 	 * @throws IOException 
 	 * @throws HttpException 
@@ -140,29 +140,29 @@ public class Headers {
 	 * @see #addHeaderForType(String, String)
 	 * @see #removeHeaderForType(String, String)
 	 */
-	public static void setHeadersForType(String mapKey, String headerStr) {
+	public static void setHeadersForType(String type, String headerStr) {
 		// toUpperCase() might generate a NullPointerException
 		// TODO: look for null headerStr
 		if (headerStr == null) {
-			_headerMap.remove(mapKey.toUpperCase());
+			_headerMap.remove(type.toUpperCase());
 		} else {
 			Header[] headerArr = parseHeadersInMultiLineString(headerStr);
-			setHeadersForType(mapKey, headerArr);
+			setHeadersForType(type, headerArr);
 		}
 	}
 	
 	
-	private static void setHeadersForType(String mapKey, Header[] headers) {
+	private static void setHeadersForType(String type, Header[] headers) {
 		
 		HeaderGroup headerGrp = new HeaderGroup();
 		headerGrp.setHeaders(headers);
-		_headerMap.put(mapKey.toUpperCase(), headerGrp);
+		_headerMap.put(type.toUpperCase(), headerGrp);
 	}
 	
 	
 	/**
 	 * Add one (or more) headers to the existing set of headers for the mapped type.
-	 * @param mapKey
+	 * @param type
 	 * @param headerStr Multi-line String containing the HTTP headers
 	 * @return
 	 * @throws IOException 
@@ -171,9 +171,9 @@ public class Headers {
 	 * @see #getHeadersForType(String)
 	 * @see #removeHeaderForType(String, String)
 	 */
-	public static String addHeadersForType(String mapKey, String headerStr) {
+	public static String addHeadersForType(String type, String headerStr) {
 		
-		if (mapKey == null) {
+		if (type == null) {
 			// TODO - throw RestException
 			return null;
 		}
@@ -182,7 +182,7 @@ public class Headers {
 		Header[] newHeaders = parseHeadersInMultiLineString(headerStr);
 		
 		// Get the preset or default values for this type
-		HeaderGroup headers = getHeaderGroupForType(mapKey);
+		HeaderGroup headers = getHeaderGroupForType(type);
 		
 		// TODO: allow duplicates if the spec allows it.  Otherwise, replace the value.
 		for (Header headerToBeAdded : newHeaders) {
@@ -195,7 +195,7 @@ public class Headers {
 
 	/**
 	 * Remove one (or more) header(s) from the existing headers for the mapped type.
-	 * @param mapKey
+	 * @param type
 	 * @param headerStr Multi-line String containing the HTTP header(s)
 	 * @return
 	 * @throws IOException 
@@ -204,13 +204,13 @@ public class Headers {
 	 * @see #getHeadersForType(String)
 	 * @see #addHeaderForType(String, String)
 	 */
-	public static String removeHeadersForType(String mapKey, String headerStr) {
-		// TODO: check for null mapKey
+	public static String removeHeadersForType(String type, String headerStr) {
+		// TODO: check for null type
 		// Convert the new header to be removed from String to Header
 		Header[] unwantedHeaders = parseHeadersInMultiLineString(headerStr);
 		// toUpperCase() might generate a NullPointerException
 		// Get the preset or default values for this type
-		HeaderGroup headers = getHeaderGroupForType(mapKey);
+		HeaderGroup headers = getHeaderGroupForType(type);
 		
 		for (Header headerToBeRemoved : unwantedHeaders) {
 			headers.removeHeader(headerToBeRemoved);
@@ -225,7 +225,7 @@ public class Headers {
 	 */
 	public static String getBinaryHeaders() {
 		
-		return getHeadersForType(BINARY_HEADERS);
+		return getHeadersForType(BINARY_TYPE);
 	}
 
 	/**
@@ -233,7 +233,7 @@ public class Headers {
 	 * @see #getBinaryHeaders()
 	 */
 	public static void setBinaryHeaders(String _binaryHeaders) {
-		setHeadersForType(BINARY_HEADERS, _binaryHeaders);
+		setHeadersForType(BINARY_TYPE, _binaryHeaders);
 	}
 
 	/**
@@ -242,7 +242,7 @@ public class Headers {
 	 */
 	public static String getJSONHeaders() {
 
-		return getHeadersForType(JSON_HEADERS);
+		return getHeadersForType(JSON_TYPE);
 	}
 
 	/**
@@ -250,7 +250,7 @@ public class Headers {
 	 * @see #getJSONHeaders()
 	 */
 	public static void setJSONHeaders(String _jsonHeaders) {
-		setHeadersForType(JSON_HEADERS, _jsonHeaders);
+		setHeadersForType(JSON_TYPE, _jsonHeaders);
 	}
 
 	/**
@@ -259,7 +259,7 @@ public class Headers {
 	 */
 	public static String getTextHeaders() {
 		
-		return getHeadersForType(TEXT_HEADERS);
+		return getHeadersForType(TEXT_TYPE);
 	}
 
 	/**
@@ -267,7 +267,7 @@ public class Headers {
 	 * @see #getTextHeaders()
 	 */
 	public static void setTextHeaders(String _textHeaders) {
-		setHeadersForType(TEXT_HEADERS, _textHeaders);
+		setHeadersForType(TEXT_TYPE, _textHeaders);
 	}
 
 	/**
@@ -276,7 +276,7 @@ public class Headers {
 	 */
 	public static String getXMLHeaders() {
 		
-		return getHeadersForType(XML_HEADERS);
+		return getHeadersForType(XML_TYPE);
 	}
 
 	/**
@@ -284,7 +284,7 @@ public class Headers {
 	 * @see #getXMLHeaders()
 	 */
 	public static void setXMLHeaders(String _xmlHeaders) {
-		setHeadersForType(XML_HEADERS, _xmlHeaders);
+		setHeadersForType(XML_TYPE, _xmlHeaders);
 	}
 
 	/**
@@ -293,7 +293,7 @@ public class Headers {
 	 */
 	public static String getHtmlHeaders() {
 		
-		return getHeadersForType(HTML_HEADERS);
+		return getHeadersForType(HTML_TYPE);
 	}
 
 	/**
@@ -301,7 +301,7 @@ public class Headers {
 	 * @see #getHtmlHeaders()
 	 */
 	public static void setHtmlHeaders(String _htmlHeaders) {
-		setHeadersForType(HTML_HEADERS, _htmlHeaders);
+		setHeadersForType(HTML_TYPE, _htmlHeaders);
 	}
 
 	/**
@@ -310,7 +310,7 @@ public class Headers {
 	 */
 	public static String getImageHeaders() {
 		
-		return getHeadersForType(IMAGE_HEADERS);
+		return getHeadersForType(IMAGE_TYPE);
 	}
 
 	/**
@@ -318,7 +318,7 @@ public class Headers {
 	 * @see #getImageHeaders()
 	 */
 	public static void setImageHeaders(String _imageHeaders) {
-		setHeadersForType(IMAGE_HEADERS, _imageHeaders);
+		setHeadersForType(IMAGE_TYPE, _imageHeaders);
 	}
 
 	/**
@@ -327,7 +327,7 @@ public class Headers {
 	 */
 	public static String getCSSHeaders() {
 		
-		return getHeadersForType(CSS_HEADERS);
+		return getHeadersForType(CSS_TYPE);
 	}
 
 	/**
@@ -335,7 +335,7 @@ public class Headers {
 	 * @see #getCSSHeaders()
 	 */
 	public static void setCSSHeaders(String _cssHeaders) {
-		setHeadersForType(CSS_HEADERS, _cssHeaders);
+		setHeadersForType(CSS_TYPE, _cssHeaders);
 	}
 
 	/**
@@ -344,7 +344,7 @@ public class Headers {
 	 */
 	public static String getScriptHeaders() {
 		
-		return getHeadersForType(SCRIPT_HEADERS);
+		return getHeadersForType(SCRIPT_TYPE);
 	}
 
 	/**
@@ -352,7 +352,7 @@ public class Headers {
 	 * @see #getScriptHeaders()
 	 */
 	public static void setScriptHeaders(String _scriptHeaders) {
-		setHeadersForType(SCRIPT_HEADERS, _scriptHeaders);
+		setHeadersForType(SCRIPT_TYPE, _scriptHeaders);
 	}
 
 	
