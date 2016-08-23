@@ -532,8 +532,8 @@ public class SelectBrowser {
 		
 		try{
 			//profile.setPreference("media.navigator.permission.disabled", true); boolean
-			//profile.setPreference(“browser.download.folderList”,2); int
-			//profile.setPreference( “intl.accept_languages”, “en-us” ); String
+			//profile.setPreference("browser.download.folderList",2); int
+			//profile.setPreference("intl.accept_languages", "en-us" ); String
 			
 			String[] keys = firefoxPreference.keySet().toArray(new String[0]);
 			Object value = null;
