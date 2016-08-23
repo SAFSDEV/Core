@@ -6,6 +6,7 @@ package org.safs.rest;
 
 import java.util.Collection;
 
+import org.safs.SAFSRuntimeException;
 import org.safs.rest.service.Headers;
 import org.safs.rest.service.RESTImpl;
 import org.safs.rest.service.Response;
@@ -60,9 +61,11 @@ public class REST {
 		try {
 			ret = restImpl.request(serviceId, requestMethod, relativeURI, headers, body);
 		}
+		catch(SAFSRuntimeException safs_ex) {
+			throw safs_ex;
+		}
 		catch(Exception ex) {
-			//TODO
-			throw new RuntimeException(ex);
+			throw new SAFSRuntimeException(ex);
 		}
 		return ret;
 	}

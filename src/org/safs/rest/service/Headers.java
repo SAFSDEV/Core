@@ -71,7 +71,13 @@ public class Headers {
 		defaultContentTypeMap.put(CSS_TYPE,    TEXT_CSS);
 		defaultContentTypeMap.put(SCRIPT_TYPE, APPL_JAVASCRIPT);
 	}
+
 	
+	private static void checkType(String type) {
+		if (type == null) {
+			throw new SAFSRuntimeException("type cannot be null!");
+		}
+	}
 	
 	/**
 	 * Returns the headers currently set for a defined resource/request type
@@ -103,10 +109,7 @@ public class Headers {
 	 */
 	private static HeaderGroup getHeaderGroupForType(String type) {
 		
-		if (type == null) {
-			throw new SAFSRuntimeException("type cannot be null!");
-		}
-		
+		checkType(type);
 		HeaderGroup hg = _headerMap.get(type.toUpperCase());
 		if (hg == null) {
 			String defContentType = defaultContentTypeMap.get(type.toUpperCase());
@@ -141,8 +144,8 @@ public class Headers {
 	 * @see #removeHeaderForType(String, String)
 	 */
 	public static void setHeadersForType(String type, String headerStr) {
-		// toUpperCase() might generate a NullPointerException
-		// TODO: look for null headerStr
+		
+		checkType(type);
 		if (headerStr == null) {
 			_headerMap.remove(type.toUpperCase());
 		} else {
@@ -154,6 +157,7 @@ public class Headers {
 	
 	private static void setHeadersForType(String type, Header[] headers) {
 		
+		checkType(type);
 		HeaderGroup headerGrp = new HeaderGroup();
 		headerGrp.setHeaders(headers);
 		_headerMap.put(type.toUpperCase(), headerGrp);
@@ -173,11 +177,8 @@ public class Headers {
 	 */
 	public static String addHeadersForType(String type, String headerStr) {
 		
-		if (type == null) {
-			// TODO - throw RestException
-			return null;
-		}
-		
+		checkType(type);
+
 		// Convert the new header(s) to be added from String to Header
 		Header[] newHeaders = parseHeadersInMultiLineString(headerStr);
 		
@@ -205,10 +206,11 @@ public class Headers {
 	 * @see #addHeaderForType(String, String)
 	 */
 	public static String removeHeadersForType(String type, String headerStr) {
-		// TODO: check for null type
+		
+		checkType(type);
+
 		// Convert the new header to be removed from String to Header
 		Header[] unwantedHeaders = parseHeadersInMultiLineString(headerStr);
-		// toUpperCase() might generate a NullPointerException
 		// Get the preset or default values for this type
 		HeaderGroup headers = getHeaderGroupForType(type);
 		
@@ -426,8 +428,7 @@ public class Headers {
 			return headers;
 		}
 		catch (Exception ex) {
-			//TODO - use a SAFS specialized exception type here?
-			throw new RuntimeException(ex);
+			throw new SAFSRuntimeException(ex);
 		}
 	}
 	
