@@ -13,5 +13,6 @@ SET SE_LIB_UPDATE=http://safsbuild.na.sas.com:81/jenkins/job/SeleniumPlus/ws/upd
 SET SE_PLUGIN_UPDATE=http://safsbuild.na.sas.com:81/jenkins/job/SeleniumPlus/ws/updatesite/plugin/latest/SEPLUS.PLUGIN.UPDATE.ZIP
 SET SAFS_LIB_UPDATE=http://safsbuild.na.sas.com:81/jenkins/job/SAFS/ws/updatesite/lib/latest/SAFS.LIB.UPDATE.ZIP
 
+copy %SELENIUM_PLUS%\libs\safsupdate.jar %SELENIUM_PLUS%\update_bak\libs\safsupdate.jar
 java -jar %SELENIUM_PLUS%\update_bak\libs\safsupdate.jar -r -a -q -prompt:"SeleniumPlus Plugin Update" -s:"%SE_PLUGIN_UPDATE%" -t:"%SELENIUM_PLUS%\eclipse\plugins" -b:"%SELENIUM_PLUS%\eclipse\plugins\update_bak"
 java -jar %SELENIUM_PLUS%\update_bak\libs\safsupdate.jar -r -a -q -prompt:"SeleniumPlus Libs Update" -s:"%SE_LIB_UPDATE%" -t:"%SELENIUM_PLUS%" -b:"%SELENIUM_PLUS%\update_bak"

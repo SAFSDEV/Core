@@ -1,0 +1,4 @@
+cd /home/project-web/safsdev/htdocs/doc
+lcd doc.copy
+mput -r *
+bye

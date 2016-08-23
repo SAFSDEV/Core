@@ -787,9 +787,9 @@ public class WDLibrary extends SearchObject {
 			p.y += lastBrowserWindow.getClientY();
 			IndependantLog.debug(debugmsg+"added lastBrowserWindow ClientXY offsets, new tentative PAGE location ("+p.x+","+p.y+")");
 			
-			//2.1 Fix “client area LOCATION offset problem”
+			//2.1 Fix "client area LOCATION offset problem"
 			if(lastFrame==null){
-				//LEIWANG: I think that “client area LOCATION offset problem” is not related to the lastFrame.
+				//LEIWANG: I think that "client area LOCATION offset problem" is not related to the lastFrame.
 				//Even the lastFrame is not null, that problem might exist too and we should try to fix it.
 				//TODO remove the condition "if(lastFrame==null)" in future
 				if (lastBrowserWindow.getClientX()==0 &&
@@ -3083,9 +3083,9 @@ public class WDLibrary extends SearchObject {
 			Alert alert = waitAlert(optionals);
 			
 			if(accept){
-				alert.accept();//“OK” button
+				alert.accept();//OK button
 			}else{
-				alert.dismiss();//“Cancel” button
+				alert.dismiss();//Cancel button
 			}
 		}catch(Exception e){
 			String message = "Fail to "+(accept?"accept":"dismiss")+" alert dialog associated with "+(browserID==null? "current browser.":"browser '"+browserID+"'.");

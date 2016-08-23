@@ -1,0 +1,207 @@
+<HTML>
+<HEAD>
+<TITLE>Test Design Guidelines</TITLE>
+</HEAD>
+<BODY>
+<H1><B><CENTER>Test Design Guidelines for Reusability</CENTER></B></H1>
+
+<center><small>Last Updated: JAN.10.2008</small></center>
+<a name="top" />
+<ul>
+<li><a href="#purpose">Purpose</a>
+<li><a href="#FileEncoding">App Map and Test Table UTF-8 File Encodings</a>
+<li><a href="#AppMapChaining">App Map Chaining</a>
+<li><a href="#AppMapResolve">App Map Resolving Embedded Variables</a>
+<li><a href="#designingtestsfornls">Designing Tests for NLS</a>
+<li><a href="#adynamicexample"><b>A Complete Dynamic Text Example Support NLS</b></a>
+</ul>
+<a name="purpose" />
+<p><h3>Purpose</h3>
+<p>
+This document provides a set of guidelines that enable a tester to plan the development of test designs and related assets to maximize reuse.  The intended context for this reuse is to maximize the potential for effective system\application configuration testing and localization testing, also known as NLS testing.  Throughout this document we will refer primarily to NLS testing, but the concepts apply equally well to configuration testing and other forms of testing requiring reconfigurable text values.
+<p>
+The App Map features referenced here as App Map Chaining and App Map Resolving Embedded Variables are only available in versions of SAFS dated on or after Aug, 2006.
+<p>
+It is important to recognize that the single most important notion for making test designs reusable for NLS and configuration testing is that no localizable or configuration-specific text must exist in the test designs or test actions--the test tables.  All such text must be managed in separate text resource files, which in the SAFS world means separate App Maps.  The test designs and test actions will reference the text via variable references which will be retrieved from the App Maps opened for the target language or configuration.
+<p><a name="FileEncoding"/>
+<h3><b>App Map and Test Table UTF-8 File Encodings</b></h3>
+<p>
+<small>(<i>Need to respecify the following statement based on most recent experiences with Rational Robot and Rational Functional Tester evaluations.</i>)</small>
+<p>
+In order to properly represent mixed character data (some single-byte and some multi-byte) the UTF-8 character encoding format is supported by RRAFS and SAFS.  All App Maps and Test Tables intended to be used for NLS testing should be encoded in the proper format required by the tools in use.
+<p><a name="AppMapChaining"/>
+<h3><b>App Map Chaining</b></h3>
+<p>
+Note: App Map Chaining by default is not enabled in order to maintain backwards compatibility with existing tests.  You must use the <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverCommands&cmd=AppMapChaining">'AppMapChaining' Driver Command</a> to enable this feature.
+<p><ul><pre>
+C, AppMapChaining, ON
+</pre></ul>
+<p>
+App Map Chaining is the process by which multiple App Maps can be opened and searched for referenced values.  App Maps opened with chaining enabled are searched in Last-In-First-Out (LIFO) order.  This allows the opening of scenario-specific maps--language or configuration, etc.--to be opened in addition to generic and shared maps.  Maps opened later can have values that override or supercede maps opened earlier.  In addition, shared maps can contain embedded variables (see below) that can be satisfied by the scenario-specific maps.  For example, a shared map may reference an embedded variable containing localizable text that will be found in another open App Map--the one specific to the language being tested.
+<p>
+<b>Example:</b>
+<p><ul><pre>
+C, SetApplicationMap, FMStudio_NLS
+C, SetApplicationMap, FMStudio_MAP
+</pre></ul>
+<p>
+This design snippet shows two maps being opened.  The first opened map (FMStudio_NLS) would contain the localized text specific to the language being tested.  All entries in this map would be in the default  [ApplicationConstants] section so that they could be retrieved as variables.  The second map (FMStudio_MAP) would be the shared map used in all testing no matter what the language or configuration.  The entries in this shared map would contain embedded variables whose values would be found in the localized map.  Since the maps are read in LIFO order due to App Map Chaining, values will first be sought in the FMStudio_MAP.  Embedded variables or other values not satisfied by that map will then be sought in the FMStudio_NLS map.
+<p><a name="AppMapResolve"/>
+<h3><b>App Map Resolving Embedded Variables</b></h3>
+<p>
+Note: Resolving embedded variables in App Maps is not enabled by default in order to maintain backwards compatibility with existing tests.  You must use the <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverCommands&cmd=AppMapResolve">'AppMapResolve' Driver Command</a> to enable this feature.
+<p><ul><pre>
+C, AppMapResolve, ON
+</pre></ul>
+<p>
+An App Map entry can contain references to variables whose values will be resolved to complete the entry.  See <a href="CreateAppMap.htm#ddv_resolve" target="_blank">Resolving DDVariables for Dynamic Recognition</a> for more information on this capability.  Essentially, the idea to keep in mind is that the shared maps will contain largely static text that does not need to be localized or changed for subsequent testing.  Where some portion of an App Map entry does need to contain localized text that portion will be represented as an embedded variable and the ultimate value of that variable will be retrieved from a locale-specific App Map that is opened in addition to the shared App Map.
+<p>
+<b>Example:</b>
+<p><ul><pre><b>
+FMStudio_NLS_en (known as FMStudio_NLS):
+----------------------------------------</b>
+[ApplicationConstants]
+nlsHello="Hello!"
+<b>
+FMStudio_NLS_es (known as FMStudio_NLS):
+----------------------------------------</b>
+[ApplicationConstants]
+nlsHello="�Hola!"
+<b>
+FMStudio_MAP:
+-------------</b>
+HelloLink="Type=HTMLLink;HTMLText={^nlsHello}"
+</pre></ul>
+<p>
+Now, let us assume that the test is run first in English and then later in Spanish.  The first time the test is run the FMStudio_NLS_en (English) map is loaded along with the FMStudio_MAP.  When the test goes to retrieve the value for the HelloLink component it will find the embedded ^nlsHello variable reference which must be retrieved.  The ^nlsHello variable does not exist in the shared map so App Map Chaining will go look for the value in the English map.  The value retrieved for ^nlsHello is "Hello!" and the resulting HelloLink value will be:
+<p>
+<ul><b>HelloLink="Type=HTMLLink;HTMLText=Hello!"</b></ul>
+<p>
+The second time the test is run the FMStudio_NLS_es Spanish map is loaded along with the FMStudio_MAP.  This time the value retrieved for ^nlsHello is "�Hola!" and the resulting HelloLink value will be:
+<p>
+<ul><b>HelloLink="Type=HTMLLink;HTMLText=�Hola!"</b></ul>
+<p>
+As you can see, App Map Chaining with Embedded Variables is a powerful combination that enables us to deliver tests that can readily be migrated for NLS testing.  However, to accomplish that it requires the Test Designers to design the tests and these assets with the goal of NLS reuse in mind.
+<a name="designingtestsfornls" /><p>
+<h3><b>Designing Tests for NLS and Other Forms of Reuse</b></h3>
+<p>
+Just as special design consideration must be given during software development to make an application support Internationalization, Localization, and Globalization, so too must our test designs receive this same level of design consideration.  If the tests are not designed from the very beginning with this goal in mind then the process of going back and making the tests NLS-ready can be very difficult and time consuming.
+<p>
+The App Map processing features mentioned above allow us to use the same common practice used by software developers when developing software.  That is, we must design our tests for NLS by separating textual data and other environment-dependent resources out of the tests themselves and into separate resource files.  This means we want all environment-dependent text stored in environment-specific App Maps.  Other environment-dependent resources like image files should be referenced through environment-specific entries in those same App Maps.  In this way, the tests themselves do not change no matter which environment is being tested.  When we go to test in a new environment we just make sure we use the appropriate App Map(s) and resources targetted for that environment.
+<p>
+It takes vigilance and attentive awareness to design a test that is truly NLS-ready.  All environment-specific text and resources must be kept out of the design and moved into the resource files (App Maps).  The designs will merely contain variable references that will ultimately be satisfied by lookups into the environment-specific App Maps.  This not only includes language-specific text that might appear in object recognition strings, but also any language-specific string that might be evaluated or verified--such as an object property value, displayed text, or image benchmarks whose image may contain environment-specific text, legends, or formats.
+<p>
+An example of this might be a Label on a dialog box that informs the user that a certain process either succeeded or failed.  The recognition string for the label may not require special handling as its Name or ID may be common across all environments as shown below:
+<p>
+<ul><b>StatusLabel="Type=Label;Name=lblStatus"</b></ul>
+<p>
+However, when we wish to verify the status displayed to the user in the Label we are going to be dealing with literal text that will likely be localized and needs to be stored separately in our NLS resource files or App Maps.
+<p>
+Problem:
+<p>
+<ul><b>T, StatusDialog, StatusLabel, VerifyProperty, "Text", "Success!"</b></ul>
+<p>
+Solution:
+<p>
+<ul><b>T, StatusDialog, StatusLabel, VerifyProperty, "Text", ^nlsSuccess</b></ul>
+<p>
+To make sure our tests are NLS-ready we are tasked to verify a few things:
+<ul>
+1. The <b><i>Name of the Label</i></b> does not change in other environments so it does not need to be localized.
+<p>
+2. The <b><i>name of the Text property</i></b> does not change in other environments so it does not need to be localized.
+<p>
+3. The <b><i>displayed text</i></b> in the Label will change in other environments so it <b><i>does</i></b> need to be localized.
+</ul>
+<p>
+Thus, our NLS-ready App Maps need to hold this localizable text so that the proper values are found at runtime:
+<p><ul><pre><b>
+FMStudio_NLS_en (known as FMStudio_NLS):
+----------------------------------------</b>
+[ApplicationConstants]
+nlsHello="Hello!"
+nlsSuccess="Success!"
+nlsFailed="Failed!"
+<b>
+FMStudio_NLS_es (known as FMStudio_NLS):
+----------------------------------------</b>
+[ApplicationConstants]
+nlsHello="�Hola!"
+nlsSuccess="��xito!"
+nlsFailed="�Fallado!"
+</pre></ul>
+<p>
+As you can see, it takes special attention and vigilance to carefully design our tests so that they are NLS-ready!  The same level of care must be taken for all forms of displayed text, text to be input from the user that might be language-specific, and other resources containing environment-specific data like locale-specific currency, time, and date formats.
+<hr>
+<a name="adynamicexample" />
+<h2><b>A Complete Dynamic Text Example Supporting NLS</b></h2>
+<p><dl>
+<dt><b>The Scenario:</b></dt>
+<dd>You wish to create a highly reusable step table (action) that will close any window in your application and then check the application state.  We'll call this the "<i>CloseAppWindow</i>" table.
+<p>
+This can serve a number of purposes, including:
+<ul><pre>
+<li>High value test assets with reduced maintenance
+<li>Supports dynamic features of the AUT
+<li>Supports growing automated coverage of the AUT
+<li>Existing automated tests are suitable for NLS testing
+</pre></ul>
+</dd>
+<p><dt><b>The Problem:</b></dt>
+<dd>For maximum reusability, <i>CloseAppWindow</i> must be able to recognize different windows according to their any-language <i>Caption</i>, so no part of <i>CloseAppWindow, <b>or any of the tables that call it</b></i>, can contain language-specific text.
+</dd>
+<p><dt><b>The Solution:</b><dt>
+<dd>Use App Map Chaining, App Map Embedded Variables, and Application Constants.
+<p>
+<b>1.</b> A few examples calling <i>CloseAppWindow</i> with the <i>Caption</i> parameter using Application Constants:
+<pre><ul><b>T&nbsp;&nbsp;&nbsp;CloseAppWindow&nbsp;&nbsp;&nbsp;^Caption=^ReportsCaption
+T&nbsp;&nbsp;&nbsp;CloseAppWindow&nbsp;&nbsp;&nbsp;^Caption=^HelpCaption
+T&nbsp;&nbsp;&nbsp;CloseAppWindow&nbsp;&nbsp;&nbsp;^Caption=^AboutCaption</b>
+
+<i>There is no localizable text calling CloseAppWindow</i>.
+</pre></ul>
+<p>
+<b>2.</b> The implementation of the <i>CloseAppWindow</i> step table:
+<ul><pre><b>T&nbsp;&nbsp;&nbsp;AnyWindow&nbsp;&nbsp;&nbsp;AnyWindow&nbsp;&nbsp;&nbsp;CloseWindow</b>
+...followed by important status and error checks
+
+<i>There is no localizable text in CloseAppWindow.</i>
+</pre></ul>
+<p>
+<b>3.</b> The Primary App Map using App Map Embedded Variables:
+<p><ul><pre>
+<b>MyApp.map:</b>
+----------
+...
+[AnyWindow]
+AnyWindow="Type=Window;Caption={^Caption}"
+...
+
+<i>There is no localizable text in the primary App Map.</i>
+</pre></ul>
+<p>
+<b>4.</b> The NLS App Maps for App Map Chaining for Application Constants:
+<ul><pre>4a. <b>MyApp_NLS_en</b> (known as MyApp_NLS):
+--------------------------------------
+[ApplicationConstants]
+ReportsCaption="Reports"
+HelpCaption="Help"
+AboutCaption="About"
+
+<i>All localizable text is confined to the NLS App Map.</i>
+
+4b. <b>MyApp_NLS_es</b> (known as MyApp_NLS):
+--------------------------------------
+[ApplicationConstants]
+ReportsCaption="Informes"
+HelpCaption="Ayuda"
+AboutCaption="Sobre"
+</pre></ul></b>
+<p>
+</dd>
+</dl>
+<p>
+This sample design shows maximum reusability.  The same test used to automatically test the English translation of the application can be used to test all other localizations.  And the amount of localization necessary for each translation has been minimized to a single NLS App Map file.
+<hr>
+</BODY>
+</HTML>
