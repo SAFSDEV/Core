@@ -2,8 +2,8 @@
 
 REM ================================================================================
 REM Purpose:
-REM   This script is supposed to push/delete safs reference files
-REM   to/from sourceforge and github.
+REM   This script is supposed to push/delete safs reference files and other static
+REM   web documents to/from sourceforge and github.
 REM Parameter:
 REM   RepoFullPath              the folder of git repository, where safs reference files reside.
 REM   SourceForgeUser           the user name of sourceforge.
@@ -75,22 +75,26 @@ git add *.css
 git add *.jpg
 git add *.png
 git add *.gif
+git add *.pdf
 
 REM Then, we use the 'git status' to get the modified files, which will be uploaded to sourceforge
-FOR /f /F "usebackq tokens=1,2* " %%i IN (`git status --short`) DO (
+FOR /f /F "usebackq tokens=1,2* " %%i IN (`git status --short`) DO (	
+    SET Modified_File=%%j
+    SET Modified_File=!Modified_File:/=\!
+    
     SET OPERATION=NONE
     IF [%%i]==[M] SET OPERATION=ADD
     IF [%%i]==[A] SET OPERATION=ADD
     IF [%%i]==[D] SET OPERATION=DELETE
-    IF DEFINED DEBUG ECHO Git status %%i -- !OPERATION! %%j
+    IF DEFINED DEBUG ECHO Git status %%i -- !OPERATION! !Modified_File!
     
     IF [!OPERATION!]==[ADD] (
-        ECHO ... Copying file %%j to folder '%FOLDER_COPY%'.
-        COPY %%j %FOLDER_COPY%
+        IF DEFINED DEBUG ECHO ... %systemroot%\system32\xcopy /c /y /q !Modified_File! %FOLDER_COPY%\!Modified_File!
+        ECHO F | %systemroot%\system32\xcopy /c /y /q !Modified_File! %FOLDER_COPY%\!Modified_File!
     )
     IF [!OPERATION!]==[DELETE] (
-        ECHO ... Copying file %%j to folder '%FOLDER_COPY%'.
-        COPY %%j %FOLDER_DEL%
+        IF DEFINED DEBUG ECHO ... %systemroot%\system32\xcopy /c /y /q !Modified_File! %FOLDER_COPY%\!Modified_File!
+        ECHO F | %systemroot%\system32\xcopy /c /y /q !Modified_File! %FOLDER_COPY%\!Modified_File!
     )
 )
 
