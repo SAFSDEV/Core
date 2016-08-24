@@ -1,4 +1,4 @@
-cd /home/project-web/safsdev/htdocs/doc
+cd /home/project-web/safsdev/htdocs
 lcd doc.copy
 mput -r *
 bye
