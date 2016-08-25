@@ -99,7 +99,7 @@ PUSHD %FULL_PATH_REPO%
 IF DEFINED DEBUG ECHO The current working directory is %cd%
 
 REM Firstly, we use 'git add' to add files to git stage area
-IF DEFINED DEBUG ECHO Git-Adding files defined in "%cd%\%FILE_TYPES%"
+IF DEFINED DEBUG ECHO Git-Adding files defined in "%cd%\%FILE_TYPES%", to git stage area.
 FOR /f "tokens=1* " %%i IN (%FILE_TYPES%) DO (
     IF DEFINED DEBUG ECHO git add %%i
     git add %%i
@@ -133,7 +133,7 @@ IF DEFINED PUSH_TO_SF (
     )
     
     ECHO === Pushing files to sourceforge ...
-    echo psftp -i %SF_PRIVATE_KEY% -b %FTP_PUT_SCRIPT% %SF_USER%,safsdev@web.sourceforge.net
+    psftp -i %SF_PRIVATE_KEY% -b %FTP_PUT_SCRIPT% %SF_USER%,safsdev@web.sourceforge.net
     REM ECHO === Deleting files from sourceforge ...
     REM psftp -i %SF_PRIVATE_KEY% -b %FTP_DEL_SCRIPT% %SF_USER%,safsdev@web.sourceforge.net
     
@@ -147,12 +147,12 @@ IF DEFINED PUSH_TO_GIT (
     ECHO === Pushing files to github ...
     git config --global user.name "safsdev"
     git config --global user.email safsdev@yourCompany.com
-    echo git commit -m "Updated by script automatically."
+    git commit -m "Updated by script automatically."
     REM The git repository remote url should be set the ssh url format
     REM git remote set-url origin git@github.com:SAFSDEV/safsdev.github.io.git
-    echo git remote set-url origin %GIT_REPO_PREFIX%%GITHUB_REPO%.git
+    git remote set-url origin %GIT_REPO_PREFIX%%GITHUB_REPO%.git
     ECHO Push committed files to git remote repository ...
-    echo git push origin master
+    git push origin master
 )
 
 POPD
