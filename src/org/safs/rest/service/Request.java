@@ -30,7 +30,7 @@ public class Request {
 	/**
 	 * @param _request_method the _request_method to set
 	 */
-	public void set_request_method(String _request_method) {
+	public void set_method(String _request_method) {
 		this._request_method = _request_method;
 	}
 
@@ -44,7 +44,7 @@ public class Request {
 	/**
 	 * @param _request_uri the _request_uri to set
 	 */
-	public void set_request_uri(String _request_uri) {
+	public void set_uri(String _request_uri) {
 		this._request_uri = _request_uri;
 	}
 
@@ -58,7 +58,7 @@ public class Request {
 	/**
 	 * @param _request_http_version the _request_http_version to set
 	 */
-	public void set_request_http_version(String _request_http_version) {
+	public void set_protocol_version(String _request_http_version) {
 		this._request_http_version = _request_http_version;
 	}
 	
