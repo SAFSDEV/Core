@@ -185,11 +185,9 @@ public class Headers {
 		// Get the preset or default values for this type
 		HeaderGroup headers = getHeaderGroupForType(type);
 		
-		// TODO: allow duplicates if the spec allows it.  Otherwise, replace the value.
+		// NOTE: HTTP spec does allow duplicate Headers under certain conditions
 		for (Header headerToBeAdded : newHeaders) {
-			if (! headers.containsHeader(headerToBeAdded.getName())) {
-				headers.addHeader(headerToBeAdded);
-			}
+			headers.addHeader(headerToBeAdded);
 		}
 		return convertHeaderGroupToMultiLineString(headers);
 	}

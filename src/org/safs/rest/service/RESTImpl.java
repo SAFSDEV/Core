@@ -8,11 +8,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.testframework.HttpClient5Adapter;
 import org.apache.hc.client5.http.testframework.HttpClientPOJOAdapter;
 import org.apache.hc.client5.http.utils.URLEncodedUtils;
 import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.ProtocolVersion;
 
 public class RESTImpl {
 	
@@ -21,31 +21,34 @@ public class RESTImpl {
 	public Response request(String serviceId, String requestMethod, String relativeURI, String headers,
 			Object body) throws Exception {
 		
+		Service service = Services.getService(serviceId);
+		ProtocolVersion protVersion = service.getProtocolVersionObject();
+		String defaultURI = service.getBaseURL();
+
+		// This is only going to be returned in the Response for informational
+		// purposes...
 		Request safsRequest = new Request();
-		safsRequest.set_request_method(requestMethod);
+		safsRequest.set_method(requestMethod);
 		safsRequest.set_message_body(body);
 		safsRequest.set_headers(headers);
-		safsRequest.set_request_uri(relativeURI);
-		//TODO: set_http_version
+		safsRequest.set_uri(defaultURI + "/" + relativeURI);
+		safsRequest.set_protocol_version(protVersion.toString());
 		
 		Response safsResponse = new Response();		
 		safsResponse.set_request(safsRequest);
-
-		Service service = Services.getService(serviceId);
 		
-		String defaultURI = service.getBaseURL();
 		Map<String,String> headersMap = Headers.getHeadersMapFromMultiLineString(headers);
 		
+		//TODO: Use HttpServerTestingFramework constants when they are added
 		Map<String,Object> request = new HashMap<String,Object>();
 		request.put("method", requestMethod);
 		request.put("path", relativeURI);
 		request.put("headers", headersMap);
 		request.put("body", body);
-		//TODO: make constants
-		request.put("contentType", headersMap.get("Content-Type"));
-		//request.put("protocolVersion", "1.1");//TODO
+		request.put("contentType", headersMap.get(Headers.CONTENT_TYPE));
+		request.put("protocolVersion", protVersion);
 
-		headersMap.remove("Content-Type");
+		headersMap.remove(Headers.CONTENT_TYPE);
 		
 		long defaultTimeout = Timeouts.getDefaultTimeouts().getMillisToTimeout();
 		request.put("timeout", defaultTimeout);
