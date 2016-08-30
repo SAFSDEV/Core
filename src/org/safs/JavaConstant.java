@@ -44,6 +44,12 @@ public class JavaConstant {
     /** "os.version" **/
 	public static final String PROPERTY_OS_VERSION ="os.version";
 	
+	/**
+	 * JVM Bit Version: 32-bit, 64-bit, or unknown
+	 * Reference URL: http://www.oracle.com/technetwork/java/hotspotfaq-138619.html#64bit_detection
+	 */
+	public static final String PROPERTY_JVM_BIT_VERSION = "sun.arch.data.model";
+	
 	/** "-Xms" JVM Option minimum memory*/
 	public static final String JVM_Xms ="-Xms";	
 	/** "-Xmx" JVM Option maximum memory*/
