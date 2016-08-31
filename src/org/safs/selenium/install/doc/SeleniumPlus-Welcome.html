@@ -1153,6 +1153,16 @@ For accurate coordinate calculations of components the Status Bar in Internet Ex
     <p>
     <img src="images/IExploreStatusBar.png">
 </ol>
+<h3><a href="https://github.com/SeleniumHQ/selenium/wiki/InternetExplorerDriver#required-configuration">For IE 11 only</a></h3>
+you will need to set a registry entry on the target computer so that the driver can maintain a connection to the instance of Internet Explorer it creates.
+<p>
+<ul>
+    <li>For 32-bit Windows installations, the key you must examine in the registry editor is: <code>HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_BFCACHE</code>.</li>
+    <li>For 64-bit Windows installations, the key is: <code>HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_BFCACHE</code>.</li>
+</ul>
+Please note that the <code>FEATURE_BFCACHE</code> subkey may or may not be present, and should be created if it is not present. Important: Inside this key, create a <code>DWORD</code> value named iexplore.exe with the value of 0.
+<h3>Appendix: Selenium Offical settings of InternetExplorerDriver</h3>
+Usually, the above settings can make you run SeleniumPlus with IE browser successfully. But if you still have problems, you'd better reference 3rd party software Selenium official setting webpage: <a href="https://github.com/SeleniumHQ/selenium/wiki/InternetExplorerDriver">https://github.com/SeleniumHQ/selenium/wiki/InternetExplorerDriver</a>.
 <hr>
 </div>
 
