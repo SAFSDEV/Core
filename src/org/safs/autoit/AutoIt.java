@@ -8,6 +8,7 @@ import java.util.Vector;
 
 import org.safs.IndependantLog;
 import org.safs.SAFSProcessorInitializationException;
+import org.safs.StringUtils;
 import org.safs.tools.consoles.ProcessCapture;
 import org.safs.tools.drivers.DriverConstant;
 
@@ -30,7 +31,7 @@ public class AutoIt {
 	public static AutoItX AutoItObject() throws SAFSProcessorInitializationException{
 
 		/** COM class instantiation method */
-		String methodName = "AutoItX.AutoItObject() ";
+		String methodName = StringUtils.getMethodName(0, false) + "() ";
 		
 		if (it == null) {
 			
@@ -144,6 +145,6 @@ public class AutoIt {
 	 * @return System Property value for "sun.arch.data.model"
 	 */
 	private static String jvmBitVersion(){
-		return System.getProperty("sun.arch.data.model");
+		return System.getProperty(DriverConstant.PROPERTY_JVM_BIT_VERSION);
 	}	
 }

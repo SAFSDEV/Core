@@ -1,0 +1,8 @@
+*.htm
+*.html
+*.js
+*.css
+*.jpg
+*.png
+*.gif
+*.pdf
