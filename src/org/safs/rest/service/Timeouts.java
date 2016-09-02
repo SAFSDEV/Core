@@ -15,7 +15,7 @@ public class Timeouts {
 
 	static Timeouts _defaultTimeouts = new Timeouts();
 	
-	long _millisToTimeout = 50;
+	long _millisToTimeout = 180000;  // 3 minutes
 
 	public static Timeouts getDefaultTimeouts(){
 		return _defaultTimeouts;
