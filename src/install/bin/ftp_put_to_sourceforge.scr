@@ -1,4 +1,4 @@
-cd /home/groups/s/sa/safsdev/htdocs/sqabasic2000/
+cd /home/groups/s/sa/safsdev/htdocs/
 lcd doc.copy
-mput *
+mput -r *
 bye

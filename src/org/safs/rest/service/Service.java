@@ -4,6 +4,10 @@
  */
 package org.safs.rest.service;
 
+import org.apache.hc.core5.http.HttpVersion;
+import org.apache.hc.core5.http.ProtocolVersion;
+import org.safs.SAFSRuntimeException;
+
 /**
  * Contains the information needed to test a specific web service.
  * <p>
@@ -20,14 +24,36 @@ public class Service{
 	private String userId;
 	private String password;
 	private String authType;
+	private ProtocolVersion protocolVersion = HttpVersion.HTTP_1_1;
 	
+	
+	/**
+	 * Constructor
+	 * @param serviceId
+	 */
 	public Service(String serviceId){
 		this.serviceId = serviceId;
 	}
 	
+	/**
+	 * Constructor
+	 * @param serviceId
+	 * @param baseURL
+	 */
 	public Service(String serviceId, String baseURL){
 		this(serviceId);
 		setBaseURL(baseURL);
+	}
+
+	/**
+	 * Constructor
+	 * @param serviceId
+	 * @param baseURL
+	 * @param protocolVersion
+	 */
+	public Service(String serviceId, String baseURL, String protocolVersion) {
+		this(serviceId, baseURL);
+		setProtocolVersion(protocolVersion);
 	}
 
 	/**
@@ -114,4 +140,38 @@ public class Service{
 		this.authType = authType;
 	}
 
+	/**
+	 * @return the protocol version
+	 */
+	public String getProtocolVersion() {
+		return protocolVersion.toString();
+	}
+	
+	/**
+	 * @param protocolVersion the protocol version to set
+	 */
+	public void setProtocolVersion(String protocolVersion) {
+		if (protocolVersion == null) {
+			throw new SAFSRuntimeException("protocolVersion should not be null");
+		}
+		switch (protocolVersion) {
+		case "HTTP/1.0":
+			this.protocolVersion = HttpVersion.HTTP_1_0;
+			break;
+		case "HTTP/1.1":
+			this.protocolVersion = HttpVersion.HTTP_1_1;
+			break;
+		case "HTTP/2.0":
+			this.protocolVersion = HttpVersion.HTTP_2_0;
+			break;
+		default:
+			throw new SAFSRuntimeException("protocolVersion must be \"HTTP/1.0\", " +
+			                               "\"HTTP/1.1\", or \"HTTP/2.0\"");
+		}
+	}
+	
+	// for internal use only
+	ProtocolVersion getProtocolVersionObject() {
+		return protocolVersion;
+	}
 }

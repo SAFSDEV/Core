@@ -1,0 +1,5 @@
+*.htm
+*.html
+*.js
+*.css
+doc/package-list
