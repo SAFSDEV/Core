@@ -8,9 +8,13 @@ import java.util.Iterator;
 import java.util.Vector;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.io.IOException;
 
 import org.safs.Log;
+import org.safs.StringUtils;
 
 /**
  * Derived from RobotKeyEvent for inputting NLS characters. It holds an 'non-standard' string and will copy it to 
@@ -39,9 +43,17 @@ public class RobotClipboardPasteEvent extends RobotKeyEvent{
 	* Suggest ms_delay>=50, for paste operation needs to wait until copying Clipboard finished.
 	*/
 	public void doEvent(java.awt.Robot robot, int ms_delay){
-		Log.debug("RobotClipboardPasteEvent: copying " + nlstring.toString() + " to system Clipboard");
-	    Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-	    clipboard.setContents( this.nlstring, null );
+	    String debugmsg = StringUtils.getClassName(0, false) + ": ";
+	    
+	    try {
+			Log.debug(debugmsg + "copying '" + this.nlstring.getTransferData(DataFlavor.stringFlavor) + "' to system Clipboard");
+			Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+			clipboard.setContents( this.nlstring, null );
+			Log.debug(debugmsg + "the content of system Clipboard is set as: '" + clipboard.getData(DataFlavor.stringFlavor) + "'.");
+		} catch (UnsupportedFlavorException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	    
 	    if(this.pasteKeys == null){
 		    Log.debug(" .....Null pasteKeys in RobotClipboardPasteEvent. No paste operation.");
