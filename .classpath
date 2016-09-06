@@ -44,5 +44,6 @@
 	<classpathentry kind="var" path="SAFS_BUILD/libs/slf4j-api-1.7.21.jar"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/httpclient5/httpclient5-5.0-alpha1.jar" sourcepath="/HTTPCLIENT5SOURCE"/>
 	<classpathentry exported="true" kind="var" path="SAFS_BUILD/libs/httpclient5/httpcore5-5.0-alpha1.jar" sourcepath="/HTTPCORE_SOURCE"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/groovy-2.4.7.jar" sourcepath="/GROOVY_HOME/src/apache-groovy-src-2.4.7.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
