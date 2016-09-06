@@ -8,9 +8,13 @@ import java.util.Iterator;
 import java.util.Vector;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.io.IOException;
 
 import org.safs.Log;
+import org.safs.StringUtils;
 
 /**
  * Derived from RobotKeyEvent for inputting NLS characters. It holds an 'non-standard' string and will copy it to 
@@ -39,9 +43,28 @@ public class RobotClipboardPasteEvent extends RobotKeyEvent{
 	* Suggest ms_delay>=50, for paste operation needs to wait until copying Clipboard finished.
 	*/
 	public void doEvent(java.awt.Robot robot, int ms_delay){
-		Log.debug("RobotClipboardPasteEvent: copying " + nlstring.toString() + " to system Clipboard");
-	    Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-	    clipboard.setContents( this.nlstring, null );
+	    String debugmsg = StringUtils.getClassName(0, false) + ": ";
+	    
+	    try {
+	    	String copiedMsg = this.nlstring.getTransferData(DataFlavor.stringFlavor).toString();
+			Log.debug(debugmsg + "copying '" + copiedMsg + "' to system Clipboard");
+			Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+			clipboard.setContents( this.nlstring, null );
+			
+			String clipboardMsg = clipboard.getData(DataFlavor.stringFlavor).toString();
+			if (!clipboardMsg.equals(copiedMsg)) {
+				Log.debug(debugmsg + "failed to send '" + copiedMsg + "' to system Clipboard, try to send it again ...");
+				
+				clipboard.setContents( this.nlstring, null );
+				clipboardMsg = clipboard.getData(DataFlavor.stringFlavor).toString();
+				if (!clipboardMsg.equals(copiedMsg)) {
+					Log.debug(debugmsg + "the copied contents '" + copiedMsg + "' is NOT equal with current system Clipboard contents '" + clipboardMsg + "'.");
+					throw new RuntimeException(debugmsg + "failed to send contents '" + copiedMsg + "' to clipboard .");
+				}
+			}
+		} catch (UnsupportedFlavorException | IOException e) {
+			Log.debug(debugmsg + e.getMessage());
+		}
 	    
 	    if(this.pasteKeys == null){
 		    Log.debug(" .....Null pasteKeys in RobotClipboardPasteEvent. No paste operation.");
