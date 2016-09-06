@@ -63,8 +63,7 @@ public class RobotClipboardPasteEvent extends RobotKeyEvent{
 				}
 			}
 		} catch (UnsupportedFlavorException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Log.debug(debugmsg + e.getMessage());
 		}
 	    
 	    if(this.pasteKeys == null){
