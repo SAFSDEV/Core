@@ -6,8 +6,11 @@
     font-size: 24px;
     font-weight: bold;
 }
-table, td {
+.border {
     border: 1px solid black;
+}
+.noborder {
+    border: none;
 }
 </style>
 </head>
@@ -17,7 +20,7 @@ table, td {
 <p>
 <hr>
 Author: Carl Nagle<br/>
-Update: Sep 06, 2016 CANAGL
+Update: Sep 07, 2016 CANAGL
 <p>
 Copyright, SAS Institute
 <a href="http://www.sas.com" target="altwin">http://www.sas.com</a><br/>
@@ -28,16 +31,16 @@ http://www.opensource.org/licenses/gpl-license.php<br/>
 	<li><span class="cap">The SAFS REST Testing API</span>
 
 		<p>
-		Refer to the <a href="http://safsdev.sourceforge.net/doc/org/safs/rest/REST.html" target="_blank" title="SAFS REST JavaDoc">SAFS REST JavaDoc</a> as part of this discussion for using this API.
+		Refer to the <a href="http://safsdev.sourceforge.net/doc/org/safs/rest/REST.html"  title="SAFS REST JavaDoc">SAFS REST JavaDoc</a> as part of this discussion for using this API.
 		<p>
 		This framework is intended to streamline REST API testing code so that more is written by the tester that actually tests and verifies the target REST API rather than preparing, making, and evaluating the calls to that target REST API.
 		<p>
-		The testing framework supports user-defined <a href="http://safsdev.sourceforge.net/doc/org/safs/rest/REST.html#StartServiceSession(java.lang.String,%20java.lang.String)" target="_blank" title="REST StartServiceSession">service "sessions"</a> intended to persist important information for a REST service for reuse.  This allows the tester to focus on the specifics of individual calls to that service.
+		The testing framework supports user-defined <a href="http://safsdev.sourceforge.net/doc/org/safs/rest/REST.html#StartServiceSession(java.lang.String,%20java.lang.String)"  title="REST StartServiceSession">service "sessions"</a> intended to persist important information for a REST service for reuse.  This allows the tester to focus on the specifics of individual calls to that service.
 
 	<li><span class="cap">Defining External, Multi-Line Headers in Java Properties files</span>
 
 		<p>
-		In order to maximize reuse and reduce the code necessary to make a proper REST API call, we promote the concept of maintaining critical multi-line Header Strings in external <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Properties.html" target="_blank">Java Properties</a> files.
+		In order to maximize reuse and reduce the code necessary to make a proper REST API call, we promote the concept of maintaining critical multi-line Header Strings in external <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Properties.html" >Java Properties</a> files.
 		<p>
 		To take advantage of this for HTTP Headers, examples of the syntax for multi-line headers are shown below:
 		<p>
@@ -59,37 +62,76 @@ http://www.opensource.org/licenses/gpl-license.php<br/>
 		<ul>
 		<table>
 		    <th>ServiceId<th>Properties File
-		    <tr><td>Google<td>GoogleHeaders.properties
-		    <tr><td>MyService<td>MyServiceHeaders.properties
+		    <tr><td>&nbsp;"Google"&nbsp;<td class="border">&nbsp;GoogleHeaders.properties&nbsp;
+		    <tr><td>&nbsp;"MyService"&nbsp;<td class="border">&nbsp;MyServiceHeaders.properties&nbsp;
 	    </table>
 	    </ul>
 	    <p>
 		<b>(PROPOSAL)</b>
 		<p>
-		When the Properties filename is based on the serviceId, and the Properties file is findable in the runtime CLASSPATH, then the framework will automatically locate and load the header types defined in the Properties file during the call to <a href="http://safsdev.sourceforge.net/doc/org/safs/rest/REST.html#StartServiceSession(java.lang.String,%20java.lang.String)" target="_blank">REST.StartServiceSession</a>.
+		When the Properties filename is based on the serviceId, and the Properties file is findable in the runtime CLASSPATH, then the framework will automatically locate and load the header types defined in the Properties file during the call to <a href="http://safsdev.sourceforge.net/doc/org/safs/rest/REST.html#StartServiceSession(java.lang.String,%20java.lang.String)" >REST.StartServiceSession</a>.
 		<p>
-		By default, the automatic loading of Service default and/or custom header types in your Headers Properties file will invoke <a href="http://safsdev.sourceforge.net/doc/org/safs/rest/service/Headers.html#setHeadersForType(java.lang.String,%20java.lang.String)" target="_blank">Headers.setHeadersForType</a> for each name=value pair found in the Headers Properties file.
+		By default, the automatic loading of Service default and/or custom header types in your Headers Properties file will invoke <a href="http://safsdev.sourceforge.net/doc/org/safs/rest/service/Headers.html#setHeadersForType(java.lang.String,%20java.lang.String)" >Headers.setHeadersForType</a> for each name=value pair found in the Headers Properties file.
 		<p>
-		If for any reason we cannot automatically find or load this default Properties file, the tester will need to load the Properties and call the appropriate Headers class methods for the types of Headers they wish to use.
+		The default Header "Types" which can be in the Properties file to override the defaults already supported should have specific predefined names of:
+		<ul><table>
+		<tr><td>BINARY <td>:&lt;multi-line headers string>
+		<tr><td>CSS <td>:&lt;multi-line headers string>
+		<tr><td>HTML <td>:&lt;multi-line headers string>
+		<tr><td>IMAGE <td>:&lt;multi-line headers string>
+		<tr><td>JSON <td>:&lt;multi-line headers string>
+		<tr><td>SCRIPT <td>:&lt;multi-line headers string>
+		<tr><td>TEXT <td>:&lt;multi-line headers string>
+		<tr><td>XML <td>:&lt;multi-line headers string>
+		<tr><td>&lt;custom> <td>:&lt;multi-line headers string>
+		</table></ul>
+		<p>
+		If for any reason we cannot automatically find or load this default Properties file, the tester will need to load the Properties and call the appropriate Headers class methods for the types of Headers they wish to use or modify from their defaults.  The tester may also need or want to change stored headers at runtime using the methods of the <a href="http://safsdev.sourceforge.net/doc/org/safs/rest/service/Headers.html" >Headers class</a>:
+		<ul>
+		Headers.setBinaryHeaders<br>
+		Headers.setCSSHeaders<br>
+		Headers.setHtmlHeaders<br>
+		Headers.setImageHeaders<br>
+		Headers.setJSONHeaders<br>
+		Headers.setScriptHeaders<br>
+		Headers.setTextHeaders<br>
+		Headers.setXMLHeaders<br>
+		Headers.setHeadersForType<br>
+		</ul>
+		<p>
 
 	<li><span class="cap">Opening and Closing Server "Sessions"</span>
 
 		<p>
-		<b><a href="http://safsdev.sourceforge.net/doc/org/safs/rest/REST.html#StartServiceSession(java.lang.String,%20java.lang.String)" target="_blank">REST.StartServiceSession</a></b> must be called prior to any attempts to use the testing framework to test a specific REST Service.  The call prepares the system for finding the specific Service for each subsequent REST.GET, PUT, POST, etc. without the tester having to explicitly specify full path URIs (domains and ports) for every call to the Service.  It also allows the system to automatically configure test framework internals for things like custom Content-Type and Accept headers that are specific to the Service being tested.
+		<b><a href="http://safsdev.sourceforge.net/doc/org/safs/rest/REST.html#StartServiceSession(java.lang.String,%20java.lang.String)" >REST.StartServiceSession</a></b> must be called prior to any attempts to use the testing framework to test a specific REST Service.  The call prepares the system for finding the specific Service for each subsequent REST.GET, PUT, POST, etc. without the tester having to explicitly specify full path URIs (domains and ports) for every call to the Service.  It also allows the system to automatically configure test framework internals for things like custom Content-Type and Accept headers that are specific to the Service being tested.
 		<p>
 		The user-defined "serviceId" is used to uniquely identify the Service to be tested.  It will also be used to automatically seek and load associated resources--like Header Properties files containing Service-specific headers and other info, if available.
 		<p>
-		<b><a href="http://safsdev.sourceforge.net/doc/org/safs/rest/REST.html#EndServiceSession(java.lang.String)" target="_blank">REST.EndServiceSession</a></b> should be called to release any assets or resources associated with testing the Service once testing for the associated Service has been completed.
+		The returned <b><a href="http://safsdev.sourceforge.net/doc/org/safs/rest/service/Service.html">Service object</a></b> is where customizations to the REST service calls can be made--such as authentication information to be used, and explicit HTTP Protocol Version to be used.
+		<p>
+		<b><a href="http://safsdev.sourceforge.net/doc/org/safs/rest/REST.html#EndServiceSession(java.lang.String)" >REST.EndServiceSession</a></b> should be called to release any assets or resources associated with testing the Service once testing for the associated Service has been completed.
 
 	<li><span class="cap">Making Simple Calls for Predefined Accept: Content Types</span>
 
+		<p>
+		Use the REST class and its inner classes to make calls to exercise the target REST Service and evaluate the Response of those calls:
+		<ul>
+		<a href="http://safsdev.sourceforge.net/doc/org/safs/rest/REST.GET.html" >REST.GET</a><br>
+		<a href="http://safsdev.sourceforge.net/doc/org/safs/rest/REST.HEAD.html" >REST.HEAD</a><br>
+		<a href="http://safsdev.sourceforge.net/doc/org/safs/rest/REST.POST.html" >REST.POST</a><br>
+		<a href="http://safsdev.sourceforge.net/doc/org/safs/rest/REST.PUT.html" >REST.PUT</a><br>
+		<a href="http://safsdev.sourceforge.net/doc/org/safs/rest/REST.PATCH.html" >REST.PATCH</a><br>
+		<a href="http://safsdev.sourceforge.net/doc/org/safs/rest/REST.DELETE.html" >REST.DELETE</a><br>
+		</ul>
 		<p>
 
 	<li><span class="cap">Making Custom Calls using Complex Headers</span>
 
 		<p>
+		Fully custom calls can be accomplished via the <a href="http://safsdev.sourceforge.net/doc/org/safs/rest/REST.html#request(java.lang.String,%20java.lang.String,%20java.lang.String,%20java.lang.String,%20java.lang.Object)">REST.request</a> method.
+		<p>
 
 </ol>
-</body>
+<hr></body>
 
 </html>
