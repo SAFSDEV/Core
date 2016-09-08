@@ -45,3 +45,6 @@ bin
 
 # Class files in Eclipse
 *.class
+
+# Eclipse preference file
+.settings/
