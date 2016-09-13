@@ -77,6 +77,8 @@ public class Utils {
 			throw new SAFSException("The input parameter 'classnames' must NOT be null or empty!");
 		}
 
+		IndependantLog.debug(debugmsg+" parameter classnames: "+classnames);
+
 		//The property "user.dir" represent the current working directory.
 		String userdir = System.getProperty("user.dir");
 		IndependantLog.debug("user.dir (current working directory) is "+userdir);
