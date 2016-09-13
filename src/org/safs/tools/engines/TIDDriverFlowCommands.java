@@ -1,5 +1,13 @@
 package org.safs.tools.engines;
-
+/**
+ * Developer History:
+ * CANAGL 	DEC 14, 2005 	Refactored with DriverConfiguredSTAFInterface superclass
+ * JunwuMa 	May 05, 2008 	Added OnInRangeGotoBlockID and OnNotInRangeGotoBlockID
+ * LeiWang 	AUG 23, 2010	Modify method cmdOnGuiExists(): assign the testRecord's windowGuiId to winrec.
+ * CANAGL 	SEP 17, 2014 	Fixing SAFS Crashes due to incomplete initialization.
+ * CANAGL 	MAY 20, 2016 	Added CallJUnit support (moved from TIDDriverCommands).
+ * LeiWang 	SEP 13, 2016 	Modified callJUnit(): Compile test class before running it.
+ */
 import java.awt.AWTException;
 import java.awt.Rectangle;
 import java.io.File;
@@ -20,6 +28,7 @@ import org.safs.SAFSNullPointerException;
 import org.safs.StatusCodes;
 import org.safs.StringUtils;
 import org.safs.TestRecordHelper;
+import org.safs.Utils;
 import org.safs.image.ImageUtils;
 import org.safs.logging.AbstractLogFacility;
 import org.safs.model.commands.DDDriverFlowCommands;
@@ -49,11 +58,7 @@ import org.safs.tools.stringutils.StringUtilities;
  * This DriverCommands engine does not assume the use of STAF. Instead, it uses the
  * various org.safs.tools Interfaces to talk with the rest of the framework (as made
  * available via the DriverInterface configuration).
- * @author CANAGL DEC 14, 2005 Refactored with DriverConfiguredSTAFInterface superclass<br>
- *         JunwuMa May 5, 2008 Added OnInRangeGotoBlockID and OnNotInRangeGotoBlockID<br>
- *         LeiWang AUG 23, 2010	Modify method cmdOnGuiExists(): assign the testRecord's windowGuiId to winrec.<br>
- *         CANAGL SEP 17, 2014 Fixing SAFS Crashes due to incomplete initialization.<br>
- *         CANAGL MAY 20, 2016 Added CallJUnit support (moved from TIDDriverCommands).<br>
+ * @author CANAGL
  */
 public class TIDDriverFlowCommands extends GenericEngine{
 
@@ -1198,13 +1203,29 @@ public class TIDDriverFlowCommands extends GenericEngine{
 	 */
 	private String callJUnit(String classname) throws ClassNotFoundException, SAFSException{
 		String debugmsg = StringUtils.debugmsg(false);
-
+		Class<?> clazz = null;
 		JUnitCore junit = new JUnitCore();
-		Result jresult = junit.run(Class.forName(classname));
+		
+		//Try to compile the class at runtime.
+		Utils.compile(classname);
+
+		try{
+			clazz = Class.forName(classname);
+		}catch(ClassNotFoundException cne){
+			IndependantLog.debug(debugmsg+" cannot instantiate '"+classname+"', met "+StringUtils.debugmsg(cne));
+		}
+		
+		if(clazz==null){
+			String detail = "Cannot instantiate '"+classname+"'!";
+			IndependantLog.error(debugmsg+" failure: "+detail);
+			throw new SAFSException(detail);
+		}
+		
+		Result jresult = junit.run(clazz);
 
 		if(jresult == null){
 			String detail = "JUnitCore executed '"+classname+"', and returned a null Result!";
-			IndependantLog.debug(debugmsg+" failure: "+detail);
+			IndependantLog.error(debugmsg+" failure: "+detail);
 			throw new SAFSException(detail);
 		}
 		StringBuffer sb = new StringBuffer();
