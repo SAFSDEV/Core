@@ -1,6 +1,14 @@
 /** Copyright (C) (SAS) All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
+/**
+ * @author JunwuMa SEP 27, 2010 Added controls for retrying a test record that is modified in SAFSMonitorFrame. 
+ * <br>SEP 03, 2013 	(SBJLWA) Delay the "flow control" if the execution is going to be paused. 
+ * <br>SEP 11, 2013 	(SBJLWA) Store the "record separator" to variable "SAFS/Hook/separator" before executing test record.
+ * <br>SEP 26, 2014 	(SBJLWA) Modify routeToPreferredEngines()/routeToEngines(): 
+ *                               set 'MORE_ENGINES' to testrecord's status-info if there are more engines can be used.
+ * <br>SEP 21, 2016 	(SBJLWA) Modified processTest(): increment "general" (instead of "test") counter for keywords "LogTestXXX".
+ */
 package org.safs.tools.drivers;
 
 import java.util.ListIterator;
@@ -38,12 +46,6 @@ import org.safs.tools.status.StatusInterface;
  * All initialization of the overall Test Driver is assumed to be completed.  
  * This is, essentially, the class that loops through the input records and 
  * gets the testing done.
- * 
- * @author JunwuMa SEP 27, 2010 Added controls for retrying a test record that is modified in SAFSMonitorFrame. 
- * <br>SEP 03, 2013 	(SBJLWA) Delay the "flow control" if the execution is going to be paused. 
- * <br>SEP 11, 2013 	(SBJLWA) Store the "record separator" to variable "SAFS/Hook/separator" before executing test record.
- * <br>SEP 26, 2014 	(SBJLWA) Modify routeToPreferredEngines()/routeToEngines(): 
- *                               set 'MORE_ENGINES' to testrecord's status-info if there are more engines can be used.
  * 
  */
 public class InputProcessor extends AbstractInputProcessor {
@@ -970,17 +972,17 @@ loopbody: {
 
 				// handle DriverCommands issuing TEST results
 				else if (result == DriverConstant.STATUS_TESTFAILURE_LOGGED){
-					statusCounter.incrementTestFailures();
+					statusCounter.incrementGeneralFailures();
 					counts.incrementAllCounters(counterInfo, counts.STATUS_TEST_FAILURE);
 					result = DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE;
 				}					
 				else if (result == DriverConstant.STATUS_TESTSUCCESS_LOGGED){
-					statusCounter.incrementTestPasses();
+					statusCounter.incrementGeneralPasses();
 					counts.incrementAllCounters(counterInfo, counts.STATUS_TEST_PASS);
 					result = DriverConstant.STATUS_NO_SCRIPT_FAILURE;
 				}					
 				else if (result == DriverConstant.STATUS_TESTWARNING_LOGGED){
-					statusCounter.incrementTestWarnings();
+					statusCounter.incrementGeneralWarnings();
 					counts.incrementAllCounters(counterInfo, counts.STATUS_TEST_WARNING);
 					result = DriverConstant.STATUS_SCRIPT_WARNING;
 				}			
