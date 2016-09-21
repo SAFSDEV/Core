@@ -1,6 +1,10 @@
 /** Copyright (C) (SAS) All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
+/**
+ * Developer Logs:
+ * SEP 21, 2016		Lei Wang	Modified incrementXXXStatus(): check non-standard status code, such as DriverConstant.STATUS_XXX_LOGGED.
+ */
 package org.safs.tools.drivers;
 
 import java.io.File;
@@ -257,7 +261,7 @@ public abstract class AbstractDriver implements DriverInterface{
 		return statuscounts;	}	
 
 	/**
-	 * Increment General (not Test) record counts.
+	 * Increment General (not Test, means not T, TW, TF) record counts.
 	 * @param status
 	 * @see StatusCodes
 	 */
@@ -265,6 +269,7 @@ public abstract class AbstractDriver implements DriverInterface{
 		if(counterInfo == null) counterInfo = new UniqueStringCounterInfo(getTestName(), getTestLevel());
 		switch(status){		
 			case StatusCodes.OK:
+			case DriverConstant.STATUS_TESTSUCCESS_LOGGED:
 				((StatusCounter) statuscounts).incrementGeneralPasses();
 				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_GENERAL_PASS);
 				break;
@@ -274,10 +279,12 @@ public abstract class AbstractDriver implements DriverInterface{
 				break;
 			case StatusCodes.GENERAL_SCRIPT_FAILURE:
 			case StatusCodes.WRONG_NUM_FIELDS:
+			case DriverConstant.STATUS_TESTFAILURE_LOGGED:
 				((StatusCounter) statuscounts).incrementGeneralFailures();
 				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_GENERAL_FAILURE);
 				break;
 			case StatusCodes.SCRIPT_WARNING:
+			case DriverConstant.STATUS_TESTWARNING_LOGGED:
 				((StatusCounter) statuscounts).incrementGeneralWarnings();
 				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_GENERAL_WARNING);
 				break;
@@ -292,7 +299,7 @@ public abstract class AbstractDriver implements DriverInterface{
 	}
 
 	/**
-	 * Increment Test Record counts.
+	 * Increment Test Record (for T, TW, TF) counts.
 	 * @param status
 	 * @see StatusCodes
 	 */
@@ -300,6 +307,7 @@ public abstract class AbstractDriver implements DriverInterface{
 		if(counterInfo == null) counterInfo = new UniqueStringCounterInfo(getTestName(), getTestLevel());
 		switch(status){		
 			case StatusCodes.OK:
+			case DriverConstant.STATUS_TESTSUCCESS_LOGGED:
 				((StatusCounter) statuscounts).incrementTestPasses();
 				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_TEST_PASS);
 				break;
@@ -311,10 +319,12 @@ public abstract class AbstractDriver implements DriverInterface{
 			case StatusCodes.WRONG_NUM_FIELDS:
 			case StatusCodes.NO_RECORD_TYPE_FIELD:
 			case StatusCodes.UNRECOGNIZED_RECORD_TYPE:
+			case DriverConstant.STATUS_TESTFAILURE_LOGGED:
 				((StatusCounter) statuscounts).incrementTestFailures();
 				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_TEST_FAILURE);
 				break;
 			case StatusCodes.SCRIPT_WARNING:
+			case DriverConstant.STATUS_TESTWARNING_LOGGED:
 				((StatusCounter) statuscounts).incrementTestWarnings();
 				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_TEST_WARNING);
 				break;
