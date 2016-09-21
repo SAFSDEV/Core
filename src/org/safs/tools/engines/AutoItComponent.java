@@ -11,6 +11,7 @@
  *                     Modify process(): Wait for window and component's existence and focus before execution.
  * JUL 12, 2016 Lei Wang Implement 'SetPosition' keyword.
  * AUG 05, 2016 Lei Wang Equipped a special DriverCommandProcessor to this engine. Implemented 'WaitForGUI'/'WaitForGUIGone'.
+ * SEP 21, 2016 Tao Xie Add AutoIt workhorse click(): Allow click action combined with specified mouse button, number of click times, and clicking offset position.
  */
 package org.safs.tools.engines;
 
@@ -41,6 +42,7 @@ import org.safs.model.commands.DriverCommands;
 import org.safs.model.commands.EditBoxFunctions;
 import org.safs.model.commands.GenericObjectFunctions;
 import org.safs.text.FAILStrings;
+import org.safs.text.GENKEYS;
 import org.safs.tools.drivers.DriverConstant;
 import org.safs.tools.drivers.DriverInterface;
 
@@ -448,6 +450,11 @@ public class AutoItComponent extends GenericEngine {
 		/** AutoItRs, the object representing the component */
 		protected AutoItRs rs = null;
 		
+		/** AutoIt's click button constants **/
+		private static final String AUTOIT_CLICKBUTTON_LEFT   = "left";
+		private static final String AUTOIT_CLICKBUTTON_MIDDLE = "middle";
+		private static final String AUTOIT_CLICKBUTTON_RIGHT  = "right";
+		
 		CFComponent (){
 			super();
 		}	
@@ -558,6 +565,86 @@ public class AutoItComponent extends GenericEngine {
 			} catch (Exception x) {
 				this.issueErrorPerformingAction(x.getClass().getSimpleName()+": "+ x.getMessage());
 			}		
+		}
+		
+		/**
+		 * Check if the mouse button string is acceptable for AutoIt engine.
+		 * 
+		 * @param mouseButton String,	the button to click, null, empty, "left", "right", or "middle" are acceptable.
+		 * @return			  boolean,	return true if mouseButton is valid, else return false.
+		 * 
+		 * @author Tao Xie
+		 * 
+		 */
+		boolean isValidMouseButton(String mouseButton){
+			if (mouseButton == null 
+					|| mouseButton.equals("")
+					|| mouseButton == AUTOIT_CLICKBUTTON_LEFT 
+					|| mouseButton == AUTOIT_CLICKBUTTON_MIDDLE
+					|| mouseButton == AUTOIT_CLICKBUTTON_RIGHT) {
+				return true;
+			}
+			
+			return false;
+		}
+		
+		/**
+		 * Workhorse of AutoIt click routine.
+		 * It allows us to use specified 'mouse button' to click target component at assigned position with a number of times.  
+		 * 
+		 * Note: at current stage, we don't support the parameter 'text' in AutoIt's API controlClick: https://www.autoitscript.com/autoit3/docs/functions/ControlClick.htm .
+		 *       We just treat parameter 'text' as empty string. 
+		 *  
+		 * @param autoArgs		AutoItRs,	AutoIt engine's recognition string.
+		 * @param mouseButton	String,		the button to click, "left", "right", or "middle". Default is the left button, which means if mouseButton is null or empty,
+		 * 									it'll use the "left" as its value.
+		 * @param nClicks		int,		number of times to click the mouse.
+		 * @param offset		Point,		the offset position to click within the target component. Also can be null.
+		 * @param optional		String...,	optional parameters.
+		 * 
+		 * @author Tao Xie
+		 * 
+		 */
+		protected void click(AutoItRs autoArgs, String mouseButton, int nClicks, Point offset, String... optional) {
+			String dbgmsg = StringUtils.getMethodName(0, false);
+			testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );
+			
+			if(autoArgs == null || (!isValidMouseButton(mouseButton)) || nClicks < 1) {
+				issueParameterCountFailure(dbgmsg + "(): invalid parameters provided!");
+				return;
+			}
+			
+			if (mouseButton == null || mouseButton.equals("")) { 
+				Log.debug(dbgmsg + "(): use 'left' value when no mouse button value is assigned.");
+				mouseButton = "left";
+			}
+			
+			try{
+				boolean rc = false;
+				
+				if (offset == null) {
+					Log.debug(dbgmsg + "(): " + "click at default 'center' position.");
+					rc = it.controlClick(autoArgs.getWindowsRS(), "", autoArgs.getComponentRS(), mouseButton, nClicks);
+				} else{
+					Log.debug(dbgmsg + "(): " + "click at offset coordinate: '" + offset + "'.");
+					rc = it.controlClick(autoArgs.getWindowsRS(), "", autoArgs.getComponentRS(), mouseButton, nClicks, offset.x, offset.y);					
+				}
+				
+				if (rc){
+					testRecordData.setStatusCode(StatusCodes.OK);
+					
+					String altText = windowName + ":" + compName + " " + action + " successful.";
+					String msg = genericText.convert(GENKEYS.SUCCESS_3, altText, windowName, compName, action);
+					log.logMessage(testRecordData.getFac(), msg, PASSED_MESSAGE);
+				} else{
+					testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
+					issueErrorPerformingAction(dbgmsg + "(): failed with rc = " + it.getError());
+				}
+				
+			} catch(Exception x){
+				issueErrorPerformingAction(dbgmsg + "(): " + x.getMessage());
+			}
+			
 		}
 		
 		/** click **/
