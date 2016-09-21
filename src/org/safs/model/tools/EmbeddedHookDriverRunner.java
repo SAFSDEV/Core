@@ -7,8 +7,9 @@ package org.safs.model.tools;
  * Logs for developers, not published to API DOC.
  * History:<br>
  * 
- * JUN 23,2015     (Lei Wang) Modify autorun(): to get autorun.classname from arguments.
- *                                            Use StringUtils.getCallerClassName() to replace the deprecated sun.reflect.Reflection.getCallerClass().
+ * JUN 23,2015     (Lei Wang) Modified autorun(): to get autorun.classname from arguments.
+ *                                              Use StringUtils.getCallerClassName() to replace the deprecated sun.reflect.Reflection.getCallerClass().
+ * SEP 21,2016     (Lei Wang) Modified command(): increment the "general counter" instead of "test counter".
  */
 import java.util.Hashtable;
 import java.util.Vector;
@@ -198,7 +199,7 @@ public class EmbeddedHookDriverRunner implements JSAFSConfiguredClassStore{
 	
 	public TestRecordHelper command(String command, String... params) throws Throwable{
 		TestRecordHelper rc = driver.runDriverCommand(command, params);
-		driver.iDriver().incrementTestStatus(rc.getStatusCode());
+		driver.iDriver().incrementGeneralStatus(rc.getStatusCode());
 		if(rc.getStatusCode()==StatusCodes.SCRIPT_NOT_EXECUTED){
 			jsafs().logMessage(command.toUpperCase() +" did NOT execute!", 
 				    "Support for this command may not be available in this runtime environment.", 
