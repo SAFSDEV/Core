@@ -61,8 +61,8 @@ public abstract class AbstractLogFacility
 	public static final int STATUS_REPORT_GENERAL_WARNINGS = 24;
 	public static final int STATUS_REPORT_GENERAL_FAILURES = 25;
 	public static final int STATUS_REPORT_IO_FAILURES = 26;
-	//public static  final int STATUS_REPORT_RESERVED = 27;
-	//public static  final int STATUS_REPORT_RESERVED = 28;
+	public static final int STATUS_REPORT_GENERAL = 27;
+	public static final int STATUS_REPORT_GENERAL_PASSES = 28;
 	//public static  final int STATUS_REPORT_RESERVED = 29;
 	//public static  final int STATUS_REPORT_RESERVED = 30;
 	public static final int STATUS_REPORT_END = 31;

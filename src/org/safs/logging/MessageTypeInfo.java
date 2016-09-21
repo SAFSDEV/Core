@@ -15,101 +15,87 @@ import java.util.*;
 public class MessageTypeInfo
 {
 	// XML message prefix per messageType
-	public static final String DEBUG_MESSAGE_XML_PREFIX = "DEBUG";
-	public static final String GENERIC_MESSAGE_XML_PREFIX = "GENERIC";
-	public static final String SKIPPED_TEST_XML_PREFIX = "SKIPPED RECORD";
-	public static final String FAILED_MESSAGE_XML_PREFIX = "FAILED";
-	public static final String FAILED_OK_MESSAGE_XML_PREFIX = "FAILURE EXPECTED";
-	public static final String PASSED_MESSAGE_XML_PREFIX = "PASSED";
-	public static final String WARNING_MESSAGE_XML_PREFIX = "WARNING";
-	public static final String WARNING_OK_MESSAGE_XML_PREFIX = "WARNING EXPECTED";
-	public static final String START_DATATABLE_XML_PREFIX = "START DATATABLE";
-	public static final String END_DATATABLE_XML_PREFIX = "END DATATABLE";
-	public static final String START_PROCEDURE_XML_PREFIX = "START PROCEDURE";
-	public static final String END_PROCEDURE_XML_PREFIX = "STOP PROCEDURE";
-	public static final String START_TESTCASE_XML_PREFIX = "START TESTCASE";
-	public static final String END_TESTCASE_XML_PREFIX = "STOP TESTCASE";
-	public static final String START_SUITE_XML_PREFIX = "START SUITE";
-	public static final String END_SUITE_XML_PREFIX = "STOP SUITE";
-	public static final String START_COUNTER_XML_PREFIX = "START COUNTER";
-	public static final String END_COUNTER_XML_PREFIX = "STOP COUNTER";
-	public static final String SUSPEND_COUNTERS_XML_PREFIX = "SUSPEND COUNTERS";
-	public static final String RESUME_COUNTERS_XML_PREFIX = "RESUME COUNTERS";
-	public static final String START_CYCLE_XML_PREFIX = "START CYCLE";
-	public static final String END_CYCLE_XML_PREFIX = "STOP CYCLE";
-	public static final String START_LOGGING_XML_PREFIX = "START LOGGING";
-	public static final String STOP_LOGGING_XML_PREFIX = "STOP LOGGING";
-	public static final String START_REQUIREMENT_XML_PREFIX = "START REQUIREMENT";
-	public static final String END_REQUIREMENT_XML_PREFIX = "STOP REQUIREMENT";
-	public static final String STATUS_REPORT_START_XML_PREFIX = "BEGIN STATUS REPORT";
+	public static final String DEBUG_MESSAGE_XML_PREFIX 		= "DEBUG";
+	public static final String GENERIC_MESSAGE_XML_PREFIX 		= "GENERIC";
+	public static final String SKIPPED_TEST_XML_PREFIX 			= "SKIPPED RECORD";
+	public static final String FAILED_MESSAGE_XML_PREFIX 		= "FAILED";
+	public static final String FAILED_OK_MESSAGE_XML_PREFIX 	= "FAILURE EXPECTED";
+	public static final String PASSED_MESSAGE_XML_PREFIX 		= "PASSED";
+	public static final String WARNING_MESSAGE_XML_PREFIX 		= "WARNING";
+	public static final String WARNING_OK_MESSAGE_XML_PREFIX 	= "WARNING EXPECTED";
+	public static final String START_DATATABLE_XML_PREFIX 		= "START DATATABLE";
+	public static final String END_DATATABLE_XML_PREFIX 		= "END DATATABLE";
+	public static final String START_PROCEDURE_XML_PREFIX 		= "START PROCEDURE";
+	public static final String END_PROCEDURE_XML_PREFIX 		= "STOP PROCEDURE";
+	public static final String START_TESTCASE_XML_PREFIX 		= "START TESTCASE";
+	public static final String END_TESTCASE_XML_PREFIX 			= "STOP TESTCASE";
+	public static final String START_SUITE_XML_PREFIX 			= "START SUITE";
+	public static final String END_SUITE_XML_PREFIX 			= "STOP SUITE";
+	public static final String START_COUNTER_XML_PREFIX 		= "START COUNTER";
+	public static final String END_COUNTER_XML_PREFIX 			= "STOP COUNTER";
+	public static final String SUSPEND_COUNTERS_XML_PREFIX 		= "SUSPEND COUNTERS";
+	public static final String RESUME_COUNTERS_XML_PREFIX 		= "RESUME COUNTERS";
+	public static final String START_CYCLE_XML_PREFIX 			= "START CYCLE";
+	public static final String END_CYCLE_XML_PREFIX 			= "STOP CYCLE";
+	public static final String START_LOGGING_XML_PREFIX 		= "START LOGGING";
+	public static final String STOP_LOGGING_XML_PREFIX 			= "STOP LOGGING";
+	public static final String START_REQUIREMENT_XML_PREFIX 	= "START REQUIREMENT";
+	public static final String END_REQUIREMENT_XML_PREFIX 		= "STOP REQUIREMENT";
+	public static final String STATUS_REPORT_START_XML_PREFIX 	= "BEGIN STATUS REPORT";
 	public static final String STATUS_REPORT_RECORDS_XML_PREFIX = "TOTAL RECORDS";
 	public static final String STATUS_REPORT_SKIPPED_XML_PREFIX = "SKIPPED RECORDS";
-	public static final String STATUS_REPORT_TESTS_XML_PREFIX = "TEST RECORDS";
-	public static final String STATUS_REPORT_TEST_PASSES_XML_PREFIX = "TESTS PASSED";
-	public static final String STATUS_REPORT_TEST_WARNINGS_XML_PREFIX = "TEST WARNINGS";
-	public static final String STATUS_REPORT_TEST_FAILURES_XML_PREFIX = "TEST FAILURES";
-	public static final String STATUS_REPORT_GENERAL_WARNINGS_XML_PREFIX =
-		"GENERAL WARNINGS";
-	public static final String STATUS_REPORT_GENERAL_FAILURES_XML_PREFIX =
-		"GENERAL FAILURES";
-	public static final String STATUS_REPORT_IO_FAILURES_XML_PREFIX = "IO FAILURES";
-	//private  final String STATUS_REPORT_RESERVED_XML_PREFIX        = 
-	//private  final String STATUS_REPORT_RESERVED_XML_PREFIX        = 
-	//private  final String STATUS_REPORT_RESERVED_XML_PREFIX        = 
-	//private  final String STATUS_REPORT_RESERVED_XML_PREFIX        = 
+	public static final String STATUS_REPORT_TESTS_XML_PREFIX 				= "TEST RECORDS";
+	public static final String STATUS_REPORT_TEST_PASSES_XML_PREFIX 		= "TESTS PASSED";
+	public static final String STATUS_REPORT_TEST_WARNINGS_XML_PREFIX 		= "TEST WARNINGS";
+	public static final String STATUS_REPORT_TEST_FAILURES_XML_PREFIX 		= "TEST FAILURES";
+	public static final String STATUS_REPORT_GENERAL_XML_PREFIX 			= "GENERAL TESTS";
+	public static final String STATUS_REPORT_GENERAL_PASSES_XML_PREFIX 		= "GENERAL PASSED";
+	public static final String STATUS_REPORT_GENERAL_WARNINGS_XML_PREFIX 	= "GENERAL WARNINGS";
+	public static final String STATUS_REPORT_GENERAL_FAILURES_XML_PREFIX 	= "GENERAL FAILURES";
+	public static final String STATUS_REPORT_IO_FAILURES_XML_PREFIX 		= "IO FAILURES";
 	public static final String STATUS_REPORT_END_XML_PREFIX = "END STATUS REPORT";
 
 
 	// standard message prefix per messageType 
-	public static final String DEBUG_MESSAGE_PREFIX = "- DEBUG - ";
-	public static final String GENERIC_MESSAGE_PREFIX = "          ";
-	public static final String SKIPPED_TEST_PREFIX = "- SKIPPED ";
-	public static final String FAILED_MESSAGE_PREFIX = "**FAILED**";
-	public static final String FAILED_OK_MESSAGE_PREFIX = "FAILED OK ";
-	public static final String PASSED_MESSAGE_PREFIX = "    OK    ";
-	public static final String WARNING_MESSAGE_PREFIX = "- WARNING ";
-	public static final String WARNING_OK_MESSAGE_PREFIX = " WARN OK  ";
-	public static final String START_DATATABLE_PREFIX = "  ------  START DATATABLE: ";
-	public static final String END_DATATABLE_PREFIX = "  ------  END DATATABLE: ";
-	public static final String START_PROCEDURE_PREFIX = "  >>>>>>  START PROCEDURE ";
-	public static final String END_PROCEDURE_PREFIX = "  <<<<<<  STOP PROCEDURE ";
-	public static final String START_TESTCASE_PREFIX = "  >>>>>>  START TESTCASE ";
-	public static final String END_TESTCASE_PREFIX = "  <<<<<<  STOP TESTCASE ";
-	public static final String START_SUITE_PREFIX = "  >>>>>>  START SUITE ";
-	public static final String END_SUITE_PREFIX = "  <<<<<<  STOP SUITE  ";
-	public static final String START_COUNTER_PREFIX = "  >>>>>>  START STATUS COUNTER ";
-	public static final String END_COUNTER_PREFIX = "  <<<<<<  STOP STATUS COUNTER ";
-	public static final String SUSPEND_COUNTERS_PREFIX =
-		"  <!<!<!  SUSPEND STATUS COUNTERS ";
-	public static final String RESUME_COUNTERS_PREFIX =
-		"  !>!>!>  RESUME STATUS COUNTERS ";
-	public static final String START_CYCLE_PREFIX = "  >>>>>>  START CYCLE ";
-	public static final String END_CYCLE_PREFIX = "  <<<<<<  STOP CYCLE ";
-	public static final String START_LOGGING_PREFIX = "  ......  START LOGGING ";
-	public static final String STOP_LOGGING_PREFIX = "  ......  STOP LOGGING ";
-	public static final String START_REQUIREMENT_PREFIX = "  ......  START REQUIREMENT ";
-	public static final String END_REQUIREMENT_PREFIX = "  ......  STOP REQUIREMENT ";
+	public static final String DEBUG_MESSAGE_PREFIX 		= "- DEBUG - ";
+	public static final String GENERIC_MESSAGE_PREFIX 		= "          ";
+	public static final String SKIPPED_TEST_PREFIX 			= "- SKIPPED ";
+	public static final String FAILED_MESSAGE_PREFIX 		= "**FAILED**";
+	public static final String FAILED_OK_MESSAGE_PREFIX 	= "FAILED OK ";
+	public static final String PASSED_MESSAGE_PREFIX 		= "    OK    ";
+	public static final String WARNING_MESSAGE_PREFIX 		= "- WARNING ";
+	public static final String WARNING_OK_MESSAGE_PREFIX 	= " WARN OK  ";
+	public static final String START_DATATABLE_PREFIX 		= "  ------  START DATATABLE: ";
+	public static final String END_DATATABLE_PREFIX 		= "  ------  END DATATABLE: ";
+	public static final String START_PROCEDURE_PREFIX 		= "  >>>>>>  START PROCEDURE ";
+	public static final String END_PROCEDURE_PREFIX 		= "  <<<<<<  STOP PROCEDURE ";
+	public static final String START_TESTCASE_PREFIX 		= "  >>>>>>  START TESTCASE ";
+	public static final String END_TESTCASE_PREFIX 			= "  <<<<<<  STOP TESTCASE ";
+	public static final String START_SUITE_PREFIX 			= "  >>>>>>  START SUITE ";
+	public static final String END_SUITE_PREFIX 			= "  <<<<<<  STOP SUITE  ";
+	public static final String START_COUNTER_PREFIX 		= "  >>>>>>  START STATUS COUNTER ";
+	public static final String END_COUNTER_PREFIX 			= "  <<<<<<  STOP STATUS COUNTER ";
+	public static final String SUSPEND_COUNTERS_PREFIX 		= "  <!<!<!  SUSPEND STATUS COUNTERS ";
+	public static final String RESUME_COUNTERS_PREFIX 		= "  !>!>!>  RESUME STATUS COUNTERS ";
+	public static final String START_CYCLE_PREFIX 			= "  >>>>>>  START CYCLE ";
+	public static final String END_CYCLE_PREFIX 			= "  <<<<<<  STOP CYCLE ";
+	public static final String START_LOGGING_PREFIX 		= "  ......  START LOGGING ";
+	public static final String STOP_LOGGING_PREFIX 			= "  ......  STOP LOGGING ";
+	public static final String START_REQUIREMENT_PREFIX 	= "  ......  START REQUIREMENT ";
+	public static final String END_REQUIREMENT_PREFIX 		= "  ......  STOP REQUIREMENT ";
 
-	public static final String STATUS_REPORT_START_PREFIX = "REPORT     BEGIN STATUS: ";
-	public static final String STATUS_REPORT_RECORDS_PREFIX = "REPORT    TOTAL RECORDS: ";
-	public static final String STATUS_REPORT_SKIPPED_PREFIX = "REPORT  SKIPPED RECORDS: ";
-	public static final String STATUS_REPORT_TESTS_PREFIX = "REPORT     TEST RECORDS: ";
-	public static final String STATUS_REPORT_TEST_PASSES_PREFIX =
-		"REPORT     TESTS PASSED: ";
-	public static final String STATUS_REPORT_TEST_WARNINGS_PREFIX =
-		"REPORT    TEST WARNINGS: ";
-	public static final String STATUS_REPORT_TEST_FAILURES_PREFIX =
-		"REPORT    TEST FAILURES: ";
-	public static final String STATUS_REPORT_GENERAL_WARNINGS_PREFIX =
-		"REPORT GENERAL WARNINGS: ";
-	public static final String STATUS_REPORT_GENERAL_FAILURES_PREFIX =
-		"REPORT GENERAL FAILURES: ";
-	public static final String STATUS_REPORT_IO_FAILURES_PREFIX =
-		"REPORT      IO FAILURES: ";
-	//private  final String STATUS_REPORT_RESERVED_PREFIX        = 
-	//private  final String STATUS_REPORT_RESERVED_PREFIX        = 
-	//private  final String STATUS_REPORT_RESERVED_PREFIX        = 
-	//private  final String STATUS_REPORT_RESERVED_PREFIX        = 
+	public static final String STATUS_REPORT_START_PREFIX 				= "REPORT     BEGIN STATUS: ";
+	public static final String STATUS_REPORT_RECORDS_PREFIX 			= "REPORT    TOTAL RECORDS: ";
+	public static final String STATUS_REPORT_SKIPPED_PREFIX 			= "REPORT  SKIPPED RECORDS: ";
+	public static final String STATUS_REPORT_TESTS_PREFIX 				= "REPORT     TEST RECORDS: ";
+	public static final String STATUS_REPORT_TEST_PASSES_PREFIX 		= "REPORT     TESTS PASSED: ";
+	public static final String STATUS_REPORT_TEST_WARNINGS_PREFIX 		= "REPORT    TEST WARNINGS: ";
+	public static final String STATUS_REPORT_TEST_FAILURES_PREFIX 		= "REPORT    TEST FAILURES: ";
+	public static final String STATUS_REPORT_GENERAL_PREFIX 			= "REPORT  GENERAL RECORDS: ";
+	public static final String STATUS_REPORT_GENERAL_PASSES_PREFIX		= "REPORT   GENERAL PASSES: ";
+	public static final String STATUS_REPORT_GENERAL_WARNINGS_PREFIX 	= "REPORT GENERAL WARNINGS: ";
+	public static final String STATUS_REPORT_GENERAL_FAILURES_PREFIX 	= "REPORT GENERAL FAILURES: ";
+	public static final String STATUS_REPORT_IO_FAILURES_PREFIX 		= "REPORT      IO FAILURES: ";
 	public static final String STATUS_REPORT_END_PREFIX = "REPORT       END STATUS: ";
 
 	// contains a collection of contant info for all message types. the mapping
@@ -139,6 +125,8 @@ public class MessageTypeInfo
 		put(new MessageTypeInfo(AbstractLogFacility.STATUS_REPORT_TEST_PASSES, "Status", STATUS_REPORT_TEST_PASSES_PREFIX, STATUS_REPORT_TEST_PASSES_XML_PREFIX));
 		put(new MessageTypeInfo(AbstractLogFacility.STATUS_REPORT_TEST_WARNINGS, "Status", STATUS_REPORT_TEST_WARNINGS_PREFIX, STATUS_REPORT_TEST_WARNINGS_XML_PREFIX));
 		put(new MessageTypeInfo(AbstractLogFacility.STATUS_REPORT_TEST_FAILURES, "Status", STATUS_REPORT_TEST_FAILURES_PREFIX, STATUS_REPORT_TEST_FAILURES_XML_PREFIX));
+		put(new MessageTypeInfo(AbstractLogFacility.STATUS_REPORT_GENERAL, "Status", STATUS_REPORT_GENERAL_PREFIX, STATUS_REPORT_GENERAL_XML_PREFIX));
+		put(new MessageTypeInfo(AbstractLogFacility.STATUS_REPORT_GENERAL_PASSES, "Status", STATUS_REPORT_GENERAL_PASSES_PREFIX, STATUS_REPORT_GENERAL_PASSES_XML_PREFIX));
 		put(new MessageTypeInfo(AbstractLogFacility.STATUS_REPORT_GENERAL_WARNINGS, "Status", STATUS_REPORT_GENERAL_WARNINGS_PREFIX, STATUS_REPORT_GENERAL_WARNINGS_XML_PREFIX));
 		put(new MessageTypeInfo(AbstractLogFacility.STATUS_REPORT_GENERAL_FAILURES, "Status", STATUS_REPORT_GENERAL_FAILURES_PREFIX, STATUS_REPORT_GENERAL_FAILURES_XML_PREFIX));
 		put(new MessageTypeInfo(AbstractLogFacility.STATUS_REPORT_IO_FAILURES, "Status", STATUS_REPORT_IO_FAILURES_PREFIX, STATUS_REPORT_IO_FAILURES_XML_PREFIX));
