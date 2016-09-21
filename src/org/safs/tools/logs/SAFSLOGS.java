@@ -2,6 +2,15 @@
  * Copyright (C) 2004 Novell, Inc
  * GNU General Public License (GPL) http://www.opensource.org/licenses/gpl-license.php
  */
+/**
+ * Developer Logs:
+ * 
+ * @author Carl Nagle 	DEC 14, 2005 	Refactored with DriverConfiguredSTAFInterface superclass
+ * <BR/> Carl Nagle 	2009.03.19 	Fixed logMessage handling of empty Descriptions
+ * <BR/> LeiWang 	2009.05.12 	Added support for STAF version 3.
+ * <BR/> Carl Nagle     2014.07.16  Added NOSTAF support for the Embedded Service.
+ * <BR/> LeiWang 	2016.09.21 	Modified logStatusInfo(): complete the counters for general test.
+ */
 package org.safs.tools.logs;
 
 import org.safs.Log;
@@ -136,15 +145,10 @@ import com.ibm.staf.STAFResult;
  * the Driver.  Any other options needed for service initialization should be 
  * specified here.  There typically will be none.
  * </dl>
- * @author Carl Nagle 	DEC 14, 2005 	Refactored with DriverConfiguredSTAFInterface superclass
- * <BR/> Carl Nagle 	2009.03.19 	Fixed logMessage handling of empty Descriptions
- * <BR/> LeiWang 	2009.05.12 	Add support for STAF version 3.
- * <BR/> Carl Nagle     JUL 16, 2014 Added NOSTAF support for the Embedded Service.
+ * @author Carl Nagle 	DEC 14, 2005
  **/
 public class SAFSLOGS extends DriverConfiguredSTAFInterfaceClass
                       implements LogsInterface {
-
-
 
      /** "org.safs.staf.service.logging.v2.SAFSLoggingService" */
 	protected static final String DEFAULT_SAFSLOGS_CLASS = "org.safs.staf.service.logging.v2.SAFSLoggingService";
@@ -560,7 +564,6 @@ public class SAFSLOGS extends DriverConfiguredSTAFInterfaceClass
 	public void logStatusInfo(UniqueIDInterface log, StatusInterface info, String infoID){
 
 		String locID = DEFAULT_STATUSINFO_ID;
-		String logResult = null;
 		UniqueStringMessageInfo facname = new UniqueStringMessageInfo((String)log.getUniqueID());
 		
 		if ((infoID != null)&&(infoID.length()>0))
@@ -582,11 +585,11 @@ public class SAFSLOGS extends DriverConfiguredSTAFInterfaceClass
 		facname.setLogMessageType(AbstractLogFacility.GENERIC_MESSAGE);
 		logMessage(facname);
 
-		long tests = info.getTestFailures();
-		tests += info.getTestPasses();
-		tests += info.getTestWarnings();
+		long total = info.getTestFailures();
+		total += info.getTestPasses();
+		total += info.getTestWarnings();
 
-		facname.setLogMessage(String.valueOf(tests).trim());
+		facname.setLogMessage(String.valueOf(total).trim());
 		facname.setLogMessageType(AbstractLogFacility.STATUS_REPORT_TESTS);
 		logMessage(facname);
 
@@ -607,6 +610,14 @@ public class SAFSLOGS extends DriverConfiguredSTAFInterfaceClass
 		facname.setLogMessageType(AbstractLogFacility.GENERIC_MESSAGE);
 		logMessage(facname);
 
+		total = info.getGeneralFailures();
+		total += info.getGeneralPasses();
+		total += info.getGeneralWarnings();
+		
+		facname.setLogMessage(String.valueOf(total).trim());
+		facname.setLogMessageType(AbstractLogFacility.STATUS_REPORT_GENERAL);
+		logMessage(facname);
+		
 		facname.setLogMessage(String.valueOf(info.getGeneralFailures()).trim());
 		facname.setLogMessageType(AbstractLogFacility.STATUS_REPORT_GENERAL_FAILURES);
 		logMessage(facname);
@@ -615,6 +626,10 @@ public class SAFSLOGS extends DriverConfiguredSTAFInterfaceClass
 		facname.setLogMessageType(AbstractLogFacility.STATUS_REPORT_GENERAL_WARNINGS);
 		logMessage(facname);
 
+		facname.setLogMessage(String.valueOf(info.getGeneralPasses()).trim());
+		facname.setLogMessageType(AbstractLogFacility.STATUS_REPORT_GENERAL_PASSES);
+		logMessage(facname);
+		
 		facname.setLogMessage(String.valueOf(info.getIOFailures()).trim());
 		facname.setLogMessageType(AbstractLogFacility.STATUS_REPORT_IO_FAILURES);
 		logMessage(facname);
