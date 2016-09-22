@@ -505,7 +505,7 @@ DATASTORE=&lt;FullPathTo&gt;\RFTProjectDir
 ;RFSMOnly=True|False
 ;RFSMCache=True|False
 
-<b>[SAFS_SELENIUM]</b>
+<b><a href="http://safsdev.github.io/doc/org/safs/selenium/webdriver/SeleniumHook.html">[SAFS_SELENIUM]</a></b>
 AUTOLAUNCH=FALSE
 ;JVM=JVMPath to Java 1.5 or higher
 ;CLASSPATH=altClasspath
@@ -513,10 +513,16 @@ AUTOLAUNCH=FALSE
 ;= to connect internet
 GATEWAYHOST=yourCorpGateway.net
 GATEWAYPORT=80
+
+;= <a href="http://safsdev.github.io/doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html">Selenium Server Settings</a>
 ;= SELENIUMHOST and SELENIUMPORT are used
 ;= to connect Selenium Server
 ;SELENIUMHOST=remote.server.com
 ;SELENIUMPORT=4444
+;= SELENIUMNODE defines the selenium nodes to run.
+;= If SELENIUMNODE is given, SELENIUMHOST will start
+;= as a selenium hub; otherwise as a stand-alone server.
+;SELENIUMNODE=node1:port:config1;node2:port:config2
 ;= SELENIUMSERVER_JVM_OPTIONS is JVM options
 ;= for starting Selenium Server
 ;SELENIUMSERVER_JVM_OPTIONS=-Xmx1g -Xms512m -Xdebug
@@ -539,15 +545,23 @@ GATEWAYPORT=80
 ;BROWSER=explorer | firefox | chrome
 PROXY_BYPASS_ADDRESS=localhost,127.0.0.1,host.not.thru.gateway
 BROWSER_REMOTE=false|true
-</pre>
+</pre></td>
 
-</td><td><pre><b>[SAFS_DRIVERCOMMANDS]</b>
+<td><pre>
+<b>[SAFS_DRIVERCOMMANDS]</b>
 AUTOLAUNCH=TRUE
 ;STAFID="SAFS/DRIVERCOMMANDS"
 ;JVM=JVMPath
 ;CLASSPATH=altClasspath
 ;Hook=String/Classname
 ;Options=LOG
+
+;= OUT_MAILXXX is <a href="http://safsdev.github.io/doc/org/safs/tools/drivers/DriverConstant.MailConstant.html">Mail setting</a>
+;OUT_MAILSERVER="mail server"
+;OUT_MAILSERVERPORT=25|465|587
+;OUT_MAILSERVERPROTOCOL=SMTP|SMTPS|TLS
+;OUT_MAILUSER=user.name@mail.com
+;OUT_MAILPASS=user.password
 
 <b>[SAFS_QTP]</b>
 AUTOLAUNCH=FALSE
