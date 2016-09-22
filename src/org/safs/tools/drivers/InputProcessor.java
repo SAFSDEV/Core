@@ -7,7 +7,6 @@
  * <br>SEP 11, 2013 	(Lei Wang) Store the "record separator" to variable "SAFS/Hook/separator" before executing test record.
  * <br>SEP 26, 2014 	(Lei Wang) Modify routeToPreferredEngines()/routeToEngines(): 
  *                               set 'MORE_ENGINES' to testrecord's status-info if there are more engines can be used.
- * <br>SEP 21, 2016 	(Lei Wang) Modified processTest(): increment "general" (instead of "test") counter for keywords "LogTestXXX".
  */
 package org.safs.tools.drivers;
 
@@ -972,17 +971,17 @@ loopbody: {
 
 				// handle DriverCommands issuing TEST results
 				else if (result == DriverConstant.STATUS_TESTFAILURE_LOGGED){
-					statusCounter.incrementGeneralFailures();
+					statusCounter.incrementTestFailures();
 					counts.incrementAllCounters(counterInfo, counts.STATUS_TEST_FAILURE);
 					result = DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE;
 				}					
 				else if (result == DriverConstant.STATUS_TESTSUCCESS_LOGGED){
-					statusCounter.incrementGeneralPasses();
+					statusCounter.incrementTestPasses();
 					counts.incrementAllCounters(counterInfo, counts.STATUS_TEST_PASS);
 					result = DriverConstant.STATUS_NO_SCRIPT_FAILURE;
 				}					
 				else if (result == DriverConstant.STATUS_TESTWARNING_LOGGED){
-					statusCounter.incrementGeneralWarnings();
+					statusCounter.incrementTestWarnings();
 					counts.incrementAllCounters(counterInfo, counts.STATUS_TEST_WARNING);
 					result = DriverConstant.STATUS_SCRIPT_WARNING;
 				}			
