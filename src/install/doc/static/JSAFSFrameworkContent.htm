@@ -1,0 +1,669 @@
+
+<!-- saved from url=(0069)http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Java SAFS Framework Interface</title></head>
+<body><a name="top">
+<h2>Java SAFS Framework Interface</h2>by Carl Nagle<br>Last Updated:
+<script language="JavaScript">document.write(document.lastModified)</script>04/28/2016 10:44:0804/09/2015 15:27:2009/26/2014 02:24:30
+<!-- 2014.08.12 Carl Nagle -->
+<p>This represents the proposed Java interface for Tool-Independent Drivers and
+Engines.
+</p></a><p><a name="top"><small>See also: </small></a><small><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSFramework.htm">SAFS
+Framework</a>, <a href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkGraphs.htm">JSAFS
+Design</a>, <a href="http://safsdev.sourceforge.net/doc/javadoc.html" target="_blank">JSAFS Javadoc</a>, <a href="http://sourceforge.net/apps/mediawiki/safsdev/index.php?title=SAFS_Driver_Development" target="_blank">SAFS Driver Development</a>, <a href="http://safsdev.sourceforge.net/" target="_blank">SAFSDEV Project</a>
+</small>
+</p><hr>
+The intention of all the following framework interfaces is to insulate any
+Driver, and any compatible Java Client--even a SAFS Engine--from interfacing
+directly with the implementation. This allows the underlying implementation to
+be completely changed, enhanced, or user-defined and subclassed as desired. For
+example, SAFSVARS and SAFSMAPS might be implemented by some mechanism other than
+STAF in some implementations. Our test tables could come from files, database
+servers, or humans typing into a manual test GUI. The same Driver could be used
+in all of these cases.
+<p>That is the goal. We are coding the tool-independent Driver (TID) to take
+advantage of these interfaces. However, the existing SAFS/RobotJ and
+SAFS/DriverCommands engines will need to be refactored to fully realize this
+capability. These engines are currently hardcoded to use our STAF services
+through specific classes. This engine refactoring, however, should not be too
+extreme, but is not part of the current Driver effort. The Driver will use the
+concrete implementations that talk with STAF, but the engines will talk with
+STAF directly until they are refactored.
+</p><hr>
+<!-- ********************************************************** --><a name="tools_interfaces"></a><a name="uniqueidinterface"></a><a name="generictoolsinterface"></a><a name="configurabletoolsinterface"></a><a name="simpletoolsinterface"></a><a name="driverconfiguredstafinterfaceclass">
+</a><p><a name="driverconfiguredstafinterfaceclass"><b></b></a><b><a href="http://safsdev.sourceforge.net/doc/org/safs/tools/package-tree.html" target="api">Tools Interfaces</a></b> <!-- ********************************************************** -->
+</p><p>These interfaces generally allow us to categorize a tool, and provide a
+simple interface to launch, reset, and shutdown the various tools through a
+common API.
+</p><hr>
+<!-- ********************************************************** --><a name="safsvars"></a><a name="safsvars_interfaces"></a><a name="varsinterface">
+</a><p><a name="varsinterface"><b></b></a><b><a href="http://safsdev.sourceforge.net/doc/org/safs/tools/vars/package-tree.html" target="api">SAFSVARS Interface</a></b> <!-- ********************************************************** -->
+</p><p>Our default, concrete <b>org.safs.tools.vars.SAFSVARS</b> implementation
+simply wraps our existing SAFSVARS STAF service. Each method in the class will
+simply be the appropriate STAF call to the running SAFSVARS service--just like
+any other client that wants to use SAFSVARS. Yet, this insulates any
+Driver/Client from talking with STAF directly and allows for alternative
+implementations and custom enhancements.
+</p><p>
+</p><ul>
+  <dl>
+    <dt><a href="http://safsdev.sourceforge.net/doc/org/safs/staf/service/SAFSVariableService.html" target="api">SAFSVARS Service</a> </dt></dl></ul>
+<p>To accomplish this interface with STAF, the implementation will need to use
+<b>org.safs.staf.STAFProcessHelpers</b> to obtain an instance of a
+<b>org.safs.STAFHelper</b> specific for the Driver process. All concrete classes
+used for and by the Driver will talk to STAF using the same process name/id. The
+class will communicate with the running STAF service through the STAFHelper. (A
+review of STAFHelper shows it looks pretty ugly, and may need some refactoring.
+Definitely it needs more documentation.)
+</p><p>The launchInterface(Object) call required from the <a href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#tools_interfaces">ConfigurableToolsInterface</a>
+would be tasked with verifying the SAFSVARS service is running, or launching the
+SAFSVARS service if it is not already running. This may be tempered by
+AUTOLAUNCH=FALSE settings provided in the <a href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#configfile">configuration
+file</a>. Configuration information is accessible through the <a href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#safsdriver">DriverInterface</a>
+object passed to the launchInterface function, or via System Properties set with
+<a href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#driveroptions">command-line
+arguments</a> when the Driver was launched.
+</p><p>The shutdown() call required from the <a href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#tools_interfaces">ConfigurableToolsInterface</a>
+would be used to close down the SAFSVARS service through STAF, but it should
+only do this if it was the call to launchInterface that started the service.
+shutdown() should not stop the service if it was already running prior to the
+call to launchInterface.
+</p><hr>
+<a name="safsmaps"><!-- ********************************************************** --></a><a name="safsmaps_interfaces"></a><a name="uniquesectioninterface"></a><a name="mapsinterface"></a><a name="uniqueiteminterface"></a><a name="uniquemapinterface">
+</a><p><a name="uniquemapinterface"><b></b></a><b><a href="http://safsdev.sourceforge.net/doc/org/safs/tools/input/package-tree.html" target="api">SAFSMAPS Interface</a></b> <!-- ********************************************************** -->
+</p><p>Our default, concrete <b>org.safs.tools.input.SAFSMAPS</b> implementation
+simply wraps our existing SAFSMAPS STAF service. Each method in the class will
+simply be the appropriate STAF call to the running SAFSMAPS service--just like
+any other client that wants to use SAFSMAPS. Yet, this insulates any
+Driver/Client from talking with STAF directly and allows for alternative
+implementations and custom enhancements.
+</p><p>
+</p><ul>
+  <dl>
+    <dt><a href="http://safsdev.sourceforge.net/doc/org/safs/staf/service/SAFSAppMapService.html" target="api">SAFSMAPS Service</a> </dt></dl></ul>
+<p>To accomplish this interface with STAF, the implementation will need to use
+<b>org.safs.staf.STAFProcessHelpers</b> to obtain an instance of a
+<b>org.safs.STAFHelper</b> specific for the Driver process. All concrete classes
+used for and by the Driver will talk to STAF using the same process name/id. The
+class will communicate with the running STAF service through the STAFHelper.
+</p><p>The launchInterface(Object) call required from the <a href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#tools_interfaces">ConfigurableToolsInterface</a>
+would be tasked with verifying the SAFSMAPS service is running, or launching the
+SAFSMAPS service if it is not already running. This may be tempered by
+AUTOLAUNCH=FALSE settings provided in the <a href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#configfile">configuration
+file</a>. Configuration information is accessible through the <a href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#safsdriver">DriverInterface</a>
+object passed to the launchInterface function, or via System Properties set with
+<a href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#driveroptions">command-line
+arguments</a> when the Driver was launched.
+</p><p>The shutdown() call required from the <a href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#tools_interfaces">ConfigurableToolsInterface</a>
+would be used to close down the SAFSMAPS service through STAF, but it should
+only do this if it was the call to launchInterface that started the service.
+shutdown() should not stop the service if it was already running prior to the
+call to launchInterface.
+</p><hr>
+<a name="safslogs"><!-- ********************************************************** --></a><a name="safslogs_interfaces"></a><a name="uniquesectioninterface"></a><a name="logsinterface"></a><a name="uniquemessageinterface">
+</a><p><a name="uniquemessageinterface"><b></b></a><b><a href="http://safsdev.sourceforge.net/doc/org/safs/tools/logs/package-tree.html" target="api">SAFSLOGS Interface</a></b> <!-- ********************************************************** -->
+</p><p>Our default, concrete <b>org.safs.tools.logs.SAFSLOGS</b> implementation
+simply wraps our existing SAFSLOGS STAF service. Each method in the class will
+simply be the appropriate STAF call to the running SAFSLOGS service--just like
+any other client that wants to use SAFSLOGS. Yet, this insulates any
+Driver/Client from talking with STAF directly and allows for alternative
+implementations and custom enhancements.
+</p><p>
+</p><ul>
+  <dl>
+    <dt><a href="http://safsdev.sourceforge.net/doc/org/safs/staf/service/logging/SAFSLoggingService.html" target="api">SAFSLOGS Service</a> </dt></dl></ul>
+<p>To accomplish this interface with STAF, the implementation will need to use
+<b>org.safs.staf.STAFProcessHelpers</b> to obtain an instance of a
+<b>org.safs.STAFHelper</b> specific for the Driver process. All concrete classes
+used for and by the Driver will talk to STAF using the same process name/id. The
+class will communicate with the running STAF service through the STAFHelper.
+</p><p>The launchInterface(Object) call required from the <a href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#tools_interfaces">ConfigurableToolsInterface</a>
+would be tasked with verifying the SAFSLOGS service is running, or launching the
+SAFSLOGS service if it is not already running. This may be tempered by
+AUTOLAUNCH=FALSE settings provided in the <a href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#configfile">configuration
+file</a>. Configuration information is accessible through the <a href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#safsdriver">DriverInterface</a>
+object passed to the launchInterface function, or via System Properties set with
+<a href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#driveroptions">command-line
+arguments</a> when the Driver was launched.
+</p><p>The shutdown() call required from the <a href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#tools_interfaces">ConfigurableToolsInterface</a>
+would be used to close down the SAFSLOGS service through STAF, but it should
+only do this if it was the call to launchInterface that started the service.
+shutdown() should not stop the service if it was already running prior to the
+call to launchInterface.
+</p><p>The implementation needs to take into consideration whatever Remote Logging
+capabilities we already support with our SAFSLOGS service to insure these
+continue to be supported.
+</p><hr>
+<a name="safsfiles"><!-- ********************************************************** --></a><a name="safsinput_interfaces"></a><a name="uniquerecordinterface"></a><a name="uniquerecordnuminterface"></a><a name="uniquerecordidinterface"></a><a name="sourceinterface"></a><a name="uniquesourceinterface"></a><a name="uniquefileinterface"></a><a name="inputinterface">
+</a><p><a name="inputinterface"><b></b></a><b><a href="http://safsdev.sourceforge.net/doc/org/safs/tools/input/package-tree.html" target="api">SAFSINPUT Interface</a></b> <!-- ********************************************************** -->
+</p><p>The default. concrete <a href="http://safsdev.sourceforge.net/doc/org/safs/tools/input/SAFSINPUT.html" target="api"><b>tools.input.SAFSINPUT</b></a> provides our interface to the
+SAFSINPUT STAF service.
+</p><p>Actual processing of test records happens in the Driver. The only exception
+will be that the current <a href="http://safsdev.sourceforge.net/doc/org/safs/staf/service/SAFSTextFile.html" target="api">SAFSTextFile</a> file reading class already knows how to skip blank
+lines and comment lines. Thus, it is able to skip those until it finds a real
+test record to send to the Driver. The SAFSINPUT Service command to OPEN a new
+file should accept optional parameters that allow us to enable those
+line-skipping features.
+</p><p>
+</p><ul>
+  <li>T, RunRegressionSuite </li></ul>
+<p>That tells the Driver we are looking for a Suite level test table--a
+file--with the default Suite level file extension (.STD) in the current default
+or "Datapool" directory.
+</p><p>But the following lines should also locate the exact same file, and the
+Driver or the SAFSINPUT Class or the SAFSINPUT Service needs to accomodate all
+these:
+</p><p>
+</p><ul>
+  <li>T, RunRegressionSuite.STD
+  </li><li>T, Datapool\RunRegressionSuite.STD
+  </li><li>T, &lt;fullPathTo&gt;\RunRegressionSuite
+  </li><li>T, &lt;fullPathTo&gt;\RunRegressionSuite.STD </li></ul>
+<p>The existing STAF <a href="http://safsdev.sourceforge.net/doc/org/safs/staf/service/SAFSTextFile.html" target="api">SAFSTextFile</a> implementation pretty much encapsulates the way the
+desired file reading should work. Each SAFSTextFile class handles working with
+one file and that is all it knows about. The SAFSINPUT STAF service handles the
+instantiation of these SAFSTextFile classes and routes incoming STAF service
+requests to the appropriate instance. The individual file readers shouldn't know
+anything about Cycles, Suites, or Steps--they are just forwarding records from
+the file they were told to play with. They have no idea what it is going to be
+used for. It is the Driver that handles which inputs are at what test level.
+</p><p>
+</p><ul>
+  <dl>
+    <dt><a href="http://safsdev.sourceforge.net/doc/org/safs/staf/service/SAFSInputService.html" target="api">SAFSINPUT Service</a> </dt></dl></ul>
+<p>Like our SAFSMAPS, SAFSLOGS, and SAFSVARS wrapper classes; the
+launchInterface(Object) call required from the <a href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#tools_interfaces">ConfigurableToolsInterface</a>
+would be tasked with verifying the SAFSINPUT service is running, and perhaps
+even launching the SAFSINPUT service if this is applicable. This may be tempered
+by AUTOLAUNCH=FALSE settings provided in the <a href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#configfile">configuration
+file</a>. Configuration information is accessible through the <a href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#safsdriver">DriverInterface</a>
+object passed to the launchInterface function, or via System Properties set with
+<a href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#driveroptions">command-line
+arguments</a> when the Driver was launched.
+</p><hr>
+<a name="safsdriver"><!-- ********************************************************** --></a><a name="driverinterface">
+</a><p><a name="driverinterface"><b></b></a><b><a href="http://safsdev.sourceforge.net/doc/org/safs/tools/drivers/package-tree.html" target="api">Driver Interface</a></b>
+</p><p><!-- ********************************************************** -->
+</p><p>The DriverInterface is primarily provided for use by the other tool
+interfaces. <a href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#tools_interfaces">ConfigurableToolsInterface</a>
+objects require access to configuration information or even other tools to
+perform their functions. The DriverInterface provides a centralized access-point
+for gaining access to most configuration information, or other required tools.
+</p><p>Of key importance, is that the Driver will provide access to the critical <a href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#configureinterfaces">ConfigureInterface</a>
+instance. This allows configurable tools to retrieve configuration information
+from external sources (like configuration files, etc.).
+</p><p>Our default, concrete <b>org.safs.tools.drivers.SAFSDRIVER</b> is currently
+designed as a standalone, Java application or class that will be launched into
+its own JVM. As it currently is designed, there is no GUI associated with the
+Driver. It is strictly a "run the specified test" class. Though it is easy to
+envision some optional GUI front-end that will allow the user to interactively
+specify test configuration information and parameters and then launch the Driver
+from there.
+</p><p>
+</p><ul>
+  <dl>
+    <dt><a href="http://safsdev.sourceforge.net/doc/org/safs/tools/drivers/SAFSDRIVER.html" target="api">SAFSDRIVER</a> </dt></dl></ul>
+<hr>
+<a name="driveroptions"><!-- ********************************************************** -->
+<p><b>SAFSDRIVER Command Line Options</b>
+</p><p><!-- ********************************************************** --><b>Command
+Line Options:</b><br>
+<table bgcolor="silver" border="1">
+  <tbody>
+  <tr>
+    <td>
+      <table cellpadding="10">
+        <tbody>
+        <tr>
+          <td>
+            <dl>
+              <dt><b>-Dsafs.driver.name=String</b>
+              </dt><dd>Unique name or ID for the driver instance. Can also
+              be specified in the Config Source. A default value should exist in
+              the Driver if none is provided.
+              <p></p>
+              </dd><dt><b>-Dsafs.driver.root=fullpath</b>
+              </dt><dd>System property for the root driver directory.
+              Points to the system-wide "safstid.ini" configuration file
+              directory. (As opposed to any project-specific "safstid.ini" file
+              located in the root project directory.)
+              <p></p>
+              </dd><dt><b>-Dsafs.project.root=fullpath/directoryname</b>
+              </dt><dd>System property for the root project directory. An
+              optional project-specific "safstid.ini" file will be sought here
+              if one is not identified through command-line options.<br>
+              If not provided, and other settings do not allow this to be deduced,
+              then the current Working Directory might be assumed.<br>
+              A single directory name instead of fullpath can be provided if running
+              from a JAR file intending to automatically extract the project at runtime.
+              The directory name will be sought as a root directory in the JAR file.
+              <p></p>
+              </dd><dt><b>-Dsafs.project.extract=fullpath</b>
+              </dt><dd>System property for the root directory in which to extract
+              a project structure from a JAR or ZIP file during runtime execution via JAR file.<br>
+              If not specified, a Temp directory will be created using the -Dsafs.project.root
+              as the root directory in Temp.
+              <p></p>
+              </dd><dt><b>-Dsafs.config.locator=classname</b>
+              </dt><dd>System Property identifying an alternate class to
+              locate driver configuration information. The class is required to
+              implement the
+              "org.safs.tools.drivers.ConfigureLocatorInterface"<br>Default
+              Locator: "org.safs.tools.drivers.ConfigureFileLocator"
+              <p></p>
+              </dd><dt><b>-Dsafs.driver.config=string|path</b>
+              </dt><dd>System Property identifying the path to an alternate
+              driver configuration file (other than safstid.ini in the driver
+              root location.
+              <p></p>
+              </dd><dt><b>-Dsafs.project.config=string|path</b>
+              </dt><dd>System Property identifying the path to an alternate
+              project configuration file (other than safstid.ini in the default
+              project config location.<br>
+              In most cases, if not specified then "test.ini" may be assumed.
+              <p></p>
+              </dd><dt><b>-Dsafs.driver.autolaunch=TRUE|FALSE</b>
+              </dt><dd>
+              <p></p>
+              </dd><dt><b>-Dsafs.test.name=string|path</b>
+              </dt><dd>
+              <p></p>
+              </dd><dt><b>-Dsafs.test.level=CYCLE|SUITE|STEP</b>
+              </dt><dd>Optional if the test level can be
+              accurately determined from the filename extension. (.CDD, .STD,
+              .SDD) </dd></dl>
+          </td><td>
+            <dl>
+              <dt><b>-Dsafs.test.millisbetweenrecords=N</b>
+              </dt><dd>System property for Driver Delay
+              millisBetweenRecords. Defaults to 100 millis.
+              <p></p>
+              </dd><dt><b>-Dsafs.test.numlockon=true|false</b>
+              </dt><dd>System property for turning on/off the 
+			  keyboard number lock before testing.
+              <p></p>
+              </dd><dt><b>-Dsafs.test.unexpected_alert_behaviour=accept|dismiss|ignore</b>
+              </dt><dd>System property for how to handle 
+			  the unexpected alert automatically. Defaults to ignore.
+              <p></p>
+              </dd><dt><b>-Dsafs.test.defaultmap=mapid</b>
+              </dt><dd>
+              <p></p>
+              </dd><dt><b>-Dsafs.step.separator=string (1 char)</b>
+              </dt><dd>Only the setting for the test level of the
+              provided test name is required.
+              <p></p>
+              </dd><dt><b>-Dsafs.suite.separator=string (1 char)</b>
+              </dt><dd>Only the setting for the test level of the
+              provided test name is required.
+              <p></p>
+              </dd><dt><b>-Dsafs.cycle.separator=string (1 char)</b>
+              </dt><dd>Only the setting for the test level of the
+              provided test name is required.
+              <p></p>
+              </dd><dt><b>-Dsafs.log.level=ERROR|WARN|PASS|GENERIC|INDEX|INFO|DEBUG</b>
+              </dt><dd>The default log level is GENERIC.
+              <p></p>
+              </dd><dt><b>-Dsafs.log.overwrite=TRUE|YES|1 (anything else is
+              FALSE)</b>
+              </dt><dd>The default log overwrite is FALSE.
+              <p></p>
+              </dd><dt><b>-Dsafs.log.capxml=TRUE|YES|1 (anything else is
+              FALSE)</b>
+              </dt><dd>The default log capxml is FALSE.
+              <p></p>
+              </dd><dt><b>-Dsafs.log.truncate=TRUE|YES|ON|numChars (anything else is
+              FALSE)</b>
+              </dt><dd>Enable log message truncation at numChars length (Default length: 128).
+              <p></p>
+              </dd><dt><b>-Dsafs.step.logname=logid|name</b>
+              </dt><dd>The primary logname used for capturing all test
+              information.
+              <p></p>
+              </dd><dt><b>-Dsafs.suite.logname=logid|name</b>
+              </dt><dd>Only needed if a separate log is used to capture
+              Suite information.
+              <p></p>
+              </dd><dt><b>-Dsafs.cycle.logname=logid|name</b>
+              </dt><dd>Only needed if a separate log is used to capture
+              Cycle information.
+              <p></p>
+              </dd><dt><b>-Dsafs.step.logmode=TEXTLOG|CONSOLELOG|XMLLOG|TOOLLOG|ALL</b>
+
+              </dt><dd>Specifies which log formats are to be
+              initialized/enabled for the primary log.
+              <p></p>
+              </dd><dt><b>-Dsafs.suite.logmode=TEXTLOG|CONSOLELOG|XMLLOG|TOOLLOG|ALL</b>
+
+              </dt><dd>Required only if a safs.suite.logname has
+              been specified. Specifies which log formats are to be
+              initialized/enabled for this log.
+              <p></p>
+              </dd><dt><b>-Dsafs.cycle.logmode=TEXTLOG|CONSOLELOG|XMLLOG|TOOLLOG|ALL</b>
+
+              </dt><dd>Required only if a safs.cycle.logname has
+              been specified. Specifies which log formats are to be
+              initialized/enabled for this log.
+</dd></dl></td></tr></tbody></table></td></tr></tbody></table>
+</p><p>Enhancements, corrections, and more detail will be added as necessary.
+</p><hr>
+</a><a name="configfile"><!-- ********************************************************** -->
+<p><b>SAFSDRIVER Configuration File Options</b>
+</p></a><p><a name="configfile"><!-- ********************************************************** -->The
+default name of the configuration file is "safstid.ini".<br>This file is
+readable by Windows AND Java classes. Items commented out with semicolons tell
+the DRIVER to use its pre-programmed default values, or items passed in via </a><a href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#driveroptions">command-line
+arguments</a>. Multiple configuration files can be used in a chain with values
+in one file overriding or masking values in another file. The default priority
+of the chain is:
+</p><ol>
+  <li>Command-Line Parameters
+  </li><li>Explicitly named PROJECT Configuration File
+  </li><li>Default PROJECT Configuration File
+  </li><li>Explicitly named DRIVER Configuration File
+  </li><li>Default DRIVER Configuration File </li></ol>
+<p>For space conservation, items are shown in 3 columns below. A real
+configuration file will only have one entry per line in a single column format.
+</p><p>
+<table col="3" bgcolor="silver" border="1">
+  <tbody>
+  <tr>
+    <td><pre><b>[SAFS_VARS]</b>
+AUTOLAUNCH=TRUE
+;Item=Alt VarsInterface Class
+;ServiceClass=Alt Service Class
+;ServiceClass=org.safs.staf.service.var.EmbeddedVariableService
+;Service=Alt Service Name
+;Options=
+;EmbedVars=TRUE
+
+<b>[SAFS_MAPS]</b>
+AUTOLAUNCH=TRUE
+;Item=Alt MapsInterface Class
+;ServiceClass=Alt Service Class
+;ServiceClass=org.safs.staf.service.map.EmbeddedMapService
+;Service=Alt Service Name
+;Options=
+
+<b>[SAFS_LOGS]</b>
+AUTOLAUNCH=TRUE
+OVERWRITE=TRUE
+CAPXML=TRUE
+TRUNCATE=ON|numChars
+;Item=Alt LogsInterface Class
+;ServiceClass=Alt Service Class
+;ServiceClass=org.safs.staf.service.logging.EmbeddedLogService
+;Service=Alt Service Name
+;Options=
+
+<b>[SAFS_INPUT]</b>
+AUTOLAUNCH=TRUE
+;Item=Alt InputInterface Class
+;ServiceClass=Alt Service Class
+;ServiceClass=org.safs.staf.service.input.EmbeddedInputService
+;Service=Alt Service Name
+;Options=
+
+<b>[SAFS_ENGINES]</b>
+First=org.safs.tools.engines.SAFSROBOTJ
+Second=Classname
+Third=Classname
+Fourth=Classname
+Fifth=Classname
+Sixth=Classname
+Seventh=Classname
+Eighth=Classname
+Ninth=Classname
+Tenth=Classname
+
+<b><a href="http://safsdev.sourceforge.net/doc/org/safs/android/DJavaHook.html" target="_blank">[SAFS_DROID]</a></b>
+AUTOLAUNCH=FALSE
+DROIDPROJECT=C:\SAFS\samples\Droid
+CONSOLE2DEBUG=True
+SHUTDOWNDELAY=10
+;EMULATOR_AVD="SprintEVO"
+;PersistEmulators=False
+;PersistJVM=False
+;DeviceSerial=serial number
+ANDROID-SDK=Android SDK Root Dir
+ANDROID-TOOLS=Android SDK Tools Dir
+FORCECLOSE=True
+FORCESTOP=True
+FORCECLEAR=True
+TCPMessengerAPK=path to TCP Messenger APK
+;TCPMessengerPackage="org.safs.android.messenger"
+TestRunnerAPK=path to TestRunner APK
+;TestRunnerPackage="org.safs.android.engine"
+;TestRunnerSource=path to TestRunner project
+;TestInstrument=from AndroidManifest.xml
+TargetAPK=path to Target APP APK
+TargetResignJar=path to re-sign.jar
+;TargetPackage="com.example.android.apis"
+AntRebuildArgs="-noclasspath"
+AntRebuildForce=True
+PortForwarding=True
+;HOOK=org.safs.android.DJavaHook
+;TIMEOUT=120
+;STAFID="SAFS/DROID"
+;JVM=JVMpath
+;JVMARGS=JVM Args
+;CLASSPATH=altClasspath
+;XBOOTCLASSPATH=&lt;CLASSPATH&gt;</pre>
+
+</td><td><pre><b><a href="http://safsdev.sourceforge.net/doc/org/safs/ios/IJavaHook.html" target="_blank">[SAFS_IOS]</a></b>
+AUTOLAUNCH=FALSE
+Project=/Library/SAFS/samples/UICatalog/
+Template="UICatalogInstruments.tracetemplate"
+;HOOK=org.safs.ios.JavaHook
+;TIMEOUT=30
+;STAFID="SAFS/IOS"
+;JVM=JVMpath
+;JVMARGS=JVM Args
+;CLASSPATH=altClasspath
+;XBOOTCLASSPATH=&lt;CLASSPATH&gt;
+
+<b>[SAFS_TC]</b>
+AUTOLAUNCH=FALSE
+HOOK="C:SAFS\TCAFS\TCAFS.VBS"
+;TIMEOUT=45
+;SuiteName="C:\Path\To\AProject.pjs"
+;ProjectName="ProjectName"
+;ScriptName="StepDriver"
+;OPTIONS="/customArg:value /Another"
+;ConvertSAFSInputKeysSyntax=True|False
+;ConvertSAFSItemPathSyntax=True|False
+;SECSWaitForWindow=30
+;SECSWaitForComponent=30
+;TFSMOnly=True|False
+;DepthLevel=25
+
+<b>[SAFS_ROBOTJ]</b>
+AUTOLAUNCH=TRUE
+DATASTORE=&lt;FullPathTo&gt;\RFTProjectDir
+;ClearProxiesAlways=True|False
+;TIMEOUT=45 (launch timeout)
+;SECSWaitForWindow=30
+;SECSWaitForComponent=30
+;TESTDomains=Html,Net,Java,Win,Flex,SWT
+;CommandLineBreakpoint=True|False
+;STAFID="SAFS/ROBOTJ"
+;JVM=altJVMpath\java.exe
+;JVMARGS="-Xms512m -Xmx1024m"
+;CLASSPATH=altClasspath
+;INSTALLDIR=&lt;wswpluginPath&gt; pre-RFT V7
+;JARPATH=&lt;FullPathTo&gt;rational_ft.jar  RFT V7+
+;PROJECTPATH=&lt;RFT V7+ CLASSPATH&gt;
+;XBOOTCLASSPATH=&lt;Classpath&gt;
+;PROJECT=&lt;Project.rsp&gt;
+;BUILD=&lt;Build #&gt;
+;PLAYBACK=TestScript
+;LOGFOLDER=Default
+;LOG=TestScript
+;USERID=&lt;userid&gt;
+;PASSWORD=
+;OPTIONS=
+;RFSMOnly=True|False
+;RFSMCache=True|False
+
+<b>[SAFS_SELENIUM]</b>
+AUTOLAUNCH=FALSE
+;JVM=JVMPath to Java 1.5 or higher
+;CLASSPATH=altClasspath
+;= GATEWAYHOST and GATEWAYPORT are used
+;= to connect internet
+GATEWAYHOST=yourCorpGateway.net
+GATEWAYPORT=80
+;= SELENIUMHOST and SELENIUMPORT are used
+;= to connect Selenium Server
+;SELENIUMHOST=remote.server.com
+;SELENIUMPORT=4444
+;= SELENIUMSERVER_JVM_OPTIONS is JVM options
+;= for starting Selenium Server
+;SELENIUMSERVER_JVM_OPTIONS=-Xmx1g -Xms512m -Xdebug
+;= SELENIUMERVER_JVM_Xmx and SELENIUMERVER_JVM_Xms 
+;= specify value of JVM options -Xmx and -Xms 
+;= for Selenium Server, it will override
+;= the default value or the value specified 
+;= in SELENIUMSERVER_JVM_OPTIONS
+;SELENIUMSERVER_JVM_Xmx=4g (default: 2g)
+;SELENIUMSERVER_JVM_Xms=256m (default: 512m)
+;SELENIUMSERVER_JVM=fullpath\java.exe (default: 1.7.0_45 64bit)
+
+;= Settings for Selnium1.0
+;HOOK=org.safs.selenium.SeleniumJavaHook
+;BROWSER=*piiexplore | *firefox | *iexplore
+;DEBUGLOG=&lt;fullpathTo&gt;/SeleniumDebug.out
+
+;= Settings for Selnium2.0 WebDriver
+;HOOK=org.safs.selenium.webdriver.SeleniumHook
+;BROWSER=explorer | firefox | chrome
+PROXY_BYPASS_ADDRESS=localhost,127.0.0.1,host.not.thru.gateway
+BROWSER_REMOTE=false|true
+</pre>
+
+</td><td><pre><b>[SAFS_DRIVERCOMMANDS]</b>
+AUTOLAUNCH=TRUE
+;STAFID="SAFS/DRIVERCOMMANDS"
+;JVM=JVMPath
+;CLASSPATH=altClasspath
+;Hook=String/Classname
+;Options=LOG
+
+<b>[SAFS_QTP]</b>
+AUTOLAUNCH=FALSE
+HOOK=C:\PathTo\QTP.VBS
+;Hook=C:\PathTo\AnyExecutable.ext
+;TIMEOUT=45
+
+<b>[STAF]</b>
+;NOSTAF=TRUE
+;EmbedDebug=&lt;filepath&gt;
+PATH=Path to/STAFProc.exe
+CONFIG=Path to/staf.cfg
+;EmbedSEM=TRUE
+;EmbedQUEUE=TRUE
+
+<b>[SAFS_DRIVER]</b>
+DriverName=String
+DriverRoot=String/DriverRootPath
+BringMonitorToFrontOnPause=True|False
+TurnOnPOF=True|False
+TurnOnPOW=True|False
+ResolveSkippedRecords=True|False
+;ShowMonitor not sought by all Drivers
+ShowMonitor=True|False
+
+<b>[SAFS_PROJECT]</b>
+ProjectName=ProjectName
+ProjectRoot=String/ProjectRootPath
+
+<b>[SAFS_TEST]</b>
+;TestName=String/Path
+;TestLevel=CYCLE|SUITE|STEP
+;DefaultMap=String
+;CycleSeparator=","
+;CycleSuffix=".CDD"
+;SuiteSeparator=","
+;SuiteSuffix=".STD"
+;StepSeparator=","
+;StepSuffix=".SDD"
+;LogLevel=String
+;StepLogName=SAFSLOG
+;StepLogMode=TEXTLOG|CONSOLELOG|XMLLOG|TOOLLOG|ALL
+;SuiteLogName=SAFSLOG
+;SuiteLogMode=TEXTLOG|CONSOLELOG|XMLLOG|TOOLLOG|ALL
+;CycleLogName=SAFSLOG
+;CycleLogMode=TEXTLOG|CONSOLELOG|XMLLOG|TOOLLOG|ALL
+;millisBetweenRecords=N  (default: 0)
+;secsWaitForWindow=N     (default: 30)
+;secsWaitForComponent=N  (default: 30)
+;numLockOn=TRUE|FALSE
+;UnexpectedAlertBehaviour ONLY works for Selenium2.0 engine for now
+;UnexpectedAlertBehaviour=accept|dismiss|ignore (default: ignore)
+
+<b>[SAFS_DIRECTORIES]</b>
+;DATADIR=Datapool
+;BENCHDIR=Datapool/Bench
+;DIFFDIR=Datapool/Dif
+;LOGDIR=Datapool/Logs
+;TESTDIR=Datapool/Test
+
+<b>[SAFS_DIFFER]</b>
+;TOOL_EXE=DIFF.EXE
+;TOOL_OPTIONS="--text -s -y"
+;TOOL_BINARY_OPTIONS="--binary -s"
+
+<b>[SAFS_DIFFVIEWER]</b>
+;TOOL_EXE=GEMINI.EXE
+;TOOL_OPTIONS=" "
+
+<b>[SAFS_OCR]</b>
+;OCRName=TOCR|GOCR (default:TOCR)
+;LanguageID=chi|zh|eng|en|jpn|jp|kor|kr|fra|fr
+;(default:system language; only en is support so far)
+
+<b>[SAFS_IBT]</b>
+;UseMultiThreadSearch=True|False (default:False)
+;ThreadNumber=4 (When UseMultiThreadSearch is true,
+;                user can adjust this for best search performance.)
+;UsePerImageModifiers=True|False (default:False)</pre></td></tr></tbody></table>
+
+</p><p>Enhancements, corrections, and more detail will be added as necessary.
+</p><hr>
+<a name="configureinterfaces"><!-- ********************************************************** --></a><a name="configureinterface">
+</a><p><a name="configureinterface"><b></b></a><b><a href="http://safsdev.sourceforge.net/doc/org/safs/tools/drivers/package-tree.html" target="api">Configure Interface</a></b>
+</p><p><!-- ********************************************************** -->
+</p><p>A ConfigureInterface generally represents the need to read a configuration
+source. Although the source is not required to be in a Windows INI file format,
+the interface reflects this format convention. The interface reflects name=value
+pairs that can be separated into named secions. Other implementations are
+possible as long as the API conforms to the documented interface.
+</p><p>Note the "add" and "insert" methods allow configuration information to be
+"chained". The parent ConfigureInterface object will maintain storage of any
+number of other ConfigureInterface objects. The parent ConfigureInterface object
+is expected to search all stored objects, usually in a documented order
+(first-in first, or last-in first), to try to locate the requested configuration
+setting. This allows test-specific or project-specific values to override stored
+global or machine-specific settings and for all of this to be resolved in a
+single call to the held ConfigureInterface.
+</p><p>ConfigurableToolsInterface classes will often require either a reference to
+the Driver, or a reference to the ConfigureInterface maintained by the Driver. A
+reference to the Driver provides access to the active ConfigureInterface. Thus,
+these <a href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#tools_interfaces">ConfigurableToolsInterface</a>
+classes may define and even require certain configuration information be made
+available via the instantiated ConfigureInterface object.
+</p><hr>
+<a name="engineinterfaces"><!-- ********************************************************** --></a><a name="engineinterface">
+</a><p><a name="engineinterface"><b></b></a><b><a href="http://safsdev.sourceforge.net/doc/org/safs/tools/engines/package-tree.html" target="api">Engine Interface</a></b>
+</p><p><!-- ********************************************************** -->
+</p><p>An instance of an engine interface will allow the Driver simple access to the
+services of the engine. Each unique engine Interface will be instanced with the
+Class specified in the SAFS_ENGINE section of the <a href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#configureinterfaces">ConfigureInterface</a>.
+The instanced engine will gain access to the ConfigureInterface and proceed with
+initialization during the call to its <a href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#tools_interfaces">ConfigurableToolsInterface</a>
+launchInterface routine. Thus, each engine can independently specify required
+and optional configuration parameters the user needs to fulfill in the Configure
+source.
+</p><hr>
+
+</body></html>
