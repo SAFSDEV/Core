@@ -9,7 +9,7 @@
 *
 * <br>   SEP 22, 2016  (SCNTAX) Initial release: create SAFS version AutoItXPlus to bridge Java and AutoIt APIs.
 * 								Add convertCOMParams(): convert String parameters array into com.jacob.com.Variant array.
-* 								Add controlClick(): provide holding special key when click action happen.
+* 								Add controlClick(): Workhorse of AutoIt click action.
 * 								Move 'isValidMouseButton()' from AutoItComponent to here.
 * 
 */
@@ -162,6 +162,8 @@ public class AutoItXPlus extends AutoItX {
 	}
 	
 	/**
+	 * Workhorse of AutoIt click action.
+	 * 
 	 * Provide click action through command sending with. It can be assigned mouse button like 'left, middle, right', number of click times, click offset
 	 * position and the special key holding when clicking.
 	 * 
