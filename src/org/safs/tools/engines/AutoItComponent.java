@@ -15,6 +15,7 @@
  * SEP 23, 2016 Tao Xie Replace 'AutoItX' as SAFS version 'AutoItXPlus', and move 'isValidMouseButton()' to AutoItXPlus.
  * 					   Refactor workhorse 'click()' to support special key holding while clicking.
  * 					   Override the 'componentClick()' function in 'AutoItComponent.CFComponent' class to deal with groups of CLICK keywords.
+ * 					   Add keyword 'DoubleClick', 'RightClick', 'CtrlClick' and 'ShiftClick' implementations.
  */
 package org.safs.tools.engines;
 
@@ -592,11 +593,102 @@ public class AutoItComponent extends GenericEngine {
 			}		
 		}
 		
+		/**
+		 * Override componentClick() to deal with groups of CLICK keywords.
+		 * 
+		 * @author Tao Xie
+		 */
 		@Override
 		protected void componentClick() throws SAFSException {
+			String dbgmsg = StringUtils.getMethodName(0, false);
+			Point point = checkForCoord(iterator);
 			
+			String autoscroll = null;
+			if(iterator.hasNext()) {
+				autoscroll = iterator.next();
+				//TODO: SEP 23, 2016 Tao Xie, Support this parameter later. 
+				throw new SAFSException(dbgmsg + "(): " + "currently NOT support 'autoscroll' parameter!");
+			}
+			
+			/**
+			 * Deal with testRecordData's StatusCode in AutoIt's click workhorse routine.
+			 * Here, only record the time consuming .
+			 */			
+			long begin = System.currentTimeMillis();
+			
+			if (action.equalsIgnoreCase(ComponentFunction.CLICK) 
+					|| action.equalsIgnoreCase(ComponentFunction.COMPONENTCLICK)) {
+				click(rs, point);
+			} else if (action.equalsIgnoreCase(ComponentFunction.DOUBLECLICK)){
+				doubleClick(rs, point);
+			} else if (action.equalsIgnoreCase(ComponentFunction.RIGHTCLICK)){
+				rightClick(rs, point);
+			} else if (action.equalsIgnoreCase(ComponentFunction.CTRLCLICK)) {
+				ctrlClick(rs, point);
+			} else if (action.equalsIgnoreCase(ComponentFunction.SHIFTCLICK)) {
+				shiftClick(rs, point);
+			}
+			
+			long timeConsumed = System.currentTimeMillis() - begin;
+			Log.debug(dbgmsg + "(): " + "took " + timeConsumed + " milliseconds or " + (timeConsumed/1000) + " seconds to perform " + action);
 		}
-				
+		
+		/**
+		 * Click with position offset.
+		 * 
+		 * @param autoArgs		AutoItRs,	AutoIt engine's recognition string.
+		 * @param offset		Point,		the offset position to click within the target component. Also can be null.
+		 * 
+		 * @author Tao Xie
+		 */
+		protected void click(AutoItRs autoArgs, Point offset) {
+			click(autoArgs, AutoItXPlus.AUTOIT_MOUSE_BUTTON_LEFT, 1, offset, null);
+		}
+		
+		/**
+		 * Double click with position offset.
+		 * @param autoArgs		AutoItRs,	AutoIt engine's recognition string.
+		 * @param offset		Point,		the offset position to click within the target component. Also can be null.
+		 * 
+		 * @author Tao Xie
+		 */
+		protected void doubleClick(AutoItRs autoArgs, Point offset) {
+			click(autoArgs, AutoItXPlus.AUTOIT_MOUSE_BUTTON_LEFT, 2, offset, null);
+		}
+		
+		/**
+		 * Right click with position offset.
+		 * @param autoArgs		AutoItRs,	AutoIt engine's recognition string.
+		 * @param offset		Point,		the offset position to click within the target component. Also can be null.
+		 * 
+		 * @author Tao Xie
+		 */
+		protected void rightClick(AutoItRs autoArgs, Point offset) {
+			click(autoArgs, AutoItXPlus.AUTOIT_MOUSE_BUTTON_RIGHT, 1, offset, null);
+		}
+		
+		/**
+		 * Ctrl click with position offset.
+		 * @param autoArgs		AutoItRs,	AutoIt engine's recognition string.
+		 * @param offset		Point,		the offset position to click within the target component. Also can be null.
+		 * 
+		 * @author Tao Xie
+		 */
+		protected void ctrlClick(AutoItRs autoArgs, Point offset) {
+			click(autoArgs, AutoItXPlus.AUTOIT_MOUSE_BUTTON_LEFT, 1, offset, AutoItXPlus.AUTOIT_SUPPORT_PRESS_CTRL);
+		}
+		
+		/**
+		 * Shift click with position offset.
+		 * @param autoArgs		AutoItRs,	AutoIt engine's recognition string.
+		 * @param offset		Point,		the offset position to click within the target component. Also can be null.
+		 * 
+		 * @author Tao Xie
+		 */
+		protected void shiftClick(AutoItRs autoArgs, Point offset) {
+			click(autoArgs, AutoItXPlus.AUTOIT_MOUSE_BUTTON_LEFT, 1, offset, AutoItXPlus.AUTOIT_SUPPORT_PRESS_SHIFT);
+		}
+		
 		/**
 		 * Workhorse of AutoIt click routine.
 		 * It allows us to use specified 'mouse button' to click target component at assigned position with a number of times.  
@@ -648,6 +740,11 @@ public class AutoItComponent extends GenericEngine {
 		}
 		
 		/** click **/
+		/** 
+		 * SEP 23, 2016 Tao Xie,	It's better to use the same click() workhorse for consistency. 
+		 * 						Depreciate this original implementation.
+		 */
+		@Deprecated
 		protected void click(AutoItRs ars){
 			testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );	 
 			try {
