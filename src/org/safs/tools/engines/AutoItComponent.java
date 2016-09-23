@@ -585,7 +585,7 @@ public class AutoItComponent extends GenericEngine {
 			testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );
 			
 			if(autoArgs == null || (!it.isValidMouseButton(mouseButton)) || nClicks < 1) {
-				issueParameterCountFailure(dbgmsg + "(): invalid parameters provided!");
+				issueParameterCountFailure(dbgmsg + "(): invalid AutoIt parameters provided!");
 				return;
 			}
 			

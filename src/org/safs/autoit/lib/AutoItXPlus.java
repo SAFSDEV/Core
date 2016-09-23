@@ -188,6 +188,13 @@ public class AutoItXPlus extends AutoItX {
 			return false;
 		}
 		
+		if (button == null || button.equals("")) { 
+			Log.debug(dbgmsg + "(): use 'left' value as no mouse button value is assigned.");
+			button = AUTOIT_CLICKBUTTON_LEFT;
+		} else{
+			Log.debug(dbgmsg + "(): " + "use mouse button '" + button + "' to click.");
+		}
+		
 		if (offset != null) {
 			Log.debug(dbgmsg + "(): " + "click at position offset '" + offset + "'.");
 			clickParam = new String[]{ title, text, controlID, button, String.valueOf(clicks), String.valueOf(offset.x), String.valueOf(offset.y) };
@@ -209,10 +216,10 @@ public class AutoItXPlus extends AutoItX {
 		}
 		
 		autoItX.invoke(AUTOIT_KEYWORD_SEND, convertCOMParams(pressKeyParam));
-		Variant result = autoItX.invoke(AUTOIT_KEYWORD_CONTROLCLICK, convertCOMParams(clickParam));
+		boolean result = oneToTrue((autoItX.invoke(AUTOIT_KEYWORD_CONTROLCLICK, convertCOMParams(clickParam))).getInt());
 		autoItX.invoke(AUTOIT_KEYWORD_SEND, convertCOMParams(upKeyParam));
 		
-		return oneToTrue(result.getInt());
+		return result;
 	}
 	
 }
