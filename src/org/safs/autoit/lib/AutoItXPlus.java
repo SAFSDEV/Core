@@ -169,22 +169,22 @@ public class AutoItXPlus extends AutoItX {
 	 * @param text 			String, text of the window to access.
 	 * @param controlID		String, control to interact with.
 	 * @param button		String, button to click, "left", "right" or "middle".
-	 * @param clicks		int, 	number of times to click the mouse. Default is center.
-	 * @param offset		Point,  position to click within the control.
-	 * @param specialKey	String, keyboard key that be hold when click action happening.
+	 * @param nClicks		int, 	number of times to click the mouse. It's supposed to be greater than or equal to 1.
+	 * @param offset		Point,  position to click within the control. It can be null or empty String. Default value is center.
+	 * @param specialKey	String, keyboard key that be hold when click action happening. It can be null or empty String.
 	 * @return				boolean
 	 * 
 	 * @author scntax
 	 */
 	public boolean controlClick(String title, String text, String controlID, 
-            String button, int clicks, Point offset, String specialKey) {		
+            String button, int nClicks, Point offset, String specialKey) {		
 		String dbgmsg = StringUtils.getMethodName(0, false);
 		String[] pressKeyParam = null;
 		String[] upKeyParam = null;
 		String[] clickParam = null;
 		
-		if (!isValidMouseButton(button) || clicks < 1) {
-			Log.debug(dbgmsg + "(): " + "invalid parameters button:'" + button + "', clicks:'" + clicks + "' provided.");
+		if (!isValidMouseButton(button) || nClicks < 1) {
+			Log.error(dbgmsg + "(): " + "invalid parameters button:'" + button + "', clicks:'" + nClicks + "' provided.");
 			return false;
 		}
 		
@@ -197,15 +197,15 @@ public class AutoItXPlus extends AutoItX {
 		
 		if (offset != null && !offset.equals("")) {
 			Log.debug(dbgmsg + "(): " + "click at position offset '" + offset + "'.");
-			clickParam = new String[]{ title, text, controlID, button, String.valueOf(clicks), String.valueOf(offset.x), String.valueOf(offset.y) };
+			clickParam = new String[]{ title, text, controlID, button, String.valueOf(nClicks), String.valueOf(offset.x), String.valueOf(offset.y) };
 		} else{
 			Log.debug(dbgmsg + "(): " + "click at default center position.");
-			clickParam = new String[]{ title, text, controlID, button, String.valueOf(clicks) };
+			clickParam = new String[]{ title, text, controlID, button, String.valueOf(nClicks) };
 		}
 		
 		if (specialKey != null && !specialKey.equals("")) {
 			if(!supportHoldingKeyPress(specialKey)) {
-				Log.debug(dbgmsg + "(): " + "the key '" + specialKey + "' is NOT supported by AutoIt.");
+				Log.error(dbgmsg + "(): " + "the key '" + specialKey + "' is NOT supported by AutoIt.");
 				return false;
 			}
 			
@@ -215,9 +215,9 @@ public class AutoItXPlus extends AutoItX {
 			upKeyParam 	= new String[]{ wrapKeyUp(specialKey), String.valueOf((supportSpecialKey? 0 : 1)) };
 		}
 		
-		autoItX.invoke(AUTOIT_KEYWORD_SEND, convertCOMParams(pressKeyParam));
+		if (pressKeyParam != null) { autoItX.invoke(AUTOIT_KEYWORD_SEND, convertCOMParams(pressKeyParam)); } 
 		boolean result = oneToTrue((autoItX.invoke(AUTOIT_KEYWORD_CONTROLCLICK, convertCOMParams(clickParam))).getInt());
-		autoItX.invoke(AUTOIT_KEYWORD_SEND, convertCOMParams(upKeyParam));
+		if (upKeyParam != null) { autoItX.invoke(AUTOIT_KEYWORD_SEND, convertCOMParams(upKeyParam)); }
 		
 		return result;
 	}
