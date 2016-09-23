@@ -70,9 +70,9 @@ public class AutoItXPlus extends AutoItX {
 	public final static String AUTOIT_RIGHT_WINDOWS_UP 	= "{RWINUP}";
 	
 	/** AutoIt's click button constants **/
-	public final static String AUTOIT_CLICKBUTTON_LEFT   = "left";
-	public final static String AUTOIT_CLICKBUTTON_MIDDLE = "middle";
-	public final static String AUTOIT_CLICKBUTTON_RIGHT  = "right";
+	public final static String AUTOIT_MOUSE_BUTTON_LEFT   = "left";
+	public final static String AUTOIT_MOUSE_BUTTON_MIDDLE = "middle";
+	public final static String AUTOIT_MOUSE_BUTTON_RIGHT  = "right";
 	
 	public AutoItXPlus(){
 		super();
@@ -117,9 +117,9 @@ public class AutoItXPlus extends AutoItX {
 	public boolean isValidMouseButton(String mouseButton){
 		if (mouseButton == null 
 				|| mouseButton.equals("")
-				|| mouseButton == AUTOIT_CLICKBUTTON_LEFT 
-				|| mouseButton == AUTOIT_CLICKBUTTON_MIDDLE
-				|| mouseButton == AUTOIT_CLICKBUTTON_RIGHT) {
+				|| mouseButton == AUTOIT_MOUSE_BUTTON_LEFT 
+				|| mouseButton == AUTOIT_MOUSE_BUTTON_MIDDLE
+				|| mouseButton == AUTOIT_MOUSE_BUTTON_RIGHT) {
 			return true;
 		}
 		
@@ -192,7 +192,7 @@ public class AutoItXPlus extends AutoItX {
 		
 		if (button == null || button.equals("")) { 
 			Log.debug(dbgmsg + "(): use 'left' value as no mouse button value is assigned.");
-			button = AUTOIT_CLICKBUTTON_LEFT;
+			button = AUTOIT_MOUSE_BUTTON_LEFT;
 		} else{
 			Log.debug(dbgmsg + "(): " + "use mouse button '" + button + "' to click.");
 		}

@@ -480,7 +480,12 @@ public class AutoItComponent extends GenericEngine {
 	        	testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
 	        	return;
 	        }
-			Log.info(debugmsg + " win: "+ windowName +"; comp: "+ compName+"; with params: "+params);
+			if (params != null) {
+				iterator = params.iterator();
+				Log.info(debugmsg + " win: "+ windowName +"; comp: "+ compName+"; with params: "+params);
+			} else{
+				Log.info(debugmsg + " win: "+ windowName +"; comp: "+ compName+" without parameters.");
+			}
 
 			// prepare Autoit RS
 			rs = new AutoItRs(winrec,comprec);
