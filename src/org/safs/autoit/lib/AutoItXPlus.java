@@ -8,11 +8,13 @@
 * History:<br>
 *
 * <br>   SEP 22, 2016  (Tao Xie) Initial release: create SAFS version AutoItXPlus to bridge Java and AutoIt APIs.
-* 								Add generateCOMParams(): convert String parameters array into com.jacob.com.Variant array.
+* 								Add convertCOMParams(): convert String parameters array into com.jacob.com.Variant array.
 * 								Add controlClick(): provide holding special key when click action happen.
 * 
 */
 package org.safs.autoit.lib;
+
+import java.awt.Point;
 
 import org.safs.Log;
 import org.safs.StringUtils;
@@ -38,7 +40,13 @@ public class AutoItXPlus extends AutoItX {
 	 * to indicate SHIFT and ALT key-presses. If 'flag == 0', it will parse special key, if 'flag == 1', no parsing.
 	 */
 	public final boolean DEFAULT_SUPPORT_SPECIALKEY = true; 
-	public boolean supportSpecialKey = DEFAULT_SUPPORT_SPECIALKEY; 
+	public boolean supportSpecialKey = DEFAULT_SUPPORT_SPECIALKEY;
+	
+	/** AutoIt 'Send' keyword, sends simulated keystrokes to the active window. **/
+	public final String AUTOIT_KEYWORD_SEND = "Send";
+	
+	/** AutoIt 'ControlClick' keyword, sends a mouse click command to a given control. **/
+	public final String AUTOIT_KEYWORD_CONTROLCLICK = "ControlClick";
 	
 	/**
 	 * AutoIt's supporting KeyPress/KeyDown keywords
@@ -72,7 +80,7 @@ public class AutoItXPlus extends AutoItX {
 	 * 
 	 * @author Tao Xie
 	 */
-	public Variant[] generateCOMParams(final String[] paramMsgs) {
+	public Variant[] convertCOMParams(final String[] paramMsgs) {
 		String dbgmsg = StringUtils.getMethodName(0, false);
 		Variant[] params = null;
 		
@@ -133,16 +141,14 @@ public class AutoItXPlus extends AutoItX {
 	 * @param controlID		String, control to interact with.
 	 * @param button		String, button to click, "left", "right" or "middle".
 	 * @param clicks		int, 	number of times to click the mouse. Default is center.
-	 * @param x				int,	x position to click within the control.
-	 * @param y				int,	y position to click within the control.
+	 * @param offset		Point,  position to click within the control.
 	 * @param specialKey	String, keyboard key that be hold when click action happening.
 	 * @return				boolean
 	 * 
 	 * @author Tao Xie
 	 */
 	public boolean controlClick(String title, String text, String controlID, 
-            String button, int clicks, int x, int y, String specialKey) {
-		
+            String button, int clicks, Point offset, String specialKey) {		
 		String dbgmsg = StringUtils.getMethodName(0, false);
 		
 		if (!supportHoldingKeyPress(specialKey)) {
@@ -150,19 +156,15 @@ public class AutoItXPlus extends AutoItX {
 			return false;
 		}
 		
-		Variant[] pressKeyParams = generateCOMParams(new String[] 
-									{wrapKeyPress(specialKey), String.valueOf((supportSpecialKey? 0 : 1))}
-								);		
-		Variant[] clickParams = generateCOMParams(new String[]
-									{title, text, controlID, button, String.valueOf(clicks), String.valueOf(x), String.valueOf(y)}
-								);
-		Variant[] upKeyParams = generateCOMParams(new String[] 
-									{wrapKeyUp(specialKey), String.valueOf((supportSpecialKey? 0 : 1))}
-								);
+		String[] pressKeyParam 	= new String[]{ wrapKeyPress(specialKey), String.valueOf((supportSpecialKey? 0 : 1)) };
+		String[] upKeyParam 	= new String[]{ wrapKeyUp(specialKey), String.valueOf((supportSpecialKey? 0 : 1)) };
+		String[] clickParam	   	= (offset != null 
+									? new String[]{ title, text, controlID, button, String.valueOf(clicks), String.valueOf(offset.x), String.valueOf(offset.y) }
+									: new String[]{ title, text, controlID, button, String.valueOf(clicks) } );
 		
-		autoItX.invoke("Send", pressKeyParams);
-		Variant result = autoItX.invoke("ControlClick", clickParams);
-		autoItX.invoke("Send", upKeyParams);
+		autoItX.invoke(AUTOIT_KEYWORD_SEND, convertCOMParams(pressKeyParam));
+		Variant result = autoItX.invoke(AUTOIT_KEYWORD_CONTROLCLICK, convertCOMParams(clickParam));
+		autoItX.invoke(AUTOIT_KEYWORD_SEND, convertCOMParams(upKeyParam));
 		
 		return oneToTrue(result.getInt());
 	}
