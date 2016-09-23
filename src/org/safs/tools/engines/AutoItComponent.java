@@ -13,6 +13,7 @@
  * AUG 05, 2016 Lei Wang Equipped a special DriverCommandProcessor to this engine. Implemented 'WaitForGUI'/'WaitForGUIGone'.
  * SEP 21, 2016 Tao Xie Add AutoIt workhorse click(): Allow click action combined with specified mouse button, number of click times, and clicking offset position.
  * SEP 23, 2016 Tao Xie Replace 'AutoItX' as SAFS version 'AutoItXPlus', and move 'isValidMouseButton()' to AutoItXPlus.
+ * 					   Refactor workhorse 'click()' to support special key holding while clicking.
  */
 package org.safs.tools.engines;
 
@@ -575,35 +576,26 @@ public class AutoItComponent extends GenericEngine {
 		 * 									it'll use the "left" as its value.
 		 * @param nClicks		int,		number of times to click the mouse.
 		 * @param offset		Point,		the offset position to click within the target component. Also can be null.
-		 * @param optional		String...,	optional parameters.
+		 * @param specialKey	String,		keyboard key that be hold when click action happening.
 		 * 
 		 * @author Tao Xie
 		 * 
 		 */
-		protected void click(AutoItRs autoArgs, String mouseButton, int nClicks, Point offset, String... optional) {
+		protected void click(AutoItRs autoArgs, String mouseButton, int nClicks, Point offset, String specialKey) {
 			String dbgmsg = StringUtils.getMethodName(0, false);
 			testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );
 			
-			if(autoArgs == null || (!it.isValidMouseButton(mouseButton)) || nClicks < 1) {
+			/**
+			 * Only need to check the autoArgs parameter, the remaining 
+			 * parameters will be checked in AutoItXPlus.controlClick().
+			 */
+			if(autoArgs == null) {
 				issueParameterCountFailure(dbgmsg + "(): invalid AutoIt parameters provided!");
 				return;
 			}
 			
-			if (mouseButton == null || mouseButton.equals("")) { 
-				Log.debug(dbgmsg + "(): use 'left' value when no mouse button value is assigned.");
-				mouseButton = "left";
-			}
-			
 			try{
-				boolean rc = false;
-				
-				if (offset == null) {
-					Log.debug(dbgmsg + "(): " + "click at default 'center' position.");
-					rc = it.controlClick(autoArgs.getWindowsRS(), "", autoArgs.getComponentRS(), mouseButton, nClicks);
-				} else{
-					Log.debug(dbgmsg + "(): " + "click at offset coordinate: '" + offset + "'.");
-					rc = it.controlClick(autoArgs.getWindowsRS(), "", autoArgs.getComponentRS(), mouseButton, nClicks, offset.x, offset.y);					
-				}
+				boolean rc = it.controlClick(autoArgs.getWindowsRS(), "", autoArgs.getComponentRS(), mouseButton, nClicks, offset, specialKey);
 				
 				if (rc){
 					testRecordData.setStatusCode(StatusCodes.OK);
