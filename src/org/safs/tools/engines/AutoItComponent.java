@@ -14,6 +14,7 @@
  * SEP 21, 2016 Tao Xie Add AutoIt workhorse click(): Allow click action combined with specified mouse button, number of click times, and clicking offset position.
  * SEP 23, 2016 Tao Xie Replace 'AutoItX' as SAFS version 'AutoItXPlus', and move 'isValidMouseButton()' to AutoItXPlus.
  * 					   Refactor workhorse 'click()' to support special key holding while clicking.
+ * 					   Override the 'componentClick()' function in 'AutoItComponent.CFComponent' class to deal with groups of CLICK keywords.
  */
 package org.safs.tools.engines;
 
@@ -500,8 +501,30 @@ public class AutoItComponent extends GenericEngine {
 				}
 			}
 			
-			if ( action.equalsIgnoreCase( GenericObjectFunctions.CLICK_KEYWORD )){		                
-				click(rs);	                
+			if ( action.equalsIgnoreCase( ComponentFunction.CLICK )
+					|| action.equalsIgnoreCase(ComponentFunction.DOUBLECLICK) 
+					|| action.equalsIgnoreCase(ComponentFunction.RIGHTCLICK)
+					|| action.equalsIgnoreCase(ComponentFunction.CTRLCLICK)
+					|| action.equalsIgnoreCase(ComponentFunction.SHIFTCLICK)){		                
+				/**
+				 * Use local override 'componentClick()' function to deal with groups of CLICK keywords.
+				 */
+				try {
+					componentClick();
+				} catch (SAFSException se) {
+					if (SAFSException.CODE_ACTION_NOT_SUPPORTED.equals(se.getCode())) {
+						Log.info(debugmsg + " '" + action + "' is not supported here.");
+						testRecordData.setStatusCode( StatusCodes.SCRIPT_NOT_EXECUTED );
+					} else{
+						testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );
+						String message = "Met "+StringUtils.debugmsg(se);
+						String detail = FAILStrings.convert(FAILStrings.STANDARD_ERROR, 
+								action +" failure in table "+ testRecordData.getFilename() + " at Line " + testRecordData.getLineNumber(), 
+								action, testRecordData.getFilename(), String.valueOf(testRecordData.getLineNumber()));
+
+						log.logMessage(testRecordData.getFac(), message, detail, FAILED_MESSAGE);
+					}
+				}
 			} else if ( action.equalsIgnoreCase( DriverCommands.SETFOCUS_KEYWORD )) {
 			    setFocus(rs);
 			} else if ( action.equalsIgnoreCase(EditBoxFunctions.SETTEXTVALUE_KEYWORD)) {
@@ -562,6 +585,11 @@ public class AutoItComponent extends GenericEngine {
 			} catch (Exception x) {
 				this.issueErrorPerformingAction(x.getClass().getSimpleName()+": "+ x.getMessage());
 			}		
+		}
+		
+		@Override
+		protected void componentClick() throws SAFSException {
+			
 		}
 				
 		/**
