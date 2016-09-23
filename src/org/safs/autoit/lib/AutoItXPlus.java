@@ -10,6 +10,7 @@
 * <br>   SEP 22, 2016  (SCNTAX) Initial release: create SAFS version AutoItXPlus to bridge Java and AutoIt APIs.
 * 								Add convertCOMParams(): convert String parameters array into com.jacob.com.Variant array.
 * 								Add controlClick(): provide holding special key when click action happen.
+* 								Move 'isValidMouseButton()' from AutoItComponent to here.
 * 
 */
 package org.safs.autoit.lib;
@@ -39,34 +40,39 @@ public class AutoItXPlus extends AutoItX {
 	 * method contains the optional parameter 'flag' to indicate if text contains special characters like + and !
 	 * to indicate SHIFT and ALT key-presses. If 'flag == 0', it will parse special key, if 'flag == 1', no parsing.
 	 */
-	public final boolean DEFAULT_SUPPORT_SPECIALKEY = true; 
-	public boolean supportSpecialKey = DEFAULT_SUPPORT_SPECIALKEY;
+	public final static boolean DEFAULT_SUPPORT_SPECIALKEY = true; 
+	private boolean supportSpecialKey = DEFAULT_SUPPORT_SPECIALKEY;
 	
 	/** AutoIt 'Send' keyword, sends simulated keystrokes to the active window. **/
-	public final String AUTOIT_KEYWORD_SEND = "Send";
+	public final static String AUTOIT_KEYWORD_SEND = "Send";
 	
 	/** AutoIt 'ControlClick' keyword, sends a mouse click command to a given control. **/
-	public final String AUTOIT_KEYWORD_CONTROLCLICK = "ControlClick";
+	public final static String AUTOIT_KEYWORD_CONTROLCLICK = "ControlClick";
 	
 	/**
 	 * AutoIt's supporting KeyPress/KeyDown keywords
 	 */
-	public final String ALT 		= "ALT";
-	public final String SHIFT 		= "SHIFT";
-	public final String CTRL 		= "CTRL";
-	public final String LWINDOWS 	= "LWIN";
-	public final String RWINDOWS 	= "RWIN";
+	public final static String AUTOIT_SUPPORT_PRESS_ALT 		= "ALT";
+	public final static String AUTOIT_SUPPORT_PRESS_SHIFT 		= "SHIFT";
+	public final static String AUTOIT_SUPPORT_PRESS_CTRL 		= "CTRL";
+	public final static String AUTOIT_SUPPORT_PRESS_LWINDOWS 	= "LWIN";
+	public final static String AUTOIT_SUPPORT_PRESS_RWINDOWS 	= "RWIN";
 	
-	public final String AUTOIT_ALT_DOWN 			= "{ALTDOWN}";
-	public final String AUTOIT_ALT_UP 				= "{ALTUP}";
-	public final String AUTOIT_SHIFT_DOWN 			= "{SHIFTDOWN}";
-	public final String AUTOIT_SHIFT_UP 			= "{SHIFTUP}";
-	public final String AUTOIT_CTRL_DOWN 			= "{CTRLDOWN}";
-	public final String AUTOIT_CTRL_UP 				= "{CTRLUP}";
-	public final String AUTOIT_LEFT_WINDOWS_DOWN 	= "{LWINDOWN}";
-	public final String AUTOIT_LEFT_WINDOWS_UP		= "{LWINUP}";
-	public final String AUTOIT_RIGHT_WINDOWS_DOWN 	= "{RWINDOWN}";
-	public final String AUTOIT_RIGHT_WINDOWS_UP 	= "{RWINUP}";
+	public final static String AUTOIT_ALT_DOWN 			= "{ALTDOWN}";
+	public final static String AUTOIT_ALT_UP 				= "{ALTUP}";
+	public final static String AUTOIT_SHIFT_DOWN 			= "{SHIFTDOWN}";
+	public final static String AUTOIT_SHIFT_UP 			= "{SHIFTUP}";
+	public final static String AUTOIT_CTRL_DOWN 			= "{CTRLDOWN}";
+	public final static String AUTOIT_CTRL_UP 				= "{CTRLUP}";
+	public final static String AUTOIT_LEFT_WINDOWS_DOWN 	= "{LWINDOWN}";
+	public final static String AUTOIT_LEFT_WINDOWS_UP		= "{LWINUP}";
+	public final static String AUTOIT_RIGHT_WINDOWS_DOWN 	= "{RWINDOWN}";
+	public final static String AUTOIT_RIGHT_WINDOWS_UP 	= "{RWINUP}";
+	
+	/** AutoIt's click button constants **/
+	public final static String AUTOIT_CLICKBUTTON_LEFT   = "left";
+	public final static String AUTOIT_CLICKBUTTON_MIDDLE = "middle";
+	public final static String AUTOIT_CLICKBUTTON_RIGHT  = "right";
 	
 	public AutoItXPlus(){
 		super();
@@ -99,6 +105,28 @@ public class AutoItXPlus extends AutoItX {
 	}
 	
 	/**
+	 * Check if the mouse button string is acceptable for AutoIt engine.
+	 * 
+	 * 
+	 * @param mouseButton String,	the button to click, null, empty, "left", "right", or "middle" are acceptable.
+	 * @return			  boolean,	return true if mouseButton is valid, else return false.
+	 * 
+	 * @author scntax
+	 * 
+	 */
+	public boolean isValidMouseButton(String mouseButton){
+		if (mouseButton == null 
+				|| mouseButton.equals("")
+				|| mouseButton == AUTOIT_CLICKBUTTON_LEFT 
+				|| mouseButton == AUTOIT_CLICKBUTTON_MIDDLE
+				|| mouseButton == AUTOIT_CLICKBUTTON_RIGHT) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	/**
 	 * According to https://www.autoitscript.com/autoit3/docs/functions/Send.htm, AutoIt supports
 	 * 5 keys pairs: 
 	 * 		1. Alt: 				{ALTDOWN}/{ALTUP},
@@ -114,11 +142,11 @@ public class AutoItXPlus extends AutoItX {
 	 * @author scntax
 	 */
 	public boolean supportHoldingKeyPress(String keyStr) {
-		if(keyStr != null && (keyStr.equals(ALT)
-				|| keyStr.equals(CTRL)
-				|| keyStr.equals(LWINDOWS)
-				|| keyStr.equals(RWINDOWS)
-				|| keyStr.equals(SHIFT))) {
+		if(keyStr != null && (keyStr.equals(AUTOIT_SUPPORT_PRESS_ALT)
+				|| keyStr.equals(AUTOIT_SUPPORT_PRESS_CTRL)
+				|| keyStr.equals(AUTOIT_SUPPORT_PRESS_LWINDOWS)
+				|| keyStr.equals(AUTOIT_SUPPORT_PRESS_RWINDOWS)
+				|| keyStr.equals(AUTOIT_SUPPORT_PRESS_SHIFT))) {
 			return true;
 		}
 		
@@ -134,7 +162,8 @@ public class AutoItXPlus extends AutoItX {
 	}
 	
 	/**
-	 * Provide functionality that holding special key when click action happen.
+	 * Provide click action through command sending with. It can be assigned mouse button like 'left, middle, right', number of click times, click offset
+	 * position and the special key holding when clicking.
 	 * 
 	 * @param title 		String, title of the window to access.
 	 * @param text 			String, text of the window to access.
@@ -150,17 +179,34 @@ public class AutoItXPlus extends AutoItX {
 	public boolean controlClick(String title, String text, String controlID, 
             String button, int clicks, Point offset, String specialKey) {		
 		String dbgmsg = StringUtils.getMethodName(0, false);
+		String[] pressKeyParam = null;
+		String[] upKeyParam = null;
+		String[] clickParam = null;
 		
-		if (!supportHoldingKeyPress(specialKey)) {
-			Log.debug(dbgmsg + "(): " + "the key '" + specialKey + "' is NOT supported by AutoIt.");
+		if (!isValidMouseButton(button) || clicks < 1) {
+			Log.debug(dbgmsg + "(): " + "invalid parameters button:'" + button + "', clicks:'" + clicks + "' provided.");
 			return false;
 		}
 		
-		String[] pressKeyParam 	= new String[]{ wrapKeyPress(specialKey), String.valueOf((supportSpecialKey? 0 : 1)) };
-		String[] upKeyParam 	= new String[]{ wrapKeyUp(specialKey), String.valueOf((supportSpecialKey? 0 : 1)) };
-		String[] clickParam	   	= (offset != null 
-									? new String[]{ title, text, controlID, button, String.valueOf(clicks), String.valueOf(offset.x), String.valueOf(offset.y) }
-									: new String[]{ title, text, controlID, button, String.valueOf(clicks) } );
+		if (offset != null) {
+			Log.debug(dbgmsg + "(): " + "click at position offset '" + offset + "'.");
+			clickParam = new String[]{ title, text, controlID, button, String.valueOf(clicks), String.valueOf(offset.x), String.valueOf(offset.y) };
+		} else{
+			Log.debug(dbgmsg + "(): " + "click at default center position.");
+			clickParam = new String[]{ title, text, controlID, button, String.valueOf(clicks) };
+		}
+		
+		if (specialKey != null && !specialKey.equals("")) {
+			if(!supportHoldingKeyPress(specialKey)) {
+				Log.debug(dbgmsg + "(): " + "the key '" + specialKey + "' is NOT supported by AutoIt.");
+				return false;
+			}
+			
+			Log.debug(dbgmsg + "(): " + "holding special key '" + specialKey + "' while clicking.");
+			
+			pressKeyParam 	= new String[]{ wrapKeyPress(specialKey), String.valueOf((supportSpecialKey? 0 : 1)) };
+			upKeyParam 	= new String[]{ wrapKeyUp(specialKey), String.valueOf((supportSpecialKey? 0 : 1)) };
+		}
 		
 		autoItX.invoke(AUTOIT_KEYWORD_SEND, convertCOMParams(pressKeyParam));
 		Variant result = autoItX.invoke(AUTOIT_KEYWORD_CONTROLCLICK, convertCOMParams(clickParam));
@@ -168,6 +214,5 @@ public class AutoItXPlus extends AutoItX {
 		
 		return oneToTrue(result.getInt());
 	}
-	
 	
 }
