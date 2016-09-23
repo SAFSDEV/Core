@@ -195,7 +195,7 @@ public class AutoItXPlus extends AutoItX {
 			Log.debug(dbgmsg + "(): " + "use mouse button '" + button + "' to click.");
 		}
 		
-		if (offset != null) {
+		if (offset != null && !offset.equals("")) {
 			Log.debug(dbgmsg + "(): " + "click at position offset '" + offset + "'.");
 			clickParam = new String[]{ title, text, controlID, button, String.valueOf(clicks), String.valueOf(offset.x), String.valueOf(offset.y) };
 		} else{
