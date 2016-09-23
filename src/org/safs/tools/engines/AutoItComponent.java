@@ -12,6 +12,7 @@
  * JUL 12, 2016 Lei Wang Implement 'SetPosition' keyword.
  * AUG 05, 2016 Lei Wang Equipped a special DriverCommandProcessor to this engine. Implemented 'WaitForGUI'/'WaitForGUIGone'.
  * SEP 21, 2016 Tao Xie Add AutoIt workhorse click(): Allow click action combined with specified mouse button, number of click times, and clicking offset position.
+ * SEP 23, 2016 Tao Xie Replace 'AutoItX' as SAFS version 'AutoItXPlus', and move 'isValidMouseButton()' to AutoItXPlus.
  */
 package org.safs.tools.engines;
 
@@ -35,6 +36,7 @@ import org.safs.StringUtils;
 import org.safs.TestRecordHelper;
 import org.safs.autoit.AutoIt;
 import org.safs.autoit.AutoItRs;
+import org.safs.autoit.lib.AutoItXPlus;
 import org.safs.logging.AbstractLogFacility;
 import org.safs.logging.LogUtilities;
 import org.safs.model.commands.DDDriverCommands;
@@ -46,7 +48,6 @@ import org.safs.text.GENKEYS;
 import org.safs.tools.drivers.DriverConstant;
 import org.safs.tools.drivers.DriverInterface;
 
-import autoitx4java.AutoItX;
 
 /**
  * Provides local in-process support Component Functions and Driver Commands
@@ -76,7 +77,7 @@ public class AutoItComponent extends GenericEngine {
 	 * 
 	 * @see #AutoItComponent()
 	 */
-	protected AutoItX it = null;
+	protected AutoItXPlus it = null;
 	
 	/**
 	 * Constructor for AUTOITComponent.<br>
@@ -449,12 +450,7 @@ public class AutoItComponent extends GenericEngine {
 		protected int DEFAULT_TIMEOUT_WAIT_WIN_FOCUSED = 1;
 		/** AutoItRs, the object representing the component */
 		protected AutoItRs rs = null;
-		
-		/** AutoIt's click button constants **/
-		private static final String AUTOIT_CLICKBUTTON_LEFT   = "left";
-		private static final String AUTOIT_CLICKBUTTON_MIDDLE = "middle";
-		private static final String AUTOIT_CLICKBUTTON_RIGHT  = "right";
-		
+				
 		CFComponent (){
 			super();
 		}	
@@ -566,28 +562,7 @@ public class AutoItComponent extends GenericEngine {
 				this.issueErrorPerformingAction(x.getClass().getSimpleName()+": "+ x.getMessage());
 			}		
 		}
-		
-		/**
-		 * Check if the mouse button string is acceptable for AutoIt engine.
-		 * 
-		 * @param mouseButton String,	the button to click, null, empty, "left", "right", or "middle" are acceptable.
-		 * @return			  boolean,	return true if mouseButton is valid, else return false.
-		 * 
-		 * @author Tao Xie
-		 * 
-		 */
-		boolean isValidMouseButton(String mouseButton){
-			if (mouseButton == null 
-					|| mouseButton.equals("")
-					|| mouseButton == AUTOIT_CLICKBUTTON_LEFT 
-					|| mouseButton == AUTOIT_CLICKBUTTON_MIDDLE
-					|| mouseButton == AUTOIT_CLICKBUTTON_RIGHT) {
-				return true;
-			}
-			
-			return false;
-		}
-		
+				
 		/**
 		 * Workhorse of AutoIt click routine.
 		 * It allows us to use specified 'mouse button' to click target component at assigned position with a number of times.  
@@ -609,7 +584,7 @@ public class AutoItComponent extends GenericEngine {
 			String dbgmsg = StringUtils.getMethodName(0, false);
 			testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );
 			
-			if(autoArgs == null || (!isValidMouseButton(mouseButton)) || nClicks < 1) {
+			if(autoArgs == null || (!it.isValidMouseButton(mouseButton)) || nClicks < 1) {
 				issueParameterCountFailure(dbgmsg + "(): invalid parameters provided!");
 				return;
 			}
@@ -717,7 +692,7 @@ public class AutoItComponent extends GenericEngine {
 			String debugmsg = StringUtils.debugmsg(false);
 			try{
 //				it.winSetState(rs.getWindowsRS(), "", AutoItX.SW_RESTORE);
-				it.winSetState(rs.getWindowsRS(), "", AutoItX.SW_SHOWNORMAL);
+				it.winSetState(rs.getWindowsRS(), "", AutoItXPlus.SW_SHOWNORMAL);
 			}catch(Exception e){
 				String msg = "Fail to resotre window due to Exception "+e.getMessage();
 				Log.error(debugmsg+msg);
@@ -756,7 +731,7 @@ public class AutoItComponent extends GenericEngine {
 		protected void _minimize() throws SAFSException{
 			String debugmsg = StringUtils.debugmsg(false);
 			try{
-				it.winSetState(rs.getWindowsRS(), "", AutoItX.SW_SHOWMINIMIZED);
+				it.winSetState(rs.getWindowsRS(), "", AutoItXPlus.SW_SHOWMINIMIZED);
 			}catch(Exception e){
 				String msg = "Fail to minimize window due to Exception "+e.getMessage();
 				Log.error(debugmsg+msg);
@@ -768,7 +743,7 @@ public class AutoItComponent extends GenericEngine {
 		protected void _maximize() throws SAFSException{
 			String debugmsg = StringUtils.debugmsg(false);
 			try{
-				it.winSetState(rs.getWindowsRS(), "", AutoItX.SW_SHOWMAXIMIZED);
+				it.winSetState(rs.getWindowsRS(), "", AutoItXPlus.SW_SHOWMAXIMIZED);
 			}catch(Exception e){
 				String msg = "Fail to maximize window due to Exception "+e.getMessage();
 				Log.error(debugmsg+msg);
