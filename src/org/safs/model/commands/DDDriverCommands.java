@@ -1846,7 +1846,8 @@ public class DDDriverCommands {
 
     /*********** <pre>Send email notification with attachments.Send email notification with attachments.
                       Mutiple TOs, custom subject line, custom message and attachment are allowed. 
-                      HTML tag pass into message to display message into HTML format.    </pre>    Supporting Engines:
+                      HTML tag pass into message to display message into HTML format.
+                    </pre>    Supporting Engines:
     <P/><UL>
         <LI>SAFS TIDDriverCommands</LI>
         <LI>OpenQA Selenium</LI>
@@ -1875,7 +1876,8 @@ public class DDDriverCommands {
 
     /*********** <pre>Send email notification with attachments.Send email notification with attachments.
                       Mutiple TOs, custom subject line, custom message and attachment are allowed. 
-                      HTML tag pass into message to display message into HTML format.    </pre>    
+                      HTML tag pass into message to display message into HTML format.
+                    </pre>    
     Supporting Engines:
     <P/><UL>
         <LI>SAFS TIDDriverCommands</LI>
