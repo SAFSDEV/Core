@@ -1,0 +1,196 @@
+<html>
+<head>
+<title>SAFS Test Tables and Record Formats</title>
+<style>
+.box {
+    border-style:     solid;
+    background-color: LightGrey;
+    padding-left:     10px;
+    padding-right:    10px;
+}
+.indent {
+    margin-left: 35px;
+}
+</style>
+</head>
+<body>
+<center><h1>SAFS Test Tables and Record Formats</h1>
+<small>Last Updated: 2016.09.22</small></center>
+<hr>
+<h3>Traditional SAFS Test Table Hierarchy</h3>
+<p>
+It is important to keep in mind that SAFS supports a hierarchy of test execution of simple text files containing CSV test records.  One test record per line.  The examples below show the default comma (,) separator between test record fields, but other delimiters like TABs, etc.. are supported.
+<p>
+Test tables are generally named with the appropriate suffix for the desired test level as defined below:
+<ol>
+<li>Test Cycles <b>(*.CDD)</b> -- Simply: A collection of Commands(C) and callable Test Suites(T).<br>Generally, packages a collection of Commands and Suites to be executed at a given stage of the applications test Cycle.
+<p>
+<li>Test Suites <b>(*.STD)</b> -- Simply: A collection of Commands(C) and callable Test Steps(T).<br>Generally, packages a collection of Commands and Actions to navigate and perform logical functions of testing the application.
+<p>
+<li>Test Steps <b>(*.SDD)</b> -- Simply: A collection of Commands(C) and callable GUI Actions(T).<br>A collection of Commands and low-level GUI Actions that make up a simple logical function of testing the application.
+</ol>
+While the above test level hierarchy is "traditional", it is important to note that various command-line options and test configuration file settings allow tests to begin at any hierarchy level.  That is; a test can begin at the CDD, STD, or SDD test level.
+<hr>
+<h3>Test Table Record Types</h3>
+<p>
+Keep the above hierarchy in mind during the following discussion of Record Types.
+<ol>
+<li>Most Common Record Types:
+	<p>
+	<dl>
+	<dt><b>Record Type: ( T ) Test</b>
+	<p>
+	<dd>A Test ( T ) record type is the most common type you will likely use.  This type of record is where you specify the thing you want to do with the application or item being tested.  It is these test records that count as tests that passed or failed in test report summaries for "Test Records".
+	<p>
+	In the topmost Cycle test tables, you specify your own application vocabulary for logical, high-level Test Suites to perform.  You give those Test Suites meaningful, logical names and those become the file names for the Test Suites:
+	<p>
+	Hypothetical Test Cycle: <b>Regression.CDD</b>
+	<p>
+	<table class="box indent"><tr><td>
+	T, Launch MyApp For Testing<br>
+	T, Test Reports Feature<br>
+	T, Test Print Feature<br>
+	T, Shutdown Testing<br>
+	</table>
+	<p>
+	At runtime, the above Cycle-level Test Records (T) tell the Driver to go look for, open, and process the appropriate Test Suite <b>files</b>:
+	<p>
+	<table class="box indent"><tr><td>
+	"Launch MyApp For Testing.STD"<br>
+	"Test Reports Feature.STD"<br>
+	"Test Print Feature.STD"<br>
+	"Shutdown Testing.STD"<br>
+	</table>
+<hr>
+	The Test Suites work the same as the Cycle: you specify your own application vocabulary for logical, low-level application Test Steps to perform.  You give those Test Steps meaningful, logical names and those become the file names for the Test Steps:
+	<p>
+	Hypothetical Test Suite: <b>Launch App For Testing.STD</b>
+	<p>
+	<table class="box indent"><tr><td>
+	T, Launch MyApp<br>
+	T, Login With Credentials,, ^UserID=^UserID1, ^Password=^Password1<br>
+	T, Verify At Main Screen<br>
+	</table>
+	<p>
+	At runtime, the above Suite-level Test Records (T) tell the Driver to go look for, open, and process the appropriate Test Step <b>files</b>:
+	<p>
+	<table class="box indent"><tr><td>
+	"Launch MyApp.SDD"<br>
+	"Login With Credentials.SDD"<br>
+	"Verify At Main Screen.SDD"<br>
+	</table>
+	<p>
+	Note how at the Cycle and Suite level you are defining a reusable test vocabulary that is nothing more than filenames.  You are not writing any code, script, or algorithms to implement this vocabulary.  The SAFS test execution Driver is already prepared to do this for you.
+	<p>
+	Also notice when we called "Login With Credentials" we added an empty(blank) field between the comma delimiters, and then expressions <b>^UserID=^UserID1</b> and <b>^Password=^Password1</b>.
+	<p>
+	That empty(blank) field is where you could specify that "Login With Credentials" is NOT comma-delimited.  If that empty field is not empty, then the Driver will assume whatever IS present there should be treated as the new CSV delimiter for "Login With Credentials".
+	<p>
+	After that, we placed <b>^UserID</b> and <b>^Password</b> expressions to assign which UserID and Password will be used for Login.  At runtime the values of these will likely be pulled out of the App Map where ApplicationConstants are stored.  Find out more about <a href="http://safsdev.sourceforge.net/sqabasic2000/CreateAppMap.htm" >App Maps and ApplicationConstants</a> as well as <a href="http://safsdev.sourceforge.net/sqabasic2000/TestDesignGuidelines.htm">Test Design Guidelines for Reusability</a>.
+<hr>
+	Now, we've made it to the low-level Test Step tables.  A  Test ( T ) record here will generally specify a GUI Action to perform on a particular component.  At this level, we are no longer calling user-defined test vocabulary and filenames.  The test records will now be calling predefined and already-implemented <b><a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSQuickReference.htm#componentfunctions">SAFS Component Functions</a></b>.  Like Test Cycle and Test Suite test records, these Component Function test records also count as "tests" that passed or failed in test report summaries of "Test Records".
+	<p>
+	Hypothetical Test Step: <b>Login With Credentials.SDD</b>
+	<p>
+	<table class="box indent"><tr><td>
+	T, Login, UserName, <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=EditBoxFunctions&cmd=SetTextValue">SetTextValue</a>, ^UserID<br>
+	T, Login, Password, SetTextValue, ^Password<br>
+	T, Login, Submit  , <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericObjectFunctions&cmd=Click">Click</a><br>
+	</table>
+	<p>
+	As we can see in the above example, the Component Function Test Records at the Test Step level are very different than those in Test Cycles and Test Suites.  The links to <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=EditBoxFunctions&cmd=SetTextValue">SetTextValue</a> and <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=GenericObjectFunctions&cmd=Click">Click</a> show that these records take a Window name, a Component in that window, the Action to perform, and any parameters used by that Action.
+	<p>
+	The Window and Component names are references to Window and Component items in the user-defined <a href="http://safsdev.sourceforge.net/sqabasic2000/CreateAppMap.htm" >App Map</a>.  The available Actions for a given Component Type are described in the <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSQuickReference.htm#componentfunctions">SAFS Quick Reference</a> or the more detailed <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php" >SAFS Keyword Reference</a>.
+	<p>
+	<dt><b>Record Types: ( C ) Driver Command</b>
+	<p>
+	<dd>A Driver Command ( C ) record type is different than a test record.  Such a command is a predefined  instruction for an execution engine to parse and execute.  It is generally an instruction for the engine itself, rather than a test action to perform on the application.
+	<p>
+	<table class="box indent"><tr><td>
+	C, <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverCommands&cmd=SetApplicationMap">SetApplicationMap</a>, AppMap_ja.map<br>
+	C, <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverCommands&cmd=StartWebBrowser">StartWebBrowser</a>, ^AppURL, ^AppID, ^Browser<br>
+	C, <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverCommands&cmd=Pause">Pause</a>, 10<br>
+	</table>
+	<p>
+	The command is always the first field after the record type.  The command is then followed by any parameters it might take.  Driver Commands are the same and applicable at all test levels.
+	<p>
+	<dt><b>Record Types: ( B ) BlockID</b>
+	<p>
+	<dd>A BlockID ( B ) record type does not have an action or a context.  It is used to simply name the current location within the test table.  That is, to give a name to the subsequent section of the table.  The record consists of the record type specifier ( B ) and the name you provide.  Currently, a BlockID merely  serves the purpose of assigning the ID.  No action occurs when an engine gets to a BlockID record.  However, <a href="http://safsdev.sourceforge.net/sqabasic2000/UsingFlowControl.htm" >branching and flow control Driver Commands</a> do have BlockIDs as their targets.
+	<p>
+	<table class="box indent"><tr><td>
+	B, "Loop_Start"<br>
+	...<br>
+	...do lots of whatever you need here...<br>
+	C, <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverFlowCommands&cmd=OnGreaterThanGotoBlockID">OnGreaterThanGotoBlockID</a>, "Loop_Exit", ^val1, ^val2<br>
+	C, <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverFlowCommands&cmd=GotoBlockID">GotoBlockID</a>, "Loop_Start"<br>
+	...<br>
+	B, "Loop_Exit"
+	</table>
+	<p>
+	<dt><b>Record Types: ( S ) Skip</b>
+	<p>
+	<dd>A Skip ( S ) record type is generally used as a placeholder in a test table.  Its main purpose is to show that a particular test, action, or command that is considered significant has either not been developed, or will be skipped during execution of the test.  This is significant in that the skipped record is not just forgotten, but is logged with text you provide.  This is necessary to show that a significant piece of the test was NOT performed and all quality determinations should take this into account.  If the record were simply commented out there would be no indication that a significant piece of the test was NOT executed and overall quality determinations might be inaccurate.
+	<p>
+	<table class="box indent"><tr><td>
+	S, StartWebBrowser, ^AppURL, ^AppID, ^Browser<br>
+	S, OnGreaterThanGotoBlockID, "Loop_Exit", ^val1, ^val2<br>
+	</table>
+	<p>
+	The above 2 records will actually log something like seen below.  They will also increment ALL active test counters with SKIPPED record counts.
+	<p>
+	<table class="box indent"><tr><td>
+	*SKIPPED* StartWebBrowser<br>
+	*SKIPPED* OnGreaterThanGotoBlockID<br>
+	</table>
+	<p>
+
+	</dl>
+<li>Least Common Record Types:
+
+	<dl>
+	<dt><b>Record Types: ( TW ) Test Warning EXPECTED</b>
+	<p>
+	<dd>When available for specific Component Functions--and only in specific test Engines--a Test Warning ( TW ) record type indicates the test record should generate and should allow a Test Warning to occur during execution and not indicate that the test has failed because of the Warning.  Note, that a Warning not related to the primary function of the called command may still generate Warning and Failure messages and be counted as a true failure.
+	<p>
+	The ( TW ) record type follows the exact same format rules as the standard ( T ) test record above.
+	<p>
+	<dt><b>Record Types: ( TF ) Test Failure EXPECTED</b>
+	<p>
+	<dd>When available, a Test Failure ( TF ) record type indicates the test record should generate and should allow a Test Failure to occur during execution and not indicate that the test has failed.  Note, that a Failure not related to the primary function of the called command may still generate Warning and Failure messages and be counted as a true failure.
+	<p>
+	The ( TF ) record type follows the exact same format rules as the standard ( T ) test record above.
+	<p>
+	<dt><b>Record Types: ( CW ) Driver Command Warning EXPECTED</b>
+	<p>
+	<dd>When available, a Command Warning ( CW ) record type indicates the command record should generate and should allow a Warning to occur during execution and not indicate that the command has failed because of the Warning.  Note, that a Warning not related to the primary function of the called command may still generate Warning and Failure messages and be counted as a true failure.
+	<p>
+	The ( CW ) record type follows the exact same format rules as the standard ( C ) command record above.
+	<p>
+	<dt><b>Record Types: ( CF ) Driver Command Failure EXPECTED</b>
+	<p>
+	<dd>When available, a Command Failure ( CF ) record type indicates the command record should generate and should allow a Failure to occur during execution and not indicate that the command has failed.  Note, that a Failure not related to the primary function of the called command may still generate Warning and Failure messages and be counted as a true failure.
+	<p>
+	The ( CF ) record type follows the exact same format rules as the standard ( C ) command record above.
+	<p>
+	<dt><b>Record Types: ( BP ) Breakpoint</b>
+	<p>
+	<dd>A Breakpoint ( BP ) record type is used during tracing in Engine\Driver Debug Mode (not usually Test Debug Mode) to pause execution of a test table.  The command only has an effect IF the table is executed while the Driver and/or the Engine is running in Debug Mode AND breakpoints have been enabled via a script or the Breakpoints Driver Command.
+	<p>
+	<table class="box indent"><tr><td>
+	C, <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverDebugCommands&cmd=Breakpoints">BreakPoints</a>, ^doBreakPoints<br>
+	BP, "If in Debug Mode check the values of various variables and other assets."<br>
+	C, OnGreaterThanGotoBlockID, "Loop_Exit", ^val1, ^val2<br>
+	</table>
+	<p>
+	<dt><b>Record Types: ( E ) Engine Command</b>
+	<p>
+	<dd>An Engine Command ( E ) record type is primarily used by tools like Process Container that attempt to automatically explore the contents of the application without having recognition strings for any of the objects in the Application.  However, advanced users can also call these as long as they handle the information returned by the commands appropriately.
+	<p>
+	<table class="box indent"><tr><td>
+	E, <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=E&lib=EngineComponentCommands&cmd=GetTopLevelWindows">GetTopLevelWindows</a><br>
+	</table>
+	</dl>
+</ol>
+<hr>
+</body></html>
