@@ -531,7 +531,7 @@ public class DriverConstant extends JavaConstant{
 	public static final String SECTION_SAFS_SELENIUM ="SAFS_SELENIUM";
 
 	/**
-	 * Define some constant strings used under section {@link DriverConstant#SECTION_SAFS_DIFFER} for Mail.
+	 * Define some constant strings used under section {@link DriverConstant#SECTION_SAFS_DRIVERCOMMANDS} for Mail.
 	 * 
 	 * @see org.safs.tools.mail.Mailer
 	 */
@@ -591,7 +591,7 @@ public class DriverConstant extends JavaConstant{
 		/**'5555' the default port number on which the SELENIUM node will run */
 		public static final String DEFAULT_SELENIUM_NODE_PORT = String.valueOf(DEFAULT_SELENIUM_NODE_PORT_INT);
 		
-		/** "SELENIUMNODE" define the selenium nodes to run. The value is something like "node1:port:nodeconfig;node2:port:nodeconfig".
+		/** "SELENIUMNODE" define the selenium nodes to run. The value is something like "node1.machine.name:port:nodeconfig;node2.machine.name:port:nodeconfig".
 		 * If this is not provided, then {@link #SELENIUMHOST} will be considered as "standalone server"
 		 * If this is provided, then {@link #SELENIUMHOST} will be considered as "grid hub" on which all nodes will register.
 		 * @see #SELENIUMHOST

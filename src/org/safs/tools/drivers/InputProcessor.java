@@ -1,6 +1,13 @@
 /** Copyright (C) (SAS) All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
+/**
+ * @author JunwuMa SEP 27, 2010 Added controls for retrying a test record that is modified in SAFSMonitorFrame. 
+ * <br>SEP 03, 2013 	(Lei Wang) Delay the "flow control" if the execution is going to be paused. 
+ * <br>SEP 11, 2013 	(Lei Wang) Store the "record separator" to variable "SAFS/Hook/separator" before executing test record.
+ * <br>SEP 26, 2014 	(Lei Wang) Modify routeToPreferredEngines()/routeToEngines(): 
+ *                               set 'MORE_ENGINES' to testrecord's status-info if there are more engines can be used.
+ */
 package org.safs.tools.drivers;
 
 import java.util.ListIterator;
@@ -38,12 +45,6 @@ import org.safs.tools.status.StatusInterface;
  * All initialization of the overall Test Driver is assumed to be completed.  
  * This is, essentially, the class that loops through the input records and 
  * gets the testing done.
- * 
- * @author JunwuMa SEP 27, 2010 Added controls for retrying a test record that is modified in SAFSMonitorFrame. 
- * <br>SEP 03, 2013 	(Lei Wang) Delay the "flow control" if the execution is going to be paused. 
- * <br>SEP 11, 2013 	(Lei Wang) Store the "record separator" to variable "SAFS/Hook/separator" before executing test record.
- * <br>SEP 26, 2014 	(Lei Wang) Modify routeToPreferredEngines()/routeToEngines(): 
- *                               set 'MORE_ENGINES' to testrecord's status-info if there are more engines can be used.
  * 
  */
 public class InputProcessor extends AbstractInputProcessor {
