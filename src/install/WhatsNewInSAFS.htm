@@ -17,7 +17,7 @@
 <div class=b1>
 <center>
 <h1>What's New in SAFS</h1>
-<h2>Updated: 2016.03.09/h2>
+<h2>Updated: 2016.08.28</h2>
 <small>Since:<b> 2016.02.05 </b></small>
 <h2>---  All active <b>"development"</b> is now at <a href="https://github.com/SAFSDEV" target="_blank" title="Link to SAFSDEV Organization on GitHub">SAFSDEV on GitHub</a>  ---</h2>
 <b>(Releases/Updates and other Binaries will be available on both GitHub and SourceForge)</b>
@@ -30,13 +30,13 @@ Here we provide info as to what has been added or fixed since the previous <a hr
 <p>
 Frequently Updated:
 <p><ul>
-Downloadable <b>SAFS Updates</b> from <a href="http://sourceforge.net/projects/safsdev/files/SAFS%20Updates/" target="_blank" title="SAFS Update Site on SourceForge">SourceForge</a>|<a href="https://github.com/SAFSDEV/UpdateSite/releases/tag/safs" target="_blank" title="SAFS Update Site on GitHub">GitHub</a>.
+Downloadable <b>SAFS Updates</b> from <a href="https://github.com/SAFSDEV/UpdateSite/releases/tag/safs" target="_blank" title="SAFS Update Site on GitHub">GitHub</a>.
 <br>
-Downloadable <b>SAFS WIN Release Candidates</b> from <a href="http://sourceforge.net/projects/safsdev/files/SAFS%20Win/" target="_blank" title="SAFS Win Download Site on SourceForge">SourceForge</a>|<a href="https://github.com/SAFSDEV/Core/releases" target="_blank" title="SAFS Win Download Site on GitHub">GitHub</a>.
+Downloadable <b>SAFS WIN Release Candidates</b> from <a href="https://github.com/SAFSDEV/Core/releases" target="_blank" title="SAFS Win Download Site on GitHub">GitHub</a>.
 <p>
-Downloadable <b>SeleniumPlus Updates</b> from <a href="http://sourceforge.net/projects/safsdev/files/SeleniumPlus%20Win/" target="_blank" title="SeleniumPlus Update Site on SourceForge">SourceForge</a>|<a href="https://github.com/SAFSDEV/UpdateSite/releases/tag/seleniumplus" target="_blank" title="SeleniumPlus Update Site on GitHub">GitHub</a>.
+Downloadable <b>SeleniumPlus Updates</b> from <a href="https://github.com/SAFSDEV/UpdateSite/releases/tag/seleniumplus" target="_blank" title="SeleniumPlus Update Site on GitHub">GitHub</a>.
 <br>
-Downloadable <b>SeleniumPlus WIN Release Candidates</b> from <a href="http://sourceforge.net/projects/safsdev/files/SeleniumPlus%20Win/" target="_blank" title="SeleniumPlus Download Site on SourceForge">SourceForge</a>|<a href="https://github.com/SAFSDEV/SeleniumPlus-Plugin/releases" target="_blank" title="SeleniumPlus Download Site on GitHub">GitHub</a>.
+Downloadable <b>SeleniumPlus WIN Release Candidates</b> from <a href="https://github.com/SAFSDEV/SeleniumPlus-Plugin/releases" target="_blank" title="SeleniumPlus Download Site on GitHub">GitHub</a>.
 </ul>
 <p>
 Less so:
@@ -49,9 +49,11 @@ Download (older) <a href="http://sourceforge.net/projects/safsdev/files/Robotium
 As you can see below, SAFS is undergoing a very rapid pace of development in many areas expanding support in:
 <ul>
 	<li>Core SAFS Framework robustness and performance
-	<li>Selenium WebDriver/SeInterpreter Support and Integration
+	<li>Selenium 2.0 WebDriver/SeInterpreter Support and Integration
 	<li>SeleniumPlus Eclipse Test Development Environment
-	<li><b>NEW! AutoIt WIN support for native Windows interactions</b>.
+	<li><b>New! CallScript support of Selenium IDE Scripts thru SeInterpreter (POC)</b>
+	<li>AutoIt support for native Windows interactions.
+	<li><b>New! CallJUnit supporting for JUnit, Groovy, Spock testing</b>
 	<li>SmartBear Test Complete (NET/WPF/Flex/Java/HTML)
 	<li>IBM Rational Functional Tester (Flex/Web/Java/Net/WPF)
 	<li>JSAFS Object Model (for ALL Domains -- ALL tools)
@@ -69,7 +71,7 @@ As you can see below, SAFS is undergoing a very rapid pace of development in man
 <tr><td class=b1>Core<td class=s1>The core SAFS Framework used by all SAFS clients/services.
 <tr><td class=b1>Flex<td class=s1>Flex/Flash client/domain support.
 <tr><td class=b1>SPC<td class=s1>SAFS Process Container.
-<tr><td class=b1>WDSPC<td class=s1><b>Selenium WebDriver Process Container</b>.
+<tr><td class=b1>WDSPC<td class=s1><b>Selenium 2.0 WebDriver Process Container</b>.
 <tr><td class=b1>TID<td class=s1>The primary Tool-Independent Driver (SAFSDRIVER).
 <tr><td class=b1>Java<td class=s1>Java client/domain support.
 <tr><td class=b1>JSAFS<td class=s1><b>The Java API for Advanced SAFS test development and execution</b>.
@@ -78,15 +80,16 @@ As you can see below, SAFS is undergoing a very rapid pace of development in man
 <tr><td class=b1>RBTM<td class=s1>Robotium Remote Control (Android).
 <tr><td class=b1>RFT<td class=s1>IBM Rational Functional Tester support.
 <tr><td class=b1>RFSM<td class=s1>RFT Find Search Mode (higher-performance Flex recognition).
-<tr><td class=b1>Se+<td class=s1><b>SeleniumPlus WebDriver support</b>.
+<tr><td class=b1>Se+<td class=s1><b>SeleniumPlus 2.0 WebDriver support</b>.
 <tr><td class=b1>TC<td class=s1><b>SmartBear TestComplete support</b>.
 <tr><td class=b1>TCPM<td class=s1>SAFS TCP Messenger (Android).
 <tr><td class=b1>Win<td class=s1>MS Windows client/domain support.
 <tr><td class=b1>Web<td class=s1>Web client support (HTML support).
 <tr><td class=b1>WPF<td class=s1>MS WPF client/domain support.
+<tr><td class=b1>AIT<td class=s1><b>SAFS AutoIt WIN Support.</b>
 </table>
 <td><table cellpadding=2>
-<tr><td class=b1>AIT<td class=s2><b>SAFS AutoIt WIN Support.</b>
+<tr><td class=b1>SID<td class=s2>Selenium IDE Script Support
 <tr><td class=b1>CUK<td class=s2>SAFS Cucumber Support.
 <tr><td class=b1>DRD<td class=s2>SAFS Android Engine support.
 <tr><td class=b1>IOS<td class=s2>Apple IOS support.
@@ -128,6 +131,421 @@ As you can see below, SAFS is undergoing a very rapid pace of development in man
 <th>DATE<th>AFFECTED<th>NEW STUFF<th>FIXES<th>DEPENDENCIES
 
 <!-- EDITOR: Copy editable block from above to immediately below and edit appropriately. -->
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2016.09.27 </b>
+<td rowspan=2><!--AFFECT-->Core
+<td><!--NEW----->Core Doc
+<td><!--FIXED--->
+<td><!--DEPEND-->Core Doc
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Published the new <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSRecordFormats.html" target="_blank">SAFS Record Formats</a> doc and fixed <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReferenceKey.htm" target="_blank">SAFS Reference Key</a> reference to it.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2016.09.22 </b>
+<td rowspan=2><!--AFFECT-->Core
+<td><!--NEW----->
+<td><!--FIXED--->Core Counters<br>Se+ Counters
+<td><!--DEPEND-->Core JARs<br>Se+ JARs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fixed Core Driver incrementStatus to increment counters on LOGGED messages. (LogTestFailure)
+<li>Added Core Log Facility "types" for general and general_counters and increment them.
+<li>Fixed SeleniumPlus embedded driver to properly increment test counters for T, TW, and TF record types.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2016.09.12 </b>
+<td rowspan=2><!--AFFECT-->Core
+<td><!--NEW----->Core CallJunit
+<td><!--FIXED--->
+<td><!--DEPEND-->Core JARS<br>Se+ JARS
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Core CallJunit support will attempt to compile the Junit test class, if necessary.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2016.09.07 </b>
+<td rowspan=2><!--AFFECT-->Core
+<td><!--NEW----->Core REST
+<td><!--FIXED--->Core Robot
+<td><!--DEPEND-->Core JARS<br>Se+ JARS
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fix Core Robot handling to properly copy/paste text contents from the Clipboard.
+<li>Add Core REST testing support to automatically load header types from Properties files.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2016.09.02 </b>
+<td rowspan=2><!--AFFECT-->Se+<br>Core
+<td><!--NEW----->Se+ Doc<br>Core Doc
+<td><!--FIXED--->
+<td><!--DEPEND-->Se+ Doc<br>Se+ Install
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Added SeleniumPlus documentation for IE driver settings.
+<li>First doc for Core <a href="http://safsdev.sourceforge.net/sqabasic2000/UsingSAFSRestTesting.htm" target="_blank">SAFS REST Testing API</a> pushed.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2016.08.25 </b>
+<td rowspan=2><!--AFFECT-->Core
+<td><!--NEW----->Core REST
+<td><!--FIXED--->
+<td><!--DEPEND-->Core JARS<br>Se+ JARS
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>First full update of working Core REST API testing framework!
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2016.08.19 </b>
+<td rowspan=2><!--AFFECT-->Core
+<td><!--NEW----->
+<td><!--FIXED--->Core Update
+<td><!--DEPEND-->Core JARS<br>Se+ JARS
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fixed Core SAFSUPDATE.JAR to recognize the -q (quiet) option.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2016.08.11 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->
+<td><!--FIXED--->Se+ ChromeOptions
+<td><!--DEPEND-->Core JARS<br>Se+ JARS
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Refactored SeleniumPlus code to disable extensions and resolve conflicts in ChromeOptions settings when starting Chrome.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2016.08.05 </b>
+<td rowspan=2><!--AFFECT-->Se+<br>AIT<br>Core
+<td><!--NEW----->Se+ Chrome<br>AIT WaitFor
+<td><!--FIXED--->Se+ Screenshot<br>Core Annotations<br>AIT Handles
+<td><!--DEPEND-->Se+ JARs<br>Se+ Update<br>Core JARS
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Upgrade SeleniumPlus Chrome support to ChromeDriver 2.22.
+<li>Fix SeleniumPlus to NOT move the screen for component captures partially offscreen.
+<li>Add WaitForGUI and WaitForGUIGone support in Core AutoIT Engine.
+<li>Fix AutoIT to NOT recognize Handle 0 as a valid component handle.
+<li>Fix Core Annotations processing of file: to parse UNC paths.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2016.07.29 </b>
+<td rowspan=2><!--AFFECT-->Core
+<td><!--NEW----->
+<td><!--FIXED--->Core REST
+<td><!--DEPEND-->Core JARS<br>Se+ JARS
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fixed setTextHeaders in Core REST API testing framework.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2016.07.21 </b>
+<td rowspan=2><!--AFFECT-->Core<br>AIT
+<td><!--NEW----->Core OpenFile<br>AIT GetGUIImage
+<td><!--FIXED--->
+<td><!--DEPEND-->Core JARS<br>Se+ JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Add APPENDRAW as a valid Mode Core DriverCommands OpenFile and OpenUTF8File.
+<li>Implement GetGUIImage ComponentFunction in the Core AutoIT Engine.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2016.07.15 </b>
+<td rowspan=2><!--AFFECT-->AIT
+<td><!--NEW----->AIT SetPosition<br>AutoIt Doc
+<td><!--FIXED--->
+<td><!--DEPEND-->Core JARS<br>Se+ JARS
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Add SetPosition support into the Core SAFS AutoIt engine.
+<li>Updates to the online <a href="http://safsdev.sourceforge.net/sqabasic2000/UsingAutoIT.htm" target="_blank" >Using AutoIt</a> documentation.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2016.07.08 </b>
+<td rowspan=2><!--AFFECT-->Core<br>Se+
+<td><!--NEW----->Core Groovy/Spock
+<td><!--FIXED--->Se+ Tree
+<td><!--DEPEND-->Core JARs<br>Se+ JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Incorporate Groovy/Spock Sample execution in Core SAFS distributions.
+<li>Fixed SeleniumPlus Tree handling to issue Warnings instead of Exceptions for disabled nodes.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2016.07.01 </b>
+<td rowspan=2><!--AFFECT-->Se+<br>Core
+<td><!--NEW----->Se+ PlugIn
+<td><!--FIXED--->Core Drivers
+<td><!--DEPEND-->Se+ PlugIn<br>Se+ JARS<br>Core JARS
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Add SeleniumPlus PlugIn feature to insert test Method code from template.
+<li>Refactor Core SAFS and JSAFS to share common DriverInterface for supporting commands like CallJunit.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2016.06.24 </b>
+<td rowspan=2><!--AFFECT-->Core<br>Se+
+<td><!--NEW----->
+<td><!--FIXED--->Core CallJunit<br>Se+ StaleElement
+<td><!--DEPEND-->Core JARS<br>Se+ JARS
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fix Core test record handling to fully implement a FILO stack for CallJUnit and CallScript.
+<li>Fix SeleniumPlus to catch and react to StaleElementExceptions earlier in searches.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2016.06.17 </b>
+<td rowspan=2><!--AFFECT-->Core
+<td><!--NEW----->Core STAFHelper<br>Core SLF4J
+<td><!--FIXED--->
+<td><!--DEPEND-->Core JARS<br>Se+ JARS
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Add Core support for Embedded STAF Helpers in LogUtilities for all Drivers and Engines.
+<li>Add SLF4J Support and Adapter/Binder implementations for SAFSLOGS and SAFS Debug Log.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2016.06.08 </b>
+<td rowspan=2><!--AFFECT-->Se+<br>Core
+<td><!--NEW----->
+<td><!--FIXED--->Se+ Doc<br>Core LaunchApplication
+<td><!--DEPEND-->Se+ JARS<br>Core JARS
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Fixed <a href="http://safsdev.sourceforge.net/selenium/doc/SeleniumPlus-Welcome.html" target="_blank">SeleniumPlus Welcome</a> doc references for Selenium WebDriver.
+<li>Fixed Core LaunchApplication support to work Embedded -- without STAF.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2016.06.03 </b>
+<td rowspan=2><!--AFFECT-->Core
+<td><!--NEW----->Core Image Diffs
+<td><!--FIXED--->
+<td><!--DEPEND-->Core JARS<br>Se+ JARS
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Added the generation of Image Diff files for Verify FileToFile commands comparing known image types.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2016.05.27 </b>
+<td rowspan=2><!--AFFECT-->Se+<br>Core
+<td><!--NEW----->Se+ CallJunit
+<td><!--FIXED--->Se+ Menu<br>Core JUnit
+<td><!--DEPEND-->Se+ JARS<br>Core JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Disable all SeleniumPlus Menu selections from doing any post-select verifications.
+<li>Expose the CallJunit command in SeleniumPlus.Misc.
+<li>Fix CallJUnit implementation to always return the correct TestRecordData from the Stack.
+<li>Officially add Groovy and Spock JAR files into our Updates and Installs.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2016.05.20 </b>
+<td rowspan=2><!--AFFECT-->Se+<br>Core
+<td><!--NEW----->Core JUnit/SPOCK
+<td><!--FIXED--->Se+ SAPUIMENU<br>Core Embedded
+<td><!--DEPEND-->Se+ JARs<br>Core JARs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Override SeleniumPlus verify support for SAP Selectable Menus that disappear after selection.
+<li>Provide a Core SPOCK example of auto-injection of SAFS RuntimeDataAwareness for SAFS Vars, etc..
+<li>Fix Core getSTAFEnv to retrieve System Environment settings even when STAF is not running.
+<li>Core SPOCK Junit test support and POC put into place with CallJUnit support in Core.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2016.05.12 </b>
+<td rowspan=2><!--AFFECT-->SID<br>Se+
+<td><!--NEW----->SID Actions
+<td><!--FIXED--->SID Paths<br>Se+ PlugIn<br>Se+ Properties<br>Se+ Search<br>SID Select
+<td><!--DEPEND-->Core JARS<br>Se+ JARs<br>Se+ PlugIn
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>SeleniumPlus Se IDE/SeBuilder support now creates missing directories in absolute paths.
+<li>SeleniumPlus PlugIn now will try to front the "Refresh Projects" dialog after an Update.
+<li>SeleniumPlus will try to verify/refresh the reference of a Component before retrieving Properties.
+<li>Fixed NullPointerException resulting from some searches in SeleniumPlus.
+<li>Add Select and AddSelection to SeleniumPlus Se IDE/SeBuilder support in REGRESSION.
+<li>Fixed a problem where Se IDE/SeBuilder Select was NOT deselecting previous selections.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2016.05.05 </b>
+<td rowspan=2><!--AFFECT-->Core<br>Se+
+<td><!--NEW----->Core JNA
+<td><!--FIXED--->Se+ JavaScript<br>Core Mailer
+<td><!--DEPEND-->Core JARS<br>Se+ JARs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Upgrade Java JNA support to 4.2.2.
+<li>Extend SeleniumPlus JavaScript execution timeout to 5 seconds.
+<li>Fixed the Core SendEmail mailer to properly order attachments.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2016.04.29 </b>
+<td rowspan=2><!--AFFECT-->Se+<br>Core<br>SID
+<td><!--NEW----->SID SAFSVARS<br>Se+ ComboBox
+<td><!--FIXED--->Core Alerts<br>Core REST
+<td><!--DEPEND-->Core JARs<br>Se+ JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Add SeleniumPlus Se IDE/SeBuilder support for embedded SAFSVARS and SAFSMAPS values.
+<li>Support App Map references in Se IDE/SeBuilder Locator parameters.
+<li>Add Check/UnCheck StepTypes in Se IDE/SeBuilder support for SeleniumPlus.
+<li>Add Open/Close browserID support in SeleniumPlus Se IDE/SeBuilder support.
+<li>Expand upon getting test INI settings in all engine hooks and drivers.
+<li>Add SelectUnverifiedPartialMatch for SeleniumPlus Combos.
+<li>Initial push of Core shell for REST API testing support.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2016.04.22 </b>
+<td rowspan=2><!--AFFECT-->Se+<br>Core
+<td><!--NEW----->Se+ AutoScroll<br>Se+ Alerts<br>Se+ TagName
+<td><!--FIXED--->Core NumLock
+<td><!--DEPEND-->Se+ JARS<br>Core JARs
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Add SeleniumPlus click action support of "autoscroll" option.
+<li>Add SeleniumPlus support for DismissUnexpectedAlerts in test INI file.
+<li>Allow SeleniumPlus to retrieve an Element TagName via JavaScript code.
+<li>Expand the support of INI SAFS_TEST:numLockOn across more tools.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2016.04.15 </b>
+<td rowspan=2><!--AFFECT-->SID
+<td><!--NEW----->SID SetTimeout
+<td><!--FIXED--->
+<td><!--DEPEND-->Core JARS<br>Se+ JARS
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Added SetTimeout to Se Scripting support in SeleniumPlus SeInterpreter.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2016.04.08 </b>
+<td rowspan=2><!--AFFECT-->Core<br>Se+
+<td><!--NEW----->Core NumLock<br>Core FileUtilities<br>Se+ Alerts
+<td><!--FIXED--->
+<td><!--DEPEND-->Core JARS<br>Se+ JARS
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Add optional Core support in INI -- SAFS_TEST:numLockOn=True|False.
+<li>Add Core FilUtilities support for Type.ALLFILES.
+<li>Add SeleniumPlus support to modify the Check Alerts Timeout value.
+<li>Fully expose the OnGuiExists and OnGuiNotExist commands in SeleniumPlus and REGRESSION.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2016.03.31 </b>
+<td rowspan=2><!--AFFECT-->Se+
+<td><!--NEW----->Se+ FlowControl<br>Se+ Alerts
+<td><!--FIXED--->
+<td><!--DEPEND-->Se+ JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Add SeleniumPlus support to properly detect Alerts resulting from Click events.
+<li>Add OnGuiExists and OnGuiNotExists support to SeleniumPlus Misc (DriverCommands).
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2016.03.25 </b>
+<td rowspan=2><!--AFFECT-->Se+<br>SID
+<td><!--NEW----->SID Actions<br>Se+ Doc<br>Se+ CMDLINE<br>Se+ Robot Keys
+<td><!--FIXED--->Se+ ProcessKiller
+<td><!--DEPEND-->Se+ JARS<br>Se+ Doc<br>Se+ Update
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Add 11 more Se IDE commands to SeleniumPlus SeInterpreter.
+<li>Add new Locator support in SeleniumPlus SeInterpreter for Se IDE commands.
+<li>Add Selenium 1.0 string pattern match support in SeIntpreter actions.
+<li>More enhancements to the SeleniumPlus Welcome "Start Browser" info.
+<li>Handle more Chrome & Firefox command-line options and preferences in SeleniumPlus.
+<li>Add SeleniumPlus ProcessKiller support for -killall (ex: chromedriver.exe).
+<li>Add SeleniumPlus support for Robot Keys getDelayBetweenKeystrokes.
+</ul>
+
+<tr class=b2>
+<td rowspan=2><!--DATE----><b> 2016.03.18 </b>
+<td rowspan=2><!--AFFECT-->Core<br>Se+<br>SID
+<td><!--NEW----->Se+ Alerts<br>SID Updates<br>Se+ Doc
+<td><!--FIXED--->SID CTRL+Click
+<td><!--DEPEND-->Core JARs<br>Se+ JARs
+<tr class=b2>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Added more robust SeleniumPlus support for handling Alerts with isAlertPresent.
+<li>Added 'forceRefresh' optional parameter support for Comboboxes.
+<li>Added more SeleniumPlus support for more Selenium IDE Script commands.
+<li>Added SeleniumPlus SearchObject support for finding/returning multiple matching objects.
+<li>Fixed some SelBuilder CTRL+Click issues using Selenium WebDriver for AddSelection.
+<li>Added a 'StartBrowser' section to SeleniumPlus Welcome documentation.
+</ul>
+
+<tr class=b1>
+<td rowspan=2><!--DATE----><b> 2016.03.11 </b>
+<td rowspan=2><!--AFFECT-->Se+<br>SID<br>Core
+<td><!--NEW----->SID Interpreter<br>SID SAFSVARS
+<td><!--FIXED--->Se+ REGRESSION<br>Se+ Combobox
+<td><!--DEPEND-->Se+ JARs<br>Core JARS
+<tr class=b1>
+<td class=note colspan=4>
+<ul><b>Notes:</b>
+<li>Initial POC push of Selenium IDE Script support through SeInterpreter.
+<li>Added support for embedded SAFSVARS/SAFSMAPS references inside SeBuilder and Selenium IDE scripts.
+<li>Enhancements to the SeleniumPlus REGRESSION test suite for robustness.
+<li>Added 'forceRefresh' enhancements to SeleniumPlus Combobox support.
+</ul>
 
 <tr class=b2>
 <td rowspan=2><!--DATE----><b> 2016.03.08 </b>
