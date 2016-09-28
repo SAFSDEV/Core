@@ -1,0 +1,278 @@
+<html>
+<head><title>SAFS Component Recognition
+</title></head>
+<body>
+<h1>SAFS Component Recognition</h1>
+Last Updated by Carl Nagle:
+<script language="JavaScript">document.write(document.lastModified)</script>
+<p>
+One of the issues involved when attempting to use multiple testing tools; or when trying to migrate from one tool to another; is that each tool has devised a unique way of specifying or locating application components.  &nbsp;Some tools, like IBM Rational Robot and Mercury's WinRunner, allow you to specify a simple string that contains information about the target component.  &nbsp;Other tools, like IBM Rational RobotJ/XDE Tester, require that you provide a valid instance of a proxy "TestObject" or a similar component object--or the component itself--in order to perform an action on the component.
+<p>
+This document attempts to explain how the SAFS framework is evolving a standardized mechanism for specifying, locating, and then retrieving these component references for each tool-specific technology.  It is important to note that this assumes the tool in use provides an API that allows you to retrieve and examine the component hierarchy of your application.
+<p>
+Goto:
+<a href="#problem">The Problem</a>,
+<a href="#solution">SAFS Solution</a>,
+<a href="#subclassing">Key Superclasses</a>,
+<a href="#walkthru">A Walk-Thru</a>.
+<hr>
+<p><a name="problem"/>
+<i><h2>The Problem:</h2></i>
+<ul><p>
+Each GUI testing tool defines a unique mechanism for specifying and locating components in the tested application.  &nbsp;Testers or frameworks wishing to exploit multiple tools, or migrating from one tool to another, must develop or maintain separate application-specific component maps for each testing tool in use.  &nbsp;The extra effort for such development and maintenance causes testers or frameworks to avoid taking advantage of multiple tools; or from migrating from one tool to another.
+</ul>
+<hr>
+<p><a name="solution"/>
+<i><h2>SAFS Solution:</h2></i>
+<p>
+<ul>
+Our current solution is to use a generic syntax that can identify key component attributes within the application component hierarchy.  &nbsp;We then provide classes with an extendable algorithm that can interpret this syntax, and locate the desired component using tool-specific subclasses.
+<p>
+Several years ago RRAFS (Rational Robot) became our first SAFS Engine.  &nbsp;The technology used to identify components was simple text strings.  &nbsp;There were no proprietary classes or objects involved and the syntax of the strings crossed environments (C, VB, Java, Web, etc..)
+<p>
+In 2003 we developed and deployed the RobotJ engine.  &nbsp;This was our first STAF-based engine and was intended to augment--not replace--the existing RRAFS engine.  &nbsp;In order to minimize the workload of test automators, we developed the classes and the algorithms that would allow our RobotJ engine to dynamically locate components using the same simple text strings used by Rational Robot.
+<p>
+These Java classes and algorithms can do the same thing when we go to develop new Java-based SAFS engines for different testing tools.  The associated classes, files, and how to provide appropriate tool-specific subclasses are discussed below.
+<p>
+<b>Note:</b> These classes have not been around long, and some refactoring will occur.  &nbsp;We are still in the process of refactoring and improving the implementation originally coded for Rational RobotJ.  &nbsp;In some cases, functionality may exist in <b>org.safs.rational.*</b> subclasses that can and should be moved into the appropriate <b>org.safs.*</b> superclass.
+</ul>
+<hr>
+<p><a name="subclassing"/>
+<i><h2>Key Superclasses:</h2></i>
+<ul>The Javadoc for each superclass has a link to each tool-specific subclass implementation.
+<p>
+<dl>
+<p>
+<dt><a href="http://safsdev.sourceforge.net/doc/org/safs/DDGUIUtilities.html">DDGUIUtilities</a>
+<p>
+<dd>Superclass of tool-specific classes to store and locate application maps in a tool-specific manner, among other things.
+
+<p>
+<dt><a href="http://safsdev.sourceforge.net/doc/org/safs/ApplicationMap.html">ApplicationMap</a>
+<p>
+<dd>Superclass of tool-specific classes to store and locate application components in a tool-specific manner.  These app maps represent a local store of tool-specific information and objects cached from previous calls to locate components.
+
+<p>
+<dt><a href="http://safsdev.sourceforge.net/doc/org/safs/GuiObjectRecognition.html">GUIObjectRecognition</a>
+<p>
+<dd>Superclass of tool-specific class to manage and manipulate component recognition string information.
+
+<p>
+<dt><a href="http://safsdev.sourceforge.net/doc/org/safs/GuiClassData.html">GUIClassData</a>
+<p>
+<dd>Superclass of tool-specific classes to retrieve tool-specific classname and classtype information for application components.  &nbsp;These provide the routines to lookup our object mapping information stored in files like:
+<ul><p>
+<li><a href="http://cvs.sourceforge.net/viewcvs.py/*checkout*/safsdev/source/common/org/safs/Attic/JavaObjectsMap.dat?content-type=text%2Fplain&rev=1.1.2.15">JavaObjectsMap.dat</a>
+<li><a href="http://cvs.sourceforge.net/viewcvs.py/*checkout*/safsdev/source/common/org/safs/Attic/ObjectTypesMap.dat?content-type=text%2Fplain&rev=1.1.2.18">ObjectsTypeMap.dat</a>
+</ul>
+
+<p>
+<dt><a href="http://safsdev.sourceforge.net/doc/org/safs/GuiObjectVector.html">GUIObjectVector</a>
+<p>
+<dd>Superclass of tool-specific classes to identify application components in a tool-specific manner.  &nbsp;In reality, it looks like there is some refactoring necessary here.  &nbsp;This is currently an empty class and ALL functionality currently exists in the <a href="http://safsdev.sourceforge.net/doc/org/safs/rational/RGuiObjectVector.html">RGuiObjectVector</a> subclass.  &nbsp;This will definitely need to be rectified!
+</dl></ul>
+<p>
+<hr>
+<p><a name="walkthru"/>
+<i><h2>A Walk-Thru:</h2></i>
+<p>
+So how do we get different tools to actually respond to the same type of recognition information?  How does a string that works for IBM Rational Robot also work for IBM Rational XDE Tester, or Mercury's WinRunner, or JRex?  Well, lets walk through an example.
+<p>
+We have a test record that tells us what window and what component we want to act on:
+<p>
+<ul><b>Test Record:</b>
+<p><b>T, LoginWindow, OKButton, Click</b></ul>
+<p>
+Now, regardless of the GUI testing tool we plan to use, we setup "standard" recognition strings in our text-based App Map file--the one readable by SAFSMAPS:
+<p>
+<ul><b>App Map A:</b>
+<p><b>
+[LoginWindow]</b><br>
+LoginWindow="Type=Window;Caption=Login"<br>
+OKButton="Type=JavaWindow;Caption=Login;\;Type=Pushbutton;Name=cmdOK"<br>
+</ul>
+<p>
+Our hypothetical testing tool of choice is "GUITest" by GUISRUS, but this walk-thru applies to any gui testing tool.
+<p>
+GUITest can use component proxies.  These are tool-specific objects that relay information and actions to the real application component.  The tool provides an <i>Object Map</i> that allows user-defined names for these to be used in our tests.  So, "LoginWindow" could be the user-defined name of such an object in the tool-specific <i>Object Map</i>.  In our SAFS lingo, the Object Map is just a tool-specific <i>App Map</i>.
+<p>
+<i>We CAN use the Object Map:</i><br>
+The quick GUITest version of AppMap lookup would be to take "LoginWindow" from the test record and retrieve the "LoginWindow" component from the GUITest Object Map.  Which is fine if you have a predefined Object Map, if the names of those objects match the names in your tests, and you don't care to use any tool but GUITest.  An augmentation of this is to still use a SAFS App Map file to map AppMap names to Object Map names like below:
+<p>
+<ul><b>App Map B:</b>
+<p><b>
+[LoginWindow]</b><br>
+LoginWindow="LoginWindow"<br>
+OKButton="oddcmdOK3"<br>
+</ul>
+<p>
+This can be beneficial if the tool's Object Map names change (shame on them!); or if maintenance in the tool is too difficult.
+<p>
+As mentioned, this means you have to create a tool-specific Object Map.  And if the component you want to reference hasn't been captured in the Object Map, then you can't play with it.  It is better to not have to make a tool-specific Object Map if we can dynamically find the objects at runtime.  And that is where "standard" recognition strings come into play.
+<p>
+<i>We CAN use "standard" Recognition Strings</i><br>
+Instead of making a tool-specific Object Map, and doing this again for every additional tool or platform; let's instead try an App Map with recognition strings and make that work for all tools.  For this, we are back to using App Map A shown previously.
+<p>
+To make this work, we implement the <a href="#subclassing">Key Subclasses</a> mentioned earlier for our GUITest tool.
+<p>
+A GTDDGUIUtilities or GTApplicationMap function could provide that Object Map lookup mechanism before resorting to the more dynamic lookup mechanism.  You can have multiple lookup mechanisms, as shown below in VERY simplified pseudocode with little or no error detection.
+<p><code><pre>
+<ul>Example of <b>org.safs.guisrus.GTDDGUIUtilities</b>:
+
+public guisrus.GUIObj getGUIObj(String mapname, String windowname, String compname){
+
+    appmap = (GTApplicationMap) getAppMap(mapname);
+
+    // is the target the window?
+    if (windowname.equalsIgnoreCase(compname)){
+
+        // try to see if we cached it in our GTTestRecordHelper
+        guiobj = ((GTTestRecordHelper)trdata).getWindowGUIObject();
+
+        // if not cached in GTTestRecordHelper
+        if (guiobj == null) {
+
+            // perform primary lookup mechanisms
+            <b>guiobj = appmap.findMappedParent(windowName);</b>
+
+            // assuming found, cache it in GTTestRecordHelper for later use
+            ((GTTestRecordHelper)trdata).setWindowGUIObject( guiobj );
+         }
+         return guiobj;
+    }
+
+    // otherwise the target is a child of the window
+    else {
+
+        // try to see if we cached it in our GTTestRecordHelper
+        guiobj = ((GTTestRecordHelper)trdata).getCompGUIObject();
+
+        // if not cached in GTTestRecordHelper
+        if (guiobj == null) {
+
+            // perform primary lookup mechanisms
+            <b>guiobj = appmap.findMappedChild(windowName, compname);</b>
+
+            // assuming found, cache it in GTTestRecordHelper for later use
+            ((GTTestRecordHelper)trdata).setCompGUIObject( guiobj );
+        }
+        return guiobj;
+    }
+}
+</ul></pre></code>
+<p>
+The routine first attempts to locate a cached <i>guisrus.guiobj</i> that might have been stored in the current instance of GTTestRecordHelper.  While that would be nice, more than likely we are not going to be that lucky.  The GTTestRecordHelper may have this cached value reset at the beginning of processing for this new record.  So odds are, we will be going down the findMappedParent path provided by our GTApplicationMap instance.
+<p>
+So, we are going to see what it takes to find the LoginWindow using the recognition strings in App Map A.  We continue in GTApplicationMap.findMappedParent().  We start in tool-specific code because we are still searching for items stored in a tool-specific manner.  But as you will see, we begin the use of predefined functions in superclasses to help locate the desired component.
+<p><code><pre>
+<ul>Example of <b>org.safs.guisrus.GTApplicationMap</b>:
+
+public guisrus.GUIObj findMappedParent(String windowname){
+
+    // check standard local ApplicationMap cache for the object
+    guiobj = (GUIObj) super.<a href="http://safsdev.sourceforge.net/doc/org/safs/ApplicationMap.html#getParentObject(java.lang.String)">getParentObject</a>(windowname);
+    if (guiobj != null) return guiobj;
+
+    // try any GUITest Object Map storage with the provided windowname
+    guiobj = GUITest.getObjectMapItem( windowname );
+    if (guiobj != null) return guiobj;
+
+    // retrieve the recognition string (or Object Map lookup value) from SAFSMAPS app map
+    windowPath = <a href="http://safsdev.sourceforge.net/doc/org/safs/STAFHelper.html#getAppMapItem(java.lang.String, java.lang.String, java.lang.String)">staf.getAppMapItem</a>(<a href="http://safsdev.sourceforge.net/doc/org/safs/ApplicationMap.html#mapname">mapname</a>, windowname, windowname);
+
+    // try any GUITest Object Map storage again, this time with the app map lookup value
+    guiobj = GUITest.getObjectMapItem( windowPath );
+    if (guiobj != null) return guiobj;
+
+    // OK. We can't find a cached guiobj anywhere. Time for our dynamic SAFS search!
+
+    // instance our subclass of <a href="http://safsdev.sourceforge.net/doc/org/safs/GuiObjectVector.html">GuiObjectVector</a>
+    guivector = new GTGuiObjectVector(windowname, windowname, windowPath);
+
+    // perform the search
+    guiobj = <b>guivector.getParentGUIObject();</b>
+
+    return guiobj;
+}
+</ul></pre></code>
+<p>
+We can now see how a <a href="http://safsdev.sourceforge.net/doc/org/safs/GuiObjectVector.html">GuiObjectVector</a> is going to start us down the dynamic search path.  Our GTGuiObjectVector subclass has a tool-specific getParentGUIObject() function, but the code will quickly be calling our predefined search algorithm.
+<p><code><pre>
+<ul>Example of <b>org.safs.guisrus.GTGuiObjectVector</b>:
+
+public guisrus.GUIObj getParentGUIObject(){
+
+    // perform any tool-specific prep here
+
+    // then jump right in to the superclass search
+    return (guisrus.GUIObje) <b><a href="http://safsdev.sourceforge.net/doc/org/safs/GuiObjectVector.html#getMatchingParentObject()">getMatchingParentObject</a>()</b>;
+}
+</ul></pre></code>
+<p><code><pre>
+<ul>Example of "pseudo" <b>org.safs.GuiObjectVector</b>:
+
+public Object <a href="http://safsdev.sourceforge.net/doc/org/safs/GuiObjectVector.html#getMatchingParentObject()">getMatchingParentObject</a>(){
+
+    // your GTGuiObjectVector subclass provides an array of all known toplevel parents (windows)
+    Object[] parents = <a href="http://safsdev.sourceforge.net/doc/org/safs/GuiObjectVector.html#getParentObjects()">getParentObjects</a>();
+
+    Object child = null;
+
+    // see if one matches our recognition string
+
+    while(( !done )&&( child==null )){
+
+    	// is the indexed parent a match?
+        if (! <b><a href="http://safsdev.sourceforge.net/doc/org/safs/GuiObjectVector.html#isMatchingParent(java.lang.Object)">isMatchingParent</a>(parents[parentIndex])</b>) {
+
+            // no, try the next
+            parentIndex++;}
+
+        else {
+
+            // YES! return it
+            child = parents[parentIndex];
+        }
+        return child;
+}
+</ul></pre></code>
+<p><code><pre>
+<ul>Example of "pseudo" <b>org.safs.GuiObjectVector</b>:
+
+public boolean <a href="http://safsdev.sourceforge.net/doc/org/safs/GuiObjectVector.html#isMatchingParent(java.lang.Object)">isMatchingParentObject</a>(Object parent){
+
+    // your GTGuiObjectRecognition subclass answers the following queries
+    <a href="http://safsdev.sourceforge.net/doc/org/safs/GuiObjectRecognition.html">GuiObjectRecognition</a> parentInfo = <a href="http://safsdev.sourceforge.net/doc/org/safs/GuiObjectVector.html#getParentGuiObjectRecognition()">getParentGuiObjectRecognition</a>();
+
+    // Is the parent showing/visible on the screen?
+    if(! parentInfo.<a href="http://safsdev.sourceforge.net/doc/org/safs/GuiObjectRecognition.html#isObjectShowing(java.lang.Object)">isObjectShowing</a>(parent)) return false;
+
+    // Does the parent class or a superclass match our recognition string Type?
+    if(! parentInfo.<a href="http://safsdev.sourceforge.net/doc/org/safs/GuiObjectRecognition.html#isMatchingClass(java.lang.Object)">isMatchingClass</a>(parent)) return false;
+
+    // Does the Caption match that of our recognition string?
+    return parentInfo.<a href="http://safsdev.sourceforge.net/doc/org/safs/GuiObjectRecognition.html#isMatchingCaption(java.lang.Object)">isMatchingCaption</a>(parent);
+}
+</ul></pre></code>
+<p>
+As you can see, the generic superclasses will handle most of the algorithm logic that searches for matching components.  The tool-specific subclasses mostly provide the information requested about a given object.  The object is whatever the tool, or your subclass implementations, needs to use.  This could be Strings, or things like Rational GuiTestObjects.  The generic algorithm simply passes them along as needed.
+<p>
+The hunt for matching child objects is essentially the same.  Once we match the parent window, we ask for arrays of child objects and process those in the same manner.  That is, we loop through the children and query your subclasses to provide the necessary information, or the true or false answers.
+<p>
+Reviewing the Rational RobotJ subclass implementations may (or may not?) make this easier to digest.  They have the necessary implementation, but they also have additional functions used by the Rational implementation that would not be necessary for other engines.
+<p>
+<ul><b>Some Key Rational implementation code:</b>
+<p>
+<li><a href="http://cvs.sourceforge.net/viewcvs.py/*checkout*/safsdev/source/common/org/safs/rational/Attic/RGuiObjectVector.java?content-type=text%2Fplain&rev=1.1.2.10">RGuiObjectVector</a>
+<p>
+<li><a href="http://cvs.sourceforge.net/viewcvs.py/*checkout*/safsdev/source/common/org/safs/rational/Attic/RGuiObjectRecognition.java?content-type=text%2Fplain&rev=1.1.2.29">RGuiObjectRecognition</a>
+<p>
+<li><a href="http://cvs.sourceforge.net/viewcvs.py/*checkout*/safsdev/source/common/org/safs/rational/Attic/RGuiClassData.java?content-type=text%2Fplain&rev=1.1.2.8">RGuiClassData</a>
+<p>
+<li><a href="http://cvs.sourceforge.net/viewcvs.py/*checkout*/safsdev/source/common/org/safs/rational/Attic/RDDGUIUtilities.java?content-type=text%2Fplain&rev=1.1.2.46">RDDGUIUtilities</a>
+<p>
+<li><a href="http://cvs.sourceforge.net/viewcvs.py/*checkout*/safsdev/source/common/org/safs/rational/Attic/RApplicationMap.java?content-type=text%2Fplain&rev=1.1.2.19">RApplicationMap</a>
+</ul>
+<hr>
+</body>
+</html>
