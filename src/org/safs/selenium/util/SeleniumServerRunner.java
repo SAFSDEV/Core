@@ -13,25 +13,37 @@ import java.util.ArrayList;
 import org.safs.tools.consoles.JavaJVMConsole;
 
 /**
- * This class is used to provide a special Java console for the standalone Selenium Server process.
- * This is essential for at least two critical cases:
+ * This class is used to provide a special Java console for the Selenium Server (standalone, hub, node) process.
+ * This is essential for the following cases (server will be launched on local machine):
  * <ul>
- * <li>Launching a standalone Selenium Server on localhost from inside Eclipse.
- * <li>Launching a remote standalone Selenium Server supporting SeleniumPlus RMI.
+ * <li>Launching a standalone Selenium Server.
+ * <li>Launching a standalone Selenium Server supporting SeleniumPlus RMI.
+ * <li>Launching a hub (in grid mode) Selenium Server.
+ * <li>Launching a hub (in grid mode) Selenium Server supporting SeleniumPlus RMI.
+ * <li>Launching a node (in grid mode) Selenium Server.
+ * <li>Launching a node (in grid mode) Selenium Server supporting SeleniumPlus RMI.
  * </ul>
- * minimum args expected:<br>
+ * 
+ * <b>Required</b> parameters:<br>
+ * <b>-jar fullpath/to/selenium-server-standalone-&lt;version>.jar</b><br>
+ * <b>-timeout=N</b> Controls how long (in seconds) the client is allowed to be gone before the session is reclaimed<br>
+ * <b>-browserTimeout=N</b> Controls how long (in seconds) the browser is allowed to hang<br>
  * <p>
- * -jar fullpath/to/selenium-server-standalone-&lt;version>.jar<br>
- * -timeout=N<br>
- * -browserTimeout=N
- * <p>
- * other optional args:<br>
- * <p>
- * "-port N" the port number for SeleniumServer. If not provided, the default port 4444 will be used<br>
- * -outputToConsole if provided, the console messages will also be printed to standard out/err.<br>
+ * <b>Optional</b> parameters:<br>
+ * <b>-port N</b>, optional, the port number for Selenium Server. If not provided, the default port will be used.
+ *                   For "standalone" and "hub" the default port number is 4444; While for "node", it is 5555.
+ *                   <br>
+ * <b>-role TheServerRole</b>, optional, if not provided, a standalone server will be launched.<br>
+ *                                         TheServerRole could be <b>"hub"</b>, and selenium server will be launched
+ *                                         as a hub (in grid mode) for other node to connect.<br>
+ *                                         TheServerRole could be <b>"node"</b>, and selenium server will be launched
+ *                                         as a node (in grid mode) to connect a hub. <b>**Note**</b> Hub's information must also 
+ *                                         be provided. Ex: <b>-role node -hub http://hub.machine:port/grid/register</b><br>
+ *                                         <br>
+ * <b>-outputToConsole</b>, optional, if provided, the console message will also be printed to standard out/err.<br>
  * <p>
  * 
- * Other JVM params--including those needed by standalone Selenium Server ( -Dwebdriver...)--must also be 
+ * Other JVM params--including those needed by Selenium Server ( -Dwebdriver...)--must also be 
  * provided and will have already been applied to this JVM process.
  * <p>
  * Consequently, a typical command-line invocation of this Java program would look like:
@@ -56,7 +68,7 @@ import org.safs.tools.consoles.JavaJVMConsole;
  *     -timeout=20
  *     -browserTimeout=60
  * </pre>
- * When being used as the SeleniumPlus RMI bootstrap mechanism on a remote standalone Selenium Server, 
+ * When being used as the SeleniumPlus RMI bootstrap mechanism on a remote standalone/node Selenium Server, 
  * the following additional command-line arguments are necessary:
  * <p><pre>
  *     -Djava.rmi.server.hostname=&lt;full hostname or ip address>
@@ -166,16 +178,25 @@ public class SeleniumServerRunner extends JavaJVMConsole{
 	 * Is expected to be able to run in its own standalone Java process.
 	 * @param args expects:
 	 * <p>
-	 * -jar fullpath/to/selenium-server-standalone*.jar<br>
-	 * -timeout=N<br>
-	 * -browserTimeout=N<br>
-	 * "-port N" the port number for SeleniumServer. If not provided, the default port 4444 will be used<br>
-	 * -outputToConsole if provided, the console message will also be printed to standard out/err.<br>
+	 * <b>-jar fullpath/to/selenium-server-standalone*.jar</b><br>
+	 * <b>-timeout=N</b> Controls how long (in seconds) the client is allowed to be gone before the session is reclaimed<br>
+	 * <b>-browserTimeout=N</b> Controls how long (in seconds) the browser is allowed to hang<br>
+	 * <b>-port N</b>, optional, the port number for Selenium Server. If not provided, the default port will be used.
+	 *                   For "standalone" and "hub" the default port number is 4444; While for "node", it is 5555.
+	 *                   <br>
+	 * <b>-role TheServerRole</b>, optional, if not provided, a standalone server will be launched.<br>
+	 *                                         TheServerRole could be <b>"hub"</b>, and selenium server will be launched
+	 *                                         as a hub (in grid mode) for other node to connect.<br>
+	 *                                         TheServerRole could be <b>"node"</b>, and selenium server will be launched
+	 *                                         as a node (in grid mode) to connect a hub. <b>**Note**</b> Hub's information must also 
+	 *                                         be provided. Ex: <b>-role node -hub http://hub.machine:port/grid/register</b><br>
+	 *                                         <br>
+	 * <b>-outputToConsole</b>, optional, if provided, the console message will also be printed to standard out/err.<br>
 	 * <p>
 	 * Other JVM params--including those needed by standalone Selenium Server ( -Dwebdriver...)--must also be 
 	 * provided and will have already been applied to this JVM process.
 	 * <p>
-	 * When being used as the SeleniumPlus RMI bootstrap mechanism on a remote standalone Selenium Server, 
+	 * When being used as the SeleniumPlus RMI bootstrap mechanism on a remote standalone/node Selenium Server, 
 	 * the following additional command-line arguments are necessary:
 	 * <p><pre>
 	 *     -Djava.rmi.server.hostname=&lt;full hostname or ip address>
