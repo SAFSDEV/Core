@@ -2,11 +2,15 @@
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
+/**
+ * Developer Log:
+ * JUL 28, 2015 Tao Xie Added SwitchToFrame and SwitchToFrameIndex support
+ * MAR 01, 2016 Carl Nagle Added Support for SAFSVARS variable lookups if local Map has no reference.
+ * SEP 27, 2016 Lei Wang Modified initRemoteWebDriver(): Launch selenium server set in the .ini configuration file.
+ *                                                     Close the browser after getting RemoteDriver.
+ */
 package org.safs.selenium.webdriver.lib.interpreter;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,10 +21,8 @@ import org.safs.SAFSException;
 import org.safs.STAFHelper;
 import org.safs.StringUtils;
 import org.safs.selenium.webdriver.WebDriverGUIUtilities;
-import org.safs.selenium.webdriver.lib.RemoteDriver;
-import org.safs.selenium.webdriver.lib.SelectBrowser;
+import org.safs.selenium.webdriver.lib.SeleniumPlusException;
 import org.safs.selenium.webdriver.lib.WDLibrary;
-import org.safs.tools.stringutils.StringUtilities;
 
 import com.sebuilder.interpreter.Locator;
 import com.sebuilder.interpreter.Script;
@@ -45,8 +47,6 @@ import com.sebuilder.interpreter.webdriverfactory.WebDriverFactory;
  * in SAFSVARS if they are not found in the local variable Map.
  *    
  * @author Carl Nagle
- * <br>JUL 28, 2015 Tao Xie Added SwitchToFrame and SwitchToFrameIndex support
- * <br>MAR 01, 2016 Carl Nagle Added Support for SAFSVARS variable lookups if local Map has no reference.
  */
 public class WDTestRun extends TestRun {
 
@@ -431,40 +431,22 @@ public class WDTestRun extends TestRun {
 			return;
 		}
 		int timeout = 30; // TODO get from parameters in this object!
-		try{ WDLibrary.startBrowser(null, null, null, timeout, true);}
-		catch(Throwable th){
-			String thmsg = th.getMessage();
-			getLog().info("WDTestRun.initRemoteWebDriver initially failed to create a new WebDriver session. RemoteServer may not be running.");
-			String seleniumhost = System.getProperty(SelectBrowser.SYSTEM_PROPERTY_SELENIUM_HOST, SelectBrowser.DEFAULT_SELENIUM_HOST);
-			String seleniumport = System.getProperty(SelectBrowser.SYSTEM_PROPERTY_SELENIUM_PORT, SelectBrowser.DEFAULT_SELENIUM_PORT);
-			if( seleniumhost.equals(SelectBrowser.DEFAULT_SELENIUM_HOST)){			
-				getLog().info("WDTestRun.initRemoteWebDriver attempting to start a local RemoteServer...");
-				boolean success = false;
+		String browserID = "sebuilder_run"+System.currentTimeMillis();
+		try{ WDLibrary.startBrowser(null, null, browserID, timeout, true);}
+		catch(Throwable th){			
+			try {
+				WebDriverGUIUtilities.launchSeleniumServers();
 				try{
-					String projectdir = WebDriverGUIUtilities._LASTINSTANCE.getSTAFHelper().getVariable(STAFHelper.SAFS_VAR_PROJECTDIRECTORY);
-					success = WebDriverGUIUtilities.startRemoteServer(projectdir);
-					if(success) getLog().info("WDTestRun.initRemoteWebDriver started RemoteServer successfully.");
-					else getLog().info("WDTestRun.initRemoteWebDriver starting RemoteServer internally not successful.");
-				}catch(Exception x){
-					getLog().info("WDTestRun.initRemoteWebDriver attempt to start RemoteServer internally: "+ x.getClass().getName()+", "+x.getMessage());					
+					WDLibrary.startBrowser(null, null, browserID, timeout, true);
+					getLog().info("WDTestRun.initRemoteWebDriver successful starting browser session.");
+				}catch(Throwable th2){
+					getLog().debug("WDTestRun.initRemoteWebDriver failed to start a new WebDriver session:", th2);
 				}
-				if(!success) {
-					getLog().info("WDTestRun.initRemoteWebDriver attempting to start RemoteServer from external script...");
-					success = WebDriverGUIUtilities.startRemoteServer();
-				}
-				if(success){
-					try{
-						WDLibrary.startBrowser(null, null, null, timeout, true);
-						getLog().info("WDTestRun.initRemoteWebDriver successful starting browser session.");
-					}catch(Throwable th2){
-						getLog().debug("WDTestRun.initRemoteWebDriver failed to start a new WebDriver session:", th2);
-					}
-				}else{
-					getLog().debug("WDTestRun.initRemoteWebDriver failed to start the local RemoteServer!");
-				}
-			}else{
-				getLog().info("WDTestRun.initRemoteWebDriver detected the expected RemoteServer '"+ seleniumhost+":"+ seleniumport +"' is not running and cannot be started locally.");
+			} catch (SeleniumPlusException e) {
+				getLog().info("WDTestRun.initRemoteWebDriver detected the expected RemoteServer is not running and cannot be started: "+StringUtils.debugmsg(e));
 			}
+		}finally{
+			WDLibrary.stopBrowser(browserID);
 		}
 	}
 	
