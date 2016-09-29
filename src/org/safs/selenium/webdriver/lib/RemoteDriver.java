@@ -14,14 +14,21 @@ package org.safs.selenium.webdriver.lib;
 *  <br>   DEC 24, 2015	  (LeiWang) Add methods to get browser's name, version, and selenium-server's version etc.
 *  <br>   FEB 29, 2016	  (LeiWang) Remove the import of org.seleniumhq.jetty7.util.ajax.JSON
 *  <br>   MAR 07, 2016	  (LeiWang) Handle firefox preference.
+*  <br>   SEP 27, 2016	  (LeiWang) Modified main(): Added parameter "-project"/"-Dselenium.project.location", and 
+*                                   adjusted the java doc.
+*                                   Wrote debug message to a file on disk c.
 */
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +53,8 @@ import org.safs.net.NetUtilities;
 import org.safs.selenium.rmi.agent.SeleniumAgent;
 import org.safs.selenium.util.GridInfoExtractor;
 import org.safs.selenium.webdriver.WebDriverGUIUtilities;
+import org.safs.sockets.DebugListener;
+import org.safs.tools.drivers.DriverConstant;
 import org.safs.tools.drivers.DriverConstant.SeleniumConfigConstant;
 import org.safs.tools.stringutils.StringUtilities;
 
@@ -801,16 +810,28 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 		}
 	}
 	
+	/** The debug log file containing debug message when calling main() to start "selenium server". */
+	public static final String debugLogFile = "C:\\"+RemoteDriver.class.getName().replaceAll("\\.", "_")+"_debug_log.txt";
+	private static PrintStream pstream = null;
+	
 	/**
-	 * This main method will start a Selenium Server. It will automatically detect the Java to use, which file to log 
-	 * messages for each browser, what driver (IE CHROME) to be used to start with Selenium Server.<br>
+	 * This main method will start a Selenium Server (standalone, hub, or node). It will automatically detect the Java to use,
+	 * which file to log messages for each browser, and what driver (IE CHROME) to be used to start with Selenium Server.<br>
 	 * <br>
 	 * @param args String[], it accepts following arguments:<br>
-	 * "-port N" the port number for Selenium Server. If not provided, the default port will be used.
-	 * For "standalone" and "hub" the default port number is 4444; While for "node", it is 5555.<br>
-	 * "SELENIUMSERVER_JVM_OPTIONS=JVM OPTIONS", the JVM Options to start the Selenium Server<br>
-	 * "-role &lt;therole>" 
-	 * 
+	 * <b>"-port N"</b>, optional, the port number for Selenium Server. If not provided, the default port will be used.
+	 *                   For "standalone" and "hub" the default port number is 4444; While for "node", it is 5555.
+	 *                   <br>
+	 * <b>"SELENIUMSERVER_JVM_OPTIONS=JVM OPTIONS"</b>, optional, the JVM Options to start the Selenium Server<br>
+	 * <b>"-role TheServerRole"</b>, optional, if not provided, a standalone server will be launched.<br>
+	 *                                         TheServerRole could be <b>"hub"</b>, and selenium server will be launched
+	 *                                         as a hub for other node to connect.<br>
+	 *                                         TheServerRole could be <b>"node"</b>, and selenium server will be launched
+	 *                                         as a node to connect a hub. <b>**Note**</b> Hub's information must also 
+	 *                                         be provided. Ex: <b>-role node -hub http://hub.machine:port/grid/register</b><br>
+	 * <b>"-project ProjectLocationAbsDir"</b>, optional, the absolute directory holding the project to test; If not provided, use
+	 *                                        SeleniumPlus or SAFS installation directory as default. This parameter has higher
+	 *                                        priority than JVM parameter "-Dsafs.project.root".<br>
 	 * <br>
 	 * Example:<br>
 	 * <ul>
@@ -830,17 +851,58 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 	 * <li> {@link SeleniumConfigConstant#SELENIUMSERVER_JVM_OPTIONS}
 	 * <li> {@link SeleniumConfigConstant#SELENIUMSERVER_JVM_Xms}
 	 * <li> {@link SeleniumConfigConstant#SELENIUMSERVER_JVM_Xmx}
+	 * <li> {@link DriverConstant#PROPERTY_SAFS_PROJECT_ROOT}
 	 * </ul>
 	 * Example:<br>
 	 * <ul>
 	 * <li>-DSELENIUMSERVER_JVM_OPTIONS="-Xms256m -Xmx1g"
 	 * <li>-DSELENIUMSERVER_JVM_Xmx=4g
 	 * <li>-DSELENIUMSERVER_JVM_Xms=512m
+	 * <li>-Dsafs.project.root=d:\full_path\to\test_project
 	 * </ul>
 	 */
 	public static void main(String[] args){
-		if(!WebDriverGUIUtilities.startRemoteServer(null, args)){
-			System.err.println("Fail to start Remote Server with parameter "+args);
+		String debugmsg = StringUtils.debugmsg(false);
+		
+		try {
+			pstream = new PrintStream(new BufferedOutputStream(new FileOutputStream(new File(debugLogFile))));
+			IndependantLog.setDebugListener(new DebugListener(){
+				public String getListenerName() {
+					return null;
+				}
+				public void onReceiveDebug(String message) {
+					if(pstream!=null) pstream.println(message);
+					System.out.println(message);
+				}
+			});
+			IndependantLog.debug(debugmsg+ RemoteDriver.class.getName() + " launching, the debug message will be in file '"+RemoteDriver.debugLogFile+"'.");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
 		}
+		
+		IndependantLog.debug(debugmsg+" Current System properties: "+System.getProperties());
+		
+		String projectLocation = System.getProperty(DriverConstant.PROPERTY_SAFS_PROJECT_ROOT);
+		
+		for(int i=0;i<args.length;i++){
+			if(args[i].equalsIgnoreCase("-project")){
+				if((i+1)<args.length){
+					projectLocation = args[++i];
+				}
+			}
+		}
+		
+		IndependantLog.debug(debugmsg+"Project location is "+projectLocation);
+		
+		if(!WebDriverGUIUtilities.startRemoteServer(projectLocation, args)){
+			IndependantLog.error(debugmsg+"Fail to start Remote Server with parameter "+Arrays.toString(args));
+		}
+		
+		if(pstream!=null){
+			pstream.flush();
+			pstream.close();
+		}
+		
+		IndependantLog.setDebugListener(null);
 	}
 }
