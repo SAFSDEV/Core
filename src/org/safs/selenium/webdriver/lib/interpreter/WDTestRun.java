@@ -445,8 +445,6 @@ public class WDTestRun extends TestRun {
 			} catch (SeleniumPlusException e) {
 				getLog().info("WDTestRun.initRemoteWebDriver detected the expected RemoteServer is not running and cannot be started: "+StringUtils.debugmsg(e));
 			}
-		}finally{
-			WDLibrary.stopBrowser(browserID);
 		}
 	}
 	
