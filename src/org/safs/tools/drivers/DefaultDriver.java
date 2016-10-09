@@ -9,14 +9,16 @@ import java.util.ListIterator;
 import java.util.Vector;
 
 import org.safs.DefaultHookConfig;
+import org.safs.IndependantLog;
 import org.safs.JavaHook;
 import org.safs.Log;
 import org.safs.Processor;
+import org.safs.SAFSException;
 import org.safs.STAFHelper;
 import org.safs.SingletonSTAFHelper;
 import org.safs.StringUtils;
-import org.safs.Utils;
 import org.safs.image.ImageUtils;
+import org.safs.robot.Robot;
 import org.safs.text.CaseInsensitiveHashtable;
 import org.safs.text.FAILStrings;
 import org.safs.tools.ConfigurableToolsInterface;
@@ -59,6 +61,7 @@ import org.safs.tools.vars.VarsInterface;
  * <br>	Oct 26, 2010	(Carl Nagle) 	Refactored to support separate misc config initialization
  * <br>	Jul 08, 2011	(Carl Nagle) 	Add support for PREFERRED_ENGINES_OVERRIDE
  * <br>	SEP 12, 2013	(Carl Nagle) 	Add Daemon threads for SAFSMonitor shutdown.
+ * <br>	OCT 09, 2016	(Lei Wang) 	Modified validateTestParameters(): handle 'DndReleaseDelay'.
  * 
  * 
  * @see org.safs.tools.UniqueStringID
@@ -450,17 +453,18 @@ public abstract class DefaultDriver extends AbstractDriver {
 	    	}
 			Log.info("Driver Delay 'secsWaitForComponent' set to "+ Processor.getSecsWaitForComponent());
 			
+			
+			String dndReleaseDelay = StringUtils.getSystemProperty(DriverConstant.PROPERTY_SAFS_TEST_DND_RELEASE_DELAY, 
+					configInfo, DriverConstant.SECTION_SAFS_TEST, DriverConstant.KEY_SAFS_TEST_DND_RELEASE_DELAY, String.valueOf(DriverConstant.DEFAULT_SAFS_TEST_DND_RELEASE_DELAY));				
+			IndependantLog.debug("the system property '" + DriverConstant.PROPERTY_SAFS_TEST_DND_RELEASE_DELAY+"' is '"+dndReleaseDelay+"'.");
+			try{
+				Robot.setDndReleaseDelay(StringUtilities.convertToInteger(dndReleaseDelay));
+			}catch(SAFSException e){
+				IndependantLog.warn("invalid value '"+dndReleaseDelay+"' for system property '"+DriverConstant.PROPERTY_SAFS_TEST_DND_RELEASE_DELAY+"', or for section value '"+DriverConstant.KEY_SAFS_TEST_DND_RELEASE_DELAY+"'");
+			}
+			
 			//check for settings such as 'NumberLock', 'UnexpectedAlertBehaviour' at engine side.
 			DefaultHookConfig.check(configInfo);
-
-			//Get value of system property 'safs.test.numlockon'
-			String numLockSetting = getParameterValue(DriverConstant.PROPERTY_SAFS_TEST_NUMLOCKON);
-			if(numLockSetting.length()>0){
-				//Set the keyboard's 'NumLock' on/off.
-				//TODO Need to work remotely on RMI server.
-				Utils.setNumLock(StringUtilities.convertBool(numLockSetting));
-				Log.info("set KeyBoard 'NumLock' to "+ numLockSetting+"; The original 'NumLock' is "+DriverConstant.DEFAULT_NUMLOCK_STATUS);
-			}
 			
 			Log.info("Test to execute: '"+ testName +"' using "+ testLevel.toUpperCase() +" DRIVER." );
 		}
