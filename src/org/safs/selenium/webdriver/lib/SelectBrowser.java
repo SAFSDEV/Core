@@ -319,7 +319,7 @@ public class SelectBrowser {
 		}
 		
 		String unexpectedAlertBehaviour = Processor.getUnexpectedAlertBehaviour();
-		if(unexpectedAlertBehaviour==null) unexpectedAlertBehaviour = System.getProperty(DriverConstant.PROERTY_SAFS_TEST_UNEXPECTEDALERTBEHAVIOUR);
+		if(unexpectedAlertBehaviour==null) unexpectedAlertBehaviour = System.getProperty(DriverConstant.PROPERTY_SAFS_TEST_UNEXPECTEDALERTBEHAVIOUR);
 		if(unexpectedAlertBehaviour!=null){
 			IndependantLog.debug(debugmsg+" Set '"+unexpectedAlertBehaviour+"' to '"+CapabilityType.UNEXPECTED_ALERT_BEHAVIOUR+"'.");
 			caps.setCapability(CapabilityType.UNEXPECTED_ALERT_BEHAVIOUR, unexpectedAlertBehaviour);
