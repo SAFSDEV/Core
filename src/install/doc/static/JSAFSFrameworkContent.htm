@@ -289,6 +289,10 @@ Line Options:</b><br>
               </dd><dt><b>-Dsafs.test.defaultmap=mapid</b>
               </dt><dd>
               <p></p>
+              </dd><dt><a href="http://safsdev.github.io/doc/org/safs/tools/drivers/DriverConstant.html#PROPERTY_SAFS_TEST_DND_RELEASE_DELAY">
+                       <b>-Dsafs.test.dnd.release.delay=N</b></a>
+              </dt><dd>System property for the delay in millisecond before releasing mouse
+              <p></p>
               </dd><dt><b>-Dsafs.step.separator=string (1 char)</b>
               </dt><dd>Only the setting for the test level of the
               provided test name is required.
@@ -505,7 +509,7 @@ DATASTORE=&lt;FullPathTo&gt;\RFTProjectDir
 ;RFSMOnly=True|False
 ;RFSMCache=True|False
 
-<b><a href="http://safsdev.github.io/doc/org/safs/selenium/webdriver/SeleniumHook.html">[SAFS_SELENIUM]</a></b>
+<b><a href="../doc/org/safs/selenium/webdriver/SeleniumHook.html">[SAFS_SELENIUM]</a></b>
 AUTOLAUNCH=FALSE
 ;JVM=JVMPath to Java 1.5 or higher
 ;CLASSPATH=altClasspath
@@ -514,7 +518,7 @@ AUTOLAUNCH=FALSE
 GATEWAYHOST=yourCorpGateway.net
 GATEWAYPORT=80
 
-;= <a href="http://safsdev.github.io/doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html">Selenium Server Settings</a>
+;= <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html">Selenium Server Settings</a>
 ;= SELENIUMHOST and SELENIUMPORT are used
 ;= to connect Selenium Server
 ;SELENIUMHOST=remote.server.com
@@ -556,7 +560,7 @@ AUTOLAUNCH=TRUE
 ;Hook=String/Classname
 ;Options=LOG
 
-;= OUT_MAILXXX is <a href="http://safsdev.github.io/doc/org/safs/tools/drivers/DriverConstant.MailConstant.html">Mail setting</a>
+;= OUT_MAILXXX is <a href="../doc/org/safs/tools/drivers/DriverConstant.MailConstant.html">Mail setting</a>
 ;OUT_MAILSERVER="mail server"
 ;OUT_MAILSERVERPORT=25|465|587
 ;OUT_MAILSERVERPROTOCOL=SMTP|SMTPS|TLS
@@ -614,6 +618,7 @@ ProjectRoot=String/ProjectRootPath
 ;numLockOn=TRUE|FALSE
 ;UnexpectedAlertBehaviour ONLY works for Selenium2.0 engine for now
 ;UnexpectedAlertBehaviour=accept|dismiss|ignore (default: ignore)
+;<a href="../doc/org/safs/tools/drivers/DriverConstant.html#KEY_SAFS_TEST_DND_RELEASE_DELAY">DndReleaseDelay=N</a>  (default: 800 millisecond)
 
 <b>[SAFS_DIRECTORIES]</b>
 ;DATADIR=Datapool
