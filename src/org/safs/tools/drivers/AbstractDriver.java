@@ -4,6 +4,7 @@
 /**
  * Developer Logs:
  * SEP 21, 2016		Lei Wang	Modified incrementXXXStatus(): check non-standard status code, such as DriverConstant.STATUS_XXX_LOGGED.
+ * SEP 22, 2016		Lei Wang	Modified incrementGeneralStatus(): if status is like DriverConstant.STATUS_TESTXXX_LOGGED, increment "test" counter.
  */
 package org.safs.tools.drivers;
 
@@ -261,7 +262,9 @@ public abstract class AbstractDriver implements DriverInterface{
 		return statuscounts;	}	
 
 	/**
-	 * Increment General (not Test, means not T, TW, TF) record counts.
+	 * Increment General (not Test, means not T, TW, TF) record counts.<br>
+	 * There is an exceptional case, the status is like DriverConstant.STATUS_TESTXXX_LOGGED, then<br>
+	 * increment the "test"(NOT "general") counter, keep consistent with InputProcessor.<br>
 	 * @param status
 	 * @see StatusCodes
 	 */
@@ -269,7 +272,6 @@ public abstract class AbstractDriver implements DriverInterface{
 		if(counterInfo == null) counterInfo = new UniqueStringCounterInfo(getTestName(), getTestLevel());
 		switch(status){		
 			case StatusCodes.OK:
-			case DriverConstant.STATUS_TESTSUCCESS_LOGGED:
 				((StatusCounter) statuscounts).incrementGeneralPasses();
 				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_GENERAL_PASS);
 				break;
@@ -279,12 +281,10 @@ public abstract class AbstractDriver implements DriverInterface{
 				break;
 			case StatusCodes.GENERAL_SCRIPT_FAILURE:
 			case StatusCodes.WRONG_NUM_FIELDS:
-			case DriverConstant.STATUS_TESTFAILURE_LOGGED:
 				((StatusCounter) statuscounts).incrementGeneralFailures();
 				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_GENERAL_FAILURE);
 				break;
 			case StatusCodes.SCRIPT_WARNING:
-			case DriverConstant.STATUS_TESTWARNING_LOGGED:
 				((StatusCounter) statuscounts).incrementGeneralWarnings();
 				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_GENERAL_WARNING);
 				break;
@@ -292,6 +292,21 @@ public abstract class AbstractDriver implements DriverInterface{
 				((StatusCounter) statuscounts).incrementSkippedRecords();
 				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_SKIPPED_RECORD);
 				break;
+			//STATUS_TESTXXX_LOGGED should be treated differently, increment the "test"(not "general") counter
+			//to keep consistent with InputProcessor
+			case DriverConstant.STATUS_TESTSUCCESS_LOGGED:
+				((StatusCounter) statuscounts).incrementTestPasses();
+				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_GENERAL_PASS);
+				break;
+			case DriverConstant.STATUS_TESTFAILURE_LOGGED:
+				((StatusCounter) statuscounts).incrementTestFailures();
+				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_GENERAL_FAILURE);
+				break;
+			case DriverConstant.STATUS_TESTWARNING_LOGGED:
+				((StatusCounter) statuscounts).incrementTestWarnings();
+				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_GENERAL_WARNING);
+				break;
+				
 			default:
 				((StatusCounter) statuscounts).incrementGeneralPasses();
 				getCountersInterface().incrementAllCounters(counterInfo, CountersInterface.STATUS_GENERAL_PASS);

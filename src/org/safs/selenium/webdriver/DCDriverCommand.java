@@ -27,39 +27,31 @@ package org.safs.selenium.webdriver;
  *                                    I did nothing but set the BLOCKID to test-record's status-info.
  *   <br>   APR 07, 2016    (Lei Wang) Refactor to handle OnGUIExistsGotoBlockID/OnGUINotExistGotoBlockID in super class DriverCommand
  *   <br>   AUT 05, 2016    (Lei Wang) Modified waitForGui/waitForGuiGone: if the RC is SCRIPT_NOT_EXECUTED (4) then stop handling here.
+ *   <br>   SEP 27, 2016    (Lei Wang) Moved methods launchSeleniumServers() to class WebDriverGUIUtilities.
  */
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.safs.DriverCommand;
-import org.safs.GuiObjectRecognition;
 import org.safs.IndependantLog;
 import org.safs.JavaHook;
 import org.safs.Log;
 import org.safs.Processor;
 import org.safs.SAFSException;
 import org.safs.SAFSObjectNotFoundException;
-import org.safs.STAFHelper;
 import org.safs.StatusCodes;
 import org.safs.StringUtils;
 import org.safs.model.commands.DDDriverCommands;
 import org.safs.model.commands.DDDriverFlowCommands;
 import org.safs.net.IHttpRequest.Key;
-import org.safs.net.NetUtilities;
-import org.safs.selenium.util.SeleniumServerRunner;
-import org.safs.selenium.webdriver.WebDriverGUIUtilities.GridNode;
-import org.safs.selenium.webdriver.lib.RemoteDriver;
 import org.safs.selenium.webdriver.lib.SelectBrowser;
 import org.safs.selenium.webdriver.lib.SeleniumPlusException;
 import org.safs.selenium.webdriver.lib.WDLibrary;
@@ -71,12 +63,9 @@ import org.safs.text.FileUtilities;
 import org.safs.text.GENKEYS;
 import org.safs.text.GENStrings;
 import org.safs.tools.CaseInsensitiveFile;
-import org.safs.tools.consoles.ProcessCapture;
-import org.safs.tools.drivers.DriverConstant.SeleniumConfigConstant;
 import org.safs.tools.drivers.DriverInterface;
 import org.safs.tools.stringutils.StringUtilities;
 
-import com.ibm.staf.STAFResult;
 import com.sebuilder.interpreter.Script;
 import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.webdriverfactory.WebDriverFactory;
@@ -600,7 +589,7 @@ holdloop:		while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 			IndependantLog.warn(debugmsg+" Fail due to: "+errorMsg);
 			try{
 				if(isRemoteBrowser){
-					launchSeleniumServers();
+					WebDriverGUIUtilities.launchSeleniumServers();
 					WDLibrary.startBrowser(browser, url, id, timeout, isRemoteBrowser, extraParameters);
 					testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
 					log.logMessage(testRecordData.getFac(),
@@ -618,267 +607,6 @@ holdloop:		while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 			testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
 			issueUnknownErrorFailure(errorMsg);
 		}
-	}
-
-	/**'-port' followed by the port number of the Selenium Server is going to use*/
-	public static final String OPTION_PORT 	= "-port";
-	/**'-role' followed by the role name of the server, it can be hub or node*/
-	public static final String OPTION_ROLE 	= "-role";
-	/**'-hub' followed by the hubRegisterUrl, something like http://hubhost:hubport/grid/register */
-	public static final String OPTION_HUB 	= "-hub";
-	
-	/**'hub' role name for the "grid hub"*/
-	public static final String ROLE_HUB 	= "hub";
-	/**'node' role name for the "grid node"*/
-	public static final String ROLE_NODE 	= "node";
-	
-	/**
-	 * Launch Selenium-Standalone-Sever or Selenium-Grid-Hub + Selenium-Grid-Nodes according to the configuration information.<br>
-	 * If the grid-node information is provided, then the Grid-Hub + Node will be launched; otherwise, standalone server will be launched.<br>
-	 * <b>Note:</b> Before calling this method:<br>
-	 * We should set the JVM property {@link SelectBrowser#SYSTEM_PROPERTY_SELENIUM_HOST} and {@link SelectBrowser#SYSTEM_PROPERTY_PROXY_PORT}.<br>
-	 * If we want to launch "grid", we should also set the JVM property {@link SelectBrowser#SYSTEM_PROPERTY_SELENIUM_NODE}.<br>
-	 * @throws SeleniumPlusException, if the server has not been started successfully.
-	 */
-	private void launchSeleniumServers() throws SeleniumPlusException{
-		String debugmsg = StringUtils.debugmsg(false);
-		
-		//Retrieve seleniumhost, seleniumport, seleniumnode
-		//We have set them to system properties in EmbeddedSeleniumHookDriver#start(), We just need to get them from system properties.
-		String host = System.getProperty(SelectBrowser.SYSTEM_PROPERTY_SELENIUM_HOST, SeleniumConfigConstant.DEFAULT_SELENIUM_HOST);
-		String port = System.getProperty(SelectBrowser.SYSTEM_PROPERTY_SELENIUM_PORT, SeleniumConfigConstant.DEFAULT_SELENIUM_PORT);
-		String nodesInfo = System.getProperty(SelectBrowser.SYSTEM_PROPERTY_SELENIUM_NODE);//There is no default value for seleniumnode
-		Log.info(debugmsg+" using selenium host name: "+ host);
-		Log.info(debugmsg+" using selenium port: "+ port);
-		Log.info(debugmsg+" using selenium nodes: "+ nodesInfo);
-
-		//if seleniumnode has been provided, we are going to launch grid-hub and grid-node, not standalone server.
-		boolean isGrid = StringUtils.isValid(nodesInfo);
-		//serverRunning can tell if the server (standalone or grid-hub) is running or not.
-		boolean serverRunning = false;
-		
-		//we are going to launch nodes, they have to know where to register them (by hubRegisterUrl)
-		//but if the hub is stared with hostname as "localhost" or "127.0.0.1", the nodes (remote machines) will not able to register them on http://localhost or http://127.0.0.1
-		//we need to find the real IP address for localhost and use it to build the hubRegisterUrl
-		String hubRegisterUrl = "http://"+host+":"+port+WebDriverGUIUtilities.URL_PATH_GRID_REGISTER;
-		if(isGrid && NetUtilities.isLocalHost(host)){
-			hubRegisterUrl = "http://"+NetUtilities.getLocalHostIP()+":"+port+WebDriverGUIUtilities.URL_PATH_GRID_REGISTER;
-		}
-		//TODO We could simply use the IP address to build the hubRegisterUrl, it is easier.
-//		hubRegisterUrl = "http://"+StringUtils.getHostIP(host)+":"+port+WebDriverGUIUtilities.URL_PATH_GRID_REGISTER;
-		
-		//Before start server, we need to verify that the server/node is NOT running. Otherwise, we just return.
-		if(isGrid){
-			if(WebDriverGUIUtilities.isGridRunning(host, port)){
-				IndependantLog.debug(debugmsg+" the selenium grid-hub server is already running on port '"+port+"' at '"+host+"'");
-				serverRunning = true;
-				if(WebDriverGUIUtilities.isNodesRunning(nodesInfo, true, host, port)){
-					IndependantLog.debug(debugmsg+" the selenium grid-hub nodes are already running.");
-					return;
-				}else{
-					IndependantLog.warn(debugmsg+" some selenium grid-hub nodes may not run at this moment, we need to restart them.");
-				}
-			}
-		}else{
-			if(WebDriverGUIUtilities.isStandalongServerRunning(host, port)){
-				IndependantLog.debug(debugmsg+" the selenium standalone server is already running on port '"+port+"' at '"+host+"'");
-				serverRunning = true;
-				return;
-			}
-		}
-
-		//if it is Grid, the server is a grid-hub. Otherwise the server is standalone.
-		String serverName = "Selenium "+ (isGrid?"Grid Hub":"Standalone server");
-		//role contains parameter to determinate what server to start, "standalone", "hub"
-		String role = isGrid? " "+OPTION_ROLE+" "+ROLE_HUB+" ":" ";//"" for standalone, "-role hub" for grid-hub
-		
-		if(!serverRunning){
-			//Start Server: standalone or grid-hub
-			IndependantLog.debug(debugmsg+" try to start the "+serverName+" at "+host+":"+port+" ... ");		
-			if(!launchSeleniumServers(host, port, role)){
-				//If server cannot be launched, throw exception.
-				throw new SeleniumPlusException(" Fail to start '"+serverName+"' at "+ host+":"+port);
-			}
-			
-			IndependantLog.debug(debugmsg+" "+serverName+" seems started, try to connect it.");
-			//Wait for "standalone server" or "grid hub server" to be ready
-			if(!WebDriverGUIUtilities.waitSeleniumServerRunning(isGrid, false, false)){
-				IndependantLog.warn(debugmsg+serverName+" can not be connected! If it is caused by SocketTimeoutException, you can enlarge timeout by WebDriverGUIUtilities.setTimeoutForHttpConnection(int/*default is 1000*/).");
-			}
-		}
-
-		if(isGrid){//Grid: hub + nodes
-			//Need also to start the nodes, if some nodes fail to launch we just log a warning instead of throwing exception.
-			//prepare parameter to register node, something like "-role node -hub http://hubhost:hubport/grid/register"
-			role = " "+OPTION_ROLE+" "+ROLE_NODE+" "+OPTION_HUB+" "+hubRegisterUrl;
-			List<GridNode> nodes = WebDriverGUIUtilities.getGridNodes(nodesInfo);
-			String nodehost = null;
-			String nodeport = null;
-
-			for(GridNode node:nodes){
-				nodehost = node.getHostname();
-				nodeport = node.getPort();
-				if(!WebDriverGUIUtilities.canConnectHubURL(nodehost, nodeport)){
-					IndependantLog.debug(debugmsg+" try to register the selenium node '"+node+"' to hub "+hubRegisterUrl);
-					if(launchSeleniumServers(nodehost, nodeport, role)){
-						IndependantLog.debug(debugmsg+" '"+node+"' has been launched, waiting for its ready... ");
-						WebDriverGUIUtilities.waitSeleniumNodeRunning(nodehost, nodeport);
-					}else{
-						IndependantLog.warn(debugmsg+" Fail to register node '"+node+"'");
-					}
-				}else{
-					//"connect to hub" is not enough to tell that this node has registered to hub
-					//We need to get the grid/console information to analyze the registered nodes
-					IndependantLog.debug(debugmsg+" selenium node '"+node+"' seems running.");
-					if(!WebDriverGUIUtilities.verifyNodesRegistered(host, port, node)){
-						IndependantLog.error(debugmsg+" selenium node '"+node+"' has not registered to hub "+hubRegisterUrl);
-					}
-				}
-			}
-		}
-		
-		//We only check if the server (standalone or grid-hub) is running
-		//if some nodes are not running, we will not throw exception; test may run on other running nodes.
-		if(!WebDriverGUIUtilities.isSeleniumServerRunning(host, port, isGrid, false, nodesInfo, false)){							
-			throw new SeleniumPlusException(" unable to connect to '"+serverName+"' at "+ host+":"+port+ (isGrid?", Grid Nodes are '"+nodesInfo+"'":""));
-		}
-	}
-	
-	/**
-	 * Used to launch standalone-server, grid-hub or grid-node.<br>
-	 * @param host String, the host name of the selenium server/node
-	 * @param port String, the port number of the selenium server/node
-	 * @param params String[], the extra parameters for starting server/node
-	 * <ul>
-	 * <li>params[0] role String, the role option, it can be<br> 
-	 *               "" for standalone server<br>
-	 *               "-role hub" for grid hub server<br>
-	 *               "-role node -hub HubRegisterUrl" for grid node<br>
-	 * </ul> 
-	 * @throws SeleniumPlusException
-	 */
-	private boolean launchSeleniumServers(String host, String port, String... params) throws SeleniumPlusException{
-		String debugmsg = StringUtils.debugmsg(false);
-		boolean serverStarted = false;
-		
-		Log.info(debugmsg+" starting server with Options: host="+ host+" port="+port+", params="+Arrays.toString(params));
-		//Prepare the optional parameters for starting Selenium Server.
-		//1. selenium server port
-		String serverPort = "";
-		if(!SeleniumConfigConstant.DEFAULT_SELENIUM_PORT.equals(port)){
-			serverPort = " "+OPTION_PORT+" "+port;
-		}
-		Log.info(debugmsg+" port Option: "+ serverPort);
-		//2. JVM options for starting selenium server
-		String serverJVMOptions = WebDriverGUIUtilities.getRemoteServerJVMOptions();
-		if(serverJVMOptions!=null && !serverJVMOptions.trim().isEmpty()){
-			//SELENIUMSERVER_JVM_OPTIONS=remoteServerJVMOptions
-			serverJVMOptions = SeleniumConfigConstant.SELENIUMSERVER_JVM_OPTIONS+GuiObjectRecognition.DEFAULT_ASSIGN_SEPARATOR+serverJVMOptions;
-		}else{
-			serverJVMOptions = "";
-		}
-		Log.info(debugmsg+" JVM Option: "+ serverJVMOptions);
-		//3. start the RMI server.
-		//   We need RMI server for the 2 situations:
-		//  a. "standalone server" on remote machine
-		//  b. "grid node" on remote machine with "grid hub" on local/remote machine
-		String rmiServer = "-"+SeleniumServerRunner.PROPERTY_RMISERVER;
-		
-		List<String> paramsList = new ArrayList<String>();
-		for(String param:params) paramsList.add(param);
-		paramsList.add(serverPort);
-		paramsList.add(serverJVMOptions);
-		
-		if(NetUtilities.isLocalHost(host)){
-			//Start the selenium server on the local machine
-			Log.info(debugmsg+" attempting to (re)start Server locally.");
-			String projectdir = null;
-			try{ projectdir = getVariable(STAFHelper.SAFS_VAR_PROJECTDIRECTORY);}
-			catch(SAFSException x){
-				Log.info(debugmsg+" getProjectDir ignoring "+x.getClass().getName()+", "+x.getMessage());
-			}
-
-			Log.debug(debugmsg+" getProjectDir '"+projectdir+"'.");
-			//locally testing, we don't need RMI server.
-			serverStarted = WebDriverGUIUtilities.startRemoteServer(projectdir, paramsList.toArray(new String[0]));
-
-			//TODO we need to modify the batch script for starting a selenium server (standalone, grid-hub, grid-node)
-			if(!serverStarted) serverStarted = WebDriverGUIUtilities.startRemoteServer();
-
-		}else{
-			//Start the selenium server on the remote machine
-			String launchServerCommand = " java "+RemoteDriver.class.getName();
-			
-			//pass parameters such as "port number", "JVM options", "rmiServer option", "server role" to start server on remote machine
-			//remotely testing, we need RMI server.
-			paramsList.add(rmiServer);
-			
-			for(String param:paramsList.toArray(new String[0])){
-				if(!StringUtils.isQuoted(param)) param = StringUtils.quote(param);
-				launchServerCommand += " "+param;
-			}
-			Log.info(debugmsg+" attempting to (re)start Server remotely at "+ host+":"+port+", with command \n"+ launchServerCommand);
-
-			String outputFile = "c:"+File.separator+"stafhandle_launch_RemoteDriver_standardoutput.txt";
-			String commandWithOutput = launchServerCommand + " STDOUT "+outputFile+" STDERRTOSTDOUT ";//Append STAF parameter 'STDOUT' and 'STDERRTOSTDOUT'
-			IndependantLog.debug(debugmsg+" RemoteServer launching, the console message will be in file '"+outputFile+"' on machine '"+host+"'");
-			
-			try {
-				//Try to start by STAFHandle, which requires STAF enabled in configuration file
-				//[STAF]
-				//NOSTAF=False
-				IndependantLog.debug(debugmsg+" Try to launch RemoteServer remotely by STAFHandle.");
-				STAFResult rc = testRecordData.getSTAFHelper().startProcess(host, commandWithOutput, null);
-				IndependantLog.debug(debugmsg+" STAFHandle launch RemoteServer, returned RC: "+rc.rc+" and result: "+rc.result);
-				serverStarted = (rc.rc==STAFResult.Ok);
-				if(!serverStarted) IndependantLog.warn(debugmsg+" STAFHandle launch RemoteServer Failed!");
-			} catch (Exception e) {
-				IndependantLog.warn(debugmsg+" STAFHandle launch RemoteServer Failed. "+StringUtils.debugmsg(e));
-			}
-
-			if(!serverStarted){
-				Process process = null;
-				ProcessCapture console = null;
-				try {
-					//try to launch the server on remote machine by launching directly a "staf machine process start command ..." command 
-					IndependantLog.debug(debugmsg+" Try to launch RemoteServer remotely by STAF process service.");
-					String stafCommand = "staf "+host+" process start command "+commandWithOutput;
-					IndependantLog.debug(debugmsg+" Runtime exec STAF command: "+stafCommand);
-					process = Runtime.getRuntime().exec(stafCommand);
-					console = new ProcessCapture(process, null, true, false);
-					try{ console.thread.join();}catch(InterruptedException x){;}
-					@SuppressWarnings("unchecked")
-					Vector<String> data = console.getData();
-					if(data!=null && data.size()>0){
-						for(String message:data){
-							if(message.startsWith(ProcessCapture.ERR_PREFIX) /*if get message from stadard err*/||
-									message.contains("RC:") /*some staf error message will be printed to standard out, not standard err*/){
-								throw new SAFSException(" Fail to execute command: "+stafCommand+" \n due to "+message);
-							}
-							//These are only STAF Response message, not interesting
-							//IndependantLog.debug(message);
-						}
-					}
-
-					serverStarted = true;
-				}catch(Exception e){
-					IndependantLog.warn(debugmsg+StringUtils.debugmsg(e));
-				}finally{
-					if(console!=null) console.shutdown();							
-				}
-			}
-
-//			if(!serverStarted){
-//				//TODO maybe try to launch the server on remote machine if there a "rshd" running there.
-//				try {
-//					Runtime.getRuntime().exec("rsh "+seleniumhost+launchServerCommand);
-//				} catch (IOException e) {
-//					IndependantLog.warn(debugmsg+StringUtils.debugmsg(e));
-//				}
-//			}
-		}
-		
-		return serverStarted;
 	}
 	
 	/**

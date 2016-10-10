@@ -123,3 +123,9 @@ td {
 	margin-left: auto;
 	margin-right: auto;
 }
+
+.property_key{
+    font-size: 90%;
+    font-weight: 700;
+    font-style:italic;
+}

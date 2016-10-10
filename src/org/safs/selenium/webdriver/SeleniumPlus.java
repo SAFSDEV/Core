@@ -126,6 +126,7 @@ import org.safs.tools.MainClass;
 import org.safs.tools.counters.CountStatusInterface;
 import org.safs.tools.counters.CountersInterface;
 import org.safs.tools.counters.UniqueStringCounterInfo;
+import org.safs.tools.drivers.DriverConstant;
 import org.safs.tools.drivers.JSAFSDriver;
 import org.safs.tools.logs.UniqueStringLogLevelInfo;
 import org.safs.tools.stringutils.StringUtilities;
@@ -793,6 +794,9 @@ public abstract class SeleniumPlus {
 		 *                                  which means the drag point is the center of the component.<br>
 		 * <b>params[1] fromSubItem</b> String, as text. e.g tree node or list item or any sub main component's item.<br>
 		 * <b>params[2] toSubItem</b> String, as text. e.g tree node or list item or any sub main component item.<br>
+		 * <b>params[3] pause</b> int, time in milliseconds to hold the mouse button at the "to component" area before releasing.
+		 *                             The default value is {@link DriverConstant#DEFAULT_SAFS_TEST_DND_RELEASE_DELAY} .<br>
+
 		 * </ul>
 		 * @return true if successfully executed, false otherwise.<p>
 		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
@@ -801,6 +805,7 @@ public abstract class SeleniumPlus {
 		 * {@code
 		 * boolean success = DragTo(Map.Google.Apps, Map.Google.Area);//Left-Drag from center of component Map.Google.Apps to center of component Map.Google.Area
 		 * boolean success = DragTo(Map.Google.Apps, Map.Google.Area, "20%,10%, %50, %60");//Left-Drag from (20%,10%) of component Map.Google.Apps to (%50, %60) of component Map.Google.Area
+		 * boolean success = DragTo(Map.Google.Apps, Map.Google.Area, "", "", "", "2000");//Left-Drag from center of component Map.Google.Apps to center of component Map.Google.Area, and hold the mouse button for 2 seconds at the component Map.Google.Area
 		 * //one of the above and then,
 		 * int rc = prevResults.getStatusCode();      // if useful
 		 * String info = prevResults.getStatusInfo(); // if useful
