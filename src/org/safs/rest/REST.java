@@ -43,19 +43,40 @@ public class REST {
 		return service;
 	}
 
+	/**
+	 * Start a named Service session with a specific web service.<br>
+	 * This doesn't actually make any type of Connection or call to the web service.
+	 * @param serviceId - unique name of the new Service session.
+	 * @param baseURL -- root URL used to interact with the service.
+	 * @param userId -- userId used to interact with the service.
+	 * @param password -- password used to interact with the service.
+	 * @return Service
+	 * @throws IllegalArgumentException if the serviceId is null or already exists.
+	 * @see #EndServiceSession(String)
+	 * @see Services#getService(String)
+	 */
+	public static Service StartServiceSession(String serviceId, String baseURL, String userId, String password) throws IllegalArgumentException{
+		Service service = new Service(serviceId, baseURL, userId, password);
+		Services.addService(service);
+		return service;
+	}
+
 	
 	/**
 	 * Start a named Service session with a specific web service.<br>
 	 * This doesn't actually make any type of Connection or call to the web service.
 	 * @param serviceId - unique name of the new Service session.
 	 * @param baseURL -- root URL used to interact with the service.
+	 * @param userId -- userId used to interact with the service.
+	 * @param password -- password used to interact with the service.
+	 * @param protocolVersion -- protocol version used to interact with the service.
 	 * @return Service
 	 * @throws IllegalArgumentException if the serviceId is null or already exists.
 	 * @see #EndServiceSession(String)
 	 * @see Services#getService(String)
 	 */
-	public static Service StartServiceSession(String serviceId, String baseURL, String protocolVersion) throws IllegalArgumentException{
-		Service service = new Service(serviceId, baseURL, protocolVersion);
+	public static Service StartServiceSession(String serviceId, String baseURL, String userId, String password, String protocolVersion) throws IllegalArgumentException{
+		Service service = new Service(serviceId, baseURL, userId, password, protocolVersion);
 		Services.addService(service);
 		return service;
 	}

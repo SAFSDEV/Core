@@ -4,6 +4,7 @@
  */
 package org.safs.rest.service;
 
+import org.apache.hc.client5.http.testframework.HttpClient5Adapter;
 import org.apache.hc.core5.http.HttpVersion;
 import org.apache.hc.core5.http.ProtocolVersion;
 import org.safs.SAFSRuntimeException;
@@ -25,7 +26,9 @@ public class Service{
 	private String password;
 	private String authType;
 	private ProtocolVersion protocolVersion = HttpVersion.HTTP_1_1;
-	
+	private String oauth2ServiceName;
+	private String clientAdapterClassName;
+	private Object clientAdapter;
 	
 	/**
 	 * Constructor
@@ -49,10 +52,26 @@ public class Service{
 	 * Constructor
 	 * @param serviceId
 	 * @param baseURL
+	 * @param userId
+	 * @param password
+	 */
+	public Service(String serviceId, String baseURL, String userId, String password) {
+		this(serviceId, baseURL);
+		setUserId(userId);
+		setPassword(password);
+		setOauth2ServiceName(oauth2ServiceName);
+	}
+
+	/**
+	 * Constructor
+	 * @param serviceId
+	 * @param baseURL
+	 * @param userId
+	 * @param password
 	 * @param protocolVersion
 	 */
-	public Service(String serviceId, String baseURL, String protocolVersion) {
-		this(serviceId, baseURL);
+	public Service(String serviceId, String baseURL, String userId, String password, String protocolVersion) {
+		this(serviceId, baseURL, userId, password);
 		setProtocolVersion(protocolVersion);
 	}
 
@@ -173,5 +192,47 @@ public class Service{
 	// for internal use only
 	ProtocolVersion getProtocolVersionObject() {
 		return protocolVersion;
+	}
+	
+	/**
+	 * @param oauth2ServiceName the service name of the oauth2 service
+	 */
+	public void setOauth2ServiceName(String oauth2ServiceName) {
+		this.oauth2ServiceName = oauth2ServiceName;
+	}
+
+	// for internal use only
+	String getOauth2ServiceName() {
+		return oauth2ServiceName;
+	}
+	
+	/**
+	 * To specify the use of a different client adapter, call this
+	 * with the class name of the adapter.
+	 * 
+	 * @param clientAdapterClassName the class name of the client adapter
+	 */
+	public void setClientAdapterClassName(String clientAdapterClassName) {
+		this.clientAdapterClassName = clientAdapterClassName;
+	}
+	
+	// for internal use only
+	String getClientAdapterClassName() {
+		return clientAdapterClassName;
+	}
+
+	// for internal use only
+	public Object getClientAdapter() throws Exception {
+		if (clientAdapter == null) {
+			if (clientAdapterClassName == null) {
+				// use HttpClient5 by default
+				clientAdapter = new HttpClient5Adapter();
+			} else {
+				Class<?> clazz = Class.forName(clientAdapterClassName);
+				clientAdapter = clazz.newInstance();
+			}
+		}
+		
+		return clientAdapter;
 	}
 }
