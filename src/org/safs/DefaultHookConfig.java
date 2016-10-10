@@ -8,12 +8,14 @@
  *
  * History:
  * MAR 25, 2016    (SBJLWA) Initial release.
+ * SEP 30, 2016    (SBJLWA) Modified check(): set the number lock if it is provided.
  */
 package org.safs;
 
 import org.safs.tools.drivers.ConfigureInterface;
 import org.safs.tools.drivers.DefaultDriver;
 import org.safs.tools.drivers.DriverConstant;
+import org.safs.tools.stringutils.StringUtilities;
 
 public class DefaultHookConfig implements HookConfig{
 	protected ConfigureInterface config = null;
@@ -47,29 +49,35 @@ public class DefaultHookConfig implements HookConfig{
 	 * Otherwise, keep the value in the System-Properties (don't override it by the value from ConfigureInterface).<br>
 	 * Finally these configuration settings may also be kept in the Processor so that the concrete Processor will be able to use it easily.
 	 * <br>
-	 * <b>Note: If the Hook run in an other JVM, the Engine's system settings will not take effect!</b><br>
+	 * <b>Note: If the Hook run in an other JVM, the Engine's system property settings will not take effect!</b><br>
 	 * 
 	 * <br>
-	 * The checked properties (configuration values) are listed as following:<br>
+	 * The checked "JVM properties"/"configuration values" are listed as following:<br>
 	 * <ul>
-	 * <li> {@link DriverConstant#PROERTY_SAFS_TEST_UNEXPECTEDALERTBEHAVIOUR} <br>
-	 *      ([{@link DriverConstant#SECTION_SAFS_TEST}] {@link DriverConstant#SECTION_SAFS_TEST_UNEXPECTEDALERTBEHAVIOUR})
+	 * <li> {@link DriverConstant#PROPERTY_SAFS_TEST_UNEXPECTEDALERTBEHAVIOUR} <br>
+	 *      ([{@link DriverConstant#SECTION_SAFS_TEST}] {@link DriverConstant#KEY_SAFS_TEST_UNEXPECTEDALERTBEHAVIOUR})
 	 * <li> {@link DriverConstant#PROPERTY_SAFS_TEST_NUMLOCKON} <br>
-	 *      ([{@link DriverConstant#SECTION_SAFS_TEST}] {@link DriverConstant#SECTION_SAFS_TEST_NUMLOCKON})
+	 *      ([{@link DriverConstant#SECTION_SAFS_TEST}] {@link DriverConstant#KEY_SAFS_TEST_NUMLOCKON})
 	 * </ul>
 	 * 
 	 * @see #checkConfiguration()
 	 * @see DefaultDriver#validateTestParameters()
 	 */
 	public static void check(ConfigureInterface config){
-		String unexpectedAlertBehaviour = StringUtils.getSystemProperty(DriverConstant.PROERTY_SAFS_TEST_UNEXPECTEDALERTBEHAVIOUR, 
-				config, DriverConstant.SECTION_SAFS_TEST, DriverConstant.SECTION_SAFS_TEST_UNEXPECTEDALERTBEHAVIOUR, DriverConstant.DEFAULT_UNEXPECTED_ALERT_BEHAVIOUR);				
-		IndependantLog.debug("the system property '" + DriverConstant.PROERTY_SAFS_TEST_UNEXPECTEDALERTBEHAVIOUR+"' is '"+unexpectedAlertBehaviour+"'.");
+		String unexpectedAlertBehaviour = StringUtils.getSystemProperty(DriverConstant.PROPERTY_SAFS_TEST_UNEXPECTEDALERTBEHAVIOUR, 
+				config, DriverConstant.SECTION_SAFS_TEST, DriverConstant.KEY_SAFS_TEST_UNEXPECTEDALERTBEHAVIOUR, DriverConstant.DEFAULT_UNEXPECTED_ALERT_BEHAVIOUR);				
+		IndependantLog.debug("the system property '" + DriverConstant.PROPERTY_SAFS_TEST_UNEXPECTEDALERTBEHAVIOUR+"' is '"+unexpectedAlertBehaviour+"'.");
 		Processor.setUnexpectedAlertBehaviour(unexpectedAlertBehaviour);
 
+		//Set the keyboard's 'NumLock' on/off.
 		String numberlock = StringUtils.getSystemProperty(DriverConstant.PROPERTY_SAFS_TEST_NUMLOCKON, 
-				config, DriverConstant.SECTION_SAFS_TEST, DriverConstant.SECTION_SAFS_TEST_NUMLOCKON);				
+				config, DriverConstant.SECTION_SAFS_TEST, DriverConstant.KEY_SAFS_TEST_NUMLOCKON);				
 		IndependantLog.debug("the system property '" + DriverConstant.PROPERTY_SAFS_TEST_NUMLOCKON+"' is '"+numberlock+"'.");
+		if(StringUtils.isValid(numberlock)){
+			//TODO Need to work remotely on RMI server.
+			Utils.setNumLock(StringUtilities.convertBool(numberlock));
+			IndependantLog.info("set KeyBoard 'NumLock' to "+ numberlock+"; The original 'NumLock' is "+DriverConstant.DEFAULT_NUMLOCK_STATUS);
+		}
 
 	}
 	

@@ -1716,21 +1716,18 @@ public class GenericObjectFunctions {
     }
 
 
-    /*********** <pre> 
-                  A left mouse drag is performed from one object to another object based on the offsets values.
-                
-                  Drag will be performed from component (from-component) to another to-component. Offsets value are the drag object select location. The location (drag and release) calucate by X and Y percentage cordination. DragTo also supports sub item of component and  sub item of to-component.
-                  
-                   The coordination specify by offsets value. First two values are for from-component and another are for to-component.
-                  
-        Offsets can be 50%,50%,50%,50% or 50%;50%;50%;50%
-                  
-                   
-	T, WINDOW,COMPONENT, DRAGTO, ToWINDOW,ToCOMPONENT,"50%,50%,50%,50%"
-	Where first 50%,50% are COMPONENT or their subitem's X and Y location
-	and second 50%,50% are ToCOMPONENT or their subitem's X and Y location.
-		             
-                    </pre>    Supporting Engines:
+    /*********** <pre>
+            A left mouse drag is performed from one object to another object based
+            on the offsets values.
+        
+            Drag will be performed from component (from-component) to another
+                to-component. Offsets value are the drag object select location. The
+                location (drag and release) calucate by X and Y percentage
+                cordination. DragTo also supports sub item of component and sub item
+                of to-component.
+             The coordination specify by offsets value. First two values are
+                for from-component and another are for to-component.
+            </pre>    Supporting Engines:
     <P/><UL>
         <LI>Automated QA TestComplete</LI>
         <LI>OpenQA Selenium</LI>
@@ -1740,24 +1737,19 @@ public class GenericObjectFunctions {
             The name of the window to act upon.
      @param compname  Optional:NO
             The name of the component to act upon.
-     @param toWindow  Optional:NO 
-                  ToWindow object.
-                
-     @param toComponent  Optional:NO 
-		    ToComponent object.
-		  
+     @param toWindow  Optional:NOToWindow object.
+     @param toComponent  Optional:NOToComponent object.
      @param offsets  Optional:YES 
-		    Drag and release location of from-component and to-component. Offsets syntax will be "50%,50%,70%,70%, where first two percentages for from-component's X and Y location and second two are for to-component's X and Y location. If offsets isn't specify then center will be used."
-		    Default value, both components center
-		  
-     @param fromSubItem  Optional:YES 
-		    Text of from-component's sub item.
-		  
-     @param toSubItem  Optional:YES 
-		    Text of to-component's sub item.
-		  
+                Drag and release location of from-component and to-component. 
+                Offsets syntax will be "50%,50%,70%,70%"", where first two percentages are for from-component 
+                and second two are for to-component. If offsets are not specified then center will be used.
+                Default value, both components center.
+              
+     @param fromSubItem  Optional:YESText of from-component's sub item.
+     @param toSubItem  Optional:YESText of to-component's sub item.
+     @param pause  Optional:YESPause time in millisecond to hold the button before releasing.
      **********/
-    static public ComponentFunction dragTo (String winname, String compname, String toWindow, String toComponent, String offsets, String fromSubItem, String toSubItem) {
+    static public ComponentFunction dragTo (String winname, String compname, String toWindow, String toComponent, String offsets, String fromSubItem, String toSubItem, String pause) {
 
         if ( winname == null ) throw new IllegalArgumentException ( "dragTo.winname = null");
         if ( compname == null ) throw new IllegalArgumentException ( "dragTo.compname = null");
@@ -1770,25 +1762,23 @@ public class GenericObjectFunctions {
         cf.addParameter(offsets);
         cf.addParameter(fromSubItem);
         cf.addParameter(toSubItem);
+        cf.addParameter(pause);
         return cf;
     }
 
 
-    /*********** <pre> 
-                  A left mouse drag is performed from one object to another object based on the offsets values.
-                
-                  Drag will be performed from component (from-component) to another to-component. Offsets value are the drag object select location. The location (drag and release) calucate by X and Y percentage cordination. DragTo also supports sub item of component and  sub item of to-component.
-                  
-                   The coordination specify by offsets value. First two values are for from-component and another are for to-component.
-                  
-        Offsets can be 50%,50%,50%,50% or 50%;50%;50%;50%
-                  
-                   
-	T, WINDOW,COMPONENT, DRAGTO, ToWINDOW,ToCOMPONENT,"50%,50%,50%,50%"
-	Where first 50%,50% are COMPONENT or their subitem's X and Y location
-	and second 50%,50% are ToCOMPONENT or their subitem's X and Y location.
-		             
-                    </pre>    
+    /*********** <pre>
+            A left mouse drag is performed from one object to another object based
+            on the offsets values.
+        
+            Drag will be performed from component (from-component) to another
+                to-component. Offsets value are the drag object select location. The
+                location (drag and release) calucate by X and Y percentage
+                cordination. DragTo also supports sub item of component and sub item
+                of to-component.
+             The coordination specify by offsets value. First two values are
+                for from-component and another are for to-component.
+            </pre>    
     Supporting Engines:
     <P/><UL>
         <LI>Automated QA TestComplete</LI>
@@ -1802,18 +1792,12 @@ public class GenericObjectFunctions {
      @param parameters  Optional:NO
             An array containing the following parameters:
     <UL>
-<BR/>        toWindow -- Optional:NO 
-                  ToWindow object.
-                <BR/>        toComponent -- Optional:NO 
-		    ToComponent object.
-		  <BR/>        offsets -- Optional:YES 
-		    Drag and release location of from-component and to-component. Offsets syntax will be "50%,50%,70%,70%, where first two percentages for from-component's X and Y location and second two are for to-component's X and Y location. If offsets isn't specify then center will be used."
-		    Default value, both components center
-		  <BR/>        fromSubItem -- Optional:YES 
-		    Text of from-component's sub item.
-		  <BR/>        toSubItem -- Optional:YES 
-		    Text of to-component's sub item.
-		  
+<BR/>        toWindow -- Optional:NOToWindow object.<BR/>        toComponent -- Optional:NOToComponent object.<BR/>        offsets -- Optional:YES 
+                Drag and release location of from-component and to-component. 
+                Offsets syntax will be "50%,50%,70%,70%"", where first two percentages are for from-component 
+                and second two are for to-component. If offsets are not specified then center will be used.
+                Default value, both components center.
+              <BR/>        fromSubItem -- Optional:YESText of from-component's sub item.<BR/>        toSubItem -- Optional:YESText of to-component's sub item.<BR/>        pause -- Optional:YESPause time in millisecond to hold the button before releasing.
     </UL>
 
      **********/

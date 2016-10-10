@@ -17,6 +17,8 @@
  * <br> LeiWang SEP 18, 2015  Add waitReaction() and modify inputKeys()/inputChars(): wait reaction of browser
  *                            for input keys if the switch 'waitReaction' is on.
  *                            Add method to clear/set/get system clip-board, and testInputKeys().
+ * <br> LeiWang SEP 30, 2016  Added leftDrag(), rightDrag(), centerDrag(): provide an extra parameter 'dndReleaseDelay'. 
+ *                            Added property 'dndReleaseDelay', which controls the global setting.
  */
 package org.safs.robot;
 
@@ -46,6 +48,7 @@ import org.safs.SAFSException;
 import org.safs.StringUtils;
 import org.safs.jvmagent.AgentClassLoader;
 import org.safs.text.INIFileReader;
+import org.safs.tools.drivers.DriverConstant;
 import org.safs.tools.input.CreateUnicodeMap;
 import org.safs.tools.input.InputKeysParser;
 import org.safs.tools.input.RobotClipboardPasteEvent;
@@ -74,6 +77,8 @@ public class Robot {
 	
 	/** 800 */
 	public static final int DEFAULT_MILLIS_BETWEEN_MOUSE_RELEASE = 800;
+	/** The delay in millisecond before releasing mouse button when 'drag and drop'.*/
+	private static int dndReleaseDelay = DriverConstant.DEFAULT_SAFS_TEST_DND_RELEASE_DELAY;
 	
 	/**
 	 * To make mouse drag correctly, after mouse key is pressed down, 
@@ -151,6 +156,19 @@ public class Robot {
 	 */
 	public static int getMillisBetweenKeystrokes(){
 		return millisBetweenKeystrokes;
+	}
+	
+	/**
+	 * @return int, The delay in millisecond before releasing mouse button when 'drag and drop'
+	 */
+	public static int getDndReleaseDelay() {
+		return dndReleaseDelay;
+	}
+	/**
+	 * @param dndReleaseDelay int, The delay in millisecond before releasing mouse button when 'drag and drop'
+	 */
+	public static void setDndReleaseDelay(int dndReleaseDelay) {
+		Robot.dndReleaseDelay = dndReleaseDelay;
 	}
 	
 	/**
@@ -380,7 +398,7 @@ public class Robot {
 	 * @param y screen Y coordinate
 	 * @param buttonmask -- specific InputEvent.BUTTONn_MASK(s) 
 	 * @param nclicks -- number of times to click (press and release)
-	 * @param delayToRelease -- number of millis to wait before final Release.
+	 * @param dndReleaseDelay -- number of millis to wait before final Release.
 	 * @return Object Currently we return a Boolean(true) object, but this may 
 	 * be subject to change.
 	 * 
@@ -388,14 +406,14 @@ public class Robot {
 	 * @see java.awt.Robot#mousePress(int)
 	 * @see java.awt.event.InputEvent#BUTTON1_MASK
 	 */
-	public static Object click(int x, int y, int buttonmask, int nclicks, int delayToRelease)throws java.awt.AWTException{
+	public static Object click(int x, int y, int buttonmask, int nclicks, int dndReleaseDelay)throws java.awt.AWTException{
 		java.awt.Robot bot = getRobot();
-		Log.info("Robot click at:"+ x +","+ y +" using button mask "+ buttonmask +" "+ nclicks +" times with release delay "+ delayToRelease);
+		Log.info("Robot click at:"+ x +","+ y +" using button mask "+ buttonmask +" "+ nclicks +" times with release delay "+ dndReleaseDelay);
 		bot.mouseMove(x, y);
 		for(int i = 0; i < nclicks; i++){
 			bot.mousePress(buttonmask);
 			if(i == nclicks-1) {
-				bot.delay(delayToRelease);
+				bot.delay(dndReleaseDelay);
 			}
 			bot.mouseRelease(buttonmask);
 		}
@@ -432,7 +450,7 @@ public class Robot {
 	 * @param buttonmask -- specific InputEvent.BUTTONn_MASK(s) 
 	 * @param keycode -- specific keycode to press & release. Ex: KeyEvent.VK_SHIFT 
 	 * @param nclicks -- number of times to click (press and release)
-	 * @param delayToRelease -- number of millis to wait before final Release.
+	 * @param dndReleaseDelay -- number of millis to wait before final Release.
 	 * @return Object Currently we return a Boolean(true) object, but this may 
 	 * be subject to change.
 	 * 
@@ -440,12 +458,12 @@ public class Robot {
 	 * @see java.awt.Robot#mousePress(int)
 	 * @see java.awt.event.InputEvent#BUTTON1_MASK
 	 */
-	public static Object clickWithKeyPress(int x, int y, int buttonmask, int keycode, int nclicks, int delayToRelease)throws java.awt.AWTException{
+	public static Object clickWithKeyPress(int x, int y, int buttonmask, int keycode, int nclicks, int dndReleaseDelay)throws java.awt.AWTException{
 		java.awt.Robot bot = getRobot();
-		Log.info("Robot click at:"+ x +","+ y +" using button mask "+ buttonmask +", keycode "+ keycode +", "+ nclicks +" times with delay to release "+ delayToRelease);
+		Log.info("Robot click at:"+ x +","+ y +" using button mask "+ buttonmask +", keycode "+ keycode +", "+ nclicks +" times with delay to release "+ dndReleaseDelay);
 		bot.mouseMove(x, y);
 		bot.keyPress(keycode);
-		click(x,y,buttonmask,nclicks,delayToRelease);
+		click(x,y,buttonmask,nclicks,dndReleaseDelay);
 		bot.keyRelease(keycode);
 		return new Boolean(true);
 	}
@@ -476,14 +494,14 @@ public class Robot {
 	 * single mousePress and Release to execute a Click.
 	 * @param x
 	 * @param y
-	 * @param delayToRelease -- number of millis to wait before final Release.
+	 * @param dndReleaseDelay -- number of millis to wait before final Release.
 	 * @return Object Currently we return a Boolean(true) object, but this may 
 	 * be subject to change.
 	 * @throws java.awt.AWTException if instantiating java.awt.Robot throws it.
 	 * @see java.awt.Robot
 	 */
-	public static Object click(int x, int y, int delayToRelease) throws java.awt.AWTException{
-		return click(x,y,InputEvent.BUTTON1_MASK,1, delayToRelease);
+	public static Object click(int x, int y, int dndReleaseDelay) throws java.awt.AWTException{
+		return click(x,y,InputEvent.BUTTON1_MASK,1, dndReleaseDelay);
 	}
 
 	/**
@@ -534,14 +552,14 @@ public class Robot {
 	 * single mousePress and Release to execute a RightClick.
 	 * @param x
 	 * @param y
-	 * @param delayToRelease millis between final release.
+	 * @param dndReleaseDelay millis between final release.
 	 * @return Object Currently we return a Boolean(true) object, but this may 
 	 * be subject to change.
 	 * @throws java.awt.AWTException if instantiating java.awt.Robot throws it.
 	 * @see java.awt.Robot
 	 */
-	public static Object rightClick(int x, int y, int delayToRelease) throws java.awt.AWTException{
-		return click(x,y,InputEvent.BUTTON3_MASK,1, delayToRelease);
+	public static Object rightClick(int x, int y, int dndReleaseDelay) throws java.awt.AWTException{
+		return click(x,y,InputEvent.BUTTON3_MASK,1, dndReleaseDelay);
 	}
 
 	
@@ -593,13 +611,13 @@ public class Robot {
 	 * @param Point screen coordinates to start of mouse press and drag.
 	 * @param Point screen coordinates to end mouse drag and mouse release.
 	 * @param int button masks to use during drag
-	 * @param delayToRelease millis before final release.
+	 * @param dndReleaseDelay millis before final release.
 	 * @return Object Currently we return a Boolean(true) object, but this may 
 	 * be subject to change.
 	 * @throws java.awt.AWTException if instantiating java.awt.Robot throws it.
 	 * @see java.awt.Robot
 	 */
-	public static Object mouseDrag(java.awt.Point start, java.awt.Point end, int buttonMasks, int delayToRelease) throws java.awt.AWTException{
+	public static Object mouseDrag(java.awt.Point start, java.awt.Point end, int buttonMasks, int dndReleaseDelay) throws java.awt.AWTException{
 		java.awt.Robot bot = getRobot();
 		Log.info("Robot mouseDrag from:"+ start +" to:"+ end +" using button mask "+ buttonMasks);
 		bot.mouseMove(start.x, start.y);
@@ -611,7 +629,7 @@ public class Robot {
 		bot.mouseMove(end.x+dragEndPointOffset.x, end.y+dragEndPointOffset.y);
 		bot.delay(150);
 		bot.mouseMove(end.x, end.y);
-		bot.delay(delayToRelease);
+		bot.delay(dndReleaseDelay);
 	    bot.mouseRelease(buttonMasks);
 		return new Boolean(true);
 	}
@@ -628,7 +646,7 @@ public class Robot {
 	 * @see java.awt.Robot
 	 */
 	public static Object mouseDrag(java.awt.Point start, java.awt.Point end, int buttonMasks) throws java.awt.AWTException{
-		return mouseDrag(start, end, buttonMasks, DEFAULT_MILLIS_BETWEEN_MOUSE_RELEASE);
+		return mouseDrag(start, end, buttonMasks, dndReleaseDelay);
 	}
 	
 	/**
@@ -811,7 +829,6 @@ public class Robot {
 	 * @param Point screen coordinates to end mouse drag and mouse release.
 	 * @return Object returned from generic mouseDrag.
 	 * @throws java.awt.AWTException if instantiating java.awt.Robot throws it.
-	 * @see java.awt.Robot
 	 * @see #mouseDrag(Point,Point,int)
 	 */
 	public static Object leftDrag(java.awt.Point start, java.awt.Point end) throws java.awt.AWTException{
@@ -825,7 +842,7 @@ public class Robot {
 	 * @param Point screen coordinates to end mouse drag and mouse release.
 	 * @return Object returned from generic mouseDrag.
 	 * @throws java.awt.AWTException if instantiating java.awt.Robot throws it.
-	 * @see java.awt.Robot
+	 * @see #mouseDrag(Point,Point,int)
 	 */
 	public static Object rightDrag(java.awt.Point start, java.awt.Point end) throws java.awt.AWTException{
 		return mouseDrag(start, end, InputEvent.BUTTON3_MASK);
@@ -838,10 +855,52 @@ public class Robot {
 	 * @param Point screen coordinates to end mouse drag and mouse release.
 	 * @return Object returned from generic mouseDrag.
 	 * @throws java.awt.AWTException if instantiating java.awt.Robot throws it.
-	 * @see java.awt.Robot
+	 * @see #mouseDrag(Point,Point,int)
 	 */
 	public static Object centerDrag(java.awt.Point start, java.awt.Point end) throws java.awt.AWTException{
 		return mouseDrag(start, end, InputEvent.BUTTON2_MASK);
+	}
+	
+	/**
+	 * Move the mouse cursor to the specified start Point coordinates then perform a 
+	 * single mousePress (Button1) and drag\move then Release the mouse button at the end point.
+	 * @param Point screen coordinates to start of mouse press and drag.
+	 * @param Point screen coordinates to end mouse drag and mouse release.
+	 * @param dndReleaseDelay millisecond before final release.
+	 * @return Object returned from generic mouseDrag.
+	 * @throws java.awt.AWTException if instantiating java.awt.Robot throws it.
+	 * @see #mouseDrag(Point, Point, int, int)
+	 */
+	public static Object leftDrag(java.awt.Point start, java.awt.Point end, int dndReleaseDelay) throws java.awt.AWTException{
+		return mouseDrag(start, end, InputEvent.BUTTON1_MASK, dndReleaseDelay);
+	}
+	
+	/**
+	 * Move the mouse cursor to the specified start Point coordinates then perform a 
+	 * single mousePress (Button3) and drag\move then Release the mouse button at the end point.
+	 * @param Point screen coordinates to start of mouse press and drag.
+	 * @param Point screen coordinates to end mouse drag and mouse release.
+	 * @param dndReleaseDelay millisecond before final release.
+	 * @return Object returned from generic mouseDrag.
+	 * @throws java.awt.AWTException if instantiating java.awt.Robot throws it.
+	 * @see #mouseDrag(Point, Point, int, int)
+	 */
+	public static Object rightDrag(java.awt.Point start, java.awt.Point end, int dndReleaseDelay) throws java.awt.AWTException{
+		return mouseDrag(start, end, InputEvent.BUTTON3_MASK, dndReleaseDelay);
+	}
+	
+	/**
+	 * Move the mouse cursor to the specified start Point coordinates then perform a 
+	 * single mousePress (Button2) and drag\move then Release the mouse button at the end point.
+	 * @param Point screen coordinates to start of mouse press and drag.
+	 * @param Point screen coordinates to end mouse drag and mouse release.
+	 * @param dndReleaseDelay millisecond before final release.
+	 * @return Object returned from generic mouseDrag.
+	 * @throws java.awt.AWTException if instantiating java.awt.Robot throws it.
+	 * @see #mouseDrag(Point, Point, int, int)
+	 */
+	public static Object centerDrag(java.awt.Point start, java.awt.Point end, int dndReleaseDelay) throws java.awt.AWTException{
+		return mouseDrag(start, end, InputEvent.BUTTON2_MASK, dndReleaseDelay);
 	}
 	
 	/**
