@@ -58,16 +58,16 @@ public class AutoItXPlus extends AutoItX {
 	public final static String AUTOIT_SUPPORT_PRESS_LWINDOWS 	= "LWIN";
 	public final static String AUTOIT_SUPPORT_PRESS_RWINDOWS 	= "RWIN";
 	
-	public final static String AUTOIT_ALT_DOWN 			= "{ALTDOWN}";
+	public final static String AUTOIT_ALT_DOWN 				= "{ALTDOWN}";
 	public final static String AUTOIT_ALT_UP 				= "{ALTUP}";
 	public final static String AUTOIT_SHIFT_DOWN 			= "{SHIFTDOWN}";
-	public final static String AUTOIT_SHIFT_UP 			= "{SHIFTUP}";
+	public final static String AUTOIT_SHIFT_UP 				= "{SHIFTUP}";
 	public final static String AUTOIT_CTRL_DOWN 			= "{CTRLDOWN}";
 	public final static String AUTOIT_CTRL_UP 				= "{CTRLUP}";
 	public final static String AUTOIT_LEFT_WINDOWS_DOWN 	= "{LWINDOWN}";
 	public final static String AUTOIT_LEFT_WINDOWS_UP		= "{LWINUP}";
 	public final static String AUTOIT_RIGHT_WINDOWS_DOWN 	= "{RWINDOWN}";
-	public final static String AUTOIT_RIGHT_WINDOWS_UP 	= "{RWINUP}";
+	public final static String AUTOIT_RIGHT_WINDOWS_UP 		= "{RWINUP}";
 	
 	/** AutoIt's click button constants **/
 	public final static String AUTOIT_MOUSE_BUTTON_LEFT   = "left";
