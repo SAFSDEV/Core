@@ -45,7 +45,6 @@ import org.safs.logging.LogUtilities;
 import org.safs.model.commands.DDDriverCommands;
 import org.safs.model.commands.DriverCommands;
 import org.safs.model.commands.EditBoxFunctions;
-import org.safs.model.commands.GenericObjectFunctions;
 import org.safs.text.FAILStrings;
 import org.safs.text.GENKEYS;
 import org.safs.tools.drivers.DriverConstant;
