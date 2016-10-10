@@ -7,6 +7,7 @@ package org.safs.tools.drivers;
  * History:
  * APR 07, 2015    (Lei Wang) Add static class SeleniumConfigConstant.
  * SEP 24, 2015    (Lei Wang) Add static class MailConstant.
+ * OCT 09, 2016    (Lei Wang) Modified 2 wrongly-named constant, corrected a typo and added constants about DndReleaseDelay.
  */
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
@@ -393,17 +394,27 @@ public class DriverConstant extends JavaConstant{
 	/** "numLockOn" option under section
 	 * [SAFS_TEST]
 	 * numLockOn=TRUE|FALSE */
-	public static final String SECTION_SAFS_TEST_NUMLOCKON ="numLockOn";
+	public static final String KEY_SAFS_TEST_NUMLOCKON ="numLockOn";
 	
 	/** 'Ignore' it is the default value for handling the unexpected alert dialog */
 	public static final String DEFAULT_UNEXPECTED_ALERT_BEHAVIOUR = "ignore";
 	/** "safs.test.unexpected_alert_behaviour" <br>
 	 * JVM command line: -Dsafs.test.unexpected_alert_behaviour=accept|dismiss|ignore */
-	public static final String PROERTY_SAFS_TEST_UNEXPECTEDALERTBEHAVIOUR = "safs.test.unexpected_alert_behaviour";
+	public static final String PROPERTY_SAFS_TEST_UNEXPECTEDALERTBEHAVIOUR = "safs.test.unexpected_alert_behaviour";
 	/** "UnexpectedAlertBehaviour" option under section
 	 * [SAFS_TEST]
 	 * UnexpectedAlertBehaviour=accept|dismiss|ignore */
-	public static final String SECTION_SAFS_TEST_UNEXPECTEDALERTBEHAVIOUR ="UnexpectedAlertBehaviour";
+	public static final String KEY_SAFS_TEST_UNEXPECTEDALERTBEHAVIOUR ="UnexpectedAlertBehaviour";
+
+	/** '800' milliseconds, it is the default value for delay before releasing mouse when 'drag and drop' */
+	public static final int DEFAULT_SAFS_TEST_DND_RELEASE_DELAY  = 800;
+	/** "safs.test.dnd.release.delay" the delay in millisecond before releasing mouse<br>
+	 * JVM command line: -Dsafs.test.dnd.release.delay=N*/
+	public static final String PROPERTY_SAFS_TEST_DND_RELEASE_DELAY = "safs.test.dnd.release.delay";
+	/** "DndReleaseDelay" option (the delay in millisecond before releasing mouse) under section
+	 * [SAFS_TEST]
+	 * DndReleaseDelay=N */
+	public static final String KEY_SAFS_TEST_DND_RELEASE_DELAY ="DndReleaseDelay";
 	
     /** "safs.log.level" <br>
 	 * JVM command line: -Dsafs.log.level=ERROR|WARN|PASS|GENERIC|INDEX|INFO|DEBUG **/
