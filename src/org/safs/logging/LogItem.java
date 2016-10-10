@@ -1,3 +1,7 @@
+/**
+ * Developer Logs:
+ * OCT 10, 2016		(Lei Wang)	Modified dateTime(): the hour will be always in 2-digit format.
+ */
 package org.safs.logging;
 
 import java.util.*;
@@ -106,7 +110,7 @@ public abstract class LogItem
 	 */
 	public static String dateTime(int dateOrTime)
 	{
-		String pattern = (dateOrTime == 0)? "MM-dd-yyyy" : "H:mm:ss";
+		String pattern = (dateOrTime == 0)? "MM-dd-yyyy" : "HH:mm:ss";
 		SimpleDateFormat formatter = new SimpleDateFormat(pattern);
 		return formatter.format(new Date());
 	}
