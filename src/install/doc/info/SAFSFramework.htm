@@ -1,0 +1,59 @@
+<html>
+<head><title>SAFS Framework Development</title></head>
+<body>
+<h2>SAFS Framework Development</h2>
+by Carl Nagle<br>
+Last Updated:
+<script language="JavaScript">document.write(document.lastModified)</script>
+<a name="top"/>
+<p>
+This document attempts to illustrate the basic flow of our ever-growing SAFS Framework Architecture.  This document will grow with information as our development moves forward.
+<p>
+See also:
+<a href="JSAFSFramework.htm" target="_top">Java Interface</a>,
+<a href="http://safsdev.sourceforge.net" target="_top">SAFSDEV Project</a>
+<p>
+<b>Fig. 1: SAFS Framework Architecture Flow</b>
+<p>
+<center><b>(click a node for API info)</b></center>
+<center>
+<img src="SAFSFramework.gif" alt="SAFS Framework Overview" usemap="#framework"/>
+</center>
+<p>
+Figure 1 shows the existing SAFS Framework tools and STAF services.  The upcoming Selenium engine is also shown. The completion of this engines is tentatively expected in the first quarter of 2008.
+<map name="framework">
+<area alt="User-Defined App Maps" nohref coords="349,41,469,92" shape="rect"/>
+<area alt="User-Defined Test Tables" nohref coords="349,107,469,176" shape="rect"/>
+<area alt="User-Defined Benchmarks" nohref coords="349,197,469,248" shape="rect"/>
+<area alt="User-Defined Test Assets" nohref coords="337,23,481,266" shape="rect"/>
+<area alt="STAF SAFSLOGS" href="http://safsdev.sourceforge.net/doc/org/safs/staf/service/logging/SAFSLoggingService.html" target="api" coords="526,68,646,101" shape="rect"/>
+<area alt="STAF SAFSVARS" href="http://safsdev.sourceforge.net/doc/org/safs/staf/service/SAFSVariableService.html" target="api" coords="526,116,646,149" shape="rect"/>
+<area alt="STAF SAFSMAPS" href="http://safsdev.sourceforge.net/doc/org/safs/staf/service/SAFSAppMapService.html" target="api" coords="526,164,646,197" shape="rect"/>
+<area alt="STAF SAFSINPUT" href="http://safsdev.sourceforge.net/doc/org/safs/staf/service/SAFSInputService.html" target="api" coords="526,212,646,245" shape="rect"/>
+<area alt="STAF Services" nohref coords="517,23,658,256" shape="rect"/>
+<area alt="IBM Rational Robot" href="http://safsdev.sourceforge.net/sqabasic2000/StepDriver.htm" target="api" coords="697,41,838,95" shape="rect" />
+<area alt="SAFSDRIVER" href="http://safsdev.sourceforge.net/doc/org/safs/tools/drivers/SAFSDRIVER.html" target="api" coords="697,119,838,170" shape="rect" />
+<area alt="Mercury WinRunner" nohref coords="688,206,860,260" shape="rect"/>
+<area alt="SAFS Drivers" nohref coords="690,38,860,265" shape="rect"/>
+<area alt="SAFSROBOTJ" href="http://safsdev.sourceforge.net/doc/org/safs/tools/engines/SAFSROBOTJ.html" target="api" coords="925,68,1033,110" shape="rect" />
+<area alt="SAFSDRIVERCOMMANDS" href="http://safsdev.sourceforge.net/doc/org/safs/tools/engines/SAFSDRIVERCOMMANDS.html" target="api" coords="901,119,1057,161" shape="rect" />
+<area alt="SAFSSELENIUM" href="http://safsdev.sourceforge.net/doc/org/safs/tools/engines/SAFSSELENIUM.html" target="api" coords="919,173,1036,215" shape="rect" />
+<area alt="SAFSABBOT" href="http://safsdev.sourceforge.net/doc/org/safs/tools/engines/SAFSABBOT.html" target="api" coords="925,224,1033,269" shape="rect" />
+<area alt="SAFS Engines" nohref coords="883,26,1072,284" shape="rect"/>
+<area alt="Tested Application" nohref coords="1111,23,1159,287" shape="rect"/>
+<area alt="Color Legend" nohref coords="15,245,261,284" shape="rect"/>
+</map>
+<p>
+Note: IBM Rational Robot (SAFS/RRAFS) currently cannot be run as a standalone SAFS/STAF engine.  It can be a Driver, it is its own engine, and it can talk to or drive other SAFS/STAF Engines like IBM Rational Functional Tester (SAFS/RobotJ).  However, currently IBM Rational Robot cannot be externally driven as a standard SAFS engine by another Driver like the TID (SAFSDRIVER).
+<p>
+Note: WinRunner (SAFS/WRAFS) is a standalone execution engine that cannot call other SAFS engines and it cannot be externally driven by another Driver like the TID (SAFSDRIVER).
+<p>
+Note: The Java JVMAgents and Abbot are essentially the same.  Abbot is a subclass implementation exploiting the tool-independent JVMAgents.  Abbot has minimal support implemented for proof-of-concept until such time as a greater need arises and resources are dedicated.
+<p>
+<b>Fig. 2: SAFS Framework Application Environment Support</b>
+<p>
+<img src="SAFSFrameworkSupport.gif" alt="SAFS Framework Support"/>
+<p>
+Figure 2 shows the existing SAFS Framework support.  This is intended to show which types of application environments are supported by specific toolsets.
+<hr>
+</body></html>

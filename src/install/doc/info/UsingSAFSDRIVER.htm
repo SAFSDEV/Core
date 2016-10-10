@@ -1,0 +1,44 @@
+<HTML>
+<HEAD>
+<TITLE>
+The TID: Using SAFSDRIVER
+</TITLE>
+</HEAD>
+<BODY>
+<H1>The TID: Using SAFSDRIVER</H1>
+<p>
+==============================================================================<br/>
+Author: Carl Nagle<br/>
+ Since: JUN 29, 2005
+<p>
+Copyright (2005) SAS Institute
+<a href="http://www.sas.com" target="altwin">http://www.sas.com</a><br/>
+<a href="http://www.opensource.org/licenses/gpl-license.php" target="altwin">General Public License (GPL)</a>:&nbsp;
+http://www.opensource.org/licenses/gpl-license.php<br/>
+==============================================================================
+<P>
+This document attempts to provide a single location for information regarding the setup and use of SAFSDRIVER -- the SAFS TID (Tool-Independent Driver). &nbsp;This document assumes the user has already successfully installed the latest SAFS Framework release.
+<P>
+From any command-prompt the user should be able to invoke the SAFS TID to run a simple sanity test. &nbsp;(All examples will assume the framework has been installed in the default location.)
+<p>
+<b>SAFS setup sanity test:
+<P>
+<pre>   java -Dsafs.project.config="C:\safs\project\TIDTest.ini" org.safs.tools.drivers.SAFSDRIVER
+</pre></b>
+<P>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/tools/drivers/SAFSDRIVER.html" target="altwin">Javadoc for SAFSDRIVER</a> contains info on command-line options and config file options.<br/>
+<a href="http://safsdev.sourceforge.net/doc/JSAFSFrameworkContent.htm#driveroptions">SAFSDRIVER Command-Line Options</a> ("-Dsafs.project.config=" above is an example of a command-line option.)<br/>
+<a href="http://safsdev.sourceforge.net/doc/JSAFSFrameworkContent.htm#configfile">SAFSDRIVER Config-File Options</a> (The specified "TIDTest.ini" file is an example of a config file.)<br/>
+<P>
+Without any additional work, the use of the TID by itself can only support "TID" and "SDC" commands shown in <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?rt=C&lib=DDDriverCommands&ref=SAFSReferenceKey.htm" target="altwin">the SAFS Reference</a>.  These are generally only a subset of the known Driver Commands.  To be able to actually test some application, we need to enable one or more SAFS Engines in the config file.
+<p>
+To tell the TID to use an engine, you generally tell it the classname of each engine that must be initialized.  Currently all supported SAFS Engines exist in the org.safs.tools.engines package.  You specify one or more engine classnames in the [SAFS_ENGINES] section of the config file as shown in the SAFSDRIVER Config-File Options linked above and subset below:
+<pre>
+   <b>[SAFS_ENGINES]</b>
+   First=<a href="http://safsdev.sourceforge.net/doc/org/safs/tools/engines/SAFSROBOTJ.html" target="altwin">org.safs.tools.engines.SAFSROBOTJ</a>
+   Second=<a href="http://safsdev.sourceforge.net/doc/org/safs/tools/engines/SAFSABBOT.html" target="altwin">org.safs.tools.engines.SAFSABBOT</a>
+</pre>
+Note, that each engine class will generally specify an additional config-file section and options that are needed in the INI file.  View the SAFSROBOTJ and SAFSABBOT links above and you will see examples of this.  For example, SAFSROBOTJ wants a <b>[SAFS_ROBOTJ]</b> section and SAFSABBOT wants a <b>[SAFS_ABBOT]</b> section in the test configuration file.
+<p>
+NOTE: As of this date the SAFSABBOT engine is not actually released for production.  There are additional setup requirements to enable the use of the SAFSABBOT engine that are subject to change until such time as the engine is ready for production.  At that time, the documentation for the SAFSABBOT engine should specify this information.
+</BODY></HTML>

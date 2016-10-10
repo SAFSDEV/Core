@@ -18,6 +18,7 @@
  *   <br>   NOV 26, 2015    (SBJLWA) Modify method getComponentRectangle(): include the frame's location for a webelement.
  *   <br>   FEB 25, 2016    (SBJLWA) Modify localProcess(): Set 'SearchContext' and 'RecognitionString' to libComponent for refreshing.
  *   <br>   APR 19, 2016    (SBJLWA) Modify componentClick(): Handle the optional parameter 'autoscroll'.
+ *   <br>   SEP 30, 2016    (SBJLWA) Modified dragTo(): support the extra parameter 'dndReleaseDelay'. 
  */
 package org.safs.selenium.webdriver;
 
@@ -929,8 +930,21 @@ public class CFComponent extends ComponentFunction{
 				offset = getPossibleMapItem(offset);
 			}
 			IndependantLog.debug(debugmsg+" offset is "+offset);
-			String[] offsetArray = StringUtils.convertCoordsToArray(offset, 4);
 			
+			//skip 2 parameters "fromSubItem" and "toSubItem"
+			if(iterator.hasNext()) iterator.next();
+			if(iterator.hasNext()) iterator.next();
+			//Get the parameter "dndReleaseDelay"
+			int dndReleaseDelay = Robot.getDndReleaseDelay();
+			if(iterator.hasNext()){
+				try{
+					dndReleaseDelay = Integer.parseInt(iterator.next());
+				}catch(NumberFormatException e){
+					IndependantLog.warn(debugmsg+"Met "+StringUtils.debugmsg(e));
+				}
+			}
+			
+			String[] offsetArray = StringUtils.convertCoordsToArray(offset, 4);
 			if(offsetArray==null){
 				throw new SAFSParamException(" Offset '"+offset+"' is not valid! The valid examples could be '20%,10%,%50,%60', '30,55,70,80', or even '20%,10%,70,80'.");
 			}
@@ -939,7 +953,7 @@ public class CFComponent extends ComponentFunction{
 			Point p2 = WDLibrary.getElementOffsetScreenLocation(toElement, offsetArray[2], offsetArray[3]);
 			
 			if(action.equalsIgnoreCase(GenericObjectFunctions.DRAGTO_KEYWORD)){
-				Robot.leftDrag(p1, p2);
+				Robot.leftDrag(p1, p2, dndReleaseDelay);
 			}else{
 				throw new SAFSException("Not supported yet.", SAFSException.CODE_ACTION_NOT_SUPPORTED);
 			}
