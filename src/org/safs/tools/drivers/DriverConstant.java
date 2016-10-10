@@ -7,6 +7,7 @@ package org.safs.tools.drivers;
  * History:
  * APR 07, 2015    (SBJLWA) Add static class SeleniumConfigConstant.
  * SEP 24, 2015    (SBJLWA) Add static class MailConstant.
+ * OCT 09, 2016    (SBJLWA) Modified 2 wrongly-named constant, corrected a typo and added constants about DndReleaseDelay.
  */
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
@@ -393,17 +394,27 @@ public class DriverConstant extends JavaConstant{
 	/** "numLockOn" option under section
 	 * [SAFS_TEST]
 	 * numLockOn=TRUE|FALSE */
-	public static final String SECTION_SAFS_TEST_NUMLOCKON ="numLockOn";
+	public static final String KEY_SAFS_TEST_NUMLOCKON ="numLockOn";
 	
 	/** 'Ignore' it is the default value for handling the unexpected alert dialog */
 	public static final String DEFAULT_UNEXPECTED_ALERT_BEHAVIOUR = "ignore";
 	/** "safs.test.unexpected_alert_behaviour" <br>
 	 * JVM command line: -Dsafs.test.unexpected_alert_behaviour=accept|dismiss|ignore */
-	public static final String PROERTY_SAFS_TEST_UNEXPECTEDALERTBEHAVIOUR = "safs.test.unexpected_alert_behaviour";
+	public static final String PROPERTY_SAFS_TEST_UNEXPECTEDALERTBEHAVIOUR = "safs.test.unexpected_alert_behaviour";
 	/** "UnexpectedAlertBehaviour" option under section
 	 * [SAFS_TEST]
 	 * UnexpectedAlertBehaviour=accept|dismiss|ignore */
-	public static final String SECTION_SAFS_TEST_UNEXPECTEDALERTBEHAVIOUR ="UnexpectedAlertBehaviour";
+	public static final String KEY_SAFS_TEST_UNEXPECTEDALERTBEHAVIOUR ="UnexpectedAlertBehaviour";
+
+	/** '800' milliseconds, it is the default value for delay before releasing mouse when 'drag and drop' */
+	public static final int DEFAULT_SAFS_TEST_DND_RELEASE_DELAY  = 800;
+	/** "safs.test.dnd.release.delay" the delay in millisecond before releasing mouse<br>
+	 * JVM command line: -Dsafs.test.dnd.release.delay=N*/
+	public static final String PROPERTY_SAFS_TEST_DND_RELEASE_DELAY = "safs.test.dnd.release.delay";
+	/** "DndReleaseDelay" option (the delay in millisecond before releasing mouse) under section
+	 * [SAFS_TEST]
+	 * DndReleaseDelay=N */
+	public static final String KEY_SAFS_TEST_DND_RELEASE_DELAY ="DndReleaseDelay";
 	
     /** "safs.log.level" <br>
 	 * JVM command line: -Dsafs.log.level=ERROR|WARN|PASS|GENERIC|INDEX|INFO|DEBUG **/
@@ -531,7 +542,7 @@ public class DriverConstant extends JavaConstant{
 	public static final String SECTION_SAFS_SELENIUM ="SAFS_SELENIUM";
 
 	/**
-	 * Define some constant strings used under section {@link DriverConstant#SECTION_SAFS_DIFFER} for Mail.
+	 * Define some constant strings used under section {@link DriverConstant#SECTION_SAFS_DRIVERCOMMANDS} for Mail.
 	 * 
 	 * @see org.safs.tools.mail.Mailer
 	 */
@@ -591,7 +602,7 @@ public class DriverConstant extends JavaConstant{
 		/**'5555' the default port number on which the SELENIUM node will run */
 		public static final String DEFAULT_SELENIUM_NODE_PORT = String.valueOf(DEFAULT_SELENIUM_NODE_PORT_INT);
 		
-		/** "SELENIUMNODE" define the selenium nodes to run. The value is something like "node1:port:nodeconfig;node2:port:nodeconfig".
+		/** "SELENIUMNODE" define the selenium nodes to run. The value is something like "node1.machine.name:port:nodeconfig;node2.machine.name:port:nodeconfig".
 		 * If this is not provided, then {@link #SELENIUMHOST} will be considered as "standalone server"
 		 * If this is provided, then {@link #SELENIUMHOST} will be considered as "grid hub" on which all nodes will register.
 		 * @see #SELENIUMHOST

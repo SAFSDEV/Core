@@ -1,0 +1,198 @@
+<html>
+<head><title>Building a SAFS Engine
+</title></head>
+<body>
+<h1>Building a SAFS Engine</h1>
+Last Updated by Carl Nagle:
+<script language="JavaScript">document.write(document.lastModified)</script>
+<p>
+This document will attempt to explain the Java-based implementation for SAFS engines. &nbsp;Specifically, how existing classes would be used or subclassed in the creation of a new Java-based engine.  &nbsp;Remember that SAFS engines use <a href="http://staf.sf.net">STAF</a> for cross-process communication. &nbsp;It is essential the engine developer become proficient in the use and understanding of what STAF offers.
+<p>
+Goto:
+<a href="#keydefinitions">Key Definitions</a>,
+<a href="#usingsubclassing">Using and Subclassing</a>,
+<a href="#standardcomponentrecognition">Standardizing Component Recognition</a>.
+<hr>
+<p><a name="keydefinitions"/>
+<i><h2>Key definitions:</h2></i>
+<p>
+<ul>
+<dl>
+<dt><h4>The Event-Driven Engine Protocol:</h4>
+<p>
+<dd>This protocol is officially defined in our
+    <a href="http://sourceforge.net/docman/display_doc.php?docid=17505&group_id=56751">
+    STAF Environment</a> doc.  See Table 2: "SAFS Multi-Process Syncronization" in that document.
+    &nbsp;It uses the internal <a href="http://staf.sourceforge.net/current/STAFUG.htm#HDRSEMSRV">SEM</a> service of STAF.
+<p>
+<ul><b>Key Protocol Events:</b>
+<p>
+<dl>
+<dt><b>&lt;=== Engine "Ready" ===></b>
+<dd>The engine is idle and "ready" for dispatch by any STAF client. &nbsp;All STAF clients listening for this event will be notified when the engine is ready.
+<p>
+<dt><b>&lt;=== Client "Dispatch" ===></b>
+<dd>A listening STAF client can seize the SAFS/Hook/TRD Mutex and "dispatch" the engine to process the test record it has stored in SAFSVARS.
+<p>
+<dt><b>&lt;=== Engine "Running" ===></b>
+<dd>The engine is now "running" a test record or performing other activities and is not available for dispatch.  &nbsp;All STAF clients listening for this event will be notified when the engine is running and, thus, not available.
+<p>
+<dt><b>&lt;=== Engine "Results" ===></b>
+<dd>The engine has completed processing and has stored the results in the shared SAFS/Hook data space.  &nbsp;All STAF clients listening for this event will be notified when the engine has completed processing and the results of that processing are available.  &nbsp;Generally, the only client really interested in this event is the one that dispatched the engine.
+<p>
+<dt><b>&lt;=== Client "Done" ===></b>
+<dd>The STAF client signals that it has retrieved the results from SAFSVARS.  &nbsp;The client would then release the SAFS/Hook/TRD Mutex and the engine would reset itself back into the "Ready" state.
+</dl>
+</ul>
+<p>
+<dt><h4>The STAF Helper:</h4>
+<p>
+<dd>The <a href="http://safsdev.sourceforge.net/doc/org/safs/STAFHelper.html">STAFHelper</a> object registers the client or engine with STAF and simplifies communication with STAF and our SAFS Framework tools and services.  &nbsp;<a href="http://safsdev.sourceforge.net/doc/org/safs/staf/STAFProcessHelpers.html">STAFProcessHelpers</a> can insure that any given process registers and reuses only 1 STAFHelper.
+<p>
+<dt><h4>The Engine Hook:</h4>
+<p>
+<dd>GUI Testing Tool class, object, or script used to inject the testing tool as a valid SAFS engine.  &nbsp;This hook is not a service.  &nbsp;It is a normal STAF client that registers with STAF and conforms to the event-driven protocol defined above.  &nbsp;This doc will focus on our <a href="http://safsdev.sourceforge.net/doc/org/safs/JavaHook.html">JavaHook</a> because that is what we currently have.  &nbsp;Hooks based on C, Perl, Tcl, VB, or any supported STAF language are also possible using these same concepts.
+<p>
+<dt><h4>The Test Record Data (TRD):</h4>
+<p>
+<dd>This is the detailed information of what action, command, or "thing" needs to be done.  &nbsp;This is generally made up of the test input record, what test table (file) it came from, and the current status of test processing, etc..  &nbsp;An official description of the Test Record Data expected by SAFS Engines can be found in our
+    <a href="http://sourceforge.net/docman/display_doc.php?docid=17227&group_id=56751">Test Record Data</a> doc.
+&nbsp;All data exchanged between a driver and any number of engines is done through Test Record Data storage in SAFSVARS.
+<p>
+A driver generally has a minimal local version of the TRD it maintains as it calls various engines to complete tests.  &nbsp;The driver copies required elements of this local TRD into the shared SAFS/HOOK/TRD in SAFSVARS so that all SAFS engines have access to the information needed to accomplish the tests when dispatched.
+<p>
+Each SAFS engine will retrieve the information passed via SAFSVARS and populate its own local <a href="http://safsdev.sourceforge.net/doc/org/safs/TestRecordHelper.html">TestRecordHelper</a>(TRH) subclass.  &nbsp;The engine, being based on a specific GUI testing tool, will have additional information stored in its TRH subclass that is specific to how that tool locates and identifies GUI components, and any other information the GUI tool needs to accomplish the task.
+<p>
+<dt><h4>The Request Processors:</h4>
+<p>
+<dd>The <a href="http://safsdev.sourceforge.net/doc/org/safs/ProcessRequest.html">ProcessRequest</a> class is the primary router of test records once the engine hook has received a dispatch.  This class receives and maintains the list of individual <a href="http://safsdev.sourceforge.net/doc/org/safs/Processor.html">Processors</a> to be used on a test record.  There may be one or more Processors for Driver Commands, Component Functions, and Custom Processors--whatever is needed by the engine developer or any particular site.
+<p>
+<dt><h4>The Log Utilities:</h4>
+<p>
+<dd>The SAFSLOGS service provides central logging to be utilized by all STAF clients involved in the test.  &nbsp;The Java <a href="http://safsdev.sourceforge.net/doc/org/safs/logging/LogUtilities.html">LogUtilities</a> provides access to this service for our Java-based clients.  Clients can generally log to this directly.  &nbsp;More often, Java-based  engines subclass the existing LogUtilities in order to include logging (and reporting?) provided by their GUI testing tool.
+<p>
+It is important to note that the design of LogUtilities does not mean you choose between using SAFSLOGS, or using your tool's logging instead.  &nbsp;The design is intended to allow you to log to all possible and enabled log outputs with a single function call.  &nbsp;SAFSLOGS outputs text logs, console logs, and XML logs and informs the subclassed tool-specific LogUtilities which log modes are active and enabled.
+<p>
+<dt><h4>The GUI Utilites:</h4>
+<p>
+<dd>Basic routines to help GUI testing tools locate and deal with GUI components.  &nbsp;Each Java-based SAFS engine based on a different GUI testing tool will have its own subclass of these <a href="http://safsdev.sourceforge.net/doc/org/safs/DDGUIUtilities.html">DDGUIUtilities</a>.  &nbsp;This is required because each tool has a unique way of finding and identifying GUI components.
+<p>
+</dl>
+</ul>
+<hr>
+<p><a name="usingsubclassing"/>
+<i><h2>Using and Subclassing:</h2></i>
+<p>
+Perhaps the quickest way for an engine developer to see how the above items would be used is to review the Javadoc, review the base classes, then review the subclasses (top of each Javadoc) that have already been done in support of existing engines.  &nbsp;Examples of subclassing exist for the SAFS/RobotJ engine and the SAFS/DriverCommands engine.
+<p>
+On a historical note, the SAFS/RobotJ engine (RJ) was our first Java-based engine and its "hook" mechanism using a <a href="http://cvs.sourceforge.net/viewcvs.py/*checkout*/safsdev/source/common/org/Attic/TestScript.java?content-type=text%2Fplain&rev=1.1.2.2">"TestScript"</a> and the <a href="http://cvs.sourceforge.net/viewcvs.py/*checkout*/safsdev/source/common/org/safs/Attic/RobotJHook.java?content-type=text%2Fplain&rev=1.1.2.33">"RobotJHook"</a> was the model for the general-purpose <a href="http://cvs.sourceforge.net/viewcvs.py/*checkout*/safsdev/source/common/org/safs/Attic/JavaHook.java?content-type=text%2Fplain&rev=1.1.2.7">"JavaHook"</a>.
+<p>
+Jump to subclassing
+<a href="#subclass_javahook">JavaHook</a>,
+<a href="#subclass_testrecordhelper">TestRecordHelper</a>,
+<a href="#subclass_logutilities">LogUtilities</a>,
+<a href="#subclass_ddguiutilities">DDGUIUtilities</a>,
+<a href="#subclass_processrequestprocessors">ProcessRequest/Processors</a>.
+<p>
+<ul>
+<p><a name="subclass_javahook"/>
+<h4>Subclassing <a href="http://safsdev.sourceforge.net/doc/org/safs/JavaHook.html">JavaHook</a>:</h4>
+<p>
+An engine-specific subclass of JavaHook is rather simple.  &nbsp;The main task of the subclass is to make sure  that the appropriate subclasses of LogUtilities, DDGUIUtilities, TestRecordHelper are instantiated and cross-pollinated with references to each other.  &nbsp;(Normally, a subclass of the ProcessRequest class is not necessary.)  &nbsp;Override *all* the superclass constructors and implement all the abstract GET methods of the JavaHook superclass.  &nbsp;Make sure these GET methods instance and return the appropriate subclass of objects.
+<p>
+If the JavaHook subclass is intended to be run standalone--that is, a runnable Java app in its own JVM--then the subclass will need an appropriate "static void main" entry point as required by all Java applications.  &nbsp;An example of such an entry point is shown below.  &nbsp;This one is from the SAFS/DriverCommands DCJavaHook subclass of JavaHook.
+<pre><code>
+    public static void main (String[] args) {
+
+        // SAMPLE STANDARD HOOK INITIALIZATION
+        // DCJavaHook hook = new DCJavaHook(SAFS_DRIVER_COMMANDS, new LogUtilities());
+
+        // SAMPLE ADVANCED HOOK INITIALIZATION
+
+    	TestRecordHelper datahelper = new TestRecordHelper();
+    	LogUtilities     logs       = new LogUtilities();
+
+    	ProcessRequest requester = new ProcessRequest(
+            datahelper,                   // TestRecordHelper
+            logs,                         // LogUtilities
+            new DriverCommandProcessor(), // use standard DriverCommandProcessor
+            null,                         // disable standard TestStepProcessor
+            null,                         // no custom driver command support
+            null);                        // no custom test step support
+
+    	DDGUIUtilities   gui_utils  = new DCGUIUtilities();
+
+        DCJavaHook hook = new DCJavaHook(
+            SAFS_DRIVER_COMMANDS,         // STAF process name for hook instance
+            STAFHelper.SAFS_HOOK_TRD,     // (default) SAFSVARS TestRecordData
+            logs,                         // LogUtilities
+            datahelper,                   // TestRecordHelper
+            gui_utils,                    // DDGUIUtilities
+            requester);                   // ProcessRequest
+
+        // this should now be properly handled by the superclass...
+        datahelper.setSTAFHelper(hook.getHelper());
+
+        // HOOK INITIALIZATION COMPLETE
+
+        if (args.length > 0 && args[0].equalsIgnoreCase("log")) {
+          Log.setHelper(hook.getHelper());
+          logs.setCopyLogClass(true);
+        }
+        hook.start();
+    }
+</code></pre>
+<p>
+The careful observer will notice that this particular engine is for Driver Commands only and is entirely independent of any GUI testing tool.  &nbsp;Therefore, there are no special subclasses for LogUtilities, TestRecordHelper, or the ProcessRequest class.  &nbsp;There is a "does nothing" generic DCGUIUtilities subclass used for DDDGUIUtilities since the supported Driver Commands in this engine will not be dealing with GUI components.
+<p>
+You may also notice that after all hook initialization is complete, there is additional code dealing with another separate <a href="http://safsdev.sourceforge.net/doc/org/safs/Log.html">Log</a> class.  &nbsp;This class is primarily used for debugging purposes, and this code won't actually do much of anything if a separate debugging Log window has not been launched.
+
+<p><a name="subclass_testrecordhelper"/>
+<h4>Subclassing <a href="http://safsdev.sourceforge.net/doc/org/safs/TestRecordHelper.html">TestRecordHelper</a>:</h4>
+<p>
+An engine-specific subclass of TestRecordHelper is also fairly straightforward.  &nbsp;Primarily, a subclass will override <a href="http://safsdev.sourceforge.net/doc/org/safs/TestRecordHelper.html#getCompInstancePath()">getCompInstancePath()</a> to provide an engine-specific package name prefix for Processors that may be dynamically sought at runtime to handle test records.  For example, this method for the RobotJ subclass returns "org.safs.rational" as the package name prefix.
+<p>
+Additionally, the subclass will add any storage and methods needed by the specific engine to handle tool-specific information needed to identify, locate, and even store GUI components referenced by the test record.  &nbsp;For example, the <a href="http://safsdev.sourceforge.net/doc/org/safs/rational/RTestRecordData.html">RTestRecordData</a> subclass of TestRecordHelper stores Rational RobotJ-specific information and objects needed at runtime to locate application objects.
+
+<p><a name="subclass_logutilities"/>
+<h4>Subclassing <a href="http://safsdev.sourceforge.net/doc/org/safs/logging/LogUtilities.html">LogUtilities</a>:</h4>
+<p>
+Again, an easy one to subclass.  LogUtilities actually handles everything that is difficult for our shared logging design.  RobotJ's <a href="http://safsdev.sourceforge.net/doc/org/safs/rational/logging/RLogUtilities.html">RLogUtilities</a> shows how all that is really needed are the wrapper functions <a href="http://safsdev.sourceforge.net/doc/org/safs/logging/LogUtilities.html#toolLog(int, java.lang.String, java.lang.String)">"toolLog"</a> to write to your tool-specific logging mechanism and <a href="http://safsdev.sourceforge.net/doc/org/safs/logging/LogUtilities.html#consoleLog(java.lang.String, java.lang.String)">"consoleLog"</a> to write to your tool-specific console (if applicable).
+<p>
+Everything else is handled by LogUtilities.  Your engine code simply uses the appropriate <a href="http://safsdev.sourceforge.net/doc/org/safs/logging/LogUtilities.html#logMessage(java.lang.String, java.lang.String, java.lang.String, int)">logMessage()</a> functions already provided by the LogUtilities superclass.  &nbsp;LogUtilities will take care of when and if your tool-specific logging needs to be called.
+
+<p><a name="subclass_ddguiutilities"/>
+<h4>Subclassing <a href="http://safsdev.sourceforge.net/doc/org/safs/DDGUIUtilities.html">DDGUIUtilities</a>:</h4>
+<p>
+Things start to get a little more "interesting" with a subclass of DDGUIUtilities.  &nbsp;This is largely because we are beginning to identify some key tool-specific functionality that must be satisfied.  &nbsp;For example, locating a text item in a List when the reference to the List may be a tool-specific class or object.  &nbsp;Unfortunately, at the same time we start to lose important details in our embedded javadoc.  Sorry.
+<p><a href="http://safsdev.sourceforge.net/doc/org/safs/DCGUIUtilities.html">DCGUIUtilities</a> represents the minimum abstract functions that must be provided.  &nbsp;These are for the SAFS/DriverCommands engine which actually processes no GUI objects, thus needs no real implementation for these methods.
+<p>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/rational/RDDGUIUtilities.html">RDDGUIUtilities</a> for RobotJ,
+on the other hand, provides real, necessary implementations for these.  It has also been given many additional fields and methods in support of locating and working with GUI components in the RobotJ toolset.
+<p>
+Until such time as the doc in the superclass can be fleshed out better, you will have to review the source of the DDGUIUtilities superclass and existing subclasses--like the <a href="http://cvs.sourceforge.net/viewcvs.py/*checkout*/safsdev/source/common/org/safs/Attic/DDGUIUtilities.java?content-type=text%2Fplain&rev=1.1.2.15">source for DCGUIUtilities</a> and <a href="http://cvs.sourceforge.net/viewcvs.py/*checkout*/safsdev/source/common/org/safs/rational/Attic/RDDGUIUtilities.java?content-type=text%2Fplain&rev=1.1.2.45">source for RDDGUIUtilities</a>) to get  an idea of how best to implement these functions for your specific tool.
+
+<p><a name="subclass_processrequestprocessors"/>
+<h4>Subclassing ProcessRequest <a href="http://safsdev.sourceforge.net/doc/org/safs/Processor.html">Processors</a>:</h4>
+<p>
+Ordinarily, the <a href="http://safsdev.sourceforge.net/doc/org/safs/ProcessRequest.html">ProcessRequest </a> class is instanced or initialized with access to all the tool-specific class information it needs to do its job.  &nbsp;Thus, it is rare that this class would ever need to be subclassed.  &nbsp;It is the Processors instanced by the ProcessRequest class that will likely need a tool-specific subclass.
+<p>
+Processor has already been subclassed to provide partial implementations for handling <a href="http://safsdev.sourceforge.net/doc/org/safs/DriverCommand.html">Driver Commands</a> and <a href="http://safsdev.sourceforge.net/doc/org/safs/ComponentFunction.html">Component Functions</a>.  Generally, tool-specific subclasses will extend one or both of these two classes to provide the necessary "process" method to handle the incoming request in a tool-specific manner.
+<p>
+Keep in mind, the STAF client that is acting as the DRIVER for these engines will normally have processed all Cycle and Suite level test records; and most Driver Commands too.  A new engine based on a specific GUI testing tool normally must only deal with implementing one or more Processors of component functions, and any Driver Commands that might reference or act on GUI objects.
+<p>
+Note, the Javadoc for the DriverCommand and ComponentFunction classes linked above show several existing subclasses for these.  Some of these are default implementations, some are default custom classes, and others are implementations specific to the RobotJ engine.  The source for these classes provide excellent examples and guidance for implementing your own tool-specific "process()" functions.
+</ul>
+<hr>
+<p><a name="standardcomponentrecognition"/>
+<i><h2>Standard Component Recognition:</h2></i>
+<p>
+One of the issues involved when attempting to use multiple testing tools; or when trying to migrate from one tool to another; is that each tool has devised a unique way of specifying or locating application components.  Some tools, like IBM Rational Robot and Mercury's WinRunner, allow you to specify a simple string that contains information about the target component.
+<p>
+Other tools, like IBM Rational RobotJ/XDE Tester, require that you provide a valid instance of a proxy "TestObject" or a similar component object--or the component itself--in order to perform an action on the component.
+<p>
+The SAFS framework is evolving a standardized mechanism for specifying, locating, and then retrieving these component references for each tool-specific technology.
+<p>
+Consult the <a href="SAFSComponentRecognition.htm">SAFS Component Recognition</a> document for details of implementing support for this in your tool-specific engine.
+<hr>
+</body></html>
