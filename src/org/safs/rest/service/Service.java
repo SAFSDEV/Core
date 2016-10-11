@@ -4,6 +4,7 @@
  */
 package org.safs.rest.service;
 
+import org.apache.hc.client5.http.testframework.HttpClient5Adapter;
 import org.apache.hc.core5.http.HttpVersion;
 import org.apache.hc.core5.http.ProtocolVersion;
 import org.safs.SAFSRuntimeException;
@@ -25,7 +26,8 @@ public class Service{
 	private String password;
 	private String authType;
 	private ProtocolVersion protocolVersion = HttpVersion.HTTP_1_1;
-	
+	private String clientAdapterClassName;
+	private Object clientAdapter;
 	
 	/**
 	 * Constructor
@@ -173,5 +175,36 @@ public class Service{
 	// for internal use only
 	ProtocolVersion getProtocolVersionObject() {
 		return protocolVersion;
+	}
+	
+	/**
+	 * To specify the use of a different client adapter, call this
+	 * with the class name of the adapter.
+	 * 
+	 * @param clientAdapterClassName the class name of the client adapter
+	 */
+	public Object setClientAdapterClassName(String clientAdapterClassName) throws Exception {
+		this.clientAdapterClassName = clientAdapterClassName;
+		return getClientAdapter();
+	}
+	
+	// for internal use only
+	String getClientAdapterClassName() {
+		return clientAdapterClassName;
+	}
+
+	// for internal use only
+	Object getClientAdapter() throws Exception {
+		if (clientAdapter == null) {
+			if (clientAdapterClassName == null) {
+				// use HttpClient5 by default
+				clientAdapter = new HttpClient5Adapter();
+			} else {
+				Class<?> clazz = Class.forName(clientAdapterClassName);
+				clientAdapter = clazz.newInstance();
+			}
+		}
+		
+		return clientAdapter;
 	}
 }
