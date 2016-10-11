@@ -719,7 +719,7 @@ public class AutoItComponent extends GenericEngine {
 			}
 			
 			try{
-				boolean rc = it.controlClick(autoArgs.getWindowsRS(), "", autoArgs.getComponentRS(), mouseButton, nClicks, offset, specialKey);
+				boolean rc = it.click(autoArgs.getWindowsRS(), "", autoArgs.getComponentRS(), mouseButton, nClicks, offset, specialKey);
 				
 				if (rc){
 					testRecordData.setStatusCode(StatusCodes.OK);
