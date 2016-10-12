@@ -1,6 +1,7 @@
 <html>
 <head>
 <title>Intro to SeleniumPlus</title>
+<link rel="stylesheet" type="text/css" href="../../sqabasic2000/rrafs.css">
 <style>
 
 .appmap {
@@ -8,7 +9,7 @@
     background-color: #C0C0C0;
     padding-left:6px;
     color: black;
-    width: 500px;
+    width: 700px;
 }
 
 pre.SourceCode { margin: 0; }
@@ -1558,74 +1559,143 @@ Note that different tools will likely require different component recognition st
 
 <div id="remote-servers" style="display: none;">
 <h2>Remote Servers</h2>
-<p>
+<h3>About Selenium Server (standalone or hub+nodes)</h3>
+The selenium server can be launched as a standalone-server or as a grid (hub and nodes).
+The servers could run locally or remotely. In the document we talk about launching them remotely.
+<ol>
+<li>standalone-server: the test actions will actually happen in the browser opened on the standalone-server.
+<li>grid-server: there is one hub connecting to multiple nodes, and the test actions will actually happen in the browser opened on nodes.
+</ol>
+
+<h3>Why we need test runs remotely</h3>
 There may be times when you want or need your tests to run on your local machine,
 but use the browsers and Selenium Server or Grid running on a remote machine.
-<p>
 Examples of these scenarios include:
-<p>
 <ul>
 <li>Testing browsers running on a Mac.
 <li>Testing browsers running on Linux.
 <li>Testing browsers running on iOS or Android devices.
 <li>Testing different browser versions hosted on different machines.
 </ul>
-<p>
-<h3>Testing using a Remote Selenium Server</h3>
-<p>
-In order for a locally run SeleniumPlus test to know it is to use a remote server there are 3 things that must be satisfied:
-<p>
-<ol>
-<li>A Selenium Server must NOT be running on the local machine. If it is, we will use it.
-<li>The test's INI file must specify the remote Selenium Server to connect to.
-<li>The remote Selenium Server must already be running.  We cannot start it remotely.
-</ol>
-<p>
-We specify a remote Selenium Server to use in the test's INI file.  This requires a hostname and a port number for the remote machine.  If the port is not provided, we will assume the default Selenium Server port of 4444.
-<p>
-Example settings in a test.ini:
-<p>
-<ul><div class="appmap"><pre>
-#
-# Settings for a remote Selenium Server
-# SELENIUMHOST=&lt;hostname>
-# SELENIUMPORT=4444  (setting not required if default)
-#
-[SAFS_SELENIUM]
-SeleniumHost=D99999.NP.SAS.COM
-SeleniumPort=4444
-</pre></div>
-</ul>
-<p>
-With these settings in place, the local test will attempt to connect and use the remote Selenium Server instead of launching a local Selenium Server.
-<p>
-<h3>Starting a Remote Selenium Server</h3>
-<p>
-It is important to note that SeleniumPlus provides some advanced features beyond the scope of Selenium itself.  For example, Selenium has particular difficulties consistently performing keyboard and mouse actions across all the different supported browsers and versions of browsers.  For this reason, SeleniumPlus augments keyboard and mouse actions with additional support not found in Selenium.
-<p>
-In order for a remote Selenium Server to provide equivalent augmented support provided by SeleniumPlus, the remote Selenium Server must be launched in a manner that allows us to inject that support into the remote Java JVM running the Selenium Server.
-<p>
-SeleniumPlus may provide a Windows BATCH file for launching just such a remote Selenium Server on Windows. &nbsp;If present, it would be in the SeleniumPlus\extra directory wherever SeleniumPlus was installed. &nbsp;If present, the Windows BATCH file should be "<b>RemoteServerWithRMI.bat</b>". &nbsp;It can serve as an example of the command-line syntax needed to launch a SeleniumPlus compatible remote Selenium Server.
-<p>
-Consult the following <a href="http://safsdev.sourceforge.net/doc/org/safs/selenium/util/SeleniumServerRunner.html" target="_blank" title="Selenium Server Runner JavaDoc" alt="Selenium Server Runner JavaDoc">Selenium Server Runner</a> Java API document who's information is largely duplicated below.
-<p>
-If the machine is NOT a Windows machine with a SeleniumPlus install:
-<p>
+
+<h3>Prerequisites:</h3>
+<h4>1. Get SeleniumPlus stuff ready on every machine</h4>
+If the machine is Windows, we could simply <a href="https://github.com/SAFSDEV/SeleniumPlus-Plugin/releases" target="_blank">install SeleniumPlus</a>.<br>
+If the machine is NOT a Windows machine with a installed SeleniumPlus:
 <ul>
 <li>All SeleniumPlus\libs assets (JARs and ZIPs, etc.) must be copied and available on the remote machine.
 <li>All Selenium Server OS-specific assets like specific browsers and browser drivers must be available on the remote machine.
-<li>The Selenium Server should be launched via the SeleniumPlus Selenium Server Runner.
-<p>
-    There are 2 special command-line parameters to enable the SeleniumPlus RMI Server for augmented support:
-    <p><ul><b><pre>
-    <li>-Djava.rmi.server.hostname=&lt;machine.intranet.com></b> or
-                           <b>&lt;123.456.789.10></b> ip address
-    <li><b>-safs.rmi.server</b></pre></ul>
+<li><a href="#launch_selenium_server">The Selenium Server should be launched</a>.<br>
 </ul>
+
+<h4 id="configure_staf">2. Install and configure STAF (Optional step, but recommended)</h4>
+<ol>
+<li>Firstly, download <a href="http://staf.sourceforge.net" title="IBM's OpenSource STAF Homepage" target="_blank">STAF</a> and install it on every machine (testing machine, server machine etc.)</li>
+<li>Then, Modify the <a href="http://staf.sourceforge.net/current/STAFUG.htm#HDRCONFIG" target="_blank">STAF config file</a> on server machine (standalone or hub+nodes) to let them <a href="http://staf.sourceforge.net/current/STAFUG.htm#HDRTRUSTCFG" target="_blank">trust your testing machine.</a><br>
+    For example, we have a testing machine named "<b>testing.machine</b>", remote server named "<b>remote.server</b>", and STAF has been installed on both machine at C:\STAF;<br>
+    We need to modify the STAF config file <b>C:\STAF\bin\STAF.cfg</b> of machine "<b>remote.server</b>" by add a line "<b>trust machine testing.machine level 5</b>"<br>
+</li>
+</ol>
+
+<h4>3. Configuration of Selenium Server</h4>
+The test's INI file should specify the remote Selenium Server to connect to.<br>
+Briefly, it requires a hostname and a port number for the remote machine. If the port is not provided, we will assume the default Selenium Server port of 4444.<br>
+For detail configurations, please refer to section  <a href="../../sqabasic2000/JSAFSFrameworkContent.htm#configfile" target="_blank">[SAFS_SELENIUM] of Configuration File Options</a>
 <p>
-Whether launched manually on a command-line, or preparing an OS-specific batch file or script, a Windows sample command-line invocation of the augmented Selenium Server is shown below:
-<p>
+Here are the critical settings in a test.ini:
 <ul><div class="appmap"><pre>
+<span class="comments"># Settings for a remote Selenium Server
+# SELENIUMHOST and SELENIUMPORT are used to connect Selenium Server (standalone or hub)</span>
+SELENIUMHOST=remote.server.name
+SELENIUMPORT=4444 (setting not required if default)
+<span class="comments"># SELENIUMNODE defines the selenium nodes to run.
+# If SELENIUMNODE is given, SELENIUMHOST will start as a selenium hub; otherwise as a stand-alone server.</span>
+SELENIUMNODE=node1:port:config1;node2:port:config2
+</pre></div>
+</ul>
+
+Here are some examples:
+<ul><div class="appmap"><pre>
+<span class="comments"># Selenium standalone server should run on local machine at default port 4444
+# [SAFS_SELENIUM]
+# If nothing is specified.</span>
+
+<span class="comments"># Selenium standalone server should run on local machine at port 6666
+[SAFS_SELENIUM]
+SeleniumPort=6666</span>
+
+<span class="comments"># Selenium standalone server should run on machine D99999.NP.SAS.COM at port 4444
+# test actions will actually happen in the browser opened on machine D99999.NP.SAS.COM</span>
+[SAFS_SELENIUM]
+SeleniumHost=D99999.NP.SAS.COM
+SeleniumPort=4444
+
+<span class="comments"># Selenium hub should run on machine selenium.hub.machine at port 5555
+# Selenium node should run on machine node.sas.com at port 6666 and connecting to hub server
+# test actions will actually happen in the browser opened on machine node.sas.com</span>
+[SAFS_SELENIUM]
+SeleniumHost=selenium.hub.machine
+SeleniumPort=5555
+SELENIUMNODE=node.sas.com:6666
+
+<span class="comments"># Selenium hub should run on local machine at port 5555
+# Selenium node should run on machine node.sas.com at port 6666 and connecting to hub server
+# test actions will actually happen in the browser opened on machine node.sas.com</span>
+[SAFS_SELENIUM]
+SeleniumPort=5555
+SELENIUMNODE=node.sas.com:6666
+</pre></div>
+</ul>
+
+<h4 id="launch_selenium_server">4. Launch Selenium Server</h4>
+The Selenium Server must be running during the SE+ Test.
+<ul>
+<li>Launch automatically by SE+.
+    If we <a href="#configure_staf">install and configure STAF</a>, SE+ <B>CAN start automatically servers remotely</B>.
+<li><a href="#manually_launch_server">Launch manually.</a>
+</ul>
+
+<h3>Start SeleniumPlus Test</h3>
+Now, we are happy to start SeleniumPlus Test as usual on the local machine, and the test actions will actually happen in the browser opened on
+selenium server (standalone or nodes).
+
+<h3 id="manually_launch_server">Reference</h3>
+
+<h4 id="manually_launch_server">Launch Selenium Server manually</h4>
+There are 3 ways listed as below:<br>
+<span class="comments">Suppose that <b>SELENIUM_PLUS</b> is the environment variable representing the location where SeleniumPlus has been installed</span>
+<ol>
+<li>The simplest way is to use <a href="../../doc/org/safs/selenium/webdriver/lib/RemoteDriverLauncher.html">RemoteDriverLauncher</a>.
+	Examples are listed below:
+	<ul>
+	<li>Start a selenium <b>standalone</b> server (<b>with</b> SeleniumPlus-<b>RMI</b>-Server).<br>
+	We could run the following command: <span class="comments">start a standalone server with RMI on port 4567 with minimum memory 512M and maximum memory 4g.</span><br>
+	<span class="commandline">"%SELENIUM_PLUS%\Java64\jre\bin\java.exe" org.safs.selenium.webdriver.lib.RemoteDriverLauncher -safs.rmi.server "-port 4567" "SELENIUMSERVER_JVM_OPTIONS=-Xms512m -Xmx4g"</span>
+	<li>Start a selenium <b>grid</b>.
+	    <ol>
+			<li style="list-style-type:lower-alpha">Start a selenium <b>hub</b><br>
+			Suppose the hub machine's name is <b>selenium.hub.machine</b>, on which we run the following command:
+			<span class="comments">start a hub server on default port 4444 with minimum memory 512M and maximum memory 2g.</span><br>
+			<span class="commandline">"%SELENIUM_PLUS%\Java64\jre\bin\java.exe" org.safs.selenium.webdriver.lib.RemoteDriverLauncher "-role hub" "SELENIUMSERVER_JVM_OPTIONS=-Xms512m -Xmx2g"</span>
+			<li style="list-style-type:lower-alpha">Start a selenium <b>node</b> (<b>with</b> SeleniumPlus-<b>RMI</b>-Server) connecting the hub (the same way, we can launch multiple nodes on different machine)<br>
+			On node machine, we could run the following command: <span class="comments">start a node server with RMI on port 5678 with minimum memory 256M and maximum memory 4g, and this node will register on hub running on port 4444 at machine <b>selenium.hub.machine</b></span><br>
+			<span class="commandline">"%SELENIUM_PLUS%\Java64\jre\bin\java.exe" org.safs.selenium.webdriver.lib.RemoteDriverLauncher -safs.rmi.server "-role node -hub http://<span style="color:yellow;">selenium.hub.machine</span>:4444/grid/register" "-port 5678"  "SELENIUMSERVER_JVM_OPTIONS=-Xms256m -Xmx4g"</span>
+	    </ol>
+	</ul>
+<p>
+<li>SeleniumPlus provides a Windows BATCH file for launching just such a remote Selenium Server on Windows.<br>
+	The batch file named "<b>RemoteServerWithRMI.bat</b>" should be in the <b>%SELENIUM_PLUS%\extra</b> directory.
+	It can serve as an example of the command-line syntax needed to launch a SeleniumPlus compatible remote Selenium Server.
+	The comments in that batch file should tell us how to launch different servers (standalone, hub, node).
+<p>
+<li id="using_seleniumserverrunner">The most powerful and complicated way is to call <a href="../../doc/org/safs/selenium/util/SeleniumServerRunner.html" target="_blank" title="Selenium Server Runner JavaDoc" alt="Selenium Server Runner JavaDoc">Selenium-Server-Runner</a>.<br>
+    In fact the first 2 ways, they both finally call Selenium-Server-Runner.
+	Whether launched on a command-line, or preparing an OS-specific batch file or script, a Windows sample command-line invocation of the augmented Selenium Server is shown below:
+	<span class="comments">
+	This command-line will launch the Selenium Server Runner (standalone) which will inject an RMI Server into the running JVM.
+    The Selenium Server Runner will also launch the Selenium Server found in the Selenium Server JAR file specified with the -jar command-line argument.
+	</span>
+	<div class="commandline"><pre>
 SET CLASSPATH=
      &lt;pathTo>\seleniumplus.jar;
      &lt;pathTo>\JSTAFEmbedded.jar;
@@ -1635,7 +1705,7 @@ SET JAVA_EXE=&lt;pathTo>\java.exe  (JRE Java 7 minimum)
 
 %JAVA_EXE%
      -Xms512m -Xmx1g
-     <b>-Djava.rmi.server.hostname=machine.intranet.com</b>
+     <span style="color:yellow;">-Djava.rmi.server.hostname=machine.intranet.com</span>
      -Dwebdriver.chrome.driver=&lt;pathTo>\chromedriver.exe
      -Dwebdriver.ie.driver=&lt;pathTo>\IEDriverServer.exe
      -cp %CLASSPATH%
@@ -1645,17 +1715,41 @@ SET JAVA_EXE=&lt;pathTo>\java.exe  (JRE Java 7 minimum)
      -jar &lt;pathTo>\selenium-server-standalone-&lt;version>.jar
      -timeout=20
      -browserTimeout=60
-     <b>-safs.rmi.server</b>
-</pre></div>
-</ul>
+     <span style="color:yellow;">-safs.rmi.server</span>
+</pre>
+	</div>
+	There are 2 special command-line parameters to enable the SeleniumPlus RMI Server:
+    <ol>
+        <li><b>-Djava.rmi.server.hostname=&lt;machine.intranet.com></b> or
+                           <b>&lt;123.456.789.10></b> ip address
+        <li><b>-safs.rmi.server</b>
+    </ol>
+</ol>
+
+<h4 id="details_seplus_rmi">About SeleninumPlus-RMI-Server.</h4>
+It is important to note that SeleniumPlus provides some advanced features beyond the scope of Selenium itself.  
+For example, Selenium has particular difficulties consistently performing keyboard and mouse actions across all the different supported browsers and versions of browsers.
+For this reason, SeleniumPlus augments keyboard and mouse actions with additional support not found in Selenium.
 <p>
-The above command-line will launch the Selenium Server Runner which will inject an RMI Server into the running JVM. &nbsp;
-The Selenium Server Runner will also launch the Selenium Server found in the Selenium Server JAR file specified with the -jar command-line argument.
+In order for a remote Selenium Server to provide equivalent augmented support provided by SeleniumPlus, 
+the remote Selenium Server must be launched in a manner that allows us to inject that support into the remote Java JVM running the Selenium Server.
+Consult <a href="#using_seleniumserverrunner" alt="Using Selenium Server Runner">Using Selenium Server Runner</a> to know how.
+
+<h4 id="details_seplus_rmi">Snapshots about launched Selenium Servers.</h4>
+<span class="comments">Selenium standalone Server with injected RMI server into the Selenium Server JVM.<br>
+The first 3 lines of the output tell us that RMI-server has been injected into the Selenium Server JVM;<br>
+while the 4th line tells us that a standalone selenium server is being started.</span><br>
+<img src="images/SeleniumServerRunner.png" alt="Selenium Standalone Server Runner Screenshot"/><br>
 <p>
-Below is a snapshot of such a launched Selenium Server. &nbsp;We can see in the first 3 lines of the output that our Selenium Server Runner has injected the RMI server into the Selenium Server JVM:
+<span class="comments">Selenium hub Server.<br>
+The first line tells us that a selenium hub server is being started.</span><br>
+<img src="images/SeleniumServerRunner_Hub.png" alt="Selenium Hub Server Runner Screenshot"/>
 <p>
-<img src="images/SeleniumServerRunner.png" alt="Selenium Server Runner Screenshot"/>
-<p>
+<span class="comments">Selenium node Server with injected RMI server into the Selenium Server JVM.<br>
+The first 3 lines of the output tell us that RMI-server has been injected into the Selenium Server JVM;<br>
+while the 4th line tells us that a selenium node server is being started;<br>
+and the last 2th line tells us that the node has registered on hub server.</span><br>
+<img src="images/SeleniumServerRunner_Node.png" alt="Selenium Node Server Runner Screenshot"/><br>
 <hr>
 </div>
 </body>
