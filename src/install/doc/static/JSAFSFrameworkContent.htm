@@ -1,8 +1,11 @@
 <!-- This file has been published to sourceforge and github: -->
 <!-- http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm -->
 <!-- http://safsdev.github.io/sqabasic2000/JSAFSFrameworkContent.htm -->
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-<title>Java SAFS Framework Interface</title></head>
+<html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<link rel="stylesheet" type="text/css" href="rrafs.css">
+<title>Java SAFS Framework Interface</title>
+</head>
 <body><a name="top">
 <h2>Java SAFS Framework Interface</h2>by Carl Nagle<br>Last Updated:
 <script language="JavaScript">document.write(document.lastModified)</script>04/28/2016 10:44:0804/09/2015 15:27:2009/26/2014 02:24:30
@@ -514,38 +517,38 @@ DATASTORE=&lt;FullPathTo&gt;\RFTProjectDir
 AUTOLAUNCH=FALSE
 ;JVM=JVMPath to Java 1.5 or higher
 ;CLASSPATH=altClasspath
-;= GATEWAYHOST and GATEWAYPORT are used
-;= to connect internet
+<span class="comments">;= GATEWAYHOST and GATEWAYPORT are used
+;= to connect internet</span>
 GATEWAYHOST=yourCorpGateway.net
 GATEWAYPORT=80
 
-;= <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html" target="api">Selenium Server Settings</a>
+<span class="comments">;= <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html" target="api">Selenium Server Settings</a>
 ;= SELENIUMHOST and SELENIUMPORT are used
-;= to connect Selenium Server
+;= to connect Selenium Server (standalone or hub)</span>
 ;SELENIUMHOST=remote.server.com
 ;SELENIUMPORT=4444
-;= SELENIUMNODE defines the selenium nodes to run.
+<span class="comments">;= SELENIUMNODE defines the selenium nodes to run.
 ;= If SELENIUMNODE is given, SELENIUMHOST will start
-;= as a selenium hub; otherwise as a stand-alone server.
+;= as a selenium hub; otherwise as a stand-alone server.</span>
 ;SELENIUMNODE=node1:port:config1;node2:port:config2
-;= SELENIUMSERVER_JVM_OPTIONS is JVM options
-;= for starting Selenium Server
+<span class="comments">;= SELENIUMSERVER_JVM_OPTIONS is JVM options
+;= for starting Selenium Server</span>
 ;SELENIUMSERVER_JVM_OPTIONS=-Xmx1g -Xms512m -Xdebug
-;= SELENIUMERVER_JVM_Xmx and SELENIUMERVER_JVM_Xms 
+<span class="comments">;= SELENIUMERVER_JVM_Xmx and SELENIUMERVER_JVM_Xms 
 ;= specify value of JVM options -Xmx and -Xms 
 ;= for Selenium Server, it will override
 ;= the default value or the value specified 
-;= in SELENIUMSERVER_JVM_OPTIONS
+;= in SELENIUMSERVER_JVM_OPTIONS</span>
 ;SELENIUMSERVER_JVM_Xmx=4g (default: 2g)
 ;SELENIUMSERVER_JVM_Xms=256m (default: 512m)
 ;SELENIUMSERVER_JVM=fullpath\java.exe (default: 1.7.0_45 64bit)
 
-;= Settings for Selnium1.0
+<span class="comments">;= Settings for Selnium1.0</span>
 ;HOOK=org.safs.selenium.SeleniumJavaHook
 ;BROWSER=*piiexplore | *firefox | *iexplore
 ;DEBUGLOG=&lt;fullpathTo&gt;/SeleniumDebug.out
 
-;= Settings for Selnium2.0 WebDriver
+<span class="comments">;= Settings for Selnium2.0 WebDriver</span>
 ;HOOK=org.safs.selenium.webdriver.SeleniumHook
 ;BROWSER=explorer | firefox | chrome
 PROXY_BYPASS_ADDRESS=localhost,127.0.0.1,host.not.thru.gateway
@@ -617,7 +620,7 @@ ProjectRoot=String/ProjectRootPath
 ;secsWaitForWindow=N     (default: 30)
 ;secsWaitForComponent=N  (default: 30)
 ;numLockOn=TRUE|FALSE
-;UnexpectedAlertBehaviour ONLY works for Selenium2.0 engine for now
+<span class="comments">;UnexpectedAlertBehaviour ONLY works for Selenium2.0 engine for now</span>
 ;UnexpectedAlertBehaviour=accept|dismiss|ignore (default: ignore)
 ;<a href="../doc/org/safs/tools/drivers/DriverConstant.html#KEY_SAFS_TEST_DND_RELEASE_DELAY" target="api">DndReleaseDelay=N</a>  (default: 800 millisecond)
 
@@ -644,8 +647,9 @@ ProjectRoot=String/ProjectRootPath
 
 <b>[SAFS_IBT]</b>
 ;UseMultiThreadSearch=True|False (default:False)
-;ThreadNumber=4 (When UseMultiThreadSearch is true,
-;                user can adjust this for best search performance.)
+<span class="comments">;When UseMultiThreadSearch is true,
+;ThreadNumber can be adjusted for best search performance.</span>
+;ThreadNumber=N (default:4)
 ;UsePerImageModifiers=True|False (default:False)</pre></td></tr></tbody></table>
 
 </p><p>Enhancements, corrections, and more detail will be added as necessary.
