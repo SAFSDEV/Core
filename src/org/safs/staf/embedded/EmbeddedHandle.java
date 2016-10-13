@@ -43,10 +43,10 @@ public class EmbeddedHandle implements HandleInterface{
 	 * @throws STAFException
 	 */
 	public void register() throws STAFException {
-		if(! isRegistered) {
+		if(!isRegistered) {
 			registerHandle();
+			isRegistered = true;
 		}
-		isRegistered = true;
 	}
 	
 	/**
@@ -71,7 +71,7 @@ public class EmbeddedHandle implements HandleInterface{
 	 * @see org.safs.staf.embedded.HandleInterface#submit(java.lang.String, java.lang.String)
 	 */
 	public String submit(String handler, String request) throws STAFException {
-		if(! isRegistered ) register();
+		register();
 		try{
 			ServiceInterface service = EmbeddedHandles.getService(handler);
 			STAFResult sr = service.acceptRequest(new InfoInterface.RequestInfo(STAFHelper.LOCAL_MACHINE, getHandle(), handleId, request));
@@ -89,7 +89,7 @@ public class EmbeddedHandle implements HandleInterface{
 	 * @see org.safs.staf.embedded.HandleInterface#submit2(java.lang.String, java.lang.String)
 	 */
 	public STAFResult submit2(String handler, String request) throws STAFException{
-		if(! isRegistered ) register();
+		register();
 		try{
 			ServiceInterface service = EmbeddedHandles.getService(handler);			
 			return service.acceptRequest(new InfoInterface.RequestInfo(STAFHelper.LOCAL_MACHINE, getHandle(), handleId, request));
@@ -105,7 +105,7 @@ public class EmbeddedHandle implements HandleInterface{
 	@Override
 	public STAFResult acceptQueueMessage(String message){
 		try {
-			if(! isRegistered ) register();
+			register();
 			queue.in(message);
 			return new STAFResult(STAFResult.Ok);
 		}catch (SAFSException e) {
@@ -124,7 +124,7 @@ public class EmbeddedHandle implements HandleInterface{
 	 */
 	@Override
 	public STAFResult sendQueueMessage(String handler, String message) throws STAFException{
-		if(! isRegistered ) register();
+		register();
 		try{
 			HandleInterface handle = EmbeddedHandles.getHandle(handler);
 			return handle.acceptQueueMessage(message);
@@ -139,7 +139,7 @@ public class EmbeddedHandle implements HandleInterface{
 	@Override
 	public STAFResult getQueueMessage(int timeout){
 		try{
-			if(! isRegistered ) register();
+			register();
 			String message = queue.out(timeout);
 			return new STAFResult(STAFResult.Ok, message);
 		}catch (SAFSException e) {
@@ -160,7 +160,7 @@ public class EmbeddedHandle implements HandleInterface{
 	 */
 	@Override
 	public String submit(String machine, String handler, String request) throws STAFException {
-		if(! isRegistered ) register();
+		register();
 		try{
 			return submit(handler, request);
 		}catch(STAFException x){ 
@@ -176,7 +176,7 @@ public class EmbeddedHandle implements HandleInterface{
 	 */
 	@Override
 	public STAFResult submit2(String machine, String handler, String request) {
-		try{ if(! isRegistered ) register();}
+		try{ register();}
 		catch(STAFException x){
 			return new STAFResult(STAFResult.STAFRegistrationError, "Registration Error");
 		}
