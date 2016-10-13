@@ -1,6 +1,11 @@
 /** Copyright (C) (SAS) All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
+
+/**
+ * History:
+ * 		SEP 23, 2016, Tao Xie, Replace 'AutoItX' as SAFS version 'AutoItXPlus'.  
+ */
 package org.safs.autoit;
 
 import java.io.File;
@@ -9,10 +14,9 @@ import java.util.Vector;
 import org.safs.IndependantLog;
 import org.safs.SAFSProcessorInitializationException;
 import org.safs.StringUtils;
+import org.safs.autoit.lib.AutoItXPlus;
 import org.safs.tools.consoles.ProcessCapture;
 import org.safs.tools.drivers.DriverConstant;
-
-import autoitx4java.AutoItX;
 
 import com.jacob.com.ComFailException;
 import com.jacob.com.LibraryLoader;
@@ -24,11 +28,11 @@ import com.jacob.com.LibraryLoader;
  */
 public class AutoIt {
     
-	private static AutoItX it = null;
+	private static AutoItXPlus it = null;
 	private static final String JACOB_DLL_32 = "jacob-1.18-x86.dll";
 	private static final String JACOB_DLL_64 = "jacob-1.18-x64.dll";
 
-	public static AutoItX AutoItObject() throws SAFSProcessorInitializationException{
+	public static AutoItXPlus AutoItObject() throws SAFSProcessorInitializationException{
 
 		/** COM class instantiation method */
 		String methodName = StringUtils.getMethodName(0, false) + "() ";
@@ -82,7 +86,7 @@ public class AutoIt {
 			IndependantLog.debug(methodName + "attempting to create AutoItX object.");
 			
 			try {
-				it = new AutoItX();
+				it = new AutoItXPlus();
 				IndependantLog.debug(methodName + "AutoItX object was created");
 			} catch (ComFailException cfe) {
 				// register dll and re initiate object
@@ -96,7 +100,7 @@ public class AutoIt {
 				IndependantLog.debug(methodName + "AutoItX DLLs should now be registered.");
 				
 				try{ 
-					it = new AutoItX();
+					it = new AutoItXPlus();
 					IndependantLog.debug(methodName + "AutoItX object was finally created");
 				}
 				catch(ComFailException cf){
