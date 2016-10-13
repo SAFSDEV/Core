@@ -11,6 +11,11 @@
  *                     Modify process(): Wait for window and component's existence and focus before execution.
  * JUL 12, 2016 SBJLWA Implement 'SetPosition' keyword.
  * AUG 05, 2016 SBJLWA Equipped a special DriverCommandProcessor to this engine. Implemented 'WaitForGUI'/'WaitForGUIGone'.
+ * SEP 21, 2016 SCNTAX Add AutoIt workhorse click(): Allow click action combined with specified mouse button, number of click times, and clicking offset position.
+ * SEP 23, 2016 SCNTAX Replace 'AutoItX' as SAFS version 'AutoItXPlus', and move 'isValidMouseButton()' to AutoItXPlus.
+ * 					   Refactor workhorse 'click()' to support special key holding while clicking.
+ * 					   Override the 'componentClick()' function in 'AutoItComponent.CFComponent' class to deal with groups of CLICK keywords.
+ * 					   Add keyword 'DoubleClick', 'RightClick', 'CtrlClick' and 'ShiftClick' implementations.
  */
 package org.safs.tools.engines;
 
@@ -34,17 +39,17 @@ import org.safs.StringUtils;
 import org.safs.TestRecordHelper;
 import org.safs.autoit.AutoIt;
 import org.safs.autoit.AutoItRs;
+import org.safs.autoit.lib.AutoItXPlus;
 import org.safs.logging.AbstractLogFacility;
 import org.safs.logging.LogUtilities;
 import org.safs.model.commands.DDDriverCommands;
 import org.safs.model.commands.DriverCommands;
 import org.safs.model.commands.EditBoxFunctions;
-import org.safs.model.commands.GenericObjectFunctions;
 import org.safs.text.FAILStrings;
+import org.safs.text.GENKEYS;
 import org.safs.tools.drivers.DriverConstant;
 import org.safs.tools.drivers.DriverInterface;
 
-import autoitx4java.AutoItX;
 
 /**
  * Provides local in-process support Component Functions and Driver Commands
@@ -74,7 +79,7 @@ public class AutoItComponent extends GenericEngine {
 	 * 
 	 * @see #AutoItComponent()
 	 */
-	protected AutoItX it = null;
+	protected AutoItXPlus it = null;
 	
 	/**
 	 * Constructor for AUTOITComponent.<br>
@@ -447,7 +452,7 @@ public class AutoItComponent extends GenericEngine {
 		protected int DEFAULT_TIMEOUT_WAIT_WIN_FOCUSED = 1;
 		/** AutoItRs, the object representing the component */
 		protected AutoItRs rs = null;
-		
+				
 		CFComponent (){
 			super();
 		}	
@@ -475,7 +480,12 @@ public class AutoItComponent extends GenericEngine {
 	        	testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
 	        	return;
 	        }
-			Log.info(debugmsg + " win: "+ windowName +"; comp: "+ compName+"; with params: "+params);
+			if (params != null) {
+				iterator = params.iterator();
+				Log.info(debugmsg + " win: "+ windowName +"; comp: "+ compName+"; with params: "+params);
+			} else{
+				Log.info(debugmsg + " win: "+ windowName +"; comp: "+ compName+" without parameters.");
+			}
 
 			// prepare Autoit RS
 			rs = new AutoItRs(winrec,comprec);
@@ -496,8 +506,30 @@ public class AutoItComponent extends GenericEngine {
 				}
 			}
 			
-			if ( action.equalsIgnoreCase( GenericObjectFunctions.CLICK_KEYWORD )){		                
-				click(rs);	                
+			if ( action.equalsIgnoreCase( ComponentFunction.CLICK )
+					|| action.equalsIgnoreCase(ComponentFunction.DOUBLECLICK) 
+					|| action.equalsIgnoreCase(ComponentFunction.RIGHTCLICK)
+					|| action.equalsIgnoreCase(ComponentFunction.CTRLCLICK)
+					|| action.equalsIgnoreCase(ComponentFunction.SHIFTCLICK)){		                
+				/**
+				 * Use local override 'componentClick()' function to deal with groups of CLICK keywords.
+				 */
+				try {
+					componentClick();
+				} catch (SAFSException se) {
+					if (SAFSException.CODE_ACTION_NOT_SUPPORTED.equals(se.getCode())) {
+						Log.info(debugmsg + " '" + action + "' is not supported here.");
+						testRecordData.setStatusCode( StatusCodes.SCRIPT_NOT_EXECUTED );
+					} else{
+						testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );
+						String message = "Met "+StringUtils.debugmsg(se);
+						String detail = FAILStrings.convert(FAILStrings.STANDARD_ERROR, 
+								action +" failure in table "+ testRecordData.getFilename() + " at Line " + testRecordData.getLineNumber(), 
+								action, testRecordData.getFilename(), String.valueOf(testRecordData.getLineNumber()));
+
+						log.logMessage(testRecordData.getFac(), message, detail, FAILED_MESSAGE);
+					}
+				}
 			} else if ( action.equalsIgnoreCase( DriverCommands.SETFOCUS_KEYWORD )) {
 			    setFocus(rs);
 			} else if ( action.equalsIgnoreCase(EditBoxFunctions.SETTEXTVALUE_KEYWORD)) {
@@ -560,7 +592,158 @@ public class AutoItComponent extends GenericEngine {
 			}		
 		}
 		
+		/**
+		 * Override componentClick() to deal with groups of CLICK keywords.
+		 * 
+		 * @author scntax
+		 */
+		@Override
+		protected void componentClick() throws SAFSException {
+			String dbgmsg = StringUtils.getMethodName(0, false);
+			Point point = checkForCoord(iterator);
+			
+			String autoscroll = null;
+			if(iterator.hasNext()) {
+				autoscroll = iterator.next();
+				//TODO: SEP 23, 2016 SCNTAX, Support this parameter later. 
+				throw new SAFSException(dbgmsg + "(): " + "currently NOT support 'autoscroll' parameter!");
+			}
+			
+			/**
+			 * Deal with testRecordData's StatusCode in AutoIt's click workhorse routine.
+			 * Here, only record the time consuming .
+			 */			
+			long begin = System.currentTimeMillis();
+			
+			if (action.equalsIgnoreCase(ComponentFunction.CLICK) 
+					|| action.equalsIgnoreCase(ComponentFunction.COMPONENTCLICK)) {
+				click(rs, point);
+			} else if (action.equalsIgnoreCase(ComponentFunction.DOUBLECLICK)){
+				doubleClick(rs, point);
+			} else if (action.equalsIgnoreCase(ComponentFunction.RIGHTCLICK)){
+				rightClick(rs, point);
+			} else if (action.equalsIgnoreCase(ComponentFunction.CTRLCLICK)) {
+				ctrlClick(rs, point);
+			} else if (action.equalsIgnoreCase(ComponentFunction.SHIFTCLICK)) {
+				shiftClick(rs, point);
+			}
+			
+			long timeConsumed = System.currentTimeMillis() - begin;
+			Log.debug(dbgmsg + "(): " + "took " + timeConsumed + " milliseconds or " + (timeConsumed/1000) + " seconds to perform " + action);
+		}
+		
+		/**
+		 * Click with position offset.
+		 * 
+		 * @param autoArgs		AutoItRs,	AutoIt engine's recognition string.
+		 * @param offset		Point,		the offset position to click within the target component. Also can be null.
+		 * 
+		 * @author scntax
+		 */
+		protected void click(AutoItRs autoArgs, Point offset) {
+			click(autoArgs, AutoItXPlus.AUTOIT_MOUSE_BUTTON_LEFT, 1, offset, null);
+		}
+		
+		/**
+		 * Double click with position offset.
+		 * @param autoArgs		AutoItRs,	AutoIt engine's recognition string.
+		 * @param offset		Point,		the offset position to click within the target component. Also can be null.
+		 * 
+		 * @author scntax
+		 */
+		protected void doubleClick(AutoItRs autoArgs, Point offset) {
+			click(autoArgs, AutoItXPlus.AUTOIT_MOUSE_BUTTON_LEFT, 2, offset, null);
+		}
+		
+		/**
+		 * Right click with position offset.
+		 * @param autoArgs		AutoItRs,	AutoIt engine's recognition string.
+		 * @param offset		Point,		the offset position to click within the target component. Also can be null.
+		 * 
+		 * @author scntax
+		 */
+		protected void rightClick(AutoItRs autoArgs, Point offset) {
+			click(autoArgs, AutoItXPlus.AUTOIT_MOUSE_BUTTON_RIGHT, 1, offset, null);
+		}
+		
+		/**
+		 * Ctrl click with position offset.
+		 * @param autoArgs		AutoItRs,	AutoIt engine's recognition string.
+		 * @param offset		Point,		the offset position to click within the target component. Also can be null.
+		 * 
+		 * @author scntax
+		 */
+		protected void ctrlClick(AutoItRs autoArgs, Point offset) {
+			click(autoArgs, AutoItXPlus.AUTOIT_MOUSE_BUTTON_LEFT, 1, offset, AutoItXPlus.AUTOIT_SUPPORT_PRESS_CTRL);
+		}
+		
+		/**
+		 * Shift click with position offset.
+		 * @param autoArgs		AutoItRs,	AutoIt engine's recognition string.
+		 * @param offset		Point,		the offset position to click within the target component. Also can be null.
+		 * 
+		 * @author scntax
+		 */
+		protected void shiftClick(AutoItRs autoArgs, Point offset) {
+			click(autoArgs, AutoItXPlus.AUTOIT_MOUSE_BUTTON_LEFT, 1, offset, AutoItXPlus.AUTOIT_SUPPORT_PRESS_SHIFT);
+		}
+		
+		/**
+		 * Workhorse of AutoIt click routine.
+		 * It allows us to use specified 'mouse button' to click target component at assigned position with a number of times.  
+		 * 
+		 * Note: at current stage, we don't support the parameter 'text' in AutoIt's API controlClick: https://www.autoitscript.com/autoit3/docs/functions/ControlClick.htm .
+		 *       We just treat parameter 'text' as empty string. 
+		 *  
+		 * @param autoArgs		AutoItRs,	AutoIt engine's recognition string.
+		 * @param mouseButton	String,		the button to click, "left", "right", or "middle". Default is the left button, which means if mouseButton is null or empty,
+		 * 									it'll use the "left" as its value.
+		 * @param nClicks		int,		number of times to click the mouse.
+		 * @param offset		Point,		the offset position to click within the target component. Also can be null.
+		 * @param specialKey	String,		keyboard key that be hold when click action happening.
+		 * 
+		 * @author scntax
+		 * 
+		 */
+		protected void click(AutoItRs autoArgs, String mouseButton, int nClicks, Point offset, String specialKey) {
+			String dbgmsg = StringUtils.getMethodName(0, false);
+			testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );
+			
+			/**
+			 * Only need to check the autoArgs parameter, the remaining 
+			 * parameters will be checked in AutoItXPlus.controlClick().
+			 */
+			if(autoArgs == null) {
+				issueParameterCountFailure(dbgmsg + "(): invalid AutoIt parameters provided!");
+				return;
+			}
+			
+			try{
+				boolean rc = it.click(autoArgs.getWindowsRS(), "", autoArgs.getComponentRS(), mouseButton, nClicks, offset, specialKey);
+				
+				if (rc){
+					testRecordData.setStatusCode(StatusCodes.OK);
+					
+					String altText = windowName + ":" + compName + " " + action + " successful.";
+					String msg = genericText.convert(GENKEYS.SUCCESS_3, altText, windowName, compName, action);
+					log.logMessage(testRecordData.getFac(), msg, PASSED_MESSAGE);
+				} else{
+					testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
+					issueErrorPerformingAction(dbgmsg + "(): failed with rc = " + it.getError());
+				}
+				
+			} catch(Exception x){
+				issueErrorPerformingAction(dbgmsg + "(): " + x.getMessage());
+			}
+			
+		}
+		
 		/** click **/
+		/** 
+		 * SEP 23, 2016 SCNTAX,	It's better to use the same click() workhorse for consistency. 
+		 * 						Depreciate this original implementation.
+		 */
+		@Deprecated
 		protected void click(AutoItRs ars){
 			testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );	 
 			try {
@@ -630,7 +813,7 @@ public class AutoItComponent extends GenericEngine {
 			String debugmsg = StringUtils.debugmsg(false);
 			try{
 //				it.winSetState(rs.getWindowsRS(), "", AutoItX.SW_RESTORE);
-				it.winSetState(rs.getWindowsRS(), "", AutoItX.SW_SHOWNORMAL);
+				it.winSetState(rs.getWindowsRS(), "", AutoItXPlus.SW_SHOWNORMAL);
 			}catch(Exception e){
 				String msg = "Fail to resotre window due to Exception "+e.getMessage();
 				Log.error(debugmsg+msg);
@@ -669,7 +852,7 @@ public class AutoItComponent extends GenericEngine {
 		protected void _minimize() throws SAFSException{
 			String debugmsg = StringUtils.debugmsg(false);
 			try{
-				it.winSetState(rs.getWindowsRS(), "", AutoItX.SW_SHOWMINIMIZED);
+				it.winSetState(rs.getWindowsRS(), "", AutoItXPlus.SW_SHOWMINIMIZED);
 			}catch(Exception e){
 				String msg = "Fail to minimize window due to Exception "+e.getMessage();
 				Log.error(debugmsg+msg);
@@ -681,7 +864,7 @@ public class AutoItComponent extends GenericEngine {
 		protected void _maximize() throws SAFSException{
 			String debugmsg = StringUtils.debugmsg(false);
 			try{
-				it.winSetState(rs.getWindowsRS(), "", AutoItX.SW_SHOWMAXIMIZED);
+				it.winSetState(rs.getWindowsRS(), "", AutoItXPlus.SW_SHOWMAXIMIZED);
 			}catch(Exception e){
 				String msg = "Fail to maximize window due to Exception "+e.getMessage();
 				Log.error(debugmsg+msg);
