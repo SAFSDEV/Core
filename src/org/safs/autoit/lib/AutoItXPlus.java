@@ -16,11 +16,15 @@
 *                               Add 'robotClick()': use Java AWT Robot to click.
 *                               Add assistant methods: 'autoit2JavaButtonmask()' and 'autoit2JavaSpecialKey()'.
 * <br>   OCT 11, 2016  (Tao Xie) Add assistant methods: 'getBorderWidth()' and 'getTitleBarHeight()'.
+* <br>   OCT 13, 2016  (Tao Xie) From current experience, the AutoIt's click API is more stable. Use AutoIt's click API first,
+*                               and then Java AWT Robot click API as workaround in workhorse 'click()'.
+*                               Modify the type of return key code in 'autoit2JavaSpecialKey()' and add support for 'Windows key' code.
 * 
 */
 package org.safs.autoit.lib;
 
 import java.awt.Point;
+import java.awt.event.KeyEvent;
 
 import org.safs.Log;
 import org.safs.SAFSException;
@@ -176,6 +180,8 @@ public class AutoItXPlus extends AutoItX {
 	 * @author Tao Xie
 	 */
 	public int autoit2JavaButtonmask(String autoitButton) throws SAFSException{
+		String dbgmsg = StringUtils.getMethodName(0, false);
+		
 		if (autoitButton.equals(AUTOIT_MOUSE_BUTTON_LEFT)) {
 			return WDLibrary.MOUSE_BUTTON_LEFT;
 		} else if (autoitButton.equals(AUTOIT_MOUSE_BUTTON_MIDDLE)) {
@@ -184,14 +190,13 @@ public class AutoItXPlus extends AutoItX {
 			return WDLibrary.MOUSE_BUTTON_RIGHT;
 		}
 		
-		throw new SAFSException("Invalid AutoIt button RS '" + autoitButton + "' to be transformed into Java button mask");
+		throw new SAFSException(dbgmsg + "(): Invalid AutoIt button RS '" + autoitButton + "' to be transformed into Java button mask");
 	}
 	
 	/**
 	 * Transform AutoIt Special Key RS into Java key code.
 	 * 
-	 * Currently, it supports only 3 special keys: Alt, Shift, Ctrl.
-	 * The 'Left Windows' and 'Right Windows' keys are treated as invalid.
+	 * Currently, it supports only 4 special keys: Alt, Shift, Ctrl and Windows.
 	 * 
 	 * @param autoitSpecialKey	String, AutoIt supported special key.
 	 * @return
@@ -200,15 +205,19 @@ public class AutoItXPlus extends AutoItX {
 	 * @author Tao Xie
 	 */
 	public int autoit2JavaSpecialKey(String autoitSpecialKey) throws SAFSException{
+		String dbgmsg = StringUtils.getMethodName(0, false);
+		
 		if (autoitSpecialKey.equals(AUTOIT_SUPPORT_PRESS_ALT)) {
-			return java.awt.event.InputEvent.ALT_DOWN_MASK;
+			return KeyEvent.VK_ALT;
 		} else if(autoitSpecialKey.equals(AUTOIT_SUPPORT_PRESS_SHIFT)) {
-			return java.awt.event.InputEvent.SHIFT_DOWN_MASK;
+			return KeyEvent.VK_SHIFT;
 		} else if (autoitSpecialKey.equals(AUTOIT_SUPPORT_PRESS_CTRL)) {
-			return java.awt.event.InputEvent.CTRL_DOWN_MASK;
+			return KeyEvent.VK_CONTROL;
+		} else if (autoitSpecialKey.equals(AUTOIT_SUPPORT_PRESS_LWINDOWS) || autoitSpecialKey.equals(AUTOIT_SUPPORT_PRESS_RWINDOWS)) {
+			return KeyEvent.VK_WINDOWS;
 		}
 		
-		throw new SAFSException("Invalid AutoIt key RS '" + autoitSpecialKey + "' to be transformed into Java key code.");
+		throw new SAFSException(dbgmsg + "(): Invalid AutoIt key RS '" + autoitSpecialKey + "' to be transformed into Java key code.");
 	}
 	
 	/**
@@ -329,21 +338,32 @@ public class AutoItXPlus extends AutoItX {
 		}
 		
 		boolean result = false;
-		try {
-			// 2. Use Java AWT Robot click call first
-			Log.info(dbgmsg + "(): " + "use Java AWT Robot to click.");
+		/**
+		 * OCT 13, 2016  (Tao Xie) 
+		 * Notes:
+		 *     Current experience shows the AutoIt's click API is more stable. Thus use
+		 *     AutoIt click API first, and then use Java AWT Robot click as workaround.
+		 */
+		// 2. Use AutoIt click call first.
+		Log.info(dbgmsg + "(): " + "use AutoIt to click.");
+		
+		if (pressKeyParam != null) { autoItX.invoke(AUTOIT_KEYWORD_SEND, convertCOMParams(pressKeyParam)); } 
+		result = oneToTrue((autoItX.invoke(AUTOIT_KEYWORD_CONTROLCLICK, convertCOMParams(clickParam))).getInt());
+		if (upKeyParam != null) { autoItX.invoke(AUTOIT_KEYWORD_SEND, convertCOMParams(upKeyParam)); }
+		
+		// 3. If AutoIt failed, use Java AWT Robot click API as workaround.
+		if (!result) {
+			Log.info(dbgmsg + "(): " + "failed to use AutoIt for clicking.");
+			Log.info(dbgmsg + "(): " + "try to use Java AWT Robot to click.");
 			
-			result = robotClick(winGetPosX(title, text) + controlGetPosX(title, text, controlID) + getBorderWidth(title, text), 
-					            winGetPosY(title, text) + controlGetPosY(title, text, controlID) + getTitleBarHeight(title, text), 
-					            button, nClicks, offset, specialKey);
-		} catch (Exception e) {
-			Log.info(dbgmsg + "(): " + "failed to use Java AWT Robot click with exception: " + e.toString());
-			Log.info(dbgmsg + "(): " + "try to use AutoIt click API.");
-			
-			// 3. If Windows Native click call failed, use AutoIt API to execute click action. 
-			if (pressKeyParam != null) { autoItX.invoke(AUTOIT_KEYWORD_SEND, convertCOMParams(pressKeyParam)); } 
-			result = oneToTrue((autoItX.invoke(AUTOIT_KEYWORD_CONTROLCLICK, convertCOMParams(clickParam))).getInt());
-			if (upKeyParam != null) { autoItX.invoke(AUTOIT_KEYWORD_SEND, convertCOMParams(upKeyParam)); }
+			try {
+				result = robotClick(winGetPosX(title, text) + controlGetPosX(title, text, controlID) + getBorderWidth(title, text), 
+						winGetPosY(title, text) + controlGetPosY(title, text, controlID) + getTitleBarHeight(title, text), 
+						button, nClicks, offset, specialKey);				
+			} catch (Exception e) {
+				Log.error(dbgmsg + "(): " + "failed to click with exception: '" + e.getMessage() + "'.");
+				result = false;
+			}			
 		}
 		
 		return result;
