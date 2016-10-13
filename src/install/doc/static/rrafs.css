@@ -129,3 +129,21 @@ td {
     font-weight: 700;
     font-style:italic;
 }
+
+.comments{
+    font-size: 90%;
+    font-style:italic;
+    color:gray;
+}
+.comments{
+    font-size: 90%;
+    font-style:italic;
+    color:gray;
+}
+.sourcecodes{
+    color:#8807B9;
+}
+.commandline{
+    background: black;
+    color:#1FFD1D;
+}
