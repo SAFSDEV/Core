@@ -30,6 +30,23 @@ import java.util.Map;
 
 //TODO:  can this class be moved beside HttpClient? (in org.apache.hc.client5.http.sync)
 public abstract class HttpClientPOJOAdapter {
+    public static final String BODY = "body";
+    public static final String CONTENT_TYPE = "contentType";
+    public static final String HEADERS = "headers";
+    public static final String METHOD = "method";
+    public static final String NAME = "name";
+    public static final String OAUTH2_SERVICE_NAME = "oauth2ServiceName";
+    public static final String PASSWORD = "password";
+    public static final String PATH = "path";
+    public static final String PROTOCOL_VERSION = "protocolVersion";
+    public static final String QUERY = "query";
+    public static final String REQUEST = "request";
+    public static final String RESPONSE = "response";
+    public static final String STATUS = "status";
+    public static final String TIMEOUT = "timeout";
+    public static final String USERID = "userid";
+    
+    
     public abstract Map<String, Object> execute(String defaultURI, Map<String, Object> request) throws Exception;
 
     public Map<String, Object> modifyRequest(final Map<String, Object> request) {
