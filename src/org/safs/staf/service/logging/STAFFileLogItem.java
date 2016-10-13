@@ -17,7 +17,6 @@ import org.safs.staf.embedded.HandleInterface;
 import org.safs.staf.service.ServiceDebugLog;
 import org.safs.tools.CaseInsensitiveFile;
 
-import com.ibm.staf.STAFHandle;
 import com.ibm.staf.STAFResult;
 import com.ibm.staf.STAFUtil;
 
@@ -33,7 +32,7 @@ import com.ibm.staf.STAFUtil;
  * 
  * @since	MAY 19 2009		(LW)	Modify the method getSTAFLogDirectory() to abstract.
  * 									getSTAFLogDirectory() contains the STAF-version related code,
- * 									realize them in subclass can make the code more independant of STAF-version.
+ * 									realize them in subclass can make the code more independent of STAF-version.
 */
 public abstract class STAFFileLogItem extends FileLogItem
 {
@@ -238,7 +237,7 @@ public abstract class STAFFileLogItem extends FileLogItem
 	/**
 	 * Returns the DIRECTORY setting of the STAF LOG service.
 	 * This method is defined as abstract. Because STAF 2 and STAF 3 return
-	 * unmarshalled and marshalled result. While to unmarshall the result, we
+	 * non-marshaled and marshaled result. While to un-marshal the result, we
 	 * must import the STAF 3 library; To separate STAF 2 and STAF 3, this
 	 * method is defined as abstract, and it will be implemented in STAFTextLogItem,
 	 * STAFTextLogItem3, STAFXmlLogItem and STAFXmlLogItem3.
