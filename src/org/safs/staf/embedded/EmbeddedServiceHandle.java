@@ -55,7 +55,7 @@ public class EmbeddedServiceHandle extends EmbeddedHandle implements ServiceInte
 	 */
 	@Override
 	public STAFResult acceptRequest(InfoInterface.RequestInfo info) {
-		try{ if(! isRegistered ) register();}
+		try{ register();}
 		catch(STAFException x){
 			return new STAFResult(STAFResult.STAFRegistrationError, "Registration Error");
 		}
