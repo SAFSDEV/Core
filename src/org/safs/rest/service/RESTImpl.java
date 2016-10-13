@@ -1,9 +1,10 @@
 package org.safs.rest.service;
 
+import static org.apache.hc.client5.http.testframework.HttpClientPOJOAdapter.PASSWORD;
+import static org.apache.hc.client5.http.testframework.HttpClientPOJOAdapter.USERID;
+
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,13 +48,17 @@ public class RESTImpl {
 		request.put("body", body);
 		request.put("contentType", headersMap.get(Headers.CONTENT_TYPE));
 		request.put("protocolVersion", protVersion);
+		request.put(USERID, service.getUserId());
+		request.put(PASSWORD, service.getPassword());
 
 		headersMap.remove(Headers.CONTENT_TYPE);
 		
 		long defaultTimeout = Timeouts.getDefaultTimeouts().getMillisToTimeout();
 		request.put("timeout", defaultTimeout);
 		
-		Map<String,Object> response = implAdapter.execute(defaultURI, request);
+		HttpClientPOJOAdapter clientAdapter = (HttpClientPOJOAdapter) service.getClientAdapter();
+
+		Map<String,Object> response = clientAdapter.execute(defaultURI, request);
 		
 		int status = (int) response.get("status");
 		
