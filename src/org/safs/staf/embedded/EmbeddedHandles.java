@@ -7,9 +7,8 @@ import java.util.Set;
 import org.safs.IndependantLog;
 import org.safs.SAFSException;
 
-
 /**
- * Handles the storage, regististration, and unregistration of Handles and Services.
+ * Handles the storage, registration, and un-registration of Handles and Services.
  * @author canagl
  */
 public class EmbeddedHandles {
