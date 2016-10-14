@@ -107,6 +107,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.safs.IndependantLog;
 import org.safs.Processor;
 import org.safs.SAFSException;
+import org.safs.SAFSParamException;
 import org.safs.StringUtils;
 import org.safs.image.ImageUtils;
 import org.safs.model.commands.DDDriverCommands;
@@ -2018,16 +2019,40 @@ public class WDLibrary extends SearchObject {
 
 	/**
 	 * Kill the process 'chromedriver.exe'.
-	 * @param host String, the host name on which the process 'chromedriver.exe' will be killed.
-	 * @return List<ProcessInfo>, a list containing the killed process's id and kill-execution-RC.
+	 * @param host String, the name of the machine on which the process 'chromedriver.exe' will be killed.
+	 * @return List<ProcessInfo>, a list containing the killed process's id and kill-execution-return-code.
 	 * @throws SAFSException
 	 */
 	public static List<ProcessInfo> killChromeDriver(String host) throws SAFSException{
+		return killExtraProcess(host, "chromedriver.exe");
+	}
+	
+	/**
+	 * Kill the process 'IEDriverServer.exe'.
+	 * @param host String, the name of the machine on which the process 'IEDriverServer.exe' will be killed.
+	 * @return List<ProcessInfo>, a list containing the killed process's id and kill-execution-return-code.
+	 * @throws SAFSException
+	 */
+	public static List<ProcessInfo> killIEDriverServer(String host) throws SAFSException{
+		return killExtraProcess(host, "IEDriverServer.exe");
+	}
+	
+	/**
+	 * Kill the process launched from executables located in %SAFSDIR%\samples\Selenium2.0\extra\ or %SELENIUM_PLUS%\extra\
+	 * @param host String, the name of machine on which the process will be killed.
+	 * @param processName String, the name of process to kill. like chromedriver.exe, IEDriverServer.exe etc.
+	 * @return List<ProcessInfo>, a list containing the killed process's id and kill-execution-return-code.
+	 * @throws SAFSException
+	 */
+	private static List<ProcessInfo> killExtraProcess(String host, String processName) throws SAFSException{
+		if(!StringUtils.isValid(processName)){
+			throw new SAFSParamException("The value of parameter 'processName' is NOT valid: "+processName);
+		}
+		IndependantLog.debug("WDLibrary.killExtraProcess(): killing process '"+processName+"' on machine '"+host+"'.");
+		
 		//wmic process where " commandline like '%d:\\seleniumplus\\extra\\chromedriver.exe%' and name = 'chromedriver.exe' "
-		String wmiSearchCondition = GenericProcessMonitor.wqlCondition("commandline", "\\extra\\chromedriver.exe", true, false);
-		
-		wmiSearchCondition += " and "+ GenericProcessMonitor.wqlCondition("name", "chromedriver.exe", false, false);
-		
+		String wmiSearchCondition = GenericProcessMonitor.wqlCondition("commandline", "\\extra\\"+processName, true, false);
+		wmiSearchCondition += " and "+ GenericProcessMonitor.wqlCondition("name", processName, false, false);
 		WQLSearchCondition condition = new WQLSearchCondition(wmiSearchCondition);
 		
 		return GenericProcessMonitor.shutdownProcess(host, condition);
@@ -3260,7 +3285,7 @@ public class WDLibrary extends SearchObject {
 	/**
 	 * Before calling this method, we could start chromedriver.exe firstly.
 	 */
-	private static void test_kill_chromedirver(){
+	private static void test_kill_extraProcess(){
 		try {
 			String host = "";
 			List<ProcessInfo> killedList = killChromeDriver(host);
@@ -3268,8 +3293,18 @@ public class WDLibrary extends SearchObject {
 				System.out.println("on host "+host+", process "+p.getId()+" has been terminated. The return code is "+p.getWmiTerminateRC());
 			}
 			
+			killedList = killIEDriverServer(host);
+			for(ProcessInfo p:killedList){
+				System.out.println("on host "+host+", process "+p.getId()+" has been terminated. The return code is "+p.getWmiTerminateRC());
+			}
+			
 			host = "internal.server";
 			killedList = killChromeDriver(host);
+			for(ProcessInfo p:killedList){
+				System.out.println("on host "+host+", process "+p.getId()+" has been terminated. The return code is "+p.getWmiTerminateRC());
+			}
+						
+			killedList = killIEDriverServer(host);
 			for(ProcessInfo p:killedList){
 				System.out.println("on host "+host+", process "+p.getId()+" has been terminated. The return code is "+p.getWmiTerminateRC());
 			}
@@ -3343,6 +3378,6 @@ public class WDLibrary extends SearchObject {
 	 */
 	public static void main(String[] args){
 		test_ajax_call();
-		test_kill_chromedirver();
+		test_kill_extraProcess();
 	}
 }
