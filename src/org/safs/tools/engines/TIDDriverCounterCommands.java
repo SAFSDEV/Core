@@ -221,7 +221,7 @@ public class TIDDriverCounterCommands extends GenericEngine {
 			}catch(IllegalArgumentException iax2){
 				desc = iax2.getMessage();
 				message = failedText.convert("failure2", "Unable to perform "+
-				                             command +" on "+ id, command, id);
+				                             command +" on "+ id, id, command);
 			    standardErrorMessage(testRecordData, message, desc);
 				return setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
 			}
@@ -268,7 +268,7 @@ public class TIDDriverCounterCommands extends GenericEngine {
 			}catch(IllegalArgumentException iax2){
 				desc = iax2.getMessage();
 				message = failedText.convert("failure2", "Unable to perform "+
-				                             command +" on "+ id, command, id);
+				                             command +" on "+ id, id, command);
 			    standardErrorMessage(testRecordData, message, desc);
 				return setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
 			}
@@ -307,7 +307,7 @@ public class TIDDriverCounterCommands extends GenericEngine {
 			}catch(IllegalArgumentException iax2){
 				desc = iax2.getMessage();
 				message = failedText.convert("failure2", "Unable to perform "+
-				                             command +" on "+ id, command, id);
+				                             command +" on "+ id, id, command);
 			    standardErrorMessage(testRecordData, message, desc);
 				return setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
 			}
@@ -430,7 +430,7 @@ public class TIDDriverCounterCommands extends GenericEngine {
 			}catch(IllegalArgumentException iax2){
 				desc = iax2.getMessage();
 				message = failedText.convert("failure2", "Unable to perform "+
-				                             command +" on "+ id, command, id);
+				                             command +" on "+ id, id, command);
 			    standardErrorMessage(testRecordData, message, desc);
 				return setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
 			}
@@ -496,7 +496,7 @@ public class TIDDriverCounterCommands extends GenericEngine {
 			
 			String detail = iax.getMessage();
 			message = failedText.convert("failure2", "Unable to perform "+
-			                             command +" on "+ id, command, id);
+			                             command +" on "+ id, id, command);
 		    standardErrorMessage(testRecordData, message, desc);
 			return setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
 		}
