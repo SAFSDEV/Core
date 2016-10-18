@@ -1,6 +1,43 @@
+[ApplicationConstants]
+SAFSDir="C:\SAFS\"
+WinDemoDir="Samples\DotNetApp\WinDemo.exe"
+preset="0,0,700,300;Status=NORMAL"
 
 [SAFS Monitor]
 SAFS Monitor=":AUTOIT:title=SAFS Monitor"
 
 [Calculator]
 Calculator=":AUTOIT:title=Calculator"
+Panel="calss=#32770;instance=1"
+Btn1="class=Button;instance=5"
+Btn2="class=Button;instance=11"
+Btn3="class=Button;instance=16"
+Btn4="class=Button;instance=4"
+Btn5="class=Button;instance=10"
+Btn6="class=Button;instance=15"
+Btn7="class=Button;instance=3"
+Btn8="class=Button;instance=9"
+Btn9="class=Button;instance=14"
+Btn0="class=Button;instance=6"
+BtnPlus="class=Button;instance=23"
+BtnMinus="class=Button;instance=22"
+BtnMulp="class=Button;instance=21"
+BtnDiv="class=Button;instance=20"
+BtnEqual="class=Button;instance=28"
+
+[Notepad]
+Notepad=":AUTOIT:title=Untitled - Notepad"
+EditBox="class=Edit;instance=1"
+preset="0,0,640,480;Status=NORMAL"
+
+[DotNetApp]
+DotNetApp=":AUTOIT:title=.NET Application"
+TableControl="NAME=tabControl1"
+DataView="NAME=dataGridView1"
+
+[Notepad_Replace]
+Notepad_Replace=":AUTOIT:title=Replace;class=#32770"
+EditBoxFind="class=Edit;instance=1"
+EditBoxReplace="class=Edit;instance=2"
+ButtonReplaceAll="class=Button;instance=5"
+ButtonCancel="class=Button;instance=6"

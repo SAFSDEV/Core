@@ -1,7 +1,20 @@
 
+C, Expressions, ON
 C, SetApplicationMap, AutoItTest.MAP
+C, LaunchApplication, "dotNetApp", ^SAFSDir & ^WinDemoDir
+T, DotNetApp, TableControl, RightClick, "Coords=30;10"
+T, DotNetApp, TableControl, Click, "Coords=214;12"
+T, DotNetApp, DataView, CtrlClick, "Coords=40;80"
+T, DotNetApp, DataView, CtrlClick, "Coords=40;125"
+T, DotNetApp, DataView, ShiftClick, "Coords=40;196"
+C, CloseApplication, "dotNetApp"
+
 C, LaunchApplication, "Calculator", "calc.exe"
 T, SAFS Monitor, SAFS Monitor, SetFocus
 C, Pause, 2
 T, Calculator, Calculator, SetFocus
+T, Calculator, Btn1, DoubleClick
+C, Pause, 1
 C, CloseApplication, "Calculator"
+
+
