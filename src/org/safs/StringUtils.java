@@ -10,24 +10,26 @@ package org.safs;
  * @author  Doug Bauman
  * @since   JUN 04, 2003
  *
- * <br>     JUN 04, 2003    (DBauman) 	Original Release
- * <br>     JUN 26, 2003    (CANAGL) 	Added convertWildcardsToRegularExpression
- * <br>     DEC 19, 2006    (CANAGL) 	Added readUTF8File support
- * <br>		OCT	29, 2008	(LeiWang)	Add method getTokenList().
- * <br>		NOV	25, 2008	(LeiWang)	Add method containsSepcialKeys(): See defect S0546329
- * <br>		JAN 26, 2009	(CANAGL) 	Fixed getTrimmedUnquotedString to trim appropriate whitespace
- * <br>		MAR 27, 2014	(SBJLWA) 	Add method getTokenList() getTokenArray(): get delimited tokens, token can contain delimiter.
- * <br>		FEB 17, 2015	(SBJLWA) 	Add method breakXpath(): break a slash-separated-xpath into an array.
- * <br>		APR 08, 2015	(SBJLWA) 	Add method getSystemProperty(): get/set property value according to configuration file.
- *                                   	Add method replaceJVMOptionValue().
- * <br>		May 20, 2015	(SBJLWA) 	Add method getTrimmedTokenList() and arrayToList().
- * <br>     JUN 23,2015     (SBJLWA) 	Add getCallerClassName(), isLocalHost(), isMacAddress() and getHostIP().
- *                                      Modify deduceUnusedSeparatorString(): avoid NullPointerException.
- * <br>     JUL 08,2015     (SBJLWA) 	Add some constant. Add method urlEncode().
- * <br>     SEP 07,2015     (SBJLWA) 	Move some content from method convertLine() to a new method convertCoordsToArray().
- * <br>     NOV 24,2015     (SBJLWA) 	Remove the dependency of WebElement.
- *                                      Deprecate method extractCoordStringPair(), use convertCoordsToArray() instead.
- *                                      Delete some methods, rename some methods to make this class clearer.
+ * JUN 04, 2003	(DBauman) 	Original Release
+ * JUN 26, 2003	(CANAGL) 	Added convertWildcardsToRegularExpression
+ * DEC 19, 2006	(CANAGL) 	Added readUTF8File support
+ * OCT 29, 2008	(LeiWang)	Add method getTokenList().
+ * NOV 25, 2008	(LeiWang)	Add method containsSepcialKeys(): See defect S0546329
+ * JAN 26, 2009	(CANAGL) 	Fixed getTrimmedUnquotedString to trim appropriate whitespace
+ * MAR 27, 2014	(SBJLWA) 	Add method getTokenList() getTokenArray(): get delimited tokens, token can contain delimiter.
+ * FEB 17, 2015	(SBJLWA) 	Add method breakXpath(): break a slash-separated-xpath into an array.
+ * APR 08, 2015	(SBJLWA) 	Add method getSystemProperty(): get/set property value according to configuration file.
+ *                          Add method replaceJVMOptionValue().
+ * May 20, 2015	(SBJLWA) 	Add method getTrimmedTokenList() and arrayToList().
+ * JUN 23, 2015	(SBJLWA) 	Add getCallerClassName(), isLocalHost(), isMacAddress() and getHostIP().
+ *                          Modify deduceUnusedSeparatorString(): avoid NullPointerException.
+ * JUL 08, 2015 (SBJLWA) 	Add some constant. Add method urlEncode().
+ * SEP 07, 2015 (SBJLWA) 	Move some content from method convertLine() to a new method convertCoordsToArray().
+ * NOV 24, 2015 (SBJLWA) 	Remove the dependency of WebElement.
+ *                          Deprecate method extractCoordStringPair(), use convertCoordsToArray() instead.
+ *                          Delete some methods, rename some methods to make this class clearer.
+ * OCT 19, 2016 (SBJLWA) 	Moved convertWindowPosition() to ComponentFunction class.
+ *                          Use IndependantLog instead of Log.
  *                                      
  **/
 import java.awt.Point;
@@ -920,9 +922,9 @@ public class StringUtils{
         Boolean result = (Boolean) obj;
         return result.booleanValue();
       } catch (InstantiationException ie) {
-        Log.error("matchRegex, using classname: "+reClassName, ie);
+        IndependantLog.error("matchRegex, using classname: "+reClassName, ie);
       } catch (java.lang.IllegalAccessException iae) {
-        Log.error("matchRegex, using classname: "+reClassName, iae);
+        IndependantLog.error("matchRegex, using classname: "+reClassName, iae);
       } catch (java.lang.reflect.InvocationTargetException ite) {
         //throw new SAFSException("expression: "+expression+", "+ite.toString());
         throw new SAFSRegExException(
@@ -952,34 +954,34 @@ public class StringUtils{
           Boolean result = (Boolean) obj;
           return result.booleanValue();
         } catch (java.lang.NoSuchMethodException nsme) {
-          Log.error("matchRegex, using classname: "+reClassName, nsme);
+          IndependantLog.error("matchRegex, using classname: "+reClassName, nsme);
           reMethod = null;
         } catch (java.lang.IllegalArgumentException iae) {
-          Log.error("matchRegex, using classname: "+reClassName, iae);
+          IndependantLog.error("matchRegex, using classname: "+reClassName, iae);
           reMethod = null;
         } catch (java.lang.IllegalAccessException iae2) {
-          Log.error("matchRegex, using classname: "+reClassName, iae2);
+          IndependantLog.error("matchRegex, using classname: "+reClassName, iae2);
           reMethod = null;
         } catch (java.lang.reflect.InvocationTargetException ite) {
               throw new SAFSRegExException("expression: "+expression+", "+ite.toString());
         } catch (java.lang.ClassCastException cce) {
-          Log.error("matchRegex, using classname: "+reClassName, cce);
+          IndependantLog.error("matchRegex, using classname: "+reClassName, cce);
           reMethod = null;
         }
       } catch (NoSuchMethodException nsme) {
-        Log.error("matchRegex, using classname: "+reClassName, nsme);
+        IndependantLog.error("matchRegex, using classname: "+reClassName, nsme);
       } catch (java.lang.reflect.InvocationTargetException ite) {
-        Log.error("matchRegex, using classname: "+reClassName, ite);
+        IndependantLog.error("matchRegex, using classname: "+reClassName, ite);
       } catch (NoClassDefFoundError nc) {
-        Log.error("matchRegex, using classname: "+reClassName+ nc);
+        IndependantLog.error("matchRegex, using classname: "+reClassName+ nc);
       } catch (ClassCastException cc) {
-        Log.error("matchRegex, using classname: "+reClassName, cc);
+        IndependantLog.error("matchRegex, using classname: "+reClassName, cc);
       } catch (InstantiationException ie) {
-        Log.error("matchRegex, using classname: "+reClassName, ie);
+        IndependantLog.error("matchRegex, using classname: "+reClassName, ie);
       } catch (ClassNotFoundException ex) {
-        Log.error("matchRegex, using classname: "+reClassName, ex);
+        IndependantLog.error("matchRegex, using classname: "+reClassName, ex);
       } catch (IllegalAccessException iae) {
-        Log.error("matchRegex, using classname: "+reClassName, iae);
+        IndependantLog.error("matchRegex, using classname: "+reClassName, iae);
       } catch (Exception reex) {
         throw new SAFSRegExException("expression: "+expression+", "+reex.toString());
       }
@@ -1416,17 +1418,17 @@ public class StringUtils{
     try {
       num = num.trim();
       if (num.equals("")) num = "1"; // assumption
-      Log.debug("num: "+num);
+      IndependantLog.debug("num: "+num);
       Integer ii = new Integer(num);
       int n = ii.intValue();
       if (--n < 0) {
-        Log.debug("bad number, illegal index, they begin from 1: "+num);
+        IndependantLog.debug("bad number, illegal index, they begin from 1: "+num);
         return null;
       }
-      Log.debug("convertNum: "+n);
+      IndependantLog.debug("convertNum: "+n);
       return new Integer(n);
     } catch (NumberFormatException ee) {
-      Log.debug("got bad num: "+num+", ee: "+ee);
+      IndependantLog.debug("got bad num: "+num+", ee: "+ee);
       return null;
     }
   }
@@ -1453,7 +1455,7 @@ public class StringUtils{
 		  if(index==(floatNumber.length()-1)) {
 			  return 0.01F * Float.parseFloat(floatNumber.substring(0, index));
 		  } else {
-			  Log.warn("Cannot parse '" + floatNumber+"', whose format might be invalid.");
+			  IndependantLog.warn("Cannot parse '" + floatNumber+"', whose format might be invalid.");
 			  throw nfe;
 		  }		  
 	  }
@@ -1491,7 +1493,7 @@ public class StringUtils{
 		int coordsindex = coords.indexOf(EQUAL);
 		if(coordsindex > 0) ncoords = ncoords.substring(coordsindex+1);
 		ncoords=ncoords.trim();
-		Log.info("working with coords: "+ coords +" prefix stripped to: "+ncoords);
+		IndependantLog.info("working with coords: "+ coords +" prefix stripped to: "+ncoords);
 		
 		// Extract parameter by delimiter ';' or ','. 
 		int sindex = ncoords.indexOf(";");
@@ -1502,7 +1504,7 @@ public class StringUtils{
 			isspace = (sindex > 0);
 		}
 		if (sindex < 0){
-    		Log.debug("invalid coords: "+ ncoords +"; no separator detected.");
+    		IndependantLog.debug("invalid coords: "+ ncoords +"; no separator detected.");
 			return null;
 		}
 		
@@ -1510,10 +1512,10 @@ public class StringUtils{
 	    String xS = null;
 		String yS = null;
 		if(isspace){
-    		Log.info("converting space-delimited coords: "+ ncoords);
+    		IndependantLog.info("converting space-delimited coords: "+ ncoords);
 			StringTokenizer toker = new StringTokenizer(ncoords, " ");
 			if(toker.countTokens() < 2) {
-        		Log.debug("invalid space-delimited coords: "+ ncoords);
+        		IndependantLog.debug("invalid space-delimited coords: "+ ncoords);
 				return null;
 			}
 			xS = toker.nextToken();
@@ -1523,16 +1525,16 @@ public class StringUtils{
 			yS = ncoords.substring(sindex+1).trim();
 		}
 		if ((xS.length()==0)||(yS.length()==0)){
-    		Log.debug("invalid coordinate substrings  "+ xS +","+ yS);
+    		IndependantLog.debug("invalid coordinate substrings  "+ xS +","+ yS);
 			return null; // assumption
 		}
 
-		Log.info("x: "+xS);
-		Log.info("y: "+yS);
+		IndependantLog.info("x: "+xS);
+		IndependantLog.info("y: "+yS);
 		
 		return new String[]{xS, yS}; 
 	} catch(Exception ee) {
-  		Log.debug( "bad coords format: "+ coords, ee);
+  		IndependantLog.debug( "bad coords format: "+ coords, ee);
   		return null;
 	}
   }
@@ -1561,12 +1563,12 @@ public class StringUtils{
 	  String debugmsg = StringUtils.debugmsg(false);
 	  
 	  if(coordsPair == null || coordsPair.length != 2) {
-		  Log.error(debugmsg + "bad coords format: "+ Arrays.toString(coordsPair));
+		  IndependantLog.error(debugmsg + "bad coords format: "+ Arrays.toString(coordsPair));
 		  return null;
 	  }
 
 	  try {
-		  Log.debug(debugmsg+" converting coordinate "+Arrays.toString(coordsPair)+" to Point, component rectangle is "+compRect);
+		  IndependantLog.debug(debugmsg+" converting coordinate "+Arrays.toString(coordsPair)+" to Point, component rectangle is "+compRect);
 		  
 		  int x = DEFAULT_X_COORDINATE;
 		  int y = DEFAULT_Y_COORDINATE;
@@ -1585,11 +1587,11 @@ public class StringUtils{
 			  y = (int) yF;
 		  }
 
-		  Log.debug(debugmsg+"converted coords: x: " + x + ", y: " + y);		  
-		  if(x < 0 || y < 0) Log.warn(debugmsg+"Coordinate contains negative value!");
+		  IndependantLog.debug(debugmsg+"converted coords: x: " + x + ", y: " + y);		  
+		  if(x < 0 || y < 0) IndependantLog.warn(debugmsg+"Coordinate contains negative value!");
 		  return new java.awt.Point(x, y);
 	  } catch (Exception e) {
-		  Log.error(debugmsg+ "bad coords format: "+ Arrays.toString(coordsPair) + ", " + e);
+		  IndependantLog.error(debugmsg+ "bad coords format: "+ Arrays.toString(coordsPair) + ", " + e);
 		  return null;
 	  }
   }
@@ -1657,14 +1659,14 @@ public class StringUtils{
       		int x2 = (int) Float.parseFloat(coordsArray[2]);
       		int y2 = (int) Float.parseFloat(coordsArray[3]);
       		
-      		Log.debug("converted points: x1: "+x1+", y1: "+y1 +", x2:"+ x2 +", y2:"+ y2);
+      		IndependantLog.debug("converted points: x1: "+x1+", y1: "+y1 +", x2:"+ x2 +", y2:"+ y2);
       		Polygon poly = new Polygon();
       		poly.addPoint(x1, y1);
       		poly.addPoint(x2, y2);
       		
         	return poly;
 	    } catch (Exception ee) {
-      		Log.debug( "bad points format: "+ coords, ee);
+      		IndependantLog.debug( "bad points format: "+ coords, ee);
       		return null;
     	}
     }
@@ -1697,18 +1699,18 @@ public class StringUtils{
     		int coordsindex = coords.indexOf(EQUAL);
     		if(coordsindex > 0) ncoords = ncoords.substring(coordsindex+1);
     		ncoords=ncoords.trim();
-    		Log.info(debugmsg+"working with coods: "+ coords +" prefix stripped to: "+ncoords);
+    		IndependantLog.info(debugmsg+"working with coods: "+ coords +" prefix stripped to: "+ncoords);
     		
     		String sep = parseSeparator(ncoords);
     		if (sep == null){
-    			Log.error(debugmsg+"invalid coods: "+ ncoords +".");
+    			IndependantLog.error(debugmsg+"invalid coods: "+ ncoords +".");
     			return null;
     		}
 
-    		Log.info(debugmsg+"converting coods: "+ ncoords);
+    		IndependantLog.info(debugmsg+"converting coods: "+ ncoords);
     		StringTokenizer toker = new StringTokenizer(ncoords, sep);
     		if(toker.countTokens() < length) {
-    			Log.error(debugmsg+"invalid coods present: "+ ncoords);
+    			IndependantLog.error(debugmsg+"invalid coods present: "+ ncoords);
     			return null;
     		}
     		//Put the token into the array
@@ -1718,15 +1720,15 @@ public class StringUtils{
     		for(int i=0; i<coordsArray.length; i++){
     			coord = coordsArray[i];
     			if(coord==null || coord.isEmpty()){
-    				Log.error(debugmsg+"invalid coods substrings  "+ Arrays.toString(coordsArray));    				
+    				IndependantLog.error(debugmsg+"invalid coods substrings  "+ Arrays.toString(coordsArray));    				
     				return null;
     			}
-    			Log.info(debugmsg+"coord "+i+": "+coord);
+    			IndependantLog.info(debugmsg+"coord "+i+": "+coord);
     		}
     		
     		return coordsArray;
     	} catch (Exception ee) {
-    		Log.debug(debugmsg+"bad coods format: "+ coords, ee);
+    		IndependantLog.debug(debugmsg+"bad coods format: "+ coords, ee);
     		return null;
     	}    	
     }
@@ -1768,72 +1770,6 @@ public class StringUtils{
     	else return ";";//stepSeparator is comma, then we return semi-colon
     }
     
-    /** 
-     * Convert window's position-size-status string of the formats:
-     * <ul>
-     * <li>"x;y;width;height;status"
-     * <li>"x,y,width,heigth,status"
-     * <li>"x y width heigth status"
-     * <li>"Coords=x;y;width;height;Status=status"
-     * <li>"Coords=x,y,width,heigth,Status=status"
-     * <li>"Coords=x y width heigth Status=status"
-     * </ul> 
-     * into a org.safs.ComponentFunction.Window object.
-     * 
-     * @param   windowPosition String, window's position-size-status string
-     * @return  org.safs.ComponentFunction.Window if successful, null otherwise
-     **/
-    public static Window convertWindowPosition(String windowPosition) {
-    	try {
-    		String position = new String(windowPosition);    		
-            // parsing preset string to get position,size and status 
-    		position = position.toUpperCase();
-    		position = position.replace("COORDS=",""); // remove "Coords="
-    		position = position.replace("STATUS=",""); // remove "Status="
-    		
-    		position=position.trim();
-    		Log.info("working with position: "+ windowPosition +" prefix stripped to: "+position);
-    		
-    		position = position.replace(";",","); //replace ";" by "," in string "0,0,640,480;Status=NORMAL"
-    		String sep = parseSeparator(position);
-    		if (sep == null){
-    			Log.error("invalid position: "+ position +".");
-    			return null;
-    		}
-    		
-    		// properly handles case where coordsindex = -1 (not found)
-    		Log.info("converting position: "+ position);
-    		StringTokenizer toker = new StringTokenizer(position, sep);
-    		if(toker.countTokens() < 4) {
-    			Log.error("invalid position: "+ position);
-    			return null;
-    		}
-    		String x = toker.nextToken().trim();
-    		String y = toker.nextToken().trim();
-    		String width = toker.nextToken().trim();
-    		String height = toker.nextToken().trim();
-    		
-    		if ((x.length()==0)||(y.length()==0)||(width.length()==0)||(height.length()==0)){
-    			Log.error("invalid position substrings  "+ x +","+ y +", "+ width +","+ height);
-    			return null;
-    		}
-    		
-    		Window window = new Window(
-    				(int) Float.parseFloat(x), 
-    				(int) Float.parseFloat(y),
-    				(int) Float.parseFloat(width),
-    				(int) Float.parseFloat(height));
-
-    		if(toker.hasMoreTokens()) window.setStatus(toker.nextToken().trim());
-    			
-    		return window;
-    		
-    	} catch (Exception ee) {
-    		Log.debug( "bad window's position-size-status format: "+ windowPosition, ee);
-    		return null;
-    	}
-    }
-    
     /**
      * Parse a string to get the separator.
      * <ul>
@@ -1847,11 +1783,11 @@ public class StringUtils{
      * @param input String, the string to parse
      * @return String, the separator
      */
-    private static String parseSeparator(String input){
+    public static String parseSeparator(String input){
 		String sep = null;
 		
 		if(input==null){
-			Log.error("input string is null");
+			IndependantLog.error("input string is null");
 			return null;
 		}
 		
@@ -1869,7 +1805,7 @@ public class StringUtils{
 		}
 		
 		if (sep==null){
-			Log.error("no separator detected for input string '"+input+"'");
+			IndependantLog.error("no separator detected for input string '"+input+"'");
 		}
 		
 		return sep;
@@ -1883,7 +1819,7 @@ public class StringUtils{
      * Generate debug message with class name and method name.<br>
      * @param clazz	Class, the class object of the instance, which is caller of the method.
      * @param methodName String, the string name of the method.
-     * @return	String, debug massage, for example "org.safs.Log.debug(): "
+     * @return	String, debug massage, for example "org.safs.IndependantLog.debug(): "
      */
     public static String debugmsg(Class<?> clazz, String methodName){
     	return (clazz==null?"":clazz.getSimpleName())+
@@ -1894,8 +1830,8 @@ public class StringUtils{
      * Generate debug message with class name, method name and message.<br>
      * @param clazz	Class, the class object of the instance, which is caller of the method.
      * @param methodName String, the string name of the method.
-     * @param message String, the detail message for the debug log. 
-     * @return	String, debug massage, for example "org.safs.Log.debug(): Something is wrong."
+     * @param message String, the detail message for the debug IndependantLog. 
+     * @return	String, debug massage, for example "org.safs.IndependantLog.debug(): Something is wrong."
      */
     public static String debugmsg(Class<?> clazz, String methodName, String message){
     	return (clazz==null?"":clazz.getSimpleName())+
@@ -1908,7 +1844,7 @@ public class StringUtils{
      * @param clazz	Class, the class object of the instance, which is caller of the method.
      * @param methodName String, the string name of the method.
      * @param e	Throwable, the Throwable object rose when calling method.
-     * @return	String, debug massage, for example "org.safs.Log.debug(): SomeException:Exception message."
+     * @return	String, debug massage, for example "org.safs.IndependantLog.debug(): SomeException:Exception message."
      */
     public static String debugmsg(Class<?> clazz, String methodName, Throwable e){
     	return (clazz==null?"":clazz.getSimpleName())+
@@ -1919,9 +1855,9 @@ public class StringUtils{
      * Generate debug message with class name, method name, detail message and Throwable object.<br>
      * @param clazz	Class, the class object of the instance, which is caller of the method.
      * @param methodName String, the string name of the method.
-     * @param message String, the detail message for the debug log. 
+     * @param message String, the detail message for the debug IndependantLog. 
      * @param e	Throwable, the Throwable object rose when calling method.
-     * @return	String, debug massage, for example "org.safs.Log.debug(): Something is wrong:SomeException:Exception message."
+     * @return	String, debug massage, for example "org.safs.IndependantLog.debug(): Something is wrong:SomeException:Exception message."
      */
     public static String debugmsg(Class<?> clazz, String methodName, String message, Throwable e){
     	return (clazz==null?"":clazz.getSimpleName())+
@@ -2538,37 +2474,37 @@ public class StringUtils{
 
 		try{
 			//First, try to get the value from the system properties
-			Log.info("Checking for Command-Line setting '-D"+property+"'");
+			IndependantLog.info("Checking for Command-Line setting '-D"+property+"'");
 			value = System.getProperty(property);
 			if(isValid(value)) return value;
 		}catch(Exception e){
-			Log.error(debugmsg+" fail to get value for property '"+property+"'. "+StringUtils.debugmsg(e));
+			IndependantLog.error(debugmsg+" fail to get value for property '"+property+"'. "+StringUtils.debugmsg(e));
 		}
 
 		//If not found, try to get the value from the configuration. And set it to system properties.
 		try{
 			if(!isValid(value)){
-				Log.info("Checking for alternative configuration setting '"+section+"':'"+key+"'...");
+				IndependantLog.info("Checking for alternative configuration setting '"+section+"':'"+key+"'...");
 				value = config.getNamedValue(section, key);
 			}
 		}catch(Exception e){
-			Log.error(debugmsg+" fail to get configuration setting '"+section+"':'"+key+"'. "+StringUtils.debugmsg(e));
+			IndependantLog.error(debugmsg+" fail to get configuration setting '"+section+"':'"+key+"'. "+StringUtils.debugmsg(e));
 		}
 
 		//If not found, assign the default value if the default value is provided.
 		try{
 			if(!isValid(value) && defaultValue!=null){
 				if(defaultValue.length>0){
-					Log.info("Use the default value '"+defaultValue[0]+"'. ");
+					IndependantLog.info("Use the default value '"+defaultValue[0]+"'. ");
 					value = defaultValue[0];
 				}
 			}
 		}catch(Exception e){
-			Log.error(debugmsg+" fail to get defaul value. "+StringUtils.debugmsg(e));
+			IndependantLog.error(debugmsg+" fail to get defaul value. "+StringUtils.debugmsg(e));
 		}
 		//Finally if the value is valid, set it to the system properties
 		if(isValid(value)){
-			Log.debug(debugmsg+" Set value '"+value+"' to system property '"+property+"'.");
+			IndependantLog.debug(debugmsg+" Set value '"+value+"' to system property '"+property+"'.");
 			System.setProperty(property, value);
 		}
 
