@@ -6,13 +6,13 @@
 <link rel="stylesheet" type="text/css" href="rrafs.css">
 <title>Java SAFS Framework Interface</title>
 </head>
-<body><a name="top">
+<body><div id="top">
 <h2>Java SAFS Framework Interface</h2>by Carl Nagle<br>Last Updated:
 <script language="JavaScript">document.write(document.lastModified)</script>04/28/2016 10:44:0804/09/2015 15:27:2009/26/2014 02:24:30
 <!-- 2014.08.12 CANAGL -->
 <p>This represents the proposed Java interface for Tool-Independent Drivers and
 Engines.
-</p></a><p><a name="top"><small>See also: </small></a><small><a href="SAFSFramework.htm">SAFS
+</p></div><p><small>See also: </small><small><a href="SAFSFramework.htm">SAFS
 Framework</a>, <a href="JSAFSFrameworkGraphs.htm">JSAFS
 Design</a>, <a href="../doc/javadoc.html" target="_blank">JSAFS Javadoc</a>, <a href="http://sourceforge.net/apps/mediawiki/safsdev/index.php?title=SAFS_Driver_Development" target="_blank">SAFS Driver Development</a>, <a href="http://safsdev.sourceforge.net/" target="_blank">SAFSDEV Project</a>
 </small>
@@ -208,7 +208,7 @@ from there.
   <dl>
     <dt><a href="../doc/org/safs/tools/drivers/SAFSDRIVER.html" target="api">SAFSDRIVER</a> </dt></dl></ul>
 <hr>
-<a name="driveroptions"><!-- ********************************************************** -->
+<div id="driveroptions"><!-- ********************************************************** -->
 <p><b>SAFSDRIVER Command Line Options</b>
 </p><p><!-- ********************************************************** --><b>Command
 Line Options:</b><br>
@@ -275,20 +275,18 @@ Line Options:</b><br>
               </dd><dt><b>-Dsafs.test.level=CYCLE|SUITE|STEP</b>
               </dt><dd>Optional if the test level can be
               accurately determined from the filename extension. (.CDD, .STD,
-              .SDD) </dd></dl>
-          </td><td>
-            <dl>
+              .SDD) </dd>
               <dt><b>-Dsafs.test.millisbetweenrecords=N</b>
               </dt><dd>System property for Driver Delay
               millisBetweenRecords. Defaults to 100 millis.
               <p></p>
               </dd><dt><b>-Dsafs.test.numlockon=true|false</b>
               </dt><dd>System property for turning on/off the 
-			  keyboard number lock before testing.
+              keyboard number lock before testing.
               <p></p>
               </dd><dt><b>-Dsafs.test.unexpected_alert_behaviour=accept|dismiss|ignore</b>
               </dt><dd>System property for how to handle 
-			  the unexpected alert automatically. Defaults to ignore.
+              the unexpected alert automatically. Defaults to ignore.
               <p></p>
               </dd><dt><b>-Dsafs.test.defaultmap=mapid</b>
               </dt><dd>
@@ -297,7 +295,11 @@ Line Options:</b><br>
                        <b>-Dsafs.test.dnd.release.delay=N</b></a>
               </dt><dd>System property for the delay in millisecond before releasing mouse
               <p></p>
-              </dd><dt><b>-Dsafs.step.separator=string (1 char)</b>
+              </dd>
+              </dl>
+          </td><td>
+            <dl>
+              <dt><b>-Dsafs.step.separator=string (1 char)</b>
               </dt><dd>Only the setting for the test level of the
               provided test name is required.
               <p></p>
@@ -337,31 +339,36 @@ Line Options:</b><br>
               Cycle information.
               <p></p>
               </dd><dt><b>-Dsafs.step.logmode=TEXTLOG|CONSOLELOG|XMLLOG|TOOLLOG|ALL</b>
-
               </dt><dd>Specifies which log formats are to be
               initialized/enabled for the primary log.
-              <p></p>
-              </dd><dt><b>-Dsafs.suite.logmode=TEXTLOG|CONSOLELOG|XMLLOG|TOOLLOG|ALL</b>
-
+              <p></p></dd>
+              
+              <dt><b>-Dsafs.suite.logmode=TEXTLOG|CONSOLELOG|XMLLOG|TOOLLOG|ALL</b>
               </dt><dd>Required only if a safs.suite.logname has
               been specified. Specifies which log formats are to be
               initialized/enabled for this log.
-              <p></p>
-              </dd><dt><b>-Dsafs.cycle.logmode=TEXTLOG|CONSOLELOG|XMLLOG|TOOLLOG|ALL</b>
-
+              <p></p></dd>
+              
+              <dt><b>-Dsafs.cycle.logmode=TEXTLOG|CONSOLELOG|XMLLOG|TOOLLOG|ALL</b>
               </dt><dd>Required only if a safs.cycle.logname has
               been specified. Specifies which log formats are to be
               initialized/enabled for this log.
-</dd></dl></td></tr></tbody></table></td></tr></tbody></table>
+              <p></dd>
+              
+              <dt><a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_CONSOLE_STATE" target="api">
+              <b>-Dsafs.selenium.console.state=MAX|MIN|NORMAL</b></a>
+              </dt><dd>Specifies the selenium server console's state.</dd>
+              
+</dl></td></tr></tbody></table></td></tr></tbody></table>
 </p><p>Enhancements, corrections, and more detail will be added as necessary.
 </p><hr>
-</a><a name="configfile"><!-- ********************************************************** -->
+</div><div id="configfile"><!-- ********************************************************** -->
 <p><b>SAFSDRIVER Configuration File Options</b>
-</p></a><p><a name="configfile"><!-- ********************************************************** -->The
+</p></div><p><!-- ********************************************************** -->The
 default name of the configuration file is "safstid.ini".<br>This file is
 readable by Windows AND Java classes. Items commented out with semicolons tell
-the DRIVER to use its pre-programmed default values, or items passed in via </a><a href="JSAFSFrameworkContent.htm#driveroptions">command-line
-arguments</a>. Multiple configuration files can be used in a chain with values
+the DRIVER to use its pre-programmed default values, or items passed in via <a href="JSAFSFrameworkContent.htm#driveroptions">command-line
+arguments.</a> Multiple configuration files can be used in a chain with values
 in one file overriding or masking values in another file. The default priority
 of the chain is:
 </p><ol>
@@ -542,6 +549,9 @@ GATEWAYPORT=80
 ;SELENIUMSERVER_JVM_Xmx=4g (default: 2g)
 ;SELENIUMSERVER_JVM_Xms=256m (default: 512m)
 ;SELENIUMSERVER_JVM=fullpath\java.exe (default: 1.7.0_45 64bit)
+<span class="comments">;= CONSOLE_STATE is used to set the state of
+;= Selenium Server Console</span>
+;CONSOLE_STATE=MIN|MAX|NORMAL
 
 <span class="comments">;= Settings for Selnium1.0</span>
 ;HOOK=org.safs.selenium.SeleniumJavaHook
