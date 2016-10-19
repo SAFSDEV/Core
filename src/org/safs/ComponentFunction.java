@@ -7,29 +7,30 @@ package org.safs;
  * @author  Doug Bauman
  * @since   JUN 04, 2003
  *
- *   <br>   JUN 04, 2003    (DBauman) Original Release
- *   <br>   SEP 16, 2003    (CANAGL) Implemented use of new SAFSLOGS logging.
- *   <br>   NOV 10, 2003    (CANAGL) Added isSupportedRecordType() implementation.
- *   <br>   OCT 28, 2005    (CANAGL) Refactored to allow for override of convertCoords methods.
- * 	 <br>   MAR 19, 2008	(LeiWang) Added componentSuccessMessage for common success message use.
- *   <br>   MAR 25, 2008	(JuwnuMa) Added componentExecutedFailureMessage
- *   <br>	DEC 03, 2008	(LeiWang) Modify method action_getGuiImage() and action_verifyGuiImageToFile():
- *   								  Call ImageUtils.saveImageToFile() to save image, instead of ImageIO.write();
- *   								  Because using ImageIO.write() will loss quality of jpg image. Now we use full
- *   								  quality to save jpg image, that is when call ImageUtils.saveImageToFile(), we
- *   								  set its third parameter to 1.0f
- *   <br>   MAR 25, 2009    (CANAGL) Added issuePassedSuccessUsing
- *   <br>   NOV 12, 2009    (CANAGL) Simple JavaDoc update
- *   <br>   APR 14, 2010    (JunwuMa)Move TIDComponent.setRectVars() to ComponentFunction for sharing. 
- *   <br>   JUL 22, 2013    (sbjlwa) Move some meothods convertXXX() to StringUtils.java and make them static.
- *   								 Modify methods action_xxxGuiImage() to concentrate the redundant code and
- *   							 	 move some concentrated code to org.safs.Processor
- *   <br>   MAR 05, 2014    (SBJLWA) Move some keywrod constants from CFComponent.
- *   <br>   DEC 12, 2014    (SBJLWA) Add extra parameter "FilteredAreas" for GetGUIImage/VerifyGUIImage.
- *   <br>   JAN 12, 2015    (SBJLWA) Modify some methods issueXXX(): Make comment and code consistent.
- *                                   Modify some methods to give more detail (line number, file name) if keyword fails.
- *   <br>   SEP 07, 2015    (SBJLWA) Handle DragTo. Correct a typo, change method preformDrag to performDrag.
- *   <br>   NOV 26, 2015    (SBJLWA) Modify methods checkForCoord() so that percentage coordinate will be accepted.
+ * JUN 04, 2003 (DBauman) Original Release
+ * SEP 16, 2003 (CANAGL) Implemented use of new SAFSLOGS logging.
+ * NOV 10, 2003 (CANAGL) Added isSupportedRecordType() implementation.
+ * OCT 28, 2005 (CANAGL) Refactored to allow for override of convertCoords methods.
+ * MAR 19, 2008	(LeiWang) Added componentSuccessMessage for common success message use.
+ * MAR 25, 2008	(JuwnuMa) Added componentExecutedFailureMessage
+ * DEC 03, 2008	(LeiWang) Modify method action_getGuiImage() and action_verifyGuiImageToFile():
+ *								  Call ImageUtils.saveImageToFile() to save image, instead of ImageIO.write();
+ *								  Because using ImageIO.write() will loss quality of jpg image. Now we use full
+ *								  quality to save jpg image, that is when call ImageUtils.saveImageToFile(), we
+ *								  set its third parameter to 1.0f
+ * MAR 25, 2009 (CANAGL) Added issuePassedSuccessUsing
+ * NOV 12, 2009 (CANAGL) Simple JavaDoc update
+ * APR 14, 2010 (JunwuMa)Move TIDComponent.setRectVars() to ComponentFunction for sharing. 
+ * JUL 22, 2013 (sbjlwa) Move some methods convertXXX() to StringUtils.java and make them static.
+ *								 Modify methods action_xxxGuiImage() to concentrate the redundant code and
+ *							 	 move some concentrated code to org.safs.Processor
+ * MAR 05, 2014 (SBJLWA) Move some keyword constants from CFComponent.
+ * DEC 12, 2014 (SBJLWA) Add extra parameter "FilteredAreas" for GetGUIImage/VerifyGUIImage.
+ * JAN 12, 2015 (SBJLWA) Modify some methods issueXXX(): Make comment and code consistent.
+ *                       Modify some methods to give more detail (line number, file name) if keyword fails.
+ * SEP 07, 2015 (SBJLWA) Handle DragTo. Correct a typo, change method preformDrag to performDrag.
+ * NOV 26, 2015 (SBJLWA) Modify methods checkForCoord() so that percentage coordinate will be accepted.
+ * NOV 26, 2015 (SBJLWA) Moved StringUtils.convertWindowPosition() to this class and renamed it to ConvertWindowPosition.
  */
 import java.awt.AWTException;
 import java.awt.Dimension;
@@ -46,6 +47,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.StringTokenizer;
 import java.util.TreeSet;
 
 import org.safs.android.auto.lib.Console;
@@ -514,7 +516,7 @@ public abstract class ComponentFunction extends Processor{
 	 * <br><em>Assumptions:</em>  all exceptions are handled.
 	 * @param                     numStr, String 
 	 * (indexed from 1, 1 will be subtracted from the number before returned)
-	 * @return                    Integer if successfull, null otherwise (if alpha chars instead
+	 * @return                    Integer if successful, null otherwise (if alpha chars instead
 	 * of digits are encountered; or if number is less than one)
 	 **/
 	public Integer convertNum (String num) {
@@ -598,7 +600,7 @@ public abstract class ComponentFunction extends Processor{
 	 * as Row and Col values as is done in org.safs.rational.CFTable
 	 * 
 	 * @param   coords, String x;y or x,y or Coords=x;y  or Coords=x,y
-	 * @return  Point if successfull, null otherwise
+	 * @return  Point if successful, null otherwise
 	 **/
 	public java.awt.Point convertCoords(String coords) {
 		return StringUtils.convertCoords(coords);
@@ -617,7 +619,7 @@ public abstract class ComponentFunction extends Processor{
 	 * into a java.awt.Polygon object.
 	 * 
 	 * @param   coords, String x1;y1;x2;y2 or x1,y1,x2,y2 or Coords=x1;y1;x2;y2  or Coords=x1,y1,x2,y2
-	 * @return  Polygon if successfull, null otherwise
+	 * @return  Polygon if successful, null otherwise
 	 **/
 	public java.awt.Polygon convertLine(String coords) {
 		return StringUtils.convertLine(coords);
@@ -627,22 +629,22 @@ public abstract class ComponentFunction extends Processor{
 	 * Convert window's position-size-status string of the formats:
 	 * <ul>
 	 * <li>"x;y;width;height;status"
-	 * <li>"x,y,width,heigth,status"
-	 * <li>"x y width heigth status"
+	 * <li>"x,y,width,height,status"
+	 * <li>"x y width height status"
 	 * <li>"Coords=x;y;width;height;Status=status"
-	 * <li>"Coords=x,y,width,heigth,Status=status"
-	 * <li>"Coords=x y width heigth Status=status"
+	 * <li>"Coords=x,y,width,height,Status=status"
+	 * <li>"Coords=x y width height Status=status"
 	 * </ul> 
 	 * into a org.safs.ComponentFunction.Window object.
 	 * 
 	 * @param   windowPosition String, window's position-size-status string; or a map reference for window's status string. 
-	 * @return  org.safs.ComponentFunction.Window if successfull, null otherwise
+	 * @return  org.safs.ComponentFunction.Window if successful, null otherwise
 	 **/
 	public Window convertWindowPosition(String windowPosition){
 		String position = windowPosition;
 		String temp = lookupAppMapReference(windowPosition);
 		if (temp != null) position = temp;
-		return StringUtils.convertWindowPosition(position);
+		return ConvertWindowPosition(position);
 	}
 
 	/** 
@@ -667,7 +669,7 @@ public abstract class ComponentFunction extends Processor{
 	 * @param referenceName, String, the reference name passed on to
 	 *         method 'lookupAppMapReference' to lookup the coordinate string 
 	 *         from an AppMap. Then that value is passed on to convertCoords. 
-	 * @return Point if successfull, null otherwise (if alpha chars instead
+	 * @return Point if successful, null otherwise (if alpha chars instead
 	 *          of digits are encountered; or if row or col less than one)
 	 **/
 	protected java.awt.Point lookupAppMapCoordReference(String referenceName) {
@@ -684,7 +686,7 @@ public abstract class ComponentFunction extends Processor{
 	 * @param referenceName, String, the reference name passed on to
 	 *         method 'lookupAppMapReference' to lookup the Line string 
 	 *         from an AppMap. Then that value is passed on to convertLine. 
-	 * @return Polygon if successfull, null otherwise (if alpha chars instead
+	 * @return Polygon if successful, null otherwise (if alpha chars instead
 	 *          of digits are encountered; or if less than 2 points are detected.)
 	 **/
 	protected java.awt.Polygon lookupAppMapLineReference(String referenceName) {
@@ -700,7 +702,7 @@ public abstract class ComponentFunction extends Processor{
 	 * @param                     referenceName, String, the reference name passed on to
 	 * method 'lookupAppMapReference' to lookup the number string from an AppMap. Then that
 	 * value is passed on to convertNum. 
-	 * @return                    Integer if successfull, null otherwise (if alpha chars instead
+	 * @return                    Integer if successful, null otherwise (if alpha chars instead
 	 * of digits are encountered; or if index is less than one)
 	 **/
 	protected Integer lookupAppMapNumReference(String referenceName) {
@@ -719,7 +721,7 @@ public abstract class ComponentFunction extends Processor{
 	/**
 	 * An inner class to encapsulate a window information for adjusting window size, position etc.<br>
 	 * It includes also some static methods to restore, maximize, minimize or close current focused window.<br>
-	 * These methods may only work on Windows system, it uses java Robot to trriger shortcut menu.<br>
+	 * These methods may only work on Windows system, it uses java Robot to trigger shortcut menu.<br>
 	 */
 	public static class Window{
 		//define valid status for window 
@@ -826,6 +828,73 @@ public abstract class ComponentFunction extends Processor{
 			return sb.toString();
 		}
 	}
+	
+    /** 
+     * Convert window's position-size-status string of the formats:
+     * <ul>
+     * <li>"x;y;width;height;status"
+     * <li>"x,y,width,height,status"
+     * <li>"x y width height status"
+     * <li>"Coords=x;y;width;height;Status=status"
+     * <li>"Coords=x,y,width,height,Status=status"
+     * <li>"Coords=x y width height Status=status"
+     * </ul> 
+     * into a org.safs.ComponentFunction.Window object.
+     * 
+     * @param   windowPosition String, window's position-size-status string
+     * @return  org.safs.ComponentFunction.Window if successful, null otherwise
+     **/
+    public static Window ConvertWindowPosition(String windowPosition) {
+    	try {
+    		String position = new String(windowPosition);    		
+            // parsing preset string to get position,size and status 
+    		position = position.toUpperCase();
+    		position = position.replace("COORDS=",""); // remove "Coords="
+    		position = position.replace("STATUS=",""); // remove "Status="
+    		
+    		position=position.trim();
+    		Log.info("working with position: "+ windowPosition +" prefix stripped to: "+position);
+    		
+    		position = position.replace(";",","); //replace ";" by "," in string "0,0,640,480;Status=NORMAL"
+    		String sep = StringUtils.parseSeparator(position);
+    		if (sep == null){
+    			Log.error("invalid position: "+ position +".");
+    			return null;
+    		}
+    		
+    		// properly handles case where coordsindex = -1 (not found)
+    		Log.info("converting position: "+ position);
+    		StringTokenizer toker = new StringTokenizer(position, sep);
+    		if(toker.countTokens() < 4) {
+    			Log.error("invalid position: "+ position);
+    			return null;
+    		}
+    		String x = toker.nextToken().trim();
+    		String y = toker.nextToken().trim();
+    		String width = toker.nextToken().trim();
+    		String height = toker.nextToken().trim();
+    		
+    		if ((x.length()==0)||(y.length()==0)||(width.length()==0)||(height.length()==0)){
+    			Log.error("invalid position substrings  "+ x +","+ y +", "+ width +","+ height);
+    			return null;
+    		}
+    		
+    		Window window = new Window(
+    				(int) Float.parseFloat(x), 
+    				(int) Float.parseFloat(y),
+    				(int) Float.parseFloat(width),
+    				(int) Float.parseFloat(height));
+
+    		if(toker.hasMoreTokens()) window.setStatus(toker.nextToken().trim());
+    			
+    		return window;
+    		
+    	} catch (Exception ee) {
+    		Log.debug( "bad window's position-size-status format: "+ windowPosition, ee);
+    		return null;
+    	}
+    }
+    
 	/**
 	 * Restore the current window.<br>
 	 */ 
@@ -846,7 +915,7 @@ public abstract class ComponentFunction extends Processor{
 	}
 	/**
 	 * Subclass should give its own implementation, if it is difficult then call this instead, but<br>
-	 * this implementation is not garantee to work<br>
+	 * this implementation is not guarantee to work<br>
 	 */ 
 	protected void _restore() throws SAFSException{
 		Window.restore();
@@ -872,7 +941,7 @@ public abstract class ComponentFunction extends Processor{
 	}
 	/**
 	 * Subclass should give its own implementation, if it is difficult then call this instead, but<br>
-	 * this implementation is not garantee to work<br>
+	 * this implementation is not guarantee to work<br>
 	 */
 	protected void _maximize() throws SAFSException{
 		Window.maximize();
@@ -898,7 +967,7 @@ public abstract class ComponentFunction extends Processor{
 	}
 	/**
 	 * Subclass should give its own implementation, if it is difficult then call this instead, but<br>
-	 * this implementation is not garantee to work<br>
+	 * this implementation is not guarantee to work<br>
 	 */
 	protected void _minimize() throws SAFSException{
 		Window.minimize();
@@ -923,7 +992,7 @@ public abstract class ComponentFunction extends Processor{
 		}
 	}
 	/**
-	 *This implementation is NOT garantee to work, if it works, it will happen on current focused window.<br>
+	 *This implementation is NOT guarantee to work, if it works, it will happen on current focused window.<br>
 	 *Subclass should give its own implementation<br>
 	 */
 	protected void _close() throws SAFSException{
@@ -931,7 +1000,7 @@ public abstract class ComponentFunction extends Processor{
 	}
 
 	/**
-	 * preform SetPosition to move Main Window, resize it and set its status.
+	 * perform SetPosition to move Main Window, resize it and set its status.
 	 * Format: "Coords=0,0,640,480;Status=NORMAL". Status can be NORMAL, MINIMAZED and MAXMAZED
 	 * Alteratively, semi-colon (;) can be used instead of comma (,) to separate 
 	 * numeric data.  This would be required when placing the data directly in the 
@@ -2466,7 +2535,7 @@ public abstract class ComponentFunction extends Processor{
 			pointRelativeToComponent = checkForCoord(param1);
 			//if point cannot be got, we just write a warning message to debug log instead of
 			//write error to SAFS Log. The reason is that maybe user just want to hover
-			//at the center of componet and hope adjust the 'hover time'.
+			//at the center of component and hope adjust the 'hover time'.
 			if(pointRelativeToComponent==null) IndependantLog.warn(debugmsg+ " '" + param1 + "' is not valid coordinate format.");
 		}
 
@@ -2538,7 +2607,7 @@ public abstract class ComponentFunction extends Processor{
 		throw new SAFSException("Not supported yet.", SAFSException.CODE_ACTION_NOT_SUPPORTED);
 	}
 	/**
-	 * @param fuzzy, false: select the menu item that exactly matches the gaven path
+	 * @param fuzzy, false: select the menu item that exactly matches the given path
 	 */
 	protected void selectMenuItem(boolean fuzzy) throws SAFSException {
 		throw new SAFSException("Not supported yet.", SAFSException.CODE_ACTION_NOT_SUPPORTED);
@@ -3028,7 +3097,7 @@ public abstract class ComponentFunction extends Processor{
 		return contents;
 	}
 	/**
-	 * Get the string value from the Ojbect value.<br>
+	 * Get the string value from the Object value.<br>
 	 * If the value is a collection, it will be converted to a string separated by 'New Line'.<br> 
 	 */
 	protected String getStringValue(Object value) throws SAFSException{
@@ -3121,7 +3190,7 @@ public abstract class ComponentFunction extends Processor{
 	 * currently represented in the current testRecordData. The 'Rectangle bounds' may be
 	 * absolute on screen or relative to a window/browser, this is decided by subclass.
 	 * If returned 'Rectangle bounds' is NOT absolute on screen, the the method 
-	 * {@link #getRectangleImage(Rectangle)} SHOULD be overrided in subclass to provide approperiate implementation.
+	 * {@link #getRectangleImage(Rectangle)} SHOULD be overridden in subclass to provide appropriate implementation.
 	 * <br>
 	 * Subclasses should assume the mapname, windowName, and compName currently stored 
 	 * for the instance hold the information needed to identify and locate the Component 
