@@ -88,6 +88,7 @@ import org.safs.selenium.webdriver.lib.WDLibrary;
 import org.safs.staf.service.map.AbstractSAFSAppMapService;
 import org.safs.text.CaseInsensitiveHashtable;
 import org.safs.tools.CaseInsensitiveFile;
+import org.safs.tools.consoles.JavaJVMConsole;
 import org.safs.tools.consoles.ProcessCapture;
 import org.safs.tools.drivers.DriverConstant;
 import org.safs.tools.drivers.DriverConstant.SeleniumConfigConstant;
@@ -1194,6 +1195,8 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		IndependantLog.info(debugmsg+" using selenium host name: "+ host);
 		IndependantLog.info(debugmsg+" using selenium port: "+ port);
 		IndependantLog.info(debugmsg+" using selenium nodes: "+ nodesInfo);
+		//Retrieve the console state
+		String state = JavaJVMConsole.PARAM_STATE + " " + System.getProperty(SeleniumConfigConstant.PROPERTY_CONSOLE_STATE, JavaJVMConsole.STATE_DEFAULT);
 
 		//if seleniumnode has been provided, we are going to launch grid-hub and grid-node, not standalone server.
 		boolean isGrid = StringUtils.isValid(nodesInfo);
@@ -1238,7 +1241,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		if(!serverRunning){
 			//Start Server: standalone or grid-hub
 			IndependantLog.debug(debugmsg+" try to start the "+serverName+" at "+host+":"+port+" ... ");		
-			if(!launchSeleniumServers(host, port, role)){
+			if(!launchSeleniumServers(host, port, role, state)){
 				//If server cannot be launched, throw exception.
 				throw new SeleniumPlusException(" Fail to start '"+serverName+"' at "+ host+":"+port);
 			}
@@ -1263,7 +1266,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 				nodeport = node.getPort();
 				if(!WebDriverGUIUtilities.canConnectHubURL(nodehost, nodeport)){
 					IndependantLog.debug(debugmsg+" try to register the selenium node '"+node+"' to hub "+hubRegisterUrl);
-					if(launchSeleniumServers(nodehost, nodeport, role)){
+					if(launchSeleniumServers(nodehost, nodeport, role, state)){
 						IndependantLog.debug(debugmsg+" '"+node+"' has been launched, waiting for its ready... ");
 						WebDriverGUIUtilities.waitSeleniumNodeRunning(nodehost, nodeport);
 					}else{
@@ -1328,7 +1331,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		//   We need RMI server for the 2 situations:
 		//  a. "standalone server" on remote machine
 		//  b. "grid node" on remote machine with "grid hub" on local/remote machine
-		String rmiServer = "-"+SeleniumServerRunner.PROPERTY_RMISERVER;
+		String rmiServer = "-"+DriverConstant.PROPERTY_RMISERVER;
 		
 		List<String> paramsList = new ArrayList<String>();
 		for(String param:params) paramsList.add(param);
