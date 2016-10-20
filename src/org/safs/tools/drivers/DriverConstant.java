@@ -473,6 +473,12 @@ public class DriverConstant extends JavaConstant{
 	 * JVM command line: -Dsafs.step.logmode=(numeric) **/
 	public static final String PROPERTY_SAFS_STEP_LOGMODE ="safs.step.logmode";
 
+	/** 'safs.rmi.server'<br>
+	 * JVM command line: -Dsafs.rmi.server=org.safs.selenium.rmi.server.SeleniumServer */
+	public static final String PROPERTY_RMISERVER = "safs.rmi.server";
+	
+	/** 'org.safs.selenium.rmi.server.SeleniumServer' */
+	public static final String DEFAULT_RMISERVER_CLASSNAME = "org.safs.selenium.rmi.server.SeleniumServer";
 
     /** "ProjectRoot" <br>
 	 * Predefined "item" in the SAFS_PROJECT section of a SAFS Configuration source. **/
@@ -646,6 +652,16 @@ public class DriverConstant extends JavaConstant{
 		 * SELENIUMSERVER_JVM="D:\jdk\jdk1.7.0_45_64bit\bin\java.exe"
 		 */
 		public static final String SELENIUMSERVER_JVM ="SELENIUMSERVER_JVM";
+		
+		/** 
+		 * "CONSOLE_STATE" defines the state of the JVM console for SELENIUM server<br>
+		 * The possible value could be: MAX|MIN|NORMAL|MAXIMIZE|MINIMIZE<br>
+		 * @see #SELENIUMSERVER_JVM_Xms
+		 * */
+		public static final String ITEM_CONSOLE_STATE ="CONSOLE_STATE";
+	    /** "safs.selenium.console.state" defines the state of the JVM console for SELENIUM server<br>
+		 * JVM command line: -Dsafs.selenium.console.state=MAX|MIN|NORMAL|MAXIMIZE|MINIMIZE **/
+		public static final String PROPERTY_CONSOLE_STATE ="safs.selenium.console.state";
 		
 	}
 	

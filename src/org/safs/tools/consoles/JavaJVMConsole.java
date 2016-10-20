@@ -2,6 +2,8 @@
  * History:
  * NOV 09, 2015	(Lei Wang) Modify run(): avoid the problem of occupy CPU too much.
  * NOV 16, 2015	(Lei Wang) Add menu to provide Save, Clear, Find functionalities.
+ * OCT 19, 2016	(Lei Wang) Provided ability to set the console window's state.
+ *                       Moved two constants to DriverConstant class.
  * 
  */
 package org.safs.tools.consoles;
@@ -51,6 +53,7 @@ import javax.swing.text.Highlighter;
 import org.safs.IndependantLog;
 import org.safs.StringUtils;
 import org.safs.text.FileUtilities;
+import org.safs.tools.drivers.DriverConstant;
 
 /**
  * Provides a JFrame console as the main application to be run.
@@ -142,8 +145,51 @@ public abstract class JavaJVMConsole extends JFrame implements Runnable, ActionL
 	/** The position of the token found last time in the text area 'display'. */
 	protected int lastFoundPosition = INVALID_POSITION;
 		
+	/** '-state' specifies the console window's state.<br>
+	 * "-state MIN|MAX|NORMAL|MINIMIZE|MAXIMIZE"<br>
+	 */
+	public static final String PARAM_STATE = "-state";
+	
+	public static final String STATE_MAX 		= "MAX";
+	public static final String STATE_MAXIMIZE 	= "MAXIMIZE";
+	public static final String STATE_MIN 		= "MIN";
+	public static final String STATE_MINIMIZE 	= "MINIMIZE";
+	public static final String STATE_NORMAL 	= "NORMAL";
+	public static final String STATE_DEFAULT 	= STATE_NORMAL;
+
+	/**
+	 * The console winodw's state to set. The default is {@link JavaJVMConsole#STATE_NORMAL}.<br>
+	 * It could also be {@link JavaJVMConsole#STATE_MAX} or {@link JavaJVMConsole#STATE_MIN}.<br>
+	 */
+	protected String state = STATE_DEFAULT;
+	
 	protected JavaJVMConsole(){
 		super();
+	}
+	
+	/**
+	 * @param outputToConsole boolean, if true the message will also be output to Standard out/err.
+	 */
+	protected JavaJVMConsole(boolean outputToConsole){
+		this();
+		this.outputToConsole = outputToConsole;
+	}
+	
+	/**
+	 * @param outputToConsole boolean, if true the message will also be output to Standard out/err.
+	 * @param state String, The console winodw's state to set. See {@link #state}.
+	 */
+	protected JavaJVMConsole(boolean outputToConsole, String state){
+		this(outputToConsole);
+		this.state = state;
+	}
+	
+	/**
+	 * Initialize the console's UI elements.<br>
+	 * Start a thread to redirect the stdout/stderr.<br>
+	 * This method <b>MUST</b> be called after calling the constructors.<br>
+	 */
+	public void init(){
 		setTitle("Java Console");
 		setSize(600,450);
 		setMinimumSize(new Dimension(600,450));
@@ -205,10 +251,44 @@ public abstract class JavaJVMConsole extends JFrame implements Runnable, ActionL
 		propsscroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		add(propsscroll, BorderLayout.CENTER);
 				
-		setVisible(true);	
+		setVisible(true);
+		setState(state);
+		
 		Thread runner = new Thread(this);
 		runner.setDaemon(true);
-		runner.start();		
+		runner.start();
+	}
+
+	/** Minimize the console window. */
+	public void minimize(){
+		this.setState(JFrame.ICONIFIED);
+	}
+	
+	/** Restore the console window to its normal size. */
+	public void restore(){
+		this.setState(JFrame.NORMAL);
+	}
+	
+	/** Maximize the console window. */
+	public void maximize(){
+		this.setExtendedState(this.getExtendedState()|JFrame.MAXIMIZED_BOTH);
+	}
+	
+	/**
+	 * Set the console window's state. Maximized, Minimized or Normal.<br>
+	 * @param state String, the state to set. It could be "MAX", "MIN" or "NORMAL".
+	 */
+	protected void setState(String state){
+		String debugmsg = StringUtils.debugmsg(false);
+		IndependantLog.debug(debugmsg+" set state '"+state+"' to this JVMConsole.");
+		if(state==null) return;
+		
+		if(STATE_MAXIMIZE.equalsIgnoreCase(state)||STATE_MAX.equalsIgnoreCase(state)) maximize();
+		else if(STATE_MINIMIZE.equalsIgnoreCase(state)||STATE_MIN.equalsIgnoreCase(state)) minimize();
+		else if(STATE_NORMAL.equalsIgnoreCase(state)) restore();
+		else{
+			IndependantLog.warn(debugmsg+" state '"+state+"' is NOT valid, ignore it.");
+		}
 	}
 	
 	/**
@@ -486,15 +566,6 @@ public abstract class JavaJVMConsole extends JFrame implements Runnable, ActionL
 			IndependantLog.warn(debugmsg+"Can not clear highlight, met "+StringUtils.debugmsg(e));
 		}
 	}
-	
-	/**
-	 * 
-	 * @param outputToConsole boolean, if true the message will also be output to Standard out/err.
-	 */
-	protected JavaJVMConsole(boolean outputToConsole){
-		this();
-		this.outputToConsole = outputToConsole;
-	}
 
     /**
      * Parameters of the method to add a URL to the System runtime classpath. 
@@ -631,5 +702,13 @@ public abstract class JavaJVMConsole extends JFrame implements Runnable, ActionL
 			displayLine(message);
 			if(outputToConsole) StandardSystemErr.println(message);
 		}
-	}    	
+	}
+	
+	//The 2 following constants have been moved to DriverConstant.
+	/** 'safs.rmi.server'<br>
+	 * JVM command line: -Dsafs.rmi.server=org.safs.selenium.rmi.server.SeleniumServer */
+	public static final String PROPERTY_RMISERVER = DriverConstant.PROPERTY_RMISERVER;
+	
+	/** 'org.safs.selenium.rmi.server.SeleniumServer' */
+	public static final String DEFAULT_RMISERVER_CLASSNAME = DriverConstant.DEFAULT_RMISERVER_CLASSNAME;
 }
