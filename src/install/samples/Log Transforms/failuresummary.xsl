@@ -2,7 +2,7 @@
 		xmlns:xsl='http://www.w3.org/1999/XSL/Transform'
 		xmlns='http://www.w3.org/TR/REC-html40'>
     
-    <xsl:output method="html" version="3.2" omit-xml-declaration="yes" />
+    <xsl:output encoding="UTF-8" method="html" version="3.2" omit-xml-declaration="yes" />
 
     <xsl:variable name="warncolor">yellow</xsl:variable>
     <xsl:variable name="failcolor">#FF8080</xsl:variable>
