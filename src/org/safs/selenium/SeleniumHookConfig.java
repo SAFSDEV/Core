@@ -114,6 +114,10 @@ public class SeleniumHookConfig extends DefaultHookConfig {
 			StringUtils.getSystemProperty(SeleniumConfigConstant.SELENIUMSERVER_JVM,
 					config, DriverConstant.SECTION_SAFS_SELENIUM, SeleniumConfigConstant.SELENIUMSERVER_JVM);
 			
+			//Set window's state for "Remote Server Console": minimize, maximize
+			StringUtils.getSystemProperty(SeleniumConfigConstant.PROPERTY_CONSOLE_STATE,
+					config, DriverConstant.SECTION_SAFS_SELENIUM, SeleniumConfigConstant.ITEM_CONSOLE_STATE);
+			
 		}catch(Exception e){
 			IndependantLog.warn(StringUtils.debugmsg(false)+" Fail. Met "+StringUtils.debugmsg(e));
 		}
