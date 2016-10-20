@@ -50,7 +50,6 @@ import javax.media.jai.RenderedOp;
 import javax.swing.ImageIcon;
 import javax.swing.filechooser.FileFilter;
 
-import org.safs.ComponentFunction;
 import org.safs.IndependantLog;
 import org.safs.Log;
 import org.safs.SAFSException;
@@ -62,8 +61,6 @@ import org.safs.text.FAILStrings;
 import org.safs.tools.CaseInsensitiveFile;
 import org.safs.tools.ocr.OCREngine;
 import org.safs.tools.stringutils.StringUtilities;
-
-import sun.util.logging.resources.logging;
 
 /**
  * Utility functions for processing or manipulating Images stored in the File system 

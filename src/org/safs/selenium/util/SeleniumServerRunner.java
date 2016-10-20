@@ -2,7 +2,11 @@
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
-
+/**
+ * Developer History:
+ * OCT 19, 2016	(sbjlwa) Provided ability to set the console window's state.
+ * 
+ */
 package org.safs.selenium.util;
 
 import java.io.IOException;
@@ -10,7 +14,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
+import org.safs.StringUtils;
 import org.safs.tools.consoles.JavaJVMConsole;
+import org.safs.tools.drivers.DriverConstant;
+import org.safs.tools.drivers.DriverConstant.SeleniumConfigConstant;
 
 /**
  * This class is used to provide a special Java console for the Selenium Server (standalone, hub, node) process.
@@ -41,6 +48,7 @@ import org.safs.tools.consoles.JavaJVMConsole;
  *                                         be provided. Ex: <b>-role node -hub http://hub.machine:port/grid/register</b><br>
  *                                         <br>
  * <b>-outputToConsole</b>, optional, if provided, the console message will also be printed to standard out/err.<br>
+ * <b>-state MAX|MIN|NORMAL</b>, optional, the console windows will be maximized, minimized or as it is.<br>
  * <p>
  * 
  * Other JVM params--including those needed by Selenium Server ( -Dwebdriver...)--must also be 
@@ -87,59 +95,91 @@ import org.safs.tools.consoles.JavaJVMConsole;
  * @see org.safs.selenium.rmi.server.SeleniumServer
  * @see org.safs.selenium.rmi.agent.SeleniumRMIAgent
  * @see org.safs.selenium.rmi.agent.SeleniumAgent
+ * 
+ * @author canagl
  */
 public class SeleniumServerRunner extends JavaJVMConsole{
 
 	protected static boolean isRMIServer = false;
+	/** The default value is null, so the console start without RMI server. */
 	protected static String rmiServerClassname = null;
 
 	/** "Selenium Server", The title will be shown. */
 	public static final String TITLE = "Selenium Server";
-	/** 'safs.rmi.server' */
-	public static final String PROPERTY_RMISERVER = "safs.rmi.server";
 	
-	/** '-outputToConsole' */
+	/** '-outputToConsole' specifies if the 'execution message' will also be printed to standard out/err. */
 	public static final String PARAM_OUTPUTCONSOLE = "-outputToConsole";
+	/** '-jar' specifies the jar file to put dynamically in the classpath.<br>
+	 * -jar fullpath/to/selenium-server-standalone*.jar<br> */
+	public static final String PARAM_JAR = "-jar";
+	/** '-safs.rmi.server' specifies the name of RMI server class to start with.<br>
+	 * '-safs.rmi.server', without value the default RMI {@link DriverConstant#DEFAULT_RMISERVER_CLASSNAME} will be used.<br>
+	 * '-safs.rmi.server full.pacakge.RMIServer', 'full.pacakge.RMIServer' will start with this console.<br>
+	 *  */
+	public static final String PARAM_RMI = "-"+ DriverConstant.PROPERTY_RMISERVER;
+	
 	/**
 	 * Normally 'execution message' will be printed to JavaJVMConsole panel.<br>
 	 * If outputToConsole is true, the 'execution message' will also be printed to standard out/err.<br>
 	 */
-	private static boolean outputToConsole = false;
-	
-	/** 'org.safs.selenium.rmi.server.SeleniumServer' */
-	public static final String DEFAULT_RMISERVER_CLASSNAME = org.safs.selenium.rmi.server.SeleniumServer.class.getName();
+	private static boolean _paramOutputToConsole = false;
+
+	/** Will be set to the value of parameter "-state stateValue", the default is "Normal". */
+	private static String _paramState = STATE_NORMAL;
 	
 	private SeleniumServerRunner(){
 		super();
-		setTitle(TITLE);
 	}
 	private SeleniumServerRunner(boolean outputToConsole){
 		super(outputToConsole);
+	}
+	private SeleniumServerRunner(boolean outputToConsole, String state){
+		super(outputToConsole, state);
+	}
+	
+	public void init(){
+		super.init();
 		setTitle(TITLE);
 	}
 
+	/**
+	 * Check the VM properties.<br>
+	 * This should be called before analyzing "program parameters", which has higher priority.<br>
+	 * @see #processArgs(String[])
+	 */
+	private static void checkSystemProperty(){
+		String value = null;
+
+		value = System.getProperty(DriverConstant.PROPERTY_RMISERVER);
+		if(value!=null){
+			if(!value.trim().isEmpty()){
+				rmiServerClassname = value;
+			}else{
+				rmiServerClassname = DriverConstant.DEFAULT_RMISERVER_CLASSNAME;
+			}
+		}
+		
+		value = System.getProperty(SeleniumConfigConstant.PROPERTY_CONSOLE_STATE);
+		if(StringUtils.isValid(value)){
+			_paramState = value;
+		}
+		
+	}
+	
     protected static String[] processArgs(String[] args) throws IOException{
     	ArrayList<String> list = new ArrayList<String>();
     	String arg = null;
-    	final String jar = "-jar";
-    	final String rmiflag = "-"+ PROPERTY_RMISERVER;
+
+    	checkSystemProperty();
     	
-    	if(System.getProperty(PROPERTY_RMISERVER) != null){
-    		arg = System.getProperty(PROPERTY_RMISERVER);
-    		if(arg.length()> 0){
-    			rmiServerClassname = new String(arg);
-    		}else{
-    			rmiServerClassname = DEFAULT_RMISERVER_CLASSNAME;
-    		}
-    	}
     	for(int i=0; i< args.length;i++){
     		arg = args[i];
-    		if(jar.equalsIgnoreCase(arg)){
+    		if(PARAM_JAR.equalsIgnoreCase(arg)){
     			if(++i < args.length){
     				arg = args[i];
     				addFile(arg);
     			}
-    		}else if(rmiflag.equalsIgnoreCase(arg)){
+    		}else if(PARAM_RMI.equalsIgnoreCase(arg)){
     			// 2nd part of rmiserver arg is OPTIONAL
     			int i2 = i + 1;
     			if( i2 < args.length){
@@ -151,9 +191,14 @@ public class SeleniumServerRunner extends JavaJVMConsole{
     	    		}
     			}
     			if(rmiServerClassname == null)
-        			rmiServerClassname = DEFAULT_RMISERVER_CLASSNAME;
+        			rmiServerClassname = DriverConstant.DEFAULT_RMISERVER_CLASSNAME;
     		}else if(PARAM_OUTPUTCONSOLE.equalsIgnoreCase(arg)){
-    			outputToConsole = true;
+    			_paramOutputToConsole = true;
+    		}else if(PARAM_STATE.equalsIgnoreCase(arg)){
+    			if(i+1<args.length){
+    				_paramState = args[++i];
+    			}
+
     		}else{
     			list.add(arg);
     		}
@@ -192,6 +237,7 @@ public class SeleniumServerRunner extends JavaJVMConsole{
 	 *                                         be provided. Ex: <b>-role node -hub http://hub.machine:port/grid/register</b><br>
 	 *                                         <br>
 	 * <b>-outputToConsole</b>, optional, if provided, the console message will also be printed to standard out/err.<br>
+	 * <b>-state MAX|MIN|NORMAL</b>, optional, the console windows will be maximized, minimized or as it is.<br>
 	 * <p>
 	 * Other JVM params--including those needed by standalone Selenium Server ( -Dwebdriver...)--must also be 
 	 * provided and will have already been applied to this JVM process.
@@ -216,9 +262,10 @@ public class SeleniumServerRunner extends JavaJVMConsole{
 		String[] passArgs = new String[0];
 		try{
 			passArgs = processArgs(args);
-			SeleniumServerRunner console = new SeleniumServerRunner(outputToConsole);
+			SeleniumServerRunner console = new SeleniumServerRunner(_paramOutputToConsole, _paramState);
+			console.init();
 			launchRMIServer();
-			Class aclass = Class.forName("org.openqa.grid.selenium.GridLauncher");
+			Class<?> aclass = Class.forName("org.openqa.grid.selenium.GridLauncher");
 			Method main = aclass.getMethod("main", String[].class);
 			main.invoke(null, new Object[]{passArgs});
 		}catch(IOException io){
