@@ -16,6 +16,9 @@
  * 					   Refactor workhorse 'click()' to support special key holding while clicking.
  * 					   Override the 'componentClick()' function in 'AutoItComponent.CFComponent' class to deal with groups of CLICK keywords.
  * 					   Add keyword 'DoubleClick', 'RightClick', 'CtrlClick' and 'ShiftClick' implementations.
+ * OCT 21, 2016 Tao Xie Add '@Override' annotation for 'AutoItComponent.CFComponent#process()'.
+ *                     Refactor 'AutoItComponent.CFComponent#process()': as all the ComponentFunction keywords will be dealt at 'compnentProcess()' in
+ *                     the last 'if cause' in this 'process()', delete the 'Click' series keywords check for their duplication.
  */
 package org.safs.tools.engines;
 
@@ -459,7 +462,11 @@ public class AutoItComponent extends GenericEngine {
 		
 		/**
 		 * Process the record present in the provided testRecordData.
+		 * 
+		 * Tao Xie Note: 
+		 *     Add '@Override' annotation.
 		 */
+		@Override
 		public void process(){
 			updateFromTestRecordData();
 			String debugmsg = "AutoItComponent$CFComponent.process() "+ action +": ";
@@ -506,31 +513,20 @@ public class AutoItComponent extends GenericEngine {
 				}
 			}
 			
-			if ( action.equalsIgnoreCase( ComponentFunction.CLICK )
-					|| action.equalsIgnoreCase(ComponentFunction.DOUBLECLICK) 
-					|| action.equalsIgnoreCase(ComponentFunction.RIGHTCLICK)
-					|| action.equalsIgnoreCase(ComponentFunction.CTRLCLICK)
-					|| action.equalsIgnoreCase(ComponentFunction.SHIFTCLICK)){		                
-				/**
-				 * Use local override 'componentClick()' function to deal with groups of CLICK keywords.
-				 */
-				try {
-					componentClick();
-				} catch (SAFSException se) {
-					if (SAFSException.CODE_ACTION_NOT_SUPPORTED.equals(se.getCode())) {
-						Log.info(debugmsg + " '" + action + "' is not supported here.");
-						testRecordData.setStatusCode( StatusCodes.SCRIPT_NOT_EXECUTED );
-					} else{
-						testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );
-						String message = "Met "+StringUtils.debugmsg(se);
-						String detail = FAILStrings.convert(FAILStrings.STANDARD_ERROR, 
-								action +" failure in table "+ testRecordData.getFilename() + " at Line " + testRecordData.getLineNumber(), 
-								action, testRecordData.getFilename(), String.valueOf(testRecordData.getLineNumber()));
-
-						log.logMessage(testRecordData.getFac(), message, detail, FAILED_MESSAGE);
-					}
-				}
-			} else if ( action.equalsIgnoreCase( DriverCommands.SETFOCUS_KEYWORD )) {
+			/**
+			 * OCT 21, 2016  Tao Xie
+			 *     As all the Component functions will be dealt at the 'compnentProcess()' 
+			 *     in the final 'if' cause, here we should ONLY check keywords NOT belong to
+			 *     keywords of ComponentFunction.
+			 *     
+			 *     Thus, delete the 'Click' series keywords check for their duplication.
+			 *     
+			 *     Also note, in each specified engine, we only need to provide the overrided
+			 *     execution method, which will be used in 'ComponentFunction#componentProcess()'. 
+			 *     Here, we've provided the overrided function 'componentClick()' in this 
+			 *     class, which will be called in 'ComponentFunction#componentProcess()'. 
+			 */
+			if ( action.equalsIgnoreCase( DriverCommands.SETFOCUS_KEYWORD )) {
 			    setFocus(rs);
 			} else if ( action.equalsIgnoreCase(EditBoxFunctions.SETTEXTVALUE_KEYWORD)) {
 				setText(rs);
