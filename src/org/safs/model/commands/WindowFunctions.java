@@ -208,6 +208,7 @@ public class WindowFunctions {
         <LI>OpenQA Selenium</LI>
         <LI>OpenQA Selenium</LI>
         <LI>AutomatedQA TestComplete</LI>
+        <LI>AUTOIT Team Autoit</LI>
     </UL>
 
      @param winname  Optional:NO
