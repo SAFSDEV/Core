@@ -14,9 +14,8 @@
 '*
 '* Optional script parameters:
 '*     
-'*     -noprompt
-'*     
-'*           Proceed with installation without prompting for approval.
+'*     -noprompt   Proceed with installation without prompting for approval.
+'*     -latest     Check the registry to use the latest version of TC
 '*
 '*
 '* The install can begin from any directory, but all the above assets must 
@@ -41,102 +40,149 @@
 '* Original Release: JUL 13, 2010
 '*
 '*   APR 13, 2011  Carl Nagle   Added support for TESTCOMPLETE_EXE
-'*
+'*   OCT 23, 2016  Lei Wang   Modified script to make it easier to maintain.
+'*                          Added support to use the latest version of TestComplete/TestExecute.
 '*     
 '* Copyright (C) SAS Institute
 '* General Public License: http://www.opensource.org/licenses/gpl-license.php
 '******************************************************************************
-
+Dim debug
 Dim shell, env, fso, args, arg, lcarg
-Dim message, response
-Dim prompt
-Dim tcafs_env, tcafs_dir, tcafs_exe
-Dim tcafs_reg, tcafs_reg_v8, tcafs_reg_path, tcafs_reg_w7, tcafs_reg_v8_w7, tcafs_reg_w7_v9
-Dim tcafs_reg_sb, tcafs_reg_v9, tcafs_reg_v9_w7
-Dim tcafs_te_reg, tcafs_te_reg_v8, tcafs_te_reg_w7, tcafs_te_reg_v8_w7, tcafs_te_reg_w7_v9
-Dim tcafs_te_reg_sb, tcafs_te_reg_v9, tcafs_te_reg_v9_w7
-Dim use_tcafs_reg, use_tcafs_reg_v8, use_tcafs_exe, wow6432node, normal32node
+Dim message, response, prompt
+Dim tcafs_env, tcafs_exe_env, tcafs_dir, tcafs_exe
+Dim REG_ENV
+Dim TESTCOMPLETE, TESTEXECUTE
+Dim wow6432node, normal32node
+
+Dim AQA_TC, AQA_TE, SB_TC, SB_TE
+Dim tcafs_reg_path
+Dim tcafs_reg_32aqa, tcafs_reg_64aqa, tcafs_reg_32sb, tcafs_reg_64sb
+Dim tcafs_te_reg_32aqa, tcafs_te_reg_64aqa, tcafs_te_reg_32sb, tcafs_te_reg_64sb
+
+Dim use_tcafs_reg, use_tcafs_reg_setup, use_executable
+
+Dim temp_reg_path, version, NOT_DECIDED_VALUE, LATEST_SUPPORT_VERSION, OLDEST_SUPPORT_VERSION
+Dim check_existing_environment
 
 Dim cr, q, nl, newline
+
+debug	= true
+check_existing_environment = true
 
 cr      = chr(13)   'carriage return
 q       = chr(34)   'double quote
 nl      = chr(10)   'next line
 newline = cr & nl   'use "carriage return" and "next line" to form a newline
 
-tcafs_env      = "TESTCOMPLETE_HOME"
-tcafs_exe_env  = "TESTCOMPLETE_EXE"
-use_tcafs_exe  = "TestComplete.exe"
+tcafs_env      	= "TESTCOMPLETE_HOME"
+tcafs_exe_env  	= "TESTCOMPLETE_EXE"
+REG_ENV			= "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment\"
 
-tcafs_reg_path = "\Product Path"
+TESTCOMPLETE	= "TestComplete.exe"
+TESTEXECUTE		= "TestExecute.exe"
+use_executable  = TESTCOMPLETE
+
+LATEST_SUPPORT_VERSION 	= 12
+OLDEST_SUPPORT_VERSION	= 8
+NOT_DECIDED_VALUE 		= "NOT_DECIDED_VALUE"
+'use_tcafs_reg_setup = "HKLM\Software\Automated QA\Test Complete\8.0\Setup"
+'use_tcafs_reg_setup = "HKLM\Software\SmartBear\TestComplete\9.0\Setup"
+use_tcafs_reg_setup = NOT_DECIDED_VALUE
+
+'Automated QA (AQA) was used in version 8 and lower
+AQA_TC="Automated QA\Test Complete\"
+AQA_TE="Automated QA\Test Execute\"
+'SmartBear (SB) was used in version 9 and higher
+SB_TC="SmartBear\TestComplete\"
+SB_TE="SmartBear\TestExecute\"
 
 normal32node   = "HKLM\Software\"
-tcafs_reg      = normal32node &"Automated QA\Test Complete"
-tcafs_reg_sb   = normal32node &"SmartBear\TestComplete"
-tcafs_reg_v8   = normal32node &"Automated QA\Test Complete\8.0\Setup"
-tcafs_reg_v9   = normal32node &"SmartBear\TestComplete\9.0\Setup"
-
-tcafs_te_reg     = normal32node &"Automated QA\Test Execute"
-tcafs_te_reg_sb  = normal32node &"SmartBear\TestExecute"
-tcafs_te_reg_v8  = normal32node &"Automated QA\Test Execute\8.0\Setup"
-tcafs_te_reg_v9  = normal32node &"SmartBear\TestExecute\9.0\Setup"
-
 wow6432node    = "HKLM\Software\Wow6432Node\"
-tcafs_reg_w7   = wow6432node &"Automated QA\Test Complete"
-tcafs_reg_w7_v9= wow6432node &"SmartBear\TestComplete"
+tcafs_reg_path = "Product Path"
 
-tcafs_reg_v8_w7= wow6432node &"Automated QA\Test Complete\8.0\Setup"
-tcafs_reg_v9_w7= wow6432node &"SmartBear\TestComplete\9.0\Setup"
+'Automated QA (AQA) was used in version 8 and lower
+tcafs_reg_32aqa  		= normal32node & AQA_TC
+tcafs_te_reg_32aqa 		= normal32node & AQA_TE
+tcafs_reg_64aqa   		= wow6432node & AQA_TC
+tcafs_te_reg_64aqa    	= wow6432node & AQA_TE
 
-tcafs_te_reg_w7    = wow6432node &"Automated QA\Test Execute"
-tcafs_te_reg_w7_v9 = wow6432node &"SmartBear\TestExecute"
-
-tcafs_te_reg_v8_w7 = wow6432node &"Automated QA\Test Execute\8.0\Setup"
-tcafs_te_reg_v9_w7 = wow6432node &"SmartBear\TestExecute\9.0\Setup"
+'SmartBear (SB) was used in version 9 and higher
+tcafs_reg_32sb   		= normal32node & SB_TC
+tcafs_te_reg_32sb  		= normal32node & SB_TE
+tcafs_reg_64sb			= wow6432node & SB_TC
+tcafs_te_reg_64sb 		= wow6432node & SB_TE
 
 Set shell = WScript.CreateObject("WScript.Shell")
 Set env   = shell.Environment("SYSTEM")
 Set fso   = WScript.CreateObject("Scripting.FileSystemObject")
 Set args  = WScript.Arguments
 
-'check for 64-bit OS 32-bit Registry
-if RegExistValue(tcafs_reg_w7 &"\") then
+'== if registry contain 'SmartBear', the version is higher than 8. We will decide the version later.
+'== if registry contain 'Automated QA', the version is 8.
+'== The search algorithm is as below:
+'== 1. Favor TestComplete over TestExecute
+'== 2. Favor "newer version" over "older version"
+'== 3. Favor "HKLM\Software\Wow6432Node\"(64 bit machine) over "HKLM\Software\" (32 bit machine)
+'SB, version 9 or higher.
+if RegExistValue(tcafs_reg_64sb ) then
+    use_tcafs_reg    = tcafs_reg_64sb
     
-    use_tcafs_reg    = tcafs_reg_w7
-    use_tcafs_reg_v8 = tcafs_reg_v8_w7
+elseif RegExistValue(tcafs_te_reg_64sb) then
+    use_tcafs_reg    = tcafs_te_reg_64sb
+	use_executable  = TESTEXECUTE
+	
+elseif RegExistValue(tcafs_reg_32sb ) then
+    use_tcafs_reg    = tcafs_reg_32sb
+
+elseif RegExistValue(tcafs_te_reg_32sb ) then
+    use_tcafs_reg    = tcafs_te_reg_32sb
+	use_executable  = TESTEXECUTE
+
+'AQA, version 8 or miner.
+elseif RegExistValue(tcafs_reg_64aqa) then
+    use_tcafs_reg    = tcafs_reg_64aqa
     
-elseif RegExistValue(tcafs_reg_w7_v9  &"\") then
-    
-    use_tcafs_reg    = tcafs_reg_w7_v9
-    use_tcafs_reg_v8 = tcafs_reg_v9
-    
-elseif RegExistValue(tcafs_te_reg_w7_v9 &"\") then
+elseif RegExistValue(tcafs_te_reg_64aqa) then
+    use_tcafs_reg    = tcafs_te_reg_64aqa
+	use_executable  = TESTEXECUTE
+	
+elseif RegExistValue(tcafs_reg_32aqa ) then
+    use_tcafs_reg    = tcafs_reg_32aqa
+	
+elseif RegExistValue(tcafs_te_reg_32aqa ) then
+    use_tcafs_reg    = tcafs_te_reg_32aqa
+	use_executable  = TESTEXECUTE
 
-    use_tcafs_reg    = tcafs_te_reg_w7_v9
-    use_tcafs_reg_v8 = tcafs_te_reg_v9_w7
-	use_tcafs_exe  = "TestExecute.exe"
-
-elseif RegExistValue(tcafs_te_reg_w7 &"\") then
-
-    use_tcafs_reg    = tcafs_te_reg_w7
-    use_tcafs_reg_v8 = tcafs_te_reg_v8_w7
-	use_tcafs_exe  = "TestExecute.exe"
-
-elseif RegExistValue(tcafs_reg_sb  &"\") then
-    use_tcafs_reg    = tcafs_reg_sb
-    use_tcafs_reg_v8 = tcafs_reg_v9
-
-elseif RegExistValue(tcafs_te_reg_sb  &"\") then
-    use_tcafs_reg    = tcafs_te_reg_sb
-    use_tcafs_reg_v8 = tcafs_te_reg_v9
-
-elseif RegExistValue(tcafs_reg  &"\") then
-    use_tcafs_reg    = tcafs_reg
-    use_tcafs_reg_v8 = tcafs_reg_v8
 else
-    use_tcafs_reg    = tcafs_te_reg
-    use_tcafs_reg_v8 = tcafs_te_reg_v8
-	use_tcafs_exe  = "TestExecute.exe"
+	use_tcafs_reg = NOT_DECIDED_VALUE
+	
+end if
+
+if use_tcafs_reg=NOT_DECIDED_VALUE then
+	msg = "Cannot deduce any TestCompleter/TestExecute installation according to Registry!"
+	WScript.Echo msg
+else	
+	'Use higher version firstly
+	For version=LATEST_SUPPORT_VERSION To OLDEST_SUPPORT_VERSION Step -1
+		temp_reg_path = use_tcafs_reg & version & ".0\Setup\"
+		if RegExistValue(temp_reg_path) then
+			use_tcafs_reg_setup = temp_reg_path
+			exit for
+		end if
+	Next
+	if use_tcafs_reg_setup=NOT_DECIDED_VALUE then
+		msg = "Cannot deduce any TestCompleter/TestExecute installation under registry " & use_tcafs_reg
+		WScript.Echo msg
+	end if
+
+	if debug then
+		msg = "According registry, we deduced: " & nl
+		msg = msg & "use_tcafs_reg: " & use_tcafs_reg & nl
+		msg = msg & "use_tcafs_reg_setup: " & use_tcafs_reg_setup & nl
+		msg = msg & "use_executable: " & use_executable
+
+		WScript.Echo msg
+	end if
 end if
 
 
@@ -159,30 +205,35 @@ For i = 0 to args.Count -1
     if (arg = "-noprompt") then 
         prompt = false
         WScript.Interactive = false
-    end if    
+    end if 
+	if arg = "-latest" then
+		check_existing_environment = false
+	end if
 Next
 
-tcafs_dir = ""
-tcafs_dir = env(tcafs_env)
-tcafs_exe = ""
-tcafs_exe = env(tcafs_exe_env)
+if check_existing_environment then
+	tcafs_dir = ""
+	tcafs_dir = env(tcafs_env)
+	tcafs_exe = ""
+	tcafs_exe = env(tcafs_exe_env)
 
-if (Len(tcafs_dir) > 0) AND (Len(tcafs_exe) > 0) then
-    if (fso.FolderExists(tcafs_dir)) AND (fso.FileExists(tcafs_dir &"\Bin\"& tcafs_exe)) then 
-        if prompt then
-            message = "System Environment TESTCOMPLETE_HOME set to:"& cr & cr & tcafs_dir & cr
-            shell.Popup message,4, "'TESTCOMPLETE_HOME' Environment",64
-        end if
-        WScript.Quit
-    end if
-    tcafs_dir = ""
-    env(tcafs_env) = tcafs_dir
-    tcafs_exe = ""
-    env(tcafs_exe_env) = tcafs_exe
+	if (Len(tcafs_dir) > 0) AND (Len(tcafs_exe) > 0) then
+		if (fso.FolderExists(tcafs_dir)) AND (fso.FileExists(tcafs_dir &"\Bin\"& tcafs_exe)) then 
+			if prompt then
+				message = "System Environment TESTCOMPLETE_HOME set to:"& cr & cr & tcafs_dir & cr
+				shell.Popup message,4, "'TESTCOMPLETE_HOME' Environment",64
+			end if
+			WScript.Quit
+		end if
+		tcafs_dir = ""
+		env(tcafs_env) = tcafs_dir
+		tcafs_exe = ""
+		env(tcafs_exe_env) = tcafs_exe
+	end if
 end if
 
-'look for generic registry "Automated QA\Test Complete"
-if NOT RegExistValue(use_tcafs_reg &"\") then 
+'look for generic registry "Automated QA\Test Complete" OR "SmartBear\TestComplete"
+if NOT RegExistValue(use_tcafs_reg) then 
     if prompt then
         message = use_tcafs_reg &"\ registry entries not found."& cr
         shell.Popup message,3, "Test Complete may not be installed",64
@@ -190,9 +241,9 @@ if NOT RegExistValue(use_tcafs_reg &"\") then
     WScript.Quit
 end if
 
-if (NOT RegExistValue(use_tcafs_reg_v8 &"\")) then 
+if NOT RegExistValue(use_tcafs_reg_setup) then 
     if prompt then
-                  message = "Cannot deduce Automated QA Test Complete installation directory "& cr
+        message = "Cannot deduce Automated QA Test Complete installation directory "& cr
         message = message & "for versions earlier than Test Complete 8."& cr & cr
         message = message & "Please set System Environment variables:"& cr & cr 
         message = message & qt & tcafs_env & qt & cr & qt & tcafs_exe_env & qt & cr & cr
@@ -202,13 +253,18 @@ if (NOT RegExistValue(use_tcafs_reg_v8 &"\")) then
     WScript.Quit
 end if
 
-if (RegReadValue(use_tcafs_reg_v8 & tcafs_reg_path, tcafs_dir)) then
+if (RegReadValue(use_tcafs_reg_setup & tcafs_reg_path, tcafs_dir)) then
+	if debug then WScript.Echo "tcafs_dir: " & tcafs_dir
     if Len(tcafs_dir) > 1 then
         if ((Right(tcafs_dir,1)="\")or(Right(tcafs_dir,1)="/")) then
             tcafs_dir = Left(tcafs_dir, Len(tcafs_dir)-1)
-        end if    
-        env(tcafs_env) = tcafs_dir
-        env(tcafs_exe_env) = use_tcafs_exe
+        end if
+		
+		'shell.RegWrite REG_ENV & tcafs_env, tcafs_dir, "REG_SZ"
+		'shell.RegWrite REG_ENV & tcafs_exe_env, use_executable, "REG_SZ"
+		env(tcafs_env) = tcafs_dir
+		env(tcafs_exe_env) = use_executable
+				
         if prompt then
             message = "TESTCOMPLETE_HOME set to: "& cr & cr & tcafs_dir & cr
             shell.Popup message,4, "'TESTCOMPLETE_HOME' Set",48
