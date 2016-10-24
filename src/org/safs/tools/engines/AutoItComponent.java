@@ -19,6 +19,7 @@
  * OCT 21, 2016 Tao Xie Add '@Override' annotation for 'AutoItComponent.CFComponent#process()'.
  *                     Refactor 'AutoItComponent.CFComponent#process()': as all the ComponentFunction keywords will be dealt at 'compnentProcess()' in
  *                     the last 'if cause' in this 'process()', delete the 'Click' series keywords check for their duplication.
+ *                     Add 'CloseWindow' keyword: provide its execution method '_close()'.
  */
 package org.safs.tools.engines;
 
@@ -864,6 +865,25 @@ public class AutoItComponent extends GenericEngine {
 			}catch(Exception e){
 				String msg = "Fail to maximize window due to Exception "+e.getMessage();
 				Log.error(debugmsg+msg);
+				throw new SAFSException(msg);
+			}
+		}
+
+		/**
+		 * Override the execution method '_close()' of
+		 * keyword 'WindowFunctions.CLOSEWINDOW_KEYWORD'
+		 *
+		 * @author Tao Xie
+		 */
+		@Override
+		protected void _close() throws SAFSException {
+			String dbgmsg = StringUtils.getMethodName(0, false);
+			
+			try {
+				it.winClose(rs.getWindowsRS(), "");
+			} catch(Exception e) {
+				String msg = dbgmsg + "(): Fail to close window due to Exception " + e.getMessage();
+				Log.error(msg);
 				throw new SAFSException(msg);
 			}
 		}
