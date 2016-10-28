@@ -1,9 +1,22 @@
+/** Copyright (C) SAS Institute, Inc. All rights reserved.
+ ** General Public License: http://www.opensource.org/licenses/gpl-license.php
+ **/
+/**
+ * History:
+ * OCT 26, 2016	(Lei Wang) Added some general code used to detect the installed versions of one product.
+ */
 package org.safs.install;
 
 import java.io.File;
 
+import org.safs.IndependantLog;
 import org.safs.natives.NativeWrapper;
 
+import com.sun.jna.Platform;
+
+/**
+ * @author Carl Nagle
+ */
 public abstract class InstallerImpl implements InstallerInterface{
 
 	static ProgressIndicator progresser = null;
@@ -15,6 +28,37 @@ public abstract class InstallerImpl implements InstallerInterface{
 	
 	public static final String REGSVR32   = s+"regsvr32.exe";
 
+	protected static final String PARAM_USE_LATEST_VERSION 	= "-"+VERSION_OPTION.USE_LATEST.name;
+	protected static final String PARAM_SWITCH 				= "-"+VERSION_OPTION.SWITCH.name;
+	
+	/**
+	 * The ProductDetector. Sub-class may need to implement:
+	 * <ul>
+	 * <li> {@link #getDefaultProductDetector()}
+	 * <li> {@link #getUnixProductDetector()}
+	 * <li> {@link #getWindowsProductDetector()}
+	 * </ul>
+	 * @see #initilizeProductDetector()
+	 */
+	protected IProductDetector productDetector = null;
+	
+	protected static enum VERSION_OPTION{
+		CHECK_ENVIRONMENT("default", "Use the current version."),
+		USE_LATEST("latest", "Check the latest version"),
+		SWITCH("switch", "Switch between multiple versions.");
+		
+		public final String name;
+		public final String message;
+		VERSION_OPTION(String name, String message){
+			this.name = name;
+			this.message = message;
+		}
+		
+		public String toString(){
+			return name;
+		}
+	}
+	
 	/** 
 	 * -installdir <br>
 	 * optional command-line argument to explicitly set the installation directory for an installer.<br>
@@ -35,6 +79,11 @@ public abstract class InstallerImpl implements InstallerInterface{
 	/** Default no-arg constructor. */
 	public InstallerImpl()  {
 		super();
+		try{
+			initilizeProductDetector();
+		}catch(UnsupportedOperationException e){
+			setProgressMessage("Ignore "+e.getMessage());
+		}
 	}
 	
 	/** Preset the installation directory so it does not need to be deduced. */
@@ -61,6 +110,39 @@ public abstract class InstallerImpl implements InstallerInterface{
 				rootdir += s+"extra"+s+"automation";
 		}
 		return rootdir;
+	}
+	
+	/**
+	 * Initialize the IProdcutDetector object according to the Operation System.<br>
+	 * A ProductDetectorDefault will be returned if the OS is not Windows or UNIX/LINUX.<br>
+	 * @throws UnsupportedOperationException
+	 */
+	protected void initilizeProductDetector() throws UnsupportedOperationException{
+		if(Platform.isWindows()){
+			if(productDetector==null) productDetector = getWindowsProductDetector();
+		}else if(Platform.isOpenBSD() ||
+				 Platform.isFreeBSD() ||
+				 Platform.isLinux() ||
+				 Platform.isSolaris()){
+			if(productDetector==null) productDetector = getUnixProductDetector();
+		}else{
+			IndependantLog.debug("Use default ProductDetector for OS:  com.sun.jna.Platform.getOSType()="+Platform.getOSType());
+			if(productDetector==null) productDetector = getDefaultProductDetector();
+		}
+	}
+	
+	protected IProductDetector getWindowsProductDetector() throws UnsupportedOperationException{
+		throw new UnsupportedOperationException("The method getWindowsProductDetector() is not supported yet.");
+	}
+	protected IProductDetector getUnixProductDetector() throws UnsupportedOperationException{
+		throw new UnsupportedOperationException("The method getUnixProductDetector() is not supported yet.");
+	}
+	/**
+	 * @return ProductDetectorDefault
+	 * @see org.safs.install.ProductDetectorDefault 
+	 */
+	protected IProductDetector getDefaultProductDetector(){
+		return new ProductDetectorDefault();
 	}
 	
 	public static void setProgressIndicator(ProgressIndicator _progresser){
