@@ -63,7 +63,6 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.safs.ComponentFunction.Window;
 import org.safs.sockets.DebugListener;
 import org.safs.text.FileUtilities;
 import org.safs.tools.CaseInsensitiveFile;
