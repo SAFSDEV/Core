@@ -1773,8 +1773,8 @@ public class StringUtils{
      * Parse a string to get the separator.
      * <ul>
      * <li>"x;y;width;height;status"
-     * <li>"x,y,width,heigth,status"
-     * <li>"x y width heigth status"
+     * <li>"x,y,width,height,status"
+     * <li>"x y width height status"
      * <li>"x1;y1;x2;y2"
      * <li>"x1,y1,x2,y2"
      * <li>"x1 y1 x2 y2"
@@ -2100,11 +2100,11 @@ public class StringUtils{
 	
 	/**
 	 * Get a separator NOT appear in command neither in params; if no such separator<br>
-	 * can be found, then the default separtor will be return.<br>
+	 * can be found, then the default separator will be return.<br>
 	 * @param sep String, the default separator
 	 * @param command String, the command
 	 * @param params String[], the parameters
-	 * @return String, an approperiate separator
+	 * @return String, an appropriate separator
 	 */
 	public static String getUniqueSep(String sep, String command, String... params){
 		StringBuffer sb = new StringBuffer();
