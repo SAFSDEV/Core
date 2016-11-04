@@ -19,10 +19,11 @@
 * <br>   OCT 13, 2016  (SCNTAX) From current experience, the AutoIt's click API is more stable. Use AutoIt's click API first,
 *                               and then Java AWT Robot click API as workaround in workhorse 'click()'.
 *                               Modify the type of return key code in 'autoit2JavaSpecialKey()' and add support for 'Windows key' code.
-* 
+*  <br>  NOV 03, 2016  (SCNTAX) Add 'mouseHover()' to support 'HoverMouse' keyword.
 */
 package org.safs.autoit.lib;
 
+import java.awt.AWTException;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
 
@@ -31,6 +32,7 @@ import org.safs.SAFSException;
 import org.safs.StringUtils;
 import org.safs.robot.Robot;
 import org.safs.selenium.webdriver.lib.WDLibrary;
+import org.safs.tools.stringutils.StringUtilities;
 
 import com.jacob.com.Variant;
 
@@ -61,6 +63,12 @@ public class AutoItXPlus extends AutoItX {
 	
 	/** AutoIt 'ControlClick' keyword, sends a mouse click command to a given control. **/
 	public final static String AUTOIT_KEYWORD_CONTROLCLICK = "ControlClick";
+	
+	/** AutoIt 'MouseMove' keyword, moves the mouse pointer. **/
+	public final static String AUTOIT_KEYWORD_MOUSEMOVE = "MouseMove";
+	
+	/** AutoIt mouse move 'speed', its range is from 1 to 100, and default value is 10. **/
+	public final static String AUTOIT_KEYWORD_MOUSEMOVE_SPEED = "10";
 	
 	/**
 	 * AutoIt's supporting KeyPress/KeyDown keywords
@@ -369,4 +377,51 @@ public class AutoItXPlus extends AutoItX {
 		return result;
 	}
 	
+	/**
+	 * Implement AutoItX's workhorse for keyword 'HoverMouse'. If the AutoItX API fails,
+	 * try to use Robot API 'mouseHover()'.
+	 *
+	 * @param pos             Point,  the screen position to hover the mouse, which must NOT be null or empty.
+	 * @param milliseconds    double, the period to hover the mouse, in milliseconds
+	 * @throws SAFSException
+	 * @author scntax
+	 */
+	public void mouseHover(Point pos, int milliSeconds) throws SAFSException{
+		String dbgmsg = StringUtils.getMethodName(0, false);
+		String mouseMoveSpeed = AUTOIT_KEYWORD_MOUSEMOVE_SPEED;
+		String[] mouseMoveParams = null;
+				
+		if (null == pos || pos.equals("")) {
+			String message = dbgmsg + "(): AutoItX's move mouse position can't be null or empty! Please provide the target position."; 
+			Log.error(message);
+			throw new SAFSException(message);
+		}
+		
+		mouseMoveParams = new String[] {String.valueOf(pos.x), String.valueOf(pos.y), mouseMoveSpeed};		
+		boolean result = oneToTrue((autoItX.invoke(AUTOIT_KEYWORD_MOUSEMOVE, convertCOMParams(mouseMoveParams))).getInt());
+		
+		if (!result) {
+			Log.debug(dbgmsg + "(): failed to mouve mouse at position '" + pos + "' by AutoItX API.");
+			Log.warn(dbgmsg + "(): try to call Robot API 'mouseHover()'.");
+			
+			Robot.mouseHover(pos, milliSeconds);
+			return;
+		}
+		
+		//Pause a while
+		StringUtilities.sleep(milliSeconds);
+		
+		mouseMoveParams = new String[] {String.valueOf(-Robot.SCREENSZIE.width), String.valueOf(-Robot.SCREENSZIE.height), mouseMoveSpeed};
+		result = oneToTrue((autoItX.invoke(AUTOIT_KEYWORD_MOUSEMOVE, convertCOMParams(mouseMoveParams))).getInt());
+		
+		if (!result) {
+			Log.debug(dbgmsg + "(): failed to mouve mouse to top-left of screen at positiion '" + pos + "', try to use Robot to move mouse.");
+			
+			try {
+				Robot.getRobot().mouseMove(-Robot.SCREENSZIE.width, -Robot.SCREENSZIE.height);
+			} catch (AWTException e) {
+				throw new SAFSException(dbgmsg + "(): failed to use Robot to move mouse to top-left of screen at position '" + pos + "'.");
+			}
+		}		
+	}
 }
