@@ -20,6 +20,7 @@
  *                     Refactor 'AutoItComponent.CFComponent#process()': as all the ComponentFunction keywords will be dealt at 'compnentProcess()' in
  *                     the last 'if cause' in this 'process()', delete the 'Click' series keywords check for their duplication.
  *                     Add 'CloseWindow' keyword: provide its execution method '_close()'.
+ * NOV 03, 2016 Tao Xie Add 'HoverMouse' keyword: provide its execution method 'performHoverMouse()'.
  */
 package org.safs.tools.engines;
 
@@ -925,6 +926,37 @@ public class AutoItComponent extends GenericEngine {
 			
 		    if(rectangle==null) IndependantLog.warn(debugmsg+"Fail to get bounds for "+ windowName+":"+compName +" on screen.");
 		    return rectangle;
+		}
+
+		/**
+		 * Override the execution method 'performHoverMouse()' of
+		 * keyword 'ComponentFunction.HOVERMOUSE'
+		 *
+		 * @author Tao Xie
+		 */
+		@Override
+		protected boolean performHoverMouse(Point offset, int milliSeconds) throws SAFSException{
+			String dbgmsg = StringUtils.getMethodName(0, false);
+			String title = rs.getWindowsRS();
+			String text = "";
+			String controlID = rs.getComponentRS();
+			
+			if (null == offset || offset.equals("")) {
+				Log.debug(dbgmsg + "(): " + "no 'offset point' parameter provided. Hover at default center position.");
+				offset = new Point(it.controlGetPosWidth(title, text, controlID) / 2, 
+						          it.controlGetPosHeight(title, text, controlID) / 2);
+			}
+
+			try{				
+				it.mouseHover(new Point(it.winGetPosX(title, text) + it.controlGetPosX(title, text, controlID) + it.getBorderWidth(title, text) + offset.x, 
+										it.winGetPosY(title, text) + it.controlGetPosY(title, text, controlID) + it.getTitleBarHeight(title, text) + offset.y), 
+										milliSeconds);
+				return true;
+			} catch(Exception e){
+				Log.error(dbgmsg + "(): Met " + e.getMessage());
+			}
+			
+			return false;
 		}
 	}
 }
