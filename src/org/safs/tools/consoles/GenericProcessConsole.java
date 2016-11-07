@@ -1,13 +1,18 @@
 /** Copyright (C) SAS Institute All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
+/**
+ * History:
+ * NOV 07, 2016	(LEIWANG) Moved ability of getting 'exitValue' from sub-class to here.
+ * 
+ */
 package org.safs.tools.consoles;
 
-import java.io.*;
-import java.lang.Process;
-
-//import org.safs.Log;
-import org.safs.tools.CaseInsensitiveFile;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.util.Vector;
 
 /**
  * Continuously monitors the wrapped process out and err streams routing them to the local 
@@ -39,7 +44,8 @@ public class GenericProcessConsole implements Runnable{
 	protected BufferedReader  out;
 	protected BufferedReader  err;	
 	protected BufferedWriter  in;
-	protected java.util.Vector exceptions = new java.util.Vector();
+	@SuppressWarnings("rawtypes")
+	protected Vector exceptions = new Vector();
 	boolean shutdown = false;
 	/** 
 	 * set false to stop a copy of output stream data going to the debug sink.
@@ -53,6 +59,11 @@ public class GenericProcessConsole implements Runnable{
     public static final String OUT_PREFIX = "OUT: ";
 	/** "ERR: "*/
     public static final String ERR_PREFIX = "ERR: ";
+	/**
+	 * Returns the exitValue returned from the underlying process.
+	 * The value is only valid if exited = true;
+	 */
+	protected int exitValue = -99;
 	
 	/**
 	 * Default (and only) public constructor for GenericProcessConsole.
@@ -85,6 +96,34 @@ public class GenericProcessConsole implements Runnable{
 	}
 
 	/**
+	 * Returns true if the process we are capturing has exited.
+	 * We may still be capturing additional data if a secondary process is being 
+	 * monitored, however.
+	 */
+	protected boolean exited = false;
+	
+	/**
+	 * Get the process exitValue.  
+	 * Use isExited() first to avoid the IllegalStateException, if desired.
+	 * @return exitValue or IllegalStateException if process has not exited.
+	 * @throws IllegalStateException if process is still running.
+	 */
+	public int getExitValue()throws IllegalStateException {
+		if(!exited) throw new IllegalStateException("Process still running...");
+		return exitValue;
+	}
+	/**
+	 * Returns true if the process we are capturing has exited.
+	 * We may still be capturing additional data if a secondary process is being 
+	 * monitored, however.
+	 * @return boolean, true if the process we are capturing has exited.
+	 */
+	public boolean isExited(){
+		return exited;
+	}
+	
+	
+	/**
 	 * Writes to System.out .
 	 * Subclasses should override to log to alternate sinks.
 	 * @param message
@@ -106,8 +145,9 @@ public class GenericProcessConsole implements Runnable{
 	/**
 	 * @return Vector storing any Exceptions read from Process out and err streams.
 	 */
-	public java.util.Vector getExceptions(){
-		return new java.util.Vector(exceptions);
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Vector getExceptions(){
+		return new Vector(exceptions);
 	}
 
 	/**
@@ -125,11 +165,13 @@ public class GenericProcessConsole implements Runnable{
 	 * @see #getExceptions()
 	 * @see #shutdown()
 	 */
+	@SuppressWarnings("unchecked")
 	public void run(){
 		boolean outdata = true;
 		boolean errdata = true;
 		String linedata = null;
-		int exitValue = -1;
+		exitValue = -99;
+		exited = false;
 		if(showOutStream) debug("GenericProcessConsole activated for process "+ process);
 		try{
 			do{
@@ -156,6 +198,10 @@ public class GenericProcessConsole implements Runnable{
 				}
 				try{
 					exitValue = process.exitValue();
+					if(exitValue!=0){
+						debug("GenericProcessConsole: The process exited with an abnormal value: '"+exitValue+"' !");
+					}
+					exited = true;
 					shutdown = true;
 				}catch(IllegalThreadStateException x){
 					// process not yet finished
