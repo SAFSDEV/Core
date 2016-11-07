@@ -7,7 +7,7 @@
  * Logs for developers, not published to API DOC.
  *
  * History:
- * SEP 20, 2016    (Lei Wang) Initial release: Mode existing code from WebDriverGUIUtilities
+ * SEP 20, 2016    (Lei Wang) Initial release: Moved existing code from WebDriverGUIUtilities to here.
  */
 package org.safs.selenium.util;
 
