@@ -32,6 +32,7 @@ package org.safs.selenium.webdriver;
  *  <br>   AUG 09, 2016	   (LeiWang) Modified setWDTimeoutxxx()/resetWDTimeoutxxx(): return a boolean value to tell if succeed.
  *  <br>   SEP 27, 2016	   (LeiWang) Moved methods launchSeleniumServers() from class DCDriverCommand.
  *                                   Modified method startRemoteServer(): moved some code to class SePlusInstallInfo.
+ *  <br>   NOV 07, 2016	   (LeiWang) Modified method startRemoteServer(): Wait longer to get more information from STDOUT/STDERR, if no running server has been detected.
  **/
 
 import java.io.BufferedReader;
@@ -50,6 +51,7 @@ import java.util.MissingResourceException;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.openqa.selenium.WebElement;
 import org.safs.ApplicationMap;
@@ -1534,26 +1536,35 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 			//TODO we should not launch a "selenium server", if there is already one running.
 			process = Runtime.getRuntime().exec(fcmd,null,workdir);
 			console = new ProcessCapture(process, SeleniumServerRunner.TITLE , true, false/*will not write out/err message to debug log, it is already in SeleniumServerRunner*/);
-			//Do we need to wait longer to get more information???
+			
 			if(isNode){
 				success = waitSeleniumNodeRunning(SeleniumConfigConstant.DEFAULT_SELENIUM_HOST, nodePort);
 			}else{
 				success = waitSeleniumServerRunning(isGrid, false, false);
 			}
+			try{
+				if(!success){
+					//Wait longer to get more information from STDOUT/STDERR, if no running server has been detected.
+					console.waitOutput(10*1000 /* milliseconds*/, 20 /* lines on STDOUT */, 20 /* lines on STDERR */);
+				}
+			}catch(TimeoutException te){
+				IndependantLog.debug(debugmsg+" met "+StringUtils.debugmsg(te));
+			}
 			
+			@SuppressWarnings("unchecked")
 			Vector<String> data = console.getData();
 			if(data!=null && data.size()>0){
 				for(String message:data){
 					IndependantLog.debug(message);
-					System.out.println(message);//print the "server starting message to console"
 					if(!success){
-						//TODO parse the output message to know if the server has been started successfully
+						System.out.println(message);//print the "server starting message to console"
 						//SeleniumServerRunner (org.openqa.grid.selenium.GridLauncher) wrongly write all messages to standard err :-(
 //						if(message.startsWith(ProcessCapture.ERR_PREFIX)){
 //							throw new SAFSException(" Fail to execute command: "+fcmd+" \n due to "+message);
 //						}
+						//parse the output message to know if the server has been failed.
 						if(message.contains("Failed to start: SocketListener")){
-							throw new SAFSException(" Fail to execute command: "+fcmd+" \n due to "+message);
+							throw new SAFSException("Failed to execute command: "+fcmd+" \n due to "+message);
 						}						
 					}
 				}

@@ -4,12 +4,15 @@
 /**
  * History:
  * NOV 16, 2015	(LEIWANG) Set the thread as daemon so that it will not block the main thread if it has to stay there running.
+ * NOV 04, 2016	(LEIWANG) Added ability to wait a certain number of lines output on STDOUT and STDERR.
  * 
  */
 package org.safs.tools.consoles;
 
 import java.util.Vector;
+import java.util.concurrent.TimeoutException;
 
+import org.safs.StringUtils;
 import org.safs.tools.GenericProcessMonitor;
 
 /**
@@ -53,26 +56,14 @@ import org.safs.tools.GenericProcessMonitor;
  */
 public class GenericProcessCapture extends GenericProcessConsole{
 
-	protected java.util.Vector data = new java.util.Vector();
+	@SuppressWarnings("rawtypes")
+	protected Vector data = new Vector();
 	
 	/**
 	 * If non-null, we will check to see if this CMD(Unix), IMAGE(Win), or PID is running. 
 	 * If the process is still running, we will not attempt to end our reading of the IO 
 	 * streams. */
 	public String monitor = null;
-	
-	/**
-	 * Returns true if the process we are capturing has exited.
-	 * We may still be capturing additional data if a secondary process is being 
-	 * monitored, however.
-	 */
-	public boolean exited = false;
-	
-	/**
-	 * Returns the exitValue returned from the exited process.
-	 * The value is only valid if exited = true; 
-	 */
-	protected int exitValue = -99;
 	
 	/**
 	 * The (running) thread used to autostart the process capture, if applicable.
@@ -93,17 +84,6 @@ public class GenericProcessCapture extends GenericProcessConsole{
 	public GenericProcessCapture(Process process) {
 		this(process, null, false);
 	}
-
-	/**
-	 * Get the process exitValue.  
-	 * Use isExited() first to avoid the IllegalStateException, if desired.
-	 * @return exitValue or IllegalStateException if process has not exited.
-	 * @throws IllegalStateException if process is still running.
-	 */
-	public int getExitValue()throws IllegalStateException {
-		if(!exited) throw new IllegalStateException("Process still running...");
-		return exitValue;
-	}
 	
 	/**
 	 * Alternative constructor allowing the IO thread to remain open as long as 
@@ -120,7 +100,6 @@ public class GenericProcessCapture extends GenericProcessConsole{
 	public GenericProcessCapture(Process process, String monitor, boolean autostart) {
 		this(process, monitor, autostart, false);
 	}
-
 	
 	/**
 	 * Alternative constructor allowing the IO thread to remain open as long as 
@@ -148,7 +127,55 @@ public class GenericProcessCapture extends GenericProcessConsole{
 			debug("GenericProcessCapture initialization error for "+ process+", "+ x.getMessage());
 		}
 	}
-
+	
+	private int stdoutLineCounter = 0;
+	private int stderrLinecounter = 0;
+	
+	/**
+	 * Wait for the number of line on both STDOUT and STDERR is bigger than some expected number respectively.<br>
+	 * @param timeout	long, the timeout in millisecond. 
+	 * @param stdoutLineToWait int, the number of line on STDOUT to wait.
+	 * @param stderrLineToWait int, the number of line on STDERR to wait.
+	 * 
+	 * @throws TimeoutException if the timeout has been reached before the condition is satisfied.
+	 * 
+	 * @example
+	 * <ol>
+	 * <li>//Wait that the number of output on STDOUT is bigger than 20 lines<br>
+	 *     <b>waitOutput(2000, 20, 0);</b>
+	 * <li>//Wait that the number of output on STDERR is bigger than 20 lines<br>
+	 *     <b>waitOutput(2000, 0, 20);</b>
+	 * <li>//Wait that the number of output on both STDOUT and STDERR is bigger than 20 lines<br>
+	 *     <b>waitOutput(2000, 20, 20);</b>
+	 * </ol>
+	 */
+	public synchronized void waitOutput(long timeout /*millisecond*/, int stdoutLineToWait, int stderrLineToWait) throws TimeoutException{
+		long end = System.currentTimeMillis()+timeout;
+		while(stderrLinecounter<stderrLineToWait || stdoutLineCounter<stdoutLineToWait){
+			try {
+				if(System.currentTimeMillis()>end){
+					throw new TimeoutException("Timeout '"+timeout+"'(milliseconds) has been reached!");
+				}
+				wait(timeout/10);
+			} catch (InterruptedException e) {
+				debug("Ingnored "+StringUtils.debugmsg(e));
+			}
+		}
+	}
+	/**
+	 * @see #waitOutput(long, int, int)
+	 */
+	private synchronized void incrementStdoutLineCounter(){
+		stdoutLineCounter++;
+		notifyAll();
+	}
+	/**
+	 * @see #waitOutput(long, int, int)
+	 */
+	private synchronized void incrementStderrLineCounter(){
+		stderrLinecounter++;
+		notifyAll();
+	}
 	
 	/**
 	 * Return a snapshot(copy) of the String lines of data from the streams.
@@ -156,7 +183,8 @@ public class GenericProcessCapture extends GenericProcessConsole{
 	 * The error stream data is prefixed with ERR_PREFIX.
 	 * @return Vector storing a snapshot of the data read from Process out and err streams.
 	 */
-	public java.util.Vector getData(){
+	@SuppressWarnings({ "rawtypes" })
+	public Vector getData(){
 		return (Vector) data.clone();
 	}
 
@@ -167,6 +195,7 @@ public class GenericProcessCapture extends GenericProcessConsole{
 		return data.size();
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void run(){
 		boolean outdata = true;
 		boolean errdata = true;
@@ -182,8 +211,9 @@ public class GenericProcessCapture extends GenericProcessConsole{
 					if (linedata.length()>0){
 						data.add(OUT_PREFIX + linedata);
 						if (linedata.toLowerCase().startsWith("unhandled exception")){
-								exceptions.add(OUT_PREFIX + linedata);
-							}
+							exceptions.add(OUT_PREFIX + linedata);
+						}
+						incrementStdoutLineCounter();
 					}
 				}
 				
@@ -195,8 +225,9 @@ public class GenericProcessCapture extends GenericProcessConsole{
 					if (linedata.length()>0){
 						data.add(ERR_PREFIX +linedata);
 						if (linedata.toLowerCase().startsWith("unhandled exception")){
-								exceptions.add(ERR_PREFIX + linedata);
-							}
+							exceptions.add(ERR_PREFIX + linedata);
+						}
+						incrementStderrLineCounter();
 					}
 				}
 				//problem getting all stream output on an exited process!
