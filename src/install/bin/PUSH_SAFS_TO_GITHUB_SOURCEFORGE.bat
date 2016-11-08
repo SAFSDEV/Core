@@ -127,8 +127,8 @@ IF DEFINED PUSH_TO_SF (
             ECHO F | %systemroot%\system32\xcopy /c /y /q %FULL_PATH_REPO_WDIR%\!Modified_File! %FOLDER_COPY%\!Modified_File!
         )
         IF [!OPERATION!]==[DELETE] (
-            IF DEFINED DEBUG ECHO ... %systemroot%\system32\xcopy /c /y /q %FULL_PATH_REPO_WDIR%\!Modified_File! %FOLDER_COPY%\!Modified_File!
-            ECHO F | %systemroot%\system32\xcopy /c /y /q %FULL_PATH_REPO_WDIR%\!Modified_File! %FOLDER_COPY%\!Modified_File!
+            IF DEFINED DEBUG ECHO ... %systemroot%\system32\xcopy /c /y /q %FULL_PATH_REPO_WDIR%\!Modified_File! %FOLDER_DEL%\!Modified_File!
+            ECHO F | %systemroot%\system32\xcopy /c /y /q %FULL_PATH_REPO_WDIR%\!Modified_File! %FOLDER_DEL%\!Modified_File!
         )
     )
     
