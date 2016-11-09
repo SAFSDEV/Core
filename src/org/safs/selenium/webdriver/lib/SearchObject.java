@@ -193,7 +193,7 @@ public class SearchObject {
 	protected static class FrameElement{
 		FrameElement parentFrame;
 		/**
-		 * If you want to operate on this webelement, you MUST swith to its parent's frame
+		 * If you want to operate on this webelement, you MUST switch to its parent's frame
 		 * <pre>
 		 * {@code
 		 *  WDLibrary.getWebDriver().switchTo().defaultContent();
@@ -3755,23 +3755,16 @@ public class SearchObject {
 
 	/**
 	 * Generate a unique name. For example, it can be used as a javascript variable name<br>
-	 * when calling functions in JavaScriptFunctions to avoid the confilct with variables defined<br>
-	 * in the Apilication Under Test.<br>
+	 * when calling functions in JavaScriptFunctions to avoid the conflict with variables defined<br>
+	 * in the Application Under Test.<br>
 	 *
-	 * @param prefix
-	 * @return
+	 * @param prefix String, the prefix of the unique name
+	 * @return String, the unique name
+	 * @deprecated This method has been moved to StringUtils, we can call <b>StringUtils.generateUniqueName()</b> directly. 
 	 */
+	@Deprecated
 	public static String generateUniqueName(String prefix){
-		String uniqueName = "";
-		if(prefix!=null && !prefix.isEmpty()){
-			uniqueName += prefix;
-		}else{
-			uniqueName = "temp";
-		}
-
-		uniqueName += new Date().getTime();
-
-		return uniqueName;
+		return StringUtils.generateUniqueName(prefix);
 	}
 
 //	/**
@@ -4582,7 +4575,7 @@ public class SearchObject {
 
 		/**
 		 * Return an array of classname, the order is important. They will be used to get<br>
-		 * an approporiate type. The first classname in the array will be tried firstly, if<br>
+		 * an appropriate type. The first classname in the array will be tried firstly, if<br>
 		 * no type can be got then try next one until a type is returned.<br>
 		 * @param element
 		 * @return
