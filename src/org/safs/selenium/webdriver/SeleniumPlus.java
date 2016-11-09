@@ -2,7 +2,6 @@
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
-package org.safs.selenium.webdriver;
 /**
  * Logs for developers, not published to API DOC.
  * History:<br>
@@ -62,6 +61,8 @@ package org.safs.selenium.webdriver;
  *  <br>   APR 19, 2016    (SBJLWA) Modify comments/examples for Click() CtrlClick() ShiftClick() etc.: Handle the optional parameter 'autoscroll'.
  *  <br>   MAY 17, 2016    (CANAGL) Add support for -junit:classname command-line parameter.
  */
+package org.safs.selenium.webdriver;
+
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.concurrent.TimeUnit;
@@ -76,6 +77,7 @@ import org.safs.Processor;
 import org.safs.SAFSPlus;
 import org.safs.StringUtils;
 import org.safs.model.tools.EmbeddedHookDriverRunner;
+import org.safs.selenium.util.DocumentClickCapture;
 import org.safs.selenium.webdriver.lib.SelectBrowser;
 import org.safs.selenium.webdriver.lib.SeleniumPlusException;
 import org.safs.selenium.webdriver.lib.WDLibrary;
@@ -164,14 +166,6 @@ public abstract class SeleniumPlus extends SAFSPlus{
 		super();
 		//To get the SAFSPlus work for SeleniumPlus, we MUST set its Runner to EmbeddedHookDriverRunner.
 		setRunner(Runner);
-	}
-
-	/**
-	 * Retrieve a reference to the Selenium WebDriver object used by the currently active (last) session.
-	 * @return The currently active (last) WebDriver object, or null if there isn't one.
-	 */
-	public static WebDriver WebDriver(){
-		return WDLibrary.getWebDriver();
 	}
 	
 	/**
@@ -305,6 +299,32 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 */
 	public static boolean StartWebBrowser(String URL,String BrowserID, String... params){
 		return DriverCommand.StartWebBrowser(URL, BrowserID, params);
+	}
+	
+	/**
+	 * Stop WebBrowser by ID.
+	 * During test, multiple browsers can be opened by {@link #StartWebBrowser(String, BrowserID, String...)}<br>
+	 * If user wants to stop one of these opened browser, use can call this method.<br>
+	 * This method requires a parameter 'ID', which is given by user when he calls {@link #StartWebBrowser(String, BrowserID, String...)}<br>
+	 * @param BrowserID String, the BrowserID served as key to get the WebDriver from cache.<br>
+	 * @return - true on success<p>
+	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+	 * @example	 
+	 * <pre>
+	 * {@code
+	 * String browserID = "GoogleMain";
+	 * StartWebBrowser("http://www.google.com", browserID);
+	 * //do some testing, then
+	 * StopWebBrowser(browserID);	  
+	 * }
+	 * </pre>	 
+	 * @see #prevResults
+	 * @see org.safs.TestRecordHelper#getStatusCode()
+	 * @see org.safs.TestRecordHelper#getStatusInfo()
+	 * @see #StartWebBrowser(String, String, String...)
+	 */
+	public static boolean StopWebBrowser(String BrowserID){
+		return DriverCommand.StopWebBrowser(BrowserID);
 	}
 	
 	/**
@@ -655,32 +675,6 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	}
 	
 	/**
-	 * Stop WebBrowser by ID.
-	 * During test, multiple browsers can be opened by {@link #StartWebBrowser(String, BrowserID, String...)}<br>
-	 * If user wants to stop one of these opened browser, use can call this method.<br>
-	 * This method requires a parameter 'ID', which is given by user when he calls {@link #StartWebBrowser(String, BrowserID, String...)}<br>
-	 * @param BrowserID String, the BrowserID served as key to get the WebDriver from cache.<br>
-	 * @return - true on success<p>
-	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
-	 * @example	 
-	 * <pre>
-	 * {@code
-	 * String browserID = "GoogleMain";
-	 * StartWebBrowser("http://www.google.com", browserID);
-	 * //do some testing, then
-	 * StopWebBrowser(browserID);	  
-	 * }
-	 * </pre>	 
-	 * @see #prevResults
-	 * @see org.safs.TestRecordHelper#getStatusCode()
-	 * @see org.safs.TestRecordHelper#getStatusInfo()
-	 * @see #StartWebBrowser(String, String, String...)
-	 */
-	public static boolean StopWebBrowser(String BrowserID){
-		return DriverCommand.StopWebBrowser(BrowserID);
-	}
-	
-	/**
 	 * Click on any visible component. 
 	 * <p>See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_Click">Detailed Reference</a>
 	 * @param comp -- Component (from App Map) to Click
@@ -688,7 +682,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * <ul>
 	 * <li><b>params[0] X,Y coordinate</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
 	 * <b>For SE+</b>, params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
-	 * <li><b>params[1] autocroll boolean</b> if the component will be scrolled into view automatically before clicking.
+	 * <li><b>params[1] auto-scroll boolean</b> if the component will be scrolled into view automatically before clicking.
 	 *                                        if not provided, the default value is true.
 	 * </ul>
 	 * @return true if successfully executed, false otherwise.<p>
@@ -720,41 +714,6 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	}
 	
 	/**
-	 * Click on any visible component without verification.<br>
-	 * This API will not guarantee that the click does happen, it simply clicks. If user wants<br>
-	 * to make sure of that, he can call {@link #Click(org.safs.model.Component, String...)} instead.<br>
-	 * <br>
-	 * @param comp -- Component (from App Map) to Click
-	 * @param offset Point, the offset relative to the component to click
-	 * @return true if successfully executed, false otherwise.<p>
-	 * @example	 
-	 * <pre>
-	 * {@code
-	 * 1) boolean success = ClickUnverified(Map.Google.Apps);//Click at the center
-	 * 2) boolean success = ClickUnverified(Map.Google.Apps, new Point(20,20));//Click at the coordinate (20,20)
-	 * }
-	 * 
-	 * </pre>	 
-	 * @see #Click(org.safs.model.Component, String...)
-	 */
-	public static boolean ClickUnverified(org.safs.model.Component comp, Point offset){
-		boolean success = false;
-		try {
-			//TODO we could provide component command 'ClickUnverified' for traditional SAFS users later.
-			WebElement we = getObject(comp);
-			success = WDLibrary.clickUnverified(we, offset);
-		} catch (SeleniumPlusException e) {
-			IndependantLog.error(StringUtils.debugmsg(false)+" failed, due to "+StringUtils.debugmsg(e));
-			success = false;
-		}
-		
-		if(success) Logging.LogTestSuccess("ClickUnverified Succeeded on "+comp.getParentName()+":"+comp.getName()+" at "+offset);
-		else Logging.LogTestFailure("ClickUnverified Failed on "+comp.getParentName()+":"+comp.getName()+" at "+offset);
-		
-		return success;
-	}
-	
-	/**
 	 * Control-Click on any visible component. 
 	 * <p>See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_CtrlClick">Detailed Reference</a>
 	 * @param comp -- Component (from App Map) to Click
@@ -762,7 +721,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * <ul>
 	 * <li><b>params[0] X,Y coordinate</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
 	 * <b>For SE+</b>, params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
-	 * <li><b>params[1] autocroll boolean</b> if the component will be scrolled into view automatically before clicking.
+	 * <li><b>params[1] auto-scroll boolean</b> if the component will be scrolled into view automatically before clicking.
 	 *                                        if not provided, the default value is true.
 	 * </ul>
 	 * @return true if successfully executed, false otherwise.<p>
@@ -799,7 +758,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * <ul>
 	 * <li><b>params[0] X,Y coordinate</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
 	 * <b>For SE+</b>, params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
-	 * <li><b>params[1] autocroll boolean</b> if the component will be scrolled into view automatically before clicking.
+	 * <li><b>params[1] auto-scroll boolean</b> if the component will be scrolled into view automatically before clicking.
 	 *                                        if not provided, the default value is true.
 	 * </ul>
 	 * @return true if successfully executed, false otherwise.<p>
@@ -836,7 +795,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * <ul>
 	 * <li><b>params[0] X,Y coordinate</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
 	 * <b>For SE+,</b> params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
-	 * <li><b>params[1] autocroll boolean</b> if the component will be scrolled into view automatically before clicking.
+	 * <li><b>params[1] auto-scroll boolean</b> if the component will be scrolled into view automatically before clicking.
 	 *                                        if not provided, the default value is true.
 	 * </ul>
 	 * @return true if successfully executed, false otherwise.<p>
@@ -873,7 +832,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * <ul>
 	 * <li><b>params[0] X,Y coordinate</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
 	 * <b>For SE+</b>, params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
-	 * <li><b>params[1] autocroll boolean</b> if the component will be scrolled into view automatically before clicking.
+	 * <li><b>params[1] auto-scroll boolean</b> if the component will be scrolled into view automatically before clicking.
 	 *                                        if not provided, the default value is true.
 	 * </ul>
 	 * @return true if successfully executed, false otherwise.<p>
@@ -1093,7 +1052,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * <ul>
 	 * <li><b>params[0] X,Y coordinate</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
 	 * <b>For SE+</b>, params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
-	 * <li><b>params[1] autocroll boolean</b> if the component will be scrolled into view automatically before clicking.
+	 * <li><b>params[1] auto-scroll boolean</b> if the component will be scrolled into view automatically before clicking.
 	 *                                        if not provided, the default value is true.
 	 * </ul>
 	 * @return true if successfully executed, false otherwise.<p>
@@ -1132,7 +1091,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	}
 	
 	/**
-	 * Pause testcase flow in seconds. If you want to pause in millisecond, use {@link Misc#Delay(int)}.
+	 * Pause test-case flow in seconds. If you want to pause in millisecond, use {@link Misc#Delay(int)}.
 	 * @param seconds int, the seconds to pause
 	 * @return true if successfully executed, false otherwise.<p>
 	 * @example	 
@@ -1392,6 +1351,478 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	public static boolean ExecuteScript(org.safs.model.Component comp, String script, String... scriptParams){
 		return Component.ExecuteScript(comp, script, scriptParams);
 	}	
+	
+	public static final String TEMP_SELENIUM_PLUS_RS_VAR = "___temp_selenium_plus_rs___";
+	/**
+	 * Find the WebElement according to the SAFS Component.<br>
+	 * This method will use the last webdriver as search context to find element,<br>
+	 * if user wants to find an element within an other context, please call {@link #getObject(SearchContext, String)}<br>
+	 * @param Component, The component to search.
+	 * @return WebElement, the sought webelement
+	 * @throws SeleniumPlusException
+	 */
+	public static WebElement getObject(org.safs.model.Component component) throws SeleniumPlusException{
+		if (component.getParent() == null) {
+			String prs = Misc.GetAppMapValue(component, "", "false");
+			return WDLibrary.getObject(prs);
+		} else {
+			String prs = Misc.GetAppMapValue(component.getParent(), "", "false");
+			WebElement pel = WDLibrary.getObject(prs);
+			String crs = Misc.GetAppMapValue(component, "", "false");
+			return WDLibrary.getObject(pel,crs);
+		}
+	}
+	
+	/**
+	 * Find the WebElement according to the SAFS Component.<br>
+	 * @param sc could be the WebDriver or a parent WebElement context.
+	 * @param Component, The component to search.
+	 * @return WebElement, the sought webelement
+	 * @throws SeleniumPlusException
+	 */
+	public static WebElement getObject(SearchContext sc, org.safs.model.Component component) throws SeleniumPlusException{
+		String rs = Misc.GetAppMapValue(component, "", "false");
+		return WDLibrary.getObject(sc, rs);
+	}
+	
+	/**
+	 * Wait for object in seconds
+	 * @param comp -- Component (from generated Map.java)
+	 * @param time - time in second
+	 * @return
+	 * @example	 
+	 * <pre>
+	 * {@code
+	 * WaitForGUI(Map.Google.SignIn,10);
+	 * }
+	 * </pre>
+	 */
+	public static boolean WaitForGUI(org.safs.model.Component comp, long time){		
+		return DriverCommand.WaitForGUI(comp, time);
+	}
+	
+	/**
+	 * Start capturing test activity counts for a specific application feature or test-case.
+	 * @param tcname The name of the test-case to start using a Counter on.
+	 * @return false only if a failure of some kind was reported in attempting to start the counter.<p>
+	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+	 * @see #prevResults
+	 * @see org.safs.TestRecordHelper#getStatusCode()
+	 * @see org.safs.TestRecordHelper#getStatusInfo()
+	 */
+	public static boolean StartTestCase(String tcname){
+		return Counters.StartTestCase(tcname);
+	}
+
+	/**
+	 * Start capturing test activity counts for the named test suite.
+	 * @param suitename The name of the suite counter to start.
+	 * @return false only if a failure of some kind was reported in attempting to start the counter.<p>
+	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+	 * @see #prevResults
+	 * @see org.safs.TestRecordHelper#getStatusCode()
+	 * @see org.safs.TestRecordHelper#getStatusInfo()
+	 */
+	public static boolean StartTestSuite(String suitename){
+		return Counters.StartTestSuite(suitename);
+	}
+
+	/**
+	 * Stop capturing test activity counts for a specific application feature or test-case.
+	 * @param tcname The name of the test-case to stop.  The name must match a counter that was 
+	 * previously started.
+	 * @return false only if a failure of some kind was reported in attempting to stop the counter.<p>
+	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+	 * @see #prevResults
+	 * @see #StartTestCase(String)
+	 * @see #PrintTestCaseSummary(String)
+	 */
+	public static boolean StopTestCase(String tcname){
+		return Counters.StopTestCase(tcname);
+	}
+	
+	/**
+	 * Convenience routine to retrieve the value of a SAFS Variable stored in SAFSVARS.
+	 * <br>This will exploit the <a href="http://safsdev.sourceforge.net/sqabasic2000/CreateAppMap.htm#ddv_lookup" target="_blank">SAFSMAPS look-thru</a> 
+	 * and <a href="http://safsdev.sourceforge.net/sqabasic2000/TestDesignGuidelines.htm#AppMapChaining" target="_blank">app map chaining</a> mechanism.  
+	 * <br>That is, any variable that does NOT exist in SAFSVARS will be sought as an 
+	 * ApplicationConstant in the SAFSMAPS service.
+	 * <p>
+	 * See <a href="http://safsdev.sourceforge.net/sqabasic2000/TestDesignGuidelines.htm" target="_blank">Test Design Guidelines for Localization</a>.
+	 * @param variableName
+	 * @return String value, or an empty String.  Null if an Exception or Error was encountered.<p>
+	 * Does not change prevResults.
+	 * @see #prevResults
+	 */
+	public static String GetVariableValue(String variableName){
+		return SAFSPlus.GetVariableValue(variableName);
+	}
+
+	/**
+	 * Convenience routine to set the value of a SAFS Variable stored in SAFSVARS.<br>
+	 * The act of logging success or failure will change prevResults.
+	 * @param variableName -- Name of variable to set.
+	 * @param variableValue -- value to store in variableName.
+	 * @return true if successfully executed, false otherwise.<p>
+	 * @see #prevResults
+	 * @see Misc#SetVariableValues(String, String...)
+	 * @see Misc#SetVariableValueEx(String, String)
+	 */
+	public static boolean SetVariableValue(String variableName, String variableValue){
+		return SAFSPlus.SetVariableValue(variableName, variableValue);
+	}
+	
+	/**
+	 * Stop capturing test activity counts for a specific application feature or test-case if it is 
+	 * still active, then print a summary report of all tests counted, passed, failed, and skipped, etc...
+	 * @param tcname The name of the test-case to start using a Counter on.  The name must match a counter 
+	 * that was previously started.
+	 * @return false only if a failure of some kind was reported in attempting to stop the counter 
+	 * or print the summary report into the log.<p>
+	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+	 * @see #prevResults
+	 * @see #StartTestCase(String)
+	 */
+	public static boolean PrintTestCaseSummary(String tcname){
+		return Counters.PrintTestCaseSummary(tcname);
+	}
+	
+	/**
+	 * Stop capturing test activity counts for the overall suite of tests if it is 
+	 * still active, then print a summary report of all counted, passed, failed, and skipped tests etc...
+	 * @param suitename The name of the suite to stop (if still running) and process.  
+	 * The name must match a counter that was previously started.
+	 * @return false only if a failure of some kind was reported in attempting to stop the counter 
+	 * or print the summary report into the log.<p>
+	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+	 * @see #prevResults
+	 */
+	public static boolean PrintTestSuiteSummary(String suitename){
+		return Counters.PrintTestSuiteSummary(suitename);
+	}
+	
+	/**
+	 * Abort running test flow.
+	 * Prints a detailed abort message to the log and throws a RuntimeException to abort the test run.
+	 * @param reason will be prepended to the detailed abort information.<p>  
+	 * @example	 
+	 * <pre>
+	 * {@code
+	 * AbortTest("reason for abort");	
+	 * }
+	 * </pre>	 
+	 * Clears prevResults TestRecordHelper to null.
+	 * @see #prevResults 
+	 */
+	public static void AbortTest(String reason) throws Throwable{
+		SAFSPlus.AbortTest(reason);
+	}
+	
+	/**
+	 * Wrapper class to handle <a href="http://safsdev.github.io//sqabasic2000/WindowFunctionsIndex.htm">Window keywords</a>, like Maximize, Minimize, SetPosition etc.<br>
+	 * For detail APIs, please refer to {@link SAFSPlus.Window}.<br>
+	 * 
+	 * @see SAFSPlus.Window
+	 */
+	public static class Window extends SAFSPlus.Window{}
+	
+	/**
+	 * Wrapper class to handle 
+	 * <a href="http://safsdev.github.io/sqabasic2000/GenericMasterFunctionsIndex.htm">GenericMasterFunctions Reference</a> and 
+	 * <a href="http://safsdev.github.io/sqabasic2000/GenericObjectFunctionsIndex.htm">GenericObjectFunctions Reference</a>, like VerifyProperty, IsPropertyExist etc.<br>
+	 * For detail APIs, please refer to {@link SAFSPlus.Component}.<br>
+	 * 
+	 * @see SAFSPlus.Component
+	 */
+	public static class Component extends SAFSPlus.Component{}
+	
+	/**
+	 * The wrapper providing APIs to operate ComboBox in SeleniumPlus.<br>
+	 */
+	public static class ComboBox extends SAFSPlus.ComboBox{}
+	/**
+	 * The wrapper providing APIs to operate ScrollBar in SeleniumPlus.<br>
+	 */
+	public static class ScrollBar extends SAFSPlus.ScrollBar{}
+	/**
+	 * A set of assertions methods for tests.  Only failed assertions are recorded.  
+	 */
+	public static class Assert extends SAFSPlus.Assert{}
+	/**
+	 * The wrapper providing APIs to operate CheckBox in SeleniumPlus.<br>
+	 */
+	public static class CheckBox extends SAFSPlus.CheckBox{}
+	
+	/**
+	 * The wrapper providing APIs to operate EditBox in SeleniumPlus.<br>
+	 */
+	public static class EditBox extends SAFSPlus.EditBox{}
+	/**
+	 * The wrapper providing APIs to operate Tree in SeleniumPlus.<br>
+	 * <pre>
+	 * By default, all parameters will be processed as an expression (math and string). As the parameter
+	 * tree-path may contain separator "->", for example "Root->Child1->GrandChild", it will be evaluated 
+	 * and 0 will be returned as parameter, this is not expected by user. To avoid the evaluation of
+	 * expression, PLEASE CALL
+	 * 
+	 * {@code
+	 * Misc.Expressions(false);
+	 * }
+	 * </pre>
+	 */
+	public static class Tree extends SAFSPlus.Tree{}
+	
+	/**
+	 * The wrapper providing APIs to operate TabControl in SeleniumPlus.<br>
+	 */
+	public static class TabControl extends SAFSPlus.TabControl{}
+	/**
+	 * The wrapper providing APIs to operate ListView in SeleniumPlus.<br>
+	 */
+	public static class ListView extends SAFSPlus.ListView{}
+	
+	/**
+	 * The wrapper providing APIs to operate MenuBar/Menu in SeleniumPlus.<br>
+	 */	
+	public static class Menu extends SAFSPlus.Menu{}
+	
+	/**
+	 * Convenience class for miscellaneous Driver Commands. 
+	 */
+	public static class Misc extends SAFSPlus.Misc{
+		//TODO: Once we implement the following keywords, we can move these methods to the super-class SAFSPlus.Misc
+		//Which one should be considered as general keyword?
+		//SetClickCapture, SetCheckAlertTimeout, GetCheckAlertTimeout
+		//IsAlertPresent, AlertAccept, AlertDismiss
+		/**
+		 * Turn on/off 'click capture'.<br>
+		 * <b>Note:</b> Calling this will not write success/failure message into the test log.
+		 * <p>
+		 * To make sure that 'click' action happens, we use 'ClickCapture' to monitor 'click event' of the target component.
+		 * But sometimes for some reason, even click does happen, the 'ClickCapture' cannot receive the 'click event' and this will
+		 * cause different kinds of troubles. At this situation, to avoid this problem 'click capture' could be turned off.<br>
+		 * Later, we could always to turn on 'click capture' to guarantee that click happens.
+		 * </p>
+		 * 
+		 * @param on boolean, if true then the 'click capture' will be turned on; otherwise turned off.
+		 * @return boolean, true if succeed.
+		 */
+		public static boolean SetClickCapture(boolean on){
+			try{
+				//TODO we could provide driver command 'SetClickCapture' for traditional SAFS users later.
+				DocumentClickCapture.ENABLE_CLICK_CAPTURE = on;
+				IndependantLog.debug(StringUtils.debugmsg(false)+" Set ClickCapture to "+on);
+				return true;
+			}catch(Exception e){
+				IndependantLog.error(StringUtils.debugmsg(false)+" Fail to Set ClickCapture, due to "+StringUtils.debugmsg(e));
+				return false;
+			}
+		}
+
+		/**
+		 * Test the presence of an Alert Dialog associated with a browser.<br>
+		 * This command will wait 2 seconds by default for the presence of Alert.<br>
+		 * @param optionals String
+		 * <ul>
+		 * <b>optionals[0] timeoutWaitAlertPresence</b> int, timeout in seconds to wait for the presence of Alert.
+		 *                                                   If not provided, default is 2 seconds.<br>
+		 * <b>optionals[0] browserID</b> String, the ID to get the browser on which the 'alert' will be closed.
+		 *                                       If not provided, the current browser will be used.<br>
+		 * </ul>
+		 * @return boolean if the Alert exist
+		 * @throws SeleniumPlusException if there is any un-expected error.
+		 * @example
+		 * <pre>
+		 * {@code
+		 * 1) boolean success = IsAlertPresent();//Test the presence of Alert (belongs to current browser) with 2 seconds timeout.
+		 * 2) boolean success = IsAlertPresent("0");//Test the presence of Alert (belongs to current browser) immediately 
+		 * 3) boolean success = IsAlertPresent("5", "browser-id");//Test the presence of Alert (belongs to browser identified by "browser-id"), 
+		 *                                                        //before that it will wait 5 seconds for the presence of the Alert
+		 * }
+		 * @see SAFSPlus#StartWebBrowser(String, String, String...)
+		 */
+		public static boolean IsAlertPresent(String... optionals) throws SeleniumPlusException{
+			try{
+				//TODO we could provide driver command 'IsAlertPresent' for traditional SAFS users later.
+				boolean success = WDLibrary.isAlertPresent(optionals);
+				if(success){
+					Logging.LogTestSuccess("An Alert dialog was present.");
+				}else{
+					Logging.LogTestSuccess("No Alert dialog was present.");
+				}
+				return success;
+			}catch(Exception e){
+				Logging.LogTestFailure("IsAlertPresent Failed.");
+				if(e instanceof SeleniumPlusException) throw e;
+				throw new SeleniumPlusException("IsAlertPresent Failed.", e);
+			}
+		}
+		
+		/**
+		 * Accept (Clicking OK button) the Alert Dialog associated with a browser.<br>
+		 * This command will wait 2 seconds by default for the presence of Alert.<br>
+		 * @param optionals String
+		 * <ul>
+		 * <b>optionals[0] timeoutWaitAlertPresence</b> int, timeout in seconds to wait for the presence of Alert.
+		 *                                                   If not provided, default is 2 seconds.<br>
+		 * <b>optionals[0] browserID</b> String, the ID to get the browser on which the 'alert' will be closed.
+		 *                                       If not provided, the current browser will be used.<br>
+		 * </ul>
+		 * @example
+		 * <pre>
+		 * {@code
+		 * 1) boolean success = AlertAccept();//Close Alert (belongs to current browser) by clicking the OK button
+		 * 2) boolean success = AlertAccept("5");//Close Alert (belongs to current browser) by clicking the OK button, 
+		 *                                       //before that it will wait 5 seconds for the presence of the Alert
+		 * 3) boolean success = AlertAccept("5", "browser-id");//Close Alert (belongs to browser identified by "browser-id") by clicking the OK button, 
+		 *                                                     //before that it will wait 5 seconds for the presence of the Alert
+		 * }
+		 * @see SAFSPlus#StartWebBrowser(String, String, String...)
+		 */
+		public static boolean AlertAccept(String... optionals){
+			try{
+				//TODO we could provide driver command 'AlertAccept' for traditional SAFS users later.
+				WDLibrary.closeAlert(true, optionals);
+				Logging.LogTestSuccess("AlertAccept Succeeded.");
+				return true;
+			}catch(Exception e){
+				Logging.LogTestFailure("AlertAccept Failed.");
+				return false;
+			}
+		}
+		
+		/**
+		 * Dismiss (Clicking Cancel button) the Alert Dialog associated with a browser.<br>
+		 * This command will wait 2 seconds by default for the presence of Alert.<br>
+		 * @param optionals String
+		 * <ul>
+		 * <b>optionals[0] timeoutWaitAlertPresence</b> int, timeout in seconds to wait for the presence of Alert.
+		 *                                                   If not provided, default is 2 seconds.<br>
+		 * <b>optionals[0] browserID</b> String, the ID to get the browser on which the 'alert' will be closed.
+		 *                                       If not provided, the current browser will be used.<br>
+		 * </ul>
+		 * @example
+		 * <pre>
+		 * {@code
+		 * 1) boolean success = AlertAccept();//Close Alert (belongs to current browser) by clicking the Cancel button
+		 * 2) boolean success = AlertAccept("5");//Close Alert (belongs to current browser) by clicking the Cancel button, 
+		 *                                       //before that it will wait 5 seconds for the presence of the Alert
+		 * 3) boolean success = AlertAccept("5", "browser-id");//Close Alert (belongs to browser identified by "browser-id") by clicking the Cancel button, 
+		 *                                                     //before that it will wait 5 seconds for the presence of the Alert
+		 * }
+		 * @see SAFSPlus#StartWebBrowser(String, String, String...)
+		 */
+		public static boolean AlertDismiss(String... optionals){
+			try{
+				//TODO we could provide driver command 'AlertDismiss' for traditional SAFS users later.
+				WDLibrary.closeAlert(false, optionals);
+				Logging.LogTestSuccess("AlertDismiss Succeeded.");
+				return true;
+			}catch(Exception e){
+				Logging.LogTestFailure("AlertDismiss Failed.");
+				return false;
+			}
+		}
+		
+		/**
+		 * Set the 'Check Alert Timeout'. Usually, it is used to expand the time to wait for
+		 * the 'Alert Box' popping up. By default, the 'Check Alert Timeout' is 0.
+		 * @param seconds int, the value of time to set.
+		 */
+		public static void SetCheckAlertTimeout(int seconds){
+			//TODO we could provide driver command 'SetCheckAlertTimeout' for traditional SAFS users later.
+			IndependantLog.info("Set 'Check Alert Timeout as: '" + seconds);
+			WDLibrary.setTimeoutCheckAlertForClick(seconds);
+		}
+		
+		/**
+		 * Get the current 'Check Alert Timeout' value.
+		 */
+		public static int GetCheckAlertTimeout(){
+			//TODO we could provide driver command 'GetCheckAlertTimeout' for traditional SAFS users later.
+			return WDLibrary.getTimeoutCheckAlertForClick();
+		}
+	}
+	
+	/**
+	 * Convenience class for Logging Commands. 
+	 */
+	public static class Logging extends SAFSPlus.Logging{}
+	
+	/**
+	 * <pre>
+	 * Convenience class for File handling Commands. 
+	 * If you meet some errors when calling these API, please try to run 
+	 * {@link Misc#Expressions(boolean)} to turn off the expression as
+	 * Misc.Expressions(false);
+	 * and then call the string method
+	 * Files.xxx();
+	 * </pre>
+	 */
+	public static class Files extends SAFSPlus.Files{}
+	
+	/**
+	 * <pre>
+	 * Convenience class for String handling Commands.
+	 * If you meet some errors when calling these API, please try to run 
+	 * {@link Misc#Expressions(boolean)} to turn off the expression as
+	 * Misc.Expressions(false);
+	 * and then call the string method
+	 * Strings.xxx();
+	 * </pre>
+	 */
+	public static class Strings extends SAFSPlus.Strings{}
+	
+	/**
+	 * Convenience class for Counter Commands.
+	 * 
+	 * @see SAFSPlus.Counters
+	 */
+	public static class Counters extends SAFSPlus.Counters{}
+	
+	/**
+	 * Click on any visible component without verification.<br>
+	 * This API will not guarantee that the click does happen, it simply clicks. If user wants<br>
+	 * to make sure of that, he can call {@link #Click(org.safs.model.Component, String...)} instead.<br>
+	 * <br>
+	 * @param comp -- Component (from App Map) to Click
+	 * @param offset Point, the offset relative to the component to click
+	 * @return true if successfully executed, false otherwise.<p>
+	 * @example	 
+	 * <pre>
+	 * {@code
+	 * 1) boolean success = ClickUnverified(Map.Google.Apps);//Click at the center
+	 * 2) boolean success = ClickUnverified(Map.Google.Apps, new Point(20,20));//Click at the coordinate (20,20)
+	 * }
+	 * 
+	 * </pre>	 
+	 * @see #Click(org.safs.model.Component, String...)
+	 */
+	public static boolean ClickUnverified(org.safs.model.Component comp, Point offset){
+		boolean success = false;
+		try {
+			//TODO we could provide component command 'ClickUnverified' for traditional SAFS users later.
+			WebElement we = getObject(comp);
+			success = WDLibrary.clickUnverified(we, offset);
+		} catch (SeleniumPlusException e) {
+			IndependantLog.error(StringUtils.debugmsg(false)+" failed, due to "+StringUtils.debugmsg(e));
+			success = false;
+		}
+		
+		if(success) Logging.LogTestSuccess("ClickUnverified Succeeded on "+comp.getParentName()+":"+comp.getName()+" at "+offset);
+		else Logging.LogTestFailure("ClickUnverified Failed on "+comp.getParentName()+":"+comp.getName()+" at "+offset);
+		
+		return success;
+	}
+	
+	/**
+	 * Retrieve a reference to the Selenium WebDriver object used by the currently active (last) session.
+	 * @return The currently active (last) WebDriver object, or null if there isn't one.
+	 */
+	public static WebDriver WebDriver(){
+		return WDLibrary.getWebDriver();
+	}
+	
 	/**
 	 * Following explanations come from <a href="http://selenium.googlecode.com/git/docs/api/java/org/openqa/selenium/JavascriptExecutor.html#executeAsyncScript-java.lang.String-java.lang.Object...-">Selenium Java Doc</a>.<br>
 	 * Execute an asynchronous piece of JavaScript in the context of the currently selected frame or window. 
@@ -1510,281 +1941,6 @@ public abstract class SeleniumPlus extends SAFSPlus{
 		return WDLibrary.executeScript(script, scriptParams);
 	}
 	
-	public static final String TEMP_SELENIUM_PLUS_RS_VAR = "___temp_selenium_plus_rs___";
-	/**
-	 * Find the WebElement according to the SAFS Component.<br>
-	 * This method will use the last webdriver as search context to find element,<br>
-	 * if user wants to find an element within an other context, please call {@link #getObject(SearchContext, String)}<br>
-	 * @param Component, The component to search.
-	 * @return WebElement, the sought webelement
-	 * @throws SeleniumPlusException
-	 */
-	public static WebElement getObject(org.safs.model.Component component) throws SeleniumPlusException{
-		
-		if (component.getParent() == null) {
-			String prs = Misc.GetAppMapValue(component, "", "false");
-			return WDLibrary.getObject(prs);
-		} else {
-			String prs = Misc.GetAppMapValue(component.getParent(), "", "false");
-			WebElement pel = WDLibrary.getObject(prs);
-			String crs = Misc.GetAppMapValue(component, "", "false");
-			return WDLibrary.getObject(pel,crs);
-		}		
-	}
-	
-	/**
-	 * Find the WebElement according to the SAFS Component.<br>
-	 * @param sc could be the WebDriver or a parent WebElement context.
-	 * @param Component, The component to search.
-	 * @return WebElement, the sought webelement
-	 * @throws SeleniumPlusException
-	 */
-	public static WebElement getObject(SearchContext sc, org.safs.model.Component component) throws SeleniumPlusException{
-		String rs = Misc.GetAppMapValue(component, "", "false");
-		return WDLibrary.getObject(sc, rs);
-	}
-	
-	/**
-	 * Wait for object in seconds
-	 * @param comp -- Component (from generated Map.java)
-	 * @param time - time in second
-	 * @return
-	 * @example	 
-	 * <pre>
-	 * {@code
-	 * WaitForGUI(Map.Google.SignIn,10);
-	 * }
-	 * </pre>
-	 */
-	public static boolean WaitForGUI(org.safs.model.Component comp, long time){		
-		return DriverCommand.WaitForGUI(comp, time);
-	}
-	
-	/**
-	 * Start capturing test activity counts for a specific application feature or testcase.
-	 * @param tcname The name of the testcase to start using a Counter on.
-	 * @return false only if a failure of some kind was reported in attempting to start the counter.<p>
-	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
-	 * @see #prevResults
-	 * @see org.safs.TestRecordHelper#getStatusCode()
-	 * @see org.safs.TestRecordHelper#getStatusInfo()
-	 */
-	public static boolean StartTestCase(String tcname){
-		return Counters.StartTestCase(tcname);
-	}
-
-	/**
-	 * Start capturing test activity counts for the named test suite.
-	 * @param suitename The name of the suite counter to start.
-	 * @return false only if a failure of some kind was reported in attempting to start the counter.<p>
-	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
-	 * @see #prevResults
-	 * @see org.safs.TestRecordHelper#getStatusCode()
-	 * @see org.safs.TestRecordHelper#getStatusInfo()
-	 */
-	public static boolean StartTestSuite(String suitename){
-		return Counters.StartTestSuite(suitename);
-	}
-
-	/**
-	 * Stop capturing test activity counts for a specific application feature or testcase.
-	 * @param tcname The name of the testcase to stop.  The name must match a counter that was 
-	 * previously started.
-	 * @return false only if a failure of some kind was reported in attempting to stop the counter.<p>
-	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
-	 * @see #prevResults
-	 * @see #StartTestCase(String)
-	 * @see #PrintTestCaseSummary(String)
-	 */
-	public static boolean StopTestCase(String tcname){
-		return Counters.StopTestCase(tcname);
-	}
-	
-	/**
-	 * Convenience routine to retrieve the value of a SAFS Variable stored in SAFSVARS.
-	 * <br>This will exploit the <a href="http://safsdev.sourceforge.net/sqabasic2000/CreateAppMap.htm#ddv_lookup" target="_blank">SAFSMAPS look-thru</a> 
-	 * and <a href="http://safsdev.sourceforge.net/sqabasic2000/TestDesignGuidelines.htm#AppMapChaining" target="_blank">app map chaining</a> mechanism.  
-	 * <br>That is, any variable that does NOT exist in SAFSVARS will be sought as an 
-	 * ApplicationConstant in the SAFSMAPS service.
-	 * <p>
-	 * See <a href="http://safsdev.sourceforge.net/sqabasic2000/TestDesignGuidelines.htm" target="_blank">Test Design Guidelines for Localization</a>.
-	 * @param variableName
-	 * @return String value, or an empty String.  Null if an Exception or Error was encountered.<p>
-	 * Does not change prevResults.
-	 * @see #prevResults
-	 */
-	public static String GetVariableValue(String variableName){
-		return SAFSPlus.GetVariableValue(variableName);
-	}
-
-	/**
-	 * Convenience routine to set the value of a SAFS Variable stored in SAFSVARS.<br>
-	 * The act of logging success or failure will change prevResults.
-	 * @param variableName -- Name of variable to set.
-	 * @param variableValue -- value to store in variableName.
-	 * @return true if successfully executed, false otherwise.<p>
-	 * @see #prevResults
-	 * @see Misc#SetVariableValues(String, String...)
-	 * @see Misc#SetVariableValueEx(String, String)
-	 */
-	public static boolean SetVariableValue(String variableName, String variableValue){
-		return SAFSPlus.SetVariableValue(variableName, variableValue);
-	}
-	
-	/**
-	 * Stop capturing test activity counts for a specific application feature or testcase if it is 
-	 * still active, then print a summary report of all tests counted, passed, failed, and skipped, etc...
-	 * @param tcname The name of the testcase to start using a Counter on.  The name must match a counter 
-	 * that was previously started.
-	 * @return false only if a failure of some kind was reported in attempting to stop the counter 
-	 * or print the summary report into the log.<p>
-	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
-	 * @see #prevResults
-	 * @see #StartTestCase(String)
-	 */
-	public static boolean PrintTestCaseSummary(String tcname){
-		return Counters.PrintTestCaseSummary(tcname);
-	}
-	
-	/**
-	 * Stop capturing test activity counts for the overall suite of tests if it is 
-	 * still active, then print a summary report of all counted, passed, failed, and skipped tests etc...
-	 * @param suitename The name of the suite to stop (if still running) and process.  
-	 * The name must match a counter that was previously started.
-	 * @return false only if a failure of some kind was reported in attempting to stop the counter 
-	 * or print the summary report into the log.<p>
-	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
-	 * @see #prevResults
-	 */
-	public static boolean PrintTestSuiteSummary(String suitename){
-		return Counters.PrintTestSuiteSummary(suitename);
-	}
-	
-	/**
-	 * Abort running test flow.
-	 * Prints a detailed abort message to the log and throws a RuntimeException to abort the test run.
-	 * @param reason will be prepended to the detailed abort information.<p>  
-	 * @example	 
-	 * <pre>
-	 * {@code
-	 * AbortTest("reason for abort");	
-	 * }
-	 * </pre>	 
-	 * Clears prevResults TestRecordHelper to null.
-	 * @see #prevResults 
-	 */
-	public static void AbortTest(String reason) throws Throwable{
-		SAFSPlus.AbortTest(reason);
-	}
-	
-	/**
-	 * Wrapper class to handle <a href="http://safsdev.github.io//sqabasic2000/WindowFunctionsIndex.htm">Window keywords</a>, like Maximize, Minimize, SetPosition etc.<br>
-	 * For detail APIs, please refer to {@link SAFSPlus.Window}.<br>
-	 * 
-	 * @see SAFSPlus.Window
-	 */
-	public static class Window extends SAFSPlus.Window{}
-	
-	/**
-	 * Wrapper class to handle 
-	 * <a href="http://safsdev.github.io/sqabasic2000/GenericMasterFunctionsIndex.htm">GenericMasterFunctions Reference</a> and 
-	 * <a href="http://safsdev.github.io/sqabasic2000/GenericObjectFunctionsIndex.htm">GenericObjectFunctions Reference</a>, like VerifyProperty, IsPropertyExist etc.<br>
-	 * For detail APIs, please refer to {@link SAFSPlus.Component}.<br>
-	 * 
-	 * @see SAFSPlus.Component
-	 */
-	public static class Component extends SAFSPlus.Component{}
-	
-	/**
-	 * The wrapper providing APIs to operate ComboBox in SeleniumPlus.<br>
-	 */
-	public static class ComboBox extends SAFSPlus.ComboBox{}
-	/**
-	 * The wrapper providing APIs to operate ScrollBar in SeleniumPlus.<br>
-	 */
-	public static class ScrollBar extends SAFSPlus.ScrollBar{}
-	/**
-	 * A set of assertions methods for tests.  Only failed assertions are recorded.  
-	 */
-	public static class Assert extends SAFSPlus.Assert{}
-	/**
-	 * The wrapper providing APIs to operate CheckBox in SeleniumPlus.<br>
-	 */
-	public static class CheckBox extends SAFSPlus.CheckBox{}
-	
-	/**
-	 * The wrapper providing APIs to operate EditBox in SeleniumPlus.<br>
-	 */
-	public static class EditBox extends SAFSPlus.EditBox{}
-	/**
-	 * The wrapper providing APIs to operate Tree in SeleniumPlus.<br>
-	 * <pre>
-	 * By default, all parameters will be processed as an expression (math and string). As the parameter
-	 * treepath may contain separator "->", for example "Root->Child1->GrandChild", it will be evaluated 
-	 * and 0 will be returned as parameter, this is not expected by user. To avoid the evaluation of
-	 * expression, PLEASE CALL
-	 * 
-	 * {@code
-	 * Misc.Expressions(false);
-	 * }
-	 * </pre>
-	 */
-	public static class Tree extends SAFSPlus.Tree{}
-	
-	/**
-	 * The wrapper providing APIs to operate TabControl in SeleniumPlus.<br>
-	 */
-	public static class TabControl extends SAFSPlus.TabControl{}
-	/**
-	 * The wrapper providing APIs to operate ListView in SeleniumPlus.<br>
-	 */
-	public static class ListView extends SAFSPlus.ListView{}
-	
-	/**
-	 * The wrapper providing APIs to operate MenuBar/Menu in SeleniumPlus.<br>
-	 */	
-	public static class Menu extends SAFSPlus.Menu{}
-	
-	/**
-	 * Convenience class for miscellaneous Driver Commands. 
-	 */
-	public static class Misc extends SAFSPlus.Misc{}
-	
-	/**
-	 * Convenience class for Logging Commands. 
-	 */
-	public static class Logging extends SAFSPlus.Logging{}
-	
-	/**
-	 * <pre>
-	 * Convenience class for File handling Commands. 
-	 * If you meet some errors when calling these API, please try to run 
-	 * {@link Misc#Expressions(boolean)} to turn off the expression as
-	 * Misc.Expressions(false);
-	 * and then call the string method
-	 * Files.xxx();
-	 * </pre>
-	 */
-	public static class Files extends SAFSPlus.Files{}
-	
-	/**
-	 * <pre>
-	 * Convenience class for String handling Commands.
-	 * If you meet some errors when calling these API, please try to run 
-	 * {@link Misc#Expressions(boolean)} to turn off the expression as
-	 * Misc.Expressions(false);
-	 * and then call the string method
-	 * Strings.xxx();
-	 * </pre>
-	 */
-	public static class Strings extends SAFSPlus.Strings{}
-	
-	/**
-	 * Convenience class for Counter Commands.
-	 * 
-	 * @see SAFSPlus.Counters
-	 */
-	public static class Counters extends SAFSPlus.Counters{}
 	
 	/**
 	 * <pre>
@@ -2086,11 +2242,11 @@ public abstract class SeleniumPlus extends SAFSPlus{
 			 *                       property can be shared in within current thread no matter which method the current
 			 *                       thread is executing;
 			 *                       if the id is provided as caller-method-full-qualified-name+Thread.currentThread().getId(),
-			 *                       then timeout-property's sahre range will be limited to caller method of current thread.
+			 *                       then timeout-property's share range will be limited to caller method of current thread.
 			 * @param timeout long, the value to set to 'timeout' property
 			 * @param unit TimeUnit, the unit to measure 'timeout'
 			 * @param waitLockTimeout long, the timeout to wait for the lock. If timeout is reached and the lock has not
-			 *                              been obtained, then stop waitting and return false.
+			 *                              been obtained, then stop waiting and return false.
 			 * @return boolean, true if the lock has been obtained and timeout has been set.
 			 */
 			boolean setTimeout(String lockID, long timeout, TimeUnit unit, long waitLockTimeout);
@@ -2245,11 +2401,11 @@ public abstract class SeleniumPlus extends SAFSPlus{
 									break;
 								case TYPE_ASYNCHRONOUS_JAVASCRIPT_WAIT:
 									//TODO What is the original timeout value?
-									//						aTimeout.setScriptTimeout(timeout, unit);
+									//aTimeout.setScriptTimeout(timeout, unit);
 									break;
 								case TYPE_PAGELOAD_WAIT:
 									//TODO What is the original timeout value?
-									//						aTimeout.pageLoadTimeout(timeout, unit);
+									//aTimeout.pageLoadTimeout(timeout, unit);
 									break;
 								}
 								return false;
@@ -2315,7 +2471,6 @@ public abstract class SeleniumPlus extends SAFSPlus{
 		}
 	}
 
-	
 	/**
 	 * Internal framework use only.
 	 * Main inherited by subclasses is required.
@@ -2372,7 +2527,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * </ul>
 	 * -autorun -- Perform Dependency Injection, AutoConfig, and AutoExecution if "-autorun" is provided.
 	 * <p>
-	 * -autorunclass -- followed by the class that is requesting the automatic configuration and execution, only take effect when paraemter '-autorun' is present.
+	 * -autorunclass -- followed by the class that is requesting the automatic configuration and execution, only take effect when parameter '-autorun' is present.
 	 * <ul>-autorunclass autorun.full.classname</ul>
 	 * <p>
 	 * -junit:classname -- perform a JUnit test instead of executing runTest() in the SeleniumPlus subclass.<br>
