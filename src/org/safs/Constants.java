@@ -20,6 +20,11 @@ import java.util.List;
  */
 public class Constants {
 
+	/**'localhost'*/
+	public static final String LOCAL_HOST = "localhost";
+	/** '127.0.0.1'*/
+	public static final String LOCAL_HOST_IP = "127.0.0.1";
+	
 	public static class BrowserConstants{
 		/**'<b>explorer</b>'*/
 		public static final String BROWSER_NAME_IE = "explorer";

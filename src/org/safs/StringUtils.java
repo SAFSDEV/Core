@@ -139,9 +139,9 @@ public class StringUtils{
     public static final String SPACE = " ";
     
 	/**'localhost'*/
-	public static final String LOCAL_HOST = "localhost";
+	public static final String LOCAL_HOST = Constants.LOCAL_HOST;
 	/** '127.0.0.1'*/
-	public static final String LOCAL_HOST_IP = "127.0.0.1";
+	public static final String LOCAL_HOST_IP = Constants.LOCAL_HOST_IP;
 	
     /** "CASE-INSENSITIVE" **/
     public static final String CASE_INSENSITIVE = "CASE-INSENSITIVE";

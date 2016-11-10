@@ -310,23 +310,6 @@ public abstract class SAFSPlus {
 		throw new java.lang.RuntimeException(reason+" "+detail);
 	}
 	
-	/**
-	 * Add double-quote around a string value. For "combine-word", the result is "\"combine-word\"";<br>
-	 * The purpose is to avoid the string parameter to be processed by SAFS.<br>
-	 * @param parameter String, the string to be double-quoted.
-	 * @return String
-	 */
-	public static String quote(String parameter){
-		if(parameter==null) return null;
-		return "\"" + parameter +"\"";
-	}
-	
-	protected static String quotePath(String path){
-		if(path==null) return null;
-		if (path.contains("->")) return quote(path);
-		return path;
-	}
-	
 	//======================================================  embedded_wrapper_classes_begin =================================================//
 	
 	/**
@@ -9265,8 +9248,24 @@ public abstract class SAFSPlus {
 			return action(menu, JavaMenuFunctions.VERIFYMENUITEMCONTAINS_KEYWORD, path, expectedStatus, indexPath);
 		}
 	}
-	
 	//======================================================  embedded_wrapper_class_end  =================================================//
+	
+	/**
+	 * Add double-quote around a string value. For "combine-word", the result is "\"combine-word\"";<br>
+	 * The purpose is to avoid the string parameter to be processed by SAFS.<br>
+	 * @param parameter String, the string to be double-quoted.
+	 * @return String
+	 */
+	public static String quote(String parameter){
+		if(parameter==null) return null;
+		return "\"" + parameter +"\"";
+	}
+	
+	protected static String quotePath(String path){
+		if(path==null) return null;
+		if (path.contains("->")) return quote(path);
+		return path;
+	}
 	/**
 	 * Sometimes the parameter (like coordination) will contain separator, but if this one is<br>
 	 * the same as 'test-step-separator', then that parameter will not be correctly parsed,<br>

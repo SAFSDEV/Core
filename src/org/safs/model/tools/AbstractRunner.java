@@ -25,6 +25,7 @@ import org.safs.model.annotations.AutoConfigureJSAFS;
 import org.safs.model.annotations.JSAFSConfiguredClassStore;
 import org.safs.model.annotations.Utilities;
 import org.safs.staf.STAFProcessHelpers;
+import org.safs.tools.drivers.DriverConstant;
 import org.safs.tools.drivers.DriverInterface;
 import org.safs.tools.drivers.InputProcessor;
 import org.safs.tools.drivers.JSAFSDriver;
@@ -105,9 +106,23 @@ public abstract class AbstractRunner implements JSAFSConfiguredClassStore{
 	 */
 	public void run() throws Exception{
 		if(!isRunning()){
+			beforeRun();
 			getDriver().run();
 			running = true;
 			//and do something else ...
+		}
+	}
+	
+	/**
+	 * Prepare something before running.
+	 * @see #run()
+	 */
+	protected void beforeRun(){
+		if(!isRunning()){
+			//Set the project's default configuration file for any driver that is going to be launched.
+			if(System.getProperty(DriverConstant.PROPERTY_SAFS_PROJECT_CONFIG)==null){
+				System.setProperty(DriverConstant.PROPERTY_SAFS_PROJECT_CONFIG, DriverConstant.DEFAULT_CONFIGURE_FILENAME_TEST_INI);
+			}
 		}
 	}
 	
