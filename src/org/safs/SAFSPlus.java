@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.safs.Constants.BrowserConstans;
+import org.safs.Constants.BrowserConstants;
 import org.safs.image.ImageUtils.SubArea;
 import org.safs.model.annotations.Utilities;
 import org.safs.model.commands.CheckBoxFunctions;
@@ -1371,12 +1371,12 @@ public abstract class SAFSPlus {
 		 * @param params optional, currently <b>ONLY supported for Selenium WebDriver</b> Engine.
 		 * <p>
 		 * <ul>
-		 * <b>params[0] browser name</b> String, (default is {@link BrowserConstans#DEFAULT_BROWSER}), it can be one of:
+		 * <b>params[0] browser name</b> String, (default is {@link BrowserConstants#DEFAULT_BROWSER}), it can be one of:
 		 * <p>
 		 * 		<ul>
-		 *          <li>{@link BrowserConstans#BROWSER_NAME_CHROME}
-		 *          <li>{@link BrowserConstans#BROWSER_NAME_FIREFOX}
-		 *          <li>{@link BrowserConstans#BROWSER_NAME_IE}
+		 *          <li>{@link BrowserConstants#BROWSER_NAME_CHROME}
+		 *          <li>{@link BrowserConstants#BROWSER_NAME_FIREFOX}
+		 *          <li>{@link BrowserConstants#BROWSER_NAME_IE}
 		 * 		</ul>
 		 * <p>
 		 * <b>params[1] timeout</b> int, in seconds. Implicit timeout for search elements<br>	
@@ -1386,7 +1386,7 @@ public abstract class SAFSPlus {
 		 * <p>
 		 * The key can be one of:
 		 * <p><ul>
-		 * {@link BrowserConstans#getExtraParameterKeys()}<br>
+		 * {@link BrowserConstants#getExtraParameterKeys()}<br>
 		 * </ul><p>
 		 * params[3] extra parameter key1<br>
 		 * params[4] extra parameter value for key1<br>
@@ -1430,7 +1430,7 @@ public abstract class SAFSPlus {
 		 *                                                        });
 		 *                                                        
 		 * //Start chrome browser with default data pool (chrome://version/, see "Profile Path") , and using the last-used user. 
-		 * String datapool = "C:\\Users\\xxx\\AppData\\Local\\Google\\Chrome\\User Data";
+		 * String datapool = "C:\\Users\\some-user\\AppData\\Local\\Google\\Chrome\\User Data";
 		 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
 		 *                                                        BrowserConstans.BROWSER_NAME_CHROME, 
 		 *                                                        "10", 
@@ -1439,7 +1439,7 @@ public abstract class SAFSPlus {
 		 *                                                        datapool
 		 *                                                        });
 		 * //Start chrome browser with default data pool (chrome://version/, see "Profile Path") , and using the default user. 
-		 * String datapool = "C:\\Users\\xxx\\AppData\\Local\\Google\\Chrome\\User Data";
+		 * String datapool = "C:\\Users\\some-user\\AppData\\Local\\Google\\Chrome\\User Data";
 		 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
 		 *                                                        BrowserConstans.BROWSER_NAME_CHROME, 
 		 *                                                        "10", 
@@ -1534,16 +1534,16 @@ public abstract class SAFSPlus {
 		 * This method will not verify the validation of the recipients address.<br>
 		 * 
 		 * @param from - Sender's email address.
-		 * @param to - Receiver's email. Multiple emails allowed by semi-column(";");
+		 * @param to - Receiver's email. Multiple receivers allowed by semicolon(";");
 		 * @param subject - Subject line of the email.
 		 * @param message - Email message, html default format. 
-		 * @param optionals - Attachment file. Multiple files allowed by semi-column(";").
+		 * @param optionals - Attachment file. Multiple files allowed by semicolon(";").
 		 * @return boolean - True on success.
 		 * @example
 		 * <pre>
 		 * {@code
 		 * 
-		 * Prereq:
+		 * Prerequisite:
 		 * in test.ini setup following
 		 *   [SAFS_DRIVERCOMMANDS]
 		 *   OUT_MAILSERVER="mail server"
@@ -1851,14 +1851,14 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * Misc.Expressions(true);
-		 * String usernamevar = "user.name";//variable
-		 * String username = "NewUserName";//value
-		 * //Create a reference "refusernamevar" to variable "user.name"
-		 * String refToUsernameVar = "refusernamevar";//reference to variable "user.name"
-		 * Misc.SetVariableValueEx(refToUsernameVar, usernamevar);
+		 * String user_name_var = "user.name";//variable
+		 * String user_name = "NewUserName";//value
+		 * //Create a reference "ref_user_name_var" to variable "user.name"
+		 * String refToUsernameVar = "ref_user_name_var";//reference to variable "user.name"
+		 * Misc.SetVariableValueEx(refToUsernameVar, user_name_var);
 		 * //Use the reference to set value to variable "user.name"
-		 * Misc.SetVariableValueEx("^"+refToUsernameVar, username);
-		 * if(!username.equals(GetVariableValue(usernamevar))) System.err.println("Fail SetVariableValues");
+		 * Misc.SetVariableValueEx("^"+refToUsernameVar, user_name);
+		 * if(!username.equals(GetVariableValue(user_name_var))) System.err.println("Fail SetVariableValues");
 		 * }
 		 * </pre>
 		 */
@@ -2448,9 +2448,9 @@ public abstract class SAFSPlus {
 		 * 
 		 * In our test code, we want to get the string value defined in map for item "UserID" under section "Login"
 		 * {@code
-		 * String userid = Misc.GetAppMapValue(Map.Login.UserID); //userid will be assigned as "xpath=foo"
-		 * String userid = Misc.GetAppMapValue(Map.Login.UserID, "result"); //get Map.Login.UserID and assign to variable "result" 
-		 * String userid = Misc.GetAppMapValue(Map.Login.UserID, "", "false"); //get Map.Login.UserID without logging message
+		 * String userID = Misc.GetAppMapValue(Map.Login.UserID); //userID will be assigned as "xpath=foo"
+		 * String userID = Misc.GetAppMapValue(Map.Login.UserID, "result"); //get Map.Login.UserID and assign to variable "result" 
+		 * String userID = Misc.GetAppMapValue(Map.Login.UserID, "", "false"); //get Map.Login.UserID without logging message
 		 * }
 		 * </pre>	
 		 * @throws SeleniumPlusException if the parameter is null or the command was not executed successfully.
@@ -3064,7 +3064,7 @@ public abstract class SAFSPlus {
 		* <pre>
 		* {@code
 		* boolean success = Logging.LogFailureOK("The following 2 tests should fail due to bad parameters."); 
-		* boolean success = Logging.LogFailureOK("The Login should fail.", "The userid and password are bogus.");
+		* boolean success = Logging.LogFailureOK("The Login should fail.", "The userID and password are bogus.");
 		* }
 		* </pre>
         */     
@@ -3267,7 +3267,7 @@ public abstract class SAFSPlus {
 			return command(DDDriverFileCommands.CLOSEFILE_KEYWORD, fileNo);
 		}
 		/**
-		 * Copy the contnet of source file to target file.<br>
+		 * Copy the content of source file to target file.<br>
 		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_CopyFile">Detailed Reference</a><p>
 		 * @param source String, the name of source file.
 		 * @param dest String, the name of destination file.
@@ -3398,7 +3398,7 @@ public abstract class SAFSPlus {
 			return command(DDDriverFileCommands.DELETEDIRECTORY_KEYWORD, directory);
 		}
 		/**
-		 * Delete recurrsively the contents (files and sub-directories), the directory itself is kept.<br>
+		 * Delete recursively the contents (files and sub-directories), the directory itself is kept.<br>
 		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_DeleteDirectoryContents">Detailed Reference</a><p>
 		 * @param directory  String, the name of directory to delete. 
 		 * @return true if successful, false otherwise.<p>
@@ -3412,8 +3412,8 @@ public abstract class SAFSPlus {
 		 * String result = "result";
 		 * String directory = "C:\\Users\\sbjlwa\\TestDriverCommand\\To Delete Folder";
 		 * if(Files.CreateDirectory(directory)){
-		 *   String newfile = directory+File.separator+"\\test.file";
-		 *   Files.CreateFile(newfile, Mode.OUTPUT, Access.W, result);
+		 *   String newFile = directory+File.separator+"\\test.file";
+		 *   Files.CreateFile(newFile, Mode.OUTPUT, Access.W, result);
 		 *   Files.CloseFile(GetVariableValue(result));
 		 *   if(Files.DeleteDirectory(directory)){
 		 *     System.err.println("directory '"+directory+"' is not empty, but it is deleted! NOT possible.");
@@ -3434,7 +3434,7 @@ public abstract class SAFSPlus {
 			return command(DDDriverFileCommands.DELETEDIRECTORYCONTENTS_KEYWORD, directoryName);
 		}
 		/**
-		 * Delete recurrsively the contents (files and sub-directories) of a provided directory.<br>
+		 * Delete recursively the contents (files and sub-directories) of a provided directory.<br>
 		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_DeleteDirectoryContents">Detailed Reference</a><p>
 		 * @param directory  String, the name of directory to delete. 
 		 * @param delectDirectory boolean, true delete also the directory itself; otherwise the directory is kept.
@@ -3449,8 +3449,8 @@ public abstract class SAFSPlus {
 		 * String result = "result";
 		 * String directory = "C:\\Users\\sbjlwa\\TestDriverCommand\\To Delete Folder";
 		 * if(Files.CreateDirectory(directory)){
-		 *   String newfile = directory+File.separator+"\\test.file";
-		 *   Files.CreateFile(newfile, Mode.OUTPUT, Access.W, result);
+		 *   String newFile = directory+File.separator+"\\test.file";
+		 *   Files.CreateFile(newFile, Mode.OUTPUT, Access.W, result);
 		 *   Files.CloseFile(GetVariableValue(result));
 		 *   if(Files.DeleteDirectoryContents(directory, true)){
 		 *     System.out.println("directory '"+directory+"' has been completely delete.");
@@ -3504,12 +3504,12 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String image = "C:\\Users\\sbjlwa\\TestDriverCommand\\keyword.png";
-		 * String subimage = "C:\\Users\\sbjlwa\\TestDriverCommand\\subimage.png";
+		 * String subImage = "C:\\Users\\sbjlwa\\TestDriverCommand\\subimage.png";
 		 * List<SubArea> subareas = new ArrayList<SubArea>();
 		 * subareas.add(new SubArea(0,0,"20%","30%"));
 		 * subareas.add(new SubArea("50%", "50%", "60%", "70%"));
 		 * subareas.add(new SubArea("80%", "80%", "90%", "90%"));
-		 * Files.FilterImage(image, subimage, subareas);//filter 3 areas
+		 * Files.FilterImage(image, subImage, subareas);//filter 3 areas
 		 * }
 		 * </pre>
 		 */
@@ -3530,9 +3530,9 @@ public abstract class SAFSPlus {
 		 *                         number means absolute coordinate, percentage-number means relative width/height.<br>
 		 *                         multiple areas can be provided, separated by space " ", to filter multiple areas.<br>
 		 *                         Examples:<br>
-		 *                         <b>0;0;35;65</b> 		a set of absoulte coordinates<br>
-		 *                         <b>0,0,35%,60%</b> 	a set of absoulte/relative coordinates<br>
-		 *                         <b>0;0;35;65 10%,10%,35%,60%</b> 		2 sets of absoulte coordinates<br>
+		 *                         <b>0;0;35;65</b> 		a set of absolute coordinates<br>
+		 *                         <b>0,0,35%,60%</b> 	a set of absolute/relative coordinates<br>
+		 *                         <b>0;0;35;65 10%,10%,35%,60%</b> 		2 sets of absolute coordinates<br>
 		 *                       
 		 * @return true if successful, false otherwise.<p>
 		 * @see #prevResults
@@ -3543,12 +3543,12 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String image = "C:\\Users\\sbjlwa\\TestDriverCommand\\keyword.png";
-		 * String subimage = "C:\\Users\\sbjlwa\\TestDriverCommand\\subimage.png";
+		 * String subImage = "C:\\Users\\sbjlwa\\TestDriverCommand\\subimage.png";
 		 * String coords = "0,0,70%,50%";//DO NOT put any space between coordinate
-		 * Files.FilterImage(image, subimage, coords);//filter 1 area
-		 * subimage = "C:\\Users\\sbjlwa\\TestDriverCommand\\subimage2.png";
+		 * Files.FilterImage(image, subImage, coords);//filter 1 area
+		 * subImage = "C:\\Users\\sbjlwa\\TestDriverCommand\\subimage2.png";
 		 * coords = "0,0,70%,50% 80%;80%;100%;100%";
-		 * Files.FilterImage(image, subimage, coords);//filter 2 areas
+		 * Files.FilterImage(image, subImage, coords);//filter 2 areas
 		 * }
 		 * </pre>
 		 */
@@ -4000,10 +4000,10 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String file = "C:\\Users\\sbjlwa\\TestDriverCommand\\New Directory\\new test file3.txt";
-		 * String dest = "C:\\Users\\sbjlwa\\TestDriverCommand\\New Directory\\second copy of file3.txt";
+		 * String destination = "C:\\Users\\sbjlwa\\TestDriverCommand\\New Directory\\second copy of file3.txt";
 		 * String fileDriverCommand = "CopyFile";
-		 * if(Files.IfExistFile(file, fileDriverCommand, file, dest))
-		 *   pass("file '"+file+"' DOES exist and it has been copied to '"+dest+"'");
+		 * if(Files.IfExistFile(file, fileDriverCommand, file, destination))
+		 *   pass("file '"+file+"' DOES exist and it has been copied to '"+destination+"'");
 		 * }
 		 * </pre>
 		 */	
@@ -4425,15 +4425,15 @@ public abstract class SAFSPlus {
 		 * Compares two strings.
 		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_Compare">Detailed Reference</a><p>
 		 * @param source String, string to compare
-		 * @param dest String, string to compare
+		 * @param destination String, string to compare
 		 * @param resultVar String, the variable to hold the result of the operation
 		 * @return true if successful, false otherwise.<p>
 		 * <pre>
 		 * {@code
 		 * String var = "result";
 		 * String source = "hello";
-		 * String dest = "Hello";
-		 * if(Strings.Compare(source, dest, var))
+		 * String destination = "Hello";
+		 * if(Strings.Compare(source, destination, var))
 		 *   System.out.println("Compare success: result is "+GetVariableValue(var));//expected result 'false'
 		 * }
 		 * </pre>
@@ -4840,7 +4840,7 @@ public abstract class SAFSPlus {
 		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_Replace">Detailed Reference</a><p>
 		 * @param source String, The input string to parse
 		 * @param find String, The string to find
-		 * @param replace String, The string used to repalce
+		 * @param replace String, The string used to replace
 		 * @param resultVar String, the variable to hold the result of the operation 
 		 * @return boolean true if successful, false otherwise.<p>
 		 * @example

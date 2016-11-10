@@ -7,7 +7,7 @@
  * Logs for developers, not published to API DOC.
  *
  * History:
- * NOV 09, 2016    (SBJLWA) Initial release.
+ * NOV 09, 2016    (SBJLWA) Initial release: Created BrowserConstants and SeleniumConstants: copied constants from org.safs.selenium.webdriver.lib.SelectBrowser.
  */
 package org.safs;
 
@@ -15,11 +15,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Containing different kinds of Constant.
+ * Containing different kinds of Constant.<br>
  *
  */
 public class Constants {
-	public static class BrowserConstans{
+
+	public static class BrowserConstants{
 		/**'<b>explorer</b>'*/
 		public static final String BROWSER_NAME_IE = "explorer";
 		/**'<b>chrome</b>'*/
@@ -125,7 +126,7 @@ public class Constants {
 		 * @see #KEY_CHROME_PROFILE_DIR
 		 * @see #KEY_CHROME_EXCLUDE_OPTIONS
 		 * @see #KEY_CHROME_DISABLE_EXTENSIONS
-		 * @see SeleniumConstans#KEY_GRID_NODES_SETTING
+		 * @see SeleniumConstants#KEY_GRID_NODES_SETTING
 		 */
 		public static String[] getExtraParameterKeys(){
 			List<String> keys = new ArrayList<String>();
@@ -139,21 +140,21 @@ public class Constants {
 			keys.add(KEY_CHROME_PROFILE_DIR);
 			keys.add(KEY_CHROME_EXCLUDE_OPTIONS);
 			keys.add(KEY_CHROME_DISABLE_EXTENSIONS);
-			keys.add(SeleniumConstans.KEY_GRID_NODES_SETTING);
+			keys.add(SeleniumConstants.KEY_GRID_NODES_SETTING);
 			
 			return keys.toArray(new String[0]);
 			
 		}
 	}
 	
-	public static class SeleniumConstans{
+	public static class SeleniumConstants{
 		/**'selenium.host'*/
 		public static final String SYSTEM_PROPERTY_SELENIUM_HOST = "selenium.host";
 		/**'selenium.port'*/
 		public static final String SYSTEM_PROPERTY_SELENIUM_PORT = "selenium.port";
 		/**'selenium.node', its value is like node1:port:nodeconfig;node2:port:nodeconfig;<br>
 		 * semi-colon(;) serves as separator between nodes,<br>
-		 * colon(:) serves as separator between nodename, port, and node-configuration.<br>
+		 * colon(:) serves as separator between node-name, port, and node-configuration.<br>
 		 */
 		public static final String SYSTEM_PROPERTY_SELENIUM_NODE = "selenium.node";
 		/**'webdriver.ie.driver'*/

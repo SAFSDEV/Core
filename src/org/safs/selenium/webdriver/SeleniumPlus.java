@@ -234,7 +234,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 *                                                        });
 	 *                                                        
 	 * //Start chrome browser with default data pool (chrome://version/, see "Profile Path") , and using the last-used user. 
-	 * String datapool = "C:\\Users\\xxx\\AppData\\Local\\Google\\Chrome\\User Data";
+	 * String datapool = "C:\\Users\\some-user\\AppData\\Local\\Google\\Chrome\\User Data";
 	 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
 	 *                                                        SelectBrowser.BROWSER_NAME_CHROME, 
 	 *                                                        "10", 
@@ -243,7 +243,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 *                                                        datapool
 	 *                                                        });
 	 * //Start chrome browser with default data pool (chrome://version/, see "Profile Path") , and using the default user. 
-	 * String datapool = "C:\\Users\\xxx\\AppData\\Local\\Google\\Chrome\\User Data";
+	 * String datapool = "C:\\Users\\some-user\\AppData\\Local\\Google\\Chrome\\User Data";
 	 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
 	 *                                                        SelectBrowser.BROWSER_NAME_CHROME, 
 	 *                                                        "10", 
