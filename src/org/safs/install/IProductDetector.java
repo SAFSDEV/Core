@@ -25,14 +25,7 @@ import java.util.Map;
  *  
  * @author sbjlwa
  */
-interface IProductDetector{
-	/** 'HKLM\Software\' registry path for application on 32-bit OS */
-	static final String REG_HKLM_ST  = "HKLM\\Software\\";	
-	/** 'HKLM\Software\Wow6432Node' registry path for 32-bit application on 64-bit OS */
-	static final String REG_HKLM_ST_WOW6432   = "HKLM\\Software\\Wow6432Node\\";
-	/** 'bin' the sub-folder (relative to product home) holding executables */
-	static final String BIN = "bin";
-	
+interface IProductDetector{	
 	/**
 	 * Note: The map's key is used for choosing product to use.<br>
 	 *       User will decide key's format. It could be "ProductName+VersionNumber" or "VersionNumber".<br>

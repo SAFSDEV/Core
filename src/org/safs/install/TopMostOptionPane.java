@@ -106,11 +106,15 @@ public class TopMostOptionPane{
 	
 	/**Set the 'visible' of dialog's parent window to original value */
 	private void resetVisible(){
-		if(window!=null) window.setVisible(originalVisible);
+		if(window!=null){
+			window.setVisible(originalVisible);
+		}
 	}
 	/**Set the 'alwaysOnTop' of dialog's parent window to original value */
 	private void resetAlwaysOnTop(){
-		if(window!=null) window.setAlwaysOnTop(originalAlwaysOnTop);
+		if(window!=null){
+			window.setAlwaysOnTop(originalAlwaysOnTop);
+		}
 	}
 
 	/**
@@ -198,7 +202,7 @@ public class TopMostOptionPane{
 	 * Test.
 	 * Directly change the JDialog's behavior to show on top. 
 	 */
-	private static void test_bring_dialog_to_top(){
+	private static void testBringDialogToTop(){
 		String msg = "Hi loooo  ... ";
 		String title = "Testing Dialog shown as top most.";
 		JOptionPane opane = new JOptionPane(msg, JOptionPane.CLOSED_OPTION);
@@ -218,7 +222,7 @@ public class TopMostOptionPane{
 	 * <li>{@link #showOptionDialog(Component, Object, String, int, int, Icon, Object[], Object)}
 	 * </ul>
 	 */
-	private static void test_bring_parent_to_top(){
+	private static void testBringParentToTop(){
 		String msg = "Hi loooo  ... ";
 		String title = "Testing Dialog shown as top most.";
 		
@@ -233,8 +237,8 @@ public class TopMostOptionPane{
 	}
 	
 	public static void main(String[] args){
-		test_bring_dialog_to_top();
+		testBringDialogToTop();
 		
-		test_bring_parent_to_top();
+		testBringParentToTop();
 	}
 }
