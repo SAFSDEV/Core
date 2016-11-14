@@ -4,7 +4,7 @@
  */
 package org.safs.rest.service;
 
-import org.apache.hc.client5.http.testframework.HttpClient5Adapter;
+import org.safs.rest.service.adapter.HttpClient5Adapter;
 import org.apache.hc.core5.http.HttpVersion;
 import org.apache.hc.core5.http.ProtocolVersion;
 import org.safs.SAFSRuntimeException;
