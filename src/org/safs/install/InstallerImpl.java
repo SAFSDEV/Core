@@ -54,6 +54,7 @@ public abstract class InstallerImpl implements InstallerInterface{
 			this.message = message;
 		}
 		
+		@Override
 		public String toString(){
 			return name;
 		}
@@ -119,15 +120,18 @@ public abstract class InstallerImpl implements InstallerInterface{
 	 */
 	protected void initilizeProductDetector() throws UnsupportedOperationException{
 		if(Platform.isWindows()){
-			if(productDetector==null) productDetector = getWindowsProductDetector();
+			if(productDetector==null)
+				productDetector = getWindowsProductDetector();
 		}else if(Platform.isOpenBSD() ||
 				 Platform.isFreeBSD() ||
 				 Platform.isLinux() ||
 				 Platform.isSolaris()){
-			if(productDetector==null) productDetector = getUnixProductDetector();
+			if(productDetector==null)
+				productDetector = getUnixProductDetector();
 		}else{
 			IndependantLog.debug("Use default ProductDetector for OS:  com.sun.jna.Platform.getOSType()="+Platform.getOSType());
-			if(productDetector==null) productDetector = getDefaultProductDetector();
+			if(productDetector==null)
+				productDetector = getDefaultProductDetector();
 		}
 	}
 	
