@@ -1,7 +1,7 @@
 package org.safs.rest.service;
 
-import static org.apache.hc.client5.http.testframework.HttpClientPOJOAdapter.PASSWORD;
-import static org.apache.hc.client5.http.testframework.HttpClientPOJOAdapter.USERID;
+import static org.safs.rest.service.adapter.HttpClientPOJOAdapter.PASSWORD;
+import static org.safs.rest.service.adapter.HttpClientPOJOAdapter.USERID;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -9,8 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.hc.client5.http.testframework.HttpClient5Adapter;
-import org.apache.hc.client5.http.testframework.HttpClientPOJOAdapter;
+import org.safs.rest.service.adapter.HttpClient5Adapter;
+import org.safs.rest.service.adapter.HttpClientPOJOAdapter;
 import org.apache.hc.client5.http.utils.URLEncodedUtils;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.ProtocolVersion;
