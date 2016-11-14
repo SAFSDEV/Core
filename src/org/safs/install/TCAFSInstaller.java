@@ -61,20 +61,23 @@ public class TCAFSInstaller extends InstallerImpl{
 		String productHome = null;
 		
 		for(String arg:args){
-			if (PARAM_SWITCH.equals(arg)) versionOption = VERSION_OPTION.SWITCH;
-			else if (PARAM_USE_LATEST_VERSION.equals(arg)) versionOption = VERSION_OPTION.USE_LATEST;
+			if (PARAM_SWITCH.equals(arg)){
+				versionOption = VERSION_OPTION.SWITCH;
+			}else if(PARAM_USE_LATEST_VERSION.equals(arg)){
+				versionOption = VERSION_OPTION.USE_LATEST;
+			}
 		}
 		
 		if(VERSION_OPTION.CHECK_ENVIRONMENT.equals(versionOption)){
-			String temp_tchome = getEnvValue(TCHomeEnv);
-			setProgressMessage("Evaluating Environment "+ TCHomeEnv+": "+temp_tchome);
-			if(temp_tchome!= null){
-				tchome = new CaseInsensitiveFile(temp_tchome).toFile();
+			String tempTChome = getEnvValue(TCHomeEnv);
+			setProgressMessage("Evaluating Environment "+ TCHomeEnv+": "+tempTChome);
+			if(tempTChome!= null){
+				tchome = new CaseInsensitiveFile(tempTChome).toFile();
 				if(tchome.isDirectory()){
-					String temp_tcexe = getEnvValue(TCExeEnv);
+					String tempTCexe = getEnvValue(TCExeEnv);
 			        try{
-			        	setProgressMessage("Evaluating Environment "+ TCExeEnv+": "+temp_tcexe);
-			        	if(!checkTCExecutableAndSetEnv(tchome, temp_tcexe)){
+			        	setProgressMessage("Evaluating Environment "+ TCExeEnv+": "+tempTCexe);
+			        	if(!checkTCExecutableAndSetEnv(tchome, tempTCexe)){
 			        		return complete("Unable to set required Path for Windows SmartBear TestComplete support.", false);
 			        	}else{
 			        		String successInfo = getSuccessInfo();
@@ -97,7 +100,7 @@ public class TCAFSInstaller extends InstallerImpl{
 			        	}
 			        }catch(FileNotFoundException e){
 						setProgressMessage(e.getMessage());
-						setProgressMessage("Cannot find any executable '"+temp_tcexe+"' under TC HOME "+temp_tchome+"!");
+						setProgressMessage("Cannot find any executable '"+tempTCexe+"' under TC HOME "+tempTChome+"!");
 					}
 				}else{
 					setProgressMessage("The producton home '"+tchome.getAbsolutePath()+"' is NOT a directory!");
@@ -173,11 +176,9 @@ public class TCAFSInstaller extends InstallerImpl{
 	}
 	
 	private String getSuccessInfo(){
-		String message = "SmartBear TestComplete has been successfully set.\n"+
-						TCHomeEnv+"="+getEnvValue(TCHomeEnv)+"\n"+
-						TCExeEnv+"="+getEnvValue(TCExeEnv)+"\n";
-		
-		return message;
+		return "SmartBear TestComplete has been successfully set.\n"+
+				TCHomeEnv+"="+getEnvValue(TCHomeEnv)+"\n"+
+				TCExeEnv+"="+getEnvValue(TCExeEnv)+"\n";
 	}
 	
 	private boolean complete(String message, boolean success){
@@ -241,23 +242,31 @@ public class TCAFSInstaller extends InstallerImpl{
 			for(float version: SUPPORTED_VERSION_SMART_BEAR){
 				productPath = getRegistryValue(REG_HKLM_ST_WOW6432+REG_PREFIX_TE_SB+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
 				key = REG_PREFIX_TE_SB+version;
-				if(productPath!=null) store(homes, key, productPath);
+				if(productPath!=null){
+					store(homes, key, productPath);
+				}
 			}
 			for(float version: SUPPORTED_VERSION_AUTOMATED_QA){
 				productPath = getRegistryValue(REG_HKLM_ST_WOW6432+REG_PREFIX_TE_AQA+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
 				key = REG_PREFIX_TE_AQA+version;
-				if(productPath!=null) store(homes, key, productPath);
+				if(productPath!=null){
+					store(homes, key, productPath);
+				}
 			}
 			setProgressMessage("Evaluating Windows SmartBear TestComplete support.");
 			for(float version: SUPPORTED_VERSION_SMART_BEAR){
 				productPath = getRegistryValue(REG_HKLM_ST_WOW6432+REG_PREFIX_TC_SB+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
 				key = REG_PREFIX_TC_SB+version;
-				if(productPath!=null) store(homes, key, productPath);
+				if(productPath!=null){
+					store(homes, key, productPath);
+				}
 			}
 			for(float version: SUPPORTED_VERSION_AUTOMATED_QA){
 				productPath = getRegistryValue(REG_HKLM_ST_WOW6432+REG_PREFIX_TC_AQA+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
 				key = REG_PREFIX_TC_AQA+version;
-				if(productPath!=null) store(homes, key, productPath);
+				if(productPath!=null){
+					store(homes, key, productPath);
+				}
 			}
 
 			setProgressMessage("Evaluating for Windows earlier than Win7.");
@@ -265,23 +274,31 @@ public class TCAFSInstaller extends InstallerImpl{
 			for(float version: SUPPORTED_VERSION_SMART_BEAR){
 				productPath = getRegistryValue(REG_HKLM_ST+REG_PREFIX_TE_SB+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
 				key = REG_PREFIX_TE_SB+version;
-				if(productPath!=null) store(homes, key, productPath);
+				if(productPath!=null){
+					store(homes, key, productPath);
+				}
 			}
 			for(float version: SUPPORTED_VERSION_AUTOMATED_QA){
 				productPath = getRegistryValue(REG_HKLM_ST+REG_PREFIX_TE_AQA+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
 				key = REG_PREFIX_TE_AQA+version;
-				if(productPath!=null) store(homes, key, productPath);
+				if(productPath!=null){
+					store(homes, key, productPath);
+				}
 			}
 			setProgressMessage("Evaluating Windows SmartBear TestComplete support.");
 			for(float version: SUPPORTED_VERSION_SMART_BEAR){
 				productPath = getRegistryValue(REG_HKLM_ST+REG_PREFIX_TC_SB+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
 				key = REG_PREFIX_TC_SB+version;
-				if(productPath!=null) store(homes, key, productPath);
+				if(productPath!=null){
+					store(homes, key, productPath);
+				}
 			}
 			for(float version: SUPPORTED_VERSION_AUTOMATED_QA){
 				productPath = getRegistryValue(REG_HKLM_ST+REG_PREFIX_TC_AQA+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
 				key = REG_PREFIX_TC_AQA+version;
-				if(productPath!=null) store(homes, key, productPath);
+				if(productPath!=null){
+					store(homes, key, productPath);
+				}
 			}
 
 			return homes;
@@ -308,11 +325,15 @@ searchRegistry:
 				setProgressMessage("Evaluating Windows SmartBear TestExecute support.");
 				for(float version: SUPPORTED_VERSION_SMART_BEAR){
 					productPath = getRegistryValue(REG_HKLM_ST_WOW6432+REG_PREFIX_TE_SB+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
-					if(productPath!=null) break searchRegistry;
+					if(productPath!=null){
+						break searchRegistry;
+					}
 				}
 				for(float version: SUPPORTED_VERSION_AUTOMATED_QA){
 					productPath = getRegistryValue(REG_HKLM_ST_WOW6432+REG_PREFIX_TE_AQA+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
-					if(productPath!=null) break searchRegistry;
+					if(productPath!=null){
+						break searchRegistry;
+					}
 				}
 				
 				setProgressMessage("Evaluating Windows SmartBear TestComplete support.");
@@ -322,27 +343,37 @@ searchRegistry:
 				}
 				for(float version: SUPPORTED_VERSION_AUTOMATED_QA){
 					productPath = getRegistryValue(REG_HKLM_ST_WOW6432+REG_PREFIX_TC_AQA+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
-					if(productPath!=null) break searchRegistry;
+					if(productPath!=null){
+						break searchRegistry;
+					}
 				}
 				
 				setProgressMessage("Evaluating for Windows earlier than Win7.");
 				setProgressMessage("Evaluating Windows SmartBear TestExecute support.");
 				for(float version: SUPPORTED_VERSION_SMART_BEAR){
 					productPath = getRegistryValue(REG_HKLM_ST+REG_PREFIX_TE_SB+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
-					if(productPath!=null) break searchRegistry;
+					if(productPath!=null){
+						break searchRegistry;
+					}
 				}
 				for(float version: SUPPORTED_VERSION_AUTOMATED_QA){
 					productPath = getRegistryValue(REG_HKLM_ST+REG_PREFIX_TE_AQA+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
-					if(productPath!=null) break searchRegistry;
+					if(productPath!=null){
+						break searchRegistry;
+					}
 				}
 				setProgressMessage("Evaluating Windows SmartBear TestComplete support.");
 				for(float version: SUPPORTED_VERSION_SMART_BEAR){
 					productPath = getRegistryValue(REG_HKLM_ST+REG_PREFIX_TC_SB+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
-					if(productPath!=null) break searchRegistry;
+					if(productPath!=null){
+						break searchRegistry;
+					}
 				}
 				for(float version: SUPPORTED_VERSION_AUTOMATED_QA){
 					productPath = getRegistryValue(REG_HKLM_ST+REG_PREFIX_TC_AQA+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
-					if(productPath!=null) break searchRegistry;
+					if(productPath!=null){
+						break searchRegistry;
+					}
 				}
 			}
 			
@@ -389,9 +420,13 @@ searchRegistry:
 			}
 		}
 		if(uninstall){
-			if( installer.uninstall(args) ) System.exit(0);
+			if( installer.uninstall(args) ){
+				System.exit(0);
+			}
 		}else{
-			if( installer.install(args) ) System.exit(0);
+			if( installer.install(args) ){
+				System.exit(0);
+			}
 		}
 		System.exit(-1);
 	}
