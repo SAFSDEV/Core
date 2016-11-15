@@ -76,6 +76,7 @@ import org.safs.IndependantLog;
 import org.safs.Processor;
 import org.safs.SAFSPlus;
 import org.safs.StringUtils;
+import org.safs.SAFSPlus.DriverCommand;
 import org.safs.model.tools.EmbeddedHookDriverRunner;
 import org.safs.selenium.util.DocumentClickCapture;
 import org.safs.selenium.webdriver.lib.SelectBrowser;
@@ -1520,7 +1521,6 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	
 	/**
 	 * Wrapper class to handle <a href="http://safsdev.github.io//sqabasic2000/WindowFunctionsIndex.htm">Window keywords</a>, like Maximize, Minimize, SetPosition etc.<br>
-	 * For detail APIs, please refer to {@link SAFSPlus.Window}.<br>
 	 * 
 	 * @see SAFSPlus.Window
 	 */
@@ -1530,35 +1530,44 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * Wrapper class to handle 
 	 * <a href="http://safsdev.github.io/sqabasic2000/GenericMasterFunctionsIndex.htm">GenericMasterFunctions Reference</a> and 
 	 * <a href="http://safsdev.github.io/sqabasic2000/GenericObjectFunctionsIndex.htm">GenericObjectFunctions Reference</a>, like VerifyProperty, IsPropertyExist etc.<br>
-	 * For detail APIs, please refer to {@link SAFSPlus.Component}.<br>
 	 * 
 	 * @see SAFSPlus.Component
 	 */
 	public static class Component extends SAFSPlus.Component{}
 	
 	/**
-	 * The wrapper providing APIs to operate ComboBox in SeleniumPlus.<br>
+	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/ComboBoxFunctionsIndex.htm">ComboBox keywords</a>, like Select, ShowList, SetTextValue etc.<br>
+	 * 
+	 * @see SAFSPlus.ComboBox
 	 */
 	public static class ComboBox extends SAFSPlus.ComboBox{}
 	/**
-	 * The wrapper providing APIs to operate ScrollBar in SeleniumPlus.<br>
+	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/ScrollBarFunctionsIndex.htm">ScrollBar keywords</a>, like OneDown, PageDown, PageUp etc.<br>
+	 * 
+	 * @see SAFSPlus.ScrollBar
 	 */
 	public static class ScrollBar extends SAFSPlus.ScrollBar{}
 	/**
-	 * A set of assertions methods for tests.  Only failed assertions are recorded.  
+	 * A set of assertions methods for tests.  Only failed assertions are recorded.
+	 * 
+	 * @see SAFSPlus.Assert
 	 */
 	public static class Assert extends SAFSPlus.Assert{}
 	/**
-	 * The wrapper providing APIs to operate CheckBox in SeleniumPlus.<br>
+	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/CheckBoxFunctionsIndex.htm">CheckBox keywords</a>, like Check, UnCheck.<br>
+	 * 
+	 * @see SAFSPlus.CheckBox
 	 */
 	public static class CheckBox extends SAFSPlus.CheckBox{}
 	
 	/**
-	 * The wrapper providing APIs to operate EditBox in SeleniumPlus.<br>
+	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/EditBoxFunctionsIndex.htm">EditBox keywords</a>, like SetTextValue, SetTextCharacters etc.<br>
+	 * 
+	 * @see SAFSPlus.EditBox
 	 */
 	public static class EditBox extends SAFSPlus.EditBox{}
 	/**
-	 * The wrapper providing APIs to operate Tree in SeleniumPlus.<br>
+	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/TreeViewFunctionsIndex.htm">Tree keywords</a>, like ClickTextNode, ExpandTextNode etc.<br>
 	 * <pre>
 	 * By default, all parameters will be processed as an expression (math and string). As the parameter
 	 * tree-path may contain separator "->", for example "Root->Child1->GrandChild", it will be evaluated 
@@ -1569,25 +1578,38 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * Misc.Expressions(false);
 	 * }
 	 * </pre>
+	 * 
+	 * @see SAFSPlus.Tree
 	 */
 	public static class Tree extends SAFSPlus.Tree{}
 	
 	/**
-	 * The wrapper providing APIs to operate TabControl in SeleniumPlus.<br>
+	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/TabControlFunctionsIndex.htm">TabControl keywords</a>, like ClickTab, SelectTabIndex etc.<br>
+	 * 
+	 * @see SAFSPlus.TabControl
 	 */
 	public static class TabControl extends SAFSPlus.TabControl{}
 	/**
-	 * The wrapper providing APIs to operate ListView in SeleniumPlus.<br>
+	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/ListViewFunctionsIndex.htm">ListView keywords</a>, like ClickIndex, VerifyListContains etc.<br>
+	 * 
+	 * @see SAFSPlus.ListView
 	 */
 	public static class ListView extends SAFSPlus.ListView{}
 	
 	/**
-	 * The wrapper providing APIs to operate MenuBar/Menu in SeleniumPlus.<br>
+	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/JavaMenuFunctionsIndex.htm">MenuBar/Menu keywords</a>, like SelectMenuItem, VerifyMenuItemContains etc.<br>
+	 * 
+	 * @see SAFSPlus.Menu
 	 */	
 	public static class Menu extends SAFSPlus.Menu{}
 	
 	/**
-	 * Convenience class for miscellaneous Driver Commands. 
+	 * Convenience class for miscellaneous Driver Commands.<br>
+	 * This is a sub-class of {@link SAFSPlus.Misc} and it provides more convenient wrapper APIs related to Selenium.<br>
+	 * The class {@link SAFSPlus.Misc} is a sub-class of {@link DriverCommand}.<br>
+	 * 
+	 * @see SAFSPlus.Misc
+	 * @see SAFSPlus.DriverCommand
 	 */
 	public static class Misc extends SAFSPlus.Misc{
 		//TODO: Once we implement the following keywords, we can move these methods to the super-class SAFSPlus.Misc
@@ -1745,11 +1767,14 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	}
 	
 	/**
-	 * Convenience class for Logging Commands. 
+	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/DDDriverLogCommandsIndex.htm">Logging keywords</a>, like LogMessage, LogTestWarning etc.<br>
+	 * 
+	 * @see SAFSPlus.Logging
 	 */
 	public static class Logging extends SAFSPlus.Logging{}
 	
 	/**
+	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/DDDriverFileCommandsIndex.htm">File keywords</a>, like OpenFile, ReadFileLine etc.<br>
 	 * <pre>
 	 * Convenience class for File handling Commands. 
 	 * If you meet some errors when calling these API, please try to run 
@@ -1758,10 +1783,13 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * and then call the string method
 	 * Files.xxx();
 	 * </pre>
+	 * 
+	 * @see SAFSPlus.Files
 	 */
 	public static class Files extends SAFSPlus.Files{}
 	
 	/**
+	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/DDDriverStringCommandsIndex.htm">String keywords</a>, like Compare, GetMultiDelimitedField etc.<br>
 	 * <pre>
 	 * Convenience class for String handling Commands.
 	 * If you meet some errors when calling these API, please try to run 
@@ -1770,11 +1798,13 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * and then call the string method
 	 * Strings.xxx();
 	 * </pre>
+	 * 
+	 * @see SAFSPlus.Strings
 	 */
 	public static class Strings extends SAFSPlus.Strings{}
 	
 	/**
-	 * Convenience class for Counter Commands.
+	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/DDDriverCounterCommandsIndex.htm">DriverCounter keywords</a>, like StartTestSuite, StartCounter, LogCounterInfo etc.<br>
 	 * 
 	 * @see SAFSPlus.Counters
 	 */

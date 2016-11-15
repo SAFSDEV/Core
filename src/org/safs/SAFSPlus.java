@@ -2408,7 +2408,7 @@ public abstract class SAFSPlus {
 
 	/**
 	 * Class for miscellaneous Driver Commands.<br>
-	 * This is a sub-class of {@link DriverCommand} and provides more convenient wrapper APIs.
+	 * This is a sub-class of {@link DriverCommand} and it provides more convenient wrapper APIs.
 	 * 
 	 * @see DriverCommand
 	 */
@@ -2699,7 +2699,7 @@ public abstract class SAFSPlus {
 	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/DDDriverCounterCommandsIndex.htm">DriverCounter keywords</a>, like StartTestSuite, StartCounter, LogCounterInfo etc.<br>
 	 * It also provides:<br>
 	 * some convenient APIs, like {@link Counters#PrintTestCaseSummary(String)}, {@link Counters#PrintTestSuiteSummary(String)} etc. by using combination of DriverCounter keywords.<br>
-	 * CountStatusInterface instance through the underlying JSAFS<br>
+	 * CountStatusInterface instance ( {@link Counters#GetCounterStatus(String)} ) through the underlying JSAFS<br>
 	 * 
 	 */
 	public static class Counters{
