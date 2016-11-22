@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.StringTokenizer;
 
 import org.safs.ComponentFunction;
+import org.safs.IndependantLog;
 import org.safs.Log;
 import org.safs.RSA;
 import org.safs.SAFSException;
@@ -25,6 +26,11 @@ import org.safs.logging.AbstractLogFacility;
 import org.safs.logging.LogUtilities;
 import org.safs.model.commands.DriverCommands;
 import org.safs.model.commands.GenericMasterFunctions;
+import org.safs.model.commands.TIDRestFunctions;
+import org.safs.rest.REST;
+import org.safs.rest.service.Headers;
+import org.safs.rest.service.Service;
+import org.safs.text.FAILKEYS;
 import org.safs.text.FAILStrings;
 import org.safs.text.FileUtilities;
 import org.safs.text.GENStrings;
@@ -69,6 +75,9 @@ public class TIDComponent extends GenericEngine {
 	/** "TIDComponent" */
 	static final String TIDCOMPONENT_ENGINE  = "TIDComponent";
 
+	/** "SAFSREST" */
+	public static final String FLAG_SAFSREST = "SAFSREST";
+    
 	// START: LOCALLY SUPPORTED COMMANDS
 
 	/** "VerifyValues" */
@@ -220,7 +229,11 @@ public class TIDComponent extends GenericEngine {
     
 	// END: LOCALLY SUPPORTED COMMANDS
 
-	ComponentFunction cf;
+    /** The special Processor for handling TID Component Function keywords.*/
+    protected ComponentFunction cf;
+	
+	/** The special Processor for handling REST Component Function keywords.*/
+    protected ComponentFunction restCF = null;
 	
 	/**
 	 * Constructor for TIDComponent
@@ -248,6 +261,9 @@ public class TIDComponent extends GenericEngine {
 		log = new LogUtilities(this.staf);
 		cf = new CFComponent();
 		cf.setLogUtilities(log);
+		
+		restCF = new RESTComponent();
+		restCF.setLogUtilities(log);
 	}
 
 	public long processRecord (TestRecordHelper testRecordData){
@@ -261,11 +277,33 @@ public class TIDComponent extends GenericEngine {
 		}
 		Collection<String> params = interpretFields(testRecordData);
 		if(params instanceof Collection){
-			cf.setTestRecordData(testRecordData);			
-			cf.setParams(params);	
-			cf.setIterator(params.iterator());
-			cf.process();
+			String flag=null;
+			try {
+				flag = testRecordData.getWindowGuiId();
+			} catch (SAFSException e) {
+
+			}
+			if(flag==null){
+				try {
+					flag = testRecordData.getWindowName();
+				} catch (SAFSException e) {
+				}
+			}
+			if(isRESTFunction(flag)){
+				restCF.setTestRecordData(testRecordData);			
+				restCF.setParams(params);	
+				restCF.setIterator(params.iterator());
+				restCF.process();
+			}
+		
+			if(StatusCodes.SCRIPT_NOT_EXECUTED==testRecordData.getStatusCode()){
+				cf.setTestRecordData(testRecordData);			
+				cf.setParams(params);	
+				cf.setIterator(params.iterator());
+				cf.process();
+			}
 		}
+		
 		if(resetTRD) testRecordData.setSTAFHelper(null);
 		return testRecordData.getStatusCode();
 	}
@@ -1972,6 +2010,275 @@ public class TIDComponent extends GenericEngine {
 	 */
 	public static boolean noWaitGUIExistence(String action){
 		return TIDComponent.isCheckGUIExistence(action) || TIDComponent.isGUILess(action);
+	}
+	
+	/**
+	 * Check if the action is a REST action.
+	 * @param flag String, it could be the WindowID or the WindowName
+	 * @return boolean true if the action is RESTful.
+	 */
+	public static boolean isRESTFunction(String flag){
+		return FLAG_SAFSREST.equalsIgnoreCase(flag);
+	}
+	
+	/**
+	 * Internal Component Function Processor to handle REST actions.
+	 */
+	protected class RESTComponent extends org.safs.ComponentFunction {
+		protected String restFlag = null;
+		protected String sessionID = null;
+		/** If the action is going to be handled without session. 
+		 * Default is false, which means the action will be handled within session. */
+		protected boolean oneShotSessionStarted = false;
+				
+		RESTComponent (){
+			super();
+		}
+		
+		/**
+		 * Process the record present in the provided testRecordData.
+		 */
+		@SuppressWarnings("unchecked")
+		@Override
+		public void process(){
+			if(action==null) updateFromTestRecordData();
+
+			if(action==null){
+				componentFailureMessage(FAILStrings.text(FAILKEYS.ACTION_NOT_VALID)+":"+testRecordData.getInputRecord());
+				testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
+				return;
+			}
+			
+			String debugmsg = "TIDRestFunctions$RESTComponent.process() "+ action +": ";
+			
+			testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
+			try{
+				restFlag = testRecordData.getWindowGuiId();
+				sessionID = testRecordData.getCompGuiId();
+			}catch(SAFSException e){
+				IndependantLog.debug(debugmsg + "recognition strings missing or invalid for AutoIt engine.");
+	        	return;
+			}
+			if (!isRESTFunction(restFlag)){
+				IndependantLog.info(debugmsg + " skipping due to non-REST ACTION recognition string.");
+	        	return;
+	        }
+						
+			try {
+				oneShotSessionStarted = false;
+				
+				if(sessionID==null){
+					if(requireSessionID()){
+						throw new SAFSException("The session ID is missing for action '"+action+"'!");
+					}else{
+						//This is one-shot connection, we ourselves will close the session after keyword execution.
+						startSession();
+					}
+				}
+				if (params != null) {
+					iterator = params.iterator();
+					IndependantLog.info(debugmsg + " win: "+ windowName +"; comp: "+ compName+"; with params: "+params);
+				} else{
+					IndependantLog.info(debugmsg + " win: "+ windowName +"; comp: "+ compName+" without parameters.");
+				}
+
+				if ( TIDRestFunctions.RESTENDSERVICESESSION_KEYWORD.equalsIgnoreCase(action)) {
+					endServiceSession();
+				} else if ( TIDRestFunctions.RESTGETBINARY_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.GET_METHOD, Headers.BINARY_TYPE);
+				} else if ( TIDRestFunctions.RESTREQUEST_KEYWORD.equalsIgnoreCase(action) ) {
+					httpRequest();
+				} else if ( TIDRestFunctions.RESTSTARTSERVICESESSION_KEYWORD.equalsIgnoreCase(action) ) {
+					startServiceSession();
+				} else {
+					throw new SAFSException("Not supported yet.", SAFSException.CODE_ACTION_NOT_SUPPORTED);
+				}
+
+			}catch( SAFSException se ) {
+				if(SAFSException.CODE_ACTION_NOT_SUPPORTED.equals(se.getCode())){
+					//Let the other engine to process
+					Log.info(debugmsg+" '"+action+"' is not supported here.");
+					testRecordData.setStatusCode( StatusCodes.SCRIPT_NOT_EXECUTED );
+				}else{
+					testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );
+					String message = "Met "+StringUtils.debugmsg(se);
+					String detail = FAILStrings.convert(FAILStrings.STANDARD_ERROR, 
+							action +" failure in table "+ testRecordData.getFilename() + " at Line " + testRecordData.getLineNumber(), 
+							action, testRecordData.getFilename(), String.valueOf(testRecordData.getLineNumber()));
+
+					log.logMessage(testRecordData.getFac(), message, detail, FAILED_MESSAGE);
+				}
+
+			}catch (Throwable e){
+				testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
+				String message = "Met "+StringUtils.debugmsg(e);
+				String detail = FAILStrings.convert(FAILStrings.STANDARD_ERROR, 
+						action +" failure in table "+ testRecordData.getFilename() + " at Line " + testRecordData.getLineNumber(), 
+						action, testRecordData.getFilename(), String.valueOf(testRecordData.getLineNumber()));
+					log.logMessage(testRecordData.getFac(), message, detail, FAILED_MESSAGE);
+
+			}finally{
+				if(oneShotSessionStarted){
+					try{
+						endSession();
+					}catch(SAFSException e){
+						IndependantLog.warn(debugmsg+"Failed to stop REST Session, due to "+StringUtils.debugmsg(e));
+					}
+				}
+			}
+			
+			if (testRecordData.getStatusCode() == StatusCodes.SCRIPT_NOT_EXECUTED) {
+				//componentProcess();//handle Generic keywords
+			} else {
+				IndependantLog.debug(debugmsg+"'"+action+"' has been processed\n with testrecorddata"+testRecordData+"\n with params "+params);
+			}
+		}
+		
+		/**
+		 * For some keywords the "sessionID" is optional; for others it is required.
+		 * @return boolean true if the "sessionID" is required.
+		 */
+		protected boolean requireSessionID(){
+			return TIDRestFunctions.RESTENDSERVICESESSION_KEYWORD.equalsIgnoreCase(action) ||
+				   TIDRestFunctions.RESTSTARTSERVICESESSION_KEYWORD.equalsIgnoreCase(action);
+		}
+		
+		private synchronized String getUniqueID(){
+			return FLAG_SAFSREST+"Session_"+System.currentTimeMillis();
+		}
+		
+		protected void startSession() throws SAFSException{
+			//Create the Service object: 
+			Service service = new Service(getUniqueID());
+			//Assign sessionID
+			sessionID = service.getServiceId();
+			
+			//TODO Load related assets for starting the session, like authentication information.
+			//TODO Do we need to register the service, probably NOT.
+			
+			oneShotSessionStarted = true;
+		}
+		protected void endSession() throws SAFSException{
+			//TODO Clean up everything for a session.
+			sessionID = null;
+			oneShotSessionStarted = false;
+		}
+		
+		protected void endServiceSession(){
+			String message = action;
+			String description = action;
+			
+			if (sessionID==null) {
+				//It is not really a parameter, it is the field #3 in the test record.
+				issueParameterValueFailure("sessionID");
+				return;
+			}
+			
+			try { 
+				//TODO implement the details
+				logMessage( message, description, AbstractLogFacility.STATUS_REPORT_TEST_PASSES);
+				setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
+				return;
+			}catch(Exception e){
+				String exceptionMsg = StringUtils.debugmsg(e);
+				message = FAILStrings.convert(FAILStrings.GENERIC_ERROR, 
+						"*** ERROR *** "+exceptionMsg, exceptionMsg);
+				standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
+				setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
+				return;
+			}
+		}
+		
+		/**
+		 * Handle the keywords like:<br/>
+		 * <ul>
+		 * 	 <li>{@link TIDRestFunctions#RESTGETBINARY_KEYWORD}
+		 *   <li>{@link TIDRestFunctions#RESTGETXML_KEYWORD}
+		 *   <li>{@link TIDRestFunctions#RESTPOSTBINARY_KEYWORD}
+		 *   <li>{@link TIDRestFunctions#RESTPOSTXML_KEYWORD}
+		 *   <li>...
+		 * </ul>
+		 * @param method String, the HTTP method to handle, like "GET" "POST" "PUT" etc.
+		 * @param type   String, the header type, like "BINARY" "JOSN" etc.
+		 */
+		protected void request(String method, String type){
+			String message = action;
+			String description = action;
+			
+			if (sessionID==null) {
+				//It is not really a parameter, it is the field #3 in the test record.
+				issueParameterValueFailure("sessionID");
+				return;
+			}
+			
+			try {
+				//TODO implement the details
+				logMessage( message, description, AbstractLogFacility.STATUS_REPORT_TEST_PASSES);
+				setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
+				return;
+			}catch(Exception e){
+				String exceptionMsg = StringUtils.debugmsg(e);
+				message = FAILStrings.convert(FAILStrings.GENERIC_ERROR, 
+						"*** ERROR *** "+exceptionMsg, exceptionMsg);
+				standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
+				setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
+				return;
+			}
+		}
+		
+		/** 
+		 * Handle the custom request.<br/>
+		 * User will set the real HTTP headers by himself.<br/>
+		 */
+		protected void httpRequest(){
+			String message = action;
+			String description = action;
+			
+			if (sessionID==null) {
+				//It is not really a parameter, it is the field #3 in the test record.
+				issueParameterValueFailure("sessionID");
+				return;
+			}
+			
+			try { 
+				//TODO implement the details
+				logMessage( message, description, AbstractLogFacility.STATUS_REPORT_TEST_PASSES);
+				setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
+				return;
+			}catch(Exception e){
+				String exceptionMsg = StringUtils.debugmsg(e);
+				message = FAILStrings.convert(FAILStrings.GENERIC_ERROR, 
+						"*** ERROR *** "+exceptionMsg, exceptionMsg);
+				standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
+				setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
+				return;
+			}
+		}
+		protected void startServiceSession(){
+			String message = action;
+			String description = action;
+			
+			if (sessionID==null) {
+				//It is not really a parameter, it is the field #3 in the test record.
+				issueParameterValueFailure("sessionID");
+				return;
+			}
+			
+			try { 
+				//TODO implement the details
+				logMessage( message, description, AbstractLogFacility.STATUS_REPORT_TEST_PASSES);
+				setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
+				return;
+			}catch(Exception e){
+				String exceptionMsg = StringUtils.debugmsg(e);
+				message = FAILStrings.convert(FAILStrings.GENERIC_ERROR, 
+						"*** ERROR *** "+exceptionMsg, exceptionMsg);
+				standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
+				setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
+				return;
+			}
+		}
+
 	}
 }
 
