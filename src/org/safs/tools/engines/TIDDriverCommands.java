@@ -176,6 +176,7 @@ public class TIDDriverCommands extends GenericEngine {
 	TIDDriverLogCommands  dcLog  = new TIDDriverLogCommands();
 	TIDDriverFlowCommands dcFlow = new TIDDriverFlowCommands();
 	TIDDriverCounterCommands dcCounters = new TIDDriverCounterCommands();
+	TIDDriverRestCommands dcRest = new TIDDriverRestCommands();
 
 	String command = "";
 	String message;
@@ -207,7 +208,7 @@ public class TIDDriverCommands extends GenericEngine {
 	
 	/**
 	 * Calls super.setLogUtilities for this class and then setLogUtilities for each 
-	 * chained processor in this class (dcLog, dcFlow, dcCounters).
+	 * chained processor in this class (dcLog, dcFlow, dcCounters, dcRest).
 	 */
 	@Override
 	public void setLogUtilities(LogUtilities log){
@@ -215,11 +216,12 @@ public class TIDDriverCommands extends GenericEngine {
 		dcLog.setLogUtilities(log);
 		dcFlow.setLogUtilities(log);
 		dcCounters.setLogUtilities(log);
+		dcRest.setLogUtilities(log);
 	}
 	
 	/**
 	 * Calls super.setLogUtilities for this class and then setLogUtilities for each 
-	 * chained processor in this class (dcLog, dcFlow, dcCounters).
+	 * chained processor in this class (dcLog, dcFlow, dcCounters, dcRest).
      * @param log
      * @param copyLogClass set to true to copy everything to the debug log (Log.class)
 	 */
@@ -229,6 +231,7 @@ public class TIDDriverCommands extends GenericEngine {
 		dcLog.setLogUtilities(log, copyLogClass);
 		dcFlow.setLogUtilities(log, copyLogClass);
 		dcCounters.setLogUtilities(log, copyLogClass);
+		dcRest.setLogUtilities(log, copyLogClass);
 	}
 	
 	/**
@@ -252,6 +255,7 @@ public class TIDDriverCommands extends GenericEngine {
 			dcLog.launchInterface(driver);
 			dcFlow.launchInterface(driver);
 			dcCounters.launchInterface(driver);
+			dcRest.launchInterface(driver);
 			if(log == null) setLogUtilities(new LogUtilities(this.staf), false);
 			
 		}catch(Exception x){
@@ -353,6 +357,7 @@ public class TIDDriverCommands extends GenericEngine {
 		    rc = dcLog.processRecord(this.testRecordData);
 			if (rc == DriverConstant.STATUS_SCRIPT_NOT_EXECUTED) rc = dcFlow.processRecord(this.testRecordData);
 			if (rc == DriverConstant.STATUS_SCRIPT_NOT_EXECUTED) rc = dcCounters.processRecord(this.testRecordData);
+			if (rc == DriverConstant.STATUS_SCRIPT_NOT_EXECUTED) rc = dcRest.processRecord(this.testRecordData);
 			return rc;	
 		}
 		catch(Exception x){
