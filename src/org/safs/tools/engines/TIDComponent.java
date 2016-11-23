@@ -31,6 +31,7 @@ import org.safs.rest.REST;
 import org.safs.rest.service.Headers;
 import org.safs.rest.service.Response;
 import org.safs.rest.service.Service;
+import org.safs.rest.service.Services;
 import org.safs.text.FAILKEYS;
 import org.safs.text.FAILStrings;
 import org.safs.text.FileUtilities;
@@ -2054,16 +2055,17 @@ public class TIDComponent extends GenericEngine {
 			testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
 			try{
 				restFlag = testRecordData.getWindowGuiId();
+			}catch(SAFSException e){
+				IndependantLog.warn(debugmsg + "window '"+windowName+"' recognition string is missing or invalid for restFlag.");
+			}
+			if(restFlag==null) restFlag = windowName;
+			
+			try{
 				sessionID = testRecordData.getCompGuiId();
 			}catch(SAFSException e){
-				IndependantLog.debug(debugmsg + "recognition strings missing or invalid for AutoIt engine.");
-	        	return;
+				IndependantLog.warn(debugmsg + "component '"+compName+"' recognition string is missing or invalid for sessionID.");
 			}
-			if (!isRESTFunction(restFlag)){
-				IndependantLog.info(debugmsg + " skipping due to non-REST ACTION recognition string.");
-	        	return;
-	        }
-						
+
 			try {
 				oneShotSessionStarted = false;
 				
@@ -2313,9 +2315,21 @@ public class TIDComponent extends GenericEngine {
 				return;
 			}
 			
+			if (params.size() < 2) {
+				issueParameterCountFailure();
+				return;
+			}
+			String relativeURI = iterator.next();
+			String responseIdVar = iterator.next();
+			String body = iterator.hasNext()? iterator.next():null;
+			String customHeaders = iterator.hasNext()? iterator.next():null;
+			String customeAuthentication = iterator.hasNext()? iterator.next():null;
+			
 			try {
 				//TODO implement the details
-				handleResponse(response);
+				response = REST.request(sessionID, method, relativeURI, Headers.getHeadersForType(type), body);
+				
+				handleResponse(response, responseIdVar);
 				logMessage( message, description, AbstractLogFacility.STATUS_REPORT_TEST_PASSES);
 				setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
 			}catch(Exception e){
@@ -2342,9 +2356,22 @@ public class TIDComponent extends GenericEngine {
 				return;
 			}
 			
+			if (params.size() < 3) {
+				issueParameterCountFailure();
+				return;
+			}
+			String method = iterator.next();
+			String relativeURI = iterator.next();
+			String responseIdVar = iterator.next();
+			String body = iterator.hasNext()? iterator.next():null;
+			String customHeaders = iterator.hasNext()? iterator.next():null;
+			String customeAuthentication = iterator.hasNext()? iterator.next():null;
+			
 			try { 
 				//TODO implement the details
-				handleResponse(response);
+				response = REST.request(sessionID, method, relativeURI, customHeaders, body);
+				
+				handleResponse(response, responseIdVar);
 				logMessage( message, description, AbstractLogFacility.STATUS_REPORT_TEST_PASSES);
 				setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
 			}catch(Exception e){
@@ -2360,10 +2387,11 @@ public class TIDComponent extends GenericEngine {
 		 * TODO
 		 * Write the details of response and request into the debug log.<br>
 		 * Store the Response object into a Map with a generated ID, which
-		 * will be set to the testRecordData object.<br>
+		 * will be saved to the variable responseIdVar.<br>
 		 * @param response Response, the response returned from invocation of a rest service.
+		 * @param responseIdVar String, the variable to store the response ID
 		 */
-		protected void handleResponse(Response response){
+		protected void handleResponse(Response response, String responseIdVar){
 			
 		}
 		
