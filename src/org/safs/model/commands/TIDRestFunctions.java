@@ -45,14 +45,282 @@ public class TIDRestFunctions {
     ****************/
     public static TIDRestFunctions getInstance() { return singleton;}
 
+    /** "RestDeleteBinary" */
+    static public final String RESTDELETEBINARY_KEYWORD = "RestDeleteBinary";
+    /** "RestDeleteCSS" */
+    static public final String RESTDELETECSS_KEYWORD = "RestDeleteCSS";
+    /** "RestDeleteCustom" */
+    static public final String RESTDELETECUSTOM_KEYWORD = "RestDeleteCustom";
+    /** "RestDeleteHTML" */
+    static public final String RESTDELETEHTML_KEYWORD = "RestDeleteHTML";
+    /** "RestDeleteImage" */
+    static public final String RESTDELETEIMAGE_KEYWORD = "RestDeleteImage";
+    /** "RestDeleteJSON" */
+    static public final String RESTDELETEJSON_KEYWORD = "RestDeleteJSON";
+    /** "RestDeleteScript" */
+    static public final String RESTDELETESCRIPT_KEYWORD = "RestDeleteScript";
+    /** "RestDeleteText" */
+    static public final String RESTDELETETEXT_KEYWORD = "RestDeleteText";
+    /** "RestDeleteXML" */
+    static public final String RESTDELETEXML_KEYWORD = "RestDeleteXML";
     /** "RestEndServiceSession" */
     static public final String RESTENDSERVICESESSION_KEYWORD = "RestEndServiceSession";
     /** "RestGetBinary" */
     static public final String RESTGETBINARY_KEYWORD = "RestGetBinary";
+    /** "RestGetCSS" */
+    static public final String RESTGETCSS_KEYWORD = "RestGetCSS";
+    /** "RestGetCustom" */
+    static public final String RESTGETCUSTOM_KEYWORD = "RestGetCustom";
+    /** "RestGetHTML" */
+    static public final String RESTGETHTML_KEYWORD = "RestGetHTML";
+    /** "RestGetImage" */
+    static public final String RESTGETIMAGE_KEYWORD = "RestGetImage";
+    /** "RestGetJSON" */
+    static public final String RESTGETJSON_KEYWORD = "RestGetJSON";
+    /** "RestGetScript" */
+    static public final String RESTGETSCRIPT_KEYWORD = "RestGetScript";
+    /** "RestGetText" */
+    static public final String RESTGETTEXT_KEYWORD = "RestGetText";
+    /** "RestGetXML" */
+    static public final String RESTGETXML_KEYWORD = "RestGetXML";
+    /** "RestHeadBinary" */
+    static public final String RESTHEADBINARY_KEYWORD = "RestHeadBinary";
+    /** "RestHeadCSS" */
+    static public final String RESTHEADCSS_KEYWORD = "RestHeadCSS";
+    /** "RestHeadCustom" */
+    static public final String RESTHEADCUSTOM_KEYWORD = "RestHeadCustom";
+    /** "RestHeadHTML" */
+    static public final String RESTHEADHTML_KEYWORD = "RestHeadHTML";
+    /** "RestHeadImage" */
+    static public final String RESTHEADIMAGE_KEYWORD = "RestHeadImage";
+    /** "RestHeadJSON" */
+    static public final String RESTHEADJSON_KEYWORD = "RestHeadJSON";
+    /** "RestHeadScript" */
+    static public final String RESTHEADSCRIPT_KEYWORD = "RestHeadScript";
+    /** "RestHeadText" */
+    static public final String RESTHEADTEXT_KEYWORD = "RestHeadText";
+    /** "RestHeadXML" */
+    static public final String RESTHEADXML_KEYWORD = "RestHeadXML";
+    /** "RestPatchBinary" */
+    static public final String RESTPATCHBINARY_KEYWORD = "RestPatchBinary";
+    /** "RestPatchCSS" */
+    static public final String RESTPATCHCSS_KEYWORD = "RestPatchCSS";
+    /** "RestPatchCustom" */
+    static public final String RESTPATCHCUSTOM_KEYWORD = "RestPatchCustom";
+    /** "RestPatchHTML" */
+    static public final String RESTPATCHHTML_KEYWORD = "RestPatchHTML";
+    /** "RestPatchImage" */
+    static public final String RESTPATCHIMAGE_KEYWORD = "RestPatchImage";
+    /** "RestPatchJSON" */
+    static public final String RESTPATCHJSON_KEYWORD = "RestPatchJSON";
+    /** "RestPatchScript" */
+    static public final String RESTPATCHSCRIPT_KEYWORD = "RestPatchScript";
+    /** "RestPatchText" */
+    static public final String RESTPATCHTEXT_KEYWORD = "RestPatchText";
+    /** "RestPatchXML" */
+    static public final String RESTPATCHXML_KEYWORD = "RestPatchXML";
+    /** "RestPostBinary" */
+    static public final String RESTPOSTBINARY_KEYWORD = "RestPostBinary";
+    /** "RestPostCSS" */
+    static public final String RESTPOSTCSS_KEYWORD = "RestPostCSS";
+    /** "RestPostCustom" */
+    static public final String RESTPOSTCUSTOM_KEYWORD = "RestPostCustom";
+    /** "RestPostHTML" */
+    static public final String RESTPOSTHTML_KEYWORD = "RestPostHTML";
+    /** "RestPostImage" */
+    static public final String RESTPOSTIMAGE_KEYWORD = "RestPostImage";
+    /** "RestPostJSON" */
+    static public final String RESTPOSTJSON_KEYWORD = "RestPostJSON";
+    /** "RestPostScript" */
+    static public final String RESTPOSTSCRIPT_KEYWORD = "RestPostScript";
+    /** "RestPostText" */
+    static public final String RESTPOSTTEXT_KEYWORD = "RestPostText";
+    /** "RestPostXML" */
+    static public final String RESTPOSTXML_KEYWORD = "RestPostXML";
+    /** "RestPutBinary" */
+    static public final String RESTPUTBINARY_KEYWORD = "RestPutBinary";
+    /** "RestPutCSS" */
+    static public final String RESTPUTCSS_KEYWORD = "RestPutCSS";
+    /** "RestPutCustom" */
+    static public final String RESTPUTCUSTOM_KEYWORD = "RestPutCustom";
+    /** "RestPutHTML" */
+    static public final String RESTPUTHTML_KEYWORD = "RestPutHTML";
+    /** "RestPutImage" */
+    static public final String RESTPUTIMAGE_KEYWORD = "RestPutImage";
+    /** "RestPutJSON" */
+    static public final String RESTPUTJSON_KEYWORD = "RestPutJSON";
+    /** "RestPutScript" */
+    static public final String RESTPUTSCRIPT_KEYWORD = "RestPutScript";
+    /** "RestPutText" */
+    static public final String RESTPUTTEXT_KEYWORD = "RestPutText";
+    /** "RestPutXML" */
+    static public final String RESTPUTXML_KEYWORD = "RestPutXML";
     /** "RestRequest" */
     static public final String RESTREQUEST_KEYWORD = "RestRequest";
     /** "RestStartServiceSession" */
     static public final String RESTSTARTSERVICESESSION_KEYWORD = "RestStartServiceSession";
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restDeleteBinary (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restDeleteBinary.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restDeleteBinary.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTDELETEBINARY_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restDeleteCSS (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restDeleteCSS.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restDeleteCSS.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTDELETECSS_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restDeleteCustom (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restDeleteCustom.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restDeleteCustom.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTDELETECUSTOM_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restDeleteHTML (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restDeleteHTML.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restDeleteHTML.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTDELETEHTML_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restDeleteImage (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restDeleteImage.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restDeleteImage.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTDELETEIMAGE_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restDeleteJSON (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restDeleteJSON.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restDeleteJSON.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTDELETEJSON_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restDeleteScript (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restDeleteScript.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restDeleteScript.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTDELETESCRIPT_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restDeleteText (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restDeleteText.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restDeleteText.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTDELETETEXT_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restDeleteXML (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restDeleteXML.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restDeleteXML.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTDELETEXML_KEYWORD, winname, compname);
+        return cf;
+    }
 
 
     /*********** <pre>
@@ -179,6 +447,798 @@ public class TIDRestFunctions {
         if ( parameters == null ) throw new IllegalArgumentException ( "restGetBinary.parameters = null");
         ComponentFunction cf = new ComponentFunction(RESTGETBINARY_KEYWORD, winname, compname);
         cf.addParameters(parameters);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restGetCSS (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restGetCSS.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restGetCSS.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTGETCSS_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restGetCustom (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restGetCustom.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restGetCustom.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTGETCUSTOM_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restGetHTML (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restGetHTML.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restGetHTML.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTGETHTML_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restGetImage (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restGetImage.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restGetImage.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTGETIMAGE_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restGetJSON (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restGetJSON.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restGetJSON.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTGETJSON_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restGetScript (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restGetScript.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restGetScript.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTGETSCRIPT_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restGetText (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restGetText.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restGetText.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTGETTEXT_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restGetXML (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restGetXML.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restGetXML.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTGETXML_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restHeadBinary (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restHeadBinary.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restHeadBinary.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTHEADBINARY_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restHeadCSS (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restHeadCSS.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restHeadCSS.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTHEADCSS_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restHeadCustom (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restHeadCustom.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restHeadCustom.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTHEADCUSTOM_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restHeadHTML (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restHeadHTML.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restHeadHTML.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTHEADHTML_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restHeadImage (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restHeadImage.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restHeadImage.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTHEADIMAGE_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restHeadJSON (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restHeadJSON.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restHeadJSON.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTHEADJSON_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restHeadScript (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restHeadScript.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restHeadScript.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTHEADSCRIPT_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restHeadText (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restHeadText.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restHeadText.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTHEADTEXT_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restHeadXML (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restHeadXML.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restHeadXML.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTHEADXML_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restPatchBinary (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restPatchBinary.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restPatchBinary.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTPATCHBINARY_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restPatchCSS (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restPatchCSS.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restPatchCSS.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTPATCHCSS_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restPatchCustom (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restPatchCustom.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restPatchCustom.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTPATCHCUSTOM_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restPatchHTML (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restPatchHTML.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restPatchHTML.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTPATCHHTML_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restPatchImage (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restPatchImage.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restPatchImage.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTPATCHIMAGE_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restPatchJSON (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restPatchJSON.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restPatchJSON.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTPATCHJSON_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restPatchScript (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restPatchScript.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restPatchScript.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTPATCHSCRIPT_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restPatchText (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restPatchText.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restPatchText.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTPATCHTEXT_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restPatchXML (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restPatchXML.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restPatchXML.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTPATCHXML_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restPostBinary (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restPostBinary.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restPostBinary.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTPOSTBINARY_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restPostCSS (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restPostCSS.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restPostCSS.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTPOSTCSS_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restPostCustom (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restPostCustom.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restPostCustom.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTPOSTCUSTOM_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restPostHTML (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restPostHTML.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restPostHTML.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTPOSTHTML_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restPostImage (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restPostImage.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restPostImage.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTPOSTIMAGE_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restPostJSON (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restPostJSON.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restPostJSON.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTPOSTJSON_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restPostScript (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restPostScript.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restPostScript.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTPOSTSCRIPT_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restPostText (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restPostText.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restPostText.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTPOSTTEXT_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restPostXML (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restPostXML.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restPostXML.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTPOSTXML_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restPutBinary (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restPutBinary.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restPutBinary.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTPUTBINARY_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restPutCSS (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restPutCSS.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restPutCSS.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTPUTCSS_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restPutCustom (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restPutCustom.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restPutCustom.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTPUTCUSTOM_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restPutHTML (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restPutHTML.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restPutHTML.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTPUTHTML_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restPutImage (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restPutImage.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restPutImage.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTPUTIMAGE_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restPutJSON (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restPutJSON.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restPutJSON.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTPUTJSON_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restPutScript (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restPutScript.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restPutScript.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTPUTSCRIPT_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restPutText (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restPutText.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restPutText.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTPUTTEXT_KEYWORD, winname, compname);
+        return cf;
+    }
+
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param winname  Optional:NO
+            The name of the window to act upon.
+     @param compname  Optional:NO
+            The name of the component to act upon.
+     **********/
+    static public ComponentFunction restPutXML (String winname, String compname) {
+
+        if ( winname == null ) throw new IllegalArgumentException ( "restPutXML.winname = null");
+        if ( compname == null ) throw new IllegalArgumentException ( "restPutXML.compname = null");
+        ComponentFunction cf = new ComponentFunction(RESTPUTXML_KEYWORD, winname, compname);
         return cf;
     }
 
