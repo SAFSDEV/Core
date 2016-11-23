@@ -71,6 +71,204 @@ public class TIDRest extends UIComponent {
 
 
 
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restDeleteBinary( ) {
+        return TIDRestFunctions.restDeleteBinary(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restDeleteBinary(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restDeleteBinary.table = null");
+        table.add( TIDRestFunctions.restDeleteBinary(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restDeleteCSS( ) {
+        return TIDRestFunctions.restDeleteCSS(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restDeleteCSS(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restDeleteCSS.table = null");
+        table.add( TIDRestFunctions.restDeleteCSS(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restDeleteCustom( ) {
+        return TIDRestFunctions.restDeleteCustom(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restDeleteCustom(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restDeleteCustom.table = null");
+        table.add( TIDRestFunctions.restDeleteCustom(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restDeleteHTML( ) {
+        return TIDRestFunctions.restDeleteHTML(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restDeleteHTML(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restDeleteHTML.table = null");
+        table.add( TIDRestFunctions.restDeleteHTML(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restDeleteImage( ) {
+        return TIDRestFunctions.restDeleteImage(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restDeleteImage(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restDeleteImage.table = null");
+        table.add( TIDRestFunctions.restDeleteImage(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restDeleteJSON( ) {
+        return TIDRestFunctions.restDeleteJSON(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restDeleteJSON(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restDeleteJSON.table = null");
+        table.add( TIDRestFunctions.restDeleteJSON(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restDeleteScript( ) {
+        return TIDRestFunctions.restDeleteScript(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restDeleteScript(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restDeleteScript.table = null");
+        table.add( TIDRestFunctions.restDeleteScript(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restDeleteText( ) {
+        return TIDRestFunctions.restDeleteText(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restDeleteText(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restDeleteText.table = null");
+        table.add( TIDRestFunctions.restDeleteText(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restDeleteXML( ) {
+        return TIDRestFunctions.restDeleteXML(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restDeleteXML(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restDeleteXML.table = null");
+        table.add( TIDRestFunctions.restDeleteXML(getWindow().getName(), getName()));
+    }
+
     /*********** <pre>
                     Stop a session for a REST service.
                 
@@ -272,6 +470,974 @@ public class TIDRest extends UIComponent {
         if ( table == null ) throw new IllegalArgumentException ( "restGetBinary.table = null");
         if ( parameters == null ) throw new IllegalArgumentException ( "restGetBinary.parameters = null");
         table.add( TIDRestFunctions.restGetBinary(getWindow().getName(), getName(), parameters));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restGetCSS( ) {
+        return TIDRestFunctions.restGetCSS(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restGetCSS(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restGetCSS.table = null");
+        table.add( TIDRestFunctions.restGetCSS(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restGetCustom( ) {
+        return TIDRestFunctions.restGetCustom(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restGetCustom(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restGetCustom.table = null");
+        table.add( TIDRestFunctions.restGetCustom(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restGetHTML( ) {
+        return TIDRestFunctions.restGetHTML(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restGetHTML(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restGetHTML.table = null");
+        table.add( TIDRestFunctions.restGetHTML(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restGetImage( ) {
+        return TIDRestFunctions.restGetImage(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restGetImage(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restGetImage.table = null");
+        table.add( TIDRestFunctions.restGetImage(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restGetJSON( ) {
+        return TIDRestFunctions.restGetJSON(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restGetJSON(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restGetJSON.table = null");
+        table.add( TIDRestFunctions.restGetJSON(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restGetScript( ) {
+        return TIDRestFunctions.restGetScript(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restGetScript(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restGetScript.table = null");
+        table.add( TIDRestFunctions.restGetScript(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restGetText( ) {
+        return TIDRestFunctions.restGetText(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restGetText(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restGetText.table = null");
+        table.add( TIDRestFunctions.restGetText(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restGetXML( ) {
+        return TIDRestFunctions.restGetXML(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restGetXML(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restGetXML.table = null");
+        table.add( TIDRestFunctions.restGetXML(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restHeadBinary( ) {
+        return TIDRestFunctions.restHeadBinary(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restHeadBinary(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restHeadBinary.table = null");
+        table.add( TIDRestFunctions.restHeadBinary(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restHeadCSS( ) {
+        return TIDRestFunctions.restHeadCSS(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restHeadCSS(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restHeadCSS.table = null");
+        table.add( TIDRestFunctions.restHeadCSS(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restHeadCustom( ) {
+        return TIDRestFunctions.restHeadCustom(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restHeadCustom(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restHeadCustom.table = null");
+        table.add( TIDRestFunctions.restHeadCustom(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restHeadHTML( ) {
+        return TIDRestFunctions.restHeadHTML(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restHeadHTML(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restHeadHTML.table = null");
+        table.add( TIDRestFunctions.restHeadHTML(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restHeadImage( ) {
+        return TIDRestFunctions.restHeadImage(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restHeadImage(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restHeadImage.table = null");
+        table.add( TIDRestFunctions.restHeadImage(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restHeadJSON( ) {
+        return TIDRestFunctions.restHeadJSON(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restHeadJSON(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restHeadJSON.table = null");
+        table.add( TIDRestFunctions.restHeadJSON(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restHeadScript( ) {
+        return TIDRestFunctions.restHeadScript(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restHeadScript(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restHeadScript.table = null");
+        table.add( TIDRestFunctions.restHeadScript(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restHeadText( ) {
+        return TIDRestFunctions.restHeadText(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restHeadText(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restHeadText.table = null");
+        table.add( TIDRestFunctions.restHeadText(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restHeadXML( ) {
+        return TIDRestFunctions.restHeadXML(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restHeadXML(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restHeadXML.table = null");
+        table.add( TIDRestFunctions.restHeadXML(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restPatchBinary( ) {
+        return TIDRestFunctions.restPatchBinary(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restPatchBinary(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restPatchBinary.table = null");
+        table.add( TIDRestFunctions.restPatchBinary(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restPatchCSS( ) {
+        return TIDRestFunctions.restPatchCSS(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restPatchCSS(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restPatchCSS.table = null");
+        table.add( TIDRestFunctions.restPatchCSS(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restPatchCustom( ) {
+        return TIDRestFunctions.restPatchCustom(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restPatchCustom(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restPatchCustom.table = null");
+        table.add( TIDRestFunctions.restPatchCustom(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restPatchHTML( ) {
+        return TIDRestFunctions.restPatchHTML(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restPatchHTML(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restPatchHTML.table = null");
+        table.add( TIDRestFunctions.restPatchHTML(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restPatchImage( ) {
+        return TIDRestFunctions.restPatchImage(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restPatchImage(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restPatchImage.table = null");
+        table.add( TIDRestFunctions.restPatchImage(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restPatchJSON( ) {
+        return TIDRestFunctions.restPatchJSON(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restPatchJSON(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restPatchJSON.table = null");
+        table.add( TIDRestFunctions.restPatchJSON(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restPatchScript( ) {
+        return TIDRestFunctions.restPatchScript(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restPatchScript(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restPatchScript.table = null");
+        table.add( TIDRestFunctions.restPatchScript(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restPatchText( ) {
+        return TIDRestFunctions.restPatchText(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restPatchText(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restPatchText.table = null");
+        table.add( TIDRestFunctions.restPatchText(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restPatchXML( ) {
+        return TIDRestFunctions.restPatchXML(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restPatchXML(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restPatchXML.table = null");
+        table.add( TIDRestFunctions.restPatchXML(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restPostBinary( ) {
+        return TIDRestFunctions.restPostBinary(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restPostBinary(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restPostBinary.table = null");
+        table.add( TIDRestFunctions.restPostBinary(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restPostCSS( ) {
+        return TIDRestFunctions.restPostCSS(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restPostCSS(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restPostCSS.table = null");
+        table.add( TIDRestFunctions.restPostCSS(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restPostCustom( ) {
+        return TIDRestFunctions.restPostCustom(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restPostCustom(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restPostCustom.table = null");
+        table.add( TIDRestFunctions.restPostCustom(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restPostHTML( ) {
+        return TIDRestFunctions.restPostHTML(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restPostHTML(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restPostHTML.table = null");
+        table.add( TIDRestFunctions.restPostHTML(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restPostImage( ) {
+        return TIDRestFunctions.restPostImage(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restPostImage(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restPostImage.table = null");
+        table.add( TIDRestFunctions.restPostImage(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restPostJSON( ) {
+        return TIDRestFunctions.restPostJSON(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restPostJSON(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restPostJSON.table = null");
+        table.add( TIDRestFunctions.restPostJSON(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restPostScript( ) {
+        return TIDRestFunctions.restPostScript(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restPostScript(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restPostScript.table = null");
+        table.add( TIDRestFunctions.restPostScript(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restPostText( ) {
+        return TIDRestFunctions.restPostText(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restPostText(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restPostText.table = null");
+        table.add( TIDRestFunctions.restPostText(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restPostXML( ) {
+        return TIDRestFunctions.restPostXML(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restPostXML(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restPostXML.table = null");
+        table.add( TIDRestFunctions.restPostXML(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restPutBinary( ) {
+        return TIDRestFunctions.restPutBinary(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restPutBinary(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restPutBinary.table = null");
+        table.add( TIDRestFunctions.restPutBinary(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restPutCSS( ) {
+        return TIDRestFunctions.restPutCSS(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restPutCSS(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restPutCSS.table = null");
+        table.add( TIDRestFunctions.restPutCSS(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restPutCustom( ) {
+        return TIDRestFunctions.restPutCustom(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restPutCustom(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restPutCustom.table = null");
+        table.add( TIDRestFunctions.restPutCustom(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restPutHTML( ) {
+        return TIDRestFunctions.restPutHTML(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restPutHTML(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restPutHTML.table = null");
+        table.add( TIDRestFunctions.restPutHTML(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restPutImage( ) {
+        return TIDRestFunctions.restPutImage(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restPutImage(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restPutImage.table = null");
+        table.add( TIDRestFunctions.restPutImage(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restPutJSON( ) {
+        return TIDRestFunctions.restPutJSON(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restPutJSON(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restPutJSON.table = null");
+        table.add( TIDRestFunctions.restPutJSON(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restPutScript( ) {
+        return TIDRestFunctions.restPutScript(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restPutScript(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restPutScript.table = null");
+        table.add( TIDRestFunctions.restPutScript(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restPutText( ) {
+        return TIDRestFunctions.restPutText(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restPutText(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restPutText.table = null");
+        table.add( TIDRestFunctions.restPutText(getWindow().getName(), getName()));
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     **********/
+    public ComponentFunction restPutXML( ) {
+        return TIDRestFunctions.restPutXML(getWindow().getName(), getName());
+    }
+
+    /*********** <pre>    </pre>    Supporting Engines:
+    <P/><UL>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     **********/
+    public void restPutXML(StepTestTable table ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restPutXML.table = null");
+        table.add( TIDRestFunctions.restPutXML(getWindow().getName(), getName()));
     }
 
     /*********** <pre>

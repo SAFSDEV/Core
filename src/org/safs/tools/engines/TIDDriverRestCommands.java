@@ -18,7 +18,7 @@ import org.safs.StringUtils;
 import org.safs.TestRecordHelper;
 import org.safs.logging.AbstractLogFacility;
 import org.safs.logging.LogUtilities;
-import org.safs.model.commands.DCDriverRestCommands;
+import org.safs.model.commands.DDDriverRestCommands;
 import org.safs.text.FAILStrings;
 import org.safs.tools.drivers.DriverConstant;
 import org.safs.tools.drivers.DriverInterface;
@@ -26,8 +26,8 @@ import org.safs.tools.drivers.DriverInterface;
 public class TIDDriverRestCommands extends GenericEngine{
 	/** "SAFS/REST" */
 	public static final String ENGINE_NAME = "SAFS/TIDDriverRestCommands";
-	/** "TIDREST: " */
-	private static final String DEBUG_PREFIX = "TIDREST: ";
+	/** "TIDDRIVERREST: " */
+	private static final String DEBUG_PREFIX = "TIDDRIVERREST: ";
 	
     /** The special Processor for handling Driver Command keywords.*/
     protected DriverCommand dc = null;
@@ -63,7 +63,7 @@ public class TIDDriverRestCommands extends GenericEngine{
 			dc.setLogUtilities(log);
 
 		}catch(Exception x){
-			IndependantLog.error("TIDDriverLogCommands requires a valid DriverInterface object for initialization!\n"+ x.getMessage());
+			IndependantLog.error(DEBUG_PREFIX+" requires a valid DriverInterface object for initialization!\n"+ x.getMessage());
 		}
 	}
 	
@@ -75,22 +75,22 @@ public class TIDDriverRestCommands extends GenericEngine{
 		    testRecordData.setSTAFHelper(staf);
 		    resetTRD = true;
 		}
-
-		if(dc==null){
-			dc = new RESTDriverCommand();
-		}
-		if(dc.getLogUtilities()==null){
-			if(staf==null){
-				IndependantLog.debug(DEBUG_PREFIX+"STAFHelper is null, try to get the STAFHelper from the test record.");
-				staf = testRecordData.getSTAFHelper();
-			}
-			if(staf!=null){
-				log = new LogUtilities(staf);
-				dc.setLogUtilities(log);
-			}else{
-				IndependantLog.warn(DEBUG_PREFIX+"STAFHelper is null, cannot initialize the IndependantLog Utilities!");
-			}
-		}
+//The following code may not be necessary.
+//		if(dc==null){
+//			dc = new RESTDriverCommand();
+//		}
+//		if(dc.getLogUtilities()==null){
+//			if(staf==null){
+//				IndependantLog.debug(DEBUG_PREFIX+"STAFHelper is null, try to get the STAFHelper from the test record.");
+//				staf = testRecordData.getSTAFHelper();
+//			}
+//			if(staf!=null){
+//				log = new LogUtilities(staf);
+//				dc.setLogUtilities(log);
+//			}else{
+//				IndependantLog.warn(DEBUG_PREFIX+"STAFHelper is null, cannot initialize the IndependantLog Utilities!");
+//			}
+//		}
 		
 		dc.setTestRecordData(testRecordData);
 		dc.process();
@@ -114,11 +114,11 @@ public class TIDDriverRestCommands extends GenericEngine{
 		}
 		
 		protected void commandProcess() {
-			if(DCDriverRestCommands.RESTDELETERESPONSE_KEYWORD.equalsIgnoreCase(command)){
+			if(DDDriverRestCommands.RESTDELETERESPONSE_KEYWORD.equalsIgnoreCase(command)){
 				deleteResponse();
-			}else if(DCDriverRestCommands.RESTDELETERESPONSESTORE_KEYWORD.equalsIgnoreCase(command)){
+			}else if(DDDriverRestCommands.RESTDELETERESPONSESTORE_KEYWORD.equalsIgnoreCase(command)){
 				deleteResponseStore();
-			}else if(DCDriverRestCommands.RESTSTORERESPONSE_KEYWORD.equalsIgnoreCase(command)){
+			}else if(DDDriverRestCommands.RESTSTORERESPONSE_KEYWORD.equalsIgnoreCase(command)){
 				storeResponse();
 			}
 		}
