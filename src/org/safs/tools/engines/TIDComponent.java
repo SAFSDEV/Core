@@ -29,6 +29,7 @@ import org.safs.model.commands.GenericMasterFunctions;
 import org.safs.model.commands.TIDRestFunctions;
 import org.safs.rest.REST;
 import org.safs.rest.service.Headers;
+import org.safs.rest.service.Response;
 import org.safs.rest.service.Service;
 import org.safs.text.FAILKEYS;
 import org.safs.text.FAILStrings;
@@ -2083,14 +2084,115 @@ public class TIDComponent extends GenericEngine {
 
 				if ( TIDRestFunctions.RESTENDSERVICESESSION_KEYWORD.equalsIgnoreCase(action)) {
 					endServiceSession();
-				} else if ( TIDRestFunctions.RESTGETBINARY_KEYWORD.equalsIgnoreCase(action) ) {
+				}
+				else if ( TIDRestFunctions.RESTDELETEBINARY_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.DELETE_METHOD, Headers.BINARY_TYPE);
+				} else if ( TIDRestFunctions.RESTDELETECSS_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.DELETE_METHOD, Headers.CSS_TYPE);
+				} else if ( TIDRestFunctions.RESTDELETEHTML_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.DELETE_METHOD, Headers.HTML_TYPE);
+				} else if ( TIDRestFunctions.RESTDELETEIMAGE_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.DELETE_METHOD, Headers.IMAGE_TYPE);
+				} else if ( TIDRestFunctions.RESTDELETEJSON_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.DELETE_METHOD, Headers.JSON_TYPE);
+				} else if ( TIDRestFunctions.RESTDELETESCRIPT_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.DELETE_METHOD, Headers.SCRIPT_TYPE);
+				} else if ( TIDRestFunctions.RESTDELETETEXT_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.DELETE_METHOD, Headers.TEXT_TYPE);
+				} else if ( TIDRestFunctions.RESTDELETEXML_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.DELETE_METHOD, Headers.XML_TYPE);
+				}
+				else if ( TIDRestFunctions.RESTGETBINARY_KEYWORD.equalsIgnoreCase(action) ) {
 					request(REST.GET_METHOD, Headers.BINARY_TYPE);
-				} else if ( TIDRestFunctions.RESTREQUEST_KEYWORD.equalsIgnoreCase(action) ) {
+				} else if ( TIDRestFunctions.RESTGETCSS_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.GET_METHOD, Headers.CSS_TYPE);
+				} else if ( TIDRestFunctions.RESTGETHTML_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.GET_METHOD, Headers.HTML_TYPE);
+				} else if ( TIDRestFunctions.RESTGETIMAGE_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.GET_METHOD, Headers.IMAGE_TYPE);
+				} else if ( TIDRestFunctions.RESTGETJSON_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.GET_METHOD, Headers.JSON_TYPE);
+				} else if ( TIDRestFunctions.RESTGETSCRIPT_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.GET_METHOD, Headers.SCRIPT_TYPE);
+				} else if ( TIDRestFunctions.RESTGETTEXT_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.GET_METHOD, Headers.TEXT_TYPE);
+				} else if ( TIDRestFunctions.RESTGETXML_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.GET_METHOD, Headers.XML_TYPE);
+				}
+				else if ( TIDRestFunctions.RESTHEADBINARY_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.HEAD_METHOD, Headers.BINARY_TYPE);
+				} else if ( TIDRestFunctions.RESTHEADCSS_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.HEAD_METHOD, Headers.CSS_TYPE);
+				} else if ( TIDRestFunctions.RESTHEADHTML_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.HEAD_METHOD, Headers.HTML_TYPE);
+				} else if ( TIDRestFunctions.RESTHEADIMAGE_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.HEAD_METHOD, Headers.IMAGE_TYPE);
+				} else if ( TIDRestFunctions.RESTHEADJSON_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.HEAD_METHOD, Headers.JSON_TYPE);
+				} else if ( TIDRestFunctions.RESTHEADSCRIPT_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.HEAD_METHOD, Headers.SCRIPT_TYPE);
+				} else if ( TIDRestFunctions.RESTHEADTEXT_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.HEAD_METHOD, Headers.TEXT_TYPE);
+				} else if ( TIDRestFunctions.RESTHEADXML_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.HEAD_METHOD, Headers.XML_TYPE);
+				}
+				else if ( TIDRestFunctions.RESTPATCHBINARY_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.PATCH_METHOD, Headers.BINARY_TYPE);
+				} else if ( TIDRestFunctions.RESTPATCHCSS_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.PATCH_METHOD, Headers.CSS_TYPE);
+				} else if ( TIDRestFunctions.RESTPATCHHTML_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.PATCH_METHOD, Headers.HTML_TYPE);
+				} else if ( TIDRestFunctions.RESTPATCHIMAGE_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.PATCH_METHOD, Headers.IMAGE_TYPE);
+				} else if ( TIDRestFunctions.RESTPATCHJSON_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.PATCH_METHOD, Headers.JSON_TYPE);
+				} else if ( TIDRestFunctions.RESTPATCHSCRIPT_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.PATCH_METHOD, Headers.SCRIPT_TYPE);
+				} else if ( TIDRestFunctions.RESTPATCHTEXT_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.PATCH_METHOD, Headers.TEXT_TYPE);
+				} else if ( TIDRestFunctions.RESTPATCHXML_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.PATCH_METHOD, Headers.XML_TYPE);
+				}
+				else if ( TIDRestFunctions.RESTPOSTBINARY_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.POST_METHOD, Headers.BINARY_TYPE);
+				} else if ( TIDRestFunctions.RESTPOSTCSS_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.POST_METHOD, Headers.CSS_TYPE);
+				} else if ( TIDRestFunctions.RESTPOSTHTML_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.POST_METHOD, Headers.HTML_TYPE);
+				} else if ( TIDRestFunctions.RESTPOSTIMAGE_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.POST_METHOD, Headers.IMAGE_TYPE);
+				} else if ( TIDRestFunctions.RESTPOSTJSON_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.POST_METHOD, Headers.JSON_TYPE);
+				} else if ( TIDRestFunctions.RESTPOSTSCRIPT_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.POST_METHOD, Headers.SCRIPT_TYPE);
+				} else if ( TIDRestFunctions.RESTPOSTTEXT_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.POST_METHOD, Headers.TEXT_TYPE);
+				} else if ( TIDRestFunctions.RESTPOSTXML_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.POST_METHOD, Headers.XML_TYPE);
+				}
+				else if ( TIDRestFunctions.RESTPUTBINARY_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.PUT_METHOD, Headers.BINARY_TYPE);
+				} else if ( TIDRestFunctions.RESTPUTCSS_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.PUT_METHOD, Headers.CSS_TYPE);
+				} else if ( TIDRestFunctions.RESTPUTHTML_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.PUT_METHOD, Headers.HTML_TYPE);
+				} else if ( TIDRestFunctions.RESTPUTIMAGE_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.PUT_METHOD, Headers.IMAGE_TYPE);
+				} else if ( TIDRestFunctions.RESTPUTJSON_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.PUT_METHOD, Headers.JSON_TYPE);
+				} else if ( TIDRestFunctions.RESTPUTSCRIPT_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.PUT_METHOD, Headers.SCRIPT_TYPE);
+				} else if ( TIDRestFunctions.RESTPUTTEXT_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.PUT_METHOD, Headers.TEXT_TYPE);
+				} else if ( TIDRestFunctions.RESTPUTXML_KEYWORD.equalsIgnoreCase(action) ) {
+					request(REST.PUT_METHOD, Headers.XML_TYPE);
+				}
+				else if ( TIDRestFunctions.RESTREQUEST_KEYWORD.equalsIgnoreCase(action) ) {
 					httpRequest();
 				} else if ( TIDRestFunctions.RESTSTARTSERVICESESSION_KEYWORD.equalsIgnoreCase(action) ) {
 					startServiceSession();
 				} else {
-					throw new SAFSException("Not supported yet.", SAFSException.CODE_ACTION_NOT_SUPPORTED);
+					throw new SAFSException("The action "+action+" is NOT supported in RESTComponent.", SAFSException.CODE_ACTION_NOT_SUPPORTED);
 				}
 
 			}catch( SAFSException se ) {
@@ -2203,6 +2305,7 @@ public class TIDComponent extends GenericEngine {
 		protected void request(String method, String type){
 			String message = action;
 			String description = action;
+			Response response = null;
 			
 			if (sessionID==null) {
 				//It is not really a parameter, it is the field #3 in the test record.
@@ -2212,16 +2315,15 @@ public class TIDComponent extends GenericEngine {
 			
 			try {
 				//TODO implement the details
+				handleResponse(response);
 				logMessage( message, description, AbstractLogFacility.STATUS_REPORT_TEST_PASSES);
 				setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
-				return;
 			}catch(Exception e){
 				String exceptionMsg = StringUtils.debugmsg(e);
 				message = FAILStrings.convert(FAILStrings.GENERIC_ERROR, 
 						"*** ERROR *** "+exceptionMsg, exceptionMsg);
 				standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
 				setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
-				return;
 			}
 		}
 		
@@ -2232,6 +2334,7 @@ public class TIDComponent extends GenericEngine {
 		protected void httpRequest(){
 			String message = action;
 			String description = action;
+			Response response = null;
 			
 			if (sessionID==null) {
 				//It is not really a parameter, it is the field #3 in the test record.
@@ -2241,18 +2344,29 @@ public class TIDComponent extends GenericEngine {
 			
 			try { 
 				//TODO implement the details
+				handleResponse(response);
 				logMessage( message, description, AbstractLogFacility.STATUS_REPORT_TEST_PASSES);
 				setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
-				return;
 			}catch(Exception e){
 				String exceptionMsg = StringUtils.debugmsg(e);
 				message = FAILStrings.convert(FAILStrings.GENERIC_ERROR, 
 						"*** ERROR *** "+exceptionMsg, exceptionMsg);
 				standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
 				setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
-				return;
 			}
 		}
+		
+		/**
+		 * TODO
+		 * Write the details of response and request into the debug log.<br>
+		 * Store the Response object into a Map with a generated ID, which
+		 * will be set to the testRecordData object.<br>
+		 * @param response Response, the response returned from invocation of a rest service.
+		 */
+		protected void handleResponse(Response response){
+			
+		}
+		
 		protected void startServiceSession(){
 			String message = action;
 			String description = action;
