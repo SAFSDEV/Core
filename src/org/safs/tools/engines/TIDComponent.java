@@ -277,19 +277,18 @@ public class TIDComponent extends GenericEngine {
 		}
 		Collection<String> params = interpretFields(testRecordData);
 		if(params instanceof Collection){
-			String flag=null;
+			boolean restful = false;
 			try {
-				flag = testRecordData.getWindowGuiId();
+				restful = isRESTFunction(testRecordData.getWindowGuiId());
 			} catch (SAFSException e) {
-
 			}
-			if(flag==null){
+			if(!restful){
 				try {
-					flag = testRecordData.getWindowName();
+					restful = isRESTFunction(testRecordData.getWindowName());
 				} catch (SAFSException e) {
 				}
 			}
-			if(isRESTFunction(flag)){
+			if(restful){
 				restCF.setTestRecordData(testRecordData);			
 				restCF.setParams(params);	
 				restCF.setIterator(params.iterator());
@@ -2041,7 +2040,7 @@ public class TIDComponent extends GenericEngine {
 		@SuppressWarnings("unchecked")
 		@Override
 		public void process(){
-			if(action==null) updateFromTestRecordData();
+			updateFromTestRecordData();
 
 			if(action==null){
 				componentFailureMessage(FAILStrings.text(FAILKEYS.ACTION_NOT_VALID)+":"+testRecordData.getInputRecord());
