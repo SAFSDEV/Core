@@ -33,16 +33,20 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.routing.DefaultProxyRoutePlanner;
 import org.apache.hc.client5.http.impl.sync.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.sync.HttpClients;
 import org.apache.hc.client5.http.methods.CloseableHttpResponse;
 import org.apache.hc.client5.http.methods.RequestBuilder;
+import org.apache.hc.client5.http.routing.HttpRoutePlanner;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.http.ProtocolVersion;
 import org.apache.hc.core5.http.entity.ContentType;
 import org.apache.hc.core5.http.entity.EntityUtils;
 import org.apache.hc.core5.http.entity.StringEntity;
+import org.safs.IndependantLog;
 
 // TODO: can this be moved beside HttpClient?  If so, throw a better exception than WebServerTestingFrameworkException.
 public class HttpClient5Adapter extends HttpClientPOJOAdapter {
@@ -114,8 +118,15 @@ public class HttpClient5Adapter extends HttpClientPOJOAdapter {
                                           new StringEntity(requestBody);
             builder = builder.setEntity(entity);
         }
-
-        final CloseableHttpClient httpclient = HttpClients.createDefault();
+        
+        HttpRoutePlanner proxy = getProxyPlanner();
+        CloseableHttpClient httpclient = null;
+        if(proxy==null){
+        	httpclient = HttpClients.createDefault();
+        }else{
+        	httpclient = HttpClients.custom().setRoutePlanner(proxy).build();
+        }
+        
         final CloseableHttpResponse response = httpclient.execute(builder.build());
 
         final HttpEntity entity = response.getEntity();
@@ -135,5 +146,55 @@ public class HttpClient5Adapter extends HttpClientPOJOAdapter {
         ret.put("contentType", contentType);
 
         return ret ;
+    }
+    
+    private HttpRoutePlanner getProxyPlanner(){
+    	if(proxyServerURL==null){
+    		return null;
+    	}
+    	
+    	IndependantLog.debug("getProxyPlanner(): parsing proxy URL "+proxyServerURL);
+    	
+    	//break proxyServerURL into "serverName", "port", "username", "password" etc.
+    	//http://user:password@server:port
+    	String HTTP = "http://";
+    	String AT = "@";
+    	String COLON = ":";
+    	int httpIndex = proxyServerURL.indexOf(HTTP);
+    	int atIndex = proxyServerURL.indexOf(AT);
+    	
+    	String serverPort = null;
+    	String proxyServer = null;
+    	int proxyPort = 80;
+    	
+    	if(atIndex>-1){
+    		serverPort = proxyServerURL.substring(atIndex+AT.length());
+    	}else{
+    		if(httpIndex>-1){
+    			serverPort = proxyServerURL.substring(httpIndex+HTTP.length());
+    		}else{
+    			serverPort = proxyServerURL;
+    		}
+    	}
+    	
+    	if(serverPort!=null){
+    		String[] serverPortArray = serverPort.split(COLON);
+    		try{
+    			proxyServer = serverPortArray[0];
+    		}catch(Exception e){
+    			IndependantLog.warn("Failed to get proxy server due to "+e.getMessage());
+    		}
+    		try{
+    			proxyPort = Integer.parseInt(serverPortArray[1]);
+    		}catch(Exception e){
+    			IndependantLog.warn("Failed to get proxy port due to "+e.getMessage());
+    		}    		
+    	}
+    	
+    	if(proxyServer==null){
+    		return null;
+    	}
+    	HttpHost proxy = new HttpHost(proxyServer, proxyPort);
+    	return new DefaultProxyRoutePlanner(proxy);    		
     }
 }
