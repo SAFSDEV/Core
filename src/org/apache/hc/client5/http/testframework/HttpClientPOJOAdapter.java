@@ -46,9 +46,14 @@ public abstract class HttpClientPOJOAdapter {
     public static final String TIMEOUT = "timeout";
     public static final String USERID = "userid";
     
+    protected String proxyServerURL = null;
     
     public abstract Map<String, Object> execute(String defaultURI, Map<String, Object> request) throws Exception;
 
+    public void setProxyServerURL(String proxyServerURL){
+    	this.proxyServerURL = proxyServerURL;
+    }
+    
     public Map<String, Object> modifyRequest(final Map<String, Object> request) {
         return request;
     };

@@ -199,6 +199,7 @@ public class Service{
 			if (clientAdapterClassName == null) {
 				// use HttpClient5 by default
 				clientAdapter = new HttpClient5Adapter();
+				((HttpClient5Adapter) clientAdapter).setProxyServerURL(getProxyServerURL());
 			} else {
 				Class<?> clazz = Class.forName(clientAdapterClassName);
 				clientAdapter = clazz.newInstance();

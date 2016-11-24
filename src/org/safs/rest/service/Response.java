@@ -145,5 +145,41 @@ public class Response {
 	public void set_request(Request _request) {
 		this._request = _request;
 	}
+	
+	/**
+	 * @return String, the response information returned from rest service.
+	 */
+	public String getResponseInfo(){
+		return get_status_code() +":"+ get_status_line() +"\n"+
+				get_reason_phrase() +"\n"+
+				get_headers() +"\n"+
+				"Message Body:\n"+
+				get_message_body()+"\n"+
+				"Entity Length: "+ get_entity_length() +"\n"+
+				"Entity Body:\n"+ 
+				get_entity_body().toString()
+				;  
+	}
+
+	/**
+	 * @return String, the original request information.
+	 */
+	public String getRequestInfo(){
+		Request r = get_request();
+		if(r==null) return null;
+		return r.get_request_method() +" : "+ r.get_request_uri() +"\n"+
+			   r.get_headers() +"\n"+
+			   "Message Body:\n"+
+			   r.get_message_body()+"\n";
+	}
+
+	/**
+	 * This is the one to call for ALL information AFTER the REQUEST has been returned in the RESPONSE
+	 * @return String, the original request information and the response information returned from rest service.
+	 */
+	public String toString(){
+		return "\n========\nRequest: " + getRequestInfo() +"\n"+
+				"=========\nResponse: "+ getResponseInfo();                
+	}
     
 }
