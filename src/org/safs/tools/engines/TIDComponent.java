@@ -9,10 +9,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.safs.ComponentFunction;
-import org.safs.IndependantLog;
 import org.safs.Log;
 import org.safs.RSA;
 import org.safs.SAFSException;
@@ -236,7 +237,10 @@ public class TIDComponent extends GenericEngine {
 	
 	/** The special Processor for handling REST Component Function keywords.*/
     protected ComponentFunction restCF = null;
-	
+    
+    /** The map holding the response object returned from a rest service. */
+    private static Map<String, Response> responseMap = new HashMap<String, Response>();
+    
 	/**
 	 * Constructor for TIDComponent
 	 */
@@ -261,6 +265,7 @@ public class TIDComponent extends GenericEngine {
 	public void launchInterface(Object configInfo){
 		super.launchInterface(configInfo);
 		log = new LogUtilities(this.staf);
+		
 		cf = new CFComponent();
 		cf.setLogUtilities(log);
 		
@@ -376,6 +381,32 @@ public class TIDComponent extends GenericEngine {
 	    return params;
 	}
 	
+	
+	/**
+	 * @param responseID String, the unique ID to identify the rest service Response.
+	 * @return Response, a cached Response returned from a rest service.
+	 */
+	public static synchronized Response getResponseMapValue(String responseID) {
+		return responseMap.get(responseID);
+	}
+
+	/**
+	 * @param responseID String, the unique ID to identify the rest service Response.
+	 * @param response Response, a Response object to be cached into a map.
+	 * @return response Response, the previous Response stored in the map with the same responseID; 
+	 *                            or null if no Response was previously stored with the key responseID.
+	 */
+	public static synchronized Response addToResponseMap(String responseID, Response response) {
+		if(responseMap.containsKey(responseID)){
+			Log.warn("responseMap has alreday contained ID "+responseID);
+		}
+		if(responseMap.containsValue(response)){
+			Log.warn("responseMap has alreday contained Response "+ response);
+		}
+		
+		return responseMap.put(responseID, response);
+	}
+
 	/******************************************************
 	 * Local CFComponent 
 	 * @author canagl
@@ -2050,20 +2081,20 @@ public class TIDComponent extends GenericEngine {
 				return;
 			}
 			
-			String debugmsg = "TIDRestFunctions$RESTComponent.process() "+ action +": ";
+			String debugmsg = "TIDRestFunctions$RESTComponent.process(): ";
 			
 			testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
 			try{
 				restFlag = testRecordData.getWindowGuiId();
 			}catch(SAFSException e){
-				IndependantLog.warn(debugmsg + "window '"+windowName+"' recognition string is missing or invalid for restFlag.");
+				Log.warn(debugmsg + "window '"+windowName+"' recognition string is missing or invalid for restFlag.");
 			}
 			if(restFlag==null) restFlag = windowName;
 			
 			try{
 				sessionID = testRecordData.getCompGuiId();
 			}catch(SAFSException e){
-				IndependantLog.warn(debugmsg + "component '"+compName+"' recognition string is missing or invalid for sessionID.");
+				Log.warn(debugmsg + "component '"+compName+"' recognition string is missing or invalid for sessionID.");
 			}
 
 			try {
@@ -2079,120 +2110,120 @@ public class TIDComponent extends GenericEngine {
 				}
 				if (params != null) {
 					iterator = params.iterator();
-					IndependantLog.info(debugmsg + " win: "+ windowName +"; comp: "+ compName+"; with params: "+params);
+					Log.info(debugmsg + "action: "+action+" win: "+ windowName +"; comp: "+ compName+"; with params: "+params);
 				} else{
-					IndependantLog.info(debugmsg + " win: "+ windowName +"; comp: "+ compName+" without parameters.");
+					Log.info(debugmsg +  "action: "+action+" win: "+ windowName +"; comp: "+ compName+" without parameters.");
 				}
 
 				if ( TIDRestFunctions.RESTENDSERVICESESSION_KEYWORD.equalsIgnoreCase(action)) {
-					endServiceSession();
+					actionEndServiceSession();
 				}
 				else if ( TIDRestFunctions.RESTDELETEBINARY_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.DELETE_METHOD, Headers.BINARY_TYPE);
+					actionRequest(REST.DELETE_METHOD, Headers.BINARY_TYPE);
 				} else if ( TIDRestFunctions.RESTDELETECSS_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.DELETE_METHOD, Headers.CSS_TYPE);
+					actionRequest(REST.DELETE_METHOD, Headers.CSS_TYPE);
 				} else if ( TIDRestFunctions.RESTDELETEHTML_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.DELETE_METHOD, Headers.HTML_TYPE);
+					actionRequest(REST.DELETE_METHOD, Headers.HTML_TYPE);
 				} else if ( TIDRestFunctions.RESTDELETEIMAGE_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.DELETE_METHOD, Headers.IMAGE_TYPE);
+					actionRequest(REST.DELETE_METHOD, Headers.IMAGE_TYPE);
 				} else if ( TIDRestFunctions.RESTDELETEJSON_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.DELETE_METHOD, Headers.JSON_TYPE);
+					actionRequest(REST.DELETE_METHOD, Headers.JSON_TYPE);
 				} else if ( TIDRestFunctions.RESTDELETESCRIPT_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.DELETE_METHOD, Headers.SCRIPT_TYPE);
+					actionRequest(REST.DELETE_METHOD, Headers.SCRIPT_TYPE);
 				} else if ( TIDRestFunctions.RESTDELETETEXT_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.DELETE_METHOD, Headers.TEXT_TYPE);
+					actionRequest(REST.DELETE_METHOD, Headers.TEXT_TYPE);
 				} else if ( TIDRestFunctions.RESTDELETEXML_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.DELETE_METHOD, Headers.XML_TYPE);
+					actionRequest(REST.DELETE_METHOD, Headers.XML_TYPE);
 				}
 				else if ( TIDRestFunctions.RESTGETBINARY_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.GET_METHOD, Headers.BINARY_TYPE);
+					actionRequest(REST.GET_METHOD, Headers.BINARY_TYPE);
 				} else if ( TIDRestFunctions.RESTGETCSS_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.GET_METHOD, Headers.CSS_TYPE);
+					actionRequest(REST.GET_METHOD, Headers.CSS_TYPE);
 				} else if ( TIDRestFunctions.RESTGETHTML_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.GET_METHOD, Headers.HTML_TYPE);
+					actionRequest(REST.GET_METHOD, Headers.HTML_TYPE);
 				} else if ( TIDRestFunctions.RESTGETIMAGE_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.GET_METHOD, Headers.IMAGE_TYPE);
+					actionRequest(REST.GET_METHOD, Headers.IMAGE_TYPE);
 				} else if ( TIDRestFunctions.RESTGETJSON_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.GET_METHOD, Headers.JSON_TYPE);
+					actionRequest(REST.GET_METHOD, Headers.JSON_TYPE);
 				} else if ( TIDRestFunctions.RESTGETSCRIPT_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.GET_METHOD, Headers.SCRIPT_TYPE);
+					actionRequest(REST.GET_METHOD, Headers.SCRIPT_TYPE);
 				} else if ( TIDRestFunctions.RESTGETTEXT_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.GET_METHOD, Headers.TEXT_TYPE);
+					actionRequest(REST.GET_METHOD, Headers.TEXT_TYPE);
 				} else if ( TIDRestFunctions.RESTGETXML_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.GET_METHOD, Headers.XML_TYPE);
+					actionRequest(REST.GET_METHOD, Headers.XML_TYPE);
 				}
 				else if ( TIDRestFunctions.RESTHEADBINARY_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.HEAD_METHOD, Headers.BINARY_TYPE);
+					actionRequest(REST.HEAD_METHOD, Headers.BINARY_TYPE);
 				} else if ( TIDRestFunctions.RESTHEADCSS_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.HEAD_METHOD, Headers.CSS_TYPE);
+					actionRequest(REST.HEAD_METHOD, Headers.CSS_TYPE);
 				} else if ( TIDRestFunctions.RESTHEADHTML_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.HEAD_METHOD, Headers.HTML_TYPE);
+					actionRequest(REST.HEAD_METHOD, Headers.HTML_TYPE);
 				} else if ( TIDRestFunctions.RESTHEADIMAGE_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.HEAD_METHOD, Headers.IMAGE_TYPE);
+					actionRequest(REST.HEAD_METHOD, Headers.IMAGE_TYPE);
 				} else if ( TIDRestFunctions.RESTHEADJSON_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.HEAD_METHOD, Headers.JSON_TYPE);
+					actionRequest(REST.HEAD_METHOD, Headers.JSON_TYPE);
 				} else if ( TIDRestFunctions.RESTHEADSCRIPT_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.HEAD_METHOD, Headers.SCRIPT_TYPE);
+					actionRequest(REST.HEAD_METHOD, Headers.SCRIPT_TYPE);
 				} else if ( TIDRestFunctions.RESTHEADTEXT_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.HEAD_METHOD, Headers.TEXT_TYPE);
+					actionRequest(REST.HEAD_METHOD, Headers.TEXT_TYPE);
 				} else if ( TIDRestFunctions.RESTHEADXML_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.HEAD_METHOD, Headers.XML_TYPE);
+					actionRequest(REST.HEAD_METHOD, Headers.XML_TYPE);
 				}
 				else if ( TIDRestFunctions.RESTPATCHBINARY_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.PATCH_METHOD, Headers.BINARY_TYPE);
+					actionRequest(REST.PATCH_METHOD, Headers.BINARY_TYPE);
 				} else if ( TIDRestFunctions.RESTPATCHCSS_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.PATCH_METHOD, Headers.CSS_TYPE);
+					actionRequest(REST.PATCH_METHOD, Headers.CSS_TYPE);
 				} else if ( TIDRestFunctions.RESTPATCHHTML_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.PATCH_METHOD, Headers.HTML_TYPE);
+					actionRequest(REST.PATCH_METHOD, Headers.HTML_TYPE);
 				} else if ( TIDRestFunctions.RESTPATCHIMAGE_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.PATCH_METHOD, Headers.IMAGE_TYPE);
+					actionRequest(REST.PATCH_METHOD, Headers.IMAGE_TYPE);
 				} else if ( TIDRestFunctions.RESTPATCHJSON_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.PATCH_METHOD, Headers.JSON_TYPE);
+					actionRequest(REST.PATCH_METHOD, Headers.JSON_TYPE);
 				} else if ( TIDRestFunctions.RESTPATCHSCRIPT_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.PATCH_METHOD, Headers.SCRIPT_TYPE);
+					actionRequest(REST.PATCH_METHOD, Headers.SCRIPT_TYPE);
 				} else if ( TIDRestFunctions.RESTPATCHTEXT_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.PATCH_METHOD, Headers.TEXT_TYPE);
+					actionRequest(REST.PATCH_METHOD, Headers.TEXT_TYPE);
 				} else if ( TIDRestFunctions.RESTPATCHXML_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.PATCH_METHOD, Headers.XML_TYPE);
+					actionRequest(REST.PATCH_METHOD, Headers.XML_TYPE);
 				}
 				else if ( TIDRestFunctions.RESTPOSTBINARY_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.POST_METHOD, Headers.BINARY_TYPE);
+					actionRequest(REST.POST_METHOD, Headers.BINARY_TYPE);
 				} else if ( TIDRestFunctions.RESTPOSTCSS_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.POST_METHOD, Headers.CSS_TYPE);
+					actionRequest(REST.POST_METHOD, Headers.CSS_TYPE);
 				} else if ( TIDRestFunctions.RESTPOSTHTML_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.POST_METHOD, Headers.HTML_TYPE);
+					actionRequest(REST.POST_METHOD, Headers.HTML_TYPE);
 				} else if ( TIDRestFunctions.RESTPOSTIMAGE_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.POST_METHOD, Headers.IMAGE_TYPE);
+					actionRequest(REST.POST_METHOD, Headers.IMAGE_TYPE);
 				} else if ( TIDRestFunctions.RESTPOSTJSON_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.POST_METHOD, Headers.JSON_TYPE);
+					actionRequest(REST.POST_METHOD, Headers.JSON_TYPE);
 				} else if ( TIDRestFunctions.RESTPOSTSCRIPT_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.POST_METHOD, Headers.SCRIPT_TYPE);
+					actionRequest(REST.POST_METHOD, Headers.SCRIPT_TYPE);
 				} else if ( TIDRestFunctions.RESTPOSTTEXT_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.POST_METHOD, Headers.TEXT_TYPE);
+					actionRequest(REST.POST_METHOD, Headers.TEXT_TYPE);
 				} else if ( TIDRestFunctions.RESTPOSTXML_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.POST_METHOD, Headers.XML_TYPE);
+					actionRequest(REST.POST_METHOD, Headers.XML_TYPE);
 				}
 				else if ( TIDRestFunctions.RESTPUTBINARY_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.PUT_METHOD, Headers.BINARY_TYPE);
+					actionRequest(REST.PUT_METHOD, Headers.BINARY_TYPE);
 				} else if ( TIDRestFunctions.RESTPUTCSS_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.PUT_METHOD, Headers.CSS_TYPE);
+					actionRequest(REST.PUT_METHOD, Headers.CSS_TYPE);
 				} else if ( TIDRestFunctions.RESTPUTHTML_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.PUT_METHOD, Headers.HTML_TYPE);
+					actionRequest(REST.PUT_METHOD, Headers.HTML_TYPE);
 				} else if ( TIDRestFunctions.RESTPUTIMAGE_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.PUT_METHOD, Headers.IMAGE_TYPE);
+					actionRequest(REST.PUT_METHOD, Headers.IMAGE_TYPE);
 				} else if ( TIDRestFunctions.RESTPUTJSON_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.PUT_METHOD, Headers.JSON_TYPE);
+					actionRequest(REST.PUT_METHOD, Headers.JSON_TYPE);
 				} else if ( TIDRestFunctions.RESTPUTSCRIPT_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.PUT_METHOD, Headers.SCRIPT_TYPE);
+					actionRequest(REST.PUT_METHOD, Headers.SCRIPT_TYPE);
 				} else if ( TIDRestFunctions.RESTPUTTEXT_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.PUT_METHOD, Headers.TEXT_TYPE);
+					actionRequest(REST.PUT_METHOD, Headers.TEXT_TYPE);
 				} else if ( TIDRestFunctions.RESTPUTXML_KEYWORD.equalsIgnoreCase(action) ) {
-					request(REST.PUT_METHOD, Headers.XML_TYPE);
+					actionRequest(REST.PUT_METHOD, Headers.XML_TYPE);
 				}
 				else if ( TIDRestFunctions.RESTREQUEST_KEYWORD.equalsIgnoreCase(action) ) {
-					httpRequest();
+					actionHttpRequest();
 				} else if ( TIDRestFunctions.RESTSTARTSERVICESESSION_KEYWORD.equalsIgnoreCase(action) ) {
-					startServiceSession();
+					actionStartServiceSession();
 				} else {
 					throw new SAFSException("The action "+action+" is NOT supported in RESTComponent.", SAFSException.CODE_ACTION_NOT_SUPPORTED);
 				}
@@ -2225,7 +2256,7 @@ public class TIDComponent extends GenericEngine {
 					try{
 						endSession();
 					}catch(SAFSException e){
-						IndependantLog.warn(debugmsg+"Failed to stop REST Session, due to "+StringUtils.debugmsg(e));
+						Log.warn(debugmsg+"Failed to stop REST Session, due to "+StringUtils.debugmsg(e));
 					}
 				}
 			}
@@ -2233,7 +2264,7 @@ public class TIDComponent extends GenericEngine {
 			if (testRecordData.getStatusCode() == StatusCodes.SCRIPT_NOT_EXECUTED) {
 				//componentProcess();//handle Generic keywords
 			} else {
-				IndependantLog.debug(debugmsg+"'"+action+"' has been processed\n with testrecorddata"+testRecordData+"\n with params "+params);
+				Log.debug(debugmsg+"'"+action+"' has been processed\n with testrecorddata"+testRecordData+"\n with params "+params);
 			}
 		}
 		
@@ -2246,13 +2277,13 @@ public class TIDComponent extends GenericEngine {
 				   TIDRestFunctions.RESTSTARTSERVICESESSION_KEYWORD.equalsIgnoreCase(action);
 		}
 		
-		private synchronized String getUniqueID(){
-			return FLAG_SAFSREST+"Session_"+System.currentTimeMillis();
+		private synchronized String getUniqueID(String value){
+			return FLAG_SAFSREST+value+System.currentTimeMillis();
 		}
 		
 		protected void startSession() throws SAFSException{
 			//Create the Service object: 
-			Service service = new Service(getUniqueID());
+			Service service = new Service(getUniqueID("_session_"));
 			//Assign sessionID
 			sessionID = service.getServiceId();
 			
@@ -2266,30 +2297,35 @@ public class TIDComponent extends GenericEngine {
 			sessionID = null;
 			oneShotSessionStarted = false;
 		}
+
+		/**
+		 * Write the details of response and request into the debug log.<br>
+		 * Store the Response object into a Map with a generated ID, which
+		 * will be saved to the variable responseIdVar.<br>
+		 * @param response Response, the response returned from invocation of a rest service.
+		 * @param responseIdVar String, the variable to store the response ID
+		 * @throws SAFSException if it failed to store the responseID to a variable
+		 */
+		protected void handleResponse(Response response, String responseIdVar) throws SAFSException{
+			Log.debug(response);
+			String responseID = getUniqueID("_response_"); 
+			addToResponseMap(responseID, response);
+			setVariable(responseIdVar, responseID);
+		}
 		
-		protected void endServiceSession(){
-			String message = action;
-			String description = action;
-			
+		/**
+		 * Check the field sessionID is not null.<br>
+		 * If it is null, log failure message about sessionID and set the status code to failure.<br> 
+		 * 
+		 * @return boolean true if the sessionID is not null.
+		 */
+		private boolean checkSessionID(){
 			if (sessionID==null) {
 				//It is not really a parameter, it is the field #3 in the test record.
 				issueParameterValueFailure("sessionID");
-				return;
+				return false;
 			}
-			
-			try { 
-				//TODO implement the details
-				logMessage( message, description, AbstractLogFacility.STATUS_REPORT_TEST_PASSES);
-				setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
-				return;
-			}catch(Exception e){
-				String exceptionMsg = StringUtils.debugmsg(e);
-				message = FAILStrings.convert(FAILStrings.GENERIC_ERROR, 
-						"*** ERROR *** "+exceptionMsg, exceptionMsg);
-				standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
-				setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
-				return;
-			}
+			return true;
 		}
 		
 		/**
@@ -2304,16 +2340,12 @@ public class TIDComponent extends GenericEngine {
 		 * @param method String, the HTTP method to handle, like "GET" "POST" "PUT" etc.
 		 * @param type   String, the header type, like "BINARY" "JOSN" etc.
 		 */
-		protected void request(String method, String type){
-			String message = action;
-			String description = action;
+		private void actionRequest(String method, String type){
+			String message = null;
+			String description = null;
 			Response response = null;
 			
-			if (sessionID==null) {
-				//It is not really a parameter, it is the field #3 in the test record.
-				issueParameterValueFailure("sessionID");
-				return;
-			}
+			if (!checkSessionID()) return;
 			
 			if (params.size() < 2) {
 				issueParameterCountFailure();
@@ -2326,11 +2358,25 @@ public class TIDComponent extends GenericEngine {
 			String customeAuthentication = iterator.hasNext()? iterator.next():null;
 			
 			try {
-				//TODO implement the details
+				//TODO handle the extra authentication information
+				if(customeAuthentication!=null){
+					
+				}
+				//TODO handle the extra headers information
+				if(customHeaders!=null){
+					
+				}
 				response = REST.request(sessionID, method, relativeURI, Headers.getHeadersForType(type), body);
 				
 				handleResponse(response, responseIdVar);
-				logMessage( message, description, AbstractLogFacility.STATUS_REPORT_TEST_PASSES);
+				
+				message = GENStrings.convert(GENStrings.SUCCESS_3, 
+						restFlag+":"+sessionID+" "+action+" successful.", 
+						restFlag, sessionID, action);
+				description = "relativeURI: "+relativeURI+"\n"+
+						      responseIdVar+": "+getVariable(responseIdVar);
+				
+				logMessage( message, description, PASSED_MESSAGE);
 				setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
 			}catch(Exception e){
 				String exceptionMsg = StringUtils.debugmsg(e);
@@ -2345,16 +2391,12 @@ public class TIDComponent extends GenericEngine {
 		 * Handle the custom request.<br/>
 		 * User will set the real HTTP headers by himself.<br/>
 		 */
-		protected void httpRequest(){
-			String message = action;
-			String description = action;
+		private void actionHttpRequest(){
+			String message = null;
+			String description = null;
 			Response response = null;
 			
-			if (sessionID==null) {
-				//It is not really a parameter, it is the field #3 in the test record.
-				issueParameterValueFailure("sessionID");
-				return;
-			}
+			if (!checkSessionID()) return;
 			
 			if (params.size() < 3) {
 				issueParameterCountFailure();
@@ -2368,11 +2410,23 @@ public class TIDComponent extends GenericEngine {
 			String customeAuthentication = iterator.hasNext()? iterator.next():null;
 			
 			try { 
-				//TODO implement the details
+				//TODO handle the extra authentication information
+				if(customeAuthentication!=null){
+					
+				}
+				
 				response = REST.request(sessionID, method, relativeURI, customHeaders, body);
 				
 				handleResponse(response, responseIdVar);
-				logMessage( message, description, AbstractLogFacility.STATUS_REPORT_TEST_PASSES);
+				
+				String actionMsg = action +" "+method;
+				message = GENStrings.convert(GENStrings.SUCCESS_3, 
+						restFlag+":"+sessionID+" "+actionMsg+" successful.", 
+						restFlag, sessionID, actionMsg);
+				description = "relativeURI: "+relativeURI+"\n"+
+						      responseIdVar+": "+getVariable(responseIdVar);
+				
+				logMessage( message, description, PASSED_MESSAGE);
 				setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
 			}catch(Exception e){
 				String exceptionMsg = StringUtils.debugmsg(e);
@@ -2383,40 +2437,63 @@ public class TIDComponent extends GenericEngine {
 			}
 		}
 		
-		/**
-		 * TODO
-		 * Write the details of response and request into the debug log.<br>
-		 * Store the Response object into a Map with a generated ID, which
-		 * will be saved to the variable responseIdVar.<br>
-		 * @param response Response, the response returned from invocation of a rest service.
-		 * @param responseIdVar String, the variable to store the response ID
-		 */
-		protected void handleResponse(Response response, String responseIdVar){
+		private void actionEndServiceSession(){
+			String message = null;
+			String description = null;
 			
-		}
-		
-		protected void startServiceSession(){
-			String message = action;
-			String description = action;
-			
-			if (sessionID==null) {
-				//It is not really a parameter, it is the field #3 in the test record.
-				issueParameterValueFailure("sessionID");
-				return;
-			}
+			if (!checkSessionID()) return;
 			
 			try { 
-				//TODO implement the details
-				logMessage( message, description, AbstractLogFacility.STATUS_REPORT_TEST_PASSES);
+				Services.deleteService(sessionID);
+				
+				message = GENStrings.convert(GENStrings.SUCCESS_3, 
+						restFlag+":"+sessionID+" "+action+" successful.", restFlag, sessionID, action);
+				
+				logMessage( message, description, PASSED_MESSAGE);
 				setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
-				return;
 			}catch(Exception e){
 				String exceptionMsg = StringUtils.debugmsg(e);
 				message = FAILStrings.convert(FAILStrings.GENERIC_ERROR, 
 						"*** ERROR *** "+exceptionMsg, exceptionMsg);
 				standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
 				setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
+			}
+		}
+		
+		private void actionStartServiceSession(){
+			String message = null;
+			String description = null;
+			
+			if (!checkSessionID()) return;
+			
+			if (params.size() < 1) {
+				issueParameterCountFailure();
 				return;
+			}
+			String baseURL = iterator.next();
+			String customeAuthentication = iterator.hasNext()? iterator.next():null;
+			
+			try{
+				//Create the Service object 
+				Service service = new Service(sessionID, baseURL);
+				Services.addService(service);
+				
+				//TODO handle the extra authentication information
+				if(customeAuthentication!=null){
+					
+				}
+				
+				message = GENStrings.convert(GENStrings.SUCCESS_3, 
+						restFlag+":"+sessionID+" "+action+" successful.", restFlag, sessionID, action);
+						
+				logMessage( message, description, PASSED_MESSAGE);
+				setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
+			}catch(Exception e){
+				String exceptionMsg = StringUtils.debugmsg(e);
+				message = FAILStrings.convert(FAILStrings.GENERIC_ERROR, 
+						"*** ERROR *** "+exceptionMsg, exceptionMsg);
+				standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
+				setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
 			}
 		}
 
