@@ -144,7 +144,7 @@ public class TIDDriverRestCommands extends GenericEngine{
 			
 			try { 
 				//TODO implement the details
-				logMessage( message, description, AbstractLogFacility.STATUS_REPORT_TEST_PASSES);
+				logMessage( message, description, PASSED_MESSAGE);
 				setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
 				return;
 			}catch(Exception e){
@@ -164,7 +164,7 @@ public class TIDDriverRestCommands extends GenericEngine{
 			
 			try { 
 				//TODO implement the details
-				logMessage( message, description, AbstractLogFacility.STATUS_REPORT_TEST_PASSES);
+				logMessage( message, description, PASSED_MESSAGE);
 				setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
 				return;
 			}catch(Exception e){
@@ -182,8 +182,8 @@ public class TIDDriverRestCommands extends GenericEngine{
 				return;
 			}
 			String debugmsg = StringUtils.debugmsg(false);
-			String message = null;
-			String description = null;
+			String message = command;
+			String description = command;
 			Iterator<?> iter = params.iterator();
 			IndependantLog.debug(debugmsg+"processing"+command+"with parameters "+params);
 			
@@ -205,7 +205,7 @@ public class TIDDriverRestCommands extends GenericEngine{
 			
 			try { 
 				//TODO implement the details
-				logMessage( message, description, AbstractLogFacility.STATUS_REPORT_TEST_PASSES);
+				logMessage( message, description, PASSED_MESSAGE);
 				setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
 				return;
 			}catch(Exception e){
@@ -218,6 +218,4 @@ public class TIDDriverRestCommands extends GenericEngine{
 			}
 		}
 	}
-
-
 }
