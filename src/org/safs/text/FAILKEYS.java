@@ -28,6 +28,8 @@ public class FAILKEYS{
 	public static final String CANT_DELETE_DIRECTORY						= "cant_delete_directory";
 	/** Can not delete file '%1%' */
 	public static final String CANT_DELETE_FILE								= "cant_delete_file";
+	/** Could not delete one or more variable values prefixed with '%1%'. */
+	public static final String COULD_NOT_DELETE_PREFIX_VARS_1				= "could_not_delete_prefix_vars_1";
 	/** Could not get '%1%'. */
 	public static final String COULD_NOT_GET								= "could_not_get";
 	/** Could not get one or more variable values. */
@@ -38,6 +40,8 @@ public class FAILKEYS{
 	public static final String COULD_NOT_SELECT								= "could_not_select";
 	/** Could not set '%1%' to '%2%'. */
 	public static final String COULD_NOT_SET								= "could_not_set";
+	/** Could not set one or more variable values prefixed with '%1%'. */
+	public static final String COULD_NOT_SET_PREFIX_VARS_1					= "could_not_set_prefix_vars_1";
 	/** Could not set one or more variable values. */
 	public static final String COULD_NOT_SET_VARS							= "could_not_set_vars";
 	/** Delimiter '%1%' was not found */
@@ -164,6 +168,8 @@ public class FAILKEYS{
 	public static final String SELECTION_NOT_PARTIAL_MATCH					= "selection_not_partial_match";
 	/** %1% was not found */
 	public static final String SOMETHING_NOT_FOUND							= "something_not_found";
+	/** Object identified by %1% was not found */
+	public static final String ID_NOT_FOUND_1								= "id_not_found1";
 	/** %1% value '%2%' does not match expected value '%3%'. */
 	public static final String SOMETHING_NOT_MATCH							= "something_not_match";
 	/** *** STAF ERROR *** %1% */

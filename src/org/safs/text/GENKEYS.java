@@ -20,6 +20,8 @@ public class GENKEYS{
 	public static final String ATTEMPT_3A									= "attempt3a";
 	/** '%1%' has been saved to '%2%' */
 	public static final String BE_SAVED_TO									= "be_saved_to";
+	/** Object identified by '%1%' has been saved to variables prefixed by '%2%' */
+	public static final String ID_OBJECT_SAVED_TO_VARIABLE_PREFIX_2			= "id_objct_saved_to_variable_prefix2";
 	/** %1% attempting branch to %2%. */
 	public static final String BRANCHING									= "branching";
 	/** '%1%' contains '%2%' */
@@ -116,6 +118,8 @@ public class GENKEYS{
 	public static final String NOT_IN_RANGE									= "not_in_range";
 	/** %1% is not less than %2% */
 	public static final String NOT_LESS										= "not_less";
+	/** Variables prefixed with '%1%' have been deleted. */
+	public static final String PREFIX_VARS_DELETE_1							= "prefix_vars_delete_1";
 	/** %1% performed on '%2%' in %3%. */
 	public static final String PERFNODE_3									= "perfnode3";
 	/** %1% performed on '%2%' in %3%; output file '%4%'. */

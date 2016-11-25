@@ -5,31 +5,38 @@
 
 package org.safs.rest.service;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Map;
+
+import org.safs.IndependantLog;
+import org.safs.tools.RuntimeDataInterface;
 
 /**
  * @author canagl
  */
 public class Response {
     
+	private static final String UNKNOWN_VALUE = "UNKNOWN";
 	Request _request;
 	
-	String _status_line;
-    
-    String _http_version;
-    int _status_code;
-    String _reason_phrase;
-    
-    
-    Map<String,String> _headers;
+	String ID = "TO BE ASSIGNED";
+	String _content_type = UNKNOWN_VALUE;
+	Object _entity_body = UNKNOWN_VALUE;
+	long _entity_length;
+	Map<String,String> _headers;
+	String _http_version = UNKNOWN_VALUE;
+	String _message_body = UNKNOWN_VALUE;
+	String _reason_phrase = UNKNOWN_VALUE;
+	int _status_code;
+	String _status_line = UNKNOWN_VALUE;
 
-    String _message_body;
-
-    long _entity_length;
-    Object _entity_body;
-
-    String _content_type;
-
+	public String getID() {
+		return ID;
+	}
+	public void setID(String iD) {
+		ID = iD;
+	}
 	public String get_content_type() {
 		return _content_type;
 	}
@@ -150,7 +157,8 @@ public class Response {
 	 * @return String, the response information returned from rest service.
 	 */
 	public String getResponseInfo(){
-		return get_status_code() +":"+ get_status_line() +"\n"+
+		return  "ID: "+ID+ "\n"+
+				get_status_code() +":"+ get_status_line() +"\n"+
 				get_reason_phrase() +"\n"+
 				get_headers() +"\n"+
 				"Message Body:\n"+
@@ -182,4 +190,211 @@ public class Response {
 				"=========\nResponse: "+ getResponseInfo();                
 	}
     
+	/**
+	 * Save Response, original Request to variables prefixed with 'variablePrefix'.<br>
+	 * <pre>
+	 * Response is saved to variables:
+	 * variablePrefix.Response.Id
+	 * variablePrefix.Response.StatusCode
+	 * variablePrefix.Response.HttpVersion
+	 * variablePrefix.Response.ContentType
+	 * ...
+	 * Request is saved to variables:
+	 * variablePrefix.Request.Method
+	 * variablePrefix.Request.URI
+	 * variablePrefix.Request.HttpVersion
+	 * variablePrefix.Request.Headers
+	 * ...
+	 * </pre>
+	 * @param runtime	RuntimeDataInterface, it provides the ability to save variable
+	 * @param variablePrefix String, the variable prefix
+	 * @param saveRequest boolean, if the original request should be saved
+	 * @return boolean if the save operation succeed
+	 */
+	public boolean save(RuntimeDataInterface runtime, String variablePrefix, boolean saveRequest){
+		boolean success = true;
+		String debugmsg = "Response.save(): ";
+		
+		if(runtime==null){
+			IndependantLog.error(debugmsg+"runtime is null.");
+			return false;
+		}
+		if(variablePrefix==null || variablePrefix.trim().isEmpty()){
+			IndependantLog.error(debugmsg+"variable prefix is null or empty.");
+			return false;
+		}
+
+
+		String variable = null;
+		String varResponsPrefix = variablePrefix+".Response.";
+		Class<?> clazz = getClass();
+
+		Field[] fields = clazz.getDeclaredFields();
+
+		Object value = null;
+		String fieldName = null;
+
+		for(Field field:fields){
+			try {
+				fieldName = field.getName();
+				if(Modifier.isFinal(field.getModifiers())){
+					continue;
+				}
+				if("_headers".equals(fieldName)){
+					value = clazz.getDeclaredMethod("get_headers").invoke(this);
+				}else if("_request".equals(fieldName)){
+					//do not save it in response variables
+					continue;
+				}else{
+					value = field.get(this);
+				}
+
+				variable = varResponsPrefix+fieldName;
+				if(value==null){
+					value = UNKNOWN_VALUE;
+					IndependantLog.debug(debugmsg+" value is null for field '"+fieldName+"', set "+UNKNOWN_VALUE+" to variable '"+variable+"'.");
+				}
+
+				runtime.setVariable(variable, value.toString());
+
+			} catch (Exception e) {
+				IndependantLog.error(debugmsg+" Met Exception "+e.getClass().getSimpleName()+", due to "+e.getMessage());
+				success = false;
+			}
+		}
+
+		if(saveRequest){
+			String varRequestPrefix = variablePrefix+".Request.";
+
+			if(_request!=null){
+				clazz = _request.getClass();
+				fields = clazz.getDeclaredFields();
+				
+				for(Field field:fields){
+					try {
+						fieldName = field.getName();
+						if(Modifier.isFinal(field.getModifiers())){
+							continue;
+						}
+						if("_message_body".equals(fieldName)){
+							//TODO do not save it in request variables???
+							continue;
+						}else{
+							value = field.get(this);
+						}
+						
+						variable = varRequestPrefix+fieldName;
+						if(value==null){
+							value = UNKNOWN_VALUE;
+							IndependantLog.debug(debugmsg+" value is null for field '"+fieldName+"', set "+UNKNOWN_VALUE+" to variable '"+variable+"'.");
+						}
+						
+						runtime.setVariable(variable, value.toString());
+						
+					} catch (Exception e) {
+						IndependantLog.error(debugmsg+" Met Exception "+e.getClass().getSimpleName()+", due to "+e.getMessage());
+						success = false;
+					}
+				}
+			}else{
+				IndependantLog.error(debugmsg+"The original request is null! Cannot save it to variables.");
+				success = false;
+			}
+		}
+		
+		return success;
+	}
+	
+	/**
+	 * Delete Response variables and original Request variables prefixed with 'variablePrefix'.<br>
+	 * <pre>
+	 * Response variables to be deleted:
+	 * variablePrefix.Response.Id
+	 * variablePrefix.Response.StatusCode
+	 * variablePrefix.Response.HttpVersion
+	 * variablePrefix.Response.ContentType
+	 * ...
+	 * Request variables to be deleted
+	 * variablePrefix.Request.Method
+	 * variablePrefix.Request.URI
+	 * variablePrefix.Request.HttpVersion
+	 * variablePrefix.Request.Headers
+	 * ...
+	 * </pre>
+	 * @param runtime	RuntimeDataInterface, it provides the ability to delete variable
+	 * @param variablePrefix String, the variable prefix
+	 * @return boolean if the delete operation succeed
+	 */
+	public static boolean delete(RuntimeDataInterface runtime, String variablePrefix){
+		boolean success = true;
+		String debugmsg = "Response.delete(): ";
+		
+		if(runtime==null){
+			IndependantLog.error(debugmsg+"runtime is null.");
+			return false;
+		}
+		if(variablePrefix==null || variablePrefix.trim().isEmpty()){
+			IndependantLog.error(debugmsg+"variable prefix is null or empty.");
+			return false;
+		}
+
+		String variable = null;
+		String varResponsPrefix = variablePrefix+".Response.";
+		Class<?> clazz = Response.class;
+
+		Field[] fields = clazz.getDeclaredFields();
+
+		String fieldName = null;
+
+		for(Field field:fields){
+			try {
+				fieldName = field.getName();
+				if(Modifier.isFinal(field.getModifiers())){
+					continue;
+				}
+				if("_request".equals(fieldName)){
+					//it wasn't saved, not need to delete
+					continue;
+				}
+
+				variable = varResponsPrefix+fieldName;
+
+				//TODO can "set null to variable" really delete the variable? we need a real API to delete variable
+				runtime.setVariable(variable, null);
+
+			} catch (Exception e) {
+				IndependantLog.error(debugmsg+" Met Exception "+e.getClass().getSimpleName()+", due to "+e.getMessage());
+				success = false;
+			}
+		}
+
+		String varRequestPrefix = variablePrefix+".Request.";
+
+		clazz = Request.class;
+		fields = clazz.getDeclaredFields();
+
+		for(Field field:fields){
+			try {
+				fieldName = field.getName();
+				if(Modifier.isFinal(field.getModifiers())){
+					continue;
+				}
+				if("_message_body".equals(fieldName)){
+					//TODO Have it been saved? If not, we don't need to delete it
+					continue;
+				}
+
+				variable = varRequestPrefix+fieldName;
+
+				//TODO can "set null to variable" really delete the variable? we need a real API to delete variable
+				runtime.setVariable(variable, null);
+
+			} catch (Exception e) {
+				IndependantLog.error(debugmsg+" Met Exception "+e.getClass().getSimpleName()+", due to "+e.getMessage());
+				success = false;
+			}
+		}
+		
+		return success;
+	}
 }
