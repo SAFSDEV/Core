@@ -271,6 +271,7 @@ public class TIDComponent extends GenericEngine {
 		
 		restCF = new RESTComponent();
 		restCF.setLogUtilities(log);
+		
 	}
 
 	public long processRecord (TestRecordHelper testRecordData){
@@ -379,32 +380,6 @@ public class TIDComponent extends GenericEngine {
 	        return null;
 	    } 
 	    return params;
-	}
-	
-	
-	/**
-	 * @param responseID String, the unique ID to identify the rest service Response.
-	 * @return Response, a cached Response returned from a rest service.
-	 */
-	public static synchronized Response getResponseMapValue(String responseID) {
-		return responseMap.get(responseID);
-	}
-
-	/**
-	 * @param responseID String, the unique ID to identify the rest service Response.
-	 * @param response Response, a Response object to be cached into a map.
-	 * @return response Response, the previous Response stored in the map with the same responseID; 
-	 *                            or null if no Response was previously stored with the key responseID.
-	 */
-	public static synchronized Response addToResponseMap(String responseID, Response response) {
-		if(responseMap.containsKey(responseID)){
-			Log.warn("responseMap has alreday contained ID "+responseID);
-		}
-		if(responseMap.containsValue(response)){
-			Log.warn("responseMap has alreday contained Response "+ response);
-		}
-		
-		return responseMap.put(responseID, response);
 	}
 
 	/******************************************************
@@ -2054,6 +2029,38 @@ public class TIDComponent extends GenericEngine {
 	}
 	
 	/**
+	 * @param responseID String, the unique ID to identify the rest service Response.
+	 * @return Response, a cached Response returned from a rest service.
+	 */
+	public static synchronized Response getRestResponse(String responseID){
+		return responseMap.get(responseID);
+	}
+	public static synchronized Response deleteRestResponse(String responseID){
+		return responseMap.remove(responseID);
+	}
+	public static synchronized void deleteRestResponseStore(String responseID){
+		responseMap.clear();
+	}
+
+	/**
+	 * @param sessionID String, the ID of session during which the response is generated.
+	 * @param responseID String, the unique ID to identify the rest service Response.
+	 * @param response Response, a Response object to be cached into a map.
+	 * @return response Response, the previous Response stored in the map with the same responseID; 
+	 *                            or null if no Response was previously stored with the key responseID.
+	 */
+	private static synchronized Response saveRestResponse(String sessionID, String responseID, Response response) {
+		if(responseMap.containsKey(responseID)){
+			Log.warn("responseMap has alreday contained ID "+responseID);
+		}
+		if(responseMap.containsValue(response)){
+			Log.warn("responseMap has alreday contained Response "+ response);
+		}
+		
+		return responseMap.put(responseID, response);
+	}
+	
+	/**
 	 * Internal Component Function Processor to handle REST actions.
 	 */
 	protected class RESTComponent extends org.safs.ComponentFunction {
@@ -2277,6 +2284,11 @@ public class TIDComponent extends GenericEngine {
 				   TIDRestFunctions.RESTSTARTSERVICESESSION_KEYWORD.equalsIgnoreCase(action);
 		}
 		
+		/**
+		 * TODO provides a more unique ID.
+		 * @param value String, the mark string prefixing the ID.
+		 * @return String, the unique ID.
+		 */
 		private synchronized String getUniqueID(String value){
 			return FLAG_SAFSREST+value+System.currentTimeMillis();
 		}
@@ -2302,14 +2314,17 @@ public class TIDComponent extends GenericEngine {
 		 * Write the details of response and request into the debug log.<br>
 		 * Store the Response object into a Map with a generated ID, which
 		 * will be saved to the variable responseIdVar.<br>
+		 * @param sessionID String, the ID of session during which the response is generated.
 		 * @param response Response, the response returned from invocation of a rest service.
 		 * @param responseIdVar String, the variable to store the response ID
 		 * @throws SAFSException if it failed to store the responseID to a variable
 		 */
-		protected void handleResponse(Response response, String responseIdVar) throws SAFSException{
+		protected void handleResponse(String sessionID, Response response, String responseIdVar) throws SAFSException{
+			String responseID = getUniqueID("_response_");
+			response.setID(responseID);
 			Log.debug(response);
-			String responseID = getUniqueID("_response_"); 
-			addToResponseMap(responseID, response);
+			
+			saveRestResponse(sessionID, responseID, response);
 			setVariable(responseIdVar, responseID);
 		}
 		
@@ -2368,7 +2383,7 @@ public class TIDComponent extends GenericEngine {
 				}
 				response = REST.request(sessionID, method, relativeURI, Headers.getHeadersForType(type), body);
 				
-				handleResponse(response, responseIdVar);
+				handleResponse(sessionID, response, responseIdVar);
 				
 				message = GENStrings.convert(GENStrings.SUCCESS_3, 
 						restFlag+":"+sessionID+" "+action+" successful.", 
@@ -2417,7 +2432,7 @@ public class TIDComponent extends GenericEngine {
 				
 				response = REST.request(sessionID, method, relativeURI, customHeaders, body);
 				
-				handleResponse(response, responseIdVar);
+				handleResponse(sessionID, response, responseIdVar);
 				
 				String actionMsg = action +" "+method;
 				message = GENStrings.convert(GENStrings.SUCCESS_3, 
@@ -2445,6 +2460,8 @@ public class TIDComponent extends GenericEngine {
 			
 			try { 
 				Services.deleteService(sessionID);
+				
+				//TODO Do we need to delete any variable left behind with this session?
 				
 				message = GENStrings.convert(GENStrings.SUCCESS_3, 
 						restFlag+":"+sessionID+" "+action+" successful.", restFlag, sessionID, action);
