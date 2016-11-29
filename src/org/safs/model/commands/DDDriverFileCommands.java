@@ -1883,7 +1883,8 @@ public class DDDriverFileCommands {
 
 
     /*********** <pre>
-          Read the number of characters from the file defined by file number                 and assign a string containing the characters read to a DDV variable.
+          Read the number of characters from the file defined by file number 
+          and assign a string containing the characters read to a DDV variable.
             </pre>    Supporting Engines:
     <P/><UL>
         <LI>Rational Robot</LI>
@@ -1898,9 +1899,10 @@ public class DDDriverFileCommands {
             
      @param numberOfChar  Optional:NO
               Number of characters to be read from the file
+              If the number is -1, then the whole content will be read .
             
      @param variableName  Optional:NO
-              Name of the DDV variable in which to store the characters                 read from the file
+              Name of the DDV variable in which to store the characters read from the file
             
      **********/
     static public DriverCommand readFileChars (String fileNumber, String numberOfChar, String variableName) {
@@ -1917,7 +1919,8 @@ public class DDDriverFileCommands {
 
 
     /*********** <pre>
-          Read the number of characters from the file defined by file number                 and assign a string containing the characters read to a DDV variable.
+          Read the number of characters from the file defined by file number 
+          and assign a string containing the characters read to a DDV variable.
             </pre>    
     Supporting Engines:
     <P/><UL>
@@ -1935,8 +1938,9 @@ public class DDDriverFileCommands {
               The file number of the file to be read from.
             <BR/>        numberOfChar -- Optional:NO
               Number of characters to be read from the file
+              If the number is -1, then the whole content will be read .
             <BR/>        variableName -- Optional:NO
-              Name of the DDV variable in which to store the characters                 read from the file
+              Name of the DDV variable in which to store the characters read from the file
             
     </UL>
 
