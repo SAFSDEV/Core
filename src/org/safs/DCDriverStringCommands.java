@@ -1,22 +1,8 @@
 /** Copyright (C) (MSA, Inc) All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
-
-package org.safs;
-
-import java.lang.reflect.Array;
-import java.util.Iterator;
-import java.util.List;
-
-import org.safs.text.FAILStrings;
-import org.safs.text.GENStrings;
-import org.safs.text.StringProcessor;
-
-
 /**
- * Process a string driver commands.
- * Instantiated by DCDriverCommand
- *
+ * History:
  *   <br>   Sep 23, 2003    (DBauman) Original Release
  *   <br>   Oct 02, 2003    (DBauman) moved to package org.safs because no dependency on rational
  *   <br>   Nov 17, 2003    (javadoug) testing writing to cvs from home<br>
@@ -38,6 +24,24 @@ import org.safs.text.StringProcessor;
  *   <br>	FEB 10, 2009	(JunwuMa)   Modify replace() to keep the source string unchanged if a substring for replacement 
  *   <br>                               is not found in it. Fix defect S0560893.
  *   <br>	APR 18, 2013	(sbjlwa)    Modify replace() to set source string to variable if no replacement occur. See S0963164.
+ *   <br>	NOV 29, 2016	(sbjlwa)    Modified compare(): support regex comparison.
+ **/
+package org.safs;
+
+import java.lang.reflect.Array;
+import java.util.Iterator;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.safs.text.FAILStrings;
+import org.safs.text.GENStrings;
+import org.safs.text.StringProcessor;
+
+
+/**
+ * Process a string driver commands.
+ * Instantiated by DCDriverCommand
  *   
  * @author Doug Bauman
  * @since   Sep 23, 2003
@@ -181,19 +185,42 @@ public class DCDriverStringCommands extends DriverCommand {
    **/
   private void compare () throws SAFSException {
     if (!checkParams(3)) return;
-    Iterator iterator = params.iterator();
+    Iterator<?> iterator = params.iterator();
     String src = (String) iterator.next();
-    String str2 = (String) iterator.next();
+    String dest = (String) iterator.next();
     String varName = (String) iterator.next();
+    
+    boolean regexMatch = false;
+    if(iterator.hasNext()){
+    	try{
+    		regexMatch = Boolean.parseBoolean(iterator.next().toString());
+    	}catch(Exception e){
+    		Log.warn("DCDSC.compare(): the parameter regexMatch is wrong, met exception "+e.getMessage());
+    	}
+    }
+    
 
     Log.info(".............................params: "+params);
-    String val = (new Boolean(src.equals(str2))).toString();
-    String comment;
+    boolean matched = false;
+    String val = null;
+    
+    if(regexMatch){
+    	//the destination string is a regular expression
+    	Pattern pattern = Pattern.compile(dest);
+    	Matcher matcher = pattern.matcher(src);
+    	matched = matcher.find();
+    }else{
+    	matched = src.equals(dest);
+    }
+    
+    val = String.valueOf(matched);
 	if (!setVar(varName, val))return;
-    comment = genericText.convert("equals", 
+    String comment = genericText.convert("equals", 
                                    varName +" equals "+ val,
                                    varName, val);
-    issueGenericSuccess(comment);
+    String detail =  StringUtils.quote(src)+ (matched? " matched ":" did not match ")+ StringUtils.quote(dest);
+    		
+    issueGenericSuccess(comment, detail);
   }
 
   /** <br><em>Purpose:</em> concatenate
