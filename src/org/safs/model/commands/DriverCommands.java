@@ -9292,7 +9292,8 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
 
 
     /*********** <pre>
-          Read the number of characters from the file defined by file number                 and assign a string containing the characters read to a DDV variable.
+          Read the number of characters from the file defined by file number 
+          and assign a string containing the characters read to a DDV variable.
             </pre>    Supporting Engines:
     <P/><UL>
         <LI>Rational Robot</LI>
@@ -9307,9 +9308,10 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
             
      @param numberOfChar  Optional:NO
               Number of characters to be read from the file
+              If the number is -1, then the whole content will be read .
             
      @param variableName  Optional:NO
-              Name of the DDV variable in which to store the characters                 read from the file
+              Name of the DDV variable in which to store the characters read from the file
             
      **********/
     static public DriverCommand readFileChars (String fileNumber, String numberOfChar, String variableName) {
@@ -9326,7 +9328,8 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
 
 
     /*********** <pre>
-          Read the number of characters from the file defined by file number                 and assign a string containing the characters read to a DDV variable.
+          Read the number of characters from the file defined by file number 
+          and assign a string containing the characters read to a DDV variable.
             </pre>    
     Supporting Engines:
     <P/><UL>
@@ -9344,8 +9347,9 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
               The file number of the file to be read from.
             <BR/>        numberOfChar -- Optional:NO
               Number of characters to be read from the file
+              If the number is -1, then the whole content will be read .
             <BR/>        variableName -- Optional:NO
-              Name of the DDV variable in which to store the characters                 read from the file
+              Name of the DDV variable in which to store the characters read from the file
             
     </UL>
 
@@ -12390,8 +12394,10 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
     /*********** <pre>
           Compares two strings and returns an integer specifying the
           result of the comparison.
-          The java version uses String.equals()  for comparison so the
-          result will be either 'true' or 'false'
+          The java version returns 'true' or 'false' as the result.
+        
+          For java version, if the parameter 'regexMatch' is true, then
+          the parameter 'dstString' is considered as regular expression.
             </pre>    Supporting Engines:
     <P/><UL>
         <LI>Rational RobotJ</LI>
@@ -12401,17 +12407,20 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
     </UL>
 
      @param sourceString  Optional:NO
-              sourceString (could come from a ^variable)
+              The source string (could come from a ^variable) to compare.
             
      @param dstString  Optional:NO
-              dstString (could come from a ^variable)
+              The destination string (could come from a ^variable) to compare.
             
      @param resultVar  Optional:NO
               the resultVar to place the result of the
               operation into
             
+     @param regexMatch  Optional:YES  DefaultVal:false
+              Indicates if the comparison is in regex way.
+            
      **********/
-    static public DriverCommand compare (String sourceString, String dstString, String resultVar) {
+    static public DriverCommand compare (String sourceString, String dstString, String resultVar, String regexMatch) {
 
         if ( dstString == null ) throw new IllegalArgumentException ( "compare.dstString = null");
         if ( resultVar == null ) throw new IllegalArgumentException ( "compare.resultVar = null");
@@ -12420,6 +12429,7 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
         dc.addParameter(sourceString);
         dc.addParameter(dstString);
         dc.addParameter(resultVar);
+        dc.addParameter(regexMatch);
         return dc;
     }
 
@@ -12427,8 +12437,10 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
     /*********** <pre>
           Compares two strings and returns an integer specifying the
           result of the comparison.
-          The java version uses String.equals()  for comparison so the
-          result will be either 'true' or 'false'
+          The java version returns 'true' or 'false' as the result.
+        
+          For java version, if the parameter 'regexMatch' is true, then
+          the parameter 'dstString' is considered as regular expression.
             </pre>    
     Supporting Engines:
     <P/><UL>
@@ -12442,12 +12454,14 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
             An array containing the following parameters:
     <UL>
 <BR/>        sourceString -- Optional:NO
-              sourceString (could come from a ^variable)
+              The source string (could come from a ^variable) to compare.
             <BR/>        dstString -- Optional:NO
-              dstString (could come from a ^variable)
+              The destination string (could come from a ^variable) to compare.
             <BR/>        resultVar -- Optional:NO
               the resultVar to place the result of the
               operation into
+            <BR/>        regexMatch -- Optional:YES  DefaultVal:false
+              Indicates if the comparison is in regex way.
             
     </UL>
 

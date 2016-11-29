@@ -167,8 +167,10 @@ public class DDDriverStringCommands {
     /*********** <pre>
           Compares two strings and returns an integer specifying the
           result of the comparison.
-          The java version uses String.equals()  for comparison so the
-          result will be either 'true' or 'false'
+          The java version returns 'true' or 'false' as the result.
+        
+          For java version, if the parameter 'regexMatch' is true, then
+          the parameter 'dstString' is considered as regular expression.
             </pre>    Supporting Engines:
     <P/><UL>
         <LI>Rational RobotJ</LI>
@@ -178,17 +180,20 @@ public class DDDriverStringCommands {
     </UL>
 
      @param sourceString  Optional:NO
-              sourceString (could come from a ^variable)
+              The source string (could come from a ^variable) to compare.
             
      @param dstString  Optional:NO
-              dstString (could come from a ^variable)
+              The destination string (could come from a ^variable) to compare.
             
      @param resultVar  Optional:NO
               the resultVar to place the result of the
               operation into
             
+     @param regexMatch  Optional:YES  DefaultVal:false
+              Indicates if the comparison is in regex way.
+            
      **********/
-    static public DriverCommand compare (String sourceString, String dstString, String resultVar) {
+    static public DriverCommand compare (String sourceString, String dstString, String resultVar, String regexMatch) {
 
         if ( dstString == null ) throw new IllegalArgumentException ( "compare.dstString = null");
         if ( resultVar == null ) throw new IllegalArgumentException ( "compare.resultVar = null");
@@ -197,6 +202,7 @@ public class DDDriverStringCommands {
         dc.addParameter(sourceString);
         dc.addParameter(dstString);
         dc.addParameter(resultVar);
+        dc.addParameter(regexMatch);
         return dc;
     }
 
@@ -204,8 +210,10 @@ public class DDDriverStringCommands {
     /*********** <pre>
           Compares two strings and returns an integer specifying the
           result of the comparison.
-          The java version uses String.equals()  for comparison so the
-          result will be either 'true' or 'false'
+          The java version returns 'true' or 'false' as the result.
+        
+          For java version, if the parameter 'regexMatch' is true, then
+          the parameter 'dstString' is considered as regular expression.
             </pre>    
     Supporting Engines:
     <P/><UL>
@@ -219,12 +227,14 @@ public class DDDriverStringCommands {
             An array containing the following parameters:
     <UL>
 <BR/>        sourceString -- Optional:NO
-              sourceString (could come from a ^variable)
+              The source string (could come from a ^variable) to compare.
             <BR/>        dstString -- Optional:NO
-              dstString (could come from a ^variable)
+              The destination string (could come from a ^variable) to compare.
             <BR/>        resultVar -- Optional:NO
               the resultVar to place the result of the
               operation into
+            <BR/>        regexMatch -- Optional:YES  DefaultVal:false
+              Indicates if the comparison is in regex way.
             
     </UL>
 
