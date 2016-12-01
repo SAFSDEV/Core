@@ -1,7 +1,31 @@
 /** Copyright (C) (MSA, Inc) All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
-
+/**
+ * History:
+ *
+ * JUN 03, 2003    (DBauman) Original Release
+ * SEP 16, 2003    (CANAGL) Implemented use of new SAFSLOGS logging.
+ * NOV 10, 2003    (CANAGL) Added constants for known record types.
+ *                          Added new abstract isSupportedRecordType()
+ * NOV 13, 2003    (CANAGL) Added support for stored processors or
+ *                          full or partial class names for processors.
+ *                          The latter is moving the functionality out of
+ *                          the TestRecordData class into the individual
+ *                          Processors for more flexible differentiation of
+ *                          processors.
+ * NOV 13, 2003    (DBauman) Added support for breakpoints.
+ * NOV 19, 2003    (CANAGL) Additional refactoring.
+ * AUG 08, 2006    (PHSABO) Added helper functions getSubAreaRectangle and getClippedSubAreaRectangle used by GetGUIImage and FilterImage.
+ * JAN 29, 2007    (CANAGL) Added chainedProcessor support for all Processors.
+ * JAN 25, 2008    (CANAGL) Removed Java 1.5 String.contains dependencies.
+ * JUL 31, 2008    (CANAGL) Added CASEINSENSITIVE static strings for subclasses.
+ * AUG 25, 2008    (CANAGL) Added try/catch in distributeConfigInfo routine.
+ * MAR 26, 2009    (CANAGL) Added safsparams support for clearProxiesAlways.
+ * MAR 08, 2011    (DharmeshPatel) Added RFSMOnly support for RFSM search mode.
+ * JUL 22, 2013    (SBJLWA) Added methods deducexxxFile().
+ * DEC 01, 2016    (SBJLWA) Added methods setAtEndOfProcess() etc.
+ **/
 package org.safs;
 
 import java.io.BufferedReader;
@@ -28,6 +52,7 @@ import org.safs.logging.AbstractLogFacility;
 import org.safs.logging.LogUtilities;
 import org.safs.text.FAILStrings;
 import org.safs.text.FileUtilities;
+import org.safs.text.GENStrings;
 import org.safs.tools.CaseInsensitiveFile;
 import org.safs.tools.DefaultTestRecordStackable;
 import org.safs.tools.ITestRecordStackable;
@@ -40,27 +65,6 @@ import org.safs.tools.drivers.DriverConstant;
  * <p>
  * @author  Doug Bauman
  * @since   JUN 03, 2003
- *
- *   <br>   JUN 03, 2003    (DBauman) Original Release
- *   <br>   SEP 16, 2003    (CANAGL) Implemented use of new SAFSLOGS logging.
- *   <br>   NOV 10, 2003    (CANAGL) Added constants for known record types.
- *   <br>                            Added new abstract isSupportedRecordType()
- *   <br>   NOV 13, 2003    (CANAGL) Added support for stored processors or
- *   <br>                            full or partial class names for processors.
- *   <br>                            The latter is moving the functionality out of
- *   <br>                            the TestRecordData class into the individual
- *   <br>                            Processors for more flexible diffentiation of
- *   <br>                            processors.
- *   <br>   NOV 13, 2003    (DBauman) Added support for breakpoints.
- *   <br>   NOV 19, 2003    (CANAGL) Additional refactoring.
- *   <br>   AUG 08, 2006    (PHSABO) Added helper functions getSubAreaRectangle and getClippedSubAreaRectangle used by GetGUIImage and FilterImage.
- *   <br>   JAN 29, 2007    (CANAGL) Added chainedProcessor support for all Processors.
- *   <br>   JAN 25, 2008    (CANAGL) Removed Java 1.5 String.contains dependencies.
- *   <br>   JUL 31, 2008    (CANAGL) Added CASEINSENSITIVE static strings for subclasses.
- *   <br>   AUG 25, 2008    (CANAGL) Added try/catch in distributeConfigInfo routine.
- *   <br>   MAR 26, 2009    (CANAGL) Added safsparams support for clearProxiesAlways.
- *   <br>   MAR 08, 2011 (DharmeshPatel) Added RFSMOnly support for RFSM search mode.
- *   <br>   JUL 22, 2013    (SBJLWA) Added methods deducexxxFile().
  **/
 public abstract class Processor implements RuntimeDataInterface, ITestRecordStackable{
 
@@ -664,7 +668,7 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
     return lookup;
   }
 
-  /** <br><em>Purpose:</em> if leading ^ found, then substitue variable.
+  /** <br><em>Purpose:</em> if leading ^ found, then substitute variable.
    ** It will log a warning message, set statusCode to StatusCodes.GENERAL_SCRIPT_FAILURE
    ** and return null if variable not found.<br>
    ** *NOTE* According to the chief architect for the SAFS framework, an engine should
@@ -867,14 +871,14 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
   }
   /**
    * @param filename		A file name
-   * @param directory		This is a varible assigned in STAF system. It can be one of following:
+   * @param directory		This is a variable assigned in STAF system. It can be one of following:
    * 						1. STAFHelper.SAFS_VAR_BENCHDIRECTORY
    * 						2. STAFHelper.SAFS_VAR_DATAPOOLDIRECTORY
    * 						3. STAFHelper.SAFS_VAR_DIFDIRECTORY
    * 						4. STAFHelper.SAFS_VAR_LOGSDIRECTORY
    * 						5. STAFHelper.SAFS_VAR_PROJECTDIRECTORY
    * 						6. STAFHelper.SAFS_VAR_TESTDIRECTORY
-   * @return				An aboulte filename
+   * @return				An absolute filename
    *                        if the parameter filename is absolute, return the parameter filename itself.
    *                        if the parameter filename is relative,
    *                           return the file under parameter directory if that file exist; 
@@ -963,7 +967,7 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
   /**
    * Retrieve the standard "SOMETHING failure in filename FILENAME at line LINENUMBER" message.
    * Expects testRecordData to already have filename and lineNumber.
-   * @param failure -- text to appear before the filname and line number info.
+   * @param failure -- text to appear before the filename and line number info.
    **/
   protected String getStandardErrorMessage(String failure){
   	return failedText.convert("standard_err", failure+" failure in filename "+
@@ -1124,6 +1128,85 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
 			  testRecordData.getFilename(),
 			  error);
 	  logFailureMessage(aborttext, details, error);
+  }
+  
+  /**
+   * If [message]==null<br>
+   * Unable to perform [action]. <br>
+   * "Error at line [number] in file [file]: [error]"<br>
+   * 
+   * If [message]!=null<br>
+   * [message] <br>
+   * "Error at line [number] in file [file]: [error]"<br>
+   * <p>
+   * Sets status to FAILURE and issues a FAILED message.
+   * called by other issueFailure routines 
+   ***/
+  protected void issueInputRecordFailure(String message, String error){
+	  testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
+	  String aborttext = message==null?
+			  FAILStrings.convert(FAILStrings.FAILURE_1, 
+			  "Unable to perform '"+testRecordData.getCommand()+"'.",
+			  testRecordData.getCommand()) : message;
+	  String details = FAILStrings.convert(FAILStrings.FAILURE_DETAIL,
+			  "Error at line "+testRecordData.getLineNumber()+
+			  " in file "+testRecordData.getFilename()+
+			  " : "+ error,
+			  String.valueOf(testRecordData.getLineNumber()),
+			  testRecordData.getFilename(),
+			  error);
+	  logFailureMessage(aborttext, details, error);
+  }
+  
+  /** 
+   * issue OK status and PASSED message.<br>
+   * If [message]==null<br>
+   * [action] successful.<br>
+   * [detail]<br>
+   * 
+   * If [message]!=null<br>
+   * [message]<br>
+   * [detail]<br>
+   * string comment is expected to already be localized, but can be null.
+   **/
+  protected void issuePassedSuccess(String message, String detail){
+      testRecordData.setStatusCode(StatusCodes.OK);
+      String success = message==null?
+    		  GENStrings.convert(GENStrings.SUCCESS_1, 
+                       testRecordData.getCommand() +" successful.",
+                       testRecordData.getCommand()) : message;
+      log.logMessage(testRecordData.getFac(), success, detail, PASSED_MESSAGE);	  
+  }
+  
+  /**
+   * At the end of processing a test-record, this method could be called to set the
+   * test-record's status code, and write the message to the Test Log.<br>
+   * Currently, for
+   * <ul> 
+   * <li>{@link StatusCodes#NO_SCRIPT_FAILURE}, it calls {@link #issuePassedSuccess(String, String)}
+   * <li>{@link StatusCodes#GENERAL_SCRIPT_FAILURE}, it calls {@link #issueInputRecordFailure(String, String)}
+   * <li>Other status code, it simply writes a generic message to the test log.
+   * </ul>
+   * @param statusCode int, the status code to set to test-record.
+   * @param message String, the message to write to the Test Log.
+   *                        If it is null, then the default message will be used. 
+   * @param detail String, the detail message to write to the Test Log.
+   *                       If it is null, then the default detail message will be used.
+   *
+   * @see #issueInputRecordFailure(String, String)
+   * @see #issuePassedSuccess(String, String)
+   */
+  protected void setAtEndOfProcess(int statusCode, String message, String detail){
+	  IndependantLog.debug("After process, the status code is '"+statusCode+"'.\n message:\n "+message+"\n detail:\n"+detail+"\n");
+
+	  if(statusCode==StatusCodes.NO_SCRIPT_FAILURE){
+		  issuePassedSuccess(message, detail);
+	  }else if(statusCode==StatusCodes.GENERAL_SCRIPT_FAILURE){
+		  issueInputRecordFailure(message, detail);
+	  }else{
+		  log.logMessage(testRecordData.getFac(), message, detail, GENERIC_MESSAGE);	
+		  testRecordData.setStatusCode(statusCode);
+	  }
   }
 
   /** 
