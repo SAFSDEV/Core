@@ -7,7 +7,8 @@
  * Logs for developers, not published to API DOC.
  *
  * History:
- * NOV 07, 2016    (SBJLWA) Initial release: Moved codes from SAFSPlus to here.
+ * NOV 07, 2016    (SBJLWA) Initial release: Moved codes from SeleniumPlus to here.
+ * DEC 01, 2016    (SBJLWA) Added method Compare(): to compare with a regex.
  */
 package org.safs;
 
@@ -4421,8 +4422,39 @@ public abstract class SAFSPlus {
 		 * }
 		 * </pre>
 		 */
-		public static boolean Compare(String source, String dest, String resultVar){
-			return command(DDDriverStringCommands.COMPARE_KEYWORD, quote(source), quote(dest), resultVar);
+		public static boolean Compare(String source, String destination, String resultVar){
+			return command(DDDriverStringCommands.COMPARE_KEYWORD, quote(source), quote(destination), resultVar);
+		}
+		/**
+		 * Compares a string with a normal string or a regular expression.
+		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_Compare">Detailed Reference</a><p>
+		 * @param source String, string to compare
+		 * @param destination String, normal string to compare or the regex string to match
+		 * @param resultVar String, the variable to hold the result of the operation
+		 * @param regexMatch boolean, if the destination string is a regex string to match.
+		 * @return true if successful, false otherwise.<p>
+		 * <pre>
+		 * {@code
+		 * String var = "result";
+		 * String source = "hello";
+		 * String destination = "^[h|H]ello?$";
+		 * if(Strings.Compare(source, destination, var))
+		 *   System.out.println("Compare success: result is "+GetVariableValue(var));//expected result 'true'
+		 * 
+		 * source = "hell";
+		 * if(Strings.Compare(source, destination, var))
+		 *   System.out.println("Compare success: result is "+GetVariableValue(var));//expected result 'true'
+		 * 
+		 * //without leading ^ and ending $, the regex will match the substring of source string.
+		 * destination = "[h|H]ello?";
+		 * source = "Hi, hello Matt.";//sub-string "hello" will match the regex
+		 * if(Strings.Compare(source, destination, var))
+		 *   System.out.println("Compare success: result is "+GetVariableValue(var));//expected result 'true'
+		 * }
+		 * </pre>
+		 */
+		public static boolean Compare(String source, String destination, String resultVar, boolean regexMatch){
+			return command(DDDriverStringCommands.COMPARE_KEYWORD, quote(source), quote(destination), resultVar, String.valueOf(regexMatch));
 		}
 		/**
 		 * Concatenate String1 with String2 and returns concatenated string.
