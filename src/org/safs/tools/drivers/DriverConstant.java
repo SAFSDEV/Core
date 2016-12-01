@@ -14,7 +14,6 @@ import java.awt.event.KeyEvent;
 
 import org.safs.JavaConstant;
 import org.safs.StatusCodes;
-import org.safs.StringUtils;
 import org.safs.logging.AbstractLogFacility;
 
 /**
@@ -107,6 +106,11 @@ public class DriverConstant extends JavaConstant{
 	/** "safstid.ini" <br>
 	 * Default Configuration filename used by TID Driver.**/
 	public static final String DEFAULT_CONFIGURE_FILENAME = "safstid.ini";
+	
+	/** "test.ini" <br>
+	 * Default Configuration filename used by org.safs.model.tools.AbstractRunner,
+	 * it serves as the default configuration file for any driver launched from within AbstractRunner. **/
+	public static final String DEFAULT_CONFIGURE_FILENAME_TEST_INI = "test.ini";
 
 	/** "org.safs.tools.drivers.ConfigureFileLocator" <br>
 	 * Default ConfigureLocatorInterface used by TID Driver.**/
@@ -349,7 +353,7 @@ public class DriverConstant extends JavaConstant{
 	/** "safs.project.config"<br>
 	 * System Property identifying the path to an alternate project 
 	 * configuration file (other than safstid.ini in the default 
-	 * project config location.<br>
+	 * project configuration location.<br>
 	 * JVM command line: -Dsafs.project.config=string|path **/
 	public static final String PROPERTY_SAFS_PROJECT_CONFIG ="safs.project.config";
 
@@ -590,9 +594,9 @@ public class DriverConstant extends JavaConstant{
 		 * */
 		public static final String SELENIUMHOST ="SELENIUMHOST";
 		/**'localhost' the default host where the SELENIUM server will run*/
-		public static final String DEFAULT_SELENIUM_HOST = StringUtils.LOCAL_HOST;
+		public static final String DEFAULT_SELENIUM_HOST = LOCAL_HOST;
 		/** '127.0.0.1' the default host where the SELENIUM server will run*/
-		public static final String DEFAULT_SELENIUM_HOST_IP = StringUtils.LOCAL_HOST_IP;
+		public static final String DEFAULT_SELENIUM_HOST_IP = LOCAL_HOST_IP;
 				
 		/** "SELENIUMPORT" define the port number on which the SELENIUM "standalone server"/"grid hub" will run
 		 * @see #SELENIUMHOST
