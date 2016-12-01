@@ -2031,14 +2031,23 @@ public class TIDComponent extends GenericEngine {
 	/**
 	 * @param responseID String, the unique ID to identify the rest service Response.
 	 * @return Response, a cached Response returned from a rest service.
+	 *                   null if it doesn't exist.
 	 */
 	public static synchronized Response getRestResponse(String responseID){
 		return responseMap.get(responseID);
 	}
+	/**
+	 * @param responseID String, the unique ID to identify the rest service Response.
+	 * @return Response, a cached Response deleted from the internal Map.
+	 *                   null if it doesn't exist.
+	 */
 	public static synchronized Response deleteRestResponse(String responseID){
 		return responseMap.remove(responseID);
 	}
-	public static synchronized void deleteRestResponseStore(String responseID){
+	/**
+	 * Clean the whole Map, all Responses will be removed.
+	 */
+	public static synchronized void deleteRestResponseStore(){
 		responseMap.clear();
 	}
 
