@@ -22,6 +22,7 @@ import org.safs.image.ImageUtils.SubArea;
 import org.safs.model.annotations.Utilities;
 import org.safs.model.commands.CheckBoxFunctions;
 import org.safs.model.commands.ComboBoxFunctions;
+import org.safs.model.commands.DDDriverRestCommands;
 import org.safs.model.commands.DDDriverCommands;
 import org.safs.model.commands.DDDriverCounterCommands;
 import org.safs.model.commands.DDDriverFileCommands;
@@ -35,6 +36,7 @@ import org.safs.model.commands.GenericObjectFunctions;
 import org.safs.model.commands.JavaMenuFunctions;
 import org.safs.model.commands.ListViewFunctions;
 import org.safs.model.commands.ScrollBarFunctions;
+import org.safs.model.commands.TIDRestFunctions;
 import org.safs.model.commands.TabControlFunctions;
 import org.safs.model.commands.TreeViewFunctions;
 import org.safs.model.commands.WindowFunctions;
@@ -5153,6 +5155,42 @@ public abstract class SAFSPlus {
 			
 			return action(window, WindowFunctions.SETPOSITION_KEYWORD, parameter.toString());
 		}	
+	}
+	
+	/**
+	 * Wrapper class providing APIs to handle 
+	 * <a href="http://safsdev.github.io/sqabasic2000/TIDRestFunctionsIndex.htm">TIDRestFunctions Reference</a> and 
+	 * <a href="http://safsdev.github.io/sqabasic2000/DDDriverRestCommandsIndex.htm">DriverRestCommands Reference</a>, like RestGetBinary, RestStoreResponse etc.<br>
+	 */
+	public static class Rest{
+
+		//REST actions
+		public static boolean EndServiceSession(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTENDSERVICESESSION_KEYWORD, params);
+		}
+		public static boolean GetBinary(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTGETBINARY_KEYWORD, params);
+		}
+		public static boolean Request(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTREQUEST_KEYWORD, params);
+		}
+		public static boolean StartServiceSession(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTSTARTSERVICESESSION_KEYWORD, params);
+		}
+		
+		//REST Driver commands
+		public static boolean DeleteResponse(String... params){
+			return command(DDDriverRestCommands.RESTDELETERESPONSE_KEYWORD, params);
+		}
+		public static boolean DeleteResponseStore(String... params){
+			return command(DDDriverRestCommands.RESTDELETERESPONSESTORE_KEYWORD, params);
+		}
+		public static boolean StoreResponse(String... params){
+			return command(DDDriverRestCommands.RESTSTORERESPONSE_KEYWORD, params);
+		}
+		public static boolean CleanResponseMap(String... params){
+			return command(DDDriverRestCommands.RESTCLEANRESPONSEMAP_KEYWORD, params);
+		}
 	}
 	
 	/**
