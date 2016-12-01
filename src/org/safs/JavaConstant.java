@@ -1,6 +1,6 @@
 package org.safs;
 
-public class JavaConstant {
+public class JavaConstant extends Constants{
 
 	/** Disable construction. **/
 	protected JavaConstant (){}

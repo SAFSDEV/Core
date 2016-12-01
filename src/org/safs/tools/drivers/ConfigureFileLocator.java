@@ -2,19 +2,11 @@ package org.safs.tools.drivers;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Enumeration;
-import java.util.MissingResourceException;
 import java.util.Vector;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.safs.GuiClassData;
-import org.safs.IndependantLog;
 import org.safs.Log;
 import org.safs.install.ProjectInstaller;
 import org.safs.text.FileUtilities;
@@ -22,7 +14,9 @@ import org.safs.tools.CaseInsensitiveFile;
 import org.safs.tools.MainClass;
 
 public class ConfigureFileLocator implements ConfigureLocatorInterface {
-	protected Vector paths = new Vector(6,1);
+	protected Vector<String> paths = new Vector<String>(6,1);
+	boolean projectExtracted = false;
+	File extractFile = null;
 	
 	/**
 	 * Constructor for ConfigureLocator
@@ -39,7 +33,6 @@ public class ConfigureFileLocator implements ConfigureLocatorInterface {
 		if (dir.isDirectory()) return dir;
 		return null;
 	}
-
 	
 	/** return a valid ConfigureInterface with the candidate path signature only once.**/
 	protected ConfigureInterface uniqueConfigureInterface(File candidate)
@@ -50,16 +43,11 @@ public class ConfigureFileLocator implements ConfigureLocatorInterface {
 		return (new ConfigureFile(candidate));
 	}
 	
-	
-	
-	boolean projectExtracted = false;
-	
 	/**
 	 * @see ConfigureLocatorInterface#locateConfigureInterface(String, String)
 	 */
 	public ConfigureInterface locateConfigureInterface(String rootDir, String configPath) {
 
-		ConfigureFile configFile = null;
 		CaseInsensitiveFile config = new CaseInsensitiveFile(configPath);
 		CaseInsensitiveFile newConfig = null;
 		
@@ -129,8 +117,6 @@ public class ConfigureFileLocator implements ConfigureLocatorInterface {
 		return null;		
 	}
 	
-	File extractFile = null;
-	
 	/**
 	 * Deduce a Temp directory or user-specified extraction directory for JAR extraction.
 	 * <p>
@@ -171,17 +157,18 @@ public class ConfigureFileLocator implements ConfigureLocatorInterface {
 	 * the ini file (configPath) is a file in that directory.
 	 * <p>
 	 * @param rootDir - required name of a project root directory to seek in the main class JAR file.
-	 * @param configPath -- required name of a config file to seek in the project root directory.
-	 * @return CaseInsensitiveFile pointing to the newly extracted config file, or null.
+	 * @param configPath -- required name of a configuration file to seek in the project root directory.
+	 * @return CaseInsensitiveFile pointing to the newly extracted configuration file, or null.
 	 * @see org.safs.tools.MainClass
 	 */
 	public CaseInsensitiveFile extractConfigPath(String rootDir, String configPath){
 		String theClassname = MainClass.getMainClass();
 		if (theClassname == null) return null; // retain normal functionality
+		ZipFile jar = null;
 		try{
 			if(rootDir == null) 
 				throw new IllegalArgumentException("The required rootDir parameter cannot be null!");
-			Class theClass = Class.forName(theClassname);
+			Class<?> theClass = Class.forName(theClassname);
 			URL domain = theClass.getProtectionDomain().getCodeSource().getLocation();
 			if(!domain.getProtocol().equalsIgnoreCase("file"))
 				throw new IllegalArgumentException(theClassname +" was not found in a JAR file!");			
@@ -190,7 +177,7 @@ public class ConfigureFileLocator implements ConfigureLocatorInterface {
 				throw new IllegalArgumentException(domain.toExternalForm() +" did not provide a valid Path!");				
 			if(!FileUtilities.isArchive(jarfile))
 				throw new IllegalArgumentException(theClassname +" was not found in a JAR file!");
-			ZipFile jar = new ZipFile(jarfile);	
+			jar = new ZipFile(jarfile);	
 			ZipEntry zipDir = jar.getEntry(rootDir);
 			if(zipDir == null)
 				throw new IllegalArgumentException("Did not get a valid ZipEntry for rootDir "+ rootDir);				
@@ -212,8 +199,9 @@ public class ConfigureFileLocator implements ConfigureLocatorInterface {
 		}
 		catch(Exception x){
 			String msg = "ConfigFileLocator.extractConfigPath "+ x.getClass().getName()+": "+x.getMessage();
-//			System.out.println(msg);
 			Log.warn(msg);
+		}finally{
+			if(jar!=null) try { jar.close();} catch (IOException ignore) {}
 		}
 		return null;
 	}
