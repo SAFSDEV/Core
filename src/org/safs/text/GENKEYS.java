@@ -20,8 +20,6 @@ public class GENKEYS{
 	public static final String ATTEMPT_3A									= "attempt3a";
 	/** '%1%' has been saved to '%2%' */
 	public static final String BE_SAVED_TO									= "be_saved_to";
-	/** Object identified by '%1%' has been saved to variables prefixed by '%2%' */
-	public static final String ID_OBJECT_SAVED_TO_VARIABLE_PREFIX_2			= "id_objct_saved_to_variable_prefix2";
 	/** %1% attempting branch to %2%. */
 	public static final String BRANCHING									= "branching";
 	/** '%1%' contains '%2%' */
@@ -76,6 +74,10 @@ public class GENKEYS{
 	public static final String GONE_TIMEOUT									= "gone_timeout";
 	/** %1% is greater than %2% */
 	public static final String GREATER										= "greater";
+	/** Object identified by '%1%' has been saved to variables prefixed by '%2%' */
+	public static final String ID_OBJECT_SAVED_TO_VARIABLE_PREFIX_2			= "id_object_saved_to_variable_prefix2";
+	/** Object identified by '%1%' has been removed from cache map. */
+	public static final String ID_OBJECT_REMOVED_FROM_MAP					= "id_object_removed_from_map";
 	/** %1% in range %2% to %3% */
 	public static final String IN_RANGE										= "in_range";
 	/** '%1%' is not selected in %2% */
@@ -118,6 +120,8 @@ public class GENKEYS{
 	public static final String NOT_IN_RANGE									= "not_in_range";
 	/** %1% is not less than %2% */
 	public static final String NOT_LESS										= "not_less";
+	/** Objects have been removed from cache map. */
+	public static final String OBJECTS_REMOVED_FROM_MAP						= "objects_removed_from_map";
 	/** Variables prefixed with '%1%' have been deleted. */
 	public static final String PREFIX_VARS_DELETE_1							= "prefix_vars_delete_1";
 	/** %1% performed on '%2%' in %3%. */
