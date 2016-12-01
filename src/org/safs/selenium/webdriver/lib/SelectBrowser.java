@@ -21,10 +21,10 @@ package org.safs.selenium.webdriver.lib;
 *  MAR 23, 2016    (LeiWang) Modify setChromeCapabilities(): handle "command line options" and "preferences" for "chrome".
 *  APR 26, 2016    (LeiWang) Modify getDesiredCapabilities(): Get value of 'unexpectedAlertBehaviour' from Processor and 'System property'
 *                                                             and set it for all browsers.
+*  NOV 09, 2016    (LeiWang) Copied constants to org.safs.Contants and refer to them.
 */
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +39,8 @@ import org.openqa.selenium.firefox.internal.ProfilesIni;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.safs.Constants.BrowserConstants;
+import org.safs.Constants.SeleniumConstants;
 import org.safs.IndependantLog;
 import org.safs.Processor;
 import org.safs.StringUtils;
@@ -58,18 +60,18 @@ public class SelectBrowser {
 	//If you add a new KEY_XXX, please update the method getExtraParameterKeys() by adding it.
 	/** 'KEY_PROXY_SETTING' the key for proxy string; 
 	 * The value is colon separated string as "proxyserver:port" */
-	public static final String KEY_PROXY_SETTING = "KEY_PROXY_SETTING";
+	public static final String KEY_PROXY_SETTING = BrowserConstants.KEY_PROXY_SETTING;
 	/** 'KEY_PROXY_BYPASS_ADDRESS' the key for proxy bypass address string; 
 	 * The value is comma separated string as "localhost,internal.server,internal.server" */
-	public static final String KEY_PROXY_BYPASS_ADDRESS = "KEY_PROXY_BYPASS_ADDRESS";
+	public static final String KEY_PROXY_BYPASS_ADDRESS = BrowserConstants.KEY_PROXY_BYPASS_ADDRESS;
 	/** 'FirefoxProfile' the key for firefox profile name/filename string; 
 	 * The value is something like "myprofile" or "&lt;AbsolutePath>/ppc2784x.default" */
-	public static final String KEY_FIREFOX_PROFILE = "FirefoxProfile";//Name Or FilePath
+	public static final String KEY_FIREFOX_PROFILE = BrowserConstants.KEY_FIREFOX_PROFILE;//Name Or FilePath
 
 	/** 'firefox.perference' the key for firefox preference file, which contains json data, 
 	 * such as { "intl.accept_languages":"zh-cn", "accessibility.accesskeycausesactivation":false, "browser.download.folderList":2 }<br>
 	 * <b>Note: Be careful when creating the json data file, do NOT quote boolean or integer value.</b>*/
-	public static final String KEY_FIREFOX_PROFILE_PREFERENCE = "firefox.perference";//Firefox Preference file
+	public static final String KEY_FIREFOX_PROFILE_PREFERENCE = BrowserConstants.KEY_FIREFOX_PROFILE_PREFERENCE;//Firefox Preference file
 	
 	/** 'chrome.perference' the key for chrome command-line-options/preferences file, which contains 
 	 * <ol>
@@ -80,15 +82,15 @@ public class SelectBrowser {
 	 *     refer to <a href="https://src.chromium.org/viewvc/chrome/trunk/src/chrome/common/pref_names.cc">detail preferences</a>
 	 * <ol>
 	 */
-	public static final String KEY_CHROME_PREFERENCE = "chrome.perference";//"Chrome Command Line Options" and "Chrome Preferences" file
+	public static final String KEY_CHROME_PREFERENCE = BrowserConstants.KEY_CHROME_PREFERENCE;//"Chrome Command Line Options" and "Chrome Preferences" file
 	
 	/** 'seplus.chrome.preference.json.key' the key for chrome preferences, which points to json data, 
 	 * such as { "intl.accept_languages":"zh-cn", intl.charset_default:"utf-8" }, 
 	 * refer to <a href="https://src.chromium.org/viewvc/chrome/trunk/src/chrome/common/pref_names.cc">detail preferences</a>*/
-	public static final String KEY_CHROME_PREFERENCE_JSON_KEY = "seplus.chrome.preference.json.key";//Chrome Preferences
+	public static final String KEY_CHROME_PREFERENCE_JSON_KEY = BrowserConstants.KEY_CHROME_PREFERENCE_JSON_KEY;//Chrome Preferences
 	
 	/** 'prefs' the key used to set chrome Experimental Option. Used internally. */
-	private static final String KEY_CHROME_PREFS = "prefs";//setExperimentalOption
+	private static final String KEY_CHROME_PREFS = BrowserConstants.KEY_CHROME_PREFS;//setExperimentalOption
 	
 	/**'user-data-dir' the parameter name for chrome options, a general custom data settings.<br>
 	 * The value is specified in <a href="http://peter.sh/experiments/chromium-command-line-switches">chrome options</a><br>
@@ -96,7 +98,7 @@ public class SelectBrowser {
 	 *             Use SeleniumPlus.quote({@value #KEY_CHROME_USER_DATA_DIR}) to keep its value.
 	 * @see #KEY_CHROME_PROFILE_DIR
 	 **/
-	public static final String KEY_CHROME_USER_DATA_DIR = "user-data-dir";
+	public static final String KEY_CHROME_USER_DATA_DIR = BrowserConstants.KEY_CHROME_USER_DATA_DIR;
 	
 	/**'profile-directory' the parameter name for chrome options, a user-specific settings, it indicates a sub-folder under "user data directory".<br>
 	* The value is specified in <a href="http://peter.sh/experiments/chromium-command-line-switches">chrome options</a><br>
@@ -104,7 +106,7 @@ public class SelectBrowser {
 	*             Use SeleniumPlus.quote({@value #KEY_CHROME_PROFILE_DIR}) to keep its value.
 	* @see #KEY_CHROME_USER_DATA_DIR
 	**/
-	public static final String KEY_CHROME_PROFILE_DIR = "profile-directory";
+	public static final String KEY_CHROME_PROFILE_DIR = BrowserConstants.KEY_CHROME_PROFILE_DIR;
 	
 	/**
 	 * 'excludeSwitches' the experimental option name for chrome options, it is used to turn off chrome starting options.<br>
@@ -114,7 +116,7 @@ public class SelectBrowser {
 	 * <b>Note:</b> As the value, excluded-options, may contain minus like "disable-component-update", it could be interpreted as an arithmetic expression, 
 	 *             Use SeleniumPlus.quote("disable-component-update") to keep its value.
 	 */
-	public static final String KEY_CHROME_EXCLUDE_OPTIONS = "excludeSwitches";
+	public static final String KEY_CHROME_EXCLUDE_OPTIONS = BrowserConstants.KEY_CHROME_EXCLUDE_OPTIONS;
 	
 	/**
 	 * '--disable-extensions' is used to disable the use of Chrome extensions. Usually, we use it
@@ -125,8 +127,12 @@ public class SelectBrowser {
 	 *     WDLibrary.startBrowser(BrowserName, Url, Id, timeout, isRemote, quote(SelectBrowser.KEY_CHROME_DISABLE_EXTENSIONS), "false");
 	 * 
 	 */
-	public static final String KEY_CHROME_DISABLE_EXTENSIONS = "--disable-extensions";
+	public static final String KEY_CHROME_DISABLE_EXTENSIONS = BrowserConstants.KEY_CHROME_DISABLE_EXTENSIONS;
 
+	/** 'selenium.node' the key for selenium grid node string; 
+	 * The value is as "node1:port:nodeconfig;node2:port:nodeconfig;" */
+	public static final String KEY_GRID_NODES_SETTING = SeleniumConstants.KEY_GRID_NODES_SETTING;
+	
 	/**'http.proxyHost'*/
 	public static final String SYSTEM_PROPERTY_PROXY_HOST = StringUtils.SYSTEM_PROPERTY_PROXY_HOST;
 	/**'http.proxyPort'*/
@@ -134,48 +140,44 @@ public class SelectBrowser {
 	/**'http.proxyBypass'*/
 	public static final String SYSTEM_PROPERTY_PROXY_BYPASS = StringUtils.SYSTEM_PROPERTY_PROXY_BYPASS;
 	/**'selenium.host'*/
-	public static final String SYSTEM_PROPERTY_SELENIUM_HOST = "selenium.host";
+	public static final String SYSTEM_PROPERTY_SELENIUM_HOST = SeleniumConstants.SYSTEM_PROPERTY_SELENIUM_HOST;
 	/**'selenium.port'*/
-	public static final String SYSTEM_PROPERTY_SELENIUM_PORT = "selenium.port";
+	public static final String SYSTEM_PROPERTY_SELENIUM_PORT = SeleniumConstants.SYSTEM_PROPERTY_SELENIUM_PORT;
 	/**'selenium.node', its value is like node1:port:nodeconfig;node2:port:nodeconfig;<br>
 	 * semi-colon(;) serves as separator between nodes,<br>
 	 * colon(:) serves as separator between nodename, port, and node-configuration.<br>
 	 */
-	public static final String SYSTEM_PROPERTY_SELENIUM_NODE = "selenium.node";
+	public static final String SYSTEM_PROPERTY_SELENIUM_NODE = SeleniumConstants.SYSTEM_PROPERTY_SELENIUM_NODE;
 	/**'webdriver.ie.driver'*/
-	public static final String SYSTEM_PROPERTY_WEBDRIVER_IE = "webdriver.ie.driver";
+	public static final String SYSTEM_PROPERTY_WEBDRIVER_IE = SeleniumConstants.SYSTEM_PROPERTY_WEBDRIVER_IE;
 	/**'webdriver.chrome.driver'*/
-	public static final String SYSTEM_PROPERTY_WEBDRIVER_CHROME = "webdriver.chrome.driver";
+	public static final String SYSTEM_PROPERTY_WEBDRIVER_CHROME = SeleniumConstants.SYSTEM_PROPERTY_WEBDRIVER_CHROME;
 	/**'webdriver.edge.driver'*/
-	public static final String SYSTEM_PROPERTY_WEBDRIVER_EDGE = "webdriver.edge.driver";
+	public static final String SYSTEM_PROPERTY_WEBDRIVER_EDGE = SeleniumConstants.SYSTEM_PROPERTY_WEBDRIVER_EDGE;
 	
 	/**'BROWSER'*/
-	public static final String SYSTEM_PROPERTY_BROWSER_NAME = "BROWSER";
+	public static final String SYSTEM_PROPERTY_BROWSER_NAME = SeleniumConstants.SYSTEM_PROPERTY_BROWSER_NAME;
 	/**'BROWSER_REMOTE'*/
-	public static final String SYSTEM_PROPERTY_BROWSER_REMOTE = "BROWSER_REMOTE";
-	
-	/** 'selenium.node' the key for selenium grid node string; 
-	 * The value is as "node1:port:nodeconfig;node2:port:nodeconfig;" */
-	public static final String KEY_GRID_NODES_SETTING = SYSTEM_PROPERTY_SELENIUM_NODE;
+	public static final String SYSTEM_PROPERTY_BROWSER_REMOTE = SeleniumConstants.SYSTEM_PROPERTY_BROWSER_REMOTE;
 	
 	/**'<b>explorer</b>'*/
-	public static final String BROWSER_NAME_IE = "explorer";
+	public static final String BROWSER_NAME_IE = BrowserConstants.BROWSER_NAME_IE;
 	/**'<b>chrome</b>'*/
-	public static final String BROWSER_NAME_CHROME = "chrome";
+	public static final String BROWSER_NAME_CHROME = BrowserConstants.BROWSER_NAME_CHROME;
 	/**'<b>firefox</b>'*/
-	public static final String BROWSER_NAME_FIREFOX = "firefox";
+	public static final String BROWSER_NAME_FIREFOX = BrowserConstants.BROWSER_NAME_FIREFOX;
 	/**'<b>safari</b>'*/
-	public static final String BROWSER_NAME_SAFARI = "safari";
+	public static final String BROWSER_NAME_SAFARI = BrowserConstants.BROWSER_NAME_SAFARI;
 	/**'<b>MicrosoftEdge</b>'*/
-	public static final String BROWSER_NAME_EDGE = "MicrosoftEdge";
+	public static final String BROWSER_NAME_EDGE = BrowserConstants.BROWSER_NAME_EDGE;
 	/**'<b>htmlunit</b>'*/
-	public static final String BROWSER_NAME_HTMLUNIT = "htmlunit";
+	public static final String BROWSER_NAME_HTMLUNIT = BrowserConstants.BROWSER_NAME_HTMLUNIT;
 	/** '<b>android.chrome</b>' chrome browser on android */
-	public static final String BROWSER_NAME_ANDROID_CHROME = "android.chrome";
+	public static final String BROWSER_NAME_ANDROID_CHROME = BrowserConstants.BROWSER_NAME_ANDROID_CHROME;
 	/** '<b>ipad.safari</b>' safari browser on ios */
-	public static final String BROWSER_NAME_IPAD_SAFARI = "ipad.safari";
+	public static final String BROWSER_NAME_IPAD_SAFARI = BrowserConstants.BROWSER_NAME_IPAD_SAFARI;
 	/** '<b>ipad.sim.safari</b>' simulator on ios */
-	public static final String BROWSER_NAME_IPAD_SIMULATOR_SAFARI = "ipad.sim.safari";
+	public static final String BROWSER_NAME_IPAD_SIMULATOR_SAFARI = BrowserConstants.BROWSER_NAME_IPAD_SIMULATOR_SAFARI;
 	
 	/**'localhost'*/
 	public static final String DEFAULT_SELENIUM_HOST = SeleniumConfigConstant.DEFAULT_SELENIUM_HOST;
@@ -595,18 +597,6 @@ public class SelectBrowser {
 	 * @see #KEY_CHROME_EXCLUDE_OPTIONS
 	 */
 	public static String[] getExtraParameterKeys(){
-		List<String> keys = new ArrayList<String>();
-		
-		keys.add(KEY_PROXY_SETTING);
-		keys.add(KEY_PROXY_BYPASS_ADDRESS);
-		keys.add(KEY_FIREFOX_PROFILE);
-		keys.add(KEY_FIREFOX_PROFILE_PREFERENCE);
-		keys.add(KEY_CHROME_PREFERENCE);
-		keys.add(KEY_CHROME_USER_DATA_DIR);
-		keys.add(KEY_CHROME_PROFILE_DIR);
-		keys.add(KEY_CHROME_EXCLUDE_OPTIONS);
-		
-		return keys.toArray(new String[0]);
-		
+		return BrowserConstants.getExtraParameterKeys();
 	}
 }
