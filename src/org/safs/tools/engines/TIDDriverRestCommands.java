@@ -16,6 +16,7 @@
 package org.safs.tools.engines;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,6 +28,10 @@ import org.safs.StringUtils;
 import org.safs.TestRecordHelper;
 import org.safs.logging.LogUtilities;
 import org.safs.model.commands.DDDriverRestCommands;
+import org.safs.persist.Persistor;
+import org.safs.persist.Persistor.FileType;
+import org.safs.persist.Persistor.Type;
+import org.safs.persist.PersistorFactory;
 import org.safs.rest.service.Response;
 import org.safs.text.FAILKEYS;
 import org.safs.text.FAILStrings;
@@ -113,7 +118,7 @@ public class TIDDriverRestCommands extends GenericEngine{
 		return testRecordData.getStatusCode();
 	}
 	
-	private static final Map<String, String> variablePrefixToResponse = new HashMap<String, String>();
+	private static final Map<String, Set<Persistor>> responseIdToPersistorSet = new HashMap<String, Set<Persistor>>();
 	
 	/**
 	 * Internal Driver Command Processor.
@@ -206,12 +211,9 @@ public class TIDDriverRestCommands extends GenericEngine{
 			String description = null;
 			
 			//TODO do we need to add "responseID" as the first parameter, if we want to delete it also from the internal map.
-//			String responseID = null;
-//			responseID = iterator.next();
-			
-			String variablePrefix = iterator.next();
-			if(!StringUtils.isValid(variablePrefix)){
-				issueParameterValueFailure("variablePrefix");
+			String responseID = iterator.next();
+			if(!StringUtils.isValid(responseID)){
+				issueParameterValueFailure("responseID");
 				return;
 			}
 			
@@ -235,22 +237,39 @@ public class TIDDriverRestCommands extends GenericEngine{
 //					status = StatusCodes.GENERAL_SCRIPT_FAILURE;
 //				}
 //			}
+			
 
-			if(variablePrefixToResponse.containsKey(variablePrefix)){
-				if(Response.delete(this, variablePrefix)){
+			Set<Persistor> persistorSet = responseIdToPersistorSet.get(responseID);
+			
+			if(persistorSet!=null){
+				boolean success = true;
+				StringBuilder sb = new StringBuilder();
+				for(Persistor p:persistorSet){
+					try{
+						p.unpersist();
+					}catch(SAFSException e){
+						success = false;
+						sb.append(e.getMessage()+"\n");
+					}
+				}
+				
+				if(success){
+					//TODO use more appropriate success message.
 					description = passedText.convert(GENKEYS.PREFIX_VARS_DELETE_1, 
-							"Variables prefixed with '"+variablePrefix+"' have been deleted.", variablePrefix);
-					variablePrefixToResponse.remove(variablePrefix);
+							"Variables prefixed with '"+responseID+"' have been deleted.", responseID);
+					responseIdToPersistorSet.remove(responseID);
 				}else{
 					message = failedText.convert(FAILKEYS.NO_SUCCESS_1, command+" was not successful.", command);
-					description = failedText.convert(FAILKEYS.COULD_NOT_DELETE_PREFIX_VARS_1, 
-							"Could not delete one or more variable values prefixed with '"+variablePrefix+"'.", variablePrefix);
+					//TODO use more appropriate failure message.
+					description = sb.toString();
+//					description = failedText.convert(FAILKEYS.COULD_NOT_DELETE_PREFIX_VARS_1, 
+//							"Could not delete one or more variable values prefixed with '"+responseID+"'.", responseID);
 					status = StatusCodes.GENERAL_SCRIPT_FAILURE;
 				}
 			}else{
 				message = failedText.convert(FAILKEYS.NO_SUCCESS_1, command+" was not successful.", command);
 				description = failedText.convert(FAILKEYS.ID_NOT_FOUND_1, 
-						"Object identified by "+variablePrefix+" was not found.", variablePrefix);
+						"Object identified by "+responseID+" was not found.", responseID);
 				status = StatusCodes.GENERAL_SCRIPT_FAILURE;
 			}
 
@@ -262,32 +281,44 @@ public class TIDDriverRestCommands extends GenericEngine{
 			String description = null;
 			
 			boolean success = true;
-			Set<String> variablePrefixes = variablePrefixToResponse.keySet();
-			StringBuffer successVariablePrefix = new StringBuffer();
-			StringBuffer failVariablePrefix = new StringBuffer();
+			boolean persistorSuccess = true;
+			Set<String> responsIDSet = responseIdToPersistorSet.keySet();
+			Set<Persistor> persistorSet = null;
+			StringBuffer successResponseIDs = new StringBuffer();
+			StringBuffer failResponseIDs = new StringBuffer();
 
-			for(String variablePrefix:variablePrefixes){
-				success = Response.delete(this, variablePrefix);
-				if(success){
-					successVariablePrefix.append(variablePrefix+" ");
-					variablePrefixToResponse.remove(variablePrefix);
+			for(String responseID:responsIDSet){
+				persistorSet = responseIdToPersistorSet.get(responseID);
+				
+				persistorSuccess = true;
+				StringBuilder sb = new StringBuilder();
+				for(Persistor p:persistorSet){
+					try{
+						p.unpersist();
+					}catch(SAFSException e){
+						persistorSuccess = false;
+						sb.append(e.getMessage()+"\n");
+					}
+				}
+				
+				if(persistorSuccess){
+					successResponseIDs.append(responseID+" ");
+					responseIdToPersistorSet.remove(responseID);
 				}else{
-					failVariablePrefix.append(variablePrefix+" ");
+					failResponseIDs.append("==== ERROR FOR RESPONSE ID: "+responseID+"\n"+sb.toString());
+					success = false;
 				}
 			}
 
-			String param = null;
 			int status = StatusCodes.NO_SCRIPT_FAILURE;
 			if(success){
-				param = successVariablePrefix.toString().trim();
 				message = passedText.convert(GENKEYS.SUCCESS_1, command+" successful.", command);
-				description = passedText.convert(GENKEYS.PREFIX_VARS_DELETE_1, 
-						"Variables prefixed with '"+param+"' have been delete.", param);
+				//TODO use more appropriate success message.
+				description = successResponseIDs.toString();
 			}else{
-				param = failVariablePrefix.toString().trim();
 				message = failedText.convert(FAILKEYS.NO_SUCCESS_1, command+" was not successful.", command);
-				description = failedText.convert(FAILKEYS.COULD_NOT_DELETE_PREFIX_VARS_1, 
-						"Could not delete one or more variable values prefixed with '"+param+"'.", param);
+				//TODO use more appropriate failure message.
+				description = failResponseIDs.toString();
 				status = StatusCodes.GENERAL_SCRIPT_FAILURE;
 			}
 				
@@ -300,6 +331,8 @@ public class TIDDriverRestCommands extends GenericEngine{
 				return;
 			}
 			boolean saveRequest = false;
+			boolean persistFile = false;
+			FileType fileType = FileType.JSON;
 			String message = null;
 			String description = null;
 			
@@ -318,6 +351,12 @@ public class TIDDriverRestCommands extends GenericEngine{
 			if(iterator.hasNext()){
 				saveRequest = Boolean.parseBoolean(iterator.next());
 			}
+			if(iterator.hasNext()){
+				persistFile = Boolean.parseBoolean(iterator.next());
+			}
+			if(iterator.hasNext()){
+				fileType = FileType.get(iterator.next());
+			}
 			
 			Response response = TIDComponent.getRestResponse(responseID);
 			int status = StatusCodes.NO_SCRIPT_FAILURE;
@@ -327,11 +366,38 @@ public class TIDDriverRestCommands extends GenericEngine{
 				description = failedText.convert(FAILKEYS.ID_NOT_FOUND_1, "Object identified by "+responseID+" was not found.", responseID);
 				status = StatusCodes.GENERAL_SCRIPT_FAILURE;
 			}else{
-				if(response.save(this, variablePrefix, saveRequest)){
+				response.setEnabled(true);
+				response.get_request().setEnabled(saveRequest);
+				Persistor persistor = null;
+				
+				if(persistFile){
+					persistor = PersistorFactory.create(Type.FILE, fileType, this, variablePrefix); 
+				}else{
+					persistor = PersistorFactory.create(Type.VARIABLE, null, this, variablePrefix);
+				}
+				
+				try{
+					persistor.persist(response);
+					
+					synchronized(responseIdToPersistorSet){
+						Set<Persistor> persistorSet = responseIdToPersistorSet.get(responseID);
+						if(persistorSet==null){
+							persistorSet = new HashSet<Persistor>();
+							responseIdToPersistorSet.put(responseID, persistorSet);
+						}
+						if(!persistorSet.add(persistor)){
+							IndependantLog.warn(StringUtils.debugmsg(false)+"Failed to add Persistor '"+persistor+"' into internal cache.");
+						}
+					}
+					
+					//TODO use more appropriate success message.
 					description = passedText.convert(GENKEYS.ID_OBJECT_SAVED_TO_VARIABLE_PREFIX_2, 
 							"Object identified by '"+responseID+"' has been saved to variables prefixed with '"+variablePrefix+"'", responseID, variablePrefix);
-					variablePrefixToResponse.put(variablePrefix, responseID);
-				}else{
+					
+				}catch(SAFSException se){
+					IndependantLog.error(StringUtils.debugmsg(false)+" Failed, met "+StringUtils.debugmsg(se));
+					
+					//TODO use more appropriate failure message.
 					message = failedText.convert(FAILKEYS.NO_SUCCESS_1, command+" was not successful.", command);
 					description = failedText.convert(FAILKEYS.COULD_NOT_SET_PREFIX_VARS_1, 
 							"Could not delete one or more variable values prefixed with '"+variablePrefix+"'.", variablePrefix);
