@@ -5,12 +5,12 @@
 
 package org.safs.rest.service;
 
-import java.util.Map;
+import org.safs.persist.PersistableDefault;
 
 /**
  * @author canagl
  */
-public class Request {
+public class Request extends PersistableDefault{
 
 	String _request_method;
 	String _request_uri;
@@ -20,6 +20,14 @@ public class Request {
 	
 	Object _message_body;
 
+	static{
+		fieldToPersistKeyMap.put("_request_method", "Method");
+		fieldToPersistKeyMap.put("_request_uri", "URI");
+		fieldToPersistKeyMap.put("_request_http_version", "HttpVersion");
+		fieldToPersistKeyMap.put("_headers", "Headers");
+		fieldToPersistKeyMap.put("_message_body", "MessageBody");
+	}
+	
 	/**
 	 * @return the _request_method
 	 */
