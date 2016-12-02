@@ -2,7 +2,12 @@
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  */
-
+/**
+ * Logs for developers, not published to API DOC.
+ *
+ * History:
+ * DEC 02, 2016    (Lei Wang) Make this class persistable.
+ */
 package org.safs.rest.service;
 
 import java.lang.reflect.Field;
@@ -10,14 +15,14 @@ import java.lang.reflect.Modifier;
 import java.util.Map;
 
 import org.safs.IndependantLog;
+import org.safs.persist.PersistableDefault;
 import org.safs.tools.RuntimeDataInterface;
 
 /**
  * @author Carl Nagle
  */
-public class Response {
+public class Response extends PersistableDefault{
     
-	private static final String UNKNOWN_VALUE = "UNKNOWN";
 	Request _request;
 	
 	String ID = "TO BE ASSIGNED";
@@ -31,6 +36,20 @@ public class Response {
 	int _status_code;
 	String _status_line = UNKNOWN_VALUE;
 
+	static{
+		fieldToPersistKeyMap.put("_request", "Request");
+		fieldToPersistKeyMap.put("ID", "ID");
+		fieldToPersistKeyMap.put("_content_type", "ContentType");
+		fieldToPersistKeyMap.put("_entity_body", "EntityBody");
+		fieldToPersistKeyMap.put("_entity_length", "EntityLength");
+		fieldToPersistKeyMap.put("_headers", "Headers");
+		fieldToPersistKeyMap.put("_http_version", "HttpVersion");
+		fieldToPersistKeyMap.put("_message_body", "MessageBody");
+		fieldToPersistKeyMap.put("_reason_phrase", "ReasonPhrase");
+		fieldToPersistKeyMap.put("_status_code", "StatusCode");
+		fieldToPersistKeyMap.put("_status_line", "StatusLine");
+	}
+	
 	public String getID() {
 		return ID;
 	}
@@ -189,9 +208,11 @@ public class Response {
 		return "\n========\nRequest: " + getRequestInfo() +"\n"+
 				"=========\nResponse: "+ getResponseInfo();                
 	}
-    
+	
 	/**
-	 * Save Response, original Request to variables prefixed with 'variablePrefix'.<br>
+	 * Persist Response, original Request.<br> 
+	 * 
+	 * to variables prefixed with 'variablePrefix'.<br>
 	 * <pre>
 	 * Response is saved to variables:
 	 * variablePrefix.Response.Id
@@ -207,11 +228,14 @@ public class Response {
 	 * ...
 	 * </pre>
 	 * @param runtime	RuntimeDataInterface, it provides the ability to save variable
-	 * @param variablePrefix String, the variable prefix
+	 * @param variablePrefixOrFileName String, the variable prefix to generate a series of variables for persisting Response/Request;
+	 *                                         Or the file name for for persisting Response/Request.
 	 * @param saveRequest boolean, if the original request should be saved
+	 * @param persistFile boolean, if true, the Response/Request should be saved to a file; 
+	 *                             otherwise to a series of variables.
 	 * @return boolean if the save operation succeed
 	 */
-	public boolean save(RuntimeDataInterface runtime, String variablePrefix, boolean saveRequest){
+	public boolean persist(RuntimeDataInterface runtime, String variablePrefixOrFileName, boolean saveRequest, boolean persistFile){
 		boolean success = true;
 		String debugmsg = "Response.save(): ";
 		
@@ -219,14 +243,14 @@ public class Response {
 			IndependantLog.error(debugmsg+"runtime is null.");
 			return false;
 		}
-		if(variablePrefix==null || variablePrefix.trim().isEmpty()){
+		if(variablePrefixOrFileName==null || variablePrefixOrFileName.trim().isEmpty()){
 			IndependantLog.error(debugmsg+"variable prefix is null or empty.");
 			return false;
 		}
 
 
 		String variable = null;
-		String varResponsPrefix = variablePrefix+".Response.";
+		String varResponsPrefix = variablePrefixOrFileName+".Response.";
 		Class<?> clazz = getClass();
 
 		Field[] fields = clazz.getDeclaredFields();
@@ -264,7 +288,7 @@ public class Response {
 		}
 
 		if(saveRequest){
-			String varRequestPrefix = variablePrefix+".Request.";
+			String varRequestPrefix = variablePrefixOrFileName+".Request.";
 
 			if(_request!=null){
 				clazz = _request.getClass();
@@ -397,4 +421,5 @@ public class Response {
 		
 		return success;
 	}
+
 }
