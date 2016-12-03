@@ -186,8 +186,7 @@ public class DDDriverStringCommands {
               The destination string (could come from a ^variable) to compare.
             
      @param resultVar  Optional:NO
-              the resultVar to place the result of the
-              operation into
+              the resultVar to place the result of the operation into
             
      @param regexMatch  Optional:YES  DefaultVal:false
               Indicates if the comparison is in regex way.
@@ -231,8 +230,7 @@ public class DDDriverStringCommands {
             <BR/>        dstString -- Optional:NO
               The destination string (could come from a ^variable) to compare.
             <BR/>        resultVar -- Optional:NO
-              the resultVar to place the result of the
-              operation into
+              the resultVar to place the result of the operation into
             <BR/>        regexMatch -- Optional:YES  DefaultVal:false
               Indicates if the comparison is in regex way.
             

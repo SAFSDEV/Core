@@ -12413,8 +12413,7 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
               The destination string (could come from a ^variable) to compare.
             
      @param resultVar  Optional:NO
-              the resultVar to place the result of the
-              operation into
+              the resultVar to place the result of the operation into
             
      @param regexMatch  Optional:YES  DefaultVal:false
               Indicates if the comparison is in regex way.
@@ -12458,8 +12457,7 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
             <BR/>        dstString -- Optional:NO
               The destination string (could come from a ^variable) to compare.
             <BR/>        resultVar -- Optional:NO
-              the resultVar to place the result of the
-              operation into
+              the resultVar to place the result of the operation into
             <BR/>        regexMatch -- Optional:YES  DefaultVal:false
               Indicates if the comparison is in regex way.
             
