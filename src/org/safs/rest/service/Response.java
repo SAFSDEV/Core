@@ -12,6 +12,7 @@ package org.safs.rest.service;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.safs.IndependantLog;
@@ -23,6 +24,8 @@ import org.safs.tools.RuntimeDataInterface;
  */
 public class Response extends PersistableDefault{
     
+	protected final static Map<String, String> fieldToPersistKeyMap = new HashMap<String, String>();
+	
 	Request _request;
 	
 	String ID = "TO BE ASSIGNED";
@@ -422,4 +425,8 @@ public class Response extends PersistableDefault{
 		return success;
 	}
 
+	@Override
+	public Map<String, String> getPersitableFields() {
+		return fieldToPersistKeyMap;
+	}
 }

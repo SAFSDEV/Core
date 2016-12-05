@@ -35,10 +35,18 @@ public class PersistorFactory {
 		Persistor persistor = null;
 		
 		try{
-			if(Type.FILE.name.equals(persistenceType.name)){
-				new PersistorToFile(runtime, fileType, object.toString());
-			}else if(Type.VARIABLE.equals(persistenceType.name)){
-				new PersistorToVariable(runtime, object.toString());
+			if(Type.FILE.equals(persistenceType)){
+				if(FileType.JSON.equals(fileType)){
+					persistor = new PersistorToJSONFile(runtime, object.toString());
+				}else if(FileType.XML.equals(fileType)){
+					persistor = new PersistorToXMLFile(runtime, object.toString());
+				}else if(FileType.PROPERTIES.equals(fileType)){
+					persistor = new PersistorToPropertiesFile(runtime, object.toString());
+				}else{
+					IndependantLog.debug(StringUtils.debugmsg(false)+" file type '"+fileType.name+"' has not been supported yet!");
+				}
+			}else if(Type.VARIABLE.equals(persistenceType)){
+				persistor = new PersistorToVariable(runtime, object.toString());
 			}
 		}catch(Exception e){
 			IndependantLog.error(StringUtils.debugmsg(false)+" Failed to create Persistor, met "+StringUtils.debugmsg(e));
