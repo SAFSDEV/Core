@@ -25,6 +25,12 @@ public interface Persistable {
 	public Map<String, Object> getContents();
 	
 	/**
+	 * This Map contains a pair, the key is the 'class field name' telling us which field needs
+	 * to be persisted; the value is a 'unique string' representing this class field in the
+	 * persistence. The 'class field name' and the 'persist key' can be same or different.<br>
+	 * When persisting a class, not all the fields need to be persisted; Only those fields
+	 * which need to be persisted will be put into this Map.<br>
+	 * 
 	 * @return Map<String, String>, a Map containing a pair(fieldName, persistKey) to persist. 
 	 */
 	public Map<String, String> getPersitableFields();

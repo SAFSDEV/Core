@@ -11,9 +11,14 @@
  */
 package org.safs.persist;
 
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
+import org.safs.IndependantLog;
 import org.safs.SAFSException;
+import org.safs.SAFSPersistableNotEnableException;
 import org.safs.tools.RuntimeDataInterface;
 
 /**
@@ -21,6 +26,8 @@ import org.safs.tools.RuntimeDataInterface;
  */
 public class PersistorToVariable extends AbstractRuntimeDataPersistor{
 	protected String variablePrefix = null;
+	protected Set<String> storedVariables = new HashSet<String>();
+	
 	
 	public PersistorToVariable(RuntimeDataInterface runtime, String variablePrefix){
 		super(runtime);
@@ -31,17 +38,47 @@ public class PersistorToVariable extends AbstractRuntimeDataPersistor{
 	public void persist(Persistable persistable) throws SAFSException {
 		super.persist(persistable);
 		
-		//TODO details
 		Map<String, Object> contents = persistable.getContents();
+		String className = persistable.getClass().getSimpleName();
+		String variableName = null;
+		Object value = null;
 		
+		for(String key:contents.keySet()){
+			value = contents.get(key);
+			if(value instanceof Persistable){
+				try{
+					//We should not break if some child is not persistable
+					persist((Persistable) value);					
+				}catch(SAFSPersistableNotEnableException pne){
+					IndependantLog.warn(pne.toString());
+				}
+			}else{
+				variableName = variablePrefix+"."+className+"."+key;
+				//TODO value is not always a String, more codes are needed.
+				runtime.setVariable(variableName, value.toString());
+				storedVariables.add(variableName);
+			}
+		}
 	}
 
 	@Override
 	public void unpersist() throws SAFSException {
-		// TODO Auto-generated method stub
-		
+		Iterator<String> variables = storedVariables.iterator();
+		while(variables.hasNext()){
+			//TODO we need to add a deleteVarialbe in the runtime
+			runtime.setVariable(variables.next(), null);
+			variables.remove();
+		}
 	}
 
+	public Type getType(){
+		return Type.VARIABLE;
+	}
+	
+	public String getPersistenceName(){
+		return variablePrefix;
+	}
+	
 	/**
 	 * If they have the same filename, then we consider them equivalent
 	 */
