@@ -5,6 +5,9 @@
 
 package org.safs.rest.service;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.safs.persist.PersistableDefault;
 
 /**
@@ -12,6 +15,8 @@ import org.safs.persist.PersistableDefault;
  */
 public class Request extends PersistableDefault{
 
+	protected final static Map<String, String> fieldToPersistKeyMap = new HashMap<String, String>();
+	
 	String _request_method;
 	String _request_uri;
 	String _request_http_version;
@@ -96,5 +101,10 @@ public class Request extends PersistableDefault{
 	 */
 	public void set_message_body(Object _message_body) {
 		this._message_body = _message_body;
+	}
+
+	@Override
+	public Map<String, String> getPersitableFields() {
+		return fieldToPersistKeyMap;
 	}
 }

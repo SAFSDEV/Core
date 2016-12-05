@@ -13,6 +13,7 @@ package org.safs.persist;
 
 import org.safs.SAFSException;
 import org.safs.SAFSNullPointerException;
+import org.safs.SAFSPersistableNotEnableException;
 import org.safs.tools.RuntimeDataInterface;
 
 /**
@@ -31,7 +32,7 @@ public abstract class AbstractRuntimeDataPersistor implements Persistor{
 			throw new SAFSNullPointerException("The persistable object is null.");
 		}
 		if(!persistable.isEnabled()){
-			throw new SAFSException("This persistable object is not enabled, so it cannot be persisted.");
+			throw new SAFSPersistableNotEnableException("The class '"+persistable.getClass().getSimpleName()+"' is not enabled.");
 		}
 	}
 }

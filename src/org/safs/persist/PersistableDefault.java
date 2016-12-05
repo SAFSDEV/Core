@@ -22,10 +22,8 @@ import org.safs.StringUtils;
 /**
  * @author Lei Wang
  */
-public class PersistableDefault implements Persistable{
+public abstract class PersistableDefault implements Persistable{
 	protected static final String UNKNOWN_VALUE = "UNKNOWN";
-
-	protected static final Map<String, String> fieldToPersistKeyMap = new HashMap<String, String>();
 	
 	protected boolean enabled = true;
 	
@@ -45,6 +43,7 @@ public class PersistableDefault implements Persistable{
 		for(String fieldName: fieldNames){
 			try{
 				field = clazz.getDeclaredField(fieldName);
+				field.setAccessible(true);
 				value = field.get(this);
 			}catch(Exception e){
 				IndependantLog.warn(debugmsg+" can NOT get value for field '"+fieldName+"', met "+StringUtils.debugmsg(e));
@@ -59,11 +58,6 @@ public class PersistableDefault implements Persistable{
 		}
 		
 		return contents;
-	}
-
-	@Override
-	public Map<String, String> getPersitableFields() {
-		return fieldToPersistKeyMap;
 	}
 
 	@Override

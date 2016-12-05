@@ -50,6 +50,8 @@ public class GENKEYS{
 	public static final String EXISTS										= "exists";
 	/** %1% in table %2% at line %3%. */
 	public static final String EXTENDED_INFO								= "extended_info";
+	/** File '%1%' has been deleted. */
+	public static final String FILE_DELETE_1								= "file_delete_1";
 	/** Archive */
 	public static final String FILE_ARCHIVE									= "file_archive";
 	/** Hidden */
@@ -76,6 +78,8 @@ public class GENKEYS{
 	public static final String GREATER										= "greater";
 	/** Object identified by '%1%' has been saved to variables prefixed by '%2%' */
 	public static final String ID_OBJECT_SAVED_TO_VARIABLE_PREFIX_2			= "id_object_saved_to_variable_prefix2";
+	/** Object identified by '%1%' has been saved to '%2%' */
+	public static final String ID_OBJECT_SAVED_TO_2			= "id_object_saved_to_2";
 	/** Object identified by '%1%' has been removed from cache map. */
 	public static final String ID_OBJECT_REMOVED_FROM_MAP					= "id_object_removed_from_map";
 	/** %1% in range %2% to %3% */

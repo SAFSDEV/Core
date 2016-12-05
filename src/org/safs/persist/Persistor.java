@@ -30,6 +30,18 @@ public interface Persistor {
 	 */
 	public void unpersist() throws SAFSException;
 	
+	/**
+	 * The persistence Type.
+	 * @return Type
+	 */
+	public Type getType();
+	
+	/**
+	 * The name of the persistence.
+	 * @return String, the file-name or the variable-name etc.
+	 */
+	public String getPersistenceName();
+	
 	public static enum Type{
 		FILE("FILE"),
 		VARIABLE("VARIABLE");
