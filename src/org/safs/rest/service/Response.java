@@ -1,4 +1,4 @@
-/** 
+/**
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  */
@@ -10,12 +10,10 @@
  */
 package org.safs.rest.service;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.safs.IndependantLog;
+import org.safs.SAFSException;
 import org.safs.persist.PersistableDefault;
 import org.safs.tools.RuntimeDataInterface;
 
@@ -23,11 +21,11 @@ import org.safs.tools.RuntimeDataInterface;
  * @author Carl Nagle
  */
 public class Response extends PersistableDefault{
-    
+
 	protected final static Map<String, String> fieldToPersistKeyMap = new HashMap<String, String>();
-	
+
 	Request _request;
-	
+
 	String ID = "TO BE ASSIGNED";
 	String _content_type = UNKNOWN_VALUE;
 	Object _entity_body = UNKNOWN_VALUE;
@@ -52,7 +50,7 @@ public class Response extends PersistableDefault{
 		fieldToPersistKeyMap.put("_status_code", "StatusCode");
 		fieldToPersistKeyMap.put("_status_line", "StatusLine");
 	}
-	
+
 	public String getID() {
 		return ID;
 	}
@@ -117,7 +115,7 @@ public class Response extends PersistableDefault{
 	 * @return the _response_header
 	 */
 	public String get_headers() {
-		
+
 		return Headers.convertHeadersMapToMultiLineString(_headers);
 	}
 	/**
@@ -174,7 +172,7 @@ public class Response extends PersistableDefault{
 	public void set_request(Request _request) {
 		this._request = _request;
 	}
-	
+
 	/**
 	 * @return String, the response information returned from rest service.
 	 */
@@ -186,9 +184,9 @@ public class Response extends PersistableDefault{
 				"Message Body:\n"+
 				get_message_body()+"\n"+
 				"Entity Length: "+ get_entity_length() +"\n"+
-				"Entity Body:\n"+ 
+				"Entity Body:\n"+
 				get_entity_body().toString()
-				;  
+				;
 	}
 
 	/**
@@ -209,220 +207,36 @@ public class Response extends PersistableDefault{
 	 */
 	public String toString(){
 		return "\n========\nRequest: " + getRequestInfo() +"\n"+
-				"=========\nResponse: "+ getResponseInfo();                
+				"=========\nResponse: "+ getResponseInfo();
 	}
-	
+
+	public static final boolean BOOL_CONTAINS 			= false;
+	public static final boolean BOOL_EXACT_MATCH_FIELD 	= true;
+	public static final boolean BOOL_VERIFY_REQUEST 	= false;
+
 	/**
-	 * Persist Response, original Request.<br> 
-	 * 
-	 * to variables prefixed with 'variablePrefix'.<br>
-	 * <pre>
-	 * Response is saved to variables:
-	 * variablePrefix.Response.Id
-	 * variablePrefix.Response.StatusCode
-	 * variablePrefix.Response.HttpVersion
-	 * variablePrefix.Response.ContentType
-	 * ...
-	 * Request is saved to variables:
-	 * variablePrefix.Request.Method
-	 * variablePrefix.Request.URI
-	 * variablePrefix.Request.HttpVersion
-	 * variablePrefix.Request.Headers
-	 * ...
-	 * </pre>
-	 * @param runtime	RuntimeDataInterface, it provides the ability to save variable
-	 * @param variablePrefixOrFileName String, the variable prefix to generate a series of variables for persisting Response/Request;
-	 *                                         Or the file name for for persisting Response/Request.
-	 * @param saveRequest boolean, if the original request should be saved
-	 * @param persistFile boolean, if true, the Response/Request should be saved to a file; 
-	 *                             otherwise to a series of variables.
-	 * @return boolean if the save operation succeed
+	 *
+	 * @param runtime	RuntimeDataInterface
+	 * @param benchFile	String
+	 * @param fileType	String
+	 * @param boolParams boolean..., the optional boolean parameters: listed as below
+	 * <ol>
+	 * <li><b>verifyRequest</b>
+	 * 						If true, then verify also Request object; otherwise only Response object will be verified.<br>
+	 * 						The default value is false.<br>
+	 * <li><b>contains</b>
+	 * 						If true, then verify that Response/Request contains the fields in benchFile;<br>
+	 *                      Otherwise, then verify that Response/Request matches exactly with the content of benchFile;<br>
+	 *                      The default value is false.<br>
+	 * <li><b>exactMatchfield</b>
+	 *                      If true, then verify that Response/Request field's value matches exactly with that in benchFile;<br>
+	 *                      Otherwise, then verify that Response/Request field's value contains case-insensitively that in benchFile;<br>
+	 *                      The default value is true;<br>
+	 * </ol>
+	 * @throws SAFSException
 	 */
-	public boolean persist(RuntimeDataInterface runtime, String variablePrefixOrFileName, boolean saveRequest, boolean persistFile){
-		boolean success = true;
-		String debugmsg = "Response.save(): ";
-		
-		if(runtime==null){
-			IndependantLog.error(debugmsg+"runtime is null.");
-			return false;
-		}
-		if(variablePrefixOrFileName==null || variablePrefixOrFileName.trim().isEmpty()){
-			IndependantLog.error(debugmsg+"variable prefix is null or empty.");
-			return false;
-		}
-
-
-		String variable = null;
-		String varResponsPrefix = variablePrefixOrFileName+".Response.";
-		Class<?> clazz = getClass();
-
-		Field[] fields = clazz.getDeclaredFields();
-
-		Object value = null;
-		String fieldName = null;
-
-		for(Field field:fields){
-			try {
-				fieldName = field.getName();
-				if(Modifier.isFinal(field.getModifiers())){
-					continue;
-				}
-				if("_headers".equals(fieldName)){
-					value = clazz.getDeclaredMethod("get_headers").invoke(this);
-				}else if("_request".equals(fieldName)){
-					//do not save it in response variables
-					continue;
-				}else{
-					value = field.get(this);
-				}
-
-				variable = varResponsPrefix+fieldName;
-				if(value==null){
-					value = UNKNOWN_VALUE;
-					IndependantLog.debug(debugmsg+" value is null for field '"+fieldName+"', set "+UNKNOWN_VALUE+" to variable '"+variable+"'.");
-				}
-
-				runtime.setVariable(variable, value.toString());
-
-			} catch (Exception e) {
-				IndependantLog.error(debugmsg+" Met Exception "+e.getClass().getSimpleName()+", due to "+e.getMessage());
-				success = false;
-			}
-		}
-
-		if(saveRequest){
-			String varRequestPrefix = variablePrefixOrFileName+".Request.";
-
-			if(_request!=null){
-				clazz = _request.getClass();
-				fields = clazz.getDeclaredFields();
-				
-				for(Field field:fields){
-					try {
-						fieldName = field.getName();
-						if(Modifier.isFinal(field.getModifiers())){
-							continue;
-						}
-						if("_message_body".equals(fieldName)){
-							//TODO do not save it in request variables???
-							continue;
-						}else{
-							value = field.get(this);
-						}
-						
-						variable = varRequestPrefix+fieldName;
-						if(value==null){
-							value = UNKNOWN_VALUE;
-							IndependantLog.debug(debugmsg+" value is null for field '"+fieldName+"', set "+UNKNOWN_VALUE+" to variable '"+variable+"'.");
-						}
-						
-						runtime.setVariable(variable, value.toString());
-						
-					} catch (Exception e) {
-						IndependantLog.error(debugmsg+" Met Exception "+e.getClass().getSimpleName()+", due to "+e.getMessage());
-						success = false;
-					}
-				}
-			}else{
-				IndependantLog.error(debugmsg+"The original request is null! Cannot save it to variables.");
-				success = false;
-			}
-		}
-		
-		return success;
-	}
-	
-	/**
-	 * Delete Response variables and original Request variables prefixed with 'variablePrefix'.<br>
-	 * <pre>
-	 * Response variables to be deleted:
-	 * variablePrefix.Response.Id
-	 * variablePrefix.Response.StatusCode
-	 * variablePrefix.Response.HttpVersion
-	 * variablePrefix.Response.ContentType
-	 * ...
-	 * Request variables to be deleted
-	 * variablePrefix.Request.Method
-	 * variablePrefix.Request.URI
-	 * variablePrefix.Request.HttpVersion
-	 * variablePrefix.Request.Headers
-	 * ...
-	 * </pre>
-	 * @param runtime	RuntimeDataInterface, it provides the ability to delete variable
-	 * @param variablePrefix String, the variable prefix
-	 * @return boolean if the delete operation succeed
-	 */
-	public static boolean delete(RuntimeDataInterface runtime, String variablePrefix){
-		boolean success = true;
-		String debugmsg = "Response.delete(): ";
-		
-		if(runtime==null){
-			IndependantLog.error(debugmsg+"runtime is null.");
-			return false;
-		}
-		if(variablePrefix==null || variablePrefix.trim().isEmpty()){
-			IndependantLog.error(debugmsg+"variable prefix is null or empty.");
-			return false;
-		}
-
-		String variable = null;
-		String varResponsPrefix = variablePrefix+".Response.";
-		Class<?> clazz = Response.class;
-
-		Field[] fields = clazz.getDeclaredFields();
-
-		String fieldName = null;
-
-		for(Field field:fields){
-			try {
-				fieldName = field.getName();
-				if(Modifier.isFinal(field.getModifiers())){
-					continue;
-				}
-				if("_request".equals(fieldName)){
-					//it wasn't saved, not need to delete
-					continue;
-				}
-
-				variable = varResponsPrefix+fieldName;
-
-				//TODO can "set null to variable" really delete the variable? we need a real API to delete variable
-				runtime.setVariable(variable, null);
-
-			} catch (Exception e) {
-				IndependantLog.error(debugmsg+" Met Exception "+e.getClass().getSimpleName()+", due to "+e.getMessage());
-				success = false;
-			}
-		}
-
-		String varRequestPrefix = variablePrefix+".Request.";
-
-		clazz = Request.class;
-		fields = clazz.getDeclaredFields();
-
-		for(Field field:fields){
-			try {
-				fieldName = field.getName();
-				if(Modifier.isFinal(field.getModifiers())){
-					continue;
-				}
-				if("_message_body".equals(fieldName)){
-					//TODO Have it been saved? If not, we don't need to delete it
-					continue;
-				}
-
-				variable = varRequestPrefix+fieldName;
-
-				//TODO can "set null to variable" really delete the variable? we need a real API to delete variable
-				runtime.setVariable(variable, null);
-
-			} catch (Exception e) {
-				IndependantLog.error(debugmsg+" Met Exception "+e.getClass().getSimpleName()+", due to "+e.getMessage());
-				success = false;
-			}
-		}
-		
-		return success;
+	public void verifyResponse(RuntimeDataInterface runtime, String benchFile, String fileType, boolean... boolParams) throws SAFSException{
+		//TODO
 	}
 
 	@Override

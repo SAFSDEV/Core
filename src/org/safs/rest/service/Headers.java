@@ -1,4 +1,4 @@
-/** 
+/**
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  */
@@ -19,21 +19,23 @@ import org.apache.hc.core5.http.impl.io.HttpTransportMetricsImpl;
 import org.apache.hc.core5.http.impl.io.SessionInputBufferImpl;
 import org.apache.hc.core5.http.message.BasicHeader;
 import org.apache.hc.core5.http.message.BasicLineParser;
-import org.apache.hc.core5.util.CharArrayBuffer;
-import org.safs.SAFSRuntimeException;
 import org.apache.hc.core5.http.message.HeaderGroup;
+import org.apache.hc.core5.util.CharArrayBuffer;
+import org.safs.SAFSException;
+import org.safs.SAFSRuntimeException;
+import org.safs.tools.RuntimeDataInterface;
 
 
 /**
  * Provides for storing header Collections for predefined AND custom request types.
- * 
+ *
  * @author Carl Nagle
  */
 public class Headers {
 
-	
+
 	private static Map<String, HeaderGroup> _headerMap = new HashMap<String, HeaderGroup>();
-	
+
 	// All map keys will be used as uppercase
 	public static final String BINARY_TYPE = "BINARY";
 	public static final String JSON_TYPE   = "JSON";
@@ -43,12 +45,12 @@ public class Headers {
 	public static final String IMAGE_TYPE  = "IMAGE";
 	public static final String CSS_TYPE    = "CSS";
 	public static final String SCRIPT_TYPE = "SCRIPT";
-	
+
 	// Constants for common Header types
 	public static final String CONTENT_TYPE      = "Content-Type";
 	public static final String ACCEPT            = "Accept";
 	public static final String USER_AGENT        = "User-Agent";
-	
+
 	public static final String APPL_OCTET_STREAM = "application/octet-stream";
 	public static final String APPL_JSON         = "application/json";
 	public static final String TEXT_PLAIN        = "text/plain";
@@ -57,40 +59,32 @@ public class Headers {
 	public static final String IMAGE             = "image";
 	public static final String TEXT_CSS          = "text/css";
 	public static final String APPL_JAVASCRIPT   = "application/javascript";
-	
+
 	public static final String MOZILLA_GENERIC_AGENT = "Mozilla/5.0 Gecko/20110201";
-	
-	private static Map<String,String> defaultContentTypeMap; 
-	
-	
+
+	private static Map<String,String> defaultContentTypeMap;
+
+
 	static {
-		defaultContentTypeMap = new HashMap<String, String>(8);
-		defaultContentTypeMap.put(BINARY_TYPE, APPL_OCTET_STREAM);
-		defaultContentTypeMap.put(JSON_TYPE,   APPL_JSON);
-		defaultContentTypeMap.put(TEXT_TYPE,   TEXT_PLAIN);
-		defaultContentTypeMap.put(XML_TYPE,    TEXT_XML);
-		defaultContentTypeMap.put(HTML_TYPE,   TEXT_HTML);
-		defaultContentTypeMap.put(IMAGE_TYPE,  IMAGE);
-		defaultContentTypeMap.put(CSS_TYPE,    TEXT_CSS);
-		defaultContentTypeMap.put(SCRIPT_TYPE, APPL_JAVASCRIPT);
+		resetHeaders();
 	}
 
-	
+
 	private static void checkType(String type) {
 		if (type == null) {
 			throw new SAFSRuntimeException("type cannot be null!");
 		}
 	}
-	
+
 	/**
 	 * Returns the headers currently set for a defined resource/request type
 	 * as a multi-line String.
 	 * <p>
-	 * There are predefined request resource/request headers that can be retrieved and even changed.  
+	 * There are predefined request resource/request headers that can be retrieved and even changed.
 	 * The user is also able to retrieve custom headers previously stored using a custom type.
 	 * <p>
 	 * Ex:<ul>
-	 * 
+	 *
 	 * </ul>
 	 * @param type
 	 * @return
@@ -99,25 +93,25 @@ public class Headers {
 	 * @see #removeHeaderForType(String, String)
 	 */
 	public static String getHeadersForType(String type){
-	
+
 		HeaderGroup hg = getHeaderGroupForType(type);
 		return convertHeaderGroupToMultiLineString(hg);
 	}
-	
+
 	/**
-	 * Returns the header group currently set for a defined resource/request 
-	 * type. If not set, then lazily sets defaults. 
+	 * Returns the header group currently set for a defined resource/request
+	 * type. If not set, then lazily sets defaults.
 	 * @param type
 	 * @return
 	 */
 	private static HeaderGroup getHeaderGroupForType(String type) {
-		
+
 		checkType(type);
 		HeaderGroup hg = _headerMap.get(type.toUpperCase());
 		if (hg == null) {
 			String defContentType = defaultContentTypeMap.get(type.toUpperCase());
 			if (defContentType == null) {
-				// This would be the case for a "custom" type for which we do 
+				// This would be the case for a "custom" type for which we do
 				// not have default values...
 				return new HeaderGroup();
 			}
@@ -132,22 +126,22 @@ public class Headers {
 		}
 		return hg;
 	}
-	
+
 	/**
-	 * Wholesale set/replace the headers multi-line String to be used for a 
+	 * Wholesale set/replace the headers multi-line String to be used for a
 	 * predefined or custom resource/request type.
-	 * If the provided String is null then the headers mapped to the type and 
-	 * the type entry will be removed. 
+	 * If the provided String is null then the headers mapped to the type and
+	 * the type entry will be removed.
 	 * @param type
 	 * @param headerStr Multi-line String containing the HTTP header(s)
-	 * @throws IOException 
-	 * @throws HttpException 
+	 * @throws IOException
+	 * @throws HttpException
 	 * @see #getHeadersForType(String)
 	 * @see #addHeaderForType(String, String)
 	 * @see #removeHeaderForType(String, String)
 	 */
 	public static void setHeadersForType(String type, String headerStr) {
-		
+
 		checkType(type);
 		if (headerStr == null) {
 			_headerMap.remove(type.toUpperCase());
@@ -156,38 +150,38 @@ public class Headers {
 			setHeadersForType(type, headerArr);
 		}
 	}
-	
-	
+
+
 	private static void setHeadersForType(String type, Header[] headers) {
-		
+
 		checkType(type);
 		HeaderGroup headerGrp = new HeaderGroup();
 		headerGrp.setHeaders(headers);
 		_headerMap.put(type.toUpperCase(), headerGrp);
 	}
-	
-	
+
+
 	/**
 	 * Add one (or more) headers to the existing set of headers for the mapped type.
 	 * @param type
 	 * @param headerStr Multi-line String containing the HTTP headers
 	 * @return
-	 * @throws IOException 
-	 * @throws HttpException 
+	 * @throws IOException
+	 * @throws HttpException
 	 * @see #setHeadersForType(String,String)
 	 * @see #getHeadersForType(String)
 	 * @see #removeHeaderForType(String, String)
 	 */
 	public static String addHeadersForType(String type, String headerStr) {
-		
+
 		checkType(type);
 
 		// Convert the new header(s) to be added from String to Header
 		Header[] newHeaders = parseHeadersInMultiLineString(headerStr);
-		
+
 		// Get the preset or default values for this type
 		HeaderGroup headers = getHeaderGroupForType(type);
-		
+
 		// NOTE: HTTP spec does allow duplicate Headers under certain conditions
 		for (Header headerToBeAdded : newHeaders) {
 			headers.addHeader(headerToBeAdded);
@@ -200,34 +194,34 @@ public class Headers {
 	 * @param type
 	 * @param headerStr Multi-line String containing the HTTP header(s)
 	 * @return
-	 * @throws IOException 
-	 * @throws HttpException 
+	 * @throws IOException
+	 * @throws HttpException
 	 * @see #setHeadersForType(String,Collection)
 	 * @see #getHeadersForType(String)
 	 * @see #addHeaderForType(String, String)
 	 */
 	public static String removeHeadersForType(String type, String headerStr) {
-		
+
 		checkType(type);
 
 		// Convert the new header to be removed from String to Header
 		Header[] unwantedHeaders = parseHeadersInMultiLineString(headerStr);
 		// Get the preset or default values for this type
 		HeaderGroup headers = getHeaderGroupForType(type);
-		
+
 		for (Header headerToBeRemoved : unwantedHeaders) {
 			headers.removeHeader(headerToBeRemoved);
 		}
 		return convertHeaderGroupToMultiLineString(headers);
 	}
-		
+
 	/**
 	 * Will lazily create the default headers for this type if they don't already exist.
 	 * @return the _binaryHeaders currently in use for all requests for Binary resources.
 	 * @see #setBinaryHeaders(Collection)
 	 */
 	public static String getBinaryHeaders() {
-		
+
 		return getHeadersForType(BINARY_TYPE);
 	}
 
@@ -261,7 +255,7 @@ public class Headers {
 	 * @see #setTextHeaders(Collection)
 	 */
 	public static String getTextHeaders() {
-		
+
 		return getHeadersForType(TEXT_TYPE);
 	}
 
@@ -278,7 +272,7 @@ public class Headers {
 	 * @see #setXMLHeaders(Collection)
 	 */
 	public static String getXMLHeaders() {
-		
+
 		return getHeadersForType(XML_TYPE);
 	}
 
@@ -295,7 +289,7 @@ public class Headers {
 	 * @see #setHtmlHeaders(Collection)
 	 */
 	public static String getHtmlHeaders() {
-		
+
 		return getHeadersForType(HTML_TYPE);
 	}
 
@@ -312,7 +306,7 @@ public class Headers {
 	 * @see #setImageHeaders(Collection)
 	 */
 	public static String getImageHeaders() {
-		
+
 		return getHeadersForType(IMAGE_TYPE);
 	}
 
@@ -329,7 +323,7 @@ public class Headers {
 	 * @see #setCSSHeaders(Collection)
 	 */
 	public static String getCSSHeaders() {
-		
+
 		return getHeadersForType(CSS_TYPE);
 	}
 
@@ -346,7 +340,7 @@ public class Headers {
 	 * @see #setScriptHeaders(Collection)
 	 */
 	public static String getScriptHeaders() {
-		
+
 		return getHeadersForType(SCRIPT_TYPE);
 	}
 
@@ -358,9 +352,9 @@ public class Headers {
 		setHeadersForType(SCRIPT_TYPE, _scriptHeaders);
 	}
 
-	
+
 	private static String convertHeaderGroupToMultiLineString(HeaderGroup headerGrp) {
-		
+
 		if (headerGrp == null) {
 			return null;
 		}
@@ -370,10 +364,10 @@ public class Headers {
 		}
 		return sb.toString();
 	}
-	
-	
+
+
 	public static String convertHeadersMapToMultiLineString(Map<String,String> headerMap) {
-		
+
 		if (headerMap == null) {
 			return null;
 		}
@@ -383,21 +377,21 @@ public class Headers {
 		}
 		return sb.toString();
 	}
-	
+
 	public static Map<String,String> convertHeadersMultiLineStringToMap(String headers){
 		return getHeadersMapFromMultiLineString(headers);
 	}
-	
+
 //	/**
 //	 * @param _headerString The string of multi-line headers
-//	 * @return Collection of separated header strings 
-//	 * @throws IOException 
-//	 * @throws HttpException 
+//	 * @return Collection of separated header strings
+//	 * @throws IOException
+//	 * @throws HttpException
 //	 */
 //	public static Collection<String> parseHeaderListFromMultiLineString(String _headerString) {
-//		
+//
 //		Header[] headers = parseHeadersInMultiLineString(_headerString);
-//		
+//
 //		// Now, return the headers as Collection<String>.
 //		Collection<String> ret = new ArrayList<String>();
 //		for (Header header : headers) {
@@ -407,19 +401,19 @@ public class Headers {
 //	}
 
 	private static Header[] parseHeadersInMultiLineString(String _headerString) {
-		
+
 		/*
 		 * This is pretty close to how Apache HTTP Client5 parses headers.
 		 */
 		try {
 			ByteArrayInputStream inputStream = new ByteArrayInputStream(_headerString.getBytes("UTF-8"));
-			
+
 			int buffersize = org.apache.hc.core5.http.config.ConnectionConfig.DEFAULT.getBufferSize();
 			HttpTransportMetricsImpl inTransportMetrics = new HttpTransportMetricsImpl();
 			MessageConstraints messageConstraints = MessageConstraints.DEFAULT;
 			SessionInputBufferImpl inbuffer = new SessionInputBufferImpl(inTransportMetrics, buffersize, -1, messageConstraints, null);
 			BasicLineParser parser = org.apache.hc.core5.http.message.BasicLineParser.INSTANCE;
-			
+
 			inbuffer.bind(inputStream);
 			List<CharArrayBuffer> headerLines = new ArrayList<CharArrayBuffer>();
 			Header[] headers = org.apache.hc.core5.http.impl.io.AbstractMessageParser.parseHeaders(
@@ -435,26 +429,25 @@ public class Headers {
 			throw new SAFSRuntimeException(ex);
 		}
 	}
-	
+
 	/**
 	 * Utility method to convert headers multi-line string to a Map
 	 * @param headers Multi-line String containing complete header info
 	 * @return Map of String
 	 */
 	 static Map<String,String> getHeadersMapFromMultiLineString(String headers) {
-		
+
 		Header[] headersList = parseHeadersInMultiLineString(headers);
-		
+
 		// Now, return the headers as Collection<String>.
-		Map<String, String> ret = new HashMap<String,String>(); 
+		Map<String, String> ret = new HashMap<String,String>();
 		for (Header header : headersList) {
 			ret.put(header.getName(), header.getValue());
 		}
 		return ret;
 	}
-	
 	/**
-	 * Given a multi-line header String, append a header value to an existing header name, 
+	 * Given a multi-line header String, append a header value to an existing header name,
 	 * or create the new header with the given value.
 	 * <p>
 	 * Example: appendHeaderValue(headers, "Accept", "text/html");
@@ -468,8 +461,8 @@ public class Headers {
 	 * @param headerValue value to add to the provided header name.
 	 * @return multiline headers properly appended, or unmodified if invalid arguments are provided.
 	 */
-	public static String appendHeaderValue(String headers, String headerName, String headerValue){		
-		if (headerName==null || 
+	public static String appendHeaderValue(String headers, String headerName, String headerValue){
+		if (headerName==null ||
 		    headerName.length()==0 ||
 		    headerValue == null ||
 		    headerValue.length()==0) return headers;
@@ -490,7 +483,7 @@ public class Headers {
 	}
 
 	/**
-	 * Given a multi-line header String, remove a header value from an existing header name, 
+	 * Given a multi-line header String, remove a header value from an existing header name,
 	 * or create the new header without the given value.
 	 * <p>
 	 * Example: removeHeaderValue(headers, "Accept", "text/html");
@@ -504,8 +497,8 @@ public class Headers {
 	 * @param headerValue value to remove.
 	 * @return multiline headers properly changed, or unmodified if invalid arguments are provided.
 	 */
-	public static String removeHeaderValue(String headers, String headerName, String headerValue){		
-		if (headerName==null || 
+	public static String removeHeaderValue(String headers, String headerName, String headerValue){
+		if (headerName==null ||
 		    headerName.length()==0 ||
 		    headerValue == null ||
 		    headerValue.length()==0) return headers;
@@ -521,7 +514,7 @@ public class Headers {
 				if(headerValue.equalsIgnoreCase(val)){
 					hm.remove(key);
 				}else{
-					
+
 				}
 				val +=", "+ headerValue;
 				hm.put(key, val);
@@ -532,4 +525,22 @@ public class Headers {
 		if(!found) hm.put(headerName, headerValue);
 		return convertHeadersMapToMultiLineString(hm);
 	}
+
+	 public static void loadHeaders(RuntimeDataInterface runtime, String headersFile, String method, String type) throws SAFSException{
+		 //TODO Load header files
+	 }
+
+	 public synchronized static void resetHeaders(){
+		 if(defaultContentTypeMap==null){
+			 defaultContentTypeMap = new HashMap<String, String>(8);
+		 }
+		 defaultContentTypeMap.put(BINARY_TYPE, APPL_OCTET_STREAM);
+		 defaultContentTypeMap.put(JSON_TYPE,   APPL_JSON);
+		 defaultContentTypeMap.put(TEXT_TYPE,   TEXT_PLAIN);
+		 defaultContentTypeMap.put(XML_TYPE,    TEXT_XML);
+		 defaultContentTypeMap.put(HTML_TYPE,   TEXT_HTML);
+		 defaultContentTypeMap.put(IMAGE_TYPE,  IMAGE);
+		 defaultContentTypeMap.put(CSS_TYPE,    TEXT_CSS);
+		 defaultContentTypeMap.put(SCRIPT_TYPE, APPL_JAVASCRIPT);
+	 }
 }

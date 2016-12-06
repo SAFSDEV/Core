@@ -1,4 +1,4 @@
-/** 
+/**
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  */
@@ -7,7 +7,7 @@
  * Logs for developers, not published to API DOC.
  *
  * History:
- * 
+ *
  * NOV 23, 2016		(Lei Wang)	Initial release.
  * NOV 25, 2016		(Lei Wang)	Implemented RestStoreResponse, RestDeleteResponse and RestDeleteResponseStore.
  * DEC 01, 2016		(Lei Wang)	Implemented RestCleanResponseMap.
@@ -24,6 +24,7 @@ import java.util.Set;
 import org.safs.DriverCommand;
 import org.safs.IndependantLog;
 import org.safs.SAFSException;
+import org.safs.SAFSParamException;
 import org.safs.StatusCodes;
 import org.safs.StringUtils;
 import org.safs.TestRecordHelper;
@@ -33,6 +34,7 @@ import org.safs.persist.Persistor;
 import org.safs.persist.Persistor.FileType;
 import org.safs.persist.Persistor.Type;
 import org.safs.persist.PersistorFactory;
+import org.safs.rest.service.Headers;
 import org.safs.rest.service.Response;
 import org.safs.text.FAILKEYS;
 import org.safs.text.FAILStrings;
@@ -41,17 +43,17 @@ import org.safs.tools.drivers.DriverInterface;
 
 /**
  * The class to handle the REST driver commands.
- * 
+ *
  */
 public class TIDDriverRestCommands extends GenericEngine{
 	/** "SAFS/REST" */
 	public static final String ENGINE_NAME = "SAFS/TIDDriverRestCommands";
 	/** "TIDDRIVERREST: " */
 	private static final String DEBUG_PREFIX = "TIDDRIVERREST: ";
-	
+
     /** The special Processor for handling Driver Command keywords.*/
     protected DriverCommand dc = null;
-	
+
 	/**
 	 * Constructor: It will set the service-name.<br>
 	 */
@@ -73,7 +75,7 @@ public class TIDDriverRestCommands extends GenericEngine{
 	 */
 	public void launchInterface(Object configInfo){
 		super.launchInterface(configInfo);
-		
+
 		try{
 			driver = (DriverInterface) configInfo;
 			if(log==null){
@@ -86,10 +88,10 @@ public class TIDDriverRestCommands extends GenericEngine{
 			IndependantLog.error(DEBUG_PREFIX+" requires a valid DriverInterface object for initialization!\n"+ x.getMessage());
 		}
 	}
-	
+
 	public long processRecord (TestRecordHelper testRecordData){
 		this.testRecordData = testRecordData;
-		
+
 		boolean resetTRD = false;
 		if (testRecordData.getSTAFHelper()==null){
 		    testRecordData.setSTAFHelper(staf);
@@ -111,37 +113,37 @@ public class TIDDriverRestCommands extends GenericEngine{
 //				IndependantLog.warn(DEBUG_PREFIX+"STAFHelper is null, cannot initialize the IndependantLog Utilities!");
 //			}
 //		}
-		
+
 		dc.setTestRecordData(testRecordData);
 		dc.process();
-		
+
 		if(resetTRD) testRecordData.setSTAFHelper(null);
 		return testRecordData.getStatusCode();
 	}
-	
+
 	private static final Map<String, Set<Persistor>> responseIdToPersistorSet = new HashMap<String, Set<Persistor>>();
-	
+
 	/**
 	 * Internal Driver Command Processor.
 	 */
 	protected class RESTDriverCommand extends DriverCommand{
 		protected String mapname;
-		
+
 		public RESTDriverCommand(){
 			super();
 		}
-		
+
 		protected void init() throws SAFSException{
 			super.init();
 			mapname = testRecordData.getAppMapName();
 		}
-		
+
 		protected void commandProcess() {
 			String debugmsg = StringUtils.debugmsg(false);
-			
+
 			try{
 				IndependantLog.debug(debugmsg+"processing"+command+"with parameters "+params);
-				
+
 				if(DDDriverRestCommands.RESTDELETERESPONSE_KEYWORD.equalsIgnoreCase(command)){
 					deleteResponse();
 				}else if(DDDriverRestCommands.RESTDELETERESPONSESTORE_KEYWORD.equalsIgnoreCase(command)){
@@ -151,46 +153,46 @@ public class TIDDriverRestCommands extends GenericEngine{
 				}else if(DDDriverRestCommands.RESTCLEANRESPONSEMAP_KEYWORD.equalsIgnoreCase(command)){
 					cleanResponseMap();
 				}else if(DDDriverRestCommands.RESTHEADERSLOAD_KEYWORD.equalsIgnoreCase(command)){
-					
+					loadHeaders();
 				}else if(DDDriverRestCommands.RESTVERIFYRESPONSE_KEYWORD.equalsIgnoreCase(command)){
-					
+					verifyResponse(false);
 				}else if(DDDriverRestCommands.RESTVERIFYRESPONSECONTAINS_KEYWORD.equalsIgnoreCase(command)){
-					
+					verifyResponse(true);
 				}else{
 					IndependantLog.debug(debugmsg+command+" is not suppported in this processor, so it was not handled yet.");
 				}
-				
+
 			}catch(Exception e){
 				String exceptionMsg = StringUtils.debugmsg(e);
-				String message = FAILStrings.convert(FAILStrings.GENERIC_ERROR, 
+				String message = FAILStrings.convert(FAILStrings.GENERIC_ERROR,
 						"*** ERROR *** "+exceptionMsg, exceptionMsg);
 				standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
 				setTRDStatus(testRecordData, StatusCodes.GENERAL_SCRIPT_FAILURE);
 			}
 
 		}
-		
+
 		private void cleanResponseMap(){
 			String debugmsg = StringUtils.debugmsg(false);
 			String message = null;
 			String description = null;
 			String responseID = null;
-			
+
 			if(iterator.hasNext()){
 				responseID = iterator.next();
 			}
-			
+
 			int status = StatusCodes.NO_SCRIPT_FAILURE;
 
 			if(responseID==null){
-				IndependantLog.warn(debugmsg+"Missing parameter 'responseID! CAUTION, ALL Responses will be removed from internal Map!'");
+				IndependantLog.warn(debugmsg+"Missing parameter 'responseID'! CAUTION, ALL Responses will be removed from internal Map!");
 				TIDComponent.deleteRestResponseStore();
 				description = passedText.text(GENKEYS.OBJECTS_REMOVED_FROM_MAP, "Objects have been removed from cache map.");
-				
+
 			}else{
 				Response response = TIDComponent.deleteRestResponse(responseID);
 				if(response!=null){
-					description = passedText.convert(GENKEYS.ID_OBJECT_REMOVED_FROM_MAP, 
+					description = passedText.convert(GENKEYS.ID_OBJECT_REMOVED_FROM_MAP,
 							"Object identified by '"+responseID+"' has been removed from cache map.", responseID);
 				}else{
 					status = StatusCodes.GENERAL_SCRIPT_FAILURE;
@@ -198,11 +200,11 @@ public class TIDDriverRestCommands extends GenericEngine{
 					description = failedText.convert(FAILKEYS.ID_NOT_FOUND_1, "Object identified by "+responseID+" was not found", responseID);
 				}
 			}
-			
+
 			setAtEndOfProcess(status, message, description);
 
 		}
-		
+
 		private void deleteResponse(){
 			if (params.size() < 1) {
 				issueParameterCountFailure();
@@ -211,13 +213,13 @@ public class TIDDriverRestCommands extends GenericEngine{
 			String debugmsg = StringUtils.debugmsg(false);
 			String message = null;
 			String description = null;
-			
+
 			String responseID = iterator.next();
 			if(!StringUtils.isValid(responseID)){
 				issueParameterValueFailure("responseID");
 				return;
 			}
-			
+
 			int status = StatusCodes.NO_SCRIPT_FAILURE;
 
 			//TODO do we need to delete the Response from the internal map???
@@ -229,19 +231,19 @@ public class TIDDriverRestCommands extends GenericEngine{
 //				status = StatusCodes.GENERAL_SCRIPT_FAILURE;
 //			}else{
 //				if(Response.delete(this, variablePrefix)){
-//					description = passedText.convert(GENKEYS.PREFIX_VARS_DELETE_1, 
+//					description = passedText.convert(GENKEYS.PREFIX_VARS_DELETE_1,
 //							"Variables prefixed with '"+variablePrefix+"' have been delete.", variablePrefix);
 //				}else{
 //					message = failedText.convert(FAILKEYS.NO_SUCCESS_1, command+" was not successful.", command);
-//					description = failedText.convert(FAILKEYS.COULD_NOT_DELETE_PREFIX_VARS_1, 
+//					description = failedText.convert(FAILKEYS.COULD_NOT_DELETE_PREFIX_VARS_1,
 //							"Could not delete one or more variable values prefixed with '"+variablePrefix+"'.", variablePrefix);
 //					status = StatusCodes.GENERAL_SCRIPT_FAILURE;
 //				}
 //			}
-			
+
 
 			Set<Persistor> persistorSet = responseIdToPersistorSet.get(responseID);
-			
+
 			if(persistorSet!=null){
 				boolean success = true;
 				StringBuilder sb = new StringBuilder();
@@ -263,7 +265,7 @@ public class TIDDriverRestCommands extends GenericEngine{
 						}
 					}
 				}
-				
+
 				if(success){
 					description = sb.toString();
 					responseIdToPersistorSet.remove(responseID);
@@ -274,19 +276,19 @@ public class TIDDriverRestCommands extends GenericEngine{
 				}
 			}else{
 				message = failedText.convert(FAILKEYS.NO_SUCCESS_1, command+" was not successful.", command);
-				description = failedText.convert(FAILKEYS.ID_NOT_FOUND_1, 
+				description = failedText.convert(FAILKEYS.ID_NOT_FOUND_1,
 						"Object identified by "+responseID+" was not found.", responseID);
 				status = StatusCodes.GENERAL_SCRIPT_FAILURE;
 			}
 
 			setAtEndOfProcess(status, message, description);
 		}
-		
+
 		private void deleteResponseStore(){
 			String debugmsg = StringUtils.debugmsg(false);
 			String message = null;
 			String description = null;
-			
+
 			boolean success = true;
 			boolean persistorSuccess = true;
 			Iterator<String> responsIDIter = responseIdToPersistorSet.keySet().iterator();
@@ -298,10 +300,10 @@ public class TIDDriverRestCommands extends GenericEngine{
 			while(responsIDIter.hasNext()){
 				responseID = responsIDIter.next();
 				persistorSet = responseIdToPersistorSet.get(responseID);
-				
+
 				persistorSuccess = true;
 				StringBuilder sb = new StringBuilder();
-				for(Persistor p:persistorSet){					
+				for(Persistor p:persistorSet){
 					try{
 						p.unpersist();
 						if(Type.FILE.equals(p.getType())){
@@ -318,9 +320,9 @@ public class TIDDriverRestCommands extends GenericEngine{
 							sb.append(failedText.convert(FAILKEYS.COULD_NOT_SET_PREFIX_VARS_1, "Could not delete one or more variable values prefixed with '"+p.getPersistenceName()+"'.", p.getPersistenceName())+"\n");
 						}
 					}
-					
+
 				}
-				
+
 				if(persistorSuccess){
 					successResponseIDs.append(responseID+"\n"+sb.toString());
 					responsIDIter.remove();
@@ -339,47 +341,90 @@ public class TIDDriverRestCommands extends GenericEngine{
 				description = failResponseIDs.toString();
 				status = StatusCodes.GENERAL_SCRIPT_FAILURE;
 			}
-				
+
 			setAtEndOfProcess(status, message, description);
 		}
-		
+
+		private void loadHeaders(){
+			String debugmsg = StringUtils.debugmsg(false);
+			String message = null;
+			String description = null;
+			String headersFile = null;
+			String method = null;
+			String type = null;
+
+			if (params.size() < 1) {
+				issueParameterCountFailure();
+				return;
+			}
+
+			headersFile = iterator.next();
+			if(iterator.hasNext()){
+				method = iterator.next();
+			}
+			if(iterator.hasNext()){
+				type = iterator.next();
+			}
+
+			int status = StatusCodes.NO_SCRIPT_FAILURE;
+
+			if(!StringUtils.isValid(headersFile)){
+				String paramName = "headersFile";
+				IndependantLog.warn(debugmsg+"Invalid parameter '"+paramName+"'!");
+				status = StatusCodes.GENERAL_SCRIPT_FAILURE;
+				description = failedText.convert(FAILKEYS.BAD_PARAM, "Invalid parameter value for "+paramName, paramName);
+
+			}else{
+				try{
+					Headers.loadHeaders(this, headersFile, method, type);
+					description = passedText.convert(GENKEYS.HEADER_FILE_LOADED_3,
+							"Header file '"+headersFile+"' has been successfully loaded using '"+method+"' '"+type+"'.", headersFile, method, type);
+				}catch(SAFSException e){
+					//TODO We can just catch specific SAFSException
+					status = StatusCodes.GENERAL_SCRIPT_FAILURE;
+					message = failedText.convert(FAILKEYS.NO_SUCCESS_1, command+" was not successful.", command);
+					description = failedText.convert(FAILKEYS.HEADER_FILE_LOADED_ERROR_3,
+							"Failed to load header file '"+headersFile+"' using '"+method+"' '"+type+"'.", headersFile, method, type);
+				}
+			}
+
+			setAtEndOfProcess(status, message, description);
+
+		}
+
 		private void storeResponse(){
 			if (params.size() < 2) {
 				issueParameterCountFailure();
 				return;
 			}
 			boolean saveRequest = false;
-			boolean persistFile = false;
 			FileType fileType = FileType.JSON;
 			Type persistenceType = Type.VARIABLE;
 			String message = null;
 			String description = null;
-			
+
 			String responseID = iterator.next();
 			if(!StringUtils.isValid(responseID)){
 				issueParameterValueFailure("responseID");
 				return;
 			}
-			
+
 			String variablePrefixOrFile = iterator.next();
 			if(!StringUtils.isValid(variablePrefixOrFile)){
 				issueParameterValueFailure("variablePrefix");
 				return;
 			}
-			
+
 			if(iterator.hasNext()){
 				saveRequest = Boolean.parseBoolean(iterator.next());
 			}
 			if(iterator.hasNext()){
-				persistFile = Boolean.parseBoolean(iterator.next());
-				if(persistFile){
-					persistenceType = Type.FILE;					
-				}
+				persistenceType = Type.get(iterator.next());
 			}
 			if(iterator.hasNext()){
 				fileType = FileType.get(iterator.next());
 			}
-			
+
 			Response response = TIDComponent.getRestResponse(responseID);
 			int status = StatusCodes.NO_SCRIPT_FAILURE;
 
@@ -390,11 +435,11 @@ public class TIDDriverRestCommands extends GenericEngine{
 			}else{
 				response.setEnabled(true);
 				response.get_request().setEnabled(saveRequest);
-				
+
 				try{
 					Persistor persistor = PersistorFactory.create(persistenceType, fileType, this, variablePrefixOrFile);
 					persistor.persist(response);
-					
+
 					synchronized(responseIdToPersistorSet){
 						Set<Persistor> persistorSet = responseIdToPersistorSet.get(responseID);
 						if(persistorSet==null){
@@ -405,24 +450,24 @@ public class TIDDriverRestCommands extends GenericEngine{
 							IndependantLog.warn(StringUtils.debugmsg(false)+"Failed to add Persistor '"+persistor+"' into internal cache.");
 						}
 					}
-					
+
 					if(Type.FILE.equals(persistenceType)){
-						description = passedText.convert(GENKEYS.ID_OBJECT_SAVED_TO_2, 
+						description = passedText.convert(GENKEYS.ID_OBJECT_SAVED_TO_2,
 								"Object identified by '"+responseID+"' has been saved to '"+variablePrefixOrFile+"'", responseID, variablePrefixOrFile);
 					}else{
 						description = passedText.convert(GENKEYS.ID_OBJECT_SAVED_TO_VARIABLE_PREFIX_2,
 								"Object identified by '"+responseID+"' has been saved to variables prefixed with '"+variablePrefixOrFile+"'", responseID, variablePrefixOrFile);
 					}
-					
+
 				}catch(SAFSException se){
 					IndependantLog.error(StringUtils.debugmsg(false)+" Failed, met "+StringUtils.debugmsg(se));
-					
+
 					message = failedText.convert(FAILKEYS.NO_SUCCESS_1, command+" was not successful.", command);
 					if(Type.FILE.equals(persistenceType)){
-						description = passedText.convert(FAILKEYS.FILE_WRITE_ERROR, 
+						description = passedText.convert(FAILKEYS.FILE_WRITE_ERROR,
 								"Error writing to file '"+variablePrefixOrFile+"'", variablePrefixOrFile);
 					}else{
-						description = failedText.convert(FAILKEYS.COULD_NOT_SET_PREFIX_VARS_1, 
+						description = failedText.convert(FAILKEYS.COULD_NOT_SET_PREFIX_VARS_1,
 								"Could not set one or more variable values prefixed with '"+variablePrefixOrFile+"'.", variablePrefixOrFile);
 					}
 					status = StatusCodes.GENERAL_SCRIPT_FAILURE;
@@ -431,5 +476,87 @@ public class TIDDriverRestCommands extends GenericEngine{
 
 			setAtEndOfProcess(status, message, description);
 		}
+
+		private void verifyResponse(boolean contains){
+			String debugmsg = StringUtils.debugmsg(false);
+			String message = null;
+			String description = null;
+			String responseID = null;
+			String benchFile = null;
+			String fileType = null;
+			boolean verifyRequest = Response.BOOL_VERIFY_REQUEST;
+			boolean exactMatchfield = Response.BOOL_EXACT_MATCH_FIELD;
+			String resultVariable = null;
+
+			if (params.size() < 1) {
+				issueParameterCountFailure();
+				return;
+			}
+
+			responseID = iterator.next();
+			if(iterator.hasNext()){
+				benchFile = iterator.next();
+			}
+			if(iterator.hasNext()){
+				fileType = iterator.next();
+			}
+			if(iterator.hasNext()){
+				resultVariable = iterator.next();
+			}
+			if(iterator.hasNext()){
+				try{
+					verifyRequest = StringUtils.parseBoolean(iterator.next());
+				}catch(SAFSParamException e){
+					IndependantLog.warn(debugmsg+e.toString());
+				}
+			}
+			if(iterator.hasNext()){
+				try{
+					exactMatchfield = StringUtils.parseBoolean(iterator.next());
+				}catch(SAFSParamException e){
+					IndependantLog.warn(debugmsg+e.toString());
+				}
+			}
+
+			int status = StatusCodes.NO_SCRIPT_FAILURE;
+
+			if(!StringUtils.isValid(responseID)){
+				String paramName = "headersFile";
+				IndependantLog.warn(debugmsg+"Invalid parameter '"+paramName+"'!");
+				status = StatusCodes.GENERAL_SCRIPT_FAILURE;
+				description = failedText.convert(FAILKEYS.BAD_PARAM, "Invalid parameter value for "+paramName, paramName);
+			}else{
+
+				if(resultVariable==null){
+					resultVariable = responseID+".verification.result";
+				}
+
+				try{
+					Response response = TIDComponent.getRestResponse(responseID);
+					if(response==null){
+						message = failedText.convert(FAILKEYS.NO_SUCCESS_1, command+" was not successful.", command);
+						description = failedText.convert(FAILKEYS.ID_NOT_FOUND_1, "Object identified by "+responseID+" was not found.", responseID);
+						status = StatusCodes.GENERAL_SCRIPT_FAILURE;
+					}else{
+						response.verifyResponse(this, benchFile, fileType, verifyRequest, contains, exactMatchfield);
+
+						String param1 = "verifyRequest: "+verifyRequest;
+						String param2 = "exactMatchfield: "+exactMatchfield;
+						description = passedText.convert(GENKEYS.ID_OBJECT_MATCHED_4,
+								"Object identified by '"+responseID+"' matched with '"+benchFile+"' with parameters '"+param1+"' '"+param2+"'.", responseID, benchFile, param1, param2);
+					}
+				}catch(SAFSException e){
+					//TODO We can just catch specific SAFSException, and adjust log message.
+					status = StatusCodes.GENERAL_SCRIPT_FAILURE;
+					message = failedText.convert(FAILKEYS.NO_SUCCESS_1, command+" was not successful.", command);
+					description = failedText.convert(FAILKEYS.ID_OBJECT_FAILED_MATCH_2,
+							"Object identified by '"+responseID+"' failed to match with '"+benchFile+"'.", responseID, benchFile);
+				}
+			}
+
+			setAtEndOfProcess(status, message, description);
+		}
+
 	}
+
 }

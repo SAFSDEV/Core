@@ -11,7 +11,11 @@
  */
 package org.safs.persist;
 
+import java.util.Arrays;
+
+import org.safs.IndependantLog;
 import org.safs.SAFSException;
+import org.safs.StringUtils;
 
 /**
  * @author Lei Wang
@@ -55,6 +59,11 @@ public interface Persistor {
 			Type type = Type.VARIABLE;
 			if(FILE.name.equalsIgnoreCase(name)) type = Type.FILE;
 			else if(VARIABLE.name.equalsIgnoreCase(name)) type = Type.VARIABLE;
+			else{
+				IndependantLog.warn(StringUtils.debugmsg(false)+"The persistence type '"+name+"' is NOT valid!\n"
+						+ "The possible valid type can be "+Arrays.toString(Type.values())+"\n"
+						+ "The default type "+type+" is returned.");
+			}
 			return type;
 		}
 	}
@@ -74,6 +83,11 @@ public interface Persistor {
 			if(JSON.name.equalsIgnoreCase(name)) type = FileType.JSON;
 			else if(XML.name.equalsIgnoreCase(name)) type = FileType.XML;
 			else if(PROPERTIES.name.equalsIgnoreCase(name)) type = FileType.PROPERTIES;
+			else{
+				IndependantLog.warn(StringUtils.debugmsg(false)+"The file type '"+name+"' is NOT valid!\n"
+						+ "The possible valid type can be "+Arrays.toString(FileType.values())+"\n"
+						+ "The default type "+type+" is returned.");
+			}
 			return type;
 		}
 	}

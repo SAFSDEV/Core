@@ -88,6 +88,8 @@ public class FAILKEYS{
 	public static final String FILE_WRITE_ERROR								= "file_write_error";
 	/** *** ERROR *** %1% */
 	public static final String GENERIC_ERROR								= "generic_error";
+	/** Failed to load header file '%1%' using '%2%' '%3%'. */
+	public static final String HEADER_FILE_LOADED_ERROR_3					= "header_file_loaded_error_3";
 	/** %1% ignoring invalid parameter '%2%'. */
 	public static final String IGNORE_BAD_PARAM								= "ignore_bad_param";
 	/** Not supported at this test level. */
@@ -170,6 +172,10 @@ public class FAILKEYS{
 	public static final String SOMETHING_NOT_FOUND							= "something_not_found";
 	/** Object identified by %1% was not found */
 	public static final String ID_NOT_FOUND_1								= "id_not_found1";
+	/** Object identified by '%1%' failed to match with '%2%'. */
+	public static final String ID_OBJECT_FAILED_MATCH_2						= "id_object_failed_match_2";
+	/** Object identified by '%1%' matched with '%2%' with parameters '%3%' '%4%'. */
+	public static final String ID_OBJECT_FAILED_MATCH_4						= "id_object_failed_match_4";
 	/** %1% value '%2%' does not match expected value '%3%'. */
 	public static final String SOMETHING_NOT_MATCH							= "something_not_match";
 	/** *** STAF ERROR *** %1% */
