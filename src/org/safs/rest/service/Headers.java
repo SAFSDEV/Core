@@ -44,9 +44,10 @@ public class Headers {
 	public static final String CSS_TYPE    = "CSS";
 	public static final String SCRIPT_TYPE = "SCRIPT";
 	
-	// Constants for default Content/Accept types
+	// Constants for common Header types
 	public static final String CONTENT_TYPE      = "Content-Type";
 	public static final String ACCEPT            = "Accept";
+	public static final String USER_AGENT        = "User-Agent";
 	
 	public static final String APPL_OCTET_STREAM = "application/octet-stream";
 	public static final String APPL_JSON         = "application/json";
@@ -56,6 +57,8 @@ public class Headers {
 	public static final String IMAGE             = "image";
 	public static final String TEXT_CSS          = "text/css";
 	public static final String APPL_JAVASCRIPT   = "application/javascript";
+	
+	public static final String MOZILLA_GENERIC_AGENT = "Mozilla/5.0 Gecko/20110201";
 	
 	private static Map<String,String> defaultContentTypeMap; 
 	
@@ -369,7 +372,7 @@ public class Headers {
 	}
 	
 	
-	static String convertHeadersMapToMultiLineString(Map<String,String> headerMap) {
+	public static String convertHeadersMapToMultiLineString(Map<String,String> headerMap) {
 		
 		if (headerMap == null) {
 			return null;
@@ -381,6 +384,9 @@ public class Headers {
 		return sb.toString();
 	}
 	
+	public static Map<String,String> convertHeadersMultiLineStringToMap(String headers){
+		return getHeadersMapFromMultiLineString(headers);
+	}
 	
 //	/**
 //	 * @param _headerString The string of multi-line headers
@@ -447,5 +453,83 @@ public class Headers {
 		return ret;
 	}
 	
+	/**
+	 * Given a multi-line header String, append a header value to an existing header name, 
+	 * or create the new header with the given value.
+	 * <p>
+	 * Example: appendHeaderValue(headers, "Accept", "text/html");
+	 * <p>
+	 * This does NOT act on prestored headers, only the header String provided.
+	 * <p>
+	 * When appending, this routine will prefix the value with a separator.
+	 * <p>
+	 * @param headers multi-line header string.
+	 * @param headerName name of the header to be created or appended.
+	 * @param headerValue value to add to the provided header name.
+	 * @return multiline headers properly appended, or unmodified if invalid arguments are provided.
+	 */
+	public static String appendHeaderValue(String headers, String headerName, String headerValue){		
+		if (headerName==null || 
+		    headerName.length()==0 ||
+		    headerValue == null ||
+		    headerValue.length()==0) return headers;
+		Map<String,String> hm = getHeadersMapFromMultiLineString(headers);
+		boolean found = false;
+		String val;
+		for(String key:hm.keySet()){
+			if(headerName.equalsIgnoreCase(key)){
+				val = hm.get(key);
+				val +=", "+ headerValue;
+				hm.put(key, val);
+				found = true;
+				break; // or do we want to handle duplicates?
+			}
+		}
+		if(!found) hm.put(headerName, headerValue);
+		return convertHeadersMapToMultiLineString(hm);
+	}
 
+	/**
+	 * Given a multi-line header String, remove a header value from an existing header name, 
+	 * or create the new header without the given value.
+	 * <p>
+	 * Example: removeHeaderValue(headers, "Accept", "text/html");
+	 * <p>
+	 * This does NOT act on prestored headers, only the header String provided.
+	 * <p>
+	 * When removing, this routine will attempt to fix any separators.
+	 * <p>
+	 * @param headers multi-line header string.
+	 * @param headerName name of the header to have a value removed.
+	 * @param headerValue value to remove.
+	 * @return multiline headers properly changed, or unmodified if invalid arguments are provided.
+	 */
+	public static String removeHeaderValue(String headers, String headerName, String headerValue){		
+		if (headerName==null || 
+		    headerName.length()==0 ||
+		    headerValue == null ||
+		    headerValue.length()==0) return headers;
+		Map<String,String> hm = getHeadersMapFromMultiLineString(headers);
+		boolean found = false;
+		String val;
+		String ucval;
+		String ucheaderValue;
+		for(String key:hm.keySet()){
+			if(headerName.equalsIgnoreCase(key)){
+				val = hm.get(key);
+				// if only value
+				if(headerValue.equalsIgnoreCase(val)){
+					hm.remove(key);
+				}else{
+					
+				}
+				val +=", "+ headerValue;
+				hm.put(key, val);
+				found = true;
+				break; // or do we want to handle duplicates?
+			}
+		}
+		if(!found) hm.put(headerName, headerValue);
+		return convertHeadersMapToMultiLineString(hm);
+	}
 }
