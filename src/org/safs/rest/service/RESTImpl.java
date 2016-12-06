@@ -32,7 +32,10 @@ public class RESTImpl {
 		safsRequest.set_method(requestMethod);
 		safsRequest.set_message_body(body);
 		safsRequest.set_headers(headers);
-		safsRequest.set_uri(defaultURI + "/" + relativeURI);
+		if(relativeURI.startsWith("/"))
+			safsRequest.set_uri(defaultURI + relativeURI);
+		else
+			safsRequest.set_uri(defaultURI + "/" + relativeURI);
 		safsRequest.set_protocol_version(protVersion.toString());
 		
 		Response safsResponse = new Response();		
