@@ -76,12 +76,18 @@ public class GENKEYS{
 	public static final String GONE_TIMEOUT									= "gone_timeout";
 	/** %1% is greater than %2% */
 	public static final String GREATER										= "greater";
+	/** Header file '%1%' has been successfully loaded using '%2%' '%3%'. */
+	public static final String HEADER_FILE_LOADED_3							= "header_file_loaded_3";
 	/** Object identified by '%1%' has been saved to variables prefixed by '%2%' */
 	public static final String ID_OBJECT_SAVED_TO_VARIABLE_PREFIX_2			= "id_object_saved_to_variable_prefix2";
 	/** Object identified by '%1%' has been saved to '%2%' */
 	public static final String ID_OBJECT_SAVED_TO_2			= "id_object_saved_to_2";
 	/** Object identified by '%1%' has been removed from cache map. */
 	public static final String ID_OBJECT_REMOVED_FROM_MAP					= "id_object_removed_from_map";
+	/** Object identified by '%1%' matched with '%2%'. */
+	public static final String ID_OBJECT_MATCHED_2							= "id_object_matched_2";
+	/** Object identified by '%1%' matched with '%2%' with parameters '%3%' '%4%'.  */
+	public static final String ID_OBJECT_MATCHED_4							= "id_object_matched_4";
 	/** %1% in range %2% to %3% */
 	public static final String IN_RANGE										= "in_range";
 	/** '%1%' is not selected in %2% */
