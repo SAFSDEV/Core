@@ -1,4 +1,4 @@
-/** 
+/**
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  */
@@ -20,20 +20,20 @@ import org.safs.SAFSPersistableNotEnableException;
 import org.safs.tools.RuntimeDataInterface;
 
 /**
- * Write Response/Request object to an XML file, such as:
+ * Write Persistable object to an XML file, such as:
  * <pre>
- * &lt;Response>
- *   &lt;StatusCode>200&lt;/StatusCode>
- *   &lt;Headers>
- *     &lt;ContentType>text/xml&lt;/ContentType>
- *   &lt;/Headers>
- *   &lt;Request>
- *     &lt;Method>GET&lt;/Method>
- *     &lt;Headers>
- *       &lt;Accept>text/xml;application/json&lt;/Accept>
- *     &lt;/Headers>
- *   &lt;/Request>
- * &lt;/Response>
+ * &lt;Response&gt;
+ *   &lt;StatusCode&gt;200&lt;/StatusCode&gt;
+ *   &lt;Headers&gt;
+ *     &lt;ContentType&gt;text/xml&lt;/ContentType&gt;
+ *   &lt;/Headers&gt;
+ *   &lt;Request&gt;
+ *     &lt;Method&gt;GET&lt;/Method&gt;
+ *     &lt;Headers&gt;
+ *       Content-Type:application/octet-stream, Accept:application/octet-stream
+ *     &lt;/Headers&gt;
+ *   &lt;/Request&gt;
+ * &lt;/Response&gt;
  * </pre>
  * @author sbjlwa
  *
@@ -47,16 +47,17 @@ public class PersistorToXMLFile extends PersistorToFile{
 	public PersistorToXMLFile(RuntimeDataInterface runtime, String filename){
 		super(runtime, filename);
 	}
-	
+
 	@Override
 	public void write(Persistable persistable) throws SAFSException, IOException{
-		
+		validate(persistable);
+
 		Map<String, Object> contents = persistable.getContents();
 		String className = persistable.getClass().getSimpleName();
 		Object value = null;
-		
-		bufferedWriter.write("<"+className+">\n");
-		
+
+		writer.write("<"+className+">\n");
+
 		String[] keys = contents.keySet().toArray(new String[0]);
 		String key = null;
 		for(int i=0;i<keys.length;i++){
@@ -70,11 +71,11 @@ public class PersistorToXMLFile extends PersistorToFile{
 					IndependantLog.warn(pne.getMessage());
 				}
 			}else{
-				bufferedWriter.write("<"+key+">"+value.toString()+"</"+key+">");
+				writer.write("<"+key+">"+value.toString()+"</"+key+">");
 			}
-			bufferedWriter.write("\n");
+			writer.write("\n");
 		}
-		
-		bufferedWriter.write("</"+className+">\n");
+
+		writer.write("</"+className+">\n");
 	}
 }
