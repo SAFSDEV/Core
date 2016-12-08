@@ -1,4 +1,4 @@
-/** 
+/**
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  */
@@ -14,6 +14,7 @@ package org.safs.persist;
 import java.io.IOException;
 
 import org.safs.SAFSException;
+import org.safs.StringUtils;
 import org.safs.tools.RuntimeDataInterface;
 
 /**
@@ -34,5 +35,6 @@ public class PersistorToPropertiesFile extends PersistorToFile{
 	public void write(Persistable persistable) throws SAFSException, IOException{
 		//TODO save to a properties file, or 2 properties files
 		//one for response and one for request.
+		throw new SAFSException(StringUtils.debugmsg(false)+" not supported yet! ");
 	}
 }

@@ -13,9 +13,7 @@ package org.safs.rest.service;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.safs.SAFSException;
 import org.safs.persist.PersistableDefault;
-import org.safs.tools.RuntimeDataInterface;
 
 /**
  * @author Carl Nagle
@@ -25,7 +23,6 @@ public class Response extends PersistableDefault{
 	protected final static Map<String, String> fieldToPersistKeyMap = new HashMap<String, String>();
 
 	Request _request;
-
 	String ID = "TO BE ASSIGNED";
 	String _content_type = UNKNOWN_VALUE;
 	Object _entity_body = UNKNOWN_VALUE;
@@ -208,35 +205,6 @@ public class Response extends PersistableDefault{
 	public String toString(){
 		return "\n========\nRequest: " + getRequestInfo() +"\n"+
 				"=========\nResponse: "+ getResponseInfo();
-	}
-
-	public static final boolean BOOL_CONTAINS 			= false;
-	public static final boolean BOOL_EXACT_MATCH_FIELD 	= true;
-	public static final boolean BOOL_VERIFY_REQUEST 	= false;
-
-	/**
-	 *
-	 * @param runtime	RuntimeDataInterface
-	 * @param benchFile	String
-	 * @param fileType	String
-	 * @param boolParams boolean..., the optional boolean parameters: listed as below
-	 * <ol>
-	 * <li><b>verifyRequest</b>
-	 * 						If true, then verify also Request object; otherwise only Response object will be verified.<br>
-	 * 						The default value is false.<br>
-	 * <li><b>contains</b>
-	 * 						If true, then verify that Response/Request contains the fields in benchFile;<br>
-	 *                      Otherwise, then verify that Response/Request matches exactly with the content of benchFile;<br>
-	 *                      The default value is false.<br>
-	 * <li><b>exactMatchfield</b>
-	 *                      If true, then verify that Response/Request field's value matches exactly with that in benchFile;<br>
-	 *                      Otherwise, then verify that Response/Request field's value contains case-insensitively that in benchFile;<br>
-	 *                      The default value is true;<br>
-	 * </ol>
-	 * @throws SAFSException
-	 */
-	public void verifyResponse(RuntimeDataInterface runtime, String benchFile, String fileType, boolean... boolParams) throws SAFSException{
-		//TODO
 	}
 
 	@Override

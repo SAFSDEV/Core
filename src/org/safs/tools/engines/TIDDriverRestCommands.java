@@ -25,19 +25,23 @@ import org.safs.DriverCommand;
 import org.safs.IndependantLog;
 import org.safs.SAFSException;
 import org.safs.SAFSParamException;
+import org.safs.SAFSVerificationException;
 import org.safs.StatusCodes;
 import org.safs.StringUtils;
 import org.safs.TestRecordHelper;
 import org.safs.logging.LogUtilities;
 import org.safs.model.commands.DDDriverRestCommands;
+import org.safs.persist.PersistenceType;
 import org.safs.persist.Persistor;
-import org.safs.persist.Persistor.FileType;
-import org.safs.persist.Persistor.Type;
 import org.safs.persist.PersistorFactory;
+import org.safs.persist.Verifier;
+import org.safs.persist.VerifierFactory;
 import org.safs.rest.service.Headers;
+import org.safs.rest.service.Request;
 import org.safs.rest.service.Response;
 import org.safs.text.FAILKEYS;
 import org.safs.text.FAILStrings;
+import org.safs.text.FileUtilities.FileType;
 import org.safs.text.GENKEYS;
 import org.safs.tools.drivers.DriverInterface;
 
@@ -250,17 +254,17 @@ public class TIDDriverRestCommands extends GenericEngine{
 				for(Persistor p:persistorSet){
 					try{
 						p.unpersist();
-						if(Type.FILE.equals(p.getType())){
+						if(PersistenceType.FILE.equals(p.getType())){
 							sb.append(passedText.convert(GENKEYS.FILE_DELETE_1,"File '"+p.getPersistenceName()+"' has been deleted.", p.getPersistenceName())+"\n");
-						}else if(Type.VARIABLE.equals(p.getType())){
+						}else if(PersistenceType.VARIABLE.equals(p.getType())){
 							sb.append( passedText.convert(GENKEYS.PREFIX_VARS_DELETE_1, "Variables prefixed with '"+p.getPersistenceName()+"' have been deleted.", p.getPersistenceName())+"\n");
 						}
 					}catch(SAFSException e){
 						success = false;
 						IndependantLog.warn(debugmsg+e.getMessage()+"\n");
-						if(Type.FILE.equals(p.getType())){
+						if(PersistenceType.FILE.equals(p.getType())){
 							sb.append(failedText.convert(FAILKEYS.CANT_DELETE_FILE,"Can not delete file '"+p.getPersistenceName()+"'", p.getPersistenceName())+"\n");
-						}else if(Type.VARIABLE.equals(p.getType())){
+						}else if(PersistenceType.VARIABLE.equals(p.getType())){
 							sb.append(failedText.convert(FAILKEYS.COULD_NOT_SET_PREFIX_VARS_1, "Could not delete one or more variable values prefixed with '"+p.getPersistenceName()+"'.", p.getPersistenceName())+"\n");
 						}
 					}
@@ -306,17 +310,17 @@ public class TIDDriverRestCommands extends GenericEngine{
 				for(Persistor p:persistorSet){
 					try{
 						p.unpersist();
-						if(Type.FILE.equals(p.getType())){
+						if(PersistenceType.FILE.equals(p.getType())){
 							sb.append(passedText.convert(GENKEYS.FILE_DELETE_1,"File '"+p.getPersistenceName()+"' has been deleted.", p.getPersistenceName())+"\n");
-						}else if(Type.VARIABLE.equals(p.getType())){
+						}else if(PersistenceType.VARIABLE.equals(p.getType())){
 							sb.append( passedText.convert(GENKEYS.PREFIX_VARS_DELETE_1, "Variables prefixed with '"+p.getPersistenceName()+"' have been deleted.", p.getPersistenceName())+"\n");
 						}
 					}catch(SAFSException e){
 						persistorSuccess = false;
 						IndependantLog.warn(debugmsg+e.getMessage()+"\n");
-						if(Type.FILE.equals(p.getType())){
+						if(PersistenceType.FILE.equals(p.getType())){
 							sb.append(failedText.convert(FAILKEYS.CANT_DELETE_FILE,"Can not delete file '"+p.getPersistenceName()+"'", p.getPersistenceName())+"\n");
-						}else if(Type.VARIABLE.equals(p.getType())){
+						}else if(PersistenceType.VARIABLE.equals(p.getType())){
 							sb.append(failedText.convert(FAILKEYS.COULD_NOT_SET_PREFIX_VARS_1, "Could not delete one or more variable values prefixed with '"+p.getPersistenceName()+"'.", p.getPersistenceName())+"\n");
 						}
 					}
@@ -399,7 +403,7 @@ public class TIDDriverRestCommands extends GenericEngine{
 			}
 			boolean saveRequest = false;
 			FileType fileType = FileType.JSON;
-			Type persistenceType = Type.VARIABLE;
+			PersistenceType persistenceType = PersistenceType.VARIABLE;
 			String message = null;
 			String description = null;
 
@@ -419,7 +423,7 @@ public class TIDDriverRestCommands extends GenericEngine{
 				saveRequest = Boolean.parseBoolean(iterator.next());
 			}
 			if(iterator.hasNext()){
-				persistenceType = Type.get(iterator.next());
+				persistenceType = PersistenceType.get(iterator.next());
 			}
 			if(iterator.hasNext()){
 				fileType = FileType.get(iterator.next());
@@ -451,7 +455,7 @@ public class TIDDriverRestCommands extends GenericEngine{
 						}
 					}
 
-					if(Type.FILE.equals(persistenceType)){
+					if(PersistenceType.FILE.equals(persistenceType)){
 						description = passedText.convert(GENKEYS.ID_OBJECT_SAVED_TO_2,
 								"Object identified by '"+responseID+"' has been saved to '"+variablePrefixOrFile+"'", responseID, variablePrefixOrFile);
 					}else{
@@ -463,7 +467,7 @@ public class TIDDriverRestCommands extends GenericEngine{
 					IndependantLog.error(StringUtils.debugmsg(false)+" Failed, met "+StringUtils.debugmsg(se));
 
 					message = failedText.convert(FAILKEYS.NO_SUCCESS_1, command+" was not successful.", command);
-					if(Type.FILE.equals(persistenceType)){
+					if(PersistenceType.FILE.equals(persistenceType)){
 						description = passedText.convert(FAILKEYS.FILE_WRITE_ERROR,
 								"Error writing to file '"+variablePrefixOrFile+"'", variablePrefixOrFile);
 					}else{
@@ -477,28 +481,30 @@ public class TIDDriverRestCommands extends GenericEngine{
 			setAtEndOfProcess(status, message, description);
 		}
 
-		private void verifyResponse(boolean contains){
+		private void verifyResponse(boolean contains) throws SAFSException{
 			String debugmsg = StringUtils.debugmsg(false);
 			String message = null;
 			String description = null;
 			String responseID = null;
 			String benchFile = null;
-			String fileType = null;
-			boolean verifyRequest = Response.BOOL_VERIFY_REQUEST;
-			boolean exactMatchfield = Response.BOOL_EXACT_MATCH_FIELD;
+			FileType fileType = FileType.JSON;
+			boolean verifyRequest = Request.BOOL_VERIFY_REQUEST;
+			boolean matchAllFields = Verifier.BOOL_MATCH_ALL_FIELDS;
+			boolean valueContains = Verifier.BOOL_VALUE_CONTAINS;
+			boolean valueCaseSensitive = Verifier.BOOL_VALUE_CASESENSITIVE;
+
 			String resultVariable = null;
 
-			if (params.size() < 1) {
+			if (params.size() < 2) {
 				issueParameterCountFailure();
 				return;
 			}
 
 			responseID = iterator.next();
+			benchFile = iterator.next();
+
 			if(iterator.hasNext()){
-				benchFile = iterator.next();
-			}
-			if(iterator.hasNext()){
-				fileType = iterator.next();
+				fileType = FileType.get(iterator.next());
 			}
 			if(iterator.hasNext()){
 				resultVariable = iterator.next();
@@ -512,7 +518,21 @@ public class TIDDriverRestCommands extends GenericEngine{
 			}
 			if(iterator.hasNext()){
 				try{
-					exactMatchfield = StringUtils.parseBoolean(iterator.next());
+					matchAllFields = StringUtils.parseBoolean(iterator.next());
+				}catch(SAFSParamException e){
+					IndependantLog.warn(debugmsg+e.toString());
+				}
+			}
+			if(iterator.hasNext()){
+				try{
+					valueContains = StringUtils.parseBoolean(iterator.next());
+				}catch(SAFSParamException e){
+					IndependantLog.warn(debugmsg+e.toString());
+				}
+			}
+			if(iterator.hasNext()){
+				try{
+					valueCaseSensitive = StringUtils.parseBoolean(iterator.next());
 				}catch(SAFSParamException e){
 					IndependantLog.warn(debugmsg+e.toString());
 				}
@@ -521,7 +541,7 @@ public class TIDDriverRestCommands extends GenericEngine{
 			int status = StatusCodes.NO_SCRIPT_FAILURE;
 
 			if(!StringUtils.isValid(responseID)){
-				String paramName = "headersFile";
+				String paramName = "responseID";
 				IndependantLog.warn(debugmsg+"Invalid parameter '"+paramName+"'!");
 				status = StatusCodes.GENERAL_SCRIPT_FAILURE;
 				description = failedText.convert(FAILKEYS.BAD_PARAM, "Invalid parameter value for "+paramName, paramName);
@@ -538,19 +558,27 @@ public class TIDDriverRestCommands extends GenericEngine{
 						description = failedText.convert(FAILKEYS.ID_NOT_FOUND_1, "Object identified by "+responseID+" was not found.", responseID);
 						status = StatusCodes.GENERAL_SCRIPT_FAILURE;
 					}else{
-						response.verifyResponse(this, benchFile, fileType, verifyRequest, contains, exactMatchfield);
 
-						String param1 = "verifyRequest: "+verifyRequest;
-						String param2 = "exactMatchfield: "+exactMatchfield;
-						description = passedText.convert(GENKEYS.ID_OBJECT_MATCHED_4,
-								"Object identified by '"+responseID+"' matched with '"+benchFile+"' with parameters '"+param1+"' '"+param2+"'.", responseID, benchFile, param1, param2);
+						Verifier verifier = VerifierFactory.create(PersistenceType.FILE, fileType, this, benchFile);
+
+						response.setEnabled(true);
+						Request request = response.get_request();
+						if(request!=null){
+							request.setEnabled(verifyRequest);
+						}
+
+						verifier.verify(response, matchAllFields, valueContains, valueCaseSensitive);
+
+						description = passedText.convert(GENKEYS.ID_OBJECT_MATCHED_2,
+								"Object identified by '"+responseID+"' matched with '.", responseID, benchFile);
 					}
-				}catch(SAFSException e){
-					//TODO We can just catch specific SAFSException, and adjust log message.
+				}catch(SAFSVerificationException e){
+					//We just catch specific SAFSVerificationException, let out the other exceptions
 					status = StatusCodes.GENERAL_SCRIPT_FAILURE;
 					message = failedText.convert(FAILKEYS.NO_SUCCESS_1, command+" was not successful.", command);
 					description = failedText.convert(FAILKEYS.ID_OBJECT_FAILED_MATCH_2,
 							"Object identified by '"+responseID+"' failed to match with '"+benchFile+"'.", responseID, benchFile);
+					description +="\n"+e.getMessage();
 				}
 			}
 

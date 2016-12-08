@@ -1,4 +1,4 @@
-/** 
+/**
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  */
@@ -11,9 +11,9 @@
  */
 package org.safs.persist;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.io.Writer;
 
 import org.safs.IndependantLog;
 import org.safs.SAFSException;
@@ -32,22 +32,22 @@ public abstract class PersistorToFile extends AbstractRuntimeDataPersistor{
 	 * The name of file to hold the information of a Persistable object.
 	 */
 	protected String filename = null;
-	
-	protected BufferedWriter bufferedWriter = null;
-	
+
+	protected Writer writer = null;
+
 	public PersistorToFile(RuntimeDataInterface runtime, String filename){
 		super(runtime);
-		this.filename = filename;		
+		this.filename = filename;
 	}
-	
+
 	@Override
 	public void persist(Persistable persistable) throws SAFSException {
 		super.persist(persistable);
-		
+
 		try {
 			//open the persistence file
 			File file = FileUtilities.deduceTestFile(filename, runtime);
-			bufferedWriter = FileUtilities.getUTF8BufferedFileWriter(file.getAbsolutePath());
+			writer = FileUtilities.getUTF8BufferedFileWriter(file.getAbsolutePath());
 			//write the persistable object to the file
 			writeHeader(persistable);
 			write(persistable);
@@ -58,17 +58,17 @@ public abstract class PersistorToFile extends AbstractRuntimeDataPersistor{
 		} finally{
 			//close the persistence file
 			try {
-				bufferedWriter.close();
+				writer.close();
 			} catch (IOException e) {
-				IndependantLog.warn(StringUtils.debugmsg(false)+"Failed to close the buffered writer on file '"+filename+"'.");
+				IndependantLog.warn(StringUtils.debugmsg(false)+"Failed to close the writer on file '"+filename+"'.");
 			}
-		}		
+		}
 	}
 
 	public void writeHeader(Persistable persistable)  throws SAFSException, IOException{}
 	public abstract void write(Persistable persistable)  throws SAFSException, IOException;
 	public void writeTailer(Persistable persistable)  throws SAFSException, IOException{}
-		
+
 	/**
 	 * Try to delete a persistence file in the test/bench folder.
 	 */
@@ -78,20 +78,20 @@ public abstract class PersistorToFile extends AbstractRuntimeDataPersistor{
 		if(file==null || !file.exists()){
 			file = FileUtilities.deduceBenchFile(filename, runtime);
 		}
-		
+
 		if(file!=null && file.exists()){
 			file.delete();
 		}
 	}
-	
-	public Type getType(){
-		return Type.FILE;
+
+	public PersistenceType getType(){
+		return PersistenceType.FILE;
 	}
-	
+
 	public String getPersistenceName(){
 		return filename;
 	}
-	
+
 	/**
 	 * If they have the same filename, then we consider them equivalent
 	 */
@@ -100,7 +100,11 @@ public abstract class PersistorToFile extends AbstractRuntimeDataPersistor{
 		if(o==null) return false;
 		if(!(o instanceof PersistorToFile)) return false;
 		PersistorToFile p = (PersistorToFile) o;
-		
+
+		if(this.equals(o)){
+			return true;
+		}
+
 		if(filename==null){
 			return p.filename==null;
 		}else{

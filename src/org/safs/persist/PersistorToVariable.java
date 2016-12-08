@@ -71,8 +71,8 @@ public class PersistorToVariable extends AbstractRuntimeDataPersistor{
 		}
 	}
 
-	public Type getType(){
-		return Type.VARIABLE;
+	public PersistenceType getType(){
+		return PersistenceType.VARIABLE;
 	}
 	
 	public String getPersistenceName(){

@@ -1,4 +1,4 @@
-/** 
+/**
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  */
@@ -21,24 +21,22 @@ import org.safs.StringUtils;
 import org.safs.tools.RuntimeDataInterface;
 
 /**
- * Write Response/Request object to a JSON file, such as:
+ * Write Persistable object to a JSON file, such as:
  * <pre>
  * {
  * "Response": {
  *   "StatusCode": "200",
- * 	   "Headers": {
+ * 	 "Headers": {
  * 	    "ContentType": "text/xml"
- *     },
+ *   },
  *   "Request": {
  * 	    "Method": "GET",
- * 	    "Headers": {
- * 	      "Accept": "text/xml;application/json"
- *      }
+ * 	    "Headers": "{Date=Tue, 06 Dec 2016 03:08:12 GMT, Content-Length=4574}"
  *   }
  *  }
  * }
  * </pre>
- * 
+ *
  * @author Lei Wang
  *
  */
@@ -54,20 +52,23 @@ public class PersistorToJSONFile extends PersistorToFile{
 
 	@Override
 	public void writeHeader(Persistable persistable) throws SAFSException, IOException {
-		bufferedWriter.write("{\n");		
+		writer.write("{\n");
 	}
 	@Override
 	public void writeTailer(Persistable persistable) throws SAFSException, IOException {
-		bufferedWriter.write("}");
+		writer.write("}");
 	}
-	
+
 	public void write(Persistable persistable) throws SAFSException, IOException {
+
+		validate(persistable);
+
 		Map<String, Object> contents = persistable.getContents();
 		String className = persistable.getClass().getSimpleName();
 		Object value = null;
-		
-		bufferedWriter.write(StringUtils.quote(className)+" : {\n");
-		
+
+		writer.write(StringUtils.quote(className)+" : {\n");
+
 		String[] keys = contents.keySet().toArray(new String[0]);
 		String key = null;
 		for(int i=0;i<keys.length;i++){
@@ -81,15 +82,15 @@ public class PersistorToJSONFile extends PersistorToFile{
 					IndependantLog.warn(pne.getMessage());
 				}
 			}else{
-				bufferedWriter.write(StringUtils.quote(key)+" : "+StringUtils.quote(value.toString()));
+				writer.write(StringUtils.quote(key)+" : "+StringUtils.quote(value.toString()));
 			}
 			if((i+1)<keys.length){
-				bufferedWriter.write(",\n");
+				writer.write(",\n");
 			}else{
-				bufferedWriter.write("\n");
+				writer.write("\n");
 			}
 		}
-		
-		bufferedWriter.write("}");
+
+		writer.write("}");
 	}
 }
