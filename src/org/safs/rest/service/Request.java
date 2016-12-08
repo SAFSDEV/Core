@@ -1,4 +1,4 @@
-/** 
+/**
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  */
@@ -15,14 +15,15 @@ import org.safs.persist.PersistableDefault;
  */
 public class Request extends PersistableDefault{
 
+	public static final boolean BOOL_VERIFY_REQUEST 	= false;
 	protected final static Map<String, String> fieldToPersistKeyMap = new HashMap<String, String>();
-	
+
 	String _request_method;
 	String _request_uri;
 	String _request_http_version;
-	
+
 	String _headers;
-	
+
 	Object _message_body;
 
 	static{
@@ -32,7 +33,7 @@ public class Request extends PersistableDefault{
 		fieldToPersistKeyMap.put("_headers", "Headers");
 		fieldToPersistKeyMap.put("_message_body", "MessageBody");
 	}
-	
+
 	/**
 	 * @return the _request_method
 	 */
@@ -74,7 +75,7 @@ public class Request extends PersistableDefault{
 	public void set_protocol_version(String _request_http_version) {
 		this._request_http_version = _request_http_version;
 	}
-	
+
 	/**
 	 * @return the headers
 	 */

@@ -7,7 +7,7 @@
  * Logs for developers, not published to API DOC.
  *
  * History:
- * DEC 02, 2016    (SBJLWA) Initial release.
+ * DEC 05, 2016    (SBJLWA) Initial release.
  */
 package org.safs.persist;
 
@@ -17,18 +17,18 @@ import org.safs.SAFSPersistableNotEnableException;
 import org.safs.tools.RuntimeDataInterface;
 
 /**
- * A Persistor with RuntimeDataInterface providing underlying functionality.
+ * A Verifier with RuntimeDataInterface providing underlying functionality.
  * @author sbjlwa
  */
-public abstract class AbstractRuntimeDataPersistor implements Persistor{
+public abstract class AbstractRuntimeDataVerifier implements Verifier{
 	protected RuntimeDataInterface runtime = null;
 
-	public AbstractRuntimeDataPersistor(RuntimeDataInterface runtime){
+	public AbstractRuntimeDataVerifier(RuntimeDataInterface runtime){
 		this.runtime = runtime;
 	}
 
 	@Override
-	public void persist(Persistable persistable) throws SAFSException {
+	public void verify(Persistable persistable, boolean... conditions) throws SAFSException {
 		validate(persistable);
 	}
 
