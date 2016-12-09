@@ -54,13 +54,6 @@ public abstract class PersistableDefault implements Persistable{
 				value = UNKNOWN_VALUE;
 			}
 
-			//TODO only for XML, we need do this. For other files, do we?
-			if(value instanceof String){
-				if(value.toString().toLowerCase().startsWith("<?xml")){
-					value = "<![CDATA["+value+"]]>";
-				}
-			}
-
 			contents.put(fieldToPersistKeyMap.get(fieldName), value);
 		}
 
