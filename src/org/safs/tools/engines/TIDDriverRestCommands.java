@@ -168,12 +168,12 @@ public class TIDDriverRestCommands extends GenericEngine{
 
 			}catch(Exception e){
 				String exceptionMsg = StringUtils.debugmsg(e);
-				String message = FAILStrings.convert(FAILStrings.GENERIC_ERROR,
-						"*** ERROR *** "+exceptionMsg, exceptionMsg);
-				standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
+				StringBuilder message = new StringBuilder();
+				message.append(FAILStrings.convert(FAILStrings.NO_SUCCESS_1, command+" was not successful.", command)+"\n");
+				message.append(exceptionMsg);
+				standardErrorMessage(testRecordData, message.toString(), testRecordData.getInputRecord());
 				setTRDStatus(testRecordData, StatusCodes.GENERAL_SCRIPT_FAILURE);
 			}
-
 		}
 
 		private void cleanResponseMap(){
@@ -539,7 +539,7 @@ public class TIDDriverRestCommands extends GenericEngine{
 				description = failedText.convert(FAILKEYS.BAD_PARAM, "Invalid parameter value for "+paramName, paramName);
 			}else{
 
-				if(resultVariable==null){
+				if(!StringUtils.isValid(resultVariable)){
 					resultVariable = responseID+".verification.result";
 				}
 
