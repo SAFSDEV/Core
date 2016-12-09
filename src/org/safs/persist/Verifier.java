@@ -36,6 +36,6 @@ public interface Verifier {
 
 	public static final boolean BOOL_MATCH_ALL_FIELDS 		= true;
 	public static final boolean BOOL_VALUE_CONTAINS 		= false;
-	public static final boolean BOOL_VALUE_CASESENSITIVE 	= false;
+	public static final boolean BOOL_VALUE_CASESENSITIVE 	= true;
 
 }

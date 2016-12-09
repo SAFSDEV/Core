@@ -46,9 +46,9 @@ public class VerifierFactory {
 		}
 
 		if(verifier==null){
-			throw new SAFSException(" Does not support\n"
+			throw new SAFSException("VerifierFactory does not support Verifier of\n"
 					+ "persistence-type: '"+persistenceType.name+"'\n"
-					+ "file-type: '"+fileType.name+"'!");
+					+ "file-type: '"+fileType.name+"'!\n");
 		}
 
 		return verifier;

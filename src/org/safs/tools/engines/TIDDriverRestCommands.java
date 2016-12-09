@@ -159,9 +159,9 @@ public class TIDDriverRestCommands extends GenericEngine{
 				}else if(DDDriverRestCommands.RESTHEADERSLOAD_KEYWORD.equalsIgnoreCase(command)){
 					loadHeaders();
 				}else if(DDDriverRestCommands.RESTVERIFYRESPONSE_KEYWORD.equalsIgnoreCase(command)){
-					verifyResponse(false);
-				}else if(DDDriverRestCommands.RESTVERIFYRESPONSECONTAINS_KEYWORD.equalsIgnoreCase(command)){
 					verifyResponse(true);
+				}else if(DDDriverRestCommands.RESTVERIFYRESPONSECONTAINS_KEYWORD.equalsIgnoreCase(command)){
+					verifyResponse(false);
 				}else{
 					IndependantLog.debug(debugmsg+command+" is not suppported in this processor, so it was not handled yet.");
 				}
@@ -481,7 +481,7 @@ public class TIDDriverRestCommands extends GenericEngine{
 			setAtEndOfProcess(status, message, description);
 		}
 
-		private void verifyResponse(boolean contains) throws SAFSException{
+		private void verifyResponse(boolean matchAllFields) throws SAFSException{
 			String debugmsg = StringUtils.debugmsg(false);
 			String message = null;
 			String description = null;
@@ -489,7 +489,6 @@ public class TIDDriverRestCommands extends GenericEngine{
 			String benchFile = null;
 			FileType fileType = FileType.JSON;
 			boolean verifyRequest = Request.BOOL_VERIFY_REQUEST;
-			boolean matchAllFields = Verifier.BOOL_MATCH_ALL_FIELDS;
 			boolean valueContains = Verifier.BOOL_VALUE_CONTAINS;
 			boolean valueCaseSensitive = Verifier.BOOL_VALUE_CASESENSITIVE;
 
@@ -512,13 +511,6 @@ public class TIDDriverRestCommands extends GenericEngine{
 			if(iterator.hasNext()){
 				try{
 					verifyRequest = StringUtils.parseBoolean(iterator.next());
-				}catch(SAFSParamException e){
-					IndependantLog.warn(debugmsg+e.toString());
-				}
-			}
-			if(iterator.hasNext()){
-				try{
-					matchAllFields = StringUtils.parseBoolean(iterator.next());
 				}catch(SAFSParamException e){
 					IndependantLog.warn(debugmsg+e.toString());
 				}
@@ -570,7 +562,9 @@ public class TIDDriverRestCommands extends GenericEngine{
 						verifier.verify(response, matchAllFields, valueContains, valueCaseSensitive);
 
 						description = passedText.convert(GENKEYS.ID_OBJECT_MATCHED_2,
-								"Object identified by '"+responseID+"' matched with '.", responseID, benchFile);
+								"Object identified by '"+responseID+"' matched with '"+benchFile+"'.", responseID, benchFile);
+
+						setVariable(resultVariable, Boolean.TRUE.toString());
 					}
 				}catch(SAFSVerificationException e){
 					//We just catch specific SAFSVerificationException, let out the other exceptions
@@ -579,6 +573,7 @@ public class TIDDriverRestCommands extends GenericEngine{
 					description = failedText.convert(FAILKEYS.ID_OBJECT_FAILED_MATCH_2,
 							"Object identified by '"+responseID+"' failed to match with '"+benchFile+"'.", responseID, benchFile);
 					description +="\n"+e.getMessage();
+					setVariable(resultVariable, Boolean.FALSE.toString());
 				}
 			}
 

@@ -132,31 +132,47 @@ public class VerifierToXMLFile extends VerifierToFile{
 			throw new SAFSException("Failed to creat XML SAX Parser!");
 		}
 
-		initFlatContents(persistable, persistable.getClass().getSimpleName());
+		initFlatContents(persistable, null);
 
 	}
 
 	/**
 	 * Turn the Persistable hierarchical contents Map into a flat key Map.
-	 * @throws SAFSException
+	 *
+	 * @param persistable Persistable, from which the contents will be retrieved.
+	 * @param ancestorsKey String, the ancestors of current Persistable object.
+	 * @throws SAFSException if the Persistable object is null.
 	 */
 	private void initFlatContents(Persistable persistable, String ancestorsKey) throws SAFSException{
-		validate(persistable);
+		String flatKey = null;
+
+		if(StringUtils.isValid(ancestorsKey)){
+			flatKey = ancestorsKey+"."+persistable.getClass().getSimpleName();
+		}else{
+			flatKey = persistable.getClass().getSimpleName();
+		}
+
+		try {
+			validate(persistable);
+		} catch (SAFSPersistableNotEnableException e) {
+			ignoredFields.add(flatKey);
+			return;
+		}
+
+		//The Persistable object itself doesn't have a value, and it contains children
+		//while the SAX XML parser will treat it as Element and assign it a default string "\n" as value
+		//So we add the default string "\n" for Persistable object itself in the actualContents Map to
+		//get the verification pass.
+		actualContents.put(flatKey, CONTAINER_ELEMENT_DEFAULT_VALUE);
 
 		Map<String, Object> contents = persistable.getContents();
-
-		String flatKey = ancestorsKey;
 
 		Object value = null;
 		for(String key:contents.keySet()){
 			value = contents.get(key);
 
 			if(value instanceof Persistable){
-				try{
-					initFlatContents((Persistable)value, flatKey);
-				}catch(SAFSPersistableNotEnableException e){
-					ignoredFields.add(flatKey);
-				}
+				initFlatContents((Persistable)value, flatKey);
 			}else{
 				actualContents.put(flatKey+"."+key, value);
 			}
@@ -208,26 +224,26 @@ public class VerifierToXMLFile extends VerifierToFile{
 	 */
 	protected void match(String field, String expectedText){
 
-		IndependantLog.debug("checking field '"+field+"' ... ");
-
 		if(isIgnoredFiled(field)){
 			IndependantLog.debug("Ignoring checking '"+field+"'.");
-		}
-
-		Object actual = actualContents.get(field);
-		checkedFields.add(field);
-		if(actual==null){
-			nonMatchedMessages.append("Cannot find the actual value for field '"+field+"'!\n");
-			matched = false;
-
 		}else{
-			String actualText = actual.toString();
+			IndependantLog.debug("Checking field '"+field+"' ... ");
 
-			if(!StringUtils.matchText(actualText, expectedText, valueContains, !valueCaseSensitive)){
-				nonMatchedMessages.append(field+" : not matched.\n"
-						+ "actual: "+actualText+"\n"
-						+ "expected: "+expectedText+"\n");
+			Object actual = actualContents.get(field);
+			checkedFields.add(field);
+			if(actual==null){
+				nonMatchedMessages.append("Cannot find the actual value for field '"+field+"'!\n");
 				matched = false;
+
+			}else{
+				String actualText = actual.toString();
+
+				if(!StringUtils.matchText(actualText, expectedText, valueContains, !valueCaseSensitive)){
+					nonMatchedMessages.append("'"+field+"' did not match!\n"
+							+ "actual: "+actualText+"\n"
+							+ "expected: "+expectedText+"\n");
+					matched = false;
+				}
 			}
 		}
 
@@ -252,6 +268,19 @@ public class VerifierToXMLFile extends VerifierToFile{
 		}
 		return false;
 	}
+
+	/**
+	 * '<b>\n</b>'<br/>
+	 * For container Element, such as <b>Response</b> in XML
+	 * <pre>
+	 * &lt;Response&gt;
+	 *   &lt;StatusCode&gt;200&lt;/StatusCode&gt;
+	 * &lt;/Response&gt;
+	 * </pre>
+	 * actually it doesn't have any string value,
+	 * but the XML SAX parser will assign a "<b>\n</b>" to it.
+	 */
+	private static final String CONTAINER_ELEMENT_DEFAULT_VALUE = "\n";
 
 	protected class VerificationHandler extends DefaultHandler{
 		/** It will contain the string value of each document. */
@@ -280,8 +309,8 @@ public class VerifierToXMLFile extends VerifierToFile{
 		}
 
 	    public void endElement (String uri, String localName, String qName) throws SAXException{
-	    	//Now the buffer 'value' holds the element's value, we can check it :-)
-	    	debug(fullPathTag.toString()+" = "+value.toString());
+	    	//Finally the buffer 'value' holds the element's value, we can check it :-)
+//	    	debug(fullPathTag.toString()+" = "+value.toString());
 
 	    	//Call the method match() in the outer class VerifierToXMLFile
 	    	match(fullPathTag.toString(), value.toString());

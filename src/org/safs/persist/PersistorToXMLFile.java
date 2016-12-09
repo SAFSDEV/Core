@@ -14,6 +14,7 @@ package org.safs.persist;
 import java.io.IOException;
 import java.util.Map;
 
+import org.safs.Constants.XMLConstants;
 import org.safs.IndependantLog;
 import org.safs.SAFSException;
 import org.safs.SAFSPersistableNotEnableException;
@@ -71,11 +72,26 @@ public class PersistorToXMLFile extends PersistorToFile{
 					IndependantLog.warn(pne.getMessage());
 				}
 			}else{
-				writer.write("<"+key+">"+value.toString()+"</"+key+">");
+				writer.write("<"+key+">"+wrapInCDATA(value)+"</"+key+">");
 			}
 			writer.write("\n");
 		}
 
 		writer.write("</"+className+">\n");
+	}
+
+	/**
+	 * Wrap the string in "<![CDATA[]]>" if it starts with "<?XML".
+	 * @param value Object, the object to write to an XML file.
+	 * @return String, the wrapped String.
+	 */
+	protected String wrapInCDATA(Object value){
+		String result = value.toString();
+
+		if(result.toUpperCase().startsWith(XMLConstants.XML_START)){
+			result = XMLConstants.CDATA_START+result+XMLConstants.CDATA_END;
+		}
+
+		return result;
 	}
 }
