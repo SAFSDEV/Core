@@ -46,9 +46,9 @@ public class PersistorFactory {
 		}
 
 		if(persistor==null){
-			throw new SAFSException(" Does not support\n"
+			throw new SAFSException("PersistorFactory does not support Persistor of\n"
 					+ "persistence-type: '"+persistenceType.name+"'\n"
-					+ "file-type: '"+fileType.name+"'!");
+					+ "file-type: '"+fileType.name+"'!\n");
 		}
 
 		return persistor;
