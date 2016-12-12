@@ -168,6 +168,7 @@ public class Response extends PersistableDefault{
 	 */
 	public void set_request(Request _request) {
 		this._request = _request;
+		this._request.setParent(this);
 	}
 
 	/**

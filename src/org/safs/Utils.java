@@ -1,4 +1,4 @@
-/** 
+/**
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  */
@@ -8,7 +8,8 @@
  *
  * History:
  * APR 22, 2016    (SBJLWA) Initial release.
- * SEP 06, 2016    (SBJLWA) Add method compile(): compile java/groovy source code at runtime.
+ * SEP 06, 2016    (SBJLWA) Added method compile(): compile java/groovy source code at runtime.
+ * DEC 12, 2016    (SBJLWA) Added method getMapValue().
  */
 package org.safs;
 
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import org.safs.natives.NativeWrapper;
@@ -34,10 +36,10 @@ public class Utils {
 	public static final String DEFAULT_SOURCE_DIRECTORY 		= "src";
 	/** 'bin' the sub-folder containing compiled classes. */
 	public static final String DEFAULT_OUTPUT_DIRECTORY 		= "bin";
-	
+
 	/** 'javac' the default java compiler. */
 	public static final String DEFAULT_JAVA_COMPILER			= "javac";
-	
+
 	/**
 	 * @param onOff boolean, Set keyboard's 'NumLock' on or off.
 	 */
@@ -50,7 +52,7 @@ public class Utils {
 	public static boolean getNumLock(){
 		return Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_NUM_LOCK);
 	}
-	
+
 	/**
 	 * Compile the java/groovy source code.<br>
 	 * <b>NOTE:</b><br>
@@ -65,7 +67,7 @@ public class Utils {
 	 *      + package2
 	 *   + {@value #DEFAULT_OUTPUT_DIRECTORY} (compiled classes go into this folder)
 	 * </pre>
-	 * 
+	 *
 	 * @param classnames String, the class names to compile separated by space, such as my.package.ClassA my.pack2.ClassB<br>
 	 *                           this parameter could be mixed with java and groovy class.<br>
 	 *                           <b>Note:</b> For groovy, we have to specify all dependency classes in order.<br>
@@ -82,25 +84,25 @@ public class Utils {
 		//The property "user.dir" represent the current working directory.
 		String userdir = System.getProperty("user.dir");
 		IndependantLog.debug("user.dir (current working directory) is "+userdir);
-				
-		//It is supposed that the "source code" locates at the sub-folder 'src' of current working directory. 
+
+		//It is supposed that the "source code" locates at the sub-folder 'src' of current working directory.
 		File sourceDir = new File(userdir, DEFAULT_SOURCE_DIRECTORY);
 		if(!sourceDir.exists() || !sourceDir.isDirectory()){
 			throw new SAFSException("The source directory path '"+sourceDir.getAbsolutePath()+"' does not exist or is not a directory!");
 		}
-		//It is supposed that the "compiled classes" go to the sub-folder 'bin' of current working directory. 
+		//It is supposed that the "compiled classes" go to the sub-folder 'bin' of current working directory.
 		File outputDir = null;
 		outputDir = new File(userdir, DEFAULT_OUTPUT_DIRECTORY);
 		if(!outputDir.exists()) outputDir.mkdir();
 		if(!outputDir.exists() || !outputDir.isDirectory()){
 			throw new SAFSException("The output path '"+outputDir.getAbsolutePath()+"' does not exist or is not a directory.");
 		}
-		
+
 		//prepare the source codes to compile
 		StringBuffer javafiles = new StringBuffer();
 		List<String> groovyfiles = new ArrayList<String>();
 		String[] clazzes = classnames.split(StringUtils.SPACE);
-		String source = null;		
+		String source = null;
 		File sourceFile = null;
 		for(int i=0;i<clazzes.length;i++){
 			source = clazzes[i].replace(".", File.separator);
@@ -118,11 +120,11 @@ public class Utils {
 				}
 			}
 		}
-				
+
 		String classpath = NativeWrapper.GetSystemEnvironmentVariable("CLASSPATH");
 		classpath = DEFAULT_OUTPUT_DIRECTORY+";"+classpath;
 		IndependantLog.debug("The classpath is "+classpath);
-		
+
 		if(!javafiles.toString().isEmpty()){
 			IndependantLog.debug(debugmsg+" Try to compile JAVA source codes: "+javafiles);
 			String[] args = {"-cp", classpath, "-encoding", "UTF-8", "-sourcepath", sourceDir.getAbsolutePath(), "-d", outputDir.getAbsolutePath(), "-implicit:class", javafiles.toString()};
@@ -134,7 +136,7 @@ public class Utils {
 				Vector output = (Vector) result.get(NativeWrapper.VECTOR_KEY);
 				IndependantLog.debug(debugmsg+" java compilation with error code "+rc+"\n  Console output is:\n"+output.toString());
 				if(rc!=0){
-					throw new SAFSException(javafiles+" cannot be compiled at runtime.");				
+					throw new SAFSException(javafiles+" cannot be compiled at runtime.");
 				}
 			} catch (IOException e) {
 				IndependantLog.error(debugmsg+javafiles+" cannot be compiled at runtime, met "+StringUtils.debugmsg(e));
@@ -152,7 +154,7 @@ public class Utils {
 					args[args.length-1] = groovyfile;
 					try{
 						IndependantLog.debug(debugmsg+" groovy comile: "+Arrays.toString(args));
-						org.codehaus.groovy.tools.FileSystemCompiler.main(args);											
+						org.codehaus.groovy.tools.FileSystemCompiler.main(args);
 					}catch(NoSystemExitException e){
 						IndependantLog.warn(debugmsg+groovyfile+" cannot be compiled at runtime, met "+StringUtils.debugmsg(e));
 					}
@@ -163,17 +165,17 @@ public class Utils {
 
 		}
 	}
-	
+
 	/**
 	 * This special SecurityManager is used to avoid JVM to halt by System.exit().<br>
 	 */
     private static class NoSystemExitSecurityManager extends SecurityManager{
-    	
+
     	public NoSystemExitSecurityManager(){}
-    	
+
         public void checkPermission(Permission perm) {}
         public void checkPermission(Permission perm, Object context) {}
-    	
+
         public void checkExit(int status){
             //avoid JVM termination by System.exit().
         	super.checkExit(status);
@@ -191,7 +193,24 @@ public class Utils {
         	return status;
         }
     }
-	
 
-	
+    /**
+     * Get the value form the map according to a key.<br/>
+     * If the map is null or the value is null, then return the default value.
+     * @param map Map
+     * @param key Object,
+     * @param defaultValue Object,
+     * @return Object
+     */
+	public static Object getMapValue(Map<?, ?> map, Object key, Object defaultValue){
+		if(map==null){
+			return defaultValue;
+		}
+		if(map.containsKey(key)){
+			return map.get(key);
+		}else{
+			return defaultValue;
+		}
+	}
+
 }
