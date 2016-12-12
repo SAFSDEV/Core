@@ -39,7 +39,7 @@ public class VerifierFactory {
 			}else if(FileType.XML.equals(fileType)){
 				verifier = new VerifierToXMLFile(runtime, object.toString());
 			}else if(FileType.PROPERTIES.equals(fileType)){
-				//					verifier = new VerifierToPropertiesFile(runtime, object.toString());
+				verifier = new VerifierToPropertiesFile(runtime, object.toString());
 			}
 		}else if(PersistenceType.VARIABLE.equals(persistenceType)){
 			//				verifier = new VerifierToVariable(runtime, object.toString());

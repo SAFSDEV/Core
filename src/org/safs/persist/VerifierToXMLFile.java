@@ -15,21 +15,14 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.safs.IndependantLog;
 import org.safs.SAFSException;
-import org.safs.SAFSPersistableNotEnableException;
-import org.safs.SAFSVerificationException;
-import org.safs.StringUtils;
 import org.safs.tools.RuntimeDataInterface;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -62,211 +55,29 @@ public class VerifierToXMLFile extends VerifierToFile{
 	protected InputSource inputSource = null;
 
 	/**
-	 * Holding the actual contents to verify, they are pairs of (flatKey, content) such as
-	 * (Response.ID, "FFE3543545JLFS")
-	 * (Response.Headers, "{Date=Tue, 06 DEC 2016 03:08:12 GMT}")
-	 * (Response.Request.Headers, "{Content-Length=4574, Via=1.1 inetgw38 (squid)}")
-	 */
-	protected Map<String, Object> actualContents = null;
-
-	protected Set<String> checkedFields = null;
-
-	/**
-	 * Holding the fields which are ignored. No need to verify.<br/>
-	 * The field is expressed as a flat key.<br/>
-	 * <pre>
-	 * If this Set contains a field 'Response.Request', then all its children will
-	 * be ignored, such as:
-	 * Response.Request.Headers
-	 * Response.Request.MessageBody
-	 * ...
-	 * </pre>
-	 * @see #isIgnoredFiled(String)
-	 */
-	protected Set<String> ignoredFields = null;
-
-	/** If the all the fields of actual object need to match with those in the persistent benchmark.<br/>
-	 * If this is true, all the fields of actual object need to be verified.<br/>
-	 * Otherwise, only the fields specified in the persistent benchmark need to be verified.<br/>
-	 */
-	protected boolean matchAllFields 	= false;
-	/** If the field's value needs to be matched wholly or partially  */
-	protected boolean valueContains 		= false;
-	/** If the field's value needs to be matched case-sensitively */
-	protected boolean valueCaseSensitive 	= false;
-
-	/**
 	 * @param runtime
 	 * @param filename
 	 */
 	public VerifierToXMLFile(RuntimeDataInterface runtime, String filename){
 		super(runtime, filename);
-		actualContents = new HashMap<String, Object>();
-		ignoredFields = new HashSet<String>();
-		checkedFields = new HashSet<String>();
-		nonMatchedMessages = new StringBuilder();
 	}
 
 	public void beforeCheck(Persistable persistable, boolean... conditions)  throws SAFSException, IOException{
-		try {
-			actualContents.clear();
-			ignoredFields.clear();
-			checkedFields.clear();
-			nonMatchedMessages.delete(0, nonMatchedMessages.length());
+		super.beforeCheck(persistable, conditions);
 
+		actualContents = persistable.getContents(defaultElementValues, ignoredFields, true);
+
+		try {
 			SAXParserFactory factory = SAXParserFactory.newInstance();
 			saxParser = factory.newSAXParser();
 			inputSource = new InputSource(reader);
 
-			if(conditions.length>0){
-				matchAllFields = conditions[0];
-			}
-			if(conditions.length>1){
-				valueContains = conditions[1];
-			}
-			if(conditions.length>2){
-				valueCaseSensitive = conditions[2];
-			}
+			//The handler will fill 'expectedContents'.
+			saxParser.parse(inputSource, new VerificationHandler());
 
 		} catch (ParserConfigurationException | SAXException e) {
 			throw new SAFSException("Failed to creat XML SAX Parser!");
 		}
-
-		initFlatContents(persistable, null);
-
-	}
-
-	/**
-	 * Turn the Persistable hierarchical contents Map into a flat key Map.
-	 *
-	 * @param persistable Persistable, from which the contents will be retrieved.
-	 * @param ancestorsKey String, the ancestors of current Persistable object.
-	 * @throws SAFSException if the Persistable object is null.
-	 */
-	private void initFlatContents(Persistable persistable, String ancestorsKey) throws SAFSException{
-		String flatKey = null;
-
-		if(StringUtils.isValid(ancestorsKey)){
-			flatKey = ancestorsKey+"."+persistable.getClass().getSimpleName();
-		}else{
-			flatKey = persistable.getClass().getSimpleName();
-		}
-
-		try {
-			validate(persistable);
-		} catch (SAFSPersistableNotEnableException e) {
-			ignoredFields.add(flatKey);
-			return;
-		}
-
-		//The Persistable object itself doesn't have a value, and it contains children
-		//while the SAX XML parser will treat it as Element and assign it a default string "\n" as value
-		//So we add the default string "\n" for Persistable object itself in the actualContents Map to
-		//get the verification pass.
-		actualContents.put(flatKey, CONTAINER_ELEMENT_DEFAULT_VALUE);
-
-		Map<String, Object> contents = persistable.getContents();
-
-		Object value = null;
-		for(String key:contents.keySet()){
-			value = contents.get(key);
-
-			if(value instanceof Persistable){
-				initFlatContents((Persistable)value, flatKey);
-			}else{
-				actualContents.put(flatKey+"."+key, value);
-			}
-		}
-	}
-
-	@Override
-	public void check(Persistable persistable, boolean... conditions) throws SAFSException, IOException {
-		try {
-			saxParser.parse(inputSource, new VerificationHandler());
-
-			if(!matched){
-				throw new SAFSVerificationException(nonMatchedMessages.toString());
-			}
-
-			//If we are here, which means all the fields in the persistence benchmark have been satisfied,
-			//that is to say "the actual object" contains all the fields in benchmark and matched.
-			if(matchAllFields){
-				//We still need to check if all the fields of actual object have been satisfied, if fieldContains is not true.
-				//all the fields of actual object should be matched.
-				Set<String> actualFields = actualContents.keySet();
-				actualFields.removeAll(checkedFields);
-				if(!actualFields.isEmpty()){
-					matched = false;
-					String errorMsg = "Missing fields in benchmark file:\n";
-					errorMsg += Arrays.toString(actualFields.toArray());
-					throw new SAFSVerificationException(errorMsg);
-				}
-			}
-
-		} catch (SAXException e) {
-			throw new SAFSException(e.toString());
-		}
-	}
-
-	/** This field will contain true if the verification succeed. */
-	protected boolean matched = true;
-	/**
-	 * It contains the messages indicating the non matched fields.
-	 */
-	protected StringBuilder nonMatchedMessages = null;
-
-	/**
-	 * This method will check the filed's value against the {@link #actualContents}<br/>
-	 * Here this class is called within {@link VerificationHandler#endElement(String, String, String)}.
-	 *
-	 * @param field	String, the field to check
-	 * @param expectedText String, the field's expected text.
-	 */
-	protected void match(String field, String expectedText){
-
-		if(isIgnoredFiled(field)){
-			IndependantLog.debug("Ignoring checking '"+field+"'.");
-		}else{
-			IndependantLog.debug("Checking field '"+field+"' ... ");
-
-			Object actual = actualContents.get(field);
-			checkedFields.add(field);
-			if(actual==null){
-				nonMatchedMessages.append("Cannot find the actual value for field '"+field+"'!\n");
-				matched = false;
-
-			}else{
-				String actualText = actual.toString();
-
-				if(!StringUtils.matchText(actualText, expectedText, valueContains, !valueCaseSensitive)){
-					nonMatchedMessages.append("'"+field+"' did not match!\n"
-							+ "actual: "+actualText+"\n"
-							+ "expected: "+expectedText+"\n");
-					matched = false;
-				}
-			}
-		}
-
-	}
-
-	/**
-	 * Check if the filed is being ignored at the moment.<br/>
-	 * <pre>
-	 * If the Set {@link #ignoredFields} contains a field 'Response.Request',
-	 * then all its children (starting with 'Response.Request') will be ignored, such as:
-	 * Response.Request.Headers
-	 * Response.Request.MessageBody
-	 * ...
-	 * </pre>
-	 * @param field String, the field to check
-	 * @return boolean if this field is being ignored.
-	 * @see #ignoredFields
-	 */
-	protected boolean isIgnoredFiled(String field){
-		for(String ignoredField:ignoredFields){
-			if(field.startsWith(ignoredField)) return true;
-		}
-		return false;
 	}
 
 	/**
@@ -281,6 +92,10 @@ public class VerifierToXMLFile extends VerifierToFile{
 	 * but the XML SAX parser will assign a "<b>\n</b>" to it.
 	 */
 	private static final String CONTAINER_ELEMENT_DEFAULT_VALUE = "\n";
+	private static final Map<String,String> defaultElementValues = new HashMap<String,String>();
+	static{
+		defaultElementValues.put(Persistable.CONTAINER_ELEMENT, CONTAINER_ELEMENT_DEFAULT_VALUE);
+	}
 
 	protected class VerificationHandler extends DefaultHandler{
 		/** It will contain the string value of each document. */
@@ -312,8 +127,8 @@ public class VerifierToXMLFile extends VerifierToFile{
 	    	//Finally the buffer 'value' holds the element's value, we can check it :-)
 //	    	debug(fullPathTag.toString()+" = "+value.toString());
 
-	    	//Call the method match() in the outer class VerifierToXMLFile
-	    	match(fullPathTag.toString(), value.toString());
+	    	//Put the pair(flat-key, value) into the Map 'expectedContents' for later verification
+	    	expectedContents.put(fullPathTag.toString(), value.toString());
 
 	    	cleanElementValue();
 	    	removeTagFromPath(qName);
