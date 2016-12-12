@@ -1,11 +1,11 @@
-/** 
+/**
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
 /**
  * Logs for developers, not published to API DOC.
  * History:<br>
- * 
+ *
  *  <br>   NOV 19, 2013    (CANAGL) Initial release.
  *  <br>   DEC 18, 2013    (SBJLWA) Update to support ComboBox.
  *  <br>   JAN 08, 2014    (DHARMESH) Update to support EditBox.
@@ -13,12 +13,12 @@
  *  <br>   JAN 26, 2014    (SBJLWA) Add method combineParams().
  *                                  Modify API ComboBox.CaptureItemsToFile(): show the required parameter filename.
  *                                  Add keyword Misc.Expressions().
- *  <br>   FEB 02, 2014	   (DHARMESH) Add Resize and Maximize WebBrowser window KW.   
- *  <br>   MAR 05, 2014    (SBJLWA) Implement click-related keywords.        
- *  <br>   APR 15, 2014    (DHARMESH) Added HighLight keyword                     
- *  <br>   APR 22, 2014    (SBJLWA) Implement keywords of TabControl.        
+ *  <br>   FEB 02, 2014	   (DHARMESH) Add Resize and Maximize WebBrowser window KW.
+ *  <br>   MAR 05, 2014    (SBJLWA) Implement click-related keywords.
+ *  <br>   APR 15, 2014    (DHARMESH) Added HighLight keyword
+ *  <br>   APR 22, 2014    (SBJLWA) Implement keywords of TabControl.
  *  <br>   APR 29, 2014    (SBJLWA) Add the ability of execution of javascript;
- *  <br>   MAY 13, 2014    (DHARMESH) Add Component class and update other component references; 
+ *  <br>   MAY 13, 2014    (DHARMESH) Add Component class and update other component references;
  *  <br>   JUL 08, 2014    (SBJLWA) Add inner class WDTimeOut to provide methods setting WebDriver's timeout thread-safely.
  *  <br>   NOV 10, 2014    (SBJLWA) Add support for Strings.
  *  <br>   NOV 19, 2014    (SBJLWA) Add support for Files.
@@ -45,11 +45,11 @@
  *  <br>   JUN 23, 2015    (SBJLWA) Modify for test auto run.
  *  <br>   JUN 24, 2015	   (SCNTAX) Add Misc.WaitForPropertyValue() and Misc.WaitForPropertyValueGone() keywords.
  *  <br>   JUL 07, 2015    (SCNTAX) Add EditBox.SetTextCharacters(), EditBox.SetUnverifiedTextCharacters() and EditBox.SetUnverifiedTextValue() keywords.
- *  <br>                            Change comments of EditBox.SetTextValue(). 
+ *  <br>                            Change comments of EditBox.SetTextValue().
  *  <br>   JUL 24, 2015    (SBJLWA) Add GetURL, SaveURLToFile, VerifyURLContent, VerifyURLToFile in Misc.
  *  <br>   AUG 17, 2015    (DHARMESH4) Add SetFocus call in Window.
  *  <br>   AUG 20, 2015    (CANAGL) Document -Dtestdesigner.debuglogname support in main().
- *  <br>   SEP 07, 2015    (SBJLWA) Add method DragTo(): parameter 'offset' will also support pixel format; 
+ *  <br>   SEP 07, 2015    (SBJLWA) Add method DragTo(): parameter 'offset' will also support pixel format;
  *                                                       optional parameter 'FromSubItem' and 'ToSubItem' are not supported yet.
  *  <br>   JAN 07, 2016    (CANAGL) Make System.exit() optional and allowExit=false, by default.
  *  <br>   MAR 02, 2016    (SBJLWA) Add Misc.AlertAccept(), Misc.AlertDismiss() and ClickUnverified().
@@ -60,6 +60,7 @@
  *                                  Modify testStatusCode(): the status code BRANCH_TO_BLOCKID will be considered successful execution.
  *  <br>   APR 19, 2016    (SBJLWA) Modify comments/examples for Click() CtrlClick() ShiftClick() etc.: Handle the optional parameter 'autoscroll'.
  *  <br>   MAY 17, 2016    (CANAGL) Add support for -junit:classname command-line parameter.
+ *  <br>   DEC 12, 2016    (SBJLWA) Modified TypeKeys() and TypeChars(): call actionGUILess() instead of Component.TypeXXX() to keep the log message consistent.
  */
 package org.safs.selenium.webdriver;
 
@@ -76,7 +77,7 @@ import org.safs.IndependantLog;
 import org.safs.Processor;
 import org.safs.SAFSPlus;
 import org.safs.StringUtils;
-import org.safs.SAFSPlus.DriverCommand;
+import org.safs.model.commands.GenericMasterFunctions;
 import org.safs.model.tools.EmbeddedHookDriverRunner;
 import org.safs.selenium.util.DocumentClickCapture;
 import org.safs.selenium.webdriver.lib.SelectBrowser;
@@ -90,13 +91,13 @@ import org.safs.selenium.webdriver.lib.WDLibrary;
  * For example, "36+9", "25*6" will be calculated as "45", "150" automatically; "^" is considered
  * as the leading char of a variable, hence "^var" will be considered as a variable "var",
  * if variable "var" exists, then "^var" will be replaced by its value, otherwise replaced by empty string "".
- * 
+ *
  * This ability is very useful for user, but sometimes it will cause UN-EXPECTED result during calling
  * SeleniumPlus's API. For example, user wants to input a string "this is a combined-word" to an EditBox,
  * the EditBox will receive "this is a 0", which is not an expected result; user wants to select all
  * text of an EditBox, he uses "Ctrl+a" by calling SeleniumPlus.TypeKeys("^a") and he finds that doesn't
  * work (the reason is that "^a" is parsed to "", because "^a" is considered as variable).
- * 
+ *
  * To avoid the problem caused by arithmetic char "+ - * /", we can call API Misc.Expressions(false) to
  * turn off the parse of an expression.
  * {@code
@@ -110,27 +111,27 @@ import org.safs.selenium.webdriver.lib.WDLibrary;
  * SeleniumPlus.TypeKeys(quote("^p")));//quote is a static method provided by SeleniumPlus
  * SeleniumPlus.TypeChars(quote("this is a combined-word"));
  * }
- * 
+ *
  * <Font color="red">NOTE 2: File path deducing.</Font>
  * In SeleniumPlus, there are some APIs like CaptureXXXToFile, VerifyXXXToFile, they require file-path as parameter.
  * As our doc is not very clear, user may confuse with the file-path parameter. Let's make it clear:
  *   There are 2 types of file, the test-file and bench-file. User can provide absolute or relative file-path for them.
- *   If it is absolute, there is not confusion. 
+ *   If it is absolute, there is not confusion.
  *   If it is relative, we will combine it with a base-directory to form an absolute file. The base-directory depends
  *   on the type of file (test or bench):
  *     if it is test-file, the base-directory will be the test-directory, <ProjectDir>/Actuals/
  *     if it is bench-file, the base-directory will be the bench-directory, <ProjectDir>/Benchmarks/
  *     After the combination, the combined-file-name will be tested, if it is not valid, the project-directory will
  *     be used as base-directory.
- * 
- * 
+ *
+ *
  * <Font color="red">NOTE 3: <a href="http://safsdev.sourceforge.net/sqabasic2000/UsingDDVariables.htm">DDVariable</a></Font>
  * To use DDVariable ability, PLEASE remember to turn on the Expression by Misc.Expressions(true);
  * The DDVariable is a variable reference, it can be expressed by a leading symbol ^ and the "variable name".
  * For example:
  * ^user.name
  * ^user.password
- * 
+ *
  * DDVariable can be used along with an assignment or by itself, example as following:
  * {@code
  * Misc.Expressions(true);
@@ -141,25 +142,25 @@ import org.safs.selenium.webdriver.lib.WDLibrary;
  * //input the value of variable "user.password"
  * Component.InputCharacters(Map.AUT.PassWord, "^user.password");
  * }
- * 
+ *
  * <Font color="red">NOTE 4: a known issue about clicking on wrong item</Font>
  * Please to TURN OFF the browser's status bar.
- * 
+ *
  * </pre>
  * For more info on command-line options, see {@link #main(String[])}.
- * 
+ *
  * @author CANAGL
  */
 public abstract class SeleniumPlus extends SAFSPlus{
 	/**
 	 * The Runner object providing access to the underlying Selenium Engine.
-	 * This is the main object subclasses would use to execute SeleniumPlus actions and commands 
-	 * and to gain references to more complex services like the running JSAFSDriver or the 
+	 * This is the main object subclasses would use to execute SeleniumPlus actions and commands
+	 * and to gain references to more complex services like the running JSAFSDriver or the
 	 * Selenium WebDriver object(s).
 	 */
 	public static final EmbeddedHookDriverRunner Runner = new EmbeddedHookDriverRunner(EmbeddedSeleniumHookDriver.class);
 
-	/** 
+	/**
 	 * Internal framework use only.
 	 * Required Default no-arg constructor.
 	 * Any subclass instantiation should also invoke this super(); */
@@ -168,10 +169,10 @@ public abstract class SeleniumPlus extends SAFSPlus{
 		//To get the SAFSPlus work for SeleniumPlus, we MUST set its Runner to EmbeddedHookDriverRunner.
 		setRunner(Runner);
 	}
-	
+
 	/**
 	 * Start WebBrowser
-	 * See <a href="http://safsdev.sourceforge.net/sqabasic2000/DDDriverCommandsReference.htm#detail_StartWebBrowser">Detailed Reference</a>	
+	 * See <a href="http://safsdev.sourceforge.net/sqabasic2000/DDDriverCommandsReference.htm#detail_StartWebBrowser">Detailed Reference</a>
 	 * @param URL String,
 	 * @param BrowserID String, Unique application/browser ID.
 	 * @param params optional
@@ -184,7 +185,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 *          <li>{@link SelectBrowser#BROWSER_NAME_IE}
 	 * 		</ul>
 	 * <p>
-	 * <b>params[1] timeout</b> int, in seconds. Implicit timeout for search elements<br>	
+	 * <b>params[1] timeout</b> int, in seconds. Implicit timeout for search elements<br>
 	 * <b>params[2] isRemote</b> boolean, (no longer used -- everything is now "remote")<br>
 	 * <br>
 	 * Following parameters indicate the <b>extra parameters</b>, they <b>MUST</b> be given by <b>PAIR(key, value)</b>
@@ -204,94 +205,94 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * ...
 	 * </ul>
 	 * @return true on success
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * StartWebBrowser("http://www.google.com", "GoogleMain");
 	 * StartWebBrowser("http://www.google.com", "GoogleMain", SelectBrowser.BROWSER_NAME_CHROME);
 	 * StartWebBrowser("http://www.google.com", "GoogleMain", SelectBrowser.BROWSER_NAME_IE, "10");
-	 * 
+	 *
 	 * <b>
 	 * The following gives some examples to start web browser with "custom profile" and "preferences".
-	 * For the detail explanation of starting browser with "custom profile" and/or "preferences", please visit the section "<font color="red">Start Browser</font>" at <a href="http://safsdev.sourceforge.net/selenium/doc/SeleniumPlus-Welcome.html">Selenium Welcome Document</a>. 
+	 * For the detail explanation of starting browser with "custom profile" and/or "preferences", please visit the section "<font color="red">Start Browser</font>" at <a href="http://safsdev.sourceforge.net/selenium/doc/SeleniumPlus-Welcome.html">Selenium Welcome Document</a>.
 	 * </b>
-	 * 
+	 *
 	 * //Start firefox browser with custom profile "myprofile" ( <a href="https://support.mozilla.org/en-US/kb/profile-manager-create-and-remove-firefox-profiles">Create custom profile</a>)
 	 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
-	 *                                                        SelectBrowser.BROWSER_NAME_FIREFOX, 
-	 *                                                        "10", 
-	 *                                                        "true", 
-	 *                                                        SelectBrowser.KEY_FIREFOX_PROFILE, 
+	 *                                                        SelectBrowser.BROWSER_NAME_FIREFOX,
+	 *                                                        "10",
+	 *                                                        "true",
+	 *                                                        SelectBrowser.KEY_FIREFOX_PROFILE,
 	 *                                                        "myprofile"
 	 *                                                        });
-	 *  
-	 * //Start firefox browser with some preference to set. 
+	 *
+	 * //Start firefox browser with some preference to set.
 	 * String absolutePreferenceFile = "c:\\firefoxPref.json.dat";//A json file containing chrome preferences, like { "intl.accept_languages":"zh-cn", "accessibility.accesskeycausesactivation":false, "browser.download.folderList":2 }
 	 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
-	 *                                                        SelectBrowser.BROWSER_NAME_FIREFOX, 
-	 *                                                        "10", 
-	 *                                                        "true", 
-	 *                                                        quote(SelectBrowser.KEY_FIREFOX_PROFILE_PREFERENCE), 
+	 *                                                        SelectBrowser.BROWSER_NAME_FIREFOX,
+	 *                                                        "10",
+	 *                                                        "true",
+	 *                                                        quote(SelectBrowser.KEY_FIREFOX_PROFILE_PREFERENCE),
 	 *                                                        quote(absolutePreferenceFile)
 	 *                                                        });
-	 *                                                        
-	 * //Start chrome browser with default data pool (chrome://version/, see "Profile Path") , and using the last-used user. 
+	 *
+	 * //Start chrome browser with default data pool (chrome://version/, see "Profile Path") , and using the last-used user.
 	 * String datapool = "C:\\Users\\some-user\\AppData\\Local\\Google\\Chrome\\User Data";
 	 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
-	 *                                                        SelectBrowser.BROWSER_NAME_CHROME, 
-	 *                                                        "10", 
-	 *                                                        "true", 
-	 *                                                        quote(SelectBrowser.KEY_CHROME_USER_DATA_DIR), 
+	 *                                                        SelectBrowser.BROWSER_NAME_CHROME,
+	 *                                                        "10",
+	 *                                                        "true",
+	 *                                                        quote(SelectBrowser.KEY_CHROME_USER_DATA_DIR),
 	 *                                                        datapool
 	 *                                                        });
-	 * //Start chrome browser with default data pool (chrome://version/, see "Profile Path") , and using the default user. 
+	 * //Start chrome browser with default data pool (chrome://version/, see "Profile Path") , and using the default user.
 	 * String datapool = "C:\\Users\\some-user\\AppData\\Local\\Google\\Chrome\\User Data";
 	 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
-	 *                                                        SelectBrowser.BROWSER_NAME_CHROME, 
-	 *                                                        "10", 
-	 *                                                        "true", 
-	 *                                                        quote(SelectBrowser.KEY_CHROME_USER_DATA_DIR), 
+	 *                                                        SelectBrowser.BROWSER_NAME_CHROME,
+	 *                                                        "10",
+	 *                                                        "true",
+	 *                                                        quote(SelectBrowser.KEY_CHROME_USER_DATA_DIR),
 	 *                                                        datapool,
 	 *                                                        quote(SelectBrowser.KEY_CHROME_PROFILE_DIR),
 	 *                                                        "Default"
 	 *                                                        });
-	 *                                                        
-	 * //Start chrome browser with custom data, and using the last-used user.                                                      
+	 *
+	 * //Start chrome browser with custom data, and using the last-used user.
 	 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
-	 *                                                        SelectBrowser.BROWSER_NAME_CHROME, 
-	 *                                                        "10", 
-	 *                                                        "true", 
-	 *                                                        quote(SelectBrowser.KEY_CHROME_USER_DATA_DIR), 
+	 *                                                        SelectBrowser.BROWSER_NAME_CHROME,
+	 *                                                        "10",
+	 *                                                        "true",
+	 *                                                        quote(SelectBrowser.KEY_CHROME_USER_DATA_DIR),
 	 *                                                        "c:\\chrome_custom_data"//<a href="http://www.chromium.org/developers/creating-and-using-profiles">Create custom data pool</a>
 	 *                                                        });
-	 * //Start chrome browser with custom data, and using the 1th user.                                                       
+	 * //Start chrome browser with custom data, and using the 1th user.
 	 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
-	 *                                                        SelectBrowser.BROWSER_NAME_CHROME, 
-	 *                                                        "10", 
-	 *                                                        "true", 
-	 *                                                        quote(SelectBrowser.KEY_CHROME_USER_DATA_DIR), 
+	 *                                                        SelectBrowser.BROWSER_NAME_CHROME,
+	 *                                                        "10",
+	 *                                                        "true",
+	 *                                                        quote(SelectBrowser.KEY_CHROME_USER_DATA_DIR),
 	 *                                                        "c:\\chrome_custom_data",//<a href="http://www.chromium.org/developers/creating-and-using-profiles">Create custom data pool</a>
 	 *                                                        quote(SelectBrowser.KEY_CHROME_PROFILE_DIR),
 	 *                                                        "Profile 1"
 	 *                                                        });
-	 * //Start chrome browser with some options to be turned off. 
-	 * String optionsToExclude = "disable-component-update";//comma separated options to exclude, like "disable-component-update, ignore-certificate-errors", be careful, there are NO 2 hyphens before options.                                                      
+	 * //Start chrome browser with some options to be turned off.
+	 * String optionsToExclude = "disable-component-update";//comma separated options to exclude, like "disable-component-update, ignore-certificate-errors", be careful, there are NO 2 hyphens before options.
 	 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
-	 *                                                        SelectBrowser.BROWSER_NAME_CHROME, 
-	 *                                                        "10", 
-	 *                                                        "true", 
-	 *                                                        quote(SelectBrowser.KEY_CHROME_EXCLUDE_OPTIONS), 
+	 *                                                        SelectBrowser.BROWSER_NAME_CHROME,
+	 *                                                        "10",
+	 *                                                        "true",
+	 *                                                        quote(SelectBrowser.KEY_CHROME_EXCLUDE_OPTIONS),
 	 *                                                        quote(optionsToExclude)
 	 *                                                        });
-	 * //Start chrome browser with some chrome-command-line-options/preferences to set. 
+	 * //Start chrome browser with some chrome-command-line-options/preferences to set.
 	 * String absolutePreferenceFile = "c:\\chromePref.json.dat";//A json file containing chrome command-line-options/preferences, like { "lang":"zh-cn", "start-maximized":"",  "<b>seplus.chrome.preference.json.key</b>":{ "intl.accept_languages":"zh-CN-pseudo", "intl.charset_default"  :"utf-8"} }
 	 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
-	 *                                                        SelectBrowser.BROWSER_NAME_CHROME, 
-	 *                                                        "10", 
-	 *                                                        "true", 
-	 *                                                        quote(SelectBrowser.KEY_CHROME_PREFERENCE), 
+	 *                                                        SelectBrowser.BROWSER_NAME_CHROME,
+	 *                                                        "10",
+	 *                                                        "true",
+	 *                                                        quote(SelectBrowser.KEY_CHROME_PREFERENCE),
 	 *                                                        quote(absolutePreferenceFile)
 	 *                                                        });
-	 * </pre>	 
+	 * </pre>
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
 	 * @see org.safs.TestRecordHelper#getStatusInfo()
@@ -301,7 +302,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	public static boolean StartWebBrowser(String URL,String BrowserID, String... params){
 		return DriverCommand.StartWebBrowser(URL, BrowserID, params);
 	}
-	
+
 	/**
 	 * Stop WebBrowser by ID.
 	 * During test, multiple browsers can be opened by {@link #StartWebBrowser(String, BrowserID, String...)}<br>
@@ -310,15 +311,15 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * @param BrowserID String, the BrowserID served as key to get the WebDriver from cache.<br>
 	 * @return - true on success<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * String browserID = "GoogleMain";
 	 * StartWebBrowser("http://www.google.com", browserID);
 	 * //do some testing, then
-	 * StopWebBrowser(browserID);	  
+	 * StopWebBrowser(browserID);
 	 * }
-	 * </pre>	 
+	 * </pre>
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
 	 * @see org.safs.TestRecordHelper#getStatusInfo()
@@ -327,21 +328,21 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	public static boolean StopWebBrowser(String BrowserID){
 		return DriverCommand.StopWebBrowser(BrowserID);
 	}
-	
+
 	/**
-	 * Switch WebBrowser by ID. 
+	 * Switch WebBrowser by ID.
 	 * During test, multiple browsers can be opened by {@link #StartWebBrowser(String, int, String...)}<br>
 	 * If user wants to switch between these opened browser, use can call this method.<br>
 	 * This method requires a parameter 'ID', which is given by user when he calls {@link #StartWebBrowser(String, int, String...)}<br>
-	 * See <a href="http://safsdev.sourceforge.net/sqabasic2000/DDDriverCommandsReference.htm#detail_UseWebBrowser">Detailed Reference</a>	
+	 * See <a href="http://safsdev.sourceforge.net/sqabasic2000/DDDriverCommandsReference.htm#detail_UseWebBrowser">Detailed Reference</a>
 	 * @param ID String, the ID served as key to get the WebDriver from cache.<br>
-	 * @return true on success 
-	 * @example	 
+	 * @return true on success
+	 * @example
 	 * <pre>
 	 * {@code
-	 * SwitchWebBrowser("GoogleNewWindow");	  
+	 * SwitchWebBrowser("GoogleNewWindow");
 	 * }
-	 * </pre>	 
+	 * </pre>
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
 	 * @see org.safs.TestRecordHelper#getStatusInfo()
@@ -350,7 +351,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	public static boolean SwitchWebBrowser(String ID){
 		return DriverCommand.UseWebBrowser(ID);
 	}
-	
+
 	/**
 	 * Sends keystrokes to the current focused Component.<br>
 	 * See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_TypeKeys">Detailed Reference</a>
@@ -361,7 +362,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 *     {Tab} = TAB Key
 	 *     ^ = CONTROL Key with another key ( "^s" = CONTROL + s )
 	 *     % = ALT Key with another key ( "%F" = ALT + F )
-	 *     + = SHIFT Key with another key ( "+{Enter}" = SHIFT + ENTER )  
+	 *     + = SHIFT Key with another key ( "+{Enter}" = SHIFT + ENTER )
 	 * </pre>
 	 * We are generally providing this support through our generic <a href="http://safsdev.sourceforge.net/doc/org/safs/tools/input/CreateUnicodeMap.html">InputKeys Support</a>.
 	 * <p>
@@ -369,7 +370,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * @return true on success
 	 * @see org.safs.robot.Robot#inputKeys(String)
 	 * @see SeleniumPlus#quote(String)
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * SeleniumPlus.TypeKeys("% n");//"Alt+Space+n" Minimize the current window
@@ -378,9 +379,11 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * </pre>
 	 */
 	public static boolean TypeKeys(String keystrokes){
-		return Component.TypeKeys(keystrokes);
+		//call actionGUILess() instead of Component.TypeKeys(): to keep the log message consistent
+		return actionGUILess(GenericMasterFunctions.TYPEKEYS_KEYWORD, keystrokes);
+//		return Component.TypeKeys(keystrokes);
 	}
-	
+
 	/**
 	 * Sends characters to the current focused Component.<br>
 	 * See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_TypeChars">Detailed Reference</a>
@@ -389,7 +392,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * @return true on success
 	 * @see org.safs.robot.Robot#inputChars(String)
 	 * @see SeleniumPlus#quote(String)
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * SeleniumPlus.TypeChars("Test Value");
@@ -399,9 +402,11 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * </pre>
 	 */
 	public static boolean TypeChars(String textvalue){
-		return Component.TypeChars(textvalue);
+		//call actionGUILess() instead of Component.TypeChars(): to keep the log message consistent
+		return actionGUILess(GenericMasterFunctions.TYPECHARS_KEYWORD, textvalue);
+//		return Component.TypeChars(textvalue);
 	}
-	
+
 	/**
 	 * Sends secret-text (such as password) to the current focused Component.<br>
 	 * See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_TypeEncryption">Detailed Reference</a>
@@ -410,7 +415,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * @param privateKeyFile String, the file containing 'private key' to decrypt the 'encrypted data'
 	 * @return true on success
 	 * @see org.safs.robot.Robot#inputChars(String)
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * //the publickey and privatekey are generated by org.safs.RSA
@@ -422,7 +427,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	public static boolean TypeEncryption(String encryptedDataFile, String privateKeyFile){
 		return Component.TypeEncryption(encryptedDataFile, privateKeyFile);
 	}
-	
+
 	/**
 	 * Hover the mouse over a specified screen location.
 	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_HoverScreenLocation">Detailed Reference</a>
@@ -432,13 +437,13 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * <b>optionals[0] hoverTime</b> int, milliseconds to hover
 	 * </ul>
 	 * @return true if hover succeeds, false otherwise.
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * boolean success = SeleniumPlus.HoverScreenLocation("500, 300", "20");
 	 * boolean success = SeleniumPlus.HoverScreenLocation("locKey", "20");//locKey="500, 300" defined in map file under "ApplicationConstants"
 	 * }
-	 * </pre>	
+	 * </pre>
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
 	 * @see org.safs.TestRecordHelper#getStatusInfo()
@@ -454,21 +459,21 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * @param optionals
 	 * <ul>
 	 * <b>optionals[0] FilterMode</b> String, one of FileUtilities.FilterMode. FilterMode.TOLERANCE is valid only when the binary files are images.<br>
-	 * <b>optionals[1] FilterOptions</b> int, if the FilterMode is FilterMode.TOLERANCE, a number between 0 and 100, 
+	 * <b>optionals[1] FilterOptions</b> int, if the FilterMode is FilterMode.TOLERANCE, a number between 0 and 100,
 	 *                                        the percentage of bits need to be the same.
 	 *                                        100 means only 100% match, 2 images will be considered matched;
 	 *                                        0 means even no bits match, 2 images will be considered matched.<br>
 	 *                                   other type, if the FilterMode is FilterMode.XXX<br>
 	 * </ul>
 	 * @return true if the 2 files contain the same content, false otherwise.
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * boolean success = SeleniumPlus.VerifyBinaryFileToFile("signIn.png", "signIn.png");
 	 * boolean success = SeleniumPlus.VerifyBinaryFileToFile("c:\bench\signIn.png", "d:\test\signIn.png");
 	 * boolean success = SeleniumPlus.VerifyBinaryFileToFile("c:\bench\signIn.png", "d:\test\signIn.png", FilterMode.TOLERANCE.name, "90");
 	 * }
-	 * </pre>	
+	 * </pre>
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
 	 * @see org.safs.TestRecordHelper#getStatusInfo()
@@ -483,13 +488,13 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * @param actualFile String, File used as the comparison file under test.
 	 * @param optionals -- NOT used yet
 	 * @return true if the 2 files contain the same content, false otherwise.
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * boolean success = SeleniumPlus.VerifyFileToFile("benchFile.txt", "actualFile.txt");
 	 * boolean success = SeleniumPlus.VerifyFileToFile("c:\bench\benchFile.txt", "d:\test\actualFile.txt");
 	 * }
-	 * </pre>	
+	 * </pre>
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
 	 * @see org.safs.TestRecordHelper#getStatusInfo()
@@ -498,19 +503,19 @@ public abstract class SeleniumPlus extends SAFSPlus{
 		return Component.VerifyFileToFile(benchFile, actualFile, optionals);
 	}
 	/**
-	 * Verify the current contents of a text file with a benchmark file (same as VerifyFileToFile). 
+	 * Verify the current contents of a text file with a benchmark file (same as VerifyFileToFile).
 	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyTextFileToFile">Detailed Reference</a>
 	 * @param benchFile String, File used as the comparison benchmark.
 	 * @param actualFile String, File used as the comparison file under test.
 	 * @param optionals -- NOT used yet
 	 * @return true if the 2 files contain the same content, false otherwise.
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * boolean success = SeleniumPlus.VerifyTextFileToFile("benchFile.txt", "actualFile.txt");
 	 * boolean success = SeleniumPlus.VerifyTextFileToFile("c:\bench\benchFile.txt", "d:\test\actualFile.txt");
 	 * }
-	 * </pre>	
+	 * </pre>
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
 	 * @see org.safs.TestRecordHelper#getStatusInfo()
@@ -528,7 +533,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * <b>optionals[0] </b>String, Set to "SuppressValue" to prevent the logging of ugly multi-line values<br>
 	 * </ul>
 	 * @return true if a string value does contain a substring, false otherwise.
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * String labelVar = "labelVariable";
@@ -538,7 +543,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * //or
 	 * boolean success = SeleniumPlus.VerifyValueContains("^"+labelVar, "labelContent");
 	 * }
-	 * </pre>	
+	 * </pre>
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
 	 * @see org.safs.TestRecordHelper#getStatusInfo()
@@ -556,14 +561,14 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * <b>optionals[0] </b>String, Set to "SuppressValue" to prevent the logging of ugly multi-line values<br>
 	 * </ul>
 	 * @return true if a string value does contain a substring ignoring case, false otherwise.
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * String labelVar = "labelVariable";
 	 * Component.AssignPropertyVariable(Map.AUT.Lable,"textContent", labelVar);
 	 * boolean success = SeleniumPlus.VerifyValueContainsIgnoreCase("^"+labelVar, "subcontent");
 	 * }
-	 * </pre>	
+	 * </pre>
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
 	 * @see org.safs.TestRecordHelper#getStatusInfo()
@@ -581,14 +586,14 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * <b>optionals[0] </b>String, Set to "SuppressValue" to prevent the logging of ugly multi-line values<br>
 	 * </ul>
 	 * @return true if a string value does NOT contain a substring, false otherwise.
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * String labelVar = "labelVariable";
 	 * Component.AssignPropertyVariable(Map.AUT.Lable,"textContent", labelVar);
 	 * boolean success = SeleniumPlus.VerifyValueDoesNotContain("^"+labelVar, "substr");
 	 * }
-	 * </pre>	
+	 * </pre>
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
 	 * @see org.safs.TestRecordHelper#getStatusInfo()
@@ -606,7 +611,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * <b>optionals[0] </b>String, Set to "SuppressValue" to prevent the logging of ugly multi-line values<br>
 	 * </ul>
 	 * @return true if the two values do equal, false otherwise.
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * String labelVar = "labelVariable";
@@ -616,7 +621,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * //or
 	 * boolean success = SeleniumPlus.VerifyValues("^"+labelVar, "labelContent");
 	 * }
-	 * </pre>	
+	 * </pre>
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
 	 * @see org.safs.TestRecordHelper#getStatusInfo()
@@ -634,14 +639,14 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * <b>optionals[0] </b>String, Set to "SuppressValue" to prevent the logging of ugly multi-line values<br>
 	 * </ul>
 	 * @return true if the two values do equal, false otherwise.
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * String labelVar = "labelVariable";
 	 * Component.AssignPropertyVariable(Map.AUT.Lable,"textContent", labelVar);
 	 * boolean success = SeleniumPlus.VerifyValuesIgnoreCase("^"+labelVar, "labelcontent");
 	 * }
-	 * </pre>	
+	 * </pre>
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
 	 * @see org.safs.TestRecordHelper#getStatusInfo()
@@ -659,14 +664,14 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * <b>optionals[0] </b>String, Set to "SuppressValue" to prevent the logging of ugly multi-line values<br>
 	 * </ul>
 	 * @return true if the two values do NOT equal, false otherwise.
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * String labelVar = "labelVariable";
 	 * Component.AssignPropertyVariable(Map.AUT.Lable,"textContent", labelVar);
 	 * boolean success = SeleniumPlus.VerifyValuesNotEqual("^"+labelVar, "labelContent");
 	 * }
-	 * </pre>	
+	 * </pre>
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
 	 * @see org.safs.TestRecordHelper#getStatusInfo()
@@ -674,9 +679,9 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	public static boolean VerifyValuesNotEqual(String value1, String value2, String... optionals){
 		return Component.VerifyValuesNotEqual(value1, value2, optionals);
 	}
-	
+
 	/**
-	 * Click on any visible component. 
+	 * Click on any visible component.
 	 * <p>See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_Click">Detailed Reference</a>
 	 * @param comp -- Component (from App Map) to Click
 	 * @param params optional
@@ -688,7 +693,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * </ul>
 	 * @return true if successfully executed, false otherwise.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * 1) boolean success = Click(Map.Google.Apps);//Click at the center
@@ -700,12 +705,12 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
 	 * }
-	 * 
+	 *
 	 * Pay attention: If you use percentage format in SE+, you'd better use 'Misc.Expressions(false);' first.
-	 * 
+	 *
 	 * "AppMapSubkey" is expected to be an AppMap entry in an "Apps" section in the App Map.
 	 * See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_Click">Detailed Reference</a>
-	 * </pre>	 
+	 * </pre>
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
 	 * @see org.safs.TestRecordHelper#getStatusInfo()
@@ -713,9 +718,9 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	public static boolean Click(org.safs.model.Component comp, String... params){
 		return Component.Click(comp, params);
 	}
-	
+
 	/**
-	 * Control-Click on any visible component. 
+	 * Control-Click on any visible component.
 	 * <p>See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_CtrlClick">Detailed Reference</a>
 	 * @param comp -- Component (from App Map) to Click
 	 * @param params optional
@@ -727,7 +732,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * </ul>
 	 * @return true if successfully executed, false otherwise.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * 1) boolean success = CtrlClick(Map.Google.Apps);//Control-Click at the center
@@ -739,10 +744,10 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
 	 * }
-	 * 
+	 *
 	 * Pay attention: If you use percentage format in SE+, you'd better use 'Misc.Expressions(false);' first.
-	 * 
-	 * </pre>	 
+	 *
+	 * </pre>
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
 	 * @see org.safs.TestRecordHelper#getStatusInfo()
@@ -750,9 +755,9 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	public static boolean CtrlClick(org.safs.model.Component comp, String... params){
 		return Component.CtrlClick(comp, params);
 	}
-	
+
 	/**
-	 * Control-Right-Click on any visible component. 
+	 * Control-Right-Click on any visible component.
 	 * <p>See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_CtrlRightClick">Detailed Reference</a>
 	 * @param comp -- Component (from App Map) to Click
 	 * @param params optional
@@ -764,7 +769,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * </ul>
 	 * @return true if successfully executed, false otherwise.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * 1) boolean success = CtrlRightClick(Map.Google.Apps);//Control-Right-Click at the center
@@ -776,10 +781,10 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
 	 * }
-	 * 
+	 *
 	 * Pay attention: If you use percentage format in SE+, you'd better use 'Misc.Expressions(false);' first.
-	 * 
-	 * </pre>	 
+	 *
+	 * </pre>
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
 	 * @see org.safs.TestRecordHelper#getStatusInfo()
@@ -787,9 +792,9 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	public static boolean CtrlRightClick(org.safs.model.Component comp, String... params){
 		return Component.CtrlRightClick(comp, params);
 	}
-	
+
 	/**
-	 * Double-Click on any visible component. 
+	 * Double-Click on any visible component.
 	 * <p>See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_DoubleClick">Detailed Reference</a>
 	 * @param comp -- Component (from App Map) to Click
 	 * @param params optional
@@ -801,7 +806,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * </ul>
 	 * @return true if successfully executed, false otherwise.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * 1) boolean success = DoubleClick(Map.Google.Apps);//Double-Click at the center
@@ -813,20 +818,20 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
 	 * }
-	 * 
+	 *
 	 * Pay attention: If you use percentage format in SE+, you'd better use 'Misc.Expressions(false);' first.
-	 * 
-	 * </pre>	 
+	 *
+	 * </pre>
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
 	 * @see org.safs.TestRecordHelper#getStatusInfo()
 	 */
 	public static boolean DoubleClick(org.safs.model.Component comp, String... params){
 		return Component.DoubleClick(comp, params);
-	}	
+	}
 
 	/**
-	 * Right-Click on any visible component. 
+	 * Right-Click on any visible component.
 	 * <p>See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_RightClick">Detailed Reference</a>
 	 * @param comp -- Component (from App Map) to Click
 	 * @param params optional
@@ -838,7 +843,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * </ul>
 	 * @return true if successfully executed, false otherwise.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * 1) boolean success = RightClick(Map.Google.Apps);//Right-Click at the center
@@ -850,10 +855,10 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
 	 * }
-	 * 
+	 *
 	 * Pay attention: If you use percentage format in SE+, you'd better use 'Misc.Expressions(false);' first.
-	 * 
-	 * </pre>	 
+	 *
+	 * </pre>
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
 	 * @see org.safs.TestRecordHelper#getStatusInfo()
@@ -863,13 +868,13 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	}
 
 	/**
-	 * A left mouse drag is performed on the object based on the stored coordinates relative to this object. 
+	 * A left mouse drag is performed on the object based on the stored coordinates relative to this object.
 	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericObjectFunctionsReference.htm#detail_LeftDrag">Detailed Reference</a>
 	 * @param comp Component, the component (from App Map) relative to which to calculate coordinates to drag
 	 * @param coordinates String, the relative coordinates. Example: "Coords=3,10,12,20", or "coordsKey" defined in App Map<br>
 	 * @return true if successfully executed, false otherwise.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * boolean success = LeftDrag(Map.Google.Apps,"3,10,12,20");//Left-Drag from (3,10) to (12,20), relative to the Left Up corner of component Map.Google.Apps
@@ -879,8 +884,8 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
 	 * }
-	 * 
-	 * </pre>	 
+	 *
+	 * </pre>
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
 	 * @see org.safs.TestRecordHelper#getStatusInfo()
@@ -889,13 +894,13 @@ public abstract class SeleniumPlus extends SAFSPlus{
 		return Component.LeftDrag(comp, coordinates);
 	}
 	/**
-	 * A Shift left mouse drag is performed on the object based on the stored coordinates relative to this object. 
+	 * A Shift left mouse drag is performed on the object based on the stored coordinates relative to this object.
 	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericObjectFunctionsReference.htm#detail_ShiftLeftDrag">Detailed Reference</a>
 	 * @param comp Component, the component (from App Map) relative to which to calculate coordinates to drag
 	 * @param coordinates String, the relative coordinates. Example: "Coords=3,10,12,20", or "coordsKey" defined in App Map<br>
 	 * @return true if successfully executed, false otherwise.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * boolean success = ShiftLeftDrag(Map.Google.Apps,"3,10,12,20");//Shift-Left-Drag from (3,10) to (12,20), relative to the Left Up corner of component Map.Google.Apps
@@ -905,8 +910,8 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
 	 * }
-	 * 
-	 * </pre>	 
+	 *
+	 * </pre>
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
 	 * @see org.safs.TestRecordHelper#getStatusInfo()
@@ -915,13 +920,13 @@ public abstract class SeleniumPlus extends SAFSPlus{
 		return Component.ShiftLeftDrag(comp, coordinates);
 	}
 	/**
-	 * A Ctrl Shift left mouse drag is performed on the object based on the stored coordinates relative to this object. 
+	 * A Ctrl Shift left mouse drag is performed on the object based on the stored coordinates relative to this object.
 	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericObjectFunctionsReference.htm#detail_CtrlShiftLeftDrag">Detailed Reference</a>
 	 * @param comp Component, the component (from App Map) relative to which to calculate coordinates to drag
 	 * @param coordinates String, the relative coordinates. Example: "Coords=3,10,12,20", or "coordsKey" defined in App Map<br>
 	 * @return true if successfully executed, false otherwise.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * boolean success = CtrlShiftLeftDrag(Map.Google.Apps,"3,10,12,20");//Ctrl-Shift-Left-Drag from (3,10) to (12,20), relative to the Left Up corner of component Map.Google.Apps
@@ -931,8 +936,8 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
 	 * }
-	 * 
-	 * </pre>	 
+	 *
+	 * </pre>
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
 	 * @see org.safs.TestRecordHelper#getStatusInfo()
@@ -941,13 +946,13 @@ public abstract class SeleniumPlus extends SAFSPlus{
 		return Component.CtrlShiftLeftDrag(comp, coordinates);
 	}
 	/**
-	 * A Ctrl left mouse drag is performed on the object based on the stored coordinates relative to this object. 
+	 * A Ctrl left mouse drag is performed on the object based on the stored coordinates relative to this object.
 	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericObjectFunctionsReference.htm#detail_CtrlLeftDrag">Detailed Reference</a>
 	 * @param comp Component, the component (from App Map) relative to which to calculate coordinates to drag
 	 * @param coordinates String, the relative coordinates. Example: "Coords=3,10,12,20", or "coordsKey" defined in App Map<br>
 	 * @return true if successfully executed, false otherwise.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * boolean success = CtrlLeftDrag(Map.Google.Apps,"3,10,12,20");//Ctrl-Left-Drag from (3,10) to (12,20), relative to the Left Up corner of component Map.Google.Apps
@@ -957,8 +962,8 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
 	 * }
-	 * 
-	 * </pre>	 
+	 *
+	 * </pre>
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
 	 * @see org.safs.TestRecordHelper#getStatusInfo()
@@ -967,13 +972,13 @@ public abstract class SeleniumPlus extends SAFSPlus{
 		return Component.CtrlLeftDrag(comp, coordinates);
 	}
 	/**
-	 * A Alt left mouse drag is performed on the object based on the stored coordinates relative to this object. 
+	 * A Alt left mouse drag is performed on the object based on the stored coordinates relative to this object.
 	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericObjectFunctionsReference.htm#detail_AltLeftDrag">Detailed Reference</a>
 	 * @param comp Component, the component (from App Map) relative to which to calculate coordinates to drag
 	 * @param coordinates String, the relative coordinates. Example: "Coords=3,10,12,20", or "coordsKey" defined in App Map<br>
 	 * @return true if successfully executed, false otherwise.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * boolean success = AltLeftDrag(Map.Google.Apps,"3,10,12,20");//Alt-Left-Drag from (3,10) to (12,20), relative to the Left Up corner of component Map.Google.Apps
@@ -983,8 +988,8 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
 	 * }
-	 * 
-	 * </pre>	 
+	 *
+	 * </pre>
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
 	 * @see org.safs.TestRecordHelper#getStatusInfo()
@@ -993,13 +998,13 @@ public abstract class SeleniumPlus extends SAFSPlus{
 		return Component.AltLeftDrag(comp, coordinates);
 	}
 	/**
-	 * A Ctrl Alt left mouse drag is performed on the object based on the stored coordinates relative to this object. 
+	 * A Ctrl Alt left mouse drag is performed on the object based on the stored coordinates relative to this object.
 	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericObjectFunctionsReference.htm#detail_CtrlAltLeftDrag">Detailed Reference</a>
 	 * @param comp Component, the component (from App Map) relative to which to calculate coordinates to drag
 	 * @param coordinates String, the relative coordinates. Example: "Coords=3,10,12,20", or "coordsKey" defined in App Map<br>
 	 * @return true if successfully executed, false otherwise.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * boolean success = CtrlAltLeftDrag(Map.Google.Apps,"3,10,12,20");//Ctrl-Alt-Left-Drag from (3,10) to (12,20), relative to the Left Up corner of component Map.Google.Apps
@@ -1009,8 +1014,8 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
 	 * }
-	 * 
-	 * </pre>	 
+	 *
+	 * </pre>
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
 	 * @see org.safs.TestRecordHelper#getStatusInfo()
@@ -1019,13 +1024,13 @@ public abstract class SeleniumPlus extends SAFSPlus{
 		return Component.CtrlAltLeftDrag(comp, coordinates);
 	}
 	/**
-	 * A right mouse drag is performed on the object based on the stored coordinates relative to this object. 
+	 * A right mouse drag is performed on the object based on the stored coordinates relative to this object.
 	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericObjectFunctionsReference.htm#detail_RightDrag">Detailed Reference</a>
 	 * @param comp Component, the component (from App Map) relative to which to calculate coordinates to drag
 	 * @param coordinates String, the relative coordinates. Example: "Coords=3,10,12,20", or "coordsKey" defined in App Map<br>
 	 * @return true if successfully executed, false otherwise.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * boolean success = RightDrag(Map.Google.Apps,"3,10,12,20");//Right-Drag from (3,10) to (12,20), relative to the Left Up corner of component Map.Google.Apps
@@ -1035,8 +1040,8 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
 	 * }
-	 * 
-	 * </pre>	 
+	 *
+	 * </pre>
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
 	 * @see org.safs.TestRecordHelper#getStatusInfo()
@@ -1044,9 +1049,9 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	public static boolean RightDrag(org.safs.model.Component comp, String coordinates){
 		return Component.RightDrag(comp, coordinates);
 	}
-	
+
 	/**
-	 * Shift-Click on any visible component. 
+	 * Shift-Click on any visible component.
 	 * <p>See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_ShiftClick">Detailed Reference</a>
 	 * @param comp -- Component (from App Map) to Click
 	 * @param params optional
@@ -1058,7 +1063,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * </ul>
 	 * @return true if successfully executed, false otherwise.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * 1) boolean success = ShiftClick(Map.Google.Apps);//Shift-Click at the center
@@ -1070,10 +1075,10 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
 	 * }
-	 * 
+	 *
 	 * Pay attention: If you use percentage format in SE+, you'd better use 'Misc.Expressions(false);' first.
-	 * 
-	 * </pre>	 
+	 *
+	 * </pre>
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
 	 * @see org.safs.TestRecordHelper#getStatusInfo()
@@ -1081,26 +1086,26 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	public static boolean ShiftClick(org.safs.model.Component comp, String... params){
 		return Component.ShiftClick(comp, params);
 	}
-	
+
 	/**
 	 * Highlight object
-	 * @param OnOff -- true or false for object highlight 
+	 * @param OnOff -- true or false for object highlight
 	 * @return true on success
 	 */
 	public static boolean Highlight(boolean OnOff){
 		return DriverCommand.Highlight(OnOff);
 	}
-	
+
 	/**
 	 * Pause test-case flow in seconds. If you want to pause in millisecond, use {@link Misc#Delay(int)}.
 	 * @param seconds int, the seconds to pause
 	 * @return true if successfully executed, false otherwise.<p>
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
-	 * Pause(20);	
+	 * Pause(20);
 	 * }
-	 * </pre>	 
+	 * </pre>
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
 	 * @see org.safs.TestRecordHelper#getStatusInfo()
@@ -1109,7 +1114,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	public static boolean Pause(int seconds){
 		return DriverCommand.Pause(seconds);
 	}
-	
+
 	/**
 	 * Take a screenshot of windows or component.<br>
 	 * See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_GetGUIImage">Detailed Reference</a><p>
@@ -1127,13 +1132,13 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 *                          Multiple areas are separated by a space character. The filtered area is covered by black.<br>
 	 * </ul>
 	 * @return boolean, true on success; false otherwise
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * GetGUIImage(Map.Google.SignIn,"SignIn");//will be saved at <testProject>\Actuals\SignIn.bmp
 	 * GetGUIImage(Map.Google.SignIn,"c:/temp/SignIn.gif");
-	 * 
-	 * //Following example will store part of the SingIn image, 
+	 *
+	 * //Following example will store part of the SingIn image,
 	 * GetGUIImage(Map.Google.SignIn,"SignInPartial.png", "0,0,50%,50%");
 	 * //"subarea" is defined in map file
 	 * //[SignIn]
@@ -1145,7 +1150,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * //subarea="0,0,50%,50%"
 	 * GetGUIImage(Map.Google.SignIn,"SignInPartial.png", Map.subarea);
 	 * GetGUIImage(Map.Google.SignIn,"SignInPartial.png", Map.subarea());
-	 * 
+	 *
 	 * //Filter the SingIn image and save it
 	 * GetGUIImage(Map.Google.SignIn,"SignInFiltered.gif", "", quote("Filter=0,0,10,10 60,60,10,10"));
 	 * //"filterAreas" is defined in map file
@@ -1158,11 +1163,11 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * GetGUIImage(Map.Google.SignIn,"SignInFiltered.gif", "", Map.filterAreas);
 	 * GetGUIImage(Map.Google.SignIn,"SignInFiltered.gif", "", Map.filterAreas());
 	 * }
-	 * </pre>	
-	 * 
+	 * </pre>
+	 *
 	 */
 	public static boolean GetGUIImage(org.safs.model.Component comp, String fileName, String... params){
-		return Component.GetGUIImage(comp, fileName, params);	
+		return Component.GetGUIImage(comp, fileName, params);
 	}
 	/**
 	 * Take a screenshot of windows or component and filter some children inside.<br>
@@ -1173,7 +1178,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 *                         If the file extension is not supported, then suffix ".bmp" will be appended to filename.<br>
 	 * @param subArea String, (x1,y1,x2,y2) indicating partial image of the component to capture, such as "0,0,50%,50%", <br>
 	 *                         it can be app map subkey under component name.<br>
-	 * @param childrenToMask org.safs.model.Component[], an array of child to filter, 
+	 * @param childrenToMask org.safs.model.Component[], an array of child to filter,
 	 *                       if some child is outside of parent, then it will be ignored.
 	 * @return boolean, true on success; false otherwise
 	 * <pre>
@@ -1210,17 +1215,17 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * It is SUGGESTED to call {@link #quote(String)} to wrap the "filter string" and then pass it to GetGUIImage/VerifyGUIImageToFile<br>
 	 * Or make sure the expression-evaluation is off by calling {@link Misc#Expressions(boolean)}<br>
 	 * @param parent org.safs.model.Component, the parent component
-	 * @param childrenToMask org.safs.model.Component[], the children inside the parent component; the child outside of 
+	 * @param childrenToMask org.safs.model.Component[], the children inside the parent component; the child outside of
 	 *                       parent component will be ignored.
 	 * @return a filter string such as Filter=x1,y1,x2,y2 x1,y1,x2,y2
 	 */
 	public static String deduceFilterAreas(org.safs.model.Component parent, org.safs.model.Component[] childrenToMask){
 		String debugmsg = StringUtils.debugmsg(false);
-		
+
 		StringBuffer filterAreas = new StringBuffer();
 		try {
 			Rectangle parentRec = WDLibrary.getRectangleOnScreen(getObject(parent));
-			
+
 			if(childrenToMask!=null && childrenToMask.length>0){
 				Rectangle childRec = null;
 				int x1, y1, x2, y2;
@@ -1243,14 +1248,14 @@ public abstract class SeleniumPlus extends SAFSPlus{
 				}
 			}
 			IndependantLog.debug(debugmsg+"deduced filterAreas="+filterAreas);
-			
+
 		} catch (Exception e) {
 			IndependantLog.error(debugmsg+"Fail due to "+StringUtils.debugmsg(e));
 		}
-		
+
 		return filterAreas.toString();
 	}
-	
+
 	/**
 	 * Verify the screen shot of a GUI component with a benchmark image file.
 	 * See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyGUIImageToFile">Detailed Reference</a><p>
@@ -1273,7 +1278,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 *                          Multiple areas are separated by a space character. The filtered area is covered by black.
 	 * </ul>
 	 * @return boolean, true if verification success; false otherwise
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * VerifyGUIImageToFile(Map.Google.SignIn,"SignIn");//will be compared with file <testProject>\Benchmarks\SignIn.bmp
@@ -1293,7 +1298,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * //subarea="0,0,50%,50%"
 	 * VerifyGUIImageToFile(Map.Google.SignIn,"SignInPartial.png", Map.subarea);
 	 * VerifyGUIImageToFile(Map.Google.SignIn,"SignInPartial.png", Map.subarea());
-	 * 
+	 *
 	 * //Filter the SingIn image and the bench image at certain areas and compare them
 	 * VerifyGUIImageToFile(Map.Google.SignIn,"c:/benchDir/SignIn.gif", "", "", "", quote("Filter=0,0,10,10 60,60,10,10"));
 	 * //"filterAreas" is defined in map file
@@ -1306,12 +1311,12 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * VerifyGUIImageToFile(Map.Google.SignIn,"c:/benchDir/SignIn.gif", "", "", "", Map.filterAreas);
 	 * VerifyGUIImageToFile(Map.Google.SignIn,"c:/benchDir/SignIn.gif", "", "", "", Map.filterAreas());
 	 * }
-	 * </pre>	
+	 * </pre>
 	 */
-	public static boolean VerifyGUIImageToFile(org.safs.model.Component comp, String benchFile, String... params){		
-		return Component.VerifyGUIImageToFile(comp, benchFile, params);	
+	public static boolean VerifyGUIImageToFile(org.safs.model.Component comp, String benchFile, String... params){
+		return Component.VerifyGUIImageToFile(comp, benchFile, params);
 	}
-	
+
 	/**
 	 * Execute a simple piece of javascript on component synchronously.
 	 * See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_ExecuteScript">Detailed Reference</a><p>
@@ -1329,30 +1334,30 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * scriptParams[1] : Passed to the script as '<b>arguments[2]</b>', if used.<br>
 	 * ... more script's parameter<br>
 	 * </ul>
-	 * @return true if no errors were encountered. 
-	 * @example	 
+	 * @return true if no errors were encountered.
+	 * @example
 	 * <pre>
 	 * {@code
 	 * SeleniumPlus.ExecuteScript(
-	 *     Map.Google.SignIn,                       // The WebElement passed as 'arguments[0]' to the script. 
+	 *     Map.Google.SignIn,                       // The WebElement passed as 'arguments[0]' to the script.
 	 *     "arguments[0].innerHTML=arguments[1];",  // Script to set the WebElements innerHTML value.
 	 *     "my text value");                        // The value passed as 'arguments[1]' to set to innerHTML.
-	 * 
+	 *
 	 * SeleniumPlus.ExecuteScript(
-	 *     Map.Google.SignIn,                       // The WebElement passed as 'arguments[0]' to the script. 
+	 *     Map.Google.SignIn,                       // The WebElement passed as 'arguments[0]' to the script.
 	 *     "return arguments[0].innerHTML;");       // A script to return the WebElemenbts innerHTML.
-	 * 
+	 *
 	 *  // scriptResult should get the innerHTML value returned.
 	 * String scriptResult = SeleniumPlus.prevResults.getStatusInfo();
 	 * }
-	 * </pre>	
+	 * </pre>
 	 * @see #executeScript(String, Object...)
 	 * @see #executeAsyncScript(String, Object...)
-	 */	
+	 */
 	public static boolean ExecuteScript(org.safs.model.Component comp, String script, String... scriptParams){
 		return Component.ExecuteScript(comp, script, scriptParams);
-	}	
-	
+	}
+
 	public static final String TEMP_SELENIUM_PLUS_RS_VAR = "___temp_selenium_plus_rs___";
 	/**
 	 * Find the WebElement according to the SAFS Component.<br>
@@ -1373,7 +1378,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 			return WDLibrary.getObject(pel,crs);
 		}
 	}
-	
+
 	/**
 	 * Find the WebElement according to the SAFS Component.<br>
 	 * @param sc could be the WebDriver or a parent WebElement context.
@@ -1385,23 +1390,23 @@ public abstract class SeleniumPlus extends SAFSPlus{
 		String rs = Misc.GetAppMapValue(component, "", "false");
 		return WDLibrary.getObject(sc, rs);
 	}
-	
+
 	/**
 	 * Wait for object in seconds
 	 * @param comp -- Component (from generated Map.java)
 	 * @param time - time in second
 	 * @return
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * WaitForGUI(Map.Google.SignIn,10);
 	 * }
 	 * </pre>
 	 */
-	public static boolean WaitForGUI(org.safs.model.Component comp, long time){		
+	public static boolean WaitForGUI(org.safs.model.Component comp, long time){
 		return DriverCommand.WaitForGUI(comp, time);
 	}
-	
+
 	/**
 	 * Start capturing test activity counts for a specific application feature or test-case.
 	 * @param tcname The name of the test-case to start using a Counter on.
@@ -1430,7 +1435,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 
 	/**
 	 * Stop capturing test activity counts for a specific application feature or test-case.
-	 * @param tcname The name of the test-case to stop.  The name must match a counter that was 
+	 * @param tcname The name of the test-case to stop.  The name must match a counter that was
 	 * previously started.
 	 * @return false only if a failure of some kind was reported in attempting to stop the counter.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
@@ -1441,12 +1446,12 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	public static boolean StopTestCase(String tcname){
 		return Counters.StopTestCase(tcname);
 	}
-	
+
 	/**
 	 * Convenience routine to retrieve the value of a SAFS Variable stored in SAFSVARS.
-	 * <br>This will exploit the <a href="http://safsdev.sourceforge.net/sqabasic2000/CreateAppMap.htm#ddv_lookup" target="_blank">SAFSMAPS look-thru</a> 
-	 * and <a href="http://safsdev.sourceforge.net/sqabasic2000/TestDesignGuidelines.htm#AppMapChaining" target="_blank">app map chaining</a> mechanism.  
-	 * <br>That is, any variable that does NOT exist in SAFSVARS will be sought as an 
+	 * <br>This will exploit the <a href="http://safsdev.sourceforge.net/sqabasic2000/CreateAppMap.htm#ddv_lookup" target="_blank">SAFSMAPS look-thru</a>
+	 * and <a href="http://safsdev.sourceforge.net/sqabasic2000/TestDesignGuidelines.htm#AppMapChaining" target="_blank">app map chaining</a> mechanism.
+	 * <br>That is, any variable that does NOT exist in SAFSVARS will be sought as an
 	 * ApplicationConstant in the SAFSMAPS service.
 	 * <p>
 	 * See <a href="http://safsdev.sourceforge.net/sqabasic2000/TestDesignGuidelines.htm" target="_blank">Test Design Guidelines for Localization</a>.
@@ -1472,13 +1477,13 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	public static boolean SetVariableValue(String variableName, String variableValue){
 		return SAFSPlus.SetVariableValue(variableName, variableValue);
 	}
-	
+
 	/**
-	 * Stop capturing test activity counts for a specific application feature or test-case if it is 
+	 * Stop capturing test activity counts for a specific application feature or test-case if it is
 	 * still active, then print a summary report of all tests counted, passed, failed, and skipped, etc...
-	 * @param tcname The name of the test-case to start using a Counter on.  The name must match a counter 
+	 * @param tcname The name of the test-case to start using a Counter on.  The name must match a counter
 	 * that was previously started.
-	 * @return false only if a failure of some kind was reported in attempting to stop the counter 
+	 * @return false only if a failure of some kind was reported in attempting to stop the counter
 	 * or print the summary report into the log.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
 	 * @see #prevResults
@@ -1487,13 +1492,13 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	public static boolean PrintTestCaseSummary(String tcname){
 		return Counters.PrintTestCaseSummary(tcname);
 	}
-	
+
 	/**
-	 * Stop capturing test activity counts for the overall suite of tests if it is 
+	 * Stop capturing test activity counts for the overall suite of tests if it is
 	 * still active, then print a summary report of all counted, passed, failed, and skipped tests etc...
-	 * @param suitename The name of the suite to stop (if still running) and process.  
+	 * @param suitename The name of the suite to stop (if still running) and process.
 	 * The name must match a counter that was previously started.
-	 * @return false only if a failure of some kind was reported in attempting to stop the counter 
+	 * @return false only if a failure of some kind was reported in attempting to stop the counter
 	 * or print the summary report into the log.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
 	 * @see #prevResults
@@ -1501,68 +1506,68 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	public static boolean PrintTestSuiteSummary(String suitename){
 		return Counters.PrintTestSuiteSummary(suitename);
 	}
-	
+
 	/**
 	 * Abort running test flow.
 	 * Prints a detailed abort message to the log and throws a RuntimeException to abort the test run.
-	 * @param reason will be prepended to the detailed abort information.<p>  
-	 * @example	 
+	 * @param reason will be prepended to the detailed abort information.<p>
+	 * @example
 	 * <pre>
 	 * {@code
-	 * AbortTest("reason for abort");	
+	 * AbortTest("reason for abort");
 	 * }
-	 * </pre>	 
+	 * </pre>
 	 * Clears prevResults TestRecordHelper to null.
-	 * @see #prevResults 
+	 * @see #prevResults
 	 */
 	public static void AbortTest(String reason) throws Throwable{
 		SAFSPlus.AbortTest(reason);
 	}
-	
+
 	/**
 	 * Wrapper class to handle <a href="http://safsdev.github.io//sqabasic2000/WindowFunctionsIndex.htm">Window keywords</a>, like Maximize, Minimize, SetPosition etc.<br>
-	 * 
+	 *
 	 * @see SAFSPlus.Window
 	 */
 	public static class Window extends SAFSPlus.Window{}
-	
+
 	/**
-	 * Wrapper class to handle 
-	 * <a href="http://safsdev.github.io/sqabasic2000/GenericMasterFunctionsIndex.htm">GenericMasterFunctions Reference</a> and 
+	 * Wrapper class to handle
+	 * <a href="http://safsdev.github.io/sqabasic2000/GenericMasterFunctionsIndex.htm">GenericMasterFunctions Reference</a> and
 	 * <a href="http://safsdev.github.io/sqabasic2000/GenericObjectFunctionsIndex.htm">GenericObjectFunctions Reference</a>, like VerifyProperty, IsPropertyExist etc.<br>
-	 * 
+	 *
 	 * @see SAFSPlus.Component
 	 */
 	public static class Component extends SAFSPlus.Component{}
-	
+
 	/**
 	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/ComboBoxFunctionsIndex.htm">ComboBox keywords</a>, like Select, ShowList, SetTextValue etc.<br>
-	 * 
+	 *
 	 * @see SAFSPlus.ComboBox
 	 */
 	public static class ComboBox extends SAFSPlus.ComboBox{}
 	/**
 	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/ScrollBarFunctionsIndex.htm">ScrollBar keywords</a>, like OneDown, PageDown, PageUp etc.<br>
-	 * 
+	 *
 	 * @see SAFSPlus.ScrollBar
 	 */
 	public static class ScrollBar extends SAFSPlus.ScrollBar{}
 	/**
 	 * A set of assertions methods for tests.  Only failed assertions are recorded.
-	 * 
+	 *
 	 * @see SAFSPlus.Assert
 	 */
 	public static class Assert extends SAFSPlus.Assert{}
 	/**
 	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/CheckBoxFunctionsIndex.htm">CheckBox keywords</a>, like Check, UnCheck.<br>
-	 * 
+	 *
 	 * @see SAFSPlus.CheckBox
 	 */
 	public static class CheckBox extends SAFSPlus.CheckBox{}
-	
+
 	/**
 	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/EditBoxFunctionsIndex.htm">EditBox keywords</a>, like SetTextValue, SetTextCharacters etc.<br>
-	 * 
+	 *
 	 * @see SAFSPlus.EditBox
 	 */
 	public static class EditBox extends SAFSPlus.EditBox{}
@@ -1570,44 +1575,44 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/TreeViewFunctionsIndex.htm">Tree keywords</a>, like ClickTextNode, ExpandTextNode etc.<br>
 	 * <pre>
 	 * By default, all parameters will be processed as an expression (math and string). As the parameter
-	 * tree-path may contain separator "->", for example "Root->Child1->GrandChild", it will be evaluated 
+	 * tree-path may contain separator "->", for example "Root->Child1->GrandChild", it will be evaluated
 	 * and 0 will be returned as parameter, this is not expected by user. To avoid the evaluation of
 	 * expression, PLEASE CALL
-	 * 
+	 *
 	 * {@code
 	 * Misc.Expressions(false);
 	 * }
 	 * </pre>
-	 * 
+	 *
 	 * @see SAFSPlus.Tree
 	 */
 	public static class Tree extends SAFSPlus.Tree{}
-	
+
 	/**
 	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/TabControlFunctionsIndex.htm">TabControl keywords</a>, like ClickTab, SelectTabIndex etc.<br>
-	 * 
+	 *
 	 * @see SAFSPlus.TabControl
 	 */
 	public static class TabControl extends SAFSPlus.TabControl{}
 	/**
 	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/ListViewFunctionsIndex.htm">ListView keywords</a>, like ClickIndex, VerifyListContains etc.<br>
-	 * 
+	 *
 	 * @see SAFSPlus.ListView
 	 */
 	public static class ListView extends SAFSPlus.ListView{}
-	
+
 	/**
 	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/JavaMenuFunctionsIndex.htm">MenuBar/Menu keywords</a>, like SelectMenuItem, VerifyMenuItemContains etc.<br>
-	 * 
+	 *
 	 * @see SAFSPlus.Menu
-	 */	
+	 */
 	public static class Menu extends SAFSPlus.Menu{}
-	
+
 	/**
 	 * Convenience class for miscellaneous Driver Commands.<br>
 	 * This is a sub-class of {@link SAFSPlus.Misc} and it provides more convenient wrapper APIs related to Selenium.<br>
 	 * The class {@link SAFSPlus.Misc} is a sub-class of {@link DriverCommand}.<br>
-	 * 
+	 *
 	 * @see SAFSPlus.Misc
 	 * @see SAFSPlus.DriverCommand
 	 */
@@ -1625,7 +1630,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 		 * cause different kinds of troubles. At this situation, to avoid this problem 'click capture' could be turned off.<br>
 		 * Later, we could always to turn on 'click capture' to guarantee that click happens.
 		 * </p>
-		 * 
+		 *
 		 * @param on boolean, if true then the 'click capture' will be turned on; otherwise turned off.
 		 * @return boolean, true if succeed.
 		 */
@@ -1657,8 +1662,8 @@ public abstract class SeleniumPlus extends SAFSPlus{
 		 * <pre>
 		 * {@code
 		 * 1) boolean success = IsAlertPresent();//Test the presence of Alert (belongs to current browser) with 2 seconds timeout.
-		 * 2) boolean success = IsAlertPresent("0");//Test the presence of Alert (belongs to current browser) immediately 
-		 * 3) boolean success = IsAlertPresent("5", "browser-id");//Test the presence of Alert (belongs to browser identified by "browser-id"), 
+		 * 2) boolean success = IsAlertPresent("0");//Test the presence of Alert (belongs to current browser) immediately
+		 * 3) boolean success = IsAlertPresent("5", "browser-id");//Test the presence of Alert (belongs to browser identified by "browser-id"),
 		 *                                                        //before that it will wait 5 seconds for the presence of the Alert
 		 * }
 		 * @see SAFSPlus#StartWebBrowser(String, String, String...)
@@ -1679,7 +1684,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 				throw new SeleniumPlusException("IsAlertPresent Failed.", e);
 			}
 		}
-		
+
 		/**
 		 * Accept (Clicking OK button) the Alert Dialog associated with a browser.<br>
 		 * This command will wait 2 seconds by default for the presence of Alert.<br>
@@ -1694,9 +1699,9 @@ public abstract class SeleniumPlus extends SAFSPlus{
 		 * <pre>
 		 * {@code
 		 * 1) boolean success = AlertAccept();//Close Alert (belongs to current browser) by clicking the OK button
-		 * 2) boolean success = AlertAccept("5");//Close Alert (belongs to current browser) by clicking the OK button, 
+		 * 2) boolean success = AlertAccept("5");//Close Alert (belongs to current browser) by clicking the OK button,
 		 *                                       //before that it will wait 5 seconds for the presence of the Alert
-		 * 3) boolean success = AlertAccept("5", "browser-id");//Close Alert (belongs to browser identified by "browser-id") by clicking the OK button, 
+		 * 3) boolean success = AlertAccept("5", "browser-id");//Close Alert (belongs to browser identified by "browser-id") by clicking the OK button,
 		 *                                                     //before that it will wait 5 seconds for the presence of the Alert
 		 * }
 		 * @see SAFSPlus#StartWebBrowser(String, String, String...)
@@ -1712,7 +1717,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 				return false;
 			}
 		}
-		
+
 		/**
 		 * Dismiss (Clicking Cancel button) the Alert Dialog associated with a browser.<br>
 		 * This command will wait 2 seconds by default for the presence of Alert.<br>
@@ -1727,9 +1732,9 @@ public abstract class SeleniumPlus extends SAFSPlus{
 		 * <pre>
 		 * {@code
 		 * 1) boolean success = AlertAccept();//Close Alert (belongs to current browser) by clicking the Cancel button
-		 * 2) boolean success = AlertAccept("5");//Close Alert (belongs to current browser) by clicking the Cancel button, 
+		 * 2) boolean success = AlertAccept("5");//Close Alert (belongs to current browser) by clicking the Cancel button,
 		 *                                       //before that it will wait 5 seconds for the presence of the Alert
-		 * 3) boolean success = AlertAccept("5", "browser-id");//Close Alert (belongs to browser identified by "browser-id") by clicking the Cancel button, 
+		 * 3) boolean success = AlertAccept("5", "browser-id");//Close Alert (belongs to browser identified by "browser-id") by clicking the Cancel button,
 		 *                                                     //before that it will wait 5 seconds for the presence of the Alert
 		 * }
 		 * @see SAFSPlus#StartWebBrowser(String, String, String...)
@@ -1745,7 +1750,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 				return false;
 			}
 		}
-		
+
 		/**
 		 * Set the 'Check Alert Timeout'. Usually, it is used to expand the time to wait for
 		 * the 'Alert Box' popping up. By default, the 'Check Alert Timeout' is 0.
@@ -1756,7 +1761,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 			IndependantLog.info("Set 'Check Alert Timeout as: '" + seconds);
 			WDLibrary.setTimeoutCheckAlertForClick(seconds);
 		}
-		
+
 		/**
 		 * Get the current 'Check Alert Timeout' value.
 		 */
@@ -1765,51 +1770,51 @@ public abstract class SeleniumPlus extends SAFSPlus{
 			return WDLibrary.getTimeoutCheckAlertForClick();
 		}
 	}
-	
+
 	/**
 	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/DDDriverLogCommandsIndex.htm">Logging keywords</a>, like LogMessage, LogTestWarning etc.<br>
-	 * 
+	 *
 	 * @see SAFSPlus.Logging
 	 */
 	public static class Logging extends SAFSPlus.Logging{}
-	
+
 	/**
 	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/DDDriverFileCommandsIndex.htm">File keywords</a>, like OpenFile, ReadFileLine etc.<br>
 	 * <pre>
-	 * Convenience class for File handling Commands. 
-	 * If you meet some errors when calling these API, please try to run 
+	 * Convenience class for File handling Commands.
+	 * If you meet some errors when calling these API, please try to run
 	 * {@link Misc#Expressions(boolean)} to turn off the expression as
 	 * Misc.Expressions(false);
 	 * and then call the string method
 	 * Files.xxx();
 	 * </pre>
-	 * 
+	 *
 	 * @see SAFSPlus.Files
 	 */
 	public static class Files extends SAFSPlus.Files{}
-	
+
 	/**
 	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/DDDriverStringCommandsIndex.htm">String keywords</a>, like Compare, GetMultiDelimitedField etc.<br>
 	 * <pre>
 	 * Convenience class for String handling Commands.
-	 * If you meet some errors when calling these API, please try to run 
+	 * If you meet some errors when calling these API, please try to run
 	 * {@link Misc#Expressions(boolean)} to turn off the expression as
 	 * Misc.Expressions(false);
 	 * and then call the string method
 	 * Strings.xxx();
 	 * </pre>
-	 * 
+	 *
 	 * @see SAFSPlus.Strings
 	 */
 	public static class Strings extends SAFSPlus.Strings{}
-	
+
 	/**
 	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/DDDriverCounterCommandsIndex.htm">DriverCounter keywords</a>, like StartTestSuite, StartCounter, LogCounterInfo etc.<br>
-	 * 
+	 *
 	 * @see SAFSPlus.Counters
 	 */
 	public static class Counters extends SAFSPlus.Counters{}
-	
+
 	/**
 	 * Click on any visible component without verification.<br>
 	 * This API will not guarantee that the click does happen, it simply clicks. If user wants<br>
@@ -1818,14 +1823,14 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * @param comp -- Component (from App Map) to Click
 	 * @param offset Point, the offset relative to the component to click
 	 * @return true if successfully executed, false otherwise.<p>
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * 1) boolean success = ClickUnverified(Map.Google.Apps);//Click at the center
 	 * 2) boolean success = ClickUnverified(Map.Google.Apps, new Point(20,20));//Click at the coordinate (20,20)
 	 * }
-	 * 
-	 * </pre>	 
+	 *
+	 * </pre>
 	 * @see #Click(org.safs.model.Component, String...)
 	 */
 	public static boolean ClickUnverified(org.safs.model.Component comp, Point offset){
@@ -1838,13 +1843,13 @@ public abstract class SeleniumPlus extends SAFSPlus{
 			IndependantLog.error(StringUtils.debugmsg(false)+" failed, due to "+StringUtils.debugmsg(e));
 			success = false;
 		}
-		
+
 		if(success) Logging.LogTestSuccess("ClickUnverified Succeeded on "+comp.getParentName()+":"+comp.getName()+" at "+offset);
 		else Logging.LogTestFailure("ClickUnverified Failed on "+comp.getParentName()+":"+comp.getName()+" at "+offset);
-		
+
 		return success;
 	}
-	
+
 	/**
 	 * Retrieve a reference to the Selenium WebDriver object used by the currently active (last) session.
 	 * @return The currently active (last) WebDriver object, or null if there isn't one.
@@ -1852,11 +1857,11 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	public static WebDriver WebDriver(){
 		return WDLibrary.getWebDriver();
 	}
-	
+
 	/**
 	 * Following explanations come from <a href="http://selenium.googlecode.com/git/docs/api/java/org/openqa/selenium/JavascriptExecutor.html#executeAsyncScript-java.lang.String-java.lang.Object...-">Selenium Java Doc</a>.<br>
-	 * Execute an asynchronous piece of JavaScript in the context of the currently selected frame or window. 
-	 * Unlike executing synchronous JavaScript, scripts executed with this method must explicitly signal they are finished by invoking the provided callback. 
+	 * Execute an asynchronous piece of JavaScript in the context of the currently selected frame or window.
+	 * Unlike executing synchronous JavaScript, scripts executed with this method must explicitly signal they are finished by invoking the provided callback.
 	 * This callback is always injected into the executed function as the last argument.<br>
 	 * <br>
 	 * The first argument passed to the callback function will be used as the script's result. This value will be handled as follows:<br>
@@ -1868,10 +1873,10 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * <li>For an array, return a List&lt;Object> with each object following the rules above. We support nested lists.
 	 * <li>Unless the value is null or there is no return value, in which null is returned
 	 * </ul>
-	 * 
-	 * The default timeout for a script to be executed is 0ms. In most cases, including the examples below, 
+	 *
+	 * The default timeout for a script to be executed is 0ms. In most cases, including the examples below,
 	 * one must set the script timeout WebDriver.Timeouts.setScriptTimeout(long, java.util.concurrent.TimeUnit) beforehand to a value sufficiently large enough.<br>
-	 * 
+	 *
 	 * @param script String, the script to execute
 	 * @param scriptParams optional, Script arguments must be a number, a boolean, a String, WebElement, or a List of any combination of the above.
 	 *                               An exception will be thrown if the arguments do not meet these criteria.
@@ -1882,22 +1887,22 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * ... more script's parameter<br>
 	 * </ul>
 	 * @return Object or null.
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
-	 * //Example #1: Performing a sleep in the browser under test. 
+	 * //Example #1: Performing a sleep in the browser under test.
 	 * long start = System.currentTimeMillis();
 	 * String script = "window.setTimeout(arguments[arguments.length - 1], 500);";
 	 * SeleniumPlus.executeAsyncScript(script);
 	 * System.out.println("Elapsed time: " + System.currentTimeMillis() - start);
-	 * 
+	 *
 	 * //Example #2: Synchronizing a test with an AJAX application:
 	 * Click(Map.Mail.ComposeButton);
 	 * String script = "var callback = arguments[arguments.length - 1];" +
 	 *                 "mailClient.getComposeWindowWidget().onload(callback);";
 	 * Object result = SeleniumPlus.executeAsyncScript(script);
 	 * Component.InputCharacters(Map.Mail.To, "bog@example.com");
-	 * 
+	 *
 	 * //Example #3: Injecting a XMLHttpRequest and waiting for the result:
 	 * String script =  "var callback = arguments[arguments.length - 1];" +
 	 *                  "var xhr = new XMLHttpRequest();" +
@@ -1910,7 +1915,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 *                  "xhr.send();";
 	 * Object result = SeleniumPlus.executeAsyncScript(script);
 	 * JsonObject json = new JsonParser().parse((String) response);
-	 * 
+	 *
 	 * }
 	 * @see org.safs.selenium.webdriver.lib.WDLibrary#executeAsyncScript(String, Object...)
 	 * @throws SeleniumPlusException
@@ -1918,13 +1923,13 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	public static Object executeAsyncScript(String script, Object... scriptParams) throws SeleniumPlusException{
 		return WDLibrary.executeAsyncScript(script, scriptParams);
 	}
-	
+
 	/**
 	 * Following explanations come from <a href="http://selenium.googlecode.com/git/docs/api/java/org/openqa/selenium/JavascriptExecutor.html#executeScript-java.lang.String-java.lang.Object...-">Selenium Java Doc</a>.<br>
-	 * Executes JavaScript synchronously in the context of the currently selected frame or window. 
+	 * Executes JavaScript synchronously in the context of the currently selected frame or window.
 	 * The script fragment provided will be executed as the body of an anonymous function.<br>
 	 * <br>
-	 * Within the script, use document to refer to the current document. 
+	 * Within the script, use document to refer to the current document.
 	 * Note that local variables will not be available once the script has finished executing, though global variables will persist.<br>
 	 * <br>
 	 * If the script has a return value (i.e. if the script contains a return statement), then the following steps will be taken:
@@ -1947,7 +1952,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * ... more script's parameter<br>
 	 * </ul>
 	 * @return Object or null.
-	 * @example	 
+	 * @example
 	 * <pre>
 	 * {@code
 	 * //set "your text" to innerHTML of component Map.Google.SignIn
@@ -1957,7 +1962,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * params.add(we);//arguments[0]
 	 * params.add("your text");//arguments[1]
 	 * SeleniumPlus.executeScript(script, params.toArray(new Object[0]));
-	 * 
+	 *
 	 * //get innerHTML of component Map.Google.SignIn
 	 * script = "return arguments[0].innerHTML;";
 	 * params.clear();
@@ -1970,8 +1975,8 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	public static Object executeScript(String script, Object... scriptParams) throws SeleniumPlusException{
 		return WDLibrary.executeScript(script, scriptParams);
 	}
-	
-	
+
+
 	/**
 	 * <pre>
 	 * This class provides some static methods to set Selenium WebDriver's timeout thread-safely.
@@ -1983,12 +1988,12 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 */
 	public static class WDTimeOut{
 		private static final long TIMEOUT_WAIT_FOREVER = -1;
-		
+
 		private static final int TYPE_INVALID = -1;
 		private static final int TYPE_IMPLICITLY_WAIT = 0;
 		private static final int TYPE_ASYNCHRONOUS_JAVASCRIPT_WAIT = 1;
 		private static final int TYPE_PAGELOAD_WAIT = 2;
-		
+
 		private static final String TYPE_INVALID_NAME = "invalid type";
 		private static final String TYPE_IMPLICITLY_WAIT_NAME = "Implicit Wait";
 		private static final String TYPE_ASYNCHRONOUS_JAVASCRIPT_WAIT_NAME = "Asynchronous JavaScript Wait";
@@ -2001,14 +2006,14 @@ public abstract class SeleniumPlus extends SAFSPlus{
 		 */
 		private static Timeouts aTimeout = getWebDriverTimeouts();
 		private static Timeouts getWebDriverTimeouts(){return SeleniumPlus.WebDriver().manage().timeouts();}
-		
-		
+
+
 		/**
-		 * Set the Web Driver's ImplicitlyWait timeout, the amount of time the driver should wait 
+		 * Set the Web Driver's ImplicitlyWait timeout, the amount of time the driver should wait
 		 * when searching for an element if it is not immediately present.<br>
-		 * <b>Note:</b>This method is <b>not thread-safe</b>. If multiple threads call this method, 
+		 * <b>Note:</b>This method is <b>not thread-safe</b>. If multiple threads call this method,
 		 * the change of 'implicitlyWait' in one thread will affect the other thread.<br>
-		 * 
+		 *
 		 * @param timeout long, the timeout to set
 		 * @param unit TimeUnit, the timeout's unit, seconds or milliseconds etc.
 		 * @return Timeouts
@@ -2026,11 +2031,11 @@ public abstract class SeleniumPlus extends SAFSPlus{
 			return timeout;
 		}
 		/**
-		 * Set the Web Driver's pageLoad timeout, the amount of time to wait for a page load to complete 
+		 * Set the Web Driver's pageLoad timeout, the amount of time to wait for a page load to complete
 		 * before throwing an error. If the timeout is negative, page loads can be indefinite.<br>
-		 * <b>Note:</b>This method is <b>not thread-safe</b>. If multiple threads call this method, 
+		 * <b>Note:</b>This method is <b>not thread-safe</b>. If multiple threads call this method,
 		 * the change of 'implicitlyWait' in one thread will affect the other thread.<br>
-		 * 
+		 *
 		 * @param timeout long, the timeout to set
 		 * @param unit TimeUnit, the timeout's unit, seconds or milliseconds etc.
 		 * @return Timeouts
@@ -2048,12 +2053,12 @@ public abstract class SeleniumPlus extends SAFSPlus{
 			return timeout;
 		}
 		/**
-		 * Set the Web Driver's Script timeout, the amount of time to wait for an asynchronous 
-		 * script to finish execution before throwing an error. If the timeout is negative, 
+		 * Set the Web Driver's Script timeout, the amount of time to wait for an asynchronous
+		 * script to finish execution before throwing an error. If the timeout is negative,
 		 * then the script will be allowed to run indefinitely.<br>
-		 * <b>Note:</b>This method is <b>not thread-safe</b>. If multiple threads call this method, 
+		 * <b>Note:</b>This method is <b>not thread-safe</b>. If multiple threads call this method,
 		 * the change of 'implicitlyWait' in one thread will affect the other thread.<br>
-		 * 
+		 *
 		 * @param timeout long, the timeout to set
 		 * @param unit TimeUnit, the timeout's unit, seconds or milliseconds etc.
 		 * @return Timeouts
@@ -2070,11 +2075,11 @@ public abstract class SeleniumPlus extends SAFSPlus{
 			}
 			return timeout;
 		}
-		
+
 		/**
 		 * <pre>
 		 * Set the 'Web Driver's ImplicitlyWait timeout' and lock the 'timeout setting'.
-		 * This method is <b>thread-safe</b>. If one thread has called this method, 
+		 * This method is <b>thread-safe</b>. If one thread has called this method,
 		 * it will set a lock and the other threads will have to wait until the first thread
 		 * unlock by calling {@link #resetImplicitlyWait(long, TimeUnit)}.
 		 * The lock range is within the caller method.
@@ -2130,7 +2135,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 		/**
 		 * <pre>
 		 * Set the 'Web Driver's JavaScript Execution timeout' and lock the 'timeout setting'.
-		 * This method is <b>thread-safe</b>. If one thread has called this method, 
+		 * This method is <b>thread-safe</b>. If one thread has called this method,
 		 * it will set a lock and the other threads will have to wait until the first thread
 		 * unlock by calling {@link #resetScriptTimeout(long, TimeUnit)}.
 		 * The lock range is within the caller method.
@@ -2183,11 +2188,11 @@ public abstract class SeleniumPlus extends SAFSPlus{
 			String caller = StringUtils.getCallerID(true);
 			return AnsynScriptTimeOut.instance().resetTimeout(caller, timeout, unit);
 		}
-		
+
 		/**
 		 * <pre>
 		 * Set the 'Web Driver's PageLoad timeout' and lock the 'timeout setting'.
-		 * This method is <b>thread-safe</b>. If one thread has called this method, 
+		 * This method is <b>thread-safe</b>. If one thread has called this method,
 		 * it will set a lock and the other threads will have to wait until the first thread
 		 * unlock by calling {@link #resetPageLoadTimeout(long, TimeUnit)}.
 		 * The lock range is within the caller method.
@@ -2229,7 +2234,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 			String caller = StringUtils.getCallerID(true);
 			return PageLoadTimeOut.instance().setTimeout(caller, timeout, unit, waitLockTimeout);
 		}
-		
+
 		/**
 		 * Reset the 'Web Driver's PageLoad timeout' and unlock the 'timeout setting'.<br>
 		 * @param timeout long, the timeout to set
@@ -2254,12 +2259,12 @@ public abstract class SeleniumPlus extends SAFSPlus{
 			default: return TYPE_INVALID_NAME;
 			}
 		}
-		
+
 		/**
 		 * <pre>
 		 * There is a 'timeout' property, and it will be shared by multiple threads. We want it to be
-		 * thread-safe, which means that if one thread possesses a lock and sets a value to 'timeout', 
-		 * the other threads will not be able to set a value to 'timeout' until the first thread finishes 
+		 * thread-safe, which means that if one thread possesses a lock and sets a value to 'timeout',
+		 * the other threads will not be able to set a value to 'timeout' until the first thread finishes
 		 * using the 'timeout' and explicitly release the lock.
 		 * </pre>
 		 */
@@ -2267,7 +2272,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 			/**
 			 * Wait for a lock to set the property 'timeout'.
 			 * @param lockID String, the lock's ID, which defines the range that 'timeout' property can be shared.
-			 *                       For example, 
+			 *                       For example,
 			 *                       if the id is provided as Thread.currentThread().getId(), then 'timeout'
 			 *                       property can be shared in within current thread no matter which method the current
 			 *                       thread is executing;
@@ -2347,11 +2352,11 @@ public abstract class SeleniumPlus extends SAFSPlus{
 			private int timeoutType = TYPE_INVALID;
 
 			private ThreadSafeTimeOut(){}
-						
+
 			/**
 			 * <pre>
 			 * Set the 'Web Driver's timeout' and lock the 'timeout setting'.
-			 * This method is thread-safe. If one thread has called this method, 
+			 * This method is thread-safe. If one thread has called this method,
 			 * it will set a lock and the other threads will have to wait until the first thread
 			 * unlock by calling {@link #resetTimeout(String, long, TimeUnit, int)}.
 			 * <font color='red'>NOTE: User must call {@link #resetTimeout(String, long, TimeUnit, int)} after calling this method.</font>
@@ -2384,7 +2389,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 						//for others, they have to wait.
 						if(firstloop) {
 							firstloop = false;
-							IndependantLog.info("Se+ waiting for owner '"+ owner +"' to release the '"+ name(type)+"' lock object...");						
+							IndependantLog.info("Se+ waiting for owner '"+ owner +"' to release the '"+ name(type)+"' lock object...");
 						}
 						if(waitLockTimeout==TIMEOUT_WAIT_FOREVER) wait();
 						else{
@@ -2421,7 +2426,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 				} catch (Throwable th) {
 					IndependantLog.error("Fail to set timeout for '"+name(type)+"' by '"+ owner +"' of WebDriver.", th);
 					try{
-						//Reset the original timeout value						
+						//Reset the original timeout value
 						int retry = 0;
 						while(++retry < 3 ){
 							try{
@@ -2464,7 +2469,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 					locked = false;
 					owner = null;
 					timeoutType = TYPE_INVALID;
-					
+
 					try{
 						int retry = 0;
 						while(++retry < 3){
@@ -2504,13 +2509,13 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	/**
 	 * Internal framework use only.
 	 * Main inherited by subclasses is required.
-	 * Subclasses should not override this main method.  
+	 * Subclasses should not override this main method.
 	 * <p>
-	 * Any subclass specific initialization should be done in the default no-arg constructor 
-	 * for the subclass.  That Constructor will be instantiated and invoked automatically by 
+	 * Any subclass specific initialization should be done in the default no-arg constructor
+	 * for the subclass.  That Constructor will be instantiated and invoked automatically by
 	 * this main startup method.
 	 * <p>
-	 * By default will seek an AppMap.order file.  However, the user can specify an alternate 
+	 * By default will seek an AppMap.order file.  However, the user can specify an alternate
 	 * AppMap order file by using the following JVM argument:
 	 * <p>
 	 * <ul>Examples:
@@ -2521,7 +2526,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * <li>-Dtestdesigner.appmap.order=AppMap_mac.order
 	 * <li>etc...
 	 * </ul>
-	 * <p>By default, the Browser Type that will be used is FireFox.  The user can specify a 
+	 * <p>By default, the Browser Type that will be used is FireFox.  The user can specify a
 	 * different default browser by using the following JVM argument {@link SelectBrowser#SYSTEM_PROPERTY_BROWSER_NAME}:
 	 * <p>
 	 * <ul>
@@ -2530,8 +2535,8 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * -DBROWSER=firefox<br>
 	 * etc...<br>
 	 * </ul>
-	 * <p>By default, the RemoteServer that will be used is at host and port:  localhost:4444 . 
-	 * The user can specify a different host and/or port (grid) by using the JVM arguments 
+	 * <p>By default, the RemoteServer that will be used is at host and port:  localhost:4444 .
+	 * The user can specify a different host and/or port (grid) by using the JVM arguments
 	 * {@link SelectBrowser#SYSTEM_PROPERTY_SELENIUM_HOST} and {@link SelectBrowser#SYSTEM_PROPERTY_SELENIUM_PORT}:
 	 * <p>
 	 * <ul>
@@ -2539,14 +2544,14 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * -Dselenium.host=L12345.company.com<br>
 	 * -Dselenium.port=5555<br>
 	 * </ul>
-	 * <p>By default, a Debug Log is usually enabled and named in the test configuration (INI) file.   
+	 * <p>By default, a Debug Log is usually enabled and named in the test configuration (INI) file.
 	 * The user can specify or override the name of this debug log file by using the following JVM argument:
 	 * <p>
 	 * <ul>
 	 * -Dtestdesigner.debuglogname=mydebuglog.txt
 	 * </ul>
 	 * <p>
-	 * @param args -- 
+	 * @param args --
 	 * <p>
 	 * -safsvar:name=value
 	 * <p><ul>
