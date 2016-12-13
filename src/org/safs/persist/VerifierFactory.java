@@ -35,14 +35,14 @@ public class VerifierFactory {
 
 		if(PersistenceType.FILE.equals(persistenceType)){
 			if(FileType.JSON.equals(fileType)){
-				//					verifier = new VerifierToJSONFile(runtime, object.toString());
+				verifier = new VerifierToJSONFile(runtime, object.toString());
 			}else if(FileType.XML.equals(fileType)){
 				verifier = new VerifierToXMLFile(runtime, object.toString());
 			}else if(FileType.PROPERTIES.equals(fileType)){
 				verifier = new VerifierToPropertiesFile(runtime, object.toString());
 			}
 		}else if(PersistenceType.VARIABLE.equals(persistenceType)){
-			//				verifier = new VerifierToVariable(runtime, object.toString());
+//						verifier = new VerifierToVariable(runtime, object.toString());
 		}
 
 		if(verifier==null){

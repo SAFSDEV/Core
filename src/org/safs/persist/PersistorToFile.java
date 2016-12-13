@@ -93,6 +93,19 @@ public abstract class PersistorToFile extends AbstractRuntimeDataPersistor{
 	}
 
 	/**
+	 * When writing a string to a file, some special characters MUST be escaped, such as
+	 * new line <b>"\n", "\r", "\r\n"</b>, or double quote <b>"</b>, or <b>&lt;?XML>...&lt;/XML></b> etc.<br/>
+	 * What characters to escape and how to escape, these depend on the format of the persistence file, and the
+	 * parser of the file. Subclass should override this method.<br/>
+	 *
+	 * @param value String, the value to escape.
+	 * @return String, the escaped string
+	 */
+	protected String escape(String value){
+		return value;
+	}
+
+	/**
 	 * If they have the same filename, then we consider them equivalent
 	 */
 	@Override

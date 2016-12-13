@@ -25,9 +25,11 @@ import org.safs.tools.RuntimeDataInterface;
  * <pre>
  * &lt;Response&gt;
  *   &lt;StatusCode&gt;200&lt;/StatusCode&gt;
- *   &lt;Headers&gt;
- *     &lt;ContentType&gt;text/xml&lt;/ContentType&gt;
- *   &lt;/Headers&gt;
+ *   &lt;Headers>{Date=Tue, 13 Dec 2016 03:29:27 GMT, Content-Length=4574, Connection=keep-alive, Content-Type=application/xml}&lt;/Headers&gt;
+ *   &lt;EntityBody&gt;<b>&lt;![CDATA[</b><font color="red">&lt;?xml</font> version="1.0"?&gt;&lt;CUSTOMERList xmlns:xlink="http://www.w3.org/1999/xlink"&gt;
+ *     &lt;CUSTOMER xlink:href="http://www.thomas-bayer.com/sqlrest/CUSTOMER/0/"&gt;0&lt;/CUSTOMER&gt;
+ *     &lt;CUSTOMER xlink:href="http://www.thomas-bayer.com/sqlrest/CUSTOMER/49/"&gt;49&lt;/CUSTOMER&gt;
+ *     &lt;/CUSTOMERList&gt;<b>]]&gt;</b>&lt;/EntityBody&gt;
  *   &lt;Request&gt;
  *     &lt;Method&gt;GET&lt;/Method&gt;
  *     &lt;Headers&gt;
@@ -36,6 +38,10 @@ import org.safs.tools.RuntimeDataInterface;
  *   &lt;/Request&gt;
  * &lt;/Response&gt;
  * </pre>
+ *
+ * NOTE: Be careful with the value starting with <font color="red">&lt;?xml</font>, which should be wrapped
+ * as &lt;![CDATA[...]]>, as showed in the example above.
+ *
  * @author sbjlwa
  *
  */
@@ -72,7 +78,7 @@ public class PersistorToXMLFile extends PersistorToFile{
 					IndependantLog.warn(pne.getMessage());
 				}
 			}else{
-				writer.write("<"+key+">"+wrapInCDATA(value)+"</"+key+">");
+				writer.write("<"+key+">"+escape(value.toString())+"</"+key+">");
 			}
 			writer.write("\n");
 		}
@@ -82,11 +88,12 @@ public class PersistorToXMLFile extends PersistorToFile{
 
 	/**
 	 * Wrap the string in "<![CDATA[]]>" if it starts with "<?XML".
-	 * @param value Object, the object to write to an XML file.
-	 * @return String, the wrapped String.
+	 *
+	 * @param value String, the value to escape
+	 * @return String, the escaped string
 	 */
-	protected String wrapInCDATA(Object value){
-		String result = value.toString();
+	protected String escape(String value){
+		String result = value;
 
 		if(result.toUpperCase().startsWith(XMLConstants.XML_START)){
 			result = XMLConstants.CDATA_START+result+XMLConstants.CDATA_END;
