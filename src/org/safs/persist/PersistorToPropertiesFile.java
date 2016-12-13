@@ -38,8 +38,8 @@ import org.safs.tools.RuntimeDataInterface;
  * Accept:application/octet-stream
  * </pre>
  *
- * <b>NOTE: Be careful with the value occupying multiple lines in the properties file, which should be escaped
- * by characters <font color="red">\</font> and <font color="red">\n</font>, as showed in the example above.
+ * NOTE: Be careful with the value occupying multiple lines in the properties file, which should be escaped
+ * as characters <font color="red">\</font> and <font color="red">\n</font>, as showed in the example above.
  *
  * @author Lei Wang
  *
@@ -67,23 +67,18 @@ public class PersistorToPropertiesFile extends PersistorToFile{
 		Object value = null;
 		for(String key:keys){
 			value = actualContents.get(key);
-			writer.write(key+" : "+ escapeNewLine(value.toString()) +"\n");
+			writer.write(key+" : "+ escape(value.toString()) +"\n");
 		}
 	}
 
 	/**
-	 * <pre>
-	 * Response.EntityBody : &lt;?xml version="1.0"?&gt;&lt;CUSTOMERList xmlns:xlink="http://www.w3.org/1999/xlink"&gt;\
-	 * \n    &lt;CUSTOMER xlink:href="http://www.thomas-bayer.com/sqlrest/CUSTOMER/0/"&gt;0&lt;/CUSTOMER&gt;\
-	 * \n    &lt;CUSTOMER xlink:href="http://www.thomas-bayer.com/sqlrest/CUSTOMER/1/"&gt;1&lt;/CUSTOMER&gt;\
-	 * \n&lt;/CUSTOMERList&gt;
-	 * </pre>
-	 * Be careful with the value occupying multiple lines in the properties file, which should be escaped
-	 * by characters <font color="red">\</font> and <font color="red">\n</font>, as showed in the example above.
-	 * @param value String, the value to escape if it contains "new line"
-	 * @return String
+	 * Escape special characters such as value occupying multiple lines in the properties file,
+	 * which should be escaped as characters <font color="red">\</font> and <font color="red">\n</font>.<br/>
+	 *
+	 * @param value String, the value to escape
+	 * @return String, the escaped string
 	 */
-	private String escapeNewLine(String value){
+	protected String escape(String value){
 		Pattern newLine = Pattern.compile("(\\n|\\r|\\r\\n)");
 		Matcher m = newLine.matcher(value);
 		StringBuffer sb = new StringBuffer();

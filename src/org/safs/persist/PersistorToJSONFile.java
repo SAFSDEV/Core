@@ -13,6 +13,8 @@ package org.safs.persist;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.safs.IndependantLog;
 import org.safs.SAFSException;
@@ -26,16 +28,19 @@ import org.safs.tools.RuntimeDataInterface;
  * {
  * "Response": {
  *   "StatusCode": "200",
- * 	 "Headers": {
- * 	    "ContentType": "text/xml"
- *   },
+ *   "Headers" : "{Date=Tue, 13 Dec 2016 03:32:13 GMT, Content-Length=4574, Content-Type=application/xml}",
+ *   "EntityBody" : "&lt;?xml version=\"1.0\"?>&lt;CUSTOMERList xmlns:xlink=\"http://www.w3.org/1999/xlink\"&gt;\n    &lt;CUSTOMER xlink:href=\"http://www.thomas-bayer.com/sqlrest/CUSTOMER/0/\"&gt;0&lt;/CUSTOMER&gt;    \n&lt;/CUSTOMERList&gt;",
  *   "Request": {
- * 	    "Method": "GET",
- * 	    "Headers": "{Date=Tue, 06 Dec 2016 03:08:12 GMT, Content-Length=4574}"
+ *      "Method": "GET",
+ *      "Headers": "{Date=Tue, 06 Dec 2016 03:08:12 GMT, Content-Length=4574}"
  *   }
  *  }
  * }
  * </pre>
+ *
+ * NOTE: Be careful with the value occupying multiple lines, which should be escaped
+ * as characters <font color="red">\n</font>; the double quote " should be escaped as
+ * <font color="red">\"</font>. The example is shown as above.
  *
  * @author Lei Wang
  *
@@ -66,6 +71,7 @@ public class PersistorToJSONFile extends PersistorToFile{
 		Map<String, Object> contents = persistable.getContents();
 		String className = persistable.getClass().getSimpleName();
 		Object value = null;
+		String escapedValue = null;
 
 		writer.write(StringUtils.quote(className)+" : {\n");
 
@@ -82,7 +88,8 @@ public class PersistorToJSONFile extends PersistorToFile{
 					IndependantLog.warn(pne.getMessage());
 				}
 			}else{
-				writer.write(StringUtils.quote(key)+" : "+StringUtils.quote(value.toString()));
+				escapedValue = escape(value.toString());
+				writer.write(StringUtils.quote(key)+" : "+StringUtils.quote(escapedValue));
 			}
 			if((i+1)<keys.length){
 				writer.write(",\n");
@@ -92,5 +99,40 @@ public class PersistorToJSONFile extends PersistorToFile{
 		}
 
 		writer.write("}");
+	}
+
+	/**
+	 * Escape special characters such as value occupying multiple lines, which should be escaped
+	 * as characters <font color="red">\n</font>; the double quote should be escaped as
+	 * <font color="red">\"</font>.<br/>
+	 *
+	 * @param value String, the value to escape
+	 * @return String, the escaped string
+	 */
+	protected String escape(String value){
+		String result = null;
+		//escape new line
+		Pattern pattern = Pattern.compile("(\\n|\\r|\\r\\n)");
+		Matcher m = pattern.matcher(value);
+		StringBuffer sb = new StringBuffer();
+		String nl = null;
+		String escapedNL = null;
+		while(m.find()){
+			nl = m.group(1);
+			if("\n".equals(nl)){
+				escapedNL = "\\\\n";
+			}else if("\r".equals(nl)){
+				escapedNL = "\\\\r";
+			}else if("\r\n".equals(nl)){
+				escapedNL = "\\\\r\\\\n";
+			}
+			m.appendReplacement(sb, escapedNL);
+		}
+		m.appendTail(sb);
+
+		//escape double quote, replace " by \"
+		result = sb.toString().replace("\"", "\\\"");
+
+		return result;
 	}
 }
