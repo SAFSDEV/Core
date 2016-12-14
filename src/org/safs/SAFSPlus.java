@@ -5168,9 +5168,40 @@ public abstract class SAFSPlus {
 		public static boolean EndServiceSession(org.safs.model.Component comp,String... params){
 			return action(comp, TIDRestFunctions.RESTENDSERVICESESSION_KEYWORD, params);
 		}
+
 		public static boolean GetBinary(org.safs.model.Component comp,String... params){
 			return action(comp, TIDRestFunctions.RESTGETBINARY_KEYWORD, params);
 		}
+		public static boolean GetCSS(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTGETCSS_KEYWORD, params);
+		}
+		public static boolean GetCustom(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTGETCUSTOM_KEYWORD, params);
+		}
+		public static boolean GetHtml(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTGETHTML_KEYWORD, params);
+		}
+		public static boolean GetImage(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTGETIMAGE_KEYWORD, params);
+		}
+		public static boolean GetJson(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTGETJSON_KEYWORD, params);
+		}
+		public static boolean GetScript(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTGETSCRIPT_KEYWORD, params);
+		}
+		public static boolean GetText(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTGETTEXT_KEYWORD, params);
+		}
+		public static boolean GetXML(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTGETXML_KEYWORD, params);
+		}
+
+
+		public static boolean HeaderXML(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTHEADXML_KEYWORD, params);
+		}
+
 		public static boolean Request(org.safs.model.Component comp,String... params){
 			return action(comp, TIDRestFunctions.RESTREQUEST_KEYWORD, params);
 		}
