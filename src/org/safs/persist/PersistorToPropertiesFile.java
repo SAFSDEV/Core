@@ -13,7 +13,6 @@ package org.safs.persist;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +61,6 @@ public class PersistorToPropertiesFile extends PersistorToFile{
 		Map<String, Object> actualContents = persistable.getContents(null, ignoredFields, PERSIST_CONTAINER);
 
 		List<String> keys = new ArrayList<String>(actualContents.keySet());
-		Collections.sort(keys);
 
 		Object value = null;
 		for(String key:keys){

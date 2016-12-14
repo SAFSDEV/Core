@@ -13,6 +13,7 @@ package org.safs.rest.service;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.safs.Printable;
 import org.safs.persist.PersistableDefault;
 
 /**
@@ -167,45 +168,13 @@ public class Response extends PersistableDefault{
 	 * @param _request the _request to set
 	 */
 	public void set_request(Request _request) {
+		if(_request instanceof Printable){
+			((Printable) _request).setTabulation(this.getTabulation()+1);
+		}
+		if(_request!=null){
+			_request.setParent(this);
+		}
 		this._request = _request;
-		this._request.setParent(this);
-	}
-
-	/**
-	 * @return String, the response information returned from rest service.
-	 */
-	public String getResponseInfo(){
-		return  "ID: "+ID+ "\n"+
-				get_status_code() +":"+ get_status_line() +"\n"+
-				get_reason_phrase() +"\n"+
-				get_headers() +"\n"+
-				"Message Body:\n"+
-				get_message_body()+"\n"+
-				"Entity Length: "+ get_entity_length() +"\n"+
-				"Entity Body:\n"+
-				get_entity_body()
-				;
-	}
-
-	/**
-	 * @return String, the original request information.
-	 */
-	public String getRequestInfo(){
-		Request r = get_request();
-		if(r==null) return null;
-		return r.get_request_method() +" : "+ r.get_request_uri() +"\n"+
-			   r.get_headers() +"\n"+
-			   "Message Body:\n"+
-			   r.get_message_body()+"\n";
-	}
-
-	/**
-	 * This is the one to call for ALL information AFTER the REQUEST has been returned in the RESPONSE
-	 * @return String, the original request information and the response information returned from rest service.
-	 */
-	public String toString(){
-		return "\n========\nRequest: " + getRequestInfo() +"\n"+
-				"=========\nResponse: "+ getResponseInfo();
 	}
 
 	@Override
