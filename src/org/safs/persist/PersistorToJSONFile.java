@@ -12,13 +12,10 @@
 package org.safs.persist;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.safs.IndependantLog;
 import org.safs.SAFSException;
-import org.safs.SAFSPersistableNotEnableException;
 import org.safs.StringUtils;
 import org.safs.tools.RuntimeDataInterface;
 
@@ -45,7 +42,7 @@ import org.safs.tools.RuntimeDataInterface;
  * @author Lei Wang
  *
  */
-public class PersistorToJSONFile extends PersistorToFile{
+public class PersistorToJSONFile extends PersistorToHierarchialFile{
 
 	/**
 	 * @param runtime
@@ -56,49 +53,33 @@ public class PersistorToJSONFile extends PersistorToFile{
 	}
 
 	@Override
-	public void writeHeader(Persistable persistable) throws SAFSException, IOException {
+	protected void writeHeader(Persistable persistable) throws SAFSException, IOException {
 		writer.write("{\n");
 	}
 	@Override
-	public void writeTailer(Persistable persistable) throws SAFSException, IOException {
+	protected void writeTailer(Persistable persistable) throws SAFSException, IOException {
 		writer.write("}");
 	}
 
-	public void write(Persistable persistable) throws SAFSException, IOException {
-
-		validate(persistable);
-
-		Map<String, Object> contents = persistable.getContents();
-		String className = persistable.getClass().getSimpleName();
-		Object value = null;
-		String escapedValue = null;
-
-		writer.write(StringUtils.quote(className)+" : {\n");
-
-		String[] keys = contents.keySet().toArray(new String[0]);
-		String key = null;
-		for(int i=0;i<keys.length;i++){
-			key = keys[i];
-			value = contents.get(key);
-			if(value instanceof Persistable){
-				try{
-					//We should not break if some child is not persistable
-					write((Persistable) value);
-				}catch(SAFSPersistableNotEnableException pne){
-					IndependantLog.warn(pne.getMessage());
-				}
-			}else{
-				escapedValue = escape(value.toString());
-				writer.write(StringUtils.quote(key)+" : "+StringUtils.quote(escapedValue));
-			}
-			if((i+1)<keys.length){
-				writer.write(",\n");
-			}else{
-				writer.write("\n");
-			}
+	@Override
+	protected void containerBegin(String tagName) throws IOException{
+		writer.write(StringUtils.quote(tagName)+" : {\n");
+	}
+	@Override
+	protected void childBegin(String key, String value) throws IOException{
+		writer.write(StringUtils.quote(key)+" : "+StringUtils.quote(value));
+	}
+	@Override
+	protected void childEnd(boolean lastTag) throws IOException{
+		if(lastTag){
+			writer.write("\n");
+		}else{
+			writer.write(",\n");
 		}
-
-		writer.write("}");
+	}
+	@Override
+	protected void containerEnd(String tagName) throws IOException{
+		writer.write("}\n");
 	}
 
 	/**

@@ -12,12 +12,8 @@
 package org.safs.persist;
 
 import java.io.IOException;
-import java.util.Map;
 
 import org.safs.Constants.XMLConstants;
-import org.safs.IndependantLog;
-import org.safs.SAFSException;
-import org.safs.SAFSPersistableNotEnableException;
 import org.safs.tools.RuntimeDataInterface;
 
 /**
@@ -45,7 +41,7 @@ import org.safs.tools.RuntimeDataInterface;
  * @author Lei Wang
  *
  */
-public class PersistorToXMLFile extends PersistorToFile{
+public class PersistorToXMLFile extends PersistorToHierarchialFile{
 
 	/**
 	 * @param runtime
@@ -56,34 +52,16 @@ public class PersistorToXMLFile extends PersistorToFile{
 	}
 
 	@Override
-	public void write(Persistable persistable) throws SAFSException, IOException{
-		validate(persistable);
-
-		Map<String, Object> contents = persistable.getContents();
-		String className = persistable.getClass().getSimpleName();
-		Object value = null;
-
-		writer.write("<"+className+">\n");
-
-		String[] keys = contents.keySet().toArray(new String[0]);
-		String key = null;
-		for(int i=0;i<keys.length;i++){
-			key = keys[i];
-			value = contents.get(key);
-			if(value instanceof Persistable){
-				try{
-					//We should not break if some child is not persistable
-					write((Persistable) value);
-				}catch(SAFSPersistableNotEnableException pne){
-					IndependantLog.warn(pne.getMessage());
-				}
-			}else{
-				writer.write("<"+key+">"+escape(value.toString())+"</"+key+">");
-			}
-			writer.write("\n");
-		}
-
-		writer.write("</"+className+">\n");
+	protected void containerBegin(String tagName) throws IOException{
+		writer.write("<"+tagName+">\n");
+	}
+	@Override
+	protected void childBegin(String key, String value) throws IOException{
+		writer.write("<"+key+">"+value+"</"+key+">");
+	}
+	@Override
+	protected void containerEnd(String tagName) throws IOException{
+		writer.write("</"+tagName+">\n");
 	}
 
 	/**
