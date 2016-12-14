@@ -183,7 +183,7 @@ public class Response extends PersistableDefault{
 				get_message_body()+"\n"+
 				"Entity Length: "+ get_entity_length() +"\n"+
 				"Entity Body:\n"+
-				get_entity_body().toString()
+				get_entity_body()
 				;
 	}
 
