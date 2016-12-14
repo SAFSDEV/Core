@@ -35,7 +35,7 @@ public abstract class PersistorToFile extends AbstractRuntimeDataPersistor{
 
 	protected Writer writer = null;
 
-	public PersistorToFile(RuntimeDataInterface runtime, String filename){
+	protected PersistorToFile(RuntimeDataInterface runtime, String filename){
 		super(runtime);
 		this.filename = filename;
 	}
@@ -65,9 +65,29 @@ public abstract class PersistorToFile extends AbstractRuntimeDataPersistor{
 		}
 	}
 
-	public void writeHeader(Persistable persistable)  throws SAFSException, IOException{}
-	public abstract void write(Persistable persistable)  throws SAFSException, IOException;
-	public void writeTailer(Persistable persistable)  throws SAFSException, IOException{}
+	/** This is called before {@link #write(Persistable)}. */
+	protected void writeHeader(Persistable persistable)  throws SAFSException, IOException{}
+	/**
+	 * Write the Persistable object into a persistent material.<br/>
+	 * {@link #writeHeader(Persistable)} is called before<br/>
+	 * {@link #writeTailer(Persistable)} is called after<br/>
+	 */
+	protected abstract void write(Persistable persistable)  throws SAFSException, IOException;
+	/** This is called after {@link #write(Persistable)}. */
+	protected void writeTailer(Persistable persistable)  throws SAFSException, IOException{}
+
+	/**
+	 * When writing a string to a file, some special characters MUST be escaped, such as
+	 * new line <b>"\n", "\r", "\r\n"</b>, or double quote <b>"</b>, or <b>&lt;?XML>...&lt;/XML></b> etc.<br/>
+	 * What characters to escape and how to escape, these depend on the format of the persistence file, and the
+	 * parser of the file. Subclass should override this method.<br/>
+	 *
+	 * @param value String, the value to escape.
+	 * @return String, the escaped string
+	 */
+	protected String escape(String value){
+		return value;
+	}
 
 	/**
 	 * Try to delete a persistence file in the test/bench folder.
@@ -90,19 +110,6 @@ public abstract class PersistorToFile extends AbstractRuntimeDataPersistor{
 
 	public String getPersistenceName(){
 		return filename;
-	}
-
-	/**
-	 * When writing a string to a file, some special characters MUST be escaped, such as
-	 * new line <b>"\n", "\r", "\r\n"</b>, or double quote <b>"</b>, or <b>&lt;?XML>...&lt;/XML></b> etc.<br/>
-	 * What characters to escape and how to escape, these depend on the format of the persistence file, and the
-	 * parser of the file. Subclass should override this method.<br/>
-	 *
-	 * @param value String, the value to escape.
-	 * @return String, the escaped string
-	 */
-	protected String escape(String value){
-		return value;
 	}
 
 	/**
