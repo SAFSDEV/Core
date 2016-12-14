@@ -12,22 +12,27 @@
 package org.safs.persist;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.safs.IndependantLog;
+import org.safs.Printable;
 import org.safs.StringUtils;
 import org.safs.Utils;
 
 /**
  * @author sbjlwa
  */
-public abstract class PersistableDefault implements Persistable{
+public abstract class PersistableDefault implements Persistable, Printable{
 	protected static final String UNKNOWN_VALUE = "UNKNOWN";
 
 	protected boolean enabled = true;
 	protected Persistable parent = null;
+
+	protected int tabulation = 0;
 
 	/**
 	 * This method use Java reflection to get the value of the field defined in {@link #getPersitableFields()}.
@@ -37,7 +42,7 @@ public abstract class PersistableDefault implements Persistable{
 		String debugmsg = StringUtils.debugmsg(false);
 
 		Map<String, String> fieldToPersistKeyMap= getPersitableFields();
-		Map<String, Object> contents = new HashMap<String, Object>();
+		Map<String, Object> contents = new TreeMap<String, Object>();
 
 		Class<?> clazz = getClass();
 
@@ -107,7 +112,7 @@ public abstract class PersistableDefault implements Persistable{
 			return null;
 		}
 
-		actualContents = new HashMap<String, Object>();
+		actualContents = new TreeMap<String, Object>();
 
 		if(includeContainer){
 			//The Persistable object itself doesn't have a value, and it contains children
@@ -139,4 +144,46 @@ public abstract class PersistableDefault implements Persistable{
 		return actualContents;
 	}
 
+	public int getTabulation(){
+		return tabulation;
+	}
+	public void setTabulation(int tabulation){
+		this.tabulation = tabulation;
+	}
+
+	private String getTabs(){
+		StringBuilder sb = new StringBuilder();
+		for(int i=0;i<getTabulation();i++){
+			sb.append("\t");
+		}
+		return sb.toString();
+	}
+
+	public String toString(){
+		String clazzname = getClass().getSimpleName();
+		Map<String, Object> contents = getContents();
+		StringBuilder sb = new StringBuilder();
+
+		List<String> complicatedChildren = new ArrayList<String>();
+		Object value = null;
+
+		sb.append("\n"+getTabs()+"============== "+clazzname+" BEGIN ================\n");
+		for(String key:contents.keySet()){
+			value = contents.get(key);
+			if(value instanceof PersistableDefault){
+				//complicatedChildren will hold the key for PersistableDefault object to print out later
+				complicatedChildren.add(key);
+			}else{
+				sb.append(getTabs()+key+" : "+value+"\n");
+			}
+		}
+
+		//print out PersistableDefault object
+		for(String key:complicatedChildren){
+			sb.append(getTabs()+key+" : "+contents.get(key)+"\n");
+		}
+		sb.append(getTabs()+"============== "+clazzname+" END ================\n");
+
+		return sb.toString();
+	}
 }

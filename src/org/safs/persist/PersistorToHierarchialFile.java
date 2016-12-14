@@ -12,7 +12,6 @@
 package org.safs.persist;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Map;
 
 import org.safs.IndependantLog;
@@ -56,7 +55,6 @@ public class PersistorToHierarchialFile extends PersistorToFile{
 		containerBegin(className);
 
 		String[] keys = contents.keySet().toArray(new String[0]);
-		Arrays.sort(keys);
 		String key = null;
 		boolean lastChild = false;
 		for(int i=0;i<keys.length;i++){

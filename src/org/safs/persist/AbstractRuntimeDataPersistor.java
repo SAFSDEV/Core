@@ -11,6 +11,7 @@
  */
 package org.safs.persist;
 
+import org.safs.IndependantLog;
 import org.safs.SAFSException;
 import org.safs.SAFSNullPointerException;
 import org.safs.SAFSPersistableNotEnableException;
@@ -30,6 +31,7 @@ public abstract class AbstractRuntimeDataPersistor implements Persistor{
 	@Override
 	public void persist(Persistable persistable) throws SAFSException {
 		validate(persistable);
+		IndependantLog.debug("Persisting\n"+persistable);
 	}
 
 	/**
