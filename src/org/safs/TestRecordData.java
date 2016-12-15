@@ -74,18 +74,18 @@ public abstract class TestRecordData implements java.io.Serializable {
    **/
   private AbstractList inputRecordTokens = null;
 
-  /** <br><em>Purpose:</em>  separator: property: char(s) delimiting the fields in the inputRecord  
+  /** <br><em>Purpose:</em>  separator: property: char(s) delimiting the fields in the inputRecord
    ** <br><em>Initialized:</em> by a helper class the first time, only set once.
    ** <br><em>Example:</em>"\t"
    **/
   private String separator;
 
-  /** <br><em>Purpose:</em>  testlevel:  the current executing test level (CYCLE, SUITE, STEP)  
+  /** <br><em>Purpose:</em>  testlevel:  the current executing test level (CYCLE, SUITE, STEP)
    ** <br><em>Initialized:</em>  by a helper class the first time, only set once.
    **/
   private String testLevel;
 
-  /** <br><em>Purpose:</em>  appmapname:  Name of AppMap storing references (if applies)  
+  /** <br><em>Purpose:</em>  appmapname:  Name of AppMap storing references (if applies)
    ** <br><em>Initialized:</em>  by a helper class the first time, only set once.
    **/
   private String appMapName;
@@ -110,20 +110,20 @@ public abstract class TestRecordData implements java.io.Serializable {
    **/
   private String windowName; // getter method deduces this.
 
-  /** <br><em>Purpose:</em>  windowguiid:  DEDUCED AppMap recognition string for windowname  
-   ** <br><em>Initialized:</em>  
-   ** <br><em>Re-set:</em> setter method  
+  /** <br><em>Purpose:</em>  windowguiid:  DEDUCED AppMap recognition string for windowname
+   ** <br><em>Initialized:</em>
+   ** <br><em>Re-set:</em> setter method
    ** <br><em>Example:</em>"Type=Window;Name=frmExistingLogin"
    **/
   private String windowGuiId;
 
-  /** <br><em>Purpose:</em>  compname:  DEDUCED AppMap reference for child of window (if applies)  
+  /** <br><em>Purpose:</em>  compname:  DEDUCED AppMap reference for child of window (if applies)
    ** <br><em>Initialized:</em>  by a processor
    ** <br><em>Example:</em>"InfoGroupBox"
    **/
   private String compName; //getter method deduces this.
 
-  /** <br><em>Purpose:</em>  compguiid:  DEDUCED AppMap recognition string for compname  
+  /** <br><em>Purpose:</em>  compguiid:  DEDUCED AppMap recognition string for compname
    ** <br><em>Initialized:</em>  by a processor
    ** <br><em>Example:</em>"Type=GroupBox;Name=frameLogin"
    **/
@@ -139,14 +139,14 @@ public abstract class TestRecordData implements java.io.Serializable {
   /** <br><em>Purpose:</em>  compClass:  DEDUCED/derived from the component itself
    ** <br><em>Initialized:</em>  by a processor
    **/
-  private String compClass;      
-  
+  private String compClass;
+
   /** <br><em>Purpose:</em>  compModule:  DEDUCED/derived from the operating system
    ** (where did comp come from)
    ** <br><em>Initialized:</em>  by a processor
    **/
-   private String compModule;     
-   
+   private String compModule;
+
   /** <br><em>Purpose:</em>  environment:  DEDUCED  GUI implementation, it can be
    ** gotten normally from the tool, component, or TestObject tree itself
    ** <br><em>Initialized:</em>  by a processor
@@ -163,7 +163,7 @@ public abstract class TestRecordData implements java.io.Serializable {
    ** <br><em>Initialized:</em>  by a helper class the first time, only set once.
    **/
   private int statusCode;
-  
+
   /** <br><em>Purpose:</em>  statusinfo:  used with statuscode, carries more status information
    ** <br><em>Initialized:</em>  by a helper class the first time.
    **/
@@ -189,7 +189,7 @@ public abstract class TestRecordData implements java.io.Serializable {
    * </ul>
    */
   public static String[] POSSIBLE_SEPARATOR = {"\t", ",", ";", "_", ":", "|", "#", "@", "$", " "};
-  
+
   /** <br><em>Purpose:</em> no-arg constructor to make this fully qualified javabean
    **/
   public TestRecordData() {
@@ -307,7 +307,7 @@ public abstract class TestRecordData implements java.io.Serializable {
 
   /**
    * Return the windowName+componentName.<br>
-   * 
+   *
    * @return String, windowName+":"+componentName. <br>
    *                 null if windowName is null. <br>
    *                 windowName+":"+windowName if componentName is null. <br>
@@ -317,7 +317,7 @@ public abstract class TestRecordData implements java.io.Serializable {
 	  if(compName==null) return windowName+":"+windowName;
 	  return windowName+":"+compName;
   }
-  
+
   /** <br><em>Purpose:</em> accessor method(s)
    **/
   public String getCompGuiId () throws SAFSException {return compGuiId;}
@@ -360,7 +360,7 @@ public abstract class TestRecordData implements java.io.Serializable {
    **/
   public int getStatusCode () {return statusCode;}
   public void setStatusCode (int statusCode) {this.statusCode = statusCode;}
-  
+
   /** <br><em>Purpose:</em> accessor method(s)
    **/
   public String getStatusInfo () {return statusInfo;}
@@ -369,7 +369,7 @@ public abstract class TestRecordData implements java.io.Serializable {
   /** <br><em>Purpose:</em> get the {@link #inputRecord} token, based on 'separator'
    ** starting from 0.
    * <br><em>Side Effects:</em> {@link #inputRecordTokens} (lazily set first time in)
-   * <br><em>State Read:</em>  {@link #inputRecordTokens}, {@link #inputRecord} 
+   * <br><em>State Read:</em>  {@link #inputRecordTokens}, {@link #inputRecord}
    * <br><em>Assumptions:</em>  We use lazy instantiation to populate the ArrayList
    * {@link #inputRecordTokens}.  Initially it is null.  We use StringTokenizer first time only.
    * <br> We also assume that inputRecord and separator are already setup when we are called.
@@ -380,7 +380,7 @@ public abstract class TestRecordData implements java.io.Serializable {
    * (n < 0 || n >= inputRecordTokens.size()).
    * @exception SAFSNullPointerException, if either 'inputRecord' or 'separator' are null
    **/
-  public String getInputRecordToken (int n) throws SAFSNullPointerException { 
+  public String getInputRecordToken (int n) throws SAFSNullPointerException {
     if (inputRecordTokens == null) {
       inputRecordTokens = new ArrayList();
       String input = getInputRecord();
@@ -437,7 +437,7 @@ public abstract class TestRecordData implements java.io.Serializable {
 	  }
 	  return stringOtherthanSeparator;
   }
-  
+
   /** toString method
    **/
   public String toString() {
@@ -488,7 +488,7 @@ public abstract class TestRecordData implements java.io.Serializable {
     buf.append("\n   fac: ");
     buf.append(getFac());
     buf.append("\n   statusCode: ");
-    buf.append(getStatusCode());
+    buf.append(getStatusCode()+" "+StatusCodes.getStatusString(getStatusCode()));
     buf.append("\n   statusInfo: ");
     buf.append(getStatusInfo());
     buf.append("\n ]");
@@ -506,17 +506,17 @@ public abstract class TestRecordData implements java.io.Serializable {
   	setStatusCode(DriverConstant.STATUS_SCRIPT_NOT_EXECUTED);
   	setStatusInfo("");
   }
-  
-  private String instanceName = STAFHelper.SAFS_HOOK_TRD;  
-  /** 
+
+  private String instanceName = STAFHelper.SAFS_HOOK_TRD;
+  /**
    * Prefix used to retrieve and store SAFSVARS TestRecordData values.
-   * The most common instance name is STAFHelper.SAFS_HOOK_TRD  
+   * The most common instance name is STAFHelper.SAFS_HOOK_TRD
    * This rarely ever needs to be changed by subclasses.
    **/
   public String getInstanceName() {return instanceName;}
-  /** 
+  /**
    * Prefix used to retrieve and store SAFSVARS TestRecordData values.
-   * The most common instance name is STAFHelper.SAFS_HOOK_TRD  
+   * The most common instance name is STAFHelper.SAFS_HOOK_TRD
    * This rarely ever needs to be set/changed by subclasses.
    **/
   public void setInstanceName(String instanceName) {this.instanceName = instanceName;}
@@ -547,6 +547,6 @@ public abstract class TestRecordData implements java.io.Serializable {
      try{target.setWindowGuiId(this.getWindowGuiId());}catch(Exception x){;}
      try{target.setWindowName(this.getWindowName());}catch(Exception x){;}
      return target;
-  }  
+  }
 }
 
