@@ -146,7 +146,7 @@ public class TIDDriverRestCommands extends GenericEngine{
 			String debugmsg = StringUtils.debugmsg(false);
 
 			try{
-				IndependantLog.debug(debugmsg+"processing"+command+"with parameters "+params);
+				IndependantLog.debug(debugmsg+"processing "+command+" with parameters "+params);
 
 				if(DDDriverRestCommands.RESTDELETERESPONSE_KEYWORD.equalsIgnoreCase(command)){
 					deleteResponse();
