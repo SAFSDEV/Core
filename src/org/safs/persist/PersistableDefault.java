@@ -33,6 +33,8 @@ public abstract class PersistableDefault implements Persistable, Printable{
 	protected Persistable parent = null;
 
 	protected int tabulation = 0;
+	protected int threshold = 0;
+	protected boolean thresholdEnabled = false;
 
 	/**
 	 * This method use Java reflection to get the value of the field defined in {@link #getPersitableFields()}.
@@ -144,9 +146,30 @@ public abstract class PersistableDefault implements Persistable, Printable{
 		return actualContents;
 	}
 
+	@Override
+	public void setThreshold(int threshold){
+		this.threshold = threshold;
+	}
+	@Override
+	public int getThreshold(){
+		return threshold;
+	}
+
+	@Override
+	public boolean isThresholdEnabled() {
+		return thresholdEnabled;
+	}
+
+	@Override
+	public void setThresholdEnabled(boolean thresholdEnabled) {
+		this.thresholdEnabled = thresholdEnabled;
+	}
+
+	@Override
 	public int getTabulation(){
 		return tabulation;
 	}
+	@Override
 	public void setTabulation(int tabulation){
 		this.tabulation = tabulation;
 	}
@@ -174,7 +197,13 @@ public abstract class PersistableDefault implements Persistable, Printable{
 				//complicatedChildren will hold the key for PersistableDefault object to print out later
 				complicatedChildren.add(key);
 			}else{
-				sb.append(getTabs()+key+" : "+value+"\n");
+
+				if(value!=null && isThresholdEnabled() && value.toString().length()>getThreshold()){
+					IndependantLog.debug("The value of '"+key+"' is too big, its size '"+value.toString().length()+"' is over threshold '"+getThreshold()+"'");
+					sb.append(getTabs()+key+" : "+DATA_BIGGER_THAN_THRESHOLD+".\n");
+				}else{
+					sb.append(getTabs()+key+" : "+value+"\n");
+				}
 			}
 		}
 
