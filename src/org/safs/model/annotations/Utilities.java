@@ -2,6 +2,15 @@
  * Copyright (c) by SAS Institute Inc., Cary, NC 27513
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  ******************************************************************************/
+/**
+ * Developer History:
+ *
+ * SEP 25, 2015 Carl Nagle Added support for AutoConfigureJSAFS classes to identify external RuntimeDataAware classes.
+ * DEC 16, 2016 Lei Wang Modified findClasses(), getPackageClasses(): add one more parameter 'includeSubPackages'.
+ *                     Modified injectRuntimeDataAwareClasses(): inject RuntimeData for classes under the root package, where
+ *                                                               the class Map.java normally locates.
+ *
+ */
 package org.safs.model.annotations;
 
 import java.io.File;
@@ -39,7 +48,6 @@ import org.safs.tools.RuntimeDataInterface;
  *
  * @author Carl Nagle
  * @since OCT 15, 2013
- * <br>SEP 25, 2015 Carl Nagle Added support for AutoConfigureJSAFS classes to identify external RuntimeDataAware classes.
  */
 public class Utilities {
 	static final String FILE_COLON_STRING = "file:";
@@ -67,7 +75,6 @@ public class Utilities {
 	 */
 	private static Package getPackageResource(String packageName){
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
-		Package p = null;
 	    assert loader != null;
 	    String path = packageName.replace('.', '/');
 	    Enumeration<URL> resources = null;
@@ -82,7 +89,7 @@ public class Utilities {
 				String packagefile = null;
 				File file = null;
 				URL resource = null;
-				Class c = null;
+				Class<?> c = null;
 				while( resources.hasMoreElements()){
 					resource = resources.nextElement();
 					filename = resource.getFile();
@@ -152,12 +159,14 @@ public class Utilities {
 	 * Recursive method used to find all classes in a given directory and subdirs.
 	 * @param directory The base directory
 	 * @param packageName The package name for classes found inside the base directory
+	 * @param hasFileColon boolean
+	 * @param includeSubPackages boolean, if the the sub-packages should be searched.
 	 * @return The classes
 	 * @throws ClassNotFoundException
 	 * @throws IOException
 	 * @throws MalformedURLException
 	 **/
-	private static List<Class<?>> findClasses(File directory, String packageName, List<String> exclusions, boolean hasFileColon)
+	private static List<Class<?>> findClasses(File directory, String packageName, List<String> exclusions, boolean hasFileColon, boolean includeSubPackages)
 			throws ClassNotFoundException,
 	               IOException,
 	               MalformedURLException {
@@ -180,6 +189,12 @@ public class Utilities {
 				if (entryName.endsWith(".class")) {
 					String className = entryName.replaceAll("[$].*", "").replaceAll("[.]class", "").replace('/', '.');
 					if(!className.startsWith(packageName)) continue;
+					if(!includeSubPackages){
+						//Check if the className is the directly child of the packageName
+						if(className.substring(className.indexOf(packageName)+packageName.length()+1/*for leading .*/).replace(".class", "").contains(".")){
+							continue;
+						}
+					}
 		        	debug("AutoConfigure adding JAR file class '"+ className+"'");
 					classes.add(Class.forName(className));
 				}
@@ -196,9 +211,10 @@ public class Utilities {
 		for (File file : files) {
 			String fileName = file.getName();
 			if (file.isDirectory()) {
+				if(!includeSubPackages) continue;
 				assert !fileName.contains(".");
-            	if(exclusions.contains(packageName +"."+ file.getName())) continue;
-				classes.addAll(findClasses(file, packageName + "." + fileName, exclusions, false));
+            	if(exclusions.contains(packageName +"."+ fileName)) continue;
+				classes.addAll(findClasses(file, packageName + "." + fileName, exclusions, false, includeSubPackages));
 			}
 			else if (fileName.endsWith(".class") && !fileName.contains("$")) {
             	debug("AutoConfigure attempting to add class URI '"+ file.getName() +"' to configurable classes.");
@@ -226,12 +242,13 @@ public class Utilities {
 	 * @param apackage -- the Package to interrogate.
 	 * Ex: my.test.package
 	 * @param cList -- the current List of classes to append to.
-	 * @param exclusions -- a List of package names (not classnames) to be excluded from the search.
+	 * @param exclusions -- a List of package names (not class-names) to be excluded from the search.
 	 * Ex: my.test.package.otherstuff
+	 * @param includeSubPackages boolean, if the the sub-packages should be searched to get classes.
 	 * @return The input cList with all newly found Classes appended to it.
 	 * This allows for the collection of many classes across different package hierarchies.
 	 */
-	private static List<Class<?>> getPackageClasses(Package apackage, List<Class<?>> cList, List<String> exclusions){
+	private static List<Class<?>> getPackageClasses(Package apackage, List<Class<?>> cList, List<String> exclusions, boolean includeSubPackages){
 		String packageName = apackage.getName();
 		debug("getPackageClasses processing package '"+ packageName +"' for configurable classes.");
 		if(exclusions.contains(packageName)) return cList;
@@ -294,14 +311,14 @@ public class Utilities {
 	    }
 	    ArrayList<Class<?>> classes = new ArrayList<Class<?>>();
 	    for (FileColonsPair fcp : fileColonPairList) {
-	        try{ classes.addAll(findClasses(fcp.getFile(), packageName, exclusions, fcp.isHasColons())); }
+	        try{ classes.addAll(findClasses(fcp.getFile(), packageName, exclusions, fcp.isHasColons(), includeSubPackages)); }
 	        catch(Exception nf){
 				debug("getPackageClasses "+ nf.getClass().getSimpleName()+" unable to retrieve SubPackage Classes associated with "+packageName);
 	        }
 	    }
 		debug("getPackageClasses found '"+ classes.size() +"' configurable classes.");
 		// Attempt to avoid duplicating items already in the List.
-		for(Class c:classes) if(!cList.contains(c)) cList.add(c);
+		for(Class<?> c:classes) if(!cList.contains(c)) cList.add(c);
 	    return cList;
 	}
 
@@ -329,7 +346,7 @@ public class Utilities {
 			return cList;
 		}
 		Package pack = c.getPackage();
-		return getPackageClasses(pack, cList, exclusions);
+		return getPackageClasses(pack, cList, exclusions, true);
 	}
 
 	/**
@@ -359,13 +376,33 @@ public class Utilities {
 	 * @see org.safs.model.tools.RuntimeDataAware#setRuntimeDataInterface(RuntimeDataInterface)
 	 **/
 	public static void injectRuntimeDataAwareClasses(Object classInstance, ArrayList<String> altPackageNames, RuntimeDataInterface dataInterface) {
+		ArrayList<String> exclusions = new ArrayList<String>();
+		List<Class<?>> cList = new ArrayList<Class<?>>();
+
 		// given a class, find the package it is in.
-		Class myclass = classInstance.getClass();
+		Class<?> myclass = classInstance.getClass();
 		debug("injectRuntimeDataAwareClasses received Class "+ myclass);
 		Package mypackage = myclass.getPackage();
-		ArrayList<String> exclusions = new ArrayList<String>();
-		List<Class<?>> cList = getPackageClasses(mypackage, new ArrayList<Class<?>>(), exclusions);
 		String mypackagename = mypackage.getName();
+
+		//Try to inject for classes under the root package
+		//If the myClass is "regression.test.package.MyClass", then the root package will be "regression" where
+		//the class Map.java normally locates, the Map.java definitely needs injected!
+		int index = mypackagename.indexOf('.');
+		if(index>0){
+			String rootPackageName = mypackagename.substring(0, index);
+			debug("injectRuntimeDataAwareClasses processing root Package '"+ rootPackageName+"'.");
+			Package rootPackage = getPackageResource(rootPackageName);
+			if(rootPackage!=null){
+				cList = getPackageClasses(rootPackage, cList, exclusions, false);
+			}else{
+				debug("injectRuntimeDataAwareClasses MISSED root Package '"+ rootPackageName+"'.");
+			}
+		}
+
+		debug("injectRuntimeDataAwareClasses processing Package '"+ mypackagename+"'.");
+		cList = getPackageClasses(mypackage, cList, exclusions, true);
+
 		debug("injectRuntimeDataAwareClasses seeking parent Package for "+ mypackagename);
 		Package subpackage = null;
 		String subpackagename = null;
@@ -379,13 +416,13 @@ public class Utilities {
 			if(parentpackage != null){
 				debug("injectRuntimeDataAwareClasses retrieving parentpPackage classes for "+ parentpackagename);
 				// new -- process the parent package for possible classes before subpackages.
-				cList = getPackageClasses(parentpackage, cList, exclusions);
+				cList = getPackageClasses(parentpackage, cList, exclusions, true);
 				for(String rootPackageName: altPackageNames){
 					subpackagename = parentpackagename+"."+rootPackageName;
 					subpackage = getPackageResource(subpackagename);
 					if(subpackage != null){
 						debug("injectRuntimeDataAwareClasses processing parent subPackage "+ subpackage.getName());
-						cList = getPackageClasses(subpackage, cList, exclusions);
+						cList = getPackageClasses(subpackage, cList, exclusions, true);
 					}else{
 						debug("injectRuntimeDataAwareClasses detected no parent subPackage "+ rootPackageName );
 					}
@@ -399,7 +436,7 @@ public class Utilities {
 			subpackage = getPackageResource(rootPackageName);
 			if(subpackage != null){
 				debug("injectRuntimeDataAwareClasses processing standalone Package "+ rootPackageName);
-				cList = getPackageClasses(subpackage, cList, exclusions);
+				cList = getPackageClasses(subpackage, cList, exclusions, true);
 			}else{
 				debug("injectRuntimeDataAwareClasses detected no standalone Package "+ rootPackageName );
 			}
@@ -407,7 +444,7 @@ public class Utilities {
 		// check for AutoConfigureJSAFS Annotated classes to enable external RuntimeDataAware dependencies
 		List<String> auto_inclusions = new ArrayList<String>();
 		List<String> auto_exclusions = new ArrayList<String>();
-		for (Class c:cList){
+		for (Class<?> c:cList){
 			if(c.isAnnotationPresent(AutoConfigureJSAFS.class)){
 				AutoConfigureJSAFS ann = (AutoConfigureJSAFS) c.getAnnotation(AutoConfigureJSAFS.class);
 				String include = ann.include();
@@ -427,28 +464,24 @@ public class Utilities {
 		for(String s:auto_inclusions) cList = getPackageClasses(s, cList, exclusions);
 
 		// look for RuntimeDataAware classes to instantiate and inject.
-		String matchname = RuntimeDataAware.class.getName();
-		for(Class c: cList){
+		for(Class<?> c: cList){
 			debug("injectRuntimeDataAwareClasses seeking RuntimeDataAwareness for Class "+ c.getName() );
-			Class[] interfaces = c.getInterfaces();
-			for(Class i: interfaces){
-				if(matchname.equals(i.getName())){
-					debug("injectRuntimeDataAwareClasses found RuntimeDataAwareness for Class "+ c.getName() );
-					try{
-						RuntimeDataAware inst = (RuntimeDataAware) c.newInstance();
-						inst.setRuntimeDataInterface(dataInterface);
-					}catch(InstantiationException x){
-						debug("injectRuntimeDataAwareClasses unable to instantiate Class "+ c.getName());
-					}catch(IllegalAccessException x){
-						debug("injectRuntimeDataAwareClasses illegal access to Class "+ c.getName());
-					}
+			if(RuntimeDataAware.class.isAssignableFrom(c)){
+				debug("injectRuntimeDataAwareClasses found RuntimeDataAwareness for Class "+ c.getName() );
+				try{
+					RuntimeDataAware inst = (RuntimeDataAware) c.newInstance();
+					inst.setRuntimeDataInterface(dataInterface);
+				}catch(InstantiationException x){
+					debug("injectRuntimeDataAwareClasses unable to instantiate Class "+ c.getName());
+				}catch(IllegalAccessException x){
+					debug("injectRuntimeDataAwareClasses illegal access to Class "+ c.getName());
 				}
 			}
 		}
 	}
 
 	/**
-	 * This is where autoconfiguration and execution of JSAFS-specific tests will generally
+	 * This is where auto-configuration and execution of JSAFS-specific tests will generally
 	 * occur.  The routine is generally called internally by other JSAFS classes and methods.
 	 * <p>
 	 * The Class initialized from the className is checked for the AutoConfigureJSAFS
@@ -807,7 +840,7 @@ class MyComparator implements Comparator<Object>{
 		if(lhs instanceof Comparable &&
 		   rhs instanceof Comparable &&
 		   lhs.getClass().getName().equals(rhs.getClass().getName())){
-			result = ((Comparable)lhs).compareTo(rhs);
+			result = ((Comparable<Object>)lhs).compareTo(rhs);
 		}else if(lhs instanceof Class && rhs instanceof Class){
 			result = ((Class<?>) lhs).getName().compareTo(((Class<?>)rhs).getName());
 		}else{
