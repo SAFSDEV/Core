@@ -24,6 +24,8 @@ public class Constants {
 	public static final String LOCAL_HOST = "localhost";
 	/** '127.0.0.1'*/
 	public static final String LOCAL_HOST_IP = "127.0.0.1";
+	/** 'NOAUTHENTICATION'*/
+	public static final String NO_AUTHENTICATION = "NOAUTHENTICATION";
 
 	public static class BrowserConstants{
 		/**'<b>explorer</b>'*/
@@ -186,6 +188,10 @@ public class Constants {
 		public static final String CDATA_END = "]]>";
 		/** "<?XML" */
 		public static final String XML_START = "<?XML";
+		/** "classname" */
+		public static final String PROPERTY_CLASSNAME = "classname";
+		/** "package" */
+		public static final String PROPERTY_PACKAGE = "package";
 
 	}
 }

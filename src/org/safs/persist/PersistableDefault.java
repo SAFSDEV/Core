@@ -20,6 +20,7 @@ import java.util.TreeMap;
 
 import org.safs.IndependantLog;
 import org.safs.Printable;
+import org.safs.SAFSException;
 import org.safs.StringUtils;
 import org.safs.Utils;
 
@@ -70,6 +71,123 @@ public abstract class PersistableDefault implements Persistable, Printable{
 		}
 
 		return contents;
+	}
+
+	@Override
+	public boolean setField(String tag, Object value){
+		String debugmsg = StringUtils.debugmsg(false);
+
+		Class<?> clazz = getClass();
+		String fieldName = null;
+		Field field = null;
+
+		fieldName = getFieldName(tag);
+
+		if(fieldName!=null){
+			try {
+				field = clazz.getDeclaredField(fieldName);
+				field.setAccessible(true);
+				field.set(this, parseFieldValue(field,value));
+				return true;
+			} catch (Exception e) {
+				IndependantLog.error(debugmsg+"Failed to set field '"+fieldName+"', met "+e.toString());
+			}
+		}else{
+			IndependantLog.warn(debugmsg+" cannot get field for field '"+tag+"'.");
+		}
+
+		return false;
+	}
+
+	/**
+	 * Convert the parameter 'value' to an appropriate Object according to the field's type.
+	 * @param field Field
+	 * @param value Object, the filed's value to parse.
+	 * @return Object, the converted Object for the field.
+	 */
+	protected static Object parseFieldValue(Field field, Object value) throws SAFSException{
+		Class<?> type = null;
+		Object fieldValue = value;
+
+		if(value==null){
+			return value;
+		}
+
+		try{
+			type = field.getType();
+
+			if(Persistable.class.isAssignableFrom(type)){
+				if(!(value instanceof Persistable)){
+					//convert an object to persistable
+				}
+			}else if(type.isAssignableFrom(String.class)){
+				if(!(value instanceof String)){
+					fieldValue = String.valueOf(value);
+				}
+			}else if(type.isAssignableFrom(Boolean.TYPE)){
+				if(!(value instanceof Boolean)){
+					fieldValue = Boolean.valueOf(value.toString());
+				}
+			}else if(type.isAssignableFrom(Integer.TYPE)){
+				if(!(value instanceof Integer)){
+					fieldValue = Integer.valueOf(value.toString());
+				}
+			}else if(type.isAssignableFrom(Short.TYPE)){
+				if(!(value instanceof Short)){
+					fieldValue = Short.valueOf(value.toString());
+				}
+			}else if(type.isAssignableFrom(Long.TYPE)){
+				if(!(value instanceof Long)){
+					fieldValue = Long.valueOf(value.toString());
+				}
+			}else if(type.isAssignableFrom(Double.TYPE)){
+				if(!(value instanceof Double)){
+					fieldValue = Double.valueOf(value.toString());
+				}
+			}else if(type.isAssignableFrom(Float.TYPE)){
+				if(!(value instanceof Float)){
+					fieldValue = Float.valueOf(value.toString());
+				}
+			}else if(type.isAssignableFrom(Byte.TYPE)){
+				if(!(value instanceof Byte)){
+					fieldValue = Byte.valueOf(value.toString());
+				}
+			}else if(type.isAssignableFrom(Character.TYPE)){
+				if(!(value instanceof Character)){
+					fieldValue = Character.valueOf(value.toString().charAt(0));
+				}
+			}
+		}catch(NumberFormatException | IndexOutOfBoundsException e){
+			//user's data error
+			throw new SAFSException(e.toString());
+		}catch(Exception e){
+			//program error, a bug
+			throw new SAFSException(e.toString());
+		}
+
+		return fieldValue;
+	}
+
+	/**
+	 * According to the tag-name, get the field name.<br/>
+	 */
+	private String getFieldName(String tagName){
+		if(tagName==null) return tagName;
+
+		Map<String, String> fieldToPersistKeyMap= getPersitableFields();
+
+		Set<String> fieldNames = fieldToPersistKeyMap.keySet();
+
+		String persistKey = null;
+		for(String fieldName: fieldNames){
+			persistKey = fieldToPersistKeyMap.get(fieldName);
+			if(tagName.equalsIgnoreCase(persistKey)){
+				return fieldName;
+			}
+		}
+
+		//If cannot find, it will be considered as a field name.
+		return tagName;
 	}
 
 	@Override

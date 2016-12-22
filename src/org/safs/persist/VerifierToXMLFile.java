@@ -101,7 +101,7 @@ public class VerifierToXMLFile extends VerifierToFile{
 
 	protected class VerificationHandler extends DefaultHandler{
 		/** It will contain the string value of each document. */
-		StringBuilder value = null;
+		protected StringBuilder value = null;
 		/** It holds the full path for the Element being processed, such as Response.StatusCode, Response.Headers etc. */
 		protected StringBuilder fullPathTag = null;
 

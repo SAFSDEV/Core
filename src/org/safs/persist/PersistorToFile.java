@@ -13,7 +13,10 @@ package org.safs.persist;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.Writer;
+import java.util.List;
+import java.util.Map;
 
 import org.safs.IndependantLog;
 import org.safs.SAFSException;
@@ -33,7 +36,22 @@ public abstract class PersistorToFile extends AbstractRuntimeDataPersistor{
 	 */
 	protected String filename = null;
 
+	/**
+	 * The Writer object of the test file. It is used to write Persistable object.
+	 */
 	protected Writer writer = null;
+
+	/**
+	 * The Reader object of the project file. Read content from it to construct/unpickle a Persistable object.
+	 */
+	protected Reader reader = null;
+
+	/**
+	 * Holding the fields which are ignored for each class. No need to unpickle.<br/>
+	 * The field is expressed as a pair of (classname, a list of fields).<br/>
+	 * @see #isIgnoredFiled(String)
+	 */
+	protected Map<String/*className*/, List<String>/*field-names*/> ignoredFieldsForUnpickle = null;
 
 	protected PersistorToFile(RuntimeDataInterface runtime, String filename){
 		super(runtime);
@@ -58,7 +76,7 @@ public abstract class PersistorToFile extends AbstractRuntimeDataPersistor{
 		} finally{
 			//close the persistence file
 			try {
-				writer.close();
+				if(writer!=null) writer.close();
 			} catch (IOException e) {
 				IndependantLog.warn(StringUtils.debugmsg(false)+"Failed to close the writer on file '"+filename+"'.");
 			}
@@ -102,6 +120,65 @@ public abstract class PersistorToFile extends AbstractRuntimeDataPersistor{
 		if(file!=null && file.exists()){
 			file.delete();
 		}
+	}
+
+	@Override
+	public Persistable unpickle(Map<String/*className*/, List<String>/*field-names*/> ignoredFields) throws SAFSException{
+		Persistable persistable = null;
+
+		try {
+			//open the persistence file
+			File file = FileUtilities.deduceProjectFile(filename, runtime);
+			reader = FileUtilities.getUTF8BufferedFileReader(file.getAbsolutePath());
+
+			//read the Persistable object from the file
+			ignoredFieldsForUnpickle = ignoredFields;
+			beforeUnpickle();
+			persistable = doUnpickle();
+
+		} catch (IOException e) {
+			String message = FAILStrings.convert(FAILKEYS.FILE_ERROR, "Error opening or reading or writing file '"+filename+"'", filename);
+			throw new SAFSException(message);
+		} finally{
+			//close the persistence file
+			try {
+				if(reader!=null) reader.close();
+			} catch (IOException e) {
+				IndependantLog.warn(StringUtils.debugmsg(false)+"Failed to close the reader on file '"+filename+"'.");
+			}
+		}
+
+		return persistable;
+	}
+
+	protected void beforeUnpickle()  throws SAFSException, IOException{
+		//do nothing for now.
+	}
+
+	protected Persistable doUnpickle()  throws SAFSException, IOException{
+		throw new SAFSException(StringUtils.debugmsg(false)+"Method not supported yet!");
+	}
+
+	/**
+	 * Check if the filed is being ignored at the moment for un-pickle.<br/>
+	 * @param className String, the className to check
+	 * @param field String, the field to check
+	 * @return boolean if this field is being ignored.
+	 * @see #ignoredFieldsForUnpickle
+	 */
+	protected boolean isIgnoredFiled(String className, String field){
+		if(ignoredFieldsForUnpickle==null || className==null || field==null){
+			return false;
+		}
+
+		List<String> ignoredFields = ignoredFieldsForUnpickle.get(className);
+		if(ignoredFields==null){
+			return false;
+		}
+		for(String ignoredField:ignoredFields){
+			if(ignoredField.equals(field)) return true;
+		}
+		return false;
 	}
 
 	public PersistenceType getType(){

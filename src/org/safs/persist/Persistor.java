@@ -11,6 +11,9 @@
  */
 package org.safs.persist;
 
+import java.util.List;
+import java.util.Map;
+
 import org.safs.SAFSException;
 
 /**
@@ -29,6 +32,14 @@ public interface Persistor {
 	 * @throws SAFSException when failing to delete the persistence or something wrong happens.
 	 */
 	public void unpersist() throws SAFSException;
+
+	/**
+	 * Convert the contents stored in a persistence substance into a Persistable object.
+	 * @param ignoredFields Map&lt;String, List&lt;String>>, a Map containing the fields of each class to be ignored when un-pickling.
+	 * @return Persistable, the Persistable object got from the persistence material.
+	 * @throws SAFSException
+	 */
+	public Persistable unpickle(Map<String/*className*/, List<String>/*field-names*/> ignoredFields) throws SAFSException;
 
 	/**
 	 * The persistence Type.

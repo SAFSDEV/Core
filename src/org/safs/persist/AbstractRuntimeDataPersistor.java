@@ -11,6 +11,9 @@
  */
 package org.safs.persist;
 
+import java.util.List;
+import java.util.Map;
+
 import org.safs.IndependantLog;
 import org.safs.SAFSException;
 import org.safs.SAFSNullPointerException;
@@ -32,6 +35,14 @@ public abstract class AbstractRuntimeDataPersistor implements Persistor{
 	public void persist(Persistable persistable) throws SAFSException {
 		validate(persistable);
 		IndependantLog.debug("Persisting\n"+persistable);
+	}
+
+	/**
+	 * Provided default implementation, simply throw out a SAFSException.
+	 */
+	@Override
+	public Persistable unpickle(Map<String/*className*/, List<String>/*field-names*/> ignoredFields) throws SAFSException{
+		throw new SAFSException("Method 'unpickle()' not supported yet!");
 	}
 
 	/**
