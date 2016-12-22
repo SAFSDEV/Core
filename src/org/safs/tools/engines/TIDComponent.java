@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.safs.ComponentFunction;
+import org.safs.Constants;
+import org.safs.IndependantLog;
 import org.safs.Log;
 import org.safs.Printable;
 import org.safs.RSA;
@@ -23,12 +25,17 @@ import org.safs.StatusCodes;
 import org.safs.StringUtils;
 import org.safs.TestRecordHelper;
 import org.safs.TestStepProcessor;
+import org.safs.auth.Auth;
 import org.safs.image.ImageUtils;
 import org.safs.logging.AbstractLogFacility;
 import org.safs.logging.LogUtilities;
 import org.safs.model.commands.DriverCommands;
 import org.safs.model.commands.GenericMasterFunctions;
 import org.safs.model.commands.TIDRestFunctions;
+import org.safs.persist.Persistable;
+import org.safs.persist.PersistenceType;
+import org.safs.persist.Persistor;
+import org.safs.persist.PersistorFactory;
 import org.safs.rest.REST;
 import org.safs.rest.service.Headers;
 import org.safs.rest.service.Response;
@@ -37,6 +44,7 @@ import org.safs.rest.service.Services;
 import org.safs.text.FAILKEYS;
 import org.safs.text.FAILStrings;
 import org.safs.text.FileUtilities;
+import org.safs.text.FileUtilities.FileType;
 import org.safs.text.GENStrings;
 import org.safs.tools.CaseInsensitiveFile;
 import org.safs.tools.drivers.DriverConstant;
@@ -2388,14 +2396,13 @@ public class TIDComponent extends GenericEngine {
 			String customeAuthentication = iterator.hasNext()? iterator.next():null;
 
 			try {
-				//TODO handle the extra authentication information
-				if(customeAuthentication!=null){
-
-				}
 				//TODO handle the extra headers information
 				if(customHeaders!=null){
 
 				}
+				//Handle the extra authentication information
+				handleAuth(Services.getService(sessionID), customeAuthentication);
+
 				response = REST.request(sessionID, method, relativeURI, Headers.getHeadersForType(type), body);
 
 				handleResponse(sessionID, response, responseIdVar);
@@ -2440,10 +2447,8 @@ public class TIDComponent extends GenericEngine {
 			String customeAuthentication = iterator.hasNext()? iterator.next():null;
 
 			try {
-				//TODO handle the extra authentication information
-				if(customeAuthentication!=null){
-
-				}
+				//Handle the extra authentication information
+				handleAuth(Services.getService(sessionID), customeAuthentication);
 
 				response = REST.request(sessionID, method, relativeURI, customHeaders, body);
 
@@ -2510,10 +2515,8 @@ public class TIDComponent extends GenericEngine {
 				Service service = new Service(sessionID, baseURL);
 				Services.addService(service);
 
-				//TODO handle the extra authentication information
-				if(customeAuthentication!=null){
-
-				}
+				//Handle the extra authentication information
+				handleAuth(service, customeAuthentication);
 
 				message = GENStrings.convert(GENStrings.SUCCESS_3,
 						restFlag+":"+sessionID+" "+action+" successful.", restFlag, sessionID, action);
@@ -2529,6 +2532,35 @@ public class TIDComponent extends GenericEngine {
 			}
 		}
 
+		/**
+		 * Handle the authentication/authorization information.<br/>
+		 * Currently it converts an XML file to Auth object and set it to Service.<br/>
+		 * @param service Service, the Service object to hold the Auth information.
+		 * @param authFile String, the file holding the authentication/authorization information.<br/>
+		 *                         Currently, on XML file is supported.
+		 * @throws SAFSException if Service object is null or Fail to covert to an Auth object.
+		 */
+		protected void handleAuth(Service service, String authFile) throws SAFSException{
+			if(service==null){
+				throw new SAFSException("The Service is null!");
+			}
+			if(!StringUtils.isValid(authFile)){
+				IndependantLog.debug(StringUtils.debugmsg(false)+" The authentication/authorizaiton file name is null or empty!");
+				return;
+			}
+
+			if(Constants.NO_AUTHENTICATION.equalsIgnoreCase(authFile)){
+				service.setAuth(null);
+			}else{
+				Persistor p = PersistorFactory.create(PersistenceType.FILE, FileType.XML, this, authFile);
+				Persistable auth = p.unpickle(null);
+				if(auth instanceof Auth){
+					service.setAuth((Auth)auth);
+				}else{
+					throw new SAFSException("Failed to get Auth object from file '"+authFile+"'");
+				}
+			}
+		}
 	}
 }
 

@@ -62,8 +62,8 @@ public class PersistorToJSONFile extends PersistorToHierarchialFile{
 	}
 
 	@Override
-	protected void containerBegin(String tagName) throws IOException{
-		writer.write(StringUtils.quote(tagName)+" : {\n");
+	protected void containerBegin(String className) throws IOException{
+		writer.write(StringUtils.quote(getTagName(className))+" : {\n");
 	}
 	@Override
 	protected void childBegin(String key, String value) throws IOException{
@@ -78,7 +78,7 @@ public class PersistorToJSONFile extends PersistorToHierarchialFile{
 		}
 	}
 	@Override
-	protected void containerEnd(String tagName) throws IOException{
+	protected void containerEnd(String className) throws IOException{
 		writer.write("}\n");
 	}
 

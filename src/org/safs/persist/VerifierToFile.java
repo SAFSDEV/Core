@@ -145,7 +145,7 @@ public class VerifierToFile extends AbstractRuntimeDataVerifier{
 	 * </code>
 	 * </pre>
 	 */
-	public void beforeCheck(Persistable persistable, boolean... conditions)  throws SAFSException, IOException{
+	protected void beforeCheck(Persistable persistable, boolean... conditions)  throws SAFSException, IOException{
 		ignoredFields.clear();
 		checkedFields.clear();
 		nonMatchedMessages.delete(0, nonMatchedMessages.length());
@@ -163,7 +163,7 @@ public class VerifierToFile extends AbstractRuntimeDataVerifier{
 	}
 
 
-	public void check(Persistable persistable, boolean... conditions)  throws SAFSException, IOException{
+	protected void check(Persistable persistable, boolean... conditions)  throws SAFSException, IOException{
 		if(actualContents==null){
 			throw new SAFSNullPointerException("The actual contents Map has not been initilized!");
 		}
@@ -181,7 +181,7 @@ public class VerifierToFile extends AbstractRuntimeDataVerifier{
 	 * Make the final check.<br/>
 	 *
 	 */
-	public void afterCheck(Persistable persistable, boolean... conditions)  throws SAFSException, IOException{
+	protected void afterCheck(Persistable persistable, boolean... conditions)  throws SAFSException, IOException{
 
 		if(!matched){
 			throw new SAFSVerificationException(nonMatchedMessages.toString());
@@ -240,7 +240,7 @@ public class VerifierToFile extends AbstractRuntimeDataVerifier{
 	}
 
 	/**
-	 * Check if the filed is being ignored at the moment.<br/>
+	 * Check if the filed is being ignored at the moment for verification.<br/>
 	 * <pre>
 	 * If the Set {@link #ignoredFields} contains a field 'Response.Request',
 	 * then all its children (starting with 'Response.Request') will be ignored, such as:

@@ -1247,6 +1247,28 @@ public class StringUtils{
   }
 
   /**
+   * @param delimitedString String, the delimited string
+   * @param delimiter String, the delimiter
+   * @return String, the last token of the delimited string
+   */
+  public static String getLastDelimitedToken(String delimitedString, String delimiter){
+	  String lastToken = null;
+	  if(delimitedString==null || delimiter==null || delimiter==""){
+		  lastToken = delimitedString;
+	  }else{
+		  int index = delimitedString.lastIndexOf(delimiter);
+		  if(index>-1){
+			  lastToken = delimitedString.substring(index+delimiter.length());
+		  }else{
+			  lastToken = delimitedString;
+		  }
+	  }
+
+//	  debug("\ndelimitedString: '"+delimitedString+"'\ndelimiter: '"+delimiter+"'\nlastToken: '"+lastToken+"'");
+	  return lastToken;
+  }
+
+  /**
    * If the token contains escapeChar+delimiter, then replace it by delimiter.
    */
   private static String removeEscapeChar(String token, String delimiter, Character escapeChar){
