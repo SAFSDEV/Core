@@ -103,4 +103,12 @@ public interface Persistable {
 	 * </pre>
 	 */
 	public Map<String/* flatKey */, Object /* content */> getContents(Map<String,String> elementAlternativeValues, Set<String> ignoredFields, boolean includeContainer);
+
+	/**
+	 * Set the field's value of this Persistable object.
+	 * @param tag String, the tag name or the persist-key. refer to {@link #getPersitableFields()}.
+	 * @param value Object, the value to set
+	 * @return boolean true if successful.
+	 */
+	public boolean setField(String tag, Object value);
 }

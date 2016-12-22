@@ -17,6 +17,7 @@ import java.util.Map;
 import org.safs.IndependantLog;
 import org.safs.SAFSException;
 import org.safs.SAFSPersistableNotEnableException;
+import org.safs.StringUtils;
 import org.safs.tools.RuntimeDataInterface;
 
 /**
@@ -48,9 +49,13 @@ public class PersistorToHierarchialFile extends PersistorToFile{
 		validate(persistable);
 
 		Map<String, Object> contents = persistable.getContents();
-		String className = persistable.getClass().getSimpleName();
+		String className = persistable.getClass().getName();
 		Object value = null;
 		String escapedValue = null;
+
+		if(contents==null){
+			throw new SAFSException("NO contents got from Persistable object!");
+		}
 
 		containerBegin(className);
 
@@ -82,6 +87,11 @@ public class PersistorToHierarchialFile extends PersistorToFile{
 
 		containerEnd(className);
 	}
+
+	protected String getTagName(String className){
+		return StringUtils.getLastDelimitedToken(className, ".");
+	}
+
 	/**
 	 * This is called inside {@link #write(Persistable)} to write the begin
 	 * of a container such as:
@@ -89,10 +99,11 @@ public class PersistorToHierarchialFile extends PersistorToFile{
 	 * <li><b>&lt;tagNam&gt;</b> for XML file
 	 * <li><b>"tagName" : {\n</b> for JSON file
 	 * </ul>
-	 * @param tagName String, the tag name of a container.
+	 * @param className String, the class name of a container. This is a full class-name, which may needs to
+	 *                          treated to get the simple class name as the tag-name.
 	 * @throws IOException
 	 */
-	protected void containerBegin(String tagName) throws IOException{}
+	protected void containerBegin(String className) throws IOException{}
 	/**
 	 * This is called inside {@link #write(Persistable)} to write "key"
 	 * and "value" of a child.
@@ -120,9 +131,10 @@ public class PersistorToHierarchialFile extends PersistorToFile{
 	 * <li><b>&lt;/tagNam&gt;</b> for XML file
 	 * <li><b>}</b> for JSON file.<br/>
 	 * </ul>
-	 * @param tagName String, the tag name, it is normally a container.
+	 * @param className String, the tag name, it is normally a container. This is a full class-name, which may needs to
+	 *                          treated to get the simple class name as the tag-name.
 	 * @throws IOException
 	 */
-	protected void containerEnd(String tagName) throws IOException{}
+	protected void containerEnd(String className) throws IOException{}
 
 }

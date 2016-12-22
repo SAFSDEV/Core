@@ -19,7 +19,7 @@ import org.safs.SAFSException;
  */
 public interface Verifier {
 	/**
-	 * Verify an object.
+	 * Verify an object against the contents stored in a persistence substance.
 	 * @param persistable Persistable, the object to verify
 	 * @param conditions boolean..., the boolean array to control the verification.
 	 *                               such as if the match is exact, if the match is case-sensitive,
