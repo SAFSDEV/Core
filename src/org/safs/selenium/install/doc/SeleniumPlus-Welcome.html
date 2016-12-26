@@ -172,6 +172,11 @@ function remoteServers(){
     document.getElementById("remote-servers").style.display="block";
     document.getElementById("href-remote-servers").style.fontWeight="900";
 }
+function callingJavascript(){
+	hideAllContentPanels();
+    document.getElementById("calling-javascript").style.display="block";
+    document.getElementById("href-calling-javascript").style.fontWeight="900";
+}
 </script>
 
 </head>
@@ -182,26 +187,27 @@ function remoteServers(){
 <br>
 <div id="menu" class="panelselector">
 <hr>
-<a href="#" onclick="showWelcome()" id ="href-welcome" >Welcome</a>&nbsp;&nbsp;
-<a href="#" onclick="newSample()" id="href-sample-install" >Sample Project</a>&nbsp;&nbsp;
-<a href="#" onclick="newProject()" id="href-project-create" >Create New Project</a>&nbsp;&nbsp;
-<a href="#" onclick="importProject()" id="href-project-import">Import Projects</a>&nbsp;&nbsp;
-<a href="#" onclick="editAppMaps()" id="href-appmaps" >Edit AppMaps</a>&nbsp;&nbsp;
-<a href="#" onclick="expressions()" id="href-expressions">Expressions</a>&nbsp;&nbsp;
-<a href="#" onclick="editTests()" id="href-project-edit">Edit Tests</a>&nbsp;&nbsp;
-<a href="#" onclick="autoConfig()" id ="href-auto-config" >Auto Config</a>&nbsp;&nbsp;
-<a href="#" onclick="runTests()" id ="href-tests-run" >Run Tests</a>&nbsp;&nbsp;
-<a href="#" onclick="logging()" id ="href-logging" >Logging</a>&nbsp;&nbsp;
-<a href="#" onclick="backupTests()" id ="href-tests-backup" >CVS/Check-in</a>&nbsp;&nbsp;
-<a href="#" onclick="checkoutTests()" id ="href-tests-checkout" >CVS/Check-out</a>&nbsp;&nbsp;
-<a href="#" onclick="showAdvanced()" id ="href-advanced" >Advanced Users</a>&nbsp;&nbsp;
-<a href="#" onclick="showIESetup()" id="href-iesetup" >Setup Browser</a>&nbsp;&nbsp;
-<a href="#" onclick="startWebBrowser()" id="href-startwebbrowser" >Start Browser</a>&nbsp;&nbsp;
-<a href="#" onclick="updateSoftware()" id="href-updatesoftware" >Update SeleniumPlus</a>&nbsp;&nbsp;
-<a href="#" onclick="projectAssets()" id="href-assets" >Project Assets</a>&nbsp;&nbsp;
-<a href="#" onclick="enableSAFS()" id="href-enable-safs" >Enable SAFS</a>&nbsp;&nbsp;
-<a href="#" onclick="remoteServers()" id="href-remote-servers" >Remote Servers</a>&nbsp;&nbsp;
-<a href="http://safsdev.sourceforge.net/sqabasic2000/UsingAutoIT.htm" onclick="usingAutoIT()">Using AutoIT</a>&nbsp;&nbsp;
+<a href="#" onclick="showWelcome()" id ="href-welcome" >Welcome</a>&nbsp;&nbsp;|
+<a href="#" onclick="newSample()" id="href-sample-install" >Sample Project</a>&nbsp;&nbsp;|
+<a href="#" onclick="newProject()" id="href-project-create" >Create New Project</a>&nbsp;&nbsp;|
+<a href="#" onclick="importProject()" id="href-project-import">Import Projects</a>&nbsp;&nbsp;|
+<a href="#" onclick="editAppMaps()" id="href-appmaps" >Edit AppMaps</a>&nbsp;&nbsp;|
+<a href="#" onclick="expressions()" id="href-expressions">Expressions</a>&nbsp;&nbsp;|
+<a href="#" onclick="editTests()" id="href-project-edit">Edit Tests</a>&nbsp;&nbsp;|
+<a href="#" onclick="autoConfig()" id ="href-auto-config" >Auto Config</a>&nbsp;&nbsp;|
+<a href="#" onclick="runTests()" id ="href-tests-run" >Run Tests</a>&nbsp;&nbsp;|
+<a href="#" onclick="logging()" id ="href-logging" >Logging</a>&nbsp;&nbsp;|
+<a href="#" onclick="backupTests()" id ="href-tests-backup" >CVS/Check-in</a>&nbsp;&nbsp;|
+<a href="#" onclick="checkoutTests()" id ="href-tests-checkout" >CVS/Check-out</a>&nbsp;&nbsp;|
+<a href="#" onclick="showAdvanced()" id ="href-advanced" >Advanced Users</a>&nbsp;&nbsp;|
+<a href="#" onclick="showIESetup()" id="href-iesetup" >Setup Browser</a>&nbsp;&nbsp;|
+<a href="#" onclick="startWebBrowser()" id="href-startwebbrowser" >Start Browser</a>&nbsp;&nbsp;|
+<a href="#" onclick="updateSoftware()" id="href-updatesoftware" >Update SeleniumPlus</a>&nbsp;&nbsp;|
+<a href="#" onclick="projectAssets()" id="href-assets" >Project Assets</a>&nbsp;&nbsp;|
+<a href="#" onclick="enableSAFS()" id="href-enable-safs" >Enable SAFS</a>&nbsp;&nbsp;|
+<a href="#" onclick="remoteServers()" id="href-remote-servers" >Remote Servers</a>&nbsp;&nbsp;|
+<a href="http://safsdev.sourceforge.net/sqabasic2000/UsingAutoIT.htm" onclick="usingAutoIT()">Using AutoIT</a>&nbsp;&nbsp;|
+<a href="#" onclick="callingJavascript()" id="href-calling-javascript" >Calling Javascript</a>&nbsp;&nbsp;|
 <a href="#" onclick="showReferences()" id="href-references" >References</a>&nbsp;&nbsp;
 <br>
 <hr>
@@ -1752,5 +1758,226 @@ and the last 2th line tells us that the node has registered on hub server.</span
 <img src="images/SeleniumServerRunner_Node.png" alt="Selenium Node Server Runner Screenshot"/><br>
 <hr>
 </div>
+
+<!--------------------------------->
+<!--    Calling Javascript       -->
+<!--------------------------------->
+<div id="calling-javascript" style="display: none" >
+<h2>Calling Javascript</h2>
+<p>
+During the test, sometimes users need to manipulate the object within the browser directly, which can be
+achieved by Javascript. This section explains how to execute Javascript through SeleniumPlus.<br/>
+<ul>
+<li><a href="#calling_javascript_apis">SE+ provides APIs</a>
+<li><a href="#before_calling_javascript">Before calling Javascript</a>
+<li><a href="#calling_javascript_examples">Examples</a>
+</ul>
+
+<h3 id="calling_javascript_apis">SE+ provides APIs:</h3>
+<ol>
+  <li>To execute a Javascript in the context of the currently selected frame or window:
+	<ul>
+	<li><a href="../../doc/org/safs/selenium/webdriver/SeleniumPlus.html#executeScript(java.lang.String,%20java.lang.Object...)" target="_blank">SeleniumPlus.executeScript()</a>
+	<li><a href="../../doc/org/safs/selenium/webdriver/SeleniumPlus.html#executeAsyncScript(java.lang.String,%20java.lang.Object...)" target="_target">SeleniumPlus.executeAsyncScript()</a>
+	</ul>
+  </li>
+  <li>To execute a Javascript on a certain <a href="../../doc/org/safs/model/Component.html">Component</a> (WebElement) in the context of the currently selected frame or window:
+	<ul>
+	<li><a href="../../doc/org/safs/selenium/webdriver/SeleniumPlus.html#ExecuteScript(org.safs.model.Component,%20java.lang.String,%20java.lang.String...)" target="_blank">SeleniumPlus.ExecuteScript()</a>
+	</ul>
+  </li>
+</ol>
+<a href="#calling-javascript">[go back]</a>
+
+
+<h3 id="before_calling_javascript">Before calling Javascript:</h3>
+<p>
+There are something we should understand. Such as the parameters of these APIs and how these Java-parameters are passed to Javascript as parameters, it is important!
+We don't need to understand all of them  :) , the items below are listed by necessity priority:
+<ol>
+  <li><b>"Javascript snippet"</b>:  It is passed in as first parameter for <span class="sourcecodes">executeScript()</span> and <span class="sourcecodes">executeAsyncScript()</span>;
+                                    While it is passed in as second parameter for <span class="sourcecodes">ExecuteScript()</span>.
+  <li><b>"Javascript parameters"</b>: They are defined by keyword arguments, so arguments[0], arguments[1] ... can be used in the Javascript snippet.
+                                      They are passed in as second, third ... parameters of <span class="sourcecodes">executeScript()</span> and <span class="sourcecodes">executeAsyncScript()</span>; 
+                                      While for <span class="sourcecodes">ExecuteScript()</span>, the first parameter Component is arguments[0], and the third parameter is arguments[1], fourth parameter is arguments[2] etc.
+  <li><b>"callback method"</b>:     It is ONLY for <b>asynchronous</b> invocation <span class="sourcecodes">executeAsyncScript()</span>, this callback is always injected automatically as the last argument,
+                                    so it is always <b>arguments[arguments.length - 1]</b>. The Javascript snippet must explicitly signal it is finished by invoking this callback. 
+                                    The first argument passed to the callback function will be used as the script's result. 
+                                    <a href="https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/JavascriptExecutor.html#executeAsyncScript-java.lang.String-java.lang.Object...-" target="_blank">The conversion from Javascript object to Java object definition</a>.
+  <li><b>"script timeout"</b>:  It is ONLY for <b>asynchronous</b> invocation <span class="sourcecodes">executeAsyncScript()</span>, the default timeout for a script to be executed is 0ms. 
+                                In most cases one must set the script timeout beforehand to a value sufficiently large enough by calling 
+                                <a href="../../doc/org/safs/selenium/webdriver/SeleniumPlus.WDTimeOut.html#setScriptTimeout(long,%20java.util.concurrent.TimeUnit)" target="_blank">setScriptTimeout(long,TimeUnit)</a>.
+  <li><b>"debug() method"</b>:  For <b>synchronous</b> invocation <span class="sourcecodes">executeScript()</span> and <span class="sourcecodes">ExecuteScript()</span>, 
+                                user can call debug(debug-message) in the Javascript snippet to write debug message into SE+ debug log.
+                                By default, this functionality is off, user can turn it on by setting <span class="sourcecodes">JavaScriptFunctions.jsDebugLogEnable=true</span>.
+                                Normally the debug message will be written to a file, we can also send debug message to browser's console by setting <span class="sourcecodes">JavaScriptFunctions.logToBrowserConsole=true</span>.
+  <li><b>"throw_error() method"</b>:    For <b>synchronous</b> invocation <span class="sourcecodes">executeScript()</span> and <span class="sourcecodes">ExecuteScript()</span>, 
+                                        user can call throw_error(error-message) in the Javascript snippet so that a JSException will be thrown out in Java code. Below is how it is normally used in Javascript snippet.
+<div class="CodeBox">
+<pre class="SourceCode">
+ try{
+   <span class="comments">//do some javascript actions</span>
+ }catch(err){
+   throw_error(err);
+ }
+</pre>
+</div>
+
+  <li><b>"event listener"</b>:  Here we are NOT talking about the "event listener" inside Javascript, BUT about the Java listener reacting to the Javascript event. 
+                                We can call 
+                                <a href="../../doc/org/safs/selenium/webdriver/lib/SearchObject.html#addJavaScriptEventListener(org.openqa.selenium.WebElement,%20java.lang.String,%20org.safs.selenium.webdriver.lib.SearchObject.GenericJSEventListener)" target="_blank">addJavaScriptEventListener(WebElement, eventName, listener)</a>/ 
+                                <a href="../../doc/org/safs/selenium/webdriver/lib/SearchObject.html#removeJavaScriptEventListener(org.openqa.selenium.WebElement,%20java.lang.String,%20java.lang.String)" target="_blank">removeJavaScriptEventListener(WebElement, eventName, listenerID)</a> 
+                                to add/remove listener. Below is an example how to add a <a href="../../doc/org/safs/selenium/webdriver/lib/SearchObject.DefaultJSEventListener.html" target="_blank">DefaultJSEventListener</a> for "mousedown" event on a WebElement. 
+                                This DefaultJSEventListener is not public class, it is a protected inner class inside <a href="https://github.com/SAFSDEV/Core/blob/master/src/org/safs/selenium/webdriver/lib/SearchObject.java" target="_blank">SearchObject</a>, 
+                                click this link and search "DefaultJSEventListener" to get the source code, you can imitate it to write your own listener.
+<div class="CodeBox">
+<pre class="SourceCode">
+ WebElement webelement = null;<span class="comments">//User must assign it with a valid value.</span>
+ String event = "mousedown";
+ int timeout = 1000;<span class="comments">//milliseconds</span>
+ DefaultJSEventListener listener = new DefaultJSEventListener(event);
+ <span class="comments">//add listener for event</span>
+ String listenerID = WDLibrary.addJavaScriptEventListener(webelement, event, listener);
+ <span class="comments">//do some mousedown related work, for example 'click'</span>
+ webelement.click();
+ <span class="comments">//wait for event happen</span>
+ if(listener.waitEventFired(timeout)){ <span class="comments">//ok, event has been fired.</span>}
+ <span class="comments">//remove the listener</span>
+ WDLibrary.removeJavaScriptEventListener(webelement, event, listenerID);
+</pre>
+</div>
+</ol>
+<a href="#calling-javascript">[go back]</a>
+
+<h3 id="calling_javascript_examples">Examples:</h3>
+<p>
+There are something we should understand. Such as the parameters of these APIs and how these Java-parameters are passed to Javascript as parameters, it is important!
+We don't need to understand all of them  :) , the items below are listed by necessity priority:
+<ol>
+<li>SeleniumPlus.executeScript()
+<div class="CodeBox">
+<pre class="SourceCode">
+ <span class="comments">//set "your text" to innerHTML of Component Map.Google.SignIn</span>
+ WebElement we = SeleniumPlus.getObject(Map.Google.SignIn);
+ String script = "arguments[0].innerHTML=arguments[1];";
+ List&lt;Object> params = new ArrayList&lt;Object>();
+ params.add(we);<span class="comments">//arguments[0]</span>
+ params.add("your text");<span class="comments">//arguments[1]</span>
+ SeleniumPlus.executeScript(script, params.toArray(new Object[0]));
+</pre>
+</div>
+<br/>
+<div class="CodeBox">
+<pre class="SourceCode">
+ <span class="comments">//get innerHTML of component Map.Google.SignIn</span>
+ script = "return arguments[0].innerHTML;";
+ params.clear();
+ params.add(we);<span class="comments">//arguments[0]</span>
+ Object result = SeleniumPlus.executeScript(script, params.toArray(new Object[0]));
+</pre>
+</div>
+</li>
+<br/>
+<li>SeleniumPlus.executeAsyncScript()
+<div class="CodeBox">
+<pre class="SourceCode">
+ <span class="comments">//Example #1: Performing a sleep in the browser under test.</span>
+ long start = System.currentTimeMillis();
+ String script = "var callback = arguments[arguments.length - 1];"+
+                 "window.setTimeout(callback, 500);";
+ SeleniumPlus.executeAsyncScript(script);
+ System.out.println("Elapsed time: " + System.currentTimeMillis() - start);
+</pre>
+</div>
+<br/>
+<div class="CodeBox">
+<pre class="SourceCode">
+ <span class="comments">//Example #2, call REST service to get a result.</span>
+ try{
+  WDTimeOut.setScriptTimeout(1, TimeUnit.SECONDS);
+  JavaScriptFunctions.DEBUG_OUTPUT_JAVASCRIPT_FUNCTIONS = true;
+  JavaScriptFunctions.setJsDebugLogEnable(true);
+
+  String script   = "try{ "
+              + "  var callback = arguments[arguments.length - 1];"
+              + "  debug('try to get registration service.');"
+              + "  var service = registry.getRegistrationService();"
+              + "  if(service==undefined){"
+              + "    debug('Failed to get service');"
+              + "  }else{"
+              + "    debug('we got registration service.'); "
+              + "  }"
+              + "  service.get({'user-id': 'administrator'}).done(callback).fail(callback);"
+              + "}catch(error){"
+              + "  debug('we met exception');"
+              + "  throw_error(error);"
+              + "}";
+
+  Object results = SeleniumPlus.executeAsyncScript(script);
+  System.out.println(results);
+ }catch(Exception e){
+  System.out.println(e.getMessage());
+ }finally{
+  WDTimeOut.resetScriptTimeout(0, TimeUnit.MILLISECONDS);
+ }
+</pre>
+</div>
+<br/>
+<div class="CodeBox">
+<pre class="SourceCode">
+ <span class="comments">//Example #3: Injecting a XMLHttpRequest and waiting for the result:</span>
+ String script =  "var callback = arguments[arguments.length - 1];" +
+                  "var xhr = new XMLHttpRequest();" +
+                  "xhr.open('GET', '/resource/data.json', true);" +
+                  "xhr.onreadystatechange = function() {" +
+                  "  if (xhr.readyState == 4) {" +
+                  "    callback(xhr.responseText);" +
+                  "  }" +
+                  "};" +
+                  "xhr.send();";
+ <span class="comments">//Wait result for at the most 5 seconds</span>
+ WDTimeOut.setScriptTimeout(5, TimeUnit.SECONDS);
+ Object result = SeleniumPlus.executeAsyncScript(script);
+ JsonObject json = new JsonParser().parse((String) result);
+</pre>
+</div>
+<br/>
+<div class="CodeBox">
+<pre class="SourceCode">
+ <span class="comments">//Example #4: Synchronizing a test with an AJAX application:</span>
+ Click(Map.Mail.ComposeButton);
+ String script = "var callback = arguments[arguments.length - 1];" +
+                 "mailClient.getComposeWindowWidget().onload(callback);";
+ Object result = SeleniumPlus.executeAsyncScript(script);
+ Component.InputCharacters(Map.Mail.To, "bog@example.com");
+</pre>
+</div>
+</li>
+<br/>
+<li>SeleniumPlus.ExecuteScript()
+<div class="CodeBox">
+<pre class="SourceCode">
+ SeleniumPlus.ExecuteScript(
+     Map.Google.SignIn,                       <span class="comments">// The WebElement passed as 'arguments[0]' to the script.</span>
+     "arguments[0].innerHTML=arguments[1];",  <span class="comments">// Script to set the WebElements innerHTML value.</span>
+     "my text value");                        <span class="comments">// The value passed as 'arguments[1]' to set to innerHTML.</span>
+</pre>
+</div>
+<br/>
+<div class="CodeBox">
+<pre class="SourceCode">
+ SeleniumPlus.ExecuteScript(
+     Map.Google.SignIn,                       <span class="comments">// The WebElement passed as 'arguments[0]' to the script.</span>
+     "return arguments[0].innerHTML;");       <span class="comments">// A script to return the WebElemenbts innerHTML.</span>
+ <span class="comments">//scriptResult should get the innerHTML value returned.</span>
+ String scriptResult = SeleniumPlus.prevResults.getStatusInfo();
+</pre>
+</div>
+</li>
+</ol>
+<a href="#calling-javascript">[go back]</a>
+
+</div>
+
 </body>
 </html>
