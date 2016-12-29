@@ -16,6 +16,7 @@ package org.safs.text;
  * <br>	DEC 09, 2014	(Carl Nagle)    Refactored deduceFile routines into here from GenericEngine and Processor.
  * <br>	FEB 04, 2015	(Lei Wang)    Modify getBufferedFileReader(): deduce the file encoding if no encoding is provided.
  * <br>	APR 06, 2016	(Carl Nagle)    Support FileAttribute.ALLFILES Type to specify all non-VOLUMELABEL files at a location.
+ * <br>	DEC 29, 2016	(Lei Wang)    Added deduceDatapoolFile(): deduce file relative to datapool.
  *
  *********************************************************************************************/
 
@@ -69,10 +70,11 @@ import org.safs.tools.stringutils.StringUtilities;
 public class FileUtilities
 {
 
-	public final static int FILE_TYPE_TEST 	  = 0;
-	public final static int FILE_TYPE_BENCH   = 1;
-	public final static int FILE_TYPE_PROJECT = 2;
-	public final static int FILE_TYPE_DIFF 	  = 3;
+	public final static int FILE_TYPE_TEST 	  	= 0;
+	public final static int FILE_TYPE_BENCH   	= 1;
+	public final static int FILE_TYPE_PROJECT 	= 2;
+	public final static int FILE_TYPE_DIFF 	  	= 3;
+	public final static int FILE_TYPE_DATAPOOL 	= 4;
 
 	public static final String VAR_SAFSBENCHDIRECTORY    = "safsbenchdirectory";
 	public static final String VAR_SAFSDATAPOOLDIRECTORY = "safsdatapooldirectory";
@@ -1564,9 +1566,10 @@ public class FileUtilities
 	   * @see {@link #FILE_TYPE_TEST}
 	   * @see {@link #FILE_TYPE_BENCH}
 	   * @see {@link #FILE_TYPE_DIFF}
+	   * @see {@link #FILE_TYPE_DATAPOOL}
 	   * @see {@link #FILE_TYPE_PROJECT}
 	   */
-	  public static File deduceFile(String filename, int type /** 0->test file; 1->bench file; 2->project file; 3->diff file */, RuntimeDataInterface data) throws SAFSException{
+	  public static File deduceFile(String filename, int type /** 0->test file; 1->bench file; 2->project file; 3->diff file; 4->datapool file */, RuntimeDataInterface data) throws SAFSException{
 		  File fn = null;
 		  if (filename==null || filename.length()==0) {
 			  throw new SAFSException("Required filename is not provided!");
@@ -1629,6 +1632,8 @@ public class FileUtilities
 					  }
 				  }else if(type==FILE_TYPE_PROJECT){
 					  pdir = data.getVariable(VAR_SAFSPROJECTDIRECTORY);
+				  }else if(type==FILE_TYPE_DATAPOOL){
+					  pdir = data.getVariable(VAR_SAFSDATAPOOLDIRECTORY);
 				  }
 			  } catch (Exception x) {}
 			  if ((pdir == null) || (pdir.equals(""))) {
@@ -1641,6 +1646,8 @@ public class FileUtilities
 					  error += " "+ VAR_SAFSDATAPOOLDIRECTORY + ", "+ VAR_SAFSDIFDIRECTORY;
 				  }else if(type==FILE_TYPE_PROJECT){
 					  error += " "+ VAR_SAFSPROJECTDIRECTORY;
+				  }else if(type==FILE_TYPE_DATAPOOL){
+					  error += " "+ VAR_SAFSDATAPOOLDIRECTORY;
 				  }
 				  throw new SAFSException(error);
 			  }
@@ -1724,6 +1731,17 @@ public class FileUtilities
 		  return deduceFile(filename, FILE_TYPE_PROJECT, data);
 	  }
 
+	  /**
+	   * Deduce the absolute full path datapool-relative file.
+	   * @param filename, String, the data file name. It can contain sub directories.
+	   * @param RuntimeDataInterface to access runtime data (directories). Like a subclass of GenericEngine, or Processor.
+	   * @return File, the absolute full path datapool file.
+	   * @throws SAFSException
+	   * @see {@link #deduceFile(String, int)}
+	   */
+	  public static File deduceDatapoolFile(String filename, RuntimeDataInterface data) throws SAFSException{
+		  return deduceFile(filename, FILE_TYPE_DATAPOOL, data);
+	  }
 
 	/**
 	 * @param file File, the file to extract the attribute information.
