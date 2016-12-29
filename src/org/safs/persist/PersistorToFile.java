@@ -72,13 +72,14 @@ public abstract class PersistorToFile extends AbstractRuntimeDataPersistor{
 			writeTailer(persistable);
 		} catch (IOException e) {
 			String message = FAILStrings.convert(FAILKEYS.FILE_ERROR, "Error opening or reading or writing file '"+filename+"'", filename);
+			IndependantLog.error(message+". Met "+e.toString());
 			throw new SAFSException(message);
 		} finally{
 			//close the persistence file
 			try {
 				if(writer!=null) writer.close();
 			} catch (IOException e) {
-				IndependantLog.warn(StringUtils.debugmsg(false)+"Failed to close the writer on file '"+filename+"'.");
+				IndependantLog.warn(StringUtils.debugmsg(false)+"Failed to close the writer on file '"+filename+"'. Met "+e.toString());
 			}
 		}
 	}
@@ -138,13 +139,14 @@ public abstract class PersistorToFile extends AbstractRuntimeDataPersistor{
 
 		} catch (IOException e) {
 			String message = FAILStrings.convert(FAILKEYS.FILE_ERROR, "Error opening or reading or writing file '"+filename+"'", filename);
+			IndependantLog.error(message+". Met "+e.toString());
 			throw new SAFSException(message);
 		} finally{
 			//close the persistence file
 			try {
 				if(reader!=null) reader.close();
 			} catch (IOException e) {
-				IndependantLog.warn(StringUtils.debugmsg(false)+"Failed to close the reader on file '"+filename+"'.");
+				IndependantLog.warn(StringUtils.debugmsg(false)+"Failed to close the reader on file '"+filename+"'. Met "+e.toString());
 			}
 		}
 
