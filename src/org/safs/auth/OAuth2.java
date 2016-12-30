@@ -22,30 +22,21 @@ import org.safs.persist.PersistableDefault;
  *
  */
 public class OAuth2 extends PersistableDefault implements Auth{
-	protected final static Map<String, String> fieldToPersistKeyMap = new HashMap<String, String>();
-
-	private String userName = null;
-	private String password = null;
+	private final static Map<String, String> fieldToPersistKeyMap = new HashMap<String, String>();
 
 	protected Content content = null;
+	protected SimpleAuth simpleAuth = null;
 
 	static{
-		fieldToPersistKeyMap.put("userName", "userName");
-		fieldToPersistKeyMap.put("password", "password");
 		fieldToPersistKeyMap.put("content", "content");
+		fieldToPersistKeyMap.put("simpleAuth", "simpleAuth");
 	}
 
-	public String getUserName() {
-		return userName;
+	public SimpleAuth getSimpleAuth() {
+		return simpleAuth;
 	}
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
-	public String getPassword() {
-		return password;
-	}
-	public void setPassword(String password) {
-		this.password = password;
+	public void setSimpleAuth(SimpleAuth simpleAuth) {
+		this.simpleAuth = simpleAuth;
 	}
 
 	public Content getContent() {

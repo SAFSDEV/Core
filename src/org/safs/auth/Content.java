@@ -22,7 +22,7 @@ import org.safs.persist.PersistableDefault;
  */
 //TODO it is just an example for testing Persistor, need to fill with more useful fields.
 public class Content extends PersistableDefault{
-	protected final static Map<String, String> fieldToPersistKeyMap = new HashMap<String, String>();
+	private final static Map<String, String> fieldToPersistKeyMap = new HashMap<String, String>();
 
 	protected String customData = null;
 	private boolean expected = false;
