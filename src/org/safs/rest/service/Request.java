@@ -16,7 +16,7 @@ import org.safs.persist.PersistableDefault;
 public class Request extends PersistableDefault{
 
 	public static final boolean BOOL_VERIFY_REQUEST 	= false;
-	protected final static Map<String, String> fieldToPersistKeyMap = new HashMap<String, String>();
+	private final static Map<String, String> fieldToPersistKeyMap = new HashMap<String, String>();
 
 	String _request_method;
 	String _request_uri;
