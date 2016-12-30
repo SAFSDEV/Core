@@ -21,7 +21,7 @@ import org.safs.persist.PersistableDefault;
  */
 public class Response extends PersistableDefault{
 
-	protected final static Map<String, String> fieldToPersistKeyMap = new HashMap<String, String>();
+	private final static Map<String, String> fieldToPersistKeyMap = new HashMap<String, String>();
 
 	Request _request;
 	String ID = "TO BE ASSIGNED";

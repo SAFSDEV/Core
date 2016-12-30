@@ -21,11 +21,10 @@ import org.safs.persist.PersistableDefault;
  *
  */
 public class SimpleAuth extends PersistableDefault implements Auth{
-	protected final static Map<String, String> fieldToPersistKeyMap = new HashMap<String, String>();
+	private final static Map<String, String> fieldToPersistKeyMap = new HashMap<String, String>();
 
 	private String userName = null;
 	private String password = null;
-
 
 	static{
 		fieldToPersistKeyMap.put("userName", "userName");
