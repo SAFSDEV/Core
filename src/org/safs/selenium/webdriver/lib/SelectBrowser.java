@@ -2,8 +2,6 @@
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
-package org.safs.selenium.webdriver.lib;
-
 /**
 * History:<br>
 *
@@ -22,7 +20,9 @@ package org.safs.selenium.webdriver.lib;
 *  APR 26, 2016    (LeiWang) Modify getDesiredCapabilities(): Get value of 'unexpectedAlertBehaviour' from Processor and 'System property'
 *                                                             and set it for all browsers.
 *  NOV 09, 2016    (LeiWang) Copied constants to org.safs.Contants and refer to them.
+*  JAN 03, 2017    (LeiWang) Modified getBrowserInstance() and getDesiredCapabilities() and added prepareHttpProxy(): Handle the HTTP proxy setting.
 */
+package org.safs.selenium.webdriver.lib;
 
 import java.io.File;
 import java.util.HashMap;
@@ -198,6 +198,42 @@ public class SelectBrowser {
 	public static WebDriver getBrowserInstance(String browserName) {
 		return getBrowserInstance(browserName, null);
 	}
+
+	/**
+	 * Get HTTP proxy settings from System properties and set them to Map object.
+	 *
+	 * @param extraParameters Map<String,Object>, the original parameters Map
+	 * @return Map<String,Object>, the parameters Map containing proxy settings from System properties if they exist.
+	 */
+	private static Map<String,Object> prepareHttpProxy(Map<String,Object> extraParameters) {
+		//Get proxy settings from System properties
+		String proxy = System.getProperty(SelectBrowser.SYSTEM_PROPERTY_PROXY_HOST);
+		if(StringUtils.isValid(proxy)){
+			if(extraParameters==null){
+				extraParameters = new HashMap<String,Object>();
+			}
+			String proxysetting = proxy;
+			String port = System.getProperty(SelectBrowser.SYSTEM_PROPERTY_PROXY_PORT);
+			if(StringUtils.isValid(port)) proxysetting += ":"+port;
+			//should NOT over-write that provided in extraParameters
+			if(!extraParameters.containsKey(KEY_PROXY_SETTING)){
+				extraParameters.put(KEY_PROXY_SETTING, proxysetting);
+			}
+		}
+		if(extraParameters!=null){
+			String bypass = System.getProperty(SelectBrowser.SYSTEM_PROPERTY_PROXY_BYPASS);
+			if(StringUtils.isValid(bypass) &&
+			   extraParameters.containsKey(KEY_PROXY_SETTING) &&
+			   //should NOT over-write that provided in extraParameters
+			   !extraParameters.containsKey(KEY_PROXY_BYPASS_ADDRESS)){
+
+				extraParameters.put(KEY_PROXY_BYPASS_ADDRESS, bypass);
+			}
+		}
+
+		return extraParameters;
+	}
+
 	/**
 	 *
 	 * @param browserName String, the browser name, such as "explorer".  If null, then the
@@ -207,7 +243,7 @@ public class SelectBrowser {
 	 * @param extraParameters HashMap<String,Object>, can be used to pass more browser parameters, such as proxy settings.
 	 * @return WebDriver
 	 */
-	public static WebDriver getBrowserInstance(String browserName, HashMap<String,Object> extraParameters) {
+	public static WebDriver getBrowserInstance(String browserName, Map<String,Object> extraParameters) {
 		WebDriver instance = null;
 		DesiredCapabilities caps = null;
 
@@ -221,22 +257,10 @@ public class SelectBrowser {
 
 		String browserNameLC = browserName.toLowerCase();
 
-		//Prepare the Capabilities
-		if(extraParameters==null || extraParameters.isEmpty()){
-			//Get proxy settings from System properties
-			String proxy = System.getProperty(SelectBrowser.SYSTEM_PROPERTY_PROXY_HOST);
-			String port = System.getProperty(SelectBrowser.SYSTEM_PROPERTY_PROXY_PORT);
-			if(proxy!=null && !proxy.isEmpty()){
-				String proxysetting = proxy;
-				if(port!=null && !port.isEmpty()) proxysetting += ":"+port;
-				extraParameters.put(KEY_PROXY_SETTING, proxysetting);
+		//Get proxy settings from System properties
+		extraParameters = prepareHttpProxy(extraParameters);
 
-				String bypass = System.getProperty(SelectBrowser.SYSTEM_PROPERTY_PROXY_BYPASS);
-				if(proxy!=null && !proxy.isEmpty()){
-					extraParameters.put(KEY_PROXY_BYPASS_ADDRESS, bypass);
-				}
-			}
-		}
+		//Prepare the Capabilities
 		if(extraParameters!=null && !extraParameters.isEmpty()){
 			caps = getDesiredCapabilities(browserNameLC, extraParameters);
 		}
@@ -281,6 +305,9 @@ public class SelectBrowser {
 	public static DesiredCapabilities getDesiredCapabilities(String browserName, Map<String,Object> extraParameters) {
 		String debugmsg = StringUtils.debugmsg(false);
 		DesiredCapabilities caps = null;
+
+		//Get proxy settings from System properties
+		extraParameters = prepareHttpProxy(extraParameters);
 
 		if (browserName.equals(BROWSER_NAME_IE)) {
 			System.setProperty(SYSTEM_PROPERTY_WEBDRIVER_IE, "IEDriverServer.exe");
