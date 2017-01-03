@@ -24,27 +24,16 @@ import org.safs.persist.PersistableDefault;
 public class Content extends PersistableDefault{
 	private final static Map<String, String> fieldToPersistKeyMap = new HashMap<String, String>();
 
-	protected String customData = null;
-	private boolean expected = false;
-
-	int count = 0;
-	float fly = 0.0f;
-	char hi = 'a';
-
-	public String getCustomData() {
-		return customData;
-	}
-
-	public void setCustomData(String customData) {
-		this.customData = customData;
-	}
+	private String consumerKey = null;
+	private String consumerSecret = null;
+	private String accessToken = null;
+	private String accessTokenSecret = null;
 
 	static{
-		fieldToPersistKeyMap.put("customData", "customData");
-		fieldToPersistKeyMap.put("expected", "Expected");
-		fieldToPersistKeyMap.put("count", "count");
-		fieldToPersistKeyMap.put("fly", "fly");
-		fieldToPersistKeyMap.put("hi", "hi");
+		fieldToPersistKeyMap.put("consumerKey", "consumerKey");
+		fieldToPersistKeyMap.put("consumerSecret", "consumerSecret");
+		fieldToPersistKeyMap.put("accessToken", "accessToken");
+		fieldToPersistKeyMap.put("accessTokenSecret", "accessTokenSecret");
 	}
 
 	@Override
@@ -52,28 +41,36 @@ public class Content extends PersistableDefault{
 		return fieldToPersistKeyMap;
 	}
 
-	public int getCount() {
-		return count;
+	public String getConsumerKey() {
+		return consumerKey;
 	}
-	public void setCount(int count) {
-		this.count = count;
+
+	public void setConsumerKey(String consumerKey) {
+		this.consumerKey = consumerKey;
 	}
-	public float getFly() {
-		return fly;
+
+	public String getConsumerSecret() {
+		return consumerSecret;
 	}
-	public void setFly(float fly) {
-		this.fly = fly;
+
+	public void setConsumerSecret(String consumerSecret) {
+		this.consumerSecret = consumerSecret;
 	}
-	public char getHi() {
-		return hi;
+
+	public String getAccessToken() {
+		return accessToken;
 	}
-	public void setHi(char hi) {
-		this.hi = hi;
+
+	public void setAccessToken(String accessToken) {
+		this.accessToken = accessToken;
 	}
-	public boolean isExpected() {
-		return expected;
+
+	public String getAccessTokenSecret() {
+		return accessTokenSecret;
 	}
-	public void setExpected(boolean expected) {
-		this.expected = expected;
+
+	public void setAccessTokenSecret(String accessTokenSecret) {
+		this.accessTokenSecret = accessTokenSecret;
 	}
+
 }
