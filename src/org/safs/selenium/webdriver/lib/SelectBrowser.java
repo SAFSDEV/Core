@@ -21,6 +21,7 @@
 *                                                             and set it for all browsers.
 *  NOV 09, 2016    (LeiWang) Copied constants to org.safs.Contants and refer to them.
 *  JAN 03, 2017    (LeiWang) Modified getBrowserInstance() and getDesiredCapabilities() and added prepareHttpProxy(): Handle the HTTP proxy setting.
+*  JAN 06, 2017    (LeiWang) Modified addFireFoxPreference(): catch IllegalArgumentException inside the loop for each FirefoxProfile.setPreference().
 */
 package org.safs.selenium.webdriver.lib;
 
@@ -559,6 +560,12 @@ public class SelectBrowser {
 	 */
 	private static void addFireFoxPreference(FirefoxProfile firefoxProfile, Map<?, ?> firefoxPreference){
 
+		String debugmsg = StringUtils.debugmsg(false);
+		if(firefoxPreference==null){
+			IndependantLog.error(debugmsg+" The parameter 'firefoxPreference' is null!");
+			return;
+		}
+
 		try{
 			//profile.setPreference("media.navigator.permission.disabled", true); boolean
 			//profile.setPreference("browser.download.folderList",2); int
@@ -567,18 +574,22 @@ public class SelectBrowser {
 			String[] keys = firefoxPreference.keySet().toArray(new String[0]);
 			Object value = null;
 			for(String key:keys){
-				value = firefoxPreference.get(key);
-				if(value instanceof Boolean){
-					firefoxProfile.setPreference(key, ((Boolean)value).booleanValue());
-				}else if(value instanceof Number){
-					firefoxProfile.setPreference(key, ((Number)value).intValue());
-				}else{
-					firefoxProfile.setPreference(key, value.toString());
+				try{
+					value = firefoxPreference.get(key);
+					if(value instanceof Boolean){
+						firefoxProfile.setPreference(key, ((Boolean)value).booleanValue());
+					}else if(value instanceof Number){
+						firefoxProfile.setPreference(key, ((Number)value).intValue());
+					}else{
+						firefoxProfile.setPreference(key, value.toString());
+					}
+				}catch(IllegalArgumentException e){
+					IndependantLog.warn(debugmsg+" failed set preference '"+key+"' to '"+value+"', due to "+StringUtils.debugmsg(e));
 				}
 			}
 
 		}catch(Exception e){
-			IndependantLog.error(StringUtils.debugmsg(false)+" failed set preference to firefox profile, due to "+StringUtils.debugmsg(e));
+			IndependantLog.error(debugmsg+" failed set preference to firefox profile, due to "+StringUtils.debugmsg(e));
 		}
 	}
 
