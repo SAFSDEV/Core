@@ -50,6 +50,8 @@ function hideAllContentPanels(){
     document.getElementById("assets").style.display="none";
     document.getElementById("enable-safs").style.display="none";
     document.getElementById("remote-servers").style.display="none";
+    document.getElementById("calling-javascript").style.display="none";
+    document.getElementById("http-proxy").style.display="none";
 
     document.getElementById("href-welcome").style.fontWeight="normal";
 	document.getElementById("href-sample-install").style.fontWeight="normal";
@@ -71,6 +73,9 @@ function hideAllContentPanels(){
 	document.getElementById("href-assets").style.fontWeight="normal";
 	document.getElementById("href-enable-safs").style.fontWeight="normal";
 	document.getElementById("href-remote-servers").style.fontWeight="normal";
+	document.getElementById("href-using-autoit").style.fontWeight="normal";
+	document.getElementById("href-calling-javascript").style.fontWeight="normal";
+	document.getElementById("href-http-proxy").style.fontWeight="normal";
 }
 function showWelcome(){
 	hideAllContentPanels();
@@ -177,6 +182,11 @@ function callingJavascript(){
     document.getElementById("calling-javascript").style.display="block";
     document.getElementById("href-calling-javascript").style.fontWeight="900";
 }
+function setHttpProxy(){
+	hideAllContentPanels();
+    document.getElementById("http-proxy").style.display="block";
+    document.getElementById("href-http-proxy").style.fontWeight="900";
+}
 </script>
 
 </head>
@@ -188,6 +198,7 @@ function callingJavascript(){
 <div id="menu" class="panelselector">
 <hr>
 <a href="#" onclick="showWelcome()" id ="href-welcome" >Welcome</a>&nbsp;&nbsp;|
+<a href="#" onclick="projectAssets()" id="href-assets" >Project Assets</a>&nbsp;&nbsp;|
 <a href="#" onclick="newSample()" id="href-sample-install" >Sample Project</a>&nbsp;&nbsp;|
 <a href="#" onclick="newProject()" id="href-project-create" >Create New Project</a>&nbsp;&nbsp;|
 <a href="#" onclick="importProject()" id="href-project-import">Import Projects</a>&nbsp;&nbsp;|
@@ -203,11 +214,11 @@ function callingJavascript(){
 <a href="#" onclick="showIESetup()" id="href-iesetup" >Setup Browser</a>&nbsp;&nbsp;|
 <a href="#" onclick="startWebBrowser()" id="href-startwebbrowser" >Start Browser</a>&nbsp;&nbsp;|
 <a href="#" onclick="updateSoftware()" id="href-updatesoftware" >Update SeleniumPlus</a>&nbsp;&nbsp;|
-<a href="#" onclick="projectAssets()" id="href-assets" >Project Assets</a>&nbsp;&nbsp;|
 <a href="#" onclick="enableSAFS()" id="href-enable-safs" >Enable SAFS</a>&nbsp;&nbsp;|
 <a href="#" onclick="remoteServers()" id="href-remote-servers" >Remote Servers</a>&nbsp;&nbsp;|
-<a href="http://safsdev.sourceforge.net/sqabasic2000/UsingAutoIT.htm" onclick="usingAutoIT()">Using AutoIT</a>&nbsp;&nbsp;|
+<a href="http://safsdev.sourceforge.net/sqabasic2000/UsingAutoIT.htm" id="href-using-autoit" onclick="usingAutoIT()">Using AutoIT</a>&nbsp;&nbsp;|
 <a href="#" onclick="callingJavascript()" id="href-calling-javascript" >Calling Javascript</a>&nbsp;&nbsp;|
+<a href="#" onclick="setHttpProxy()" id="href-http-proxy" >HTTP Proxy</a>&nbsp;&nbsp;|
 <a href="#" onclick="showReferences()" id="href-references" >References</a>&nbsp;&nbsp;
 <br>
 <hr>
@@ -1391,9 +1402,16 @@ StartWebBrowser(URL, ID, SelectBrowser.BROWSER_NAME_CHROME, "30", "true", quote(
 <!-- Update SeleniumPlus         -->
 <!--------------------------------->
 <div id="updatesoftware" style="display: none;">
-<h2>Update SeleniumPlus</h2>
 <p>
-Update SelenumPlus jars and SeleniumPlus eclipse plugin to the latest level. During the update, SELENUM_PLUS/update_bak and SELENIUM_PLUS/eclipse/plugins/update_bak are created so user can revert the changes back.
+"Update" expects that "SeleniumPlus" has already successfully installed, so the system environment %<b>SELENUM_PLUS</b>% has been defined correctly.<br/>
+Update SelenumPlus jars and SeleniumPlus eclipse plugin to the latest level. During the update, %<b>SELENUM_PLUS</b>%/update_bak and %<b>SELENIUM_PLUS</b>%/eclipse/plugins/update_bak are created so user can revert the changes back.<br/>
+There are 3 ways:
+<ul>
+<li><a href="#updatesoftware_from_ide">Update From SeleniumPlus IDE</a>
+<li><a href="#updatesoftware_by_script">Update by script</a>
+<li><a href="#updatesoftware_manually">Manual SeleniumPlus update steps</a>
+</ul>
+<h2 id="updatesoftware_from_ide">Update From SeleniumPlus IDE</h2>
 <p><ol>
 	Before update, make sure correct Selenium+ preference are enable.
 	<li>From the Eclipse main menu.
@@ -1415,11 +1433,45 @@ Update SelenumPlus jars and SeleniumPlus eclipse plugin to the latest level. Dur
 	<li>When Update finish, Jars will be updated into build path.
 	<li>Close the Update Complete window.
 	</ol>
-	<p>
+<a href="#updatesoftware">[go back]</a>
 
+<p>
+<h2 id="updatesoftware_by_script">Update by script</h2>
+	The batch script "<b>updateRuntime.bat</b>" can be used to update SeleniumPlus/SAFS.<br/>
+	This script expects that "SeleniumPlus"/"SAFS" has already successfully installed, so the system environment SELENIUM_PLUS/SAFSDIR has been defined correctly.<br/>
 	<p>
-	If automated update fails then use manual steps to update SeleniumPlus environment.
-	<h2>Manual SeleniumPlus update steps</h2>
+	This script should be in folder %SELENIUM_PLUS%\extra or %SAFSDIR%\extra.<br/>
+	<ol>
+	<li>If it exists and is latest<br/>
+	    The script usage is <span class="sourcecodes">updateRuntime.bat [ALL|SE|SAFS]</span>, with parameter "SE" it updates SeleniumPlus, with "SAFS" it updates SAFS, with "ALL" it updates both "SeleniumPlus" and "SAFS".<br/> 
+	    So call <span class="commandline">updateRuntime.bat SE</span> to update SeleniumPlus.<br/>	
+	<li>If it exists but is not latest<br/>
+	    No parameter is needed, call <span class="commandline">updateRuntime.bat</span> directly to get latest version of SeleniumPlus.
+	<li>If it does not exist<br/>
+	    Please get its <a href="https://github.com/SAFSDEV/Core/blob/master/src/org/safs/selenium/install/extra/updateRuntime.bat" target="blank">sourcecode</a> manually. The latest script should be dated 11/30/2016.<br/>
+	    Then call <span class="commandline">updateRuntime.bat SE</span>.
+	</ol>
+	
+	<p>
+	In the script, we are using the internal update resource which is faster. If you prefer using external update resource, then comment "internal resource" and un-comment "external resource".
+	<div class="CodeBox">
+    <pre class="SourceCode">
+    <span class="comments">REM External update resource
+    REM SET SE_LIB_UPDATE=https://github.com/SAFSDEV/UpdateSite/releases/download/seleniumplus/SEPLUS.LIB.UPDATE.ZIP
+    REM SET SE_PLUGIN_UPDATE=https://github.com/SAFSDEV/UpdateSite/releases/download/seleniumplus/SEPLUS.PLUGIN.UPDATE.ZIP
+    REM SET SAFS_LIB_UPDATE=https://github.com/SAFSDEV/UpdateSite/releases/download/safs/SAFS.LIB.UPDATE.ZIP</span>
+
+    <span class="comments">REM Internal update resource</span>
+    SET SE_LIB_UPDATE=http://safsbuild.na.sas.com:81/jenkins/job/SeleniumPlus/ws/updatesite/lib/latest/SEPLUS.LIB.UPDATE.ZIP
+    SET SE_PLUGIN_UPDATE=http://safsbuild.na.sas.com:81/jenkins/job/SeleniumPlus/ws/updatesite/plugin/latest/SEPLUS.PLUGIN.UPDATE.ZIP
+    SET SAFS_LIB_UPDATE=http://safsbuild.na.sas.com:81/jenkins/job/SAFS/ws/updatesite/lib/latest/SAFS.LIB.UPDATE.ZIP
+    </pre>
+    </div>
+<a href="#updatesoftware">[go back]</a>
+
+<p>
+If automated update fails then use manual steps to update SeleniumPlus environment.
+<h2 id="updatesoftware_manually">Manual SeleniumPlus update steps</h2>
 	<p>
 	SeleniumPlus library update:
 	<ol>
@@ -1446,8 +1498,7 @@ Update SelenumPlus jars and SeleniumPlus eclipse plugin to the latest level. Dur
 	    (Note: Please back-up dir/files before update).
 	<li>Click Selenium+->Update->Refresh Build Path.
 	</ol>
-	<p>
-
+<a href="#updatesoftware">[go back]</a>
 
 <hr>
 </div>
@@ -1976,6 +2027,74 @@ We don't need to understand all of them  :) , the items below are listed by nece
 </li>
 </ol>
 <a href="#calling-javascript">[go back]</a>
+
+</div>
+
+
+<!--------------------------------->
+<!--    Setting HTTP Proxy       -->
+<!--------------------------------->
+<div id="http-proxy" style="display: none" >
+<h2>HTTP Proxy</h2>
+<p>
+In some testing environment, Internet access is not direct, but through a Proxy server.
+This section is talking about HTTP proxy settings in SeleniumPlus.<br/>
+There are 2 ways:
+<ul>
+<li><a href="#http_proxy_global_setting">Global setting</a>
+<li><a href="#http_proxy_set_by_api_param">By API parameters</a>
+</ul>
+If user sets the "HTTP proxy" in both ways, "API parameters" will override those in "Global setting".
+
+<h3 id="http_proxy_global_setting">Global setting:</h3>
+The HTTP proxy can be set globally in the INI configuration file.
+<pre class="appmap">
+[SAFS_SELENIUM]
+<span class="comments">;define the HTTP PROXY host name to connect Internet</span>
+<a href="../../doc/org/safs/tools/drivers/DriverConstant.html#GATEWAYHOST" target="_blank">GATEWAYHOST</a>=yourGateway.net
+<span class="comments">;define the HTTP PROXY port number to connect Internet</span>
+<a href="../../doc/org/safs/tools/drivers/DriverConstant.html#GATEWAYPORT" target="_blank">GATEWAYPORT</a>=80
+<span class="comments">;define the HTTP PROXY "bypass address" when connecting INTRANET</span>
+<a href="../../doc/org/safs/tools/drivers/DriverConstant.html#PROXY_BYPASS_ADDRESS" target="_blank">PROXY_BYPASS_ADDRESS</a>=localhost,127.0.0.1,host.not.thru.gateway
+</pre>
+<a href="#http-proxy">[go back]</a>
+
+<h3 id="http_proxy_set_by_api_param">By API parameters:</h3>
+<p>
+The HTTP proxy can also be set by the optional parameters of <a href="../../doc/org/safs/selenium/webdriver/SeleniumPlus.html#StartWebBrowser(java.lang.String,%20java.lang.String,%20java.lang.String...)" target="_blank">StartWebBrowser</a> API.
+The optional parameters are given as pair (key, value). The keys related to "HTTP proxy" are:
+<ol>
+  <li><a href="../../doc/org/safs/selenium/webdriver/lib/SelectBrowser.html#KEY_PROXY_SETTING" target="_blank">KEY_PROXY_SETTING</a>: the key for proxy string; The value is colon separated string as "proxyserver:port"
+  <li><a href="../../doc/org/safs/selenium/webdriver/lib/SelectBrowser.html#KEY_PROXY_BYPASS_ADDRESS" target="_blank">KEY_PROXY_BYPASS_ADDRESS</a>: the key for proxy bypass address string; The value is comma separated string as "localhost,tadsrv,rnd.sas.com"
+</ol>
+
+Examples:
+<div class="CodeBox">
+<pre class="SourceCode">
+<span class="comments">//Start the firefox web browser with proxy server as "proxy.server" and proxy server port as "8080"</span>
+StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
+                                                        SelectBrowser.BROWSER_NAME_FIREFOX,
+                                                        "10",
+                                                        "true",
+                                                        <b>quote(SelectBrowser.KEY_PROXY_SETTING)</b>,
+                                                        <b>quote("proxy.server:8080")</b>
+                                                        });
+                                                        
+<span class="comments">//Start the firefox web browser with proxy server as "proxy.server" and proxy server port as "8080"</span>
+<span class="comments">//local.site1, local.site2 will not be routed through "proxy.server"</span>
+StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
+                                                        SelectBrowser.BROWSER_NAME_FIREFOX,
+                                                        "10",
+                                                        "true",
+                                                        <b>quote(SelectBrowser.KEY_PROXY_SETTING)</b>,
+                                                        <b>quote("proxy.server:8080")</b>,
+                                                        <b>quote(SelectBrowser.KEY_PROXY_BYPASS_ADDRESS)</b>,
+                                                        <b>quote("local.site1, local.site2")</b>
+                                                        });
+
+</pre>
+</div>
+<a href="#http-proxy">[go back]</a>
 
 </div>
 
