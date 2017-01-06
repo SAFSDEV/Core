@@ -5,13 +5,14 @@ import static org.apache.hc.client5.http.testframework.HttpClientPOJOAdapter.USE
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.hc.client5.http.testframework.HttpClient5Adapter;
 import org.apache.hc.client5.http.testframework.HttpClientPOJOAdapter;
-import org.apache.hc.client5.http.utils.URLEncodedUtils;
+import org.apache.hc.core5.net.URLEncodedUtils;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.ProtocolVersion;
 
@@ -82,7 +83,7 @@ public class RESTImpl {
 	public static Map<String,Object> parseUri(String uriString) throws URISyntaxException {
 		URI uri = new URI(uriString);
 		Map<String, String> query = new HashMap<String,String>();
-		List<NameValuePair> nvplist = URLEncodedUtils.parse(uri, "UTF-8" /*StandardCharsets.UTF_8*/);
+		List<NameValuePair> nvplist = URLEncodedUtils.parse(uri, StandardCharsets.UTF_8);
 		
 		for (NameValuePair nvp : nvplist) {
 			query.put(nvp.getName(), nvp.getValue());
