@@ -6,6 +6,7 @@ package org.safs.rest.service;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.CharsetDecoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -14,14 +15,16 @@ import java.util.Map;
 
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpException;
-import org.apache.hc.core5.http.config.MessageConstraints;
-import org.apache.hc.core5.http.impl.io.HttpTransportMetricsImpl;
+import org.apache.hc.core5.http.config.H1Config;
+import org.apache.hc.core5.http.impl.BasicHttpTransportMetrics;
+import org.apache.hc.core5.http.impl.io.AbstractMessageParser;
 import org.apache.hc.core5.http.impl.io.SessionInputBufferImpl;
 import org.apache.hc.core5.http.message.BasicHeader;
 import org.apache.hc.core5.http.message.BasicLineParser;
 import org.apache.hc.core5.util.CharArrayBuffer;
 import org.safs.SAFSRuntimeException;
 import org.apache.hc.core5.http.message.HeaderGroup;
+import org.apache.hc.core5.http.message.LineParser;
 
 
 /**
@@ -409,24 +412,26 @@ public class Headers {
 	private static Header[] parseHeadersInMultiLineString(String _headerString) {
 		
 		/*
-		 * This is pretty close to how Apache HTTP Client5 parses headers.
+		 * This is pretty close to how Apache HTTP Core5 parses headers.
 		 */
 		try {
 			ByteArrayInputStream inputStream = new ByteArrayInputStream(_headerString.getBytes("UTF-8"));
 			
 			int buffersize = org.apache.hc.core5.http.config.ConnectionConfig.DEFAULT.getBufferSize();
-			HttpTransportMetricsImpl inTransportMetrics = new HttpTransportMetricsImpl();
-			MessageConstraints messageConstraints = MessageConstraints.DEFAULT;
-			SessionInputBufferImpl inbuffer = new SessionInputBufferImpl(inTransportMetrics, buffersize, -1, messageConstraints, null);
-			BasicLineParser parser = org.apache.hc.core5.http.message.BasicLineParser.INSTANCE;
+			BasicHttpTransportMetrics inTransportMetrics = new BasicHttpTransportMetrics();
+			final H1Config h1Config = H1Config.DEFAULT;
+			final CharsetDecoder chardecoder = null;
+			SessionInputBufferImpl inbuffer = new SessionInputBufferImpl(inTransportMetrics, buffersize, -1, 
+			                                                             h1Config.getMaxLineLength(), chardecoder);
+			final LineParser lineParser = BasicLineParser.INSTANCE;
 			
-			inbuffer.bind(inputStream);
-			List<CharArrayBuffer> headerLines = new ArrayList<CharArrayBuffer>();
-			Header[] headers = org.apache.hc.core5.http.impl.io.AbstractMessageParser.parseHeaders(
+			List<CharArrayBuffer> headerLines = new ArrayList<>();
+			final Header[] headers = AbstractMessageParser.parseHeaders(
 				inbuffer,
-				messageConstraints.getMaxHeaderCount(),
-				messageConstraints.getMaxLineLength(),
-				parser,
+				inputStream,
+				h1Config.getMaxHeaderCount(),
+				h1Config.getMaxLineLength(),
+				lineParser,
 				headerLines
 			);
 			return headers;
