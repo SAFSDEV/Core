@@ -36,16 +36,16 @@ import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.routing.DefaultProxyRoutePlanner;
 import org.apache.hc.client5.http.impl.sync.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.sync.HttpClients;
-import org.apache.hc.client5.http.methods.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.sync.CloseableHttpResponse;
 import org.apache.hc.client5.http.methods.RequestBuilder;
 import org.apache.hc.client5.http.routing.HttpRoutePlanner;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.http.ProtocolVersion;
-import org.apache.hc.core5.http.entity.ContentType;
-import org.apache.hc.core5.http.entity.EntityUtils;
-import org.apache.hc.core5.http.entity.StringEntity;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.safs.IndependantLog;
 
 // TODO: can this be moved beside HttpClient?  If so, throw a better exception than WebServerTestingFrameworkException.
@@ -134,7 +134,7 @@ public class HttpClient5Adapter extends HttpClientPOJOAdapter {
         final String contentType = entity == null ? null : entity.getContentType();
 
         final Map<String, Object> ret = new HashMap<String, Object>();
-        ret.put("status", response.getStatusLine().getStatusCode());
+        ret.put("status", response.getCode());
 
         // convert the headers to a Map
         final Map<String, Object> headerMap = new HashMap<String, Object>();
