@@ -10,7 +10,7 @@ import org.safs.rest.service.commands.curl.CurlCommand
 import java.util.Map;
 import org.apache.hc.core5.http.HttpException
 
-import org.safs.rest.service.adapter.HttpClientPOJOAdapter
+import org.apache.hc.core5.testing.framework.ClientPOJOAdapter
 
 /**
  *
@@ -51,7 +51,7 @@ import org.safs.rest.service.adapter.HttpClientPOJOAdapter
  *                ]
  * </pre>
  */
-class SafsrestAdapter extends HttpClientPOJOAdapter {
+class SafsrestAdapter extends ClientPOJOAdapter {
     public static final USERID = "userid"
     public static final PASSWORD = "password"
     
@@ -260,7 +260,7 @@ class SafsrestAdapter extends HttpClientPOJOAdapter {
      * @return name of the HTTP Client.
      */
     @Override
-    public String getHTTPClientName() {
+    public String getClientName() {
         "SAFSREST${useScript ? '_using_OS_shell' : ''}${execCurlFromJVM ? '_execCurlFromJVM' : ''}"
     }
 

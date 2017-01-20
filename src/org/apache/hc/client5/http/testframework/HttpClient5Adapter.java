@@ -25,7 +25,7 @@
  *
  */
 
-package org.safs.rest.service.adapter;
+package org.apache.hc.client5.http.testframework;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -33,16 +33,20 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.routing.DefaultProxyRoutePlanner;
 import org.apache.hc.client5.http.impl.sync.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.sync.HttpClients;
-import org.apache.hc.client5.http.methods.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.sync.CloseableHttpResponse;
 import org.apache.hc.client5.http.methods.RequestBuilder;
+import org.apache.hc.client5.http.routing.HttpRoutePlanner;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.http.ProtocolVersion;
-import org.apache.hc.core5.http.entity.ContentType;
-import org.apache.hc.core5.http.entity.EntityUtils;
-import org.apache.hc.core5.http.entity.StringEntity;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.safs.IndependantLog;
 
 // TODO: can this be moved beside HttpClient?  If so, throw a better exception than HttpServerTestingFrameworkException.
 /**
@@ -59,16 +63,16 @@ public class HttpClient5Adapter extends HttpClientPOJOAdapter {
     public Map<String, Object> execute(final String defaultURI, final Map<String, Object> request) throws Exception {
         // check the request for missing items.
         if (defaultURI == null) {
-            throw new HttpServerTestingFrameworkException("defaultURL cannot be null");
+            throw new Exception("defaultURL cannot be null");
         }
         if (request == null) {
-            throw new HttpServerTestingFrameworkException("request cannot be null");
+            throw new Exception("request cannot be null");
         }
         if (! request.containsKey("path")) {
-            throw new HttpServerTestingFrameworkException("Request path should be set.");
+            throw new Exception("Request path should be set.");
         }
         if (! request.containsKey("method")) {
-            throw new HttpServerTestingFrameworkException("Request method should be set.");
+            throw new Exception("Request method should be set.");
         }
 
         // Append the path to the defaultURI.
@@ -91,6 +95,14 @@ public class HttpClient5Adapter extends HttpClientPOJOAdapter {
 
         if (request.containsKey("protocolVersion")) {
             builder = builder.setVersion((ProtocolVersion) request.get("protocolVersion"));
+        }
+
+        // timeout
+        if (request.containsKey("timeout")) {
+            final long timeout = (long) request.get("timeout");
+            RequestConfig.Builder requestConfigBuilder = RequestConfig.custom();
+            requestConfigBuilder.setSocketTimeout((int) timeout);
+            builder.setConfig(requestConfigBuilder.build());
         }
 
         // call addParameter for each parameter in the query.
@@ -121,16 +133,15 @@ public class HttpClient5Adapter extends HttpClientPOJOAdapter {
             builder = builder.setEntity(entity);
         }
 
-        // timeout
-        if (request.containsKey("timeout")) {
-            final long timeout = (long) request.get("timeout");
-            RequestConfig.Builder requestConfigBuilder = RequestConfig.custom();
-            requestConfigBuilder.setSocketTimeout((int) timeout);
-            builder.setConfig(requestConfigBuilder.build());
+         // Now execute the request.
+        HttpRoutePlanner proxy = getProxyPlanner();
+        CloseableHttpClient httpclient = null;
+        if(proxy==null){
+        	httpclient = HttpClients.createDefault();
+        }else{
+        	httpclient = HttpClients.custom().setRoutePlanner(proxy).build();
         }
-
-        // Now execute the request.
-        final CloseableHttpClient httpclient = HttpClients.createDefault();
+        
         final CloseableHttpResponse response = httpclient.execute(builder.build());
 
         // Prepare the response.  It will contain status, body, headers, and contentType.
@@ -139,7 +150,7 @@ public class HttpClient5Adapter extends HttpClientPOJOAdapter {
         final String contentType = entity == null ? null : entity.getContentType();
 
         final Map<String, Object> ret = new HashMap<String, Object>();
-        ret.put("status", response.getStatusLine().getStatusCode());
+        ret.put("status", response.getCode());
 
         // convert the headers to a Map
         final Map<String, Object> headerMap = new HashMap<String, Object>();
@@ -157,7 +168,58 @@ public class HttpClient5Adapter extends HttpClientPOJOAdapter {
      * {@inheritDoc}
      */
     @Override
-    public String getHTTPClientName() {
+    public String getClientName() {
         return "HttpClient5";
+    }
+
+    
+    private HttpRoutePlanner getProxyPlanner(){
+    	if(proxyServerURL==null){
+    		return null;
+    	}
+    	
+    	IndependantLog.debug("getProxyPlanner(): parsing proxy URL "+proxyServerURL);
+    	
+    	//break proxyServerURL into "serverName", "port", "username", "password" etc.
+    	//http://user:password@server:port
+    	String HTTP = "http://";
+    	String AT = "@";
+    	String COLON = ":";
+    	int httpIndex = proxyServerURL.indexOf(HTTP);
+    	int atIndex = proxyServerURL.indexOf(AT);
+    	
+    	String serverPort = null;
+    	String proxyServer = null;
+    	int proxyPort = 80;
+    	
+    	if(atIndex>-1){
+    		serverPort = proxyServerURL.substring(atIndex+AT.length());
+    	}else{
+    		if(httpIndex>-1){
+    			serverPort = proxyServerURL.substring(httpIndex+HTTP.length());
+    		}else{
+    			serverPort = proxyServerURL;
+    		}
+    	}
+    	
+    	if(serverPort!=null){
+    		String[] serverPortArray = serverPort.split(COLON);
+    		try{
+    			proxyServer = serverPortArray[0];
+    		}catch(Exception e){
+    			IndependantLog.warn("Failed to get proxy server due to "+e.getMessage());
+    		}
+    		try{
+    			proxyPort = Integer.parseInt(serverPortArray[1]);
+    		}catch(Exception e){
+    			IndependantLog.warn("Failed to get proxy port due to "+e.getMessage());
+    		}    		
+    	}
+    	
+    	if(proxyServer==null){
+    		return null;
+    	}
+    	HttpHost proxy = new HttpHost(proxyServer, proxyPort);
+    	return new DefaultProxyRoutePlanner(proxy);    		
     }
 }

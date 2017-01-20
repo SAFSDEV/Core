@@ -42,9 +42,10 @@
 	<classpathentry kind="var" path="SAFS_BUILD/libs/autoit/AutoItX4Java.jar"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/autoit/jacob.jar"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/slf4j-api-1.7.21.jar"/>
-	<classpathentry kind="var" path="SAFS_BUILD/libs/httpclient5/httpclient5-5.0-alpha1.jar" sourcepath="/HTTPCLIENT5SOURCE"/>
-	<classpathentry kind="var" path="SAFS_BUILD/libs/httpclient5/httpcore5-5.0-alpha1.jar" sourcepath="/HTTPCORE_SOURCE"/>
-	<classpathentry kind="var" path="SAFS_BUILD/libs/groovy/groovy-all-2.4.7.jar"/>
+	<classpathentry exported="true" kind="var" path="SAFS_BUILD/libs/httpclient5/httpclient5-5.0-alpha2-SNAPSHOT.jar" sourcepath="/HTTPCLIENT5SOURCE"/>
+	<classpathentry exported="true" kind="var" path="SAFS_BUILD/libs/httpclient5/httpcore5-5.0-alpha2.jar" sourcepath="/HTTPCORE_SOURCE"/>
+	<classpathentry exported="true" kind="var" path="SAFS_BUILD/libs/httpclient5/httpcore5-testing-5.0-alpha2.jar" sourcepath="/HTTPCORE_SOURCE"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/groovy/groovy-2.4.7.jar"/>
 	<classpathentry kind="lib" path="dependencies/saxon/Saxon-HE-9.7.0-8.jar"/>
 	<classpathentry exported="true" kind="con" path="GROOVY_DSL_SUPPORT"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/spring-web/spring-web-4.2.7.RELEASE.jar"/>
