@@ -11,6 +11,7 @@ package org.safs.model.tools;
  */
 import java.io.File;
 
+import org.safs.IndependantLog;
 import org.safs.StatusCodes;
 import org.safs.StringUtils;
 import org.safs.TestRecordHelper;
@@ -73,11 +74,8 @@ public abstract class AbstractDriver {
 		boolean filesarg = false;
 		
 		try{ 
-			if(jsafs() != null) { dir = jsafs().getDatapoolDir(); }
-			else{
-				// TODO: Use InputProcessor if JSAFSDriver not present.
-				dir = processor().getDatapoolDir();
-			}
+			dir = iDriver().getDatapoolDir();
+			
 			filename = DEFAULT_APPMAP_ORDER;
 			String jvmarg = null;
 			jvmarg = System.getProperty(APPMAP_ORDER_PROPERTY);
@@ -94,7 +92,9 @@ public abstract class AbstractDriver {
 					files = jvmarg.split(COMMA);
 				System.out.println("Alternate "+ jvmarg +" App Map file(s) requested.");				
 			}			
-		}catch(Throwable ignore){}
+		}catch(Throwable ignore){
+			IndependantLog.warn(StringUtils.debugmsg(false)+" Ignoring "+StringUtils.debugmsg(ignore));
+		}
 		
 		if (filesarg){
 			
@@ -175,30 +175,12 @@ public abstract class AbstractDriver {
 			return jsafs().processExpression(expression);//Expression will turn off/on both "math" and "DDVariable" 
 			//return jsafs().resolveExpression(expression);//Expression will turn off/on "math", while "DDVariable" will be kept all the time
 		}else{
-			// TODO: Use InputProcessor if JSAFSDriver not present.
+			//Use InputProcessor if JSAFSDriver not present.
 			String sep = processor().getTestRecordData().getSeparator();
 			String exp = processor().getVarsInterface().resolveExpressions(expression, sep);
 			// LeiWang: should we always remove the wrapping double-quote? If the original expression is double-quoted, then we should not remove them.
 			return StringUtils.removeWrappingDoubleQuotes(exp);
-		}
-	}
-
-	protected abstract JSAFSDriver jsafs();	
-	protected abstract InputProcessor processor();
-	
-	/**
-	 * @return DriverInterface currently being used.<br>
-	 * Could be a JSAFSDriver.  Could be an InputProcessor.<br>
-	 * Subclasses should override to support other DriverInterface instances not tracked in this superclass.  
-	 * Can be null if none are set.
-	 * @see #setIDriver(DriverInterface)
-	 * @see JSAFSDriver
-	 * @see InputProcessor
-	 */
-	public DriverInterface iDriver(){
-		if(jsafs() instanceof DriverInterface) return jsafs();
-		if(processor() instanceof DriverInterface) return processor();
-		return null;
+		}		
 	}
 	
 	/**
@@ -312,7 +294,7 @@ public abstract class AbstractDriver {
 		try{
 			sep = StringUtils.getUniqueSep(jsafs().SEPARATOR, command, parameters);
 		}catch(NullPointerException np){
-			// TODO: Use InputProcessor if JSAFSDriver not present.
+			//Use InputProcessor if JSAFSDriver not present.
 			sep = StringUtils.getUniqueSep(processor().getDefaultSeparator(), command, parameters);
 		}
 		TestRecordHelper trd = null;
@@ -365,7 +347,7 @@ public abstract class AbstractDriver {
 		String sep = null;
 		try{ sep = StringUtils.getUniqueSep(jsafs().SEPARATOR, command+child+parent, parameters);}
 		catch(NullPointerException np){
-			// TODO: Use InputProcessor if JSAFSDriver not present.
+			//Use InputProcessor if JSAFSDriver not present.
 			sep = StringUtils.getUniqueSep(processor().getDefaultSeparator(), command+child+parent, parameters);
 		}
 		if(parameters instanceof String[]&& parameters.length > 0) 
@@ -407,5 +389,39 @@ public abstract class AbstractDriver {
 		    }
 			return trd;
 		}
-	}	
+	}
+
+	/**
+	 * @return DriverInterface currently being used.<br>
+	 * Could be a JSAFSDriver.  Could be an InputProcessor.<br>
+	 * Subclasses should override to support other DriverInterface instances not tracked in this superclass.  
+	 * Can be null if none are set.
+	 * @see #setIDriver(DriverInterface)
+	 * @see JSAFSDriver
+	 * @see InputProcessor
+	 */
+	public DriverInterface iDriver(){
+		if(jsafs() instanceof DriverInterface) return jsafs();
+		if(processor() instanceof DriverInterface) return processor();
+		return null;
+	}
+	
+	/** Return the possible embedded JSAFSDriver. */
+	protected abstract JSAFSDriver jsafs();	
+	/** Return the possible embedded InputProcessor. */
+	protected abstract InputProcessor processor();
+	
+	/**
+	 * Initiates the embedded drivers and engines to start running if it is not already running.
+	 * The user should call this method to ensure the drivers/engines are initialized before using them.
+	 * @throws Exception
+	 */
+	public abstract void run() throws Exception;
+	
+	/**
+	 * Shutdown the driver and all related resources such as hooks, engines, services and logs etc.
+	 * @throws Exception
+	 */
+	public abstract void shutdown() throws Exception;
+	
 }

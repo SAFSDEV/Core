@@ -6,11 +6,11 @@ import org.safs.rest.service.commands.curl.CurlCommand
 
 import java.util.Map
 
-import org.safs.rest.service.adapter.HttpClientPOJOAdapter;
-import org.safs.rest.service.adapter.HttpServerTestingAdapter
-import org.safs.rest.service.adapter.HttpServerTestingFrameworkException;
-import org.safs.rest.service.adapter.HttpServerTestingRequestHandler;
-import org.safs.rest.service.adapter.HttpServerTestingFramework
+import org.apache.hc.core5.testing.framework.ClientPOJOAdapter;
+import org.apache.hc.core5.testing.framework.ClientTestingAdapter
+import org.apache.hc.core5.testing.framework.TestingFrameworkException;
+import org.apache.hc.core5.testing.framework.TestingFrameworkRequestHandler;
+import org.apache.hc.core5.testing.framework.TestingFramework
 
 /**
  *
@@ -39,13 +39,13 @@ import org.safs.rest.service.adapter.HttpServerTestingFramework
  *
  * @since 5.0
  */
-class SafsrestTestingAdapter extends HttpServerTestingAdapter {
+class SafsrestTestingAdapter extends ClientTestingAdapter {
     public SafsrestTestingAdapter() {
         /*
          * This adapter will perform the HTTP request and return the response in the
          * expected format.
          */
-        adapter = new SafsrestAdapter()
+        super(new SafsrestAdapter())
     }
 
 
@@ -74,9 +74,9 @@ class SafsrestTestingAdapter extends HttpServerTestingAdapter {
     public Map<String, Object> execute(
             String defaultURI,
             Map<String, Object> request,
-            HttpServerTestingRequestHandler requestHandler,
+            TestingFrameworkRequestHandler requestHandler,
             Map<String, Object> responseExpectations)
-    throws HttpServerTestingFrameworkException {
+    throws TestingFrameworkException {
 
         def response = adapter.execute(defaultURI, request)
 

@@ -4,20 +4,34 @@ package org.safs.rest.service.commands.curl
 
 import groovy.util.logging.Slf4j
 import org.apache.hc.client5.http.methods.RequestBuilder
+import org.apache.hc.core5.http.ClassicHttpResponse
+import org.apache.hc.core5.http.ContentLengthStrategy
+import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.Header
 import org.apache.hc.core5.http.HttpHeaders;
-import org.apache.hc.core5.http.impl.io.HttpTransportMetricsImpl
-import org.apache.hc.core5.http.config.MessageConstraints;
+import org.apache.hc.core5.http.config.ConnectionConfig
+import org.apache.hc.core5.http.config.H1Config;
+import org.apache.hc.core5.http.impl.BasicHttpTransportMetrics
+import org.apache.hc.core5.http.impl.ConnSupport;
+import org.apache.hc.core5.http.impl.io.AbstractMessageParser;
+import org.apache.hc.core5.http.impl.io.ContentLengthOutputStream
+import org.apache.hc.core5.http.impl.DefaultContentLengthStrategy
+import org.apache.hc.core5.http.impl.io.DefaultHttpResponseWriterFactory;
 import org.apache.hc.core5.http.impl.io.SessionInputBufferImpl;
+import org.apache.hc.core5.http.impl.io.SessionOutputBufferImpl
+import org.apache.hc.core5.http.io.HttpMessageWriter
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.http.message.BasicLineParser;
+import org.apache.hc.core5.http.message.LineParser
 import org.apache.hc.core5.util.CharArrayBuffer
 
+import java.io.ByteArrayOutputStream
+import java.nio.charset.CharsetDecoder
+import java.nio.charset.CharsetEncoder
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.hc.client5.http.impl.sync.HttpClients;
-import org.apache.hc.core5.http.entity.EntityUtils;
-import org.apache.hc.core5.http.entity.StringEntity
-import org.apache.hc.core5.http.entity.ContentType;
 
 import org.safs.rest.service.commands.CommandInvoker
 import org.safs.rest.service.commands.CommandResults
@@ -205,20 +219,39 @@ class CurlInvoker {
         def httpclient = HttpClients.createDefault()
         def response = httpclient.execute(builder.build())
         
-        String stdOut = ""
+        // Write the response to an output stream similar to the way HttpCore5 does it.
+        def baos = new ByteArrayOutputStream()
         
-        String statusLine = response.getStatusLine()
-        stdOut += "$statusLine\n"
         
-        for (Header header : response.getAllHeaders()) {
-            stdOut += "${header.getName()}:${header.getValue()}\n"
-        }
-        stdOut += "\n"
-        def entity = response.getEntity()
-        String body = entity == null ? null : EntityUtils.toString(entity)
-        if (body) {
-            stdOut += body
-        }
+        BasicHttpTransportMetrics outTransportMetrics = new BasicHttpTransportMetrics();
+        
+        ConnectionConfig cconfig = ConnectionConfig.DEFAULT
+        int buffersize = cconfig.getBufferSize()
+        H1Config h1Config = H1Config.DEFAULT
+        CharsetEncoder charencoder = ConnSupport.createEncoder(cconfig)
+
+        def outbuffer = new SessionOutputBufferImpl(outTransportMetrics, buffersize,
+                                                    h1Config.getChunkSizeHint(), charencoder);
+                                                
+        HttpMessageWriter<ClassicHttpResponse> responseWriter = DefaultHttpResponseWriterFactory.INSTANCE.create()
+        responseWriter.write(response, outbuffer, baos)
+		outbuffer.flush(baos)
+		
+		// write the body if it exists
+		def entity = response.getEntity()
+		if (entity != null) {
+			ContentLengthStrategy outgoingContentStrategy = DefaultContentLengthStrategy.INSTANCE
+			long len = outgoingContentStrategy.determineLength(response)
+			
+			OutputStream outstream = new ContentLengthOutputStream(outbuffer, baos, len)
+			entity.writeTo(outstream);
+			outstream.close()
+		}
+		
+        baos.close()
+            
+        String stdOut = baos.toString("UTF-8")
+        
         def exitValue = 0
         def stdErr = ""
         CommandResults results =
@@ -247,26 +280,28 @@ class CurlInvoker {
     }
 
     
-    private static Header[] parseHeadersInMultiLineString(String headerString) {
+    private static Header[] parseHeadersInMultiLineString(String _headerString) {
         
         /*
-         * This is pretty close to how Apache HTTP Client5 parses headers.
+         * This is pretty close to how Apache HTTP Core5 parses headers.
          */
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(headerString.getBytes("UTF-8"));
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(_headerString.getBytes("UTF-8"));
         
         int buffersize = org.apache.hc.core5.http.config.ConnectionConfig.DEFAULT.getBufferSize();
-        HttpTransportMetricsImpl inTransportMetrics = new HttpTransportMetricsImpl();
-        MessageConstraints messageConstraints = MessageConstraints.DEFAULT;
-        SessionInputBufferImpl inbuffer = new SessionInputBufferImpl(inTransportMetrics, buffersize, -1, messageConstraints, null);
-        def parser = org.apache.hc.core5.http.message.BasicLineParser.INSTANCE;
+        BasicHttpTransportMetrics inTransportMetrics = new BasicHttpTransportMetrics();
+        final H1Config h1Config = H1Config.DEFAULT;
+        final CharsetDecoder chardecoder = null;
+        SessionInputBufferImpl inbuffer = new SessionInputBufferImpl(inTransportMetrics, buffersize, -1, 
+                                                                     h1Config.getMaxLineLength(), chardecoder);
+        final LineParser lineParser = BasicLineParser.INSTANCE;
         
-        inbuffer.bind(inputStream);
-        def headerLines = new ArrayList<CharArrayBuffer>();
-        Header[] headers = org.apache.hc.core5.http.impl.io.AbstractMessageParser.parseHeaders(
+        List<CharArrayBuffer> headerLines = new ArrayList<>();
+        final Header[] headers = AbstractMessageParser.parseHeaders(
             inbuffer,
-            messageConstraints.getMaxHeaderCount(),
-            messageConstraints.getMaxLineLength(),
-            parser,
+            inputStream,
+            h1Config.getMaxHeaderCount(),
+            h1Config.getMaxLineLength(),
+            lineParser,
             headerLines
         );
         return headers;
