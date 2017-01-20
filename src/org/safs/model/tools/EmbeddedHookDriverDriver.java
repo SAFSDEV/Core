@@ -49,7 +49,7 @@ public class EmbeddedHookDriverDriver extends AbstractDriver{
 	 * @see org.safs.EmbeddedDCHookDriver
 	 * @see org.safs.selenium.EmbeddedSeleniumHookDriver
 	 */
-	public EmbeddedHookDriverDriver(Class clazz){
+	public EmbeddedHookDriverDriver(Class<?> clazz){
 		this();
 		if(driver == null){
 			try{ 
@@ -82,7 +82,8 @@ public class EmbeddedHookDriverDriver extends AbstractDriver{
 	 * @see org.safs.model.annotations.AutoConfigureJSAFS
 	 * @see org.safs.model.tools.EmbeddedHookDriverRunner#autorun(String[])
 	 */
-	public void run(){
+	@Override
+	public void run() throws Exception{
 		driver.run();
 		preloadAppMapExpressions();
 		preloadAppMaps();
@@ -94,7 +95,7 @@ public class EmbeddedHookDriverDriver extends AbstractDriver{
 	public final Thread SHUTDOWN_HOOK = new Thread(){
 		public void run(){
 			System.out.println("SAFS EmbeddedDriver AfterAll hook has been invoked.");
-			try{ shutdownDriver(); }
+			try{ shutdown(); }
 			catch(Throwable t){
 				System.out.println(t.getMessage());
 			}
@@ -106,8 +107,20 @@ public class EmbeddedHookDriverDriver extends AbstractDriver{
 	 * @throws Exception
 	 * @see EmbeddedHookDriver#shutdown()
 	 */
-	public void shutdownDriver() throws Exception {
+	@Override
+	public void shutdown() throws Exception {
 		driver.shutdown();		
+	}
+	
+	/**
+	 * Used to invoke the Driver shutdown function.
+	 * @throws Exception
+	 * @see EmbeddedHookDriver#shutdown()
+	 * @deprecated Use the same method name defined in the super class. Please use {@link #shutdown()} instead.
+	 */
+	@Deprecated
+	public void shutdownDriver() throws Exception {
+		shutdown();		
 	}
 
 	public TestRecordHelper initializeTestRecordData(AbstractCommand model, String separator){

@@ -50,6 +50,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -139,9 +140,9 @@ public class StringUtils{
     public static final String SPACE = " ";
     
 	/**'localhost'*/
-	public static final String LOCAL_HOST = "localhost";
+	public static final String LOCAL_HOST = Constants.LOCAL_HOST;
 	/** '127.0.0.1'*/
-	public static final String LOCAL_HOST_IP = "127.0.0.1";
+	public static final String LOCAL_HOST_IP = Constants.LOCAL_HOST_IP;
 	
     /** "CASE-INSENSITIVE" **/
     public static final String CASE_INSENSITIVE = "CASE-INSENSITIVE";
@@ -2538,6 +2539,27 @@ public class StringUtils{
 	 */
 	public static boolean isValid(String value){
 		return (value!=null && !value.trim().isEmpty());
+	}
+	
+	/**
+	 * Generate a unique name. For example, it can be used as a javascript variable name<br>
+	 * when calling functions in JavaScriptFunctions to avoid the conflict with variables defined<br>
+	 * in the Application Under Test.<br>
+	 *
+	 * @param prefix String, the prefix of the unique name
+	 * @return String, the unique name
+	 */
+	public static String generateUniqueName(String prefix){
+		StringBuffer uniqueName = new StringBuffer();
+		if(prefix!=null && !prefix.trim().isEmpty()){
+			uniqueName.append(prefix);
+		}else{
+			uniqueName.append("temp");
+		}
+
+		uniqueName.append(new Date().getTime());
+
+		return uniqueName.toString();
 	}
 	
 	/**

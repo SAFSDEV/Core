@@ -1,7 +1,32 @@
 /** Copyright (C) (MSA, Inc) All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
-
+/**
+ * History:
+ *   <br>   Sep 23, 2003    (DBauman) Original Release
+ *   <br>   Oct 02, 2003    (DBauman) moved to package org.safs because no dependency on rational
+ *   <br>   NOV 21, 2003    (Carl Nagle) Added FindSubstringInFile
+ *   <br>   Jan 13, 2004    (Carl Nagle) Fixed findSubstrings to accept caret in varname strings.<br>
+ *   <br>   Jan 20, 2006    (Carl Nagle) Removed incorrectly implemented ReadFileString support.
+ *   <br>   Aug 16, 2006    (PHSABO) Added FilterImage method to black out parts of images.
+ *   <br>   Nov 07, 2006    (Bob Lawler) Added DeleteDirectoryContents and CopyMatchingFiles. RJL
+ *   <br>   Nov 07, 2006    (Bob Lawler) Updated copyFile() to use new actuallyCopyBytes() helper method. RJL
+ *   <br>   Dec 19, 2006    (Carl Nagle) Updated openFile() to handle new OpenUTF8File command
+ *   <br>	May 26, 2008	(LeiWang) Add keyword OnFileEOFGoToBlockId
+ *   <br>	Sep 23, 2008	(LeiWang) Modified methods setFileProtections(),getFileProtections(),getFiles()
+ *   								  Add method isSomeFile()
+ *   								  Add inner class RJFileFilter
+ *   								  See defect S0536736
+ *   <br>   DEC 07, 2009	(JunwuMa) Update RJFileFilter.accept() to use the same way for non-Windows to decide 
+ *                                    whether a file on Windows is archive. Fix S0629544.
+ *   <br>	FEB 25, 2010	(JunwuMa) Added two keywords GETTEXTFROMIMAGE and SAVETEXTFROMIMAGE 
+ *                                    for detecting text in image file using OCR.  
+ *   <br>	APR 20, 2010	(LeiWang) Modify method GetSaveTextFromImage(): use static method of OCREngine to get
+ *                                    an OCR engine to use.                              
+ *   <br>   Mar 20, 2013    (Carl Nagle) Fixed FilterImage to use ImageUtils and accept more formats.
+ *   <br>   Nov 19, 2014    (Lei Wang) Refactor: move codes to FileUtilies, fix errors, model FileAttribute.
+ *   <br>   NOV 29, 2016    (Lei Wang) Modified readFileLine(): support to read the whole file content.
+ **/
 package org.safs;
 
 import java.awt.image.BufferedImage;
@@ -57,29 +82,6 @@ import org.safs.tools.stringutils.StringUtilities;
  *
  * @author Doug Bauman
  * @since   Sep 23, 2003
- *
- *   <br>   Sep 23, 2003    (DBauman) Original Release
- *   <br>   Oct 02, 2003    (DBauman) moved to package org.safs because no dependency on rational
- *   <br>   NOV 21, 2003    (Carl Nagle) Added FindSubstringInFile
- *   <br>   Jan 13, 2004    (Carl Nagle) Fixed findSubstrings to accept caret in varname strings.<br>
- *   <br>   Jan 20, 2006    (Carl Nagle) Removed incorrectly implemented ReadFileString support.
- *   <br>   Aug 16, 2006    (PHSABO) Added FilterImage method to black out parts of images.
- *   <br>   Nov 07, 2006    (Bob Lawler) Added DeleteDirectoryContents and CopyMatchingFiles. RJL
- *   <br>   Nov 07, 2006    (Bob Lawler) Updated copyFile() to use new actuallyCopyBytes() helper method. RJL
- *   <br>   Dec 19, 2006    (Carl Nagle) Updated openFile() to handle new OpenUTF8File command
- *   <br>	May 26, 2008	(LeiWang) Add keyword OnFileEOFGoToBlockId
- *   <br>	Sep 23, 2008	(LeiWang) Modified methods setFileProtections(),getFileProtections(),getFiles()
- *   								  Add method isSomeFile()
- *   								  Add inner class RJFileFilter
- *   								  See defect S0536736
- *   <br>   DEC 07, 2009	(JunwuMa) Update RJFileFilter.accept() to use the same way for non-Windows to decide 
- *                                    whether a file on Windows is archive. Fix S0629544.
- *   <br>	FEB 25, 2010	(JunwuMa) Added two keywords GETTEXTFROMIMAGE and SAVETEXTFROMIMAGE 
- *                                    for detecting text in image file using OCR.  
- *   <br>	APR 20, 2010	(LeiWang) Modify method GetSaveTextFromImage(): use static method of OCREngine to get
- *                                    an OCR engine to use.                              
- *   <br>   Mar 20, 2013    (Carl Nagle) Fixed FilterImage to use ImageUtils and accept more formats.
- *   <br>   Nov 19, 2014    (Lei Wang) Refactor: move codes to FileUtilies, fix errors, model FileAttribute.
  **/
 public class DCDriverFileCommands extends DriverCommand {
   public static final String CLOSEFILE                     = "CloseFile";
@@ -1912,12 +1914,12 @@ public class DCDriverFileCommands extends DriverCommand {
     String filenum = (String) iterator.next();
     String varname = (String) iterator.next();
     String numcharsStr = null;
-    Integer numchars = null;
+    int numchars = FileUtilities.PARAM_ALL_CHARACTERS;
     if (chars) {
       numcharsStr = varname;
       varname = (String) iterator.next();
       try {
-        numchars = new Integer(numcharsStr);
+        numchars = Integer.parseInt(numcharsStr);
       } catch (NumberFormatException nfe) {
     	  this.issueParameterValueFailure("NumberOfChars");
     	  return;
@@ -1930,12 +1932,18 @@ public class DCDriverFileCommands extends DriverCommand {
       if (rw instanceof BufferedReader) {
         BufferedReader reader = (BufferedReader) rw;
         if (reader != null) {
-        	String line = null;
+          String line = null;
           if (chars) {
-            char [] buf = new char[numchars.intValue()];
-            int numRead = reader.read(buf, 0, numchars.intValue());
-            Log.debug("'"+numRead+"' chars have been read.");
-            line = new String(buf);
+        	if(FileUtilities.PARAM_ALL_CHARACTERS==numchars){
+        		line = FileUtilities.readStringFromFile(reader);        		
+        		Log.debug("The whole file has been read.");
+        	}else{
+        		int numRead = 0;
+        		char [] buf = new char[numchars];
+        		numRead = reader.read(buf, 0, numchars);        		
+        		Log.debug("'"+numRead+"' chars have been read.");
+        		line = new String(buf);
+        	}
           }else{
             line = reader.readLine();
                        

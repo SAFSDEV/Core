@@ -51,9 +51,23 @@ import org.safs.tools.stringutils.StringUtilities;
  */
 public class EmbeddedHookDriver extends JavaHook {
 
-	public static final String SAFS_PROJECT_CONFIG = "safs.project.config";
+	/** "safs.project.config"<br>
+	 * System Property identifying the path to an alternate project 
+	 * configuration file (other than safstid.ini in the default 
+	 * project configuration location.<br>
+	 * JVM command line: -Dsafs.project.config=string|path **/
+	public static final String SAFS_PROJECT_CONFIG = DriverConstant.PROPERTY_SAFS_PROJECT_CONFIG;
+	/** "testdesigner.project.config"<br>
+	 * System Property identifying the path to an alternate project 
+	 * configuration file (other than safstid.ini in the default 
+	 * project configuration location.<br>
+	 * This property has a higher priority than {@link #SAFS_PROJECT_CONFIG}, if both
+	 * of them are specified, then its value will be used.<br>
+	 * JVM command line: -Dtestdesigner.project.config=string|path **/
 	public static final String TESTDESIGNER_PROJECT_CONFIG = "testdesigner.project.config";
-	public static final String TEST_INI_DEFAULT = "test.ini";
+	/** "test.ini" <br>
+	 * Default project's Configuration filename. **/
+	public static final String TEST_INI_DEFAULT = DriverConstant.DEFAULT_CONFIGURE_FILENAME_TEST_INI;
 		
 	private static boolean running = false;	
 	private static boolean weStartedSTAF = false;
@@ -488,7 +502,7 @@ public class EmbeddedHookDriver extends JavaHook {
 			if( System.getProperty(TESTDESIGNER_PROJECT_CONFIG)!= null)
 				try{ System.setProperty(SAFS_PROJECT_CONFIG, System.getProperty(TESTDESIGNER_PROJECT_CONFIG));}
 			    catch(Throwable ignore){}
-			if( System.getProperty(SAFS_PROJECT_CONFIG) == null ) System.setProperty(SAFS_PROJECT_CONFIG, TEST_INI_DEFAULT);			
+			if( System.getProperty(SAFS_PROJECT_CONFIG) == null ) System.setProperty(SAFS_PROJECT_CONFIG, TEST_INI_DEFAULT);
 		    System.out.println("Validating Root Configure Parameters...");
 		    jsafs.validateRootConfigureParameters(false);	
 

@@ -6,6 +6,7 @@ package org.safs.rest.service;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.CharsetDecoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -14,14 +15,16 @@ import java.util.Map;
 
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpException;
-import org.apache.hc.core5.http.config.MessageConstraints;
-import org.apache.hc.core5.http.impl.io.HttpTransportMetricsImpl;
+import org.apache.hc.core5.http.config.H1Config;
+import org.apache.hc.core5.http.impl.BasicHttpTransportMetrics;
+import org.apache.hc.core5.http.impl.io.AbstractMessageParser;
 import org.apache.hc.core5.http.impl.io.SessionInputBufferImpl;
 import org.apache.hc.core5.http.message.BasicHeader;
 import org.apache.hc.core5.http.message.BasicLineParser;
 import org.apache.hc.core5.util.CharArrayBuffer;
 import org.safs.SAFSRuntimeException;
 import org.apache.hc.core5.http.message.HeaderGroup;
+import org.apache.hc.core5.http.message.LineParser;
 
 
 /**
@@ -44,9 +47,10 @@ public class Headers {
 	public static final String CSS_TYPE    = "CSS";
 	public static final String SCRIPT_TYPE = "SCRIPT";
 	
-	// Constants for default Content/Accept types
+	// Constants for common Header types
 	public static final String CONTENT_TYPE      = "Content-Type";
 	public static final String ACCEPT            = "Accept";
+	public static final String USER_AGENT        = "User-Agent";
 	
 	public static final String APPL_OCTET_STREAM = "application/octet-stream";
 	public static final String APPL_JSON         = "application/json";
@@ -56,6 +60,8 @@ public class Headers {
 	public static final String IMAGE             = "image";
 	public static final String TEXT_CSS          = "text/css";
 	public static final String APPL_JAVASCRIPT   = "application/javascript";
+	
+	public static final String MOZILLA_GENERIC_AGENT = "Mozilla/5.0 Gecko/20110201";
 	
 	private static Map<String,String> defaultContentTypeMap; 
 	
@@ -369,7 +375,7 @@ public class Headers {
 	}
 	
 	
-	static String convertHeadersMapToMultiLineString(Map<String,String> headerMap) {
+	public static String convertHeadersMapToMultiLineString(Map<String,String> headerMap) {
 		
 		if (headerMap == null) {
 			return null;
@@ -381,6 +387,9 @@ public class Headers {
 		return sb.toString();
 	}
 	
+	public static Map<String,String> convertHeadersMultiLineStringToMap(String headers){
+		return getHeadersMapFromMultiLineString(headers);
+	}
 	
 //	/**
 //	 * @param _headerString The string of multi-line headers
@@ -403,24 +412,26 @@ public class Headers {
 	private static Header[] parseHeadersInMultiLineString(String _headerString) {
 		
 		/*
-		 * This is pretty close to how Apache HTTP Client5 parses headers.
+		 * This is pretty close to how Apache HTTP Core5 parses headers.
 		 */
 		try {
 			ByteArrayInputStream inputStream = new ByteArrayInputStream(_headerString.getBytes("UTF-8"));
 			
 			int buffersize = org.apache.hc.core5.http.config.ConnectionConfig.DEFAULT.getBufferSize();
-			HttpTransportMetricsImpl inTransportMetrics = new HttpTransportMetricsImpl();
-			MessageConstraints messageConstraints = MessageConstraints.DEFAULT;
-			SessionInputBufferImpl inbuffer = new SessionInputBufferImpl(inTransportMetrics, buffersize, -1, messageConstraints, null);
-			BasicLineParser parser = org.apache.hc.core5.http.message.BasicLineParser.INSTANCE;
+			BasicHttpTransportMetrics inTransportMetrics = new BasicHttpTransportMetrics();
+			final H1Config h1Config = H1Config.DEFAULT;
+			final CharsetDecoder chardecoder = null;
+			SessionInputBufferImpl inbuffer = new SessionInputBufferImpl(inTransportMetrics, buffersize, -1, 
+			                                                             h1Config.getMaxLineLength(), chardecoder);
+			final LineParser lineParser = BasicLineParser.INSTANCE;
 			
-			inbuffer.bind(inputStream);
-			List<CharArrayBuffer> headerLines = new ArrayList<CharArrayBuffer>();
-			Header[] headers = org.apache.hc.core5.http.impl.io.AbstractMessageParser.parseHeaders(
+			List<CharArrayBuffer> headerLines = new ArrayList<>();
+			final Header[] headers = AbstractMessageParser.parseHeaders(
 				inbuffer,
-				messageConstraints.getMaxHeaderCount(),
-				messageConstraints.getMaxLineLength(),
-				parser,
+				inputStream,
+				h1Config.getMaxHeaderCount(),
+				h1Config.getMaxLineLength(),
+				lineParser,
 				headerLines
 			);
 			return headers;
@@ -447,5 +458,83 @@ public class Headers {
 		return ret;
 	}
 	
+	/**
+	 * Given a multi-line header String, append a header value to an existing header name, 
+	 * or create the new header with the given value.
+	 * <p>
+	 * Example: appendHeaderValue(headers, "Accept", "text/html");
+	 * <p>
+	 * This does NOT act on prestored headers, only the header String provided.
+	 * <p>
+	 * When appending, this routine will prefix the value with a separator.
+	 * <p>
+	 * @param headers multi-line header string.
+	 * @param headerName name of the header to be created or appended.
+	 * @param headerValue value to add to the provided header name.
+	 * @return multiline headers properly appended, or unmodified if invalid arguments are provided.
+	 */
+	public static String appendHeaderValue(String headers, String headerName, String headerValue){		
+		if (headerName==null || 
+		    headerName.length()==0 ||
+		    headerValue == null ||
+		    headerValue.length()==0) return headers;
+		Map<String,String> hm = getHeadersMapFromMultiLineString(headers);
+		boolean found = false;
+		String val;
+		for(String key:hm.keySet()){
+			if(headerName.equalsIgnoreCase(key)){
+				val = hm.get(key);
+				val +=", "+ headerValue;
+				hm.put(key, val);
+				found = true;
+				break; // or do we want to handle duplicates?
+			}
+		}
+		if(!found) hm.put(headerName, headerValue);
+		return convertHeadersMapToMultiLineString(hm);
+	}
 
+	/**
+	 * Given a multi-line header String, remove a header value from an existing header name, 
+	 * or create the new header without the given value.
+	 * <p>
+	 * Example: removeHeaderValue(headers, "Accept", "text/html");
+	 * <p>
+	 * This does NOT act on prestored headers, only the header String provided.
+	 * <p>
+	 * When removing, this routine will attempt to fix any separators.
+	 * <p>
+	 * @param headers multi-line header string.
+	 * @param headerName name of the header to have a value removed.
+	 * @param headerValue value to remove.
+	 * @return multiline headers properly changed, or unmodified if invalid arguments are provided.
+	 */
+	public static String removeHeaderValue(String headers, String headerName, String headerValue){		
+		if (headerName==null || 
+		    headerName.length()==0 ||
+		    headerValue == null ||
+		    headerValue.length()==0) return headers;
+		Map<String,String> hm = getHeadersMapFromMultiLineString(headers);
+		boolean found = false;
+		String val;
+		String ucval;
+		String ucheaderValue;
+		for(String key:hm.keySet()){
+			if(headerName.equalsIgnoreCase(key)){
+				val = hm.get(key);
+				// if only value
+				if(headerValue.equalsIgnoreCase(val)){
+					hm.remove(key);
+				}else{
+					
+				}
+				val +=", "+ headerValue;
+				hm.put(key, val);
+				found = true;
+				break; // or do we want to handle duplicates?
+			}
+		}
+		if(!found) hm.put(headerName, headerValue);
+		return convertHeadersMapToMultiLineString(hm);
+	}
 }

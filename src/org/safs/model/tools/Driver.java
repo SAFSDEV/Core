@@ -96,11 +96,11 @@ public class Driver extends AbstractDriver {
 	/** 
 	 * This is an 'AfterAll' JVM ShutdownHook--if it is needed.
 	 */
-	public static final Thread SHUTDOWN_HOOK = new Thread(){
+	public final Thread SHUTDOWN_HOOK = new Thread(){
 		public void run(){
 			System.out.println("SAFS Model Driver AfterAll hook has been invoked.");
 			if(allow_shutdown) { 
-				try{ shutdownJSAFS(); }
+				try{ shutdown(); }
 				catch(Throwable t){
 					System.out.println(t.getMessage());
 				}
@@ -120,5 +120,15 @@ public class Driver extends AbstractDriver {
 			if(jsafs instanceof JSAFSDriver) jsafs.shutdown();	
 			running = false;
 		}
+	}
+	
+	@Override
+	public void shutdown() throws Exception{
+		shutdownJSAFS();
+	}
+	
+	@Override
+	public void run() throws Exception{
+		beforeAll();
 	}
 }

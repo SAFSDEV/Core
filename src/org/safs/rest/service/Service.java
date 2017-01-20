@@ -4,7 +4,7 @@
  */
 package org.safs.rest.service;
 
-import org.safs.rest.service.adapter.HttpClient5Adapter;
+import org.apache.hc.client5.http.testframework.HttpClient5Adapter;
 import org.apache.hc.core5.http.HttpVersion;
 import org.apache.hc.core5.http.ProtocolVersion;
 import org.safs.SAFSRuntimeException;
@@ -199,6 +199,7 @@ public class Service{
 			if (clientAdapterClassName == null) {
 				// use HttpClient5 by default
 				clientAdapter = new HttpClient5Adapter();
+				((HttpClient5Adapter) clientAdapter).setProxyServerURL(getProxyServerURL());
 			} else {
 				Class<?> clazz = Class.forName(clientAdapterClassName);
 				clientAdapter = clazz.newInstance();
