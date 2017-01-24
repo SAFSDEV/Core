@@ -50,6 +50,8 @@ public class GENKEYS{
 	public static final String EXISTS										= "exists";
 	/** %1% in table %2% at line %3%. */
 	public static final String EXTENDED_INFO								= "extended_info";
+	/** File '%1%' has been deleted. */
+	public static final String FILE_DELETE_1								= "file_delete_1";
 	/** Archive */
 	public static final String FILE_ARCHIVE									= "file_archive";
 	/** Hidden */
@@ -74,6 +76,18 @@ public class GENKEYS{
 	public static final String GONE_TIMEOUT									= "gone_timeout";
 	/** %1% is greater than %2% */
 	public static final String GREATER										= "greater";
+	/** Header file '%1%' has been successfully loaded using '%2%' '%3%'. */
+	public static final String HEADER_FILE_LOADED_3							= "header_file_loaded_3";
+	/** Object identified by '%1%' has been saved to variables prefixed by '%2%' */
+	public static final String ID_OBJECT_SAVED_TO_VARIABLE_PREFIX_2			= "id_object_saved_to_variable_prefix2";
+	/** Object identified by '%1%' has been saved to '%2%' */
+	public static final String ID_OBJECT_SAVED_TO_2			= "id_object_saved_to_2";
+	/** Object identified by '%1%' has been removed from cache map. */
+	public static final String ID_OBJECT_REMOVED_FROM_MAP					= "id_object_removed_from_map";
+	/** Object identified by '%1%' matched with '%2%'. */
+	public static final String ID_OBJECT_MATCHED_2							= "id_object_matched_2";
+	/** Object identified by '%1%' matched with '%2%' with parameters '%3%' '%4%'.  */
+	public static final String ID_OBJECT_MATCHED_4							= "id_object_matched_4";
 	/** %1% in range %2% to %3% */
 	public static final String IN_RANGE										= "in_range";
 	/** '%1%' is not selected in %2% */
@@ -116,6 +130,10 @@ public class GENKEYS{
 	public static final String NOT_IN_RANGE									= "not_in_range";
 	/** %1% is not less than %2% */
 	public static final String NOT_LESS										= "not_less";
+	/** Objects have been removed from cache map. */
+	public static final String OBJECTS_REMOVED_FROM_MAP						= "objects_removed_from_map";
+	/** Variables prefixed with '%1%' have been deleted. */
+	public static final String PREFIX_VARS_DELETE_1							= "prefix_vars_delete_1";
 	/** %1% performed on '%2%' in %3%. */
 	public static final String PERFNODE_3									= "perfnode3";
 	/** %1% performed on '%2%' in %3%; output file '%4%'. */

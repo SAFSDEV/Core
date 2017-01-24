@@ -30,7 +30,7 @@ package org.safs;
  *                          Delete some methods, rename some methods to make this class clearer.
  * OCT 19, 2016 (SBJLWA) 	Moved convertWindowPosition() to ComponentFunction class.
  *                          Use IndependantLog instead of Log.
- *                                      
+ *
  **/
 import java.awt.Point;
 import java.awt.Polygon;
@@ -138,12 +138,12 @@ public class StringUtils{
     public static final String PERCENTAGE = "%";
     /**" "*/
     public static final String SPACE = " ";
-    
+
 	/**'localhost'*/
 	public static final String LOCAL_HOST = Constants.LOCAL_HOST;
 	/** '127.0.0.1'*/
 	public static final String LOCAL_HOST_IP = Constants.LOCAL_HOST_IP;
-	
+
     /** "CASE-INSENSITIVE" **/
     public static final String CASE_INSENSITIVE = "CASE-INSENSITIVE";
     /** "CASEINSENSITIVE" **/
@@ -154,13 +154,13 @@ public class StringUtils{
     public static final String CRLF = "\r\n";
     /** "\r" carriage return **/
     public static final String CARRIAGE_RETURN = "\r";
-    
+
     /** "UTF-8" charset **/
     public static final String CHARSET_UTF8 = "UTF-8";
 	/** The charset used to translate the base64 encoded bytes to string,
 	 *  and translate that string back to base64 encoded bytes.*/
 	public static final String KEY_UTF8_CHARSET = "UTF-8";
-	
+
 	/**'http.proxyHost'*/
 	public static final String SYSTEM_PROPERTY_PROXY_HOST = "http.proxyHost";
 	/**'http.proxyPort'*/
@@ -169,10 +169,10 @@ public class StringUtils{
 	public static final String SYSTEM_PROPERTY_PROXY_BYPASS = "http.proxyBypass";
 	/**'http.nonProxyHosts'*/
 	public static final String SYSTEM_PROPERTY_NON_PROXY_HOSTS = "http.nonProxyHosts";
-    
+
   /** <br><em>Purpose:</em> find a match based on the parameter by walking the list,
    ** finding a string which contains the matching substring, and returning the index
-   ** into the list if it matched.  
+   ** into the list if it matched.
    * <br><em>Side Effects:</em> The iterator will be moved to the appropriate item (one past),
    * therefore, the value of the item can also be fetched with iter.previous()
    * <br><em>Assumptions:</em>  match is not null; All elements on the supporting List
@@ -196,7 +196,7 @@ public class StringUtils{
 
   /** <br><em>Purpose:</em> find an exact match based on the parameter by walking the list,
    ** finding a string which equals the matching string, and returning the index
-   ** into the list if it matched.  
+   ** into the list if it matched.
    * <br><em>Side Effects:</em> The iterator will be moved to the appropriate item (one past),
    * therefore, the value of the item can also be fetched with iter.previous()
    * <br><em>Assumptions:</em>  match is not null; All elements on the supporting List
@@ -225,17 +225,17 @@ public class StringUtils{
 			  (caseSensitiveStr.equalsIgnoreCase("FALSE")));
   }
 
-  /** 
+  /**
    * <em>Purpose:</em> evaluate 2 string values to see if they match.
    * If exactMatch is true, then the 2 strings must match exactly.
-   * If exactMatch is false, then we will not only ignore case, but the 
+   * If exactMatch is false, then we will not only ignore case, but the
    * source string can merely be a substring appearing anywhere in the target.
    * @param    source, String to match against target.  Can be a case-insensitive
    *           substring of target if exactMatch is false.
    * <p>
    * @param    target, String to compare with source.
    * <p>
-   * @param    exactMatch, false allows a case-insensitive comparison for a source 
+   * @param    exactMatch, false allows a case-insensitive comparison for a source
    *           substring in target.  Otherwise, the source and target must match exactly.
    * <p>
    * @return   true for a match as described above or if *both* source and target are null.
@@ -248,8 +248,8 @@ public class StringUtils{
 	if (exactMatch) return source.equals(target);
 	return (target.toLowerCase().indexOf(source.toLowerCase()) > -1);
   }
-  
-  	
+
+
   /** <br><em>Purpose:</em> get a string with the number of specified spaces
    * @param                     num Integer
    * @return                    String with spaces
@@ -320,12 +320,12 @@ public class StringUtils{
   }
 
   public static String PROPERTY_START = ":PROPERTY:";
-  
-  /** <br><em>Purpose:</em> read all contents of BufferedReader assuming the contents are in 
+
+  /** <br><em>Purpose:</em> read all contents of BufferedReader assuming the contents are in
    * a SAFS Properties file format:
    * <pre>
    * :PROPERTY:propertyName
-   * property value possibly spanning 
+   * property value possibly spanning
    * multiple lines.
    * :PROPERTY:propertyName
    * etc...
@@ -346,28 +346,28 @@ public class StringUtils{
 			  try{
 				  if(test.startsWith(PROPERTY_START)){
 					  // save last property value
-					  if(name.length() > 0) 
-						  props.put(name, logical);						  
+					  if(name.length() > 0)
+						  props.put(name, logical);
 					  // begin new property
 					  name = test.substring(PROPERTY_START.length()).trim();
 					  logical = "";
-				  }else{					  
-					  logical = logical.length() > 0   ? 
-							    logical +"\n"+ natural : 
+				  }else{
+					  logical = logical.length() > 0   ?
+							    logical +"\n"+ natural :
 							    natural;
 				  }
 			  }catch(Exception ignore){}
 		  }else{
 			  // gotta save that last property!
-			  if(name.length() > 0) 
-				  props.put(name, logical);						  
+			  if(name.length() > 0)
+				  props.put(name, logical);
 		  }
 		} while (natural != null);
 		reader.close();
 		return props;
   }
 
-  /** 
+  /**
    * read file based on 'filename', returns collection of lines with no CR or
    * LF.  The file is assumed to be in the default System character encoding.
    * @param                     filename, String
@@ -379,8 +379,8 @@ public class StringUtils{
     return readBuffer(FileUtilities.getSystemBufferedFileReader(filename));
   }
 
-  /** 
-   * read file based on 'filename', returns StringBuffer of file contents.<br>  
+  /**
+   * read file based on 'filename', returns StringBuffer of file contents.<br>
    * The file is assumed to be in the default System character encoding.
    * @param                     filename, String
    * @return                    StringBuffer
@@ -391,7 +391,7 @@ public class StringUtils{
     return readRawBuffer(FileUtilities.getSystemBufferedFileReader(filename));
   }
 
-  /** 
+  /**
    * read file based on 'filename', returns collection of lines with no CR or
    * LF.  The file is assumed to be using UTF-8 character encoding.
    * @param                     filename, String
@@ -399,23 +399,23 @@ public class StringUtils{
    * @see FileUtilities#getUTF8BufferedFileReader(String)
    * @see #readBuffer(BufferedReader)
    **/
-  public static  Collection readUTF8file(String filename) throws IOException {	
+  public static  Collection readUTF8file(String filename) throws IOException {
 	return readBuffer(FileUtilities.getUTF8BufferedFileReader(filename));
   }
 
-  /** 
-   * read file based on 'filename', returns StringBuffer of file contents.<br>  
+  /**
+   * read file based on 'filename', returns StringBuffer of file contents.<br>
    * The file is assumed to be using UTF-8 character encoding.
    * @param                     filename, String
    * @return                    StringBuffer
    * @see FileUtilities#getUTF8BufferedFileReader(String)
    * @see #readRawBuffer(BufferedReader)
    **/
-  public static  StringBuffer readRawUTF8File(String filename) throws IOException {	
+  public static  StringBuffer readRawUTF8File(String filename) throws IOException {
 	return readRawBuffer(FileUtilities.getUTF8BufferedFileReader(filename));
   }
 
-  /** 
+  /**
    * read file based on 'filename', returns collection of lines with no CR or
    * LF.  The file is assumed to be using character encoding indicated by parameter.
    * @param                     filename, String
@@ -424,11 +424,11 @@ public class StringUtils{
    * @see FileUtilities#getUTF8BufferedFileReader(String)
    * @see #readBuffer(BufferedReader)
    **/
-  public static  Collection readEncodingfile(String filename, String encoding) throws IOException {	
+  public static  Collection readEncodingfile(String filename, String encoding) throws IOException {
 	return readBuffer(FileUtilities.getBufferedFileReader(filename, encoding));
   }
-  
-  /** 
+
+  /**
    * read file based on 'filename', returns collection of lines with no CR or
    * LF.  The file is assumed to be using character encoding indicated by parameter.
    * @param                     filename, String
@@ -437,13 +437,13 @@ public class StringUtils{
    * @see FileUtilities#getUTF8BufferedFileReader(String)
    * @see #readBuffer(BufferedReader)
    **/
-  public static Map<String,String> readEncodingMap(String filename, String encoding) throws IOException {	
+  public static Map<String,String> readEncodingMap(String filename, String encoding) throws IOException {
 	return readPropertiesMap(FileUtilities.getBufferedFileReader(filename, encoding));
   }
-  
+
   /**
    * Encode the object to a string with charset {@value #KEY_UTF8_CHARSET}.<br>
-   * 
+   *
    * @param object, Object an object must implements interface Serializable.
    * @return	String, the base64 encoded string with charset {@value #KEY_UTF8_CHARSET}
    * @throws IllegalThreadStateException
@@ -455,7 +455,7 @@ public class StringUtils{
 
   /**
    * Decode a string to object with charset {@value #KEY_UTF8_CHARSET}.<br>
-   * 
+   *
    * @param base64String, String, the base64 encoded string with charset {@value #KEY_UTF8_CHARSET}
    * @return Object, an object who implements interface Serializable.
    * @throws IllegalThreadStateException
@@ -464,7 +464,7 @@ public class StringUtils{
   public static Object decodeBase64Object(String base64String) throws IllegalThreadStateException{
 	  return Base64Decoder.decodeBase64Object(base64String, KEY_UTF8_CHARSET);
   }
-  
+
   /**
    * @param source
    * @param target
@@ -497,7 +497,7 @@ public class StringUtils{
   }
 
   /**
-   * Compares 2 Maps, but only cares about matching those key/value items that exist 
+   * Compares 2 Maps, but only cares about matching those key/value items that exist
    * in the target/benchmark.  The source can have additional key/value pairs that are ignored.
    * @param source -- runtime Map to be compared against the target/benchmark.
    * @param target -- benchmark to be compared against.
@@ -523,8 +523,8 @@ public class StringUtils{
 		return matched;
   }
 
-  /** 
-   * read string, returns collection of lines with no CR or LF.  This essentially 
+  /**
+   * read string, returns collection of lines with no CR or LF.  This essentially
    * splits the String at line separators into an array of Strings.
    * @param                     str, String,
    * @return                    Collection (instance of type ArrayList)
@@ -569,12 +569,12 @@ public class StringUtils{
     return buf;
   }
 
-  /** 
+  /**
    * write to file 'filename' the toString() values contained in list.
-   * Each item is written as a separate line using '\n' as the line separator 
-   * regardless of operating system.  
+   * Each item is written as a separate line using '\n' as the line separator
+   * regardless of operating system.
    * Values are written in the system default character encoding.
-   *  
+   *
    * @param filename String full absolute path filename of file to write.
    * @param list Collection of lines to write.
    * @throws FileNotFoundException if file cannot be created for any reason.
@@ -587,13 +587,13 @@ public class StringUtils{
       FileUtilities.writeCollectionToFile(writer, list, NEW_LINE);
   }
 
-  /** 
+  /**
    * Note: The file will be opened as UTF-8 OutputStreamWriter
    * write to file 'filename' the toString() values contained in list.
-   * Each item is written as a separate line using '\n' as the line separator 
-   * regardless of operating system.  
+   * Each item is written as a separate line using '\n' as the line separator
+   * regardless of operating system.
    * Values are written in the UTF-8 encoding.
-   *  
+   *
    * @param filename String full absolute path filename of file to write.
    * @param list Collection of lines to write.
    * @throws FileNotFoundException if file cannot be created for any reason.
@@ -606,13 +606,13 @@ public class StringUtils{
       FileUtilities.writeCollectionToFile(writer, list, NEW_LINE);
   }
 
-  /** 
+  /**
    * Note: The file will be opened as OutputStreamWriter with encoding
    * write to file 'filename' the toString() values contained in list.
-   * Each item is written as a separate line using '\n' as the line separator 
-   * regardless of operating system.  
+   * Each item is written as a separate line using '\n' as the line separator
+   * regardless of operating system.
    * Values are written in the encoding indicated by parameter
-   *  
+   *
    * @param filename   String full absolute path filename of file to write.
    * @param list       Collection of lines to write.
    * @param encoding   Encoding is used to write a file.
@@ -625,11 +625,11 @@ public class StringUtils{
       BufferedWriter writer = FileUtilities.getBufferedFileWriter(filename, encoding);
       FileUtilities.writeCollectionToFile(writer, list, NEW_LINE);
   }
-  
+
   /**
    * Convert a collection of text entries formatted as name=value into a Map file.
    * Each item in the collection has potential linebreaks "normalized".
-   * @param contents 
+   * @param contents
    * @param sep the separator used to delimit the name from the value
    * @return Map<String,String>
    * @see #normalizeLineBreaks(String)
@@ -656,8 +656,8 @@ public class StringUtils{
 	 }
 	 return props;
   }
-  
-  /** 
+
+  /**
    * Convert window's position-size-status string of the formats:
    * <ul>
    * <li>"x;y;width;height;status"
@@ -666,9 +666,9 @@ public class StringUtils{
    * <li>"Coords=x;y;width;height;Status=status"
    * <li>"Coords=x,y,width,height,Status=status"
    * <li>"Coords=x y width height Status=status"
-   * </ul> 
+   * </ul>
    * into a org.safs.ComponentFunction.Window object.
-   * 
+   *
    * @param   windowPosition String, window's position-size-status string
    * @return  org.safs.ComponentFunction.Window if successful, null otherwise
    * @deprecated Please use {@link ComponentFunction#ConvertWindowPosition(String)} instead. <b>This method will be removed in the future.</b>
@@ -677,13 +677,13 @@ public class StringUtils{
   public static Window convertWindowPosition(String windowPosition) {
 	  return ComponentFunction.ConvertWindowPosition(windowPosition);
   }
-  
-  /** 
+
+  /**
    * Note: The file will be opened as OutputStreamWriter with encoding
    * write to file 'filename' the toString() values contained in list.
-   * Each property is written as in a special format allowing for multi-line property values.  
+   * Each property is written as in a special format allowing for multi-line property values.
    * Values are written in the encoding indicated by parameter
-   *  
+   *
    * @param filename   String full absolute path filename of file to write.
    * @param list       Properties to write.
    * @param encoding   Encoding is used to write a file.
@@ -696,7 +696,7 @@ public class StringUtils{
       BufferedWriter writer = FileUtilities.getBufferedFileWriter(filename, encoding);
       FileUtilities.writePropertiesFile(writer, list);
   }
-  
+
   /**
    * @deprecated for DatabaseUtils.writefile(String, Collection, String)
    * @see DatabaseUtils#writefile(String, Collection, String)
@@ -705,20 +705,20 @@ public class StringUtils{
   	DatabaseUtils.writefile(filename, list, delim);
   }
 
-  /** 
+  /**
    * @deprecated for DatabaseUtils.getDBVal(Object)
    * @see DatabaseUtils#getDBVal(Object)
    **/
   public static String getDBVal (Object m) {
   	return DatabaseUtils.getDBVal(m);
   }
-  
-  
-	/** 
-	 * Trims all chars below char (int) 32 EXCEPT for TAB char (int) 9 
-	 * from the left side of the provided text string.  Does not modify the input 
-	 * text string. 
-	 * @return a new trimmed string if changes were made, or the text string passed 
+
+
+	/**
+	 * Trims all chars below char (int) 32 EXCEPT for TAB char (int) 9
+	 * from the left side of the provided text string.  Does not modify the input
+	 * text string.
+	 * @return a new trimmed string if changes were made, or the text string passed
 	 * as input if no changes were made, or null if the provided text was null.
 	 */
 	public static String leftTrimSpace(String text){
@@ -727,21 +727,21 @@ public class StringUtils{
 			if (text.length() > 0){
 				int i = 0;
 			    for(;i<text.length();i++){
-			        char c = text.charAt(i); 
+			        char c = text.charAt(i);
 			        if (c == (int) 9) break;
 			        if (c > (int)32) break;
 			    }
-			    if( i < text.length()) lttext = text.substring(i);						        
+			    if( i < text.length()) lttext = text.substring(i);
 			}
 			return lttext;
 		}catch(NullPointerException npx){ return null;}
 	}
-	
-	/** 
-	 * Trims all chars below char (int) 32 EXCEPT for TAB characters (int) 9 
-	 * from the right side of the provided text string.  Does not modify the input 
+
+	/**
+	 * Trims all chars below char (int) 32 EXCEPT for TAB characters (int) 9
+	 * from the right side of the provided text string.  Does not modify the input
 	 * text string.
-	 * @return a new trimmed string if changes were made, or the text string passed 
+	 * @return a new trimmed string if changes were made, or the text string passed
 	 * as input if no changes were made, or null if the provided text was null.
 	 */
 	public static String rightTrimSpace(String text){
@@ -750,19 +750,19 @@ public class StringUtils{
 			if (text.length() > 0){
 				int i = text.length();
 			    for(;i>0;i--){
-			        char c = text.charAt(i-1); 
+			        char c = text.charAt(i-1);
 			        if (c == (int) 9) break;
 			        if (c > (int)32) break;
 			    }
-			    if( i > 0) rttext = text.substring(0,i);						        
+			    if( i > 0) rttext = text.substring(0,i);
 			}
 			return rttext;
 		}catch(NullPointerException npx){ return null;}
 	}
-	
-  
-  /** <br><em>Purpose:</em> This method takes a string trims it of leading and trailing 
-   * spaces, non-breaking spaces, and tabs, 
+
+
+  /** <br><em>Purpose:</em> This method takes a string trims it of leading and trailing
+   * spaces, non-breaking spaces, and tabs,
    * and then strips one leading and/or trailing quotation mark(#34)--if they exist.
    * @param                     str, String to unquote
    * @return String result, null if str was null
@@ -805,10 +805,10 @@ public class StringUtils{
     }
     emark = i;
     if (smark == emark) return ""; // all whitespace
-    
+
     // trim leading and\or trailing whitespace
     if(mod) result = result.substring(smark, emark);
-    
+
     if (result.substring(0, 1).equals(quote)) {
       result = result.substring(1, result.length());
     }
@@ -859,10 +859,10 @@ public class StringUtils{
   private static Object patternInstance  = null;
   private static Method patternMethod  = null;
 
-  private static Class charSequenceClass = null;  
-  static{ 
+  private static Class charSequenceClass = null;
+  static{
   	try{ charSequenceClass = Class.forName("java.lang.CharSequence");}
-  	catch(Exception e){;}  	
+  	catch(Exception e){;}
   }
 
   private static final Class [] patternType = {String.class, charSequenceClass};
@@ -897,7 +897,7 @@ public class StringUtils{
 
         Boolean result = (Boolean) obj;
         return result.booleanValue();
-      } 
+      }
       catch (Exception re) {}
     } else {
       try {
@@ -921,7 +921,7 @@ public class StringUtils{
         } catch (java.lang.IllegalAccessException iae2) {
           patternMethod = null;
         } catch (java.lang.reflect.InvocationTargetException ite) {
-          patternMethod = null;          
+          patternMethod = null;
         } catch (java.lang.ClassCastException cce) {
           patternMethod = null;
         }
@@ -1015,7 +1015,7 @@ public class StringUtils{
   }
 
 	/**
-	 * match a text(provided as fullstring, substing, regex) against<br> 
+	 * match a text(provided as fullstring, substing, regex) against<br>
 	 * the actual text got from application component(list, menu, tree, tab etc.)<br>
 	 * @param actualText String, the actual text of the component's label
 	 * @param expectedText String, the expected text, it can be full-string, sub-string or regex.
@@ -1026,27 +1026,27 @@ public class StringUtils{
 	public static boolean matchText(String actualText, String expectedText, boolean partialMatch, boolean ignoreCase){
 		String debugmsg = debugmsg(StringUtils.class, "matchText");
 		boolean matched = false;
-		
+
 		try{
 			if(ignoreCase){
 				actualText = actualText.toLowerCase();
 				expectedText = expectedText.toLowerCase();
 			}
-			
+
 			if(partialMatch){
 				matched = actualText.contains(expectedText);
 			}else{
-				matched = actualText.equals(expectedText);				
+				matched = actualText.equals(expectedText);
 			}
 			if(!matched) matched = matchRegex(expectedText, actualText);
-			
+
 		}catch(Exception e){
 			IndependantLog.debug(debugmsg+"fail to match '"+expectedText+"' against '"+actualText+"'",e);
 		}
-		
+
 		return matched;
 	}
-  
+
   public static String[] getSortArray(String[] inp) {
     String[] res = new String[inp.length];
     TreeMap map = new TreeMap();
@@ -1072,7 +1072,7 @@ public class StringUtils{
    * @exception                 java.lang.StringIndexOutOfBoundsException if not found for index n
    **/
   public static String getInputToken (String input, int n,
-                                      String sep) throws SAFSNullPointerException { 
+                                      String sep) throws SAFSNullPointerException {
     if (input != null && sep != null) {
       int j=0;
       for (StringTokenizer st = new SAFSStringTokenizer(input, sep); st.hasMoreTokens(); j++) {
@@ -1086,7 +1086,7 @@ public class StringUtils{
   }
 
   /** <br><em>Purpose:</em> Finds the count of all fields within the inputRecord found from
-   **        startindex to the end of the inputRecord.  
+   **        startindex to the end of the inputRecord.
    * @param                     input, String
    * @param                     startindex, int
    * @param                     seps, String
@@ -1094,7 +1094,7 @@ public class StringUtils{
    * @exception                 SAFSNullPointerException if input or sep are null
    **/
   public static int getFieldCount (String input, int startindex,
-                                   String seps) throws SAFSNullPointerException { 
+                                   String seps) throws SAFSNullPointerException {
     if (input != null && seps != null) {
       int j=0;
       for (StringTokenizer st = new SAFSStringTokenizer(input.substring(startindex, input.length()), seps); st.hasMoreTokens(); j++) {
@@ -1105,7 +1105,7 @@ public class StringUtils{
       throw new SAFSNullPointerException("either 'input' or 'seps' are null");
     }
   }
-  
+
   /**
    * As the List returned by Arrays.asList() does not support remove operation.<br>
    * So we provide this method ourselves.
@@ -1119,11 +1119,11 @@ public class StringUtils{
 	  }
 	  return list;
   }
-  
+
   /**
    * <em>Purpose:</em> Get tokens of text delimited by delimiter, delimiter will be considered as a whole string.
    *                   If the tokens contain any leading/ending spaces, they will be removed.
-   *                   
+   *
    * @param text		String, the delimited string
    * @param delimiter	String, the delimiter
    * @return	List, a list of tokens
@@ -1132,35 +1132,35 @@ public class StringUtils{
   public static List<String> getTrimmedTokenList(String text, String delimiter){
 	  return getTrimmedTokenList(text, delimiter, null);
   }
-  
+
   /**
    * <em>Purpose:</em> Get tokens of text separated by delimiter, delimiter will be considered as a whole string,
-   * 				   if some token contains the delimiter, user needs to escape the delimiter. If the tokens 
+   * 				   if some token contains the delimiter, user needs to escape the delimiter. If the tokens
    *                   contain any leading/ending spaces, they will be removed.
-   * 
+   *
    * @param text		String, the delimited string
    * @param delimiter	String, the delimiter
    * @param escapeChar	Character, the char to escape the delimiter
    * @return	List, a list of tokens
    * @see #getTokenList(String, String, Character)
-   */ 
+   */
   public static List<String> getTrimmedTokenList(String text, String delimiter, Character escapeChar){
 	  List<String> tokens = getTokenList(text, delimiter, escapeChar);
-	  
+
 	  String temp = null;
 	  for(int i=0;i<tokens.size();i++){
 		  temp = tokens.get(i);
 		  if(temp!=null) tokens.set(i, temp.trim());
 	  }
-	  
+
 	  return tokens;
   }
-  
+
   /**
    * <em>Purpose:</em> Get tokens of text delimited by delimiter, delimiter will be considered as a whole string
-   * 
+   *
    * <br>Example: If delimiter is "->", text is "parent->child->grandChild", then the returned list will contains
-   * <br>		  3 items: "parent", "child" and "grandChild". 
+   * <br>		  3 items: "parent", "child" and "grandChild".
    * @param text		String, the delimited string
    * @param delimiter	String, the delimiter
    * @return	List, a list of tokens
@@ -1173,19 +1173,19 @@ public class StringUtils{
   /**
    * <em>Purpose:</em> Get tokens of text delimited by delimiter, delimiter will be considered as a whole string,
    * 				   if some token contains the delimiter, user needs to escape the delimiter.
-   * 
+   *
    * <br>Example: If delimiter is "=", text is "css=input[name*='sf.c']", then the returned list will contains
-   * <br>		  3 items: "css", "input[name*" and "'sf.c']"; 
+   * <br>		  3 items: "css", "input[name*" and "'sf.c']";
    * <br>		  But if user wants "input[name*='sf.c']" as one whole token, then he needs to escape the delimiter,
    * <br>		  specify the text as css=input[name*\='sf.c'], and call this method with '\' for parameter escapeChar,
    * <br>		  then the result will be 2 items: "css" and "input[name*='sf.c']".
    * <br>		  <b>Note: Nothing MUST NOT appear between 'escape char' and 'delimiter'.</b>
-   * 
+   *
    * @param text		String, the delimited string
    * @param delimiter	String, the delimiter
    * @param escapeChar	Character, the char to escape the delimiter
    * @return	List, a list of tokens
-   */  
+   */
   public static List<String> getTokenList(String text, String delimiter, Character escapeChar){
 	  List<String> tokenList = new ArrayList<String>();
 	  if(text==null || text.equals("")) return tokenList;
@@ -1213,7 +1213,7 @@ public class StringUtils{
 				  startPosition = 0;
 			  }
 		  }
-		  
+
 		  tokenList.add(removeEscapeChar(text.substring(0,delimiterIndex), delimiter, escapeChar));
 		  if(delimiterIndex+delimiterLength==text.length()){
 			  //Reach the end
@@ -1221,10 +1221,10 @@ public class StringUtils{
 		  }
 		  text = text.substring(delimiterIndex+delimiterLength);
 	  }
-	  
+
 	  return tokenList;
   }
-  
+
   /**
    * @param text		String, the delimited string
    * @param delimiter	String, the delimiter
@@ -1234,7 +1234,7 @@ public class StringUtils{
   public static String[] getTokenArray(String text, String delimiter){
 	  return getTokenList(text, delimiter).toArray(new String[0]);
   }
-  
+
   /**
    * @param text		String, the delimited string
    * @param delimiter	String, the delimiter
@@ -1245,18 +1245,40 @@ public class StringUtils{
   public static String[] getTokenArray(String text, String delimiter, Character escapeChar){
 	  return getTokenList(text, delimiter, escapeChar).toArray(new String[0]);
   }
-  
+
+  /**
+   * @param delimitedString String, the delimited string
+   * @param delimiter String, the delimiter
+   * @return String, the last token of the delimited string
+   */
+  public static String getLastDelimitedToken(String delimitedString, String delimiter){
+	  String lastToken = null;
+	  if(delimitedString==null || delimiter==null || delimiter==""){
+		  lastToken = delimitedString;
+	  }else{
+		  int index = delimitedString.lastIndexOf(delimiter);
+		  if(index>-1){
+			  lastToken = delimitedString.substring(index+delimiter.length());
+		  }else{
+			  lastToken = delimitedString;
+		  }
+	  }
+
+//	  debug("\ndelimitedString: '"+delimitedString+"'\ndelimiter: '"+delimiter+"'\nlastToken: '"+lastToken+"'");
+	  return lastToken;
+  }
+
   /**
    * If the token contains escapeChar+delimiter, then replace it by delimiter.
    */
   private static String removeEscapeChar(String token, String delimiter, Character escapeChar){
-	  
+
 	  if(token==null || token.isEmpty()) return token;
 	  if(delimiter==null || escapeChar==null) return token;
-	  
+
 	  String result = token;
 	  String toReplace = escapeChar.toString()+delimiter;
-	  
+
 	  if(token.contains(toReplace)){
 		  //If the escapeChar equals to the 'Regex escape char', we need to escape it again
 		  //by 'Regex escape char', so that the escapeChar will be considered as normal literal and replaced
@@ -1265,10 +1287,10 @@ public class StringUtils{
 		  }
 		  result = token.replaceAll(toReplace, delimiter);
 	  }
-	  
+
 	  return result;
   }
-  
+
   /**
    * <em>Purpose:</em> Get text strung delimited by delimiter from a list, delimiter will be considered as a whole string
    * <br>Example: If delimiter is "->", if the list contains 3 items, "parent" "child" "grandChild"
@@ -1279,7 +1301,7 @@ public class StringUtils{
    */
   public static String getDelimitedString(List<String> list, String delimiter){
 	  String delimitedString = "";
-	  
+
 	  if(list!=null && delimiter!=null){
 		  for(int i=0;i<list.size();i++){
 			  delimitedString +=list.get(i)+delimiter;
@@ -1289,30 +1311,30 @@ public class StringUtils{
 	  if(delimitedString.endsWith(delimiter)){
 		  delimitedString = delimitedString.substring(0, delimitedString.lastIndexOf(delimiter));
 	  }
-	  
+
 	  return delimitedString;
   }
-  
+
   public static boolean containsSepcialKeys(String value){
 	  boolean contain = false;
-	  
+
 	  if(value==null || value.equals("")){
 		  return false;
 	  }
-	  
+
 	  for(int i=0;i<specialKeys.length;i++){
 		  if(value.indexOf(specialKeys[i])!=-1){
 			  contain = true;
 			  break;
 		  }
 	  }
-	  
+
 	  return contain;
   }
-  
+
   /** An array defines the characters should not be encoded. */
   public static final char[] URL_ENCODING_IGNORE_CHARACTERS = {CHAR_EQUAL, CHAR_AND, CHAR_COLON, CHAR_SLASH, CHAR_INTERROGATION};
-  
+
   /**
    * Encode URL or form-content. The encoding is {@link #CHARSET_UTF8}, and the escape characters are {@link #URL_ENCODING_IGNORE_CHARACTERS}.
    * @param content String, the URL or form-content to encode
@@ -1341,7 +1363,7 @@ public class StringUtils{
    */
   public static String urlEncode(String content, String encoding, char[] escapeChars){
 	  if(content==null) return null;
-	  
+
 	  String debugmsg = debugmsg(false);
 	  StringBuffer result = new StringBuffer();
 	  try {
@@ -1378,7 +1400,7 @@ public class StringUtils{
 		  IndependantLog.error(debugmsg+debugmsg(e));
 		  result.append(content);
 	  }
-	  
+
 	  return result.toString();
   }
   /**
@@ -1394,7 +1416,7 @@ public class StringUtils{
 	  }
 	  return false;
   }
-  
+
   /**
    * Convert an array to a string, which contains the array's value separated by a space.<br>
    * @param values Object[], the array to convert
@@ -1422,16 +1444,16 @@ public class StringUtils{
 	  StringBuffer buffer = new StringBuffer();
 	  String del = (delimiter != null) ? delimiter : " ";
 	  for(int i=0; i < values.length; i++){
-		  if(i > 0) buffer.append(del);		  
-		  buffer.append(String.valueOf(values[i]));			  		  
+		  if(i > 0) buffer.append(del);
+		  buffer.append(String.valueOf(values[i]));
 	  }
 	  return buffer.toString();
   }
-  
-  
+
+
   /** <br><em>Purpose:</em> convertNum: convert into a number
    * <br><em>Assumptions:</em>  all exceptions are handled.
-   * @param                     numStr, String 
+   * @param                     numStr, String
    * (indexed from 1, 1 will be subtracted from the number before returned)
    * @return                    Integer if successful, null otherwise (if alpha chars instead
    * of digits are encountered; or if number is less than one)
@@ -1454,13 +1476,13 @@ public class StringUtils{
       return null;
     }
   }
-  
+
   /**
-   * Convert s String float number (such as 35%, 0.68, 23, 5.4 etc.) into float. 
+   * Convert s String float number (such as 35%, 0.68, 23, 5.4 etc.) into float.
    * @param floatNumber String, the String float number need to be converted
    * @return float, the converted float number.
    * <br>
-   * NumberFormatException will be thrown out if the parameter is not valid. 
+   * NumberFormatException will be thrown out if the parameter is not valid.
    */
   public static float parseFloat(String floatNumber) {
 	  if(!isValid(floatNumber)){
@@ -1479,7 +1501,7 @@ public class StringUtils{
 		  } else {
 			  IndependantLog.warn("Cannot parse '" + floatNumber+"', whose format might be invalid.");
 			  throw nfe;
-		  }		  
+		  }
 	  }
   }
 
@@ -1492,32 +1514,32 @@ public class StringUtils{
    * <li>"Coords=x;y"
    * <li>"Coords=x,y"
    * <li>"Coords=x y"
-   * </ul> 
-   * 
+   * </ul>
+   *
    * @param   coords String, x;y or x,y or Coords=x;y  or Coords=x,y
    * @return  String[], String pair if successful, null otherwise
    * @deprecated call {@link #convertCoordsToArray(String, int)}, which is more generic.
    */
   public static String[] extractCoordStringPair(String coords) {
-	// CANAGL OCT 21, 2005 This function previously did NOT support the 
+	// CANAGL OCT 21, 2005 This function previously did NOT support the
   	// "Coords=" prefix and used to decrement 1 for all provided values.
-  	// It also did not accept coords of x or y < 0.  And it allowed the 
+  	// It also did not accept coords of x or y < 0.  And it allowed the
   	// y value to be left off.
-  	// The routine has been modified to leave the provided values "as-is" 
+  	// The routine has been modified to leave the provided values "as-is"
   	// and to support the "Coords=" prefix.  The y value
-	  
+
 	//SCNTAX NOV 12, 2015 Moved from the original 'convertCoords(String)' method.
 	// 					  Keep the comments here for reference.
 	try {
 		String ncoords = new String(coords);
-		
+
 		// Strip string from beginning to '=' mark.
 		int coordsindex = coords.indexOf(EQUAL);
 		if(coordsindex > 0) ncoords = ncoords.substring(coordsindex+1);
 		ncoords=ncoords.trim();
 		IndependantLog.info("working with coords: "+ coords +" prefix stripped to: "+ncoords);
-		
-		// Extract parameter by delimiter ';' or ','. 
+
+		// Extract parameter by delimiter ';' or ','.
 		int sindex = ncoords.indexOf(";");
 		if (sindex < 0) sindex = ncoords.indexOf(",");
 		boolean isspace = false;
@@ -1529,7 +1551,7 @@ public class StringUtils{
     		IndependantLog.debug("invalid coords: "+ ncoords +"; no separator detected.");
 			return null;
 		}
-		
+
 		// properly handles case where coordsindex = -1 (not found)
 	    String xS = null;
 		String yS = null;
@@ -1553,29 +1575,29 @@ public class StringUtils{
 
 		IndependantLog.info("x: "+xS);
 		IndependantLog.info("y: "+yS);
-		
-		return new String[]{xS, yS}; 
+
+		return new String[]{xS, yS};
 	} catch(Exception ee) {
   		IndependantLog.debug( "bad coords format: "+ coords, ee);
   		return null;
 	}
   }
-  
+
   /** '5', the default x coordinate in pixel.*/
   public static final int DEFAULT_X_COORDINATE = 5;
   /** '5', the default y coordinate in pixel.*/
   public static final int DEFAULT_Y_COORDINATE = 5;
-  
+
   /**
    * Convert the coordinate (given by array of String) into java.awt.Point format.<br>
    * <p>
    * The 'coordinate' could be provided in 2 formats:<br>
    * It could be <b>number, such as [12, 15], [5, 10]</b>. With this format
    * the second parameter 'compRect' is not needed (could be provided as null).<br>
-   * Or it could be in <b>percentage format, such as [30%, 45%], [0.25, 0.8]</b>. With this 
-   * format, the second parameter 'compRect' SHOULD be provided, and the width and 
+   * Or it could be in <b>percentage format, such as [30%, 45%], [0.25, 0.8]</b>. With this
+   * format, the second parameter 'compRect' SHOULD be provided, and the width and
    * height of component rectangle are necessary.<br>
-   * 
+   *
    * @param coordsPair String[], the 2 dimension array representing the [x,y] coordinate.<br>
    * @param compRect Rectangle, it represents the component relative to which the coordinate will be calculated.<br>
    *                            Only the width and height will be counted, the rectangle x,y position will not be used.<br>
@@ -1583,7 +1605,7 @@ public class StringUtils{
    */
   public static java.awt.Point convertCoords(String[] coordsPair, Rectangle compRect) {
 	  String debugmsg = StringUtils.debugmsg(false);
-	  
+
 	  if(coordsPair == null || coordsPair.length != 2) {
 		  IndependantLog.error(debugmsg + "bad coords format: "+ Arrays.toString(coordsPair));
 		  return null;
@@ -1591,7 +1613,7 @@ public class StringUtils{
 
 	  try {
 		  IndependantLog.debug(debugmsg+" converting coordinate "+Arrays.toString(coordsPair)+" to Point, component rectangle is "+compRect);
-		  
+
 		  int x = DEFAULT_X_COORDINATE;
 		  int y = DEFAULT_Y_COORDINATE;
 
@@ -1609,7 +1631,7 @@ public class StringUtils{
 			  y = (int) yF;
 		  }
 
-		  IndependantLog.debug(debugmsg+"converted coords: x: " + x + ", y: " + y);		  
+		  IndependantLog.debug(debugmsg+"converted coords: x: " + x + ", y: " + y);
 		  if(x < 0 || y < 0) IndependantLog.warn(debugmsg+"Coordinate contains negative value!");
 		  return new java.awt.Point(x, y);
 	  } catch (Exception e) {
@@ -1617,7 +1639,7 @@ public class StringUtils{
 		  return null;
 	  }
   }
-  
+
   /**
    * Convert the coordinate (given by array of String) into java.awt.Point format.<br>
    * @param coordsPair String[], a 2 dimension array containing [x,y] to be converted.
@@ -1627,7 +1649,7 @@ public class StringUtils{
 	  return convertCoords(coordsPair, null);
   }
 
-    /** 
+    /**
      * Convert coordinates string formats:
      * <ul>
      * <li>"x;y"
@@ -1636,19 +1658,19 @@ public class StringUtils{
 	 * <li>"Coords=x;y"
 	 * <li>"Coords=x,y"
 	 * <li>"Coords=x y"
-	 * </ul> 
+	 * </ul>
 	 * into a java.awt.Point object.
 	 * <p>
-     * Subclasses may override to convert alternative values, such 
+     * Subclasses may override to convert alternative values, such
      * as Row and Column values as is done in org.safs.rational.CFTable
-     * 
+     *
      * @param   coords String, x;y or x,y or Coords=x;y  or Coords=x,y
      * @return  java.awt.Point if successful, null otherwise
      * @author CANAGL OCT 21, 2005 modified to work as required for keywords as documented.
      * @author CANAGL MAR 23, 2010 added space delimiter support
      * @author SCNTAX NOV 12, 2015 This method has been split into {@link #extractCoordStringPair(String)} and {@link #convertCoords(String[], Rectangle)} methods.
      * @author SBJLWA NOV 24, 2015 Call {@link #convertCoordsToArray(String, int)} instead of {@link #extractCoordStringPair(String)}.
-     * 
+     *
      * @see #extractCoordStringPair(String)
      * @see #convertCoords(String[])
      * @see #convertCoordsToArray(String, int)
@@ -1657,7 +1679,7 @@ public class StringUtils{
     	return convertCoords(convertCoordsToArray(coords, 2));
     }
 
-    /** 
+    /**
      * Convert 2-point Line coordinates string of the formats:
      * <ul>
      * <li>"x1;y1;x2;y2"
@@ -1666,34 +1688,34 @@ public class StringUtils{
 	 * <li>"Coords=x1;y1;x2;y2"
 	 * <li>"Coords=x1,y1,x2,y2"
 	 * <li>"Coords=x1 y1 x2 y2"
-	 * </ul> 
+	 * </ul>
 	 * into a java.awt.Polygon object.
-     * 
+     *
      * @param   coords String, x1;y1;x2;y2 or x1,y1,x2,y2 or Coords=x1;y1;x2;y2  or Coords=x1,y1,x2,y2
      * @return  Polygon if successful, null otherwise
      **/
     public static java.awt.Polygon convertLine(String coords) {
 	    try {
 	    	String[] coordsArray = convertCoordsToArray(coords, 4);
-	    	
+
 	    	int x1 = (int) Float.parseFloat(coordsArray[0]);
       		int y1 = (int) Float.parseFloat(coordsArray[1]);
       		int x2 = (int) Float.parseFloat(coordsArray[2]);
       		int y2 = (int) Float.parseFloat(coordsArray[3]);
-      		
+
       		IndependantLog.debug("converted points: x1: "+x1+", y1: "+y1 +", x2:"+ x2 +", y2:"+ y2);
       		Polygon poly = new Polygon();
       		poly.addPoint(x1, y1);
       		poly.addPoint(x2, y2);
-      		
+
         	return poly;
 	    } catch (Exception ee) {
       		IndependantLog.debug( "bad points format: "+ coords, ee);
       		return null;
     	}
     }
-    
-    /** 
+
+    /**
      * Convert coordinates string of the formats:
      * <ul>
      * <li>"x1;y1;x2;y2"
@@ -1704,25 +1726,25 @@ public class StringUtils{
 	 * <li>"Coords=x1,y1,x2,y2"
 	 * <li>"Coords=x1 y1 x2 y2"
 	 * <li>"Coords=x1 y1 x2 y2 x3 y3 x4 y4"
-	 * </ul> 
+	 * </ul>
 	 * into an array object.
-     * 
+     *
      * @param coords String, x1;y1;x2;y2 or x1,y1,x2,y2 or Coords=x1;y1;x2;y2  or Coords=x1,y1,x2,y2
-     * @param length int, the number of token contained in the first parameter coords. 
+     * @param length int, the number of token contained in the first parameter coords.
      * @return  String[] an array of coordinates if successful, null otherwise.
      **/
     public static String[] convertCoordsToArray(String coords, int length) {
     	String debugmsg = debugmsg(false);
-    	
+
     	try {
     		String[] coordsArray = new String[length];
-    		
+
     		String ncoords = new String(coords.trim());
     		int coordsindex = coords.indexOf(EQUAL);
     		if(coordsindex > 0) ncoords = ncoords.substring(coordsindex+1);
     		ncoords=ncoords.trim();
     		IndependantLog.info(debugmsg+"working with coods: "+ coords +" prefix stripped to: "+ncoords);
-    		
+
     		String sep = parseSeparator(ncoords);
     		if (sep == null){
     			IndependantLog.error(debugmsg+"invalid coods: "+ ncoords +".");
@@ -1737,27 +1759,27 @@ public class StringUtils{
     		}
     		//Put the token into the array
     		for(int i=0;i<length;i++) coordsArray[i] = toker.nextToken().trim();
-    		
+
     		String coord = null;
     		for(int i=0; i<coordsArray.length; i++){
     			coord = coordsArray[i];
     			if(coord==null || coord.isEmpty()){
-    				IndependantLog.error(debugmsg+"invalid coods substrings  "+ Arrays.toString(coordsArray));    				
+    				IndependantLog.error(debugmsg+"invalid coods substrings  "+ Arrays.toString(coordsArray));
     				return null;
     			}
     			IndependantLog.info(debugmsg+"coord "+i+": "+coord);
     		}
-    		
+
     		return coordsArray;
     	} catch (Exception ee) {
     		IndependantLog.debug(debugmsg+"bad coods format: "+ coords, ee);
     		return null;
-    	}    	
+    	}
     }
-    
+
     /**
      * If the params contain the originalSeparator, then replace it by a different separator.<br>
-     * 
+     *
      * @param originalSeparator String, the original separator to search in parameters
      * @param params String..., an array of parameter
      * @return String[], an array of parameter with new separator
@@ -1779,7 +1801,7 @@ public class StringUtils{
 		}
 		return params;
 	}
-    
+
     /**
      * Generate a separator different from 'step separator', and it can be used to separate<br>
      * the coordinates for the position parameter in a test record.<br>
@@ -1791,7 +1813,7 @@ public class StringUtils{
     	if(!stepSeparator.equals(",")) return ",";
     	else return ";";//stepSeparator is comma, then we return semi-colon
     }
-    
+
     /**
      * Parse a string to get the separator.
      * <ul>
@@ -1801,18 +1823,18 @@ public class StringUtils{
      * <li>"x1;y1;x2;y2"
      * <li>"x1,y1,x2,y2"
      * <li>"x1 y1 x2 y2"
-     * </ul> 
+     * </ul>
      * @param input String, the string to parse
      * @return String, the separator
      */
     public static String parseSeparator(String input){
 		String sep = null;
-		
+
 		if(input==null){
 			IndependantLog.error("input string is null");
 			return null;
 		}
-		
+
 		int sindex = input.indexOf(";");
 		if (sindex < 0) {
 			sindex = input.indexOf(",");
@@ -1825,18 +1847,18 @@ public class StringUtils{
 		}else{
 			sep = ";";
 		}
-		
+
 		if (sep==null){
 			IndependantLog.error("no separator detected for input string '"+input+"'");
 		}
-		
+
 		return sep;
     }
-    
+
     public static String debugmsg(Throwable e){
     	return (e==null? "":e.getClass().getSimpleName()+":"+e.getMessage());
-    }    
-    
+    }
+
     /**
      * Generate debug message with class name and method name.<br>
      * @param clazz	Class, the class object of the instance, which is caller of the method.
@@ -1847,12 +1869,12 @@ public class StringUtils{
     	return (clazz==null?"":clazz.getSimpleName())+
     		   (methodName==null? ": ":"."+methodName+"(): ");
     }
-    
+
     /**
      * Generate debug message with class name, method name and message.<br>
      * @param clazz	Class, the class object of the instance, which is caller of the method.
      * @param methodName String, the string name of the method.
-     * @param message String, the detail message for the debug IndependantLog. 
+     * @param message String, the detail message for the debug IndependantLog.
      * @return	String, debug massage, for example "org.safs.IndependantLog.debug(): Something is wrong."
      */
     public static String debugmsg(Class<?> clazz, String methodName, String message){
@@ -1860,7 +1882,7 @@ public class StringUtils{
     		   (methodName==null? ": ":"."+methodName+"(): ")+
     		   (message==null? "":message);
     }
-    
+
     /**
      * Generate debug message with class name, method name and Throwable object.<br>
      * @param clazz	Class, the class object of the instance, which is caller of the method.
@@ -1877,7 +1899,7 @@ public class StringUtils{
      * Generate debug message with class name, method name, detail message and Throwable object.<br>
      * @param clazz	Class, the class object of the instance, which is caller of the method.
      * @param methodName String, the string name of the method.
-     * @param message String, the detail message for the debug IndependantLog. 
+     * @param message String, the detail message for the debug IndependantLog.
      * @param e	Throwable, the Throwable object rose when calling method.
      * @return	String, debug massage, for example "org.safs.IndependantLog.debug(): Something is wrong:SomeException:Exception message."
      */
@@ -1887,7 +1909,7 @@ public class StringUtils{
     			(message==null? "":message)+
     			(e==null? "":":"+e.getClass().getSimpleName()+":"+e.getMessage());
     }
-    
+
     /**
      * @param fullQualified boolean, true if the returned method name should be full-qualified.
      * @return String, "my method name"+"(): "
@@ -1932,7 +1954,7 @@ public class StringUtils{
     	id.append(Thread.currentThread().getId());
     	return id.toString();
     }
-    
+
     /**
      * Get the method name, or its caller's name, or its caller's caller's name etc.<br>
      * this depends on the parameter 'level'.
@@ -1940,7 +1962,7 @@ public class StringUtils{
      * level=1, the method calling the method at level 0
      * level=2, the method calling the method at level 1
      * ...
-     * 
+     *
      * @param level	int, the level in the StackTrace.
      * @param fullQualified boolean, true if the returned name should be full qualified.
      * @return String, the method name.
@@ -1958,7 +1980,7 @@ public class StringUtils{
     		}else{
     			lastPointIndex = fullClassName.lastIndexOf(".")+1;
     			callerName.append(fullClassName.substring(lastPointIndex)).append(".").append(trace.getMethodName());
-    		}    		
+    		}
     	}catch(Exception e){
     		IndependantLog.error("Fail to get MethodName infomation, Met Exception ", e);
     	}
@@ -1972,7 +1994,7 @@ public class StringUtils{
      * level=1, the class name in which a method calling the method at level 0
      * level=2, the class name in which a method calling the method at level 1
      * ...
-     * 
+     *
      * @param level	int, the level in the StackTrace.
      * @param fullQualified boolean, true if the returned name should be full qualified.
      * @return String, the class name.
@@ -1990,7 +2012,7 @@ public class StringUtils{
     		}else{
     			lastPointIndex = fullClassName.lastIndexOf(".")+1;
     			callerName.append(fullClassName.substring(lastPointIndex));
-    		}    		
+    		}
     	}catch(Exception e){
     		IndependantLog.error("Fail to get ClassName infomation, Met Exception ", e);
     	}
@@ -2009,16 +2031,16 @@ public class StringUtils{
      * level=1, Here is the direct caller of method at level 0
      * level=2, Here is the direct caller of method at level 1
      * ...
-     * 
+     *
      * We can supply the parameter 'level' to this method, and we can get the appropriate StackTraceElement.
-     * 
+     *
      * </pre>
-     * 
+     *
      * @param level	int, the level in the StackTrace under 'org.safs.StringUtils.getStackTraceElement'
      * @return StackTraceElement, it conatins the information of method, class, file etc.
      */
     public static StackTraceElement getStackTraceElement(int level){
-    	
+
     	try{
     		StackTraceElement[] traces = Thread.currentThread().getStackTrace();
     		StackTraceElement trace = null;
@@ -2030,7 +2052,7 @@ public class StringUtils{
     		for(int i=0;i<traces.length;i++){
     			trace = traces[i];
     			//java.lang.Thread.getStackTrace
-    			if(trace.getClassName().equals(Thread.class.getName()) 
+    			if(trace.getClassName().equals(Thread.class.getName())
     					&& trace.getMethodName().equals(getStackTraceMethodName)){
     				if(++i<traces.length){
     					trace = traces[i];
@@ -2047,7 +2069,7 @@ public class StringUtils{
     							IndependantLog.warn("Stack Trace doesn't contain enough infomation.");
     						}
     					}else{
-    						IndependantLog.warn("StackTraceElement at '"+i+"' is not '"+StringUtils.class.getName()+"."+myMethodName+"'");    						
+    						IndependantLog.warn("StackTraceElement at '"+i+"' is not '"+StringUtils.class.getName()+"."+myMethodName+"'");
     					}
     				}else{
     					IndependantLog.warn("Stack Trace doesn't contain enough infomation.");
@@ -2074,10 +2096,10 @@ public class StringUtils{
     	}catch(Exception e){}
     	return content;
     }
-    
+
     /**
      * Reverse an array.
-     * @param array T[], the array to reverse. 
+     * @param array T[], the array to reverse.
      * @return boolean, true if the reverse has been done successfully.
      */
 	public static <T> boolean reverseArray(T[] array){
@@ -2096,19 +2118,19 @@ public class StringUtils{
 				IndependantLog.warn(debugmsg+" the array is null, cannot reverse.");
 				return false;
 			}
-			
+
 		}catch(Exception e){
 			IndependantLog.error(debugmsg+" Met Exception ", e);
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Decide what is the best separator to use for a record from a possible separator list:
 	 * {@link TestRecordData#POSSIBLE_SEPARATOR}.<br>
-	 * @param expression String, to examine to find which of the separators does NOT exist inside 
+	 * @param expression String, to examine to find which of the separators does NOT exist inside
 	 * the expression.
-	 * @return a single String sep, or null if the expression contains a character of every 
+	 * @return a single String sep, or null if the expression contains a character of every
 	 * possible separator.
 	 */
 	public static String deduceUnusedSeparatorString(String expression){
@@ -2120,7 +2142,7 @@ public class StringUtils{
 		IndependantLog.warn(StringUtils.debugmsg(false)+" cannot deduce a valid separator for expression: "+expression);
 		return null;
 	}
-	
+
 	/**
 	 * Get a separator NOT appear in command neither in params; if no such separator<br>
 	 * can be found, then the default separator will be return.<br>
@@ -2137,7 +2159,7 @@ public class StringUtils{
 		String check = command.concat(sb.toString());
 		return check.contains(sep) ? deduceUnusedSeparatorString(check): sep;
 	}
-	
+
 	/**
 	 * Remove the leading and ending double quote.<br>
 	 * @param expression
@@ -2180,7 +2202,7 @@ public class StringUtils{
 		if(trimmedValue.startsWith(DOUBLE_QUOTE) && trimmedValue.endsWith(DOUBLE_QUOTE)) return true;
 		return false;
 	}
-	
+
 	/**
 	 * Normalize potential line breaks:
 	 * <pre>
@@ -2189,7 +2211,7 @@ public class StringUtils{
 	 * </pre>
 	 * into a single uniform {@link StringUtils#NEW_LINE} linebreak.
 	 * @param source
-	 * @return String with all linebreaks normalized to {@link StringUtils#NEW_LINE}. 
+	 * @return String with all linebreaks normalized to {@link StringUtils#NEW_LINE}.
 	 */
 	public static String normalizeLineBreaks(String source){
 		if(source != null){
@@ -2198,7 +2220,7 @@ public class StringUtils{
 		}
 		return source;
 	}
-	
+
 	/**
 	 * This class is used to parse the test error message.
 	 */
@@ -2234,7 +2256,7 @@ public class StringUtils{
 		 *  It contains 3 groups, 1->filename, 2->methodname, and 3->linenumber<br>
 		 */
 		private static final Pattern TEST_ERROR_PATTERN4 = Pattern.compile("Unable to perform \\w+ on \\w+ in "+PATTERN_FILE+" line ("+PATTERN_LINENUMBER+")");
-		
+
 		/**
 		 * According to a line of console string, generate the ErrorTrace.<br>
 		 * If the "console string" matches some patterns, a ErrorTrace will be generated.<br>
@@ -2292,7 +2314,7 @@ public class StringUtils{
 
 			return errorTrace;
 		}
-		
+
 	}
 	/**
 	 * This class encapsulate the test error message.
@@ -2445,7 +2467,7 @@ public class StringUtils{
 
 		return xparts;
 	}
-	
+
 	/**
 	 * Return the parent part of an xpath. If this xpath doesn't have a parent then "" or "//" etc. will be returned.
 	 * @param xpath String, the xpath to parse
@@ -2476,13 +2498,13 @@ public class StringUtils{
 	/**
 	 * <pre>
 	 * Get the value of a property from system properties and Set a value from the configuration to System-Properties.
-	 * If the System-Properties contains the 'property', 
+	 * If the System-Properties contains the 'property',
 	 *   keep the value in the System-Properties (don't override by the value from ConfigureInterface).
-	 * Otherwise, 
-	 *   if the System-Properties does NOT contain the 'property', then get the value from the ConfigureInterface, 
+	 * Otherwise,
+	 *   if the System-Properties does NOT contain the 'property', then get the value from the ConfigureInterface,
 	 *   if the value is null or empty, assign the 'default value' if it is provided. Finally set this value to System-Properties.
 	 * </pre>
-	 * 
+	 *
 	 * @param property String, The property name in System-Properties.
 	 * @param config ConfigureInterface, containing the configuration initial parameters
 	 * @param section String, The section name in the ConfigureInterface
@@ -2532,7 +2554,7 @@ public class StringUtils{
 
 		return value;
 	}
-	
+
 	/**
 	 * @param value String, the string value to test
 	 * @return boolean, true if the value is not null and is not empty.
@@ -2540,7 +2562,26 @@ public class StringUtils{
 	public static boolean isValid(String value){
 		return (value!=null && !value.trim().isEmpty());
 	}
-	
+
+	/**
+	 * @param booleanString, the boolean string to parse.
+	 * @return boolean, the boolean value, parsed result of the parameter 'booleanString'.
+	 * @throws SAFSParamException if the parameter 'booleanString' is not a valid boolean string.
+	 */
+	public static boolean parseBoolean(String booleanString) throws SAFSParamException{
+		boolean valid = (booleanString!=null && !booleanString.trim().isEmpty() &&
+				 (
+				   booleanString.equalsIgnoreCase(Boolean.TRUE.toString()) ||
+				   booleanString.equalsIgnoreCase(Boolean.FALSE.toString())
+				  )
+				);
+		if(valid){
+			return Boolean.parseBoolean(booleanString);
+		}else{
+			throw new SAFSParamException("The parameter '"+booleanString+"' is not a valid boolean string.");
+		}
+	}
+
 	/**
 	 * Generate a unique name. For example, it can be used as a javascript variable name<br>
 	 * when calling functions in JavaScriptFunctions to avoid the conflict with variables defined<br>
@@ -2561,7 +2602,7 @@ public class StringUtils{
 
 		return uniqueName.toString();
 	}
-	
+
 	/**
 	 * Replace the value of an option in the whole JVM options.<br>
 	 * @param jvmOptions String, the JVM options to modify
@@ -2572,7 +2613,7 @@ public class StringUtils{
 	public static String replaceJVMOptionValue(String jvmOptions, String option, String value){
 		StringBuffer sb = new StringBuffer();
 		String debugmsg = StringUtils.debugmsg(false);
-		
+
 		try{
 			int optionIndex = jvmOptions.indexOf(option);
 			String optionSepearator = " ";
@@ -2583,7 +2624,7 @@ public class StringUtils{
 					optionSepearator = "\t";//try other separator
 					optionSepearatorIndex = jvmOptions.indexOf(optionSepearator, optionIndex);
 				}
-				
+
 				String oldvalue = null;
 				if(optionSepearatorIndex<0){
 					//we may need to try other separators
@@ -2593,29 +2634,29 @@ public class StringUtils{
 					sb.append(" "+option+value);
 				}else{
 					//retrive the option value and replace it
-					oldvalue = jvmOptions.substring(optionIndex+option.length(), optionSepearatorIndex);					
+					oldvalue = jvmOptions.substring(optionIndex+option.length(), optionSepearatorIndex);
 					sb.append(" "+option+value);
 					sb.append(" "+jvmOptions.substring(optionSepearatorIndex+optionSepearator.length()));
 				}
 				IndependantLog.debug(debugmsg+" replace the old value '"+oldvalue+"' by '"+value+"' for option '"+option+"'");
-				
+
 			}else{
 				//Cannot find the option to replace, return the original one
 				return jvmOptions;
 			}
-			
+
 		}catch(Exception e){
 			IndependantLog.error(debugmsg(false)+" Fail to replace due to "+debugmsg(e));
 			return jvmOptions;
 		}
-		
+
 		return sb.toString();
 	}
 
 	/**
 	 * Get the object's memory address according to the method hashCode().<br>
 	 * <b>Note:</b> The method hashCode() should not be overridden.
-	 * 
+	 *
 	 * @param object Object, the object to get memory address for.
 	 * @return String, the memory address
 	 */
@@ -2623,7 +2664,7 @@ public class StringUtils{
 		if(object==null) return null;
 		return "@"+Integer.toHexString(object.hashCode());
 	}
-	
+
 	/**
 	 * @param object Object, the object to get string
 	 * @return String, the object's string format with memory address.
@@ -2632,9 +2673,9 @@ public class StringUtils{
 		if(object==null) return null;
 		return getMemoryAddress(object) +" : "+object;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param stack Stack, a stack holding some objects.
 	 * @return String, the string format of the stack,
 	 * @see #toStringWithAddress(Object)
@@ -2647,67 +2688,67 @@ public class StringUtils{
 			object = stack.elementAt(i);
 			sb.append(toStringWithAddress(object)+"\n");
 		}
-		
+
 		return sb.toString();
 	}
-	
+
 	public static void test_replaceJVMOptionValue(){
 		String jvmOptions = JavaConstant.JVM_Xms+"128m   "+JavaConstant.JVM_Xmx+"1g";
-		
+
 		debug(jvmOptions);
 		String newoptions = replaceJVMOptionValue(jvmOptions, JavaConstant.JVM_Xms, "512m");
-		debug("newoptions="+newoptions);		
+		debug("newoptions="+newoptions);
 		newoptions = replaceJVMOptionValue(newoptions, JavaConstant.JVM_Xmx, "2g");
-		debug("newoptions="+newoptions);		
+		debug("newoptions="+newoptions);
 		debug("newoptions="+newoptions);
 		debug("");
-		
+
 		jvmOptions = JavaConstant.JVM_Xms+"128m   "+JavaConstant.JVM_Xmx+"1g  ";
 		debug(jvmOptions);
 		newoptions = replaceJVMOptionValue(jvmOptions, JavaConstant.JVM_Xms, "512m");
-		debug("newoptions="+newoptions);		
+		debug("newoptions="+newoptions);
 		newoptions = replaceJVMOptionValue(newoptions, JavaConstant.JVM_Xmx, "2g");
 		debug("newoptions="+newoptions);
 		debug("");
-		
+
 		jvmOptions = JavaConstant.JVM_Xms+"128m\t"+JavaConstant.JVM_Xmx+"1g\t";
 		debug(jvmOptions);
 		newoptions = replaceJVMOptionValue(jvmOptions, JavaConstant.JVM_Xms, "512m");
-		debug("newoptions="+newoptions);		
+		debug("newoptions="+newoptions);
 		newoptions = replaceJVMOptionValue(newoptions, JavaConstant.JVM_Xmx, "2g");
 		debug("newoptions="+newoptions);
 		debug("");
-		
+
 		jvmOptions = JavaConstant.JVM_Xms+"128m\t"+JavaConstant.JVM_Xmx+"1g\t";
 		debug(jvmOptions);
 		newoptions = replaceJVMOptionValue(jvmOptions, JavaConstant.JVM_Xms, "512m");
-		debug("newoptions="+newoptions);		
+		debug("newoptions="+newoptions);
 		newoptions = replaceJVMOptionValue(newoptions, "-Xgc:", "singlecon");
-		debug("newoptions="+newoptions);		
+		debug("newoptions="+newoptions);
 		newoptions = replaceJVMOptionValue(newoptions, JavaConstant.JVM_Xmx, "2g");
 		debug("newoptions="+newoptions);
 		debug("");
-		
+
 		jvmOptions = "-Xgc:gencon" + JavaConstant.JVM_Xms+"128m\t"+JavaConstant.JVM_Xmx+"1g\t" +"-Xdebug";
 		debug(jvmOptions);
 		newoptions = replaceJVMOptionValue(jvmOptions, JavaConstant.JVM_Xms, "512m");
-		debug("newoptions="+newoptions);		
+		debug("newoptions="+newoptions);
 		newoptions = replaceJVMOptionValue(newoptions, JavaConstant.JVM_Xmx, "2g");
 		debug("newoptions="+newoptions);
 		debug("");
-		
+
 		jvmOptions = "-Xgc:gencon" + " -Xdebug";
 		debug(jvmOptions);
 		newoptions = replaceJVMOptionValue(jvmOptions, JavaConstant.JVM_Xms, "512m");
-		debug("newoptions="+newoptions);		
+		debug("newoptions="+newoptions);
 		newoptions = replaceJVMOptionValue(newoptions, JavaConstant.JVM_Xmx, "2g");
 		debug("newoptions="+newoptions);
 		newoptions = replaceJVMOptionValue(newoptions, "-Xgc:", "singlecon");
 		debug("newoptions="+newoptions);
 		debug("");
-		
+
 	}
-	
+
 	public static void test_breakXpath(){
 		debug("\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$"+debugmsg(false)+"$$$$$$$$$$$$$$$$$$$");
 		String[] xpaths = {
@@ -2732,7 +2773,7 @@ public class StringUtils{
 			debug("XPARTS ARRAY="+Arrays.toString(xparts));
 		}
 	}
-	
+
 	public static void test_getTokenList(){
 		debug("\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$"+debugmsg(false)+"$$$$$$$$$$$$$$$$$$$");
 		String delimiter = "=";
@@ -2785,7 +2826,7 @@ public class StringUtils{
 		text = "css=input[jsaction*X='sf.c']";
 		debug(text+ "		"+getTokenList(text, delimiter, escape));
 	}
-	
+
 	public static void test_reverseArray(){
 		debug("\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$"+debugmsg(false)+"$$$$$$$$$$$$$$$$$$$");
 		Integer[] arr = {1,2,3,4,5,6,7,8,9,0};
@@ -2797,7 +2838,7 @@ public class StringUtils{
 		System.out.println("Original "+Arrays.toString(a));
 		reverseArray(a);
 		System.out.println("Reversed "+Arrays.toString(a));
-		
+
 		Character[] strArr = {'S', 't', 'r', 'i', 'n', 'g'};
 		System.out.println("Original "+Arrays.toString(strArr));
 		reverseArray(strArr);
@@ -2805,20 +2846,20 @@ public class StringUtils{
 
 		reverseArray(null);
 	}
-	
+
 	public static void test_convertLine(){
 		Point pointA = new Point(13, 45);
 		Point pointB = new Point(18, 27);
 		String coords = pointA.x+", "+pointA.y+", "+pointB.x+", "+pointB.y;
 		java.awt.Polygon poly = convertLine(coords);
-		
+
 		if(pointA.equals(new Point(poly.xpoints[0], poly.ypoints[0])) && pointB.equals(new Point(poly.xpoints[1], poly.ypoints[1]))){
 			System.out.println("Succeed convert "+coords+" to polygon "+poly);
 		}else{
 			System.err.println("Fail to convert "+coords+" to polygon. The polygon is "+poly);
 		}
 	}
-	
+
 	private static void testErrorLineParser(){
 		debug("\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$"+debugmsg(false)+"$$$$$$$$$$$$$$$$$$$");
 		String[] testStrings = {"Error at line 50 in file sample.testcases.TestCase1#main(): Some error happened.",
@@ -2832,12 +2873,12 @@ public class StringUtils{
 				"in table sample.testcases.TestCase1#main() at line 28",
 				"Unable to perform Click on Button_as in sample.testcases.TestCase1#main() line 36"
 		};
-		
+
 		for(String s:testStrings){
 			ErrorLineParser.parse(0, s);
 		}
 	}
-	
+
 	private static void test_urlEncode(){
 		debug(urlEncode("http://no.exist.com/hello?name=Mickey Mouse&pass=!he*$&email=mickey.mouse@disney.com"));
 		debug(urlEncode("http://no.exist.com/hello?name=Mickey Mouse &pass=!he*$&email=mickey.mouse@disney.com="));
@@ -2845,7 +2886,7 @@ public class StringUtils{
 		debug(urlEncode("http://no.exist.com/hello?name=Mickey Mouse&pass=!he*$&email=mickey.mouse@disney.com\\/"));
 		debug(urlEncode("name=Mickey Mouse&pass=!he*@$&email=mickey.mouse@disney.com\\/"));
 	}
-	
+
 	/**
 	 * Test {@link #convertCoordsToArray(String, int)} and {@link #extractCoordStringPair(String)}. It seems that
 	 * {@link #convertCoordsToArray(String, int)} is more tolerable.
@@ -2855,10 +2896,10 @@ public class StringUtils{
 		String[] badCoordinatesArray = {null, "", " ", "23," , ",23, , 56", ";;23"};
 		String[] goodCoordinatesArray = { "23, 56", "23;56", "23 56", "  23   56  ", ";23 ; 56; ", ",23, 56, , ,"};
 		String[] resultArray = null;
-		
+
 		System.out.println("\n========================== "+debugmsg(false)+" ============================");
 		int unexpected = 0;
-		
+
 		System.out.println("\n----------------------------------------------> Convert badCoordinatesArray: ");
 		for(String coordinates: badCoordinatesArray){
 			resultArray = extractCoordStringPair(coordinates);
@@ -2867,7 +2908,7 @@ public class StringUtils{
 				//we don't care too much about the error of deprecated method
 				System.out.println("extractCoordStringPair(): Conversion for '"+coordinates+"' is wrong!");
 			}
-			
+
 			resultArray = convertCoordsToArray(coordinates, 2);
 			if(showDetail) System.out.println("convertCoordsToArray(): '"+coordinates+"' has been converted to array "+Arrays.toString(resultArray));
 			if(resultArray!=null){
@@ -2875,7 +2916,7 @@ public class StringUtils{
 				unexpected++;
 			}
 		}
-		
+
 		System.out.println("\n----------------------------------------------> Convert goodCoordinatesArray: ");
 		for(String coordinates: goodCoordinatesArray){
 			resultArray = extractCoordStringPair(coordinates);
@@ -2884,27 +2925,27 @@ public class StringUtils{
 				//we don't care too much about the error of deprecated method
 				System.out.println("extractCoordStringPair(): conversion for '"+coordinates+"' is wrong!");
 			}
-			
+
 			if(showDetail)  resultArray = convertCoordsToArray(coordinates, 2);
-			System.out.println("convertCoordsToArray(): '"+coordinates+"' has been converted to array "+Arrays.toString(resultArray));			
+			System.out.println("convertCoordsToArray(): '"+coordinates+"' has been converted to array "+Arrays.toString(resultArray));
 			if(resultArray==null){
 				System.err.println("convertCoordsToArray(): conversion for '"+coordinates+"' is wrong!");
 				unexpected++;
 			}
 		}
-		
+
 		if(unexpected>0){
 			System.err.println(debugmsg(false)+"XXXXXXXXXXXXXXXXXXXXXXX We met "+unexpected+" UNEXPECTED errors.");
 		}
 	}
-	
+
 	private static void test_parseFloat(){
 		String[] goodFloatNumber = {"23.5", " 23% ", " 0.36 ", "12.3", " 45 ", "  12.5  % ", "12.3 %"};
 		String[] badFloatNumber = {"%%", " % ", " ", " 12. 3", " %5 ", "%", null};
-		
+
 		System.out.println("\n========================== "+debugmsg(false)+" ============================");
 		int unexpected = 0;
-		
+
 		for(String number:goodFloatNumber){
 			try{
 				System.out.println("Converting '"+number+"' to float "+parseFloat(number));
@@ -2921,16 +2962,16 @@ public class StringUtils{
 				System.out.println("Fail to convert '"+number+"' to float, met "+debugmsg(e));
 			}
 		}
-		
+
 		if(unexpected>0){
 			System.err.println(debugmsg(false)+"XXXXXXXXXXXXXXXXXXXXXXX We met "+unexpected+" UNEXPECTED errors.");
 		}
 	}
-	
+
 	private static void debug(String message){
 		System.out.println(message);
 	}
-	
+
 	public static void initIndependantLogByConsole(){
 		IndependantLog.setDebugListener(new DebugListener() {
 			public String getListenerName() {
@@ -2941,10 +2982,10 @@ public class StringUtils{
 			}
 		});
 	}
-	
+
 	public static void main(String[] args){
 		initIndependantLogByConsole();
-		
+
 		test_getTokenList();
 		test_reverseArray();
 		testErrorLineParser();
@@ -2954,7 +2995,7 @@ public class StringUtils{
 		test_convertLine();
 		test_convertCoords(true);
 		test_parseFloat();
-		
+
 	}
-	
+
 }

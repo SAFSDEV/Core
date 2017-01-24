@@ -16,6 +16,7 @@ package org.safs.text;
  * <br>	DEC 09, 2014	(CANAGL)    Refactored deduceFile routines into here from GenericEngine and Processor.
  * <br>	FEB 04, 2015	(SBJLWA)    Modify getBufferedFileReader(): deduce the file encoding if no encoding is provided.
  * <br>	APR 06, 2016	(CANAGL)    Support FileAttribute.ALLFILES Type to specify all non-VOLUMELABEL files at a location.
+ * <br>	DEC 29, 2016	(SBJLWA)    Added deduceDatapoolFile(): deduce file relative to datapool.
  *
  *********************************************************************************************/
 
@@ -38,6 +39,7 @@ import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -68,10 +70,11 @@ import org.safs.tools.stringutils.StringUtilities;
 public class FileUtilities
 {
 
-	public final static int FILE_TYPE_TEST 	  = 0;
-	public final static int FILE_TYPE_BENCH   = 1;
-	public final static int FILE_TYPE_PROJECT = 2;
-	public final static int FILE_TYPE_DIFF 	  = 3;
+	public final static int FILE_TYPE_TEST 	  	= 0;
+	public final static int FILE_TYPE_BENCH   	= 1;
+	public final static int FILE_TYPE_PROJECT 	= 2;
+	public final static int FILE_TYPE_DIFF 	  	= 3;
+	public final static int FILE_TYPE_DATAPOOL 	= 4;
 
 	public static final String VAR_SAFSBENCHDIRECTORY    = "safsbenchdirectory";
 	public static final String VAR_SAFSDATAPOOLDIRECTORY = "safsdatapooldirectory";
@@ -200,7 +203,7 @@ public class FileUtilities
 		if(_byte1!=0xEF) rc=false;
 		if(_byte2!=0xBB) rc=false;
 		if(_byte3!=0xBF) rc=false;
-		
+
 		return rc;
 	}
 
@@ -208,7 +211,7 @@ public class FileUtilities
 	 * The Method object of method detectFileEncoding() of class {@link org.safs.text.FileUtilitiesByThirdParty}.
 	 */
 	private static Method detectFileEncodingMethod = null;
-	
+
 	private static Method detectStringEncodingMethod = null;
 	/**
 	 * Detects file's encoding.<br>
@@ -227,7 +230,7 @@ public class FileUtilities
 			Throwable cause = e.getCause();
 			IndependantLog.warn("caused by "+cause.getClass().getSimpleName()+":"+cause.getMessage());
 		}
-		
+
 		return encoding;
 	}
 
@@ -248,11 +251,11 @@ public class FileUtilities
 			Throwable cause = e.getCause();
 			IndependantLog.warn("caused by "+cause.getClass().getSimpleName()+":"+cause.getMessage());
 		}
-		
+
 		return encoding;
 	}
-	
-	
+
+
 	/**
 	 * Attempt to replace all filename path separators ( "\" or "/" ) with the correct ones for
 	 * the current environment.
@@ -1138,6 +1141,30 @@ public class FileUtilities
 	    }
 	}
 
+	public static enum FileType{
+		JSON("JSON"),
+		XML("XML"),
+		PROPERTIES("PROPERTIES");
+
+		public final String name;
+		FileType(String name){
+			this.name = name;
+		}
+
+		public static FileType get(String name){
+			FileType type = FileType.JSON;
+			if(JSON.name.equalsIgnoreCase(name)) type = FileType.JSON;
+			else if(XML.name.equalsIgnoreCase(name)) type = FileType.XML;
+			else if(PROPERTIES.name.equalsIgnoreCase(name)) type = FileType.PROPERTIES;
+			else{
+				IndependantLog.warn(StringUtils.debugmsg(false)+"The file type '"+name+"' is NOT valid!\n"
+						+ "The possible valid type can be "+Arrays.toString(FileType.values())+"\n"
+						+ "The default type "+type+" is returned.");
+			}
+			return type;
+		}
+	}
+
 	public static enum FilterMode{
 		TOLERANCE("TOLERANCE");
 
@@ -1146,7 +1173,7 @@ public class FileUtilities
 			this.name = name;
 		}
 	}
-	
+
 	public static enum PatternFilterMode{
 		WILDCARD("WILDCARD"),
 		REGEXP("REGEXP");
@@ -1539,9 +1566,10 @@ public class FileUtilities
 	   * @see {@link #FILE_TYPE_TEST}
 	   * @see {@link #FILE_TYPE_BENCH}
 	   * @see {@link #FILE_TYPE_DIFF}
+	   * @see {@link #FILE_TYPE_DATAPOOL}
 	   * @see {@link #FILE_TYPE_PROJECT}
 	   */
-	  public static File deduceFile(String filename, int type /** 0->test file; 1->bench file; 2->project file; 3->diff file */, RuntimeDataInterface data) throws SAFSException{
+	  public static File deduceFile(String filename, int type /** 0->test file; 1->bench file; 2->project file; 3->diff file; 4->datapool file */, RuntimeDataInterface data) throws SAFSException{
 		  File fn = null;
 		  if (filename==null || filename.length()==0) {
 			  throw new SAFSException("Required filename is not provided!");
@@ -1604,6 +1632,8 @@ public class FileUtilities
 					  }
 				  }else if(type==FILE_TYPE_PROJECT){
 					  pdir = data.getVariable(VAR_SAFSPROJECTDIRECTORY);
+				  }else if(type==FILE_TYPE_DATAPOOL){
+					  pdir = data.getVariable(VAR_SAFSDATAPOOLDIRECTORY);
 				  }
 			  } catch (Exception x) {}
 			  if ((pdir == null) || (pdir.equals(""))) {
@@ -1616,6 +1646,8 @@ public class FileUtilities
 					  error += " "+ VAR_SAFSDATAPOOLDIRECTORY + ", "+ VAR_SAFSDIFDIRECTORY;
 				  }else if(type==FILE_TYPE_PROJECT){
 					  error += " "+ VAR_SAFSPROJECTDIRECTORY;
+				  }else if(type==FILE_TYPE_DATAPOOL){
+					  error += " "+ VAR_SAFSDATAPOOLDIRECTORY;
 				  }
 				  throw new SAFSException(error);
 			  }
@@ -1629,14 +1661,14 @@ public class FileUtilities
 
 	  /**
 	   * Deduce the absolute full path test-relative file.
-	   * @param filename, String, the test/actual file name.  If there are any File.separators in the 
-	   * relative path then the path is actually considered relative to the Datapool 
+	   * @param filename, String, the test/actual file name.  If there are any File.separators in the
+	   * relative path then the path is actually considered relative to the Datapool
 	   * directory unless it does not exist, or is already an absolute file path.
 	   * <p>
-	   * If a relative directory path does not exist relative to the Datapool directory then 
+	   * If a relative directory path does not exist relative to the Datapool directory then
 	   * the final path will be relative to the Project directory.
 	   * <p>
-	   * If it is an absolute path, and contains a root path that includes the Bench directory, then the 
+	   * If it is an absolute path, and contains a root path that includes the Bench directory, then the
 	   * file will be converted to a comparable relative path off the Test directory.
 	   * <p>
 	   * @param RuntimeDataInterface to access runtime data (directories). Like a subclass of GenericEngine, or Processor.
@@ -1647,17 +1679,17 @@ public class FileUtilities
 	  public static File deduceTestFile(String filename, RuntimeDataInterface data) throws SAFSException{
 		  return deduceFile(filename, FILE_TYPE_TEST, data);
 	  }
-	  
+
 	  /**
 	   * Deduce the absolute full path Diff-relative file.
-	   * @param filename, String, the diff file name.  If there are any File.separators in the 
-	   * relative path then the path is actually considered relative to the Datapool 
+	   * @param filename, String, the diff file name.  If there are any File.separators in the
+	   * relative path then the path is actually considered relative to the Datapool
 	   * directory unless it does not exist, or is already an absolute file path.
 	   * <p>
-	   * If a relative directory path does not exist relative to the Datapool directory then 
+	   * If a relative directory path does not exist relative to the Datapool directory then
 	   * the final path will be relative to the Project directory.
 	   * <p>
-	   * If it is an absolute path, and contains a root path that includes the Bench directory, then the 
+	   * If it is an absolute path, and contains a root path that includes the Bench directory, then the
 	   * file will be converted to a comparable relative path off the Diff directory.
 	   * <p>
 	   * @param RuntimeDataInterface to access runtime data (directories). Like a subclass of GenericEngine, or Processor.
@@ -1668,13 +1700,13 @@ public class FileUtilities
 	  public static File deduceDiffFile(String filename, RuntimeDataInterface data) throws SAFSException{
 		  return deduceFile(filename, FILE_TYPE_DIFF, data);
 	  }
-	  
+
 	  /**
 	   * Deduce the absolute full path bench-relative file.
-	   * @param filename, String, the test file name.  If there are any File.separators in the 
-	   * relative path then the path is actually considered relative to the Datapool 
+	   * @param filename, String, the test file name.  If there are any File.separators in the
+	   * relative path then the path is actually considered relative to the Datapool
 	   * directory unless it does not exist, or is already an absolute file path.
-	   * If a relative directory path does not exist relative to the Datapool directory then 
+	   * If a relative directory path does not exist relative to the Datapool directory then
 	   * the final path will be relative to the Project directory.
 	   * @param RuntimeDataInterface to access runtime data (directories). Like a subclass of GenericEngine, or Processor.
 	   * @return File, the absolute full path bench file.
@@ -1684,22 +1716,33 @@ public class FileUtilities
 	  public static File deduceBenchFile(String filename, RuntimeDataInterface data) throws SAFSException{
 		  return deduceFile(filename, FILE_TYPE_BENCH, data);
 	  }
-	  
+
 	  /**
 	   * Deduce the absolute full path to a project-relative file.
-	   * @param filename, String, the test file name.  The path is ALWAYS considered relative 
-	   * to the project root directory regardless of the absence or presence of File.separators 
+	   * @param filename, String, the test file name.  The path is ALWAYS considered relative
+	   * to the project root directory regardless of the absence or presence of File.separators
 	   * unless the file is already an absolute path.
 	   * @param RuntimeDataInterface to access runtime data (directories). Like a subclass of GenericEngine, or Processor.
 	   * @return File, the absolute full path bench file.
-	   * @throws SAFSException 
+	   * @throws SAFSException
 	   * @see {@link #deduceFile(String, int)}
 	   */
 	  public static File deduceProjectFile(String filename, RuntimeDataInterface data) throws SAFSException{
 		  return deduceFile(filename, FILE_TYPE_PROJECT, data);
 	  }
-	  
-	
+
+	  /**
+	   * Deduce the absolute full path datapool-relative file.
+	   * @param filename, String, the data file name. It can contain sub directories.
+	   * @param RuntimeDataInterface to access runtime data (directories). Like a subclass of GenericEngine, or Processor.
+	   * @return File, the absolute full path datapool file.
+	   * @throws SAFSException
+	   * @see {@link #deduceFile(String, int)}
+	   */
+	  public static File deduceDatapoolFile(String filename, RuntimeDataInterface data) throws SAFSException{
+		  return deduceFile(filename, FILE_TYPE_DATAPOOL, data);
+	  }
+
 	/**
 	 * @param file File, the file to extract the attribute information.
 	 * @return FileAttribute, the file's attributes

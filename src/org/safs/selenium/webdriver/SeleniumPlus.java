@@ -1816,6 +1816,15 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	public static class Counters extends SAFSPlus.Counters{}
 
 	/**
+	 * Wrapper class providing APIs to handle 
+	 * <a href="http://safsdev.github.io/sqabasic2000/TIDRestFunctionsIndex.htm">TIDRestFunctions Reference</a> and 
+	 * <a href="http://safsdev.github.io/sqabasic2000/DDDriverRestCommandsIndex.htm">DriverRestCommands Reference</a>, like RestGetBinary, RestStoreResponse etc.<br>
+	 * 
+	 * @see SAFSPlus.Rest
+	 */
+	public static class Rest extends SAFSPlus.Rest{}
+	
+	/**
 	 * Click on any visible component without verification.<br>
 	 * This API will not guarantee that the click does happen, it simply clicks. If user wants<br>
 	 * to make sure of that, he can call {@link #Click(org.safs.model.Component, String...)} instead.<br>
