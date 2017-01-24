@@ -1,4 +1,4 @@
-/** 
+/**
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  */
@@ -8,17 +8,18 @@ import org.apache.hc.client5.http.testframework.HttpClient5Adapter;
 import org.apache.hc.core5.http.HttpVersion;
 import org.apache.hc.core5.http.ProtocolVersion;
 import org.safs.SAFSRuntimeException;
+import org.safs.auth.Auth;
 
 /**
  * Contains the information needed to test a specific web service.
  * <p>
- * A test or ongoing interactive session with a specific web service will have a unique service Id 
+ * A test or ongoing interactive session with a specific web service will have a unique service Id
  * and all information associated with that interactive service session will be retained here.
- *  
+ *
  * @author canagl
  */
 public class Service{
-	
+
 	private String serviceId;
 	private String proxyServerURL;
 	private String baseURL;
@@ -28,7 +29,8 @@ public class Service{
 	private ProtocolVersion protocolVersion = HttpVersion.HTTP_1_1;
 	private String clientAdapterClassName;
 	private Object clientAdapter;
-	
+	private Auth auth = null;
+
 	/**
 	 * Constructor
 	 * @param serviceId
@@ -36,7 +38,7 @@ public class Service{
 	public Service(String serviceId){
 		this.serviceId = serviceId;
 	}
-	
+
 	/**
 	 * Constructor
 	 * @param serviceId
@@ -148,7 +150,7 @@ public class Service{
 	public String getProtocolVersion() {
 		return protocolVersion.toString();
 	}
-	
+
 	/**
 	 * @param protocolVersion the protocol version to set
 	 */
@@ -171,23 +173,31 @@ public class Service{
 			                               "\"HTTP/1.1\", or \"HTTP/2.0\"");
 		}
 	}
-	
+
 	// for internal use only
 	ProtocolVersion getProtocolVersionObject() {
 		return protocolVersion;
 	}
-	
+
+	public Auth getAuth() {
+		return auth;
+	}
+
+	public void setAuth(Auth auth) {
+		this.auth = auth;
+	}
+
 	/**
 	 * To specify the use of a different client adapter, call this
 	 * with the class name of the adapter.
-	 * 
+	 *
 	 * @param clientAdapterClassName the class name of the client adapter
 	 */
 	public Object setClientAdapterClassName(String clientAdapterClassName) throws Exception {
 		this.clientAdapterClassName = clientAdapterClassName;
 		return getClientAdapter();
 	}
-	
+
 	// for internal use only
 	String getClientAdapterClassName() {
 		return clientAdapterClassName;
@@ -205,7 +215,7 @@ public class Service{
 				clientAdapter = clazz.newInstance();
 			}
 		}
-		
+
 		return clientAdapter;
 	}
 }

@@ -1,35 +1,60 @@
-/** 
+/**
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  */
-
+/**
+ * Logs for developers, not published to API DOC.
+ *
+ * History:
+ * DEC 02, 2016    (SBJLWA) Make this class persistable.
+ */
 package org.safs.rest.service;
 
+import java.util.HashMap;
 import java.util.Map;
+
+import org.safs.Printable;
+import org.safs.persist.PersistableDefault;
 
 /**
  * @author canagl
  */
-public class Response {
-    
+public class Response extends PersistableDefault{
+
+	private final static Map<String, String> fieldToPersistKeyMap = new HashMap<String, String>();
+
 	Request _request;
-	
-	String _status_line;
-    
-    String _http_version;
-    int _status_code;
-    String _reason_phrase;
-    
-    
-    Map<String,String> _headers;
+	String ID = "TO BE ASSIGNED";
+	String _content_type = UNKNOWN_VALUE;
+	Object _entity_body = UNKNOWN_VALUE;
+	long _entity_length;
+	Map<String,String> _headers;
+	String _http_version = UNKNOWN_VALUE;
+	String _message_body = UNKNOWN_VALUE;
+	String _reason_phrase = UNKNOWN_VALUE;
+	int _status_code;
+	String _status_line = UNKNOWN_VALUE;
 
-    String _message_body;
+	static{
+		fieldToPersistKeyMap.put("_request", "Request");
+		fieldToPersistKeyMap.put("ID", "ID");
+		fieldToPersistKeyMap.put("_content_type", "ContentType");
+		fieldToPersistKeyMap.put("_entity_body", "EntityBody");
+		fieldToPersistKeyMap.put("_entity_length", "EntityLength");
+		fieldToPersistKeyMap.put("_headers", "Headers");
+		fieldToPersistKeyMap.put("_http_version", "HttpVersion");
+		fieldToPersistKeyMap.put("_message_body", "MessageBody");
+		fieldToPersistKeyMap.put("_reason_phrase", "ReasonPhrase");
+		fieldToPersistKeyMap.put("_status_code", "StatusCode");
+		fieldToPersistKeyMap.put("_status_line", "StatusLine");
+	}
 
-    long _entity_length;
-    Object _entity_body;
-
-    String _content_type;
-
+	public String getID() {
+		return ID;
+	}
+	public void setID(String iD) {
+		ID = iD;
+	}
 	public String get_content_type() {
 		return _content_type;
 	}
@@ -88,7 +113,7 @@ public class Response {
 	 * @return the _response_header
 	 */
 	public String get_headers() {
-		
+
 		return Headers.convertHeadersMapToMultiLineString(_headers);
 	}
 	/**
@@ -143,43 +168,17 @@ public class Response {
 	 * @param _request the _request to set
 	 */
 	public void set_request(Request _request) {
+		if(_request instanceof Printable){
+			((Printable) _request).setTabulation(this.getTabulation()+1);
+		}
+		if(_request!=null){
+			_request.setParent(this);
+		}
 		this._request = _request;
 	}
-	
-	/**
-	 * @return String, the response information returned from rest service.
-	 */
-	public String getResponseInfo(){
-		return get_status_code() +":"+ get_status_line() +"\n"+
-				get_reason_phrase() +"\n"+
-				get_headers() +"\n"+
-				"Message Body:\n"+
-				get_message_body()+"\n"+
-				"Entity Length: "+ get_entity_length() +"\n"+
-				"Entity Body:\n"+ 
-				get_entity_body().toString()
-				;  
-	}
 
-	/**
-	 * @return String, the original request information.
-	 */
-	public String getRequestInfo(){
-		Request r = get_request();
-		if(r==null) return null;
-		return r.get_request_method() +" : "+ r.get_request_uri() +"\n"+
-			   r.get_headers() +"\n"+
-			   "Message Body:\n"+
-			   r.get_message_body()+"\n";
+	@Override
+	public Map<String, String> getPersitableFields() {
+		return fieldToPersistKeyMap;
 	}
-
-	/**
-	 * This is the one to call for ALL information AFTER the REQUEST has been returned in the RESPONSE
-	 * @return String, the original request information and the response information returned from rest service.
-	 */
-	public String toString(){
-		return "\n========\nRequest: " + getRequestInfo() +"\n"+
-				"=========\nResponse: "+ getResponseInfo();                
-	}
-    
 }
