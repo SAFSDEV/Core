@@ -1,7 +1,31 @@
 /** Copyright (C) (MSA, Inc) All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
-
+/**
+ * History:
+ *
+ * JUN 03, 2003    (DBauman) Original Release
+ * SEP 16, 2003    (Carl Nagle) Implemented use of new SAFSLOGS logging.
+ * NOV 10, 2003    (Carl Nagle) Added constants for known record types.
+ *                          Added new abstract isSupportedRecordType()
+ * NOV 13, 2003    (Carl Nagle) Added support for stored processors or
+ *                          full or partial class names for processors.
+ *                          The latter is moving the functionality out of
+ *                          the TestRecordData class into the individual
+ *                          Processors for more flexible differentiation of
+ *                          processors.
+ * NOV 13, 2003    (DBauman) Added support for breakpoints.
+ * NOV 19, 2003    (Carl Nagle) Additional refactoring.
+ * AUG 08, 2006    (PHSABO) Added helper functions getSubAreaRectangle and getClippedSubAreaRectangle used by GetGUIImage and FilterImage.
+ * JAN 29, 2007    (Carl Nagle) Added chainedProcessor support for all Processors.
+ * JAN 25, 2008    (Carl Nagle) Removed Java 1.5 String.contains dependencies.
+ * JUL 31, 2008    (Carl Nagle) Added CASEINSENSITIVE static strings for subclasses.
+ * AUG 25, 2008    (Carl Nagle) Added try/catch in distributeConfigInfo routine.
+ * MAR 26, 2009    (Carl Nagle) Added safsparams support for clearProxiesAlways.
+ * MAR 08, 2011    (DharmeshPatel) Added RFSMOnly support for RFSM search mode.
+ * JUL 22, 2013    (Lei Wang) Added methods deducexxxFile().
+ * DEC 01, 2016    (Lei Wang) Added methods setAtEndOfProcess() etc.
+ **/
 package org.safs;
 
 import java.io.BufferedReader;
@@ -28,6 +52,7 @@ import org.safs.logging.AbstractLogFacility;
 import org.safs.logging.LogUtilities;
 import org.safs.text.FAILStrings;
 import org.safs.text.FileUtilities;
+import org.safs.text.GENStrings;
 import org.safs.tools.CaseInsensitiveFile;
 import org.safs.tools.DefaultTestRecordStackable;
 import org.safs.tools.ITestRecordStackable;
@@ -40,27 +65,6 @@ import org.safs.tools.drivers.DriverConstant;
  * <p>
  * @author  Doug Bauman
  * @since   JUN 03, 2003
- *
- *   <br>   JUN 03, 2003    (DBauman) Original Release
- *   <br>   SEP 16, 2003    (Carl Nagle) Implemented use of new SAFSLOGS logging.
- *   <br>   NOV 10, 2003    (Carl Nagle) Added constants for known record types.
- *   <br>                            Added new abstract isSupportedRecordType()
- *   <br>   NOV 13, 2003    (Carl Nagle) Added support for stored processors or
- *   <br>                            full or partial class names for processors.
- *   <br>                            The latter is moving the functionality out of
- *   <br>                            the TestRecordData class into the individual
- *   <br>                            Processors for more flexible diffentiation of
- *   <br>                            processors.
- *   <br>   NOV 13, 2003    (DBauman) Added support for breakpoints.
- *   <br>   NOV 19, 2003    (Carl Nagle) Additional refactoring.
- *   <br>   AUG 08, 2006    (PHSABO) Added helper functions getSubAreaRectangle and getClippedSubAreaRectangle used by GetGUIImage and FilterImage.
- *   <br>   JAN 29, 2007    (Carl Nagle) Added chainedProcessor support for all Processors.
- *   <br>   JAN 25, 2008    (Carl Nagle) Removed Java 1.5 String.contains dependencies.
- *   <br>   JUL 31, 2008    (Carl Nagle) Added CASEINSENSITIVE static strings for subclasses.
- *   <br>   AUG 25, 2008    (Carl Nagle) Added try/catch in distributeConfigInfo routine.
- *   <br>   MAR 26, 2009    (Carl Nagle) Added safsparams support for clearProxiesAlways.
- *   <br>   MAR 08, 2011 (DharmeshPatel) Added RFSMOnly support for RFSM search mode.
- *   <br>   JUL 22, 2013    (Lei Wang) Added methods deducexxxFile().
  **/
 public abstract class Processor implements RuntimeDataInterface, ITestRecordStackable{
 
@@ -72,7 +76,7 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
   public static final String DEFAULT_CUSTOM_PROCESSOR_SUBPACKAGE = "custom";
   public static final String CASEINSENSITIVE_FLAG = "CASEINSENSITIVE";
   public static final String CASE_INSENSITIVE_FLAG = "CASE-INSENSITIVE";
-  
+
   /** The ITestRecordStackable used to store 'Test Record' in a FILO. */
   protected ITestRecordStackable testrecordStackable = new DefaultTestRecordStackable();
 
@@ -160,7 +164,7 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
    * provide default handling of Driver Command records.
    **/
   private Processor procInstance     = null;
-  
+
   /**
    * Return/Create an instance of the actual processor used to interpret test data.
    * If we already have stored a procInstance object; that that will be returned.
@@ -185,25 +189,25 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
       procInstance = aprocessor;
   }
 
-  /** 
-   * The instance of the chained processor to interpret test data if this 
+  /**
+   * The instance of the chained processor to interpret test data if this
    * one does not succeed in processing the data.
    * <p>
    * For example, we may store an org.safs.DriverCommandProcessor object to
-   * provide default handling of Driver Command records not overridden by 
+   * provide default handling of Driver Command records not overridden by
    * some DriverCommand subclass.
    * @since Jan 29, 2007 Carl Nagle
    **/
   private Processor chainedProcessor   = null;
 
-  /** 
-   * True if this processor has an instance of a chained processor to 
+  /**
+   * True if this processor has an instance of a chained processor to
    * interpret test data if this one does not succeed in processing the data.
    * @since Jan 29, 2007 Carl Nagle
    **/
   public boolean hasChainedProcessor(){return chainedProcessor != null;}
-  
-  /** 
+
+  /**
    * Returns chained processor to interpret test data, if any.
    * Can be null if no chainedProcessor has been set.
    * @since Jan 29, 2007 Carl Nagle
@@ -211,13 +215,13 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
   public Processor getChainedProcessor(){
   	return chainedProcessor;
   }
-  
-  /** 
-   * Set the instance of the chained processor to interpret test data if this 
+
+  /**
+   * Set the instance of the chained processor to interpret test data if this
    * one does not succeed in processing the data.
    * <p>
    * For example, we may store an org.safs.DriverCommandProcessor object to
-   * provide default handling of Driver Command records not overridden by 
+   * provide default handling of Driver Command records not overridden by
    * some subclass.
    * <p>
    * Can be set to null to remove any existing chainedProcessor.
@@ -228,7 +232,7 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
   	try{
   		if (aprocessor.getLogUtilities()==null) aprocessor.setLogUtilities(this.getLogUtilities());
 		if (aprocessor.getTestRecordData()==null) aprocessor.setTestRecordData(this.getTestRecordData());
-  	}catch(Exception np){;}  	
+  	}catch(Exception np){;}
   }
 
   /**
@@ -601,7 +605,7 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
 		  Log.error("Ignoring exception when saving Processor Config Settings:"+ x.getClass().getSimpleName());
 	  }
   }
-  
+
   /** Init the processor and process a record
    * Initializes the processor by passing it the currently active LogUtilities,
    * TestRecordHelper, and extracted record parameters.  It then invokes the
@@ -622,7 +626,7 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
       if(!processorConfigSet) distributeConfigInformation();
       aprocessor.setParams(params);
       aprocessor.process();
-      boolean success = aprocessor.isRecordProcessed();      
+      boolean success = aprocessor.isRecordProcessed();
       // handle the case where aprocessor does not properly set recordProcessed status
       return (testRecordData.getStatusCode() == StatusCodes.SCRIPT_NOT_EXECUTED) ?
              false:success;
@@ -664,7 +668,7 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
     return lookup;
   }
 
-  /** <br><em>Purpose:</em> if leading ^ found, then substitue variable.
+  /** <br><em>Purpose:</em> if leading ^ found, then substitute variable.
    ** It will log a warning message, set statusCode to StatusCodes.GENERAL_SCRIPT_FAILURE
    ** and return null if variable not found.<br>
    ** *NOTE* According to the chief architect for the SAFS framework, an engine should
@@ -740,11 +744,11 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
    * invokes chainedProcessor.process(),<br>
    * invokes setRecordProcessed(chainedProcessor.isRecordProcessed()).
    * <p>
-   * Thus, any subclassing Processor should attempt to process it's 
-   * own commands and then invoke super.process() to try any chained 
-   * Processor(s). 
+   * Thus, any subclassing Processor should attempt to process it's
+   * own commands and then invoke super.process() to try any chained
+   * Processor(s).
    * <p>
-   * Otherwise, by default executes setRecordProcessed(false) if no 
+   * Otherwise, by default executes setRecordProcessed(false) if no
    * chainedProcessor is present.
    * @since Jan27, 2007 Carl Nagle
    */
@@ -841,8 +845,8 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
 
   /**
    * check if params.size() < minparams
-   * If params.size() is insufficient we set testRecordData.setStatusCode to GENERAL_SCRIPT_FAILURE 
-   * and log a paramsFailedMsg and return 'false'.  
+   * If params.size() is insufficient we set testRecordData.setStatusCode to GENERAL_SCRIPT_FAILURE
+   * and log a paramsFailedMsg and return 'false'.
    * Otherwise, we simply return 'true'.
    * @param minparams - minimum number of parameters required for processing
    * @return true if minimum number of parameters exist
@@ -858,8 +862,8 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
 		  String emsg = e.getMessage();
 		  if (emsg.length()==0) emsg = e.getClass().getName();
 		  testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
-		  standardFailureMessage(failedText.convert("failure1", 
-								 "Unable to perform "+ testRecordData.getCommand(), testRecordData.getCommand()), 
+		  standardFailureMessage(failedText.convert("failure1",
+								 "Unable to perform "+ testRecordData.getCommand(), testRecordData.getCommand()),
 								 "SAFSException:"+ emsg);
 		  return false;
 	  }
@@ -867,17 +871,17 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
   }
   /**
    * @param filename		A file name
-   * @param directory		This is a varible assigned in STAF system. It can be one of following:
+   * @param directory		This is a variable assigned in STAF system. It can be one of following:
    * 						1. STAFHelper.SAFS_VAR_BENCHDIRECTORY
    * 						2. STAFHelper.SAFS_VAR_DATAPOOLDIRECTORY
    * 						3. STAFHelper.SAFS_VAR_DIFDIRECTORY
    * 						4. STAFHelper.SAFS_VAR_LOGSDIRECTORY
    * 						5. STAFHelper.SAFS_VAR_PROJECTDIRECTORY
    * 						6. STAFHelper.SAFS_VAR_TESTDIRECTORY
-   * @return				An aboulte filename
+   * @return				An absolute filename
    *                        if the parameter filename is absolute, return the parameter filename itself.
    *                        if the parameter filename is relative,
-   *                           return the file under parameter directory if that file exist; 
+   *                           return the file under parameter directory if that file exist;
    *                           otherwise if that file does not exist, return file under directory STAFHelper.SAFS_VAR_PROJECTDIRECTORY
    */
   protected String getAbsolutFileName(String filename, String directory){
@@ -892,7 +896,7 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
 		  }
 		  if (pdir == null) pdir="";
 		  fn = new CaseInsensitiveFile(pdir, filename).toFile();
-		  
+
 		  try{
 			  //Check the parent directory, if it is not valid, we try to combine filename with the project directory
 			  File parent = fn.getParentFile();
@@ -909,13 +913,13 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
 			  Log.error("Fail to check parent directory '"+fn.getParentFile().getAbsolutePath()+"', due to "+StringUtils.debugmsg(e));
 		  }
 	  }
-	  
+
 	  //It is possible that the file does NOT exist when user capture data for the first time
 	  if(!fn.exists() || !fn.isFile()) Log.warn("The file '"+ fn.getAbsolutePath() +"' does NOT exist.");
-	  
+
 	  return fn.getAbsolutePath();
   }
-  
+
   /**
    * Return an absolute file name. If the parameter 'filename' is relative, the returned absolute<br>
    * filename will use value of variable {@link STAFHelper#SAFS_VAR_TESTDIRECTORY} as parent folder.<br>
@@ -926,19 +930,19 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
   protected String normalizeTestFileName(String filename){
 	  return getAbsolutFileName(filename, STAFHelper.SAFS_VAR_TESTDIRECTORY);
   }
-  
+
   /**
    * Retrieve a non-empty field value from the testRecordData inputrecord.
-   * If successful, fvalue will exit with the retrieved value.  On failure, the routine 
-   * will set testRecordData.setStatusCode to GENERAL_SCRIPT_FAILURE and log a 'bad_param' 
+   * If successful, fvalue will exit with the retrieved value.  On failure, the routine
+   * will set testRecordData.setStatusCode to GENERAL_SCRIPT_FAILURE and log a 'bad_param'
    * standardFailureMessage.
-   * 
+   *
    * @param findex - 0-based index of field to extract from input record.
    * @param fname - field name to use in issuing any Invalid Parameter error messages.
    * @param fvalue - String to receive the desired field value on success.
-   * @return true if fvalue was successfully set to a non-empty value.  false if it 
+   * @return true if fvalue was successfully set to a non-empty value.  false if it
    * was not and standard failure logging was performed.
-   */  
+   */
   protected boolean getRequiredField(int findex, String fname, String fvalue){
 	  try {
 		  fvalue = StringUtils.getTrimmedUnquotedStr(testRecordData.getInputRecordToken(findex));
@@ -952,8 +956,8 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
 		  String emsg = e.getMessage();
 		  if (emsg.length()==0) emsg = e.getClass().getName();
 		  testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
-		  standardFailureMessage(failedText.convert("failure1", 
-							   "Unable to perform "+ testRecordData.getCommand(), testRecordData.getCommand()), 
+		  standardFailureMessage(failedText.convert("failure1",
+							   "Unable to perform "+ testRecordData.getCommand(), testRecordData.getCommand()),
 							   "SAFSException:"+ emsg);
 		  return false;
 	  }
@@ -963,7 +967,7 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
   /**
    * Retrieve the standard "SOMETHING failure in filename FILENAME at line LINENUMBER" message.
    * Expects testRecordData to already have filename and lineNumber.
-   * @param failure -- text to appear before the filname and line number info.
+   * @param failure -- text to appear before the filename and line number info.
    **/
   protected String getStandardErrorMessage(String failure){
   	return failedText.convert("standard_err", failure+" failure in filename "+
@@ -987,14 +991,14 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
   protected static int secsWaitForWindow    = 30;
   public static void setSecsWaitForWindow(int secs){ secsWaitForWindow = secs;}
   public static int getSecsWaitForWindow(){ return secsWaitForWindow;}
-  
+
   protected static int secsWaitForComponent = 30;
   public static void setSecsWaitForComponent(int secs){ secsWaitForComponent = secs;}
   public static int getSecsWaitForComponent(){ return secsWaitForComponent;}
-  
+
   protected static boolean commandLineBreakpoint = false;
   public static void setCommandLineBreakpoint(boolean enabled){ commandLineBreakpoint = enabled;}
-  
+
   // should be some semi-colon delimited combination of Java;Html;Swt;Net;Win;Flex
   protected static String testDomains = "Html;Java;Swt;Net;Win;Flex";
   public static void setTestDomains(String domains){ if(domains != null) testDomains = domains;}
@@ -1002,18 +1006,18 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
   protected static boolean clearProxiesAlways = false;
   public static void setClearProxiesAlways(boolean enabled){ clearProxiesAlways = enabled;}
   public static boolean getClearProxiesAlways(){ return clearProxiesAlways;}
-  
+
   protected static boolean RFSMOnly;
   public static void setRFSMOnly(boolean enable){RFSMOnly = enable;}
   public static boolean isRFSMOnly(){return RFSMOnly;}
-  
+
   protected static boolean RFSMCache;
   public static void setRFSMCache(boolean enable){RFSMCache = enable;}
   public static boolean isRFSMCache(){return RFSMCache;}
 
   /** How to handle the 'alert dialog' if it is visible unexpectedly, it could be set as 'accept' or 'dismiss' or 'ignore' */
   protected static String unexpectedAlertBehaviour = DriverConstant.DEFAULT_UNEXPECTED_ALERT_BEHAVIOUR;
-  /** Get how the 'alert dialog' will be handled if it is visible unexpectedly. 
+  /** Get how the 'alert dialog' will be handled if it is visible unexpectedly.
    * @return String, 'accept' or 'dismiss' or 'ignore'*/
   public static String getUnexpectedAlertBehaviour() {
 	  return unexpectedAlertBehaviour;
@@ -1022,17 +1026,17 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
   public static void setUnexpectedAlertBehaviour(String behaviour) {
 	  unexpectedAlertBehaviour = behaviour;
   }
-  
+
   /**
    * Deduce the absolute full path test-relative file.
-   * @param filename, String, the test/actual file name.  If there are any File.separators in the 
-   * relative path then the path is actually considered relative to the Datapool 
+   * @param filename, String, the test/actual file name.  If there are any File.separators in the
+   * relative path then the path is actually considered relative to the Datapool
    * directory unless it does not exist, or is already an absolute file path.
    * <p>
-   * If a relative directory path does not exist relative to the Datapool directory then 
+   * If a relative directory path does not exist relative to the Datapool directory then
    * the final path will be relative to the Project directory.
    * <p>
-   * If it is an absolute path, and contains a root path that includes the Bench directory, then the 
+   * If it is an absolute path, and contains a root path that includes the Bench directory, then the
    * file will be converted to a comparable relative path off the Test directory.
    * <p>
    * @return File, the absolute full path test file.
@@ -1042,17 +1046,17 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
   protected File deduceTestFile(String filename) throws SAFSException{
 	  return FileUtilities.deduceFile(filename, FileUtilities.FILE_TYPE_TEST, this);
   }
-  
+
   /**
    * Deduce the absolute full path Diff-relative file.
-   * @param filename, String, the diff file name.  If there are any File.separators in the 
-   * relative path then the path is actually considered relative to the Datapool 
+   * @param filename, String, the diff file name.  If there are any File.separators in the
+   * relative path then the path is actually considered relative to the Datapool
    * directory unless it does not exist, or is already an absolute file path.
    * <p>
-   * If a relative directory path does not exist relative to the Datapool directory then 
+   * If a relative directory path does not exist relative to the Datapool directory then
    * the final path will be relative to the Project directory.
    * <p>
-   * If it is an absolute path, and contains a root path that includes the Bench directory, then the 
+   * If it is an absolute path, and contains a root path that includes the Bench directory, then the
    * file will be converted to a comparable relative path off the Diff directory.
    * <p>
    * @return File, the absolute full path diff file.
@@ -1062,13 +1066,13 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
   protected File deduceDiffFile(String filename) throws SAFSException{
 	  return FileUtilities.deduceFile(filename, FileUtilities.FILE_TYPE_DIFF, this);
   }
-  
+
   /**
    * Deduce the absolute full path bench-relative file.
-   * @param filename, String, the test file name.  If there are any File.separators in the 
-   * relative path then the path is actually considered relative to the Datapool 
+   * @param filename, String, the test file name.  If there are any File.separators in the
+   * relative path then the path is actually considered relative to the Datapool
    * directory unless it does not exist, or is already an absolute file path.
-   * If a relative directory path does not exist relative to the Datapool directory then 
+   * If a relative directory path does not exist relative to the Datapool directory then
    * the final path will be relative to the Project directory.
    * @return File, the absolute full path bench file.
    * @throws SAFSException
@@ -1077,14 +1081,14 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
   protected File deduceBenchFile(String filename) throws SAFSException{
 	  return FileUtilities.deduceFile(filename, FileUtilities.FILE_TYPE_BENCH, this);
   }
-  
+
   /**
    * Deduce the absolute full path to a project-relative file.
-   * @param filename, String, the test file name.  The path is ALWAYS considered relative 
-   * to the project root directory regardless of the absence or presence of File.separators 
+   * @param filename, String, the test file name.  The path is ALWAYS considered relative
+   * to the project root directory regardless of the absence or presence of File.separators
    * unless the file is already an absolute path.
    * @return File, the absolute full path bench file.
-   * @throws SAFSException 
+   * @throws SAFSException
    * @see {@link #deduceFile(String, int)}
    */
   protected File deduceProjectFile(String filename) throws SAFSException{
@@ -1101,19 +1105,19 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
   protected void logFailureMessage(String aborttext, String details, String error){
 	  log.logMessage(testRecordData.getFac(), aborttext , details, FAILED_MESSAGE);
 	  IndependantLog.error("Error at line "+testRecordData.getLineNumber()+ " in file "+testRecordData.getFilename()+" : "+ error);
-	  IndependantLog.error("Inputrecord "+testRecordData.getInputRecord());  
+	  IndependantLog.error("Inputrecord "+testRecordData.getInputRecord());
   }
-  
-  /** 
+
+  /**
    * Unable to perform [action]. <br>
    * "Error at line [number] in file [file]: [error]"
    * <p>
    * Sets status to FAILURE and issues a FAILED message.
-   * called by other issueFailure routines 
+   * called by other issueFailure routines
    ***/
   protected void issueInputRecordFailure(String error){
 	  testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
-	  String aborttext = FAILStrings.convert(FAILStrings.FAILURE_1, 
+	  String aborttext = FAILStrings.convert(FAILStrings.FAILURE_1,
 			  "Unable to perform '"+testRecordData.getCommand()+"'.",
 			  testRecordData.getCommand());
 	  String details = FAILStrings.convert(FAILStrings.FAILURE_DETAIL,
@@ -1126,16 +1130,97 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
 	  logFailureMessage(aborttext, details, error);
   }
 
-  /** 
+  /**
+   * If [message]==null<br>
+   * Unable to perform [action]. <br>
+   * "Error at line [number] in file [file]: [error]"<br>
+   *
+   * If [message]!=null<br>
+   * [message] <br>
+   * "Error at line [number] in file [file]: [error]"<br>
+   * <p>
+   * Sets status to FAILURE and issues a FAILED message.
+   * called by other issueFailure routines
+   ***/
+  protected void issueInputRecordFailure(String message, String error){
+	  testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
+	  String aborttext = message==null?
+			  FAILStrings.convert(FAILStrings.FAILURE_1,
+			  "Unable to perform '"+testRecordData.getCommand()+"'.",
+			  testRecordData.getCommand()) : message;
+	  String details = FAILStrings.convert(FAILStrings.FAILURE_DETAIL,
+			  "Error at line "+testRecordData.getLineNumber()+
+			  " in file "+testRecordData.getFilename()+
+			  " : "+ error,
+			  String.valueOf(testRecordData.getLineNumber()),
+			  testRecordData.getFilename(),
+			  error);
+	  logFailureMessage(aborttext, details, error);
+  }
+
+  /**
+   * issue OK status and PASSED message.<br>
+   * If [message]==null<br>
+   * [action] successful.<br>
+   * [detail]<br>
+   *
+   * If [message]!=null<br>
+   * [message]<br>
+   * [detail]<br>
+   * string comment is expected to already be localized, but can be null.
+   **/
+  protected void issuePassedSuccess(String message, String detail){
+      testRecordData.setStatusCode(StatusCodes.OK);
+      String success = message==null?
+    		  GENStrings.convert(GENStrings.SUCCESS_1,
+                       testRecordData.getCommand() +" successful.",
+                       testRecordData.getCommand()) : message;
+      log.logMessage(testRecordData.getFac(), success, detail, PASSED_MESSAGE);
+  }
+
+  /**
+   * At the end of processing a test-record, this method could be called to set the
+   * test-record's status code, and write the message to the Test Log.<br>
+   * Currently, for
+   * <ul>
+   * <li>{@link StatusCodes#NO_SCRIPT_FAILURE}, it calls {@link #issuePassedSuccess(String, String)}
+   * <li>{@link StatusCodes#GENERAL_SCRIPT_FAILURE}, it calls {@link #issueInputRecordFailure(String, String)}
+   * <li>Other status code, it simply writes a generic message to the test log.
+   * </ul>
+   * @param statusCode int, the status code to set to test-record.
+   * @param message String, the message to write to the Test Log.
+   *                        If it is null, then the default message will be used.
+   * @param detail String, the detail message to write to the Test Log.
+   *                       If it is null, then the default detail message will be used.
+   *
+   * @see #issueInputRecordFailure(String, String)
+   * @see #issuePassedSuccess(String, String)
+   */
+  protected void setAtEndOfProcess(int statusCode, String message, String detail){
+	  IndependantLog.debug(getClass().getSimpleName()+" processed '"+testRecordData.getCommand() +"'.\n"
+	  		+ " The status code is '"+statusCode+"', which means "+StatusCodes.getStatusString(statusCode)+".\n"
+	  		+ " message:\n "+message+"\n detail:\n "+detail+"\n");
+
+	  if(statusCode==StatusCodes.NO_SCRIPT_FAILURE){
+		  issuePassedSuccess(message, detail);
+	  }else if(statusCode==StatusCodes.GENERAL_SCRIPT_FAILURE){
+		  issueInputRecordFailure(message, detail);
+	  }else{
+		  log.logMessage(testRecordData.getFac(), message, detail, GENERIC_MESSAGE);
+		  testRecordData.setStatusCode(statusCode);
+	  }
+  }
+
+  /**
    * Unable to perform [action]. <br>
    * "Error at line [number] in file [file]: [error]"
    * <p>
    * Sets status to FAILURE and issues a FAILED message.
-   * called by other issueFailure routines 
+   * called by other issueFailure routines
    ***/
   protected void issueActionFailure(String error){
 	  testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
-	  String aborttext = FAILStrings.convert(FAILStrings.FAILURE_1, 
+	  String aborttext = FAILStrings.convert(FAILStrings.FAILURE_1,
 			  "Unable to perform '"+testRecordData.getCommand()+"'.",
 			  testRecordData.getCommand());
 	  aborttext += "  "+ error;
@@ -1157,7 +1242,7 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
    */
   protected void issueActionOnXFailure(String x, String error){
 	  testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
-	  String aborttext = FAILStrings.convert(FAILStrings.FAILURE_1, 
+	  String aborttext = FAILStrings.convert(FAILStrings.FAILURE_1,
 			  "Unable to perform '"+testRecordData.getCommand()+"' on '"+ x +"'.",
 			  testRecordData.getCommand(), x);
 	  aborttext += "  "+ error;
@@ -1171,13 +1256,13 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
 	  logFailureMessage(aborttext, details, error);
   }
 
-  /** 
+  /**
    * "Error performing [action]."<br>
    * "Error at line [number] in file [file]: [error]"
    ***/
   protected void issueErrorPerformingAction(String error){
 	  testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
-	  String aborttext = FAILStrings.convert(FAILStrings.ERROR_PERFORMING_1, 
+	  String aborttext = FAILStrings.convert(FAILStrings.ERROR_PERFORMING_1,
 			  "Error performing '"+testRecordData.getCommand()+"'.",
 			  testRecordData.getCommand());
 	  aborttext += "  "+ error;
@@ -1197,7 +1282,7 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
    ***/
   protected void issueErrorPerformingActionOnX(String x, String error){
 	  testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
-	  String aborttext = FAILStrings.convert(FAILStrings.ERROR_PERFORMING_2, 
+	  String aborttext = FAILStrings.convert(FAILStrings.ERROR_PERFORMING_2,
 			  "Error performing '"+testRecordData.getCommand()+"' on '"+ x +"'.",
 			  testRecordData.getCommand(), x);
 	  aborttext += "  "+ error;
@@ -1217,7 +1302,7 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
    ***/
   protected void issueErrorPerformingActionUsing(String x, String error){
 	  testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
-	  String aborttext = FAILStrings.convert(FAILStrings.NO_SUCCESS_2, 
+	  String aborttext = FAILStrings.convert(FAILStrings.NO_SUCCESS_2,
 			  testRecordData.getCommand()+ " was not successful using '"+ x +"'.",
 			  testRecordData.getCommand(), x);
 	  aborttext += "  "+ error;
@@ -1230,61 +1315,61 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
 			  error);
 	  logFailureMessage(aborttext, details, error);
   }
-  
+
   /** "safsparams.dat" **/
   public static final String SAFS_PARAMS_FILE = "safsparams.dat";
-  
-  /** "clearProxiesAlways" 
+
+  /** "clearProxiesAlways"
    **/
    public static final String SAFS_CLEARPROXIESALWAYS_ITEM = "clearProxiesAlways";
-   
-  /** 
-  * "testDomains" 
+
+  /**
+  * "testDomains"
   * Config setting should contain semi-colon delimited combinations of values:
   * Java;Html;Net;Win
   **/
   public static final String SAFS_TESTDOMAINS_ITEM = "testDomains";
-  
-  /** "secsWaitForWindow" 
+
+  /** "secsWaitForWindow"
   **/
   public static final String SAFS_SECSWAITFORWINDOW_ITEM = "secsWaitForWindow";
-  
-  /** "secsWaitForComponent" 
+
+  /** "secsWaitForComponent"
   **/
   public static final String SAFS_SECSWAITFORCOMPONENT_ITEM = "secsWaitForComponent";
-  
-  /** "commandLineBreakpoint" 
+
+  /** "commandLineBreakpoint"
   **/
   public static final String SAFS_COMMANDLINEBREAKPOINT_ITEM = "commandLineBreakpoint";
-  
-  /** "safs.secsWaitForWindow" 
+
+  /** "safs.secsWaitForWindow"
   **/
   public static final String SAFS_SECSWAITFORWINDOW_VARIABLE = "safs."+ SAFS_SECSWAITFORWINDOW_ITEM;
 
-  /** "safs.secsWaitForComponent" 
+  /** "safs.secsWaitForComponent"
   **/
   public static final String SAFS_SECSWAITFORCOMPONENT_VARIABLE = "safs."+ SAFS_SECSWAITFORCOMPONENT_ITEM;
-  
-  /** "safs.commandLineBreakpoint" 
+
+  /** "safs.commandLineBreakpoint"
   **/
   public static final String SAFS_COMMANDLINEBREAKPOINT_VARIABLE = "safs."+ SAFS_COMMANDLINEBREAKPOINT_ITEM;
 
-  /** "safs.testDomains" 
+  /** "safs.testDomains"
   **/
   public static final String SAFS_TESTDOMAINS_VARIABLE = "safs."+ SAFS_TESTDOMAINS_ITEM;
-  
+
   protected static boolean processorConfigSet = false;
-  
+
   /** "RFSMOnly"
    **/
   public static final String RFT_FIND_SEARCH_MODE_ALGORITHM = "RFSMOnly";
-  
+
   /** "RFSMCache"
    **/
   public static final String RFT_FIND_SEARCH_MODE_CACHE = "RFSMCache";
 
   static {
-    try{      
+    try{
       Properties safsparams = new Properties();
       Log.info("Processor attempting getResource for "+ SAFS_PARAMS_FILE);
 
@@ -1293,13 +1378,13 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
       catch(MissingResourceException mr){throw new NullPointerException("SAFS.Processor could not locate:"+ SAFS_PARAMS_FILE);}
       URL custom = AgentClassLoader.findCustomizedJARResource(url, SAFS_PARAMS_FILE);
       try{ if(!custom.sameFile(url))url = custom; }catch(Exception x){;}
-      
+
       InputStream in = url.openStream();
       System.out.println(SAFS_PARAMS_FILE +" path: '"+ url.getPath()+"'");
-      
+
       if (in != null) {
-    	
-    	Log.info("Processor loading "+ SAFS_PARAMS_FILE);        
+
+    	Log.info("Processor loading "+ SAFS_PARAMS_FILE);
         safsparams.load(in);
         in.close();
         in = null;
@@ -1314,7 +1399,7 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
         System.out.println(SAFS_COMMANDLINEBREAKPOINT_ITEM +": "+commandLineBreakpoint);
         p = safsparams.getProperty(SAFS_TESTDOMAINS_ITEM);
         if ((p!=null)&&(p.length()> 0)) {
-        	testDomains = p;        	
+        	testDomains = p;
         }
         Domains.enableDomains(testDomains);
         System.out.println(SAFS_TESTDOMAINS_ITEM +": "+testDomains);
@@ -1340,18 +1425,18 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
       Log.error(e.getMessage(), e);
     }
   }
-  
+
 	/**
 	 * <p>
 	 * Push the current 'test record' into the Stack before the execution of a keyword.
 	 * This should be called after the 'test record' is properly set.
 	 * </p>
-	 * 
+	 *
 	 * @param trd TestRecordData, the test record to push into a stack
 	 * @see #popTestRecord()
 	 */
 	public void pushTestRecord(TestRecordData trd) {
-		testrecordStackable.pushTestRecord(trd);		
+		testrecordStackable.pushTestRecord(trd);
 	}
 
 	/**
@@ -1360,22 +1445,22 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
 	 * After execution of a keyword, pop the test record from Stack and return is as the result.
 	 * Replace the class field 'Test Record' by that popped from the stack if they are not same.
 	 * </p>
-	 * 
+	 *
 	 * @see #pushTestRecord()
 	 * @return TestRecordData, the 'Test Record' on top of the stack
 	 */
 	public TestRecordData popTestRecord() {
 		String debugmsg = StringUtils.debugmsg(false);
 		DefaultTestRecordStackable.debug(debugmsg+"Current test record: "+StringUtils.toStringWithAddress(testRecordData));
-		
+
 		TestRecordData history = testrecordStackable.popTestRecord();
-		
+
 		if(!testRecordData.equals(history)){
 			DefaultTestRecordStackable.debug(debugmsg+"Reset current test record to: "+StringUtils.toStringWithAddress(history));
 			//The cast should be safe, as we push TestRecordHelper into the stack.
 			testRecordData = (TestRecordHelper) history;
 		}
-		
+
 		return history;
 	}
 }
