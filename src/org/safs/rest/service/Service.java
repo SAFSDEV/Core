@@ -9,6 +9,8 @@ import org.apache.hc.core5.http.HttpVersion;
 import org.apache.hc.core5.http.ProtocolVersion;
 import org.safs.SAFSRuntimeException;
 import org.safs.auth.Auth;
+import org.safs.auth.OAuth2;
+import org.safs.rest.service.models.consumers.SafsrestAdapter;
 
 /**
  * Contains the information needed to test a specific web service.
@@ -106,6 +108,12 @@ public class Service{
 	 * @return the userId
 	 */
 	public String getUserId() {
+		if ((userId == null) && (auth != null)) {
+			// If userId not set yet, try to get from the OAuth2 information.
+			if (OAuth2.class.isAssignableFrom(auth.getClass())) {
+				userId = ((OAuth2) auth).getSimpleAuth().getUserName();
+			}
+		}
 		return userId;
 	}
 
@@ -120,6 +128,12 @@ public class Service{
 	 * @return the password
 	 */
 	public String getPassword() {
+		if ((password == null) && (auth != null)) {
+			// If password not set yet, try to get from the OAuth2 information.
+			if (OAuth2.class.isAssignableFrom(auth.getClass())) {
+				password = ((OAuth2) auth).getSimpleAuth().getPassword();
+			}
+		}
 		return password;
 	}
 
@@ -185,6 +199,14 @@ public class Service{
 
 	public void setAuth(Auth auth) {
 		this.auth = auth;
+		if (OAuth2.class.isAssignableFrom(auth.getClass())) {
+			OAuth2 tempAuth = (OAuth2) auth;
+			clientAdapter = new DelegateSafsrestAdapter();
+			SafsrestAdapter tempAdapter = ((DelegateSafsrestAdapter) clientAdapter).getAdapter();
+			tempAdapter.setTokenProviderServiceName(tempAuth.getContent().getOauth2ServiceName());
+			tempAdapter.setTrustedUserid(tempAuth.getContent().getTrustedUserid());
+			tempAdapter.setTrustedPassword(tempAuth.getContent().getTrustedUserPassword());
+		}
 	}
 
 	/**
