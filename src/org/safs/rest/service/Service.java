@@ -204,8 +204,8 @@ public class Service{
 			clientAdapter = new DelegateSafsrestAdapter();
 			SafsrestAdapter tempAdapter = ((DelegateSafsrestAdapter) clientAdapter).getAdapter();
 			tempAdapter.setTokenProviderServiceName(tempAuth.getContent().getOauth2ServiceName());
-			tempAdapter.setTrustedUserid(tempAuth.getContent().getTrustedUserid());
-			tempAdapter.setTrustedPassword(tempAuth.getContent().getTrustedUserPassword());
+			tempAdapter.setTrustedUserid(tempAuth.getContent().getClientID());
+			tempAdapter.setTrustedPassword(tempAuth.getContent().getClientSecret());
 		}
 	}
 
