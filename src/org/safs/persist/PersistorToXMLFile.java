@@ -77,7 +77,7 @@ public class PersistorToXMLFile extends PersistorToHierarchialFile{
 	}
 
 	/**
-	 * Wrap the string in "<![CDATA[]]>" if it starts with "<?XML".
+	 * Wrap the string in "<![CDATA[]]>" if it contains special symbols to escape, refer to {@link #needEscape(String)}
 	 *
 	 * @param value String, the value to escape
 	 * @return String, the escaped string
@@ -86,11 +86,28 @@ public class PersistorToXMLFile extends PersistorToHierarchialFile{
 	protected String escape(String value){
 		String result = value;
 
-		if(result.toUpperCase().startsWith(XMLConstants.XML_START)){
+		if(needEscape(result)){
 			result = XMLConstants.CDATA_START+result+XMLConstants.CDATA_END;
 		}
 
 		return result;
+	}
+
+	/**
+	 * Some symbols is not permitted in XML document, and they needs to be escaped.<br>
+	 * Such as "<?XML", ">", "<", "&", "'", "\"" etc.
+	 *
+	 * @param value String, the value to test
+	 * @return boolean if the value needed escape.
+	 */
+	private boolean needEscape(String value){
+		if(value.toUpperCase().startsWith(XMLConstants.XML_START)){
+			return true;
+		}
+		for(String symbol: XMLConstants.SYMBOL_TO_ESCAPE){
+			if(value.contains(symbol)) return true;
+		}
+		return false;
 	}
 
 	@Override
