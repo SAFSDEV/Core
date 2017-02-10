@@ -29,8 +29,8 @@ public class Content extends PersistableDefault{
 	private String accessToken = null;
 	private String accessTokenSecret = null;
 	private String oauth2ServiceName = null;
-	private String trustedUserid = null;
-	private String trustedUserPassword = null;
+	private String clientID = null;
+	private String clientSecret = null;
 
 	static{
 		fieldToPersistKeyMap.put("consumerKey", "consumerKey");
@@ -38,8 +38,8 @@ public class Content extends PersistableDefault{
 		fieldToPersistKeyMap.put("accessToken", "accessToken");
 		fieldToPersistKeyMap.put("accessTokenSecret", "accessTokenSecret");
 		fieldToPersistKeyMap.put("oauth2ServiceName", "oauth2ServiceName");
-		fieldToPersistKeyMap.put("trustedUserid", "trustedUserid");
-		fieldToPersistKeyMap.put("trustedUserPassword", "trustedUserPassword");
+		fieldToPersistKeyMap.put("clientID", "clientID");
+		fieldToPersistKeyMap.put("clientSecret", "clientSecret");
 	}
 
 	@Override
@@ -87,20 +87,20 @@ public class Content extends PersistableDefault{
 		this.oauth2ServiceName = oauth2ServiceName;
 	}
 
-	public String getTrustedUserid() {
-		return trustedUserid;
+	public String getClientID() {
+		return clientID;
 	}
 
-	public void setTrustedUserid(String trustedUserid) {
-		this.trustedUserid = trustedUserid;
+	public void setClientID(String clientID) {
+		this.clientID = clientID;
 	}
 
-	public String getTrustedUserPassword() {
-		return trustedUserPassword;
+	public String getClientSecret() {
+		return clientSecret;
 	}
 
-	public void setTrustedUserPassword(String trustedUserPassword) {
-		this.trustedUserPassword = trustedUserPassword;
+	public void setClientSecret(String clientSecret) {
+		this.clientSecret = clientSecret;
 	}
 
 }
