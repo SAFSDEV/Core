@@ -36,23 +36,32 @@ import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.routing.DefaultProxyRoutePlanner;
 import org.apache.hc.client5.http.impl.sync.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.sync.HttpClients;
-import org.apache.hc.client5.http.methods.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.sync.CloseableHttpResponse;
 import org.apache.hc.client5.http.methods.RequestBuilder;
 import org.apache.hc.client5.http.routing.HttpRoutePlanner;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.http.ProtocolVersion;
-import org.apache.hc.core5.http.entity.ContentType;
-import org.apache.hc.core5.http.entity.EntityUtils;
-import org.apache.hc.core5.http.entity.StringEntity;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.safs.IndependantLog;
 
-// TODO: can this be moved beside HttpClient?  If so, throw a better exception than WebServerTestingFrameworkException.
+// TODO: can this be moved beside HttpClient?  If so, throw a better exception than HttpServerTestingFrameworkException.
+/**
+ * Implementation of {@link HttpClientPOJOAdapter} for Apache HttpClient5.
+ *
+ * @since 5.0
+ */
 public class HttpClient5Adapter extends HttpClientPOJOAdapter {
-	
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Map<String, Object> execute(final String defaultURI, final Map<String, Object> request) throws Exception {
+        // check the request for missing items.
         if (defaultURI == null) {
             throw new Exception("defaultURL cannot be null");
         }
@@ -62,16 +71,17 @@ public class HttpClient5Adapter extends HttpClientPOJOAdapter {
         if (! request.containsKey("path")) {
             throw new Exception("Request path should be set.");
         }
+        if (! request.containsKey("method")) {
+            throw new Exception("Request method should be set.");
+        }
+
+        // Append the path to the defaultURI.
         String tempDefaultURI = defaultURI;
         if (! defaultURI.endsWith("/")) {
             tempDefaultURI += "/";
         }
         final String uri = tempDefaultURI + request.get("path");
 
-        if (! request.containsKey("method")) {
-            throw new Exception("Request method should be set.");
-        }
-        
         /*
          * Use reflection to call a static method on RequestBuilder that is the
          * lowercase of the HTTP method.
@@ -87,13 +97,15 @@ public class HttpClient5Adapter extends HttpClientPOJOAdapter {
             builder = builder.setVersion((ProtocolVersion) request.get("protocolVersion"));
         }
 
+        // timeout
         if (request.containsKey("timeout")) {
-    		RequestConfig.Builder confBuilder = RequestConfig.custom();
-    		confBuilder.setSocketTimeout( ((Long) request.get("timeout")).intValue() );
-    		RequestConfig reqConf = confBuilder.build();
-    		builder.setConfig(reqConf);
+            final long timeout = (long) request.get("timeout");
+            RequestConfig.Builder requestConfigBuilder = RequestConfig.custom();
+            requestConfigBuilder.setSocketTimeout((int) timeout);
+            builder.setConfig(requestConfigBuilder.build());
         }
 
+        // call addParameter for each parameter in the query.
         @SuppressWarnings("unchecked")
         final Map<String, String> queryMap = (Map<String, String>) request.get("query");
         if (queryMap != null) {
@@ -102,6 +114,7 @@ public class HttpClient5Adapter extends HttpClientPOJOAdapter {
             }
         }
 
+        // call addHeader for each header in headers.
         @SuppressWarnings("unchecked")
         final Map<String, String> headersMap = (Map<String, String>) request.get("headers");
         if (headersMap != null) {
@@ -110,6 +123,7 @@ public class HttpClient5Adapter extends HttpClientPOJOAdapter {
             }
         }
 
+        // call setEntity if a body is specified.
         final String requestBody = (String) request.get("body");
         if (requestBody != null) {
             final String requestContentType = (String) request.get("contentType");
@@ -118,7 +132,8 @@ public class HttpClient5Adapter extends HttpClientPOJOAdapter {
                                           new StringEntity(requestBody);
             builder = builder.setEntity(entity);
         }
-        
+
+         // Now execute the request.
         HttpRoutePlanner proxy = getProxyPlanner();
         CloseableHttpClient httpclient = null;
         if(proxy==null){
@@ -129,12 +144,13 @@ public class HttpClient5Adapter extends HttpClientPOJOAdapter {
         
         final CloseableHttpResponse response = httpclient.execute(builder.build());
 
+        // Prepare the response.  It will contain status, body, headers, and contentType.
         final HttpEntity entity = response.getEntity();
         final String body = entity == null ? null : EntityUtils.toString(entity);
         final String contentType = entity == null ? null : entity.getContentType();
 
         final Map<String, Object> ret = new HashMap<String, Object>();
-        ret.put("status", response.getStatusLine().getStatusCode());
+        ret.put("status", response.getCode());
 
         // convert the headers to a Map
         final Map<String, Object> headerMap = new HashMap<String, Object>();
@@ -147,6 +163,15 @@ public class HttpClient5Adapter extends HttpClientPOJOAdapter {
 
         return ret ;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getClientName() {
+        return "HttpClient5";
+    }
+
     
     private HttpRoutePlanner getProxyPlanner(){
     	if(proxyServerURL==null){
