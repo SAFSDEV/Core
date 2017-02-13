@@ -42,7 +42,6 @@ public class Content extends PersistableDefault{
 	 * but it seems that it is required by Twitter, LinkedIn etc.
 	 */
 	private String accessTokenSecret = null;
-	private String oauth2ServiceName = null;
 
 	//tokenProviderServerName:tokenProviderServerPort/tokenProviderServiceName/tokenProviderAuthTokenResource
 	/**
@@ -107,14 +106,6 @@ public class Content extends PersistableDefault{
 
 	public void setAccessTokenSecret(String accessTokenSecret) {
 		this.accessTokenSecret = accessTokenSecret;
-	}
-
-	public String getOauth2ServiceName() {
-		return oauth2ServiceName;
-	}
-
-	public void setOauth2ServiceName(String oauth2ServiceName) {
-		this.oauth2ServiceName = oauth2ServiceName;
 	}
 
 	public String getAccessTokenType() {
