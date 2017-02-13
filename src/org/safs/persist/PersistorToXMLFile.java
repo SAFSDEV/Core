@@ -94,11 +94,11 @@ public class PersistorToXMLFile extends PersistorToHierarchialFile{
 	}
 
 	/**
-	 * Some symbols is not permitted in XML document, and they needs to be escaped.<br>
+	 * Some symbols are not permitted in XML document, and they needs to be escaped.<br>
 	 * Such as "<?XML", ">", "<", "&", "'", "\"" etc.
 	 *
 	 * @param value String, the value to test
-	 * @return boolean if the value needed escape.
+	 * @return boolean if the value needs escape.
 	 */
 	private boolean needEscape(String value){
 		if(value.toUpperCase().startsWith(XMLConstants.XML_START)){
