@@ -24,43 +24,73 @@ import org.safs.persist.PersistableDefault;
 public class Content extends PersistableDefault{
 	private final static Map<String, String> fieldToPersistKeyMap = new HashMap<String, String>();
 
-	private String consumerKey = null;
-	private String consumerSecret = null;
+	/**
+	 * If the access token request is valid and authorized, the authorization server issues an access token.<br>
+	 * This token token will be used to access client's resources on behalf of client without authentication.<br>
+	 * Refer to <a href="https://tools.ietf.org/html/rfc6749#section-5">Access Token</a>
+	 */
 	private String accessToken = null;
+	/**
+	 * Currently, it could be 'bearer' or 'mac'.<br>
+	 * Refer to <a href="https://tools.ietf.org/html/rfc6749#section-7.1">Token Type</a>
+	 */
+	private String accessTokenType = null;
+
+	/**
+	 * The secret/password used along with accessToken. It is not specified in the
+	 * <a href="https://tools.ietf.org/html/rfc6749">The OAuth 2.0 Authorization Framework</a>,
+	 * but it seems that it is required by Twitter, LinkedIn etc.
+	 */
 	private String accessTokenSecret = null;
 	private String oauth2ServiceName = null;
+
+	//tokenProviderServerName:tokenProviderServerPort/tokenProviderServiceName/tokenProviderAuthTokenResource
+	/**
+	 * The name of token provider server. Such as http://oauth2.token.server
+	 * TODO not used yet, do we need it?
+	 */
+	private String tokenProviderServerName = null;
+	/**
+	 * The port number of the token provider server.
+	 * TODO not used yet, do we need it?
+	 */
+	private int tokenProviderServerPort = 80;
+	/**
+	 * The base service name.
+	 */
+	private String tokenProviderServiceName = null;
+	/**
+	 * The resource path to get auth token.
+	 */
+	private String tokenProviderAuthTokenResource = null;
+
+	/** The Identifier of client used to register with authorization server.
+	 *  In the real world, it can also be called as 'consumerID', 'clientKey' or 'trustedUserid' etc.
+	 *  But they are the same meaning.
+	 */
 	private String clientID = null;
+	/** The password of client used to register with authorization server.
+	 *  In the real world, it can also be called as 'consumerSecret', 'clientSecret' or 'trustedUserPassword' etc.
+	 *  But they are the same meaning.
+	 */
 	private String clientSecret = null;
 
 	static{
-		fieldToPersistKeyMap.put("consumerKey", "consumerKey");
-		fieldToPersistKeyMap.put("consumerSecret", "consumerSecret");
 		fieldToPersistKeyMap.put("accessToken", "accessToken");
+		fieldToPersistKeyMap.put("accessTokenType", "accessTokenType");
 		fieldToPersistKeyMap.put("accessTokenSecret", "accessTokenSecret");
-		fieldToPersistKeyMap.put("oauth2ServiceName", "oauth2ServiceName");
 		fieldToPersistKeyMap.put("clientID", "clientID");
 		fieldToPersistKeyMap.put("clientSecret", "clientSecret");
+		fieldToPersistKeyMap.put("accessTokenSecret", "accessTokenSecret");
+		fieldToPersistKeyMap.put("tokenProviderServerName", "tokenProviderServerName");
+		fieldToPersistKeyMap.put("tokenProviderServerPort", "tokenProviderServerPort");
+		fieldToPersistKeyMap.put("tokenProviderServiceName", "tokenProviderServiceName");
+		fieldToPersistKeyMap.put("tokenProviderAuthTokenResource", "tokenProviderAuthTokenResource");
 	}
 
 	@Override
 	public Map<String, String> getPersitableFields() {
 		return fieldToPersistKeyMap;
-	}
-
-	public String getConsumerKey() {
-		return consumerKey;
-	}
-
-	public void setConsumerKey(String consumerKey) {
-		this.consumerKey = consumerKey;
-	}
-
-	public String getConsumerSecret() {
-		return consumerSecret;
-	}
-
-	public void setConsumerSecret(String consumerSecret) {
-		this.consumerSecret = consumerSecret;
 	}
 
 	public String getAccessToken() {
@@ -87,6 +117,14 @@ public class Content extends PersistableDefault{
 		this.oauth2ServiceName = oauth2ServiceName;
 	}
 
+	public String getAccessTokenType() {
+		return accessTokenType;
+	}
+
+	public void setAccessTokenType(String accessTokenType) {
+		this.accessTokenType = accessTokenType;
+	}
+
 	public String getClientID() {
 		return clientID;
 	}
@@ -101,6 +139,23 @@ public class Content extends PersistableDefault{
 
 	public void setClientSecret(String clientSecret) {
 		this.clientSecret = clientSecret;
+	}
+
+	public String getTokenProviderServiceName() {
+		return tokenProviderServiceName;
+	}
+
+	public void setTokenProviderServiceName(String tokenProviderServiceName) {
+		this.tokenProviderServiceName = tokenProviderServiceName;
+	}
+
+	public String getTokenProviderAuthTokenResource() {
+		return tokenProviderAuthTokenResource;
+	}
+
+	public void setTokenProviderAuthTokenResource(
+			String tokenProviderAuthTokenResource) {
+		this.tokenProviderAuthTokenResource = tokenProviderAuthTokenResource;
 	}
 
 }
