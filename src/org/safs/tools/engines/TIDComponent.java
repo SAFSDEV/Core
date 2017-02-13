@@ -2159,6 +2159,8 @@ public class TIDComponent extends GenericEngine {
 					actionRequest(REST.DELETE_METHOD, Headers.TEXT_TYPE);
 				} else if ( TIDRestFunctions.RESTDELETEXML_KEYWORD.equalsIgnoreCase(action) ) {
 					actionRequest(REST.DELETE_METHOD, Headers.XML_TYPE);
+				} else if ( TIDRestFunctions.RESTDELETECUSTOM_KEYWORD.equalsIgnoreCase(action) ) {
+					actionRequest(REST.DELETE_METHOD, null);
 				}
 				else if ( TIDRestFunctions.RESTGETBINARY_KEYWORD.equalsIgnoreCase(action) ) {
 					actionRequest(REST.GET_METHOD, Headers.BINARY_TYPE);
@@ -2176,6 +2178,8 @@ public class TIDComponent extends GenericEngine {
 					actionRequest(REST.GET_METHOD, Headers.TEXT_TYPE);
 				} else if ( TIDRestFunctions.RESTGETXML_KEYWORD.equalsIgnoreCase(action) ) {
 					actionRequest(REST.GET_METHOD, Headers.XML_TYPE);
+				} else if ( TIDRestFunctions.RESTGETCUSTOM_KEYWORD.equalsIgnoreCase(action) ) {
+					actionRequest(REST.GET_METHOD, null);
 				}
 				else if ( TIDRestFunctions.RESTHEADBINARY_KEYWORD.equalsIgnoreCase(action) ) {
 					actionRequest(REST.HEAD_METHOD, Headers.BINARY_TYPE);
@@ -2193,6 +2197,8 @@ public class TIDComponent extends GenericEngine {
 					actionRequest(REST.HEAD_METHOD, Headers.TEXT_TYPE);
 				} else if ( TIDRestFunctions.RESTHEADXML_KEYWORD.equalsIgnoreCase(action) ) {
 					actionRequest(REST.HEAD_METHOD, Headers.XML_TYPE);
+				} else if ( TIDRestFunctions.RESTHEADCUSTOM_KEYWORD.equalsIgnoreCase(action) ) {
+					actionRequest(REST.HEAD_METHOD, null);
 				}
 				else if ( TIDRestFunctions.RESTPATCHBINARY_KEYWORD.equalsIgnoreCase(action) ) {
 					actionRequest(REST.PATCH_METHOD, Headers.BINARY_TYPE);
@@ -2210,6 +2216,8 @@ public class TIDComponent extends GenericEngine {
 					actionRequest(REST.PATCH_METHOD, Headers.TEXT_TYPE);
 				} else if ( TIDRestFunctions.RESTPATCHXML_KEYWORD.equalsIgnoreCase(action) ) {
 					actionRequest(REST.PATCH_METHOD, Headers.XML_TYPE);
+				} else if ( TIDRestFunctions.RESTPATCHCUSTOM_KEYWORD.equalsIgnoreCase(action) ) {
+					actionRequest(REST.PATCH_METHOD, null);
 				}
 				else if ( TIDRestFunctions.RESTPOSTBINARY_KEYWORD.equalsIgnoreCase(action) ) {
 					actionRequest(REST.POST_METHOD, Headers.BINARY_TYPE);
@@ -2227,6 +2235,8 @@ public class TIDComponent extends GenericEngine {
 					actionRequest(REST.POST_METHOD, Headers.TEXT_TYPE);
 				} else if ( TIDRestFunctions.RESTPOSTXML_KEYWORD.equalsIgnoreCase(action) ) {
 					actionRequest(REST.POST_METHOD, Headers.XML_TYPE);
+				} else if ( TIDRestFunctions.RESTPOSTCUSTOM_KEYWORD.equalsIgnoreCase(action) ) {
+					actionRequest(REST.POST_METHOD, null);
 				}
 				else if ( TIDRestFunctions.RESTPUTBINARY_KEYWORD.equalsIgnoreCase(action) ) {
 					actionRequest(REST.PUT_METHOD, Headers.BINARY_TYPE);
@@ -2244,6 +2254,8 @@ public class TIDComponent extends GenericEngine {
 					actionRequest(REST.PUT_METHOD, Headers.TEXT_TYPE);
 				} else if ( TIDRestFunctions.RESTPUTXML_KEYWORD.equalsIgnoreCase(action) ) {
 					actionRequest(REST.PUT_METHOD, Headers.XML_TYPE);
+				} else if ( TIDRestFunctions.RESTPUTCUSTOM_KEYWORD.equalsIgnoreCase(action) ) {
+					actionRequest(REST.PUT_METHOD, null);
 				}
 				else if ( TIDRestFunctions.RESTREQUEST_KEYWORD.equalsIgnoreCase(action) ) {
 					actionHttpRequest();
@@ -2376,9 +2388,11 @@ public class TIDComponent extends GenericEngine {
 		 *   <li>...
 		 * </ul>
 		 * @param method String, the HTTP method to handle, like "GET" "POST" "PUT" etc.
-		 * @param type   String, the header type, like "BINARY" "JOSN" etc.
+		 * @param type   String, the header type, like "BINARY" "JOSN" etc.<br/>
+		 *                       it can be null if no default header should be applied.
 		 */
 		private void actionRequest(String method, String type){
+			String debugmsg = StringUtils.debugmsg(false);
 			String message = null;
 			String description = null;
 			Response response = null;
@@ -2394,16 +2408,19 @@ public class TIDComponent extends GenericEngine {
 			String body = iterator.hasNext()? iterator.next():null;
 			String customHeaders = iterator.hasNext()? iterator.next():null;
 			String customeAuthentication = iterator.hasNext()? iterator.next():null;
+			String headers = type==null? null : Headers.getHeadersForType(type);
 
 			try {
-				//TODO handle the extra headers information
+				//handle the extra headers information
 				if(customHeaders!=null){
-
+					customHeaders = getPossibleMapItem(customHeaders);
+					IndependantLog.debug(debugmsg+" appending custom headers \n"+customHeaders);
+					headers = headers==null? customHeaders: headers + "\n"+customHeaders;
 				}
 				//Handle the extra authentication information
 				handleAuth(Services.getService(sessionID), customeAuthentication);
 
-				response = REST.request(sessionID, method, relativeURI, Headers.getHeadersForType(type), body);
+				response = REST.request(sessionID, method, relativeURI, headers, body);
 
 				handleResponse(sessionID, response, responseIdVar);
 
