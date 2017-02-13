@@ -192,6 +192,17 @@ public class Constants {
 		public static final String PROPERTY_CLASSNAME = "classname";
 		/** "package" */
 		public static final String PROPERTY_PACKAGE = "package";
-
+		/** "&" */
+		public static final String SYMBOL_AND = "&";
+		/** "'" */
+		public static final String SYMBOL_APOS = "'";
+		/** "\"" */
+		public static final String SYMBOL_QUOTE = "\"";
+		/** "<" */
+		public static final String SYMBOL_LESS = "<";
+		/** ">" */
+		public static final String SYMBOL_BIGGER = ">";
+		/** An array of symbols needing escape in XML document, such as & ' " < > */
+		public static final String[] SYMBOL_TO_ESCAPE = {SYMBOL_AND, SYMBOL_APOS, SYMBOL_QUOTE, SYMBOL_LESS, SYMBOL_BIGGER};
 	}
 }

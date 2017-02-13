@@ -71,4 +71,12 @@ public abstract class HttpClientPOJOAdapter {
             throw new Exception(reason);
         }
     }
+    
+    /**
+     * Name of the HTTP Client that this adapter uses.
+     *
+     * @return name of the HTTP Client.
+     */
+    public abstract String getClientName();
+
 }
