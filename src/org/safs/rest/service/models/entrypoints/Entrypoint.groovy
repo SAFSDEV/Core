@@ -29,6 +29,7 @@ package org.safs.rest.service.models.entrypoints
  */
 class Entrypoint {
     public static final CharSequence DEFAULT_SERVICE_NAME = 'defaultRestServiceName'
+    public static final CharSequence DEFAULT_PROTOCOL = 'http'
     public static final CharSequence DEFAULT_HOST = 'localhost'
     public static final int DEFAULT_PORT = 80
 
@@ -60,6 +61,8 @@ class Entrypoint {
      */
     String service = DEFAULT_SERVICE_NAME
 
+	/** The protocol over which the service is provided. It can be "http", "https" etc. */
+    String protocol = DEFAULT_PROTOCOL
     String host = DEFAULT_HOST
     def port = DEFAULT_PORT
 
@@ -90,7 +93,7 @@ class Entrypoint {
      * @return the protocol and authority components of the entrypoint URL
      */
     CharSequence getRootUrl() {
-        "http://${host}:${port}"
+        "${protocol}://${host}:${port}"
     }
 
 
