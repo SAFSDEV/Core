@@ -10,7 +10,6 @@ import org.apache.hc.core5.http.ProtocolVersion;
 import org.safs.SAFSRuntimeException;
 import org.safs.auth.Auth;
 import org.safs.auth.OAuth2;
-import org.safs.rest.service.models.consumers.SafsrestAdapter;
 
 /**
  * Contains the information needed to test a specific web service.
@@ -199,14 +198,9 @@ public class Service{
 
 	public void setAuth(Auth auth) {
 		this.auth = auth;
-		if (OAuth2.class.isAssignableFrom(auth.getClass())) {
-			OAuth2 tempAuth = (OAuth2) auth;
-			clientAdapter = new DelegateSafsrestAdapter();
-			SafsrestAdapter tempAdapter = ((DelegateSafsrestAdapter) clientAdapter).getAdapter();
-			tempAdapter.setTokenProviderServiceName(tempAuth.getContent().getTokenProviderServiceName());
-			tempAdapter.setTokenProviderAuthTokenResource(tempAuth.getContent().getTokenProviderAuthTokenResource());
-			tempAdapter.setTrustedUserid(tempAuth.getContent().getClientID());
-			tempAdapter.setTrustedPassword(tempAuth.getContent().getClientSecret());
+		if (auth!=null && OAuth2.class.isAssignableFrom(auth.getClass())) {
+			clientAdapterClassName = "org.safs.rest.service.DelegateSafsrestAdapter";
+			//ClientAdapter will be obtained in method getClientAdapter().
 		}
 	}
 
@@ -236,6 +230,9 @@ public class Service{
 			} else {
 				Class<?> clazz = Class.forName(clientAdapterClassName);
 				clientAdapter = clazz.newInstance();
+				if(clientAdapter instanceof DelegateSafsrestAdapter && auth!=null){
+					((DelegateSafsrestAdapter) clientAdapter).getAdapter().setAuth(auth);
+				}
 			}
 		}
 
