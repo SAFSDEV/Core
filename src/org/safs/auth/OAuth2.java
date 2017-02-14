@@ -24,11 +24,13 @@ import org.safs.persist.PersistableDefault;
 public class OAuth2 extends PersistableDefault implements Auth{
 	private final static Map<String, String> fieldToPersistKeyMap = new HashMap<String, String>();
 
+	protected AuthorizationServer authorizationServer = null;
 	protected Content content = null;
 	protected SimpleAuth simpleAuth = null;
 
 	static{
 		fieldToPersistKeyMap.put("content", "content");
+		fieldToPersistKeyMap.put("authorizationServer", "authorizationServer");
 		fieldToPersistKeyMap.put("simpleAuth", "simpleAuth");
 	}
 
@@ -36,6 +38,7 @@ public class OAuth2 extends PersistableDefault implements Auth{
 		return simpleAuth;
 	}
 	public void setSimpleAuth(SimpleAuth simpleAuth) {
+		adjustTabulation(simpleAuth);
 		this.simpleAuth = simpleAuth;
 	}
 
@@ -43,10 +46,20 @@ public class OAuth2 extends PersistableDefault implements Auth{
 		return content;
 	}
 	public void setContent(Content content) {
-		if(content instanceof Printable){
-			((Printable) content).setTabulation(getTabulation()+1);
-		}
+		adjustTabulation(content);
 		this.content = content;
+	}
+
+	public AuthorizationServer getAuthorizationServer() {
+		return authorizationServer;
+	}
+	public void setAuthorizationServer(AuthorizationServer authorizationServer) {
+		adjustTabulation(authorizationServer);
+		this.authorizationServer = authorizationServer;
+	}
+
+	protected void adjustTabulation(Printable printable){
+		printable.setTabulation(getTabulation()+1);
 	}
 
 	@Override
