@@ -46,7 +46,8 @@ import org.xml.sax.helpers.DefaultHandler;
  * </pre>
  *
  * NOTE: Be careful with the value starting with <font color="red">&lt;?xml</font>, which should be wrapped
- * as &lt;![CDATA[...]]>, as showed in the example above.
+ * as &lt;![CDATA[...]]>, as showed in the example above. For other special symbols to be escaped, please
+ * refer to {@link XMLConstants#SYMBOL_TO_ESCAPE}.
  *
  * @author sbjlwa
  *
@@ -77,9 +78,10 @@ public class PersistorToXMLFile extends PersistorToHierarchialFile{
 	}
 
 	/**
-	 * Wrap the string in "<![CDATA[]]>" if it contains special symbols to escape, refer to {@link #needEscape(String)}
+	 * Wrap the string in "<![CDATA[]]>" if it contains special symbols {@link XMLConstants#SYMBOL_TO_ESCAPE},
+	 * please refer to {@link #needEscape(String)}.
 	 *
-	 * @param value String, the value to escape
+	 * @param value String, the value to be escaped if it contains special symbols
 	 * @return String, the escaped string
 	 */
 	@Override
@@ -94,11 +96,11 @@ public class PersistorToXMLFile extends PersistorToHierarchialFile{
 	}
 
 	/**
-	 * Some symbols are not permitted in XML document, and they needs to be escaped.<br>
+	 * Some symbols are not permitted in XML document and they need to be escaped.<br>
 	 * Such as "<?XML", ">", "<", "&", "'", "\"" etc.
 	 *
 	 * @param value String, the value to test
-	 * @return boolean if the value needs escape.
+	 * @return boolean if the value needs to be escaped.
 	 */
 	private boolean needEscape(String value){
 		if(value.toUpperCase().startsWith(XMLConstants.XML_START)){
