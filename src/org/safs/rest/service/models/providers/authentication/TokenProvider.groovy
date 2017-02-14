@@ -2,9 +2,8 @@
 
 package org.safs.rest.service.models.providers.authentication
 
-import groovy.util.logging.Slf4j
-
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE
+import groovy.util.logging.Slf4j
 
 import org.safs.rest.service.commands.curl.Response
 import org.safs.rest.service.models.consumers.RestConsumer
@@ -54,6 +53,7 @@ class TokenProvider {
     void initializeEntrypoints() {
         if (!entrypoints && consumer) {
             def entrypointParameters = [
+                protocol: consumer.protocol,
                 host: consumer.host,
                 port: consumer.port,
                 tokenProviderServiceName: consumer.tokenProviderServiceName,
@@ -93,7 +93,7 @@ class TokenProvider {
                     "--data username=${userName}",
                     "--data password=${password}",
             ]
-            
+
             if (trustedPassword == null) {
                 trustedPassword = TRUSTED_USER_PASSWORD
             }

@@ -26,15 +26,16 @@ class TokenProviderEntrypoints extends Entrypoint {
      */
     TokenProviderEntrypoints(Map tokenProvEntrypointParameters) {
         service = (tokenProvEntrypointParameters.tokenProviderServiceName != null) ?
-                   tokenProvEntrypointParameters.tokenProviderServiceName : 
+                   tokenProvEntrypointParameters.tokenProviderServiceName :
                    SERVICE_NAME
-                   
+
         authTokenResource = (tokenProvEntrypointParameters.tokenProviderAuthTokenResource != null) ?
-                             tokenProvEntrypointParameters.tokenProviderAuthTokenResource : 
+                             tokenProvEntrypointParameters.tokenProviderAuthTokenResource :
                              AUTH_TOKEN_RESOURCE
 
         def entrypointParameters = [
-            host: tokenProvEntrypointParameters.host,
+			protocol: tokenProvEntrypointParameters.protocol,
+			host: tokenProvEntrypointParameters.host,
             port: tokenProvEntrypointParameters.port,
         ]
         initializeProperties entrypointParameters

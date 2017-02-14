@@ -5,10 +5,10 @@ package org.safs.rest.service.models.providers
 import static org.safs.rest.service.commands.curl.CurlCommand.DEFAULT_MAX_TIME
 import static org.safs.rest.service.models.entrypoints.Entrypoint.DEFAULT_HOST
 import static org.safs.rest.service.models.entrypoints.Entrypoint.DEFAULT_PORT
+import static org.safs.rest.service.models.entrypoints.Entrypoint.DEFAULT_PROTOCOL
 import static org.safs.rest.service.models.providers.authentication.TokenProvider.FAKE_AUTH_TOKEN
 import static org.safs.rest.service.models.providers.authentication.TokenProvider.TRUSTED_USER_NAME
 import static org.safs.rest.service.models.providers.authentication.TokenProvider.TRUSTED_USER_PASSWORD
-
 import groovy.transform.ToString
 import groovy.util.logging.Slf4j
 
@@ -83,6 +83,7 @@ class SafsRestPropertyProvider {
     // exposed by SafsRestPropertyProvider. These properties begin with
     // host and end with customProperties.
 
+    String protocol = DEFAULT_PROTOCOL
     String host = DEFAULT_HOST
     int port = DEFAULT_PORT as int
     String userName = DEFAULT_USER_NAME
@@ -223,7 +224,7 @@ class SafsRestPropertyProvider {
         }
         acquireAuthToken(password, trustedPassword)
     }
-    
+
     public def acquireAuthToken(password, trustedPassword) {
 
         def acquiredToken = FAKE_AUTH_TOKEN
@@ -266,8 +267,13 @@ class SafsRestPropertyProvider {
         }
     }
 
+    public void setProtocol(String protocol) {
+		if (protocol) {
+			this.protocol = protocol;
+		}
+	}
 
-    /**
+	/**
      * Set the host property (safsrestServiceHost) to the value supplied, as
      * long as the parameter is true under Groovy truth rules.
      *
@@ -323,7 +329,7 @@ class SafsRestPropertyProvider {
         }
     }
 
-    
+
     /**
      * Convenience method for setting the max time property (i.e. the
      * safsrestMaxTime system property). The max time property must be a
