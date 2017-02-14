@@ -17,16 +17,20 @@ import java.util.Map;
 import org.safs.persist.PersistableDefault;
 
 /**
+ * This class contains the information of OAUTH2:<br/>
+ * {@link #clientID} and {@link #clientSecret} are used to make request to the authorization server.<br/>
+ * {@link #accessToken}, {@link #accessTokenType}, {@link #accessTokenSecret} and {@link #refreshToken}
+ * are returned as response from the authorization server.<br/>
+ *
  * @author Lei Wang
  *
  */
-//TODO it is just an example for testing Persistor, need to fill with more useful fields.
 public class Content extends PersistableDefault{
 	private final static Map<String, String> fieldToPersistKeyMap = new HashMap<String, String>();
 
 	/**
 	 * If the access token request is valid and authorized, the authorization server issues an access token.<br>
-	 * This token token will be used to access client's resources on behalf of client without authentication.<br>
+	 * This token will be used to access client's resources on behalf of client without authentication.<br>
 	 * Refer to <a href="https://tools.ietf.org/html/rfc6749#section-5">Access Token</a>
 	 */
 	private String accessToken = null;
@@ -43,25 +47,11 @@ public class Content extends PersistableDefault{
 	 */
 	private String accessTokenSecret = null;
 
-	//tokenProviderServerName:tokenProviderServerPort/tokenProviderServiceName/tokenProviderAuthTokenResource
 	/**
-	 * The name of token provider server. Such as http://oauth2.token.server
-	 * TODO not used yet, do we need it?
+	 * It is used to obtain new access tokens. Please refer to <a href="https://tools.ietf.org/html/rfc6749#section-5.1">refresh_token</a>.<br/>
+	 * How to refresh to obtain new access tokens, please refer to <a href="https://tools.ietf.org/html/rfc6749#section-6">Refreshing an Access Token</a>.<br/>
 	 */
-	private String tokenProviderServerName = null;
-	/**
-	 * The port number of the token provider server.
-	 * TODO not used yet, do we need it?
-	 */
-	private int tokenProviderServerPort = 80;
-	/**
-	 * The base service name.
-	 */
-	private String tokenProviderServiceName = null;
-	/**
-	 * The resource path to get auth token.
-	 */
-	private String tokenProviderAuthTokenResource = null;
+	private String refreshToken = null;
 
 	/** The Identifier of client used to register with authorization server.
 	 *  In the real world, it can also be called as 'consumerID', 'clientKey' or 'trustedUserid' etc.
@@ -76,15 +66,11 @@ public class Content extends PersistableDefault{
 
 	static{
 		fieldToPersistKeyMap.put("accessToken", "accessToken");
+		fieldToPersistKeyMap.put("refreshToken", "refreshToken");
 		fieldToPersistKeyMap.put("accessTokenType", "accessTokenType");
 		fieldToPersistKeyMap.put("accessTokenSecret", "accessTokenSecret");
 		fieldToPersistKeyMap.put("clientID", "clientID");
 		fieldToPersistKeyMap.put("clientSecret", "clientSecret");
-		fieldToPersistKeyMap.put("accessTokenSecret", "accessTokenSecret");
-		fieldToPersistKeyMap.put("tokenProviderServerName", "tokenProviderServerName");
-		fieldToPersistKeyMap.put("tokenProviderServerPort", "tokenProviderServerPort");
-		fieldToPersistKeyMap.put("tokenProviderServiceName", "tokenProviderServiceName");
-		fieldToPersistKeyMap.put("tokenProviderAuthTokenResource", "tokenProviderAuthTokenResource");
 	}
 
 	@Override
@@ -132,21 +118,11 @@ public class Content extends PersistableDefault{
 		this.clientSecret = clientSecret;
 	}
 
-	public String getTokenProviderServiceName() {
-		return tokenProviderServiceName;
+	public String getRefreshToken() {
+		return refreshToken;
 	}
 
-	public void setTokenProviderServiceName(String tokenProviderServiceName) {
-		this.tokenProviderServiceName = tokenProviderServiceName;
+	public void setRefreshToken(String refreshToken) {
+		this.refreshToken = refreshToken;
 	}
-
-	public String getTokenProviderAuthTokenResource() {
-		return tokenProviderAuthTokenResource;
-	}
-
-	public void setTokenProviderAuthTokenResource(
-			String tokenProviderAuthTokenResource) {
-		this.tokenProviderAuthTokenResource = tokenProviderAuthTokenResource;
-	}
-
 }
