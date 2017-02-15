@@ -46,7 +46,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * </pre>
  *
  * NOTE: Be careful with the value starting with <font color="red">&lt;?xml</font>, which should be wrapped
- * as &lt;![CDATA[...]]>, as showed in the example above. For other special symbols to be escaped, please
+ * as &lt;![CDATA[...]]>, as shown in the example above. For other special symbols to be escaped, please
  * refer to {@link XMLConstants#SYMBOL_TO_ESCAPE}.
  *
  * @author sbjlwa
