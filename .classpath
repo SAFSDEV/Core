@@ -50,5 +50,7 @@
 	<classpathentry exported="true" kind="con" path="GROOVY_DSL_SUPPORT"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/spring-web/spring-web-4.2.7.RELEASE.jar"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/spring-core/spring-core-4.2.7.RELEASE.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/log4j/log4j-api-2.8.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/log4j/log4j-core-2.8.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
