@@ -37,21 +37,21 @@ public class ConfigureFile implements ConfigureInterface {
 		    this.configFile = configFile;
 		    reader = new INIFileReader(this.configFile, INIFileReader.IFR_MEMORY_MODE_STORED);
 		}
-	}
+	}
 	/**
 	 * @see ConfigureInterface#addConfigureInterface(ConfigureInterface)
 	 */
 	public void addConfigureInterface(ConfigureInterface configSource) {
 		store.addElement(configSource);
 	}
-
+
 	/**
 	 * @see ConfigureInterface#insertConfigureInterface(ConfigureInterface)
 	 */
 	public void insertConfigureInterface(ConfigureInterface configSource) {
 		store.insertElementAt(configSource, 0);
 	}
-
+
 	/**
 	 * @see ConfigureInterface#getNamedValue(String, String)
 	 */
