@@ -3,8 +3,6 @@ package org.safs.rest.service
 import org.apache.hc.client5.http.testframework.HttpClientPOJOAdapter
 import org.safs.rest.service.models.consumers.SafsrestAdapter
 
-import groovy.lang.Delegate
-
 /**
  *
  * Because this class is instantiated by SAFS Core internally, there is a
@@ -25,8 +23,13 @@ class DelegateSafsrestAdapter extends HttpClientPOJOAdapter {
 
 	@Delegate
 	SafsrestAdapter adapter = new SafsrestAdapter()
-	
+
 	public SafsrestAdapter getAdapter() {
 		adapter
+	}
+
+	@Override
+	public String getClientName(){
+		//give a void implementation to avoid the build failure.
 	}
 }
