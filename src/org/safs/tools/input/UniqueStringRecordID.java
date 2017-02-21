@@ -1,7 +1,7 @@
 package org.safs.tools.input;
-
+
 import org.safs.tools.UniqueStringID;
-
+
 public class UniqueStringRecordID
 	extends UniqueStringRecordClass implements UniqueRecordIDInterface{
 	protected String recordid = null;

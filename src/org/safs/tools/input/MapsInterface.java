@@ -1,8 +1,8 @@
 package org.safs.tools.input;
 
-import org.safs.tools.UniqueIDInterface;
+import org.safs.tools.UniqueIDInterface;
 public interface MapsInterface {
-
+
 	/** Open a Map and give it a unique ID. **/
 	public void openMap (UniqueMapInterface map);
 	

@@ -61,7 +61,7 @@ public class UniqueStringLogInfo
 	public String getTextLogName() {
 		return textname;
 	}
-
+
 	/**
 	 * Set XML logname to provided value.
 	 */
