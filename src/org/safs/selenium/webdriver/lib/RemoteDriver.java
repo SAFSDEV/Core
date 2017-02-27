@@ -17,6 +17,7 @@ package org.safs.selenium.webdriver.lib;
 *  <br>   SEP 27, 2016	  (LeiWang) Modified main(): Added parameter "-project"/"-Dselenium.project.location", and
 *                                   adjusted the java doc.
 *                                   Wrote debug message to a file on disk c.
+*  <br>   FEB 27, 2016	  (LeiWang) Modified startSession(): quit the appropriate webdriver when cleaning up.
 */
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -40,6 +41,7 @@ import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.DriverCommand;
@@ -371,7 +373,7 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 		String remoteserver = (String) desiredCapabilities.getCapability(CAPABILITY_REMOTESERVER);
 		if(remote_hostname == null) remote_hostname = remoteserver; //might still be null
 
-		// clean up obsolete session
+		//Clean up any obsolete sessions
 		try {
 			List<SessionInfo> list = getSessionsFromFile();
 			for (SessionInfo info : list) {
@@ -379,32 +381,45 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 					setSessionId(info.session);
 					getCurrentUrl();
 				} catch (WebDriverException check){
-					IndependantLog.debug("RemoteDriver deleting sessionid "+ info.id +" from session file due to: "+ check.getClass().getSimpleName());
-					deleteSessionIdFromFile(info.id);
-					quit();
+					IndependantLog.debug("RemoteDriver failed deleting obsolete session "+ info.id +" from session file due to: "+ check);
+					WebDriver wdToDelete = SearchObject.getWebDriver(info.id);
+					if (wdToDelete instanceof RemoteDriver){
+						((RemoteDriver) wdToDelete).quit();
+					}else{
+						if(wdToDelete!=null){
+							deleteSessionIdFromFile(info.id);
+							wdToDelete.quit();
+						}else{
+							IndependantLog.error("RemoteDriver cannot get session '"+info.id+"' from cache, so failed to delete it!");
+						}
+					}
 				}
 			}
 		} catch (Exception e1) {}
 
+		//Start the session
 		if (reconnect.booleanValue()){
-		    SessionInfo sid = null;
+		    SessionInfo info = null;
 			try {
-				sid = retrieveSessionInfoFromFile(ID);
-				if (sid != null){
-					setSessionId(sid.session);
+				info = retrieveSessionInfoFromFile(ID);
+				if (info != null){
+					setSessionId(info.session);
 					getCurrentUrl();
 					newSession = false;
+				}else{
+					IndependantLog.debug("RemoteDriver failed to get cached session of ID '"+ID+"'.");
 				}
 
 			} catch (WebDriverException we) {
-				IndependantLog.debug("RemoteDriver deleting sessionid "+ sid +" from session file due to: "+ we.getClass().getSimpleName());
+				IndependantLog.debug("RemoteDriver failed starting session '"+ info.id +"' due to: "+ we);
 				try {
+					//This session might be obsolete, delete it from the session file
 					deleteSessionIdFromFile(ID);
 				} catch (Exception e) {
-					IndependantLog.debug("RemoteDriver error deleting sessionid "+ sid +" from session file due to: "+ e.getClass().getSimpleName());
+					IndependantLog.debug("RemoteDriver error deleting session '"+ info.id +"' from session file due to: "+ e);
 				}
 			} catch (Exception e) {
-				IndependantLog.debug("RemoteDriver error retrieving sessionid "+ sid +" from session file due to: "+ e.getClass().getSimpleName());
+				IndependantLog.debug("RemoteDriver error retrieving session '"+ info.id +"' from session file due to: "+ e);
 			}
 
 		} else {
@@ -412,7 +427,7 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 			try {
 				storeSessionIdToFile(remote_hostname, ID,browserName,getSessionId().toString(), desiredCapabilities);
 			} catch (Exception e) {
-				IndependantLog.debug("RemoteDriver error storing sessionid to file due to: "+ e.getClass().getSimpleName());
+				IndependantLog.debug("RemoteDriver error storing sessionid to file due to: "+ e);
 			}
 
 		}
