@@ -43,7 +43,6 @@ package org.safs.selenium.webdriver.lib;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -175,7 +174,7 @@ public class SearchObject {
 	 * @see #getValue(WebElement, String...)
 	 */
 	public static final String[] TEXT_VALUE_ATTRIBUTES = {"value","text","placeholder"};
-	
+
 	/**
 	 * The Selenium 'WebDriver' currently used to manipulate the browser.
 	 */
@@ -850,7 +849,7 @@ public class SearchObject {
 				capabilities.setBrowserName(info.browser);
 				try{
 					// try to see if it is a valid session
-					IndependantLog.debug(debugmsg+" trying to connect remote server at 'http://" + host + ":" + port +"/wd/hub' ... "); 
+					IndependantLog.debug(debugmsg+" trying to connect remote server at 'http://" + host + ":" + port +"/wd/hub' ... ");
 					result = new RemoteDriver(new URL("http://" + host + ":" + port +"/wd/hub"),capabilities);
 					// NOT changing anything about the existing sessions
 					//d.manage().window().setSize(d.manage().window().getSize());
@@ -1265,15 +1264,15 @@ public class SearchObject {
 	    	return this;
 	    }
 	}
-	
-	/** 
-	 * Before doing any component search, we make sure we are in the correct frame.  
+
+	/**
+	 * Before doing any component search, we make sure we are in the correct frame.
 	 * Frame information may or may not be within the provided recognition string.
 	 * @param recognitionString
 	 */
 	protected static SwitchFramesResults _switchFrames(String recognitionString){
 		String debugmsg = StringUtils.debugmsg(SearchObject.class, "_swithcFrames");
-		
+
 		String[] st = StringUtils.getTokenArray(recognitionString, childSeparator, escapeChar);
 		/* rsWithoutFrames: Recognition String may contain some Frame-RS, after handling the
 		 * frames, these Frame-RS are no longer useful, so they will be removed and the rest
@@ -1412,7 +1411,7 @@ public class SearchObject {
 		}
 		return new SwitchFramesResults().setRsWithoutFrames(rsWithoutFrames).setSwitchedFrames(haveSwichedFrame);
 	}
-	
+
 	/**
 	 * Primary entry point to seek a WebElement based on a provided recognition string.
 	 * We support multiple types of recognition strings
@@ -1431,7 +1430,7 @@ public class SearchObject {
 		}
 
 		SwitchFramesResults sfr =_switchFrames(recognitionString);
-		
+
 		SearchContext wel = sc;
 
 		//3. SBJLWA, FIX http://sww.sas.com/cgi-bin/quick_browse?defectid=S1138290
@@ -1539,10 +1538,10 @@ public class SearchObject {
 			IndependantLog.error("SearchContext is null, cannot continue search!!!");
 			return list;
 		}
-		
-		SearchContext wel = sc;		
+
+		SearchContext wel = sc;
 		SwitchFramesResults sfr =_switchFrames(recognitionString);
-		
+
 		//3. SBJLWA, FIX http://sww.sas.com/cgi-bin/quick_browse?defectid=S1138290
 		//Error 1: Map doesn't contain a window definition (under a frame)
 		//  [Window]
@@ -1573,7 +1572,7 @@ public class SearchObject {
 		String rst = null;
 		boolean isLastRS = false;
 		for (int i=0;i<st.length;i++) {
-			try{				
+			try{
 				prefixes.clear();
 				rst = GuiObjectVector.removeRStringPrefixes(st[i], prefixes);
 				isPASM = GuiObjectVector.isPASMMode(prefixes);
@@ -1583,7 +1582,7 @@ public class SearchObject {
 				searchCriteria = firstQualifierPair[0];
 				value = firstQualifierPair[1];
 				isLastRS = (i == st.length-1);
-				
+
 				IndependantLog.debug(debugmsg+"qualifier='"+searchCriteria+"' value='"+value+"' isPASM="+isPASM);
 
 				if ( SEARCH_CRITERIA_TYPE.equalsIgnoreCase(searchCriteria)){
@@ -2325,9 +2324,9 @@ public class SearchObject {
 			}else{
 				preMatches = sc.findElements(By.xpath(xpath));
 			}
-			
+
 			if(preMatches.isEmpty()) return list; // return empty list
-			
+
 			//Handle the other qualifiers "ItemIndex", "Path"
 			if(!qualifiers.isEmpty()){
 				for(int i=0;i<preMatches.size();i++){
@@ -2337,7 +2336,7 @@ public class SearchObject {
 						String itemIndex = qualifiers.get(SEARCH_CRITERIA_ITEMINDEX);//0-based
 						IndependantLog.debug(debugmsg+" handling ItemIndex='"+itemIndex+"'");
 						criterion = new TextMatchingCriterion(Integer.parseInt(itemIndex));
-	
+
 					}else if(qualifiers.containsKey(SEARCH_CRITERIA_PATH)){
 						String path = qualifiers.get(SEARCH_CRITERIA_PATH);
 						//TODO HANDLE the pathIndex "4->2->3", "Path=A->B;PathIndex=3->2"
@@ -2525,7 +2524,7 @@ public class SearchObject {
 	 */
 	protected static List<WebElement> getObjectsForDomain(SearchContext sc, String RS, boolean isPropertyAllMode){
 		//search the target element within a frame (if exist) level by level
-		
+
 		List<WebElement> list = new ArrayList<WebElement>();
 		WebElement obj = null;
 		String debugmsg = StringUtils.debugmsg(false);
@@ -2666,7 +2665,7 @@ public class SearchObject {
 
 	/**
 	 * Attempts to retrieve a text value for the WebElement.
-	 * This is by combining webelement.getText() and our own getValue() and returning whichever gets 
+	 * This is by combining webelement.getText() and our own getValue() and returning whichever gets
 	 * us a text value.
 	 * @param webelement WebElement, the web element to get text from.
 	 * @return String, the element's text content
@@ -2676,23 +2675,23 @@ public class SearchObject {
 		String tt = webelement.getText();
 		String t = tt == null ? "" : tt;
 		Object ov = getValue(webelement, TEXT_VALUE_ATTRIBUTES);
-		String v = ov == null ? "" : ov.toString();	
+		String v = ov == null ? "" : ov.toString();
 		IndependantLog.info(debugmsg+"getText()  received: "+ t);
 		IndependantLog.info(debugmsg+"getValue() received: "+ v);
 		String rc = t.length() > 0 ? t: v;
 		IndependantLog.info(debugmsg+"returning: "+ rc);
-		return rc;		
+		return rc;
 	}
-	
+
 	/**
 	 * Get a value from the WebElement according to the attributes.<br>
 	 * The first non-null-value of the attributes will be returned, so the order<br>
 	 * of attributes may affect the result.<br>
-	 * 
+	 *
 	 * @param webelement WebElement, the WebElement to get value of an attribute.<br>
 	 * @param attributes String..., an array of attribute to get value for.
 	 * @return Object the first non-null-value of the attributes; or null if all attributes have null value.
-	 * 
+	 *
 	 * @see #TEXT_VALUE_ATTRIBUTES
 	 */
 	public static Object getValue(WebElement webelement, String... attributes){
@@ -2738,8 +2737,8 @@ public class SearchObject {
 		Thread t = new Thread(new Runnable(){
 			public void run() {
 				try{js_result = getJS().executeScript(js_code);}
-				catch(org.openqa.selenium.UnhandledAlertException x){ 
-					IndependantLog.warn(StringUtils.debugmsg(SearchObject.class, "js_executeWithTimeout") + " UnhandledAlertException: " + x); 
+				catch(org.openqa.selenium.UnhandledAlertException x){
+					IndependantLog.warn(StringUtils.debugmsg(SearchObject.class, "js_executeWithTimeout") + " UnhandledAlertException: " + x);
 				}
 				catch(SeleniumPlusException x){throw new RuntimeException(x);}
 			}
@@ -3525,7 +3524,7 @@ public class SearchObject {
 					throw JSException.instance(error, errorcode);
 				}
 			}
-			
+
 			IndependantLog.debug(debugmsg+" Javascript execution succeed. It is returning result ...");
 
 			return object;
@@ -3760,7 +3759,7 @@ public class SearchObject {
 	 *
 	 * @param prefix String, the prefix of the unique name
 	 * @return String, the unique name
-	 * @deprecated This method has been moved to StringUtils, we can call <b>StringUtils.generateUniqueName()</b> directly. 
+	 * @deprecated This method has been moved to StringUtils, we can call <b>StringUtils.generateUniqueName()</b> directly.
 	 */
 	@Deprecated
 	public static String generateUniqueName(String prefix){
