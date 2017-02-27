@@ -39,6 +39,8 @@ package org.safs.selenium.webdriver.lib;
  *  <br>  MAY 04, 2016    (Lei Wang)  Modified js_getErrorXXX(): call {@link #js_executeWithTimeout(String, long)} to avoid JavaScriptExecutor locking problem.
  *  <br>  MAY 06, 2016    (Lei Wang)  Modified js_executeWithTimeout(): throw SeleniumPlusException if the timeout is not enough for javascript execution.
  *                                  Modified js_getErrorCode(): enlarge the timeout to 5000 milliseconds.
+ *  <br>  FEB 27, 2017    (Lei Wang)  Added setJsTimeout(): It is used to set timeout for javascript execution.
+ *                                  Modified js_executeWithTimeout(): used local variable instead of global static variable.
  */
 import java.lang.reflect.Constructor;
 import java.net.URL;
@@ -2731,20 +2733,44 @@ public class SearchObject {
 		}
 	}
 
-	private static Object js_result = null;
-	private static String js_code = null;
-	protected static Object js_executeWithTimeout(String js, long msTimeout)throws SeleniumPlusException, InterruptedException{
+	/** '5000' milliseconds */
+	public static final long DEFAULT_JS_TIMEOUT = 5000;
+	/** timeout in milliseconds for javascript code to execute */
+	private static long jsTimeout = DEFAULT_JS_TIMEOUT;
+	/**
+	 * Set the timeout for javascript code to execute.
+	 * @param jsTimeout long, timeout in milliseconds for the javascript execution to finish
+	 * @see #js_getErrorCode()
+	 * @see #js_getErrorObject()
+	 * @see #js_getGlobalVariable(String)
+	 */
+	public static void setJsTimeout(long jsTimeout){
+		SearchObject.jsTimeout = jsTimeout;
+	}
+	public static long getJsTimeout(){
+		return jsTimeout;
+	}
+
+	/**
+	 *
+	 * @param js	String, the javascript code to execute
+	 * @param msTimeout	long, the timeout in milliseconds for the javascript execution
+	 * @return Object, the javascript execution result
+	 * @throws SeleniumPlusException if the timeout has been reached
+	 * @throws InterruptedException if the thread (executing javascript) has been interrupted
+	 */
+	protected static Object js_executeWithTimeout(final String js, long msTimeout)throws SeleniumPlusException, InterruptedException{
+		final List<Object> js_result = new ArrayList<Object>();
+		js_result.add(null);
 		Thread t = new Thread(new Runnable(){
 			public void run() {
-				try{js_result = getJS().executeScript(js_code);}
+				try{js_result.set(0, getJS().executeScript(js));}
 				catch(org.openqa.selenium.UnhandledAlertException x){
 					IndependantLog.warn(StringUtils.debugmsg(SearchObject.class, "js_executeWithTimeout") + " UnhandledAlertException: " + x);
 				}
 				catch(SeleniumPlusException x){throw new RuntimeException(x);}
 			}
 		});
-		js_result = null;
-		js_code = js;
 		t.setDaemon(true);
 		t.start();
 		t.join(msTimeout);
@@ -2754,7 +2780,7 @@ public class SearchObject {
 			throw new SeleniumPlusException(error);
 		}
 
-		return js_result;
+		return js_result.get(0);
 	}
 
 	/**
@@ -2773,7 +2799,7 @@ public class SearchObject {
 			}
 			// TODO Carl Nagle
 			//result = getJS().executeScript(JavaScriptFunctions.getGlobalVariable(variable));
-			result = js_executeWithTimeout(JavaScriptFunctions.getGlobalVariable(variable), 1000);
+			result = js_executeWithTimeout(JavaScriptFunctions.getGlobalVariable(variable), jsTimeout);
 			if(result==null){
 				IndependantLog.error(debugmsg+"The js returned result is null.");
 			}
@@ -2905,7 +2931,7 @@ public class SearchObject {
 		String debugmsg = StringUtils.debugmsg(SearchObject.class, "js_getErrorCode");
 		try {
 //			Object object = getJS().executeScript(JavaScriptFunctions.getJSErrorCode());
-			Object object = js_executeWithTimeout(JavaScriptFunctions.getJSErrorCode(), 5000/*give 5 seconds, it needs more time to get work done with Firefox*/);
+			Object object = js_executeWithTimeout(JavaScriptFunctions.getJSErrorCode(), jsTimeout/*give 5 seconds, it needs more time to get work done with Firefox*/);
 			return ((Long) object).intValue();
 		} catch (SeleniumPlusException e) {
 			throw e;
@@ -2933,7 +2959,7 @@ public class SearchObject {
 		String debugmsg = StringUtils.debugmsg(false);
 		try {
 //			Object object = getJS().executeScript(JavaScriptFunctions.getJSErrorObject());
-			Object object = js_executeWithTimeout(JavaScriptFunctions.getJSErrorObject(), 5000/*give 5 seconds, the error object may be big and takes more time to return*/);
+			Object object = js_executeWithTimeout(JavaScriptFunctions.getJSErrorObject(), jsTimeout/*give 5 seconds, the error object may be big and takes more time to return*/);
 			return object;
 		} catch (SeleniumPlusException e) {
 			throw e;
