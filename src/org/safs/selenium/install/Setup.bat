@@ -6,10 +6,15 @@ REM instead of the default 64-bit version.
 REM 
 REM ***************************************************************************
 
+REM %CD% will be wrongly interpreted as "C:\Windows\System32" on some environment such as Windows 10, it is not stable.
+REM SET CURRENT_DIRETORY=%CD%
+SET CURRENT_DIRETORY=%~dp0
+REM ECHO %CURRENT_DIRETORY%
+
 IF EXIST %WINDIR%\SysWOW64\cscript.exe GOTO FORCE32
-%WINDIR%\System32\cscript.exe "%CD%\install\Setup.WSF" "%CD%"
+%WINDIR%\System32\cscript.exe "%CURRENT_DIRETORY%\install\Setup.WSF" "%CURRENT_DIRETORY%"
 GOTO END
 
 :FORCE32
-%WINDIR%\SysWOW64\cscript.exe "%CD%\install\Setup.WSF" "%CD%"
+%WINDIR%\SysWOW64\cscript.exe "%CURRENT_DIRETORY%\install\Setup.WSF" "%CURRENT_DIRETORY%"
 :END
