@@ -2,9 +2,9 @@ package org.safs.selenium.webdriver.lib;
 
 /**
 * History:<br>
-* 
+*
 *  <br>   DEC 19, 2013    (DHARMESH4) Initial release.
-*  <br>	  JAN 16, 2014    (DHARMESH4) Updated reconnection browser support. 
+*  <br>	  JAN 16, 2014    (DHARMESH4) Updated reconnection browser support.
 *  <br>	  APR 09, 2014 	  (DHARMESH4) Fixed javascript support for webdriver reconnection.
 *  <br>	  SEP 04, 2014    (LeiWang) Store Capabilities's firefoxProfile info to session file.
 *  <br>   OCT 30, 2014    (CANAGL) Initial fix for IE JSON problems after new page load/redirection.
@@ -14,9 +14,10 @@ package org.safs.selenium.webdriver.lib;
 *  <br>   DEC 24, 2015	  (LeiWang) Add methods to get browser's name, version, and selenium-server's version etc.
 *  <br>   FEB 29, 2016	  (LeiWang) Remove the import of org.seleniumhq.jetty7.util.ajax.JSON
 *  <br>   MAR 07, 2016	  (LeiWang) Handle firefox preference.
-*  <br>   SEP 27, 2016	  (LeiWang) Modified main(): Added parameter "-project"/"-Dselenium.project.location", and 
+*  <br>   SEP 27, 2016	  (LeiWang) Modified main(): Added parameter "-project"/"-Dselenium.project.location", and
 *                                   adjusted the java doc.
 *                                   Wrote debug message to a file on disk c.
+*  <br>   FEB 27, 2016	  (LeiWang) Modified startSession(): quit the appropriate webdriver when cleaning up.
 */
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -40,6 +41,7 @@ import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.DriverCommand;
@@ -65,31 +67,31 @@ import com.google.common.collect.Lists;
 /**
  * Handle the Session information (serverhost, browsername, sessionid, firefoxProfile, chrome-user-data-dir, chrome-profile-dir, chrome-preference, chromeExcludedOptions, firefoxPreference).<br>
  * Handle a SeleniumRMIAgent, if enabled, to communicate with a remote SAFS Selenium RMI Server.<br>
- * 
+ *
  */
 public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
-	
+
 	private static boolean newSession = true;
 	private boolean _quit = false;
-	
+
 	/** The URL provided at construction time. */
-	public URL remote_URL; 
-	/** 
-	 * parsed hostname of the remote selenium server (standalone or grid-hub) 
+	public URL remote_URL;
+	/**
+	 * parsed hostname of the remote selenium server (standalone or grid-hub)
 	 * might be needed for additional Selenium RMI Server communication. */
 	public String remote_hostname = null;
-	/** 
-	 * parsed port number of the remote selenium server (standalone or grid-hub) 
+	/**
+	 * parsed port number of the remote selenium server (standalone or grid-hub)
 	 * might be needed for get grid-node information. */
 	public int remote_port = SeleniumConfigConstant.DEFAULT_SELENIUM_PORT_INT;
 
-	/** 
-	 * hostname of the remote grid-node. 
+	/**
+	 * hostname of the remote grid-node.
 	 * might be needed for additional Selenium RMI Server communication. */
 	public String rmi_hostname = null;
-	
+
 	public int rmi_registry_port = 1099;//default registry port to look for RMI
-	
+
 	/**
 	 * A SeleniumRMIAgent, if enabled, to communicate with a remote SAFS Selenium RMI Server.<br>
 	 * This may be null if we could not initialize an agent or find a server.<br>
@@ -101,11 +103,11 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 	 * @see org.safs.selenium.rmi.server.SeleniumRMIServer
 	 */
 	public SeleniumAgent rmiAgent = null;
-	
+
 	/**
-	 * It is a string containing session information for reconnecting a session,<br> 
+	 * It is a string containing session information for reconnecting a session,<br>
 	 * it contains a few fields separated by {@link #SPLITTER}<br>
-	 * currently, it contains 
+	 * currently, it contains
 	 * serverHostname +SPLITTER+ browserName +SPLITTER+ sessionid + SPLITTER+ firefoxProfile
 	 * + SPLITTER+ chromeUserDataDir + SPLITTER+ chromeProfileDir + SPLITTER+ chromePreference
 	 * + SPLITTER+ chromeExcludedOptions + SPLITTER+ firefoxPreference
@@ -118,7 +120,7 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 	/** "java.io.tmpdir" */
 	public static final String JAVA_TMPDIR = "java.io.tmpdir";
 	/** "selenium.session.tmp" */
-	public static final String SESSION_FILE = "selenium.session.tmp";	
+	public static final String SESSION_FILE = "selenium.session.tmp";
 	/** "ID" */
 	public static final String CAPABILITY_ID = "ID";
 	/** "RECONNECT" */
@@ -128,15 +130,15 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 
 	/**if this is a grid-hub server*/
 	protected boolean isGrid = false;
-	
+
 	/**
 	 * Not used by SAFS Selenium.<br>
 	 * Should not be used if retaining SAFS Selenium RMI Server capabilities.
 	 * @param capabilities
 	 * @see #RemoteDriver(URL, DesiredCapabilities)
 	 */
-	public RemoteDriver(DesiredCapabilities capabilities){				
-		super(capabilities);		
+	public RemoteDriver(DesiredCapabilities capabilities){
+		super(capabilities);
 	}
 
 	/**
@@ -160,13 +162,13 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * @return String, the version of the browser where test is running. Or null if something wrong happens.
 	 */
 	public String getBrowserVersion(){
 		String debugmsg = StringUtils.debugmsg(false);
-		try{			
+		try{
 			String version = getCapabilities().getVersion().toString();
 			IndependantLog.debug(debugmsg+version);
 			return version;
@@ -182,13 +184,13 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * @return String, the name of the platform where the browser is running. Or null if something wrong happens.
 	 */
 	public String getPlatform(){
 		String debugmsg = StringUtils.debugmsg(false);
-		try{			
+		try{
 			String platform = getCapabilities().getPlatform().toString();
 			IndependantLog.debug(debugmsg+platform);
 			return platform;
@@ -204,7 +206,7 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * @return String, the version of 'selenium server' with which the test is running. Or null if something wrong happens.
 	 */
@@ -213,10 +215,10 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 		String hostname = null;
 		String port = null;
 		String version = null;
-		
+
 		if(isGrid ){
 			//according to the session id, get the node hostname and port
-			SessionId id = getSessionId(); 
+			SessionId id = getSessionId();
 			String[] node  = GridInfoExtractor.getHostNameAndPort(remote_hostname, remote_port, id);
 			IndependantLog.debug(debugmsg+"connected to grid NODE, host="+node[0]+"; port="+node[1]);
 			hostname = node[0];
@@ -225,7 +227,7 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 			hostname = remote_hostname;
 			port = String.valueOf(remote_port);
 		}
-		
+
 		String result = WebDriverGUIUtilities.readHubStaticURL(hostname, port);
 		//result from error stream, it is something like following:
 //		{"sessionId":null,
@@ -256,15 +258,15 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 				}
 				version = StringUtilities.removeSingleQuotes(version.trim());
 			}
-			
+
 			IndependantLog.debug(debugmsg+version);
 		} catch (Exception e) {
 			IndependantLog.error(debugmsg+" Met "+StringUtils.debugmsg(e));
 		}
-		
+
 		return version;
 	}
-		
+
 	/**
 	 * Connect to a remote selenium standalone server.<br>
 	 * We will also parse the URL to attempt to connect to a SAFS Selenium RMI Server on RMI-SERVER-HOST.<br>
@@ -273,50 +275,50 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 	 * 2. The node host assigned by this Selenium Server (grid-hub).<br>
 	 * @param selenium_server_url -- URL of the remote Selenium Server.
 	 * <p>
-	 * @param capabilities -- to enable the possibility of SAFS Selenium RMI Server/Agent communication 
+	 * @param capabilities -- to enable the possibility of SAFS Selenium RMI Server/Agent communication
 	 * you must set a "capability" of REMOTESERVER to be the hostname of the remote selenium server.
 	 * <p>
 	 * Ex: capabilities.setCapability(RemoteDriver.CAPABILITY_REMOTESERVER, hostname);
 	 * <p>
-	 * This is done automatically within the SAFS Selenium code where needed.  Only advanced users doing 
+	 * This is done automatically within the SAFS Selenium code where needed.  Only advanced users doing
 	 * custom initialization and instantiation need set this capability.
 	 */
 	public RemoteDriver(URL selenium_server_url, DesiredCapabilities capabilities){
 		super(selenium_server_url,capabilities);
 		remote_URL = selenium_server_url;
 		parseSeleniumServerURL(selenium_server_url);
-		
+
 		//if it is grid, we need to set RMIAgent with the RMIServer on the grid-node (not on the grid-hub)
 		Object gridnodes = capabilities.getCapability(SelectBrowser.KEY_GRID_NODES_SETTING);
 		if(gridnodes!=null && gridnodes instanceof String) isGrid = StringUtils.isValid((String)gridnodes);
 		if(!isGrid) isGrid = WebDriverGUIUtilities.isGridRunning(remote_hostname, String.valueOf(remote_port));
 
 		if(isGrid ){
-			SessionId id = getSessionId(); 
+			SessionId id = getSessionId();
 			String[] node  = GridInfoExtractor.getHostNameAndPort(remote_hostname, remote_port, id);
 			IndependantLog.debug(StringUtils.debugmsg(false)+"connected to grid NODE, host="+node[0]+"; port="+node[1]);
 			rmi_hostname = node[0];
 		}
-		
+
 		startRMIAgent(rmi_hostname, rmi_registry_port);
 	}
 
 	/**
 	 * try to start a SAFS Selenium RMI Agent if our "selenium server" is NOT on localhost or it is a "grid hub server".
 	 * @param rmihost String, the host name of the RMI server
-	 * @param rmiport int, the port number of the RMI server, default is 1099 
+	 * @param rmiport int, the port number of the RMI server, default is 1099
 	 */
 	protected void startRMIAgent(String rmihost, int rmiport){
 		if(isLocalServer()) return;
 		try{
-			rmiAgent = new SeleniumAgent();		
+			rmiAgent = new SeleniumAgent();
 			rmiAgent.setServerHost(rmihost);
 			rmiAgent.initialize();
 		}catch(RemoteException rx){
 			rx.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * @return true if our standalone Selenium Server is local (localhost), otherwise false.
 	 */
@@ -324,7 +326,7 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 		if(isGrid) return false;//If server is grid-hub, then we need RMI server. But if the node is local machine?
 		return remote_hostname == null || NetUtilities.isLocalHost(remote_hostname);
 	}
-	
+
 	/**
 	 * Extract the needed remote_hostname and remote_port from the selenium server URL.
 	 * @param URL - URL of the Selenium Server used.
@@ -345,9 +347,9 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 			remote_port = SeleniumConfigConstant.DEFAULT_SELENIUM_PORT_INT;
 		}
 	}
-	
+
 	@Override
-	public void quit(){		
+	public void quit(){
 		super.quit();
 		try{ deleteSessionIdFromFile((String)this.getCapabilities().getCapability(CAPABILITY_ID));}
 		catch(Throwable t){}
@@ -355,69 +357,82 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 		catch(Throwable t){}
 		_quit = true;
 	}
-	
+
 	public boolean hasQuit(){ return _quit; }
-	
+
 	/**
 	 * Called internally by OpenQA RemoteWebDriver during Constructor initialization.
 	 */
 	@Override
-	public void startSession(Capabilities desiredCapabilities, 
+	public void startSession(Capabilities desiredCapabilities,
 		      Capabilities requiredCapabilities){
-		
+
 		String ID = (String) desiredCapabilities.getCapability(CAPABILITY_ID);
 		Boolean reconnect = (Boolean) desiredCapabilities.getCapability(CAPABILITY_RECONNECT);
 		String browserName = desiredCapabilities.getBrowserName();
 		String remoteserver = (String) desiredCapabilities.getCapability(CAPABILITY_REMOTESERVER);
 		if(remote_hostname == null) remote_hostname = remoteserver; //might still be null
-		
-		// clean up obsolete session 
+
+		//Clean up any obsolete sessions
 		try {
-			List<SessionInfo> list = getSessionsFromFile();			
-			for (SessionInfo info : list) {	
-				try {					
-					setSessionId(info.session);					
+			List<SessionInfo> list = getSessionsFromFile();
+			for (SessionInfo info : list) {
+				try {
+					setSessionId(info.session);
 					getCurrentUrl();
-				} catch (WebDriverException check){	
-					IndependantLog.debug("RemoteDriver deleting sessionid "+ info.id +" from session file due to: "+ check.getClass().getSimpleName());
-					deleteSessionIdFromFile(info.id);
-					quit();	
-				}						
-			}						
-		} catch (Exception e1) {}		
-			
+				} catch (WebDriverException check){
+					IndependantLog.debug("RemoteDriver failed deleting obsolete session "+ info.id +" from session file due to: "+ check);
+					WebDriver wdToDelete = SearchObject.getWebDriver(info.id);
+					if (wdToDelete instanceof RemoteDriver){
+						((RemoteDriver) wdToDelete).quit();
+					}else{
+						if(wdToDelete!=null){
+							deleteSessionIdFromFile(info.id);
+							wdToDelete.quit();
+						}else{
+							IndependantLog.error("RemoteDriver cannot get session '"+info.id+"' from cache, so failed to delete it!");
+						}
+					}
+				}
+			}
+		} catch (Exception e1) {}
+
+		//Start the session
 		if (reconnect.booleanValue()){
-		    SessionInfo sid = null;
-			try {						
-				sid = retrieveSessionInfoFromFile(ID);				
-				if (sid != null){
-					setSessionId(sid.session);
+		    SessionInfo info = null;
+			try {
+				info = retrieveSessionInfoFromFile(ID);
+				if (info != null){
+					setSessionId(info.session);
 					getCurrentUrl();
 					newSession = false;
+				}else{
+					IndependantLog.debug("RemoteDriver failed to get cached session of ID '"+ID+"'.");
 				}
-					
+
 			} catch (WebDriverException we) {
-				IndependantLog.debug("RemoteDriver deleting sessionid "+ sid +" from session file due to: "+ we.getClass().getSimpleName());
+				IndependantLog.debug("RemoteDriver failed starting session '"+ info.id +"' due to: "+ we);
 				try {
-					deleteSessionIdFromFile(ID);					
+					//This session might be obsolete, delete it from the session file
+					deleteSessionIdFromFile(ID);
 				} catch (Exception e) {
-					IndependantLog.debug("RemoteDriver error deleting sessionid "+ sid +" from session file due to: "+ e.getClass().getSimpleName());
+					IndependantLog.debug("RemoteDriver error deleting session '"+ info.id +"' from session file due to: "+ e);
 				}
 			} catch (Exception e) {
-				IndependantLog.debug("RemoteDriver error retrieving sessionid "+ sid +" from session file due to: "+ e.getClass().getSimpleName());
+				IndependantLog.debug("RemoteDriver error retrieving session '"+ info.id +"' from session file due to: "+ e);
 			}
-			
-		} else {					
-			super.startSession(desiredCapabilities,requiredCapabilities);	
+
+		} else {
+			super.startSession(desiredCapabilities,requiredCapabilities);
 			try {
 				storeSessionIdToFile(remote_hostname, ID,browserName,getSessionId().toString(), desiredCapabilities);
 			} catch (Exception e) {
-				IndependantLog.debug("RemoteDriver error storing sessionid to file due to: "+ e.getClass().getSimpleName());				
+				IndependantLog.debug("RemoteDriver error storing sessionid to file due to: "+ e);
 			}
-			 		
+
 		}
 	}
-	
+
 	/*
 	 * Trying to fix a problem with IE JSON values containing "-1.IND"
 	 * (non-Javadoc)
@@ -437,8 +452,8 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 	    		v = v.replace("':", "\":");
 	    		v = v.replace(":'", ":\"");
 	    		v = v.replace("',", "\",");
-	    		v = v.replace(",'", ",\"");	    		
-        		try{ 
+	    		v = v.replace(",'", ",\"");
+        		try{
         			Object nv = Json.convert(Map.class, v);
         			if(nv instanceof Map){
     	        		IndependantLog.info(debugmsg + driverCommand +" JSON Map conversion SUCCESSFUL: "+ nv.toString());
@@ -465,12 +480,12 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 			if(response == null) {
 				IndependantLog.debug(debugmsg + driverCommand +" failed to get any type of response.");
 			}else{
-				// DEBUG IndependantLog.debug(debugmsg + driverCommand +" received a "+ response.getClass().getSimpleName()+" response.");				
+				// DEBUG IndependantLog.debug(debugmsg + driverCommand +" received a "+ response.getClass().getSimpleName()+" response.");
 			}
     	}
     	return response;
     }
-	
+
 	public static boolean isNewSession(){
 		return newSession;
 	}
@@ -478,20 +493,20 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 	private static String getString(Capabilities capabilities, String key){
 		try{
 			Object value = capabilities.getCapability(key);
-			return (value==null? "":(String)value);			
+			return (value==null? "":(String)value);
 		}catch(Exception e){
 			IndependantLog.error(StringUtils.debugmsg(false)+" Met "+StringUtils.debugmsg(e));
 			return "";
 		}
 	}
-	
+
 	public static synchronized void storeSessionIdToFile(String serverHostname, String Id,  String browserName, String sessionid, Capabilities desiredCapabilities) throws Exception{
-		
+
 		try {
 			Properties prop = new Properties();
 			String dirname = System.getProperty(JAVA_TMPDIR);
 			String file = dirname + SESSION_FILE;
-			
+
 			IndependantLog.debug("RemoteDriver.storeSessionIDToFile attempting to store session id: "+ Id);
 
 			File afile = new File(file);
@@ -517,30 +532,30 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 
 			//create the session-content used for reconnection
 			sessionContent = serverHostname +SPLITTER+ browserName +SPLITTER+ sessionid + SPLITTER+ firefoxProfile
-					+ SPLITTER+ chromeUserDataDir+ SPLITTER+ chromeProfileDir+ SPLITTER+ chromePreference+ SPLITTER+ chromeExcludeOptions + SPLITTER + firefoxPreference; 
-			prop.put(Id, sessionContent); 
-			prop.put(LAST_SESSION_KEY, Id); 
+					+ SPLITTER+ chromeUserDataDir+ SPLITTER+ chromeProfileDir+ SPLITTER+ chromePreference+ SPLITTER+ chromeExcludeOptions + SPLITTER + firefoxPreference;
+			prop.put(Id, sessionContent);
+			prop.put(LAST_SESSION_KEY, Id);
 
 			//if (!afile.exists()) afile.createNewFile();
-			OutputStream out = new FileOutputStream(afile);	
+			OutputStream out = new FileOutputStream(afile);
 			prop.store(out, file);
-			
+
 		} catch (Exception e) {
 			IndependantLog.debug("RemoteDriver error writing session file due to: "+ e.getClass().getSimpleName());
 			throw new Exception("Session store issue " + e.getMessage());
-		} 
+		}
 
 	}
-	
-	
+
+
 	/**
 	 * Delete the session from the RemoteDriver file with the given Id.
-	 * If the Id is also set as the LAST_SESSION, then the LAST_SESSION_KEY 
+	 * If the Id is also set as the LAST_SESSION, then the LAST_SESSION_KEY
 	 * will also be removed showing the last or "current" session is uncertain.
 	 * @param Id
 	 * @throws Exception if there is a problem reading or deleting the session info.
 	 */
-	public static synchronized void deleteSessionIdFromFile(String Id) throws Exception {		
+	public static synchronized void deleteSessionIdFromFile(String Id) throws Exception {
 		try {
 			Properties prop = new Properties();
 
@@ -581,32 +596,32 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 	 * @throws Exception
 	 */
 	public static synchronized SessionInfo retrieveSessionInfoFromFile(String Id) throws Exception{
-				
+
 		try {
 			if(Id == null || Id.length()==0) throw new IllegalArgumentException("Id cannot be null or zero-length.");
-			
+
 			Properties prop = new Properties();
-					
+
 			String dirname = System.getProperty(JAVA_TMPDIR);
 			String file = dirname + SESSION_FILE;
-			
+
 			File afile = new File(file);
 			if (! afile.exists()){
 				IndependantLog.debug("RemoteDriver.retrieveSessionIDFromFile file does NOT already exist: "+ afile.getCanonicalPath());
 			}
 			prop.load(new FileInputStream(file));
 			String session = prop.getProperty(Id,null);
-			
+
 			if (session == null)return null;
-			
+
 			String last = prop.getProperty(LAST_SESSION_KEY);
 			SessionInfo info = new SessionInfo(Id, Id.equalsIgnoreCase(last), session);
 			return info;
-		} 
+		}
 		catch (Exception e) {
 			IndependantLog.debug("RemoteDriver.retrieveSessionIDFromFile file error due to: "+ e.getClass().getSimpleName()+ ", "+ e.getMessage());
 			throw new Exception("Session retrieve issue.  Session info may not be valid or complete.");
-		}                
+		}
 	}
 	/**
 	 * Retrieve the remote server's session string for the session with the given id.
@@ -616,52 +631,52 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 	 */
 	public static synchronized String retriveSessionIdFromFile(String Id) throws Exception{
 
-		return retrieveSessionInfoFromFile(Id).session;        
+		return retrieveSessionInfoFromFile(Id).session;
 	}
-	
+
 	public static synchronized void setLastSessionId(String Id) throws Exception{
-		
+
 		try {
 			if( Id==null || Id.length()==0) throw new IllegalArgumentException("Id cannot be null or zero-length.");
 			Properties prop = new Properties();
-					
+
 			String dirname = System.getProperty(JAVA_TMPDIR);
 			String file = dirname + SESSION_FILE;
-			
+
 			File afile = new File(file);
 			if (afile.exists()){
-				prop.load(new FileInputStream(afile));			
+				prop.load(new FileInputStream(afile));
 				prop.put(LAST_SESSION_KEY, Id);
 			}else{
-				IndependantLog.debug("RemoteDriver.setLastSessionID file does NOT already exist: "+ afile.getCanonicalPath());				
+				IndependantLog.debug("RemoteDriver.setLastSessionID file does NOT already exist: "+ afile.getCanonicalPath());
 			}
-		    
+
 			//if (!afile.exists()) afile.createNewFile();
-			OutputStream out = new FileOutputStream(afile);	
-			prop.store(out, file);			
-			
+			OutputStream out = new FileOutputStream(afile);
+			prop.store(out, file);
+
 		} catch (Exception e) {
 			IndependantLog.debug("RemoteDriver.setLastSessionID error due to: "+ e.getClass().getSimpleName()+", "+e.getMessage());
 			throw new Exception("Session retrive issue");
-		}        
+		}
 	}
-	
+
 	/**
 	 * Retrieve SessionInfo representing the "current" or "last" session
 	 * @return SessionInfo -- can be null if there is no session running or stored.
 	 * @throws Exception
 	 */
-	public static synchronized SessionInfo retriveLastSessionInfoFromFile() throws Exception{		
-		
+	public static synchronized SessionInfo retriveLastSessionInfoFromFile() throws Exception{
+
 		try {
 			Properties prop = new Properties();
-					
+
 			String dirname = System.getProperty(JAVA_TMPDIR);
 			String file = dirname + SESSION_FILE;
-			
+
 			File afile = new File(file);
 			if (!afile.exists()){
-				IndependantLog.debug("RemoteDriver.retrieveLastSessionIDFromFile file does NOT already exist: "+ afile.getCanonicalPath());				
+				IndependantLog.debug("RemoteDriver.retrieveLastSessionIDFromFile file does NOT already exist: "+ afile.getCanonicalPath());
 			}
 			prop.load(new FileInputStream(file));
 			String browserId = prop.getProperty(LAST_SESSION_KEY,null);
@@ -669,30 +684,30 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 			sessionContent = prop.getProperty(browserId,null);
 
 			return new SessionInfo(browserId, true, sessionContent);
-			
+
 		} catch (Exception e) {
 			IndependantLog.debug("RemoteDriver.retrieveLastSessionIDFromFile error due to: "+ e.getClass().getSimpleName());
 			throw new Exception("Session Key retrieval issue");
 		}
-        
+
 	}
-	
+
 	/**
 	 * Returns a List of SessionInfo objects.
 	 * @return List --can be empty if no sessions and no Exception is thrown.
 	 * @throws Exception if the sessions are not retrievable (do not exist).
 	 */
-	public static synchronized List<SessionInfo> getSessionsFromFile() throws Exception{		
-		
+	public static synchronized List<SessionInfo> getSessionsFromFile() throws Exception{
+
 		try {
 			Properties prop = new Properties();
-					
+
 			String dirname = System.getProperty(JAVA_TMPDIR);
 			String file = dirname + SESSION_FILE;
-			
+
 			File afile = new File(file);
 			if (!afile.exists()){
-				IndependantLog.debug("RemoteDriver.getSessionsFromFile file does NOT already exist: "+ afile.getCanonicalPath());				
+				IndependantLog.debug("RemoteDriver.getSessionsFromFile file does NOT already exist: "+ afile.getCanonicalPath());
 			}
 			prop.load(new FileInputStream(file));
 			List<SessionInfo> list = new ArrayList<SessionInfo> ();
@@ -702,41 +717,41 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 			while(en.hasMoreElements()){
 				key = (String)en.nextElement();
 				if(key.equals(LAST_SESSION_KEY)) continue;
-				sessionContent = prop.getProperty(key);				
+				sessionContent = prop.getProperty(key);
 
 				try{ list.add(new SessionInfo(key, key.equals(last), sessionContent));}
 				catch(Exception ignore){}
 			}
 			return list;
-			
+
 		} catch (Exception e) {
-			IndependantLog.debug("RemoteDriver.getSessionsFromFile error due to: "+ e.getClass().getSimpleName());				
+			IndependantLog.debug("RemoteDriver.getSessionsFromFile error due to: "+ e.getClass().getSimpleName());
 			throw new Exception("Session Key retrieval issue", e);
-		}        
+		}
 	}
-	
+
 	public static synchronized void deleteSessionFile(){
 		String dirname = System.getProperty(JAVA_TMPDIR);
-		String fileName = dirname + SESSION_FILE;		
+		String fileName = dirname + SESSION_FILE;
 		File afile = new File(fileName);
-		if (afile.exists()) afile.delete();		
+		if (afile.exists()) afile.delete();
 	}
-	
+
 	public <X> X getScreenshotAs(OutputType<X> target)
 				throws WebDriverException {
-		
+
 			return target
 					.convertFromBase64Png(execute(DriverCommand.SCREENSHOT)
-							.getValue().toString());		
+							.getValue().toString());
 	}
-	
+
 	/*
-	 * Override Javascript executescript method due to reconnection 
+	 * Override Javascript executescript method due to reconnection
 	 * webdriver throw null exception
 	 */
 	@Override
 	public Object executeScript(String script, Object... args) {
-	    		 
+
 	    // Escape the quote marks
 	    script = script.replaceAll("\"", "\\\"");
 
@@ -749,7 +764,7 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 
 	    return execute(DriverCommand.EXECUTE_SCRIPT, params).getValue();
 	 }
-	
+
 	/**
 	 * The current format of each SessionInfo when stored in file:
 	 * <p>
@@ -762,12 +777,12 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 		public String session = null;
 		public boolean isCurrentSession = false;
 		public HashMap<String,Object> extraParameters = new HashMap<String,Object>();
-		
+
 		private SessionInfo(){super();}
-		
+
 		/**
 		 * Builds a new SessionInfo object from a real new session.
-		 * 
+		 *
 		 * @param serverHost
 		 * @param id
 		 * @param browser
@@ -781,7 +796,7 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 			this.session = session;
 			this.isCurrentSession = isCurrentSession;
 		}
-		
+
 		/**
 		 * Builds a SessionInfo object from (probably) stored sessionContent information.
 		 * @param id
@@ -791,7 +806,7 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 		public SessionInfo(String id, boolean isCurrentSession, String sessionContent){
 			this.id = id;
 			this.isCurrentSession = isCurrentSession;
-			
+
 			try{
 				String[] sessionInfos = StringUtils.getTokenArray(sessionContent, SPLITTER);
 				this.serverHost = sessionInfos[0];
@@ -803,17 +818,17 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 				try{if(!sessionInfos[6].isEmpty()) extraParameters.put(SelectBrowser.KEY_CHROME_PREFERENCE, sessionInfos[6]);}catch(Exception e){}
 				try{if(!sessionInfos[7].isEmpty()) extraParameters.put(SelectBrowser.KEY_CHROME_EXCLUDE_OPTIONS, sessionInfos[7]);}catch(Exception e){}
 				try{if(!sessionInfos[8].isEmpty()) extraParameters.put(SelectBrowser.KEY_FIREFOX_PROFILE_PREFERENCE, sessionInfos[8]);}catch(Exception e){}
-				
+
 			}catch(Exception e){
 				IndependantLog.error("Fail to initialize SessionInfo due to "+StringUtils.debugmsg(e));
-			}			
+			}
 		}
 	}
-	
+
 	/** The debug log file containing debug message when calling main() to start "selenium server". */
 	public static final String debugLogFile = "C:\\"+RemoteDriver.class.getName().replaceAll("\\.", "_")+"_debug_log.txt";
 	private static PrintStream pstream = null;
-	
+
 	/**
 	 * This main method will start a Selenium Server (standalone, hub, or node). It will automatically detect the Java to use,
 	 * which file to log messages for each browser, and what driver (IE CHROME) to be used to start with Selenium Server.<br>
@@ -827,7 +842,7 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 	 *                                         TheServerRole could be <b>"hub"</b>, and selenium server will be launched
 	 *                                         as a hub for other node to connect.<br>
 	 *                                         TheServerRole could be <b>"node"</b>, and selenium server will be launched
-	 *                                         as a node to connect a hub. <b>**Note**</b> Hub's information must also 
+	 *                                         as a node to connect a hub. <b>**Note**</b> Hub's information must also
 	 *                                         be provided. Ex: <b>-role node -hub http://hub.machine:port/grid/register</b><br>
 	 * <b>"-project ProjectLocationAbsDir"</b>, optional, the absolute directory holding the project to test; If not provided, use
 	 *                                        SeleniumPlus or SAFS installation directory as default. This parameter has higher
@@ -837,13 +852,13 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 	 * <ul>
 	 * <li>Start "selenium standalone server on port 4567 with JVM option -Xms512m -Xmx2g"<br>
 	 * java org.safs.selenium.webdriver.lib.RemoteDriver "-port 4567" "SELENIUMSERVER_JVM_OPTIONS=-Xms512m -Xmx2g"<br>
-	 * 
+	 *
 	 * <li>Start "selenium hub on port 4567 with JVM option -Xms512m -Xmx2g"<br>
 	 * java org.safs.selenium.webdriver.lib.RemoteDriver "-role hub" "-port 4567" "SELENIUMSERVER_JVM_OPTIONS=-Xms512m -Xmx2g"<br>
-	 * 
+	 *
 	 * <li>Start "selenium node" on port 5555 with JVM option -Xms512m -Xmx2g", and register it to hub.machine:4567<br>
 	 * java org.safs.selenium.webdriver.lib.RemoteDriver "-role node -hub http://hub.machine:4567/grid/register" "-port 5678" "SELENIUMSERVER_JVM_OPTIONS=-Xms512m -Xmx2g"<br>
-	 * 
+	 *
 	 * </ul>
 	 * <br>
 	 * We can also provide the following <b>JVM parameters</b>.<br>
@@ -863,7 +878,7 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 	 */
 	public static void main(String[] args){
 		String debugmsg = StringUtils.debugmsg(false);
-		
+
 		try {
 			pstream = new PrintStream(new BufferedOutputStream(new FileOutputStream(new File(debugLogFile))));
 			IndependantLog.setDebugListener(new DebugListener(){
@@ -879,11 +894,11 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		
+
 		IndependantLog.debug(debugmsg+" Current System properties: "+System.getProperties());
-		
+
 		String projectLocation = System.getProperty(DriverConstant.PROPERTY_SAFS_PROJECT_ROOT);
-		
+
 		for(int i=0;i<args.length;i++){
 			if(args[i].equalsIgnoreCase("-project")){
 				if((i+1)<args.length){
@@ -891,18 +906,18 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 				}
 			}
 		}
-		
+
 		IndependantLog.debug(debugmsg+"Project location is "+projectLocation);
-		
+
 		if(!WebDriverGUIUtilities.startRemoteServer(projectLocation, args)){
 			IndependantLog.error(debugmsg+"Fail to start Remote Server with parameter "+Arrays.toString(args));
 		}
-		
+
 		if(pstream!=null){
 			pstream.flush();
 			pstream.close();
 		}
-		
+
 		IndependantLog.setDebugListener(null);
 	}
 }
