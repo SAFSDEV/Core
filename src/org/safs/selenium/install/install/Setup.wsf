@@ -61,6 +61,11 @@ if Len(safsdir) = 0 then
    WScript.Quit
 end if
 
+'Remove the ending back-slash of safsdir
+if Right(safsdir, 1)="\" then
+   safsdir=left(safsdir, len(safsdir)-1)
+end if
+
 If NOT fso.FileExists(safsdir & "\libs\SPFilterImageGUI.jar") Then 
    msg = "SeleniumPlus path provided appears to be invalid."& cr & cr
    shell.Popup msg,0,"SeleniumPlus Installation Abort",16
@@ -120,9 +125,6 @@ ELSE
    End If
 End if
 
-'reset/clear variable
-arg=""
-
 On Error Resume Next
 Set exec = shell.Exec(cmd)
 
@@ -134,7 +136,8 @@ End if
 
 On Error Goto 0
 
-arg = ""
+'reset/clear variable
+arg=""
 Do While exec.Status = 0
     if not exec.StdOut.AtEndOfStream then
         arg = arg & exec.StdOut.ReadAll        
@@ -148,6 +151,7 @@ Loop
 
 On Error Resume Next
 Set OutStream = fso.OpenTextFile(safsdir &"\install\setup.log", 2, True)
+OutStream.Write cmd & newline
 OutStream.Write arg
 On Error Goto 0
 

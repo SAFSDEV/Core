@@ -7,14 +7,13 @@ REM
 REM ***************************************************************************
 
 REM %CD% will be wrongly interpreted as "C:\Windows\System32" on some environment such as Windows 10, it is not stable.
-REM SET CURRENT_DIRETORY=%CD%
-SET CURRENT_DIRETORY=%~dp0
-REM ECHO %CURRENT_DIRETORY%
+REM SET CURRENT_DIRECTORY=%CD%\
+SET CURRENT_DIRECTORY=%~dp0
 
 IF EXIST %WINDIR%\SysWOW64\cscript.exe GOTO FORCE32
-%WINDIR%\System32\cscript.exe "%CURRENT_DIRETORY%\install\Setup.WSF" "%CURRENT_DIRETORY%"
+%WINDIR%\System32\cscript.exe "%CURRENT_DIRECTORY%install\Setup.WSF" "%CURRENT_DIRECTORY%"
 GOTO END
 
 :FORCE32
-%WINDIR%\SysWOW64\cscript.exe "%CURRENT_DIRETORY%\install\Setup.WSF" "%CURRENT_DIRETORY%"
+%WINDIR%\SysWOW64\cscript.exe "%CURRENT_DIRECTORY%install\Setup.WSF" "%CURRENT_DIRECTORY%"
 :END
