@@ -2,6 +2,7 @@
 
 package org.safs.rest.service.models.providers
 
+
 /**
  * This class provides a central location to retrieve SAFSREST properties.
  * The SAFSREST properties can be true system properties, environment variables,
@@ -11,21 +12,15 @@ package org.safs.rest.service.models.providers
  * @since September 8, 2015
  */
 class SystemPropertyProvider {
+    public static final String OS_PROPERTY_NAME = 'os.name'
     public static final String OS_LINUX = 'linux'
     public static final String OS_WINDOWS = 'windows'
 
-    public boolean isLinux() {
-        getOperatingSystem() == OS_LINUX
-    }
-    
-    public boolean isWindows() {
-        getOperatingSystem() == OS_WINDOWS
-    }
 
     String getOperatingSystem() {
         String operatingSystem = OS_LINUX
 
-        def systemOsName = System.properties.'os.name'?.trim()?.toLowerCase()
+        def systemOsName = System.properties[OS_PROPERTY_NAME]?.trim()?.toLowerCase()
 
         if (systemOsName.startsWith(OS_WINDOWS)) {
             operatingSystem = OS_WINDOWS
@@ -34,4 +29,12 @@ class SystemPropertyProvider {
         operatingSystem
     }
 
+
+    boolean isLinux() {
+        operatingSystem == OS_LINUX
+    }
+    
+    public boolean isWindows() {
+        operatingSystem == OS_WINDOWS
+    }
 }

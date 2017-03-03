@@ -1,12 +1,18 @@
 // Copyright (c) 2016 by SAS Institute Inc., Cary, NC, USA. All Rights Reserved.
-
 package org.safs.rest.service.commands.curl
 
 import static org.safs.rest.service.commands.CommandInvoker.PRESERVE_SPECIAL_CHARACTERS_QUOTE
 import static org.safs.rest.service.commands.curl.Response.EMPTY_BODY
+import static org.safs.rest.service.models.entrypoints.Entrypoint.SECURE_HTTP_PROTOCOL
+import static org.safs.rest.service.models.providers.authentication.TokenProvider.PASSWORD_KEY
+import static org.safs.rest.service.models.providers.http.SecureOptions.NONE
+
 import static org.springframework.http.HttpHeaders.ACCEPT as ACCEPT_HEADER
 import static org.springframework.http.HttpHeaders.AUTHORIZATION as AUTHORIZATION_HEADER
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE as CONTENT_TYPE_HEADER
+import static org.springframework.http.HttpHeaders.IF_MATCH
+import static org.springframework.http.HttpHeaders.IF_NONE_MATCH
+import static org.springframework.http.HttpHeaders.IF_RANGE
 import static org.springframework.http.HttpMethod.DELETE
 import static org.springframework.http.HttpMethod.GET
 import static org.springframework.http.HttpMethod.HEAD
@@ -23,9 +29,12 @@ import groovy.xml.XmlUtil
 
 import org.safs.rest.service.commands.ExecutableCommand
 import org.safs.rest.service.models.providers.SafsRestPropertyProvider
+import org.safs.rest.service.models.providers.SystemPropertyProvider
 import org.safs.rest.service.models.providers.authentication.TokenProviderEntrypoints
 
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType
 
 
 
@@ -81,8 +90,22 @@ class CurlCommand extends ExecutableCommand {
     public static final AUTHORIZATION_BEARER_HEADER_OPTION= /${HEADER_OPTION}${AUTHORIZATION_BEARER_HEADER}/
 
     /**
+     * @see #DATA_BINARY_OPTION
+     */
+    public static final DATA_OPTION = '--data'
+
+    /**
+     * Displayed instead of the user's password in the generated
+     * console string.
+     *
+     * {@see #getConsoleString}
+     */
+    public static final PASSWORD_MASK = '*' * 12
+
+    /**
      * DATA_BINARY_OPTION tells curl to treat the request body exactly as
-     * it is specified. Use this option instead of the DATA_OPTION.
+     * it is specified. Use this option instead of the DATA_OPTION for
+     * most requests with a body.
      *
      * <b>NOTE:</b> Users of {@link CurlCommand} do not need to set this option directly if they supply
      * a value for the {@link #requestBody} property. {@link CurlCommand} generates the proper options
@@ -106,7 +129,7 @@ class CurlCommand extends ExecutableCommand {
     public static final FILE_DATA_PREFIX = '@'
 
     /**
-     * Name of the curl command line location option.
+     * Name of the curl command line <code>location</code> option.
      *
      * The curl <code>--location</code> option follows a 30x redirect for a GET request; for a POST request
      * with status 301, 302, or 303, curl turns the POST into a GET before retrying the request (see the curl
@@ -114,6 +137,10 @@ class CurlCommand extends ExecutableCommand {
      */
     public static final LOCATION_OPTION = '--location'
 
+    /**
+     * Name of the curl command line <code>insecure</code> option, which instructs curl NOT
+     * to perform validation of HTTPS certificates received from a server.
+     */
     public static final INSECURE_OPTION = '--insecure'
 
     /*
@@ -127,7 +154,9 @@ class CurlCommand extends ExecutableCommand {
     public static final PROPERTY_PROVIDER_ARGUMENT_NAME = 'propertyProvider'
     public static final ACCEPT_ARGUMENT_NAME = 'accept'
     public static final CONTENT_TYPE_ARGUMENT_NAME = 'contentType'
+    public static final HTTP_HEADERS_ARGUMENT_NAME = 'httpHeaders'
     public static final FORM_FIELDS_ARGUMENT_NAME = 'formFields'
+    public static final AUTO_REDIRECT_ARGUMENT_NAME = 'autoRedirect'
 
 
     /**
@@ -204,6 +233,9 @@ class CurlCommand extends ExecutableCommand {
 
     private boolean isRequestBodyJson = false
 
+    private static final Set HEADERS_USING_ETAGS = [IF_MATCH, IF_NONE_MATCH, IF_RANGE]
+
+
     /**
      * A textual representation of the HTTP entrypoint to be used with this
      * CurlCommand. The entrypoint should contain the full URL where a request
@@ -224,17 +256,36 @@ class CurlCommand extends ExecutableCommand {
      * the request includes one. This value defaults to {@link Response#EMPTY_BODY}.
      */
     String requestBody = EMPTY_BODY
-    String rawRequestBody = requestBody
-    
+	String rawRequestBody = requestBody
+	
     /**
      * accept contains the String media type value for the HTTP Accept: header
+     *
+     * @deprecated Use {@link #httpHeaders} instead.
      */
+    @Deprecated
     String accept = null
 
     /**
      * contentType contains the String media type value for the HTTP Content-Type: header
+     *
+     * @deprecated Use {@link #httpHeaders} instead.
      */
+    @Deprecated
     String contentType = null
+
+
+    // TODO Bruce Faulkner 10 November 2016: Need to add Groovydoc comment. Also, the
+    // values specified for the Accept and Content-Type headers in httpHeaders
+    // will supersede the values specified for the accept and contentType properties.
+    HttpHeaders httpHeaders = null
+
+    /**
+     * By default, CurlCommand generates the --location curl option to
+     * automatically follow redirects for a request. Set autoRedirect to false
+     * to prevent CurlCommand from generating this option.
+     */
+    boolean autoRedirect = true
 
     /**
      *  The final modifier tells Groovy to only generate a getter method for
@@ -244,6 +295,10 @@ class CurlCommand extends ExecutableCommand {
      *  been injected via the constructor, then one will be created.
      */
     final SafsRestPropertyProvider propertyProvider = null
+
+
+    private static final SystemPropertyProvider SYSTEM_PROPERTIES = new SystemPropertyProvider()
+    private static final boolean WINDOWS_OS = !SYSTEM_PROPERTIES.linux
 
 
 
@@ -257,7 +312,7 @@ class CurlCommand extends ExecutableCommand {
 
         if (propertyProviderArgument && propertyProviderArgument instanceof SafsRestPropertyProvider) {
             propertyProvider = propertyProviderArgument
-        } else if (!propertyProvider) {
+        } else {
             propertyProvider = new SafsRestPropertyProvider()
         }
 
@@ -270,7 +325,7 @@ class CurlCommand extends ExecutableCommand {
 
         def argumentToLoad = arguments?."${argumentName}"
 
-        if (argumentToLoad || argumentToLoad == 0 ) {
+        if (argumentToLoad || argumentToLoad == 0 || isBooleanArgument(argumentToLoad)) {
             argumentValue = argumentToLoad
 
             if (argumentValue instanceof String) {
@@ -279,6 +334,25 @@ class CurlCommand extends ExecutableCommand {
         }
 
         argumentValue
+    }
+
+
+    private boolean isBooleanArgument(argument) {
+        boolean isBooleanArgument = false
+
+        // To support arguments with a boolean value of false, convert
+        // the argument to a String so the empty property can be examined
+        // to determine the actual value of the argument. Without this
+        // conversion (and the subsequent check below), the Groovy truth
+        // value will be evaluated, which causes the incorrect value to
+        // be set when the actual value is false.
+        if (argument instanceof Boolean) {
+            String argumentString = argument as String
+
+            isBooleanArgument = (argumentString?.empty == false)
+        }
+
+        isBooleanArgument
     }
 
 
@@ -292,8 +366,20 @@ class CurlCommand extends ExecutableCommand {
         def contentTypeParameter = loadArgument arguments, CONTENT_TYPE_ARGUMENT_NAME
         setContentType contentTypeParameter
 
+// TODO Bruce Faulkner 15 November 2016: Must call setHttpHeaders after calling setAccept
+// and setContentType as current (temporary for SAFSREST 0.8.3) implementation of
+// setHttpHeaders will only look for the accept and content type headers and then
+// set those properties. A future version of SAFSREST (> 0.9.0) will remove the
+// accept and contentType properties and provide full support for generating
+// the proper curl options for any HTTP headers.
+        def httpHeadersParameter = loadArgument arguments, HTTP_HEADERS_ARGUMENT_NAME
+        setHttpHeaders httpHeadersParameter
+
         def requestBodyParameter = loadArgument arguments, REQUEST_BODY_ARGUMENT_NAME
         setRequestBody requestBodyParameter
+
+        def autoRedirectParameter = loadArgument arguments, AUTO_REDIRECT_ARGUMENT_NAME
+        setAutoRedirect autoRedirectParameter
 
         def userOptions = loadArgument arguments, OPTIONS_ARGUMENT_NAME
         def userOptionList = [ userOptions ].flatten()
@@ -307,6 +393,8 @@ class CurlCommand extends ExecutableCommand {
 
         def httpMethodParameter = loadArgument arguments, HTTP_METHOD_ARGUMENT_NAME
         setHttpMethod httpMethodParameter
+
+        initInsecureOption()
     }
 
 
@@ -354,26 +442,71 @@ class CurlCommand extends ExecutableCommand {
         if (entrypoint) {
             CharSequence normalizedEntrypoint = normalizeString entrypoint
 
-            URL entrypointUrl = new URL(normalizedEntrypoint)
-
-            def entrypointParameters = [
-                host: entrypointUrl.host,
-                port: entrypointUrl.port
-            ]
-            TokenProviderEntrypoints tokenEntrypoints = new TokenProviderEntrypoints(entrypointParameters)
+            TokenProviderEntrypoints tokenEntrypoints = new TokenProviderEntrypoints(rootUrl: normalizedEntrypoint)
 
             if (entrypoint != tokenEntrypoints.authTokenResource) {
                 defaultOptions << initializeAuthorizationHeaderOption(userOptions)
             }
         }
 
-        defaultOptions << initializeDefaultAcceptHeaderOption(userOptions)
-
-        defaultOptions << initializeDefaultContentTypeHeaderOption(userOptions)
+        defaultOptions << initializeAllHeaderOptions()
+        requireContentTypeHeader defaultOptions
 
         defaultOptions << initializeLocationOption(userOptions)
 
         defaultOptions.flatten()
+    }
+
+
+    private List initializeAllHeaderOptions() {
+        List headerOptions = []
+
+        httpHeaders?.each { headerName, headerValue ->
+            String headerValueString = convertHeaderValueToString headerValue
+
+            headerOptions << makeHeaderOption(headerName, headerValueString)
+        }
+
+// TODO Bruce Faulkner 13 December 2016: Temporarily add the Accept header if httpHeaders
+// does not contain a value but the accept property has been specified. When the
+// deprecated accept property has been removed, this code can be removed as well.
+        if (!httpHeaders?.getAccept() && accept) {
+            headerOptions << makeHeaderOption(ACCEPT_HEADER, accept)
+        }
+
+// TODO Bruce Faulkner 13 December 2016: Temporarily add the Content-Type header if httpHeaders
+// does not contain a value but the contentType property has been specified. When the
+// deprecated contentType property has been removed, this code can be removed as well.
+        if (!httpHeaders?.getContentType() && contentType) {
+            headerOptions << makeHeaderOption(CONTENT_TYPE_HEADER, contentType)
+        }
+
+        headerOptions
+    }
+
+
+    /**
+     * Converts a header value to a String.
+     *
+     * The Spring HttpHeaders object is an instance of a MultiValueMap,
+     * so the value will likely always be a List. To be conservative,
+     * check to see if the value is an instance of a Collection. If so,
+     * strip the brackets from the string representation.
+     *
+     * @param headerValue is an object representing a header value from an
+     * instance of {@link HttpHeaders}
+     * @return the String representation of the object WITHOUT any collection
+     * notation
+     */
+    private String convertHeaderValueToString(headerValue) {
+        String headerValueString = headerValue as String
+
+        if (headerValue instanceof Collection) {
+            // Strip the list brackets notation from the String representation
+            headerValueString = headerValueString[1..-2]
+        }
+
+        headerValueString
     }
 
 
@@ -421,45 +554,40 @@ class CurlCommand extends ExecutableCommand {
     }
 
 
-    private List initializeDefaultAcceptHeaderOption(List userOptions) {
-        List defaultAcceptHeaderOption = []
+    private CharSequence makeHeaderOption(String header, String headerValue) {
+        assert header
+        assert headerValue
 
-        if (hasAcceptHeader(userOptions) == false) {
-            if (accept) {
-                defaultAcceptHeaderOption << makeHeaderOption(ACCEPT_HEADER, accept)
-            }
+        CharSequence headerOption = /${HEADER_OPTION}${header}${HEADER_FIELD_SEPARATOR}${headerValue}/
+
+// TODO Bruce Faulkner 13 December 2016: For now, just wrap with single quotes the
+// values of any headers where an eTag can be specified.
+// TODO Bruce Faulkner 14 December 2016: Consider whether all
+// header options should be wrapped for simplicity's sake.
+// TODO Bruce Faulkner 14 December 2016: Also, consider whether some attempt should be
+// made to "guess" when a headerValue is an ETag, perhaps by checking for the
+// presence of leading and trailing ASCII_DOUBLE_QUOTE characters? Research
+// needs to be done to determine whether there is a reliable way to recognize
+// an ETag. Of course, if the simpler route to wrap all header options gets
+// implemented, then there's no need to try to recognize ETag values.
+        if (header in HEADERS_USING_ETAGS) {
+            headerOption = "${ASCII_SINGLE_QUOTE}${headerOption}${ASCII_SINGLE_QUOTE}"
         }
 
-        defaultAcceptHeaderOption
+        headerOption
     }
 
 
-    private CharSequence makeHeaderOption(String header, String mediaType) {
-        assert header
-        assert mediaType
-
-        /${HEADER_OPTION}${header}${HEADER_FIELD_SEPARATOR}${mediaType}/
-    }
-
-
-    private List initializeDefaultContentTypeHeaderOption(userOptions) {
-        List defaultContentTypeHeaderOption = []
-
+    private void requireContentTypeHeader(userOptions) {
         def needsContentTypeHeader = isContentTypeHeaderNeeded userOptions
 
-        if (needsContentTypeHeader) {
-            if (!contentType) {
-                // Because a content type header needs to be generated, and no good
-                // default value exists, then throw an exception if the user has
-                // not supplied the content type header option nor the contentType
-                // property.
-                throw new IllegalStateException(EXPECTED_CONTENT_TYPE_MESSAGE)
-            }
-
-            defaultContentTypeHeaderOption << makeHeaderOption(CONTENT_TYPE_HEADER, contentType)
+        if (needsContentTypeHeader && !httpHeaders?.getContentType() && !contentType) {
+            // Because a content type header needs to be generated, and no good
+            // default value exists, then throw an exception if the user has
+            // not supplied the content type header option nor the contentType
+            // property.
+            throw new IllegalStateException(EXPECTED_CONTENT_TYPE_MESSAGE)
         }
-
-        defaultContentTypeHeaderOption
     }
 
 
@@ -473,14 +601,14 @@ class CurlCommand extends ExecutableCommand {
      * requestBody on this CurlCommand is not empty; false otherwise.
      */
     private boolean isContentTypeHeaderNeeded(List userOptions) {
-        contentType || ((hasContentTypeHeader(userOptions) == false) && requestBody)
+        httpHeaders?.getContentType() || contentType || ((hasContentTypeHeader(userOptions) == false) && requestBody)
     }
 
 
     private def initializeLocationOption(userOptions) {
         def defaultLocationOption = ''
 
-        if (isOptionMissing(userOptions, LOCATION_OPTION)) {
+        if (autoRedirect) {
             defaultLocationOption = LOCATION_OPTION
         }
 
@@ -500,7 +628,11 @@ class CurlCommand extends ExecutableCommand {
 
     private boolean hasOption(List userOptions, CharSequence singleOption) {
         def foundOption = userOptions.find { option ->
-            option.toLowerCase().contains singleOption.toLowerCase()
+            if (option instanceof List) {
+                hasOption option, singleOption
+            } else {
+                option?.toLowerCase().contains singleOption.toLowerCase()
+            }
         }
 
         foundOption
@@ -517,27 +649,10 @@ class CurlCommand extends ExecutableCommand {
     }
 
 
-    private boolean hasAcceptHeader(List userOptions) {
-        hasOption userOptions, ACCEPT_HEADER
-    }
-
-
-// TODO Bruce Faulkner Sep 29, 2015: Consider making this setter private to that
-// the object is immutable; alternatively, consider @Immutable on the class.
     /**
-     * <p><strong>NOTE:</strong></p>
-     * <p>
-     *     Users of the CurlCommand class should provide the entrypoint value
-     *     as an argument to the constructor (via
-     *     {@link #ENTRYPOINT_ARGUMENT_NAME}) instead of calling this method directly.
-     * </p>
-     * <p>
-     *     A future release of SAFSREST might convert this method to private scope.
-     * </p>
-     *
-     * @param entrypointValue a URL to use with this instance of a CurlCommand
+     * @param entrypointValue an URL to use with this instance of a CurlCommand
      */
-    void setEntrypoint(entrypointValue = '') {
+    private void setEntrypoint(entrypointValue = '') {
         def quotedEntrypointValue = quoteEntrypointWhenHasSpecialCharacters entrypointValue
 
         this.entrypoint = quotedEntrypointValue
@@ -590,34 +705,21 @@ class CurlCommand extends ExecutableCommand {
     }
 
 
-// TODO Bruce Faulkner Sep 29, 2015: Consider making this setter private to that
-// the object is immutable; alternatively, consider @Immutable on the class.
     /**
      * Set the value of the {@link #requestBody} property to the value
      * supplied in the parameter. If the supplied requestBodyValue contains
      * embedded single quotes, then the requestBody will be
      * {@link #normalizeRequestBody(String) normalized}.
      *
-     * <p><strong>NOTE:</strong></p>
-     * <p>
-     *     Users of the CurlCommand class should provide the requestBody value
-     *     as an argument to the constructor (via
-     *     {@link #REQUEST_BODY_ARGUMENT_NAME}) instead of calling this method
-     *     directly.
-     * </p>
-     * <p>
-     *     A future release of SAFSREST might convert this method to private scope.
-     * </p>
-     *
      * @param requestBodyValue a String representing the value to be supplied
      * as part of a request. This value normally represents a JSON object
      * or collection. The default value for requestBodyValue is
      * {@link Response#EMPTY_BODY}.
      */
-    void setRequestBody(requestBodyValue = EMPTY_BODY) {
+    private void setRequestBody(requestBodyValue = EMPTY_BODY) {
         this.requestBody = requestBodyValue
-        this.rawRequestBody = this.requestBody
-
+		this.rawRequestBody = this.requestBody
+		
         setRequestBodyJson()
 
         formatRequestBody()
@@ -716,7 +818,9 @@ class CurlCommand extends ExecutableCommand {
      * @return true if the contentType is XML
      */
     private boolean isXmlContentType() {
-        this.contentType?.endsWith('xml')
+        String headerContentType = httpHeaders?.getContentType()
+
+        this.contentType?.endsWith('xml') || headerContentType?.endsWith('xml')
     }
 
 
@@ -909,24 +1013,13 @@ class CurlCommand extends ExecutableCommand {
     }
 
 
-// TODO Bruce Faulkner Sep 29, 2015: Consider making this setter private to that
-// the object is immutable; alternatively, consider @Immutable on the class.
     /**
-     * <p><strong>NOTE:</strong></p>
-     * <p>
-     *     Users of the CurlCommand class should provide the HTTP method value
-     *     as an argument to the constructor (via
-     *     {@link #HTTP_METHOD_ARGUMENT_NAME}) instead of calling this method
-     *     directly.
-     * </p>
-     * <p>
-     *     A future release of SAFSREST might convert this method to private scope.
-     * </p>
+     * Sets the HTTP method name from a String.
      *
      * @param httpMethod the String representation of an HTTP Method
      * @see HttpMethod
      */
-    void setHttpMethod(String httpMethod) {
+    private void setHttpMethod(String httpMethod) {
         HttpMethod method = GET
 
         if (httpMethod) {
@@ -937,25 +1030,14 @@ class CurlCommand extends ExecutableCommand {
     }
 
 
-// TODO Bruce Faulkner Sep 29, 2015: Consider making this setter private to that
-// the object is immutable; alternatively, consider @Immutable on the class.
     /**
-     * <p><strong>NOTE:</strong></p>
-     * <p>
-     *     Users of the CurlCommand class should provide the HTTP method value
-     *     as an argument to the constructor (via
-     *     {@link #HTTP_METHOD_ARGUMENT_NAME}) instead of calling this method
-     *     directly.
-     * </p>
-     * <p>
-     *     A future release of SAFSREST might convert this method to private scope.
-     * </p>
+     * Sets the HTTP method name from a Spring {@link HttpMethod} enumeration.
      *
      * @param httpMethod a Spring {@link HttpMethod} enumeration representing
      * a HTTP method
      * @see HttpMethod
      */
-    void setHttpMethod(HttpMethod httpMethod) {
+    private void setHttpMethod(HttpMethod httpMethod) {
         this.httpMethod = httpMethod
 
         initPropertiesForHttpMethod()
@@ -1057,6 +1139,7 @@ class CurlCommand extends ExecutableCommand {
     }
 
 
+    @Deprecated
     private void setAccept(acceptParameter) {
         if (acceptParameter) {
             this.accept = acceptParameter as String
@@ -1064,9 +1147,38 @@ class CurlCommand extends ExecutableCommand {
     }
 
 
+    @Deprecated
     private void setContentType(contentTypeParameter) {
         if (contentTypeParameter) {
             this.contentType = contentTypeParameter as String
+        }
+    }
+
+
+    private void setHttpHeaders(httpHeadersParameter) {
+        if (httpHeadersParameter) {
+            httpHeaders = httpHeadersParameter
+
+// TODO Bruce Faulkner 16 November 2016: Temporarily set the accept and contentType properties from the httpHeaders
+// to minimize changes for SAFSREST 0.8.3. Post-0.8.3, these properties will be removed and the values will
+// be provided by httpHeaders when generating the CurlCommand. This method call can then be safely removed.
+            temporarySetIndividualHeaderProperties()
+        }
+    }
+
+
+// TODO Bruce Faulkner 16 November 2016: Temporarily set the accept and contentType properties from the httpHeaders
+// to minimize changes for SAFSREST 0.8.3. Post-0.8.3, these properties will be removed and the values will
+// be provided by httpHeaders when generating the CurlCommand. This method can then be safely removed.
+    private void temporarySetIndividualHeaderProperties() {
+        List acceptHeaders = httpHeaders.getAccept()
+        if (acceptHeaders?.empty == false) {
+            accept = null
+        }
+
+        MediaType contentType = httpHeaders.getContentType()
+        if (contentType) {
+            this.contentType = null
         }
     }
 
@@ -1098,4 +1210,110 @@ class CurlCommand extends ExecutableCommand {
             this.options = this.options.flatten()
         }
     }
+
+
+    private void setAutoRedirect(autoRedirectParameter) {
+        String autoRedirectValue = autoRedirectParameter as String
+
+        if (autoRedirectValue?.empty == false) {
+            autoRedirect = autoRedirectParameter
+        }
+    }
+
+
+    private void initInsecureOption() {
+        boolean isSecureProtocol = (propertyProvider.protocol == SECURE_HTTP_PROTOCOL)
+
+        if (isSecureProtocol || propertyProvider.secureOptions != NONE) {
+            this.options << INSECURE_OPTION
+        }
+    }
+
+/*
+    @Override
+    protected List loadCommandList() {
+        def commandListToExecute = []
+
+        commandListToExecute << "${executable}"
+
+        // In the case of CurlCommand, the dataProvider contains the entrypoint
+        // URL, so write that into the list ahead of the options to prevent
+        // certain cryptic curl failures.
+        dataProvider commandListToExecute
+
+        if (options.empty == false) {
+            commandListToExecute << options
+        }
+
+        commandListToExecute.flatten()
+    }
+*/
+    /**
+     * Creates a String representation, suitable for display in the console,
+     * of the command list for this CurlCommand. If the command list contains
+     * a {@link #DATA_OPTION} specifying a password query parameter, then this
+     * method will cause a redacted password value to be generated for display
+     * purposes only.
+     *
+     * <p>
+     *     In most cases (the exception being a redacted password), this
+     *     generated representation of the CurlCommand can be copied from the
+     *     console and run from a bash shell.
+     * </p>
+     *
+     * @return a String representing the displayable version of the command
+     * list for this CurlCommand
+     */
+    @Override
+    String getConsoleString() {
+        List consoleCommandList = commandList.clone()
+
+        redactPasswordIfNecessary consoleCommandList
+
+        String consoleText = consoleCommandList.join COMMAND_LIST_SEPARATOR
+
+        if (WINDOWS_OS) {
+            consoleText = consoleText.replaceAll(/\\"/, '"')
+            consoleText = consoleText.replaceAll(/\\'/, "\'")
+        }
+
+        consoleText = consoleText.replace('\\\\u', '\\u')
+
+        consoleText
+    }
+
+
+    private void redactPasswordIfNecessary(List consoleCommandList) {
+        int passwordIndex = consoleCommandList.findIndexOf { String command ->
+            command.contains "${DATA_OPTION} ${PASSWORD_KEY}="
+        }
+
+        if (passwordIndex >= 0) {
+            String passwordCommand = consoleCommandList[passwordIndex]
+
+            consoleCommandList[passwordIndex] = makeRedactedPassword passwordCommand
+        }
+    }
+
+
+    private String makeRedactedPassword(String passwordCommand) {
+        String redactedPassword = passwordCommand
+
+        List passwordElements = passwordCommand.split '='
+
+        if (passwordElements.size() == 2) {
+            redactedPassword = "${passwordElements[0]}=${PASSWORD_MASK}" as String
+        }
+
+        redactedPassword
+    }
+
+
+//    @Override
+//    String getCommandString() {
+//        String commandText = super.getCommandString()
+//        commandText = commandText.replace('\\\\u', '\\u')
+//        "${commandText}"
+//    }
+
 }
