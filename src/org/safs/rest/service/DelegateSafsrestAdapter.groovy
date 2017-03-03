@@ -28,4 +28,19 @@ class DelegateSafsrestAdapter extends HttpClientPOJOAdapter {
 		adapter
 	}
 
+	@Override
+	public String getClientName(){
+		//give an implementation to avoid the build failure.
+		if(adapter!=null){
+			adapter.getClientName();
+		}
+	}
+
+	@Override
+	public Map<String, Object> execute(String defaultURI, Map<String, Object> request) throws Exception{
+		//give an implementation to avoid the build failure.
+		if(adapter!=null){
+			return adapter.execute(defaultURI, request);
+		}
+	}
 }
