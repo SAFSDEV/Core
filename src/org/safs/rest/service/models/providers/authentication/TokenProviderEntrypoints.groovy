@@ -1,5 +1,4 @@
 // Copyright (c) 2016 by SAS Institute Inc., Cary, NC, USA. All Rights Reserved.
-
 package org.safs.rest.service.models.providers.authentication
 
 import org.safs.rest.service.models.entrypoints.Entrypoint
@@ -9,8 +8,8 @@ class TokenProviderEntrypoints extends Entrypoint {
     static final SERVICE_NAME = ''
     static final AUTH_TOKEN_RESOURCE = 'oauth/token'
 
-    private authTokenResource
-
+	private authTokenResource
+	
     /**
      * Creates an entrypoint reference for retrieving an authorization
      * access token.
@@ -26,18 +25,18 @@ class TokenProviderEntrypoints extends Entrypoint {
      */
     TokenProviderEntrypoints(Map tokenProvEntrypointParameters) {
         service = (tokenProvEntrypointParameters.tokenProviderServiceName != null) ?
-                   tokenProvEntrypointParameters.tokenProviderServiceName :
+                   tokenProvEntrypointParameters.tokenProviderServiceName : 
                    SERVICE_NAME
-
+                   
         authTokenResource = (tokenProvEntrypointParameters.tokenProviderAuthTokenResource != null) ?
-                             tokenProvEntrypointParameters.tokenProviderAuthTokenResource :
+                             tokenProvEntrypointParameters.tokenProviderAuthTokenResource : 
                              AUTH_TOKEN_RESOURCE
 
-        def entrypointParameters = [
-			protocol: tokenProvEntrypointParameters.protocol,
-			host: tokenProvEntrypointParameters.host,
-            port: tokenProvEntrypointParameters.port,
-        ]
+        def entrypointParameters = [:]
+        entrypointParameters.putAll(tokenProvEntrypointParameters)
+        entrypointParameters.remove("tokenProviderServiceName")
+        entrypointParameters.remove("tokenProviderAuthTokenResource")
+
         initializeProperties entrypointParameters
     }
 
