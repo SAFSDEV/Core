@@ -2,15 +2,20 @@
 
 package org.safs.rest.service.commands.curl
 
+import static java.lang.reflect.Modifier.isFinal
+import static java.lang.reflect.Modifier.isStatic
 import static java.nio.charset.StandardCharsets.UTF_8
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE
-import static org.springframework.http.HttpStatus.*
-import static org.springframework.http.MediaType.*
+import static org.springframework.http.HttpStatus.I_AM_A_TEAPOT
+import static org.springframework.http.MediaType.APPLICATION_JSON
 
+import java.lang.reflect.Field
 import java.nio.charset.Charset
 
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+
 
 
 /**
@@ -45,6 +50,41 @@ class CurlResponseInfo {
     int status = I_AM_A_TEAPOT.value()
     HttpStatus httpStatus = I_AM_A_TEAPOT
 
+    /**
+     * The HTTP headers returned as part of this curl response. Only those
+     * HTTP headers supported by {@link HttpHeaders} will be available through
+     * this property. This property will be set by parsing the information
+     * returned as part of the curl response.
+     *
+     * @see HttpHeaders
+     */
+    HttpHeaders httpHeaders = new HttpHeaders()
+
+
+    private static Set validHttpHeaders = loadValidHttpHeaders()
+
+    // Initialize the set of valid HTTP header values to be the same Set
+    // supported by HttpHeaders
+    private static loadValidHttpHeaders() {
+        Set headerNames = []
+
+        // Class.fields returns only the __public__ fields of the class
+        def fields = HttpHeaders.fields
+
+        fields.each { Field field ->
+            int modifiers = field.modifiers
+
+            // Since the field is public, make sure it is also static and
+            // final before adding it to the Set of valid HTTP headers
+            if (isStatic(modifiers) && isFinal(modifiers)) {
+                headerNames << HttpHeaders."${field.name}"
+            }
+        }
+
+        headerNames
+    }
+
+
 
     CurlResponseInfo(List responseInfoLines) {
         this.responseInfoLines = responseInfoLines
@@ -55,9 +95,69 @@ class CurlResponseInfo {
 
     private void loadProperties() {
         if (responseInfoLines) {
+            loadHttpHeaders()
             loadContentTypeProperties()
             loadStatusProperties()
         }
+    }
+
+
+    private void loadHttpHeaders() {
+        List httpHeaderLines = loadHttpHeaderLines()
+
+        httpHeaderLines.each { String line ->
+            String headerName = findHttpHeaderName line
+            String headerValue = findHttpHeaderValue line
+
+            if (headerName) {
+                httpHeaders.set headerName, headerValue
+            }
+        }
+    }
+
+
+    private List loadHttpHeaderLines() {
+        List httpHeaderLines = []
+
+        responseInfoLines.each { String line ->
+            String headerName = findHttpHeaderName line
+
+            if (headerName) {
+                httpHeaderLines << line
+            }
+        }
+
+        httpHeaderLines
+    }
+
+
+    private String findHttpHeaderName(String httpHeaderLine) {
+        String httpHeaderName = ''
+
+        int httpHeaderSeparatorIndex = httpHeaderLine.indexOf HTTP_MESSAGE_FIELD_SEPARATOR
+
+        if (httpHeaderSeparatorIndex > 0) {
+            String possibleHeader = httpHeaderLine[0..httpHeaderSeparatorIndex - 1]
+
+            if (possibleHeader in validHttpHeaders) {
+                httpHeaderName = possibleHeader
+            }
+        }
+
+        httpHeaderName.trim()
+    }
+
+
+    private String findHttpHeaderValue(String httpHeaderLine) {
+        String httpHeaderValue = ''
+
+        int httpHeaderSeparatorIndex = httpHeaderLine.indexOf HTTP_MESSAGE_FIELD_SEPARATOR
+
+        if (httpHeaderSeparatorIndex > 0) {
+            httpHeaderValue = httpHeaderLine[httpHeaderSeparatorIndex + 1..-1]
+        }
+
+        httpHeaderValue.trim()
     }
 
 
@@ -69,7 +169,7 @@ class CurlResponseInfo {
      *   Content-Type: application/vnd.sas.collection;version=2;charset=UTF-8
      */
     private void loadContentTypeProperties() {
-        def contentTypeLine = loadContentTypeLine()
+        String contentTypeLine = loadContentTypeLine()
 
         if (contentTypeLine) {
             def contentTypeFieldValue = loadContentTypeFieldValue contentTypeLine
@@ -79,7 +179,7 @@ class CurlResponseInfo {
     }
 
 
-    private def loadContentTypeLine() {
+    private String loadContentTypeLine() {
         responseInfoLines.find { String line ->
             line.startsWith CONTENT_TYPE
         }
@@ -110,8 +210,8 @@ class CurlResponseInfo {
             contentTypeVersion = contentTypeVersionParameter
         }
 
-        if (contentType.charSet) {
-            charset = contentType.charSet
+        if (contentType.charset) {
+            charset = contentType.charset
         }
     }
 
