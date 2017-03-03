@@ -1,12 +1,16 @@
 package org.safs.rest.service.models.consumers
 
-import org.apache.hc.core5.testing.framework.ClientPOJOAdapter
-import org.safs.auth.Auth
-import org.safs.auth.OAuth2
 import org.safs.rest.service.commands.CommandInvoker
-import org.safs.rest.service.commands.curl.CurlCommand
 import org.safs.rest.service.commands.curl.CurlInvoker
+import org.safs.rest.service.commands.curl.Response
 import org.safs.rest.service.models.providers.SafsRestPropertyProvider
+import org.safs.rest.service.models.providers.authentication.TokenProviderEntrypoints
+import org.safs.rest.service.commands.curl.CurlCommand
+
+import java.util.Map;
+import org.apache.hc.core5.http.HttpException
+
+import org.apache.hc.core5.testing.framework.ClientPOJOAdapter
 
 /**
  *
@@ -50,22 +54,17 @@ import org.safs.rest.service.models.providers.SafsRestPropertyProvider
 class SafsrestAdapter extends ClientPOJOAdapter {
     public static final USERID = "userid"
     public static final PASSWORD = "password"
-
-	/** an Auth object holding the necessary information to authenticate and get authorization. */
-	public Auth auth
-	/** a convenient reference holding the OAuth2 object. */
-	public OAuth2 auth2
-
+    
     public trustedUserid
     public trustedPassword
     public tokenProviderServiceName
     public tokenProviderAuthTokenResource
-
+    
     /**
      * Use a bash or CMD shell to run curl.
      */
     def useScript = false
-
+    
     /**
      * Use Java VM's execution facilities to run curl.
      */
@@ -89,9 +88,9 @@ class SafsrestAdapter extends ClientPOJOAdapter {
     throws Exception {
 
         request = modifyRequest(request)
-
+        
         SafsRestPropertyProvider propertyProvider = new SafsRestPropertyProvider()
-
+        
         if (tokenProviderServiceName != null) {
             propertyProvider.tokenProviderServiceName = tokenProviderServiceName
         }
@@ -101,7 +100,7 @@ class SafsrestAdapter extends ClientPOJOAdapter {
 
         def userid = request.userid
         def password = request.password
-
+        
         if (userid) {
             propertyProvider.userName = userid
         }
@@ -117,7 +116,7 @@ class SafsrestAdapter extends ClientPOJOAdapter {
                                                                             useScript:useScript,
                                                                             execCurlFromJVM:execCurlFromJVM,
                                                                 ) : null
-
+                                                            
         CurlInvoker curlInvoker = new CurlInvoker(commandInvoker:commandInvoker)
 
         RestConsumer consumer = new RestConsumer(curlInvoker: curlInvoker, safsrestProperties: propertyProvider)
@@ -144,15 +143,11 @@ class SafsrestAdapter extends ClientPOJOAdapter {
         if (request.headers) {
             request.headers.each { entry -> optionList << /${CurlCommand.HEADER_OPTION}${entry.key}${CurlCommand.HEADER_FIELD_SEPARATOR}${entry.value}/ }
         }
-
-		if(auth2!=null /* TODO In what condition, we need to make request to authorization server. */){
-			//Modify the propertyProvider according to OAuth2's AuthorizationServer so that
-			//SafsRestPropertyProvider will make request on the correct authorization server.
-			propertyProvider.protocol = auth2.getAuthorizationServer().getProtocol();
-			propertyProvider.host = auth2.getAuthorizationServer().getHost();
-			propertyProvider.port =  auth2.getAuthorizationServer().getPort();
-		}
-
+        
+        def uri = new URI(entrypoint)
+        def rootUrl = "${uri.scheme}://${uri.host}:${uri.port}"
+        propertyProvider.rootUrl = rootUrl
+        
         if (userid && password) {
             // token has to be acquired after the host and port are set.
             propertyProvider.acquireAuthToken(password, trustedPassword)
@@ -168,13 +163,6 @@ class SafsrestAdapter extends ClientPOJOAdapter {
         }
 
         safsrestMap.contentType = request.contentType
-
-		//Modify the propertyProvider according to the REST service's entrypoint so that
-		//RestConsumer will make request on the correct REST-service server.
-		def url = new URL(entrypoint)
-		propertyProvider.protocol = url.protocol
-		propertyProvider.host = url.host
-		propertyProvider.port = url.port
 
         // call the appropriate method: get(), post(), etc.
         def response = consumer."${request.method.toLowerCase()}"(safsrestMap)
@@ -276,17 +264,6 @@ class SafsrestAdapter extends ClientPOJOAdapter {
         "SAFSREST${useScript ? '_using_OS_shell' : ''}${execCurlFromJVM ? '_execCurlFromJVM' : ''}"
     }
 
-    public setAuth(auth) {
-    	this.auth = auth;
-		if(auth instanceof OAuth2){
-			auth2 = (OAuth2) auth;
-			tokenProviderServiceName = auth2.getAuthorizationServer().getBaseServiceName();
-			tokenProviderAuthTokenResource = auth2.getAuthorizationServer().getAuthTokenResource();
-			trustedUserid = auth2.getContent().getClientID();
-			trustedPassword = auth2.getContent().getClientSecret();
-		}
-    }
-
     public setTrustedUserid(trustedUserid) {
         this.trustedUserid = trustedUserid
     }
@@ -296,7 +273,7 @@ class SafsrestAdapter extends ClientPOJOAdapter {
     public setTokenProviderServiceName(tokenProviderServiceName) {
         this.tokenProviderServiceName = tokenProviderServiceName
     }
-
+    
     public setTokenProviderAuthTokenResource(tokenProviderAuthTokenResource) {
         this.tokenProviderAuthTokenResource = tokenProviderAuthTokenResource
     }
