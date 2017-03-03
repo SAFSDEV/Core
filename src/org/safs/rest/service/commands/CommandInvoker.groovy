@@ -1,8 +1,5 @@
 // Copyright (c) 2016 by SAS Institute Inc., Cary, NC, USA. All Rights Reserved.
-
 package org.safs.rest.service.commands
-
-import static org.safs.rest.service.models.providers.SystemPropertyProvider.OS_LINUX
 
 import static org.safs.rest.service.commands.curl.CurlCommand.ASCII_DOUBLE_QUOTE
 import static org.safs.rest.service.commands.curl.CurlCommand.DATA_BINARY_OPTION
@@ -56,15 +53,13 @@ class CommandInvoker {
      */
     SystemPropertyProvider systemProperties
 
-    /**
-     * May be injected via a constructor named argument
-     */
-    SystemInformationProvider systemInformationProvider
+	/**
+	 * May be injected via a constructor named argument
+	 */
+	SystemInformationProvider systemInformationProvider
 
     CommandResults execute(ExecutableCommand systemCommand) {
-        List executionCommandList = systemCommand.commandList
-
-        def consoleCommandString = executionCommandList.join ' '
+        def consoleCommandString = systemCommand.consoleString
 
         if (showCommand) {
             // Note: The command is intentionally logged at the error level because want this
@@ -72,22 +67,9 @@ class CommandInvoker {
             log.error consoleCommandString
         }
 
-        def retMap = makeNormalizedCommandList executionCommandList
-        def normalizedCommandList = retMap.list
-        def canUseList = retMap.canUseList
-
-        def commandActuallyUsed = canUseList ? normalizedCommandList : normalizedCommandList.join(' ')
+        def executableCommand = makeCommand(systemCommand).command
 
         String requestBody = null
-        def windowsCommandList = modifyCommandForWindows(normalizedCommandList, requestBody)
-        def windowsCommandString = windowsCommandList.join ' '
-        
-//        if (showCommand) {
-//            // Note: The command is intentionally logged at the error level because want this
-//            //       message to always display
-//            log.error "Windows CMD: $windowsCommandString"
-//        }
-
         if (useScript) {
             /*
              * useScript is set to true during some testing to make sure the
@@ -95,62 +77,80 @@ class CommandInvoker {
              * can actually be used.  The command string is written to a script, and
              * the command needed to execute the script is returned.
              */
-            commandActuallyUsed = writeShellScript(isLinux() ? consoleCommandString : windowsCommandString)
+            if (isLinux()) {
+                executableCommand = writeShellScript(consoleCommandString)
+            } else {
+                throw new RuntimeException("not supported yet")
+			}
         } else {
-            commandActuallyUsed = prepareCommandListForJavaExecution(commandActuallyUsed)
+            executableCommand = prepareCommandListForJavaExecution(executableCommand)
         }
         
-        Process process = ProcessGroovyMethods.execute commandActuallyUsed
+        log.debug "actual executableCommand: <<${executableCommand}>>"
+
+        Process process = ProcessGroovyMethods.execute executableCommand
 
         log.debug PROCESS_LOG_MESSAGE, process
 
+        makeCommandResults process
+    }
 
+
+    private Map makeCommand(command) {
+        List executionCommandList = command.commandList
+
+        def retMap = makeNormalizedCommandList executionCommandList
+        def normalizedCommandList = retMap.list
+        def canUseList = retMap.canUseList
+
+        def retCommand = canUseList ? normalizedCommandList : normalizedCommandList.join(' ')
+
+        [
+            command : retCommand,
+            commandList : normalizedCommandList,
+        ]
+    }
+
+
+    private CommandResults makeCommandResults(Process process) {
         StringBuffer stdOut = new StringBuffer()
         StringBuffer stdErr = new StringBuffer()
 
-        ProcessGroovyMethods.waitForProcessOutput process, stdOut, stdErr
+        process.waitForProcessOutput stdOut, stdErr
 
         CommandResults results =
-            new CommandResults(output: stdOut, error: stdErr, exitValue: process.exitValue())
+                new CommandResults(output: stdOut, error: stdErr, exitValue: process.exitValue())
 
-         log.debug  results.commandResultsString
+        log.debug  results.commandResultsString
 
         results
     }
 
 
-
     CommandResults pipeTo(ExecutableCommand producer, ExecutableCommand consumer) {
-        List producerCommandList = producer.commandList
-        def consoleProducerCommandString = producerCommandList.join ' '
+        def consoleProducerCommandString = producer.consoleString
+        def producerCommandMap = makeCommand producer
+		def producerCommand = producerCommandMap.command
+		def producerCommandList = producerCommandMap.commandList
 
-        def retMap = makeNormalizedCommandList producerCommandList
-        def normalizedProducerCommandList = retMap.list
-        def producerCanUseList = retMap.canUseList
+        def consoleConsumerCommandString = consumer.consoleString
+        def consumerCommandMap = makeCommand consumer
+		def consumerCommand = consumerCommandMap.command
+		def consumerCommandList = consumerCommandMap.commandList
 
-        def producerCommandActuallyUsed = producerCanUseList ? normalizedProducerCommandList : normalizedProducerCommandList.join(' ')
 
-        List consumerCommandList = consumer.commandList
-        def consoleConsumerCommandString = consumerCommandList.join ' '
-
-        retMap = makeNormalizedCommandList consumerCommandList
-        List normalizedConsumerCommandList = retMap.list
-        def consumerCanUseList = retMap.canUseList
-
-        def consumerCommandActuallyUsed = consumerCanUseList ? normalizedConsumerCommandList : normalizedConsumerCommandList.join(' ')
-        
         // last parameter of the echo is the request body.
-        String requestBody = normalizedProducerCommandList[-1]
-        def windowsCommandList = modifyCommandForWindows(normalizedConsumerCommandList, requestBody)
-        def windowsCommandString = windowsCommandList.join ' '
-        
-        
+        String requestBody = producerCommandList[-1]
+        def windowsCommandList = modifyCommandForWindows(consumerCommandList, requestBody)
+		def windowsCommandString = windowsCommandList.join ' '
+		
         def consoleCommandString = "$consoleProducerCommandString | $consoleConsumerCommandString" as String
         if (showCommand) {
             // Note: The command is intentionally logged at the error level because want this
             //       message to always display
             log.error consoleCommandString
-//            log.error "Windows CMD: $windowsCommandString"
+
+            log.debug '*** actual (native OS) command to be executed: {} | {}', producerCommand, consumerCommand
         }
 
         if (! isLinux() && ! isLinuxLike()) {
@@ -167,17 +167,16 @@ class CommandInvoker {
              * Use the list instead of the string.  This keeps us from needing to use
              * quotes.
              */
-            consumerCommandActuallyUsed = windowsCommandList
+            consumerCommand = windowsCommandList
             
             // Set the echo (the producer) to null so it won't be used.
-            producerCommandActuallyUsed = null
+            producerCommand = null
         }
-
         if (showCommand) {
-            if (producerCommandActuallyUsed) {
-                log.debug '*** actual (native OS) command to be executed: {} | {}', producerCommandActuallyUsed, consumerCommandActuallyUsed
+            if (producerCommand) {
+                log.debug '*** actual (native OS) command to be executed: {} | {}', producerCommand, consumerCommand
             } else {
-                log.debug '*** actual (native OS) command to be executed: {}', consumerCommandActuallyUsed
+                log.debug '*** actual (native OS) command to be executed: {}', consumerCommand
             }
         }
 
@@ -188,35 +187,100 @@ class CommandInvoker {
              * can actually be used.  On Linux, the consoleCommandString is written to a file, and
              * the command needed to execute the script is returned.
              */
-            consumerCommandActuallyUsed = writeShellScript(isLinux() ? consoleCommandString : windowsCommandString)
+            consumerCommand = writeShellScript(isLinux() ? consoleCommandString : windowsCommandString)
         } else {
             if (execCurlFromJVM) { 
-                consumerCommandActuallyUsed = prepareCommandListForJavaExecution(consumerCommandActuallyUsed)
+                consumerCommand = prepareCommandListForJavaExecution(consumerCommand)
             } else {
                 return null
             }
         }
         
-        Process producerProcess = producerCommandActuallyUsed ? ProcessGroovyMethods.execute(producerCommandActuallyUsed) : null
-        Process consumerProcess = ProcessGroovyMethods.execute consumerCommandActuallyUsed
+        Process producerProcess = producerCommand ? producerCommand.execute() : null
+        Process consumerProcess = consumerCommand.execute()
 
         Process process = producerProcess ?
-                          ProcessGroovyMethods.pipeTo(producerProcess, consumerProcess) :
+                          producerProcess | consumerProcess :
                           consumerProcess
 
         log.debug PROCESS_LOG_MESSAGE, process
 
-        StringBuffer stdOut = new StringBuffer()
-        StringBuffer stdErr = new StringBuffer()
+        makeCommandResults process
+    }
 
-        ProcessGroovyMethods.waitForProcessOutput process, stdOut, stdErr
 
-        CommandResults results =
-            new CommandResults(output: stdOut, error: stdErr, exitValue: process.exitValue())
+    /**
+     * Normalizes a list of commands that represent an OS-specific invocation with parameters into
+     * a list without shell-related quotation marks, as appropriate.
+     *
+     * The return value of this method depends on the underlying operating system. For Windows,
+     * the method returns the list unmodified. For Linux, the method examines each element in the
+     * list. If an individual element in the list starts with or ends with single quotation mark,
+     * which preserves special characters in the bash shell on Linux, then strip the single quotation
+     * marks from the element so that the full command list can be executed properly by a native process,
+     * which has no operating system shell, that a JVM Process object starts.
+     *
+     * @param commandList a list of the individual elements making up an operating system command to
+     * be invoked.
+     * @return on Windows, the unmodified list; on Linux, a list where no elements have leading or
+     * trailing single quotation marks
+     */
+    Map makeNormalizedCommandList(List commandList) {
+        def normalizedCommandList = commandList
 
-        log.debug results.commandResultsString
+        def canUseList = false
 
-        results
+        if (isLinux()) {
+            canUseList = true
+            // If the command starts with or ends with single quotation mark,
+            // which preserves special characters in the bash shell, then
+            // strip the single quotation marks from the command string so that
+            // the full command can be executed properly by the native process
+            // (with no shell) started by a JVM Process object.
+            normalizedCommandList = commandList.collect { String command ->
+                if (command.startsWith(PRESERVE_SPECIAL_CHARACTERS_QUOTE)) {
+                    command = command[1..-1]
+                }
+
+                if (command.endsWith(PRESERVE_SPECIAL_CHARACTERS_QUOTE)) {
+                    command = command[0..-2]
+                }
+
+                command
+            }
+        } else {
+            /*
+             * Do largely the same as with linux for the non-cygwin Windows case.  
+             * Single quotes around the endpoint mess up non-cygwin curl.  
+             * It interprets the protocol as "'http" instead of just "http".
+             * 
+             * Note: care must be taken here to call isLinuxLike() only if there
+             * are quotes.  Otherwise, isLinuxLike() may create a SystemInformationProvider
+             * which will cause another CommandInvoker to be created to process 
+             * a "which which" command (to see if "which" is on the PATH).  This will
+             * cause us to reach this point again.  Since there are no quotes around
+             * "which", isLinuxLike() will not be called again and there will be
+             * no circular logic or stack overflow.
+             */
+            normalizedCommandList = commandList.collect { String command ->
+                if (command.startsWith(PRESERVE_SPECIAL_CHARACTERS_QUOTE) &&
+                    command.endsWith(PRESERVE_SPECIAL_CHARACTERS_QUOTE)) {
+                    if (isLinuxLike()) {
+                        // passing a list to the JVM Process with single quotes will not work
+                        canUseList = false
+                    } else {
+                        command = command[1..-2]
+                        canUseList = true
+                    }
+                }
+                command
+            }
+        }
+
+        [
+            list:normalizedCommandList,
+            canUseList:canUseList,
+        ]
     }
 
     /**
@@ -318,80 +382,6 @@ class CommandInvoker {
         command
     }
     
-    /**
-     * Normalizes a list of commands that represent an OS-specific invocation with parameters into
-     * a list without shell-related quotation marks, as appropriate.
-     *
-     * The return value of this method depends on the underlying operating system. For Windows,
-     * the method returns the list unmodified. For Linux, the method examines each element in the
-     * list. If an individual element in the list starts with or ends with single quotation mark,
-     * which preserves special characters in the bash shell on Linux, then strip the single quotation
-     * marks from the element so that the full command list can be executed properly by a native process,
-     * which has no operating system shell, that a JVM Process object starts.
-     *
-     * @param commandList a list of the individual elements making up an operating system command to
-     * be invoked.
-     * @return on Windows, the unmodified list; on Linux, a list where no elements have leading or
-     * trailing single quotation marks
-     */
-    Map makeNormalizedCommandList(List commandList) {
-        def normalizedCommandList = commandList
-
-        def canUseList = false
-
-        if (isLinux()) {
-            canUseList = true
-            // If the command starts with or ends with single quotation mark,
-            // which preserves special characters in the bash shell, then
-            // strip the single quotation marks from the command string so that
-            // the full command can be executed properly by the native process
-            // (with no shell) started by a JVM Process object.
-            normalizedCommandList = commandList.collect { String command ->
-                if (command.startsWith(PRESERVE_SPECIAL_CHARACTERS_QUOTE)) {
-                    command = command[1..-1]
-                }
-
-                if (command.endsWith(PRESERVE_SPECIAL_CHARACTERS_QUOTE)) {
-                    command = command[0..-2]
-                }
-
-                command
-            }
-        } else {
-            /*
-             * Do largely the same as with linux for the non-cygwin Windows case.  
-             * Single quotes around the endpoint mess up non-cygwin curl.  
-             * It interprets the protocol as "'http" instead of just "http".
-             * 
-             * Note: care must be taken here to call isLinuxLike() only if there
-             * are quotes.  Otherwise, isLinuxLike() may create a SystemInformationProvider
-             * which will cause another CommandInvoker to be created to process 
-             * a "which which" command (to see if "which" is on the PATH).  This will
-             * cause us to reach this point again.  Since there are no quotes around
-             * "which", isLinuxLike() will not be called again and there will be
-             * no circular logic or stack overflow.
-             */
-            normalizedCommandList = commandList.collect { String command ->
-                if (command.startsWith(PRESERVE_SPECIAL_CHARACTERS_QUOTE) &&
-                    command.endsWith(PRESERVE_SPECIAL_CHARACTERS_QUOTE)) {
-                    if (isLinuxLike()) {
-                        // passing a list to the JVM Process with single quotes will not work
-                        canUseList = false
-                    } else {
-                        command = command[1..-2]
-                        canUseList = true
-                    }
-                }
-                command
-            }
-        }
-
-        [
-            list:normalizedCommandList,
-            canUseList:canUseList,
-        ]
-    }
-
     private boolean isLinux() {
         if (!systemProperties) {
             systemProperties = new SystemPropertyProvider()
