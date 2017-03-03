@@ -1,8 +1,10 @@
 // Copyright (c) 2016 by SAS Institute Inc., Cary, NC, USA. All Rights Reserved.
-
 package org.safs.rest.service.models.providers.authentication
 
+import static org.safs.rest.service.commands.curl.CurlCommand.DATA_OPTION
+
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE
+
 import groovy.util.logging.Slf4j
 
 import org.safs.rest.service.commands.curl.Response
@@ -21,6 +23,11 @@ class TokenProvider {
             'This-FAKE-auth-token-should-ONLY-appear-in-TESTS-that-do-not-need-a-real-auth-token'
     public static final CharSequence AUTH_TOKEN_ERROR = '\n\nERROR: Unable to get an authentication token. ' +
             'The server may not be available or userId and password specified may not have access.\n\n'
+
+    public static final GRANT_TYPE_KEY = 'grant_type'
+    public static final GRANT_TYPE_PASSWORD = 'password'
+    public static final USERNAME_KEY = 'username'
+    public static final PASSWORD_KEY = 'password'
 
     public static final CharSequence TRUSTED_USER_NAME = ''
     public static final CharSequence TRUSTED_USER_PASSWORD = ''
@@ -52,15 +59,11 @@ class TokenProvider {
 
     void initializeEntrypoints() {
         if (!entrypoints && consumer) {
-            def entrypointParameters = [
-                protocol: consumer.protocol,
-                host: consumer.host,
-                port: consumer.port,
+            entrypoints = new TokenProviderEntrypoints(
+                rootUrl: consumer.rootUrl,
                 tokenProviderServiceName: consumer.tokenProviderServiceName,
-                tokenProviderAuthTokenResource: consumer.tokenProviderAuthTokenResource
-            ]
-
-            entrypoints = new TokenProviderEntrypoints(entrypointParameters)
+                tokenProviderAuthTokenResource: consumer.tokenProviderAuthTokenResource,
+            )
         }
     }
 
@@ -89,9 +92,9 @@ class TokenProvider {
             // avoids problems with the & character being interpreted as a
             // special character in various operating environments.
             def authenticationRequestOptions = [
-                    '--data grant_type=password',
-                    "--data username=${userName}",
-                    "--data password=${password}",
+                    "${DATA_OPTION} ${GRANT_TYPE_KEY}=${GRANT_TYPE_PASSWORD}",
+                    "${DATA_OPTION} ${USERNAME_KEY}=${userName}",
+                    "${DATA_OPTION} ${PASSWORD_KEY}=${password}",
             ]
 
             if (trustedPassword == null) {

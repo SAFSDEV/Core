@@ -280,30 +280,30 @@ class CurlInvoker {
     }
 
     
-    private static Header[] parseHeadersInMultiLineString(String _headerString) {
+    private static Header[] parseHeadersInMultiLineString(String headerString) {
         
         /*
          * This is pretty close to how Apache HTTP Core5 parses headers.
          */
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(_headerString.getBytes("UTF-8"));
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(headerString.getBytes("UTF-8"));
         
         int buffersize = org.apache.hc.core5.http.config.ConnectionConfig.DEFAULT.getBufferSize();
         BasicHttpTransportMetrics inTransportMetrics = new BasicHttpTransportMetrics();
-        final H1Config h1Config = H1Config.DEFAULT;
-        final CharsetDecoder chardecoder = null;
+        final H1Config H1CONFIG = H1Config.DEFAULT;
+        final CharsetDecoder CHARDECODER = null;
         SessionInputBufferImpl inbuffer = new SessionInputBufferImpl(inTransportMetrics, buffersize, -1, 
-                                                                     h1Config.getMaxLineLength(), chardecoder);
-        final LineParser lineParser = BasicLineParser.INSTANCE;
+                                                                     H1CONFIG.getMaxLineLength(), CHARDECODER);
+        final LineParser LINEPARSER = BasicLineParser.INSTANCE;
         
         List<CharArrayBuffer> headerLines = new ArrayList<>();
-        final Header[] headers = AbstractMessageParser.parseHeaders(
+        final Header[] HEADERS = AbstractMessageParser.parseHeaders(
             inbuffer,
             inputStream,
-            h1Config.getMaxHeaderCount(),
-            h1Config.getMaxLineLength(),
-            lineParser,
+            H1CONFIG.getMaxHeaderCount(),
+            H1CONFIG.getMaxLineLength(),
+            LINEPARSER,
             headerLines
         );
-        return headers;
+        return HEADERS;
     }
 }

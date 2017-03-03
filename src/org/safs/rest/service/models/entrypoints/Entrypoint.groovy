@@ -1,8 +1,5 @@
 // Copyright (c) 2016 by SAS Institute Inc., Cary, NC, USA. All Rights Reserved.
-
 package org.safs.rest.service.models.entrypoints
-
-
 /**
  * Provides the basic wrapper for a REST entrypoint.
  *
@@ -28,24 +25,34 @@ package org.safs.rest.service.models.entrypoints
  *
  */
 class Entrypoint {
-    public static final CharSequence DEFAULT_SERVICE_NAME = 'defaultRestServiceName'
-    public static final CharSequence DEFAULT_PROTOCOL = 'http'
-    public static final CharSequence DEFAULT_HOST = 'localhost'
-    public static final int DEFAULT_PORT = 80
+    public static final String HTTP_PROTOCOL = 'http'
+    public static final String SECURE_HTTP_PROTOCOL = 'https'
 
-    public static final CharSequence API_META = 'apiMeta'
-    public static final CharSequence API_META_RESOURCE =  makeUriFromResource API_META
+    public static final int DEFAULT_HTTP_PORT = 80
+    public static final int DEFAULT_HTTP_SECURE_PORT = 443
+    public static final int NO_PORT = -1
+
+    public static final String DEFAULT_SERVICE_NAME = 'defaultRestServiceName'
+    public static final String DEFAULT_HOST = 'localhost'
+    public static final String DEFAULT_ROOT_URL = "${HTTP_PROTOCOL}://${DEFAULT_HOST}"
+
+    public static final String API_META = 'apiMeta'
+    public static final String API_META_RESOURCE =  makeUriFromResource API_META
+    public static final String API_SPEC = 'api'
+    public static final String API_SPEC_RESOURCE = makeUriFromResource API_SPEC
+    public static final String API_META_SPEC = "${API_META}${API_SPEC_RESOURCE}"
+    public static final String API_META_SPEC_RESOURCE = makeUriFromResource API_META_SPEC
 
     /**
      * Character used to separate the entire query string from the rest of a URL.
      */
-    public static final QUERY_STRING_SEPARATOR = '?'
+    public static final String QUERY_STRING_SEPARATOR = '?'
 
     /**
      * Character used to separate each query parameter from the next when more
      * than one exists in the URL.
      */
-    public static final QUERY_PARAMETER_DELIMITER = '&'
+    public static final String QUERY_PARAMETER_DELIMITER = '&'
 
 
     // NOTE: Override the default values for the following properties via
@@ -61,10 +68,28 @@ class Entrypoint {
      */
     String service = DEFAULT_SERVICE_NAME
 
-	/** The protocol over which the service is provided. It can be "http", "https" etc. */
-    String protocol = DEFAULT_PROTOCOL
-    String host = DEFAULT_HOST
-    def port = DEFAULT_PORT
+    /**
+     * Represents the protocol and authority components of the entrypoint URL.
+     *
+     * For example, in the serviceUrl http://myhost.example.com:7980/foobar/elements,
+     * the rootUrl would be http://myhost.example.com:7980, while a serviceUrl
+     * of http://myhost.example.com/foobar/elements would have
+     * http://myhost.example.com as the rootUrl.
+     *
+     * The value of the rootUrl can be useful in HATEOAS tests that follow
+     * link href components where the href is a relative URL
+     * (e.g. /foobar/elements).
+     */
+    String rootUrl = DEFAULT_ROOT_URL
+
+    /**
+     * Private URL object representation of the rootUrl String. Used to parse
+     * the rootUrl into constituent components, such as the protocol, host,
+     * and port.
+     */
+    private URL rootEntrypoint
+
+
 
 
     /**
@@ -83,22 +108,57 @@ class Entrypoint {
 
 
     /**
-     * Returns the protocol and authority components of the entrypoint URL.
+     * Sets the protocol and authority components of the entrypoint URL.
      *
-     * For example, in the serviceUrl http://myhost.sas.com:7980/casmgmt/servers,
-     * the returned value will be http://myhost.sas.com:7980. This value can
-     * be useful in HATEOAS tests following link href components where the href
-     * is a relative URL (e.g. /casmgmt/servers).
+     * @param rootUrlValue String containing the protocol and authority
+     * components of the entrypoint URL.
      *
-     * @return the protocol and authority components of the entrypoint URL
+     * @see #rootUrl
      */
-    CharSequence getRootUrl() {
-        "${protocol}://${host}:${port}"
+    void setRootUrl(String rootUrlValue) {
+        rootUrl = rootUrlValue
+
+        rootEntrypoint = new URL(rootUrl)
     }
 
 
     /**
-     * Concatenates the host, port, and service to form a URL string
+     * Returns the host portion of the entrypoint URL.
+     *
+     * @return String representing the host portion of the entrypoint URL.
+     * @see URL#getHost()
+     */
+    String getHost() {
+        rootEntrypoint?.host ?: DEFAULT_HOST
+    }
+
+
+    /**
+     * Returns the port from the entrypoint URL or {@link #NO_PORT} if the
+     * URL does not contain a port.
+     *
+     * @return int value of the port portion of the entrypoint URL.
+     * @see URL#getPort()
+     */
+    int getPort() {
+        rootEntrypoint?.port ?: NO_PORT
+    }
+
+
+    /**
+     * Returns the protocol portion of the entrypoint URL.
+     *
+     * @return String with the protocol portion of the entrypoint URL.
+     * @see URL#getProtocol()
+     */
+    String getProtocol() {
+        rootEntrypoint?.protocol ?: HTTP_PROTOCOL
+    }
+
+
+    /**
+     * Concatenates the {@link #rootUrl} and {@link #service} to form a
+     * URL string.
      *
      * @return String representation of the URL to the service
      */
@@ -108,7 +168,7 @@ class Entrypoint {
 
 
     /**
-     * Returns the service property with a leading "/" character.
+     * Returns the {@link #service} property with a leading "/" character.
      *
      * @return the service property with a leading "/" character.
      */
@@ -118,8 +178,29 @@ class Entrypoint {
 
 
     /**
-     * Concatenates the value of the API_META_RESOURCE to the end of the
-     * serviceUrl.
+     * Concatenates the URL string created in {@link #getServiceUrl()} with
+     * a trailing "/" character to form a new URL string for accessing the
+     * root resource of the API.
+     *
+     * <p>
+     *     <strong>NOTE:</strong> When accessing the root resource of an
+     *     API via the HTTPS protocol, the URL must end with a trailing "/".
+     *     To use the root resource to build other resource URLs, use
+     *     {@link #getServiceUrl()} instead.
+     * </p>
+     *
+     * @return String representation of the URL to the root resource
+     * of the API, ending in a "/" character.
+     */
+    String getApiRootUrl() {
+        def apiRootResource = '/'
+        "${serviceUrl}${apiRootResource}"
+    }
+
+
+    /**
+     * Concatenates the value of the {@link #API_META_RESOURCE} to the end of
+     * the serviceUrl.
      *
      * @return String representation of the URL to the API_META_RESOURCE
      * for a given service
@@ -132,20 +213,34 @@ class Entrypoint {
 
 
     /**
+     * Concatenates the value of the {@link #API_META_SPEC_RESOURCE} to the end of
+     * the serviceUrl.
+     *
+     * @return String representation of the URL to the PI_META_API_RESOURCE
+     * for a given service
+     *
+     * @see #getServiceUrl
+     */
+    CharSequence getApiSpecification() {
+        "${serviceUrl}${API_META_SPEC_RESOURCE}"
+    }
+
+
+    /**
      * Returns a URL query parameter of the form <code>key=value</code>. If
      * the key does not exist or there is a key and the value is either a null
      * or an empty string, then an empty string will be returned. For instance,
      *
      *     <code>
-     *         def queryParameter = makeQueryParameter 'serverId', 'cas'
-     *         assert queryParameter == 'serverId=cas'
+     *         def queryParameter = makeQueryParameter 'serverId', 'foobar'
+     *         assert queryParameter == 'serverId=foobar'
      *
      *         queryParameter = makeQueryParameter 'someKeyValue', ''
      *         assert queryParameter == ''
      *     </code>
      *
      * @param key a name for the query parameter (e.g. <code>serverId</code>)
-     * @param value some value to associate with the query parameter (e.g. <code>cas</code>)
+     * @param value some value to associate with the query parameter (e.g. <code>foobar</code>)
      *
      * @return a URL query parameter of the form <code>key=value</code> or empty string.
      */
@@ -212,25 +307,29 @@ class Entrypoint {
         queryString
     }
 
+
     /**
      * Makes a query parameter for use in a query string. Returns a string
      * starting with '?' or '&' followed by the values 'key=value'.
      *
      * <p>
-     * <strong>NOTE:</strong> This method has been given a scope of
-     * <code>protected</code> so subclasses of {@link Entrypoint} can call
-     * the public method {@link #makeQueryString} without encountering
-     * {@link MissingMethodException} for private methods called within a
-     * closure. Subclasses should <strong>NOT</strong> call this method directly;
-     * instead, they should call {@link #makeQueryString}. See
-     * <a href="https://myhost.sas.com/browse/SAFSREST-428">SAFSREST-428</a> for more
-     * information about this issue.
+     *      <strong>NOTE:</strong> This method has been given a scope of
+     *      <code>protected</code> so subclasses of {@link Entrypoint} can call
+     *      the public method {@link #makeQueryString} without encountering
+     *      {@link MissingMethodException} for private methods called within a
+     *      closure. Subclasses should <strong>NOT</strong> call this method
+     *      directly; instead, they should call {@link #makeQueryString}.
+     * </p>
+     * <p>
+     *      See <a href="https://myhost.sas.com/browse/SAFSREST-428">SAFSREST-428</a>
+     *      for more information about this issue.
      * </p>
      *
      * @param key the query parameter name
      * @param value the value associated with the query parameter
      * @param needsSeparator true indicates that the returned string starts
      * with '?'; false indicates that the returned string starts with '&'
+     *
      * @return a String representing one query parameter of an overall query
      * string used as a URL; the String starts with either '?' or '&' depending
      * on the value of the needsSeparator parameter.
@@ -267,6 +366,7 @@ class Entrypoint {
      * character gets added to resource and the resulting URI becomes the return value.
      *
      * @param resource a resource identifier that is (usually) not a complete URI
+     *
      * @return a URI representation of the resource or null
      */
     static String makeUriFromResource(String resource) {

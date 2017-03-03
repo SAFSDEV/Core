@@ -18,7 +18,7 @@ import org.safs.rest.service.commands.ExecutableCommand
 class SystemInformationProvider {
     public static final String UNAME_EXECUTABLE = 'uname'
     public static final String ALL_OPTION = '--all'
-    
+
     public static final String SYSTEMINFO_EXECUTABLE = 'systeminfo.exe'
     
     public static final String WHICH_EXECUTABLE = 'which'
@@ -39,7 +39,7 @@ class SystemInformationProvider {
     public final CommandInvoker commandInvoker = new CommandInvoker(showCommand: false, systemInformationProvider:this)
 
     private izLinuxLike = null
-
+    
     String getSystemInformation() {
         String systemInformation = MessageFormat.format EXECUTABLE_NOT_FOUND_MESSAGE, WHICH_EXECUTABLE
         boolean isWhichFound = hasWhich()
@@ -69,7 +69,7 @@ class SystemInformationProvider {
                 // systeminfo.exe is not likely on the PATH - ignore
             }
         }
-
+        
         systemInformation
     }
 

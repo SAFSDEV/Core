@@ -15,6 +15,7 @@ import groovy.util.logging.Slf4j
 
 import org.safs.rest.service.commands.CommandResults
 
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 
 
@@ -44,13 +45,17 @@ class Response {
 
     /**
      * The value of the content-type header returned as part of the response
+     * @deprecated Use {@link #httpHeaders} instead.
      */
+    @Deprecated
     String contentType = APPLICATION_JSON_VALUE
 
     /**
      * The value of the version for the Content-Type header returned as part
      * of the response.
+     * @deprecated Use {@link #httpHeaders} instead.
      */
+    @Deprecated
     String contentTypeVersion = DEFAULT_CONTENT_TYPE_VERSION
 
     /**
@@ -64,6 +69,7 @@ class Response {
      */
     String body = EMPTY_BODY
 
+    // TODO: look into using the new httpHeaders instead.
     Map<String, String> headers
     
     /**
@@ -71,6 +77,21 @@ class Response {
      * constructor via the named argument <tt>commandResults</tt>.
      */
     @Delegate CommandResults commandResults
+
+// TODO Bruce Faulkner 09 December 2016: Consider making httpHeaders a delegate to
+// avoid having test authors have to call the get/set methods through it.
+// Make sure this is CAREFUL CONSIDERATION as given that HttpHeaders is a Map,
+// the convenience by making the instance a delegate MIGHT be far outweighed
+// by potential issues.
+    /**
+     * The HTTP headers contained in this response. Only those HTTP headers
+     * supported by {@link HttpHeaders} will be available through this
+     * property.
+     *
+     * @see HttpHeaders
+     */
+    HttpHeaders httpHeaders = new HttpHeaders()
+
 
 
     Response(args) {
@@ -129,7 +150,7 @@ class Response {
         def blankLineIndex = lines?.findIndexOf { line ->
             line.trim() == ''
         }
-        
+
         def headerLines
 
         if (blankLineIndex >= 0) {
@@ -176,5 +197,7 @@ class Response {
         contentTypeVersion = responseInfo.contentTypeVersion
 
         charset = responseInfo.charset
+
+        httpHeaders = responseInfo.httpHeaders
     }
 }
