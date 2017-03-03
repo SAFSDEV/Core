@@ -57,6 +57,7 @@ class SafsrestAdapter extends ClientPOJOAdapter {
     
     public trustedUserid
     public trustedPassword
+    public tokenProviderRootUrl
     public tokenProviderServiceName
     public tokenProviderAuthTokenResource
     
@@ -149,8 +150,8 @@ class SafsrestAdapter extends ClientPOJOAdapter {
         propertyProvider.rootUrl = rootUrl
         
         if (userid && password) {
-            // token has to be acquired after the host and port are set.
-            propertyProvider.acquireAuthToken(password, trustedPassword)
+            // token has to be acquired after the rootUrl is set.
+            acquireAuthToken(propertyProvider, password)
         }
 
         def safsrestMap = [
@@ -188,6 +189,20 @@ class SafsrestAdapter extends ClientPOJOAdapter {
             status:status,
             headers:response.headers,
         ]
+    }
+
+    private acquireAuthToken(propertyProvider, password) {
+        def savedRootUrl = propertyProvider.rootUrl
+        try {
+            if (tokenProviderRootUrl) {
+                // if there is a different rootUrl for the authentication service, use it now.
+                propertyProvider.rootUrl = tokenProviderRootUrl
+            }
+            propertyProvider.acquireAuthToken(password, trustedPassword)
+        } finally {
+            // restore the rootUrl
+            propertyProvider.rootUrl = savedRootUrl
+        }
     }
 
     /**
@@ -269,6 +284,9 @@ class SafsrestAdapter extends ClientPOJOAdapter {
     }
     public setTrustedPassword(trustedPassword) {
         this.trustedPassword = trustedPassword
+    }
+    public setTokenProviderRootUrl(tokenProviderRootUrl) {
+        this.tokenProviderRootUrl = tokenProviderRootUrl
     }
     public setTokenProviderServiceName(tokenProviderServiceName) {
         this.tokenProviderServiceName = tokenProviderServiceName
