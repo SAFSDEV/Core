@@ -2,10 +2,8 @@
 package org.safs.rest.service.models.providers
 
 import static org.safs.rest.service.commands.curl.CurlCommand.DEFAULT_MAX_TIME
-import static org.safs.rest.service.models.entrypoints.Entrypoint.DEFAULT_HOST
 import static org.safs.rest.service.models.entrypoints.Entrypoint.DEFAULT_ROOT_URL
 import static org.safs.rest.service.models.entrypoints.Entrypoint.HTTP_PROTOCOL
-import static org.safs.rest.service.models.entrypoints.Entrypoint.NO_PORT
 import static org.safs.rest.service.models.providers.authentication.TokenProvider.FAKE_AUTH_TOKEN
 import static org.safs.rest.service.models.providers.authentication.TokenProvider.TRUSTED_USER_NAME
 import static org.safs.rest.service.models.providers.authentication.TokenProvider.TRUSTED_USER_PASSWORD
@@ -43,8 +41,6 @@ class SafsRestPropertyProvider {
     public static final String SAFSREST_PROPERTY_KEY_PREFIX = 'safsrest'
 
     // Keys for standard safsrest* properties
-    @Deprecated public static final String SAFSREST_SERVICE_HOST_PROPERTY_KEY = 'safsrestServiceHost'
-    @Deprecated public static final String SAFSREST_SERVICE_PORT_PROPERTY_KEY = 'safsrestServicePort'
     @Deprecated public static final String SAFSREST_AUTH_TOKEN_KEY = 'safsrestAuthToken'
 
     public static final String SAFSREST_ROOT_URL_KEY = 'safsrestRootUrl'
@@ -63,8 +59,6 @@ class SafsRestPropertyProvider {
     public static final String SAFSREST_CAS_SERVER_ID_KEY = 'safsrestCasServerId'
 
     public static final STANDARD_PROPERTY_KEYS = [
-            SAFSREST_SERVICE_HOST_PROPERTY_KEY,
-            SAFSREST_SERVICE_PORT_PROPERTY_KEY,
             SAFSREST_ROOT_URL_KEY,
             SAFSREST_USERNAME_KEY,
             SAFSREST_SHOW_STANDARD_STREAMS_KEY,
@@ -92,11 +86,6 @@ class SafsRestPropertyProvider {
     // rootUrl and end with customProperties.
 
     String rootUrl = DEFAULT_ROOT_URL
-
-    @Deprecated
-    String host = DEFAULT_HOST
-    @Deprecated
-    int port = NO_PORT
 
 
 // TODO brfaul 08 February 2017: Might be moved to RestConsumer later
@@ -298,43 +287,6 @@ class SafsRestPropertyProvider {
 
 
     /**
-     * Set the host property (safsrestServiceHost) to the value supplied, as
-     * long as the parameter is true under Groovy truth rules.
-     *
-     * @param hostName is the String name of the host where the service
-     * under test runs
-     *
-     * @deprecated Use {@link #setRootUrl(String)} instead.
-     */
-    @Deprecated
-    void setHost(String hostName) {
-        if (hostName) {
-            host = hostName
-        }
-    }
-
-
-    /**
-     * Convenience method for setting the port property (i.e. the
-     * safsrestServicePort system property). The port property must be either a
-     * valid port or the NO_PORT constant value.
-     * @see #isValidPort
-     *
-     * @param portValue is usually the integer port number where the service
-     * under test runs. The NO_PORT constant value can also be specified, which
-     * causes the protocol default port to be used.
-     *
-     * @deprecated Use {@link #setRootUrl(String)} instead.
-     */
-    @Deprecated
-    void setPort(portValue) {
-        if (isValidPort(portValue) || portValue == NO_PORT) {
-            port = portValue as int
-        }
-    }
-
-
-    /**
      * Set the rootUrl property (safsrestRootUrl) to the value supplied, as
      * long as the parameter is true under Groovy truth rules.
      *
@@ -357,8 +309,6 @@ class SafsRestPropertyProvider {
             URL entrypoint = new URL(rootUrl)
             protocol = entrypoint.protocol
 
-            host = entrypoint.host
-            port = entrypoint.port
         } else {
             log.debug 'No value supplied for rootUrlValue in SafsRestPropertyProvider setRootUrl method.'
         }
