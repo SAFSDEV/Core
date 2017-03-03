@@ -235,6 +235,10 @@ public class Service{
 					if(auth instanceof OAuth2){
 						OAuth2 auth2 = (OAuth2) auth;
 						SafsrestAdapter adapter = ((DelegateSafsrestAdapter) clientAdapter).getAdapter();
+						String rootUrl = auth2.getAuthorizationServer().getRootUrl();
+						if (rootUrl != null) {
+							adapter.setTokenProviderRootUrl(rootUrl);
+						}
 						adapter.setTokenProviderServiceName(auth2.getAuthorizationServer().getBaseServiceName());
 						adapter.setTokenProviderAuthTokenResource(auth2.getAuthorizationServer().getAuthTokenResource());
 						adapter.setTrustedUserid(auth2.getContent().getClientID());
