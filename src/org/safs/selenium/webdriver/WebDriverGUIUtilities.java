@@ -1,20 +1,20 @@
-/** 
+/**
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
 
 package org.safs.selenium.webdriver;
 
-/** 
+/**
  * History:<br>
- * 
+ *
  *  <br>   NOV 19, 2013    (CANAGL) Initial release.
  *  <br>   DEC 18, 2013    (SBJLWA) Modify method getCompType() to support DOJO object.
  *  <br>   JAN 08, 2014    (DHARMESH) Add EditBox support.
  *  <br>   JAN 15, 2014    (SBJLWA) Update method getCompType(): deduce the type by dojo-classname if object is dojo domain.
  *  <br>   FEB 11, 2014    (CANAGL) Support external Class2Type.properties and CustomClass2Type.properties mappings.
  *  <br>   FEB 19, 2014    (DHARMESH) Modify Start Remote Server call.
- *  <br>   APR 15, 2014    (DHARMESH) Added HighLight static varibale.   
+ *  <br>   APR 15, 2014    (DHARMESH) Added HighLight static varibale.
  *  <br>   APR 21, 2014    (DHARMESH) Allow default window RS if user doesn't specify RS.
  *  <br>   NOV 26, 2014    (SBJLWA) Modify waitForObject(): distinguish ObjectNotFound from other errors.
  *  <br>   FEB 27, 2015    (DHARMESH) Added -Xms512m -Xmx2g support to start server JVM.
@@ -102,27 +102,27 @@ import com.ibm.staf.STAFResult;
  */
 public class WebDriverGUIUtilities extends DDGUIUtilities {
 
-	/** 
-	 * "Class2Type.properties" 
+	/**
+	 * "Class2Type.properties"
 	 * Typically embedded in the JAR file for the class seeking the mapping. */
 	public static final String DEFAULT_CLASS2TYPE_MAP = "Class2Type.properties";
-	/** 
-	 * "CustomClass2Type.properties" 
+	/**
+	 * "CustomClass2Type.properties"
 	 * should exist in the /lib/ or /libs/ directory of the JAR file seeking the mapping. */
 	public static final String CUSTOM_CLASS2TYPE_MAP = "CustomClass2Type.properties";
 
 	public static boolean HIGHLIGHT = false;
-	
+
 	public static WebDriverGUIUtilities _LASTINSTANCE = null;
-	
-	private long gSecTimeout = 0;// or Processor.getSecsWaitForComponent();	
+
+	private long gSecTimeout = 0;// or Processor.getSecsWaitForComponent();
 
 	/*
 	 * Mapped non-generic html tag to component function types here.<br>
 	 * Non-mapped items should be considered to be generic "Component" types.
 	 */
 	private static final CaseInsensitiveHashtable _cfmap = new CaseInsensitiveHashtable();
-	
+
 	/*
 	 * Type to classname mapping. One type can be mapped to more than one classes. The class
 	 * names are separated by comma (,)
@@ -130,7 +130,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	 */
 	private static final CaseInsensitiveHashtable _fcmap = new CaseInsensitiveHashtable();
 	private static final String CLASS_NAME_SEPARATOR = ",";
-	
+
 	/**
 	 * No-argument constructor.
 	 * Simply calls super()
@@ -140,10 +140,10 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		super();
 		_LASTINSTANCE = this;
 	}
-	
+
 	/**
 	 * Constructor providing the STAFHelper and LogUtilities needed for
-	 * proper operation. 
+	 * proper operation.
 	 * @param helper The STAFHelper for performing STAF requests.
 	 * @param log the LogUtilities for logging.
 	 * @see org.safs.STAFHelper
@@ -179,14 +179,14 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	public static boolean isSeleniumPlus(){
 		return SePlusInstallInfo.IsSeleniumPlus();
 	}
-	
+
 	/**
 	 * @return true if we detect we are running from a SAFS installation (/lib/safsselenium.jar)
 	 */
 	public static boolean isSAFS(){
 		return SePlusInstallInfo.IsSAFS();
 	}
-		
+
 	/**
 	 * Retrieve the Class2Type mapping, if any, for the provided classname.
 	 * This will force the loading of class mappings if they are not already loaded.
@@ -212,7 +212,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Retrieve the Type2Classes mapping, if any, for the provided type name.
 	 * This will force the loading of class mappings if they are not already loaded.
@@ -237,7 +237,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Get the mapped-class-names according to the type; then get the webelement's<br>
 	 * class-name (and its superclasses' names) if the webelement is DOJO/SAP object,<br>
@@ -245,11 +245,11 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	 * <p>
 	 * Finally, compare the mapped-class-names with webelement's class-names, if one<br>
 	 * of them match, then we can say the type is matched.<br>
-	 * 
-	 * <b>Note:</b> 
-	 * For DOJO, we can only get the class-name of webelement itself.<br> 
+	 *
+	 * <b>Note:</b>
+	 * For DOJO, we can only get the class-name of webelement itself.<br>
 	 * We need a way to get its superclass names.
-	 * 
+	 *
 	 * @param we	WebElement, the webelement to test
 	 * @param type	String, the SAFS named type for a gui component
 	 * @return	boolean, true if the webelement can match the provided type.
@@ -273,11 +273,11 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 			}else{
 				realType = type;
 			}
-			
+
 			String compType = getCompType(we);
 			IndependantLog.debug(debugmsg+realType+"="+compType+"?");
 			if(realType.equalsIgnoreCase(compType)) return true;
-			
+
 			if(isDojo || WDLibrary.isDojoDomain(we)){
 				IndependantLog.info(debugmsg+"searching for a Dojo "+ realType);
 //				elementClassNames = DOJO.getDojoClassNames(we);
@@ -289,7 +289,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 			}else if(isSap || WDLibrary.isSAPDomain(we)){
 				IndependantLog.info(debugmsg+"searching for a SAP "+ realType);
 				elementClassNames = SAP.getSAPClassNames(we);
-				
+
 				IndependantLog.info(debugmsg+"found "+ elementClassNames.size() +" in SAP class hierarchy");
 			}
 			//We will always add the HTML classes to the list elementClassNames
@@ -298,7 +298,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 			if(classes!=null) {
 				for(String classname: classes) elementClassNames.add(classname);
 			}
-			
+
 			typeMappedClassNames = getTypeClassesMapping(realType);
 			IndependantLog.info(debugmsg+"comparing against "+ typeMappedClassNames.length +" classes mapped to type "+realType);
 			for(String elementClassName: elementClassNames){
@@ -315,17 +315,17 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		IndependantLog.info(debugmsg+"did not match element as type "+ type);
 		return false;
 	}
-	
+
 	/**
 	 * load the Class2Type.properties mappings and any CustomClass2Type.properties mappings.
-	 * CustomClass2Type.properties mappings, if present, 
+	 * CustomClass2Type.properties mappings, if present,
 	 * would normally exist in the directory containing the JAR file containing this class.
 	 */
 	protected static void loadClassMappings(){
 		try{
 			URL jom = getResourceURL(DEFAULT_CLASS2TYPE_MAP);
 			URL customjom = AgentClassLoader.findCustomizedJARResource(jom, CUSTOM_CLASS2TYPE_MAP);
-	
+
 			IndependantLog.info("WDGU.loading standard mappings from "+jom.getPath());
 			InputStream in = jom.openStream();
 			Properties props = new Properties();
@@ -350,8 +350,8 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 				in = ClassLoader.getSystemResourceAsStream( CUSTOM_CLASS2TYPE_MAP );
 				if(in == null){
 					try{
-						String safsdir = null;					
-						if(isSAFS()){ 
+						String safsdir = null;
+						if(isSAFS()){
 							safsdir = System.getenv(DriverConstant.SYSTEM_PROPERTY_SAFS_DIR)+ File.separator+"lib"+File.separator;
 						}else{//isSeleniumPlus
 							safsdir = System.getenv(DriverConstant.SYSTEM_PROPERTY_SELENIUMPLUS_DIR)+ File.separator +"libs"+File.separator;
@@ -359,7 +359,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 						File custurl = new CaseInsensitiveFile(safsdir + CUSTOM_CLASS2TYPE_MAP).toFile();
 						if(custurl.isFile()) in = custurl.toURL().openStream();
 					}catch(MissingResourceException x){
-						IndependantLog.info("WDGU ignoring missing custom mappings for "+ CUSTOM_CLASS2TYPE_MAP);						
+						IndependantLog.info("WDGU ignoring missing custom mappings for "+ CUSTOM_CLASS2TYPE_MAP);
 					}catch(MalformedURLException x){
 						IndependantLog.info("WDGU ignoring malformed URL mappings for "+ CUSTOM_CLASS2TYPE_MAP);
 					}
@@ -372,14 +372,14 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 					in = null;
 					if (props.size() > 0) _cfmap.putAll(props);
 					props.clear();
-					props = null;					
+					props = null;
 				}
 			}
 			catch(Exception anye){
 				IndependantLog.error("Error loading "+ CUSTOM_CLASS2TYPE_MAP +" resource:"+ anye.getMessage(),
 	                      anye);
 			}
-			
+
 			Enumeration<?> clazzes = null;
 			String className = null;
 			String type = null;
@@ -394,21 +394,21 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 					else _fcmap.put(type, classNames+CLASS_NAME_SEPARATOR+className);
 				}
 			}
-			
+
 		}catch(Exception ex){
 			try{
 				//If ex.getMessage() return null, for some java sdk, println(null) will throw NullPointerException
-				System.err.println(ex.getMessage());				
+				System.err.println(ex.getMessage());
 				IndependantLog.error(ex.getMessage(), ex);
 			}catch(Exception e){
-				System.err.println(e);					
+				System.err.println(e);
 			}
-		}			
-	}						
-	
+		}
+	}
+
 	/**
 	 * Attempt to locate the URL of a resource.
-	 * This can be in the JAR file containing a specified class, 
+	 * This can be in the JAR file containing a specified class,
 	 * or in the directory containing the JAR file.
 	 * Multitple searches attempted including:
 	 * <ol>
@@ -430,7 +430,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		if (jom == null){
 			URL domain = WebDriverGUIUtilities.class.getProtectionDomain().getCodeSource().getLocation();
 			String filepath = domain.getFile(); //  /C:/SAFS/lib/safs.jar  or  /C:/SeleniumPlus/libs/selenium-plus*.jar
-			// ex: /C:/SAFS/lib/safs.jar			
+			// ex: /C:/SAFS/lib/safs.jar
 			if(domain.getProtocol().equals("file")){
 				filepath = filepath.substring(1);
 				filepath.replace("/", File.separator);
@@ -446,7 +446,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		}
 		return jom;
 	}
-	
+
 	/**
 	 * In SeleniumPlus, some GUILess keywords will be handled in CFComponent<br>
 	 * So a fake window 'ApplicationConstants' is used to get these keywords executed.<br>
@@ -463,19 +463,19 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		}
 		return isFakeWindow;
 	}
-	
+
 	/**
 	 * Uses the Application Map caching mechanism provided by the superclass.
-	 * Retrieves cached references or recognition strings from the App Map and attempts to 
+	 * Retrieves cached references or recognition strings from the App Map and attempts to
 	 * identify the matching component via the remote AUT JVM proxies.
 	 * <p>
 	 * @param appMapName  the name/ID of the App Map currently in use.
 	 * @param windowName  the name/ID of the window as predefined in the App Map.
-	 * @param compName    the name/ID of the child component of the window as predefined 
+	 * @param compName    the name/ID of the child component of the window as predefined
 	 * in the App Map.
-	 * @param secTimeout the number of seconds allowed to located the object before a 
+	 * @param secTimeout the number of seconds allowed to located the object before a
 	 * SAFSObjectNotFoundException is thrown.
-	 * 
+	 *
 	 * @return 0 on success.<br>
 	 *         {@link StatusCodes#SCRIPT_NOT_EXECUTED} if the recognition string is in AUTOIT/IBT format.<br>
 	 * @throws SAFSObjectNotFoundException if specified parent or child cannot be found.
@@ -487,7 +487,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	 */
 	public int waitForObject (String appMapName, String windowName, String compName, long secTimeout)
 	                           throws SAFSObjectNotFoundException, SAFSException{
-		
+
 		ApplicationMap map = null;
 		WDTestRecordHelper trdata = (WDTestRecordHelper) this.trdata;
 
@@ -509,14 +509,14 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		          throw new SAFSException("Could not register App Map "+ appMapName);
 		      }
 		    }
-		    
+
 		    //TODO: Find and inject into window not launched by us.
     		//TODO: currently, we do no caching so we don't care if the recognition is dynamic.
 	    	String winRec = map.getParentGUIID(windowName, false);
 	    	//CACHE HANDLE
 //	    	boolean ignoreCache = ApplicationMap.isGUIIDDynamic(winRec);
 //	    	if(ignoreCache) winRec = ApplicationMap.extractTaggedGUIID(winRec);
-	    	
+
 	    	//If user doesn't specify window RS then use html default window.
 	    	if (winRec == null || winRec.length() == 0){
 	    		if(isFakeWindow(windowName, compName)){
@@ -524,9 +524,9 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		    		trdata.setCompGuiId(windowName);
 		    		trdata.setWindowGuiId(compName);
 		    		trdata.setCompTestObject(null);
-		    		trdata.setWindowTestObject(null);		
+		    		trdata.setWindowTestObject(null);
 		    		trdata.setCompType("Component");
-		    		IndependantLog.info( "WDGU: WFO assuming GUILess command: "+trdata.getCommand());				
+		    		IndependantLog.info( "WDGU: WFO assuming GUILess command: "+trdata.getCommand());
 					return 0;
 	    		}else{
 	    			IndependantLog.warn("WDGU: WFO could NOT retrieve AppMap entry for Window '"+ windowName +"'. Verify it exists.");
@@ -534,7 +534,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	    		}
 	    	}
 	    	trdata.setWindowGuiId(winRec);
-	    	
+
             IndependantLog.info("WDGU: WFO winRec retrieved: "+ winRec);
             WebElement winObj = null;
             //CACHE HANDLE
@@ -542,24 +542,24 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 //				winObj = (WebElement)map.getParentObject(windowName);
 //				IndependantLog.info("WDGU: winObj got from cache: "+ winObj);
 //			}
-            
+
             // check for possible Autoit-Based Testing recognition string
             if(AutoItRs.isAutoitBasedRecognition(winRec)){
 	    		trdata.setWindowGuiId(winRec);
 	    		trdata.setCompTestObject(null);
-	    		trdata.setWindowTestObject(null);		
+	    		trdata.setWindowTestObject(null);
 	    		trdata.setCompType("Component");
-	    		IndependantLog.info( "WDGU: WFO returning. Assuming AutoIt Testing for "+trdata.getCommand());				
+	    		IndependantLog.info( "WDGU: WFO returning. Assuming AutoIt Testing for "+trdata.getCommand());
 				return StatusCodes.SCRIPT_NOT_EXECUTED;
             }
-            
+
             // check for possible Image-Based Testing recognition string
             if(ImageUtils.isImageBasedRecognition(winRec)){
 	    		trdata.setWindowGuiId(winRec);
 	    		trdata.setCompTestObject(null);
-	    		trdata.setWindowTestObject(null);		
+	    		trdata.setWindowTestObject(null);
 	    		trdata.setCompType("Component");
-	    		IndependantLog.info( "WDGU: WFO returning. Assuming Image-Based Testing for "+trdata.getCommand());				
+	    		IndependantLog.info( "WDGU: WFO returning. Assuming Image-Based Testing for "+trdata.getCommand());
 	    		return StatusCodes.SCRIPT_NOT_EXECUTED;
             }
 
@@ -569,13 +569,13 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
             	IndependantLog.debug("WDGU: WFO Store the window object into the map cache with key '"+windowName+"' in section ["+windowName+"]");
             	map.setParentObject(windowName, winObj);
             }
-					
-	    	//these may not be needed if seeking parent window only	    	
+
+	    	//these may not be needed if seeking parent window only
 	    	String compRec = null;
 	    	WebElement compObj = null;
-	    	
+
 	    	boolean isParent = windowName.equalsIgnoreCase(compName);
-	    	
+
 	    	// get values if a child component is the target and not just the window
 	    	if(!isParent){
 	    		// currently, we do no caching so we don't care if the recognition is dynamic.
@@ -596,15 +596,15 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	    		trdata.setCompTestObject(winObj);
 	    		trdata.setCompType(getCompType(winObj));  // winObj can still go Stale in here!
 				IndependantLog.info( "WDGU: WFO Matched: "+ winObj.toString());
-				return 0;	
+				return 0;
 	    	}
-	    	  
+
 	    	//CACHE HANDLE
 //	    	if(!ignoreCache){
 //	    		compObj = (WebElement)map.getChildObject(windowName, compName);
 //	    		IndependantLog.info("WDGU: compObj got from cache: "+ compObj);
 //	    	}
-	    	
+
 	    	//Try to get the Component TestObject dynamically
 	    	if(compObj==null){
 	    		compObj = waitCompObject(winObj, windowName, winRec, compName, compRec, secTimeout);
@@ -616,12 +616,12 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	    	trdata.setCompGuiId(compRec);
 	    	trdata.setWindowGuiId(winRec);
 	    	trdata.setCompTestObject(compObj);
-	    	trdata.setWindowTestObject(winObj);		
-	    	trdata.setCompType(getCompType(compObj)); // compObj can still go Stale in here!	    
+	    	trdata.setWindowTestObject(winObj);
+	    	trdata.setCompType(getCompType(compObj)); // compObj can still go Stale in here!
 			IndependantLog.info( "WDGU: WFO Matched: "+ compObj.toString());
-			
+
 			return 0;
-			
+
 	    }catch(SAFSObjectNotFoundException sonfe){
 	    	throw sonfe;
 	    }catch(Exception x){
@@ -637,11 +637,11 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 			}
 		}
 	}
-	
+
 	/**
 	 * Wait a window object within a timeout. If not found, a SAFSObjectNotFoundException will be thrown out.<br>
 	 * This method will be called in {@link #waitForObject(String, String, String, long)}.<br>
-	 * 
+	 *
 	 * @param windowName 	String, the window's name
 	 * @param winRec 		String, the window's recognition string
 	 * @param secTimeout	long, the time (in seconds) to wait for a window
@@ -651,7 +651,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	private WebElement waitWinObject(String windowName, String winRec, long secTimeout) throws SAFSObjectNotFoundException{
 		String debugmsg = StringUtils.debugmsg(false);
 		WebElement winObj = null;
-				
+
 		boolean done = false;
 		long endtime = System.currentTimeMillis()+(secTimeout * 1000);
 		long delay = 1000;
@@ -683,7 +683,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	 * Wait a component object within a timeout. If not found, a SAFSObjectNotFoundException will be thrown out.<br>
 	 * If the window object becomes stale during searching component object, we will try to get a fresh window object.<br>
 	 * This method will be called in {@link #waitForObject(String, String, String, long)}.<br>
-	 * 
+	 *
 	 * @param winObj		WebElement, the window object.
 	 * @param windowName 	String, the window's name
 	 * @param winRec 		String, the window's recognition string
@@ -691,18 +691,18 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	 * @param compRec		String, the component's recognition string
 	 * @param secTimeout	long, the time (in seconds) to wait for a component
 	 * @return WebElement the component object.
-	 * @throws SAFSObjectNotFoundException if the component object could not be found, 
+	 * @throws SAFSObjectNotFoundException if the component object could not be found,
 	 *                                     or the window object becomes stale and could not be refreshed.
 	 */
 	private WebElement waitCompObject(WebElement winObj, String windowName, String winRec, String compName, String compRec, long secTimeout) throws SAFSObjectNotFoundException{
 		String debugmsg = StringUtils.debugmsg(false);
 		WebElement compObj = null;
-		
+
 		boolean done = false;
 		long endtime = System.currentTimeMillis()+(secTimeout * 1000);
 		long delay = 1000;
 		boolean isStale = false;
-		
+
 		IndependantLog.debug(debugmsg+" Waitting '"+windowName+"."+compName+"' ... ");
 		while(!done){
 			isStale = false;
@@ -722,7 +722,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 						done = true;
 					}
 				} catch (SeleniumPlusException e) {
-					compObj = null;	
+					compObj = null;
 					isStale = true;
 					IndependantLog.debug(debugmsg+" the component "+compName+" test for Stale Element returned "+ e.getClass().getSimpleName()+", "+ e.getMessage());
 				}
@@ -747,17 +747,17 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
     	if(compObj==null){
 			throw new SAFSObjectNotFoundException("Could not find matching object for Component '"+ windowName +":"+ compName +"'");
 		}
-		
+
 		return compObj;
 	}
-	
+
 	public static void highlightThenClear(WebElement webelement, int duration){
 		if(HIGHLIGHT) WDLibrary.highlightThenClear(webelement, duration);
 	}
-	
+
 	/**
 	 * Wait for the property matching/gone with the expected value.
-	 * <p> 
+	 * <p>
 	 * @param windowName String, the window name
 	 * @param compName String, the component name
 	 * @param propertyName String, the property name
@@ -772,70 +772,70 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	 */
 	public int waitForPropertyStatus(String windowName, String compName, String propertyName, String expectedValue, long secTimeout, boolean b_caseInsensitive, boolean propertyStatus)
 			throws SAFSObjectNotFoundException, SAFSException {
-		
+
 		WDTestRecordHelper trdata = (WDTestRecordHelper) this.trdata;
 		WebElement element;
 		String propertyValue = "";
 		boolean compareRes = false;
 		long endtime = System.currentTimeMillis() + (secTimeout * 1000);
 		long delay = 1000;
-		boolean done = false;		
-		
+		boolean done = false;
+
 		try {
 			element = WDLibrary.getObject(trdata.getCompGuiId());
-			highlightThenClear(element, 1000);			
-		} catch (Exception e) { 
+			highlightThenClear(element, 1000);
+		} catch (Exception e) {
 			IndependantLog.debug("WDGU: property: fail to highlight component.", e);
 		}
-		
+
 		while (!done) {
-			// get property value		
+			// get property value
 			try {
 				element = WDLibrary.getObject(trdata.getCompGuiId());
-				propertyValue = WDLibrary.getProperty(element, propertyName);			
-			} catch (Exception badvalue) { 
+				propertyValue = WDLibrary.getProperty(element, propertyName);
+			} catch (Exception badvalue) {
 				throw badvalue;
 			}
-			
+
 			// compare with expected value
 			if(b_caseInsensitive) {
 				compareRes = propertyValue.equals(expectedValue);
 			} else {
 				compareRes = propertyValue.equalsIgnoreCase(expectedValue);
 			}
-			
+
 			if(compareRes == propertyStatus) {
 				if(true == propertyStatus) {
 					IndependantLog.info("WDGU: property:" + propertyName + " match with expected value:" + expectedValue);
 				} else {
 					IndependantLog.info("WDGU: property:" + propertyName + " has gone with expected value:" + expectedValue);
 				}
-				
+
 				return 0;
 			}
-				
-						
+
+
 			done = System.currentTimeMillis() > (endtime - delay);
-			
+
 			if(!done) {
 				try {
 					Thread.sleep(delay);
 				} catch(Exception x) { }
 			}
-				
+
 		}
-		
+
 		if(true == propertyStatus) {
 			IndependantLog.info("WDGU: property:" + propertyName + " did NOT match with expected value:" + expectedValue);
 		} else {
 			IndependantLog.info("WDGU: property:" + propertyName + " did NOT gone with expected value:" + expectedValue);
 		}
-		
+
 		return -1;
 	}
-	
+
 	/**
-	 * Try to deduce the Component Type as stored in our cfmap.  If not found, then the 
+	 * Try to deduce the Component Type as stored in our cfmap.  If not found, then the
 	 * default type of "Component" is returned.
 	 * @param compObj
 	 * @return the Mapped component type, or "Component" if not mapped.
@@ -859,7 +859,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 					clazz = WDLibrary.DOJO.getDojoClassName(compObj);
 					if(clazz!=null) type = getClassTypeMapping(clazz);
 				}catch(SeleniumPlusException e){}
-				
+
 				//Then, we try 'css class name' to map a library type
 				if(type==null){
 					clazz = compObj.getAttribute("class");
@@ -871,28 +871,28 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 					String[] classes = WDLibrary.SAP.getSAPClassNames(compObj).toArray(new String[0]);
 					clazz = Arrays.toString(classes);
 					type = getClassTypeMapping(classes);
-					
+
 				}catch(SeleniumPlusException e){}
-				
+
 			}
 //			else if(WDLibrary.isOtherDomain(compObj)){
-//				//Try to get the componet type for this sepcical domain 
+//				//Try to get the componet type for this sepcical domain
 //			}
-			
+
 			//Finally, try the html class name (tag or type) to deduce the type
 			if(type==null){
 				String[] classes = WDLibrary.HTML.html_getClassName(compObj);
 				clazz = Arrays.toString(classes);
 				type = getClassTypeMapping(classes);
 			}
-			
+
 			IndependantLog.debug(debugmsg+"Mapping '"+clazz+"' to '"+type+"'");
 		}catch(Exception x){
 			IndependantLog.debug(debugmsg+" IGNORING Exception.", x);
 		}
 		return (type == null) ? "Component": type;
 	}
-	
+
 	/**
 	 * Normally, component-type is the same as library-type, but sometimes they are different.<br>
 	 * componentToLibraryMap is used to contain the mapping, if they are different.<br>
@@ -908,13 +908,13 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		loadComponentToLibraryMap();
 		libType = (String) componentToLibraryMap.get(compType);
 		libType = (libType==null? compType: libType);
-		
+
 		return libType;
 	}
 	public static String getLibraryPackage(){
 		return "org.safs.selenium.webdriver.lib";
 	}
-	
+
 	/**
 	 * Gets the object defined by the windowName and childName
 	 * @param mapName  the name/ID of the App Map currently in use.
@@ -942,7 +942,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 			}
 		}
 
-				
+
 		WebElement tobj = null;
 		if ((childName == null)||(windowName.equalsIgnoreCase(childName))){
 
@@ -999,10 +999,10 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 
 		return tobj;
 	}
-	
+
 	private static boolean timeout_lock = false;
 	private static String timeout_lock_owner = null;
-	
+
 	/**
 	 * Set the webdriver element search timeout.
 	 * Will only succeed if the setting is not locked, or the lock is owned by the caller.
@@ -1026,11 +1026,11 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	}
 
 	/**
-	 * Suspends any changes to the WDTimeout except by the calling Method.  
-	 * This is primarily used in broad widespread processing like ProcessContainer that need 
-	 * to prevent other smaller processes from resetting the timeout back to its normal value.  
+	 * Suspends any changes to the WDTimeout except by the calling Method.
+	 * This is primarily used in broad widespread processing like ProcessContainer that need
+	 * to prevent other smaller processes from resetting the timeout back to its normal value.
 	 * <p>
-	 * The call to SET and RESET the lock MUST occur within the same Method 
+	 * The call to SET and RESET the lock MUST occur within the same Method
 	 * of the calling class.
 	 * @return boolean true if successfully set the timeout lock.
 	 * @see #setWDTimeout(long)
@@ -1048,7 +1048,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		}else{
 	        IndependantLog.info("WDGU: *** WDTimeout Lock cannot be changed.  It is already owned by: "+ timeout_lock_owner +" ***");
 	        return false;
-		}        
+		}
 	}
 
 	/**
@@ -1064,7 +1064,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		String caller = trace.getClassName()+"."+trace.getMethodName();
 		if(! timeout_lock || caller.equals(timeout_lock_owner)) {
 			// use window timeout for reset
-			long timeout = Processor.getSecsWaitForWindow(); 
+			long timeout = Processor.getSecsWaitForWindow();
 			SeleniumPlus.WebDriver().manage().timeouts().implicitlyWait(timeout, TimeUnit.SECONDS);
 	        IndependantLog.info("WDGU: Reset timeout back  to '"+ timeout +"' by: "+caller);
 	        return true;
@@ -1073,10 +1073,10 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	        return false;
 		}
 	}
-	
+
 	/**
-	 * Resumes allowing changes to the WDTimeout.  This is primarily used in broad widespread processing 
-	 * like ProcessContainer that needs to prevent other smaller processes from changing the timeout 
+	 * Resumes allowing changes to the WDTimeout.  This is primarily used in broad widespread processing
+	 * like ProcessContainer that needs to prevent other smaller processes from changing the timeout
 	 * value.
 	 * @return boolean true if successfully reset the timeout lock.
 	 * @see #setWDTimeoutLock()
@@ -1144,17 +1144,17 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		String server = null;
 		if(isSeleniumPlus()){
 			root = System.getenv("SELENIUM_PLUS");
-			server = root + "/extra/RemoteServer.bat";		
+			server = root + "/extra/RemoteServer.bat";
 		}
 		if(isSAFS()){
 			root = System.getenv("SAFSDIR");
-			server = root + "/samples/Selenium2.0/extra/RemoteServer.bat";		
+			server = root + "/samples/Selenium2.0/extra/RemoteServer.bat";
 		}
 		if(root == null || server == null){
 			IndependantLog.debug("WDGU: startRemoteServer failed to determine RemoteServer startup script location.");
 			return false;
-		}		 
-		try{			
+		}
+		try{
 			NativeWrapper.runAsynchExec(server);
 		}catch(Throwable t){
 	        IndependantLog.debug("WDGU: startRemoteServer failed with "+t.getClass().getSimpleName()+": "+t.getMessage());
@@ -1169,12 +1169,12 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	public static final String OPTION_ROLE 	= "-role";
 	/**'-hub' followed by the hubRegisterUrl, something like http://hubhost:hubport/grid/register */
 	public static final String OPTION_HUB 	= "-hub";
-	
+
 	/**'hub' role name for the "grid hub"*/
 	public static final String ROLE_HUB 	= "hub";
 	/**'node' role name for the "grid node"*/
 	public static final String ROLE_NODE 	= "node";
-	
+
 	/**
 	 * Launch Selenium-Standalone-Sever or Selenium-Grid-Hub + Selenium-Grid-Nodes according to the configuration information.<br>
 	 * If the grid-node information is provided, then the Grid-Hub + Node will be launched; otherwise, standalone server will be launched.<br>
@@ -1182,13 +1182,13 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	 * Before calling this method:<br>
 	 * <b>1.</b> We should set the JVM property {@link SelectBrowser#SYSTEM_PROPERTY_SELENIUM_HOST} and {@link SelectBrowser#SYSTEM_PROPERTY_PROXY_PORT}.<br>
 	 * <b>2.</b> If we want to launch "grid", we should also set the JVM property {@link SelectBrowser#SYSTEM_PROPERTY_SELENIUM_NODE}.<br>
-	 * 
+	 *
 	 * @throws SeleniumPlusException, if the server has not been started successfully.
 	 * @see #startRemoteServer(String, String...)
 	 */
 	public static void launchSeleniumServers() throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(false);
-		
+
 		//Retrieve seleniumhost, seleniumport, seleniumnode
 		//We have set them to system properties in EmbeddedSeleniumHookDriver#start(), We just need to get them from system properties.
 		String host = System.getProperty(SelectBrowser.SYSTEM_PROPERTY_SELENIUM_HOST, SeleniumConfigConstant.DEFAULT_SELENIUM_HOST);
@@ -1204,7 +1204,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		boolean isGrid = StringUtils.isValid(nodesInfo);
 		//serverRunning can tell if the server (standalone or grid-hub) is running or not.
 		boolean serverRunning = false;
-		
+
 		//we are going to launch nodes, they have to know where to register them (by hubRegisterUrl)
 		//but if the hub is stared with hostname as "localhost" or "127.0.0.1", the nodes (remote machines) will not able to register them on http://localhost or http://127.0.0.1
 		//we need to find the real IP address for localhost and use it to build the hubRegisterUrl
@@ -1214,7 +1214,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		}
 		//TODO We could simply use the IP address to build the hubRegisterUrl, it is easier.
 //		hubRegisterUrl = "http://"+NetUtilities.getHostIP(host)+":"+port+WebDriverGUIUtilities.URL_PATH_GRID_REGISTER;
-		
+
 		//Before starting server, we need to verify that the server/node is NOT running. Otherwise, we just return.
 		if(isGrid){
 			if(WebDriverGUIUtilities.isGridRunning(host, port)){
@@ -1239,15 +1239,15 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		String serverName = "Selenium "+ (isGrid?"Grid Hub":"Standalone server");
 		//role contains parameter to determinate what server to start, "standalone", "hub"
 		String role = isGrid? " "+OPTION_ROLE+" "+ROLE_HUB+" ":" ";//"" for standalone, "-role hub" for grid-hub
-		
+
 		if(!serverRunning){
 			//Start Server: standalone or grid-hub
-			IndependantLog.debug(debugmsg+" try to start the "+serverName+" at "+host+":"+port+" ... ");		
+			IndependantLog.debug(debugmsg+" try to start the "+serverName+" at "+host+":"+port+" ... ");
 			if(!launchSeleniumServers(host, port, role, state)){
 				//If server cannot be launched, throw exception.
 				throw new SeleniumPlusException(" Fail to start '"+serverName+"' at "+ host+":"+port);
 			}
-			
+
 			IndependantLog.debug(debugmsg+" "+serverName+" seems started, try to connect it.");
 			//Wait for "standalone server" or "grid hub server" to be ready
 			if(!WebDriverGUIUtilities.waitSeleniumServerRunning(isGrid, false, false)){
@@ -1284,25 +1284,25 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 				}
 			}
 		}
-		
+
 		//We only check if the server (standalone or grid-hub) is running
 		//if some nodes are not running, we will not throw exception; test may run on other running nodes.
-		if(!WebDriverGUIUtilities.isSeleniumServerRunning(host, port, isGrid, false, nodesInfo, false)){							
+		if(!WebDriverGUIUtilities.isSeleniumServerRunning(host, port, isGrid, false, nodesInfo, false)){
 			throw new SeleniumPlusException(" unable to connect to '"+serverName+"' at "+ host+":"+port+ (isGrid?", Grid Nodes are '"+nodesInfo+"'":""));
 		}
 	}
-	
+
 	/**
 	 * Used to launch standalone-server, grid-hub or grid-node.<br>
 	 * @param host String, the host name of the selenium server/node
 	 * @param port String, the port number of the selenium server/node
 	 * @param params String[], the extra parameters for starting server/node
 	 * <ul>
-	 * <li>params[0] role String, the role option, it can be<br> 
+	 * <li>params[0] role String, the role option, it can be<br>
 	 *               "" for standalone server<br>
 	 *               "-role hub" for grid hub server<br>
 	 *               "-role node -hub HubRegisterUrl" for grid node<br>
-	 * </ul> 
+	 * </ul>
 	 * @throws SeleniumPlusException
 	 * @see {@link #startRemoteServer()}
 	 * @see #startRemoteServer(String, String...)
@@ -1310,7 +1310,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	private static boolean launchSeleniumServers(String host, String port, String... params) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(false);
 		boolean serverStarted = false;
-		
+
 		IndependantLog.info(debugmsg+" starting server with Options: host="+ host+" port="+port+", params="+Arrays.toString(params));
 		//Prepare the optional parameters for starting Selenium Server.
 		//1. selenium server port
@@ -1334,12 +1334,12 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		//  a. "standalone server" on remote machine
 		//  b. "grid node" on remote machine with "grid hub" on local/remote machine
 		String rmiServer = "-"+DriverConstant.PROPERTY_RMISERVER;
-		
+
 		List<String> paramsList = new ArrayList<String>();
 		for(String param:params) paramsList.add(param);
 		paramsList.add(serverPort);
 		paramsList.add(serverJVMOptions);
-		
+
 		if(NetUtilities.isLocalHost(host)){
 			//Start the selenium server on the local machine
 			IndependantLog.info(debugmsg+" attempting to (re)start Server locally.");
@@ -1362,11 +1362,11 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 			//Start the selenium server on the remote machine
 			Class remoteDriverLauncher = RemoteDriverLauncher.class;
 			String launchServerCommand = "java " + remoteDriverLauncher.getName();
-			
+
 			//pass parameters such as "port number", "JVM options", "rmiServer option", "server role" to start server on remote machine
 			//remotely testing, we need RMI server.
 			paramsList.add(rmiServer);
-			
+
 			for(String param:paramsList){
 				if(!StringUtils.isQuoted(param)) param = StringUtils.quote(param);
 				launchServerCommand += " "+param;
@@ -1377,7 +1377,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 			String commandWithOutput = launchServerCommand + " STDOUT "+outputFile+" STDERRTOSTDOUT ";//Append STAF parameter 'STDOUT' and 'STDERRTOSTDOUT'
 			IndependantLog.debug(debugmsg+ remoteDriverLauncher.getName() + " starting, the debug message will be in file '"+outputFile+"' on machine '"+host+"'");
 			IndependantLog.debug(debugmsg+ RemoteDriver.class.getName() + " launching, the debug message will be in file '"+RemoteDriver.debugLogFile+"' on machine '"+host+"'");
-			
+
 			try {
 				//Try to start by STAFHandle, which requires STAF enabled in configuration file
 				//[STAF]
@@ -1395,7 +1395,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 				Process process = null;
 				ProcessCapture console = null;
 				try {
-					//try to launch the server on remote machine by launching directly a "staf machine process start command ..." command 
+					//try to launch the server on remote machine by launching directly a "staf machine process start command ..." command
 					IndependantLog.debug(debugmsg+" Try to launch RemoteServer remotely by STAF process service.");
 					String stafCommand = "staf "+host+" process start command "+commandWithOutput;
 					IndependantLog.debug(debugmsg+" Runtime exec STAF command: "+stafCommand);
@@ -1419,7 +1419,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 				}catch(Exception e){
 					IndependantLog.warn(debugmsg+StringUtils.debugmsg(e));
 				}finally{
-					if(console!=null) console.shutdown();							
+					if(console!=null) console.shutdown();
 				}
 			}
 
@@ -1432,12 +1432,12 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 //				}
 //			}
 		}
-		
+
 		return serverStarted;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param projectdir
 	 * @param extraParams String[], the optional parameters
 	 * <pre>
@@ -1447,7 +1447,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	 *                             TheServerRole could be <b>"hub"</b>, and selenium server will be launched
 	 *                             as a hub (in grid mode) for other node to connect.
 	 *                             TheServerRole could be <b>"node"</b>, and selenium server will be launched
-	 *                             as a node (in grid mode) to connect a hub. <b>**Note**</b> Hub's information must also 
+	 *                             as a node (in grid mode) to connect a hub. <b>**Note**</b> Hub's information must also
 	 *                             be provided. Ex: <b>-role node -hub http://hub.machine:port/grid/register</b>
 	 * <b>SELENIUMSERVER_JVM_OPTIONS=jvm options</b> Ex: SELENIUMSERVER_JVM_OPTIONS="-Xms256m -Xmx1g"
 	 * </pre>
@@ -1461,14 +1461,14 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		String consoledir = null;
 		SePlusInstallInfo seinfo = null;
 		File projectroot = null;
-		
+
 		try {
 			seinfo = SePlusInstallInfo.instance();
 		} catch (SeleniumPlusException e) {
 			IndependantLog.error(debugmsg, e);
 			return success;
 		}
-		
+
 		projectroot = projectdir==null? null:new CaseInsensitiveFile(projectdir).toFile();
 		if(projectroot != null ){
 			consoledir = projectroot.getAbsolutePath();
@@ -1476,14 +1476,14 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 			consoledir = seinfo.getRootDir().getAbsolutePath();
 		}
 		IndependantLog.debug(debugmsg+": Selenium Server runtime consoles expected at "+ consoledir);
-		
+
 		List<String> extraParamsList = StringUtils.arrayToList(extraParams);
-		
+
 		boolean isGrid = false;//indicate the type (grid-hub or standalone) of the server to start
 		boolean isNode = false;//indicate that we are starting a node
 		String nodePort = SeleniumConfigConstant.DEFAULT_SELENIUM_NODE_PORT;
 		String jvmOptions = null;
-		
+
 		String param = null;
 		for(int i=0; i<extraParamsList.size();i++){
 			param = extraParamsList.get(i).trim();
@@ -1509,11 +1509,11 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		if(jvmOptions==null) jvmOptions = getRemoteServerJVMOptions();
 		IndependantLog.debug(debugmsg+" with JVM options : "+jvmOptions);
 		ProcessCapture console = null;
-		
+
 		try{
 			String cp = " -cp "+ seinfo.getClassPath(false);
-			
-			String cmdline = seinfo.getJavaexe() +" "+jvmOptions + cp +" "+SeleniumServerRunner.class.getName()+" "+ 
+
+			String cmdline = seinfo.getJavaexe() +" "+jvmOptions + cp +" "+SeleniumServerRunner.class.getName()+" "+
 					         " -Dwebdriver.log.file=\""+consoledir+File.separator+"webdriver.console\""+
 					         " -Dwebdriver.firefox.logfile=\""+consoledir+File.separator+"firefox.console\""+
 					         " -Dwebdriver.safari.logfile=\""+consoledir+File.separator+"safari.console\""+
@@ -1523,20 +1523,20 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 
 			if(seinfo.getChromeDriver().isFile()) cmdline += " -Dwebdriver.chrome.driver=\""+ seinfo.getChromeDriver().getAbsolutePath() +"\"";
 			if(seinfo.getIEDriver().isFile()) cmdline += " -Dwebdriver.ie.driver=\""+ seinfo.getIEDriver().getAbsolutePath() +"\"";
-			
+
 			//The other parameter will be passed directly to "org.safs.selenium.util.SeleniumServerRunner"
 			for(String parameter: extraParamsList) cmdline += " "+parameter;
 			cmdline += " -timeout=20 -browserTimeout=60 "+SeleniumServerRunner.PARAM_OUTPUTCONSOLE;
-			
+
 			final String fcmd = cmdline;
 			final File workdir = projectroot == null ? seinfo.getRootDir(): projectroot;
 			IndependantLog.debug(debugmsg+" launching Selenium Server with cmdline: "+ fcmd);
-			
+
 			Process process = null;
 			//TODO we should not launch a "selenium server", if there is already one running.
 			process = Runtime.getRuntime().exec(fcmd,null,workdir);
 			console = new ProcessCapture(process, SeleniumServerRunner.TITLE , true, false/*will not write out/err message to debug log, it is already in SeleniumServerRunner*/);
-			
+
 			if(isNode){
 				success = waitSeleniumNodeRunning(SeleniumConfigConstant.DEFAULT_SELENIUM_HOST, nodePort);
 			}else{
@@ -1550,7 +1550,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 			}catch(TimeoutException te){
 				IndependantLog.debug(debugmsg+" met "+StringUtils.debugmsg(te));
 			}
-			
+
 			@SuppressWarnings("unchecked")
 			Vector<String> data = console.getData();
 			if(data!=null && data.size()>0){
@@ -1565,15 +1565,15 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 						//parse the output message to know if the server has been failed.
 						if(message.contains("Failed to start: SocketListener")){
 							throw new SAFSException("Failed to execute command: "+fcmd+" \n due to "+message);
-						}						
+						}
 					}
 				}
 			}
-			
+
 		}catch(Exception x){
 			IndependantLog.debug(debugmsg+" failed to launch Selenium Server due to "+x.getClass().getName()+": "+x.getMessage(), x);
 		}
-		
+
 		return success;
 	}
 
@@ -1581,7 +1581,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	 * Wait for selenium "grid node" to be ready.<br>
 	 * This method will only check if the URL "http://host:port/wd/hub" can be connected. It will<br>
 	 * not check if "grid node" has been registered to "grid hub".<br>
-	 * 
+	 *
 	 * @param host String, the hostname of the "grid node".
 	 * @param port String, the port number where the "grid node" is running on.
 	 * @param params int[], optional parameters<br>
@@ -1589,7 +1589,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	 * <li>params[0] repeatTimes int, how many times to try to connect with Server. Default is 5 times.
 	 * <li>params[1] pause int, the pause time (milliseconds) between each connection try. Default is 500 milliseconds.
 	 * <ul>
-	 * 
+	 *
 	 * @return boolean, true if the server is running.
 	 */
 	public static boolean waitSeleniumNodeRunning(String host, String port, int... params){
@@ -1614,7 +1614,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	 * <b>Note:</b> Before calling this method:<br>
 	 * We should set the JVM property {@link SelectBrowser#SYSTEM_PROPERTY_SELENIUM_HOST} and {@link SelectBrowser#SYSTEM_PROPERTY_PROXY_PORT}.<br>
 	 * If we are waiting for "grid hub, grid nodes", we should also set the JVM property {@link SelectBrowser#SYSTEM_PROPERTY_SELENIUM_NODE}.<br>
-	 * 
+	 *
 	 * @param isGrid boolean, if false the server is "standalone"; if true the server is "grid hub" and "grid nodes".
 	 * @param waitForNodes boolean, if true then should wait for "grid nodes" to be ready. This parameter take effect only if isGrid is true.
 	 * @param verifyRegistered boolean, if true then verify "grid nodes" have been registered to "grid hub". This parameter take effect only if isGrid and waitForNodes are true.
@@ -1623,7 +1623,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	 * <li>params[0] repeatTimes int, how many times to try to connect with Server. Default is 5 times.
 	 * <li>params[1] pause int, the pause time (milliseconds) between each connection try. Default is 500 milliseconds.
 	 * <ul>
-	 * 
+	 *
 	 * @return boolean, true if the server is running.
 	 */
 	public static boolean waitSeleniumServerRunning(boolean isGrid, boolean waitForNodes, boolean verifyRegistered, int... params){
@@ -1643,7 +1643,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		String port = System.getProperty(SelectBrowser.SYSTEM_PROPERTY_SELENIUM_PORT);
 		port = normalizePort(port, SelectBrowser.DEFAULT_SELENIUM_PORT/*4444 for server (standalone or grid hub)*/);
 		String nodesInfo = System.getProperty(SelectBrowser.SYSTEM_PROPERTY_SELENIUM_NODE);
-		
+
 		if(isGrid){
 			while(!isGridRunning(host, port) && tries++ < repeat){
 				try{ Thread.sleep(pause);}catch(Exception x){}
@@ -1659,7 +1659,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 			}
 		}else{
 			while(!running && tries++ < repeat){
-				running = isStandalongServerRunning(host, port);			
+				running = isStandalongServerRunning(host, port);
 				try{ Thread.sleep(pause);}catch(Exception x){}
 			}
 		}
@@ -1669,25 +1669,25 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 
 	/**
 	 * Test if selenium "standalone"/"grid hub, grid nodes" is ready.<br>
-	 * 
+	 *
 	 * @param host String, the hostname of server (standalone or grid-hub).
 	 * @param port String, the port number where the server is running.
 	 * @param isGrid boolean, if false the server is "standalone"; if true the server is "grid hub".
 	 * @param checkNodes boolean, if true then check if "grid nodes" are running. This parameter takes effect only if isGrid is true.
 	 * @param nodesInfo String, the information of the "grid nodes" to check. This parameter takes effect only if isGrid and checkNodes are true.
 	 * @param verifyRegistered boolean, if true then check if "grid nodes" have been registered to "grid hub". This parameter takes effect only if isGrid and checkNodes are true.
-	 * 
+	 *
 	 * @return boolean, true if the selenium "standalone"/"grid hub, grid nodes" is running.
 	 */
-	public static boolean isSeleniumServerRunning(String host, String port, boolean isGrid, 
+	public static boolean isSeleniumServerRunning(String host, String port, boolean isGrid,
 			                                      boolean checkNodes, String nodesInfo, boolean verifyRegistered){
 		boolean running = false;
-		
+
 		if(isGrid){
 			running = isGridRunning(host, port);
-			if(running && checkNodes) running = isNodesRunning(nodesInfo, verifyRegistered, host, port);			
+			if(running && checkNodes) running = isNodesRunning(nodesInfo, verifyRegistered, host, port);
 		}else{
-			running = isStandalongServerRunning(host, port);			
+			running = isStandalongServerRunning(host, port);
 		}
 
 		return running;
@@ -1695,18 +1695,18 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 
 	/**
 	 * Checks to see if a "Selenium Standalone Server" is running.<br>
-	 * 
+	 *
 	 * @param host String, the hostname of the "standalone server".
 	 * @param port String, the port number where the server is running on.
 	 * @return true if the server responds, false otherwise.
 	 */
-	public static boolean isStandalongServerRunning(String host, String port/*4444 for standalone server*/){		
+	public static boolean isStandalongServerRunning(String host, String port/*4444 for standalone server*/){
 		return canConnectHubURL(host, port);
 	}
 
 	/**
 	 * Checks to see if a "Selenium Grid Hub server" is running.<br>
-	 * 
+	 *
 	 * @param host String, the hostname of the "grid hub server".
 	 * @param port String, the port number where the server is running on.
 	 * @return true if the server responds, false otherwise.
@@ -1718,7 +1718,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 
 	/**
 	 * Checks to see if all "Selenium Grid Nodes" are running and registered to a grid-hub:<br>
-	 * 
+	 *
 	 * @param nodesInfo String, the "grid nodes" to check. It is like "node1:port:nodeconfig;node2:port:nodeconfig;".
 	 * @param verifyRegistered boolean, if we need to verify that all nodes are registered to "grid hub"
 	 * @param hubhost String, the name of the "gird hub". It is valid only when verifyRegistered is true.
@@ -1726,10 +1726,10 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	 * @return boolean, true if all nodes are running and have been registered to grid hub.
 	 * @see #isGridRunning()
 	 */
-	public static boolean isNodesRunning(String nodesInfo /*node1:port:nodeconfig;node2:port:nodeconfig;*/, 
+	public static boolean isNodesRunning(String nodesInfo /*node1:port:nodeconfig;node2:port:nodeconfig;*/,
 			                             boolean verifyRegistered, String hubhost, String hubport){
 		String debugmsg = StringUtils.debugmsg(false);
-		
+
 		List<GridNode> nodes = getGridNodes(nodesInfo);
 
 		for(GridNode node: nodes){
@@ -1764,7 +1764,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		if(nodesInfo!=null){
 			List<String> nodes = StringUtils.getTrimmedTokenList(nodesInfo, StringUtils.SEMI_COLON);
 			//nodes is a list of "node1:port:nodeconfig"
-			for(String node:nodes) nodesList.add(new GridNode(node));				
+			for(String node:nodes) nodesList.add(new GridNode(node));
 		}
 
 		return nodesList;
@@ -1784,7 +1784,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		private String hostip = SelectBrowser.DEFAULT_SELENIUM_HOST_IP;
 		private String port = SeleniumConfigConstant.DEFAULT_SELENIUM_NODE_PORT;//Grid-node's default port is 5555
 		private Object config = null;
-		
+
 		public GridNode(String nodeInfo /* nodeInfo is something like "node1:port:nodeconfig"*/) {
 			List<String> info = StringUtils.getTrimmedTokenList(nodeInfo, StringUtils.COLON);
 			int i = 0;
@@ -1825,14 +1825,14 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		public void setConfig(Object config) {
 			this.config = config;
 		}
-		
+
 		public boolean isSameHostPort(GridNode node){
 			if(node==null) return false;
 			if(!hostip.trim().equals(node.getHostip().trim())) return false;
 			if(!port.trim().equals(node.getPort().trim())) return false;
 			return true;
 		}
-		
+
 		public String toString(){
 			return hostname+StringUtils.COLON+port;
 		}
@@ -1844,9 +1844,9 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	public static final String URL_PATH_GRID_CONSOLE 	= "/grid/console";
 	/** "/wd/hub" the path to visit HTTP standalone-server or grid-node */
 	public static final String URL_PATH_HUB 			= "/wd/hub";
-	
-	/** 
-	 * "/wd/hub/static" the path to get information about the running standalone-server or grid-node 
+
+	/**
+	 * "/wd/hub/static" the path to get information about the running standalone-server or grid-node
 	 * This is a NON-valid url, and the information is supposed to get from the error-stream.
 	 */
 	public static final String URL_PATH_HUB_STATIC		= "/wd/hub/static";
@@ -1884,17 +1884,17 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	public static String readHubStaticURL(String host, String port){
 		return readHttpURL(host, port, URL_PATH_HUB_STATIC);
 	}
-	
+
 	/**
-	 * Parse the port to make sure that it is an integer and bigger than 1000. 
-	 * If there is something wrong, use the default port number provided by parameter. 
+	 * Parse the port to make sure that it is an integer and bigger than 1000.
+	 * If there is something wrong, use the default port number provided by parameter.
 	 * @param port String, the port number to parse
 	 * @param defaultPort String, the default port number. 4444 for "standalone server"/"grid hub"; 5555 for "grid node".
 	 * @return String, the port number
 	 */
 	private static String normalizePort(String port, String defaultPort){
 		String resutlPort = port;
-		try{ 
+		try{
 			if(Integer.parseInt(port) < 1000 ) resutlPort = defaultPort;
 		}catch(Exception ignore){
 			IndependantLog.debug(" ignoring invalid port setting '"+port+"'. Using default: "+ defaultPort);
@@ -1919,7 +1919,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		} catch (MalformedURLException e) {
 			IndependantLog.error(debugmsg+" URL '"+url+"' is not correct."+StringUtils.debugmsg(e));
 			return false;
-		}	
+		}
 	}
 	/**
 	 * @param host String, the host name
@@ -1929,25 +1929,25 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	 */
 	private static String readHttpURL(String host, String port, String path){
 		String debugmsg = StringUtils.debugmsg(false);
-		
+
 		String url = "http://"+host+":"+ port +path;
 		try {
 			return NetUtilities.readHttpURL(new URL(url), "UTF-8", timeoutForHttpConnection);
 		} catch (MalformedURLException e) {
 			IndependantLog.error(debugmsg+" URL '"+url+"' is not correct."+StringUtils.debugmsg(e));
 			return null;
-		}	
+		}
 	}
-	
+
 	/**
 	 * timeout for HTTP connection, the default value is 1000 milliseconds.<br>
-	 * For example:<br> 
+	 * For example:<br>
 	 * connect to selenium-standalone-server {@link #URL_PATH_HUB} <br>
 	 * connect to selenium-grid-hub {@link #URL_PATH_GRID_CONSOLE} <br>
 	 * If we always fail to connect even the site is running, we may consider to enlarge this timeout by {@link #setTimeoutForHttpConnection(int)}.<br>
 	 */
 	private static int timeoutForHttpConnection = 1000;//milliseconds
-	
+
 	/** get {@link #timeoutForHttpConnection}*/
 	public static int getTimeoutForHttpConnection() {
 		return timeoutForHttpConnection;
@@ -2013,11 +2013,11 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	public static boolean verifyNodesRegistered(String hubhost, String hubport, GridNode... nodes){
 		String debugmsg = StringUtils.debugmsg(false);
 		boolean debug = false;
-		
+
 		HttpURLConnection con = null;
 		InputStream ins = null;
 		BufferedReader br = null;
-		
+
 		try{
 			String gridConsoleURL = "http://"+hubhost+":"+ hubport +URL_PATH_GRID_CONSOLE;
 			con = (HttpURLConnection) (new URL(gridConsoleURL)).openConnection();
@@ -2028,7 +2028,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 				IndependantLog.debug(debugmsg+"respond message: "+con.getResponseMessage());
 				IndependantLog.debug(debugmsg+"content length: "+con.getContentLengthLong());
 			}
-			
+
 			if(con.getResponseCode()==HttpURLConnection.HTTP_OK && con.getContentLengthLong()>50){
 				ins = con.getInputStream();
 				//verify the content of "http://hub:port/grid/console" to see if the node has registered
@@ -2052,13 +2052,13 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 						matched = node.isSameHostPort(registeredNode);
 						if(matched) break;
 					}
-					if(!matched) break; 
+					if(!matched) break;
 				}
 				if(matched) return true;
 			}else{
 				IndependantLog.warn(debugmsg+"Fail to connect to grid hub server at URL '"+gridConsoleURL+"'");
 			}
-			
+
 		}catch(Exception e){
 			IndependantLog.error(debugmsg+StringUtils.debugmsg(e));
 		}finally{
@@ -2068,10 +2068,10 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Parse the response got from URL "http://hub:port/grid/console", and get the GridNode.
-	 * 
+	 *
 	 * @param nodeInfo String, the string containing information of a registered node.
 	 * @return GridNode, the registered node.
 	 */
@@ -2082,7 +2082,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		int endIndex = -1;
 		String host = null;
 		String port = null;
-		
+
 		IndependantLog.debug(debugmsg+" parse nodeInfo: "+nodeInfo);
 		if(StringUtils.isValid(nodeInfo)){
 			if(nodeInfo.contains(GRID_CONSOLE_RESPONSE_HOST)){
@@ -2116,10 +2116,10 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 			IndependantLog.debug(debugmsg+" Create GridNode with host:"+host+" port:"+port);
 			node = new GridNode(host, port);
 		}
-		
+
 		return node;
 	}
-	
+
 	/**
 	 * Retrieve the JVM options from system properties.<br>
 	 * Before calling this method, we may need to set some java system property.<br>
@@ -2134,16 +2134,16 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	 * value does not contain "-Xms" or "-Xmx".<br>
 	 * If {@link SeleniumConfigConstant#SELENIUMSERVER_JVM_OPTIONS} exist, and {@link SeleniumConfigConstant#SELENIUMSERVER_JVM_Xms}
 	 * and/or {@link SeleniumConfigConstant#SELENIUMSERVER_JVM_Xmx} exist, then we will add "-Xms512m -Xmx1g" to the JVM options if its
-	 * value does not contain "-Xms" or "-Xmx", otherwise if its value contains ""-Xms" or "-Xmx", we will replace them by the value of 
+	 * value does not contain "-Xms" or "-Xmx", otherwise if its value contains ""-Xms" or "-Xmx", we will replace them by the value of
 	 * {@link SeleniumConfigConstant#SELENIUMSERVER_JVM_Xms} and/or {@link SeleniumConfigConstant#SELENIUMSERVER_JVM_Xmx}.<br>
-	 * 
+	 *
 	 * @return String, the JVM options for starting SELENIUM Remote Server.
 	 * @see #startRemoteServer(String)
 	 */
 	public static String getRemoteServerJVMOptions(){
 		String debugmsg = StringUtils.debugmsg(false);
 		//Get the JVM Options from system properties
-		//We have set them to system properties in EmbeddedSeleniumHookDriver#start() 		
+		//We have set them to system properties in EmbeddedSeleniumHookDriver#start()
 		String Xms = System.getProperty(SeleniumConfigConstant.SELENIUMSERVER_JVM_Xms);
 		String Xmx = System.getProperty(SeleniumConfigConstant.SELENIUMSERVER_JVM_Xmx);
 		IndependantLog.debug(debugmsg+" get JVM parameter : Xms="+ Xms+" Xmx="+Xmx);
@@ -2165,13 +2165,13 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 			}else{
 				Xmx = SeleniumConfigConstant.DEFAULT_JVM_MEMORY_MAXIMUM;
 			}
-			
+
 			//if jvmOptions does not contain -Xmx or -Xms, we will add them to jvmOptions
 			if(!jvmOptions.contains(JavaConstant.JVM_Xms)) jvmOptions += " "+JavaConstant.JVM_Xms+Xms;
 			if(!jvmOptions.contains(JavaConstant.JVM_Xmx)) jvmOptions += " "+JavaConstant.JVM_Xmx+Xmx;
 		}
 		IndependantLog.debug(debugmsg+" return JVM options : "+jvmOptions);
-		
+
 		return jvmOptions;
 	}
 }
