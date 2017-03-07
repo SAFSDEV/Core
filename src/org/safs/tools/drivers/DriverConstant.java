@@ -8,6 +8,7 @@ package org.safs.tools.drivers;
  * APR 07, 2015    (Lei Wang) Add static class SeleniumConfigConstant.
  * SEP 24, 2015    (Lei Wang) Add static class MailConstant.
  * OCT 09, 2016    (Lei Wang) Modified 2 wrongly-named constant, corrected a typo and added constants about DndReleaseDelay.
+ * MAR 07, 2017    (Lei Wang) Made SeleniumConfigConstant subclass of SeleniumConstants.
  */
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
@@ -587,7 +588,7 @@ public class DriverConstant extends JavaConstant{
 	 *
 	 * Define some constant strings used under section {@link DriverConstant#SECTION_SAFS_SELENIUM} for SELENIUM.
 	 */
-	public static final class SeleniumConfigConstant{
+	public static final class SeleniumConfigConstant extends SeleniumConstants{
 
 		/** "SELENIUMHOST" define the host name where the SELENIUM "standalone server"/"grid hub" will run
 		 * @see #SELENIUMPORT

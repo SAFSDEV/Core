@@ -33,6 +33,7 @@ package org.safs.selenium.webdriver;
  *  <br>   SEP 27, 2016	   (LeiWang) Moved methods launchSeleniumServers() from class DCDriverCommand.
  *                                   Modified method startRemoteServer(): moved some code to class SePlusInstallInfo.
  *  <br>   NOV 07, 2016	   (LeiWang) Modified method startRemoteServer(): Wait longer to get more information from STDOUT/STDERR, if no running server has been detected.
+ *  <br>   MAR 07, 2017	   (LeiWang) Modified methods launchSeleniumServers(), startRemoteServer(): start selenium server with 'browser drivers' option.
  **/
 
 import java.io.BufferedReader;
@@ -55,6 +56,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.openqa.selenium.WebElement;
 import org.safs.ApplicationMap;
+import org.safs.Constants.SeleniumConstants;
 import org.safs.DDGUIUtilities;
 import org.safs.GuiClassData;
 import org.safs.GuiObjectRecognition;
@@ -1169,6 +1171,8 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	public static final String OPTION_ROLE 	= "-role";
 	/**'-hub' followed by the hubRegisterUrl, something like http://hubhost:hubport/grid/register */
 	public static final String OPTION_HUB 	= "-hub";
+	/**'-drivers' followed by the browser drivers (separated by colon :), something like explorer:chrome:MicrosoftEdge */
+	public static final String OPTION_BROWSER_DRIVERS 	= "-drivers";
 
 	/**'hub' role name for the "grid hub"*/
 	public static final String ROLE_HUB 	= "hub";
@@ -1180,8 +1184,8 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	 * If the grid-node information is provided, then the Grid-Hub + Node will be launched; otherwise, standalone server will be launched.<br>
 	 * <b>Note:</b><br>
 	 * Before calling this method:<br>
-	 * <b>1.</b> We should set the JVM property {@link SelectBrowser#SYSTEM_PROPERTY_SELENIUM_HOST} and {@link SelectBrowser#SYSTEM_PROPERTY_PROXY_PORT}.<br>
-	 * <b>2.</b> If we want to launch "grid", we should also set the JVM property {@link SelectBrowser#SYSTEM_PROPERTY_SELENIUM_NODE}.<br>
+	 * <b>1.</b> We should set the JVM property {@link SelectBrowser#SYSTEM_PROPERTY_SELENIUM_HOST} and {@link SelectBrowser#SYSTEM_PROPERTY_SELENIUM_PORT}.<br>
+	 * <b>2.</b> If we want to launch "grid+nodes", we should also set the JVM property {@link SelectBrowser#SYSTEM_PROPERTY_SELENIUM_NODE}.<br>
 	 *
 	 * @throws SeleniumPlusException, if the server has not been started successfully.
 	 * @see #startRemoteServer(String, String...)
@@ -1199,6 +1203,8 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		IndependantLog.info(debugmsg+" using selenium nodes: "+ nodesInfo);
 		//Retrieve the console state
 		String state = JavaJVMConsole.PARAM_STATE + " " + System.getProperty(SeleniumConfigConstant.PROPERTY_CONSOLE_STATE, JavaJVMConsole.STATE_DEFAULT);
+		//Retrieve the browser drivers
+		String webdrivers = OPTION_BROWSER_DRIVERS+" "+System.getProperty(SeleniumConstants.PROPERTY_WEB_DRIVERS, "");
 
 		//if seleniumnode has been provided, we are going to launch grid-hub and grid-node, not standalone server.
 		boolean isGrid = StringUtils.isValid(nodesInfo);
@@ -1243,7 +1249,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		if(!serverRunning){
 			//Start Server: standalone or grid-hub
 			IndependantLog.debug(debugmsg+" try to start the "+serverName+" at "+host+":"+port+" ... ");
-			if(!launchSeleniumServers(host, port, role, state)){
+			if(!launchSeleniumServers(host, port, role, state, webdrivers)){
 				//If server cannot be launched, throw exception.
 				throw new SeleniumPlusException(" Fail to start '"+serverName+"' at "+ host+":"+port);
 			}
@@ -1255,7 +1261,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 			}
 		}
 
-		if(isGrid){//Grid: hub + nodes
+		if(isGrid){//Grid: grid-hub has already been started, we are going to start each node one by one.
 			//Need also to start the nodes, if some nodes fail to launch we just log a warning instead of throwing exception.
 			//prepare parameter to register node, something like "-role node -hub http://hubhost:hubport/grid/register"
 			role = " "+OPTION_ROLE+" "+ROLE_NODE+" "+OPTION_HUB+" "+hubRegisterUrl;
@@ -1268,7 +1274,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 				nodeport = node.getPort();
 				if(!WebDriverGUIUtilities.canConnectHubURL(nodehost, nodeport)){
 					IndependantLog.debug(debugmsg+" try to register the selenium node '"+node+"' to hub "+hubRegisterUrl);
-					if(launchSeleniumServers(nodehost, nodeport, role, state)){
+					if(launchSeleniumServers(nodehost, nodeport, role, state, webdrivers)){
 						IndependantLog.debug(debugmsg+" '"+node+"' has been launched, waiting for its ready... ");
 						WebDriverGUIUtilities.waitSeleniumNodeRunning(nodehost, nodeport);
 					}else{
@@ -1302,6 +1308,9 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	 *               "" for standalone server<br>
 	 *               "-role hub" for grid hub server<br>
 	 *               "-role node -hub HubRegisterUrl" for grid node<br>
+	 *
+	 * <li>params[1] state String, the state option, it can "-state MIN|MAX|NORMAL|MINIMIZE|MAXIMIZE"<br>
+	 * <li>params[2] drivers String, the drivers option, it can be "-drivers explorer:chrome:MicrosoftEdge"<br>
 	 * </ul>
 	 * @throws SeleniumPlusException
 	 * @see {@link #startRemoteServer()}
@@ -1449,7 +1458,9 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	 *                             TheServerRole could be <b>"node"</b>, and selenium server will be launched
 	 *                             as a node (in grid mode) to connect a hub. <b>**Note**</b> Hub's information must also
 	 *                             be provided. Ex: <b>-role node -hub http://hub.machine:port/grid/register</b>
-	 * <b>SELENIUMSERVER_JVM_OPTIONS=jvm options</b> Ex: SELENIUMSERVER_JVM_OPTIONS="-Xms256m -Xmx1g"
+	 * <b>SELENIUMSERVER_JVM_OPTIONS=jvm options</b> Ex: SELENIUMSERVER_JVM_OPTIONS=-Xms256m -Xmx1g
+	 * <b>-drivers browser-drivers</b> Ex: -drivers=explorer:chrome:MicrosoftEdge
+	 *
 	 * </pre>
 	 * @return boolean, true if the server has been successfully started
 	 * @author Carl Nagle 2015.11.02 Add support for new SAFS\jre\Java64\jre\bin
@@ -1483,6 +1494,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		boolean isNode = false;//indicate that we are starting a node
 		String nodePort = SeleniumConfigConstant.DEFAULT_SELENIUM_NODE_PORT;
 		String jvmOptions = null;
+		String webDrivers = null;
 
 		String param = null;
 		for(int i=0; i<extraParamsList.size();i++){
@@ -1493,7 +1505,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 				int sepLength = GuiObjectRecognition.DEFAULT_ASSIGN_SEPARATOR.length();
 				int index = param.indexOf(GuiObjectRecognition.DEFAULT_ASSIGN_SEPARATOR /* = */, prefixLength);
 				if(index>-1 && (index+sepLength)<param.length()) jvmOptions = param.substring(index+sepLength);
-				extraParamsList.remove(i);
+				extraParamsList.remove(i);//Remove it, it will not be passed to SeleniumServerRunner
 			}else if(param.toLowerCase().startsWith(OPTION_ROLE)){
 				//try to get grid-hub, grid-node information
 				//-role hub
@@ -1503,6 +1515,10 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 			}else if(param.toLowerCase().startsWith(OPTION_PORT)){
 				//try to get the port information, -port portNumber
 				nodePort = param.substring(OPTION_PORT.length()).trim();
+			}else if(param.toLowerCase().startsWith(OPTION_BROWSER_DRIVERS)){
+				//try to get the browser drivers, -drivers explorer:chrome:MicrosoftEdge
+				webDrivers = param.substring(OPTION_BROWSER_DRIVERS.length()).trim();
+				extraParamsList.remove(i);//Remove it, it will not be passed to SeleniumServerRunner
 			}
 		}
 		//try to get "JVM Options" from system properties
@@ -1514,15 +1530,37 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 			String cp = " -cp "+ seinfo.getClassPath(false);
 
 			String cmdline = seinfo.getJavaexe() +" "+jvmOptions + cp +" "+SeleniumServerRunner.class.getName()+" "+
-					         " -Dwebdriver.log.file=\""+consoledir+File.separator+"webdriver.console\""+
-					         " -Dwebdriver.firefox.logfile=\""+consoledir+File.separator+"firefox.console\""+
-					         " -Dwebdriver.safari.logfile=\""+consoledir+File.separator+"safari.console\""+
-					         " -Dwebdriver.ie.logfile=\""+consoledir+File.separator+"ie.console\""+
-					         " -Dwebdriver.opera.logfile=\""+consoledir+File.separator+"opera.console\""+
-					         " -Dwebdriver.chrome.logfile=\""+consoledir+File.separator+"chrome.console\"";
+					         " -Dwebdriver.log.file=\""+consoledir+File.separator+"webdriver.console\"";
 
-			if(seinfo.getChromeDriver().isFile()) cmdline += " -Dwebdriver.chrome.driver=\""+ seinfo.getChromeDriver().getAbsolutePath() +"\"";
-			if(seinfo.getIEDriver().isFile()) cmdline += " -Dwebdriver.ie.driver=\""+ seinfo.getIEDriver().getAbsolutePath() +"\"";
+			if(webDrivers!=null && !webDrivers.isEmpty()){
+				IndependantLog.debug(debugmsg+" Starting selenium server with browser drivers '"+webDrivers+"'.");
+				String[] driverNames = webDrivers.split(":");
+				File driverFile = null;
+				String driverShortName = null;
+				for(String driverName:driverNames){
+					driverName = driverName.trim();
+					driverFile = seinfo.getDriver(driverName);
+					driverShortName = SeleniumConstants.DRIVER_SHORT_NAME_MAP.get(driverName);
+					if(driverFile.isFile()){
+						cmdline += " -Dwebdriver."+driverShortName+".driver=\""+ driverFile.getAbsolutePath() +"\"";
+					}else{
+						IndependantLog.warn(debugmsg+" can NOT set driver '"+driverName+"' VM parameters! File '"+driverFile.getAbsolutePath()+"' doesn't exist!");
+					}
+					//Some driver is included inside the selenium-server, such as Firefox.
+					//Whether the driver executable exists or not, we will set the log file parameter.
+					cmdline += " -Dwebdriver."+driverShortName+".logfile=\""+consoledir+File.separator+driverShortName+".console\"";
+				}
+			}else{
+				//Keep these settings for back-compatibility
+				cmdline += " -Dwebdriver.firefox.logfile=\""+consoledir+File.separator+"firefox.console\""+
+						" -Dwebdriver.safari.logfile=\""+consoledir+File.separator+"safari.console\""+
+						" -Dwebdriver.ie.logfile=\""+consoledir+File.separator+"ie.console\""+
+						" -Dwebdriver.opera.logfile=\""+consoledir+File.separator+"opera.console\""+
+						" -Dwebdriver.chrome.logfile=\""+consoledir+File.separator+"chrome.console\"";
+
+				if(seinfo.getChromeDriver().isFile()) cmdline += " -Dwebdriver.chrome.driver=\""+ seinfo.getChromeDriver().getAbsolutePath() +"\"";
+				if(seinfo.getIEDriver().isFile()) cmdline += " -Dwebdriver.ie.driver=\""+ seinfo.getIEDriver().getAbsolutePath() +"\"";
+			}
 
 			//The other parameter will be passed directly to "org.safs.selenium.util.SeleniumServerRunner"
 			for(String parameter: extraParamsList) cmdline += " "+parameter;

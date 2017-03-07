@@ -357,7 +357,12 @@ Line Options:</b><br>
               
               <dt><a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_CONSOLE_STATE" target="api">
               <b>-Dsafs.selenium.console.state=MAX|MIN|NORMAL</b></a>
-              </dt><dd>Specifies the selenium server console's state.</dd>
+              </dt><dd>Specifies the selenium server console's state.<p></dd>
+              
+              <dt><a href="../doc/org/safs/Constants.SeleniumConstants.html#PROPERTY_WEB_DRIVERS" target="api">
+              <b>-Dsafs.selenium.web.drivers=explorer:chrome:MicrosoftEdge</b></a>
+              </dt><dd>Defines specific drivers (separated by colon :) to start with selenium server.
+              By default, IE and Chrome driver will start up with selenium server.<p></dd>
               
 </dl></td></tr></tbody></table></td></tr></tbody></table>
 </p><p>Enhancements, corrections, and more detail will be added as necessary.
@@ -552,6 +557,10 @@ GATEWAYPORT=80
 <span class="comments">;= CONSOLE_STATE is used to set the state of
 ;= Selenium Server Console</span>
 ;CONSOLE_STATE=MIN|MAX|NORMAL
+<span class="comments">;= WEB_DRIVERS is used to set the specific browser
+;= drivers (separated by colon :) to start with selenium server. 
+;= IE and Chrome driver will be started by Default.</span>
+;<a href="../doc/org/safs/Constants.SeleniumConstants.html#ITEM_WEB_DRIVERS" target="api">WEB_DRIVERS</a>=explorer:chrome:MicrosoftEdge
 
 <span class="comments">;= Settings for Selnium1.0</span>
 ;HOOK=org.safs.selenium.SeleniumJavaHook
