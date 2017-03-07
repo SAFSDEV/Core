@@ -71,6 +71,8 @@ class SafsrestAdapter extends ClientPOJOAdapter {
      */
     def execCurlFromJVM = false
 
+    private SafsRestPropertyProvider propertyProvider = new SafsRestPropertyProvider()
+
     /**
      * Execute an HTTP request.
      *
@@ -89,8 +91,6 @@ class SafsrestAdapter extends ClientPOJOAdapter {
     throws Exception {
 
         request = modifyRequest(request)
-        
-        SafsRestPropertyProvider propertyProvider = new SafsRestPropertyProvider()
         
         if (tokenProviderServiceName != null) {
             propertyProvider.tokenProviderServiceName = tokenProviderServiceName
@@ -149,7 +149,7 @@ class SafsrestAdapter extends ClientPOJOAdapter {
         def rootUrl = "${uri.scheme}://${uri.host}:${uri.port}"
         propertyProvider.rootUrl = rootUrl
         
-        if (userid && password) {
+        if (userid && password && (propertyProvider.authToken == null)) {
             // token has to be acquired after the rootUrl is set.
             acquireAuthToken(propertyProvider, password)
         }
