@@ -398,7 +398,7 @@ class CurlCommand extends ExecutableCommand {
     }
 
 
-    private initOptions(userOptions) {
+    private void initOptions(userOptions) {
         def defaultOptions = initializeDefaultOptions userOptions
 
         def allOptions = [
@@ -418,6 +418,10 @@ class CurlCommand extends ExecutableCommand {
         }
 
         this.options = allOptions.flatten()
+
+        // Set allOptions before ensuring that a HTTP Content-Type header
+        // has been specified IF the command requires that header.
+        requireContentTypeHeader allOptions
     }
 
 
@@ -450,8 +454,6 @@ class CurlCommand extends ExecutableCommand {
         }
 
         defaultOptions << initializeAllHeaderOptions()
-        requireContentTypeHeader defaultOptions
-
         defaultOptions << initializeLocationOption(userOptions)
 
         defaultOptions.flatten()
@@ -579,9 +581,9 @@ class CurlCommand extends ExecutableCommand {
 
 
     private void requireContentTypeHeader(userOptions) {
-        def needsContentTypeHeader = isContentTypeHeaderNeeded userOptions
+        boolean needsContentTypeHeader = isContentTypeHeaderNeeded userOptions
 
-        if (needsContentTypeHeader && !httpHeaders?.getContentType() && !contentType) {
+        if (needsContentTypeHeader && !hasContentTypeHeader(userOptions)) {
             // Because a content type header needs to be generated, and no good
             // default value exists, then throw an exception if the user has
             // not supplied the content type header option nor the contentType
@@ -601,7 +603,13 @@ class CurlCommand extends ExecutableCommand {
      * requestBody on this CurlCommand is not empty; false otherwise.
      */
     private boolean isContentTypeHeaderNeeded(List userOptions) {
-        httpHeaders?.getContentType() || contentType || ((hasContentTypeHeader(userOptions) == false) && requestBody)
+        !hasContentTypeHeader(userOptions) && requestBody
+    }
+
+
+    private boolean hasContentTypeHeader(userOptions) {
+        def hasContentTypeInOptions = hasContentTypeHeaderInOptions userOptions
+        httpHeaders?.getContentType() || contentType || hasContentTypeInOptions
     }
 
 
@@ -621,21 +629,17 @@ class CurlCommand extends ExecutableCommand {
     }
 
 
-    private boolean isOptionMissing(List allOptions, CharSequence singleOption) {
-        hasOption(allOptions, singleOption) == false
-    }
-
-
     private boolean hasOption(List userOptions, CharSequence singleOption) {
         def foundOption = userOptions.find { option ->
             if (option instanceof List) {
                 hasOption option, singleOption
             } else {
-                option?.toLowerCase().contains singleOption.toLowerCase()
+                String optionString = option as String
+                optionString?.toLowerCase().contains singleOption.toLowerCase()
             }
         }
 
-        foundOption
+        foundOption as boolean
     }
 
 
@@ -644,7 +648,7 @@ class CurlCommand extends ExecutableCommand {
     }
 
 
-    private boolean hasContentTypeHeader(List userOptions) {
+    private boolean hasContentTypeHeaderInOptions(List userOptions) {
         hasOption userOptions, CONTENT_TYPE_HEADER
     }
 
@@ -1229,25 +1233,31 @@ class CurlCommand extends ExecutableCommand {
         }
     }
 
-/*
-    @Override
-    protected List loadCommandList() {
-        def commandListToExecute = []
 
-        commandListToExecute << "${executable}"
 
-        // In the case of CurlCommand, the dataProvider contains the entrypoint
-        // URL, so write that into the list ahead of the options to prevent
-        // certain cryptic curl failures.
-        dataProvider commandListToExecute
+// TODO brfaul 02 March 2017: Temporarily comment out the loadCommandList
+// method since it is not used yet. This code will be uncommented as the
+// refactoring of ExecutableCommand, CurlCommand, CommandInvoker, and
+// CurlInvoker progresses.
+//    @Override
+//    protected List loadCommandList() {
+//        def commandListToExecute = []
+//
+//        commandListToExecute << "${executable}"
+//
+//        // In the case of CurlCommand, the dataProvider contains the entrypoint
+//        // URL, so write that into the list ahead of the options to prevent
+//        // certain cryptic curl failures.
+//        dataProvider commandListToExecute
+//
+//        if (options.empty == false) {
+//            commandListToExecute << options
+//        }
+//
+//        commandListToExecute.flatten()
+//    }
 
-        if (options.empty == false) {
-            commandListToExecute << options
-        }
 
-        commandListToExecute.flatten()
-    }
-*/
     /**
      * Creates a String representation, suitable for display in the console,
      * of the command list for this CurlCommand. If the command list contains
