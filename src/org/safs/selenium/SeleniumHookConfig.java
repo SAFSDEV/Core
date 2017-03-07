@@ -8,6 +8,7 @@
  *
  * History:
  * APR 25, 2016    (SBJLWA) Initial release.
+ * MAR 07, 2017    (SBJLWA) Read setting of browser-drivers.
  */
 package org.safs.selenium;
 
@@ -117,6 +118,10 @@ public class SeleniumHookConfig extends DefaultHookConfig {
 			//Set window's state for "Remote Server Console": minimize, maximize
 			StringUtils.getSystemProperty(SeleniumConfigConstant.PROPERTY_CONSOLE_STATE,
 					config, DriverConstant.SECTION_SAFS_SELENIUM, SeleniumConfigConstant.ITEM_CONSOLE_STATE);
+
+			//Set browser-drivers to start with selenium-server: explorer, chrome, MicrosoftEdge etc.
+			StringUtils.getSystemProperty(SeleniumConfigConstant.PROPERTY_WEB_DRIVERS,
+					config, DriverConstant.SECTION_SAFS_SELENIUM, SeleniumConfigConstant.ITEM_WEB_DRIVERS);
 
 		}catch(Exception e){
 			IndependantLog.warn(StringUtils.debugmsg(false)+" Fail. Met "+StringUtils.debugmsg(e));

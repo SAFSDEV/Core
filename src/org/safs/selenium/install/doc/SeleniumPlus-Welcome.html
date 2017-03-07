@@ -1704,7 +1704,38 @@ SELENIUMNODE=node.sas.com:6666
 </pre></div>
 </ul>
 
-<h4 id="launch_selenium_server">4. Launch Selenium Server</h4>
+<h4>4. Configuration of browser drivers</h4>
+Selenium WebDriver needs specific browser-driver to communicate with a certain browser. When starting selenium server, <br>
+the browser drivers should also be specified so that the selenium WebDriver knows where to find them and <br>
+use them to talk to the browsers.<br>
+By default, the IE and Chrome driver will start with the selenium server; If user would like to use other browsers, he may<br>
+need to configure the browser driver in the .ini file or with VM parameter. As usual, the VM parameter has higher priority;<br>
+if browser drivers are set in both ways, VM parameter will be taken into account.<br>
+<b>NOTE:</b><span class="note">Some browser driver, such as firefox, is integrated into selenium, and needs not configured.</span><br>
+Examples as below:<br>
+
+<ul>
+<li>Configure in .ini file:
+<div class="appmap"><pre>
+<span class="comments"># <a href="../doc/org/safs/Constants.SeleniumConstants.html#ITEM_WEB_DRIVERS" target="api">WEB_DRIVERS</a> is used to set the specific browser
+# drivers (separated by colon :) to start with selenium server. 
+# The following setting means 3 drivers, IE, chrome and edge will
+# start with the selenium server.</span>
+[SAFS_SELENIUM]
+WEB_DRIVERS=explorer:chrome:MicrosoftEdge
+</pre></div>
+<p>
+
+<li>Configure by VM parameter:
+<pre><span class="comments">VM parameter '<a href="../doc/org/safs/Constants.SeleniumConstants.html#PROPERTY_WEB_DRIVERS" target="api">safs.selenium.web.drivers</a>' is used to 
+set the specific browser drivers (separated by colon :) to start with selenium server. 
+The following setting means 2 drivers, IE and edge will start with the selenium server,
+and it the class SampleTest, user can test with browser chrome or edge.</span>
+java <b>-Dsafs.selenium.web.drivers=chrome:MicrosoftEdge</b> SampleTest
+</pre>
+</ul>
+
+<h4 id="launch_selenium_server">5. Launch Selenium Server</h4>
 The Selenium Server must be running during the SE+ Test.
 <ul>
 <li>Launch automatically by SE+.
