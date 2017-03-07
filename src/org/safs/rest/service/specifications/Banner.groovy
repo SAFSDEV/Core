@@ -3,12 +3,12 @@ package org.safs.rest.service.specifications
 
 import static org.safs.rest.service.models.providers.SafsRestPropertyProvider.SAFSREST_PASSWORD_KEY
 import static org.safs.rest.service.models.providers.SafsRestPropertyProvider.SAFSREST_USERNAME_KEY
-import static org.safs.rest.service.models.providers.SafsRestPropertyProvider.isValidPort
 
 import org.safs.rest.service.models.consumers.RestConsumer
 import org.safs.rest.service.models.providers.SystemInformationProvider
 import org.safs.rest.service.models.version.CurlVersion
 import org.safs.rest.service.models.version.VersionInterface
+
 
 
 /**
@@ -46,14 +46,11 @@ class Banner {
     public static final EYECATCHER = '='
     public static final SINGLE_INDENTATION = '\t'
     public static final DOUBLE_INDENTATION = SINGLE_INDENTATION * 2
-    public static final String TRIPLE_INDENTATION = SINGLE_INDENTATION * 3
 
     public static final COPYRIGHT_SECTION = "${SINGLE_INDENTATION}Copyright:"
     public static final ENVIRONMENT_SECTION = "${SINGLE_INDENTATION}Environment:"
     public static final STANDARD_PROPERTIES_SECTION = "${SINGLE_INDENTATION}Standard properties:"
     public static final CUSTOM_PROPERTIES_SECTION = "${SINGLE_INDENTATION}Custom properties:"
-
-    public static final NO_PORT_SPECIFIED_MESSAGE = 'DEFAULT (No port specified in root URL.)'
 
     public static final READY_LINE = 'READY TO TEST!'
 
@@ -155,15 +152,6 @@ class Banner {
 
     private void addStandardProperties(List bannerItems) {
         def rootUrlMessage = "${DOUBLE_INDENTATION}root URL (under test): ${consumer?.rootUrl}"
-        def protocolMessage = "${TRIPLE_INDENTATION}protocol (under test): ${consumer?.protocol}"
-        def hostMessage = "${TRIPLE_INDENTATION}host (under test): ${consumer?.host}"
-
-        def portText = NO_PORT_SPECIFIED_MESSAGE
-        def port = consumer?.port
-        if (isValidPort(port)) {
-            portText = port
-        }
-        def portMessage = "${TRIPLE_INDENTATION}port (under test): ${portText}"
 
         def userNameMessage = "${DOUBLE_INDENTATION}userName: ${consumer?.userName}"
         def showStandardStreamsMessage =
@@ -175,9 +163,6 @@ class Banner {
         def standardProperties = [
                 STANDARD_PROPERTIES_SECTION,
                 rootUrlMessage,
-                protocolMessage,
-                hostMessage,
-                portMessage,
                 userNameMessage,
                 showStandardStreamsMessage,
                 authTokenMessage,
