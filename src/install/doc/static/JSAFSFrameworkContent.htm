@@ -291,9 +291,9 @@ Line Options:</b><br>
               </dd><dt><b>-Dsafs.test.defaultmap=mapid</b>
               </dt><dd>
               <p></p>
-              </dd><dt><a href="../doc/org/safs/tools/drivers/DriverConstant.html#PROPERTY_SAFS_TEST_DND_RELEASE_DELAY" target="api">
-                       <b>-Dsafs.test.dnd.release.delay=N</b></a>
-              </dt><dd>System property for the delay in millisecond before releasing mouse
+              </dd>
+              <dt><b>-D<a href="../doc/org/safs/tools/drivers/DriverConstant.html#PROPERTY_SAFS_TEST_DND_RELEASE_DELAY" target="api">safs.test.dnd.release.delay</a>=N</b></dt>
+              <dd>System property for the delay in millisecond before releasing mouse
               <p></p>
               </dd>
               </dl>
@@ -355,9 +355,12 @@ Line Options:</b><br>
               initialized/enabled for this log.
               <p></dd>
               
-              <dt><a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_CONSOLE_STATE" target="api">
-              <b>-Dsafs.selenium.console.state=MAX|MIN|NORMAL</b></a>
-              </dt><dd>Specifies the selenium server console's state.</dd>
+              <dt><b>-D<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_CONSOLE_STATE" target="api">safs.selenium.console.state</a>=MAX|MIN|NORMAL</b></dt>
+              <dd>Specifies the selenium server console's state.<p></dd>
+              
+              <dt><b>-D<a href="../doc/org/safs/Constants.SeleniumConstants.html#PROPERTY_WEB_DRIVERS" target="api">safs.selenium.web.drivers</a>=explorer:chrome:MicrosoftEdge</b></dt>
+              <dd>Defines specific drivers (separated by colon :) to start with selenium server.
+              By default, IE and Chrome driver will start up with selenium server.<p></dd>
               
 </dl></td></tr></tbody></table></td></tr></tbody></table>
 </p><p>Enhancements, corrections, and more detail will be added as necessary.
@@ -552,6 +555,10 @@ GATEWAYPORT=80
 <span class="comments">;= CONSOLE_STATE is used to set the state of
 ;= Selenium Server Console</span>
 ;CONSOLE_STATE=MIN|MAX|NORMAL
+<span class="comments">;= WEB_DRIVERS is used to set the specific browser
+;= drivers (separated by colon :) to start with selenium server. 
+;= IE and Chrome driver will be started by Default.</span>
+;<a href="../doc/org/safs/Constants.SeleniumConstants.html#ITEM_WEB_DRIVERS" target="api">WEB_DRIVERS</a>=explorer:chrome:MicrosoftEdge
 
 <span class="comments">;= Settings for Selnium1.0</span>
 ;HOOK=org.safs.selenium.SeleniumJavaHook
@@ -632,7 +639,7 @@ ProjectRoot=String/ProjectRootPath
 ;numLockOn=TRUE|FALSE
 <span class="comments">;UnexpectedAlertBehaviour ONLY works for Selenium2.0 engine for now</span>
 ;UnexpectedAlertBehaviour=accept|dismiss|ignore (default: ignore)
-;<a href="../doc/org/safs/tools/drivers/DriverConstant.html#KEY_SAFS_TEST_DND_RELEASE_DELAY" target="api">DndReleaseDelay=N</a>  (default: 800 millisecond)
+;<a href="../doc/org/safs/tools/drivers/DriverConstant.html#KEY_SAFS_TEST_DND_RELEASE_DELAY" target="api">DndReleaseDelay</a>=N  (default: 800 millisecond)
 
 <b>[SAFS_DIRECTORIES]</b>
 ;DATADIR=Datapool
