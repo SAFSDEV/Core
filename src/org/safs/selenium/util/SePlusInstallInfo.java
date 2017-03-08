@@ -1,4 +1,4 @@
-/** 
+/**
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  */
@@ -8,13 +8,20 @@
  *
  * History:
  * SEP 20, 2016    (SBJLWA) Initial release: Moved existing code from WebDriverGUIUtilities to here.
+ * MAR 02, 2016    (SBJLWA) Refactored code to get driver file according to the browser name.
+ *                          Changed the RELATIVE_DIR_EXTRA_SAFS: use 'extra' instead of 'samples/Selenium2.0/extra', all drivers have been put into the folder 'extra'.
  */
 package org.safs.selenium.util;
 
 import java.io.File;
 import java.io.FilenameFilter;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import org.safs.Constants.BrowserConstants;
 import org.safs.IndependantLog;
 import org.safs.StringUtils;
 import org.safs.natives.NativeWrapper;
@@ -25,17 +32,17 @@ import org.safs.tools.drivers.DriverConstant.SeleniumConfigConstant;
 /**
  * This class holds the information related to the Selenium, Embedded Java, Library etc.<br>
  * We provide support of Selenium Engine in both SAFS and SeleniumPlus.<br>
- * But the the file structure is different between SAFS and SeleniumPlus,<br> 
+ * But the the file structure is different between SAFS and SeleniumPlus,<br>
  * this class intends to detect automatically which one has been installed<br>
  * and deduce the related appropriate resources to use.<br>
- *  
+ *
  */
 public class SePlusInstallInfo{
 	private String extra = null;
 	private String library = null;
 	private String javabin = null;
 	private String product = null;
-	
+
 	/** The installation directory of SAFS or SeleniumPlus */
 	private File rootDir = null;
 	/** The extra directory holding extra resources related to Selenium */
@@ -46,14 +53,36 @@ public class SePlusInstallInfo{
 	private String javaexe = null;
 	/** The latest selenium-standalone jar file provided by SAFS or SeleniumPlus*/
 	private File seleniumStandaloneJar = null;
-	/** The chrome-driver executable file */
-	private File chromedriver = null;
-	/** The ie-driver executable file */
-	private File iedriver = null;
-	
+
+	/**
+	 * Holding the pair(<b>key</b>, driver-executable-file).<br/>
+	 * The <b>key</b> is the browser name, such as
+	 * <ul>
+	 * <li>{@link BrowserConstants#BROWSER_NAME_CHROME}
+	 * <li>{@link BrowserConstants#BROWSER_NAME_IE}
+	 * <li>{@link BrowserConstants#BROWSER_NAME_EDGE}
+	 * </ul>
+	 * The <b>value</b> is the File object of that driver executable.
+	 * <b>Note:</b>It supposed that only one executable exists for a certain browser
+	 * under an Operating System. If multiple executables exist, we may use a List as value.
+	 * */
+	private Map<String, File> browserToDriverFile = new HashMap<String, File>();
+
+	/**
+	 * Holding the pair(<b>key</b>, a <b>list</b> of driver-file-name).<br/>
+	 * The <b>key</b> is the browser name, such as
+	 * <ul>
+	 * <li>{@link BrowserConstants#BROWSER_NAME_CHROME}
+	 * <li>{@link BrowserConstants#BROWSER_NAME_IE}
+	 * <li>{@link BrowserConstants#BROWSER_NAME_EDGE}
+	 * </ul>
+	 * The <b>list</b> of driver-file-name contains the driver file name under different OS.
+	 */
+	private static Map<String, List<String>> browserToDriverFiles = new HashMap<String, List<String>>();
+
 	/** The instance of this class. */
 	private static SePlusInstallInfo instance = null;
-	
+
 	/**
 	 * @param extra String, 'extra' directory relative to root installation directory
 	 * @param library String, 'library' directory relative to root installation directory
@@ -67,14 +96,14 @@ public class SePlusInstallInfo{
 		this.javabin = javabin;
 		this.product = product;
 	}
-	
+
 	public boolean isSeleniumPlus(){
 		return PRODUCT_SELENIUM_PLUS.equals(product);
 	}
 	public boolean isSAFS(){
 		return PRODUCT_SAFS.equals(product);
 	}
-	
+
 	public static synchronized SePlusInstallInfo instance() throws SeleniumPlusException{
 		if(instance==null){
 			//TODO if it is not SELENIUM, assume it is SAFS. Future test precise condition to create instance.
@@ -82,7 +111,7 @@ public class SePlusInstallInfo{
 		}
 		return instance.validate();
 	}
-	
+
 	private static SePlusInstallInfo instanceSAFS(){
 		return  new SePlusInstallInfo(
 				RELATIVE_DIR_EXTRA_SAFS,
@@ -128,7 +157,7 @@ public class SePlusInstallInfo{
 	public void setSeleniumStandaloneJar(File seleniumStandaloneJar) {
 		this.seleniumStandaloneJar = seleniumStandaloneJar;
 	}
-	
+
 	public String getClassPath(boolean appendSystemClassPath){
 		String cp = seleniumStandaloneJar.getAbsolutePath();
 
@@ -145,28 +174,60 @@ public class SePlusInstallInfo{
 
 		return cp;
 	}
-	
+
 	public File getChromeDriver(){
-		if(chromedriver==null){
-			chromedriver = new CaseInsensitiveFile(extraDir, CHOROMEDRIVER_WINDOWS).toFile();
-			if(!chromedriver.isFile()) chromedriver = new CaseInsensitiveFile(extraDir, CHOROMEDRIVER_UNIX).toFile();
-			if(!chromedriver.isFile()){
-				IndependantLog.warn(StringUtils.debugmsg(false)+" chromedriver '"+chromedriver+"' is NOT a file.");
-			}
-		}
-		return chromedriver;
+		return getDriver(BrowserConstants.BROWSER_NAME_CHROME);
 	}
-	
+
 	public File getIEDriver(){
-		if(iedriver==null){
-			iedriver = new CaseInsensitiveFile(extraDir, IEDRIVER_WINDOWS).toFile();
-			if(!iedriver.isFile()){
-				IndependantLog.warn(StringUtils.debugmsg(false)+" iedriver '"+iedriver+"' is NOT a file.");
+		return getDriver(BrowserConstants.BROWSER_NAME_IE);
+	}
+
+	public File getEdgeDriver(){
+		return getDriver(BrowserConstants.BROWSER_NAME_EDGE);
+	}
+
+	/**
+	 *
+	 * @param browserName String, the key representing the browser, such as
+	 * <ul>
+	 * <li>{@link BrowserConstants#BROWSER_NAME_CHROME}
+	 * <li>{@link BrowserConstants#BROWSER_NAME_IE}
+	 * <li>{@link BrowserConstants#BROWSER_NAME_EDGE}
+	 * </ul>
+	 * @return File, the driver executable file.
+	 *               The return value is never null, we need to call {@link File#isFile()} to verify its validity.
+	 */
+	public File getDriver(String browserName){
+		String debugmsg = StringUtils.debugmsg(false);
+		File driver = browserToDriverFile.get(browserName);
+		if(driver==null || !driver.isFile()){
+			List<String> names = browserToDriverFiles.get(browserName);
+			if(names!=null){
+				//iterate through driver names, we use the first found.
+				for(String name:names){
+					driver = new CaseInsensitiveFile(extraDir, name).toFile();
+					browserToDriverFile.put(browserName, driver);
+					if(driver.isFile()) break;
+				}
+			}else{
+				IndependantLog.warn(debugmsg+browserName+" driver has not been supported!");
+			}
+
+			driver = browserToDriverFile.get(browserName);
+			if(driver==null){
+				//We should not return a null as result to keep the backward compatibility.
+				IndependantLog.debug(debugmsg+" cannot get '"+browserName+"' driver! Put a fake File in the Map.");
+				driver = new CaseInsensitiveFile(extraDir, FAKE_DRIVER_NAME).toFile();
+				browserToDriverFile.put(browserName, driver);
+			}else if(driver.isFile()){
+				IndependantLog.debug(debugmsg+browserName+" driver '"+driver+"' has been found.");
 			}
 		}
-		return iedriver;
+
+		return driver;
 	}
-	
+
 	/**
 	 * Validate the path of Selenium, Embedded Java, Library etc.<br>
 	 * @return SePlusInstallInfo, a valid SePlusInstallInfo holding correct information about Selenium, Embedded Java, Library etc.
@@ -177,7 +238,7 @@ public class SePlusInstallInfo{
 		String homeEnv = null;
 		String installationDir = null;//SEPLUS or SAFS installation directory
 		String errmsg = null;
-			
+
 		homeEnv = isSeleniumPlus()? ENV_SELENIUM_PLUS: ENV_SAFSDIR;
 		installationDir = System.getenv(homeEnv);
 		if(!StringUtils.isValid(installationDir)){
@@ -185,7 +246,7 @@ public class SePlusInstallInfo{
 			IndependantLog.debug(debugmsg+errmsg);
 			throw new SeleniumPlusException(errmsg);
 		}
-		
+
 		//Old SAFS installation is NOT shipped with 64 bit java, we have to use 32 bit java
 		if(isSAFS()){
 			File java64Dir = new CaseInsensitiveFile(installationDir, javabin).toFile();
@@ -195,7 +256,7 @@ public class SePlusInstallInfo{
 				IndependantLog.debug(debugmsg+" trying older 32-bit Java Installation Directory: "+ javabin);
 			}
 		}
-				
+
 		rootDir = new CaseInsensitiveFile(installationDir).toFile();
 		if(!rootDir.isDirectory()){
 			errmsg = "cannot confirm "+ product +" install directory at: "+rootDir.getAbsolutePath();
@@ -211,22 +272,22 @@ public class SePlusInstallInfo{
 		}
 		javaexe = System.getProperty(SeleniumConfigConstant.SELENIUMSERVER_JVM);
 		if(javaexe==null){
-			File javabindir = new CaseInsensitiveFile(rootDir, javabin).toFile();		
+			File javabindir = new CaseInsensitiveFile(rootDir, javabin).toFile();
 			if(javabindir.isDirectory()) javaexe = javabindir.getAbsolutePath()+File.separator+"java";
 			else{
 				IndependantLog.debug(debugmsg+"can not deduce java bin directory, "+javabindir.getAbsolutePath()+" is not a directory. Simply use 'java' as executable. ");
-				javaexe = "java"; 
+				javaexe = "java";
 			}
 		}
 		if(!StringUtils.isQuoted(javaexe)) javaexe=StringUtils.quote(javaexe);
-		
+
 		libraryDir = new CaseInsensitiveFile(rootDir, library).toFile();
 		if(!libraryDir.isDirectory()){
 			errmsg = "cannot deduce valid "+ product +" library directory at: "+libraryDir.getAbsolutePath();
 			IndependantLog.debug(debugmsg+errmsg);
 			throw new SeleniumPlusException(errmsg);
 		}
-		
+
 		//Find the latest selenium-server-standalone jar
 		File[] files = libraryDir.listFiles(new FilenameFilter(){ public boolean accept(File dir, String name){
 			try{ return name.toLowerCase().startsWith(NAME_PARTIAL_SELENIUM_SERVER_STDALONE);}catch(Exception x){ return false;}
@@ -243,15 +304,16 @@ public class SePlusInstallInfo{
 				seleniumStandaloneJar = afile;
 			}
 		}
-		
-		getChromeDriver();
-		getIEDriver();
-		
+
+		for(String browser:browserToDriverFiles.keySet()){
+			getDriver(browser);
+		}
+
 		IndependantLog.debug(debugmsg+this);
-		
+
 		return this;
 	}
-	
+
 	public String toString(){
 		StringBuffer sb = new StringBuffer();
 		sb.append(" \n");
@@ -259,44 +321,51 @@ public class SePlusInstallInfo{
 		sb.append(" the embedded java executable is '"+ javaexe+"'\n");
 		sb.append(" the library path is '"+ libraryDir+"'\n");
 		sb.append(" the extra path is '"+ extraDir+"'\n");
-		sb.append(" the chromedriver path is '"+ chromedriver+"'\n");
-		sb.append(" the iedriver path is '"+ iedriver+"'\n");
-		sb.append(" the selenium server jar is '"+ seleniumStandaloneJar+"'\n");			
+		for(String browser:browserToDriverFiles.keySet()){
+			sb.append(" the '"+browser+"' driver path is '"+ getDriver(browser) +"'\n");
+		}
+		sb.append(" the selenium server jar is '"+ seleniumStandaloneJar+"'\n");
 
 		return sb.toString();
 	}
-	
+
 	public static final String PRODUCT_SELENIUM_PLUS 	= "SeleniumPlus";
 	public static final String PRODUCT_SAFS 			= "SAFS";
-	
+
 	public static final String ENV_SELENIUM_PLUS 		= "SELENIUM_PLUS";
 	public static final String ENV_SAFSDIR 				= "SAFSDIR";
-	
-	public static final String RELATIVE_DIR_EXTRA_SAFS 			= "samples/Selenium2.0/extra";
+
+	public static final String RELATIVE_DIR_EXTRA_SAFS 			= "extra";
 	public static final String RELATIVE_DIR_LIB_SAFS 			= "lib";
 	public static final String RELATIVE_DIR_JAVA64_BIN_SAFS 	= "jre/Java64/jre/bin";
 	public static final String RELATIVE_DIR_JAVA32_BIN_SAFS 	= "jre/bin";
-	
+
 	public static final String RELATIVE_DIR_EXTRA_SEPLUS 		= "extra";
 	public static final String RELATIVE_DIR_LIB_SEPLUS 			= "libs";
 	public static final String RELATIVE_DIR_JAVA_BIN_SEPLUS 	= "Java64/jre/bin";
-	
+
 	public static final String JAR_SELENIUM_SAFS 				= "safsselenium.jar";
-	public static final String JAR_SELENIUM_SEPLUS 				= "seleniumplus.jar";	
+	public static final String JAR_SELENIUM_SEPLUS 				= "seleniumplus.jar";
 	public static final String JAR_JSTAFEMBEDDED		 		= "JSTAFEmbedded.jar";
 
 	// file:/c:/pathTo/libs/selenium-plus*.jar
 	public static final String INDICATOR_SEPLUS		 		= "/libs/selenium";
 	// file:/c:/pathTo/lib/safsselenium*.jar
 	public static final String INDICATOR_SAFS		 		= "/lib/safsselenium";
-	
+
 	public static final String CHOROMEDRIVER_WINDOWS 		= "chromedriver.exe";
 	public static final String CHOROMEDRIVER_UNIX	 		= "chromedriver";
-	
+
 	public static final String IEDRIVER_WINDOWS	 			= "IEDriverServer.exe";
-	
+
+	public static final String EDGEDRIVER_WINDOWS	 		= "MicrosoftWebDriver.exe";
+
+	public static final String OPERADRIVER_WINDOWS	 		= "operadriver.exe";
+
+	public static final String FAKE_DRIVER_NAME	 			= "aFakeBrowserDriver.exe";
+
 	public static final String NAME_PARTIAL_SELENIUM_SERVER_STDALONE	= "selenium-server-standalone";
-	
+
 	private static String _sourceLocation = null;
 	/**
 	 * @return String, the source location of this class. ( xxx/libs/selenium-plus*.jar or xxx/lib/safsselenium.jar)
@@ -304,12 +373,12 @@ public class SePlusInstallInfo{
 	public static String getSourceLocation(){
 		if(_sourceLocation==null){
 			URL domain = SePlusInstallInfo.class.getProtectionDomain().getCodeSource().getLocation();
-			_sourceLocation = domain.getFile();			
+			_sourceLocation = domain.getFile();
 		}
-		IndependantLog.info(StringUtils.debugmsg(false)+" class Location:"+ _sourceLocation); 
+		IndependantLog.info(StringUtils.debugmsg(false)+" class Location:"+ _sourceLocation);
 		return _sourceLocation;
 	}
-	
+
 	/**
 	 * @return true if we detect we are running from a SeleniumPlus installation (/libs/selenium-plus*.jar)
 	 */
@@ -317,12 +386,20 @@ public class SePlusInstallInfo{
 		String filepath = getSourceLocation();
 		return filepath.toLowerCase().contains(INDICATOR_SEPLUS);
 	}
-	
+
 	/**
 	 * @return true if we detect we are running from a SAFS installation (/lib/safsselenium.jar)
 	 */
 	public static boolean IsSAFS(){
 		String filepath = getSourceLocation();
 		return filepath.toLowerCase().contains(INDICATOR_SAFS);
+	}
+
+	static{
+		browserToDriverFiles.put(BrowserConstants.BROWSER_NAME_CHROME, Arrays.asList(CHOROMEDRIVER_WINDOWS, CHOROMEDRIVER_UNIX));
+		browserToDriverFiles.put(BrowserConstants.BROWSER_NAME_IE, Arrays.asList(IEDRIVER_WINDOWS));
+		browserToDriverFiles.put(BrowserConstants.BROWSER_NAME_EDGE, Arrays.asList(EDGEDRIVER_WINDOWS));
+		browserToDriverFiles.put(BrowserConstants.BROWSER_NAME_OPERA, Arrays.asList(OPERADRIVER_WINDOWS));
+		//Add more drivers for other browser
 	}
 }

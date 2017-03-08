@@ -1,4 +1,4 @@
-/** 
+/**
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  */
@@ -8,6 +8,7 @@
  *
  * History:
  * APR 25, 2016    (SBJLWA) Initial release.
+ * MAR 07, 2017    (SBJLWA) Read setting of browser-drivers.
  */
 package org.safs.selenium;
 
@@ -44,7 +45,7 @@ public class SeleniumHookConfig extends DefaultHookConfig {
 	 * <li> {@link SeleniumConfigConstant#SELENIUMSERVER_JVM_OPTIONS}
 	 * <li> {@link SeleniumConfigConstant#SELENIUMSERVER_JVM}
 	 * </ul>
-	 * 
+	 *
 	 * @see #setSystemProperties(ConfigureInterface)
 	 */
 	public void checkConfiguration() {
@@ -52,7 +53,7 @@ public class SeleniumHookConfig extends DefaultHookConfig {
 
 		setSystemProperties(config);
 	}
-	
+
 	/**
 	 * Set the configurations to System-Properties.<br>
 	 * If the System-Properties does NOT contain the 'property', then get the value from the ConfigureInterface and set to System-Properties;<br>
@@ -77,15 +78,15 @@ public class SeleniumHookConfig extends DefaultHookConfig {
 	public static void setSystemProperties(ConfigureInterface config){
 		try{
 			//Set browserName
-			StringUtils.getSystemProperty(SelectBrowser.SYSTEM_PROPERTY_BROWSER_NAME, 
+			StringUtils.getSystemProperty(SelectBrowser.SYSTEM_PROPERTY_BROWSER_NAME,
 					config, DriverConstant.SECTION_SAFS_SELENIUM, SelectBrowser.SYSTEM_PROPERTY_BROWSER_NAME);
 
 			//Set browserRemote
-			StringUtils.getSystemProperty(SelectBrowser.SYSTEM_PROPERTY_BROWSER_REMOTE, 
+			StringUtils.getSystemProperty(SelectBrowser.SYSTEM_PROPERTY_BROWSER_REMOTE,
 					config, DriverConstant.SECTION_SAFS_SELENIUM, SelectBrowser.SYSTEM_PROPERTY_BROWSER_REMOTE);
 
 			//Set SELENIUM "remote server/grid" host and port
-			StringUtils.getSystemProperty(SelectBrowser.SYSTEM_PROPERTY_SELENIUM_HOST, 
+			StringUtils.getSystemProperty(SelectBrowser.SYSTEM_PROPERTY_SELENIUM_HOST,
 					config, DriverConstant.SECTION_SAFS_SELENIUM, SeleniumConfigConstant.SELENIUMHOST,
 					SeleniumConfigConstant.DEFAULT_SELENIUM_HOST);
 			StringUtils.getSystemProperty(SelectBrowser.SYSTEM_PROPERTY_SELENIUM_PORT,
@@ -113,11 +114,15 @@ public class SeleniumHookConfig extends DefaultHookConfig {
 			//Set JVM for SELENIUM server
 			StringUtils.getSystemProperty(SeleniumConfigConstant.SELENIUMSERVER_JVM,
 					config, DriverConstant.SECTION_SAFS_SELENIUM, SeleniumConfigConstant.SELENIUMSERVER_JVM);
-			
+
 			//Set window's state for "Remote Server Console": minimize, maximize
 			StringUtils.getSystemProperty(SeleniumConfigConstant.PROPERTY_CONSOLE_STATE,
 					config, DriverConstant.SECTION_SAFS_SELENIUM, SeleniumConfigConstant.ITEM_CONSOLE_STATE);
-			
+
+			//Set browser-drivers to start with selenium-server: explorer, chrome, MicrosoftEdge etc.
+			StringUtils.getSystemProperty(SeleniumConfigConstant.PROPERTY_WEB_DRIVERS,
+					config, DriverConstant.SECTION_SAFS_SELENIUM, SeleniumConfigConstant.ITEM_WEB_DRIVERS);
+
 		}catch(Exception e){
 			IndependantLog.warn(StringUtils.debugmsg(false)+" Fail. Met "+StringUtils.debugmsg(e));
 		}

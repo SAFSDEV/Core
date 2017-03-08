@@ -1,4 +1,4 @@
-/** 
+/**
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
@@ -8,6 +8,7 @@ package org.safs.tools.drivers;
  * APR 07, 2015    (SBJLWA) Add static class SeleniumConfigConstant.
  * SEP 24, 2015    (SBJLWA) Add static class MailConstant.
  * OCT 09, 2016    (SBJLWA) Modified 2 wrongly-named constant, corrected a typo and added constants about DndReleaseDelay.
+ * MAR 07, 2017    (SBJLWA) Made SeleniumConfigConstant subclass of SeleniumConstants.
  */
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
@@ -67,7 +68,7 @@ public class DriverConstant extends JavaConstant{
     public static final int STATUS_INVALID_FILE_IO          = StatusCodes.INVALID_FILE_IO;
 
 	/** "4". No processing has occurred.
-	 * This generally means an engine or driver has not accepted responsibility 
+	 * This generally means an engine or driver has not accepted responsibility
 	 * for the record.  Noone has tried to execute it yet.
 	 */
     public static final int STATUS_SCRIPT_NOT_EXECUTED      = StatusCodes.SCRIPT_NOT_EXECUTED;       //for scripts AND test tables
@@ -75,38 +76,38 @@ public class DriverConstant extends JavaConstant{
 	/** "8". An  EXIT TABLE Driver Command flags premature termination.**/
     public static final int STATUS_EXIT_TABLE_COMMAND       = StatusCodes.EXIT_TABLE_COMMAND;
 
-	/** "16". IGNORE this status code. 
-	 * Another process has handled 'stuff'.  
-	 * Generally, a Driver Command will have set this if it already handled all 
+	/** "16". IGNORE this status code.
+	 * Another process has handled 'stuff'.
+	 * Generally, a Driver Command will have set this if it already handled all
 	 * necessary activities like incrementing counters, etc...
 	 */
     public static final int STATUS_IGNORE_RETURN_CODE       = StatusCodes.IGNORE_RETURN_CODE;      //drivers ignore this one
 
-    /** "256". BRANCH TO BLOCKID. 
+    /** "256". BRANCH TO BLOCKID.
 	 * Used by Driver Command to denote that branching is expected.
 	 * added 11.15.2005 (bolawl) RJL
 	 */
-    public static final int STATUS_BRANCH_TO_BLOCKID       = StatusCodes.BRANCH_TO_BLOCKID; 
-    
-	/** "5". User-Defined TEST FAILURE pre-logged. 
-	 * The driver should increment the appropriate counters.
-	 */
-    public static final int STATUS_TESTFAILURE_LOGGED       = 5;      
+    public static final int STATUS_BRANCH_TO_BLOCKID       = StatusCodes.BRANCH_TO_BLOCKID;
 
-	/** "6". User-Defined TEST SUCCESS pre-logged. 
+	/** "5". User-Defined TEST FAILURE pre-logged.
 	 * The driver should increment the appropriate counters.
 	 */
-    public static final int STATUS_TESTSUCCESS_LOGGED       = 6;      
+    public static final int STATUS_TESTFAILURE_LOGGED       = 5;
 
-	/** "7". User-Defined TEST WARNING pre-logged. 
+	/** "6". User-Defined TEST SUCCESS pre-logged.
 	 * The driver should increment the appropriate counters.
 	 */
-    public static final int STATUS_TESTWARNING_LOGGED       = 7;      
+    public static final int STATUS_TESTSUCCESS_LOGGED       = 6;
+
+	/** "7". User-Defined TEST WARNING pre-logged.
+	 * The driver should increment the appropriate counters.
+	 */
+    public static final int STATUS_TESTWARNING_LOGGED       = 7;
 
 	/** "safstid.ini" <br>
 	 * Default Configuration filename used by TID Driver.**/
 	public static final String DEFAULT_CONFIGURE_FILENAME = "safstid.ini";
-	
+
 	/** "test.ini" <br>
 	 * Default Configuration filename used by org.safs.model.tools.AbstractRunner,
 	 * it serves as the default configuration file for any driver launched from within AbstractRunner. **/
@@ -119,15 +120,15 @@ public class DriverConstant extends JavaConstant{
 	/** "org.safs.tools.input.SAFSINPUT" <br>
 	 * Default InputInterface used by TID Driver.**/
 	public static final String DEFAULT_INPUT_INTERFACE = "org.safs.tools.input.SAFSINPUT";
-	
+
 	/** "org.safs.tools.input.SAFSMAPS" <br>
 	 * Default MapsInterface used by TID Driver.**/
 	public static final String DEFAULT_MAPS_INTERFACE = "org.safs.tools.input.SAFSMAPS";
-	
+
 	/** "org.safs.tools.vars.SAFSVARS" <br>
 	 * Default VarsInterface used by TID Driver.**/
 	public static final String DEFAULT_VARS_INTERFACE = "org.safs.tools.vars.SAFSVARS";
-	
+
 	/** "org.safs.tools.logs.SAFSLOGS" <br>
 	 * Default LogsInterface used by TID Driver.**/
 	public static final String DEFAULT_LOGS_INTERFACE = "org.safs.tools.logs.SAFSLOGS";
@@ -135,36 +136,36 @@ public class DriverConstant extends JavaConstant{
 	/** "org.safs.tools.stacks.SAFSSTACKS" <br>
 	 * Default StacksInterface used by TID Driver.**/
 	public static final String DEFAULT_STACKS_INTERFACE = "org.safs.tools.stacks.SAFSSTACKS";
-	
+
 	/** "org.safs.tools.status.SAFSSTATUS" <br>
 	 * Default StatusInterface used by TID Driver.**/
 	public static final String DEFAULT_STATUS_INTERFACE = "org.safs.tools.status.SAFSSTATUS";
-	
+
 	/** "org.safs.tools.counters.SAFSCOUNTERS" <br>
 	 * Default CountersInterface used by TID Driver.**/
 	public static final String DEFAULT_COUNTERS_INTERFACE = "org.safs.tools.counters.SAFSCOUNTERS";
-	
+
 	/** "safs.config.locator"<br>
-	 * System Property identifying an alternate class to locate driver 
-	 * configuration information. The class is required to implement the 
+	 * System Property identifying an alternate class to locate driver
+	 * configuration information. The class is required to implement the
 	 * org.safs.tools.drivers.ConfigureLocatorInterface<br>
 	 * JVM command line: -Dsafs.config.locator=classname <br>
 	 * The default locator is listed above.<br>
 	 * @see ConfigureLocatorInterface **/
 	public static final String PROPERTY_SAFS_CONFIG_LOCATOR ="safs.config.locator";
-	
+
 	/** "," <br>
 	 * Default field separator used on input sources.**/
 	public static final String DEFAULT_FIELD_SEPARATOR = ",";
-	
+
 	/** ".CDD" <br>
 	 * Default CYCLE testname suffix.**/
 	public static final String DEFAULT_CYCLE_TESTNAME_SUFFIX = ".CDD";
-	
+
 	/** ".STD" <br>
 	 * Default SUITE testname suffix.**/
 	public static final String DEFAULT_SUITE_TESTNAME_SUFFIX = ".STD";
-	
+
 	/** ".SDD" <br>
 	 * Default STEP testname suffix.**/
 	public static final String DEFAULT_STEP_TESTNAME_SUFFIX = ".SDD";
@@ -175,9 +176,9 @@ public class DriverConstant extends JavaConstant{
 
 	/** "1", AbstractLogFacility.LOGMODE_TOOL;
 	 * TOOLLOG logmode enabled.  This can be OR'd with other logmodes.<br>
-	 * The tool log is whatever proprietary logging mechanism is available from the underlying 
-	 * execution engine(s).  For example, with Rational this would be the TestManager log.  
-	 * Of course, only those messages issued by the particular engine will appear in that tools 
+	 * The tool log is whatever proprietary logging mechanism is available from the underlying
+	 * execution engine(s).  For example, with Rational this would be the TestManager log.
+	 * Of course, only those messages issued by the particular engine will appear in that tools
 	 * proprietary log.  But the SAFSLOGS logs will contain messages issued from ALL engines.**/
 	public static final long DRIVER_TOOLLOG_ENABLED = AbstractLogFacility.LOGMODE_TOOL;
 
@@ -194,10 +195,10 @@ public class DriverConstant extends JavaConstant{
 
 	/** "8", AbstractLogFacility.LOGMODE_CONSOLE;
 	 * CONSOLELOG logmode enabled.  This can be OR'd with other logmodes.<br>
-	 * The console log is whatever proprietary log console is available from the underlying 
-	 * execution engine.  For example, with Rational this would be the Console written to 
+	 * The console log is whatever proprietary log console is available from the underlying
+	 * execution engine.  For example, with Rational this would be the Console written to
 	 * with SQAConsoleWrite.<br>
-	 * Of course, only those messages issued by the particular engine will appear in that tools 
+	 * Of course, only those messages issued by the particular engine will appear in that tools
 	 * proprietary console.  But the SAFSLOGS logs will contain messages issued from ALL engines.**/
 	public static final long DRIVER_CONSOLELOG_ENABLED = AbstractLogFacility.LOGMODE_CONSOLE;
 
@@ -215,10 +216,10 @@ public class DriverConstant extends JavaConstant{
 
 	/** "127", AbstractLogFacility.LOGMODE_MAX;
 	 * MAXLOGMODE enabled.  This enables all logmodes.<br>
-	 * Note, this constant value can change in future releases as additional logmodes are 
+	 * Note, this constant value can change in future releases as additional logmodes are
 	 * created.  The developer should not count on this constant value being what it is today.<br<
-	 * The user should be cautious in using MAX_LOGMODE as it is very resource intensive.  
-	 * Also, using MAX_LOGMODE means that new logmodes will automatically be enabled once they 
+	 * The user should be cautious in using MAX_LOGMODE as it is very resource intensive.
+	 * Also, using MAX_LOGMODE means that new logmodes will automatically be enabled once they
 	 * become available.  And that may be an undesirable, performance-hindering side-affect.<br>
 	 * Note LOGMODE values of 32, 64, and 128 are RESERVED.**/
 	public static final long DRIVER_MAX_LOGMODE_ENABLED = AbstractLogFacility.LOGMODE_MAX;
@@ -277,7 +278,7 @@ public class DriverConstant extends JavaConstant{
 	/** "CYCLE" <br>
 	 * CYCLE test level constant.**/
 	public static final String DRIVER_CYCLE_TESTLEVEL = "CYCLE";
-	
+
 	/** "SUITE" <br>
 	 * SUITE test level constant.**/
 	public static final String DRIVER_SUITE_TESTLEVEL = "SUITE";
@@ -288,7 +289,7 @@ public class DriverConstant extends JavaConstant{
 
 	/** "datapool"<br>
 	 * Default project datapool subdirectory.<br>
-	 * This is where test tables and app maps are stored by default. 
+	 * This is where test tables and app maps are stored by default.
 	 * Generally, all inputs except benchmarks are placed here.<br>
 	 * Default resolves to .\safsproject\datapool\ **/
 	public static final String DEFAULT_PROJECT_DATAPOOL = "datapool";
@@ -307,12 +308,12 @@ public class DriverConstant extends JavaConstant{
 	 * Default project differences subdirectory.<br>
 	 * Default resolves to .\safsproject\datapool\dif\ **/
 	public static final String DEFAULT_PROJECT_DIF = "dif";
-	
+
 	/** "test"<br>
 	 * Default project test/actuals subdirectory.<br>
 	 * Default resolves to .\safsproject\datapool\test\ **/
 	public static final String DEFAULT_PROJECT_TEST = "test";
-	
+
 	/** "safs.modified.root"<br>
 	 * System property for a root directory Property that was dynamically altered at runtime. <br>
 	 **/
@@ -320,8 +321,8 @@ public class DriverConstant extends JavaConstant{
 
 	/** "safs.driver.root"<br>
 	 * System property for the root driver directory. <br>
-	 * If this property is not provided at startup, the driver must resort to 
-	 * searching the entire CLASSPATH looking for a suitable "safstid.ini" 
+	 * If this property is not provided at startup, the driver must resort to
+	 * searching the entire CLASSPATH looking for a suitable "safstid.ini"
 	 * configuration file.<br>
 	 * JVM command line: -Dsafs.driver.root=fullpath **/
 	public static final String PROPERTY_SAFS_DRIVER_ROOT = "safs.driver.root";
@@ -334,38 +335,38 @@ public class DriverConstant extends JavaConstant{
 
 	/** "safs.project.root"<br>
 	 * System property for the root project directory. <br>
-	 * If this property is not provided at startup, the driver must hope to 
+	 * If this property is not provided at startup, the driver must hope to
 	 * find a suitable setting in the provided or sought configuration file(s).<br>
 	 * JVM command line: -Dsafs.project.root=fullpath **/
 	public static final String PROPERTY_SAFS_PROJECT_ROOT = "safs.project.root";
 
 	/** "safs.modified.config"<br>
-	 * System Property for a config file Property that was dynamically altered at runtime. <br> 
+	 * System Property for a config file Property that was dynamically altered at runtime. <br>
      **/
 	public static final String PROPERTY_SAFS_MODIFIED_CONFIG ="safs.modified.config";
-	
+
 	/** "safs.driver.config"<br>
-	 * System Property identifying the path to an alternate driver 
+	 * System Property identifying the path to an alternate driver
 	 * configuration file (other than safstid.ini in the driver root location.<br>
 	 * JVM command line: -Dsafs.driver.config=string|path **/
 	public static final String PROPERTY_SAFS_DRIVER_CONFIG ="safs.driver.config";
-	
+
 	/** "safs.project.config"<br>
-	 * System Property identifying the path to an alternate project 
-	 * configuration file (other than safstid.ini in the default 
+	 * System Property identifying the path to an alternate project
+	 * configuration file (other than safstid.ini in the default
 	 * project configuration location.<br>
 	 * JVM command line: -Dsafs.project.config=string|path **/
 	public static final String PROPERTY_SAFS_PROJECT_CONFIG ="safs.project.config";
 
 	/** "safs.config.paths"<br>
-	 * System property identifying chained configuration file paths to be used by 
-	 * running engines or other Java processes.  Each chained file path is separated by 
+	 * System property identifying chained configuration file paths to be used by
+	 * running engines or other Java processes.  Each chained file path is separated by
 	 * the normal File.pathSeparator for the current platform.<br>
 	 * Mac Ex: /SAFS/Project/TIDTest.ini:/SAFS/Project/safstid.ini:/SAFS/safstid.ini<br>
 	 * Win Ex: C:\SAFS\Project\TIDTest.ini;C:\SAFS\Project\safstid.ini;C:\SAFS\safstid.ini
 	 */
 	public static final String PROPERTY_SAFS_CONFIG_PATHS = "safs.config.paths";
-	
+
     /** "safs.driver.autolaunch" <br>
 	 * JVM command line: -Dsafs.driver.autolaunch=TRUE|FALSE **/
 	public static final String PROPERTY_SAFS_DRIVER_AUTOLAUNCH ="safs.driver.autolaunch";
@@ -389,7 +390,7 @@ public class DriverConstant extends JavaConstant{
     /** "safs.test.secswaitforcomponent" <br>
 	 * JVM command line: -Dsafs.test.secswaitforcomponent=0-N **/
 	public static final String PROPERTY_SAFS_TEST_SECSWAITFORCOMPONENT ="safs.test.secswaitforcomponent";
-	
+
 	/** the default value of the number lock, it is the current number lock status. */
 	public static final boolean DEFAULT_NUMLOCK_STATUS = Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_NUM_LOCK);
 	/** "safs.test.numLockon" <br>
@@ -399,7 +400,7 @@ public class DriverConstant extends JavaConstant{
 	 * [SAFS_TEST]
 	 * numLockOn=TRUE|FALSE */
 	public static final String KEY_SAFS_TEST_NUMLOCKON ="numLockOn";
-	
+
 	/** 'Ignore' it is the default value for handling the unexpected alert dialog */
 	public static final String DEFAULT_UNEXPECTED_ALERT_BEHAVIOUR = "ignore";
 	/** "safs.test.unexpected_alert_behaviour" <br>
@@ -419,7 +420,7 @@ public class DriverConstant extends JavaConstant{
 	 * [SAFS_TEST]
 	 * DndReleaseDelay=N */
 	public static final String KEY_SAFS_TEST_DND_RELEASE_DELAY ="DndReleaseDelay";
-	
+
     /** "safs.log.level" <br>
 	 * JVM command line: -Dsafs.log.level=ERROR|WARN|PASS|GENERIC|INDEX|INFO|DEBUG **/
 	public static final String PROPERTY_SAFS_LOG_LEVEL ="safs.log.level";
@@ -480,7 +481,7 @@ public class DriverConstant extends JavaConstant{
 	/** 'safs.rmi.server'<br>
 	 * JVM command line: -Dsafs.rmi.server=org.safs.selenium.rmi.server.SeleniumServer */
 	public static final String PROPERTY_RMISERVER = "safs.rmi.server";
-	
+
 	/** 'org.safs.selenium.rmi.server.SeleniumServer' */
 	public static final String DEFAULT_RMISERVER_CLASSNAME = "org.safs.selenium.rmi.server.SeleniumServer";
 
@@ -490,7 +491,7 @@ public class DriverConstant extends JavaConstant{
     /** "DriverRoot" <br>
 	 * Predefined "item" in the SAFS_DRIVER section of a SAFS Configuration source. **/
 	public static final String ITEM_DRIVER_ROOT = "DriverRoot";
-	
+
     /** "STAF" <br>
 	 * Predefined "section" of a Driver Configuration source. **/
 	public static final String SECTION_STAF ="STAF";
@@ -553,11 +554,11 @@ public class DriverConstant extends JavaConstant{
 
 	/**
 	 * Define some constant strings used under section {@link DriverConstant#SECTION_SAFS_DRIVERCOMMANDS} for Mail.
-	 * 
+	 *
 	 * @see org.safs.tools.mail.Mailer
 	 */
 	public static final class MailConstant{
-		
+
 		/** "OUT_MAILSERVER" define the mail server for sending mails. */
 		public static final String OUT_MAILSERVER 			="OUT_MAILSERVER";
 		/** "OUT_MAILSERVERPORT" define the port of mail server for sending mails. */
@@ -569,26 +570,26 @@ public class DriverConstant extends JavaConstant{
 		public static final String OUT_MAILUSER 			="OUT_MAILUSER";
 		/** "OUT_MAILPASS" define the password for authentication on mail server for sending mails. */
 		public static final String OUT_MAILPASS 			="OUT_MAILPASS";
-		
+
 		/** "IN_MAILSERVER" define the mail server for receiving mails. */
 		public static final String IN_MAILSERVER 			="IN_MAILSERVER";
 		/** "IN_MAILSERVERPORT" define the port of mail server for receiving mails. */
 		public static final String IN_MAILSERVERPORT 		="IN_MAILSERVERPORT";
-		/** "IN_MAILSERVERPROTOCOL" define the protocol used by mail server for receiving mails. 
+		/** "IN_MAILSERVERPROTOCOL" define the protocol used by mail server for receiving mails.
 		 * The value could be IMAP, POP3 etc. */
 		public static final String IN_MAILSERVERPROTOCOL 	="IN_MAILSERVERPROTOCOL";
 		/** "IN_MAILUSER" define the user for authentication on mail server for receiving mails. */
 		public static final String IN_MAILUSER 				="IN_MAILUSER";
 		/** "IN_MAILPASS" define the password for authentication on mail server for receiving mails. */
 		public static final String IN_MAILPASS 				="IN_MAILPASS";
-		
+
 	}
 	/**
-	 * 
+	 *
 	 * Define some constant strings used under section {@link DriverConstant#SECTION_SAFS_SELENIUM} for SELENIUM.
 	 */
-	public static final class SeleniumConfigConstant{
-		
+	public static final class SeleniumConfigConstant extends SeleniumConstants{
+
 		/** "SELENIUMHOST" define the host name where the SELENIUM "standalone server"/"grid hub" will run
 		 * @see #SELENIUMPORT
 		 * */
@@ -597,7 +598,7 @@ public class DriverConstant extends JavaConstant{
 		public static final String DEFAULT_SELENIUM_HOST = LOCAL_HOST;
 		/** '127.0.0.1' the default host where the SELENIUM server will run*/
 		public static final String DEFAULT_SELENIUM_HOST_IP = LOCAL_HOST_IP;
-				
+
 		/** "SELENIUMPORT" define the port number on which the SELENIUM "standalone server"/"grid hub" will run
 		 * @see #SELENIUMHOST
 		 * */
@@ -606,20 +607,20 @@ public class DriverConstant extends JavaConstant{
 		public static final int DEFAULT_SELENIUM_PORT_INT = 4444;
 		/**'4444' the default port number on which the SELENIUM "standalone server"/"grid hub" will run */
 		public static final String DEFAULT_SELENIUM_PORT = String.valueOf(DEFAULT_SELENIUM_PORT_INT);
-		
+
 		/** 5555 */
 		public static final int DEFAULT_SELENIUM_NODE_PORT_INT = 5555;
 		/**'5555' the default port number on which the SELENIUM node will run */
 		public static final String DEFAULT_SELENIUM_NODE_PORT = String.valueOf(DEFAULT_SELENIUM_NODE_PORT_INT);
-		
+
 		/** "SELENIUMNODE" define the selenium nodes to run. The value is something like "node1.machine.name:port:nodeconfig;node2.machine.name:port:nodeconfig".
 		 * If this is not provided, then {@link #SELENIUMHOST} will be considered as "standalone server"
 		 * If this is provided, then {@link #SELENIUMHOST} will be considered as "grid hub" on which all nodes will register.
 		 * @see #SELENIUMHOST
 		 * */
 		public static final String SELENIUMNODE ="SELENIUMNODE";
-		
-		/** 
+
+		/**
 		 * "SELENIUMSERVER_JVM_Xmx" define the maximum memory to use for SELENIUM server<br>
 		 * To use a very high memory, 4g for example, you may need to specify the {@link #SELENIUMSERVER_JVM} to use 64 bits Java.<br>
 		 * @see #SELENIUMSERVER_JVM_Xms
@@ -627,15 +628,15 @@ public class DriverConstant extends JavaConstant{
 		public static final String SELENIUMSERVER_JVM_Xmx ="SELENIUMSERVER_JVM_Xmx";
 		/** "2g" default maximum memory for SELENIUM server*/
 		public static String DEFAULT_JVM_MEMORY_MAXIMUM = "2g";
-		
+
 		/** "SELENIUMSERVER_JVM_Xms" define the minimum memory to use for SELENIUM server
 		 * @see #SELENIUMSERVER_JVM_Xmx
 		 * */
 		public static final String SELENIUMSERVER_JVM_Xms ="SELENIUMSERVER_JVM_Xms";
 		/** "512m" default minimum memory for SELENIUM server*/
 		public static String DEFAULT_JVM_MEMORY_MINIMUM = "512m";
-		
-		/** 
+
+		/**
 		 * "SELENIUMSERVER_JVM_OPTIONS" define the JVM Options for SELENIUM server.
 		 * {@link #SELENIUMSERVER_JVM_Xms} and {@link #SELENIUMSERVER_JVM_Xmx} are finer, if they exist then
 		 * they will be used instead of the options specified in {@link #SELENIUMSERVER_JVM_OPTIONS}.<br>
@@ -656,8 +657,8 @@ public class DriverConstant extends JavaConstant{
 		 * SELENIUMSERVER_JVM="D:\jdk\jdk1.7.0_45_64bit\bin\java.exe"
 		 */
 		public static final String SELENIUMSERVER_JVM ="SELENIUMSERVER_JVM";
-		
-		/** 
+
+		/**
 		 * "CONSOLE_STATE" defines the state of the JVM console for SELENIUM server<br>
 		 * The possible value could be: MAX|MIN|NORMAL|MAXIMIZE|MINIMIZE<br>
 		 * @see #SELENIUMSERVER_JVM_Xms
@@ -666,25 +667,25 @@ public class DriverConstant extends JavaConstant{
 	    /** "safs.selenium.console.state" defines the state of the JVM console for SELENIUM server<br>
 		 * JVM command line: -Dsafs.selenium.console.state=MAX|MIN|NORMAL|MAXIMIZE|MINIMIZE **/
 		public static final String PROPERTY_CONSOLE_STATE ="safs.selenium.console.state";
-		
+
 	}
-	
+
 	/** "GATEWAYHOST" define the HTTP PROXY host name to connect Internet
 	 * @see #GATEWAYPORT
 	 * */
 	public static final String GATEWAYHOST ="GATEWAYHOST";
-	
+
 	/** "GATEWAYPORT" define the HTTP PROXY port number to connect Internet
 	 * @see #GATEWAYHOST
 	 * */
 	public static final String GATEWAYPORT ="GATEWAYPORT";
-	
+
 	/** "PROXY_BYPASS_ADDRESS" define the HTTP PROXY "bypass address" when connecting INTRANET
 	 * @see #GATEWAYHOST
 	 * @see #GATEWAYPORT
 	 * */
 	public static final String PROXY_BYPASS_ADDRESS ="PROXY_BYPASS_ADDRESS";
-	
+
     /** "SAFS_WINRUNNER" <br>
 	 * Predefined "section" of a Driver Configuration source. **/
 	public static final String SECTION_SAFS_WINRUNNER ="SAFS_WINRUNNER";
@@ -720,11 +721,11 @@ public class DriverConstant extends JavaConstant{
     /** "SAFS_DIFFVIEWER" <br>
 	 * Predefined "section" of a Driver Configuration source. **/
 	public static final String SECTION_SAFS_DIFFVIEWER ="SAFS_DIFFVIEWER";
-	
+
 	/** "SAFS_JREX" <br>
 	 * Predefined "section" of a Driver Configuration source. **/
 	public static final String SECTION_SAFS_JREX ="SAFS_JREX";
-	
+
 	/** "SAFS_OCR" <br>
 	 * Predefined "section" of a Driver Configuration source. **/
 	public static final String SECTION_SAFS_OCR ="SAFS_OCR";
@@ -732,7 +733,7 @@ public class DriverConstant extends JavaConstant{
 	/** "SAFS_IBT" <br>
 	 * Predefined "section" of a Driver Configuration source. **/
 	public static final String SECTION_SAFS_IBT ="SAFS_IBT";
-	
+
 	/** "SAFSDIR" <br>
 	 * System Environment variable for SAFS Installation Directory **/
 	public static final String SYSTEM_PROPERTY_SAFS_DIR = "SAFSDIR";
@@ -740,57 +741,57 @@ public class DriverConstant extends JavaConstant{
 	/** "STAFDIR" <br>
 	 * System Environment variable for STAF Installation Directory **/
 	public static final String SYSTEM_PROPERTY_STAF_DIR = "STAFDIR";
-	
+
 	/** DOMAIN_SEPARATOR*/
 	public static final String DOMAIN_SEPARATOR = ";";
-	
+
 	/** "Android Client" */
-	public static final String ANDROID_CLIENT_DISPLAY = "Android Client";	
+	public static final String ANDROID_CLIENT_DISPLAY = "Android Client";
 	/** "Android" */
 	public static final String ANDROID_CLIENT_TEXT = "Android";
 
 	/** "Java Client" */
-	public static final String JAVA_CLIENT_DISPLAY = "Java Client";	
+	public static final String JAVA_CLIENT_DISPLAY = "Java Client";
 	/** "Java" */
 	public static final String JAVA_CLIENT_TEXT = "Java";
 
 	/** "HTML Client" */
-	public static final String HTML_CLIENT_DISPLAY = "HTML Client";	
+	public static final String HTML_CLIENT_DISPLAY = "HTML Client";
 	/** "HTML" */
 	public static final String HTML_CLIENT_TEXT = "Html";
 
 	/** ".Net Client" */
-	public static final String NET_CLIENT_DISPLAY = ".Net Client";	
+	public static final String NET_CLIENT_DISPLAY = ".Net Client";
 	/** "Net" */
 	public static final String NET_CLIENT_TEXT = "Net";
 
 	/** "RCP Client" */
-	public static final String RCP_CLIENT_DISPLAY = "RCP Client";	
+	public static final String RCP_CLIENT_DISPLAY = "RCP Client";
 	/** "Win" */
 	public static final String RCP_CLIENT_TEXT = "Win";
 
 	/** "Flex Client" */
-	public static final String FLEX_CLIENT_DISPLAY = "Flex Client";	
+	public static final String FLEX_CLIENT_DISPLAY = "Flex Client";
 	/** "Html" */
 	public static final String FLEX_CLIENT_TEXT = "Flex";
 
 	/** "Win Client" */
-	public static final String WIN_CLIENT_DISPLAY = "Win Client";	
+	public static final String WIN_CLIENT_DISPLAY = "Win Client";
 	/** "Win" */
 	public static final String WIN_CLIENT_TEXT = "Win";
 
 	/** "Swt Client" */
-	public static final String SWT_CLIENT_DISPLAY = "Swt Client";	
+	public static final String SWT_CLIENT_DISPLAY = "Swt Client";
 	/** "Swt" */
 	public static final String SWT_CLIENT_TEXT = "Swt";
 
 	/** "SELENIUM_PLUS" */
 	public static final String SYSTEM_PROPERTY_SELENIUMPLUS_DIR = "SELENIUM_PLUS";
-	
+
 	/** "MORE_ENGINES" */
 	public static final String MORE_ENGINES = "MORE_ENGINES";
 
 	/** 'showMonitor' */
-	public static final String SHOW_MONITOR 			    = "showMonitor";	  
+	public static final String SHOW_MONITOR 			    = "showMonitor";
 }
 
