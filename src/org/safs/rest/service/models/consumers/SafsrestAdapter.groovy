@@ -1,16 +1,10 @@
 package org.safs.rest.service.models.consumers
 
-import org.safs.rest.service.commands.CommandInvoker
-import org.safs.rest.service.commands.curl.CurlInvoker
-import org.safs.rest.service.commands.curl.Response
-import org.safs.rest.service.models.providers.SafsRestPropertyProvider
-import org.safs.rest.service.models.providers.authentication.TokenProviderEntrypoints
-import org.safs.rest.service.commands.curl.CurlCommand
-
-import java.util.Map;
-import org.apache.hc.core5.http.HttpException
-
 import org.apache.hc.core5.testing.framework.ClientPOJOAdapter
+import org.safs.rest.service.commands.CommandInvoker
+import org.safs.rest.service.commands.curl.CurlCommand
+import org.safs.rest.service.commands.curl.CurlInvoker
+import org.safs.rest.service.models.providers.SafsRestPropertyProvider
 
 /**
  *
@@ -54,18 +48,18 @@ import org.apache.hc.core5.testing.framework.ClientPOJOAdapter
 class SafsrestAdapter extends ClientPOJOAdapter {
     public static final USERID = "userid"
     public static final PASSWORD = "password"
-    
+
     public trustedUserid
     public trustedPassword
     public tokenProviderRootUrl
     public tokenProviderServiceName
     public tokenProviderAuthTokenResource
-    
+
     /**
      * Use a bash or CMD shell to run curl.
      */
     def useScript = false
-    
+
     /**
      * Use Java VM's execution facilities to run curl.
      */
@@ -91,7 +85,7 @@ class SafsrestAdapter extends ClientPOJOAdapter {
     throws Exception {
 
         request = modifyRequest(request)
-        
+
         if (tokenProviderServiceName != null) {
             propertyProvider.tokenProviderServiceName = tokenProviderServiceName
         }
@@ -101,7 +95,7 @@ class SafsrestAdapter extends ClientPOJOAdapter {
 
         def userid = request.userid
         def password = request.password
-        
+
         if (userid) {
             propertyProvider.userName = userid
         }
@@ -117,7 +111,7 @@ class SafsrestAdapter extends ClientPOJOAdapter {
                                                                             useScript:useScript,
                                                                             execCurlFromJVM:execCurlFromJVM,
                                                                 ) : null
-                                                            
+
         CurlInvoker curlInvoker = new CurlInvoker(commandInvoker:commandInvoker)
 
         RestConsumer consumer = new RestConsumer(curlInvoker: curlInvoker, safsrestProperties: propertyProvider)
@@ -144,11 +138,11 @@ class SafsrestAdapter extends ClientPOJOAdapter {
         if (request.headers) {
             request.headers.each { entry -> optionList << /${CurlCommand.HEADER_OPTION}${entry.key}${CurlCommand.HEADER_FIELD_SEPARATOR}${entry.value}/ }
         }
-        
+
         def uri = new URI(entrypoint)
         def rootUrl = "${uri.scheme}://${uri.host}:${uri.port}"
         propertyProvider.rootUrl = rootUrl
-        
+
         if (userid && password && (propertyProvider.authToken == null)) {
             // token has to be acquired after the rootUrl is set.
             acquireAuthToken(propertyProvider, password)
@@ -291,7 +285,7 @@ class SafsrestAdapter extends ClientPOJOAdapter {
     public setTokenProviderServiceName(tokenProviderServiceName) {
         this.tokenProviderServiceName = tokenProviderServiceName
     }
-    
+
     public setTokenProviderAuthTokenResource(tokenProviderAuthTokenResource) {
         this.tokenProviderAuthTokenResource = tokenProviderAuthTokenResource
     }
