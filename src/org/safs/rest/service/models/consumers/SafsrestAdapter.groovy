@@ -55,6 +55,14 @@ class SafsrestAdapter extends ClientPOJOAdapter {
     public tokenProviderServiceName
     public tokenProviderAuthTokenResource
 
+	/**
+	 * The previous propertyProvider holding an 'access token'.
+	 * It is only set after getting a new 'access token' and
+	 * it provides the 'access token' next time a request comes
+	 * without getting a new one if 'userName', 'tokenProviderUrl', 'trustedUserid' don't change.
+	 */
+    private SafsRestPropertyProvider previousPropertyProvider = null
+
     /**
      * Use a bash or CMD shell to run curl.
      */
@@ -64,8 +72,6 @@ class SafsrestAdapter extends ClientPOJOAdapter {
      * Use Java VM's execution facilities to run curl.
      */
     def execCurlFromJVM = false
-
-    private SafsRestPropertyProvider propertyProvider = new SafsRestPropertyProvider()
 
     /**
      * Execute an HTTP request.
@@ -83,7 +89,7 @@ class SafsrestAdapter extends ClientPOJOAdapter {
             String defaultURI,
             Map<String, Object> request)
     throws Exception {
-
+		SafsRestPropertyProvider propertyProvider = new SafsRestPropertyProvider()
         request = modifyRequest(request)
 
         if (tokenProviderServiceName != null) {
@@ -143,7 +149,7 @@ class SafsrestAdapter extends ClientPOJOAdapter {
         def rootUrl = "${uri.scheme}://${uri.host}:${uri.port}"
         propertyProvider.rootUrl = rootUrl
 
-        if (userid && password && (propertyProvider.authToken == null)) {
+        if (userid && password) {
             // token has to be acquired after the rootUrl is set.
             acquireAuthToken(propertyProvider, password)
         }
@@ -187,12 +193,30 @@ class SafsrestAdapter extends ClientPOJOAdapter {
 
     private acquireAuthToken(propertyProvider, password) {
         def savedRootUrl = propertyProvider.rootUrl
+		def needNewToken = false
         try {
-            if (tokenProviderRootUrl) {
-                // if there is a different rootUrl for the authentication service, use it now.
-                propertyProvider.rootUrl = tokenProviderRootUrl
-            }
-            propertyProvider.acquireAuthToken(password, trustedPassword)
+			if(previousPropertyProvider==null){
+				needNewToken = true
+			}else{
+				//TODO what is the condition that we need a new token?
+				if(previousPropertyProvider.userName!=propertyProvider.userName ||
+					previousPropertyProvider.rootUrl!= tokenProviderRootUrl ||
+					previousPropertyProvider.trustedUser!= trustedUserid){
+					needNewToken = true
+				}
+			}
+
+			if(needNewToken){
+				if (tokenProviderRootUrl) {
+					// if there is a different rootUrl for the authentication service, use it now.
+					propertyProvider.rootUrl = tokenProviderRootUrl
+				}
+				propertyProvider.acquireAuthToken(password, trustedPassword)
+
+				previousPropertyProvider = propertyProvider
+			}else{
+				propertyProvider.authToken = previousPropertyProvider.authToken
+			}
         } finally {
             // restore the rootUrl
             propertyProvider.rootUrl = savedRootUrl
