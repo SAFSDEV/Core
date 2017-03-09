@@ -8,7 +8,7 @@
  *
  * History:
  * NOV 09, 2016    (SBJLWA) Initial release: Created BrowserConstants and SeleniumConstants: copied constants from org.safs.selenium.webdriver.lib.SelectBrowser.
- * MAR 07, 2017    (SBJLWA) Add constants for setting of browser-driver in selenium.
+ * MAR 07, 2017    (SBJLWA) Add constants for setting of the browser-driver in Selenium.
  */
 package org.safs;
 
@@ -189,8 +189,8 @@ public class Constants {
 		public static final String KEY_GRID_NODES_SETTING = SYSTEM_PROPERTY_SELENIUM_NODE;
 
 		/**
-		 * "WEB_DRIVERS" defines a set of drivers to start with selenium-server.<br>
-		 * The possible value could be a combination (separated by colon :) of:<br>
+		 * "WEB_DRIVERS" defines a set of drivers to start with the selenium-server.<br>
+		 * The value can be a combination (separated by a colon :) of<br>
 		 * <ul>
 		 * <li>{@link BrowserConstants#BROWSER_NAME_IE}
 		 * <li>{@link BrowserConstants#BROWSER_NAME_CHROME}
@@ -198,12 +198,12 @@ public class Constants {
 		 * <li>BrowserConstants.BROWSER_NAME_XXX might be supported.
 		 * </ul>
 		 * Examples:<br>
-		 * <b>explorer</b> Only IEDriver will start with selenium-server.<br>
-		 * <b>explorer:chrome:MicrosoftEdge</b> IEDriver, ChromeDriver, EdgeDriver will start with selenium-server.<br>
+		 * <b>explorer</b> Only IEDriver will start with the selenium-server.<br>
+		 * <b>explorer:chrome:MicrosoftEdge</b> IEDriver, ChromeDriver and EdgeDriver will start with the selenium-server.<br>
 		 * */
 		public static final String ITEM_WEB_DRIVERS ="WEB_DRIVERS";
-		/** "safs.selenium.web.drivers" defines a set of drivers to start with selenium-server.<br>
-		 * The possible value could be a combination (separated by colon :) of:<br>
+		/** "safs.selenium.web.drivers" defines a set of drivers to start with the selenium-server.<br>
+		 * The value can be a combination (separated by a colon :) of<br>
 		 * <ul>
 		 * <li>{@link BrowserConstants#BROWSER_NAME_IE}
 		 * <li>{@link BrowserConstants#BROWSER_NAME_CHROME}
@@ -211,17 +211,17 @@ public class Constants {
 		 * <li>BrowserConstants.BROWSER_NAME_XXX might be supported.
 		 * </ul>
 		 * Examples:<br>
-		 * -Dsafs.selenium.web.drivers=<b>explorer</b> Only IEDriver will start with selenium-server.<br>
-		 * -Dsafs.selenium.web.drivers=<b>explorer:chrome:MicrosoftEdge</b> IEDriver, ChromeDriver, EdgeDriver will start with selenium-server.<br>
+		 * -Dsafs.selenium.web.drivers=<b>explorer</b> Only IEDriver will start with the selenium-server.<br>
+		 * -Dsafs.selenium.web.drivers=<b>explorer:chrome:MicrosoftEdge</b> IEDriver, ChromeDriver and EdgeDriver will start with the selenium-server.<br>
 		 * **/
 		public static final String PROPERTY_WEB_DRIVERS ="safs.selenium.web.drivers";
 
 		/**
-		 * When starting selenium server, the browser-drivers can be specified as VM parameters, such as:<br/>
+		 * When starting the selenium server, the browser-drivers can be specified as VM parameters, such as<br/>
 		 * -Dwebdriver.<b>ie</b>.driver=path\to\IEDriverServer.exe<br/>
 		 * -Dwebdriver.<b>ie</b>.logfile=workspace\log\ie.console<br/>
 		 * The VM parameter is in format webdriver.<b>&lt;browserShortName></b>.driver and webdriver.<b>&lt;browserShortName></b>.logfile,
-		 * browser names (NOT short name) have been defined in class {@link BrowserConstants} such as {@link BrowserConstants#BROWSER_NAME_EDGE} etc. But not all
+		 * the browser names (NOT short name) have been defined in class {@link BrowserConstants} such as {@link BrowserConstants#BROWSER_NAME_EDGE} etc. But not all
 		 * of them is suitable to specify the VM parameter, so this Map is created for mapping 'browser-name' to 'browser-short-name'. The 'browser-short-name'
 		 * will be used to specify the VM parameter.
 		 *
