@@ -621,23 +621,23 @@ public class DriverConstant extends JavaConstant{
 		public static final String SELENIUMNODE ="SELENIUMNODE";
 
 		/**
-		 * "SELENIUMSERVER_JVM_Xmx" define the maximum memory to use for SELENIUM server<br>
+		 * "SELENIUMSERVER_JVM_Xmx" define the maximum memory to use for the SELENIUM server<br>
 		 * To use a very high memory, 4g for example, you may need to specify the {@link #SELENIUMSERVER_JVM} to use 64 bits Java.<br>
 		 * @see #SELENIUMSERVER_JVM_Xms
 		 * */
 		public static final String SELENIUMSERVER_JVM_Xmx ="SELENIUMSERVER_JVM_Xmx";
-		/** "2g" default maximum memory for SELENIUM server*/
+		/** "2g" default maximum memory for the SELENIUM server*/
 		public static String DEFAULT_JVM_MEMORY_MAXIMUM = "2g";
 
-		/** "SELENIUMSERVER_JVM_Xms" define the minimum memory to use for SELENIUM server
+		/** "SELENIUMSERVER_JVM_Xms" define the minimum memory to use for the SELENIUM server
 		 * @see #SELENIUMSERVER_JVM_Xmx
 		 * */
 		public static final String SELENIUMSERVER_JVM_Xms ="SELENIUMSERVER_JVM_Xms";
-		/** "512m" default minimum memory for SELENIUM server*/
+		/** "512m" default minimum memory for the SELENIUM server*/
 		public static String DEFAULT_JVM_MEMORY_MINIMUM = "512m";
 
 		/**
-		 * "SELENIUMSERVER_JVM_OPTIONS" define the JVM Options for SELENIUM server.
+		 * "SELENIUMSERVER_JVM_OPTIONS" defines the JVM Options for the SELENIUM server.
 		 * {@link #SELENIUMSERVER_JVM_Xms} and {@link #SELENIUMSERVER_JVM_Xmx} are finer, if they exist then
 		 * they will be used instead of the options specified in {@link #SELENIUMSERVER_JVM_OPTIONS}.<br>
 		 * For example, the we have specified option as following, then 4g and 512m will be used to start the selenium server.
@@ -652,19 +652,19 @@ public class DriverConstant extends JavaConstant{
 		 * */
 		public static final String SELENIUMSERVER_JVM_OPTIONS ="SELENIUMSERVER_JVM_OPTIONS";
 		/**
-		 * "SELENIUMSERVER_JVM" defines the JVM to start SELENIUM server.<br>
-		 * The value should be an absolute path the the java.exe executable, for example as following<br>
+		 * "SELENIUMSERVER_JVM" defines the JVM to start the SELENIUM server.<br>
+		 * The value should be an absolute path of the java.exe executable, for example as following<br>
 		 * SELENIUMSERVER_JVM="D:\jdk\jdk1.7.0_45_64bit\bin\java.exe"
 		 */
 		public static final String SELENIUMSERVER_JVM ="SELENIUMSERVER_JVM";
 
 		/**
-		 * "CONSOLE_STATE" defines the state of the JVM console for SELENIUM server<br>
-		 * The possible value could be: MAX|MIN|NORMAL|MAXIMIZE|MINIMIZE<br>
+		 * "CONSOLE_STATE" defines the state of the JVM console for the SELENIUM server<br>
+		 * The value can be: MAX|MIN|NORMAL|MAXIMIZE|MINIMIZE<br>
 		 * @see #SELENIUMSERVER_JVM_Xms
 		 * */
 		public static final String ITEM_CONSOLE_STATE ="CONSOLE_STATE";
-	    /** "safs.selenium.console.state" defines the state of the JVM console for SELENIUM server<br>
+	    /** "safs.selenium.console.state" defines the state of the JVM console for the SELENIUM server<br>
 		 * JVM command line: -Dsafs.selenium.console.state=MAX|MIN|NORMAL|MAXIMIZE|MINIMIZE **/
 		public static final String PROPERTY_CONSOLE_STATE ="safs.selenium.console.state";
 
