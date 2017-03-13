@@ -8,7 +8,8 @@
  *
  * History:
  * NOV 09, 2016    (SBJLWA) Initial release: Created BrowserConstants and SeleniumConstants: copied constants from org.safs.selenium.webdriver.lib.SelectBrowser.
- * MAR 07, 2017    (SBJLWA) Add constants for setting of the browser-driver in Selenium.
+ * MAR 07, 2017    (SBJLWA) Added constants for setting of the browser-driver in Selenium.
+ * MAR 10, 2017    (SBJLWA) Added RestConstants.
  */
 package org.safs;
 
@@ -261,5 +262,29 @@ public class Constants {
 		public static final String SYMBOL_BIGGER = ">";
 		/** An array of symbols needing escape in XML document, such as & ' " < > */
 		public static final String[] SYMBOL_TO_ESCAPE = {SYMBOL_AND, SYMBOL_APOS, SYMBOL_QUOTE, SYMBOL_LESS, SYMBOL_BIGGER};
+	}
+
+	public static class RestConstants{
+		/**
+		 * "<b>SAFS_REST</b>" is the section where the REST related information will be defined.
+		 */
+		public static final String SECTION_SAFS_REST = "SAFS_REST";
+
+		/**
+		 * "<b>AUTH</b>" defines a file holding the authorization/authentication information.<br>
+		 * The file can be relative to the project root directory; or it can be an absolute path.<br>
+		 * Examples:<br>
+		 * <b>config\auth2.xml</b> The file &lt;projectRoot>\config\auth2.xml will be used as authorization/authentication information.<br>
+		 * <b>C:\Users\xxx\simpleAuth.xml</b> The file C:\Users\xxx\simpleAuth.xml will be used as authorization/authentication information.<br>
+		 *
+		 * */
+		public static final String ITEM_AUTH ="AUTH";
+		/** "<b>safs.rest.auth</b>" defines a file holding the authorization/authentication information.<br>
+		 * The file can be relative to the project root directory; or it can be an absolute path.<br>
+		 * Examples:<br>
+		 * -Dsafs.rest.auth=<b>config\auth2.xml</b> The file &lt;projectRoot>\config\auth2.xml will be used as authorization/authentication information.<br>
+		 * -Dsafs.rest.auth=<b>C:\Users\xxx\simpleAuth.xml</b> The file C:\Users\xxx\simpleAuth.xml will be used as authorization/authentication information.<br>
+		 * **/
+		public static final String PROPERTY_AUTH ="safs.rest.auth";
 	}
 }
