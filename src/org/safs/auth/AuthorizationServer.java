@@ -8,6 +8,7 @@
  *
  * History:
  * 2017年2月14日    (SBJLWA) Initial release.
+ * MAR 10, 2017  (SBJLWA) Modified comments as we replaced field 'protocol', 'host' and 'port' by one field 'rootUrl'.
  */
 package org.safs.auth;
 
@@ -25,14 +26,15 @@ import org.safs.persist.PersistableDefault;
  */
 public class AuthorizationServer extends PersistableDefault{
 	private final static Map<String, String> fieldToPersistKeyMap = new HashMap<String, String>();
-	//protocol://host:port/baseServiceName/authCodeResource
+	//rootUrl/baseServiceName/authCodeResource
 	//https://github.com/login/oauth/authorize
 
-	//protocol://host:port/baseServiceName/authTokenResource
+	//rootUrl/baseServiceName/authTokenResource
 	//https://github.com/login/oauth/token
 
 	/**
-	 * The rootUrl of the authorization server. Such as "http://oauth2.authorization.server:80".
+	 * The rootUrl of the authorization server. It is in format <b>protocol://host:port</b>,
+	 * such as "http://oauth2.authorization.server:80".
 	 */
 	private String rootUrl = null;
 	/**

@@ -362,6 +362,9 @@ Line Options:</b><br>
               <dd>Defines specific drivers (separated by colon :) to start with the selenium server.
               By default, IE and Chrome drivers will start up with the selenium server.<p></dd>
               
+              <dt><b>-D<a href="../doc/org/safs/Constants.RestConstants.html#PROPERTY_AUTH" target="api">safs.rest.auth</a>=config\<a href="../configure/auth2.xml" target="api">auth2.xml</a></b></dt>
+              <dd>Defines file (relative to project or absolute) holding the authorization/authentication information for REST testing.<p></dd>
+
 </dl></td></tr></tbody></table></td></tr></tbody></table>
 </p><p>Enhancements, corrections, and more detail will be added as necessary.
 </p><hr>
@@ -522,6 +525,11 @@ DATASTORE=&lt;FullPathTo&gt;\RFTProjectDir
 ;OPTIONS=
 ;RFSMOnly=True|False
 ;RFSMCache=True|False
+
+<b>[SAFS_REST]</b>
+<span class="comments">;= AUTH holds the authorization/authentication
+;= file (relative to project or absolute) for REST testing</span>
+<a href="../doc/org/safs/Constants.RestConstants.html#ITEM_AUTH" target="api">AUTH</a>=config\<a href="../configure/auth2.xml" target="api">auth2.xml</a>
 
 <b><a href="../doc/org/safs/selenium/webdriver/SeleniumHook.html" target="api">[SAFS_SELENIUM]</a></b>
 AUTOLAUNCH=FALSE
