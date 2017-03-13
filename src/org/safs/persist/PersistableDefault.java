@@ -8,6 +8,7 @@
  *
  * History:
  * DEC 02, 2016    (SBJLWA) Initial release.
+ * MAR 10, 2017    (SBJLWA) Override the method equals().
  */
 package org.safs.persist;
 
@@ -332,5 +333,32 @@ public abstract class PersistableDefault implements Persistable, Printable{
 		sb.append(getTabs()+"============== "+clazzname+" END ================\n");
 
 		return sb.toString();
+	}
+
+	public boolean equals(Object obj){
+		if(obj==null) return false;
+		if(!(obj instanceof Persistable)) return false;
+		if(obj==this) return true;
+		Persistable tempPersistable = (Persistable) obj;
+		if(getPersitableFields().size()!=tempPersistable.getPersitableFields().size()) return false;
+
+		Set<String> fields = getPersitableFields().keySet();
+		String persistKey = null;
+		Object value1 = null;
+		Object value2 = null;
+		for(String field:fields){
+			if(!tempPersistable.getPersitableFields().containsKey(field)) return false;
+			persistKey = getPersitableFields().get(field);
+			value1 = getContents().get(persistKey);
+			persistKey = tempPersistable.getPersitableFields().get(field);
+			value2 = getContents().get(persistKey);
+			if(value1==null){
+				if(value2!=null) return false;
+			}else if(!value1.equals(value2)){
+				return false;
+			}
+		}
+
+		return true;
 	}
 }
