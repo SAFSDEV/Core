@@ -1,0 +1,23 @@
+<OAuth2 classname="org.safs.auth.OAuth2">
+	<AuthorizationServer classname="org.safs.auth.AuthorizationServer">
+		<authCodeResource>oauth/authorize</authCodeResource>
+		<authTokenResource>oauth/token</authTokenResource>
+		<baseServiceName>login</baseServiceName>
+		<rootUrl>http://oauth2.authorization.server:8080</rootUrl>
+	</AuthorizationServer>
+
+	<Content classname="org.safs.auth.Content">
+		<accessToken>HARHA34HAZFUREHFDAEIPOZ=D</accessToken>
+		<accessTokenSecret>UNKNOWN</accessTokenSecret>
+		<accessTokenType>UNKNOWN</accessTokenType>
+		<clientID>UNKNOWN</clientID>
+		<clientSecret>UNKNOWN</clientSecret>
+		<refreshToken>UNKNOWN</refreshToken>
+	</Content>
+
+	<SimpleAuth classname="org.safs.auth.SimpleAuth">
+		<password>unitA123</password>
+		<userName>wanglei</userName>
+	</SimpleAuth>
+
+</OAuth2>
