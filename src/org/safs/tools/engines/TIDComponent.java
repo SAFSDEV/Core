@@ -15,6 +15,7 @@ import java.util.StringTokenizer;
 
 import org.safs.ComponentFunction;
 import org.safs.Constants;
+import org.safs.Constants.RestConstants;
 import org.safs.IndependantLog;
 import org.safs.Log;
 import org.safs.Printable;
@@ -78,6 +79,8 @@ import org.safs.tools.stringutils.StringUtilities;
  *                           an OCR engine to use.
  * <br>	Carl Nagle MAY 10, 2012  Modify process() call to isMixedUse to gracefully handle missing App Map
  *                           recognition entries.
+ * <br>	Lei Wang MAR 10, 2017  Modified RESTComponent to handle authorization/authentication information with/without session.
+ *                           The "custom header" can be provided as a file in a Map.
  */
 public class TIDComponent extends GenericEngine {
 
@@ -2120,6 +2123,7 @@ public class TIDComponent extends GenericEngine {
 				sessionID = testRecordData.getCompGuiId();
 			}catch(SAFSException e){
 				Log.warn(debugmsg + "component '"+compName+"' recognition string is missing or invalid for sessionID.");
+				sessionID = null;
 			}
 
 			try {
@@ -2130,7 +2134,7 @@ public class TIDComponent extends GenericEngine {
 						throw new SAFSException("The session ID is missing for action '"+action+"'!");
 					}else{
 						//This is one-shot connection, we ourselves will close the session after keyword execution.
-						startSession();
+						__startSession();
 					}
 				}
 				if (params != null) {
@@ -2291,7 +2295,7 @@ public class TIDComponent extends GenericEngine {
 			}finally{
 				if(oneShotSessionStarted){
 					try{
-						endSession();
+						__endSession();
 					}catch(SAFSException e){
 						Log.warn(debugmsg+"Failed to stop REST Session, due to "+StringUtils.debugmsg(e));
 					}
@@ -2323,21 +2327,36 @@ public class TIDComponent extends GenericEngine {
 			return FLAG_SAFSREST+value+System.currentTimeMillis();
 		}
 
-		protected void startSession() throws SAFSException{
+		/**
+		 * Start the session <b>ONLY</b> for one-shot-connection.
+		 * @throws SAFSException
+		 */
+		private void __startSession() throws SAFSException{
 			//Create the Service object:
 			Service service = new Service(getUniqueID("_session_"));
 			//Assign sessionID
 			sessionID = service.getServiceId();
+			//Register the service
+			Services.addService(service);
 
-			//TODO Load related assets for starting the session, like authentication information.
-			//TODO Do we need to register the service, probably NOT.
+			//Load related assets for starting the session, like authentication information.
+			//Handle the authentication/authorization information, Read the auth info from the .ini and VM parameters
+			String authFile = StringUtils.getSystemProperty(RestConstants.PROPERTY_AUTH, config, RestConstants.SECTION_SAFS_REST, RestConstants.ITEM_AUTH);
+			handleAuth(service, authFile);
 
 			oneShotSessionStarted = true;
 		}
-		protected void endSession() throws SAFSException{
-			//TODO Clean up everything for a session.
-			sessionID = null;
-			oneShotSessionStarted = false;
+		/**
+		 * Stop <b>ONLY</b> the session of one-shot-connection.
+		 * @throws SAFSException
+		 */
+		private void __endSession() throws SAFSException{
+			if(oneShotSessionStarted){
+				//TODO Clean up everything for a session.
+				Services.deleteService(sessionID);
+				sessionID = null;
+				oneShotSessionStarted = false;
+			}
 		}
 
 		/**
@@ -2388,14 +2407,12 @@ public class TIDComponent extends GenericEngine {
 		 *   <li>...
 		 * </ul>
 		 * @param method String, the HTTP method to handle, like "GET" "POST" "PUT" etc.
-		 * @param type   String, the header type, like "BINARY" "JOSN" etc.<br/>
+		 * @param type   String, the header type (content_type or accept), like "BINARY" "JOSN" etc.<br/>
 		 *                       it can be null if no default header should be applied.
 		 */
 		private void actionRequest(String method, String type){
-			String debugmsg = StringUtils.debugmsg(false);
 			String message = null;
 			String description = null;
-			Response response = null;
 
 			if (!checkSessionID()) return;
 
@@ -2407,22 +2424,10 @@ public class TIDComponent extends GenericEngine {
 			String responseIdVar = iterator.next();
 			String body = iterator.hasNext()? iterator.next():null;
 			String customHeaders = iterator.hasNext()? iterator.next():null;
-			String customeAuthentication = iterator.hasNext()? iterator.next():null;
-			String headers = type==null? null : Headers.getHeadersForType(type);
+			String authFile = iterator.hasNext()? iterator.next():null;
 
 			try {
-				//handle the extra headers information
-				if(customHeaders!=null){
-					customHeaders = getPossibleMapItem(customHeaders);
-					IndependantLog.debug(debugmsg+" appending custom headers \n"+customHeaders);
-					headers = headers==null? customHeaders: headers + "\n"+customHeaders;
-				}
-				//Handle the extra authentication information
-				handleAuth(Services.getService(sessionID), customeAuthentication);
-
-				response = REST.request(sessionID, method, relativeURI, headers, body);
-
-				handleResponse(sessionID, response, responseIdVar);
+				__request(method, relativeURI, responseIdVar, body, type, customHeaders, authFile);
 
 				message = GENStrings.convert(GENStrings.SUCCESS_3,
 						restFlag+":"+sessionID+" "+action+" successful.",
@@ -2448,7 +2453,6 @@ public class TIDComponent extends GenericEngine {
 		private void actionHttpRequest(){
 			String message = null;
 			String description = null;
-			Response response = null;
 
 			if (!checkSessionID()) return;
 
@@ -2461,15 +2465,10 @@ public class TIDComponent extends GenericEngine {
 			String responseIdVar = iterator.next();
 			String body = iterator.hasNext()? iterator.next():null;
 			String customHeaders = iterator.hasNext()? iterator.next():null;
-			String customeAuthentication = iterator.hasNext()? iterator.next():null;
+			String authFile = iterator.hasNext()? iterator.next():null;
 
 			try {
-				//Handle the extra authentication information
-				handleAuth(Services.getService(sessionID), customeAuthentication);
-
-				response = REST.request(sessionID, method, relativeURI, customHeaders, body);
-
-				handleResponse(sessionID, response, responseIdVar);
+				__request(method, relativeURI, responseIdVar, body, null, customHeaders, authFile);
 
 				String actionMsg = action +" "+method;
 				message = GENStrings.convert(GENStrings.SUCCESS_3,
@@ -2486,6 +2485,94 @@ public class TIDComponent extends GenericEngine {
 						"*** ERROR *** "+exceptionMsg, exceptionMsg);
 				standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
 				setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
+			}
+		}
+
+		/**
+		 * This method will pass the "Request" to the REST implementation, which handles the "Request"
+		 * and return the "Response".<br>
+		 * Before passing the "Request", this method will
+		 * <ol>
+		 * <li>handle the "headers" according to "type" and "customHeaders"
+		 * <li>handle the "custom authorization/authentication"
+		 * </ol>
+		 * After getting the "Response", this method will
+		 * <ol>
+		 * <li>assign an ID to the "Response"
+		 * <li>save the "Response" into an internal Map according the ID.
+		 * <li>save the "Response ID" to a SAFS variable
+		 * <li>write the "Response" to the debug log
+		 * </ol>
+		 *
+		 * @param method String, the HTTP method, such as "get", "post", "head" etc.
+		 * @param relativeURI String, the relative URL if within a session; otherwise it is the full URL
+		 * @param responseIdVar String, the SAFS variable to hold the "Response ID"
+		 * @param optionals String[], an array of optional parameters
+		 * <pre>
+		 *        optionals[0] String, the "body" to send
+		 *        optionals[1] String, the "header type" (content_type or accept), like "BINARY" "JOSN" etc.
+		 *                             it can be null if no default header should be applied.
+		 *        optionals[2] String, the "customer headers"; it can be a header-string, or a map item holding
+		 *                             a header-string or holding a file which contains a header-string
+		 *        optionals[3] String, the "customer authorization/authentication". It is an auth-file relative to the project root
+		 *                             or an absolute file name; it can also be a map item holding the file name.
+		 * </pre>
+		 * @return Response
+		 * @throws Exception will be thrown if any unexpected thing happens.
+		 * @see #handleAuth(Service, String)
+		 * @see #handleResponse(String, Response, String)
+		 */
+		private Response __request(String method, String relativeURI, String responseIdVar, String...optionals /*body, type, customHeaders, authFile*/) throws Exception{
+			String debugmsg = StringUtils.debugmsg(false);
+			String type = null;
+			String body = null;
+			String customHeaders = null;
+			String customAuthFile = null;
+			Response response = null;
+
+			Service service = null;
+			Auth sessionAuth = null;
+			boolean serviceModified = false;
+			try {
+				try{ body = optionals[0]; }catch(Exception e){}
+				try{ type = optionals[1]; }catch(Exception e){}
+				try{ customHeaders = optionals[2]; }catch(Exception e){}
+				try{ customAuthFile = optionals[3]; }catch(Exception e){}
+
+				String headers = type==null? null : Headers.getHeadersForType(type);
+				//handle the custom headers information
+				if(StringUtils.isValid(customHeaders)){
+					customHeaders = getPossibleMapItem(customHeaders);
+					try{
+						File tempHeaderFile = FileUtilities.deduceProjectFile(customHeaders, this);
+						if(tempHeaderFile.isFile()){
+							customHeaders = FileUtilities.readStringFromUTF8File(tempHeaderFile.getAbsolutePath());
+						}
+					}catch(SAFSException e){
+						IndependantLog.warn(debugmsg+" Failed to read custom header file due to "+e.toString());
+					}
+					IndependantLog.debug(debugmsg+" appending custom headers \n"+customHeaders);
+					headers = headers==null? customHeaders: headers + "\n"+customHeaders;
+				}
+
+				//Handle the custom authentication/authorization information
+				if(StringUtils.isValid(customAuthFile)){
+					service = Services.getService(sessionID);
+					sessionAuth = service.getAuth();
+					serviceModified = handleAuth(service, customAuthFile);
+				}
+
+				response = REST.request(sessionID, method, relativeURI, headers, body);
+
+				handleResponse(sessionID, response, responseIdVar);
+
+				return response;
+			}catch(Exception e){
+				throw e;
+			}finally{
+				if(service!=null && serviceModified && !oneShotSessionStarted){
+					service.setAuth(sessionAuth);
+				}
 			}
 		}
 
@@ -2525,15 +2612,19 @@ public class TIDComponent extends GenericEngine {
 				return;
 			}
 			String baseURL = iterator.next();
-			String customeAuthentication = iterator.hasNext()? iterator.next():null;
+			String authFile = iterator.hasNext()? iterator.next():null;
+			if(!StringUtils.isValid(authFile)){
+				//if the parameter 'auth file' is not provided, then get the authentication information from
+				//the .ini configuration file or from the VM parameter, VM parameter has higher priority.
+				authFile = StringUtils.getSystemProperty(RestConstants.PROPERTY_AUTH, config, RestConstants.SECTION_SAFS_REST, RestConstants.ITEM_AUTH);
+			}
 
 			try{
 				//Create the Service object
 				Service service = new Service(sessionID, baseURL);
 				Services.addService(service);
-
-				//Handle the extra authentication information
-				handleAuth(service, customeAuthentication);
+				//Handle the authentication/authorization information
+				handleAuth(service, authFile);
 
 				message = GENStrings.convert(GENStrings.SUCCESS_3,
 						restFlag+":"+sessionID+" "+action+" successful.", restFlag, sessionID, action);
@@ -2550,21 +2641,25 @@ public class TIDComponent extends GenericEngine {
 		}
 
 		/**
-		 * Handle the authentication/authorization information.<br/>
+		 * Handle the authentication/authorization information, and set it to {@link Service}.<br/>
 		 * Currently it converts an XML file to Auth object and set it to Service.<br/>
 		 * @param service Service, the Service object to hold the Auth information.
 		 * @param authFile String, the file holding the authentication/authorization information.<br/>
 		 *                         Currently, on XML file is supported.
+		 * @return boolean true, if Service's Auth has been changed; false otherwise.
 		 * @throws SAFSException if Service object is null or Fail to covert to an Auth object.
 		 */
-		protected void handleAuth(Service service, String authFile) throws SAFSException{
+		protected boolean handleAuth(Service service, String authFile) throws SAFSException{
 			if(service==null){
 				throw new SAFSException("The Service is null!");
 			}
 			if(!StringUtils.isValid(authFile)){
 				IndependantLog.debug(StringUtils.debugmsg(false)+" The authentication/authorizaiton file name is null or empty!");
-				return;
+				return false;
 			}
+
+			//Try to get the 'authFile' from the Map
+			authFile = getPossibleMapItem(authFile);
 
 			if(Constants.NO_AUTHENTICATION.equalsIgnoreCase(authFile)){
 				service.setAuth(null);
@@ -2577,6 +2672,8 @@ public class TIDComponent extends GenericEngine {
 					throw new SAFSException("Failed to get Auth object from file '"+authFile+"'");
 				}
 			}
+
+			return true;
 		}
 	}
 }
