@@ -162,15 +162,6 @@ public class PersistorToJSONFile extends PersistorToHierarchialFile{
 		return persistable;
 	}
 
-	@Override
-	protected String parseFiledValue(Object value){
-		String result = super.parseFiledValue(value);
-		if(value instanceof String){
-			result = StringUtils.quote(result);
-		}
-		return result;
-	}
-
 	/**
 	 * Escape special characters such as value occupying multiple lines, which should be escaped
 	 * as characters <font color="red">\n</font>; the double quote should be escaped as
