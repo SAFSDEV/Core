@@ -8,6 +8,7 @@
  *
  * History:
  * DEC 02, 2016    (Lei Wang) Initial release.
+ * MAR 14, 2017    (Lei Wang) Modified method create(): create persistor according to the file's suffix.
  */
 package org.safs.persist;
 
@@ -22,7 +23,6 @@ import org.safs.tools.RuntimeDataInterface;
 public class PersistorFactory {
 
 	/**
-	 *
 	 * @param persistenceType PersistenceType, what kind of persistence to store object, it can be file, variable or database etc.
 	 * @param fileType FileType enum object, ONLY useful when persistenceType is PersistenceType.FILE
 	 * @param runtime RuntimeDataInterface, required by a concrete Persistor.
@@ -34,12 +34,22 @@ public class PersistorFactory {
 		Persistor persistor = null;
 
 		if(PersistenceType.FILE.equals(persistenceType)){
+			String filename = object.toString();
 			if(FileType.JSON.equals(fileType)){
-				persistor = new PersistorToJSONFile(runtime, object.toString());
+				persistor = new PersistorToJSONFile(runtime, filename);
 			}else if(FileType.XML.equals(fileType)){
-				persistor = new PersistorToXMLFile(runtime, object.toString());
+				persistor = new PersistorToXMLFile(runtime, filename);
 			}else if(FileType.PROPERTIES.equals(fileType)){
-				persistor = new PersistorToPropertiesFile(runtime, object.toString());
+				persistor = new PersistorToPropertiesFile(runtime, filename);
+			}else{
+				String filenameuc = filename.toUpperCase();
+				if(filenameuc.endsWith(FileType.JSON.name())){
+					persistor = new PersistorToJSONFile(runtime, filename);
+				}else if(filenameuc.endsWith(FileType.XML.name())){
+					persistor = new PersistorToXMLFile(runtime, filename);
+				}else if(filenameuc.endsWith(FileType.PROPERTIES.name())){
+					persistor = new PersistorToPropertiesFile(runtime, filename);
+				}
 			}
 		}else if(PersistenceType.VARIABLE.equals(persistenceType)){
 			persistor = new PersistorToVariable(runtime, object.toString());

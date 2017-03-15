@@ -8,6 +8,7 @@
  *
  * History:
  * DEC 08, 2016    (Lei Wang) Initial release.
+ * MAR 14, 2017    (Lei Wang) Modified method create(): create verifier according to the file's suffix.
  */
 package org.safs.persist;
 
@@ -34,12 +35,22 @@ public class VerifierFactory {
 		Verifier verifier = null;
 
 		if(PersistenceType.FILE.equals(persistenceType)){
+			String filename = object.toString();
 			if(FileType.JSON.equals(fileType)){
 				verifier = new VerifierToJSONFile(runtime, object.toString());
 			}else if(FileType.XML.equals(fileType)){
 				verifier = new VerifierToXMLFile(runtime, object.toString());
 			}else if(FileType.PROPERTIES.equals(fileType)){
 				verifier = new VerifierToPropertiesFile(runtime, object.toString());
+			}else{
+				String filenameuc = filename.toUpperCase();
+				if(filenameuc.endsWith(FileType.JSON.name())){
+					verifier = new VerifierToJSONFile(runtime, filename);
+				}else if(filenameuc.endsWith(FileType.XML.name())){
+					verifier = new VerifierToXMLFile(runtime, filename);
+				}else if(filenameuc.endsWith(FileType.PROPERTIES.name())){
+					verifier = new VerifierToPropertiesFile(runtime, filename);
+				}
 			}
 		}else if(PersistenceType.VARIABLE.equals(persistenceType)){
 //						verifier = new VerifierToVariable(runtime, object.toString());

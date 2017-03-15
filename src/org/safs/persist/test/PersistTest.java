@@ -8,6 +8,7 @@
  *
  * History:
  * 2017年3月10日    (Lei Wang) Initial release.
+ * 2017年3月15日    (Lei Wang) Added test of unpickle from JSON file.
  */
 package org.safs.persist.test;
 
@@ -163,7 +164,8 @@ public class PersistTest {
 	 * Verify the un-pickled OAuth2 object is the same as the original OAuth2 object.<br>
 	 */
 	private static void testOAuth2(){
-		String auth2file = "auth2.xml";
+		String xmlfile = "auth2.xml";
+		String jsonfile = "auth2.json";
 
 		SimpleAuth simpleauth = new SimpleAuth();
 		simpleauth.setUserName("wanglei");
@@ -186,12 +188,18 @@ public class PersistTest {
 		try {
 			System.out.println("Original OAuth2:\n"+auth2);
 
-			Persistor p = PersistorFactory.create(PersistenceType.FILE, FileType.XML, runtimeData, auth2file);
+			//Test the persistor to XML file
+			Persistor p = PersistorFactory.create(PersistenceType.FILE, FileType.XML, runtimeData, xmlfile);
 			p.persist(auth2);
-
 			Persistable persist = p.unpickle(null);
-			System.out.println("Unpickled OAuth2:\n"+auth2);
+			System.out.println("Unpickled OAuth2 from file '"+xmlfile+"'\n"+persist);
+			assert persist.equals(auth2);
 
+			//Test the persistor to JSON file
+			p = PersistorFactory.create(PersistenceType.FILE, FileType.JSON, runtimeData, jsonfile);
+			p.persist(auth2);
+			persist = p.unpickle(null);
+			System.out.println("Unpickled OAuth2 from file '"+jsonfile+"'\n"+persist);
 			assert persist.equals(auth2);
 
 		} catch (SAFSException e) {
