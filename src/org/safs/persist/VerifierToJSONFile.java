@@ -22,6 +22,7 @@ import org.json.JSONTokener;
 import org.safs.IndependantLog;
 import org.safs.SAFSException;
 import org.safs.StringUtils;
+import org.safs.Constants.JSONConstants;
 import org.safs.tools.RuntimeDataInterface;
 
 /**
@@ -46,7 +47,6 @@ import org.safs.tools.RuntimeDataInterface;
  */
 public class VerifierToJSONFile extends VerifierToFile{
 
-	JSONTokener tokener = null;
 	JSONObject jsonObject = null;
 
 	/**
@@ -63,7 +63,7 @@ public class VerifierToJSONFile extends VerifierToFile{
 		actualContents = persistable.getContents(defaultElementValues, ignoredFields, false);
 
 		try {
-			tokener = new JSONTokener(reader);
+			JSONTokener tokener = new JSONTokener(reader);
 			jsonObject = new JSONObject(tokener);
 			parse(jsonObject, null);
 		} catch (JSONException e) {
@@ -76,13 +76,17 @@ public class VerifierToJSONFile extends VerifierToFile{
 
 		String debugmsg = StringUtils.debugmsg(false);
 
-	    @SuppressWarnings("unchecked")
-		Iterator<String> iterator = jsonObject.keys();
+	    Iterator<String> iterator = jsonObject.keys();
 	    String flatKey = null;
 	    String key = null;
 	    Object value = null;
 	    for (; iterator.hasNext();) {
 	    	key = iterator.next();
+
+	    	//"$classname" (reserved for unpickle) is not a valid field, we don't verify it.
+	    	if(JSONConstants.PROPERTY_CLASSNAME.equals(key)){
+	    		continue;
+	    	}
 
 	    	if(jsonObject.isNull(key)){
 	    		IndependantLog.warn(debugmsg+" the value is null for key '"+key+"'.");

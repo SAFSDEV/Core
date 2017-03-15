@@ -45,7 +45,6 @@ import org.safs.rest.service.Services;
 import org.safs.text.FAILKEYS;
 import org.safs.text.FAILStrings;
 import org.safs.text.FileUtilities;
-import org.safs.text.FileUtilities.FileType;
 import org.safs.text.GENStrings;
 import org.safs.tools.CaseInsensitiveFile;
 import org.safs.tools.drivers.DriverConstant;
@@ -2645,7 +2644,7 @@ public class TIDComponent extends GenericEngine {
 		 * Currently it converts an XML file to Auth object and set it to Service.<br/>
 		 * @param service Service, the Service object to hold the Auth information.
 		 * @param authFile String, the file holding the authentication/authorization information.<br/>
-		 *                         Currently, on XML file is supported.
+		 *                         Currently, XML and JSON file are supported.
 		 * @return boolean true, if Service's Auth has been changed; false otherwise.
 		 * @throws SAFSException if Service object is null or Fail to covert to an Auth object.
 		 */
@@ -2664,7 +2663,7 @@ public class TIDComponent extends GenericEngine {
 			if(Constants.NO_AUTHENTICATION.equalsIgnoreCase(authFile)){
 				service.setAuth(null);
 			}else{
-				Persistor p = PersistorFactory.create(PersistenceType.FILE, FileType.XML, this, authFile);
+				Persistor p = PersistorFactory.create(PersistenceType.FILE, null, this, authFile);
 				Persistable auth = p.unpickle(null);
 				if(auth instanceof Auth){
 					service.setAuth((Auth)auth);
