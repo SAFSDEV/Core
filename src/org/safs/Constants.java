@@ -24,9 +24,9 @@ import java.util.Map;
  */
 public class Constants {
 
-	/**'localhost'*/
+	/**'<b>localhost</b>'*/
 	public static final String LOCAL_HOST = "localhost";
-	/** '127.0.0.1'*/
+	/** '<b>127.0.0.1</b>'*/
 	public static final String LOCAL_HOST_IP = "127.0.0.1";
 
 	/** 'NOAUTHENTICATION'*/
@@ -57,22 +57,22 @@ public class Constants {
 		public static final String BROWSER_NAME_IPAD_SIMULATOR_SAFARI = "ipad.sim.safari";
 
 		//If you add a new KEY_XXX, please update the method getExtraParameterKeys() by adding it.
-		/** 'KEY_PROXY_SETTING' the key for proxy string;
+		/** '<b>KEY_PROXY_SETTING</b>' the key for proxy string;
 		 * The value is colon separated string as "proxyserver:port" */
 		public static final String KEY_PROXY_SETTING = "KEY_PROXY_SETTING";
-		/** 'KEY_PROXY_BYPASS_ADDRESS' the key for proxy bypass address string;
+		/** '<b>KEY_PROXY_BYPASS_ADDRESS</b>' the key for proxy bypass address string;
 		 * The value is comma separated string as "localhost,tadsrv,rnd.sas.com" */
 		public static final String KEY_PROXY_BYPASS_ADDRESS = "KEY_PROXY_BYPASS_ADDRESS";
-		/** 'FirefoxProfile' the key for firefox profile name/filename string;
+		/** '<b>FirefoxProfile</b>' the key for firefox profile name/filename string;
 		 * The value is something like "myprofile" or "&lt;AbsolutePath>/ppc2784x.default" */
 		public static final String KEY_FIREFOX_PROFILE = "FirefoxProfile";//Name Or FilePath
 
-		/** 'firefox.perference' the key for firefox preference file, which contains json data,
+		/** '<b>firefox.perference</b>' the key for firefox preference file, which contains json data,
 		 * such as { "intl.accept_languages":"zh-cn", "accessibility.accesskeycausesactivation":false, "browser.download.folderList":2 }<br>
 		 * <b>Note: Be careful when creating the json data file, do NOT quote boolean or integer value.</b>*/
 		public static final String KEY_FIREFOX_PROFILE_PREFERENCE = "firefox.perference";//Firefox Preference file
 
-		/** 'chrome.perference' the key for chrome command-line-options/preferences file, which contains
+		/** '<b>chrome.perference</b>' the key for chrome command-line-options/preferences file, which contains
 		 * <ol>
 		 * <li><b>command-line-options</b> json data, such as { "lang":"zh-cn", "disable-download-notification":"" },
 		 *     refer to <a href="http://peter.sh/experiments/chromium-command-line-switches/">detail options</a>
@@ -83,15 +83,15 @@ public class Constants {
 		 */
 		public static final String KEY_CHROME_PREFERENCE = "chrome.perference";//"Chrome Command Line Options" and "Chrome Preferences" file
 
-		/** 'seplus.chrome.preference.json.key' the key for chrome preferences, which points to json data,
+		/** '<b>seplus.chrome.preference.json.key</b>' the key for chrome preferences, which points to json data,
 		 * such as { "intl.accept_languages":"zh-cn", intl.charset_default:"utf-8" },
 		 * refer to <a href="https://src.chromium.org/viewvc/chrome/trunk/src/chrome/common/pref_names.cc">detail preferences</a>*/
 		public static final String KEY_CHROME_PREFERENCE_JSON_KEY = "seplus.chrome.preference.json.key";//Chrome Preferences
 
-		/** 'prefs' the key used to set chrome Experimental Option. Used internally. */
+		/** '<b>prefs</b>' the key used to set chrome Experimental Option. Used internally. */
 		public static final String KEY_CHROME_PREFS = "prefs";//setExperimentalOption
 
-		/**'user-data-dir' the parameter name for chrome options, a general custom data settings.<br>
+		/**'<b>user-data-dir</b>' the parameter name for chrome options, a general custom data settings.<br>
 		 * The value is specified in <a href="http://peter.sh/experiments/chromium-command-line-switches">chrome options</a><br>
 		 * <b>Note:</b> As this {@value #KEY_CHROME_USER_DATA_DIR} contains minus, it could be interpreted as an arithmetic expression,
 		 *             Use SeleniumPlus.quote({@value #KEY_CHROME_USER_DATA_DIR}) to keep its value.
@@ -99,7 +99,7 @@ public class Constants {
 		 **/
 		public static final String KEY_CHROME_USER_DATA_DIR = "user-data-dir";
 
-		/**'profile-directory' the parameter name for chrome options, a user-specific settings, it indicates a sub-folder under "user data directory".<br>
+		/**'<b>profile-directory</b>' the parameter name for chrome options, a user-specific settings, it indicates a sub-folder under "user data directory".<br>
 		* The value is specified in <a href="http://peter.sh/experiments/chromium-command-line-switches">chrome options</a><br>
 		* <b>Note:</b> As this {@value #KEY_CHROME_PROFILE_DIR} contains minus, it could be interpreted as an arithmetic expression,
 		*             Use SeleniumPlus.quote({@value #KEY_CHROME_PROFILE_DIR}) to keep its value.
@@ -108,7 +108,7 @@ public class Constants {
 		public static final String KEY_CHROME_PROFILE_DIR = "profile-directory";
 
 		/**
-		 * 'excludeSwitches' the experimental option name for chrome options, it is used to turn off chrome starting options.<br>
+		 * '<b>excludeSwitches</b>' the experimental option name for chrome options, it is used to turn off chrome starting options.<br>
 		 * The value is separated-options to exclude, the separator can be comma(,) or semicolon(;) , <br>
 		 * like "disable-component-update, ignore-certificate-errors" or "disable-component-update; ignore-certificate-errors",<br>
 		 * <b>be careful</b>, there are NO 2 hyphens before options, "--disable-component-update, --ignore-certificate-errors" is wrong.<br>
@@ -118,7 +118,7 @@ public class Constants {
 		public static final String KEY_CHROME_EXCLUDE_OPTIONS = "excludeSwitches";
 
 		/**
-		 * '--disable-extensions' is used to disable the use of Chrome extensions. Usually, we use it
+		 * '<b>--disable-extensions</b>' is used to disable the use of Chrome extensions. Usually, we use it
 		 * as DEFAULT to avoid popping up 'Disable developer mode extensions' message.
 		 *
 		 * In 'SeleniumPlus.StartWebBrowser()' or 'WDLibrary.startBrowser()', we can use 'false' value to cancel this default 'disable' setting.
@@ -164,33 +164,33 @@ public class Constants {
 	}
 
 	public static class SeleniumConstants{
-		/**'selenium.host'*/
+		/**'<b>selenium.host</b>'*/
 		public static final String SYSTEM_PROPERTY_SELENIUM_HOST = "selenium.host";
-		/**'selenium.port'*/
+		/**'<b>selenium.port</b>'*/
 		public static final String SYSTEM_PROPERTY_SELENIUM_PORT = "selenium.port";
-		/**'selenium.node', its value is like node1:port:nodeconfig;node2:port:nodeconfig;<br>
+		/**'<b>selenium.node</b>', its value is like node1:port:nodeconfig;node2:port:nodeconfig;<br>
 		 * semi-colon(;) serves as separator between nodes,<br>
 		 * colon(:) serves as separator between node-name, port, and node-configuration.<br>
 		 */
 		public static final String SYSTEM_PROPERTY_SELENIUM_NODE = "selenium.node";
-		/**'webdriver.ie.driver'*/
+		/**'<b>webdriver.ie.driver</b>'*/
 		public static final String SYSTEM_PROPERTY_WEBDRIVER_IE = "webdriver.ie.driver";
-		/**'webdriver.chrome.driver'*/
+		/**'<b>webdriver.chrome.driver</b>'*/
 		public static final String SYSTEM_PROPERTY_WEBDRIVER_CHROME = "webdriver.chrome.driver";
-		/**'webdriver.edge.driver'*/
+		/**'<b>webdriver.edge.driver</b>'*/
 		public static final String SYSTEM_PROPERTY_WEBDRIVER_EDGE = "webdriver.edge.driver";
 
-		/**'BROWSER' Indicates the browser's name */
+		/**'<b>BROWSER</b>' Indicates the browser's name */
 		public static final String SYSTEM_PROPERTY_BROWSER_NAME = "BROWSER";
-		/**'BROWSER_REMOTE' true or false. */
+		/**'<b>BROWSER_REMOTE</b>' true or false. */
 		public static final String SYSTEM_PROPERTY_BROWSER_REMOTE = "BROWSER_REMOTE";
 
-		/** 'selenium.node' the key for selenium grid node string;
+		/** '<b>selenium.node</b>' the key for selenium grid node string;
 		 * The value is as "node1:port:nodeconfig;node2:port:nodeconfig;" */
 		public static final String KEY_GRID_NODES_SETTING = SYSTEM_PROPERTY_SELENIUM_NODE;
 
 		/**
-		 * "WEB_DRIVERS" defines a set of drivers to start with the selenium-server.<br>
+		 * "<b>WEB_DRIVERS</b>" defines a set of drivers to start with the selenium-server.<br>
 		 * The value can be a combination (separated by a colon :) of<br>
 		 * <ul>
 		 * <li>{@link BrowserConstants#BROWSER_NAME_IE}
@@ -203,7 +203,7 @@ public class Constants {
 		 * <b>explorer:chrome:MicrosoftEdge</b> IEDriver, ChromeDriver and EdgeDriver will start with the selenium-server.<br>
 		 * */
 		public static final String ITEM_WEB_DRIVERS ="WEB_DRIVERS";
-		/** "safs.selenium.web.drivers" defines a set of drivers to start with the selenium-server.<br>
+		/** "<b>safs.selenium.web.drivers</b>" defines a set of drivers to start with the selenium-server.<br>
 		 * The value can be a combination (separated by a colon :) of<br>
 		 * <ul>
 		 * <li>{@link BrowserConstants#BROWSER_NAME_IE}
@@ -239,28 +239,33 @@ public class Constants {
 		}
 	}
 
+	public static class JSONConstants{
+		/** "<b>$classname</b>" special reserved key to track the Object class name.*/
+		public static final String PROPERTY_CLASSNAME = "$classname";
+	}
+
 	public static class XMLConstants{
-		/**  "<![CDATA[" */
+		/**  "<b>&lt;![CDATA[</b>" */
 		public static final String CDATA_START = "<![CDATA[";
-		/** "]]>" */
+		/** "<b>]]></b>" */
 		public static final String CDATA_END = "]]>";
-		/** "<?XML" */
+		/** "<b>&lt;?XML</b>" */
 		public static final String XML_START = "<?XML";
-		/** "classname" */
+		/** "<b>classname</b>" */
 		public static final String PROPERTY_CLASSNAME = "classname";
-		/** "package" */
+		/** "<b>package</b>" */
 		public static final String PROPERTY_PACKAGE = "package";
-		/** "&" */
+		/** "<b>&</b>" */
 		public static final String SYMBOL_AND = "&";
-		/** "'" */
+		/** "<b>'</b>" */
 		public static final String SYMBOL_APOS = "'";
-		/** "\"" */
+		/** "<b>\"</b>" */
 		public static final String SYMBOL_QUOTE = "\"";
-		/** "<" */
+		/** "<b>&lt;</b>" */
 		public static final String SYMBOL_LESS = "<";
-		/** ">" */
+		/** "<b>&gt;</b>" */
 		public static final String SYMBOL_BIGGER = ">";
-		/** An array of symbols needing escape in XML document, such as & ' " < > */
+		/** An array of symbols needing escape in XML document, such as <b>& ' " < ></b> */
 		public static final String[] SYMBOL_TO_ESCAPE = {SYMBOL_AND, SYMBOL_APOS, SYMBOL_QUOTE, SYMBOL_LESS, SYMBOL_BIGGER};
 	}
 
