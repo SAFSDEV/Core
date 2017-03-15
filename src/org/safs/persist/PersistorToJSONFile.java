@@ -8,13 +8,21 @@
  *
  * History:
  * DEC 05, 2016    (SBJLWA) Initial release.
+ * MAR 15, 2017    (SBJLWA) Supported the unpickle functionality.
  */
 package org.safs.persist;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
+import org.safs.Constants.JSONConstants;
+import org.safs.IndependantLog;
 import org.safs.SAFSException;
 import org.safs.StringUtils;
 import org.safs.tools.RuntimeDataInterface;
@@ -44,6 +52,8 @@ import org.safs.tools.RuntimeDataInterface;
  */
 public class PersistorToJSONFile extends PersistorToHierarchialFile{
 
+	JSONObject jsonObject = null;
+
 	/**
 	 * @param runtime
 	 * @param filename
@@ -64,6 +74,7 @@ public class PersistorToJSONFile extends PersistorToHierarchialFile{
 	@Override
 	protected void containerBegin(String className) throws IOException{
 		writer.write(StringUtils.quote(getTagName(className))+" : {\n");
+		writer.write(StringUtils.quote(JSONConstants.PROPERTY_CLASSNAME)+" : "+StringUtils.quote(className)+",\n"/*The container should have more children, so add a comma after the field '$classname'*/);
 	}
 	@Override
 	protected void childBegin(String key, String value) throws IOException{
@@ -80,6 +91,84 @@ public class PersistorToJSONFile extends PersistorToHierarchialFile{
 	@Override
 	protected void containerEnd(String className) throws IOException{
 		writer.write("}\n");
+	}
+
+	protected void beforeUnpickle()  throws SAFSException, IOException{
+		super.beforeUnpickle();
+
+		try {
+			jsonObject = new JSONObject(new JSONTokener(reader));
+
+		} catch (JSONException e) {
+			throw new SAFSException("Failed to creat JSON Object! Met "+e.toString());
+		}
+	}
+
+	protected Persistable doUnpickle()  throws SAFSException, IOException{
+		if(jsonObject==null || jsonObject.length()!=1){
+			throw new SAFSException("JsonObject is null or the size is not 1. JsonObject should contain only one field, it is a Persistable object");
+		}
+		JSONObject persistableObj = null;
+		Iterator<String> keys = jsonObject.keys();
+		if(keys.hasNext()){
+			String persistableObject = keys.next();
+			String persistenceName = persistFile==null? getPersistenceName():persistFile.getAbsolutePath();
+			IndependantLog.debug("unpickling '"+persistableObject+"' of persistence '"+persistenceName+"'.");
+			persistableObj = jsonObject.getJSONObject(persistableObject);
+		}else{
+			throw new SAFSException("There is no more object in JsonOjbect.");
+		}
+
+		return unpickleParse(persistableObj);
+	}
+
+	private Persistable unpickleParse(JSONObject body) throws SAFSException{
+		Persistable persistable = null;
+
+		try {
+			String className = body.getString(JSONConstants.PROPERTY_CLASSNAME);
+			Object object = Class.forName(className).newInstance();
+			if(object instanceof Persistable){
+				persistable = (Persistable) object;
+
+				body.remove(JSONConstants.PROPERTY_CLASSNAME);
+				Iterator<String> fields =  body.keys();
+				String field = null;
+				Object value = null;
+				JSONArray arrayValue = null;
+				while(fields.hasNext()){
+					field = fields.next();
+					value = body.get(field);
+					if(value instanceof JSONObject){
+						persistable.setField(field, unpickleParse((JSONObject)value));
+
+					}else if(value instanceof JSONArray){
+						arrayValue = (JSONArray) value;
+						Object[] values = arrayValue.toList().toArray();
+						persistable.setField(field, values);
+
+					}else{
+						persistable.setField(field, value);
+					}
+				}
+
+			}else{
+				throw new SAFSException(className+" is not a Persistable!");
+			}
+		} catch (ClassNotFoundException|JSONException | InstantiationException | IllegalAccessException e) {
+			throw new SAFSException(e.toString());
+		}
+
+		return persistable;
+	}
+
+	@Override
+	protected String parseFiledValue(Object value){
+		String result = super.parseFiledValue(value);
+		if(value instanceof String){
+			result = StringUtils.quote(result);
+		}
+		return result;
 	}
 
 	/**

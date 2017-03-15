@@ -37,6 +37,11 @@ public abstract class PersistorToFile extends AbstractRuntimeDataPersistor{
 	protected String filename = null;
 
 	/**
+	 * The file holds the information of a Persistable object.
+	 */
+	protected File persistFile = null;
+
+	/**
 	 * The Writer object of the test file. It is used to write Persistable object.
 	 */
 	protected Writer writer = null;
@@ -64,8 +69,8 @@ public abstract class PersistorToFile extends AbstractRuntimeDataPersistor{
 
 		try {
 			//open the persistence file
-			File file = FileUtilities.deduceTestFile(filename, runtime);
-			writer = FileUtilities.getUTF8BufferedFileWriter(file.getAbsolutePath());
+			persistFile = FileUtilities.deduceTestFile(filename, runtime);
+			writer = FileUtilities.getUTF8BufferedFileWriter(persistFile.getAbsolutePath());
 			//write the persistable object to the file
 			writeHeader(persistable);
 			write(persistable);
@@ -129,8 +134,8 @@ public abstract class PersistorToFile extends AbstractRuntimeDataPersistor{
 
 		try {
 			//open the persistence file
-			File file = FileUtilities.deduceProjectFile(filename, runtime);
-			reader = FileUtilities.getUTF8BufferedFileReader(file.getAbsolutePath());
+			persistFile = FileUtilities.deduceProjectFile(filename, runtime);
+			reader = FileUtilities.getUTF8BufferedFileReader(persistFile.getAbsolutePath());
 
 			//read the Persistable object from the file
 			ignoredFieldsForUnpickle = ignoredFields;
