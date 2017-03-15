@@ -1,0 +1,29 @@
+{
+	"OAuth2" : {
+		"$classname" : "org.safs.auth.OAuth2",
+		"AuthorizationServer" : {
+			"$classname" : "org.safs.auth.AuthorizationServer",
+			"authCodeResource" : "oauth/authorize",
+			"authTokenResource" : "oauth/token",
+			"baseServiceName" : "login",
+			"rootUrl" : "http://oauth2.authorization.server:8080"
+		}
+		,
+		"Content" : {
+			"$classname" : "org.safs.auth.Content",
+			"accessToken" : "HARHA34HAZFUREHFDAEIPOZ=D",
+			"accessTokenSecret" : "UNKNOWN",
+			"accessTokenType" : "UNKNOWN",
+			"clientID" : "UNKNOWN",
+			"clientSecret" : "UNKNOWN",
+			"refreshToken" : "UNKNOWN"
+		}
+		,
+		"SimpleAuth" : {
+			"$classname" : "org.safs.auth.SimpleAuth",
+			"password" : "unitA123",
+			"userName" : "wanglei"
+		}
+
+	}
+}
