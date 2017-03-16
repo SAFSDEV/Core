@@ -2644,7 +2644,7 @@ public class TIDComponent extends GenericEngine {
 		 * Currently it converts an XML file to Auth object and set it to Service.<br/>
 		 * @param service Service, the Service object to hold the Auth information.
 		 * @param authFile String, the file holding the authentication/authorization information.<br/>
-		 *                         Currently, XML and JSON file are supported.
+		 *                         Currently, XML and JSON files are supported.
 		 * @return boolean true, if Service's Auth has been changed; false otherwise.
 		 * @throws SAFSException if Service object is null or Fail to covert to an Auth object.
 		 */
