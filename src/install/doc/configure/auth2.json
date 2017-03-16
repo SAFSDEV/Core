@@ -22,7 +22,7 @@
 		"SimpleAuth" : {
 			"$classname" : "org.safs.auth.SimpleAuth",
 			"password" : "unitA123",
-			"userName" : "wanglei"
+			"userName" : "Tom"
 		}
 
 	}
