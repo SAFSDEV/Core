@@ -101,15 +101,33 @@ public abstract class PersistorToFile extends AbstractRuntimeDataPersistor{
 	protected void writeTailer(Persistable persistable)  throws SAFSException, IOException{}
 
 	/**
+	 * If the string value needs to be quoted before writing into a kind of persistence.<br/>
+	 * JSON file requires that for <b>string value</b>.<br/>
+	 * In JSON file, For example: <br/>
+	 * "key" : "stringValue"		is good<br/>
+	 * "key" : stringValue			is bad<br/>
+	 *
+	 * @return boolean true if the value needs to be quoted before writing into persistence.
+	 */
+	protected boolean stringNeedQuoted(){
+		return false;
+	}
+
+	/**
 	 * When writing a string to a file, some special characters MUST be escaped, such as
 	 * new line <b>"\n", "\r", "\r\n"</b>, or double quote <b>"</b>, or <b>&lt;?XML>...&lt;/XML></b> etc.<br/>
 	 * What characters to escape and how to escape, these depend on the format of the persistence file, and the
 	 * parser of the file. Subclass should override this method.<br/>
+	 * This method will also quote the value if {@link #stringNeedQuoted()} returns true.<br/>
 	 *
 	 * @param value String, the value to escape.
 	 * @return String, the escaped string
+	 * @see #stringNeedQuoted()
 	 */
 	protected String escape(String value){
+		if(stringNeedQuoted()){
+			return StringUtils.quote(value);
+		}
 		return value;
 	}
 

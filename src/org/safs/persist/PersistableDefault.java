@@ -9,11 +9,17 @@
  * History:
  * DEC 02, 2016    (SBJLWA) Initial release.
  * MAR 10, 2017    (SBJLWA) Override the method equals().
+ * MAR 16, 2017    (SBJLWA) Added default implementation of method getPersitableFields().
+ *                          Added caches holding result of getContents() and getPersitableFields().
+ *                          Handled the field of type "array": setField(), equals().
+ *
  */
 package org.safs.persist;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,7 +35,13 @@ import org.safs.Utils;
  * @author sbjlwa
  */
 public abstract class PersistableDefault implements Persistable, Printable{
-	protected static final String UNKNOWN_VALUE = "UNKNOWN";
+	protected static final String UNKNOWN_VALUE 		= "UNKNOWN";
+	protected static final String FAILED_RETRIEVE_VALUE = "FAILED_RETRIEVE";
+
+	/** a cache holding the Map of (fieldName, persistKey) */
+	private Map<String/*fieldName*/, String/*persistKey*/> fieldNameToPersistKeyMap = null;
+	/** a cache holding the Map of (persistKey, fieldValue) */
+	private Map<String/*persistKey*/, Object/*fieldValue*/> persistKeyToFieldValueMap = null;
 
 	protected boolean enabled = true;
 	protected Persistable parent = null;
@@ -38,18 +50,35 @@ public abstract class PersistableDefault implements Persistable, Printable{
 	protected int threshold = 0;
 	protected boolean thresholdEnabled = false;
 
+	@Override
+	public Map<String, String> getPersitableFields(){
+
+		if(fieldNameToPersistKeyMap==null){
+			Field[] fields = getClass().getDeclaredFields();
+			fieldNameToPersistKeyMap = new HashMap<String, String>();
+			for(Field field:fields){
+				fieldNameToPersistKeyMap.put(field.getName(), field.getName());
+			}
+		}
+
+		return fieldNameToPersistKeyMap;
+	}
+
 	/**
 	 * This method use Java reflection to get the value of the field defined in {@link #getPersitableFields()}.
 	 */
 	@Override
 	public Map<String, Object> getContents() {
+		if(persistKeyToFieldValueMap!=null){
+			return persistKeyToFieldValueMap;
+		}
+
 		String debugmsg = StringUtils.debugmsg(false);
 
-		Map<String, String> fieldToPersistKeyMap= getPersitableFields();
-		Map<String, Object> contents = new TreeMap<String, Object>();
+		Map<String, String> fieldToPersistKeyMap = getPersitableFields();
+		persistKeyToFieldValueMap = new TreeMap<String, Object>();
 
 		Class<?> clazz = getClass();
-
 		Set<String> fieldNames = fieldToPersistKeyMap.keySet();
 
 		Field field = null;
@@ -60,135 +89,67 @@ public abstract class PersistableDefault implements Persistable, Printable{
 				field.setAccessible(true);
 				value = field.get(this);
 			}catch(Exception e){
-				IndependantLog.warn(debugmsg+" can NOT get value for field '"+fieldName+"', met "+StringUtils.debugmsg(e));
+				IndependantLog.warn(debugmsg+" can NOT get value for field '"+fieldName+"', met "+StringUtils.debugmsg(e)+"\nset "+FAILED_RETRIEVE_VALUE+" as its value.");
+				value = FAILED_RETRIEVE_VALUE;
 			}
 
 			if(value==null){
-				IndependantLog.debug(debugmsg+" value is null for field '"+fieldName+"', set "+UNKNOWN_VALUE+" to as its value.");
+				IndependantLog.debug(debugmsg+" value is null for field '"+fieldName+"', set "+UNKNOWN_VALUE+" as its value.");
 				value = UNKNOWN_VALUE;
 			}
 
-			contents.put(fieldToPersistKeyMap.get(fieldName), value);
+			persistKeyToFieldValueMap.put(fieldToPersistKeyMap.get(fieldName), value);
 		}
 
-		return contents;
+		return persistKeyToFieldValueMap;
 	}
 
 	@Override
-	public boolean setField(String tag, Object value){
+	public boolean setField(String persistKey, Object value){
 		String debugmsg = StringUtils.debugmsg(false);
 
 		Class<?> clazz = getClass();
 		String fieldName = null;
 		Field field = null;
 
-		fieldName = getFieldName(tag);
+		fieldName = getFieldName(persistKey);
 
 		if(fieldName!=null){
 			try {
 				field = clazz.getDeclaredField(fieldName);
 				field.setAccessible(true);
-				field.set(this, parseFieldValue(field,value));
+				field.set(this, Utils.parseValue(field.getType(),value));
 				return true;
 			} catch (Exception e) {
-				IndependantLog.error(debugmsg+"Failed to set field '"+fieldName+"', met "+e.toString());
+				IndependantLog.error(debugmsg+"Failed to set field '"+fieldName+"', due to "+e.toString());
 			}
 		}else{
-			IndependantLog.warn(debugmsg+" cannot get field for field '"+tag+"'.");
+			IndependantLog.warn(debugmsg+" cannot get field-name for persistKey '"+persistKey+"'.");
 		}
 
 		return false;
 	}
 
 	/**
-	 * Convert the parameter 'value' to an appropriate Object according to the field's type.
-	 * @param field Field
-	 * @param value Object, the filed's value to parse.
-	 * @return Object, the converted Object for the field.
+	 * According to the persistKey, get the field name.<br/>
 	 */
-	protected static Object parseFieldValue(Field field, Object value) throws SAFSException{
-		Class<?> type = null;
-		Object fieldValue = value;
+	private String getFieldName(String persistKey){
+		if(persistKey==null) return persistKey;
 
-		if(value==null){
-			return value;
-		}
-
-		try{
-			type = field.getType();
-
-			if(Persistable.class.isAssignableFrom(type)){
-				if(!(value instanceof Persistable)){
-					//convert an object to persistable
-				}
-			}else if(type.isAssignableFrom(String.class)){
-				if(!(value instanceof String)){
-					fieldValue = String.valueOf(value);
-				}
-			}else if(type.isAssignableFrom(Boolean.TYPE)){
-				if(!(value instanceof Boolean)){
-					fieldValue = Boolean.valueOf(value.toString());
-				}
-			}else if(type.isAssignableFrom(Integer.TYPE)){
-				if(!(value instanceof Integer)){
-					fieldValue = Integer.valueOf(value.toString());
-				}
-			}else if(type.isAssignableFrom(Short.TYPE)){
-				if(!(value instanceof Short)){
-					fieldValue = Short.valueOf(value.toString());
-				}
-			}else if(type.isAssignableFrom(Long.TYPE)){
-				if(!(value instanceof Long)){
-					fieldValue = Long.valueOf(value.toString());
-				}
-			}else if(type.isAssignableFrom(Double.TYPE)){
-				if(!(value instanceof Double)){
-					fieldValue = Double.valueOf(value.toString());
-				}
-			}else if(type.isAssignableFrom(Float.TYPE)){
-				if(!(value instanceof Float)){
-					fieldValue = Float.valueOf(value.toString());
-				}
-			}else if(type.isAssignableFrom(Byte.TYPE)){
-				if(!(value instanceof Byte)){
-					fieldValue = Byte.valueOf(value.toString());
-				}
-			}else if(type.isAssignableFrom(Character.TYPE)){
-				if(!(value instanceof Character)){
-					fieldValue = Character.valueOf(value.toString().charAt(0));
-				}
-			}
-		}catch(NumberFormatException | IndexOutOfBoundsException e){
-			//user's data error
-			throw new SAFSException(e.toString());
-		}catch(Exception e){
-			//program error, a bug
-			throw new SAFSException(e.toString());
-		}
-
-		return fieldValue;
-	}
-
-	/**
-	 * According to the tag-name, get the field name.<br/>
-	 */
-	private String getFieldName(String tagName){
-		if(tagName==null) return tagName;
-
-		Map<String, String> fieldToPersistKeyMap= getPersitableFields();
+		Map<String, String> fieldToPersistKeyMap = getPersitableFields();
 
 		Set<String> fieldNames = fieldToPersistKeyMap.keySet();
 
-		String persistKey = null;
+		String tempKey = null;
 		for(String fieldName: fieldNames){
-			persistKey = fieldToPersistKeyMap.get(fieldName);
-			if(tagName.equalsIgnoreCase(persistKey)){
+			tempKey = fieldToPersistKeyMap.get(fieldName);
+			if(persistKey.equalsIgnoreCase(tempKey)){
 				return fieldName;
 			}
 		}
 
 		//If cannot find, it will be considered as a field name.
-		return tagName;
+		return persistKey;
 	}
 
 	@Override
@@ -236,10 +197,10 @@ public abstract class PersistableDefault implements Persistable, Printable{
 		actualContents = new TreeMap<String, Object>();
 
 		if(includeContainer){
-			//The Persistable object itself doesn't have a value, and it contains children
-			//while the SAX XML parser will treat it as Element and assign it a default string "\n" as value
+			//The Persistable object itself doesn't have a real value, but it contains children;
+			//while the SAX XML parser will treat it as an Element and assign it a default string "\n" as value
 			//So we add the default string "\n" for Persistable object itself in the actualContents Map to
-			//get the verification pass.
+			//get the verification pass. See VerifierToXMLFile#beforeCheck().
 			Object containerValue = Utils.getMapValue(elementAlternativeValues, CONTAINER_ELEMENT, "");
 			actualContents.put(flatKey, containerValue);
 		}
@@ -317,6 +278,14 @@ public abstract class PersistableDefault implements Persistable, Printable{
 				complicatedChildren.add(key);
 			}else{
 
+				if(value.getClass().isArray()){
+					try {
+						value = Arrays.toString(Utils.getArray(value));
+					} catch (SAFSException e) {
+						IndependantLog.warn("Failed to get array field value, due to "+e.toString());
+					}
+				}
+
 				if(value!=null && isThresholdEnabled() && value.toString().length()>getThreshold()){
 					IndependantLog.debug("The value of '"+key+"' is too big, its size '"+value.toString().length()+"' is over threshold '"+getThreshold()+"'");
 					sb.append(getTabs()+key+" : "+DATA_BIGGER_THAN_THRESHOLD+".\n");
@@ -335,10 +304,20 @@ public abstract class PersistableDefault implements Persistable, Printable{
 		return sb.toString();
 	}
 
+	/**
+	 * If
+	 * <ul>
+	 * <li>The parameter obj is also a Persistable.
+	 * <li>The size of {@link #getPersitableFields()} are same
+	 * <li>The values of each field from {@link #getPersitableFields()} are same
+	 * </ul>
+	 * then they will be considered as equal.<br/>
+	 */
 	public boolean equals(Object obj){
 		if(obj==null) return false;
 		if(!(obj instanceof Persistable)) return false;
 		if(obj==this) return true;
+
 		Persistable tempPersistable = (Persistable) obj;
 		if(getPersitableFields().size()!=tempPersistable.getPersitableFields().size()) return false;
 
@@ -351,9 +330,16 @@ public abstract class PersistableDefault implements Persistable, Printable{
 			persistKey = getPersitableFields().get(field);
 			value1 = getContents().get(persistKey);
 			persistKey = tempPersistable.getPersitableFields().get(field);
-			value2 = getContents().get(persistKey);
+			value2 = tempPersistable.getContents().get(persistKey);
 			if(value1==null){
 				if(value2!=null) return false;
+			}else if(value1.getClass().isArray()){
+				try {
+					return Arrays.toString(Utils.getArray(value1)).equals(Arrays.toString(Utils.getArray(value2)));
+				} catch (SAFSException e) {
+					IndependantLog.warn("Not equal, due to "+e.toString());
+					return false;
+				}
 			}else if(!value1.equals(value2)){
 				return false;
 			}
