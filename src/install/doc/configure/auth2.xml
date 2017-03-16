@@ -17,7 +17,7 @@
 
 	<SimpleAuth classname="org.safs.auth.SimpleAuth">
 		<password>unitA123</password>
-		<userName>wanglei</userName>
+		<userName>Tom</userName>
 	</SimpleAuth>
 
 </OAuth2>
