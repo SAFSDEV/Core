@@ -11,7 +11,6 @@
  */
 package org.safs.auth;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.safs.persist.PersistableDefault;
@@ -21,15 +20,8 @@ import org.safs.persist.PersistableDefault;
  *
  */
 public class SimpleAuth extends PersistableDefault implements Auth{
-	private final static Map<String, String> fieldToPersistKeyMap = new HashMap<String, String>();
-
 	private String userName = null;
 	private String password = null;
-
-	static{
-		fieldToPersistKeyMap.put("userName", "userName");
-		fieldToPersistKeyMap.put("password", "password");
-	}
 
 	public String getUserName() {
 		return userName;
@@ -42,10 +34,5 @@ public class SimpleAuth extends PersistableDefault implements Auth{
 	}
 	public void setPassword(String password) {
 		this.password = password;
-	}
-
-	@Override
-	public Map<String, String> getPersitableFields() {
-		return fieldToPersistKeyMap;
 	}
 }

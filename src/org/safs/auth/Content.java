@@ -11,9 +11,6 @@
  */
 package org.safs.auth;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.safs.persist.PersistableDefault;
 
 /**
@@ -26,8 +23,6 @@ import org.safs.persist.PersistableDefault;
  *
  */
 public class Content extends PersistableDefault{
-	private final static Map<String, String> fieldToPersistKeyMap = new HashMap<String, String>();
-
 	/**
 	 * If the access token request is valid and authorized, the authorization server issues an access token.<br>
 	 * This token will be used to access client's resources on behalf of client without authentication.<br>
@@ -63,20 +58,6 @@ public class Content extends PersistableDefault{
 	 *  But they are the same meaning.
 	 */
 	private String clientSecret = null;
-
-	static{
-		fieldToPersistKeyMap.put("accessToken", "accessToken");
-		fieldToPersistKeyMap.put("refreshToken", "refreshToken");
-		fieldToPersistKeyMap.put("accessTokenType", "accessTokenType");
-		fieldToPersistKeyMap.put("accessTokenSecret", "accessTokenSecret");
-		fieldToPersistKeyMap.put("clientID", "clientID");
-		fieldToPersistKeyMap.put("clientSecret", "clientSecret");
-	}
-
-	@Override
-	public Map<String, String> getPersitableFields() {
-		return fieldToPersistKeyMap;
-	}
 
 	public String getAccessToken() {
 		return accessToken;

@@ -94,6 +94,6 @@ public class PersistorToPropertiesFile extends PersistorToFile{
 			m.appendReplacement(sb, "\\\\"+m.group(1)+escapedNL);
 		}
 		m.appendTail(sb);
-		return sb.toString();
+		return super.escape(sb.toString());
 	}
 }
