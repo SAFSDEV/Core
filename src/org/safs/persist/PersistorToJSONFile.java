@@ -78,7 +78,7 @@ public class PersistorToJSONFile extends PersistorToHierarchialFile{
 	}
 	@Override
 	protected void childBegin(String key, String value) throws IOException{
-		writer.write(StringUtils.quote(key)+" : "+StringUtils.quote(value));
+		writer.write(StringUtils.quote(key)+" : "+value);
 	}
 	@Override
 	protected void childEnd(boolean lastTag) throws IOException{
@@ -100,13 +100,13 @@ public class PersistorToJSONFile extends PersistorToHierarchialFile{
 			jsonObject = new JSONObject(new JSONTokener(reader));
 
 		} catch (JSONException e) {
-			throw new SAFSException("Failed to creat JSON Object! Met "+e.toString());
+			throw new SAFSException("Failed to create JSON Object! Met "+e.toString());
 		}
 	}
 
 	protected Persistable doUnpickle()  throws SAFSException, IOException{
 		if(jsonObject==null || jsonObject.length()!=1){
-			throw new SAFSException("JsonObject is null or the size is not 1. JsonObject should contain only one field, it is a Persistable object");
+			throw new SAFSException("JsonObject is null or the size is not 1. JsonObject should contain only one field, it is a Persistable object.");
 		}
 		JSONObject persistableObj = null;
 		Iterator<String> keys = jsonObject.keys();
@@ -116,7 +116,7 @@ public class PersistorToJSONFile extends PersistorToHierarchialFile{
 			IndependantLog.debug("unpickling '"+persistableObject+"' of persistence '"+persistenceName+"'.");
 			persistableObj = jsonObject.getJSONObject(persistableObject);
 		}else{
-			throw new SAFSException("There is no more object in JsonOjbect.");
+			throw new SAFSException("There is no more objects in JsonObject.");
 		}
 
 		return unpickleParse(persistableObj);
@@ -162,6 +162,11 @@ public class PersistorToJSONFile extends PersistorToHierarchialFile{
 		return persistable;
 	}
 
+	@Override
+	protected boolean stringNeedQuoted(){
+		return true;
+	}
+
 	/**
 	 * Escape special characters such as value occupying multiple lines, which should be escaped
 	 * as characters <font color="red">\n</font>; the double quote should be escaped as
@@ -194,6 +199,6 @@ public class PersistorToJSONFile extends PersistorToHierarchialFile{
 		//escape double quote, replace " by \"
 		result = sb.toString().replace("\"", "\\\"");
 
-		return result;
+		return super.escape(result);
 	}
 }

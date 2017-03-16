@@ -21,9 +21,9 @@ import java.util.Set;
 public interface Persistable {
 
 	/**
-	 * @return Map<String, Object>, a Map containing a pair(persistKey, value) to persist.
+	 * @return Map<String, Object>, a Map containing a pair(persistKey, fieldValue) to persist.
 	 */
-	public Map<String /*persistKey*/, Object/*content*/> getContents();
+	public Map<String /*persistKey*/, Object/*fieldValue*/> getContents();
 
 	/**
 	 * This Map contains a pair, the key is the 'class field name' telling us which field needs
@@ -106,9 +106,9 @@ public interface Persistable {
 
 	/**
 	 * Set the field's value of this Persistable object.
-	 * @param tag String, the tag name or the persist-key. refer to {@link #getPersitableFields()}.
+	 * @param persistKey String, the persist-key (it can be tag-name in XML, key-string in JSON etc.). refer to {@link #getPersitableFields()}.
 	 * @param value Object, the value to set
 	 * @return boolean true if successful.
 	 */
-	public boolean setField(String tag, Object value);
+	public boolean setField(String persistKey, Object value);
 }

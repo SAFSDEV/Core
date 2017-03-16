@@ -18,6 +18,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.json.JSONArray;
 import org.safs.Constants.XMLConstants;
 import org.safs.SAFSException;
 import org.safs.tools.RuntimeDataInterface;
@@ -92,7 +93,7 @@ public class PersistorToXMLFile extends PersistorToHierarchialFile{
 			result = XMLConstants.CDATA_START+result+XMLConstants.CDATA_END;
 		}
 
-		return result;
+		return super.escape(result);
 	}
 
 	/**
@@ -251,6 +252,14 @@ public class PersistorToXMLFile extends PersistorToHierarchialFile{
 								//I am a simple field
 								if(!parent.container.setField(me.name, value.toString())){
 									warnings.append("\nFailed to set field '"+parent.name+"."+me.name+"' with value '"+value+"'");
+									String trimmedValue = value.toString().trim();
+									if(trimmedValue.startsWith("[") && trimmedValue.endsWith("]")){
+										//It is probably an array object in JSON format
+										JSONArray array = new JSONArray(trimmedValue);
+										if(!parent.container.setField(me.name, array.toList().toArray())){
+											warnings.append("\nFailed to set field '"+parent.name+"."+me.name+"' with array value '"+value+"'");
+										}
+									}
 								}
 							}else{
 								//I am a container field, value doesn't hold any value, set my container to parent.

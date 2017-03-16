@@ -10,6 +10,7 @@
  * APR 22, 2016    (Lei Wang) Initial release.
  * SEP 06, 2016    (Lei Wang) Added method compile(): compile java/groovy source code at runtime.
  * DEC 12, 2016    (Lei Wang) Added method getMapValue().
+ * MAR 16, 2017    (Lei Wang) Added method getArray() and parseValue().
  */
 package org.safs;
 
@@ -17,6 +18,7 @@ import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +28,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.safs.natives.NativeWrapper;
+import org.safs.persist.Persistable;
 
 public class Utils {
 	/** '.java' the suffix of java source code. */
@@ -213,4 +216,126 @@ public class Utils {
 		}
 	}
 
+	/**
+	 * Convert the parameter 'value' to an appropriate Object according to the expectedType.
+	 * @param expectedType Class, the expected field type
+	 * @param value Object, the value to parse.
+	 * @return Object, the converted Object.
+	 */
+	public static Object parseValue(Class<?> expectedType, Object value) throws SAFSException{
+		if(expectedType==null || value==null){
+			return value;
+		}
+		if(expectedType.isAssignableFrom(value.getClass())){
+			return value;
+		}
+
+		Object fieldValue = value;
+
+		try{
+
+			if(Persistable.class.isAssignableFrom(expectedType)){
+				if(!(value instanceof Persistable)){
+					IndependantLog.warn("Need to convert the object from '"+value.getClass().getName()+"' to Persistable subclass '"+expectedType.getName()+"'");
+				}
+				//else, even the 'value' is a Persistable, it is not sure that it can be assigned to the field.
+
+			}else if(expectedType.getName().equals(String.class.getName())){
+				if(!(value instanceof String)){
+					fieldValue = String.valueOf(value);
+				}
+			}else if(expectedType.getName().equals(Boolean.TYPE.getName())){
+				if(!(value instanceof Boolean)){
+					fieldValue = Boolean.valueOf(value.toString());
+				}
+			}else if(expectedType.getName().equals(Integer.TYPE.getName())){
+				if(!(value instanceof Integer)){
+					fieldValue = Integer.valueOf(value.toString());
+				}
+			}else if(expectedType.getName().equals(Short.TYPE.getName())){
+				if(!(value instanceof Short)){
+					fieldValue = Short.valueOf(value.toString());
+				}
+			}else if(expectedType.getName().equals(Long.TYPE.getName())){
+				if(!(value instanceof Long)){
+					fieldValue = Long.valueOf(value.toString());
+				}
+			}else if(expectedType.getName().equals(Double.TYPE.getName())){
+				if(!(value instanceof Double)){
+					fieldValue = Double.valueOf(value.toString());
+				}
+			}else if(expectedType.getName().equals(Float.TYPE.getName())){
+				if(!(value instanceof Float)){
+					fieldValue = Float.valueOf(value.toString());
+				}
+			}else if(expectedType.getName().equals(Byte.TYPE.getName())){
+				if(!(value instanceof Byte)){
+					fieldValue = Byte.valueOf(value.toString());
+				}
+			}else if(expectedType.getName().equals(Character.TYPE.getName())){
+				if(!(value instanceof Character)){
+					fieldValue = Character.valueOf(value.toString().charAt(0));
+				}
+			}else if(expectedType.isArray()){
+				if(value.getClass().isArray()){
+					//convert to appropriate array
+					Class<?> actualArrayType = value.getClass().getComponentType();
+					Class<?> expectedArrayType = expectedType.getComponentType();
+					int length = Array.getLength(value);
+					Object arrayItem = null;
+
+					if(!expectedArrayType.isAssignableFrom(actualArrayType)){
+						fieldValue = Array.newInstance(expectedArrayType, length);
+						for(int i=0;i<length;i++){
+							arrayItem = Array.get(value, i);
+							//cast arrayItem to 'expectedArrayType'
+							arrayItem = parseValue(expectedArrayType, arrayItem);
+							Array.set(fieldValue, i, arrayItem);
+						}
+					}
+				}else{
+					throw new SAFSException("cannot set a non array object to an array field!");
+				}
+			}
+		}catch(NumberFormatException | IndexOutOfBoundsException e){
+			//user's data error
+			throw new SAFSException(e.toString());
+		}catch(SAFSException se){
+			throw se;
+		}catch(Exception e){
+			//program error, a bug
+			throw new SAFSException(e.toString());
+		}
+
+		return fieldValue;
+	}
+
+	/**
+	 * @param array Object, an array object.
+	 * @return Object[]
+	 * @throws SAFSException
+	 */
+	public static Object[] getArray(Object array) throws SAFSException{
+		if(array==null){
+			throw new SAFSException("cannot convert a null to an array object.");
+		}
+
+		Class<?> clazz = array.getClass();
+		if(!clazz.isArray()){
+			throw new SAFSException(clazz.getName()+ "is not an array object.");
+		}
+
+		Class<?> componentType = clazz.getComponentType();
+
+		if(componentType.isPrimitive()){
+			int length = Array.getLength(array);
+			Object[] values = new Object[length];
+			for(int i=0;i<length;i++){
+				values[i] = Array.get(array, i);
+			}
+			return values;
+		}else{
+			return (Object[]) array;
+		}
+	}
 }
