@@ -106,7 +106,7 @@ public class PersistorToJSONFile extends PersistorToHierarchialFile{
 
 	protected Persistable doUnpickle()  throws SAFSException, IOException{
 		if(jsonObject==null || jsonObject.length()!=1){
-			throw new SAFSException("JsonObject is null or the size is not 1. JsonObject should contain only one field, it is a Persistable object.");
+			throw new SAFSException("JsonObject is null or the size is not 1. JsonObject should contain only one field, which is a Persistable object.");
 		}
 		JSONObject persistableObj = null;
 		Iterator<String> keys = jsonObject.keys();
@@ -116,12 +116,21 @@ public class PersistorToJSONFile extends PersistorToHierarchialFile{
 			IndependantLog.debug("unpickling '"+persistableObject+"' of persistence '"+persistenceName+"'.");
 			persistableObj = jsonObject.getJSONObject(persistableObject);
 		}else{
-			throw new SAFSException("There is no more objects in JsonObject.");
+			throw new SAFSException("There are no more objects in JsonObject.");
 		}
 
 		return unpickleParse(persistableObj);
 	}
 
+	/**
+	 * Try to convert <a href="http://safsdev.github.io/configure/auth2.xml">JSON File</a> to a {@link Persistable} object.<br/>
+	 * In JSON file, the special JSON key {@link JSONConstants#PROPERTY_CLASSNAME} holds the name of the class which the
+	 * JSONObject represents; the other keys are the name of the fields of that class.<br/>
+	 *
+	 * @param body JSONObject
+	 * @return Persistable
+	 * @throws SAFSException
+	 */
 	private Persistable unpickleParse(JSONObject body) throws SAFSException{
 		Persistable persistable = null;
 
