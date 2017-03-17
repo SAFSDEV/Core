@@ -734,7 +734,7 @@ public class FileUtilities
 	 */
 	public static void replaceAllSubdirectoryFilesSubstrings(String directory, String[] fileEndings, String findString, String replaceString, boolean isCaseSensitive) throws IOException{
 	    File dir = new CaseInsensitiveFile(directory).toFile();
-	    if(!dir.isDirectory()) throw new IOException(directory +" is not a valid Directory!");
+	    if(!dir.isDirectory()) throw new FileNotFoundException(directory +" is not a valid Directory and will be ignored.");
 	    replaceDirectoryFilesSubstrings(dir.getAbsolutePath(), fileEndings, findString, replaceString, isCaseSensitive);
 	    File[] files = dir.listFiles();
 	    String filename;
