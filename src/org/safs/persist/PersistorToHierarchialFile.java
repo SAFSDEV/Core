@@ -119,7 +119,7 @@ public class PersistorToHierarchialFile extends PersistorToFile{
 	protected void childBegin(String key, String value) throws IOException{}
 
 	/**
-	 * Parse the parameter value and convert it to a string which will be used to write into the persistence (File or Variable or ...)<br>
+	 * Parse the parameter value and convert it to a string which will be persisted to (File or Variable or ...)<br>
 	 * The following are the ways to parse value:
 	 * <ul>
 	 * <li>The String value will be {@link #escape(String)} and double-quoted if needed.
@@ -140,7 +140,7 @@ public class PersistorToHierarchialFile extends PersistorToFile{
 		StringBuffer result = new StringBuffer();
 		String debugmsg = StringUtils.debugmsg(false);
 		Class<?> fieldClass = value.getClass();
-		IndependantLog.debug(debugmsg+" parsing valud of field of type '"+fieldClass.getName()+"'");
+		IndependantLog.debug(debugmsg+" parsing field value of type '"+fieldClass.getName()+"'");
 
 		if(value instanceof String){
 			result.append(escape(value.toString()));
@@ -166,7 +166,7 @@ public class PersistorToHierarchialFile extends PersistorToFile{
 		}
 		//TODO we might need to handle more types
 		else{
-			IndependantLog.debug(StringUtils.debugmsg(false)+" need more implementation to handle field of type '"+value.getClass().getSimpleName()+"'");
+			IndependantLog.warn(StringUtils.debugmsg(false)+" the type '"+value.getClass().getSimpleName()+"' is not supported yet.");
 			result.append(escape(value.toString()));
 		}
 
