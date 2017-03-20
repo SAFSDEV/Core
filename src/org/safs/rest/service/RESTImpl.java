@@ -30,7 +30,9 @@ public class RESTImpl {
 		safsRequest.set_method(requestMethod);
 		safsRequest.set_message_body(body);
 		safsRequest.set_headers(headers);
-		if(relativeURI.startsWith("/"))
+		if(defaultURI.endsWith("/") && relativeURI.startsWith("/"))
+			safsRequest.set_uri(defaultURI + relativeURI.substring(1));
+		else if(defaultURI.endsWith("/") || relativeURI.startsWith("/"))
 			safsRequest.set_uri(defaultURI + relativeURI);
 		else
 			safsRequest.set_uri(defaultURI + "/" + relativeURI);
