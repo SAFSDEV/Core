@@ -22,7 +22,9 @@ import java.lang.reflect.Array;
 import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -222,21 +224,33 @@ public class Utils {
 	 * @param value Object, the value to parse.
 	 * @return Object, the converted Object.
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static Object parseValue(Class<?> expectedType, Object value) throws SAFSException{
+		Object fieldValue = value;
+
 		if(expectedType==null || value==null){
-			return value;
-		}
-		if(expectedType.isAssignableFrom(value.getClass())){
-			return value;
+			return fieldValue;
 		}
 
-		Object fieldValue = value;
+		//The type of the value
+		Class<?> actualType = value.getClass();
+
+		if(expectedType.isAssignableFrom(actualType)){
+			return fieldValue;
+		}
 
 		try{
 
+			if(Collection.class.isAssignableFrom(expectedType) && Collection.class.isAssignableFrom(actualType)){
+				//If both are collection,
+				fieldValue = expectedType.newInstance();//create a collection object
+				((Collection) fieldValue).addAll((Collection) value);//add the actual collection of objects to fieldValue
+				return fieldValue;
+			}
+
 			if(Persistable.class.isAssignableFrom(expectedType)){
 				if(!(value instanceof Persistable)){
-					IndependantLog.warn("Need to convert the object from '"+value.getClass().getName()+"' to Persistable subclass '"+expectedType.getName()+"'");
+					IndependantLog.warn("Need to convert the object from '"+actualType.getName()+"' to Persistable subclass '"+expectedType.getName()+"'");
 				}
 				//else, even the 'value' is a Persistable, it is not sure that it can be assigned to the field.
 
@@ -277,25 +291,52 @@ public class Utils {
 					fieldValue = Character.valueOf(value.toString().charAt(0));
 				}
 			}else if(expectedType.isArray()){
-				if(value.getClass().isArray()){
-					//convert to appropriate array
-					Class<?> actualArrayType = value.getClass().getComponentType();
-					Class<?> expectedArrayType = expectedType.getComponentType();
-					int length = Array.getLength(value);
-					Object arrayItem = null;
+				Class<?> expectedItemType = expectedType.getComponentType();
+				//convert the value (Object) to an appropriate array
+				if(actualType.isArray()){
+					Class<?> actualItemType = value.getClass().getComponentType();
+					if(!expectedItemType.isAssignableFrom(actualItemType)){
+						IndependantLog.warn("'"+actualItemType+"' cannot be assigned to '"+expectedItemType+"'");
+						//if expectedItemType is [L, but actualItemType is a List of Long, this situation should be valid
+					}
 
-					if(!expectedArrayType.isAssignableFrom(actualArrayType)){
-						fieldValue = Array.newInstance(expectedArrayType, length);
-						for(int i=0;i<length;i++){
-							arrayItem = Array.get(value, i);
-							//cast arrayItem to 'expectedArrayType'
-							arrayItem = parseValue(expectedArrayType, arrayItem);
-							Array.set(fieldValue, i, arrayItem);
+					int length = Array.getLength(value);
+					fieldValue = Array.newInstance(expectedItemType, length);
+					Object arrayItem = null;
+					for(int i=0;i<length;i++){
+						arrayItem = Array.get(value, i);
+						//cast arrayItem to 'expectedItemType'
+						arrayItem = parseValue(expectedItemType, arrayItem);
+						Array.set(fieldValue, i, arrayItem);
+					}
+				}else if(Iterable.class.isAssignableFrom(actualType)){
+					Iterator<?> iter = ((Iterable<?>) value).iterator();
+					List<Object> items = new ArrayList<Object>();
+					while(iter.hasNext()){
+						items.add(iter.next());
+					}
+					fieldValue = Array.newInstance(expectedItemType, items.size());
+
+					if(items.size()>0){
+						Class<?> actualItemType = items.get(0).getClass();
+						if(!expectedItemType.isAssignableFrom(actualItemType)){
+							IndependantLog.warn("'"+actualItemType+"' cannot be assigned to '"+expectedItemType+"'");
+							//if expectedItemType is [L, but actualItemType is a List of Long, this situation should be valid
 						}
 					}
+
+					Object arrayItem = null;
+					for(int i=0;i<items.size();i++){
+						//cast arrayItem to 'expectedItemType'
+						arrayItem = parseValue(expectedItemType, items.get(i));
+						Array.set(fieldValue, i, arrayItem);
+					}
+
 				}else{
 					throw new SAFSException("cannot set a non array object to an array field!");
 				}
+			}else{
+				IndependantLog.warn("There is yet no implelementation for type '"+expectedType+"'.");
 			}
 		}catch(NumberFormatException | IndexOutOfBoundsException e){
 			//user's data error
@@ -317,7 +358,7 @@ public class Utils {
 	 */
 	public static Object[] getArray(Object array) throws SAFSException{
 		if(array==null){
-			throw new SAFSException("cannot convert a null to an array object.");
+			throw new SAFSException("parameter array is null.");
 		}
 
 		Class<?> clazz = array.getClass();
@@ -337,5 +378,106 @@ public class Utils {
 		}else{
 			return (Object[]) array;
 		}
+	}
+
+	/**
+	 * Convert an Object to a string, even this object is a multiple dimension array.
+	 * @param object Object
+	 * @return String
+	 */
+	public static String toString(Object object){
+		String result = null;
+		try{
+			Object[] array = getArray(object);
+			result = Arrays.deepToString(array);
+		}catch(SAFSException se){
+			result = object!=null? object.toString():null;
+		}
+
+		return result;
+	}
+
+	/**
+	 * Compare 2 objects even they are multiple-dimension arrays.
+	 * @param value1 Object
+	 * @param value2 Object
+	 * @return boolean
+	 */
+	public static boolean equals(Object value1, Object value2){
+		if(value1==value2)
+			return true;
+		if(value1==null || value2==null)
+			return false;
+
+		if(value1.getClass().isArray()){
+			if(!value2.getClass().isArray()){
+				return false;
+			}
+			try {
+				Object[] array1 = getArray(value1);
+				Object[] array2 = getArray(value2);
+				if(array1.length!=array2.length){
+					return false;
+				}
+				for(int i=0;i<array1.length;i++){
+					if(!equals(array1[i], array2[i])) return false;
+				}
+			} catch (SAFSException e) {
+				IndependantLog.warn("Not equal, due to "+e.toString());
+				return false;
+			}
+		}else if(!value1.equals(value2)){
+			return false;
+		}
+
+		return true;
+	}
+
+	private static void testArrays(){
+		String[] stringArray1 = {"item1","item2","item3","item4","item5"};
+		String[] stringArray2 = {"item1","item2","item3","item4","item5"};
+		String[] stringArray3 = {"item1","item2","item3","item4","item5", ""};
+
+		int[] intArray1 = {1,2,3,4,5};
+		int[] intArray2 = {1,2,3,4,5};
+		int[] intArray3 = {1,2,3};
+
+		Double[] doubleArray1 = {1.0, 2.0, 3.0, 4.0, 5.0};
+		Double[] doubleArray2 = {1.0, 2.0, 3.0, 4.0, 5.0};
+		Double[] doubleArray3 = null;
+
+		float[][] _2DimFloatArray1 = {{19.0F, 17.45F}, {65.0F, 25.40F}, {1.42F, 78.23F}};
+		float[][] _2DimFloatArray2 = {{19.0F, 17.45F}, {65.0F, 25.40F}, {1.42F, 78.23F}};
+		float[][] _2DimFloatArray3 = {{19.0F, 17.45F}, {65.0F, 25.40F}, {1.42F}};
+
+		__assert_2_arrays(stringArray1, stringArray2, true);
+		__assert_2_arrays(stringArray1, stringArray3, false);
+
+		__assert_2_arrays(intArray1, intArray2, true);
+		__assert_2_arrays(intArray1, intArray3, false);
+
+		__assert_2_arrays(doubleArray1, doubleArray2, true);
+		__assert_2_arrays(doubleArray1, doubleArray3, false);
+
+		__assert_2_arrays(_2DimFloatArray1, _2DimFloatArray2, true);
+		__assert_2_arrays(_2DimFloatArray1, _2DimFloatArray3, false);
+
+	}
+
+	private static void __assert_2_arrays(Object array1, Object array2, boolean positive){
+		System.out.println("comparing\narray1: "+toString(array1)+"\narray2: "+toString(array2)+"\n");
+
+		if(positive){
+			assert toString(array1).equals(toString(array2));
+			assert equals(array1, array2);
+		}else{
+			assert !toString(array1).equals(toString(array2));
+			assert !equals(array1, array2);
+		}
+	}
+
+	/** java -ea org.safs.Utils */
+	public static void main(String[] params){
+		testArrays();
 	}
 }

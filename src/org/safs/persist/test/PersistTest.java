@@ -14,9 +14,11 @@ package org.safs.persist.test;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import org.safs.SAFSException;
 import org.safs.auth.AuthorizationServer;
@@ -28,6 +30,7 @@ import org.safs.persist.PersistableDefault;
 import org.safs.persist.PersistenceType;
 import org.safs.persist.Persistor;
 import org.safs.persist.PersistorFactory;
+import org.safs.persist.Verifier;
 import org.safs.text.FileUtilities;
 import org.safs.text.FileUtilities.FileType;
 import org.safs.tools.RuntimeDataInterface;
@@ -150,9 +153,10 @@ public class PersistTest {
 			Map<String/*className*/, List<String>/*field-names*/> ignoredFields = new HashMap<String, List<String>>();
 			List<String> fields = new ArrayList<String>();
 			fields.add("password");
-			ignoredFields.put("org.safs.auth.SimpleAuth", fields);
+			ignoredFields.put(SimpleAuth.class.getName(), fields);
 			persist = p.unpickle(ignoredFields);
 			System.out.println("Unpickled SimpleAuth without fields "+fields+"\n"+persist);
+			assert !persist.equals(simpleauth);
 
 		} catch (SAFSException e) {
 			e.printStackTrace();
@@ -215,6 +219,18 @@ public class PersistTest {
 		String[] stringArray = {"item1","item2","item3","item4","item5"};
 		int[] intArray = {1,2,3,4,5};
 		Double[] doubleArray = {1.0, 2.0, 3.0, 4.0, 5.0};
+		List<?> listObject = Arrays.asList("item1","item2","item3");
+		List<?> listObject_bis = Arrays.asList("item1_bis","item2_bis","item3_bis");
+		float[][] float2DimensionArray = {{19.0F, 17.45F}, {65.0F, 25.40F, 33.25F}, {78.23F}};
+		String[][] string2DimArray = {{"item1","item2"}, {"item3","item4"}, {"item5"}};
+		List<List<?>> list2DimObject = new ArrayList<List<?>>();
+		list2DimObject.add(listObject);
+		list2DimObject.add(listObject_bis);
+		Vector<Integer> vectorObject = new Vector<Integer>(4);
+		vectorObject.addElement(new Integer(1));
+		vectorObject.addElement(new Integer(2));
+		vectorObject.addElement(new Integer(3));
+		vectorObject.addElement(new Integer(4));
 
 		MyPersistable myPersistable = new MyPersistable();
 		myPersistable.setByteField((byte)21);
@@ -226,22 +242,33 @@ public class PersistTest {
 		myPersistable.setStringArray(stringArray);
 		myPersistable.setIntArray(intArray);
 		myPersistable.setDoubleArray(doubleArray);
+		myPersistable.setFloat2DimArray(float2DimensionArray);
+		myPersistable.setString2DimArray(string2DimArray);
+		myPersistable.setListObject(listObject);
+		myPersistable.setList2DimObject(list2DimObject);
+		myPersistable.setVectorObject(vectorObject);
 
 		System.out.println("Original :\n"+myPersistable);
 
 		Persistor p = null;
+		Verifier v = null;
 		Persistable persist = null;
 
 		try {
-
 			//Test the persistor to XML file
 			p = PersistorFactory.create(PersistenceType.FILE, null, runtimeData, xmlfile);
 			p.persist(myPersistable);
 			persist = p.unpickle(null);
-			System.out.println("Unpickled from file '"+xmlfile+"'\n"+persist);
+			System.out.println("Unpickled from file '"+xmlfile+"'"+persist);
 			assert persist.equals(myPersistable);
 
-		} catch (SAFSException e) {
+			//modify a field's value of unpickled object, and verify that it doesn't equal to original one
+			MyPersistable tmp = ((MyPersistable)persist);
+			tmp.setIntField(tmp.getIntField()+5);
+			System.out.println("Unpickled-Persistable-object is modified, the result of comparison should be false."+persist);
+			assert !persist.equals(myPersistable);
+
+		}catch (SAFSException e) {
 			e.printStackTrace();
 		}
 
@@ -250,7 +277,7 @@ public class PersistTest {
 			p = PersistorFactory.create(PersistenceType.FILE, null, runtimeData, jsonfile);
 			p.persist(myPersistable);
 			persist = p.unpickle(null);
-			System.out.println("Unpickled from file '"+jsonfile+"'\n"+persist);
+			System.out.println("Unpickled from file '"+jsonfile+"'"+persist);
 			assert persist.equals(myPersistable);
 
 		} catch (SAFSException e) {
@@ -269,7 +296,43 @@ public class PersistTest {
 		private String[] stringArray;
 		private int[] intArray;
 		private Double[] doubleArray;
+		private List<?> listObject = null;
+		private Vector<?> vectorObject = null;
 
+		private float[][] float2DimArray;
+		private String[][] string2DimArray;
+		private List<List<?>> list2DimObject = null;
+
+		public Vector<?> getVectorObject() {
+			return vectorObject;
+		}
+		public void setVectorObject(Vector<?> vectorObject) {
+			this.vectorObject = vectorObject;
+		}
+		public List<List<?>> getList2DimObject() {
+			return list2DimObject;
+		}
+		public void setList2DimObject(List<List<?>> list2DimObject2) {
+			this.list2DimObject = list2DimObject2;
+		}
+		public List<?> getListObject() {
+			return listObject;
+		}
+		public void setListObject(List<?> listObject) {
+			this.listObject = listObject;
+		}
+		public String[][] getString2DimArray() {
+			return string2DimArray;
+		}
+		public void setString2DimArray(String[][] string2DimArray) {
+			this.string2DimArray = string2DimArray;
+		}
+		public float[][] getFloat2DimArray() {
+			return float2DimArray;
+		}
+		public void setFloat2DimArray(float[][] floatArray) {
+			this.float2DimArray = floatArray;
+		}
 		public int getIntField() {
 			return intField;
 		}

@@ -13,6 +13,7 @@ package org.safs.persist;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.util.Collection;
 import java.util.Map;
 
 import org.safs.IndependantLog;
@@ -145,14 +146,22 @@ public class PersistorToHierarchialFile extends PersistorToFile{
 		if(value instanceof String){
 			result.append(escape(value.toString()));
 
-		}else if(fieldClass.isArray()){
-			//By default, we use the JSON way to keep the array.
+		}else if(fieldClass.isArray() ||
+				(value instanceof Collection) ){
+
+			Object arrayObject = value;
+			if(value instanceof Collection){
+				//The Collection object will also be saved as Array
+				arrayObject = ((Collection<?>)value).toArray();
+			}
+
+			//By default, we use the JSON way to keep the array or List
 			//[item1, item2, item3, item4, item5]
-			int length = Array.getLength(value);
+			int length = Array.getLength(arrayObject);
 			Object arrayValue = null;
 			result.append("[");
 			for(int i=0;i<length;i++){
-				arrayValue = Array.get(value, i);
+				arrayValue = Array.get(arrayObject, i);
 				result.append(parseFiledValue(arrayValue));
 				if(i<length-1){//not the last element, so append a comma
 					result.append(", ");
