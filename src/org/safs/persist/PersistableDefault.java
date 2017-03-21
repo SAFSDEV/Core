@@ -18,7 +18,6 @@ package org.safs.persist;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +26,6 @@ import java.util.TreeMap;
 
 import org.safs.IndependantLog;
 import org.safs.Printable;
-import org.safs.SAFSException;
 import org.safs.StringUtils;
 import org.safs.Utils;
 
@@ -43,6 +41,14 @@ public abstract class PersistableDefault implements Persistable, Printable{
 	/** a cache holding the Map of (persistKey, fieldValue) */
 	private Map<String/*persistKey*/, Object/*fieldValue*/> persistKeyToFieldValueMap = null;
 
+	/** <b>true</b>
+	 *  If it is true, then the cache {@link #persistKeyToFieldValueMap} will be ignored, that is
+	 *  to say that the field's value will be got from this instance.<br/>
+	 *  Otherwise, the field's value will be got from {@link #persistKeyToFieldValueMap} if the map
+	 *  is not null.
+	 */
+	private boolean ignoredContentsCache = true;
+
 	protected boolean enabled = true;
 	protected Persistable parent = null;
 
@@ -50,6 +56,10 @@ public abstract class PersistableDefault implements Persistable, Printable{
 	protected int threshold = 0;
 	protected boolean thresholdEnabled = false;
 
+	/**
+	 * This default implementation get all the declared fields {@link Class#getDeclaredFields()} and
+	 * put their name as 'fieldName' and 'persistKey' into the 'persistableFields Map'.
+	 */
 	@Override
 	public Map<String, String> getPersitableFields(){
 
@@ -70,13 +80,18 @@ public abstract class PersistableDefault implements Persistable, Printable{
 	@Override
 	public Map<String, Object> getContents() {
 		if(persistKeyToFieldValueMap!=null){
-			return persistKeyToFieldValueMap;
+			if(ignoredContentsCache){
+				persistKeyToFieldValueMap.clear();
+			}else{
+				return persistKeyToFieldValueMap;
+			}
+		}else{
+			persistKeyToFieldValueMap = new TreeMap<String, Object>();
 		}
 
 		String debugmsg = StringUtils.debugmsg(false);
 
 		Map<String, String> fieldToPersistKeyMap = getPersitableFields();
-		persistKeyToFieldValueMap = new TreeMap<String, Object>();
 
 		Class<?> clazz = getClass();
 		Set<String> fieldNames = fieldToPersistKeyMap.keySet();
@@ -219,6 +234,7 @@ public abstract class PersistableDefault implements Persistable, Printable{
 			}else{
 				String tempKey = flatKey+"."+key;
 				Object altValue = Utils.getMapValue(elementAlternativeValues, tempKey, null);
+
 				actualContents.put(tempKey, altValue==null?value:altValue);
 			}
 		}
@@ -254,6 +270,14 @@ public abstract class PersistableDefault implements Persistable, Printable{
 		this.tabulation = tabulation;
 	}
 
+	public boolean isIgnoredContentCache() {
+		return ignoredContentsCache;
+	}
+
+	public void setIgnoredContentCache(boolean ignoredContentCache) {
+		this.ignoredContentsCache = ignoredContentCache;
+	}
+
 	private String getTabs(){
 		StringBuilder sb = new StringBuilder();
 		for(int i=0;i<getTabulation();i++){
@@ -269,6 +293,7 @@ public abstract class PersistableDefault implements Persistable, Printable{
 
 		List<String> complicatedChildren = new ArrayList<String>();
 		Object value = null;
+		String stringValue = null;
 
 		sb.append("\n"+getTabs()+"============== "+clazzname+" BEGIN ================\n");
 		for(String key:contents.keySet()){
@@ -277,20 +302,13 @@ public abstract class PersistableDefault implements Persistable, Printable{
 				//complicatedChildren will hold the key for PersistableDefault object to print out later
 				complicatedChildren.add(key);
 			}else{
+				stringValue = Utils.toString(value);
 
-				if(value.getClass().isArray()){
-					try {
-						value = Arrays.toString(Utils.getArray(value));
-					} catch (SAFSException e) {
-						IndependantLog.warn("Failed to get array field value, due to "+e.toString());
-					}
-				}
-
-				if(value!=null && isThresholdEnabled() && value.toString().length()>getThreshold()){
-					IndependantLog.debug("The value of '"+key+"' is too big, its size '"+value.toString().length()+"' is over threshold '"+getThreshold()+"'");
+				if(stringValue!=null && isThresholdEnabled() && stringValue.length()>getThreshold()){
+					IndependantLog.debug("The value of '"+key+"' is too big, its size '"+stringValue.length()+"' is over threshold '"+getThreshold()+"'");
 					sb.append(getTabs()+key+" : "+DATA_BIGGER_THAN_THRESHOLD+".\n");
 				}else{
-					sb.append(getTabs()+key+" : "+value+"\n");
+					sb.append(getTabs()+key+" : "+stringValue+"\n");
 				}
 			}
 		}
@@ -331,16 +349,7 @@ public abstract class PersistableDefault implements Persistable, Printable{
 			value1 = getContents().get(persistKey);
 			persistKey = tempPersistable.getPersitableFields().get(field);
 			value2 = tempPersistable.getContents().get(persistKey);
-			if(value1==null){
-				if(value2!=null) return false;
-			}else if(value1.getClass().isArray()){
-				try {
-					return Arrays.toString(Utils.getArray(value1)).equals(Arrays.toString(Utils.getArray(value2)));
-				} catch (SAFSException e) {
-					IndependantLog.warn("Not equal, due to "+e.toString());
-					return false;
-				}
-			}else if(!value1.equals(value2)){
+			if(!Utils.equals(value1, value2)){
 				return false;
 			}
 		}
