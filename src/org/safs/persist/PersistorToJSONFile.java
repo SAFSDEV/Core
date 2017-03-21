@@ -144,7 +144,7 @@ public class PersistorToJSONFile extends PersistorToHierarchialFile{
 				Iterator<String> fields =  body.keys();
 				String field = null;
 				Object value = null;
-				JSONArray arrayValue = null;
+				JSONArray jsonArray = null;
 				while(fields.hasNext()){
 					field = fields.next();
 					value = body.get(field);
@@ -152,9 +152,8 @@ public class PersistorToJSONFile extends PersistorToHierarchialFile{
 						persistable.setField(field, unpickleParse((JSONObject)value));
 
 					}else if(value instanceof JSONArray){
-						arrayValue = (JSONArray) value;
-						Object[] values = arrayValue.toList().toArray();
-						persistable.setField(field, values);
+						jsonArray = (JSONArray) value;
+						persistable.setField(field, jsonArray.toList());
 
 					}else{
 						persistable.setField(field, value);

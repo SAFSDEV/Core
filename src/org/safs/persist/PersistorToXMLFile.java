@@ -255,8 +255,8 @@ public class PersistorToXMLFile extends PersistorToHierarchialFile{
 									String trimmedValue = value.toString().trim();
 									if(trimmedValue.startsWith("[") && trimmedValue.endsWith("]")){
 										//It is probably an array object in JSON format
-										JSONArray array = new JSONArray(trimmedValue);
-										if(!parent.container.setField(me.name, array.toList().toArray())){
+										JSONArray jsonArray = new JSONArray(trimmedValue);
+										if(!parent.container.setField(me.name, jsonArray.toList())){
 											warnings.append("\nFailed to set field '"+parent.name+"."+me.name+"' with array value '"+value+"'");
 										}
 									}
