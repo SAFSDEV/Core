@@ -15,11 +15,13 @@ import org.safs.SAFSException;
 
 
 /**
+ * Provides the ability to verify a Persistable object against the contents stored in a persistence substance.
+ *
  * @author Lei Wang
  */
 public interface Verifier {
 	/**
-	 * Verify an object against the contents stored in a persistence substance.
+	 * Verify a Persistable object against the contents stored in a persistence substance.
 	 * @param persistable Persistable, the object to verify
 	 * @param conditions boolean..., the boolean array to control the verification.
 	 *                               such as

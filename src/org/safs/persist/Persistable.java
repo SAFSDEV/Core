@@ -48,8 +48,17 @@ public interface Persistable {
 	 */
 	public void setEnabled(boolean enabled);
 
+	/**
+	 * Persistable object can contain Persistable object to form a tree-like structure.<br/>
+	 * When defining a Persistable class, it is important to this method in the setter of Persistable-field
+	 * to make sure that the {@link Persistor} and {@link Verifier} can work correctly.<br/>
+	 * @param parent Persistable,
+	 */
 	public void setParent(Persistable parent);
 
+	/**
+	 * @return Persistable, the parent Persistable object; null if it doesn't have.
+	 */
 	public Persistable getParent();
 
 	/**

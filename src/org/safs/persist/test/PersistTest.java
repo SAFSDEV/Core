@@ -131,8 +131,11 @@ public class PersistTest {
 	/**
 	 * Save SimpleAuth object to an XML file.<br>
 	 * Create SimpleAuth object from that XML file.<br>
-	 * Verify the un-pickled SimpleAuth object is the same as the original SimpleAuth object.<br>
-	 * Create SimpleAuth object from that XML file, but ignore the field 'password'.<br>
+	 * Assert the un-pickled SimpleAuth object is the same as the original SimpleAuth object.<br>
+	 * Use the Verifier to verify original SimpleAuth object against the persistent file.<br/>
+	 *
+	 * Create SimpleAuth object from that XML file, but ignore the field 'password'; and Assert this<br>
+	 * un-pickled SimpleAuth object is not the same as the original SimpleAuth object.<br>
 	 */
 	private static void testSimpleAuth(){
 		String simpleauthfile = "simpleauth.xml";
@@ -147,6 +150,7 @@ public class PersistTest {
 		try {
 			System.out.println("Original SimpleAuth:\n"+simpleauth);
 
+			//Test the Persistor
 			p = PersistorFactory.create(PersistenceType.FILE, FileType.XML, runtimeData, simpleauthfile);
 			p.persist(simpleauth);
 			Persistable persist = p.unpickle(null);
@@ -177,8 +181,15 @@ public class PersistTest {
 
 	/**
 	 * Save OAuth2 object to an XML file.<br>
-	 * Create OAuth2 object from that XML file.<br>
-	 * Verify the un-pickled OAuth2 object is the same as the original OAuth2 object.<br>
+	 * Create OAuth2 object from that XML file<br>
+	 * Assert the un-pickled OAuth2 object is the same as the original OAuth2 object.<br>
+	 *
+	 * Save OAuth2 object to an JSON file.<br>
+	 * Create OAuth2 object from that JSON file<br>
+	 * Assert the un-pickled OAuth2 object is the same as the original OAuth2 object.<br>
+	 *
+	 * Use the Verifier to verify original SimpleAuth object against the persistent XML file.<br/>
+	 * Use the Verifier to verify original SimpleAuth object against the persistent JSON file.<br/>
 	 */
 	private static void testOAuth2(){
 		String xmlfile = "auth2.xml";
@@ -243,6 +254,19 @@ public class PersistTest {
 		}
 	}
 
+	/**
+	 * Save MyPersistable object to an XML file.<br>
+	 * Create MyPersistable object from that XML file<br>
+	 * Assert the un-pickled MyPersistable object is the same as the original MyPersistable object.<br>
+	 * Modify a field of the un-pickled MyPersistable object and Assert that it is not the same as the original one.<br>
+	 * Use the Verifier to verify original MyPersistable object against the persistent XML file.<br/>
+	 *
+	 * Save MyPersistable object to an JSON file.<br>
+	 * Create MyPersistable object from that JSON file<br>
+	 * Assert the un-pickled MyPersistable object is the same as the original MyPersistable object.<br>
+	 * Use the Verifier to verify original MyPersistable object against the persistent JSON file.<br/>
+	 *
+	 */
 	private static void testMyPersistable(){
 		String xmlfile = "MyPersistable.xml";
 		String jsonfile = "MyPersistable.json";
