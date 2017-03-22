@@ -76,6 +76,22 @@ public class VerifierToJSONFile extends VerifierToFile{
 
 		String debugmsg = StringUtils.debugmsg(false);
 
+		Persistable persistable = null;
+		Object className = jsonObject.opt(JSONConstants.PROPERTY_CLASSNAME);
+
+		if(className!=null){
+			try {
+				Object object = Class.forName((String)className).newInstance();
+				if(object instanceof Persistable){
+					persistable = (Persistable) object;
+				}else{
+					IndependantLog.warn(debugmsg+" class '"+className+"' is not Persistable, cannot be handled!");
+				}
+			} catch (Exception e) {
+				IndependantLog.warn(debugmsg+" Failed to instantiate class '"+className+"', due to "+e.toString());
+			}
+		}
+
 	    Iterator<String> iterator = jsonObject.keys();
 	    String flatKey = null;
 	    String key = null;
@@ -114,8 +130,14 @@ public class VerifierToJSONFile extends VerifierToFile{
 	            expectedContents.put(flatKey, (Boolean) value);
 	        else if (value instanceof JSONObject)
 	            parse((JSONObject) value, flatKey);
-	        else if (value instanceof JSONArray)
-	            parse((JSONArray) value, flatKey);
+	        else if (value instanceof JSONArray){
+	        	if(persistable!=null){
+	        		persistable.setField(key, value);
+	        		expectedContents.put(flatKey, persistable.getField(key));
+	        	}else{
+	        		parse((JSONArray) value, flatKey);
+	        	}
+	        }
 	        else{
 	        	IndependantLog.warn(debugmsg+"not prepared for converting instance of class " + value.getClass());
 	        	expectedContents.put(flatKey, value.toString());
@@ -143,6 +165,7 @@ public class VerifierToJSONFile extends VerifierToFile{
 	    	}
 
 	    	flatKey = StringUtils.isValid(parentKey)? parentKey+"."+i : String.valueOf(i);
+
 
 	    	if (value instanceof String)
 	            expectedContents.put(flatKey, (String) value);

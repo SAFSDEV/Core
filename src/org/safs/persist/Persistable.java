@@ -105,10 +105,19 @@ public interface Persistable {
 	public Map<String/* flatKey */, Object /* content */> getContents(Map<String,String> elementAlternativeValues, Set<String> ignoredFields, boolean includeContainer);
 
 	/**
-	 * Set the field's value of this Persistable object.
+	 * Set the field's value of this Persistable object to the persist-key.<br/>
+	 * The field name can be got from {@link #getPersitableFields()} according to the persist-key, then the value will be set to that field.<br/>
 	 * @param persistKey String, the persist-key (it can be tag-name in XML, key-string in JSON etc.). refer to {@link #getPersitableFields()}.
 	 * @param value Object, the value to set
 	 * @return boolean true if successful.
 	 */
 	public boolean setField(String persistKey, Object value);
+
+	/**
+	 * Get the field's value of this Persistable object according to the persist-key.<br/>
+	 * The field name can be got from {@link #getPersitableFields()} according to the persist-key, then the value will be got of that field.<br/>
+	 * @param persistKey String, the persist-key (it can be tag-name in XML, key-string in JSON etc.). refer to {@link #getPersitableFields()}.
+	 * @param value Object, the value of the field pointing by persistKey.
+	 */
+	public Object getField(String persistKey);
 }

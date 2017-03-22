@@ -89,13 +89,7 @@ public class PersistorToHierarchialFile extends PersistorToFile{
 	}
 
 	protected String getTagName(String className){
-		String tag = StringUtils.getLastDelimitedToken(className, ".");
-
-		//Replace the "$" in the internal class name (such as PersistTest$MyPersistable) by an underscore "_"
-		//"$" is not valid to serve as a tag name in the XML document
-		tag = tag.replaceAll("\\$", "_");
-
-		return tag;
+		return PersistableDefault.getTagName(className);
 	}
 
 	/**

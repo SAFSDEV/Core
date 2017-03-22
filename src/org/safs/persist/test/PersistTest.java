@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.safs.SAFSException;
+import org.safs.SAFSVerificationException;
 import org.safs.auth.AuthorizationServer;
 import org.safs.auth.Content;
 import org.safs.auth.OAuth2;
@@ -31,6 +32,7 @@ import org.safs.persist.PersistenceType;
 import org.safs.persist.Persistor;
 import org.safs.persist.PersistorFactory;
 import org.safs.persist.Verifier;
+import org.safs.persist.VerifierFactory;
 import org.safs.text.FileUtilities;
 import org.safs.text.FileUtilities.FileType;
 import org.safs.tools.RuntimeDataInterface;
@@ -139,16 +141,25 @@ public class PersistTest {
 		simpleauth.setUserName("Tom");
 		simpleauth.setPassword("unitA123");
 
+		Persistor p = null;
+		Verifier v = null;
+
 		try {
 			System.out.println("Original SimpleAuth:\n"+simpleauth);
 
-			Persistor p = PersistorFactory.create(PersistenceType.FILE, FileType.XML, runtimeData, simpleauthfile);
+			p = PersistorFactory.create(PersistenceType.FILE, FileType.XML, runtimeData, simpleauthfile);
 			p.persist(simpleauth);
-
 			Persistable persist = p.unpickle(null);
 			System.out.println("Unpickled SimpleAuth:\n"+persist);
-
 			assert persist.equals(simpleauth);
+
+			//Test the Verifier with XML file
+			v = VerifierFactory.create(PersistenceType.FILE, null, runtimeData, simpleauthfile);
+			try{
+				v.verify(simpleauth, true, false, true);
+			}catch(SAFSVerificationException vfe){
+				assert false: vfe.toString();
+			}
 
 			Map<String/*className*/, List<String>/*field-names*/> ignoredFields = new HashMap<String, List<String>>();
 			List<String> fields = new ArrayList<String>();
@@ -157,6 +168,7 @@ public class PersistTest {
 			persist = p.unpickle(ignoredFields);
 			System.out.println("Unpickled SimpleAuth without fields "+fields+"\n"+persist);
 			assert !persist.equals(simpleauth);
+
 
 		} catch (SAFSException e) {
 			e.printStackTrace();
@@ -190,11 +202,14 @@ public class PersistTest {
 		auth2.setSimpleAuth(simpleauth);
 		auth2.setAuthorizationServer(server);
 
+		Persistor p = null;
+		Verifier v = null;
+
 		try {
 			System.out.println("Original OAuth2:\n"+auth2);
 
 			//Test the persistor to XML file
-			Persistor p = PersistorFactory.create(PersistenceType.FILE, FileType.XML, runtimeData, xmlfile);
+			p = PersistorFactory.create(PersistenceType.FILE, FileType.XML, runtimeData, xmlfile);
 			p.persist(auth2);
 			Persistable persist = p.unpickle(null);
 			System.out.println("Unpickled OAuth2 from file '"+xmlfile+"'\n"+persist);
@@ -206,6 +221,22 @@ public class PersistTest {
 			persist = p.unpickle(null);
 			System.out.println("Unpickled OAuth2 from file '"+jsonfile+"'\n"+persist);
 			assert persist.equals(auth2);
+
+			//Test the Verifier with XML file
+			v = VerifierFactory.create(PersistenceType.FILE, null, runtimeData, xmlfile);
+			try{
+				v.verify(auth2, true, false, true);
+			}catch(SAFSVerificationException vfe){
+				assert false: vfe.toString();
+			}
+
+			//Test the Verifier with JSON file
+			v = VerifierFactory.create(PersistenceType.FILE, null, runtimeData, jsonfile);
+			try{
+				v.verify(auth2, true, false, true);
+			}catch(SAFSVerificationException vfe){
+				assert false: vfe.toString();
+			}
 
 		} catch (SAFSException e) {
 			e.printStackTrace();
@@ -268,6 +299,14 @@ public class PersistTest {
 			System.out.println("Unpickled-Persistable-object is modified, the result of comparison should be false."+persist);
 			assert !persist.equals(myPersistable);
 
+			//Use the Verifier to verify
+			v = VerifierFactory.create(PersistenceType.FILE, null, runtimeData, xmlfile);
+			try{
+				v.verify(myPersistable, true, false, true);
+			}catch(SAFSVerificationException vfe){
+				assert false: vfe.toString();
+			}
+
 		}catch (SAFSException e) {
 			e.printStackTrace();
 		}
@@ -280,6 +319,13 @@ public class PersistTest {
 			System.out.println("Unpickled from file '"+jsonfile+"'"+persist);
 			assert persist.equals(myPersistable);
 
+			//Use the Verifier to verify
+			v = VerifierFactory.create(PersistenceType.FILE, null, runtimeData, jsonfile);
+			try{
+				v.verify(myPersistable, true, false, true);
+			}catch(SAFSVerificationException vfe){
+				assert false: vfe.toString();
+			}
 		} catch (SAFSException e) {
 			e.printStackTrace();
 		}

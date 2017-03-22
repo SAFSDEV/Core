@@ -25,6 +25,7 @@ import org.safs.SAFSException;
 import org.safs.SAFSNullPointerException;
 import org.safs.SAFSVerificationException;
 import org.safs.StringUtils;
+import org.safs.Utils;
 import org.safs.text.FAILKEYS;
 import org.safs.text.FAILStrings;
 import org.safs.text.FileUtilities;
@@ -105,6 +106,15 @@ public class VerifierToFile extends AbstractRuntimeDataVerifier{
 		expectedContents = new HashMap<String, Object>();
 	}
 
+	/**
+	 * @param persistable Persistable, the object to verify
+	 * @param conditions boolean..., the boolean array to control the verification.
+	 *        <ul>
+	 *        <li>conditions[0] {@link #matchAllFields}
+	 *        <li>conditions[1] {@link #valueContains}
+	 *        <li>conditions[2] {@link #valueCaseSensitive}
+	 *        </ul>
+	 */
 	@Override
 	public void verify(Persistable persistable, boolean... conditions) throws SAFSException {
 		super.verify(persistable);
@@ -144,6 +154,7 @@ public class VerifierToFile extends AbstractRuntimeDataVerifier{
 	 * }
 	 * </code>
 	 * </pre>
+	 *
 	 */
 	protected void beforeCheck(Persistable persistable, boolean... conditions)  throws SAFSException, IOException{
 		ignoredFields.clear();
@@ -226,8 +237,8 @@ public class VerifierToFile extends AbstractRuntimeDataVerifier{
 
 			}else{
 				//TODO compare the non-String value
-				String actualText = actual.toString();
-				String expectedText = expectation.toString();
+				String actualText = Utils.toString(actual);
+				String expectedText = Utils.toString(expectation);
 
 				if(!StringUtils.matchText(actualText, expectedText, valueContains, !valueCaseSensitive)){
 					nonMatchedMessages.append("'"+field+"' did not match!\n"
