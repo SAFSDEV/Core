@@ -120,6 +120,31 @@ public abstract class PersistableDefault implements Persistable, Printable{
 	}
 
 	@Override
+	public Object getField(String persistKey){
+		String debugmsg = StringUtils.debugmsg(false);
+
+		Class<?> clazz = getClass();
+		String fieldName = null;
+		Field field = null;
+
+		fieldName = getFieldName(persistKey);
+
+		if(fieldName!=null){
+			try {
+				field = clazz.getDeclaredField(fieldName);
+				field.setAccessible(true);
+				return field.get(this);
+			} catch (Exception e) {
+				IndependantLog.error(debugmsg+"Failed to get field '"+fieldName+"', due to "+e.toString());
+			}
+		}else{
+			IndependantLog.warn(debugmsg+" cannot get field-name for persistKey '"+persistKey+"'.");
+		}
+
+		return null;
+	}
+
+	@Override
 	public boolean setField(String persistKey, Object value){
 		String debugmsg = StringUtils.debugmsg(false);
 
@@ -187,9 +212,24 @@ public abstract class PersistableDefault implements Persistable, Printable{
 		return parent;
 	}
 
+	/**
+	 * Convert a full qualified class name into a tag name.<br/>
+	 * @param className String the full qualified class name.
+	 * @return String the tag name used in the persistence materials like XML, JSON, Properties files.
+	 */
+	public static String getTagName(String className){
+		String tag = StringUtils.getLastDelimitedToken(className, ".");
+
+		//Replace the "$" in the internal class name (such as PersistTest$MyPersistable) by an underscore "_"
+		//"$" is not valid to serve as a tag name in the XML document
+		tag = tag.replaceAll("\\$", "_");
+
+		return tag;
+	}
+
 	@Override
 	public String getFlatKey(){
-		String key = getClass().getSimpleName();
+		String key = getTagName(getClass().getName());
 		if(parent!=null){
 			key = parent.getFlatKey()+"."+key;
 		}
@@ -215,7 +255,7 @@ public abstract class PersistableDefault implements Persistable, Printable{
 			//The Persistable object itself doesn't have a real value, but it contains children;
 			//while the SAX XML parser will treat it as an Element and assign it a default string "\n" as value
 			//So we add the default string "\n" for Persistable object itself in the actualContents Map to
-			//get the verification pass. See VerifierToXMLFile#beforeCheck().
+			//get the verification pass. See VerifierToXMLFile#defaultElementValues and VerifierToXMLFile#beforeCheck().
 			Object containerValue = Utils.getMapValue(elementAlternativeValues, CONTAINER_ELEMENT, "");
 			actualContents.put(flatKey, containerValue);
 		}

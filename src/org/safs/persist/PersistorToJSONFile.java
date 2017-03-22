@@ -131,7 +131,7 @@ public class PersistorToJSONFile extends PersistorToHierarchialFile{
 	 * @return Persistable
 	 * @throws SAFSException
 	 */
-	private Persistable unpickleParse(JSONObject body) throws SAFSException{
+	public static Persistable unpickleParse(JSONObject body) throws SAFSException{
 		Persistable persistable = null;
 
 		try {
@@ -153,7 +153,7 @@ public class PersistorToJSONFile extends PersistorToHierarchialFile{
 
 					}else if(value instanceof JSONArray){
 						jsonArray = (JSONArray) value;
-						persistable.setField(field, jsonArray.toList());
+						persistable.setField(field, jsonArray);
 
 					}else{
 						persistable.setField(field, value);

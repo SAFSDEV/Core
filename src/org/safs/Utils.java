@@ -19,16 +19,20 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.lang.reflect.Modifier;
 import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Vector;
 
+import org.json.JSONArray;
 import org.safs.natives.NativeWrapper;
 import org.safs.persist.Persistable;
 
@@ -241,11 +245,55 @@ public class Utils {
 
 		try{
 
-			if(Collection.class.isAssignableFrom(expectedType) && Collection.class.isAssignableFrom(actualType)){
-				//If both are collection,
-				fieldValue = expectedType.newInstance();//create a collection object
-				((Collection) fieldValue).addAll((Collection) value);//add the actual collection of objects to fieldValue
-				return fieldValue;
+			if(Collection.class.isAssignableFrom(expectedType)){
+				//If we expect collection data,
+				Collection collectionValue = null;
+
+				//Create an appropriate collection object
+				if(expectedType.isInterface() || Modifier.isAbstract(expectedType.getModifiers())){
+					if(expectedType.isAssignableFrom(ArrayList.class)){
+						collectionValue = new ArrayList();
+					}else if(expectedType.isAssignableFrom(HashSet.class)){
+						collectionValue = new HashSet();
+					}else if(expectedType.isAssignableFrom(PriorityQueue.class)){
+						collectionValue = new PriorityQueue();
+					}else{
+						IndependantLog.warn("Failed to instantiate collection of type '"+expectedType+"'.");
+					}
+				}else{
+					try{
+						collectionValue = (Collection) expectedType.newInstance();
+					}catch(InstantiationException ite){
+						IndependantLog.warn("Failed to instantiate collection of type '"+expectedType+"', due to "+ite.toString());
+						collectionValue = new ArrayList();
+					}
+				}
+
+				if(collectionValue!=null){
+					if(Collection.class.isAssignableFrom(actualType)){
+						collectionValue.addAll((Collection) value);//add the actual collection of objects to fieldValue
+					}else if(JSONArray.class.isAssignableFrom(actualType)){
+						//TODO If the JSONArray contains JSONObject???
+						collectionValue.addAll(((JSONArray)value).toList());
+					}else if(Iterable.class.isAssignableFrom(actualType)){
+						Iterator<?> iter = ((Iterable<?>) value).iterator();
+						while(iter.hasNext()){
+							collectionValue.add(iter.next());
+						}
+					}else if(actualType.isArray()){
+						int length = Array.getLength(value);
+						for(int i=0;i<length;i++){
+							collectionValue.add(Array.get(value, i));
+						}
+					}else{
+						IndependantLog.warn("Need more implementation to handle '"+actualType+"', and assign it to '"+expectedType+"'!");
+					}
+
+					if(!collectionValue.isEmpty()){
+						return collectionValue;
+					}
+				}
+
 			}
 
 			if(Persistable.class.isAssignableFrom(expectedType)){
@@ -309,6 +357,10 @@ public class Utils {
 						arrayItem = parseValue(expectedItemType, arrayItem);
 						Array.set(fieldValue, i, arrayItem);
 					}
+				}else if(JSONArray.class.isAssignableFrom(actualType)){
+					//TODO If the JSONArray contains JSONObject???
+					fieldValue = parseValue(expectedType, ((JSONArray)value).toList());
+
 				}else if(Iterable.class.isAssignableFrom(actualType)){
 					Iterator<?> iter = ((Iterable<?>) value).iterator();
 					List<Object> items = new ArrayList<Object>();
