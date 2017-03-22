@@ -17,18 +17,25 @@ import java.util.Map;
 import org.safs.SAFSException;
 
 /**
+ * Provides the abilities to
+ * <ul>
+ * <li>Persist a Persistable object to the persistence (a file, the variables etc.)
+ * <li>Delete the persistence (a file, the variables etc.)
+ * <li>Convert the contents stored in a persistence substance into a Persistable object.
+ * </ul>
+ *
  * @author sbjlwa
  */
 public interface Persistor {
 	/**
-	 * Persist an object.
+	 * Persist a Persistable object.
 	 * @param persistable Persistable, the object to persist
 	 * @throws SAFSException when persistence fails or something wrong happens.
 	 */
 	public void persist(Persistable persistable) throws SAFSException;
 
 	/**
-	 * Delete the persistence.
+	 * Delete the persistence (a file, the variables etc.)
 	 * @throws SAFSException when failing to delete the persistence or something wrong happens.
 	 */
 	public void unpersist() throws SAFSException;
