@@ -22,9 +22,17 @@ public interface Verifier {
 	 * Verify an object against the contents stored in a persistence substance.
 	 * @param persistable Persistable, the object to verify
 	 * @param conditions boolean..., the boolean array to control the verification.
-	 *                               such as if the match is exact, if the match is case-sensitive,
-	 *                               if all the fields should be matched etc.
-	 * @throws SAFSException when verification fails or something wrong happens.
+	 *                               such as
+	 *                               <ul>
+	 *                               <li>If the all the fields of persistable object need to match with those in the persistent benchmark.<br/>
+	 *                                   If this is true, all the fields of actual object need to be verified.<br/>
+	 *                                   Otherwise, only the fields specified in the persistent benchmark need to be verified.<br/>
+	 *                               <li>if the match is partial, which means if the bench-text is provided as sub-string
+	 *                               <li>if the match is case-sensitive
+	 *                               </ul>
+	 *                               etc.
+	 * @throws SAFSVerificationException when verification fails.
+	 * @throws SAFSException when something wrong happens.
 	 */
 	public void verify(Persistable persistable, boolean... conditions) throws SAFSException;
 

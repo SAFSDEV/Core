@@ -28,6 +28,7 @@ public class OAuth2 extends PersistableDefault implements Auth{
 	}
 	public void setSimpleAuth(SimpleAuth simpleAuth) {
 		adjustTabulation(simpleAuth);
+		simpleAuth.setParent(this);
 		this.simpleAuth = simpleAuth;
 	}
 
@@ -36,6 +37,7 @@ public class OAuth2 extends PersistableDefault implements Auth{
 	}
 	public void setContent(Content content) {
 		adjustTabulation(content);
+		content.setParent(this);
 		this.content = content;
 	}
 
@@ -44,6 +46,7 @@ public class OAuth2 extends PersistableDefault implements Auth{
 	}
 	public void setAuthorizationServer(AuthorizationServer authorizationServer) {
 		adjustTabulation(authorizationServer);
+		authorizationServer.setParent(this);
 		this.authorizationServer = authorizationServer;
 	}
 

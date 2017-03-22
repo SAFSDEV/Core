@@ -75,7 +75,7 @@ public class PersistorToXMLFile extends PersistorToHierarchialFile{
 	}
 	@Override
 	protected void containerEnd(String className) throws IOException{
-		writer.write("</"+getTagName(className)+">\n");
+		writer.write("</"+getTagName(className)+">");
 	}
 
 	/**
@@ -256,7 +256,7 @@ public class PersistorToXMLFile extends PersistorToHierarchialFile{
 									if(trimmedValue.startsWith("[") && trimmedValue.endsWith("]")){
 										//It is probably an array object in JSON format
 										JSONArray jsonArray = new JSONArray(trimmedValue);
-										if(!parent.container.setField(me.name, jsonArray.toList())){
+										if(!parent.container.setField(me.name, jsonArray)){
 											warnings.append("\nFailed to set field '"+parent.name+"."+me.name+"' with array value '"+value+"'");
 										}
 									}
