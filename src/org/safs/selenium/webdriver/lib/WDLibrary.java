@@ -1881,13 +1881,13 @@ public class WDLibrary extends SearchObject {
 
 	/**
 	 * Start browser
-	 * @param BrowserName - Browser name such as InternetExplorer, Chrome and FireFox.
-	 * @param Url - Url including http protocol prefix.
-	 * @param Id - Id or Title of the Browser incase of two instances needs.
-	 * @param timeout - Implicit time out to be waited before throw exception.
-	 * @param isRemote - Start interactive testcase development mode.
-	 * @throws Exception
-	 * @see {@link #startBrowser(String, String, String, int, boolean, HashMap)}
+	 * @param BrowserName String, Browser name such as InternetExplorer, Chrome and FireFox.
+	 * @param Url String, Url including HTTP protocol prefix.
+	 * @param Id String, Id or Title of the Browser in case of two instances needs.
+	 * @param timeout String, Implicit time out to be waited before throw exception.
+	 * @param isRemote String, Start interactive testcase development mode.
+	 * @throws SeleniumPlusException
+	 * @see {@link #startBrowser(String, String, String, int, boolean, Map)}
 	 */
 	public static void startBrowser(String BrowserName, String Url, String Id, int timeout, boolean isRemote) throws SeleniumPlusException{
 		startBrowser(BrowserName, Url, Id, timeout, isRemote, null);
@@ -1899,15 +1899,15 @@ public class WDLibrary extends SearchObject {
 	 * Expects System Properties 'selenium.host' and 'selenium.port' to be set.<br>
 	 * Otherwise, defaults to 'localhost' on port '4444'.
 	 * <p>
-	 * @param BrowserName - Browser name such as InternetExplorer, Chrome and FireFox.
-	 * @param Url - Url including http protocol prefix.
-	 * @param Id - Id or Title of the Browser incase of two instances needs.
-	 * @param timeout - Implicit time out to be waited before throw exception.
-	 * @param isRemote - Start interactive testcase development mode.
-	 * @param extraParameters HashMap<String,Object>, can be used to pass more browser parameters, such as a firefox profile to use.
-	 * @throws Exception
+	 * @param BrowserName String, Browser name such as InternetExplorer, Chrome and FireFox.
+	 * @param Url String, Url including HTTP protocol prefix.
+	 * @param Id String, Id or Title of the Browser in case of two instances needs.
+	 * @param timeout String, Implicit time out to be waited before throw exception.
+	 * @param isRemote String, Start interactive testcase development mode.
+	 * @param extraParameters Map<String,Object>, can be used to pass more browser parameters, such as a firefox profile to use.
+	 * @throws SeleniumPlusException
 	 */
-	public static void startBrowser(String BrowserName, String Url, String Id, int timeout, boolean isRemote, HashMap<String,Object> extraParameters) throws SeleniumPlusException{
+	public static void startBrowser(String BrowserName, String Url, String Id, int timeout, boolean isRemote, Map<String, Object> extraParameters) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(WDLibrary.class, "startBrowser");
 		//previousDriver is the possible WebDriver with the same ID stored in the Cache.
 		WebDriver previousDriver = null;
