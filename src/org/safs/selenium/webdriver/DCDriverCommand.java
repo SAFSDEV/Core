@@ -555,7 +555,7 @@ holdloop:		while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 		//Handle the extra parameters, appear as pair(key, value)
 		String key = null;
 		Object value = null;
-		HashMap<String,Object> extraParameters = new HashMap<String,Object>();
+		Map<String,Object> extraParameters = new HashMap<String,Object>();
 		while(iterator.hasNext()){                               // params[5] +
 			try{
 				key = (String) iterator.next();
