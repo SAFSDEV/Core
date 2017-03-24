@@ -158,7 +158,7 @@ public class WDLibrary extends SearchObject {
 
     /** 2 seconds to wait for a click action finished on page. */
 	public static final int DEFAULT_TIMEOUT_WAIT_CLICK = 2;//seconds
-	
+
 	/**
 	 * The timeout in seconds to wait for the alert's presence.<br>
 	 * The default value is 2 seconds.<br>
@@ -172,33 +172,33 @@ public class WDLibrary extends SearchObject {
 
     /** 10 seconds to wait for a Robot click action finished on page. */
 	public static final int DEFAULT_TIMEOUT_WAIT_ROBOT_CLICK = 10;//seconds
-	
+
 	/** time (in seconds) to wait for a click action finished on page. */
 	public static int timeoutWaitClick = DEFAULT_TIMEOUT_WAIT_CLICK;//seconds
 
 	/** time (in seconds) to wait for an Alert appear on page. */
 	public static int timeoutWaitAlert = DEFAULT_TIMEOUT_WAIT_ALERT;//seconds
-	
+
 	/** time (in seconds) to check if an Alert is present on page before clicking.
 	 * The default value is set to {@link #TIMEOUT_NOWAIT}, means we check immediately
 	 * without waiting for presence of Alert. */
 	public static int timeoutCheckAlertForClick = TIMEOUT_NOWAIT;//seconds
-	
+
 
 	/** time (in seconds) to wait for a Robot click action finished on page. */
 	public static int timeoutWaitRobotClick = DEFAULT_TIMEOUT_WAIT_ROBOT_CLICK;//seconds
-	
+
 	static protected InputKeysParser keysparser = null;
 
 
 	public static int getTimeoutCheckAlertForClick() {
 		return timeoutCheckAlertForClick;
 	}
-	
+
 	public static void setTimeoutCheckAlertForClick(int timeoutCheckAlertForClick) {
 		WDLibrary.timeoutCheckAlertForClick = timeoutCheckAlertForClick;
 	}
-	
+
 	/**
      * Default true.
      * Set to true if we want an Exception to be thrown when we perform a Click and attempt to verify through event
@@ -262,7 +262,7 @@ public class WDLibrary extends SearchObject {
 				try{new Actions(WDLibrary.getWebDriver()).moveToElement(clickable).perform();}
 				catch(Throwable t){
 					IndependantLog.error("Ignoring Selenium Click 'moveToElement' action failure caused by "+ t.getClass().getName());
-				}				
+				}
 			}
 			clickable.click();
 		}catch (Throwable th){
@@ -342,19 +342,19 @@ public class WDLibrary extends SearchObject {
 
 	/**
 	 * Check if the point is inside of the boundary of WebElement.<br>
-	 * @param element	WebElement,	The element to get boundary to check with. 
+	 * @param element	WebElement,	The element to get boundary to check with.
 	 * @param p			Point,	The point to check.
 	 * @return boolean, true if the point is inside of the boundary of WebElement
 	 */
 	public static boolean inside(WebElement element, Point p){
 		if(p==null) return true;
-		
+
 		Dimension dimension = element.getSize();
 		Rectangle rect = new Rectangle(0, 0, dimension.width, dimension.height);
-		
+
 		return rect.contains(p);
 	}
-	
+
 	/**
 	 * Enlarge the listening area of DocumentClickCapture, if click offset is outside of the WebElement's boundary.<br>
 	 * @param clickable	WebElement, The element to click.
@@ -363,23 +363,23 @@ public class WDLibrary extends SearchObject {
 	 */
 	private static void checkOffset(WebElement clickable, Point offset, DocumentClickCapture listener){
 		String debugmsg = StringUtils.debugmsg(false);
-		
+
 		if(clickable==null || offset==null || listener==null){
 			//We have nothing to check, or have no listener to disable
 			return;
 		}
-		
+
 		if(!inside(clickable, offset)){
 			IndependantLog.warn(debugmsg+"Enlarge the listening area of DocumentClickCapture, the click point "+offset+" is outside of the WebElement "+clickable.getSize());
 			listener.setEnlargeListeningArea(true);
 		}
 	}
-	
+
 	/**
 	 * 'true', the default value for scrolling the web-element into view automatically before performing click ation on it.
 	 */
 	public static final boolean DEFAUT_AUTOSCROLL = true;
-	
+
 	/**
 	 * parse the optional parameter to get the value of 'autoscroll'.
 	 * @see #click(WebElement, String...)
@@ -389,7 +389,7 @@ public class WDLibrary extends SearchObject {
 	 */
 	private static boolean parseAutoScroll(String... optional){
 		boolean autoscroll = DEFAUT_AUTOSCROLL;
-		
+
 		if(optional!=null && optional.length>0 && optional[0]!=null){
 			try{
 				autoscroll = Boolean.parseBoolean(optional[0]);
@@ -397,10 +397,10 @@ public class WDLibrary extends SearchObject {
 				IndependantLog.warn(StringUtils.debugmsg(false)+" Ignoring invalid parameter 'autoscroll' "+optional[0]+", met "+StringUtils.debugmsg(e));
 			}
 		}
-		
+
 		return autoscroll;
 	}
-	
+
 	/**
 	 * Click the WebElement at a certain coordination with a special key pressed.<br>
 	 * Firstly it will try to get webelement's location and use Robot to click. At the same<br>
@@ -431,18 +431,18 @@ public class WDLibrary extends SearchObject {
 		WebDriver wd = WDLibrary.getWebDriver();
 		RemoteDriver rd = (wd instanceof RemoteDriver)? (RemoteDriver) wd : null;
 		boolean autoscroll = parseAutoScroll(optional);
-		
+
 		if(autoscroll){
 			try{new Actions(wd).moveToElement(clickable).perform();}
 			catch(Throwable t){
 				IndependantLog.error(debugmsg+"Ignoring Selenium Robot Click 'moveToElement' action failure caused by "+ t.getClass().getName());
-			}			
+			}
 		}
-		
+
 		MouseEvent event = null;
 		DocumentClickCapture listener = new DocumentClickCapture(true, clickable);
 		checkOffset(clickable, offset, listener);
-		
+
 		try {
 			//2. Perform the click action by Robot
 			Point location = getScreenLocation(clickable);
@@ -454,7 +454,7 @@ public class WDLibrary extends SearchObject {
 			listener.addListeners(false);
 			RBT.click(rd, location, specialKey, mouseButtonNumber, 1);
 			listener.startListening();
-			
+
 			//3. Wait for the 'click' event, check if the 'mousedown' event really happened.
 			// CANAGL -- FIREFOX PROBLEM: A link that takes you to a new page (like the Google SignIn link) will
 			// trigger the default action and apparently will NOT allow us to detect the Click occurred.
@@ -510,19 +510,19 @@ public class WDLibrary extends SearchObject {
 					WDTimeOut.setImplicitlyWait(0, TimeUnit.SECONDS);
 					actions.build().perform();
 					listener.startListening();
-					
-					// Dharmesh: Not report waitForClick failure due to listener event not capture 
-					// if click coordination out of component size or background. 
+
+					// Dharmesh: Not report waitForClick failure due to listener event not capture
+					// if click coordination out of component size or background.
 					// It is hard to find sibling component.
-					try {event = listener.waitForClick(timeoutWaitClick);} 
+					try {event = listener.waitForClick(timeoutWaitClick);}
 					catch (Throwable the) {IndependantLog.debug(debugmsg+" waitForClick failed but not reported");};
-					
+
 					/*if(event != null)
 						IndependantLog.debug(debugmsg+"click has been performed.");
 					else{
 						throw new SeleniumPlusException("Selenium Action.click failed to return the MouseEvent.");
 					}*/
-					
+
 				}catch(StaleElementReferenceException x){
 					listener.stopListening();  // chrome is NOT stopping!
 					// the click probably was successful because the elements have changed!
@@ -575,12 +575,12 @@ public class WDLibrary extends SearchObject {
 		String debugmsg = StringUtils.debugmsg(WDLibrary.class, "doubleClick");
 
 		checkBeforeOperation(clickable, true);
-		
+
 		MouseEvent event = null;
 		DocumentClickCapture listener = new DocumentClickCapture(true, clickable);
 		checkOffset(clickable, offset, listener);
 		boolean autoscroll = parseAutoScroll(optional);
-		
+
 		try {
 			//2. Perform the click action by Robot
 			Point location = getScreenLocation(clickable);
@@ -608,7 +608,7 @@ public class WDLibrary extends SearchObject {
 
 				if(autoscroll){
 					if(offset!=null) actions.moveToElement(clickable, offset.x, offset.y);
-					else actions.moveToElement(clickable);					
+					else actions.moveToElement(clickable);
 				}
 
 				if(specialKey!=null) actions.keyDown(specialKey);
@@ -691,12 +691,12 @@ public class WDLibrary extends SearchObject {
 	}
 
 	/**
-	 * Get the web-element's location relative to the browser. If the web-element is inside frames, 
+	 * Get the web-element's location relative to the browser. If the web-element is inside frames,
 	 * the frame's location will also be added.<br>
 	 * <b>Note: </b>The location got by this method might be slightly shifted. To get more accurate
 	 *             location, please call {@link #getLocation(WebElement, boolean)} with 2th parameter
 	 *             given as false.<br>
-	 * 
+	 *
 	 * @param webelement WebElement, the element to get location
 	 * @return Point, the element's location inside a browser
 	 * @throws SeleniumPlusException
@@ -705,9 +705,9 @@ public class WDLibrary extends SearchObject {
 	public static Point getLocation(WebElement webelement) throws SeleniumPlusException{
 		return getLocation(webelement, true);
 	}
-	
+
 	/**
-	 * Get the web-element's location relative to the browser client area. If the web-element is inside frames, 
+	 * Get the web-element's location relative to the browser client area. If the web-element is inside frames,
 	 * the frame's location will also be added.<br>
 	 * <b>Note: </b>If the 2th parameter is given false, you might get a more accurate location.<br>
 	 * @param webelement WebElement, the element to get location
@@ -717,7 +717,7 @@ public class WDLibrary extends SearchObject {
 	 *                                  But historically, we called {@link Coordinates#onPage()} in first place.<br>
 	 *                                  If this parameter is true, {@link Coordinates#onPage()} will be used firstly as before.<br>
 	 *                                  Otherwise, {@link WebElement#getLocation()} will be used directly<br>
-	 * 
+	 *
 	 * @return Point, the element's location relative to the browser client area
 	 * @throws SeleniumPlusException
 	 */
@@ -738,7 +738,7 @@ public class WDLibrary extends SearchObject {
 					IndependantLog.debug(debugmsg+"ignoring "+ StringUtils.debugmsg(t));
 				}
 			}
-			if(p==null) p = webelement.getLocation();			
+			if(p==null) p = webelement.getLocation();
 			IndependantLog.debug(debugmsg+"Selenium reports the WebElement 'CLIENT AREA' location as ("+p.x+","+p.y+")");
 
 			//2. Add the frame's location (relative to the the browser client area)
@@ -767,8 +767,8 @@ public class WDLibrary extends SearchObject {
 		String debugmsg = StringUtils.debugmsg(WDLibrary.class, "getScreenLocation");
 
 		Point p = null;
-		try{ 
-			try{ 
+		try{
+			try{
 				Coordinates c = ((RemoteWebElement)webelement).getCoordinates();
 				org.openqa.selenium.Point screen = c.onScreen();
 				IndependantLog.debug(debugmsg+"Selenium reports the WebElement SCREEN location as ("+screen.x+","+screen.y+")");
@@ -779,23 +779,23 @@ public class WDLibrary extends SearchObject {
 			catch(Throwable t){
 				IndependantLog.debug(debugmsg+"ignoring "+ StringUtils.debugmsg(t));
 			}
-			
+
 			//1. Get the element's location relative to the browser client area
 			p = getLocation(webelement);
-			
+
 			//2. Add the browser client area's location (relative to the browser's window), which is different according to browser
 			p.x += lastBrowserWindow.getClientX();
 			p.y += lastBrowserWindow.getClientY();
 			IndependantLog.debug(debugmsg+"added lastBrowserWindow ClientXY offsets, new tentative PAGE location ("+p.x+","+p.y+")");
-			
+
 			//2.1 Fix "client area LOCATION offset problem"
 			if(lastFrame==null){
 				//LEIWANG: I think that "client area LOCATION offset problem" is not related to the lastFrame.
 				//Even the lastFrame is not null, that problem might exist too and we should try to fix it.
 				//TODO remove the condition "if(lastFrame==null)" in future
 				if (lastBrowserWindow.getClientX()==0 &&
-					lastBrowserWindow.getBorderWidth()==0 && 
-					lastBrowserWindow.getPageXOffset()==0 && 
+					lastBrowserWindow.getBorderWidth()==0 &&
+					lastBrowserWindow.getPageXOffset()==0 &&
 					lastBrowserWindow.getWidth()>lastBrowserWindow.getClientWidth() ) {
 					int diff = Math.round(lastBrowserWindow.getWidth()- lastBrowserWindow.getClientWidth())/2;
 					IndependantLog.debug(debugmsg + "detecting potential client area LOCATION offset problem of "+ diff +" pixels");
@@ -803,12 +803,12 @@ public class WDLibrary extends SearchObject {
 						p.x += diff;
 						p.y += diff;
 						IndependantLog.debug(debugmsg + "added lastBrowserWindow suspected location offset error, new tentative PAGE location ("
-								+ p.x + "," 
+								+ p.x + ","
 								+ p.y + ")");
 					}
 				}
 			}
-			
+
 			//3. Add the browser window's location (relative to the screen)
 			p.x += lastBrowserWindow.getX();
 			p.y += lastBrowserWindow.getY();
@@ -1262,7 +1262,7 @@ public class WDLibrary extends SearchObject {
 			throw new SeleniumPlusException("Unable to successfully complete setDelayBetweenKeystrokes due to "+ e.getMessage(), e);
 		}
 	}
-	
+
 	/**
 	 * Gets the current delay in milliseconds between Robot keystrokes for both local and remote servers.
 	 * @throws SeleniumPlusException if we are unable to process the keystrokes successfully.
@@ -1274,7 +1274,7 @@ public class WDLibrary extends SearchObject {
 		IndependantLog.info("WDLibrary.getDelayBetweenKeystrokes returning  '"+String.valueOf(d)+"' from Robot.");
 		return d;
 	}
-	
+
 	/**
 	 * Set if wait for reaction to "input keys/chars" for both local and remote servers.
 	 * @param wait boolean if wait or not.
@@ -1304,10 +1304,10 @@ public class WDLibrary extends SearchObject {
 	/**
 	 * Set if wait for reaction to "input keys/chars" for both local and remote servers.
 	 * @param wait boolean, if wait or not.
-	 * @param tokenLength int, the length of a token. Only if the string is longer than this 
-	 *                         then we wait the reaction after input-keys a certain time 
+	 * @param tokenLength int, the length of a token. Only if the string is longer than this
+	 *                         then we wait the reaction after input-keys a certain time
 	 *                         indicated by the parameter dealyForToken.
-	 * @param dealyForToken int, The delay in millisecond to wait the reaction after input-keys 
+	 * @param dealyForToken int, The delay in millisecond to wait the reaction after input-keys
 	 *                           for the string as long as a token.
 	 * @param dealy int, The constant delay in millisecond to wait the reaction after input-keys.
 	 * @throws SeleniumPlusException if fail.
@@ -1405,14 +1405,14 @@ public class WDLibrary extends SearchObject {
 			throw new SeleniumPlusException("Unable to successfully complete InputCharacters due to "+ e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Clear the clipboard on local machine or on machine where the RMI server is running.
 	 * @throws SeleniumPlusException
 	 */
 	public static void clearClipboard() throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(false);
-		
+
 		try{
 			RemoteDriver wd = null;
 			try{ wd = (RemoteDriver) getWebDriver();}catch(Exception x){}
@@ -1432,7 +1432,7 @@ public class WDLibrary extends SearchObject {
 			throw new SeleniumPlusException("Unable to successfully complete ClearClipboard due to "+ e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Set content to the clipboard on local machine or on machine where the RMI server is running.
 	 * @param content String, the content to set to clipboard
@@ -1440,7 +1440,7 @@ public class WDLibrary extends SearchObject {
 	 */
 	public static void setClipboard(String content) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(false);
-		
+
 		try{
 			RemoteDriver wd = null;
 			try{ wd = (RemoteDriver) getWebDriver();}catch(Exception x){}
@@ -1460,7 +1460,7 @@ public class WDLibrary extends SearchObject {
 			throw new SeleniumPlusException("Unable to successfully complete SetClipboard due to "+ e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Get the content from the clipboard on local machine or on machine where the RMI server is running.
 	 * @param dataFlavor DataFlavor, the data flavor for the content in clipboard
@@ -1469,7 +1469,7 @@ public class WDLibrary extends SearchObject {
 	 */
 	public static Object getClipboard(DataFlavor dataFlavor) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(false);
-		
+
 		try{
 			RemoteDriver wd = null;
 			try{ wd = (RemoteDriver) getWebDriver();}catch(Exception x){}
@@ -1784,21 +1784,21 @@ public class WDLibrary extends SearchObject {
     /**
      * Given the element, and the (offsetX, offsetY) relative to element.
      * This function will calculate the offset point screen coordination.
-     * 
+     *
      * @param element WebElement, the element relative to which the coordination will be calculated.
      * @param offsetX String, the offset on x axis, in pixel or in percentage, for example 15 or 30%.
      * @param offsetX String, the offset on y axis, in pixel or in percentage, for example 45 or 50%.
-     * 
+     *
      * @return Point, the offset point screen coordination; or null if any exception occured.
      *
      **/
     public static Point getElementOffsetScreenLocation(WebElement element, String offsetX, String offsetY){
     	String debugmsg = StringUtils.debugmsg(false);
-    	
+
     	try {
     		Point screenLoc = WDLibrary.getScreenLocation(element);
     		Dimension dimemsion = element.getSize();
-    		
+
     		//calc coords according to the offset and element's location and dimension
     		double dx, dy;
     		dx = ImageUtils.calculateAbsoluteCoordinate(screenLoc.getX(), dimemsion.getWidth(), offsetX);
@@ -1810,7 +1810,7 @@ public class WDLibrary extends SearchObject {
     		return null;
     	}
     }
-    
+
 	/**
 	 * Capture component image
 	 * @param we - WebElement object.
@@ -2026,7 +2026,7 @@ public class WDLibrary extends SearchObject {
 	public static List<ProcessInfo> killChromeDriver(String host) throws SAFSException{
 		return killExtraProcess(host, "chromedriver.exe");
 	}
-	
+
 	/**
 	 * Kill the process 'IEDriverServer.exe'.
 	 * @param host String, the name of the machine on which the process 'IEDriverServer.exe' will be killed.
@@ -2036,7 +2036,7 @@ public class WDLibrary extends SearchObject {
 	public static List<ProcessInfo> killIEDriverServer(String host) throws SAFSException{
 		return killExtraProcess(host, "IEDriverServer.exe");
 	}
-	
+
 	/**
 	 * Kill the process launched from executables located in %SAFSDIR%\samples\Selenium2.0\extra\ or %SELENIUM_PLUS%\extra\
 	 * @param host String, the name of machine on which the process will be killed.
@@ -2049,15 +2049,15 @@ public class WDLibrary extends SearchObject {
 			throw new SAFSParamException("The value of parameter 'processName' is NOT valid: "+processName);
 		}
 		IndependantLog.debug("WDLibrary.killExtraProcess(): killing process '"+processName+"' on machine '"+host+"'.");
-		
+
 		//wmic process where " commandline like '%d:\\seleniumplus\\extra\\chromedriver.exe%' and name = 'chromedriver.exe' "
 		String wmiSearchCondition = GenericProcessMonitor.wqlCondition("commandline", "\\extra\\"+processName, true, false);
 		wmiSearchCondition += " and "+ GenericProcessMonitor.wqlCondition("name", processName, false, false);
 		WQLSearchCondition condition = new WQLSearchCondition(wmiSearchCondition);
-		
+
 		return GenericProcessMonitor.shutdownProcess(host, condition);
 	}
-	
+
 	/**
 	 * scroll browser window by x and/or y number of pixels.
 	 * Only works if the associated scrollbar(s) are actually visible.
@@ -2234,7 +2234,7 @@ public class WDLibrary extends SearchObject {
 
 		try{
 			WDLibrary.checkNotNull(element);
-			
+
 			//The location(Left-Top) is relative to the viewport
 			org.openqa.selenium.Point elementLTLoc = element.getLocation();
 			Dimension elementD = element.getSize();
@@ -2249,9 +2249,9 @@ public class WDLibrary extends SearchObject {
 			int browserClientW = (int) WDLibrary.lastBrowserWindow.getClientWidth();
 			int browserClientH = (int) WDLibrary.lastBrowserWindow.getClientHeight();
 			Dimension browserPageBounds = new Dimension(browserClientW, browserClientH);
-			
+
 			IndependantLog.debug(debugmsg+" offset="+offset+"; element dimension="+elementD+"; ");
-			
+
 			if(offset!=null && isLocationInBounds(offset, elementD)){
 				//check the offset point is shown browser's page
 				elementLTLoc = elementLTLoc.moveBy(offset.x, offset.y);
@@ -2266,14 +2266,14 @@ public class WDLibrary extends SearchObject {
 		}catch(Exception e){
 			IndependantLog.error(debugmsg+"Fail due to "+StringUtils.debugmsg(e));
 		}
-		
+
 		IndependantLog.debug(debugmsg+" return "+isShowOnPage);
 		return isShowOnPage;
 	}
 
 	/**
 	 * check if the point p locates in the Dimension.
-	 * @param p Point, relative to the Dimension. Usually the top-left point of an item. 
+	 * @param p Point, relative to the Dimension. Usually the top-left point of an item.
 	 * see if the Point is inside bounds of 0,0,bounds.width, bounds.height.
 	 * @param bounds Dimension, the boundary
 	 * @return boolean true if the point p locates in the Dimension.
@@ -2286,17 +2286,17 @@ public class WDLibrary extends SearchObject {
 
 	/**
 	 * check if the Point p locates inside the Dimension.
-	 * @param p Point, point relative to 0,0, bounds.width, bounds.height.  
+	 * @param p Point, point relative to 0,0, bounds.width, bounds.height.
 	 * Usually this is the bottom-right point test of a boundary.
 	 * @param bounds Dimension, the boundary
-	 * @return boolean true if the point p locates in the Dimension. 
+	 * @return boolean true if the point p locates in the Dimension.
 	 * A point p on the extreme width or height boundary IS considered in-bounds.
 	 */
 	public static boolean isPointInBounds(org.openqa.selenium.Point p, Dimension bounds){
 		if(p==null || bounds==null) return false;
 		return (0<p.x && p.x<=bounds.width) && (0<p.y && p.y<=bounds.height);
 	}
-	
+
 	/**
 	 * Set position of current browser window.
 	 * Synonymous to Javascript window.moveTo().
@@ -2308,12 +2308,12 @@ public class WDLibrary extends SearchObject {
 
 		try{
 			org.openqa.selenium.Point position = new org.openqa.selenium.Point(x, y);
-			lastUsedWD.manage().window().setPosition(position);			
+			lastUsedWD.manage().window().setPosition(position);
 		} catch (Exception e){
 			throw new SeleniumPlusException("Failed to set position of current browser window to ("+x+","+y+") "+ e.getMessage());
 		}
 	}
-		
+
 	/**
 	 * Maximize current browser window
 	 * @throws SeleniumPlusException
@@ -2416,7 +2416,7 @@ public class WDLibrary extends SearchObject {
 	/**
 	 * Highlight Element / object
 	 * @param element to be highlighted
-	 * 
+	 *
 	 * @deprecated it is replaced by {@link #highlight(WebElement)}.
 	 */
 	public static void highlightElement(WebElement element) throws SeleniumPlusException{
@@ -2606,7 +2606,7 @@ public class WDLibrary extends SearchObject {
 		//and if element is dynamically added by javascript and will be considered as stale
 		//which will cause executeJavaScriptOnWebElement to throw SeleniumPlusException
 		//executeJavaScriptOnWebElement("try{ window.top.focus();}catch(error){ debug(error); }", element);
-				
+
 		executeScript("try{ window.top.focus();}catch(error){ debug(error); }");
 		return true;
 	}
@@ -2622,7 +2622,7 @@ public class WDLibrary extends SearchObject {
 		boolean rc = false;
 		IndependantLog.info("WDLibrary.windowSetFocus set focus via WebDriver window title");
 		try{
-			rc = windowSetFocus(adriver.getTitle()); 
+			rc = windowSetFocus(adriver.getTitle());
 		}catch(Exception x){
 			IndependantLog.info("WDLibrary.windowSetFocus RemoteWebElement ignoring "+ getThrowableMessages(x)+ ": "+ x.getMessage());
 		}
@@ -2630,7 +2630,7 @@ public class WDLibrary extends SearchObject {
 	}
 
 	/**
-	 * Set a specific Window matching the provided title to be the foreground window. 
+	 * Set a specific Window matching the provided title to be the foreground window.
 	 * @param titleRegExp -- title or regular expression matching the target window's caption.
 	 * @return true on success
 	 * @throws SeleniumPlusException
@@ -2642,7 +2642,7 @@ public class WDLibrary extends SearchObject {
 		if (!rc) throw new SeleniumPlusException("Failed to setfocus, return:" + rc);
 		return rc;
 	}
-	
+
 	/**
 	 * Attempt to SetFocus on the WebElement.
 	 * @param element WebElement, to get focus.
@@ -2860,11 +2860,11 @@ public class WDLibrary extends SearchObject {
 	 * {@link JavaScriptFunctions#sendHttpRequest(Map)} to handle HTTP Request. If the execution
 	 * is asynchronous, some value of {@link Key} will be stored in javascript global variables,
 	 * and they can be retrieved later.
-	 * 
+	 *
 	 * @see org.safs.net.XMLHttpRequest
 	  */
 	public static class WD_XMLHttpRequest extends XMLHttpRequest{
-		
+
 		/**
 		 * Implementation: through {@link WDLibrary}, execute {@link JavaScriptFunctions#sendHttpRequest(Map)}.<br>
 		 * For synchronous execution, all results will be stored in the returned Map result with one value of {@link Key};<br>
@@ -2877,14 +2877,14 @@ public class WDLibrary extends SearchObject {
 		 *   {@link #VARIABLE_RESPONSE_TEXT}:     HTTP response as string
 		 *   {@link #VARIABLE_RESPONSE_XML}:      HTTP response as XML data
 		 * </pre>
-		 * 
+		 *
 		 * @throws SeleniumPlusException
 		 * @see {@link #getReadyState()}
 		 */
 		@SuppressWarnings({ "unchecked" })
 		public Map<String, Object> execute(HttpCommand command, String url, boolean async, Map<String, String> headers, String data) throws SeleniumPlusException {
 			if(!StringUtils.isValid(url)) throw new SeleniumPlusException("The request url is null or is empty!");
-			
+
 			String debugmsg = StringUtils.debugmsg(false);
 
 			String parameters = ""+(data==null?"":"with data '"+data+"'")+((headers==null||headers.isEmpty())?"":" with request headers "+headers);
@@ -2919,7 +2919,7 @@ public class WDLibrary extends SearchObject {
 				return null;
 			}
 		}
-		
+
 		/**
 		 * Get javascript global variable {@link #VARIABLE_READY_STATE}.
 		 */
@@ -2968,7 +2968,7 @@ public class WDLibrary extends SearchObject {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * @return String, the version of the browser where test is running. Or null if something wrong happens.
 	 */
@@ -2979,7 +2979,7 @@ public class WDLibrary extends SearchObject {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * @return String, the name of the platform where the browser is running. Or null if something wrong happens.
 	 */
@@ -2990,7 +2990,7 @@ public class WDLibrary extends SearchObject {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * @return String, the version of 'selenium server' with which the test is running. Or null if something wrong happens.
 	 */
@@ -3010,8 +3010,8 @@ public class WDLibrary extends SearchObject {
 	public static void checkKnownIssue(String keyword) throws SeleniumPlusException{
 
 		if(DDDriverCommands.GETURL_KEYWORD.equalsIgnoreCase(keyword) ||
-		   DDDriverCommands.SAVEURLTOFILE_KEYWORD.equalsIgnoreCase(keyword) ||		
-		   DDDriverCommands.VERIFYURLCONTENT_KEYWORD.equalsIgnoreCase(keyword) ||		
+		   DDDriverCommands.SAVEURLTOFILE_KEYWORD.equalsIgnoreCase(keyword) ||
+		   DDDriverCommands.VERIFYURLCONTENT_KEYWORD.equalsIgnoreCase(keyword) ||
 		   DDDriverCommands.VERIFYURLTOFILE_KEYWORD.equalsIgnoreCase(keyword)){
 			//Check the known issue with selenium-standalone2.47.1 and Firefox 42.0
 			//These keywords will be skipped for FireFox until we find the reason why 'AJAX execution is stuck with FireFox'.
@@ -3024,16 +3024,16 @@ public class WDLibrary extends SearchObject {
 			}
 		}
 	}
-	
+
 	/**
 	 * Click a component with an offset. This API will not verify that the click does happen.<br>
 	 * If you want to make sure of that, please call {@link #click(WebElement, Point)} instead.<br>
 	 * <br>
-	 * Sometimes we want to click without verification, for example, to show an Alert.<br> 
+	 * Sometimes we want to click without verification, for example, to show an Alert.<br>
 	 * With presence of Alert, any call to Selenium API will throw out UnhandledAlertException<br>
 	 * and close the Alert automatically. Our API {@link #click(WebElement, Point)} will call<br>
-	 * Selenium API for verification, so it is unable to open the Alert successfully.<br>  
-	 * 
+	 * Selenium API for verification, so it is unable to open the Alert successfully.<br>
+	 *
 	 * @param component WebElement, the component to click
 	 * @param offset Point, the offset (relative to component) to click at
 	 * @param optional String[], the optional parameters
@@ -3046,7 +3046,7 @@ public class WDLibrary extends SearchObject {
 	 */
 	public static boolean clickUnverified(WebElement component, Point offset, String... optional){
 		String debugmsg = StringUtils.debugmsg(false);
-		
+
 		try {
 			IndependantLog.debug(debugmsg+" click with parameter componet:"+component+", offset:"+offset);
 			//Create a combined actions according to the parameters
@@ -3059,19 +3059,19 @@ public class WDLibrary extends SearchObject {
 			}
 			IndependantLog.debug(debugmsg+" Try Selenium API to click.");
 			actions.click().perform();
-			
+
 			return true;
 		} catch (Exception e) {
 			IndependantLog.warn(debugmsg+" Failed with Selenium API, met "+StringUtils.debugmsg(e)+". Try Robot click.");
-			
+
 			try {
 				Point p = WDLibrary.getScreenLocation(component);
 
 				if(offset!=null) p.translate(offset.x, offset.y);
 				else p.translate(component.getSize().width/2, component.getSize().height/2);
-				
+
 				RBT.click(p, null, WDLibrary.MOUSE_BUTTON_LEFT, 1);
-				
+
 				return true;
 			} catch (Exception e1) {
 				IndependantLog.error(debugmsg+" Failed with Robot click!");
@@ -3079,12 +3079,12 @@ public class WDLibrary extends SearchObject {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Close the Alert-Modal-Dialog associated with a certain browser identified by ID.<br>
 	 * It will get the cached webdriver according to the browser's id, and close the 'alert' through that webdriver.<br>
 	 * <b>Note:</b>This API will NOT change the current WebDriver. {@link #getWebDriver()} will still return the same object.<br>
-	 * 
+	 *
 	 * @param accept boolean, if true then accept (click OK) the alert; otherwise dismiss (click Cancel) the alert.
 	 * @param optionals String
 	 * <ul>
@@ -3099,14 +3099,14 @@ public class WDLibrary extends SearchObject {
 	public static void closeAlert(boolean accept, String... optionals) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(false);
 		String browserID = null;
-		
+
 		if(optionals!=null && optionals.length>0){
 			if(optionals.length>1 && StringUtils.isValid(optionals[1])) browserID=optionals[1];
 		}
-		
+
 		try{
 			Alert alert = waitAlert(optionals);
-			
+
 			if(accept){
 				alert.accept();//OK button
 			}else{
@@ -3120,11 +3120,11 @@ public class WDLibrary extends SearchObject {
 	}
 
 	/**
-	 * 
+	 *
 	 * Test the presence of Alert-Modal-Dialog associated with a certain browser identified by ID.<br>
 	 * It will get the cached webdriver according to the browser's id, and get the 'alert' through that webdriver.<br>
 	 * <b>Note:</b>This API will NOT change the current WebDriver. {@link #getWebDriver()} will still return the same object.<br>
-	 * 
+	 *
 	 * @param optionals String...
 	 * <ul>
 	 * <b>optionals[0] timeoutWaitAlertPresence</b> int, timeout in seconds to wait for the presence of Alert.
@@ -3152,12 +3152,12 @@ public class WDLibrary extends SearchObject {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Wait for the presence of Alert-Modal-Dialog associated with a certain browser identified by ID.<br>
 	 * It will get the cached webdriver according to the browser's id, and get the 'alert' through that webdriver.<br>
 	 * <b>Note:</b>This API will NOT change the current WebDriver. {@link #getWebDriver()} will still return the same object.<br>
-	 * 
+	 *
 	 * @param optionals String...
 	 * <ul>
 	 * <b>optionals[0] timeoutWaitAlertPresence</b> int, timeout in seconds to wait for the presence of Alert.
@@ -3175,20 +3175,20 @@ public class WDLibrary extends SearchObject {
 		String browserID = null;
 		int timeout = timeoutWaitAlert;
 		Alert alert = null;
-		
+
 		if(optionals!=null && optionals.length>0){
 			if(StringUtils.isValid(optionals[0])){
 				try{ timeout = Integer.parseInt(optionals[0]); }catch(NumberFormatException e){}
 			}
 			if(optionals.length>1 && StringUtils.isValid(optionals[1])) browserID=optionals[1];
 		}
-		
+
 		WebDriver webdriver = getWebDriver(browserID);
 
 		if(webdriver==null){
 			throw new SeleniumPlusException("cannot get webdriver according to id '"+browserID+"'",SeleniumPlusException.CODE_OBJECT_IS_NULL);
 		}
-		
+
 		try{
 			if(timeout==TIMEOUT_NOWAIT){
 				alert = webdriver.switchTo().alert();//NoAlertPresentException
@@ -3196,7 +3196,7 @@ public class WDLibrary extends SearchObject {
 				WebDriverWait wait = new WebDriverWait(webdriver, timeout);
 				alert = wait.until(ExpectedConditions.alertIsPresent());//TimeoutException
 			}
-			
+
 			return alert;
 		}catch(Exception e){
 			String message = "Fail to get alert dialog associated with "+(browserID==null? "current browser.":"browser '"+browserID+"'.");
@@ -3204,10 +3204,10 @@ public class WDLibrary extends SearchObject {
 			throw new SeleniumPlusException(message);
 		}
 	}
-	
+
 	/**
 	 * <b>Before running this test, the Selenium Sever should have already started</b> (it can be launched by "java org.safs.selenium.webdriver.lib.RemoteDriver" ).<br>
-	 * 
+	 *
 	 * @see RemoteDriver#main(String[])
 	 */
 	private static void test_ajax_call(String browser){
@@ -3216,7 +3216,7 @@ public class WDLibrary extends SearchObject {
 		final String ID = "thomas";
 		int timeout = 10;
 		boolean isRemote = true;
-		
+
 		final String ajaxRequestURL = "http://www.thomas-bayer.com/sqlrest/";
 		final Map<String, String> headers = new HashMap<String, String>();
 		final Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -3227,7 +3227,7 @@ public class WDLibrary extends SearchObject {
 			WDLibrary.startBrowser(browser, url, ID, timeout, isRemote);
 
 			checkKnownIssue(DDDriverCommands.GETURL_KEYWORD);
-			
+
 			Thread threadGetUrl = new Thread(new Runnable(){
 				public void run() {
 					try {
@@ -3270,18 +3270,18 @@ public class WDLibrary extends SearchObject {
 			threadGetUrl.start();
 		}
 	}
-	
+
 	private static void test_ajax_call(){
 		String[] browsers = {
-				             SelectBrowser.BROWSER_NAME_CHROME, 
-				             SelectBrowser.BROWSER_NAME_IE, 
+				             SelectBrowser.BROWSER_NAME_CHROME,
+				             SelectBrowser.BROWSER_NAME_IE,
 				             SelectBrowser.BROWSER_NAME_FIREFOX
 				             };
 		for(String browser:browsers){
 			test_ajax_call(browser);
-		}		
+		}
 	}
-	
+
 	/**
 	 * Before calling this method, we could start chromedriver.exe firstly.
 	 */
@@ -3292,45 +3292,45 @@ public class WDLibrary extends SearchObject {
 			for(ProcessInfo p:killedList){
 				System.out.println("on host "+host+", process "+p.getId()+" has been terminated. The return code is "+p.getWmiTerminateRC());
 			}
-			
+
 			killedList = killIEDriverServer(host);
 			for(ProcessInfo p:killedList){
 				System.out.println("on host "+host+", process "+p.getId()+" has been terminated. The return code is "+p.getWmiTerminateRC());
 			}
-			
+
 			host = "tadsrv";
 			killedList = killChromeDriver(host);
 			for(ProcessInfo p:killedList){
 				System.out.println("on host "+host+", process "+p.getId()+" has been terminated. The return code is "+p.getWmiTerminateRC());
 			}
-						
+
 			killedList = killIEDriverServer(host);
 			for(ProcessInfo p:killedList){
 				System.out.println("on host "+host+", process "+p.getId()+" has been terminated. The return code is "+p.getWmiTerminateRC());
 			}
-			
+
 		} catch (SAFSException e) {
 			e.printStackTrace();
 		}
-		
+
 	}
-	
+
 	/**
 	 * This class represents a Robot, which can do work locally (thru local org.safs.robot.Robot) or remotely (thru a RMI agent).<br>
-	 * 
+	 *
 	 * @author sbjlwa
-	 * 
+	 *
 	 */
 	public static class RBT{
 		/**
 		 * Use Robot to click locally or remotely (through RMI).
 		 * Use the current WebDriver as a RemoteDriver to provide an RMI agent.
-		 * 
+		 *
 		 * @param location	Point, The screen location to click at.
 		 * @param specialKey	Keys, The selenium Keys value, representing the key (such as Ctrl, Alt) pressed during mouse click.
 		 * @param mouseButtonNumber	int, Representing the mouse button to click, such as {@link WDLibrary#MOUSE_BUTTON_LEFT}.
 		 * @param nclicks	int, How many times to click mouse.
-		 * 
+		 *
 		 * @throws Exception
 		 */
 		protected static void click(Point location, Keys specialKey, int mouseButtonNumber, int nclicks) throws Exception{
@@ -3338,16 +3338,16 @@ public class WDLibrary extends SearchObject {
 			RemoteDriver rd = (wd instanceof RemoteDriver)? (RemoteDriver) wd : null;
 			click(rd, location, specialKey, mouseButtonNumber, nclicks);
 		}
-		
+
 		/**
 		 * Use Robot to click locally or remotely (through RMI).
-		 * 
+		 *
 		 * @param rd	RemoteDriver, The Remote Driver with an RMI agent.
 		 * @param location	Point, The screen location to click at.
 		 * @param specialKey	Keys, The selenium Keys value, representing the key (such as Ctrl, Alt) pressed during mouse click.
 		 * @param mouseButtonNumber	int, Representing the mouse button to click, such as {@link WDLibrary#MOUSE_BUTTON_LEFT}.
 		 * @param nclicks	int, How many times to click mouse.
-		 * 
+		 *
 		 * @throws Exception
 		 */
 		public static void click(RemoteDriver rd, Point location, Keys specialKey, int mouseButtonNumber, int nclicks) throws Exception{
@@ -3357,7 +3357,7 @@ public class WDLibrary extends SearchObject {
 				}else{
 					org.safs.robot.Robot.clickWithKeyPress(location.x, location.y, mouseButtonNumber, toJavaKeyCode(specialKey), nclicks);
 				}
-			} 
+			}
 			else{// handle remote selenium
 				if(rd.rmiAgent != null){
 					if(specialKey==null){
