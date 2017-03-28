@@ -34,6 +34,7 @@ package org.safs.selenium.webdriver;
  *                                   Modified method startRemoteServer(): moved some code to class SePlusInstallInfo.
  *  <br>   NOV 07, 2016	   (LeiWang) Modified method startRemoteServer(): Wait longer to get more information from STDOUT/STDERR, if no running server has been detected.
  *  <br>   MAR 07, 2017	   (LeiWang) Modified methods launchSeleniumServers(), startRemoteServer(): start selenium server with 'browser drivers' option.
+ *  <br>   MAR 24, 2017	   (LeiWang) Modified startRemoteServer(): even we cannot determine the installed product, we still try to launch from default batch file.
  **/
 
 import java.io.BufferedReader;
@@ -1144,24 +1145,46 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	public static boolean startRemoteServer(){
 		String root = null;
 		String server = null;
+		File executable = null;
+
 		if(isSeleniumPlus()){
 			root = System.getenv("SELENIUM_PLUS");
 			server = root + "/extra/RemoteServer.bat";
+			executable = new File(server);
 		}
 		if(isSAFS()){
 			root = System.getenv("SAFSDIR");
 			server = root + "/samples/Selenium2.0/extra/RemoteServer.bat";
+			executable = new File(server);
 		}
-		if(root == null || server == null){
-			IndependantLog.debug("WDGU: startRemoteServer failed to determine RemoteServer startup script location.");
-			return false;
+
+		if(root == null || !executable.exists()){
+			if(root==null){
+				IndependantLog.warn("WDGU: startRemoteServer cannot determine the installed product.");
+			}else{
+				IndependantLog.warn("WDGU: startRemoteServer executable '"+executable.getAbsolutePath()+"' doesn't not exist.");
+			}
+			root = System.getenv("SELENIUM_PLUS");
+			server = root + "/extra/RemoteServer.bat";
+			executable = new File(server);
+			if(!executable.exists()){
+				root = System.getenv("SAFSDIR");
+				server = root + "/samples/Selenium2.0/extra/RemoteServer.bat";
+				executable = new File(server);
+				if(!executable.exists()){
+					IndependantLog.error("WDGU: startRemoteServer failed to determine RemoteServer startup script location.");
+					return false;
+				}
+			}
 		}
+
 		try{
 			NativeWrapper.runAsynchExec(server);
 		}catch(Throwable t){
-	        IndependantLog.debug("WDGU: startRemoteServer failed with "+t.getClass().getSimpleName()+": "+t.getMessage());
+	        IndependantLog.error("WDGU: startRemoteServer failed with "+t.getClass().getSimpleName()+": "+t.getMessage());
 	        return false;
 		}
+
 		return true;
 	}
 

@@ -50,6 +50,7 @@ function hideAllContentPanels(){
     document.getElementById("assets").style.display="none";
     document.getElementById("enable-safs").style.display="none";
     document.getElementById("remote-servers").style.display="none";
+    document.getElementById("browser-drivers").style.display="none";
     document.getElementById("calling-javascript").style.display="none";
     document.getElementById("http-proxy").style.display="none";
 
@@ -73,6 +74,7 @@ function hideAllContentPanels(){
 	document.getElementById("href-assets").style.fontWeight="normal";
 	document.getElementById("href-enable-safs").style.fontWeight="normal";
 	document.getElementById("href-remote-servers").style.fontWeight="normal";
+	document.getElementById("href-browser-drivers").style.fontWeight="normal";
 	document.getElementById("href-using-autoit").style.fontWeight="normal";
 	document.getElementById("href-calling-javascript").style.fontWeight="normal";
 	document.getElementById("href-http-proxy").style.fontWeight="normal";
@@ -187,10 +189,16 @@ function setHttpProxy(){
     document.getElementById("http-proxy").style.display="block";
     document.getElementById("href-http-proxy").style.fontWeight="900";
 }
+function browserDrivers(){
+	hideAllContentPanels();
+    document.getElementById("browser-drivers").style.display="block";
+    document.getElementById("href-browser-drivers").style.fontWeight="900";
+}
 </script>
 
 </head>
-<body>
+
+<body onload="showWelcome();">
 <span style="font-size: 32px;font-weight: bold">Intro to SeleniumPlus</span>
 <br>
 <small>Updated: 2015.09.30</small>
@@ -216,6 +224,7 @@ function setHttpProxy(){
 <a href="#" onclick="updateSoftware()" id="href-updatesoftware" >Update SeleniumPlus</a>&nbsp;&nbsp;|
 <a href="#" onclick="enableSAFS()" id="href-enable-safs" >Enable SAFS</a>&nbsp;&nbsp;|
 <a href="#" onclick="remoteServers()" id="href-remote-servers" >Remote Servers</a>&nbsp;&nbsp;|
+<a href="#" onclick="browserDrivers()" id="href-browser-drivers" >Browser Drivers</a>&nbsp;&nbsp;|
 <a href="http://safsdev.sourceforge.net/sqabasic2000/UsingAutoIT.htm" id="href-using-autoit" onclick="usingAutoIT()">Using AutoIT</a>&nbsp;&nbsp;|
 <a href="#" onclick="callingJavascript()" id="href-calling-javascript" >Calling Javascript</a>&nbsp;&nbsp;|
 <a href="#" onclick="setHttpProxy()" id="href-http-proxy" >HTTP Proxy</a>&nbsp;&nbsp;|
@@ -232,10 +241,17 @@ function setHttpProxy(){
 <p>
 Thanks for giving SeleniumPlus a try!
 <p>
-Select any of the links above to go directly to an area of interest.
+Select any of the links above ("<b>Project Assets</b>", "<b>Sample Project</b>" etc.) to go directly to an area of interest.
 <p>
 We welcome any feedback (both good and bad) that can help us make the test automation experience better!
-<p> <br>
+<p>
+When meeting any problem, please<br/>
+<ol>
+<li>Visit <a href=" http://safsdev.freeforums.net/board/6/faq" target="_blank">SE+ FAQ</a>
+<li>Post thread at <a href="http://safsdev.freeforums.net/board/13/general-discussion" target="_blank">SE+ Discussion</a>
+<li>Contact us at <a href="mailto:safsdev@sas.com">SAFS DEV Group</a>
+</ol>
+<br>
 <p>
 The SAFS/SeleniumPlus Development Team
 <ul>
@@ -1704,7 +1720,7 @@ SELENIUMNODE=node.sas.com:6666
 </pre></div>
 </ul>
 
-<h4>4. Configuration of browser drivers</h4>
+<h4 id="configure_browser_driver">4. Configuration of browser drivers</h4>
 Selenium WebDriver needs specific browser-driver to communicate with a certain browser. When starting selenium server, <br>
 the browser drivers should also be specified so that the selenium WebDriver knows where to find them and <br>
 use them to talk to the browsers.<br>
@@ -1839,6 +1855,47 @@ while the 4th line tells us that a selenium node server is being started;<br>
 and the last 2th line tells us that the node has registered on hub server.</span><br>
 <img src="images/SeleniumServerRunner_Node.png" alt="Selenium Node Server Runner Screenshot"/><br>
 <hr>
+</div>
+
+<!--------------------------------->
+<!-- Browser Driers info         -->
+<!--------------------------------->
+<div id="browser-drivers" style="display: none;">
+<h2>Browser Drivers</h2>
+<h3>About Browser Drivers</h3>
+    Selenium needs a driver to communicate with a specific browser. On Windows for example, 
+    <ul>
+    <li>chromedriver.exe is needed to run test on Chrome; 
+    <li>IEDriverServer.exe is needed for IE;
+    <li>MicrosoftWebDriver.exe is needed for Edge
+    <li>etc.
+    </ul>
+    These drivers are provided by third party (NOT by selenium). 
+    Only one exception, prior to "Selenium 3.0", the firefox driver is integrated in the selenium.
+    But after "Selenium 3.0", the firefox driver has been moved out of selenium, and it is independent as gecko-driver.
+     
+<h3>Currently supported browsers</h3>
+    <ul>
+    <li>IE <b>11</b> or earlier
+    <li>Firefox <b>45.0</b> or earlier
+    <li>Chrome <b>v55-57</b>
+    <li>Edge <b>14.14393</b> or earlier
+    </ul>
+<h3>Update browser drivers</h3>
+    We have posted a thread talking about 
+    <a href="http://safsdev.freeforums.net/thread/42/get-appropriate-drivers-specific-browser" target="_blank">get appropriate drivers for a specific browser</a><br/>
+    After getting the driver,
+    <ol> 
+    <li>We can put it into the folder %SELENIUM_PLUS%/extra
+    <li>User may also need to update the <a href="http://selenium-release.storage.googleapis.com/index.html" target="_blank">selenium-server-standalone-xxx.jar</a> and
+    put it to %SELENIUM_PLUS%/libs
+    </ol>
+<h3>Configure browser drivers</h3>
+    Only <b>chrome</b>, <b>IE</b> and <b>firefox</b> are by default configured to start with "selenium server", and
+    the test can run on them.<br/>
+    User needs to <a href="http://safsdev.freeforums.net/thread/40/configure-browser-drivers-seleniumplus" target="_blank">configure drivers</a> 
+    if he wants to run test against another browser.
+    
 </div>
 
 <!--------------------------------->

@@ -321,7 +321,7 @@ public class SelectBrowser {
 			caps = DesiredCapabilities.chrome();
 
 			// Disable extensions to avoid popping up 'Disable developer mode extensions' message by default.
-			if(!extraParameters.containsKey(KEY_CHROME_DISABLE_EXTENSIONS)) {
+			if(extraParameters!=null && !extraParameters.containsKey(KEY_CHROME_DISABLE_EXTENSIONS)) {
 				// Only execute if no user's setting
 				extraParameters.put(KEY_CHROME_DISABLE_EXTENSIONS, "true");
 			}

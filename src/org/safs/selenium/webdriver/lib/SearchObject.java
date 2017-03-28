@@ -2837,7 +2837,7 @@ public class SearchObject {
 
 	/**
 	 * Execute javascript to initialize global javascript variables.<br>
-	 * @see WDLibrary#startBrowser(String, String, String, int, boolean, HashMap)
+	 * @see WDLibrary#startBrowser(String, String, String, int, boolean, Map)
 	 */
 	protected static void js_initialize(){
 		String debugmsg = StringUtils.debugmsg(SearchObject.class, "js_initialize");
