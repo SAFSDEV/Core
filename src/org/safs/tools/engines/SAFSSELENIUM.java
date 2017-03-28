@@ -1,4 +1,15 @@
+/** Copyright (C) SAS Institute, Inc. All rights reserved.
+ ** General Public License: http://www.opensource.org/licenses/gpl-license.php
+ **/
 package org.safs.tools.engines;
+
+/**
+ * History:
+ * @author PHSABO AUG 14, 2006
+ * @author CANAGL APR 18, 2008 Primarily updating documentation.
+ * @author CANAGL NOV 03, 2015 More complete conversion to Selenium 2.0 WebDriver usage.
+ * @author SBJLWA MAR 28, 2017 Modified launchInterface(): append selenium-server-standalone.xxx.jar on CLASSPATH.
+ */
 
 import java.io.File;
 
@@ -6,8 +17,9 @@ import org.safs.Log;
 import org.safs.SAFSException;
 import org.safs.TestRecordHelper;
 import org.safs.selenium.SeleniumJavaHook;
+import org.safs.selenium.util.SePlusInstallInfo;
 import org.safs.selenium.webdriver.WebDriverGUIUtilities;
-import org.safs.tools.CaseInsensitiveFile;
+import org.safs.selenium.webdriver.lib.SeleniumPlusException;
 import org.safs.tools.consoles.ProcessConsole;
 import org.safs.tools.drivers.DriverConstant;
 import org.safs.tools.drivers.DriverInterface;
@@ -26,9 +38,6 @@ import org.safs.tools.drivers.DriverInterface;
  * {@link <a href="http://safsdev.sf.net/sqabasic2000/JSAFSFrameworkContent.htm#configfile" target="_blank">SAFSDRIVER Configuration File</a>}
  * for more information.
  * </ul>
- * @author PHSABO AUG 14, 2006
- * @author CANAGL APR 18, 2008 Primarily updating documentation.
- * @author CANAGL NOV 03, 2015 More complete conversion to Selenium 2.0 WebDriver usage.
  */
 public class SAFSSELENIUM extends GenericEngine {
 
@@ -113,8 +122,22 @@ public class SAFSSELENIUM extends GenericEngine {
 				    }
 
 					// CLASSPATH
-				    tempstr   = config.getNamedValue(DriverConstant.SECTION_SAFS_SELENIUM,
-				         		      "CLASSPATH");
+				    tempstr   = config.getNamedValue(DriverConstant.SECTION_SAFS_SELENIUM, "CLASSPATH");
+				    try{
+				    	//append the selenium-sever-standalone.xxx.jar on the classpath
+				    	File seleniumstandaloneFile = SePlusInstallInfo.instance().getSeleniumStandaloneJar();
+				    	if(seleniumstandaloneFile.exists()){
+				    		if (tempstr != null) {
+				    			tempstr += File.pathSeparator+seleniumstandaloneFile.getAbsolutePath();
+				    		}else{
+				    			tempstr = System.getenv("CLASSPATH")+File.pathSeparator+seleniumstandaloneFile.getAbsolutePath() +" ";
+				    		}
+				    	}else{
+				    		throw new SeleniumPlusException("'"+seleniumstandaloneFile.getAbsolutePath()+"' does not exist.");
+				    	}
+				    }catch(SeleniumPlusException se){
+				    	Log.warn("Failed to get seleniumstandalonejar, due to "+se.toString());
+				    }
 				    if (tempstr != null) {
 				    	array += "-cp "+ tempstr +" ";
 				    }
