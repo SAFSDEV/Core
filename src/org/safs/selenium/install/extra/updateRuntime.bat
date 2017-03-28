@@ -7,6 +7,8 @@ REM Example:
 REM         updateRuntime.bat SAFS
 REM         updateRuntime.bat SE
 REM         updateRuntime.bat ALL
+
+SETLOCAL
  
 REM External update resource
 REM SET SE_LIB_UPDATE=https://github.com/SAFSDEV/UpdateSite/releases/download/seleniumplus/SEPLUS.LIB.UPDATE.ZIP
@@ -69,3 +71,5 @@ GOTO END
 ECHO "Product %PRODUCT% has been updated."
 
 :END
+
+ENDLOCAL
