@@ -1,9 +1,6 @@
 /** Copyright (C) (MSA, Inc) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
-package org.safs;
-
+ *  General Public License: http://www.opensource.org/licenses/gpl-license.php
+ */
 /**
  * <br><em>Purpose:</em> string utilities
  * <p>
@@ -30,8 +27,14 @@ package org.safs;
  *                          Delete some methods, rename some methods to make this class clearer.
  * OCT 19, 2016 (SBJLWA) 	Moved convertWindowPosition() to ComponentFunction class.
  *                          Use IndependantLog instead of Log.
+ * APR 01, 2017 (SBJLWA) 	Made it subclass of StringUtilities.
+ *                          Made this class abstract: only static methods should be called.
+ *                          Made some test methods private.
+ *                          Moved getStackTraceElement(), getClassName(),  debug() methods to StringUtilities().
  *
  **/
+package org.safs;
+
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
@@ -69,13 +72,14 @@ import org.safs.sockets.DebugListener;
 import org.safs.text.FileUtilities;
 import org.safs.tools.CaseInsensitiveFile;
 import org.safs.tools.drivers.ConfigureInterface;
+import org.safs.tools.stringutils.StringUtilities;
 import org.w3c.tools.codec.Base64Decoder;
 import org.w3c.tools.codec.Base64Encoder;
 
 /**
  * This class provides different kinds of utilities to handle string.
  **/
-public class StringUtils{
+public abstract class StringUtils extends StringUtilities{
 
 	/**"."*/
 	public static final String REGEX_CHARACTER_ANY			= ".";
@@ -1604,7 +1608,7 @@ public class StringUtils{
    * @return java.awt.Point, the converted coordinate relative to the component
    */
   public static java.awt.Point convertCoords(String[] coordsPair, Rectangle compRect) {
-	  String debugmsg = StringUtils.debugmsg(false);
+	  String debugmsg = debugmsg(false);
 
 	  if(coordsPair == null || coordsPair.length != 2) {
 		  IndependantLog.error(debugmsg + "bad coords format: "+ Arrays.toString(coordsPair));
@@ -1855,235 +1859,6 @@ public class StringUtils{
 		return sep;
     }
 
-    public static String debugmsg(Throwable e){
-    	return (e==null? "":e.getClass().getSimpleName()+":"+e.getMessage());
-    }
-
-    /**
-     * Generate debug message with class name and method name.<br>
-     * @param clazz	Class, the class object of the instance, which is caller of the method.
-     * @param methodName String, the string name of the method.
-     * @return	String, debug massage, for example "org.safs.IndependantLog.debug(): "
-     */
-    public static String debugmsg(Class<?> clazz, String methodName){
-    	return (clazz==null?"":clazz.getSimpleName())+
-    		   (methodName==null? ": ":"."+methodName+"(): ");
-    }
-
-    /**
-     * Generate debug message with class name, method name and message.<br>
-     * @param clazz	Class, the class object of the instance, which is caller of the method.
-     * @param methodName String, the string name of the method.
-     * @param message String, the detail message for the debug IndependantLog.
-     * @return	String, debug massage, for example "org.safs.IndependantLog.debug(): Something is wrong."
-     */
-    public static String debugmsg(Class<?> clazz, String methodName, String message){
-    	return (clazz==null?"":clazz.getSimpleName())+
-    		   (methodName==null? ": ":"."+methodName+"(): ")+
-    		   (message==null? "":message);
-    }
-
-    /**
-     * Generate debug message with class name, method name and Throwable object.<br>
-     * @param clazz	Class, the class object of the instance, which is caller of the method.
-     * @param methodName String, the string name of the method.
-     * @param e	Throwable, the Throwable object rose when calling method.
-     * @return	String, debug massage, for example "org.safs.IndependantLog.debug(): SomeException:Exception message."
-     */
-    public static String debugmsg(Class<?> clazz, String methodName, Throwable e){
-    	return (clazz==null?"":clazz.getSimpleName())+
-    		   (methodName==null? ": ":"."+methodName+"(): ")+
-    		   (e==null? "":e.getClass().getSimpleName()+":"+e.getMessage());
-    }
-    /**
-     * Generate debug message with class name, method name, detail message and Throwable object.<br>
-     * @param clazz	Class, the class object of the instance, which is caller of the method.
-     * @param methodName String, the string name of the method.
-     * @param message String, the detail message for the debug IndependantLog.
-     * @param e	Throwable, the Throwable object rose when calling method.
-     * @return	String, debug massage, for example "org.safs.IndependantLog.debug(): Something is wrong:SomeException:Exception message."
-     */
-    public static String debugmsg(Class<?> clazz, String methodName, String message, Throwable e){
-    	return (clazz==null?"":clazz.getSimpleName())+
-    			(methodName==null? ": ":"."+methodName+"(): ")+
-    			(message==null? "":message)+
-    			(e==null? "":":"+e.getClass().getSimpleName()+":"+e.getMessage());
-    }
-
-    /**
-     * @param fullQualified boolean, true if the returned method name should be full-qualified.
-     * @return String, "my method name"+"(): "
-     * @see #getMethodName(int, boolean)
-     */
-    public static String debugmsg(boolean fullQualified){
-    	return getMethodName(1, fullQualified)+"(): ";
-    }
-    /**
-     * @param fullQualified boolean, true if the returned method name should be full qualified.
-     * @return String, my method name
-     * @see #getMethodName(int, boolean)
-     */
-    public static String getCurrentMethodName(boolean fullQualified){
-    	return getMethodName(1, fullQualified);
-    }
-    /**
-     * @param fullQualified boolean, true if the returned method name should be full qualified.
-     * @return String, my caller's method name
-     * @see #getMethodName(int, boolean)
-     */
-    public static String getCallerName(boolean fullQualified){
-    	return getMethodName(2, fullQualified);
-    }
-    /**
-     * @param fullQualified boolean, true if the returned class name should be full qualified.
-     * @return String, my caller's class name
-     * @see #getClassName(int, boolean)
-     */
-    public static String getCallerClassName(boolean fullQualified){
-    	return getClassName(2, fullQualified);
-    }
-    /**
-     * Get my caller's id, which is a string containing 'full-qualified-callername'+'current-thread-id',
-     * @param fullQualified boolean, true if the returned method name should be full qualified.
-     * @return String, my caller's id
-     * @see #getMethodName(int, boolean)
-     */
-    public static String getCallerID(boolean fullQualified){
-    	StringBuffer id = new StringBuffer();
-    	id.append(getMethodName(2, fullQualified));
-    	id.append(Thread.currentThread().getId());
-    	return id.toString();
-    }
-
-    /**
-     * Get the method name, or its caller's name, or its caller's caller's name etc.<br>
-     * this depends on the parameter 'level'.
-     * level=0, the method calling 'org.safs.StringUtils.getMethodName'
-     * level=1, the method calling the method at level 0
-     * level=2, the method calling the method at level 1
-     * ...
-     *
-     * @param level	int, the level in the StackTrace.
-     * @param fullQualified boolean, true if the returned name should be full qualified.
-     * @return String, the method name.
-     * @see #getStackTraceElement(int)
-     */
-    public static String getMethodName(int level, boolean fullQualified){
-    	StringBuffer callerName = new StringBuffer();
-    	try{
-    		String fullClassName = null;
-    		int lastPointIndex = -1;
-    		StackTraceElement trace = getStackTraceElement(level+1);//+1 to skip current method 'getMethodName' in stack
-    		fullClassName = trace.getClassName();
-    		if(fullQualified){
-    			callerName.append(fullClassName).append(".").append(trace.getMethodName());
-    		}else{
-    			lastPointIndex = fullClassName.lastIndexOf(".")+1;
-    			callerName.append(fullClassName.substring(lastPointIndex)).append(".").append(trace.getMethodName());
-    		}
-    	}catch(Exception e){
-    		IndependantLog.error("Fail to get MethodName infomation, Met Exception ", e);
-    	}
-		return callerName.toString();
-    }
-
-    /**
-     * Get the class name, or class-name of its caller, or class-name of its caller's caller etc.<br>
-     * this depends on the parameter 'level'.
-     * level=0, the class name in which a method calling the method 'org.safs.StringUtils.getClassName'
-     * level=1, the class name in which a method calling the method at level 0
-     * level=2, the class name in which a method calling the method at level 1
-     * ...
-     *
-     * @param level	int, the level in the StackTrace.
-     * @param fullQualified boolean, true if the returned name should be full qualified.
-     * @return String, the class name.
-     * @see #getStackTraceElement(int)
-     */
-    public static String getClassName(int level, boolean fullQualified){
-    	StringBuffer callerName = new StringBuffer();
-    	try{
-    		String fullClassName = null;
-    		int lastPointIndex = -1;
-    		StackTraceElement trace = getStackTraceElement(level+1);//+1 to skip current method 'getClassName' in stack
-    		fullClassName = trace.getClassName();
-    		if(fullQualified){
-    			callerName.append(fullClassName);
-    		}else{
-    			lastPointIndex = fullClassName.lastIndexOf(".")+1;
-    			callerName.append(fullClassName.substring(lastPointIndex));
-    		}
-    	}catch(Exception e){
-    		IndependantLog.error("Fail to get ClassName infomation, Met Exception ", e);
-    	}
-    	return callerName.toString();
-    }
-
-    /**
-     * <pre>
-     * To get the current method information or its caller or its ancester dynamically,
-     * we can refer to the StackTrace, which is a stack recording the methods' invocation trace.
-     * The current thread trace of this method is as following:
-     * ...
-     * java.lang.Thread.getStackTrace
-     * org.safs.StringUtils.getStackTraceElement
-     * level=0, Here is the method, who calls StringUtils.getStackTraceElement()
-     * level=1, Here is the direct caller of method at level 0
-     * level=2, Here is the direct caller of method at level 1
-     * ...
-     *
-     * We can supply the parameter 'level' to this method, and we can get the appropriate StackTraceElement.
-     *
-     * </pre>
-     *
-     * @param level	int, the level in the StackTrace under 'org.safs.StringUtils.getStackTraceElement'
-     * @return StackTraceElement, it conatins the information of method, class, file etc.
-     */
-    public static StackTraceElement getStackTraceElement(int level){
-
-    	try{
-    		StackTraceElement[] traces = Thread.currentThread().getStackTrace();
-    		StackTraceElement trace = null;
-    		String getStackTraceMethodName = "getStackTrace";
-    		//Remember change the value of field 'myMethodName', if this method name changes
-    		String myMethodName = "getStackTraceElement";
-
-
-    		for(int i=0;i<traces.length;i++){
-    			trace = traces[i];
-    			//java.lang.Thread.getStackTrace
-    			if(trace.getClassName().equals(Thread.class.getName())
-    					&& trace.getMethodName().equals(getStackTraceMethodName)){
-    				if(++i<traces.length){
-    					trace = traces[i];
-    					//org.safs.StringUtils.getStackTraceElement
-    					if(trace.getClassName().equals(StringUtils.class.getName())
-    							&& trace.getMethodName().equals(myMethodName)){
-    						//under 'org.safs.StringUtils.getStackTraceElement', the StackTraceElement is what we want
-    						//according to the level, we will get the StackTraceElement
-    						i = i+1+level;
-    						if(i<traces.length){
-    							trace = traces[i];
-    							return trace;
-    						}else{
-    							IndependantLog.warn("Stack Trace doesn't contain enough infomation.");
-    						}
-    					}else{
-    						IndependantLog.warn("StackTraceElement at '"+i+"' is not '"+StringUtils.class.getName()+"."+myMethodName+"'");
-    					}
-    				}else{
-    					IndependantLog.warn("Stack Trace doesn't contain enough infomation.");
-    				}
-    				break;
-    			}
-    		}
-
-    	}catch(Exception e){
-    		IndependantLog.error("Fail to get StackTraceElement infomation, Met Exception ", e);
-    	}
-
-    	return null;
-    }
 
     /**
      * @param content String, multiple lines, delimited by "\n"
@@ -2139,7 +1914,7 @@ public class StringUtils{
 				if(expression.indexOf(sep)< 0) return sep;
 			}
 		}
-		IndependantLog.warn(StringUtils.debugmsg(false)+" cannot deduce a valid separator for expression: "+expression);
+		IndependantLog.warn(debugmsg(false)+" cannot deduce a valid separator for expression: "+expression);
 		return null;
 	}
 
@@ -2309,7 +2084,7 @@ public class StringUtils{
 				//The link will be shown on fileName
 				if(matched) errorTrace = new ErrorLinkTrace(fileName, methodName, lineNumber, error, offset, fileName.length());
 			}catch(Exception ex) {
-				IndependantLog.warn(StringUtils.debugmsg(false)+StringUtils.debugmsg(ex));
+				IndependantLog.warn(debugmsg(false)+debugmsg(ex));
 			}
 
 			return errorTrace;
@@ -2513,7 +2288,7 @@ public class StringUtils{
 	 * @return String, the value of the property.
 	 */
 	public static String getSystemProperty(String property, ConfigureInterface config, String section, String key, String... defaultValue){
-		String debugmsg = StringUtils.debugmsg(false);
+		String debugmsg = debugmsg(false);
 		String value = null;
 
 		try{
@@ -2522,7 +2297,7 @@ public class StringUtils{
 			value = System.getProperty(property);
 			if(isValid(value)) return value;
 		}catch(Exception e){
-			IndependantLog.error(debugmsg+" fail to get value for property '"+property+"'. "+StringUtils.debugmsg(e));
+			IndependantLog.error(debugmsg+" fail to get value for property '"+property+"'. "+debugmsg(e));
 		}
 
 		//If not found, try to get the value from the configuration. And set it to system properties.
@@ -2532,7 +2307,7 @@ public class StringUtils{
 				value = config.getNamedValue(section, key);
 			}
 		}catch(Exception e){
-			IndependantLog.error(debugmsg+" fail to get configuration setting '"+section+"':'"+key+"'. "+StringUtils.debugmsg(e));
+			IndependantLog.error(debugmsg+" fail to get configuration setting '"+section+"':'"+key+"'. "+debugmsg(e));
 		}
 
 		//If not found, assign the default value if the default value is provided.
@@ -2544,7 +2319,7 @@ public class StringUtils{
 				}
 			}
 		}catch(Exception e){
-			IndependantLog.error(debugmsg+" fail to get defaul value. "+StringUtils.debugmsg(e));
+			IndependantLog.error(debugmsg+" fail to get defaul value. "+debugmsg(e));
 		}
 		//Finally if the value is valid, set it to the system properties
 		if(isValid(value)){
@@ -2612,7 +2387,7 @@ public class StringUtils{
 	 */
 	public static String replaceJVMOptionValue(String jvmOptions, String option, String value){
 		StringBuffer sb = new StringBuffer();
-		String debugmsg = StringUtils.debugmsg(false);
+		String debugmsg = debugmsg(false);
 
 		try{
 			int optionIndex = jvmOptions.indexOf(option);
@@ -2692,7 +2467,7 @@ public class StringUtils{
 		return sb.toString();
 	}
 
-	public static void test_replaceJVMOptionValue(){
+	private static void test_replaceJVMOptionValue(){
 		String jvmOptions = JavaConstant.JVM_Xms+"128m   "+JavaConstant.JVM_Xmx+"1g";
 
 		debug(jvmOptions);
@@ -2749,7 +2524,7 @@ public class StringUtils{
 
 	}
 
-	public static void test_breakXpath(){
+	private static void test_breakXpath(){
 		debug("\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$"+debugmsg(false)+"$$$$$$$$$$$$$$$$$$$");
 		String[] xpaths = {
 				"/html/table/tr[3]/td[0]/a[@name='hello wang/sa']/",
@@ -2774,7 +2549,7 @@ public class StringUtils{
 		}
 	}
 
-	public static void test_getTokenList(){
+	private static void test_getTokenList(){
 		debug("\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$"+debugmsg(false)+"$$$$$$$$$$$$$$$$$$$");
 		String delimiter = "=";
 		Character escape = CHAR_BACK_SLASH;
@@ -2827,7 +2602,7 @@ public class StringUtils{
 		debug(text+ "		"+getTokenList(text, delimiter, escape));
 	}
 
-	public static void test_reverseArray(){
+	private static void test_reverseArray(){
 		debug("\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$"+debugmsg(false)+"$$$$$$$$$$$$$$$$$$$");
 		Integer[] arr = {1,2,3,4,5,6,7,8,9,0};
 		System.out.println("Original "+Arrays.toString(arr));
@@ -2847,7 +2622,7 @@ public class StringUtils{
 		reverseArray(null);
 	}
 
-	public static void test_convertLine(){
+	private static void test_convertLine(){
 		Point pointA = new Point(13, 45);
 		Point pointB = new Point(18, 27);
 		String coords = pointA.x+", "+pointA.y+", "+pointB.x+", "+pointB.y;
@@ -2968,11 +2743,29 @@ public class StringUtils{
 		}
 	}
 
+	private static void test_stacktrace(){
+		String myName = "test_stacktrace";
+		Class<?> myClass = StringUtils.class;
+
+		String myFullName = myClass.getName()+"."+myName;
+		String mySimpleName = myClass.getSimpleName()+"."+myName;
+
+		assert debugmsg(true).trim().equals(myFullName+"():");
+		assert debugmsg(false).trim().equals(mySimpleName+"():");
+
+		TestStacktraceCaller ts = new TestStacktraceCaller();
+		assert myClass.getName().equals(ts.getcallerClassname(true));
+		assert myClass.getSimpleName().equals(ts.getcallerClassname(false));
+
+		assert myFullName.equals(ts.getcallerName(true));
+		assert mySimpleName.equals(ts.getcallerName(false));
+	}
+
 	private static void debug(String message){
 		System.out.println(message);
 	}
 
-	public static void initIndependantLogByConsole(){
+	private static void initIndependantLogByConsole(){
 		IndependantLog.setDebugListener(new DebugListener() {
 			public String getListenerName() {
 				return null;
@@ -2983,6 +2776,10 @@ public class StringUtils{
 		});
 	}
 
+	/**
+	 * java -ea org.safs.StringUtils
+	 * @param args
+	 */
 	public static void main(String[] args){
 		initIndependantLogByConsole();
 
@@ -2996,6 +2793,7 @@ public class StringUtils{
 		test_convertCoords(true);
 		test_parseFloat();
 
+		test_stacktrace();
 	}
 
 }
