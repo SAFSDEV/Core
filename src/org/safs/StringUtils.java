@@ -31,7 +31,7 @@
  *                          Made this class abstract: only static methods should be called.
  *                          Made some test methods private.
  *                          Moved getStackTraceElement(), getClassName(),  debug() methods to StringUtilities().
- *
+ * APR 04, 2017 (CANAGL)    Fixed visibility of iniIndependentLogByConsole used by HttpRequest.java.
  **/
 package org.safs;
 
@@ -2765,7 +2765,7 @@ public abstract class StringUtils extends StringUtilities{
 		System.out.println(message);
 	}
 
-	private static void initIndependantLogByConsole(){
+	public static void initIndependantLogByConsole(){
 		IndependantLog.setDebugListener(new DebugListener() {
 			public String getListenerName() {
 				return null;
