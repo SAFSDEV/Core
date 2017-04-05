@@ -10,6 +10,7 @@
  * NOV 09, 2016    (SBJLWA) Initial release: Created BrowserConstants and SeleniumConstants: copied constants from org.safs.selenium.webdriver.lib.SelectBrowser.
  * MAR 07, 2017    (SBJLWA) Added constants for setting of the browser-driver in Selenium.
  * MAR 10, 2017    (SBJLWA) Added RestConstants.
+ * APR 05, 2017    (SBJLWA) Added AutoItConstants.
  */
 package org.safs;
 
@@ -292,4 +293,92 @@ public class Constants {
 		 * **/
 		public static final String PROPERTY_AUTH ="safs.rest.auth";
 	}
+
+	public static class AutoItConstants{
+	    /** "<b>:</b>" */
+	    public static final String AUTOIT_RSKEY_VALUE_DELIMITER = StringUtils.COLON;
+		/** "<b>=</b>" */
+		public static final String AUTOIT_ASSIGN_SEPARATOR 	= GuiObjectRecognition.DEFAULT_ASSIGN_SEPARATOR;
+		/** "<b>[</b>" */
+		public static final String AUTOIT_ENGINE_RS_START 	= "[";
+		/** "<b>]</b>" */
+		public static final String AUTOIT_ENGINE_RS_END 	= "]";
+
+		/** <b>":autoit:"</b> */
+		public static final String AUTOIT_PREFIX = ":autoit:";
+
+		/** <b>WinTitleMatchMode</b> It is the first parameter of method <a href="https://www.autoitscript.com/autoit3/docs/functions/AutoItSetOption.htm" target="_blank">AutoItSetOption</a>,<br/>
+		 * It is used to alter the way (matching window titles) of the methods during search operations.<br/>
+		 * <b>Setting this will only affect the way of matching window's title. NOT the window text.</b>
+		 */
+		public static final String MODE_WIN_TITLE_MATCH 	= "WinTitleMatchMode";
+
+		/** <b>1</b> Matches partial text from the start. The case is sensitive. */
+		public static final int MATCHING_PATIAL 	= 1;
+		/** <b>2</b> Matches any substring in the text. The case is sensitive. */
+		public static final int MATCHING_SUBSTRING = 2;
+		/** <b>3</b> Exact match. The case is sensitive. */
+		public static final int MATCHING_EXACT 	= 3;
+		/** <b>4</b> Advanced mode. The case is sensitive.
+		 * @deprecated  (Kept for backward compatibility) replaced by <a href="https://www.autoitscript.com/autoit3/docs/intro/windowsadvanced.htm" target="_blank">Advanced Window Descriptions</a>
+		 */
+		public static final int MATCHING_ADVANCE 	= 4;
+		/** <b>1</b> Matches partial text from the start. The case is sensitive. */
+		public static final int MATCHING_DEFAULT 	= MATCHING_PATIAL;
+
+		/** <b>-1</b> Matches partial text from the start. The case is NOT sensitive. */
+		public static final int MATCHING_PATIAL_CASE_INSENSITIVE 		= -1;
+		/** <b>-2</b> Matches any substring in the text. The case is NOT sensitive. */
+		public static final int MATCHING_SUBSTRING_CASE_INSENSITIVE 	= -2;
+		/** <b>-3</b> Exact match. The case is NOT sensitive. */
+		public static final int MATCHING_EXACT_CASE_INSENSITIVE 		= -3;
+		/** <b>-44</b> Advanced mode. The case is NOT sensitive.
+		 * @deprecated  (Kept for backward compatibility) replaced by <a href="https://www.autoitscript.com/autoit3/docs/intro/windowsadvanced.htm" target="_blank">Advanced Window Descriptions</a>
+		 */
+		public static final int MATCHING_ADVANCE_CASE_INSENSITIVE 		= -4;
+
+		//Properties used uniquely by Control
+		public static final String RS_KEY_ID 			= "id";
+		public static final String RS_KEY_CLASSNN 		= "classnn";
+		public static final String RS_KEY_NAME 			= "name";
+
+		//Properties used uniquely by Window
+		public static final String RS_KEY_TITLE 		= "title";
+		/** "<b>caption</b>" */
+		public final static String RS_KEY_CAPTION 		= "caption";
+		public static final String RS_KEY_REGEXPTITLE 	= "regexptitle";
+		public static final String RS_KEY_LAST 			= "last";
+		public static final String RS_KEY_ACTIVE 		= "active";
+
+		//Properties used by both Control and Window
+		public static final String RS_KEY_CLASS 		= "class";
+		public static final String RS_KEY_REGEXPCLASS 	= "regexpclass";
+		public static final String RS_KEY_X 			= "x";
+		public static final String RS_KEY_Y 			= "y";
+		public static final String RS_KEY_W 			= "w";
+		public static final String RS_KEY_H 			= "h";
+		public static final String RS_KEY_INSTANCE 		= "instance";
+		//This property 'TEXT' exists for Control, does NOT exist for window; But it can be provided as the parameter of most AUTOIT method to help finding a Window.
+		public static final String RS_KEY_TEXT 			= "text";
+
+		/** '<b>rs_gen_</b>' the prefix of properties used for generating recognition string. */
+		public static final String PREFIX_PROPERTY_FOR_RS 		= "rs_gen_";
+
+		public static String getTitleMatchMode(int titleMatchMode){
+			switch(titleMatchMode){
+			case MATCHING_PATIAL:
+				return "beginPatial Mode";
+			case MATCHING_SUBSTRING:
+				return "substring Mode";
+			case MATCHING_EXACT:
+				return "exact Mode";
+			case MATCHING_ADVANCE:
+				return "advance Mode";
+			default:
+				return "";
+			}
+		}
+	}
+
+
 }

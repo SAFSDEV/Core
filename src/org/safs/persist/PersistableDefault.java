@@ -12,6 +12,7 @@
  * MAR 16, 2017    (SBJLWA) Added default implementation of method getPersitableFields().
  *                          Added caches holding result of getContents() and getPersitableFields().
  *                          Handled the field of type "array": setField(), equals().
+ * APR FOOL, 2017    (SBJLWA) Modified getField(), setField(): make them work for superclass.
  *
  */
 package org.safs.persist;
@@ -29,6 +30,7 @@ import org.safs.Printable;
 import org.safs.StringUtils;
 import org.safs.Utils;
 
+
 /**
  * @author sbjlwa
  */
@@ -37,9 +39,9 @@ public abstract class PersistableDefault implements Persistable, Printable{
 	protected static final String FAILED_RETRIEVE_VALUE = "FAILED_RETRIEVE";
 
 	/** a cache holding the Map of (fieldName, persistKey) */
-	private Map<String/*fieldName*/, String/*persistKey*/> fieldNameToPersistKeyMap = null;
+	protected Map<String/*fieldName*/, String/*persistKey*/> fieldNameToPersistKeyMap = null;
 	/** a cache holding the Map of (persistKey, fieldValue) */
-	private Map<String/*persistKey*/, Object/*fieldValue*/> persistKeyToFieldValueMap = null;
+	protected Map<String/*persistKey*/, Object/*fieldValue*/> persistKeyToFieldValueMap = null;
 
 	/** <b>true</b>
 	 *  If it is true, then the cache {@link #persistKeyToFieldValueMap} will be ignored, that is
@@ -119,55 +121,57 @@ public abstract class PersistableDefault implements Persistable, Printable{
 		return persistKeyToFieldValueMap;
 	}
 
-	@Override
-	public Object getField(String persistKey){
+	private Object _set_getField(String persistKey, Object value, boolean setter){
 		String debugmsg = StringUtils.debugmsg(false);
 
 		Class<?> clazz = getClass();
+		String clazzName = clazz.getName();
 		String fieldName = null;
 		Field field = null;
+		Object result = null;
 
 		fieldName = getFieldName(persistKey);
 
 		if(fieldName!=null){
-			try {
-				field = clazz.getDeclaredField(fieldName);
-				field.setAccessible(true);
-				return field.get(this);
-			} catch (Exception e) {
-				IndependantLog.error(debugmsg+"Failed to get field '"+fieldName+"', due to "+e.toString());
+			while(clazz!=null){
+				clazzName = clazz.getName();
+				try {
+					field = clazz.getDeclaredField(fieldName);
+					field.setAccessible(true);
+					if(setter){
+						field.set(this, Utils.parseValue(field.getType(),value));
+						result = new Boolean(true);
+					}else{
+						result = field.get(this);
+					}
+					break;
+				}catch(NoSuchFieldException nfe){
+					//Get the field of super class.
+					clazz = clazz.getSuperclass();
+					if(clazz==null){
+						IndependantLog.warn(debugmsg+" there is NO super class for class '"+clazzName+"'.");
+					}
+				} catch (Exception e) {
+					IndependantLog.error(debugmsg+"Failed to "+(setter?"set":"get")+" field '"+fieldName+"' for clazz '"+clazzName+"', due to "+e.toString());
+					break;
+				}
 			}
 		}else{
 			IndependantLog.warn(debugmsg+" cannot get field-name for persistKey '"+persistKey+"'.");
 		}
 
-		return null;
+		return result;
+	}
+
+	@Override
+	public Object getField(String persistKey){
+		return _set_getField(persistKey, null, false);
 	}
 
 	@Override
 	public boolean setField(String persistKey, Object value){
-		String debugmsg = StringUtils.debugmsg(false);
-
-		Class<?> clazz = getClass();
-		String fieldName = null;
-		Field field = null;
-
-		fieldName = getFieldName(persistKey);
-
-		if(fieldName!=null){
-			try {
-				field = clazz.getDeclaredField(fieldName);
-				field.setAccessible(true);
-				field.set(this, Utils.parseValue(field.getType(),value));
-				return true;
-			} catch (Exception e) {
-				IndependantLog.error(debugmsg+"Failed to set field '"+fieldName+"', due to "+e.toString());
-			}
-		}else{
-			IndependantLog.warn(debugmsg+" cannot get field-name for persistKey '"+persistKey+"'.");
-		}
-
-		return false;
+		Object success = _set_getField(persistKey, value, true);
+		return StringUtils.convertBool(success);
 	}
 
 	/**
