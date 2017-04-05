@@ -74,13 +74,13 @@ public class Utils {
 	 *   + {@value #DEFAULT_SOURCE_DIRECTORY} (source files folder)
 	 *      + package1
 	 *      + package2
-	 *   + {@value #DEFAULT_OUTPUT_DIRECTORY} (compiled classes go into this folder)
+	 *   + {@value #DEFAULT_OUTPUT_DIRECTORY} (compiled classes go into this folder--which will be created if not already present.)
 	 * </pre>
 	 *
 	 * @param classnames String, the class names to compile separated by space, such as my.package.ClassA my.pack2.ClassB<br>
 	 *                           this parameter could be mixed with java and groovy class.<br>
 	 *                           <b>Note:</b> For groovy, we have to specify all dependency classes in order.<br>
-	 * @throws SAFSException if the compilation failed.
+	 * @throws SAFSException if the compilation failed for any reason--including bad parameter values.
 	 */
 	public static void compile(String classnames) throws SAFSException{
 		String debugmsg = StringUtils.debugmsg(false);
@@ -88,23 +88,68 @@ public class Utils {
 			throw new SAFSException("The input parameter 'classnames' must NOT be null or empty!");
 		}
 
-		IndependantLog.debug(debugmsg+" parameter classnames: "+classnames);
-
 		//The property "user.dir" represent the current working directory.
 		String userdir = System.getProperty("user.dir");
-		IndependantLog.debug("user.dir (current working directory) is "+userdir);
 
 		//It is supposed that the "source code" locates at the sub-folder 'src' of current working directory.
 		File sourceDir = new File(userdir, DEFAULT_SOURCE_DIRECTORY);
-		if(!sourceDir.exists() || !sourceDir.isDirectory()){
-			throw new SAFSException("The source directory path '"+sourceDir.getAbsolutePath()+"' does not exist or is not a directory!");
-		}
+
 		//It is supposed that the "compiled classes" go to the sub-folder 'bin' of current working directory.
 		File outputDir = null;
 		outputDir = new File(userdir, DEFAULT_OUTPUT_DIRECTORY);
+
+		String classpath = NativeWrapper.GetSystemEnvironmentVariable("CLASSPATH");
+		classpath = DEFAULT_OUTPUT_DIRECTORY+";"+classpath;
+
+		compile(classnames, sourceDir.getAbsolutePath(), outputDir.getAbsolutePath(), classpath);
+	}
+
+	/**
+	 * Compile java and/or groovy source code.<br>
+	 * 
+	 * @param classnames String, the class names to compile separated by space, such as my.package.ClassA my.pack2.ClassB<br>
+	 *                           this parameter could be mixed with java and groovy class.<br>
+	 *                           <b>Note:</b> For groovy, we have to specify all dependency classes in order.<br>
+	 * @param sourceDIR String, the root directory off which the sourcecode files reside.<br>
+	 * @param outDIR String, the root directory off which the compiled classes will be stored. The directory will be created, if necessary.<br>
+	 * @param useClasspath String, the semi-colon separated CLASSPATH to be used for the compile.<br>
+	 *                          
+	 * @throws SAFSException if the compilation failed for any reason--including bad parameter values.
+	 */
+	public static void compile(String classnames, String sourceDIR, String outDIR, String useClasspath) throws SAFSException{
+		String debugmsg = StringUtils.debugmsg(false);
+		if(!StringUtils.isValid(classnames)){
+			throw new SAFSException("The input parameter 'classnames' must NOT be null or empty!");
+		}
+		IndependantLog.debug(debugmsg+" parameter classnames: "+classnames);
+
+		if(!StringUtils.isValid(sourceDIR)){
+			throw new SAFSException("The input parameter 'sourceDIR' must NOT be null or empty!");
+		}
+		IndependantLog.debug(debugmsg+" parameter sourceDIR: "+sourceDIR);
+
+		if(!StringUtils.isValid(outDIR)){
+			throw new SAFSException("The input parameter 'outDIR' must NOT be null or empty!");
+		}
+		IndependantLog.debug(debugmsg+" parameter outDIR: "+outDIR);
+
+		if(!StringUtils.isValid(useClasspath)){
+			throw new SAFSException("The input parameter 'useClasspath' must NOT be null or empty!");
+		}
+		IndependantLog.debug(debugmsg+" parameter useClasspath: "+useClasspath);
+
+		//It is supposed that the "source code" locates at the sub-folder 'src' of current working directory.
+		File sourceDir = new File(sourceDIR);
+		if(!sourceDir.exists() || !sourceDir.isDirectory()){
+			throw new SAFSException("The source directory path '"+sourceDir.getAbsolutePath()+"' does not exist or is not a directory!");
+		}
+
+		//It is supposed that the "compiled classes" go to the sub-folder 'bin' of current working directory.
+		File outputDir = null;
+		outputDir = new File(outDIR);
 		if(!outputDir.exists()) outputDir.mkdir();
 		if(!outputDir.exists() || !outputDir.isDirectory()){
-			throw new SAFSException("The output path '"+outputDir.getAbsolutePath()+"' does not exist or is not a directory.");
+			throw new SAFSException("The output path '"+outputDir.getAbsolutePath()+"' does not exist, is not a directory, and could not be created.");
 		}
 
 		//prepare the source codes to compile
@@ -130,9 +175,8 @@ public class Utils {
 			}
 		}
 
-		String classpath = NativeWrapper.GetSystemEnvironmentVariable("CLASSPATH");
-		classpath = DEFAULT_OUTPUT_DIRECTORY+";"+classpath;
-		IndependantLog.debug("The classpath is "+classpath);
+		String classpath = outDIR +";"+ useClasspath;
+		IndependantLog.debug("The full classpath is "+classpath);
 
 		if(!javafiles.toString().isEmpty()){
 			IndependantLog.debug(debugmsg+" Try to compile JAVA source codes: "+javafiles);
@@ -175,6 +219,7 @@ public class Utils {
 		}
 	}
 
+	
 	/**
 	 * This special SecurityManager is used to avoid JVM to halt by System.exit().<br>
 	 */
