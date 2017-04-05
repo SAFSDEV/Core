@@ -21,6 +21,8 @@
  *                     the last 'if cause' in this 'process()', delete the 'Click' series keywords check for their duplication.
  *                     Add 'CloseWindow' keyword: provide its execution method '_close()'.
  * NOV 03, 2016 SCNTAX Add 'HoverMouse' keyword: provide its execution method 'performHoverMouse()'.
+ * APR 05, 2017 SBJLWA Modified process(): catch SAFSObjectRecognitionException when creating AutoItRs.
+ *                     Modified activate(): moved it to AutoItLib.
  */
 package org.safs.tools.engines;
 
@@ -39,11 +41,13 @@ import org.safs.IndependantLog;
 import org.safs.Log;
 import org.safs.Processor;
 import org.safs.SAFSException;
+import org.safs.SAFSObjectRecognitionException;
 import org.safs.StatusCodes;
 import org.safs.StringUtils;
 import org.safs.TestRecordHelper;
 import org.safs.autoit.AutoIt;
 import org.safs.autoit.AutoItRs;
+import org.safs.autoit.lib.AutoItLib;
 import org.safs.autoit.lib.AutoItXPlus;
 import org.safs.logging.AbstractLogFacility;
 import org.safs.logging.LogUtilities;
@@ -496,8 +500,22 @@ public class AutoItComponent extends GenericEngine {
 				Log.info(debugmsg + " win: "+ windowName +"; comp: "+ compName+" without parameters.");
 			}
 
+			//TODO read mode from .ini (or map) file, or from vm parameter.
+//			int mode = Constants.MATCHING_ADVANCE;
+//			it.autoItSetOption("WinTitleMatchMode", String.valueOf(mode));
+
 			// prepare Autoit RS
-			rs = new AutoItRs(winrec,comprec);
+			try {
+				rs = new AutoItRs(winrec,comprec);
+//				rs.setWinRSMode(mode);
+			} catch (SAFSObjectRecognitionException e) {
+				String errormsg = "Failed to create recognition string for '"+windowName+":"+compName+"' ";
+				Log.debug(debugmsg+errormsg+e.toString());
+				testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );
+				issueErrorPerformingAction(errormsg+e.getMessage());
+				return;
+			}
+
 
 			//Wait the window to exist
 			if(!it.winWait(rs.getWindowsRS(), "", secsWaitForWindow)){
@@ -547,24 +565,12 @@ public class AutoItComponent extends GenericEngine {
 		 * @return boolean, true if the window and component are focused.
 		 */
 		protected boolean activate(AutoItRs rs){
-			String debugmsg = StringUtils.debugmsg(false);
-			boolean success = true;
 			try {
-				it.winActivate(rs.getWindowsRS());
-				if(it.getError()==1){
-					success = false;
-					Log.debug(debugmsg+" failed to activate window '"+windowName+"'.");
-				}
-
-				if(success && testRecordData.targetIsComponent()){
-					success = it.controlFocus(rs.getWindowsRS(), "", rs.getComponentRS());
-					if(!success) Log.debug(debugmsg+" failed to activate component '"+compName+"'.");
-				}
+				return AutoItLib.activate(it, rs);
 			} catch (Exception x) {
-				success = false;
-				Log.debug(debugmsg+" Met "+StringUtils.debugmsg(x));
+				Log.debug(StringUtils.debugmsg(false)+" Met "+StringUtils.debugmsg(x));
+				return false;
 			}
-			return success;
 		}
 
 		/** setfoucs **/

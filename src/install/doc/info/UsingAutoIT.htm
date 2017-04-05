@@ -159,15 +159,38 @@ id="Picture 6" src="AutoitInfo.jpg"></p>
 
 <p class=MsoNoSpacing style='margin-left:20.25pt;text-indent:-20.25pt'><b>4.</b><b><span
 style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span>How to define AutoIT recognition string(RS) for window?</b></p>
+</span>How to define AutoIT recognition string(RS)?</b></p>
 <p class=MsoNoSpacing style='margin-left:20.25pt'>
-  Currently, we <b>MUST use 'title'</b> to define a window. 
-  We can use part of the title, it must be the beginning part of the title.
-  For example, we have a Notepad window with title "Untitled - Notepad", we 
-  can define RS as Notepad=":AUTOIT:title=Untitled - Notepad" using the full title 
-  or Notepad=":AUTOIT:title=Untitled" using the beginning part of the title;
-  but we should not define RS as Notepad=":AUTOIT:title=Notepad" which uses the
-  ending part of the title.
+  The recognition string is composed with pairs of <b>RSkey=value</b> separated by semi-colon <b>;</b> such as key1=value;key2=value <br/>
+  Please refer to <a href="http://safsdev.sourceforge.net/doc/org/safs/autoit/AutoItRs.html" target="_blank" title="SAFS AutoIt Recognition Strings">SAFS AutoIt Recognition Strings</a> for more information.<br/>
+  
+ <br/> 
+ <b>Examples</b>:
+  The application Calculator's "radio button Radians" is captured as below:
+  <p class=MsoNoSpacing style='margin-left:.5in'><img src="AutoitInfoCalculator.png"></p> 
+ Then the Recognition String can be defined as:
+ <ul>
+	 <li>Window Recognition:
+	   <ul>
+	      <li>Calculator=":AUTOIT:title=Calculator"
+	      <li>Calculator=":AUTOIT:CAPTION=Calc"
+	      <li>Calculator=":AUTOIT:class=CalcFrame"
+	      <li>Calculator=":AUTOIT:REGEXPTITLE=[C|c].*lator"
+	      <li>Calculator=":AUTOIT:REGEXPCLASS=.*Fra.*"
+	      <li>Calculator=":AUTOIT:title=Calculator;class=CalcFrame;Text=Degrees"
+	   </ul>
+	 <li>Child Control Recognition:
+	   <ul>
+	      <li>btnRadians=":AutoIt:text=Radians"
+	      <li>btnRadians="text=Radians"
+	      <li>btnRadians="id=131"
+	      <li>btnRadians="classnn=Button5"
+	      <li>btnRadians="class=Button"
+	      <li>btnRadians="id=131;class=Button"
+	      <li>btnRadians="class=Button;instance=5"
+	   </ul>
+ </ul>
+
 </p>
 <p class=MsoNoSpacing style='margin-left:.5in'>&nbsp;</p>
 
