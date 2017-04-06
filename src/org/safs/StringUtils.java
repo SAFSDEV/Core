@@ -32,6 +32,7 @@
  *                          Made some test methods private.
  *                          Moved getStackTraceElement(), getClassName(),  debug() methods to StringUtilities().
  * APR 04, 2017 (Carl Nagle)    Fixed visibility of iniIndependentLogByConsole used by HttpRequest.java.
+ * APR 06, 2017 (Lei Wang) 	Added method wildcardToRegex().
  **/
 package org.safs;
 
@@ -81,67 +82,95 @@ import org.w3c.tools.codec.Base64Encoder;
  **/
 public abstract class StringUtils extends StringUtilities{
 
-	/**"."*/
-	public static final String REGEX_CHARACTER_ANY			= ".";
-	/**"*"*/
-	public static final String REGEX_CHARACTER_MATCH_MANY	= "*";
-	/**"?"*/
-	public static final String REGEX_CHARACTER_MATCH_ONE	= "?";
-	/**character slash / */
+	/**character dot <b>.</b> */
+	public static final char CHAR_DOT = '.';
+	/**character star <b>*</b> */
+	public static final char CHAR_STAR = '*';
+	/**character slash <b>/</b> */
 	public static final char CHAR_SLASH = '/';
-	/**character single quote ' */
+	/**character single quote <b>'</b> */
 	public static final char CHAR_QUOTE = '\'';
-	/**character double quote " */
+	/**character double quote <b>"</b> */
 	public static final char CHAR_DOUBLE_QUOTE = '"';
-	/**character back slash \ */
+	/**character back slash <b>\</b> */
 	public static final char CHAR_BACK_SLASH = '\\';
-	/**character number # */
+	/**character number <b>#</b> */
 	public static final char CHAR_NUMBER = '#';
-	/**character colon : */
+	/**character colon <b>:</b> */
 	public static final char CHAR_COLON = ':';
-	/**character equal = */
+	/**character equal <b>=</b> */
 	public static final char CHAR_EQUAL = '=';
-	/**character and & */
+	/**character and <b>&</b> */
 	public static final char CHAR_AND = '&';
-	/**character interrogation ? */
+	/**character interrogation <b>?</b> */
 	public static final char CHAR_INTERROGATION = '?';
-	/**string slash / */
-	public static final String SLASH = String.valueOf(StringUtils.CHAR_SLASH);
-	/**string single quote ' */
-	public static final String QUOTE = String.valueOf(StringUtils.CHAR_QUOTE);
-	/**string double quote " */
-	public static final String DOUBLE_QUOTE = String.valueOf(StringUtils.CHAR_DOUBLE_QUOTE);
-	/**string back slash \ */
-	public static final String BACK_SLASH = String.valueOf(StringUtils.CHAR_BACK_SLASH);
-	/**string number # */
-	public static final String NUMBER = String.valueOf(StringUtils.CHAR_NUMBER);
-	/**string colon :*/
-	public static final String COLON = String.valueOf(StringUtils.CHAR_COLON);
-	/**string equal = */
-	public static final String EQUAL = String.valueOf(StringUtils.CHAR_EQUAL);
-	/**string and & */
-	public static final String AND = String.valueOf(StringUtils.CHAR_AND);
-	/**string interrogation ? */
-	public static final String INTERROGATION = String.valueOf(StringUtils.CHAR_INTERROGATION);
+	/**character caret <b>^</b> */
+	public static final char CHAR_CARET 		= '^';
+	/**character dollar <b>$</b> */
+	public static final char CHAR_DOLLAR 		= '$';
+    /**'<b>+</b>'*/
+	public static final char CHAR_PLUS 			= '+';
+	/**'<b>-</b>'*/
+	public static final char CHAR_MINUS 		= '-';
+	/**'<b>,</b>'*/
+	public static final char CHAR_COMMA 		= ',';
+	/**'<b>;</b>'*/
+    public static final char CHAR_SEMI_COLON	= ';';
+    /**'<b>%</b>'*/
+    public static final char CHAR_PERCENTAGE	= '%';
+    /**' '*/
+    public static final char CHAR_SPACE 		= ' ';
+    /** '*', '$'*/
+    public static final char[] WILDCARD_CHARS 	= {CHAR_STAR, CHAR_INTERROGATION};
+
+	/**"<b>.</b>"*/
+	public static final String REGEX_CHARACTER_ANY			= String.valueOf(CHAR_DOT);
+	/**"<b>*</b>"*/
+	public static final String REGEX_CHARACTER_MATCH_MANY	= String.valueOf(CHAR_STAR);
+	/**"<b>?</b>"*/
+	public static final String REGEX_CHARACTER_MATCH_ONE	= String.valueOf(CHAR_INTERROGATION);
+	/**'\'*/
+	public static final Character REGEX_ESCAPE_CHARACTER		= new Character(CHAR_BACK_SLASH);
+	/**string slash <b>/</b> */
+	public static final String SLASH = String.valueOf(CHAR_SLASH);
+	/**string single quote <b>'</b> */
+	public static final String QUOTE = String.valueOf(CHAR_QUOTE);
+	/**string double quote <b>"</b> */
+	public static final String DOUBLE_QUOTE = String.valueOf(CHAR_DOUBLE_QUOTE);
+	/**string back slash <b>\</b> */
+	public static final String BACK_SLASH = String.valueOf(CHAR_BACK_SLASH);
+	/**string number <b>#</b> */
+	public static final String NUMBER = String.valueOf(CHAR_NUMBER);
+	/**string colon <b>:</b> */
+	public static final String COLON = String.valueOf(CHAR_COLON);
+	/**string equal <b>=</b> */
+	public static final String EQUAL = String.valueOf(CHAR_EQUAL);
+	/**string and <b>&</b> */
+	public static final String AND = String.valueOf(CHAR_AND);
+	/**string interrogation <b>?</b> */
+	public static final String INTERROGATION = String.valueOf(CHAR_INTERROGATION);
+	/** string caret <b>^</b> */
+	public static final String CARET = String.valueOf(CHAR_CARET);
+	/** string dollar <b>$</b> */
+	public static final String DOLLAR = String.valueOf(CHAR_DOLLAR);
+	/**"<b>+</b>"*/
+	public static final String PLUS 			= String.valueOf(CHAR_PLUS);
+	/**"<b>-</b>"*/
+	public static final String MINUS 			= String.valueOf(CHAR_MINUS);
+	/**"<b>,</b>"*/
+	public static final String COMMA 			= String.valueOf(CHAR_COMMA);
+	/**"<b>;</b>"*/
+	public static final String SEMI_COLON 		= String.valueOf(CHAR_SEMI_COLON);
+	/**"<b>%</b>"*/
+	public static final String PERCENTAGE 		= String.valueOf(CHAR_PERCENTAGE);
+	/**" "*/
+	public static final String SPACE 			= String.valueOf(CHAR_SPACE);
 	/**10000*/
     public static final int maxBytesPerRead = 10000;
     /**1024*10*/
     public static final int DEFAULT_BUFFER_SIZE = 1024 * 10;
+    /** "~", "+", "^", "%", "(", ")", "{", "}" */
     public static final String[] specialKeys = {"~","+","^","%","(",")","{","}"};
-    /**'\\'*/
-    public static final Character REGEX_ESCAPE_CHARACTER		= new Character('\\');
-    /**"+"*/
-	public static final String PLUS 			= "+";
-	/**"-"*/
-	public static final String MINUS 		= "-";
-	/**","*/
-	public static final String COMMA = ",";
-	/**";"*/
-    public static final String SEMI_COLON = ";";
-    /**"%"*/
-    public static final String PERCENTAGE = "%";
-    /**" "*/
-    public static final String SPACE = " ";
 
 	/**'localhost'*/
 	public static final String LOCAL_HOST = Constants.LOCAL_HOST;
@@ -833,32 +862,32 @@ public abstract class StringUtils extends StringUtilities{
     return s1+s2+s3;
   }
 
-	/** convert ? and * wildcarding to regular expression wildcarding .? and .*
-	 **/
-	public static String convertWildcardsToRegularExpression(String input){
+  /** convert ? and * wildcarding to regular expression wildcarding .? and .*
+   **/
+  public static String convertWildcardsToRegularExpression(String input){
 
-		int len = -1;
+	  int len = -1;
 
-		// don't play with bad input
-		try{ len = input.length();}
-		catch(NullPointerException np){ return null;}
+	  // don't play with bad input
+	  try{ len = input.length();}
+	  catch(NullPointerException np){ return null;}
 
-		StringBuffer buffer = new StringBuffer(input);
-		String value = null;
+	  StringBuffer buffer = new StringBuffer(input);
+	  String value = null;
 
-		// loop backwards through the string and insert . as necessary
-		for (int i = len -1; i >= 0; i--){
+	  // loop backwards through the string and insert . as necessary
+	  for (int i = len -1; i >= 0; i--){
 
-			value = input.substring(i, i+1);
-			if ((value.equals(REGEX_CHARACTER_MATCH_MANY)) ||
-			    (value.equals(REGEX_CHARACTER_MATCH_ONE))){
+		  value = input.substring(i, i+1);
+		  if ((value.equals(REGEX_CHARACTER_MATCH_MANY)) ||
+				  (value.equals(REGEX_CHARACTER_MATCH_ONE))){
 
-		 	   buffer.insert(i, REGEX_CHARACTER_ANY);
-			}
-		}
+			  buffer.insert(i, REGEX_CHARACTER_ANY);
+		  }
+	  }
 
-		return buffer.toString();
-	}
+	  return buffer.toString();
+  }
 
   private static Object patternInstance  = null;
   private static Method patternMethod  = null;
@@ -2467,6 +2496,84 @@ public abstract class StringUtils extends StringUtilities{
 		return sb.toString();
 	}
 
+	/**
+	 * Convert the wildcard string to regex expression.<br/>
+	 * @param wildcard String, the wildcard string.
+	 * @return String, the regex string
+	 */
+	public static String wildcardToRegex(String wildcard){
+		return wildcardToRegex(wildcard, false, false);
+	}
+	/**
+	 * Convert the wildcard string to regex expression.<br/>
+	 * The wildcard <b>*</b> represents zero or more characters. It will be replaced by .*<br/>
+	 * The wildcard <b>?</b> represents ONE of any characters. It will be replaced by .<br/>
+	 * @param wildcard String, the wildcard string
+	 * @param matchLineBegin boolean, add ^ at the beginning of regex string
+	 * @param matchLineEnd boolean, add $ at the end of regex string
+	 * @return String, the converted regex expression
+	 */
+	public static String wildcardToRegex(String wildcard, boolean matchLineBegin, boolean matchLineEnd){
+		if(!isValid(wildcard)){
+			return wildcard;
+		}
+		StringBuilder sb = new StringBuilder();
+		if(matchLineBegin){
+			sb.append(CARET);//Add ^
+		}
+		char c = '\0';
+		for(int i=0;i<wildcard.length();i++){
+			c = wildcard.charAt(i);
+			switch(c) {
+			case '*':
+				sb.append(".*");
+				break;
+			case '?':
+				sb.append(".");
+				break;
+			//escape special regex characters
+			case '(': case ')': case '[': case ']': case '{': case '}':
+			case '^': case '.': case '|': case '&': case '$': case '\\':
+				sb.append("\\");
+				sb.append(c);
+				break;
+			default:
+				sb.append(c);
+				break;
+			}
+		}
+		if(matchLineEnd){
+			sb.append(DOLLAR);//Add $
+		}
+
+		return sb.toString();
+	}
+
+	private static void __test_converRegex(String wildcard, String expectedStr, boolean expectedMatch){
+		String regex = wildcardToRegex(wildcard);
+
+		try {
+			boolean result = matchRegex(regex, expectedStr);
+			System.out.println("Matching wildcard '"+wildcard+"' (regex '"+regex+"') to '"+expectedStr+"'\n"+result);
+			assert (expectedMatch? result:!result);
+		} catch (SAFSException e) {
+			e.printStackTrace();
+		}
+	}
+	private static void test_converRegex(){
+        String test = "123ABCdef";
+        __test_converRegex("1*", test, true);
+        __test_converRegex("?2*", test, true);
+        __test_converRegex("??2*", test, false);
+        __test_converRegex("*A*", test, true);
+        __test_converRegex("*Z*", test, false);
+        __test_converRegex("123*", test, true);
+        __test_converRegex("123", test, false);
+        __test_converRegex("*ABC*", test, true);
+        __test_converRegex("*abc*", test, false);
+        __test_converRegex("ABC*", test, false);
+	}
+
 	private static void test_replaceJVMOptionValue(){
 		String jvmOptions = JavaConstant.JVM_Xms+"128m   "+JavaConstant.JVM_Xmx+"1g";
 
@@ -2783,17 +2890,18 @@ public abstract class StringUtils extends StringUtilities{
 	public static void main(String[] args){
 		initIndependantLogByConsole();
 
-		test_getTokenList();
-		test_reverseArray();
-		testErrorLineParser();
-		test_breakXpath();
-		test_replaceJVMOptionValue();
-		test_urlEncode();
-		test_convertLine();
-		test_convertCoords(true);
-		test_parseFloat();
-
-		test_stacktrace();
+//		test_getTokenList();
+//		test_reverseArray();
+//		testErrorLineParser();
+//		test_breakXpath();
+//		test_replaceJVMOptionValue();
+//		test_urlEncode();
+//		test_convertLine();
+//		test_convertCoords(true);
+//		test_parseFloat();
+//
+//		test_stacktrace();
+		test_converRegex();
 	}
 
 }
