@@ -165,8 +165,10 @@ style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;
   Please refer to <a href="http://safsdev.sourceforge.net/doc/org/safs/autoit/AutoItRs.html" target="_blank" title="SAFS AutoIt Recognition Strings">SAFS AutoIt Recognition Strings</a> for more information.<br/>
   
  <br/> 
+ 
  <b>Examples</b>:
   The application Calculator's "radio button Radians" is captured as below:
+  
   <p class=MsoNoSpacing style='margin-left:.5in'><img src="AutoitInfoCalculator.png"></p> 
  Then the Recognition String can be defined as:
  <ul>
@@ -174,6 +176,7 @@ style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;
 	   <ul>
 	      <li>Calculator=":AUTOIT:title=Calculator"
 	      <li>Calculator=":AUTOIT:CAPTION=Calc"
+	      <li>Calculator=":AUTOIT:Caption=*alcul?t*"
 	      <li>Calculator=":AUTOIT:class=CalcFrame"
 	      <li>Calculator=":AUTOIT:REGEXPTITLE=[C|c].*lator"
 	      <li>Calculator=":AUTOIT:REGEXPCLASS=.*Fra.*"
@@ -183,15 +186,26 @@ style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;
 	   <ul>
 	      <li>btnRadians=":AutoIt:text=Radians"
 	      <li>btnRadians="text=Radians"
-	      <li>btnRadians="id=131"
-	      <li>btnRadians="classnn=Button5"
+	      <li>btnRadians="id=322"
+	      <li>btnRadians="classnn=Button30"
 	      <li>btnRadians="class=Button"
-	      <li>btnRadians="id=131;class=Button"
-	      <li>btnRadians="class=Button;instance=5"
+	      <li>btnRadians="id=322;class=Button"
+	      <li>btnRadians="class=Button;index=30"
+	      <li>btnRadians="class=Button;instance=30"
 	   </ul>
  </ul>
+</p>
+<p class=MsoNoSpacing style='margin-left:20.25pt'>
+ <b>Note:</b><br/>
+ 1. "Caption=" accepts also "wildcard string", * for zero or more characters; ? for one character.<br/>
+    "Caption=" is equivalent to "Title=" if the value is a normal string;<br/>
+    "Caption=" is equivalent to "RegexpTitle=" if the value is a wildcard string;<br/>
+    <br/>
+ 2. "Index=" is equivalent to "Instance=".   
+    <br/>
 
 </p>
+
 <p class=MsoNoSpacing style='margin-left:.5in'>&nbsp;</p>
 
 <p class=MsoNoSpacing style='margin-left:20.25pt;text-indent:-20.25pt'><b>5.</b><b><span
