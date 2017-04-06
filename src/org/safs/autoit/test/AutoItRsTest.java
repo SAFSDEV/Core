@@ -28,7 +28,7 @@ import org.safs.autoit.lib.AutoItXPlus;
 public class AutoItRsTest {
 	private static void __engineMethods(AutoItXPlus it, String title, String text){
 
-		System.out.println(" title: "+title+" text: "+text);
+		System.out.println("title: "+title+" text: "+text);
 
 		String tempStr = it.winGetClassList(title, text);
 		System.out.println("winGetClassList=\n"+tempStr);
@@ -55,7 +55,7 @@ public class AutoItRsTest {
 		String title = "Calculator";
 		String text = "Degrees";
 
-		System.out.println("\n TEST ENGINE METHODS \n");
+		System.out.println("\n======= TEST ENGINE METHODS =================\n");
 		__engineMethods(it, title, text);
 
 	}
@@ -64,14 +64,9 @@ public class AutoItRsTest {
 		int secsWaitForWindow = 1;
 		it.autoItSetOption(AutoItConstants.MODE_WIN_TITLE_MATCH, String.valueOf(mode));
 
-		System.out.println("mode: "+AutoItConstants.getTitleMatchMode(mode)+" title: "+title+" text: "+text);
-		if(!it.winWait(title, text, secsWaitForWindow)){
-			System.out.println("NOT FOUND");
-			return false;
-		}else{
-			System.out.println("FOUND");
-			return true;
-		}
+		boolean found = it.winWait(title, text, secsWaitForWindow);
+		System.out.println( (found?"FOUND\t\t":"NOT FOUND\t") +"mode: "+AutoItConstants.getTitleMatchMode(mode)+" title: "+title+" text: "+text);
+		return found;
 	}
 
 	/**
@@ -81,6 +76,7 @@ public class AutoItRsTest {
 	 */
 	private static void test_mode(AutoItXPlus it){
 
+		System.out.println("========================   Test  WinTitleMatchMode   =========================");
 		int mode = AutoItConstants.MATCHING_PATIAL;
 		String title = "Calculator";
 		String text = "Degrees";//match as sub string
@@ -183,10 +179,10 @@ public class AutoItRsTest {
 	private static boolean __waitWin_autoItRs(AutoItXPlus it, AutoItRs rs, int secsWaitForWindow){
 
 		if(!it.winWait(rs.getWindowsRS(), rs.getWindowText(), secsWaitForWindow)){
-			System.out.println("NOT FOUND "+rs);
+			System.out.println("\nNOT FOUND "+rs);
 			return false;
 		}else{
-			System.out.println("FOUND "+rs);
+			System.out.println("\nFOUND "+rs);
 			return true;
 		}
 
@@ -199,7 +195,7 @@ public class AutoItRsTest {
 		String windowRS = "";
 		String controlRS = "";
 
-		System.out.println("\n=========================   TEST AutoItRs implementation =========================================\n");
+		System.out.println("\n=========================   TEST AutoItRs implementation =========================================");
 
 		System.out.println("\n1.The recognition string is provided as SAFS RS\n");
 		try {
@@ -218,7 +214,25 @@ public class AutoItRsTest {
 		}
 
 		try {
-			windowRS = "Title=Calculator;Text=Degrees";
+			windowRS = "Title=Calc;";//beginning part will work
+			controlRS = null;
+			rs = new AutoItRs(windowRS, controlRS);
+			assert __waitWin_autoItRs(it, rs, secsWaitForWindow);
+		} catch (SAFSObjectRecognitionException e) {
+			assert false: e.toString();
+		}
+
+		try {
+			windowRS = "Title=lator;";//ending part will NOT work
+			controlRS = null;
+			rs = new AutoItRs(windowRS, controlRS);
+			assert !__waitWin_autoItRs(it, rs, secsWaitForWindow);
+		} catch (SAFSObjectRecognitionException e) {
+			assert false: e.toString();
+		}
+
+		try {
+			windowRS = "Caption=Calculator;Text=Degrees";
 			controlRS = "";
 			rs = new AutoItRs(windowRS, controlRS);
 			assert __waitWin_autoItRs(it, rs, secsWaitForWindow);
@@ -226,16 +240,65 @@ public class AutoItRsTest {
 			assert false: e.toString();
 		}
 
-
 		try {
 			windowRS = ":AUTOIT:REGEXPCLASS=.*Fra.*";
 			controlRS = "class=Button;instance=5";
 			rs = new AutoItRs(windowRS, controlRS);
 
 			assert __waitWin_autoItRs(it, rs, secsWaitForWindow);
-
 			assert AutoItLib.activate(it, rs);
 
+		} catch (SAFSException e) {
+			assert false: e.toString();
+		}
+
+		try {
+			System.out.println("\nTest SAFS rs key 'INDEX='");
+			windowRS = ":AUTOIT:REGEXPCLASS=.*Fra.*";
+			controlRS = "class=Button;index=5";
+			rs = new AutoItRs(windowRS, controlRS);
+
+			assert __waitWin_autoItRs(it, rs, secsWaitForWindow);
+			assert AutoItLib.activate(it, rs);
+
+		} catch (SAFSException e) {
+			assert false: e.toString();
+		}
+
+		try {
+			System.out.println("\nTest SAFS rs key 'CAPTION=' with wildcard. ");
+			windowRS = "Caption=?alculator";
+			controlRS = "class=Button;index=5";
+			rs = new AutoItRs(windowRS, controlRS);
+
+			assert __waitWin_autoItRs(it, rs, secsWaitForWindow);
+			assert AutoItLib.activate(it, rs);
+
+		} catch (SAFSException e) {
+			assert false: e.toString();
+		}
+
+		try {
+			System.out.println("\nTest SAFS rs key 'CAPTION=' with wildcard.");
+			windowRS = "Caption=*Calcul?t*";
+			controlRS = "class=Button;index=5";
+			rs = new AutoItRs(windowRS, controlRS);
+
+			assert __waitWin_autoItRs(it, rs, secsWaitForWindow);
+			assert AutoItLib.activate(it, rs);
+
+		} catch (SAFSException e) {
+			assert false: e.toString();
+		}
+
+		try {
+			System.out.println("\nTest SAFS rs key 'CAPTION=' with wildcard.");
+			windowRS = "Caption=?Calcul?t*";
+			controlRS = "class=Button;index=5";
+			rs = new AutoItRs(windowRS, controlRS);
+
+			assert !__waitWin_autoItRs(it, rs, secsWaitForWindow);
+			assert !AutoItLib.activate(it, rs);
 
 		} catch (SAFSException e) {
 			assert false: e.toString();
@@ -260,10 +323,7 @@ public class AutoItRsTest {
 			rs = new AutoItRs(windowRS, controlRS);
 
 			assert __waitWin_autoItRs(it, rs, secsWaitForWindow);
-
 			assert AutoItLib.activate(it, rs);
-
-
 		} catch (SAFSException e) {
 			assert false: e.toString();
 		}
@@ -277,7 +337,7 @@ public class AutoItRsTest {
 		try {
 			//Open a "Calculator"
 			process = Runtime.getRuntime().exec("calc.exe");
-			testAutoItAPI(it);
+//			testAutoItAPI(it);
 
 			testAutoItRs(it);
 

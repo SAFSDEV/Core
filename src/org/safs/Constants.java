@@ -357,6 +357,8 @@ public class Constants {
 		public static final String RS_KEY_Y 			= "y";
 		public static final String RS_KEY_W 			= "w";
 		public static final String RS_KEY_H 			= "h";
+		/** "index" is the same as "instance" */
+		public static final String RS_KEY_INDEX 		= "index";
 		public static final String RS_KEY_INSTANCE 		= "instance";
 		//This property 'TEXT' exists for Control, does NOT exist for window; But it can be provided as the parameter of most AUTOIT method to help finding a Window.
 		public static final String RS_KEY_TEXT 			= "text";
