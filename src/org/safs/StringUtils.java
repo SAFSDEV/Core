@@ -2890,17 +2890,17 @@ public abstract class StringUtils extends StringUtilities{
 	public static void main(String[] args){
 		initIndependantLogByConsole();
 
-//		test_getTokenList();
-//		test_reverseArray();
-//		testErrorLineParser();
-//		test_breakXpath();
-//		test_replaceJVMOptionValue();
-//		test_urlEncode();
-//		test_convertLine();
-//		test_convertCoords(true);
-//		test_parseFloat();
-//
-//		test_stacktrace();
+		test_getTokenList();
+		test_reverseArray();
+		testErrorLineParser();
+		test_breakXpath();
+		test_replaceJVMOptionValue();
+		test_urlEncode();
+		test_convertLine();
+		test_convertCoords(true);
+		test_parseFloat();
+
+		test_stacktrace();
 		test_converRegex();
 	}
 
