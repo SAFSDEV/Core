@@ -333,6 +333,7 @@ public class AutoItRsTest {
 	public static void main(String[] args){
 		AutoItXPlus it = AutoIt.AutoItObject();
 
+		long starttime = System.currentTimeMillis();
 		Process process = null;
 		try {
 			//Open a "Calculator"
@@ -345,6 +346,7 @@ public class AutoItRsTest {
 			e.printStackTrace();
 		}finally{
 			if(process!=null) process.destroy();
+			System.out.println("\n====== Time Consummed: "+(System.currentTimeMillis()-starttime)+" milliseconds. =======");
 		}
 	}
 }
