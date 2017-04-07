@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.safs.Constants.AutoItConstants;
 import org.safs.GuiObjectRecognition;
@@ -28,17 +29,17 @@ import org.safs.persist.PersistableDefault;
 import org.safs.tools.stringutils.StringUtilities;
 
 /**
- * Class to handle recognition string parsing for the AutoIt engine.<br/>
- * Window Recognition String will be converted to <a href="https://www.autoitscript.com/autoit3/docs/intro/windowsadvanced.htm">AUTOIT engine window's RS</a>.<br/>
- * Child Control Recognition String will be converted to <a href="https://www.autoitscript.com/autoit3/docs/intro/controls.htm">AUTOIT engine control's RS</a>.<br/>
- * The TEXT in Window Recognition String will be converted to <a href="https://www.autoitscript.com/autoit3/docs/intro/windowsbasic.htm#specialtext">Window Text</a>.<br/>
+ * Class to handle recognition-string-parsing for the AutoIt engine.<br/>
+ * <b>Window Recognition String</b> will be converted to <a href="https://www.autoitscript.com/autoit3/docs/intro/windowsadvanced.htm"><b>AUTOIT window's RS</b></a>.<br/>
+ * <b>Child Recognition String</b> will be converted to <a href="https://www.autoitscript.com/autoit3/docs/intro/controls.htm"><b>AUTOIT control's RS</b></a>.<br/>
+ * The <b>TEXT</b> in Window Recognition String will be converted to <a href="https://www.autoitscript.com/autoit3/docs/intro/windowsbasic.htm#specialtext"><b>Window Text</b></a>.<br/>
  * <p>
  * The recognition string is composed with pairs of <b>RsKey=value</b> separated by semi-colon <b>;</b> such as <b>key1=value;key2=value</b><br/>
  * <br/>
  *
  * <b>Window Recognition</b>:<br/>
- * Note: the case-insensitive "<b>:autoit:</b>" prefix MUST appear in Window RS and will be removed as needed.<br/>
- * The window's <b>RS KEY</b> (case-insensitive) can be
+ * Note: the case-insensitive "<b>:autoit:</b>" prefix MUST appear in Window RS and will be removed when parsing.<br/>
+ * The window's <b>RsKey</b> (case-insensitive) can be
  * <ul>
  * <li><b>TITLE \ CAPTION</b> - Window title.<br/>
  *                   By default, The <b>TITLE</b> or <b>CAPTION</b> must be the beginning part of the title.
@@ -62,7 +63,7 @@ import org.safs.tools.stringutils.StringUtilities;
  *                   <li>Control text
  *                   <li>Misc text - sometimes you don't know what it is :)
  *                   </ul>
- *                   When you specify the text parameter in a window function it is treated as a <b>substring</b>.<br/>
+ *                   When you specify the TEXT RsKey, it is treated as a <b>substring</b>.<br/>
  *                   <br/>
  * <li><b>CLASS</b> - The internal window classname
  * <li><b>REGEXPTITLE</b> - Window title using a regular expression
@@ -72,17 +73,17 @@ import org.safs.tools.stringutils.StringUtilities;
  * <li><b>X</b> \ <b>Y</b> \ <b>W</b> \ <b>H</b> - The position and size of a window
  * <li><b>INDEX \ INSTANCE</b> - The 1-based instance when all given properties match
  * </ul>
- *
+ * <br/>
  * <b>Child Control Recognition</b>:<br/>
- * Note: the case-insensitive "<b>:autoit:</b>" prefix CAN appear in Control RS and will be removed if present.<br/>
- * The control's <b>RS KEY</b> (case-insensitive) can be
+ * Note: the case-insensitive "<b>:autoit:</b>" prefix CAN appear in Control RS and will be removed if present when parsing.<br/>
+ * The control's <b>RsKey</b> (case-insensitive) can be
  * <ul>
  * <li><b>ID</b> - The internal control ID. The Control ID is the internal numeric identifier that windows gives to each control. It is generally the best method of identifying controls.
  * <li><b>TEXT</b> - The text on a control, for example "&Next" on a button
  * <li><b>CLASS</b> - The internal control classname such as "Edit" or "Button"
  * <li><b>CLASSNN</b> - The ClassnameNN value as used in previous versions of AutoIt, such as "Edit1"
- * <li><b>NAME</b> - The internal .NET Framework WinForms name (if available)
  * <li><b>REGEXPCLASS</b> - Control classname using a regular expression
+ * <li><b>NAME</b> - The internal .NET Framework WinForms name (if available)
  * <li><b>X</b> \ <b>Y</b> \ <b>W</b> \ <b>H</b> - The position and size of a control.
  * <li><b>INDEX \ INSTANCE</b> - The 1-based instance when all given properties match.
  * </ul>
@@ -245,6 +246,10 @@ public class AutoItRs implements IAutoItRs{
 		return control.getEngineRS();
 	}
 
+	/**
+	 * This interface represents something can be used by automation tool to find AUT's window or component.
+	 *
+	 */
 	protected static interface Recognizable{
 		/** This raw Recognition String is provided by user, it can be in SAFS format,
 		 *  engine format, or any other format which will be parsed into engine RS. */
@@ -255,6 +260,14 @@ public class AutoItRs implements IAutoItRs{
 		public void parseRawRS();
 	}
 
+	/**
+	 * This class provides default implementation of interface {@link Recognizable}.<br/>
+	 * As the field of name starting with {@link AutoItConstants#PREFIX_PROPERTY_FOR_RS}
+	 * will be used for generating recognition string, please avoid adding new fields of
+	 * name starting with {@link AutoItConstants#PREFIX_PROPERTY_FOR_RS} to this class
+	 * when refactoring this class.<br/>
+	 *
+	 */
 	protected static class DefaultRecognizable extends PersistableDefault implements Recognizable{
 		/** The recognition string provided by user. */
 		protected String rawRS = null;
@@ -325,8 +338,8 @@ public class AutoItRs implements IAutoItRs{
 						fieldNameToPersistKeyMap.put(fieldname, fieldname);
 					}
 
-					//We stop at class DefaultRecognizable, non further than it.
-					if(DefaultRecognizable.class.getName().equals(clazz.getName())){
+					//We stop at top most class, non further than it.
+					if(clazz.getName().equals(getTopMostClassname())){
 						break;
 					}
 					clazz = clazz.getSuperclass();
@@ -337,30 +350,39 @@ public class AutoItRs implements IAutoItRs{
 		}
 
 		/**
-		 * @return Set<String>, a set containing the fields NOT for generating the "engine RS".
+		 *
+		 * @return String, the name of the class representing the top most class to check recursively.
+		 *
+		 * @see #getPersitableFields()
+		 * @see #getNonRecognizableFields()
 		 */
-		protected Set<String> getIgnoredRecognizableFields(){
-			Set<String> ignored = new HashSet<String>();
-
-			ignored.add("rawRS");
-			ignored.add("engineRS");
-			ignored.add("fieldNameToRsKeyMap");
-
-			return ignored;
+		protected String getTopMostClassname(){
+			return DefaultRecognizable.class.getName();
 		}
 
 		/**
-		 * @return Map<String, String>, a map containing the fields for generating the "engine RS".
+		 * @return Set<String>, a set containing the fields NOT for generating the "engine RS".
 		 */
-		public Map<String, String> getRecognizableFields(){
+		protected Set<String> getNonRecognizableFields(){
+			IndependantLog.warn(StringUtils.debugmsg(false)+" has not been implemented yet!");
+			return null;
+		}
+
+		/**
+		 * @return Map<String, String>, a map containing the pairs of (field, RsKey) for generating the "engine RS".
+		 */
+		protected Map<String, String> getRecognizableFieldToRsKeyMap(){
 
 			if(fieldNameToRsKeyMap==null){
-				fieldNameToRsKeyMap = new HashMap<String, String>();
+				fieldNameToRsKeyMap = new ConcurrentHashMap<String, String>();
 
 				fieldNameToRsKeyMap.putAll(getPersitableFields());
 
-				for(String ignored:getIgnoredRecognizableFields()){
-					fieldNameToRsKeyMap.remove(ignored);
+				Set<String> ignoredFields = getNonRecognizableFields();
+				if(ignoredFields!=null){
+					for(String ignored:ignoredFields){
+						fieldNameToRsKeyMap.remove(ignored);
+					}
 				}
 			}
 
@@ -369,24 +391,36 @@ public class AutoItRs implements IAutoItRs{
 
 	}
 
+	/**
+	 * This class provides default implementation of interface {@link Recognizable} for AUTOIT engine.<br/>
+	 *
+	 */
 	protected static class DefaultRecognizableAutoIt extends DefaultRecognizable{
 
-		/** the mapping RS key is {@link AutoItConstants#RS_KEY_TITLE} */
+		/** the field name is composed of {@link AutoItConstants#PREFIX_PROPERTY_FOR_RS} and {@link AutoItConstants#RS_KEY_TITLE},
+		 *  the mapping rsKey is {@link AutoItConstants#RS_KEY_TITLE} */
 		protected String rs_gen_title = null;
-		/** the mapping RS key is {@link AutoItConstants#RS_KEY_CLASS} */
+		/** the field name is composed of {@link AutoItConstants#PREFIX_PROPERTY_FOR_RS} and {@link AutoItConstants#RS_KEY_CLASS},
+		 *  the mapping rsKey is {@link AutoItConstants#RS_KEY_CLASS} */
 		protected String rs_gen_class = null;
-		/** the mapping RS key is {@link AutoItConstants#RS_KEY_TEXT} */
+		/** the field name is composed of {@link AutoItConstants#PREFIX_PROPERTY_FOR_RS} and {@link AutoItConstants#RS_KEY_TEXT},
+		 *  the mapping rsKey is {@link AutoItConstants#RS_KEY_TEXT} */
 		protected String rs_gen_text = null;
 
-		/** the mapping RS key is {@link AutoItConstants#RS_KEY_X} */
+		/** the field name is composed of {@link AutoItConstants#PREFIX_PROPERTY_FOR_RS} and {@link AutoItConstants#RS_KEY_X},
+		 *  the mapping rsKey is {@link AutoItConstants#RS_KEY_X} */
 		protected String rs_gen_x = null;
-		/** the mapping RS key is {@link AutoItConstants#RS_KEY_Y} */
+		/** the field name is composed of {@link AutoItConstants#PREFIX_PROPERTY_FOR_RS} and {@link AutoItConstants#RS_KEY_Y},
+		 *  the mapping rsKey is {@link AutoItConstants#RS_KEY_Y} */
 		protected String rs_gen_y = null;
-		/** the mapping RS key is {@link AutoItConstants#RS_KEY_W} */
+		/** the field name is composed of {@link AutoItConstants#PREFIX_PROPERTY_FOR_RS} and {@link AutoItConstants#RS_KEY_W},
+		 *  the mapping rsKey is {@link AutoItConstants#RS_KEY_W} */
 		protected String rs_gen_w = null;
-		/** the mapping RS key is {@link AutoItConstants#RS_KEY_H} */
+		/** the field name is composed of {@link AutoItConstants#PREFIX_PROPERTY_FOR_RS} and {@link AutoItConstants#RS_KEY_H},
+		 *  the mapping rsKey is {@link AutoItConstants#RS_KEY_H} */
 		protected String rs_gen_h = null;
-		/** the mapping RS key is {@link AutoItConstants#RS_KEY_INSTANCE} */
+		/** the field name is composed of {@link AutoItConstants#PREFIX_PROPERTY_FOR_RS} and {@link AutoItConstants#RS_KEY_INSTANCE},
+		 *  the mapping rsKey is {@link AutoItConstants#RS_KEY_INSTANCE} */
 		protected String rs_gen_instance = null;
 
 		public DefaultRecognizableAutoIt(String originalRS){
@@ -401,13 +435,16 @@ public class AutoItRs implements IAutoItRs{
 		 */
 		@Override
 		protected void beforeParse(){
+			//remove the leading and ending spaces
+			rawRS = rawRS.trim();
+
 			//remove ":autoit:" from field 'originalRS'.
 			if(isAutoitBasedRecognition(rawRS)){
 				rawRS = rawRS.substring(AUTOIT_PREFIX.length());
 				rawRS = rawRS.trim();
 			}
 
-			//If the raw RS is provided as engine RS directly, then set the rawRS to engineRS
+			//If the raw RS is provided as engine RS, then set the rawRS to engineRS
 			if(isEngineRs(rawRS)){
 				engineRS = rawRS;
 			}
@@ -472,13 +509,45 @@ public class AutoItRs implements IAutoItRs{
 
 			return super.setField(property, value);
 		}
+
 		/**
-		 * Only those fields starting with {@link AutoItConstants#PREFIX_PROPERTY_FOR_RS} are considered as
-		 * recognizable fields, so fields not starting with that prefix will be removed from the map.
+		 * This implementation will consider all fields (of its own and super-class) not prefixing by
+		 * {@link AutoItConstants#PREFIX_PROPERTY_FOR_RS} as non-recognizable fields.<br/>
+		 * @return Set<String>, a set containing the fields NOT for generating the "engine RS".
 		 */
 		@Override
-		public Map<String, String> getRecognizableFields(){
-			super.getRecognizableFields();
+		protected Set<String> getNonRecognizableFields(){
+			Set<String> nonRecognizableFields = new HashSet<String>();
+
+			Class<?> clazz = getClass();
+			String fieldname = null;
+
+			while(clazz!=null){
+				Field[] fields = clazz.getDeclaredFields();
+				for(Field field:fields){
+					fieldname = field.getName();
+					if(!fieldname.startsWith(AutoItConstants.PREFIX_PROPERTY_FOR_RS)){
+						nonRecognizableFields.add(fieldname);
+					}
+				}
+
+				//We stop at top most class, non further than it.
+				if(clazz.getName().equals(getTopMostClassname())){
+					break;
+				}
+				clazz = clazz.getSuperclass();
+			}
+
+			return nonRecognizableFields;
+		}
+
+		/**
+		 * Only those fields starting with {@link AutoItConstants#PREFIX_PROPERTY_FOR_RS} are considered as
+		 * recognizable fields, so those fields not starting with that prefix will be removed from the map.
+		 */
+		@Override
+		protected Map<String, String> getRecognizableFieldToRsKeyMap(){
+			super.getRecognizableFieldToRsKeyMap();
 
 			String rsKey = null;
 
@@ -504,7 +573,7 @@ public class AutoItRs implements IAutoItRs{
 		 * @return String, the class real property name.
 		 */
 		protected String rsKeyToProperty(String rsKey){
-			Map<String, String> fieldToRSKeyMap = getRecognizableFields();
+			Map<String, String> fieldToRSKeyMap = getRecognizableFieldToRsKeyMap();
 			String tempRSKey = null;
 
 			for(String field: fieldToRSKeyMap.keySet()){
@@ -529,7 +598,7 @@ public class AutoItRs implements IAutoItRs{
 		@Override
 		public String getEngineRS(){
 			//will return something like "[TITLE:My Window; CLASS:My Class; INSTANCE:2]"
-			Map<String, String> fieldToRSKeyMap = getRecognizableFields();
+			Map<String, String> fieldToRSKeyMap = getRecognizableFieldToRsKeyMap();
 			if(engineRS==null){
 				StringBuilder rs= new StringBuilder();
 				rs.append(AutoItConstants.AUTOIT_ENGINE_RS_START);
@@ -563,7 +632,7 @@ public class AutoItRs implements IAutoItRs{
 		public String toString(){
 
 			StringBuilder sb= new StringBuilder();
-			Set<String> properties = getRecognizableFields().keySet();
+			Set<String> properties = getRecognizableFieldToRsKeyMap().keySet();
 			Object value = null;
 
 			sb.append("\n========= "+this.getClass().getSimpleName()+" ========");
@@ -579,6 +648,10 @@ public class AutoItRs implements IAutoItRs{
 		}
 	}
 
+	/**
+	 * The AUTOIT Window object, the implementation of {@link Recognizable}
+	 *
+	 */
 	protected static class Window extends DefaultRecognizableAutoIt{
 
 		private int titleMatchMode = AutoItConstants.MATCHING_PATIAL;//Matches partial text from the start.
@@ -590,40 +663,18 @@ public class AutoItRs implements IAutoItRs{
 			this.titleMatchMode = titleMatchMode;
 		}
 
-		/** the mapping RS key is {@link AutoItConstants#RS_KEY_REGEXPTITLE} */
+		/** the field name is composed of {@link AutoItConstants#PREFIX_PROPERTY_FOR_RS} and {@link AutoItConstants#RS_KEY_REGEXPTITLE},
+		 *  the mapping rsKey is {@link AutoItConstants#RS_KEY_REGEXPTITLE} */
 		protected String rs_gen_regexptitle = null;
-		/** the mapping RS key is {@link AutoItConstants#RS_KEY_REGEXPCLASS} */
+		/** the field name is composed of {@link AutoItConstants#PREFIX_PROPERTY_FOR_RS} and {@link AutoItConstants#RS_KEY_REGEXPCLASS},
+		 *  the mapping rsKey is {@link AutoItConstants#RS_KEY_REGEXPCLASS} */
 		protected String rs_gen_regexpclass = null;
-		/** the mapping RS key is {@link AutoItConstants#RS_KEY_LAST} */
+		/** the field name is composed of {@link AutoItConstants#PREFIX_PROPERTY_FOR_RS} and {@link AutoItConstants#RS_KEY_LAST},
+		 *  the mapping rsKey is {@link AutoItConstants#RS_KEY_LAST} */
 		protected Boolean rs_gen_last = false;
-		/** the mapping RS key is {@link AutoItConstants#RS_KEY_ACTIVE} */
+		/** the field name is composed of {@link AutoItConstants#PREFIX_PROPERTY_FOR_RS} and {@link AutoItConstants#RS_KEY_ACTIVE},
+		 *  the mapping rsKey is {@link AutoItConstants#RS_KEY_ACTIVE} */
 		protected Boolean rs_gen_active = false;
-
-		@Override
-		protected Set<String> getIgnoredRecognizableFields(){
-			Set<String> ignored = super.getIgnoredRecognizableFields();
-			if(ignored==null){
-				ignored = new HashSet<String>();
-			}
-			ignored.add("titleMatchMode");
-
-			return ignored;
-		}
-
-		/**
-		 * The "window text" consists of all the text that AutoIt can "see".
-		 * This will usually be things like the contents of edit but will also include other text like:
-		 * <ol>
-		 * <li>Button text like &Yes, &No, &Next (the & indicates an underlined letter)
-		 * <li>Dialog text like "Are you sure you wish to continue?"
-		 * <li>Control text
-		 * <li>Misc text - sometimes you don't know what it is :)
-		 * </ol>
-		 * The important thing is that you can use the text along with the title to uniquely identify a window to work with.
-		 * When you specify the text parameter in a window function it is treated as a substring.
-		 *
-		 */
-		//protected String text = null;
 
 		public Window(String rs){
 			super(rs);
@@ -653,7 +704,7 @@ public class AutoItRs implements IAutoItRs{
 					rs.append(rsKey+AUTOIT_DELIMITER+" ");
 				}
 			}else if(AutoItConstants.RS_KEY_TEXT.endsWith(rsKey)){
-				//ignore this, it will be returned separately by getText()
+				//ignore the key "TEXT" for window, it will be returned separately by getText()
 			}
 			else{
 				super.appendEngineRS(rs, rsKey, value);
@@ -662,12 +713,19 @@ public class AutoItRs implements IAutoItRs{
 
 	}
 
+	/**
+	 * The AUTOIT Control object, the implementation of {@link Recognizable}
+	 *
+	 */
 	protected static class Control extends DefaultRecognizableAutoIt{
-		/** the mapping RS key is {@link AutoItConstants#RS_KEY_ID} */
+		/** the field name is composed of {@link AutoItConstants#PREFIX_PROPERTY_FOR_RS} and {@link AutoItConstants#RS_KEY_ID},
+		 *  the mapping rsKey is {@link AutoItConstants#RS_KEY_ID} */
 		protected String rs_gen_id = null;
-		/** the mapping RS key is {@link AutoItConstants#RS_KEY_CLASSNN} */
+		/** the field name is composed of {@link AutoItConstants#PREFIX_PROPERTY_FOR_RS} and {@link AutoItConstants#RS_KEY_CLASSNN},
+		 *  the mapping rsKey is {@link AutoItConstants#RS_KEY_CLASSNN} */
 		protected String rs_gen_classnn = null;
-		/** the mapping RS key is {@link AutoItConstants#RS_KEY_NAME} */
+		/** the field name is composed of {@link AutoItConstants#PREFIX_PROPERTY_FOR_RS} and {@link AutoItConstants#RS_KEY_NAME},
+		 *  the mapping rsKey is {@link AutoItConstants#RS_KEY_NAME} */
 		protected String rs_gen_name = null;
 
 		public Control(String rs){
