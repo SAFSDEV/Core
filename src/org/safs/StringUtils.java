@@ -33,6 +33,7 @@
  *                          Moved getStackTraceElement(), getClassName(),  debug() methods to StringUtilities().
  * APR 04, 2017 (CANAGL)    Fixed visibility of iniIndependentLogByConsole used by HttpRequest.java.
  * APR 06, 2017 (SBJLWA) 	Added method wildcardToRegex().
+ * APR 11, 2017 (SBJLWA) 	Removed the deprecated convertWindowPosition(): reduce the dependency of org.safs.ComponentFunction.Window.
  **/
 package org.safs;
 
@@ -68,7 +69,6 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.safs.ComponentFunction.Window;
 import org.safs.sockets.DebugListener;
 import org.safs.text.FileUtilities;
 import org.safs.tools.CaseInsensitiveFile;
@@ -688,27 +688,6 @@ public abstract class StringUtils extends StringUtilities{
 		 }
 	 }
 	 return props;
-  }
-
-  /**
-   * Convert window's position-size-status string of the formats:
-   * <ul>
-   * <li>"x;y;width;height;status"
-   * <li>"x,y,width,height,status"
-   * <li>"x y width height status"
-   * <li>"Coords=x;y;width;height;Status=status"
-   * <li>"Coords=x,y,width,height,Status=status"
-   * <li>"Coords=x y width height Status=status"
-   * </ul>
-   * into a org.safs.ComponentFunction.Window object.
-   *
-   * @param   windowPosition String, window's position-size-status string
-   * @return  org.safs.ComponentFunction.Window if successful, null otherwise
-   * @deprecated Please use {@link ComponentFunction#ConvertWindowPosition(String)} instead. <b>This method will be removed in the future.</b>
-   **/
-  @Deprecated
-  public static Window convertWindowPosition(String windowPosition) {
-	  return ComponentFunction.ConvertWindowPosition(windowPosition);
   }
 
   /**

@@ -10,21 +10,25 @@
  * SEP 20, 2016    (SBJLWA) Initial release: Moved existing code from WebDriverGUIUtilities to here.
  * MAR 02, 2016    (SBJLWA) Refactored code to get driver file according to the browser name.
  *                          Changed the RELATIVE_DIR_EXTRA_SAFS: use 'extra' instead of 'samples/Selenium2.0/extra', all drivers have been put into the folder 'extra'.
+ * APR 11, 2017    (SBJLWA) Added methods to detect embedded Eclipse, get Eclipse configuration info. Added IsProduct().
  */
 package org.safs.selenium.util;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.FilenameFilter;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
+import org.safs.Constants;
 import org.safs.Constants.BrowserConstants;
 import org.safs.IndependantLog;
 import org.safs.StringUtils;
-import org.safs.natives.NativeWrapper;
 import org.safs.selenium.webdriver.lib.SeleniumPlusException;
 import org.safs.tools.CaseInsensitiveFile;
 import org.safs.tools.drivers.DriverConstant.SeleniumConfigConstant;
@@ -39,6 +43,7 @@ import org.safs.tools.drivers.DriverConstant.SeleniumConfigConstant;
  */
 public class SePlusInstallInfo{
 	private String extra = null;
+	private String eclipse = null;
 	private String library = null;
 	private String javabin = null;
 	private String product = null;
@@ -47,6 +52,8 @@ public class SePlusInstallInfo{
 	private File rootDir = null;
 	/** The extra directory holding extra resources related to Selenium */
 	private File extraDir = null;
+	/** The eclipse directory holding Eclipse resources embedded in SeleniumPlus */
+	private File eclipseDir = null;
 	/** The library directory holding the library jar files etc. */
 	private File libraryDir = null;
 	/** The full path of java executable provided by SAFS or SeleniumPlus*/
@@ -85,13 +92,15 @@ public class SePlusInstallInfo{
 
 	/**
 	 * @param extra String, 'extra' directory relative to root installation directory
+	 * @param eclipse String, 'eclipse' directory relative to root installation directory
 	 * @param library String, 'library' directory relative to root installation directory
 	 * @param javabin String, 'java bin' directory relative to root installation directory
 	 * @param product String, product name, {@link #PRODUCT_SAFS} or {@link #PRODUCT_SELENIUM_PLUS}
 	 */
-	private SePlusInstallInfo(String extra, String library, String javabin, String product) {
+	private SePlusInstallInfo(String extra, String eclipse, String library, String javabin, String product) {
 		super();
 		this.extra = extra;
+		this.eclipse = eclipse;
 		this.library = library;
 		this.javabin = javabin;
 		this.product = product;
@@ -113,15 +122,19 @@ public class SePlusInstallInfo{
 	}
 
 	private static SePlusInstallInfo instanceSAFS(){
+		IndependantLog.debug("Intialize SePlusInstallInfo with SAFS Product.");
 		return  new SePlusInstallInfo(
 				RELATIVE_DIR_EXTRA_SAFS,
+				RELATIVE_DIR_ECLIPSE,
 				RELATIVE_DIR_LIB_SAFS,
 				RELATIVE_DIR_JAVA64_BIN_SAFS,
 				PRODUCT_SAFS);
 	}
 	private static SePlusInstallInfo instanceSEPLUS(){
+		IndependantLog.debug("Intialize SePlusInstallInfo with SeleniumPlus Product.");
 		return new SePlusInstallInfo(
 				RELATIVE_DIR_EXTRA_SEPLUS,
+				RELATIVE_DIR_ECLIPSE,
 				RELATIVE_DIR_LIB_SEPLUS,
 				RELATIVE_DIR_JAVA_BIN_SEPLUS,
 				PRODUCT_SELENIUM_PLUS);
@@ -138,6 +151,12 @@ public class SePlusInstallInfo{
 	}
 	public void setExtraDir(File extraDir) {
 		this.extraDir = extraDir;
+	}
+	/**
+	 * @return File, the Eclipse directory {@link #eclipseDir}.
+	 */
+	public File getEclipseDir() {
+		return eclipseDir;
 	}
 	public File getLibraryDir() {
 		return libraryDir;
@@ -169,10 +188,68 @@ public class SePlusInstallInfo{
 
 		cp += File.pathSeparatorChar +libraryDir.getAbsolutePath()+File.separator+JAR_JSTAFEMBEDDED;
 
-		if(appendSystemClassPath) cp += File.pathSeparatorChar+NativeWrapper.GetSystemEnvironmentVariable("CLASSPATH");
+		if(appendSystemClassPath) cp += File.pathSeparatorChar+GetSystemEnvironmentVariable("CLASSPATH");
 		if(cp.contains(" ")) cp ="\""+ cp + "\"";
 
 		return cp;
+	}
+
+	protected static String GetSystemEnvironmentVariable(String env){
+		Object result = null;
+
+		result = System.getenv(env);
+
+		String nativeWrapperClassName = "org.safs.natives.NativeWrapper";
+		Class<?> nativeWrapperClass = null;
+
+		if(result==null){
+			try {
+				nativeWrapperClass = Class.forName(nativeWrapperClassName);
+//				Method method = nativeWrapperClass.getMethod(StringUtils.getCurrentMethodName(false), env.getClass());
+				Method method = nativeWrapperClass.getMethod("GetSystemEnvironmentVariable", Object.class);
+				result = method.invoke(null, env);
+			} catch (Exception e) {
+				IndependantLog.warn(StringUtils.debugmsg(false)+" cannot find "+nativeWrapperClassName);
+			}
+		}
+
+		return result==null?null:result.toString();
+	}
+
+	/**
+	 * Get the value of a property from the Eclipse configuration file (under Eclipse directory {@link #getEclipseDir()})
+	 * <ul>
+	 * <li>".eclipseproduct"
+	 * <li>"configuration\config.ini"
+	 * </ul>
+	 * @param property String, the property name in Eclipse configuration file.
+	 * @return String, the value of the property
+	 * @see #getEclipseDir()
+	 */
+	public String getEclipseConfig(String property){
+		String value = null;
+		Properties p = new Properties();
+		try {
+			p.load(new FileReader(getEclipseDir().getAbsolutePath()+File.separator+".eclipseproduct"));
+			if(p.containsKey(property)){
+				value = p.getProperty(property);
+			}
+		} catch (Exception e) {
+			IndependantLog.debug(StringUtils.debugmsg(false)+"Failed to get property '"+property+"' from file '.eclipseproduct', due to "+e.toString());
+		}
+
+		if(value==null){
+			try {
+				p.load(new FileReader(getEclipseDir().getAbsolutePath()+File.separator+"configuration"+File.separator+"config.ini"));
+				if(p.containsKey(property)){
+					value = p.getProperty(property);
+				}
+			} catch (Exception e) {
+				IndependantLog.debug(StringUtils.debugmsg(false)+"Failed to get property '"+property+"' from file 'config.ini', due to "+e.toString());
+			}
+		}
+
+		return value;
 	}
 
 	public File getChromeDriver(){
@@ -240,7 +317,7 @@ public class SePlusInstallInfo{
 		String errmsg = null;
 
 		homeEnv = isSeleniumPlus()? ENV_SELENIUM_PLUS: ENV_SAFSDIR;
-		installationDir = System.getenv(homeEnv);
+		installationDir = GetSystemEnvironmentVariable(homeEnv);
 		if(!StringUtils.isValid(installationDir)){
 			errmsg = "cannot deduce "+ product +" Installation Directory by Environment Variable '"+homeEnv+"'.";
 			IndependantLog.debug(debugmsg+errmsg);
@@ -269,6 +346,14 @@ public class SePlusInstallInfo{
 			errmsg = "cannot deduce Selenium 'extra' directory at: "+extraDir.getAbsolutePath();
 			IndependantLog.debug(debugmsg+errmsg);
 			throw new SeleniumPlusException(errmsg);
+		}
+		eclipseDir = new File(rootDir, eclipse);
+		if(!eclipseDir.isDirectory()){
+			errmsg = "cannot deduce 'eclipse' directory at: "+eclipseDir.getAbsolutePath();
+			IndependantLog.warn(debugmsg+errmsg);
+			eclipseDir = null;
+			//SAFS doesn't have the embedded Eclipse, so we will not
+			//throw new SeleniumPlusException(errmsg);
 		}
 		javaexe = System.getProperty(SeleniumConfigConstant.SELENIUMSERVER_JVM);
 		if(javaexe==null){
@@ -321,6 +406,7 @@ public class SePlusInstallInfo{
 		sb.append(" the embedded java executable is '"+ javaexe+"'\n");
 		sb.append(" the library path is '"+ libraryDir+"'\n");
 		sb.append(" the extra path is '"+ extraDir+"'\n");
+		sb.append(" the embedded eclipse path is '"+ eclipseDir+"'\n");
 		for(String browser:browserToDriverFiles.keySet()){
 			sb.append(" the '"+browser+"' driver path is '"+ getDriver(browser) +"'\n");
 		}
@@ -332,8 +418,10 @@ public class SePlusInstallInfo{
 	public static final String PRODUCT_SELENIUM_PLUS 	= "SeleniumPlus";
 	public static final String PRODUCT_SAFS 			= "SAFS";
 
-	public static final String ENV_SELENIUM_PLUS 		= "SELENIUM_PLUS";
-	public static final String ENV_SAFSDIR 				= "SAFSDIR";
+	public static final String ENV_SELENIUM_PLUS 		= Constants.ENV_SELENIUM_PLUS;
+	public static final String ENV_SAFSDIR 				= Constants.ENV_SAFSDIR;
+
+	public static final String RELATIVE_DIR_ECLIPSE 			= "eclipse";
 
 	public static final String RELATIVE_DIR_EXTRA_SAFS 			= "extra";
 	public static final String RELATIVE_DIR_LIB_SAFS 			= "lib";
@@ -380,19 +468,44 @@ public class SePlusInstallInfo{
 	}
 
 	/**
-	 * @return true if we detect we are running from a SeleniumPlus installation (/libs/selenium-plus*.jar)
+	 * To test if we are using product "SeleniumPlus". Needs satisfy:
+	 * <ul>
+	 * <li>The environment {@link Constants#ENV_SELENIUM_PLUS} must exist.
+	 * <li>We are running from a SeleniumPlus installation (/libs/selenium-plus*.jar or {@link Constants#ENV_SELENIUM_PLUS})
+	 * </ul>
+	 * @return true if we are using product "SeleniumPlus"
 	 */
 	public static boolean IsSeleniumPlus(){
-		String filepath = getSourceLocation();
-		return filepath.toLowerCase().contains(INDICATOR_SEPLUS);
+		return IsProduct(ENV_SELENIUM_PLUS, INDICATOR_SEPLUS);
 	}
-
 	/**
-	 * @return true if we detect we are running from a SAFS installation (/lib/safsselenium.jar)
+	 * To test if we are using product "SAFS". Needs satisfy:
+	 * <ul>
+	 * <li>The environment {@link Constants#ENV_SAFSDIR} must exist.
+	 * <li>We are running from a SAFS installation (/lib/safsselenium.jar or {@link Constants#ENV_SAFSDIR})
+	 * </ul>
+	 * @return boolean if we detect we are using product "SAFS"
 	 */
 	public static boolean IsSAFS(){
-		String filepath = getSourceLocation();
-		return filepath.toLowerCase().contains(INDICATOR_SAFS);
+		return IsProduct(ENV_SAFSDIR, INDICATOR_SAFS);
+	}
+
+	private static boolean IsProduct(String environmentHome, String indicator){
+		String sourceLocation = getSourceLocation().toLowerCase();
+
+		String home = GetSystemEnvironmentVariable(environmentHome);
+
+		if(home!=null){
+			//replace backslash "\" by slash "/"
+			if(File.separator.equals("\\")){
+				home = home.replaceAll("\\\\", "/");
+			}
+			IndependantLog.debug(environmentHome+"="+home);
+			IndependantLog.debug("sourceLocation="+sourceLocation);
+			return sourceLocation.contains(indicator) || sourceLocation.contains(home.toLowerCase());
+		}
+
+		return false;
 	}
 
 	static{
