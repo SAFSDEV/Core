@@ -9,6 +9,7 @@ package org.safs.install;
  *                                                                   Call these functionalities in downloader thread directly, wait for unzip done before updateDiretory.
  *    JUL 15, 2015	(LeiWang)	Modify processArgs(): Catch Throwable to avoid infinite loop waiting.
  *    JAN 04, 2016	(LeiWang)	Add '-q' for quiet mode so that no dialog will prompt for confirmation.
+ *    APR 11, 2017	(LeiWang)	Initialized unzipSkipPredicator for skipping plugin files for certain Eclipse version.
  **/
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -31,7 +32,14 @@ import java.util.Set;
 
 import javax.swing.JOptionPane;
 
+import org.safs.Constants.EclipseConstants;
+import org.safs.IndependantLog;
+import org.safs.SAFSException;
+import org.safs.StringUtils;
+import org.safs.selenium.util.SePlusInstallInfo;
+import org.safs.selenium.webdriver.lib.SeleniumPlusException;
 import org.safs.text.FileUtilities;
+import org.safs.text.FileUtilities.Predicate;
 
 /**
  * A generic customizable File directory updater for SAFS users wishing to update certain library assets
@@ -144,6 +152,12 @@ public class LibraryUpdate {
 	final ProgressIndicator progressor = new ProgressIndicator();
     int progress = 0;
 
+    /**
+     * Used to skip any files when un-zip file. It is initialized in {@link #init()}.
+     * @see #init()
+     */
+    protected Predicate<String> unzipSkipPredicator = null;
+
 	/**
 	 * Default constructor using standard System.out and System.err console streams.
 	 */
@@ -166,6 +180,31 @@ public class LibraryUpdate {
 	        	progressor.createAndShowGUI();
 	        }
 	    });
+
+	    try {
+			String eclipseVersion = SePlusInstallInfo.instance().getEclipseConfig(EclipseConstants.PROPERTY_VERSION);
+			//If the current installed Eclipse is NOT Mars (Eclipse4.5), then initialize the "unzipSkipPredicator" to bapass the "eclipse cvs plugin files"
+			if(!EclipseConstants.VERSION_NUMBER_MARS.equals(eclipseVersion)){
+				unzipSkipPredicator = new Predicate<String>(){
+					@Override
+					public boolean test(String filename) {
+						for(String pattern: EclipseConstants.PATTERN_PLUGINS_CVS_FOR_MARS){
+							try {
+								if(StringUtils.matchRegex(pattern, filename)){
+									return true;
+								}
+							} catch (SAFSException e) {
+								IndependantLog.warn("Failed to compare pattern '"+pattern+"' with filename '"+filename+"', due to "+e.toString());
+							}
+						}
+						return false;
+					}
+				};
+			}
+		} catch (SAFSException e) {
+			IndependantLog.warn("Failed to initialize field 'unzipSkipperPredicate', due to "+e.toString());
+		}
+
 	}
 
 	/**
@@ -231,7 +270,7 @@ public class LibraryUpdate {
 								//Unzip the downloaded zip file, it takes time
 								zipfileFullPath = zipfile.getAbsolutePath();
 								progressor.setProgressMessage("Unzipping '"+zipfileFullPath+"' to '"+sourcedir+"'...");
-								FileUtilities.unzipFile(zipfileFullPath, sourcedir, false);
+								FileUtilities.unzipJAR(zipfileFullPath, sourcedir, false, unzipSkipPredicator);
 								zipfile.delete();
 								unzipDone = true;
 							}catch(MalformedURLException mf){
@@ -683,6 +722,32 @@ public class LibraryUpdate {
 		return quiet;
 	}
 
+	private void __testUpzipSkipperPredicate() throws SeleniumPlusException {
+
+		if(unzipSkipPredicator!=null){
+			SePlusInstallInfo seinfo = SePlusInstallInfo.instance();
+			File eclipseDir = seinfo.getEclipseDir();
+			if(eclipseDir!=null){
+				progressor.setProgressMessage("eclipse "+EclipseConstants.PROPERTY_VERSION+"="+seinfo.getEclipseConfig(EclipseConstants.PROPERTY_VERSION));
+				progressor.setProgressMessage(EclipseConstants.PROPERTY_BUILDID+"="+seinfo.getEclipseConfig(EclipseConstants.PROPERTY_BUILDID));
+				//Get all plugins of Eclipse
+				File plugins = new File(eclipseDir.getAbsolutePath()+File.separator+"plugins");
+
+				for(File plugin: plugins.listFiles()){
+					if(unzipSkipPredicator.test(plugin.getName())){
+						progressor.setProgressMessage("Sikp "+plugin.getAbsolutePath());
+					}
+				}
+			}else{
+				progressor.setProgressMessage("Cannot detect Eclipse installation directory.");
+			}
+		}else{
+			progressor.setProgressMessage("unzip skipper predicator has not been initialized.");
+		}
+
+		StringUtils.sleep(3000);
+	}
+
 	/**
 	 * The main entry point for the application when invoked via the command-line.
 	 * @param args
@@ -717,6 +782,13 @@ public class LibraryUpdate {
 		int exitcode = 0;
 		try{
 			updater = new LibraryUpdate();
+
+			//if the argument is "-unittest"
+			if(args.length>0 && args[0].trim().toLowerCase().equals("-unittest")){
+				updater.__testUpzipSkipperPredicate();
+				return;
+			}
+
 			//sufficent valid args provided
 			if(!updater.processArgs(args)){
 				if(! updater.canceled){
@@ -743,12 +815,14 @@ public class LibraryUpdate {
 			updater.progressor.setProgressInfo(100,x.getMessage());
 			if(!updater.isQuiet())  JOptionPane.showMessageDialog(null, x.getMessage()+"\n"+ updater.help_string, updater.prompt, JOptionPane.ERROR_MESSAGE);
 			exitcode = -2;
+		}finally{
+			try{
+				String mainclass = org.safs.tools.MainClass.deduceMainClass();
+				if( LibraryUpdate.class.getName().equals(mainclass) ||
+						mainclass.endsWith("safsupdate.jar")	)
+					System.exit(exitcode);
+			}catch(Throwable ignore){}
 		}
-		try{
-			String mainclass = org.safs.tools.MainClass.deduceMainClass();
-			if( LibraryUpdate.class.getName().equals(mainclass) ||
-			    mainclass.endsWith("safsupdate.jar")	)
-			     System.exit(exitcode);
-		}catch(Throwable ignore){}
+
 	}
 }

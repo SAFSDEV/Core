@@ -17,6 +17,7 @@ package org.safs.text;
  * <br>	FEB 04, 2015	(SBJLWA)    Modify getBufferedFileReader(): deduce the file encoding if no encoding is provided.
  * <br>	APR 06, 2016	(CANAGL)    Support FileAttribute.ALLFILES Type to specify all non-VOLUMELABEL files at a location.
  * <br>	DEC 29, 2016	(SBJLWA)    Added deduceDatapoolFile(): deduce file relative to datapool.
+ * <br>	APR 11, 2017	(SBJLWA)    Override unzipJAR(): provide a version accepting Predicate parameter.
  *
  *********************************************************************************************/
 
@@ -50,6 +51,7 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.safs.Constants;
 import org.safs.IndependantLog;
 import org.safs.SAFSException;
 import org.safs.StringUtils;
@@ -935,6 +937,16 @@ public class FileUtilities
 	}
 
 	/**
+	 * Provides one method test() returning boolean.<br/>
+	 * A copy from Java 8, this interface could be removed when using Java 8 or later.<br/>
+	 *
+	 * @param <T>
+	 */
+	public interface Predicate<T> {
+	  boolean test(T t);
+	}
+
+	/**
 	 * @param zipFileName, String, the 'zip' or 'jar' file to be uncompressed.
 	 * @param root, File, the directory to store the uncompressed files.
 	 * @param verbose, boolean, if the uncompressed message will be printed to console.
@@ -943,70 +955,92 @@ public class FileUtilities
 	 * @throws FileNotFoundException
 	 */
 	public static void unzipJAR(String zipFileName, File root, boolean verbose, boolean noMETADir) throws IOException, FileNotFoundException{
-		ZipFile zip = new ZipFile(zipFileName);
-		Enumeration<?> files = zip.entries();
-		final String METAINF  = "META-INF";
-		final String MANIFEST = "MANIFEST.MF";
+		Predicate<String> skipPredicator = null;
+		if(noMETADir){
+			skipPredicator = new Predicate<String>(){
+				@Override
+				public boolean test(String filename) {
+					return filename.toUpperCase().contains(Constants.METAINF+"/");
+				}
+			};
+		}
 
-		// cycle through to make any required subdirectories
-		while(files.hasMoreElements()){
+		unzipJAR(zipFileName, root, verbose, skipPredicator);
 
-			ZipEntry zipfile = (ZipEntry) files.nextElement();
-			File file;
-			File directory;
+	}
+	/**
+	 * @param zipFileName String, the 'zip' or 'jar' file to be uncompressed.
+	 * @param root File, the directory to store the uncompressed files.
+	 * @param verbose boolean, if the uncompressed message will be printed to console.
+	 * @param skipPredicator Predicate, if its method test(T) returns true, then skip the file when unzip files.
+	 * @throws IOException
+	 * @throws FileNotFoundException
+	 */
+	public static void unzipJAR(String zipFileName, File root, boolean verbose, Predicate<String> skipPredicator) throws IOException, FileNotFoundException{
+		ZipFile zip = null;
 
-			String filename  = zipfile.getName();
-			long   time      = zipfile.getTime();
+		try{
+			zip = new ZipFile(zipFileName);
+			Enumeration<?> files = zip.entries();
+			// cycle through to make any required subdirectories
+			while(files.hasMoreElements()){
 
-			if(noMETADir){
-				if(filename.toUpperCase().contains(METAINF+"/")) {
-					//System.out.println("Skipping JAR Entry "+ filename);
+				ZipEntry zipfile = (ZipEntry) files.nextElement();
+				File file;
+				File directory;
+
+				String filename  = zipfile.getName();
+				long   time      = zipfile.getTime();
+
+				if(skipPredicator!=null && skipPredicator.test(filename)){
 					if(verbose) IndependantLog.info("Skipping file "+filename+" ...");
 					continue;
 				}
-			}
-			// see if the current file in the ZipFile is needed to be copied to the target directory.
-			// If a same file exists in the target directory already,it will be decided by its last modified time.
-			// No need to replace the existing file if it is newer than its update!
-			String replacedfilename = root + File.separator + filename;
-			File replacedfile = new CaseInsensitiveFile(root + File.separator + filename).toFile();
-			try {
-				if (replacedfile.exists()) {
-					long modifiedtime = replacedfile.lastModified();
-					if (modifiedtime >= time){ // no need to replace the existing file
-						if(!replacedfile.isDirectory()) IndependantLog.info(replacedfilename + " does not have a new version, will not overwrite it!");
-						continue;
+
+				// see if the current file in the ZipFile is needed to be copied to the target directory.
+				// If a same file exists in the target directory already,it will be decided by its last modified time.
+				// No need to replace the existing file if it is newer than its update!
+				String replacedfilename = root + File.separator + filename;
+				File replacedfile = new CaseInsensitiveFile(root + File.separator + filename).toFile();
+				try {
+					if (replacedfile.exists()) {
+						long modifiedtime = replacedfile.lastModified();
+						if (modifiedtime >= time){ // no need to replace the existing file
+							if(!replacedfile.isDirectory()) IndependantLog.info(replacedfilename + " does not have a new version, will not overwrite it!");
+							continue;
+						}
+					}
+				}catch (Exception x){;}
+
+				if(verbose) IndependantLog.info("Extracting file "+filename+" ...");
+				if( zipfile.isDirectory()){
+					directory = new CaseInsensitiveFile(root, filename).toFile();
+					directory.mkdirs();
+					continue;
+				}
+				else{
+					file = new CaseInsensitiveFile(root, filename).toFile();
+					try{
+						directory = file.getParentFile();
+						if (! directory.exists()){
+							directory.mkdirs();
+						}
+					}
+					catch(NullPointerException np){;}
+					catch(Exception x){
+						throw new FileNotFoundException(
+								"Specified install path could not be created.");
 					}
 				}
-			}catch (Exception x){;}
 
-			if(verbose) IndependantLog.info("Extracting file "+filename+" ...");
-			if( zipfile.isDirectory()){
-				directory = new CaseInsensitiveFile(root, filename).toFile();
-				directory.mkdirs();
-				continue;
+				copyFile(zip.getInputStream(zipfile), new FileOutputStream(file));
+
+				file.setLastModified(time);
 			}
-			else{
-				file = new CaseInsensitiveFile(root, filename).toFile();
-				try{
-					directory = file.getParentFile();
-					if (! directory.exists()){
-						directory.mkdirs();
-				    }
-				}
-				catch(NullPointerException np){;}
-				catch(Exception x){
-				    throw new FileNotFoundException(
-				    "Specified install path could not be created.");
-				}
-			}
-
-			copyFile(zip.getInputStream(zipfile), new FileOutputStream(file));
-
-			file.setLastModified(time);
+		}finally{
+			if(zip!=null) zip.close();
 		}
 
-		zip.close();
 	}
 
 	/**

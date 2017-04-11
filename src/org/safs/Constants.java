@@ -11,6 +11,7 @@
  * MAR 07, 2017    (SBJLWA) Added constants for setting of the browser-driver in Selenium.
  * MAR 10, 2017    (SBJLWA) Added RestConstants.
  * APR 05, 2017    (SBJLWA) Added AutoItConstants.
+ * APR 11, 2017    (SBJLWA) Added EclipseConstants and some other constant fields.
  */
 package org.safs;
 
@@ -30,8 +31,18 @@ public class Constants {
 	/** '<b>127.0.0.1</b>'*/
 	public static final String LOCAL_HOST_IP = "127.0.0.1";
 
-	/** 'NOAUTHENTICATION'*/
+	/** '<b>NOAUTHENTICATION</b>'*/
 	public static final String NO_AUTHENTICATION = "NOAUTHENTICATION";
+
+	/** '<b>META-INF</b>' */
+	public static final String METAINF  = "META-INF";
+	/** '<b>MANIFEST.MF</b>' */
+	public static final String MANIFEST = "MANIFEST.MF";
+
+	/** '<b>SELENIUM_PLUS</b>' environment storing the installation directory of Selenium Plus. */
+	public static final String ENV_SELENIUM_PLUS 		= "SELENIUM_PLUS";
+	/** '<b>SAFSDIR</b>' environment storing the installation directory of SAFS. */
+	public static final String ENV_SAFSDIR 				= "SAFSDIR";
 
 	public static class BrowserConstants{
 		/**'<b>explorer</b>'*/
@@ -162,6 +173,24 @@ public class Constants {
 			return keys.toArray(new String[0]);
 
 		}
+	}
+
+	public static class EclipseConstants{
+
+		/** "version" the property in file ".eclipseproduct" indicating the Eclipse's version. */
+		public static final String PROPERTY_VERSION = "version";
+
+		/** "eclipse.buildId" the property in file "config.ini" indicating the Eclipse's build ID. */
+		public static final String PROPERTY_BUILDID = "eclipse.buildId";
+
+		/** "4.5" for Eclipse Mars, refer to https://en.wikipedia.org/wiki/Eclipse_(software) */
+		public static final String VERSION_NUMBER_MARS = "4.5";
+
+		public static final String[] PATTERN_PLUGINS_CVS_FOR_MARS = {
+			"org\\.eclipse\\.cvs_.*\\.jar",
+			"org\\.eclipse\\.team\\.cvs\\..*\\.jar"
+		};
+
 	}
 
 	public static class SeleniumConstants{
