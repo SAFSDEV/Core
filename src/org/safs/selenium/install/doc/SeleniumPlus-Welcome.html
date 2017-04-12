@@ -1,7 +1,7 @@
 <html>
 <head>
 <title>Intro to SeleniumPlus</title>
-<link rel="stylesheet" type="text/css" href="../../sqabasic2000/rrafs.css">
+<link rel="stylesheet" type="text/css" href="../../sqabasic2000/rrafs.css" />
 <style>
 
 .appmap {
@@ -201,7 +201,7 @@ function browserDrivers(){
 <body onload="showWelcome();">
 <span style="font-size: 32px;font-weight: bold">Intro to SeleniumPlus</span>
 <br>
-<small>Updated: 2015.09.30</small>
+<small>Updated: 2017.04.12</small>
 <br>
 <div id="menu" class="panelselector">
 <hr>
@@ -256,9 +256,7 @@ When meeting any problem, please<br/>
 The SAFS/SeleniumPlus Development Team
 <ul>
     Carl Nagle<br>
-    Dharmesh Patel<br>
-    Lei Wang</br>
-    Tao Xie
+    Lei Wang
 </ul>
 </div>
 
@@ -456,9 +454,8 @@ For more detailed information on each:
 <!-- Edit AppMaps                -->
 <!--------------------------------->
 <div id="appmaps" style="display: none;">
-<a name="edit_maps"/>
 <p><h2>
-	App Maps provide a critical <b style='color:red;'>single point of maintenance</b>
+	App Maps provide a critical <span style="color:red;">single point of maintenance</span>
 	for important data and component recognition used throughout your tests.
 </h2>
 <p>
@@ -478,8 +475,9 @@ For more detailed information on each:
 	<p>
 	In general, there is a "primary" ProjectApp.map file which holds the bulk of all recognition strings and Application Constants.  Then, there can be one or more App Map files containing language-specific values used by or overriding the primary App Map values.
 	<p>
-	The <b>AppMap.order</b> file is a means to chain multiple App Maps to be loaded in a specific order.<br>
-	<br/> Example:
+	The <b>AppMap.order</b> file is a means to chain multiple App Maps to be loaded in a specific order.
+	<p>
+	Example:
 <div class="appmap"><pre>
 ;
 ; Order App Maps Last In First Out (LIFO) for "chaining"
@@ -1459,15 +1457,15 @@ There are 3 ways:
 	This script should be in folder %SELENIUM_PLUS%\extra or %SAFSDIR%\extra.<br/>
 	<ol>
 	<li>If it exists and is latest<br/>
-	    The script usage is <span class="sourcecodes">updateRuntime.bat [ALL|SE|SAFS]</span>, with parameter "SE" it updates SeleniumPlus, with "SAFS" it updates SAFS, with "ALL" it updates both "SeleniumPlus" and "SAFS".<br/> 
-	    So call <span class="commandline">updateRuntime.bat SE</span> to update SeleniumPlus.<br/>	
+	    The script usage is <span class="sourcecodes">updateRuntime.bat [ALL|SE|SAFS]</span>, with parameter "SE" it updates SeleniumPlus, with "SAFS" it updates SAFS, with "ALL" it updates both "SeleniumPlus" and "SAFS".<br/>
+	    So call <span class="commandline">updateRuntime.bat SE</span> to update SeleniumPlus.<br/>
 	<li>If it exists but is not latest<br/>
 	    No parameter is needed, call <span class="commandline">updateRuntime.bat</span> directly to get latest version of SeleniumPlus.
 	<li>If it does not exist<br/>
 	    Please get its <a href="https://github.com/SAFSDEV/Core/blob/master/src/org/safs/selenium/install/extra/updateRuntime.bat" target="blank">sourcecode</a> manually. The latest script should be dated 11/30/2016.<br/>
 	    Then call <span class="commandline">updateRuntime.bat SE</span>.
 	</ol>
-	
+
 	<p>
 	In the script, we are using the internal update resource which is faster. If you prefer using external update resource, then comment "internal resource" and un-comment "external resource".
 	<div class="CodeBox">
@@ -1735,7 +1733,7 @@ Examples as below:<br>
 <div class="appmap"><pre>
 [SAFS_SELENIUM]
 <span class="comments"># <a href="../../doc/org/safs/Constants.SeleniumConstants.html#ITEM_WEB_DRIVERS" target="api">WEB_DRIVERS</a> is used to set the specific browser
-# drivers (separated by colon :) to start with selenium server. 
+# drivers (separated by colon :) to start with selenium server.
 # The following setting means 3 drivers, IE, chrome and edge will
 # start with the selenium server.</span>
 WEB_DRIVERS=explorer:chrome:MicrosoftEdge
@@ -1743,8 +1741,8 @@ WEB_DRIVERS=explorer:chrome:MicrosoftEdge
 <p>
 
 <li>Configured by VM parameter:
-<pre><span class="comments">VM parameter '<a href="../../doc/org/safs/Constants.SeleniumConstants.html#PROPERTY_WEB_DRIVERS" target="api">safs.selenium.web.drivers</a>' is used to 
-set the specific browser drivers (separated by colon :) to start with selenium server. 
+<pre><span class="comments">VM parameter '<a href="../../doc/org/safs/Constants.SeleniumConstants.html#PROPERTY_WEB_DRIVERS" target="api">safs.selenium.web.drivers</a>' is used to
+set the specific browser drivers (separated by colon :) to start with selenium server.
 The following setting means 2 drivers, IE and edge will start with the selenium server,
 and in the class SampleTest, the user can test with the chrome or edge browser.</span>
 java <b>-Dsafs.selenium.web.drivers=chrome:MicrosoftEdge</b> SampleTest
@@ -1831,11 +1829,11 @@ SET JAVA_EXE=&lt;pathTo>\java.exe  (JRE Java 7 minimum)
 </ol>
 
 <h4 id="details_seplus_rmi">About SeleninumPlus-RMI-Server.</h4>
-It is important to note that SeleniumPlus provides some advanced features beyond the scope of Selenium itself.  
+It is important to note that SeleniumPlus provides some advanced features beyond the scope of Selenium itself.
 For example, Selenium has particular difficulties consistently performing keyboard and mouse actions across all the different supported browsers and versions of browsers.
 For this reason, SeleniumPlus augments keyboard and mouse actions with additional support not found in Selenium.
 <p>
-In order for a remote Selenium Server to provide equivalent augmented support provided by SeleniumPlus, 
+In order for a remote Selenium Server to provide equivalent augmented support provided by SeleniumPlus,
 the remote Selenium Server must be launched in a manner that allows us to inject that support into the remote Java JVM running the Selenium Server.
 Consult <a href="#using_seleniumserverrunner" alt="Using Selenium Server Runner">Using Selenium Server Runner</a> to know how.
 
@@ -1863,17 +1861,17 @@ and the last 2th line tells us that the node has registered on hub server.</span
 <div id="browser-drivers" style="display: none;">
 <h2>Browser Drivers</h2>
 <h3>About Browser Drivers</h3>
-    Selenium needs a driver to communicate with a specific browser. On Windows for example, 
+    Selenium needs a driver to communicate with a specific browser. On Windows for example,
     <ul>
-    <li>chromedriver.exe is needed to run test on Chrome; 
+    <li>chromedriver.exe is needed to run test on Chrome;
     <li>IEDriverServer.exe is needed for IE;
     <li>MicrosoftWebDriver.exe is needed for Edge
     <li>etc.
     </ul>
-    These drivers are provided by third party (NOT by selenium). 
+    These drivers are provided by third party (NOT by selenium).
     Only one exception, prior to "Selenium 3.0", the firefox driver is integrated in the selenium.
     But after "Selenium 3.0", the firefox driver has been moved out of selenium, and it is independent as gecko-driver.
-     
+
 <h3>Currently supported browsers</h3>
     <ul>
     <li>IE <b>11</b> or earlier
@@ -1882,10 +1880,10 @@ and the last 2th line tells us that the node has registered on hub server.</span
     <li>Edge <b>14.14393</b> or earlier
     </ul>
 <h3>Update browser drivers</h3>
-    We have posted a thread talking about 
+    We have posted a thread talking about
     <a href="http://safsdev.freeforums.net/thread/42/get-appropriate-drivers-specific-browser" target="_blank">get appropriate drivers for a specific browser</a><br/>
     After getting the driver,
-    <ol> 
+    <ol>
     <li>We can put it into the folder %SELENIUM_PLUS%/extra
     <li>User may also need to update the <a href="http://selenium-release.storage.googleapis.com/index.html" target="_blank">selenium-server-standalone-xxx.jar</a> and
     put it to %SELENIUM_PLUS%/libs
@@ -1893,9 +1891,9 @@ and the last 2th line tells us that the node has registered on hub server.</span
 <h3>Configure browser drivers</h3>
     Only <b>chrome</b>, <b>IE</b> and <b>firefox</b> are by default configured to start with "selenium server", and
     the test can run on them.<br/>
-    User needs to <a href="http://safsdev.freeforums.net/thread/40/configure-browser-drivers-seleniumplus" target="_blank">configure drivers</a> 
+    User needs to <a href="http://safsdev.freeforums.net/thread/40/configure-browser-drivers-seleniumplus" target="_blank">configure drivers</a>
     if he wants to run test against another browser.
-    
+
 </div>
 
 <!--------------------------------->
@@ -1937,20 +1935,20 @@ We don't need to understand all of them  :) , the items below are listed by nece
   <li><b>"Javascript snippet"</b>:  It is passed in as first parameter for <span class="sourcecodes">executeScript()</span> and <span class="sourcecodes">executeAsyncScript()</span>;
                                     While it is passed in as second parameter for <span class="sourcecodes">ExecuteScript()</span>.
   <li><b>"Javascript parameters"</b>: They are defined by keyword arguments, so arguments[0], arguments[1] ... can be used in the Javascript snippet.
-                                      They are passed in as second, third ... parameters of <span class="sourcecodes">executeScript()</span> and <span class="sourcecodes">executeAsyncScript()</span>; 
+                                      They are passed in as second, third ... parameters of <span class="sourcecodes">executeScript()</span> and <span class="sourcecodes">executeAsyncScript()</span>;
                                       While for <span class="sourcecodes">ExecuteScript()</span>, the first parameter Component is arguments[0], and the third parameter is arguments[1], fourth parameter is arguments[2] etc.
   <li><b>"callback method"</b>:     It is ONLY for <b>asynchronous</b> invocation <span class="sourcecodes">executeAsyncScript()</span>, this callback is always injected automatically as the last argument,
-                                    so it is always <b>arguments[arguments.length - 1]</b>. The Javascript snippet must explicitly signal it is finished by invoking this callback. 
-                                    The first argument passed to the callback function will be used as the script's result. 
+                                    so it is always <b>arguments[arguments.length - 1]</b>. The Javascript snippet must explicitly signal it is finished by invoking this callback.
+                                    The first argument passed to the callback function will be used as the script's result.
                                     <a href="https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/JavascriptExecutor.html#executeAsyncScript-java.lang.String-java.lang.Object...-" target="_blank">The conversion from Javascript object to Java object definition</a>.
-  <li><b>"script timeout"</b>:  It is ONLY for <b>asynchronous</b> invocation <span class="sourcecodes">executeAsyncScript()</span>, the default timeout for a script to be executed is 0ms. 
-                                In most cases one must set the script timeout beforehand to a value sufficiently large enough by calling 
+  <li><b>"script timeout"</b>:  It is ONLY for <b>asynchronous</b> invocation <span class="sourcecodes">executeAsyncScript()</span>, the default timeout for a script to be executed is 0ms.
+                                In most cases one must set the script timeout beforehand to a value sufficiently large enough by calling
                                 <a href="../../doc/org/safs/selenium/webdriver/SeleniumPlus.WDTimeOut.html#setScriptTimeout(long,%20java.util.concurrent.TimeUnit)" target="_blank">setScriptTimeout(long,TimeUnit)</a>.
-  <li><b>"debug() method"</b>:  For <b>synchronous</b> invocation <span class="sourcecodes">executeScript()</span> and <span class="sourcecodes">ExecuteScript()</span>, 
+  <li><b>"debug() method"</b>:  For <b>synchronous</b> invocation <span class="sourcecodes">executeScript()</span> and <span class="sourcecodes">ExecuteScript()</span>,
                                 user can call debug(debug-message) in the Javascript snippet to write debug message into SE+ debug log.
                                 By default, this functionality is off, user can turn it on by setting <span class="sourcecodes">JavaScriptFunctions.jsDebugLogEnable=true</span>.
                                 Normally the debug message will be written to a file, we can also send debug message to browser's console by setting <span class="sourcecodes">JavaScriptFunctions.logToBrowserConsole=true</span>.
-  <li><b>"throw_error() method"</b>:    For <b>synchronous</b> invocation <span class="sourcecodes">executeScript()</span> and <span class="sourcecodes">ExecuteScript()</span>, 
+  <li><b>"throw_error() method"</b>:    For <b>synchronous</b> invocation <span class="sourcecodes">executeScript()</span> and <span class="sourcecodes">ExecuteScript()</span>,
                                         user can call throw_error(error-message) in the Javascript snippet so that a JSException will be thrown out in Java code. Below is how it is normally used in Javascript snippet.
 <div class="CodeBox">
 <pre class="SourceCode">
@@ -1962,12 +1960,12 @@ We don't need to understand all of them  :) , the items below are listed by nece
 </pre>
 </div>
 
-  <li><b>"event listener"</b>:  Here we are NOT talking about the "event listener" inside Javascript, BUT about the Java listener reacting to the Javascript event. 
-                                We can call 
-                                <a href="../../doc/org/safs/selenium/webdriver/lib/SearchObject.html#addJavaScriptEventListener(org.openqa.selenium.WebElement,%20java.lang.String,%20org.safs.selenium.webdriver.lib.SearchObject.GenericJSEventListener)" target="_blank">addJavaScriptEventListener(WebElement, eventName, listener)</a>/ 
-                                <a href="../../doc/org/safs/selenium/webdriver/lib/SearchObject.html#removeJavaScriptEventListener(org.openqa.selenium.WebElement,%20java.lang.String,%20java.lang.String)" target="_blank">removeJavaScriptEventListener(WebElement, eventName, listenerID)</a> 
-                                to add/remove listener. Below is an example how to add a <a href="../../doc/org/safs/selenium/webdriver/lib/SearchObject.DefaultJSEventListener.html" target="_blank">DefaultJSEventListener</a> for "mousedown" event on a WebElement. 
-                                This DefaultJSEventListener is not public class, it is a protected inner class inside <a href="https://github.com/SAFSDEV/Core/blob/master/src/org/safs/selenium/webdriver/lib/SearchObject.java" target="_blank">SearchObject</a>, 
+  <li><b>"event listener"</b>:  Here we are NOT talking about the "event listener" inside Javascript, BUT about the Java listener reacting to the Javascript event.
+                                We can call
+                                <a href="../../doc/org/safs/selenium/webdriver/lib/SearchObject.html#addJavaScriptEventListener(org.openqa.selenium.WebElement,%20java.lang.String,%20org.safs.selenium.webdriver.lib.SearchObject.GenericJSEventListener)" target="_blank">addJavaScriptEventListener(WebElement, eventName, listener)</a>/
+                                <a href="../../doc/org/safs/selenium/webdriver/lib/SearchObject.html#removeJavaScriptEventListener(org.openqa.selenium.WebElement,%20java.lang.String,%20java.lang.String)" target="_blank">removeJavaScriptEventListener(WebElement, eventName, listenerID)</a>
+                                to add/remove listener. Below is an example how to add a <a href="../../doc/org/safs/selenium/webdriver/lib/SearchObject.DefaultJSEventListener.html" target="_blank">DefaultJSEventListener</a> for "mousedown" event on a WebElement.
+                                This DefaultJSEventListener is not public class, it is a protected inner class inside <a href="https://github.com/SAFSDEV/Core/blob/master/src/org/safs/selenium/webdriver/lib/SearchObject.java" target="_blank">SearchObject</a>,
                                 click this link and search "DefaultJSEventListener" to get the source code, you can imitate it to write your own listener.
 <div class="CodeBox">
 <pre class="SourceCode">
@@ -2167,7 +2165,7 @@ StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
                                                         <b>quote(SelectBrowser.KEY_PROXY_SETTING)</b>,
                                                         <b>quote("proxy.server:8080")</b>
                                                         });
-                                                        
+
 <span class="comments">//Start the firefox web browser with proxy server as "proxy.server" and proxy server port as "8080"</span>
 <span class="comments">//local.site1, local.site2 will not be routed through "proxy.server"</span>
 StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
