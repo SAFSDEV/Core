@@ -44,17 +44,20 @@ IF NOT [%PRODUCT%]==[ALL] (
 :UPDATE_SE
 ECHO "Updating product SeleniumPlus."
 SET BACKUP_LIBDIR=%SELENIUM_PLUS%\update_bak\libs
+SET JAVA_EXE=%SELENIUM_PLUS%\Java\bin\java
+IF NOT EXIST %BACKUP_LIBDIR% MKDIR %BACKUP_LIBDIR%
 copy %SELENIUM_PLUS%\libs\safsupdate.jar %BACKUP_LIBDIR%\safsupdate.jar
-java -jar %BACKUP_LIBDIR%\safsupdate.jar -r -a -q -prompt:"SeleniumPlus Plugin Update" -s:"%SE_PLUGIN_UPDATE%" -t:"%SELENIUM_PLUS%\eclipse\plugins" -b:"%SELENIUM_PLUS%\eclipse\plugins\update_bak"
-java -jar %BACKUP_LIBDIR%\safsupdate.jar -r -a -q -prompt:"SeleniumPlus Libs Update" -s:"%SE_LIB_UPDATE%" -t:"%SELENIUM_PLUS%" -b:"%SELENIUM_PLUS%\update_bak"
+%JAVA_EXE% -jar %BACKUP_LIBDIR%\safsupdate.jar -r -a -q -prompt:"SeleniumPlus Plugin Update" -s:"%SE_PLUGIN_UPDATE%" -t:"%SELENIUM_PLUS%\eclipse\plugins" -b:"%SELENIUM_PLUS%\eclipse\plugins\update_bak"
+%JAVA_EXE% -jar %BACKUP_LIBDIR%\safsupdate.jar -r -a -q -prompt:"SeleniumPlus Libs Update" -s:"%SE_LIB_UPDATE%" -t:"%SELENIUM_PLUS%" -b:"%SELENIUM_PLUS%\update_bak"
 IF NOT [%PRODUCT%]==[ALL] GOTO SHOW_INFO
 
 :UPDATE_SAFS
 ECHO "Updating product SAFS."
 SET BACKUP_LIBDIR=%SAFSDIR%\update_bak\lib
+SET JAVA_EXE=%SAFSDIR%\jre\bin\java
 IF NOT EXIST %BACKUP_LIBDIR% MKDIR %BACKUP_LIBDIR%
 copy %SAFSDIR%\lib\safsupdate.jar %BACKUP_LIBDIR%\safsupdate.jar
-java -jar %BACKUP_LIBDIR%\safsupdate.jar -r -a -q -prompt:"SAFS Libs Update" -s:"%SAFS_LIB_UPDATE%" -t:"%SAFSDIR%" -b:"%SAFSDIR%\update_bak"
+%JAVA_EXE% -jar %BACKUP_LIBDIR%\safsupdate.jar -r -a -q -prompt:"SAFS Libs Update" -s:"%SAFS_LIB_UPDATE%" -t:"%SAFSDIR%" -b:"%SAFSDIR%\update_bak"
 IF NOT [%PRODUCT%]==[ALL] GOTO SHOW_INFO
 
 GOTO END
