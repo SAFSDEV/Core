@@ -185,6 +185,8 @@ public class Constants {
 
 		/** "4.5" for Eclipse Mars, refer to https://en.wikipedia.org/wiki/Eclipse_(software) */
 		public static final String VERSION_NUMBER_MARS = "4.5";
+		/** "4.5.2" is the version of Eclipse Mars (without CVS plugins) once provided with SeleniumPlus. */
+		public static final String VERSION_NUMBER_MARS_4_5_2 = "4.5.2";
 
 		public static final String[] PATTERN_PLUGINS_CVS_FOR_MARS = {
 			"org\\.eclipse\\.cvs_.*\\.jar",
