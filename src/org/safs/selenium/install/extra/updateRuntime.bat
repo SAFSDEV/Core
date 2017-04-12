@@ -47,8 +47,8 @@ SET BACKUP_LIBDIR=%SELENIUM_PLUS%\update_bak\libs
 SET JAVA_EXE=%SELENIUM_PLUS%\Java\bin\java
 IF NOT EXIST %BACKUP_LIBDIR% MKDIR %BACKUP_LIBDIR%
 copy %SELENIUM_PLUS%\libs\safsupdate.jar %BACKUP_LIBDIR%\safsupdate.jar
-%JAVA_EXE% -jar %BACKUP_LIBDIR%\safsupdate.jar -r -a -q -prompt:"SeleniumPlus Plugin Update" -s:"%SE_PLUGIN_UPDATE%" -t:"%SELENIUM_PLUS%\eclipse\plugins" -b:"%SELENIUM_PLUS%\eclipse\plugins\update_bak"
 %JAVA_EXE% -jar %BACKUP_LIBDIR%\safsupdate.jar -r -a -q -prompt:"SeleniumPlus Libs Update" -s:"%SE_LIB_UPDATE%" -t:"%SELENIUM_PLUS%" -b:"%SELENIUM_PLUS%\update_bak"
+%JAVA_EXE% -jar %BACKUP_LIBDIR%\safsupdate.jar -r -a -q -prompt:"SeleniumPlus Plugin Update" -s:"%SE_PLUGIN_UPDATE%" -t:"%SELENIUM_PLUS%\eclipse\plugins" -b:"%SELENIUM_PLUS%\eclipse\plugins\update_bak"
 IF NOT [%PRODUCT%]==[ALL] GOTO SHOW_INFO
 
 :UPDATE_SAFS
