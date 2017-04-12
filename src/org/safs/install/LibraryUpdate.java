@@ -9,7 +9,7 @@ package org.safs.install;
  *                                                                   Call these functionalities in downloader thread directly, wait for unzip done before updateDiretory.
  *    JUL 15, 2015	(LeiWang)	Modify processArgs(): Catch Throwable to avoid infinite loop waiting.
  *    JAN 04, 2016	(LeiWang)	Add '-q' for quiet mode so that no dialog will prompt for confirmation.
- *    APR 11, 2017	(LeiWang)	Initialized unzipSkipPredicator for skipping plugin files for certain Eclipse version.
+ *    APR 12, 2017	(LeiWang)	Initialized unzipSkipPredicator (for skipping plugin files) if Eclipse version is not "4.5.2".
  **/
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -157,6 +157,10 @@ public class LibraryUpdate {
      * @see #init()
      */
     protected Predicate<String> unzipSkipPredicator = null;
+    /**
+     * Used to get the information of the current installed product.
+     */
+    protected SePlusInstallInfo productInfo = null;
 
 	/**
 	 * Default constructor using standard System.out and System.err console streams.
@@ -181,10 +185,17 @@ public class LibraryUpdate {
 	        }
 	    });
 
+
 	    try {
-			String eclipseVersion = SePlusInstallInfo.instance().getEclipseConfig(EclipseConstants.PROPERTY_VERSION);
-			//If the current installed Eclipse is NOT Mars (Eclipse4.5), then initialize the "unzipSkipPredicator" to bapass the "eclipse cvs plugin files"
-			if(!EclipseConstants.VERSION_NUMBER_MARS.equals(eclipseVersion)){
+	    	productInfo = SePlusInstallInfo.instance();
+			String installedEclipseVersion = productInfo.getEclipseConfig(EclipseConstants.PROPERTY_VERSION);
+			//TODO copy plugins for Eclipse later than Mars (4.5). We also need to make sure that the plugins provided by zip(jar) file can match the user's Eclipse.
+			//From Mars (Eclipse 4.5), the CVS plugins has been removed; For the previous version, the CVS plugins are provided directly with Eclipse,
+			//we don't need to add these plugins when updating SE+, so we initialize the "unzipSkipPredicator" to bypass the "CVS plugins" in ZIP file.
+//			if(installedEclipseVersion!=null && EclipseConstants.VERSION_NUMBER_MARS.compareTo(installedEclipseVersion)>0){
+
+			//Currently, we only fix the Eclipse (4.5.2) we once provided with SePlus.
+			if(!EclipseConstants.VERSION_NUMBER_MARS_4_5_2.equals(installedEclipseVersion)){
 				unzipSkipPredicator = new Predicate<String>(){
 					@Override
 					public boolean test(String filename) {
@@ -722,14 +733,20 @@ public class LibraryUpdate {
 		return quiet;
 	}
 
-	private void __testUpzipSkipperPredicate() throws SeleniumPlusException {
+	private void __testUpzipSkipPredicator() throws SeleniumPlusException {
 
-		if(unzipSkipPredicator!=null){
-			SePlusInstallInfo seinfo = SePlusInstallInfo.instance();
-			File eclipseDir = seinfo.getEclipseDir();
-			if(eclipseDir!=null){
-				progressor.setProgressMessage("eclipse "+EclipseConstants.PROPERTY_VERSION+"="+seinfo.getEclipseConfig(EclipseConstants.PROPERTY_VERSION));
-				progressor.setProgressMessage(EclipseConstants.PROPERTY_BUILDID+"="+seinfo.getEclipseConfig(EclipseConstants.PROPERTY_BUILDID));
+		String debugmsg = StringUtils.debugmsg(false);
+
+		if(productInfo==null){
+			progressor.setProgressMessage(debugmsg+"Initilalize SePlusInstallInfo");
+			productInfo =SePlusInstallInfo.instance();
+		}
+		File eclipseDir = productInfo.getEclipseDir();
+		if(eclipseDir!=null){
+			progressor.setProgressMessage("eclipse "+EclipseConstants.PROPERTY_VERSION+"="+productInfo.getEclipseConfig(EclipseConstants.PROPERTY_VERSION));
+			progressor.setProgressMessage(EclipseConstants.PROPERTY_BUILDID+"="+productInfo.getEclipseConfig(EclipseConstants.PROPERTY_BUILDID));
+
+			if(unzipSkipPredicator!=null){
 				//Get all plugins of Eclipse
 				File plugins = new File(eclipseDir.getAbsolutePath()+File.separator+"plugins");
 
@@ -739,10 +756,10 @@ public class LibraryUpdate {
 					}
 				}
 			}else{
-				progressor.setProgressMessage("Cannot detect Eclipse installation directory.");
+				progressor.setProgressMessage(debugmsg+"unzip-skip-predicator has not been initialized.");
 			}
 		}else{
-			progressor.setProgressMessage("unzip skipper predicator has not been initialized.");
+			progressor.setProgressMessage(debugmsg+"Cannot detect Eclipse installation directory.");
 		}
 
 		StringUtils.sleep(3000);
@@ -783,9 +800,9 @@ public class LibraryUpdate {
 		try{
 			updater = new LibraryUpdate();
 
-			//if the argument is "-unittest"
-			if(args.length>0 && args[0].trim().toLowerCase().equals("-unittest")){
-				updater.__testUpzipSkipperPredicate();
+			//if the first argument is "-unittest"
+			if(args.length>0 && "-unittest".equalsIgnoreCase(args[0].trim())){
+				updater.__testUpzipSkipPredicator();
 				return;
 			}
 
