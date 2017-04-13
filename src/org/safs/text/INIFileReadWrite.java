@@ -20,14 +20,15 @@ import java.util.Enumeration;
 public class INIFileReadWrite extends INIFileReader {
 
 	/**
-	 * @see INIFileReader()
+	 * @see INIFileReader#INIFileReader()
 	 */
 	public INIFileReadWrite() {
 		super();
 	}
 
 	/**
-	 * @see INIFileReader(File, int)
+	 *
+	 * @see INIFileReader#INIFileReader(File, int)
 	 */
 	public INIFileReadWrite(File file, int memorymode) {
 		super(file, memorymode);
@@ -131,7 +132,7 @@ public class INIFileReadWrite extends INIFileReader {
 			store = (section == null) ? null: (CaseInsensitiveHashtable) sections.get(section);
 			if (store != null) writeSection(writer, section, store);
 			// write remaining sections
-			Enumeration keys = sections.keys();
+			Enumeration<?> keys = sections.keys();
 			while(keys.hasMoreElements()){
 				section = (String) keys.nextElement();
 				if (section.length()==0) continue;
@@ -163,7 +164,7 @@ public class INIFileReadWrite extends INIFileReader {
 			}
 			String item = null;
 			String value = null;
-			Enumeration keys = items.keys();
+			Enumeration<?> keys = items.keys();
 			while(keys.hasMoreElements()){
 				item = (String) keys.nextElement();
 				value = item+"="+items.get(item).toString();

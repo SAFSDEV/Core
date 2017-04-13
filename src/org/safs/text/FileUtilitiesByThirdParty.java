@@ -35,10 +35,13 @@ public class FileUtilitiesByThirdParty {
 	public static final int MAX_BTYES_TO_READ = 4096*4;//16k bytes to read, enough?
 	/**
 	 * Opens a FileInputStream and detects its encoding. If no encoding is detected, the default system
-	 * encoding will be returned.
-	 * {@link http://code.google.com/p/juniversalchardet/}
-	 * {@link http://www-archive.mozilla.org/projects/intl/UniversalCharsetDetection.html}
-	 * @param filename case-insensitive absolute filename path.
+	 * encoding will be returned.<br/>
+	 * Refer to
+	 * <ul>
+	 * <li><a href="http://code.google.com/p/juniversalchardet/">juniversalchardet</a>
+	 * <li><a href="http://www-archive.mozilla.org/projects/intl/UniversalCharsetDetection.html>UniversalCharsetDetection</a>
+	 * </ul>
+	 * @param filename String, case-insensitive absolute filename path.
 	 * @return String, the file encoding, it might be null.
 	 * @see FileUtilities#detectFileEncoding(String)
 	 */
@@ -99,9 +102,11 @@ public class FileUtilitiesByThirdParty {
 	/**
 	 * Read String as input to find encoding. If no encoding is detected, the default system
 	 * encoding will be returned.
-	 * {@link http://code.google.com/p/juniversalchardet/}
-	 * {@link http://www-archive.mozilla.org/projects/intl/UniversalCharsetDetection.html}
-	 * @param String
+	 * <ul>
+	 * <li><a href="http://code.google.com/p/juniversalchardet/">juniversalchardet</a>
+	 * <li><a href="http://www-archive.mozilla.org/projects/intl/UniversalCharsetDetection.html>UniversalCharsetDetection</a>
+	 * </ul>
+	 * @param str String, the string according to which the encoding will be detected.
 	 * @return String, the file encoding, it might be null.
 	 * @see FileUtilities#detectFileEncoding(String)
 	 */
