@@ -12,36 +12,36 @@ import java.nio.charset.*;
  * <p>
  * This FileReader class is intended as a generic file instance class for reading text files.<br>
  * <p>
- * This class represents the most basic reader functionality.  It will simply read a line 
- * of text for each call to readLine().  It uses a java.io.BufferedReader as the underlying 
+ * This class represents the most basic reader functionality.  It will simply read a line
+ * of text for each call to readLine().  It uses a java.io.BufferedReader as the underlying
  * IO mechanism.  The file to be read is expected to be ANSI or a supported Charset encoding.
  * <p>
  * @author Carl Nagle, SAS Institute
  * @version 1.0, 03/24/2004
- * @version 11/03/2006 (Carl Nagle) modified to accept mixed-mode UTF-8 files. 
+ * @version 11/03/2006 (Carl Nagle) modified to accept mixed-mode UTF-8 files.
  * @version 03/21/2007 (Carl Nagle) modified to strip utf-8 leader bytes when needed.
  * @version 07/16/2010 (Carl Nagle) modified to support other Charset encodings.
  * @version 12/16/2014 (Carl Nagle) Fix NullPointerException on empty files in readLine.
- * 
+ *
  * Software Automation Framework Support (SAFS) http://safsdev.sourceforge.net<br>
  * Software Testing Automation Framework (STAF) http://staf.sourceforge.net<br>
  ******************************************************************************************/
 public class FileLineReader {
 
 	public static int DEFAULT_BUFFER_SIZE = 1024 * 10;
-	
+
 	protected String fullpath = new String();
 	protected String filename = new String();
 	protected InputStream stream = null;
-	protected File file = null;	
+	protected File file = null;
 	protected BufferedReader reader = null;
 	protected boolean eof = false;
 	protected boolean firstline = true;
 	protected String charset = "UTF-8";//default
-	
+
 	protected String linetext = null; // current (last read0 line of text
 
-	
+
 	/*******************************************************************************************
 	 * This constructor will create an inoperable (Closed) file object.  No use whatsoever. :)
 	 ******************************************************************************************/
@@ -49,7 +49,7 @@ public class FileLineReader {
 
 	/*******************************************************************************************
 	 * The constructor used by the FileReader if the input is a File.
-	 * 
+	 *
 	 * All subclasses using File MUST invoke this constructor prior to completing their initialization.<br>
 	 * Invoke this constructor from the subclass with:
 	 * <p>
@@ -63,7 +63,7 @@ public class FileLineReader {
 
 	/*******************************************************************************************
 	 * The constructor used by the FileReader if the input is a File.
-	 * 
+	 *
 	 * All subclasses using File MUST invoke this constructor prior to completing their initialization.<br>
 	 * Invoke this constructor from the subclass with:
 	 * <p>
@@ -78,11 +78,11 @@ public class FileLineReader {
 	}
 
 	/*******************************************************************************************
-	 * The constructor used by the FileReader if the input is an InputStream.  For example, 
-	 * resources or files stored in JARs loaded via ClassLoaders.  Files can be loaded from 
-	 * the file system if the directory is in the System CLASSPATH where getSystemResourceAsStream 
+	 * The constructor used by the FileReader if the input is an InputStream.  For example,
+	 * resources or files stored in JARs loaded via ClassLoaders.  Files can be loaded from
+	 * the file system if the directory is in the System CLASSPATH where getSystemResourceAsStream
 	 * can find it.
-	 * 
+	 *
 	 * All subclasses using InputStreams MUST invoke this constructor prior to completing their initialization.<br>
 	 * Invoke this constructor from the subclass with:
 	 * <p>
@@ -96,11 +96,11 @@ public class FileLineReader {
 	}
 
 	/*******************************************************************************************
-	 * The constructor used by the FileReader if the input is an InputStream.  For example, 
-	 * resources or files stored in JARs loaded via ClassLoaders.  Files can be loaded from 
-	 * the file system if the directory is in the System CLASSPATH where getSystemResourceAsStream 
+	 * The constructor used by the FileReader if the input is an InputStream.  For example,
+	 * resources or files stored in JARs loaded via ClassLoaders.  Files can be loaded from
+	 * the file system if the directory is in the System CLASSPATH where getSystemResourceAsStream
 	 * can find it.
-	 * 
+	 *
 	 * All subclasses using InputStreams MUST invoke this constructor prior to completing their initialization.<br>
 	 * Invoke this constructor from the subclass with:
 	 * <p>
@@ -132,7 +132,7 @@ public class FileLineReader {
 			try{ debug.invoke(logger, message);}catch(Throwable ignore){}
 		}
 	}
-	
+
 	/**
 	 * Allows us to set (and change) the file that will be read.
 	 * Setting the file also opens the file for reading (assuming it is a valid file).
@@ -165,11 +165,11 @@ public class FileLineReader {
 			log("FileLineReader InputStream is NULL and will not function!");
 		}
 	}
-	
+
 	/*******************************************************************************************
 	 * Subclasses should not need to override this function.
 	 * <p>
-	 * @return the short format of the filename--no path information. An empty string if this 
+	 * @return the short format of the filename--no path information. An empty string if this
 	 *         object failed to open the file.
 	 ******************************************************************************************/
 	public  String  getFilename (){ return filename.toString();}
@@ -177,7 +177,7 @@ public class FileLineReader {
 	/*******************************************************************************************
 	 * Subclasses should not need to override this function.
 	 * <p>
-	 * @return the full filename path of the file.  An empty string if this object failed to 
+	 * @return the full filename path of the file.  An empty string if this object failed to
 	 *         open.
 	 ******************************************************************************************/
 	public  String  getFullpath (){ return fullpath.toString();}
@@ -187,40 +187,40 @@ public class FileLineReader {
 	 * <p>
 	 * @return true if the BufferedReader was not successfully opened or has been closed (nulled).
 	 ******************************************************************************************/
-	public boolean  isClosed    (){ return (reader==null);	}	
+	public boolean  isClosed    (){ return (reader==null);	}
 
 	/*******************************************************************************************
 	 * Subclasses should not need to override this function.
 	 * <p>
-	 * @return true if we have reached the end of the file.  Reaching end of file does not 
-	 *         Close the file.  However, this file cannot be reset.  So reaching end of file 
+	 * @return true if we have reached the end of the file.  Reaching end of file does not
+	 *         Close the file.  However, this file cannot be reset.  So reaching end of file
 	 *         pretty much means this object has reached the end of its usefulness.
 	 ******************************************************************************************/
 	public boolean  isEOF       (){ return eof;}
-	
+
 
 	/*******************************************************************************************
-	 * This routine is the most basic readLine function.  It simply gets the next line in the 
-	 * file.  It will remove any leading ignorable Unicode FORMAT character from the first line 
-	 * of a file.  This is generally required when reading UTF-8 files with the leading FORMAT 
-	 * marker (BOM).  
+	 * This routine is the most basic readLine function.  It simply gets the next line in the
+	 * file.  It will remove any leading ignorable Unicode FORMAT character from the first line
+	 * of a file.  This is generally required when reading UTF-8 files with the leading FORMAT
+	 * marker (BOM).
 	 * <p>
-	 * Subclasses that intend to maintain any kind of pointers MUST override this method in order 
-	 * to maintain their pointer counts but should still call this method with super.readLine() 
+	 * Subclasses that intend to maintain any kind of pointers MUST override this method in order
+	 * to maintain their pointer counts but should still call this method with super.readLine()
 	 * to retain the Unicode character removal on the retrieved text.
 	 * <p>
-	 * It is still desirable to maintain the basic functionality of returning the text 
-	 * value unmodified in each subclass intending to return lines of text.  A subclass wishing 
-	 * to embellish or otherwise process the line of text before returning it should do so in 
+	 * It is still desirable to maintain the basic functionality of returning the text
+	 * value unmodified in each subclass intending to return lines of text.  A subclass wishing
+	 * to embellish or otherwise process the line of text before returning it should do so in
 	 * a different method specific to that subclass.
 	 * <p>
-	 * @return the next line in the file.  If the file is closed or has reached the end of file, 
+	 * @return the next line in the file.  If the file is closed or has reached the end of file,
 	 *         then a NULL value is returned and EOF is set true.
 	 ******************************************************************************************/
-	public String readLine (){ 
+	public String readLine (){
 
 		if((isClosed())||(isEOF())) return null;
-		
+
 		try{
 			linetext = reader.readLine();
 			if (firstline){
@@ -237,11 +237,11 @@ public class FileLineReader {
 					}
 				}
 			}
-			
+
 			// if EOF
 			eof = (linetext==null);
-			
-		}catch(IOException e){ 
+
+		}catch(IOException e){
 			close();
 		}
 		return linetext;
@@ -250,7 +250,7 @@ public class FileLineReader {
 
 	/*******************************************************************************************
 	 * Resets important fields during Close and other operations.
-	 * Subclasses should override this function to add any additional pointer or value reset 
+	 * Subclasses should override this function to add any additional pointer or value reset
 	 * operations.  Those subclasses should still call the superclass method with:
 	 * <p>
 	 * &nbsp; &nbsp; super.resetpointers();
@@ -267,56 +267,56 @@ public class FileLineReader {
 			log("FileLineReader InputStream may not support Reset:"+e.getClass().getSimpleName()+":"+e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Called internally by open().
-	 * Sets BufferedReader to a valid reader or null; 
+	 * Sets BufferedReader to a valid reader or null;
 	 */
 	protected void openFile(){
 		if( (! isClosed()) || (file == null)) return;
 		if(! file.isFile()){
-			log("FileLineReader attempt to open '"+ file.getAbsolutePath() +"' failed."); 
-			close(); 
-			return; 
-		}		
+			log("FileLineReader attempt to open '"+ file.getAbsolutePath() +"' failed.");
+			close();
+			return;
+		}
 		try{
 			reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), Charset.forName(charset)), DEFAULT_BUFFER_SIZE);
 			resetpointers();
 		}catch(IOException e){
 			close();
-		}	
+		}
 	}
-	
+
 	/**
 	 * Called internally by open().
-	 * Sets BufferedReader to a valid reader or null; 
+	 * Sets BufferedReader to a valid reader or null;
 	 */
 	protected void openStream(){
 		if( (! isClosed()) || (stream == null)) return;
 		try{
 			if((stream.available()< 1)){
-				log("FileLineReader attempt to open InputStream '"+ fullpath +"' failed."); 
-				close(); 
+				log("FileLineReader attempt to open InputStream '"+ fullpath +"' failed.");
+				close();
 				return;
-			} 
+			}
 			reader = new BufferedReader(new InputStreamReader(stream, Charset.forName(charset)), DEFAULT_BUFFER_SIZE);
 			resetpointers();
 		}catch(IOException e){
 			close();
-		}	
+		}
 	}
 
 	/*******************************************************************************************
-	 * Subclasses should not need to override this function unless some very interesting things 
-	 * need to be done before or after the file is opened.  However, since the file is opened 
+	 * Subclasses should not need to override this function unless some very interesting things
+	 * need to be done before or after the file is opened.  However, since the file is opened
 	 * during object construction, all that interesting stuff should be handled there, not here.
 	 * <p>
 	 ******************************************************************************************/
 	public void open(){
-	
+
 		if( (! isClosed()) || ((file == null)&&(stream == null))) return;
 		if ( file instanceof File) {openFile();}
-		else if (stream instanceof InputStream){ openStream();} 
+		else if (stream instanceof InputStream){ openStream();}
 	}
 
 	/**
@@ -330,17 +330,17 @@ public class FileLineReader {
 			finally{
 				reader = null;
 			}
-		}		
+		}
 	}
-				
+
 	/*******************************************************************************************
 	 * A call to this routine is essentially telling the object that its useful life is over.
-	 * This is the equivalent of "terminate".  You are soon to be NULLED and garbage collected.  
-	 * The open BufferedReader is closed by calling closeReader.  The remaining API 
+	 * This is the equivalent of "terminate".  You are soon to be NULLED and garbage collected.
+	 * The open BufferedReader is closed by calling closeReader.  The remaining API
 	 * will respond accordingly signalling that the file isClosed.
 	 * <p>
-	 * Subclasses should not need to override this function unless there is additional cleanup 
-	 * needed prior to getting whacked.  If the method is overridden, the subclass should still 
+	 * Subclasses should not need to override this function unless there is additional cleanup
+	 * needed prior to getting whacked.  If the method is overridden, the subclass should still
 	 * call this routine with:
 	 * <p>
 	 * &nbsp; &nbsp; super.close();
@@ -348,7 +348,7 @@ public class FileLineReader {
 	 * @see #closeReader()
 	 * @see #resetpointers()
 	 ******************************************************************************************/
-	public void close(){ 
+	public void close(){
 		closeReader();
 		resetpointers();
 	}
