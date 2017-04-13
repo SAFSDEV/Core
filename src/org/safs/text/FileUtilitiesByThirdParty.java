@@ -23,10 +23,10 @@ import org.safs.tools.CaseInsensitiveFile;
 /**
  * <p>
  * This class will use some third-party jars to provide some functionalities.
- * For example, method {@link #detectFileEncoding(String)} will depend on 
+ * For example, method {@link #detectFileEncoding(String)} will depend on
  * <a href="http://code.google.com/p/juniversalchardet/">juniversalchardet</a>
  * <p>
- * This class is created for making class {@link org.safs.text.FileUtilities} independent 
+ * This class is created for making class {@link org.safs.text.FileUtilities} independent
  * of these third-party jars. In {@link org.safs.text.FileUtilities}, we use java-reflection
  * to call methods in this class.
  */
@@ -48,11 +48,11 @@ public class FileUtilitiesByThirdParty {
 		int totalReadBytes = 0;
 		String encoding = null;
 		FileInputStream fis = null;
-		
+
 		try{
 			fis = new FileInputStream(new CaseInsensitiveFile(filename).toFile());
 			UniversalDetector detector = new UniversalDetector(null);
-			
+
 			//Feed detector with bytes until it detect the encoding or reach the max bytes to read
 			//if the detector can't get the encoding after reading some bytes, we should stop to save time.
 			while ((nread = fis.read(buf))>0 && !detector.isDone() && totalReadBytes<MAX_BTYES_TO_READ) {
@@ -63,7 +63,7 @@ public class FileUtilitiesByThirdParty {
 				//IndependantLog.warn("Didn't detect file encoding after reading "+totalReadBytes+" bytes.");
 			}
 			detector.dataEnd();
-			
+
 			//Get the file encoding string (defined in org.mozilla.universalchardet.Constants)
 			encoding = detector.getDetectedCharset();
 			detector.reset();
@@ -80,7 +80,7 @@ public class FileUtilitiesByThirdParty {
 		} catch (Exception e) {
 			IndependantLog.warn(StringUtils.debugmsg(false)+StringUtils.debugmsg(e));
 		}
-		
+
 		//If no encoding is detected, get the default file encoding
 		try{
 			if(encoding==null || encoding.trim().isEmpty()) encoding = System.getProperty("file.encoding");
@@ -92,38 +92,38 @@ public class FileUtilitiesByThirdParty {
 		} catch (Exception e) {
 			IndependantLog.warn(StringUtils.debugmsg(false)+StringUtils.debugmsg(e));
 		}
-		
+
 		return encoding;
 	}
-	
+
 	/**
 	 * Read String as input to find encoding. If no encoding is detected, the default system
 	 * encoding will be returned.
 	 * {@link http://code.google.com/p/juniversalchardet/}
 	 * {@link http://www-archive.mozilla.org/projects/intl/UniversalCharsetDetection.html}
-	 * @param String 
+	 * @param String
 	 * @return String, the file encoding, it might be null.
 	 * @see FileUtilities#detectFileEncoding(String)
 	 */
 	public static String detectStringEncoding(String str){
-		
-		String encoding = null;		
-		
+
+		String encoding = null;
+
 		try{
-			
+
 			UniversalDetector detector = new UniversalDetector(null);
-			
+
 			detector.handleData(str.getBytes(), 0, str.getBytes().length);
-					
+
 			detector.dataEnd();
-			
+
 			//Get the file encoding string (defined in org.mozilla.universalchardet.Constants)
 			encoding = detector.getDetectedCharset();
 			detector.reset();
 
 		}catch(Exception e){
 			IndependantLog.warn(StringUtils.debugmsg(false)+StringUtils.debugmsg(e));
-		}	
+		}
 
 		//If no encoding is detected, get the default file encoding
 		try{
@@ -136,7 +136,7 @@ public class FileUtilitiesByThirdParty {
 		} catch (Exception e) {
 			IndependantLog.warn(StringUtils.debugmsg(false)+StringUtils.debugmsg(e));
 		}
-		
+
 		return encoding;
 	}
 }
