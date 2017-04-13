@@ -4,8 +4,6 @@ import java.io.*;
 import java.lang.reflect.Method;
 import java.nio.charset.*;
 
-//import org.safs.Log;
-
 /*******************************************************************************************
  * Copyright 2003 SAS Institute
  * GNU General Public License (GPL) http://www.opensource.org/licenses/gpl-license.php
@@ -69,8 +67,8 @@ public class FileLineReader {
 	 * <p>
 	 * &nbsp; &nbsp; super(file);
 	 * <p>
-	 * @param file A File object that references the file to be opened.
-	 * @param encoding.  a valid Charset encoding like "UTF-16", etc...
+	 * @param file File, A File object that references the file to be opened.
+	 * @param encoding String, a valid Charset encoding like "UTF-16", etc...
 	 ******************************************************************************************/
 	public FileLineReader (File file, String encoding){
 		charset = encoding;
@@ -106,8 +104,8 @@ public class FileLineReader {
 	 * <p>
 	 * &nbsp; &nbsp; super(stream);
 	 * <p>
-	 * @param stream an InputStream object that references the data to be opened.
-	 * @param encoding.  a valid Charset encoding like "UTF-16", etc...
+	 * @param stream InputStream, an InputStream object that references the data to be opened.
+	 * @param encoding String, a valid Charset encoding like "UTF-16", etc...
 	 * @see ClassLoader#getSystemResourceAsStream(java.lang.String)
 	 ******************************************************************************************/
 	public FileLineReader (InputStream stream, String encoding){
@@ -117,7 +115,7 @@ public class FileLineReader {
 
 	private static Object logger;
 	private static Method debug;
-	private static Class logclass;
+	private static Class<?> logclass;
 	private static boolean logtried = false;
 	private static void log(String message){
 		if(! logtried){
