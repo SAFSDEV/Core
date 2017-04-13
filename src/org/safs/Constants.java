@@ -308,15 +308,18 @@ public class Constants {
 		public static final String SECTION_SAFS_REST = "SAFS_REST";
 
 		/**
-		 * "<b>AUTH</b>" defines a file holding the authorization/authentication information.<br>
+		 * "<b>AUTH</b>" is the "map item" (under section {@link #SECTION_SAFS_REST}) defining a file holding the authorization/authentication information.<br>
 		 * The file can be relative to the project root directory; or it can be an absolute path.<br>
 		 * Examples:<br>
-		 * <b>config\auth2.xml</b> The file &lt;projectRoot>\config\auth2.xml will be used as authorization/authentication information.<br>
-		 * <b>C:\Users\xxx\simpleAuth.xml</b> The file C:\Users\xxx\simpleAuth.xml will be used as authorization/authentication information.<br>
+		 * [SAFS_REST]<br>
+		 * AUTH=<b>config\auth2.xml</b> The file &lt;projectRoot>\config\auth2.xml will be used as authorization/authentication information.<br>
+		 * <br/>
+		 * [SAFS_REST]<br>
+		 * AUTH=<b>C:\Users\xxx\simpleAuth.xml</b> The file C:\Users\xxx\simpleAuth.xml will be used as authorization/authentication information.<br>
 		 *
 		 * */
 		public static final String ITEM_AUTH ="AUTH";
-		/** "<b>safs.rest.auth</b>" defines a file holding the authorization/authentication information.<br>
+		/** "<b>safs.rest.auth</b>" is the JVM property defining a file holding the authorization/authentication information.<br>
 		 * The file can be relative to the project root directory; or it can be an absolute path.<br>
 		 * Examples:<br>
 		 * -Dsafs.rest.auth=<b>config\auth2.xml</b> The file &lt;projectRoot>\config\auth2.xml will be used as authorization/authentication information.<br>
