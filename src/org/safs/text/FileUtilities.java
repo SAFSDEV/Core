@@ -182,7 +182,7 @@ public class FileUtilities
 
 	/**
 	 * Opens a FileInputStream and checks for UTF-8 0xEF 0xBB 0xBF marker bytes and closes the file.
-	 * {@link http://en.wikipedia.org/wiki/Byte_Order_Mark#Representations_of_byte_order_marks_by_encoding}
+	 * See <a href="http://en.wikipedia.org/wiki/Byte_Order_Mark#Representations_of_byte_order_marks_by_encoding">Representations_of_byte_order_marks_by_encoding</a>
 	 * @param filename case-insensitive absolute filename path.
 	 * @return true if the file starts with the UTF-8 marker bytes. false otherwise--including if there
 	 * are not 3 bytes of data available to be read from the file.
@@ -195,18 +195,18 @@ public class FileUtilities
 	 */
 	public static boolean isFileUTF8(String filename)throws FileNotFoundException, IOException{
 		FileInputStream reader = new FileInputStream(new CaseInsensitiveFile(filename).toFile());
-		if (reader.available()< 3) return false;
-		int _byte1 = reader.read();
-		int _byte2 = reader.read();
-		int _byte3 = reader.read();
-		reader.close();
-		boolean rc = true;
-		// check for UTF-8 marker bytes
-		if(_byte1!=0xEF) rc=false;
-		if(_byte2!=0xBB) rc=false;
-		if(_byte3!=0xBF) rc=false;
+		try{
+			if (reader.available()< 3)
+				return false;
+			int _byte1 = reader.read();
+			int _byte2 = reader.read();
+			int _byte3 = reader.read();
+			// check for UTF-8 marker bytes
+			return (_byte1==0xEF && _byte2==0xBB && _byte3==0xBF);
 
-		return rc;
+		}finally{
+			reader.close();
+		}
 	}
 
 	/**
@@ -466,9 +466,9 @@ public class FileUtilities
 	 * @param newline String to append to each item in the list.
 	 * @throws IOException thrown if an IO error occurs during writing.
 	 */
-	public static void writeCollectionToFile(BufferedWriter writer, Collection list, String newline)throws IOException{
+	public static void writeCollectionToFile(BufferedWriter writer, Collection<?> list, String newline)throws IOException{
 	    try {
-	      for(Iterator i= list.iterator(); i.hasNext(); ) {
+	      for(Iterator<?> i= list.iterator(); i.hasNext(); ) {
 	        writer.write(i.next().toString() + newline);
 	      }
 	    }
@@ -494,8 +494,8 @@ public class FileUtilities
 	   * :PROPERTY:propertyName
 	   * etc...
 	   * </pre>
-	   * @param                     reader
-	   * @return                    Properties
+	   * @param writer BufferedWriter
+	   * @param props Map, the properties to write
 	   **/
 	  public static void writePropertiesFile(BufferedWriter writer, Map<String,String> props)throws IOException{
 			String test = null;
@@ -602,7 +602,7 @@ public class FileUtilities
 	 * @see #writeCollectionToFile(BufferedWriter, Collection, String)
 	 * @see #writeCollectionToFile(BufferedWriter, Collection, String)
 	 */
-	public static void writeCollectionToFile(BufferedWriter writer, Collection list)throws IOException{
+	public static void writeCollectionToFile(BufferedWriter writer, Collection<?> list)throws IOException{
 		String newline = System.getProperty("line.separator");
 		writeCollectionToFile(writer, list, newline);
 	}
@@ -618,7 +618,7 @@ public class FileUtilities
 	 * @throws IOException thrown if an IO error occurs during writing.
 	 * @see #writeCollectionToFile(BufferedWriter, Collection)
 	 */
-	public static void writeCollectionToSystemFile(String filename, Collection list)throws FileNotFoundException, IOException {
+	public static void writeCollectionToSystemFile(String filename, Collection<?> list)throws FileNotFoundException, IOException {
 		writeCollectionToFile(getSystemBufferedFileWriter(filename), list);
 	}
 
@@ -633,13 +633,13 @@ public class FileUtilities
 	 * @throws IOException thrown if an IO error occurs during writing.
 	 * @see #writeCollectionToFile(BufferedWriter, Collection)
 	 */
-	public static void writeCollectionToUTF8File(String filename, Collection list)throws FileNotFoundException, IOException {
+	public static void writeCollectionToUTF8File(String filename, Collection<?> list)throws FileNotFoundException, IOException {
 		writeCollectionToFile(getUTF8BufferedFileWriter(filename), list);
 	}
 
 	/**
 	 * Read file contents into a String.  The String is expected to contain all formatting,
-	 * tabs, and newlines, etc.. and will be returned unmodifed.
+	 * tabs, and newlines, etc.. and will be returned unmodified.
 	 *
 	 * The character decoding is determined by the BufferedReader provided.
 	 *
@@ -682,12 +682,11 @@ public class FileUtilities
 	 * @param filepath
 	 * @return String[] contents of file
 	 * @throws IOException thrown if an IO error occurs.
-	 * @see #readStringFromFile(BuffereReader)
 	 * @see #readStringFromSystemFile(String)
 	 * @see #readStringFromUTF8File(String)
 	 */
 	public static String[] readLinesFromFile(String filepath)throws IOException{
-		ArrayList buf = new ArrayList();
+		List<String> buf = new ArrayList<String>();
     	BufferedReader reader = null;
 	    try {
 	    	String line = null;
@@ -728,7 +727,7 @@ public class FileUtilities
 
 	/**
 	 * Recursively replaceDirectoryFileSubstrings in all matching files in the directory and all
-	 * subdirectories.
+	 * sub-directories.
 	 * @param directory
 	 * @param fileEndings
 	 * @param findString
@@ -742,9 +741,7 @@ public class FileUtilities
 	    if(!dir.isDirectory()) throw new FileNotFoundException(directory +" is not a valid Directory and will be ignored.");
 	    replaceDirectoryFilesSubstrings(dir.getAbsolutePath(), fileEndings, findString, replaceString, isCaseSensitive);
 	    File[] files = dir.listFiles();
-	    String filename;
 	    for(File afile: files){
-	    	filename = afile.getAbsolutePath();
 	    	if(afile.isDirectory())
 	    		replaceAllSubdirectoryFilesSubstrings(afile.getAbsolutePath(), fileEndings, findString, replaceString, isCaseSensitive);
 	    }
@@ -821,7 +818,7 @@ public class FileUtilities
 
 	/**
 	 * Read file contents into a String.  The String is expected to contain all formatting,
-	 * tabs, and newlines, etc.. and will be returned unmodifed.
+	 * tabs, and newlines, etc.. and will be returned unmodified.
 	 *
 	 * The default System character decoding is assumed.
 	 *
@@ -925,9 +922,9 @@ public class FileUtilities
 
 	/**
 	 * Calls unzipJAR with noMETATDir as false.
-	 * @param zipFileName, String, the 'zip file' to be uncompressed.
-	 * @param root, File, the directory to store the uncompressed files.
-	 * @param verbose, boolean, if the uncompressed message will be printed to console.
+	 * @param zipFileName String, the 'zip file' to be uncompressed.
+	 * @param root File, the directory to store the uncompressed files.
+	 * @param verbose boolean, if the uncompressed message will be printed to console.
 	 * @throws IOException
 	 * @throws FileNotFoundException
 	 * @see #unzipJAR(String, File, boolean, boolean)
@@ -947,10 +944,10 @@ public class FileUtilities
 	}
 
 	/**
-	 * @param zipFileName, String, the 'zip' or 'jar' file to be uncompressed.
-	 * @param root, File, the directory to store the uncompressed files.
-	 * @param verbose, boolean, if the uncompressed message will be printed to console.
-	 * @param noMETADir, true to bypass the META-INF directory and MANIFEST.MF file.
+	 * @param zipFileName String, the 'zip' or 'jar' file to be uncompressed.
+	 * @param root File, the directory to store the uncompressed files.
+	 * @param verbose boolean, if the uncompressed message will be printed to console.
+	 * @param noMETADir true to bypass the META-INF directory and MANIFEST.MF file.
 	 * @throws IOException
 	 * @throws FileNotFoundException
 	 */
@@ -1044,8 +1041,8 @@ public class FileUtilities
 	}
 
 	/**
-	 * @param in, InputStream, The InputStream of the source file to be copied.
-	 * @param out, OutputStream, The OutputStream of the destination file.
+	 * @param in InputStream, The InputStream of the source file to be copied.
+	 * @param out OutputStream, The OutputStream of the destination file.
 	 * @throws IOException
 	 */
 	public static void copyFile(InputStream in, OutputStream out) throws IOException{
@@ -1069,9 +1066,9 @@ public class FileUtilities
 
 	/**
 	 * Remove directory recursively by JAVA API
-	 * @param directory, String, the directory to be recursively deleted.
-	 * @param verbose, boolean, if the error message will be printed to console.
-	 * @return
+	 * @param directory String, the directory to be recursively deleted.
+	 * @param verbose boolean, if the error message will be printed to console.
+	 * @return int
 	 */
 	public static int deleteDirectoryRecursively(String directory, boolean verbose){
 		//If directory does not exist, just return 0.
@@ -1397,7 +1394,7 @@ public class FileUtilities
 		/**
 		 * @param actualAttributes int
 		 * @param expectedAttributes int, one of {@link FileAttribute.Type} or their combination.
-		 * @return boolean true if fileAttributeCode bit-contains filetype
+		 * @return boolean true if fileAttributeCode bit-contains file-type
 		 */
 		public static boolean contains(int actualAttributes, int expectedAttributes){
 //			IndependantLog.info(StringUtils.debugmsg(false)+" actualAttributes: "+actualAttributes+"; expectedAttributes: "+expectedAttributes);
@@ -1533,10 +1530,10 @@ public class FileUtilities
 			}
 		}else{
 			IndependantLog.info(debugmsg+"Using '"+Console.getOsFamilyName()+"' OS, use java to set attributes.");
-			// not a windows pc platform
+			// not a windows platform
 			// only attribute available is File.setReadOnly()
 			// using a security manager might be more robust, but you need
-			// a policy implemented which can not be assumed or programatically determined
+			// a policy implemented which can not be assumed or programmatically determined
 			// within safs
 			String errorKey = null;
 			String alterMsg = null;
@@ -1578,7 +1575,7 @@ public class FileUtilities
 
 	  /**
 	   * Deduce the absolute full path to a project-relative, test-relative, bench-relative, diff-relative filename.
-	   * @param filename, String, usually a relative path filename.
+	   * @param filename String, usually a relative path filename.
 	   * <p>
 	   * There is a caveat for test/bench/diff-relative filenames.  If there is any File.separator
 	   * present in the relative path then the path is considered relative to whatever is considered the
@@ -1593,8 +1590,8 @@ public class FileUtilities
 	   * relative path off the Test or Diff directories as appropriate.  This is done to avoid unintentional overwriting
 	   * of benchmark files by test/actual and diff files.
 	   * <p>
-	   * @param type, int, the type of the file: test-relative, bench-relative, project-relative.
-	   * @param RuntimeDataInterface to access runtime data (directories). Like a subclass of GenericEngine, or Processor.
+	   * @param type int, the type of the file: test-relative, bench-relative, project-relative.
+	   * @param data RuntimeDataInterface to access runtime data (directories). Like a subclass of GenericEngine, or Processor.
 	   * @return File, the absolute full path test/bench/diff file.
 	   * @throws SAFSException
 	   * @see {@link #FILE_TYPE_TEST}
@@ -1695,7 +1692,7 @@ public class FileUtilities
 
 	  /**
 	   * Deduce the absolute full path test-relative file.
-	   * @param filename, String, the test/actual file name.  If there are any File.separators in the
+	   * @param filename String, the test/actual file name.  If there are any File.separators in the
 	   * relative path then the path is actually considered relative to the Datapool
 	   * directory unless it does not exist, or is already an absolute file path.
 	   * <p>
@@ -1705,10 +1702,10 @@ public class FileUtilities
 	   * If it is an absolute path, and contains a root path that includes the Bench directory, then the
 	   * file will be converted to a comparable relative path off the Test directory.
 	   * <p>
-	   * @param RuntimeDataInterface to access runtime data (directories). Like a subclass of GenericEngine, or Processor.
+	   * @param data RuntimeDataInterface to access runtime data (directories). Like a subclass of GenericEngine, or Processor.
 	   * @return File, the absolute full path test file.
 	   * @throws SAFSException
-	   * @see {@link #deduceFile(String, int)}
+	   * @see {@link #deduceFile(String, int, RuntimeDataInterface)}
 	   */
 	  public static File deduceTestFile(String filename, RuntimeDataInterface data) throws SAFSException{
 		  return deduceFile(filename, FILE_TYPE_TEST, data);
@@ -1716,7 +1713,7 @@ public class FileUtilities
 
 	  /**
 	   * Deduce the absolute full path Diff-relative file.
-	   * @param filename, String, the diff file name.  If there are any File.separators in the
+	   * @param filename String, the diff file name.  If there are any File.separators in the
 	   * relative path then the path is actually considered relative to the Datapool
 	   * directory unless it does not exist, or is already an absolute file path.
 	   * <p>
@@ -1726,10 +1723,10 @@ public class FileUtilities
 	   * If it is an absolute path, and contains a root path that includes the Bench directory, then the
 	   * file will be converted to a comparable relative path off the Diff directory.
 	   * <p>
-	   * @param RuntimeDataInterface to access runtime data (directories). Like a subclass of GenericEngine, or Processor.
+	   * @param data RuntimeDataInterface to access runtime data (directories). Like a subclass of GenericEngine, or Processor.
 	   * @return File, the absolute full path diff file.
 	   * @throws SAFSException
-	   * @see {@link #deduceFile(String, int)}
+	   * @see {@link #deduceFile(String, int, RuntimeDataInterface)}
 	   */
 	  public static File deduceDiffFile(String filename, RuntimeDataInterface data) throws SAFSException{
 		  return deduceFile(filename, FILE_TYPE_DIFF, data);
@@ -1737,15 +1734,15 @@ public class FileUtilities
 
 	  /**
 	   * Deduce the absolute full path bench-relative file.
-	   * @param filename, String, the test file name.  If there are any File.separators in the
+	   * @param filename String, the test file name.  If there are any File.separators in the
 	   * relative path then the path is actually considered relative to the Datapool
 	   * directory unless it does not exist, or is already an absolute file path.
 	   * If a relative directory path does not exist relative to the Datapool directory then
 	   * the final path will be relative to the Project directory.
-	   * @param RuntimeDataInterface to access runtime data (directories). Like a subclass of GenericEngine, or Processor.
+	   * @param data RuntimeDataInterface to access runtime data (directories). Like a subclass of GenericEngine, or Processor.
 	   * @return File, the absolute full path bench file.
 	   * @throws SAFSException
-	   * @see {@link #deduceFile(String, int)}
+	   * @see {@link #deduceFile(String, int, RuntimeDataInterface)}
 	   */
 	  public static File deduceBenchFile(String filename, RuntimeDataInterface data) throws SAFSException{
 		  return deduceFile(filename, FILE_TYPE_BENCH, data);
@@ -1753,13 +1750,13 @@ public class FileUtilities
 
 	  /**
 	   * Deduce the absolute full path to a project-relative file.
-	   * @param filename, String, the test file name.  The path is ALWAYS considered relative
+	   * @param filename String, the test file name.  The path is ALWAYS considered relative
 	   * to the project root directory regardless of the absence or presence of File.separators
 	   * unless the file is already an absolute path.
-	   * @param RuntimeDataInterface to access runtime data (directories). Like a subclass of GenericEngine, or Processor.
+	   * @param data RuntimeDataInterface to access runtime data (directories). Like a subclass of GenericEngine, or Processor.
 	   * @return File, the absolute full path bench file.
 	   * @throws SAFSException
-	   * @see {@link #deduceFile(String, int)}
+	   * @see {@link #deduceFile(String, int, RuntimeDataInterface)}
 	   */
 	  public static File deduceProjectFile(String filename, RuntimeDataInterface data) throws SAFSException{
 		  return deduceFile(filename, FILE_TYPE_PROJECT, data);
@@ -1767,11 +1764,11 @@ public class FileUtilities
 
 	  /**
 	   * Deduce the absolute full path datapool-relative file.
-	   * @param filename, String, the data file name. It can contain sub directories.
-	   * @param RuntimeDataInterface to access runtime data (directories). Like a subclass of GenericEngine, or Processor.
+	   * @param filename String, the data file name. It can contain sub directories.
+	   * @param data RuntimeDataInterface to access runtime data (directories). Like a subclass of GenericEngine, or Processor.
 	   * @return File, the absolute full path datapool file.
 	   * @throws SAFSException
-	   * @see {@link #deduceFile(String, int)}
+	   * @see {@link #deduceFile(String, int, RuntimeDataInterface)}
 	   */
 	  public static File deduceDatapoolFile(String filename, RuntimeDataInterface data) throws SAFSException{
 		  return deduceFile(filename, FILE_TYPE_DATAPOOL, data);
