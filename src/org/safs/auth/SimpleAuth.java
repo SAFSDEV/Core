@@ -11,8 +11,6 @@
  */
 package org.safs.auth;
 
-import java.util.Map;
-
 import org.safs.persist.PersistableDefault;
 
 /**
