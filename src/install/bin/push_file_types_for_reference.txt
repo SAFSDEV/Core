@@ -6,3 +6,5 @@
 *.png
 *.gif
 *.pdf
+*.xml
+*.properties
