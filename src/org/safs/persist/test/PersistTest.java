@@ -9,10 +9,12 @@
  * History:
  * 2017年3月10日    (SBJLWA) Initial release.
  * 2017年3月15日    (SBJLWA) Added test of unpickle from JSON file.
+ * 2017年4月14日    (SBJLWA) Added test for "filter fields according to their modifier".
  */
 package org.safs.persist.test;
 
 import java.io.File;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -207,6 +209,11 @@ public class PersistTest {
 		server.setBaseServiceName("login");
 		server.setAuthCodeResource("oauth/authorize");
 		server.setAuthTokenResource("oauth/token");
+		String[] staticAndFinalFields = {"DEFAULT_AUTH_TOKEN_RESOURCE", "DEFAULT_AUTH_CODE_RESOURCE"};
+		System.out.println("AuthorizationServer's persistable-fields-map should not conatin 'static & final' fields: "+Arrays.toString(staticAndFinalFields));
+		for(String field: staticAndFinalFields){
+			assert !server.getPersitableFields().containsKey(field);
+		}
 
 		OAuth2 auth2 = new OAuth2();
 		auth2.setContent(content);
@@ -353,6 +360,22 @@ public class PersistTest {
 		} catch (SAFSException e) {
 			e.printStackTrace();
 		}
+
+		//All "final" fields will be ignored
+		myPersistable = new MyPersistable(Modifier.FINAL);
+		assert !myPersistable.getPersitableFields().containsKey("finalField");
+		assert !myPersistable.getPersitableFields().containsKey("finalStaticField");
+
+		//All "final & static" fields will be ignored
+		myPersistable = new MyPersistable(Modifier.FINAL|Modifier.STATIC);
+		assert myPersistable.getPersitableFields().containsKey("finalField");
+		assert !myPersistable.getPersitableFields().containsKey("finalStaticField");
+
+		//All "final & static & transient" fields will be ignored
+		myPersistable = new MyPersistable(Modifier.FINAL|Modifier.STATIC|Modifier.TRANSIENT);
+		assert myPersistable.getPersitableFields().containsKey("finalField");
+		assert myPersistable.getPersitableFields().containsKey("finalStaticField");
+
 	}
 
 	public static class MyPersistable extends PersistableDefault{
@@ -372,6 +395,21 @@ public class PersistTest {
 		private float[][] float2DimArray;
 		private String[][] string2DimArray;
 		private List<List<?>> list2DimObject = null;
+
+		public final int finalField = 100;
+		public static final int finalStaticField = 100;
+
+		public MyPersistable(){
+			super();
+		}
+
+		/**
+		 * DO NOT use this constructor to instantiate a MyPersistable to "pickle" and "unpickle".
+		 * @param ignoredFiledTypes
+		 */
+		public MyPersistable(int ignoredFiledTypes){
+			super(ignoredFiledTypes);
+		}
 
 		public Vector<?> getVectorObject() {
 			return vectorObject;
