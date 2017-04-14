@@ -46,7 +46,7 @@ package org.safs.selenium.webdriver.lib;
 *  <br>   DEC 24, 2015    (Lei Wang) Add methods to get browser's name, version, and selenium-server's version etc.
 *                                  Add method checkKnownIssue().
 *  <br>   FEB 05, 2016    (Lei Wang) Add method killChromeDriver().
-*  <br>   FEB 26, 2016    (Lei Wang) Modify cilck(), doubleClick(): if the offset is out of element's boundary, disable the click listener.
+*  <br>   FEB 26, 2016    (Lei Wang) Modify click(), doubleClick(): if the offset is out of element's boundary, disable the click listener.
 *  <br>   FEB 29, 2016    (Lei Wang) Modify checkOffset(): if the offset is out of element's boundary, use the whole document as click event receiver.
 *  <br>   MAR 02, 2016    (Lei Wang) Add clickUnverified(), closeAlert().
 *                                  Add class RBT: To encapsulate the local Robot and Robot RMI agent.
@@ -274,7 +274,7 @@ public class WDLibrary extends SearchObject {
 	/**
 	 * Click(Mouse Left Button) the WebElement at center with a special key pressed.
 	 * @param clickable 	WebElement, the WebElement to click on
-	 * @param specialKey	Keys, the special key to presse during the click
+	 * @param specialKey	Keys, the special key to press during the click
 	 * @param optional String[], the optional parameters
 	 * <ul>
 	 * <li> optional[0] autoscroll boolean, if the component will be scrolled into view automatically before clicking.
@@ -665,7 +665,7 @@ public class WDLibrary extends SearchObject {
 	/**
 	 * Double-Click(Mouse Left Button) the WebElement at the center with a special key pressed.
 	 * @param clickable 	WebElement, the WebElement to click on
-	 * @param specialKey	Keys, the special key to presse during the click
+	 * @param specialKey	Keys, the special key to press during the click
 	 * @param optional String[], the optional parameters
 	 * <ul>
 	 * <li> optional[0] autoscroll boolean, if the component will be scrolled into view automatically before clicking.
@@ -1039,7 +1039,7 @@ public class WDLibrary extends SearchObject {
 	 * @return CharSequence character, or null.
 	 */
 	static CharSequence convertToCharacter(RobotKeyEvent event){
-		ArrayList<RobotKeyEvent> list = new ArrayList();
+		List<RobotKeyEvent> list = new ArrayList<RobotKeyEvent>();
 		list.add(event);
 		return keysparser.antiParse(list);
 	}
@@ -1064,12 +1064,12 @@ public class WDLibrary extends SearchObject {
 		try{ wd = (RemoteDriver) getWebDriver();}catch(Exception x){}
 		// convert to Selenium low-level Action keystrokes.
 		if(keysparser != null){
-			Vector keys = keysparser.parseInput(keystrokes);
+			Vector<?> keys = keysparser.parseInput(keystrokes);
 			Actions actions = new Actions(wd);
 
 			if(we!=null) actions = actions.moveToElement(we);
 
-			Iterator events = keys.iterator();
+			Iterator<?> events = keys.iterator();
 			RobotKeyEvent event;
 			Keys k = null;
 			CharSequence c = null;
@@ -1796,7 +1796,7 @@ public class WDLibrary extends SearchObject {
      * @param offsetX String, the offset on x axis, in pixel or in percentage, for example 15 or 30%.
      * @param offsetX String, the offset on y axis, in pixel or in percentage, for example 45 or 50%.
      *
-     * @return Point, the offset point screen coordination; or null if any exception occured.
+     * @return Point, the offset point screen coordination; or null if any exception occurred.
      *
      **/
     public static Point getElementOffsetScreenLocation(WebElement element, String offsetX, String offsetY){
@@ -1937,8 +1937,7 @@ public class WDLibrary extends SearchObject {
 
 		if (!isRemote) {
 			IndependantLog.warn(debugmsg+"attempting to start a local (not remote) browser instance...");
-			SelectBrowser sb = new SelectBrowser();
-			previousDriver = addWebDriver(Id,sb.getBrowserInstance(BrowserName, extraParameters));
+			previousDriver = addWebDriver(Id,SelectBrowser.getBrowserInstance(BrowserName, extraParameters));
 			lastUsedWD.manage().timeouts().implicitlyWait(timeout, TimeUnit.SECONDS);
 			lastUsedWD.manage().window().setSize(new Dimension(1024,768)); // default window size
 			if(Url != null && Url.length()> 0) lastUsedWD.get(Url);
@@ -1946,8 +1945,7 @@ public class WDLibrary extends SearchObject {
 		} else {
 			IndependantLog.warn(debugmsg+"attempting to start new session on remote server");
 			try {
-				SelectBrowser sb = new SelectBrowser();
-				DesiredCapabilities capabilities = sb.getDesiredCapabilities(BrowserName, extraParameters);
+				DesiredCapabilities capabilities = SelectBrowser.getDesiredCapabilities(BrowserName, extraParameters);
 				capabilities.setJavascriptEnabled(true);
 				capabilities.setCapability(CapabilityType.TAKES_SCREENSHOT, true);
 				capabilities.setCapability(RemoteDriver.CAPABILITY_ID, Id); // custom id for session tracking
@@ -2521,7 +2519,7 @@ public class WDLibrary extends SearchObject {
 		BufferedReader reader = FileUtilities.getUTF8BufferedFileReader(source.getAbsolutePath());
 		WDScriptFactory factory = new WDScriptFactory();
 		StepTypeFactory stepTypes = new StepTypeFactory();
-		stepTypes.setSecondaryPackage(factory.SRSTEPTYPE_PACKAGE);
+		stepTypes.setSecondaryPackage(WDScriptFactory.SRSTEPTYPE_PACKAGE);
 		factory.setStepTypeFactory(stepTypes);
 		try{ return factory.parse(reader, source).get(0);}
 		catch(IOException x){
@@ -2581,7 +2579,7 @@ public class WDLibrary extends SearchObject {
 	}
 
 	/**
-	 * Run a SeBuilder JSON Script explictly using the existing WebDriver instance.
+	 * Run a SeBuilder JSON Script explicitly using the existing WebDriver instance.
 	 * <p>
 	 * @param path - fullpath to JSON script file.
 	 * <p>
@@ -2843,7 +2841,7 @@ public class WDLibrary extends SearchObject {
 	 * Attempts to fire (dispatchEvent) a MouseEvent.
 	 * The MouseEvent should be suitable and contain all relevant and necessary information for the event.
 	 * This is typically used to re-fire a MouseEvent that might have been captured with DocumentClickCapture
-	 * but was not allowed to propogate to the actual element.
+	 * but was not allowed to propagate to the actual element.
 	 * @param event
 	 * @throws SeleniumPlusException on an execution error.
 	 * @throws NullPointerException if required parameters in the MouseEvent are null.
