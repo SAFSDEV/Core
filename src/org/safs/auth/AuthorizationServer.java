@@ -9,11 +9,12 @@
  * History:
  * 2017年2月14日    (Lei Wang) Initial release.
  * MAR 10, 2017  (Lei Wang) Modified comments as we replaced field 'protocol', 'host' and 'port' by one field 'rootUrl'.
+ * APR 14, 2017  (Lei Wang) Removed the static map field and method getPersitableFields().
+ *                        Made the default constructor ignoring "static&final" fields when persisting ("pickle" and "unpickle").
  */
 package org.safs.auth;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.lang.reflect.Modifier;
 
 import org.safs.persist.PersistableDefault;
 
@@ -22,20 +23,17 @@ import org.safs.persist.PersistableDefault;
  * can get the 'authorization code', 'access token', 'refresh token' etc.<br/>
  *
  * @author Lei Wang
- *
  */
 public class AuthorizationServer extends PersistableDefault{
-	private final static Map<String, String> fieldToPersistKeyMap = new HashMap<String, String>();
+	/**
+	 * The rootUrl of the authorization server. It is in format <b>protocol://host:port</b>,
+	 * such as "http://oauth2.authorization.server:80".
+	 */
 	//rootUrl/baseServiceName/authCodeResource
 	//https://github.com/login/oauth/authorize
 
 	//rootUrl/baseServiceName/authTokenResource
 	//https://github.com/login/oauth/token
-
-	/**
-	 * The rootUrl of the authorization server. It is in format <b>protocol://host:port</b>,
-	 * such as "http://oauth2.authorization.server:80".
-	 */
 	private String rootUrl = null;
 	/**
 	 * The base name of authorization service. Such as "login".
@@ -55,16 +53,12 @@ public class AuthorizationServer extends PersistableDefault{
 	/** 'oauth/authorize' */
 	public static final String DEFAULT_AUTH_CODE_RESOURCE 	= "oauth/authorize";
 
-	static{
-		fieldToPersistKeyMap.put("rootUrl", "rootUrl");
-		fieldToPersistKeyMap.put("baseServiceName", "baseServiceName");
-		fieldToPersistKeyMap.put("authCodeResource", "authCodeResource");
-		fieldToPersistKeyMap.put("authTokenResource", "authTokenResource");
-	}
-
-	@Override
-	public Map<String, String> getPersitableFields() {
-		return fieldToPersistKeyMap;
+	/**
+	 * This default constructor will create an AuthorizationServer ignoring "static&final" fields
+	 * when persisting ("pickle" and "unpickle").
+	 */
+	public AuthorizationServer(){
+		super(Modifier.STATIC|Modifier.FINAL);
 	}
 
 	public String getRootUrl() {

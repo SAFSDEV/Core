@@ -12,12 +12,14 @@
  * MAR 16, 2017    (Lei Wang) Added default implementation of method getPersitableFields().
  *                          Added caches holding result of getContents() and getPersitableFields().
  *                          Handled the field of type "array": setField(), equals().
- * APR FOOL, 2017    (Lei Wang) Modified getField(), setField(): make them work for superclass.
+ * APR FOOL, 2017  (Lei Wang) Modified getField(), setField(): make them work for superclass.
+ * APR 14, 2017    (Lei Wang) Added the ability to filter the fields according to their modifier.
  *
  */
 package org.safs.persist;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -58,22 +60,69 @@ public abstract class PersistableDefault implements Persistable, Printable{
 	protected int threshold = 0;
 	protected boolean thresholdEnabled = false;
 
+	private final static int MODIFIER_NONE = 0;//none modifier
+	/**
+	 * If the field's modifiers fit all bits set in 'ignoredFiledTypes', then ignore it.
+	 * Modifier such as Modifier.FINAL, Modifier.STATIC, Modifier.FINAL | Modifier.STATIC etc.
+	 */
+	private int ignoredFiledModifiers = MODIFIER_NONE;
+
+	public PersistableDefault(){}
+
+	/**
+	 * Construct a PersistableDefault with modifier to filter the field for persisting.
+	 *
+	 * <pre>
+	 * <b>Note</b>:
+	 * This constructor is <b>protected</b>, and it is suggested to call it
+	 * in a constructor without parameter to keep the consistency between "pickle" and "unpickle".
+	 * If user makes it public in a child class and create a Persistable object with it,
+	 * then inconsistency may happen between "pickle" and "unpickle", because "unpickle" uses
+	 * the constructor without parameter, which is different than this one.
+	 * </pre>
+	 *
+	 * @param ignoredFiledModifiers int, the modifier used to filter the field for persisting.
+	 * @see #ignoredFiledModifiers
+	 */
+	protected PersistableDefault(int ignoredFiledModifiers/* filed modifiers, such as Modifier.FINAL, Modifier.STATIC etc.*/){
+		//Swipe away the non-field modifiers
+		this.ignoredFiledModifiers = ignoredFiledModifiers & Modifier.fieldModifiers();
+	}
+
 	/**
 	 * This default implementation get all the declared fields {@link Class#getDeclaredFields()} and
-	 * put their name as 'fieldName' and 'persistKey' into the 'persistableFields Map'.
+	 * put their name as 'fieldName' and 'persistKey' into the 'persistableFields Map'. But if
+	 * {@link #ignoreFieldForPersist(Field)} returns true, then that field will not get into 'persistableFields Map'.
+	 *
+	 * @see #ignoreFieldForPersist(Field)
 	 */
 	@Override
 	public Map<String, String> getPersitableFields(){
-
 		if(fieldNameToPersistKeyMap==null){
 			Field[] fields = getClass().getDeclaredFields();
 			fieldNameToPersistKeyMap = new HashMap<String, String>();
 			for(Field field:fields){
+				if(ignoreFieldForPersist(field)){
+					continue;
+				}
 				fieldNameToPersistKeyMap.put(field.getName(), field.getName());
 			}
 		}
 
 		return fieldNameToPersistKeyMap;
+	}
+
+	/**
+	 * @param field Field, the field to test.
+	 * @return boolean if true, then the field should be ignored when persisting.
+	 * @see #getPersitableFields()
+	 */
+	protected boolean ignoreFieldForPersist(Field field){
+		boolean ignore = false;
+		//If the field's modifiers fit all bits set in 'ignoredFiledTypes', then ignore it.
+		ignore = ignoredFiledModifiers!=MODIFIER_NONE &&
+				(ignoredFiledModifiers&field.getModifiers())==ignoredFiledModifiers;
+		return ignore;
 	}
 
 	/**
