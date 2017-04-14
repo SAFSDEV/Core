@@ -20,7 +20,7 @@ package org.safs;
  *								  set its third parameter to 1.0f
  * MAR 25, 2009 (Carl Nagle) Added issuePassedSuccessUsing
  * NOV 12, 2009 (Carl Nagle) Simple JavaDoc update
- * APR 14, 2010 (JunwuMa)Move TIDComponent.setRectVars() to ComponentFunction for sharing. 
+ * APR 14, 2010 (JunwuMa)Move TIDComponent.setRectVars() to ComponentFunction for sharing.
  * JUL 22, 2013 (Lei Wang) Move some methods convertXXX() to StringUtils.java and make them static.
  *								 Modify methods action_xxxGuiImage() to concentrate the redundant code and
  *							 	 move some concentrated code to org.safs.Processor
@@ -69,10 +69,10 @@ import org.safs.tools.stringutils.StringUtilities;
  * <br><em>Purpose:</em> abstract ComponentFunction, enforces that the 'process' method be implemented
  *  <br>
  * <ul>
- * <li>COMPONENT FUNCTIONS (so far...): 
+ * <li>COMPONENT FUNCTIONS (so far...):
  * <ul>
  * <li>  CFButton
- * 
+ *
  * <li>  CFCheckBox
  * <ul>
  * <li>    check
@@ -84,7 +84,7 @@ import org.safs.tools.stringutils.StringUtilities;
  * <li>      Example: TF,Frame,rememberPasswordCheckBox,uncheck
  * </ul>
  * </ul>
- * 
+ *
  * <li>  CFComboBox
  * <ul>
  * <li>    selectIndex
@@ -107,7 +107,7 @@ import org.safs.tools.stringutils.StringUtilities;
  * <li>      Example: T,Frame,nameComboComboBox,showlist
  * </ul>
  * </ul>
- * 
+ *
  * <li>  CFComponent (Available to nearly all components)
  * <ul>
  * <li>    click/rightClick
@@ -174,7 +174,7 @@ import org.safs.tools.stringutils.StringUtilities;
  * </ul>
  * </ul>
  * <li>  CFLabel
- * 
+ *
  * <li>  CFList (similar to combobox)
  * <ul>
  * <li>    activatetextitem
@@ -339,10 +339,10 @@ import org.safs.tools.stringutils.StringUtilities;
  * </ul>
  **/
 public abstract class ComponentFunction extends Processor{
-	//GenericObjectFunctions Actions	
+	//GenericObjectFunctions Actions
 	public static final String ALTCLICK						= "AltClick";
 	public static final String CLICK						= GenericObjectFunctions.CLICK_KEYWORD;//"Click";
-	public static final String COMPONENTCLICK				= "ComponentClick";	
+	public static final String COMPONENTCLICK				= "ComponentClick";
 	public static final String CTRLCLICK					= GenericObjectFunctions.CTRLCLICK_KEYWORD;//"CtrlClick";
 	public static final String CTRLRIGHTCLICK				= GenericObjectFunctions.CTRLRIGHTCLICK_KEYWORD;//"CtrlRightClick";
 	public static final String DOUBLECLICK					= GenericObjectFunctions.DOUBLECLICK_KEYWORD;//"DoubleClick";
@@ -377,7 +377,7 @@ public abstract class ComponentFunction extends Processor{
 	public static final String VERIFYBINARYFILETOFILE    	= GenericMasterFunctions.VERIFYBINARYFILETOFILE_KEYWORD;//"VerifyBinaryFileToFile";
 	public static final String VERIFYCLIPBOARDTOFILE    	= GenericMasterFunctions.VERIFYCLIPBOARDTOFILE_KEYWORD;//"VerifyClipboardToFile";
 	public static final String VERIFYFILETOFILE           	= GenericMasterFunctions.VERIFYFILETOFILE_KEYWORD;//"VerifyFileToFile";
-	public static final String VERIFYGUIIMAGETOFILE			= GenericMasterFunctions.VERIFYGUIIMAGETOFILE_KEYWORD;//"VerifyGUIImageToFile";  
+	public static final String VERIFYGUIIMAGETOFILE			= GenericMasterFunctions.VERIFYGUIIMAGETOFILE_KEYWORD;//"VerifyGUIImageToFile";
 	public static final String VERIFYOBJECTDATATOFILE	    = GenericMasterFunctions.VERIFYOBJECTDATATOFILE_KEYWORD;//"VerifyObjectDataToFile";
 	public static final String VERIFYPROPERTY				= GenericMasterFunctions.VERIFYPROPERTY_KEYWORD;//"VerifyProperty";
 	public static final String VERIFYPROPERTYTOFILE       	= GenericMasterFunctions.VERIFYPROPERTYTOFILE_KEYWORD;//"VerifyPropertyToFile";
@@ -391,7 +391,7 @@ public abstract class ComponentFunction extends Processor{
 	// Keywords to detect text on GUI via OCR
 	public static final String GETTEXTFROMGUI			   	= GenericMasterFunctions.GETTEXTFROMGUI_KEYWORD;//"GetTextFromGUI";
 	public static final String LOCATESCREENIMAGE         	= GenericMasterFunctions.LOCATESCREENIMAGE_KEYWORD;//"LocateScreenImage";
-	public static final String SAVETEXTFROMGUI		 	  	= GenericMasterFunctions.SAVETEXTFROMGUI_KEYWORD;//"SaveTextFromGUI";  
+	public static final String SAVETEXTFROMGUI		 	  	= GenericMasterFunctions.SAVETEXTFROMGUI_KEYWORD;//"SaveTextFromGUI";
 
 	//WindowFunctions Actions
 	public static final String CLOSEWINDOW					= WindowFunctions.CLOSEWINDOW_KEYWORD;//"CloseWindow";
@@ -420,7 +420,7 @@ public abstract class ComponentFunction extends Processor{
 	protected static final String PROPERTY_Items 				= "Items";
 
 	/** "innerText" property to html element's content. **/
-	protected static final String PROPERTY_innerText			= "innerText";	
+	protected static final String PROPERTY_innerText			= "innerText";
 	/** "textContent" property to html element's content. **/
 	protected static final String PROPERTY_textContent 			= "textContent";
 	/** "innerHTML", property to grab html element's content. **/
@@ -441,8 +441,8 @@ public abstract class ComponentFunction extends Processor{
 	protected String altText;
 
 	/**
-	 * Updates our internal storage for action, windowName, compName, and mapname from 
-	 * the current TestRecordData.  Missing items in the TestRecordData will update our 
+	 * Updates our internal storage for action, windowName, compName, and mapname from
+	 * the current TestRecordData.  Missing items in the TestRecordData will update our
 	 * storage with null.
 	 */
 	protected void updateFromTestRecordData(){
@@ -453,7 +453,7 @@ public abstract class ComponentFunction extends Processor{
 		try{ compName = testRecordData.getCompName();}
 		catch(Exception npe){compName = null;}
 		try{ mapname = testRecordData.getAppMapName();}
-		catch(Exception npe){mapname = null;}		
+		catch(Exception npe){mapname = null;}
 	}
 
 	/** Supports standard TEST STEP record types (T, TW, TF) **/
@@ -514,7 +514,7 @@ public abstract class ComponentFunction extends Processor{
 
 	/** <br><em>Purpose:</em> convertNum: convert into a number
 	 * <br><em>Assumptions:</em>  all exceptions are handled.
-	 * @param                     numStr, String 
+	 * @param                     numStr, String
 	 * (indexed from 1, 1 will be subtracted from the number before returned)
 	 * @return                    Integer if successful, null otherwise (if alpha chars instead
 	 * of digits are encountered; or if number is less than one)
@@ -522,18 +522,18 @@ public abstract class ComponentFunction extends Processor{
 	public Integer convertNum (String num) {
 		return StringUtils.convertNum(num);
 	}
-	
+
 	/**
 	 * <br>
 	 * <em>Purpose:</em> check 'iterator' for coords, either a map reference, or x;y notation
 	 * and convert it into Point.
-	 * 
+	 *
 	 * The 'coords' could be provided in 2 formats:<br>
 	 * It could be <b>number, such as "12, 15", "5, 10"</b>.
-	 * Or it could be in <b>percentage format, such as "30%, 45%", "0.25, 0.8"</b>. With this 
-	 * format, the method {@link #getComponentRectangle()} should be provided in subclass, component's width and 
+	 * Or it could be in <b>percentage format, such as "30%, 45%", "0.25, 0.8"</b>. With this
+	 * format, the method {@link #getComponentRectangle()} should be provided in subclass, component's width and
 	 * height are necessary to calculate the coordinate.<br>
-	 *  
+	 *
 	 * @param iterator Iterator, whose next element is the coords parameter or map-reference
 	 * @return java.awt.Point, null if iterator doesn't have another element
 	 * @see #checkForCoord(String)
@@ -544,27 +544,27 @@ public abstract class ComponentFunction extends Processor{
 
 		return null;
 	}
-	
+
 	/**
 	 * <em>Purpose:</em> check for coords, either a map reference, or x;y notation
 	 * and convert it into Point.
-	 * 
+	 *
 	 * The 'coords' could be provided in 2 formats:<br>
 	 * It could be <b>number, such as "12, 15", "5, 10"</b>.
-	 * Or it could be in <b>percentage format, such as "30%, 45%", "0.25, 0.8"</b>. With this 
-	 * format, the method {@link #getComponentRectangle()} should be provided in subclass, component's width and 
+	 * Or it could be in <b>percentage format, such as "30%, 45%", "0.25, 0.8"</b>. With this
+	 * format, the method {@link #getComponentRectangle()} should be provided in subclass, component's width and
 	 * height are necessary to calculate the coordinate.<br>
-	 * 
+	 *
 	 * @param coordinate String, either an AppMap reference, or (x;y) notation
 	 * @return java.awt.Point, null if coordinate is null or empty
-	 * 
+	 *
 	 * @see #getComponentRectangle()
 	 **/
 	protected java.awt.Point checkForCoord(String coordinate) {
 		String debugmsg = StringUtils.debugmsg(false);
 		String[] coordsPair = null;
 		java.awt.Point point = null;
-		
+
 		Log.info(debugmsg+ "checking for coordinate: " + coordinate);
 		if(!StringUtils.isValid(coordinate)){
 			IndependantLog.warn(StringUtils.debugmsg(false)+"The passed in parameter '"+coordinate+"' is not valid");
@@ -584,7 +584,7 @@ public abstract class ComponentFunction extends Processor{
 		return point;
 	}
 
-	/** 
+	/**
 	 * Convert coordinates string of the formats:
 	 * <ul>
 	 * <li>"x;y"
@@ -593,12 +593,12 @@ public abstract class ComponentFunction extends Processor{
 	 * <li>"Coords=x;y"
 	 * <li>"Coords=x,y"
 	 * <li>"Coords=x y"
-	 * </ul> 
+	 * </ul>
 	 * into a java.awt.Point object.
 	 * <p>
-	 * Subclasses may override to convert alternative values, such 
+	 * Subclasses may override to convert alternative values, such
 	 * as Row and Col values as is done in org.safs.rational.CFTable
-	 * 
+	 *
 	 * @param   coords, String x;y or x,y or Coords=x;y  or Coords=x,y
 	 * @return  Point if successful, null otherwise
 	 **/
@@ -606,7 +606,7 @@ public abstract class ComponentFunction extends Processor{
 		return StringUtils.convertCoords(coords);
 	}
 
-	/** 
+	/**
 	 * Convert 2-point Line coordinates string of the formats:
 	 * <ul>
 	 * <li>"x1;y1;x2;y2"
@@ -615,9 +615,9 @@ public abstract class ComponentFunction extends Processor{
 	 * <li>"Coords=x1;y1;x2;y2"
 	 * <li>"Coords=x1,y1,x2,y2"
 	 * <li>"Coords=x1 y1 x2 y2"
-	 * </ul> 
+	 * </ul>
 	 * into a java.awt.Polygon object.
-	 * 
+	 *
 	 * @param   coords, String x1;y1;x2;y2 or x1,y1,x2,y2 or Coords=x1;y1;x2;y2  or Coords=x1,y1,x2,y2
 	 * @return  Polygon if successful, null otherwise
 	 **/
@@ -625,7 +625,7 @@ public abstract class ComponentFunction extends Processor{
 		return StringUtils.convertLine(coords);
 	}
 
-	/** 
+	/**
 	 * Convert window's position-size-status string of the formats:
 	 * <ul>
 	 * <li>"x;y;width;height;status"
@@ -634,10 +634,10 @@ public abstract class ComponentFunction extends Processor{
 	 * <li>"Coords=x;y;width;height;Status=status"
 	 * <li>"Coords=x,y,width,height,Status=status"
 	 * <li>"Coords=x y width height Status=status"
-	 * </ul> 
+	 * </ul>
 	 * into a org.safs.ComponentFunction.Window object.
-	 * 
-	 * @param   windowPosition String, window's position-size-status string; or a map reference for window's status string. 
+	 *
+	 * @param   windowPosition String, window's position-size-status string; or a map reference for window's status string.
 	 * @return  org.safs.ComponentFunction.Window if successful, null otherwise
 	 **/
 	public Window convertWindowPosition(String windowPosition){
@@ -647,10 +647,10 @@ public abstract class ComponentFunction extends Processor{
 		return ConvertWindowPosition(position);
 	}
 
-	/** 
+	/**
 	 * Looks up an item using the current appmapID=mapname, section=compName, item=referenceName.
 	 * mapname and compName are expected to already be set from prior command processing.
-	 * @param  referenceName 
+	 * @param  referenceName
 	 * @return retrieved value or null
 	 **/
 	protected String lookupAppMapReference(String referenceName) {
@@ -663,12 +663,12 @@ public abstract class ComponentFunction extends Processor{
 		return lookup;
 	}
 
-	/** 
+	/**
 	 * lookupAppMapCoordReference: uses 'convertCoords'
 	 * after the call to 'lookupAppMapReference'.
 	 * @param referenceName, String, the reference name passed on to
-	 *         method 'lookupAppMapReference' to lookup the coordinate string 
-	 *         from an AppMap. Then that value is passed on to convertCoords. 
+	 *         method 'lookupAppMapReference' to lookup the coordinate string
+	 *         from an AppMap. Then that value is passed on to convertCoords.
 	 * @return Point if successful, null otherwise (if alpha chars instead
 	 *          of digits are encountered; or if row or col less than one)
 	 **/
@@ -680,12 +680,12 @@ public abstract class ComponentFunction extends Processor{
 		return convertCoords(lookup);
 	}
 
-	/** 
+	/**
 	 * lookupAppMapLineReference: uses 'convertLine'
 	 * after the call to 'lookupAppMapReference'.
 	 * @param referenceName, String, the reference name passed on to
-	 *         method 'lookupAppMapReference' to lookup the Line string 
-	 *         from an AppMap. Then that value is passed on to convertLine. 
+	 *         method 'lookupAppMapReference' to lookup the Line string
+	 *         from an AppMap. Then that value is passed on to convertLine.
 	 * @return Polygon if successful, null otherwise (if alpha chars instead
 	 *          of digits are encountered; or if less than 2 points are detected.)
 	 **/
@@ -701,7 +701,7 @@ public abstract class ComponentFunction extends Processor{
 	 ** after the call to 'lookupAppMapReference'.
 	 * @param                     referenceName, String, the reference name passed on to
 	 * method 'lookupAppMapReference' to lookup the number string from an AppMap. Then that
-	 * value is passed on to convertNum. 
+	 * value is passed on to convertNum.
 	 * @return                    Integer if successful, null otherwise (if alpha chars instead
 	 * of digits are encountered; or if index is less than one)
 	 **/
@@ -709,7 +709,7 @@ public abstract class ComponentFunction extends Processor{
 		String lookup = lookupAppMapReference(referenceName);
 		if( lookup == null) return null;
 
-		log.logMessage(testRecordData.getFac(), "Calling convertNum: ("+lookup+")", 
+		log.logMessage(testRecordData.getFac(), "Calling convertNum: ("+lookup+")",
 				DEBUG_MESSAGE);
 		Integer result = convertNum(lookup);
 		if (result == null) {
@@ -724,7 +724,7 @@ public abstract class ComponentFunction extends Processor{
 	 * These methods may only work on Windows system, it uses java Robot to trigger shortcut menu.<br>
 	 */
 	public static class Window{
-		//define valid status for window 
+		//define valid status for window
 		/** 'NORMAL'. */
 		public static final String NORMAL		= "NORMAL";
 		/** 'MINIMIZED'. */
@@ -771,7 +771,7 @@ public abstract class ComponentFunction extends Processor{
 		/**
 		 * Restore the current window.
 		 */
-		public static void restore() throws SAFSException{		
+		public static void restore() throws SAFSException{
 			try{
 				Robot.restoreFocusedWindow();
 			}catch(Exception e){
@@ -828,8 +828,8 @@ public abstract class ComponentFunction extends Processor{
 			return sb.toString();
 		}
 	}
-	
-    /** 
+
+    /**
      * Convert window's position-size-status string of the formats:
      * <ul>
      * <li>"x;y;width;height;status"
@@ -838,30 +838,30 @@ public abstract class ComponentFunction extends Processor{
      * <li>"Coords=x;y;width;height;Status=status"
      * <li>"Coords=x,y,width,height,Status=status"
      * <li>"Coords=x y width height Status=status"
-     * </ul> 
+     * </ul>
      * into a org.safs.ComponentFunction.Window object.
-     * 
+     *
      * @param   windowPosition String, window's position-size-status string
      * @return  org.safs.ComponentFunction.Window if successful, null otherwise
      **/
     public static Window ConvertWindowPosition(String windowPosition) {
     	try {
-    		String position = new String(windowPosition);    		
-            // parsing preset string to get position,size and status 
+    		String position = new String(windowPosition);
+            // parsing preset string to get position,size and status
     		position = position.toUpperCase();
     		position = position.replace("COORDS=",""); // remove "Coords="
     		position = position.replace("STATUS=",""); // remove "Status="
-    		
+
     		position=position.trim();
     		Log.info("working with position: "+ windowPosition +" prefix stripped to: "+position);
-    		
+
     		position = position.replace(";",","); //replace ";" by "," in string "0,0,640,480;Status=NORMAL"
     		String sep = StringUtils.parseSeparator(position);
     		if (sep == null){
     			Log.error("invalid position: "+ position +".");
     			return null;
     		}
-    		
+
     		// properly handles case where coordsindex = -1 (not found)
     		Log.info("converting position: "+ position);
     		StringTokenizer toker = new StringTokenizer(position, sep);
@@ -873,34 +873,34 @@ public abstract class ComponentFunction extends Processor{
     		String y = toker.nextToken().trim();
     		String width = toker.nextToken().trim();
     		String height = toker.nextToken().trim();
-    		
+
     		if ((x.length()==0)||(y.length()==0)||(width.length()==0)||(height.length()==0)){
     			Log.error("invalid position substrings  "+ x +","+ y +", "+ width +","+ height);
     			return null;
     		}
-    		
+
     		Window window = new Window(
-    				(int) Float.parseFloat(x), 
+    				(int) Float.parseFloat(x),
     				(int) Float.parseFloat(y),
     				(int) Float.parseFloat(width),
     				(int) Float.parseFloat(height));
 
     		if(toker.hasMoreTokens()) window.setStatus(toker.nextToken().trim());
-    			
+
     		return window;
-    		
+
     	} catch (Exception ee) {
     		Log.debug( "bad window's position-size-status format: "+ windowPosition, ee);
     		return null;
     	}
     }
-    
+
 	/**
 	 * Restore the current window.<br>
-	 */ 
+	 */
 	protected void restore() throws SAFSException{
 		String debugmsg = StringUtils.debugmsg(getClass(), "restore");
-		try {			
+		try {
 			_restore();
 			testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
 			String msg = genericText.convert(GENKEYS.SUCCESS_2, action+" "+ windowName+ " successful.", action, windowName);
@@ -916,7 +916,7 @@ public abstract class ComponentFunction extends Processor{
 	/**
 	 * Subclass should give its own implementation, if it is difficult then call this instead, but<br>
 	 * this implementation is not guarantee to work<br>
-	 */ 
+	 */
 	protected void _restore() throws SAFSException{
 		Window.restore();
 	}
@@ -926,7 +926,7 @@ public abstract class ComponentFunction extends Processor{
 	 */
 	protected void maximize() throws SAFSException{
 		String debugmsg = StringUtils.debugmsg(getClass(), "maximize");
-		try {			
+		try {
 			_maximize();
 			testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
 			String msg = genericText.convert(GENKEYS.SUCCESS_2, action+" "+ windowName+ " successful.", action, windowName);
@@ -952,7 +952,7 @@ public abstract class ComponentFunction extends Processor{
 	 */
 	protected void minimize() throws SAFSException{
 		String debugmsg = StringUtils.debugmsg(getClass(), "minimize");
-		try {			
+		try {
 			_minimize();
 			testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
 			String msg = genericText.convert(GENKEYS.SUCCESS_2, action+" "+ windowName+ " successful.", action, windowName);
@@ -978,7 +978,7 @@ public abstract class ComponentFunction extends Processor{
 	 */
 	protected void close() throws SAFSException{
 		String debugmsg = StringUtils.debugmsg(getClass(), "close");
-		try {			
+		try {
 			_close();
 			testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
 			String msg = genericText.convert(GENKEYS.SUCCESS_2, action+" "+ windowName+ " successful.", action, windowName);
@@ -1002,20 +1002,20 @@ public abstract class ComponentFunction extends Processor{
 	/**
 	 * perform SetPosition to move Main Window, resize it and set its status.
 	 * Format: "Coords=0,0,640,480;Status=NORMAL". Status can be NORMAL, MINIMAZED and MAXMAZED
-	 * Alteratively, semi-colon (;) can be used instead of comma (,) to separate 
-	 * numeric data.  This would be required when placing the data directly in the 
-	 * test record and NOT in the App Map when using comma-delimited test tables. 
+	 * Alteratively, semi-colon (;) can be used instead of comma (,) to separate
+	 * numeric data.  This would be required when placing the data directly in the
+	 * test record and NOT in the App Map when using comma-delimited test tables.
 	 * @exception SAFSException
 	 */
 	protected void setPosition() throws SAFSException {
 		String debugInf = StringUtils.debugmsg(false);
 		if (params.size()<1) {
-			paramsFailedMsg(windowName, compName);  
+			paramsFailedMsg(windowName, compName);
 			return;
 		}
 
 		try {
-			// format of preset: Coords=0,0,640,480;Status=NORMAL       
+			// format of preset: Coords=0,0,640,480;Status=NORMAL
 			String preset = (String)params.iterator().next();
 			Log.info("...params for SetPosition: "+preset);
 
@@ -1037,13 +1037,13 @@ public abstract class ComponentFunction extends Processor{
 			testRecordData.setStatusCode(StatusCodes.OK);
 			log.logMessage(testRecordData.getFac(),
 					genericText.convert(TXT_SUCCESS_3, altText, windowName, compName, action),
-					PASSED_MESSAGE);	    
+					PASSED_MESSAGE);
 
 		} catch (Exception e) {
 			Log.debug(debugInf+StringUtils.debugmsg(e));
 			testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
 			componentFailureMessage(e.getMessage());
-		} 
+		}
 	}
 	/**
 	 *Subclass should give its own implementation<br>
@@ -1057,7 +1057,7 @@ public abstract class ComponentFunction extends Processor{
 	protected void _setSize(Dimension size) throws SAFSException {
 		throw new SAFSException("Un-Supported yet.");
 	}
-	/** 
+	/**
 	 * "windowName compName action successful."
 	 * "[detail]"
 	 * <br><em>Purpose:</em> Log a generic success message.
@@ -1067,7 +1067,7 @@ public abstract class ComponentFunction extends Processor{
 		String message = passedText.convert(TXT_SUCCESS_3, altMsg,this.windowName, this.compName, this.action);
 		log.logMessage(testRecordData.getFac(), message,  PASSED_MESSAGE, detail);
 	}
-	/** 
+	/**
 	 * "windowName compName action successful. [comment]"
 	 * Sets status to OK and issues a PASSED message.
 	 * string comment is expected to already be localized.
@@ -1076,12 +1076,12 @@ public abstract class ComponentFunction extends Processor{
 	protected void issuePassedSuccess(String comment){
 		testRecordData.setStatusCode(StatusCodes.OK);
 		if (comment == null) comment = "";
-		String success = GENStrings.convert(GENStrings.SUCCESS_3, 
+		String success = GENStrings.convert(GENStrings.SUCCESS_3,
 				windowName+":"+compName+" "+action+" successful.",
 				windowName, compName, action);
 		log.logMessage(testRecordData.getFac(), success+" "+comment, PASSED_MESSAGE);
 	}
-	/** 
+	/**
 	 * "windowName compName action successful using [using]"
 	 * Sets status to OK and issues a PASSED message.
 	 * string comment is expected to already be localized, if necessary.
@@ -1093,11 +1093,11 @@ public abstract class ComponentFunction extends Processor{
 				windowName, compName, action, using);
 		log.logMessage(testRecordData.getFac(), success, PASSED_MESSAGE);
 	}
-	
-	/** 
+
+	/**
 	 * "Unable to perform action on compName in file line N."
 	 * "[Detail]"
-	 * <br><em>Purpose:</em> log an "Unable to perform function" FAILED_MESSAGE with detail. 
+	 * <br><em>Purpose:</em> log an "Unable to perform function" FAILED_MESSAGE with detail.
 	 * Expects testRecordData to already have filename, lineNumber, compName, and command.**/
 	protected void componentFailureMessage(String detail) {
 		String tag = LINE_FAILURE_4;
@@ -1113,10 +1113,10 @@ public abstract class ComponentFunction extends Processor{
 	/**
 	 * "windowname compName action processed with a negative result."
 	 * "Error at line number in file: [detail]"
-	 * <br><em>Purpose:</em> log a simple failure message when a test record got processed with negative result. When an 
-	 *            action intends to make a judgment, a negative result is gotten if the logical result of the judgment 
+	 * <br><em>Purpose:</em> log a simple failure message when a test record got processed with negative result. When an
+	 *            action intends to make a judgment, a negative result is gotten if the logical result of the judgment
 	 *            is false; the test step will be logged as 'FAIL' although it got executed correctly. Called by some comparing actions.
-	 *              
+	 *
 	 * E.g. When doing verifyCaptureText, the result is negative if the body test captured doesn't match the bench mark file.
 	 *
 	 * @param error -- a error message
@@ -1136,44 +1136,44 @@ public abstract class ComponentFunction extends Processor{
 
 	/** Issue parameter count error and failure message **/
 	protected void issueParameterCountFailure(){
-		issueInputRecordFailure(FAILStrings.text(FAILStrings.PARAMSIZE, 
+		issueInputRecordFailure(FAILStrings.text(FAILStrings.PARAMSIZE,
 				"Insufficient Parameters."));
-	}    
+	}
 
-	/** Issue parameter count error and failure message 
+	/** Issue parameter count error and failure message
 	 * @param detail detail about specific missing params or command format
 	 ***/
 	protected void issueParameterCountFailure(String detail){
 		issueInputRecordFailure(FAILStrings.text(FAILStrings.PARAMSIZE, detail));
-	}    
+	}
 
-	/** Issue parameter value error and failure message 
+	/** Issue parameter value error and failure message
 	 * @param paramName -- the Name of the action parameter in error. **/
 	protected void issueParameterValueFailure(String paramName){
 		String error = FAILStrings.convert(FAILStrings.BAD_PARAM,
 				"Invalid parameter value for "+ paramName +".",
 				paramName);
 		issueInputRecordFailure(error);
-	}    
+	}
 
-	/** Issue a file error and failure message 
+	/** Issue a file error and failure message
 	 * Filename does not need to be localized. **/
 	protected void issueFileErrorFailure(String filename){
-		issueActionFailure(FAILStrings.convert(FAILStrings.FILE_ERROR, 
+		issueActionFailure(FAILStrings.convert(FAILStrings.FILE_ERROR,
 				"Error opening or using "+filename,
 				filename));
-	}    
+	}
 
-	/** Issue a generic error and failure message 
+	/** Issue a generic error and failure message
 	 * The cause parameter is expected to already be localized. **/
 	protected void issueUnknownErrorFailure(String cause){
-		issueActionFailure(FAILStrings.convert(FAILStrings.GENERIC_ERROR, 
+		issueActionFailure(FAILStrings.convert(FAILStrings.GENERIC_ERROR,
 				"*** Error *** "+cause,
 				cause));
 	}
 
 	/**
-	 * @param subareaMapKey, String, the reference in Map file, represent the subarea; 
+	 * @param subareaMapKey, String, the reference in Map file, represent the subarea;
 	 *                               or the subarea itself. The subares is defined as (x, y, width, height)
 	 *                               for example like (0, 0, %50, %90)
 	 * @return Rectangle, The subarea rectangle deduced from the 'Component Rectangle' and 'subarea'
@@ -1182,10 +1182,10 @@ public abstract class ComponentFunction extends Processor{
 	 * @see {@link #getComponentRectangle()}
 	 */
 	protected Rectangle deduceImageRect(String subareaMapKey) throws SAFSException{
-		
+
 		//scroll to make the element show as much as possible
 		//showComponentAsMuchPossible(false);//Lei: auto-scroll may cause the difference of captured image for each time.
-		
+
 		Rectangle compRect = getComponentRectangle();
 		if (compRect==null) throw new SAFSException("Can't get Rectangle for Componet "+compName);
 
@@ -1207,7 +1207,7 @@ public abstract class ComponentFunction extends Processor{
 	}
 
 	protected String getPossibleMapItem(String mapKey){
-		
+
 		String mapValue = null;
 		if(mapKey==null || mapKey.equals("")){
 			Log.info ("Map Key not provided..., will return null as value.");
@@ -1216,7 +1216,7 @@ public abstract class ComponentFunction extends Processor{
 			if (mapValue == null) {
 				//bad_app_map_item  :Item '%1%' was not found in App Map '%2%'
 				String error = FAILStrings.convert(FAILStrings.BAD_APP_MAP_ITEM,
-						"Item '"+ compName+":"+mapKey +"' was not found in App Map '"+ mapname +"'", 
+						"Item '"+ compName+":"+mapKey +"' was not found in App Map '"+ mapname +"'",
 						compName+":"+mapKey, mapname);
 				IndependantLog.warn(error);
 				//If can't find value from map, maybe itself is the value
@@ -1225,26 +1225,26 @@ public abstract class ComponentFunction extends Processor{
 		}
 		return  mapValue;
 	}
-	
+
 
 	/**
 	 * Processes a Component Function Test Record to capture a screen GUI image to a file.
-	 * Currently, the available formats for the output file are JPG, BMP, TIF, GIF, PNG and PNM. 
+	 * Currently, the available formats for the output file are JPG, BMP, TIF, GIF, PNG and PNM.
 	 * Optionally, the user may utilize the SubArea parameter to only capture a portion of the Component.
-	 * This routine expects to be called by subclasses only and the subclass must override 
-	 * the getComponentRectangle method to provide the necessary location of the 
-	 * desired Component.  Subclasses must also have already set the fields for mapname, 
-	 * windowName, compName, and action.  This is usually already done in the process() call 
+	 * This routine expects to be called by subclasses only and the subclass must override
+	 * the getComponentRectangle method to provide the necessary location of the
+	 * desired Component.  Subclasses must also have already set the fields for mapname,
+	 * windowName, compName, and action.  This is usually already done in the process() call
 	 * from the subclasses.
 	 * This routine utilizes Java Advanced Imaging (JAI) to output the screen image to the file.
 	 * JAI must be installed at compile time and runtime.
 	 **/
 	protected void action_getGuiImage () throws SAFSException {
-		testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );	        
+		testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );
 		if ( params.size( ) < 1 ) {
 			this.issueParameterCountFailure("OutputFile");
 			return;
-		} 
+		}
 		String filename = iterator.next( );
 		File fn = null;
 		try{
@@ -1272,7 +1272,7 @@ public abstract class ComponentFunction extends Processor{
 			filteredAreas = (String) iterator.next();
 			filteredAreas = parseFilteredAreasParam(filteredAreas, warnings);
 		}
-		
+
 		//capture component image to file
 		//since our call to getSubAreaRectangle() has already confirmed that imageRect is
 		//contained in compRect, we can assume that imageRect is also contained in the parent window
@@ -1285,14 +1285,14 @@ public abstract class ComponentFunction extends Processor{
 				buffimg = ImageUtils.filterImage(buffimg, filteredAreas, warnings);
 				Log.debug("CF GetGuiImage filtered image resolves to: "+ buffimg);
 			}
-			
+
 			if(!warnings.isEmpty()) for(String warning:warnings) log.logMessage(testRecordData.getFac(), warning, WARNING_MESSAGE);
 
 			ImageUtils.saveImageToFile(buffimg, fn, 1.0F);
 		}
 		catch (java.lang.SecurityException se) {
 			//error, security problems accessing output file
-			this.issueErrorPerformingAction(FAILStrings.convert(FAILStrings.CANT_CREATE_FILE, 
+			this.issueErrorPerformingAction(FAILStrings.convert(FAILStrings.CANT_CREATE_FILE,
 					"Can not create file '"+fn.getAbsolutePath()+"': "+
 							se.getClass().getSimpleName(), fn.getAbsolutePath()+": "+ se.getClass().getSimpleName()));
 			return;
@@ -1300,15 +1300,15 @@ public abstract class ComponentFunction extends Processor{
 		catch (java.lang.IllegalArgumentException se) {
 			//error, bad parameters sent to JAI.create call
 			//error, security problems accessing output file
-			this.issueErrorPerformingAction(FAILStrings.convert(FAILStrings.CANT_CREATE_FILE, 
+			this.issueErrorPerformingAction(FAILStrings.convert(FAILStrings.CANT_CREATE_FILE,
 					"Can not create file '"+fn.getAbsolutePath()+"': "+
 							se.getClass().getSimpleName(), fn.getAbsolutePath()+": "+ se.getClass().getSimpleName()));
 			return;
 		}
 		catch (NoClassDefFoundError ncdfe) {
 			//error, JAI not installed
-			this.issueErrorPerformingAction(FAILStrings.convert(FAILStrings.SUPPORT_NOT_FOUND, 
-					"Support for Java Advanced Imaging (JAI) not found!", 
+			this.issueErrorPerformingAction(FAILStrings.convert(FAILStrings.SUPPORT_NOT_FOUND,
+					"Support for Java Advanced Imaging (JAI) not found!",
 					"Java Advanced Imaging (JAI)"));
 			return;
 		}
@@ -1319,8 +1319,8 @@ public abstract class ComponentFunction extends Processor{
 		}
 
 		//success!  set status to ok
-		this.issuePassedSuccess(GENStrings.convert(GENStrings.BE_SAVED_TO, 
-				"Image has been saved to '"+fn.getAbsolutePath()+"'", 
+		this.issuePassedSuccess(GENStrings.convert(GENStrings.BE_SAVED_TO,
+				"Image has been saved to '"+fn.getAbsolutePath()+"'",
 				"Image", fn.getAbsolutePath()));
 		testRecordData.setStatusCode(StatusCodes.OK);
 	}
@@ -1344,37 +1344,37 @@ public abstract class ComponentFunction extends Processor{
 		}
 		throw new IllegalArgumentException("Provided parameter is NOT a valid UUID= parameter.");
 	}
-	
+
 	/**
 	 * Processes a Component Function Test Record to verify a screen GUI image to a file.
-	 * Currently, the available formats for the output file are BMP, JPG, TIFF, GIF, PNG, and PNM.  
+	 * Currently, the available formats for the output file are BMP, JPG, TIFF, GIF, PNG, and PNM.
 	 * Optionally, the user may utilize the SubArea parameter to only capture a portion of the Component.
-	 * This routine expects to be called by subclasses only and the subclass must override 
-	 * the getComponentRectangle method to provide the necessary location of the 
-	 * desired Component.  Subclasses must also have already set the fields for mapname, 
-	 * windowName, compName, and action.  This is usually already done in the process() call 
+	 * This routine expects to be called by subclasses only and the subclass must override
+	 * the getComponentRectangle method to provide the necessary location of the
+	 * desired Component.  Subclasses must also have already set the fields for mapname,
+	 * windowName, compName, and action.  This is usually already done in the process() call
 	 * from the subclasses.
 	 * This routine utilizes Java Advanced Imaging (JAI) to output the screen image to the file.
 	 * JAI must be installed at compile time and runtime.
 	 **/
 	protected void action_verifyGuiImageToFile () throws SAFSException {
 		String debugmsg = StringUtils.debugmsg(false);
-		
-		testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );	        
+
+		testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );
 		if ( params.size( ) < 1 ) {
 			this.issueParameterCountFailure("BenchmarkFile");
 			return;
-		} 
+		}
 
 		String benchname = iterator.next( );
-		
+
 		// make the UUID suffix for Actuals and Diffs optional (default = true)
 		boolean doUUID = true;
 		File benchFile = null;
 		File testout = null;
 		String benchsuffix = null;
 		boolean missingBench = false;
-		
+
 		try{
 			benchname = ImageUtils.normalizeFileNameSuffix(benchname);
 			benchsuffix = benchname.substring(benchname.lastIndexOf("."));//.jpg .png .bmp
@@ -1392,7 +1392,7 @@ public abstract class ComponentFunction extends Processor{
 		//	this.issueParameterValueFailure("BenchmarkFile="+fn.getAbsolutePath());
 		//	return;
 		}
-		
+
 		//get optional SubArea parameter
 		String stemp = iterator.hasNext()? (String) iterator.next() : null;
 		Rectangle imageRect = null;
@@ -1413,7 +1413,7 @@ public abstract class ComponentFunction extends Processor{
 			}
 		}
 		if(iterator.hasNext()) try{ doUUID = getUUIDBoolean(iterator.next());}catch(Exception ignore){}
-		
+
 		List<String> warnings = new ArrayList<String>();
 		//get optional FilteredAreas parameter
 		String filteredAreas = null;
@@ -1423,14 +1423,14 @@ public abstract class ComponentFunction extends Processor{
 		}
 
 		String warnMsg = null;
-		
+
 		//capture component image to file
 		//since our call to getSubAreaRectangle() has already confirmed that imageRect is
 		//contained in compRect, we can assume that imageRect is also contained in the parent window
 		//(compRect was retrieved from parent window)
 		try {
 			BufferedImage buffimg = getRectangleImage(imageRect);
-			
+
 			try{
 				if(filteredAreas!=null) buffimg = ImageUtils.filterImage(buffimg, filteredAreas, warnings);
 			}catch(SAFSException e){
@@ -1440,15 +1440,15 @@ public abstract class ComponentFunction extends Processor{
 				return;
 			}
 
-			//Save the BufferedImage to a temporary file with the same suffix as bench image file 
+			//Save the BufferedImage to a temporary file with the same suffix as bench image file
 			File tmpFile = File.createTempFile("image",benchsuffix);
             boolean tmpFileDelete = true;
-            
+
 			ImageUtils.saveImageToFile(buffimg, tmpFile, 1.0F);
 
 			//Read these two files
 			String bench = null;
-			String test  = null; 
+			String test  = null;
 			try{ bench = StringUtils.readBinaryFile(benchFile.getAbsolutePath()).toString();}
 			catch(IOException io){
 				Log.warn(debugmsg+action +" failed to load benchmark file "+benchFile.getAbsolutePath());
@@ -1481,7 +1481,7 @@ public abstract class ComponentFunction extends Processor{
 						issueErrorPerformingActionUsing(filteredAreas, warnMsg);
 						return;
 					}
-					
+
 					verified = ImageUtils.compareImage(buffimg, benchimg, percentBitsTolerance);
 					if(!verified){
 						try{ diffimg = ImageUtils.createDiffImage(buffimg, benchimg);}
@@ -1500,30 +1500,30 @@ public abstract class ComponentFunction extends Processor{
 			FileUtilities.copyFileToFile(tmpFile, testout);
 
 			if(!warnings.isEmpty()) for(String warning:warnings) log.logMessage(testRecordData.getFac(), warning, WARNING_MESSAGE);
-			
+
 			if (verified) {
 				//success!  set status to ok
 				testRecordData.setStatusCode(StatusCodes.OK);
 				issuePassedSuccess(GENStrings.convert(GENStrings.CONTENT_MATCHES_KEY,
 						"the content of '"+ testout.getAbsolutePath() +"' matches the content of "+benchFile.getAbsolutePath(),
-						testout.getAbsolutePath(),benchFile.getAbsolutePath())); 
+						testout.getAbsolutePath(),benchFile.getAbsolutePath()));
 			} else {
 				try{
 					StringBuffer message = new StringBuffer();
 					//If the verification failure was caused by "bench file missing or bench reading error"
-					//we cannot make a diff image, 
+					//we cannot make a diff image,
 					if(missingBench || bench==null){
 						if(missingBench){
-							message.append(GENStrings.convert(GENStrings.NOT_EXIST, 
-									benchFile.getAbsolutePath() +" does not exist.", 
+							message.append(GENStrings.convert(GENStrings.NOT_EXIST,
+									benchFile.getAbsolutePath() +" does not exist.",
 									benchFile.getAbsolutePath()));
 						}else{
-							message.append(FAILStrings.convert(FAILKEYS.FILE_READ_ERROR, 
-									"Error reading from file '"+benchFile.getAbsolutePath()+"'", 
+							message.append(FAILStrings.convert(FAILKEYS.FILE_READ_ERROR,
+									"Error reading from file '"+benchFile.getAbsolutePath()+"'",
 									benchFile.getAbsolutePath()));
 						}
-						message.append("; "+GENStrings.convert(GENStrings.BE_SAVED_TO, 
-								compName+" Image has been saved to '"+testout.getAbsolutePath()+"'", 
+						message.append("; "+GENStrings.convert(GENStrings.BE_SAVED_TO,
+								compName+" Image has been saved to '"+testout.getAbsolutePath()+"'",
 								compName+" Image", testout.getAbsolutePath()));
 					}else{
 						File diffout = null;
@@ -1545,7 +1545,7 @@ public abstract class ComponentFunction extends Processor{
 									diffout.getAbsolutePath()));
 						}
 					}
-					
+
 					issueErrorPerformingActionOnX(compName, message.toString());
 				}catch(SAFSException x){
 					tmpFileDelete = false;
@@ -1559,21 +1559,21 @@ public abstract class ComponentFunction extends Processor{
 		}
 		catch (java.lang.SecurityException se) {
 			//error, security problems accessing output file
-			issueErrorPerformingActionOnX(compName,FAILStrings.convert(FAILStrings.FILE_ERROR, 
+			issueErrorPerformingActionOnX(compName,FAILStrings.convert(FAILStrings.FILE_ERROR,
 					"Error opening or reading or writing file '"+benchFile.getAbsolutePath()+"': "+
 							se.getClass().getSimpleName(), benchFile.getAbsolutePath()+": "+ se.getClass().getSimpleName()));
 		}
 		catch (java.lang.IllegalArgumentException se) {
 			//error, bad parameters sent to JAI.create call
 			//error, security problems accessing output file
-			this.issueErrorPerformingActionOnX(compName, FAILStrings.convert(FAILStrings.FILE_ERROR, 
+			this.issueErrorPerformingActionOnX(compName, FAILStrings.convert(FAILStrings.FILE_ERROR,
 					"Error opening or reading or writing file '"+benchFile.getAbsolutePath()+"': "+
 							se.getClass().getSimpleName(), benchFile.getAbsolutePath()+": "+ se.getClass().getSimpleName()));
 		}
 		catch (NoClassDefFoundError ncdfe) {
 			//error, JAI not installed
-			this.issueErrorPerformingActionOnX(compName,FAILStrings.convert(FAILStrings.SUPPORT_NOT_FOUND, 
-					"Support for Java Advanced Imaging (JAI) not found!", 
+			this.issueErrorPerformingActionOnX(compName,FAILStrings.convert(FAILStrings.SUPPORT_NOT_FOUND,
+					"Support for Java Advanced Imaging (JAI) not found!",
 					"Java Advanced Imaging (JAI)"));
 		}
 		catch (Exception e) {
@@ -1592,7 +1592,7 @@ public abstract class ComponentFunction extends Processor{
 		String debugmsg = StringUtils.debugmsg(false);
 		String filteredAreas = filteredAreasParam;
 		boolean isFilteredAreas = false;
-		
+
 		//Maybe the parameter is just a key in the map file, mapkey="Filter=0,0,5,5 40,40,30%,50%"
 		filteredAreas = getPossibleMapItem(filteredAreas);
 
@@ -1631,11 +1631,11 @@ public abstract class ComponentFunction extends Processor{
 			return filteredAreas;
 		}
 	}
-	
+
 	/**
-	 * Set the varname.x, varname.y, varname.w, and varname.h variables to the 
+	 * Set the varname.x, varname.y, varname.w, and varname.h variables to the
 	 * values retrieved from the rectangle.
-	 * @param rect Rectangle, 
+	 * @param rect Rectangle,
 	 * @param varname String,
 	 * @return
 	 */
@@ -1794,7 +1794,7 @@ public abstract class ComponentFunction extends Processor{
 				dragTo();
 			} else if (action.equalsIgnoreCase(SENDEVENT)) {
 				sendEvent();
-			} else if (action.equalsIgnoreCase(GETTEXTFROMGUI) || 
+			} else if (action.equalsIgnoreCase(GETTEXTFROMGUI) ||
 					action.equalsIgnoreCase(SAVETEXTFROMGUI)) {
 				action_GetSaveTextFromGUI();
 			} else if (action.equalsIgnoreCase(LOCATESCREENIMAGE)) {
@@ -1811,8 +1811,8 @@ public abstract class ComponentFunction extends Processor{
 			}else{
 				testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );
 				String message = "Met "+StringUtils.debugmsg(se);
-				String detail = FAILStrings.convert(FAILStrings.STANDARD_ERROR, 
-						action +" failure in table "+ testRecordData.getFilename() + " at Line " + testRecordData.getLineNumber(), 
+				String detail = FAILStrings.convert(FAILStrings.STANDARD_ERROR,
+						action +" failure in table "+ testRecordData.getFilename() + " at Line " + testRecordData.getLineNumber(),
 						action, testRecordData.getFilename(), String.valueOf(testRecordData.getLineNumber()));
 
 				log.logMessage(testRecordData.getFac(), message, detail, FAILED_MESSAGE);
@@ -1831,8 +1831,8 @@ public abstract class ComponentFunction extends Processor{
 			}else{
 				testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
 				String message = null;
-				String detail = FAILStrings.convert(FAILStrings.STANDARD_ERROR, 
-						action +" failure in table "+ testRecordData.getFilename() + " at Line " + testRecordData.getLineNumber(), 
+				String detail = FAILStrings.convert(FAILStrings.STANDARD_ERROR,
+						action +" failure in table "+ testRecordData.getFilename() + " at Line " + testRecordData.getLineNumber(),
 						action, testRecordData.getFilename(), String.valueOf(testRecordData.getLineNumber()));
 
 				if(SAFSException.NAME_FT_ObjectNotFoundException.equals(eName)){
@@ -1848,7 +1848,7 @@ public abstract class ComponentFunction extends Processor{
 					message = "UnsupportedAction: possibly the component is not visible, or possibly this action is really not supported;"+eMessage;
 
 				}else if(SAFSException.NAME_FT_WindowActivateFailedException.equals(eName)){
-					message = GENStrings.convert(GENStrings.ACTIVATE_WARN, 
+					message = GENStrings.convert(GENStrings.ACTIVATE_WARN,
 							compName +" activation warning.  "+ compName +" may be disabled or obstructed.", compName);
 
 				}else{
@@ -1909,10 +1909,10 @@ public abstract class ComponentFunction extends Processor{
 			if ( testrval.indexOf(testval) < 0 ) {
 				// failed
 				testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );
-				String detail = genericText.convert("bench_not_contains", 
+				String detail = genericText.convert("bench_not_contains",
 						compName+":"+prop +" did not contain expected substring '"+ val +"'",
-						compName+":"+prop, val);				
-				detail += " " + genericText.convert("actual_value", "ActualValue='"+ rval +"'", rval);  
+						compName+":"+prop, val);
+				detail += " " + genericText.convert("actual_value", "ActualValue='"+ rval +"'", rval);
 				componentExecutedFailureMessage(detail);
 			} else {
 				// set status to ok
@@ -1958,7 +1958,7 @@ public abstract class ComponentFunction extends Processor{
 				}
 			}catch(SAFSException e){
 				if(!SAFSException.CODE_PropertyNotFoundException.equals(e.getCode())) throw e;
-				Log.info(debugmsg+" property '"+prop+"' NOT found.");					
+				Log.info(debugmsg+" property '"+prop+"' NOT found.");
 			}
 
 			if (!setVariable(propExistVar, exist)) {
@@ -2016,7 +2016,7 @@ public abstract class ComponentFunction extends Processor{
 			Map<String,String>benchmark = new HashMap<String,String>();
 			StringBuffer sb = new StringBuffer();
 			if(!actualContents.isEmpty()){
-				Collection<String> normcontents = new ArrayList<String>();				
+				Collection<String> normcontents = new ArrayList<String>();
 				for(String line: actualContents){
 					line = StringUtils.normalizeLineBreaks(line);
 					normcontents.add(line);
@@ -2035,7 +2035,7 @@ public abstract class ComponentFunction extends Processor{
 					try{
 						benchmark = StringUtils.readEncodingMap(benchFile, fileEncoding);
 					}catch(IOException io){
-						Log.info("VerifyObjectDataToFile benchmark file '"+ benchFile +"' IOException: "+io.getMessage());	
+						Log.info("VerifyObjectDataToFile benchmark file '"+ benchFile +"' IOException: "+io.getMessage());
 						isMissing = true;
 						missingMessage = io.getMessage();
 					}
@@ -2045,7 +2045,7 @@ public abstract class ComponentFunction extends Processor{
 						benchContents = StringUtils.readEncodingfile(benchFile, fileEncoding);
 						if(!benchContents.isEmpty()) benchmark.put(OBJECT_DATA, benchContents.iterator().next().toString());
 					}catch(IOException io){
-						Log.info("VerifyObjectDataToFile benchmark file '"+ benchFile +"' IOException: "+io.getMessage());	
+						Log.info("VerifyObjectDataToFile benchmark file '"+ benchFile +"' IOException: "+io.getMessage());
 						benchContents = benchmark.values();// nothing. Empty Collection.
 						isMissing = true;
 						missingMessage = io.getMessage();
@@ -2055,8 +2055,8 @@ public abstract class ComponentFunction extends Processor{
 					issuePassedSuccessUsing(benchFile);
 				}else{
 					actfilename = FileUtilities.deduceMatchingUUIDFilename(benchFile);
-					File testout = deduceTestFile(actfilename);						
-					Log.info("VerifyObjectDataToFile property file: "+ testout.getAbsolutePath() +", encoding: "+fileEncoding);	
+					File testout = deduceTestFile(actfilename);
+					Log.info("VerifyObjectDataToFile property file: "+ testout.getAbsolutePath() +", encoding: "+fileEncoding);
 					if(multiline){
 						StringUtils.writeEncodingProperties(testout.getAbsolutePath(), properties, fileEncoding);
 					}else{
@@ -2066,15 +2066,15 @@ public abstract class ComponentFunction extends Processor{
 						missingMessage = FAILStrings.convert(FAILKEYS.FILE_READ_ERROR,
 								  "Error reading from file '"+ benchFile+"'",
 								  benchFile) +
-								  ": "+ missingMessage +". " + 
+								  ": "+ missingMessage +". " +
 								  GENStrings.convert(GENKEYS.BE_SAVED_TO,
 										  "'"+ OBJECT_DATA +"' has been save to '"+ testout.getAbsolutePath()+"'",
 										  OBJECT_DATA,testout.getAbsolutePath());
 						issueErrorPerformingActionOnX(compName, missingMessage);
 					}else{
-						
-					issueErrorPerformingActionOnX(compName, GENStrings.convert(GENKEYS.CONTENT_NOT_MATCHES_KEY, 
-				               "the content of '"+ testout.getAbsolutePath() +"' does not match the content of '"+ benchFile+"'", 
+
+					issueErrorPerformingActionOnX(compName, GENStrings.convert(GENKEYS.CONTENT_NOT_MATCHES_KEY,
+				               "the content of '"+ testout.getAbsolutePath() +"' does not match the content of '"+ benchFile+"'",
 				               testout.getAbsolutePath(),benchFile));
 					}
 				}
@@ -2108,7 +2108,7 @@ public abstract class ComponentFunction extends Processor{
 			filename = getAbsolutFileName(filename, STAFHelper.SAFS_VAR_TESTDIRECTORY);
 			IndependantLog.info(debugmsg+" filename='"+filename+"'; encoding='"+encoding+"'.");
 			Map<String,String> props = new HashMap<String,String>();
-			
+
 			boolean multiline = false;
 			try {
 				Collection<String> contents = captureObjectData();
@@ -2116,7 +2116,7 @@ public abstract class ComponentFunction extends Processor{
 					String type = testRecordData.getCompType();
 					throw new SAFSException("Fail to get object data"+(type==null?"":" for '"+type+"'"),SAFSException.CODE_CONTENT_ISNULL);
 				}
-				Collection<String> normcontents = new ArrayList<String>();				
+				Collection<String> normcontents = new ArrayList<String>();
 				for(String line: contents){
 					line = StringUtils.normalizeLineBreaks(line);
 					normcontents.add(line);
@@ -2135,7 +2135,7 @@ public abstract class ComponentFunction extends Processor{
 				}
 				// set status to ok
 				issuePassedSuccessUsing(filename);
-				
+
 			}catch(IOException ioe) {
 				testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
 				log.logMessage(testRecordData.getFac(),
@@ -2182,7 +2182,7 @@ public abstract class ComponentFunction extends Processor{
 
 		if(verified){
 			testRecordData.setStatusCode(StatusCodes.OK);
-			String message = genericText.convert(TXT_SUCCESS_3, altText,windowName, compName, action); 
+			String message = genericText.convert(TXT_SUCCESS_3, altText,windowName, compName, action);
 			log.logMessage(testRecordData.getFac(), message, GENERIC_MESSAGE);
 
 		}else{
@@ -2234,13 +2234,13 @@ public abstract class ComponentFunction extends Processor{
 					rawline = propertyContents.iterator().next();
 					normline = StringUtils.normalizeLineBreaks(rawline);
 					multiline = normline.contains(StringUtils.NEW_LINE);
-					properties.put(prop, normline);					
+					properties.put(prop, normline);
 					// should be just one property value, not name=value.
 					if(multiline){
 						try{
 							benchmark = StringUtils.readEncodingMap(benchFile, fileEncoding);
 						}catch(IOException io){
-							Log.info(debugmsg+" benchmark file '"+ benchFile +"' IOException: "+io.getMessage());	
+							Log.info(debugmsg+" benchmark file '"+ benchFile +"' IOException: "+io.getMessage());
 							isMissing = true;
 							missingMessage = io.getMessage();
 						}
@@ -2250,7 +2250,7 @@ public abstract class ComponentFunction extends Processor{
 							benchContents = StringUtils.readEncodingfile(benchFile, fileEncoding);
 							if(!benchContents.isEmpty()) benchmark.put(prop, benchContents.iterator().next());
 						}catch(IOException io){
-							Log.info(debugmsg+" benchmark file '"+ benchFile +"' IOException: "+io.getMessage());	
+							Log.info(debugmsg+" benchmark file '"+ benchFile +"' IOException: "+io.getMessage());
 							benchContents = benchmark.values();// nothing. Empty Collection.
 							isMissing = true;
 							missingMessage = io.getMessage();
@@ -2260,8 +2260,8 @@ public abstract class ComponentFunction extends Processor{
 						issuePassedSuccessUsing(benchFile);
 					}else{
 						testFile = FileUtilities.deduceMatchingUUIDFilename(benchFile);
-						File testout = deduceTestFile(testFile);						
-						Log.info(debugmsg+" property file: "+ testout.getAbsolutePath() +", encoding: "+fileEncoding);	
+						File testout = deduceTestFile(testFile);
+						Log.info(debugmsg+" property file: "+ testout.getAbsolutePath() +", encoding: "+fileEncoding);
 						if(multiline){
 							StringUtils.writeEncodingProperties(testout.getAbsolutePath(), properties, fileEncoding);
 						}else{
@@ -2271,15 +2271,15 @@ public abstract class ComponentFunction extends Processor{
 							missingMessage = FAILStrings.convert(FAILKEYS.FILE_READ_ERROR,
 									  "Error reading from file '"+ benchFile+"'",
 									  benchFile) +
-									  ": "+ missingMessage +". " + 
+									  ": "+ missingMessage +". " +
 									  GENStrings.convert(GENKEYS.BE_SAVED_TO,
 											  "'"+ prop +"' has been save to '"+ testout.getAbsolutePath()+"'",
 											  prop,testout.getAbsolutePath());
 							issueErrorPerformingActionOnX(compName, missingMessage);
 						}else{
-							
-						issueErrorPerformingActionOnX(compName, GENStrings.convert(GENKEYS.CONTENT_NOT_MATCHES_KEY, 
-					               "the content of '"+ testout.getAbsolutePath() +"' does not match the content of '"+ benchFile+"'", 
+
+						issueErrorPerformingActionOnX(compName, GENStrings.convert(GENKEYS.CONTENT_NOT_MATCHES_KEY,
+					               "the content of '"+ testout.getAbsolutePath() +"' does not match the content of '"+ benchFile+"'",
 					               testout.getAbsolutePath(),benchFile));
 						}
 					}
@@ -2337,32 +2337,32 @@ public abstract class ComponentFunction extends Processor{
 					if(multiline){
 						try{ benchmark = StringUtils.readEncodingMap(benchFile, fileEncoding);}
 						catch(IOException io){
-							Log.info(debugmsg+" benchmark file '"+ benchFile +"' IOException: "+io.getMessage());	
+							Log.info(debugmsg+" benchmark file '"+ benchFile +"' IOException: "+io.getMessage());
 							isMissing = true;
 							missingMessage = io.getMessage();
 						}
 					}else{
-						try{ 
+						try{
 							benchContents = StringUtils.readEncodingfile(benchFile, fileEncoding);
 							if(benchContents != null && !benchContents.isEmpty()){
 								benchmark = StringUtils.convertCollectionToMap(benchContents, testRecordData.getSeparator());
 							}
 						}
 						catch(IOException io){
-							Log.info(debugmsg+" benchmark file '"+ benchFile +"' IOException: "+io.getMessage());	
+							Log.info(debugmsg+" benchmark file '"+ benchFile +"' IOException: "+io.getMessage());
 							isMissing = true;
 							missingMessage = io.getMessage();
 						}
 					}
 					boolean success = action.equalsIgnoreCase(GenericMasterFunctions.VERIFYPROPERTIESSUBSETTOFILE_KEYWORD) ?
-					                  StringUtils.isMatchingTargetMapValues(properties, benchmark): 							        	  
+					                  StringUtils.isMatchingTargetMapValues(properties, benchmark):
 							          StringUtils.isMatchingMaps(properties, benchmark);
 					if(success){
 						issuePassedSuccessUsing(benchFile);
 					}else{
 						testFile = FileUtilities.deduceMatchingUUIDFilename(benchFile);
-						File testout = deduceTestFile(testFile);						
-						Log.info(debugmsg+" properties file: "+ testout.getAbsolutePath() +", encoding: "+fileEncoding);	
+						File testout = deduceTestFile(testFile);
+						Log.info(debugmsg+" properties file: "+ testout.getAbsolutePath() +", encoding: "+fileEncoding);
 						if(multiline){
 							StringUtils.writeEncodingProperties(testout.getAbsolutePath(), properties, fileEncoding);
 						}else{
@@ -2372,14 +2372,14 @@ public abstract class ComponentFunction extends Processor{
 							missingMessage = FAILStrings.convert(FAILKEYS.FILE_READ_ERROR,
 									  "Error reading from file '"+ benchFile+"'",
 									  benchFile) +
-									  ": "+ missingMessage +". " + 
+									  ": "+ missingMessage +". " +
 									  GENStrings.convert(GENKEYS.BE_SAVED_TO,
 											  "'Properties' has been save to '"+ testout.getAbsolutePath()+"'",
 											  "Properties", testout.getAbsolutePath());
 							issueErrorPerformingActionOnX(compName, missingMessage);
 						}else{
-						    issueErrorPerformingActionOnX(compName, GENStrings.convert(GENKEYS.CONTENT_NOT_MATCHES_KEY, 
-					               "the content of '"+ testout.getAbsolutePath() +"' does not match the content of '"+ benchFile+"'", 
+						    issueErrorPerformingActionOnX(compName, GENStrings.convert(GENKEYS.CONTENT_NOT_MATCHES_KEY,
+					               "the content of '"+ testout.getAbsolutePath() +"' does not match the content of '"+ benchFile+"'",
 					               testout.getAbsolutePath(),benchFile));
 						}
 					}
@@ -2430,8 +2430,8 @@ public abstract class ComponentFunction extends Processor{
 							passedText.convert(GENKEYS.PERFNODE4A,
 									action+" performed on "+ compName +"; output file '"+ filename +"'.",
 									action, compName, filename),
-							passedText.convert(GENKEYS.BE_SAVED_TO, 
-									"'"+ prop +"' has been saved to '"+ filename +"'", 
+							passedText.convert(GENKEYS.BE_SAVED_TO,
+									"'"+ prop +"' has been saved to '"+ filename +"'",
 									prop,filename),
 									PASSED_MESSAGE);
 				}else{
@@ -2485,7 +2485,7 @@ public abstract class ComponentFunction extends Processor{
 							passedText.convert(GENKEYS.PERFNODE4A,
 									action+" performed on "+ compName +"; output file '"+ filename +"'.",
 									action, compName, filename),
-									PASSED_MESSAGE);					
+									PASSED_MESSAGE);
 				}else{
 					issueActionFailure(failedText.convert(FAILKEYS.COULD_NOT_GET,
 	                           							  "Could not get 'Properties'.",
@@ -2505,11 +2505,11 @@ public abstract class ComponentFunction extends Processor{
 		throw new SAFSException("Not supported yet.", SAFSException.CODE_ACTION_NOT_SUPPORTED);
 	}
 
-	/** 
+	/**
 	 * <em>Purpose:</em> Response for HOVERMOUSE; called by componentProcess() to hover mouse.<br>
 	 * <pre>
 	 * Parameters:
-	 * CoordinationMapKey String, The offset from 'Uper-Left corner' of component, 
+	 * CoordinationMapKey String, The offset from 'Uper-Left corner' of component,
 	 *                            such as "20;40", or a mapKey defined under "ComponentName" or "ApplicationConstants" in map file.
 	 * HoverTime int, milliseconds to hover
 	 * support different format of test record:
@@ -2522,7 +2522,7 @@ public abstract class ComponentFunction extends Processor{
 	 *  4. T,	ClassicCD,	JavaTree,	HoverMouse,	"10;10", 4000
 	 *  5. T,	ClassicCD,	JavaMenu,	HoverMouse,	, 3000
 	 *</pre>
-	 **/ 
+	 **/
 	protected void hoverMouse() throws SAFSException{
 		String debugmsg = StringUtils.debugmsg(false);
 		Point pointRelativeToComponent = null;//null is default, means the center to hover
@@ -2583,7 +2583,7 @@ public abstract class ComponentFunction extends Processor{
 				hoverSuccess = false;
 			}
 		}
-		
+
 		if(hoverSuccess){
 			String message = null;
 			if(pointRelativeToComponent!=null){
@@ -2632,7 +2632,7 @@ public abstract class ComponentFunction extends Processor{
 	 * Use OCR to detect the text from captured screen, executing SaveTextFromGUI or SaveTextFromGUI.
 	 * T, Window, Component, SaveTextFromGUI, outputfile [,subArea] [,OCR option] [,LangId] [,scaleRatio]
 	 * T, Window, Component,GetTextFromGUI, variable [,subArea][,OCR] [,LangId] [,scaleRatio]
-	 * 
+	 *
 	 * @throws SAFSException
 	 */
 	protected void action_GetSaveTextFromGUI() throws SAFSException {
@@ -2647,10 +2647,10 @@ public abstract class ComponentFunction extends Processor{
 		}
 
 		String output  = iterator.next();		     				// 1st param, a variable name (for GetTextFromImage) or a file name (for SaveTextFromImage)
-		String subareaKey = "";                        	     		// 2nd optional param, setting default. A subkey in appmap 
-		String ocrId      = OCREngine.OCR_DEFAULT_ENGINE_KEY;		// 3th optional param, setting default 
+		String subareaKey = "";                        	     		// 2nd optional param, setting default. A subkey in appmap
+		String ocrId      = OCREngine.OCR_DEFAULT_ENGINE_KEY;		// 3th optional param, setting default
 		String langId     = OCREngine.getOCRLanguageCode(staf);  	// 4th optional param, setting the language defined in STAF as default
-		float  scaleRatio  = -1; 							     	// 5th optional param, setting default 
+		float  scaleRatio  = -1; 							     	// 5th optional param, setting default
 
 		if (iterator.hasNext()) subareaKey = iterator.next();
 		if (iterator.hasNext()) {
@@ -2661,7 +2661,7 @@ public abstract class ComponentFunction extends Processor{
 			langId = iterator.next();
 			if(langId.equals("")) langId = OCREngine.getOCRLanguageCode(staf);
 		}
-		if (iterator.hasNext()) 
+		if (iterator.hasNext())
 			try { scaleRatio = (float)Double.parseDouble(iterator.next()); } catch(NumberFormatException nfe){}
 
 		IndependantLog.debug(debugmsg+" Parameters: output='"+output+"' "+
@@ -2679,7 +2679,7 @@ public abstract class ComponentFunction extends Processor{
 			return;
 		}
 
-		//capture GUI	  
+		//capture GUI
 		BufferedImage buffimg = null;
 		try {
 			Log.debug(debugmsg+" ...Capture Screen Area: "+ imageRect);
@@ -2689,7 +2689,7 @@ public abstract class ComponentFunction extends Processor{
 			return;
 		}
 
-		// detect the text on GUI	  
+		// detect the text on GUI
 		OCREngine ocrEngine = OCREngine.getOCREngine(ocrId, staf);
 		scaleRatio = (scaleRatio <=0 )? ocrEngine.getdefaultZoomScale():scaleRatio;
 
@@ -2698,7 +2698,7 @@ public abstract class ComponentFunction extends Processor{
 
 		//get optional SubArea parameter
 		if (GETTEXTFROMGUI.equalsIgnoreCase(action)) {
-			//write the detected text to output variable 
+			//write the detected text to output variable
 			if (!setVariable(output, text)) {
 				testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
 				issueErrorPerformingAction(" setVariable failure, variable: " + output);
@@ -2731,7 +2731,7 @@ public abstract class ComponentFunction extends Processor{
 		//set status to ok
 		testRecordData.setStatusCode(StatusCodes.OK);
 		String detail = genericText.convert(TXT_SUCCESS_2a, action + " successful using " + ocrId, action, ocrId)+ ". " +
-				genericText.convert(GENStrings.BE_SAVED_TO, "'"+text+"' has been saved to '"+output+"'", text, output); 		 
+				genericText.convert(GENStrings.BE_SAVED_TO, "'"+text+"' has been saved to '"+output+"'", text, output);
 
 		log.logMessage(testRecordData.getFac(), detail, PASSED_MESSAGE);
 	}
@@ -2744,16 +2744,16 @@ public abstract class ComponentFunction extends Processor{
 	 * <em>Purpose:</em> Response for HOVERMOUSE; called by componentProcess() to hover mouse.<br>
 	 * <pre>
 	 * Parameters:
-	 * VarName String, The root name of the collection of variables to receive the location and dimensions. 
+	 * VarName String, The root name of the collection of variables to receive the location and dimensions.
 	 * WhomRelativeTo String, "screen" or "parent"
 	 * T  WindowName  CompName  LocateScreenImage  VarName [WhomRelativeTo]
 	 *        [WhomRelativeTo]: relative to the screen or parentWindow
 	 *        default(not set): relative to the screen
 	 *                  screen: relative to the screen
-	 *                  parent: relative to the parent window       
-	 *                         
+	 *                  parent: relative to the parent window
+	 *
 	 * locate the GUI if CompName in the GUI of WindowName and write the area to Varname
-	 * 
+	 *
 	 * variables set:
 	 *   varname=x y w h  (space delimited)
 	 *   varname.x=x
@@ -2810,9 +2810,9 @@ public abstract class ComponentFunction extends Processor{
 			}
 			rectangle.x = rectangle.x - winRect.x;
 			rectangle.y = rectangle.y - winRect.y;
-		}	
+		}
 
-		if (setRectVars(rectangle, varname)) {	        	
+		if (setRectVars(rectangle, varname)) {
 			//varAssigned2:Value '%1%' was assigned to variable '%2%'.
 			String vals = rectangle.x +" "+rectangle.y+" "+rectangle.width+" "+ rectangle.height;
 			String vars = varname+".x, "+ varname+".y, "+ varname+".w, "+ varname+".h";
@@ -2826,31 +2826,31 @@ public abstract class ComponentFunction extends Processor{
 			return;
 		}
 	}
-	
+
 	/**
 	 * <em>Purpose:</em> Show the component on the page as much as possible.<br>
 	 */
 	protected void action_showOnPage() throws SAFSException{
 		testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );
-		
+
 		boolean verify = false;
 		if(iterator.hasNext()){
 			verify = StringUtilities.convertBool(iterator.next());
 		}
-		
+
 		if(showComponentAsMuchPossible(verify)){
-			String message = GENStrings.convert(GENStrings.SUCCESS_3, 
-					windowName+":"+compName+" "+action+" successful.", 
+			String message = GENStrings.convert(GENStrings.SUCCESS_3,
+					windowName+":"+compName+" "+action+" successful.",
 					windowName, compName, action);
-			issuePassedSuccess(message);			
+			issuePassedSuccess(message);
 		}else{
-			String message = FAILStrings.convert(FAILStrings.FAILURE_3, 
+			String message = FAILStrings.convert(FAILStrings.FAILURE_3,
 					"Unable to perform "+action+" on "+compName+" in "+windowName+".",
 					windowName, compName, action);
 			issueActionFailure(message);
 		}
 	}
-	
+
 	protected void clearCache() throws SAFSException {
 		throw new SAFSException("Not supported yet.", SAFSException.CODE_ACTION_NOT_SUPPORTED);
 	}
@@ -2874,7 +2874,7 @@ public abstract class ComponentFunction extends Processor{
 
 		if (compName.equalsIgnoreCase(windowName)) {
 			// wait for the window
-			int status = waitForObject( mapname, windowName, compName, secii );				
+			int status = waitForObject( mapname, windowName, compName, secii );
 
 			//if window cannot be found within timeout
 			if (status != 0) {
@@ -2890,11 +2890,11 @@ public abstract class ComponentFunction extends Processor{
 			}
 		} else {
 			//look for the component
-			int status = waitForObject( mapname, windowName, compName, secii );				
+			int status = waitForObject( mapname, windowName, compName, secii );
 			//if component cannot be found within timeout
 			if (status != 0) {
 				log.logMessage(testRecordData.getFac(),
-						WAITFORGUI + "\n" +							
+						WAITFORGUI + "\n" +
 								"COMPONENT:"+ compName +" could not be found in window " +
 								windowName + "." + testRecordData.getFilename() +
 								" at Line " + testRecordData.getLineNumber() + ", " +
@@ -2930,7 +2930,7 @@ public abstract class ComponentFunction extends Processor{
 		String rval = getProperty(prop).toString();
 		Log.info("..... real value is: "+rval);
 
-		if ((!ignorecase && val.equals(rval)) 
+		if ((!ignorecase && val.equals(rval))
 				|| (ignorecase && val.equalsIgnoreCase(rval))){
 			// set status to ok
 			testRecordData.setStatusCode(StatusCodes.OK);
@@ -2943,8 +2943,8 @@ public abstract class ComponentFunction extends Processor{
 							PASSED_MESSAGE);
 			return;
 		}
-		
-		String message = FAILStrings.convert(FAILStrings.SOMETHING_NOT_MATCH, 
+
+		String message = FAILStrings.convert(FAILStrings.SOMETHING_NOT_MATCH,
 				                             "Property '"+prop+"' value '"+rval+"' does not match expected value '"+val+"'.",
 				                             "Property '"+prop+"'", rval, val);
 		issueErrorPerformingActionOnX(compName, message);
@@ -2992,7 +2992,7 @@ public abstract class ComponentFunction extends Processor{
 	}
 
 	protected int waitForObject(String mapname, String windowName, String compName, int secii) throws SAFSException{
-		DDGUIUtilities utils = ((TestRecordHelper)testRecordData).getDDGUtils(); 
+		DDGUIUtilities utils = ((TestRecordHelper)testRecordData).getDDGUtils();
 		return utils.waitForObject(mapname,windowName, windowName, secii);
 	}
 
@@ -3006,7 +3006,7 @@ public abstract class ComponentFunction extends Processor{
 	 * by calling this method, this value will be broke into several values according to those line breaks.<br>
 	 * Each of these values will be stored as an item in the new collection. (The old collection contains<br>
 	 * these values as ONE item containing all the various linebreaks.)<br>
-	 * 
+	 *
 	 * @param properties Collection<String>, a collection of properties to normalize
 	 * @param encoding String, the encoding used to write and read a collection of properties
 	 * @return Collection<String>, a normalized collection of properties
@@ -3039,13 +3039,13 @@ public abstract class ComponentFunction extends Processor{
 				StringUtils.writeEncodingfile(tempFile.getCanonicalPath(), properties, encoding);
 				normalizedProperties = StringUtils.readEncodingfile(tempFile.getCanonicalPath(), encoding);
 			}
-			
+
 		}catch(Exception e){
 			IndependantLog.error(StringUtils.debugmsg(false)+" met "+StringUtils.debugmsg(e));
 		}finally{
 			if(tempFile!=null) tempFile.delete();
 		}
-		
+
 		return normalizedProperties;
 	}
 
@@ -3067,7 +3067,7 @@ public abstract class ComponentFunction extends Processor{
 	 * If the property-list contains multiple properties, the collection will contain a set of string like "property:value".<br>
 	 * The assignment separator will actually be the current value of the testRecordData.separator.
 	 * If the property-list is null, then all the properties should be retrieved.<br>
-	 * @param propertyList List<String>, a list of property names 
+	 * @param propertyList List<String>, a list of property names
 	 * @return Collection<String>, a set of values
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -3098,7 +3098,7 @@ public abstract class ComponentFunction extends Processor{
 	}
 	/**
 	 * Get the string value from the Object value.<br>
-	 * If the value is a collection, it will be converted to a string separated by 'New Line'.<br> 
+	 * If the value is a collection, it will be converted to a string separated by 'New Line'.<br>
 	 */
 	protected String getStringValue(Object value) throws SAFSException{
 		if(value==null) return null;
@@ -3160,7 +3160,7 @@ public abstract class ComponentFunction extends Processor{
 		IndependantLog.warn(debugmsg+"Not supported yet. Sub class '"+getClass()+"' SHOULD override me!");
 		return null;
 	}
-	
+
 	/**
 	 * Get the absolute 'Rectangle bounds' of the Component, which means the rectangle is relative to the<br>
 	 * whole screen, NOT to a window/browser.<br>
@@ -3171,7 +3171,7 @@ public abstract class ComponentFunction extends Processor{
 		IndependantLog.warn(debugmsg+"Not supported yet. Sub class '"+getClass()+"' SHOULD override me!");
 		return null;
 	}
-	
+
 	/**
 	 * If the component is not fully shown on the screen, try to make it visible on screen as much
 	 * as possible.
@@ -3186,14 +3186,14 @@ public abstract class ComponentFunction extends Processor{
 	}
 	/**
 	 * Do nothing method returns null.
-	 * Subclasses should override to provide the 'Rectangle bounds' of the Component 
+	 * Subclasses should override to provide the 'Rectangle bounds' of the Component
 	 * currently represented in the current testRecordData. The 'Rectangle bounds' may be
 	 * absolute on screen or relative to a window/browser, this is decided by subclass.
-	 * If returned 'Rectangle bounds' is NOT absolute on screen, the the method 
+	 * If returned 'Rectangle bounds' is NOT absolute on screen, the the method
 	 * {@link #getRectangleImage(Rectangle)} SHOULD be overridden in subclass to provide appropriate implementation.
 	 * <br>
-	 * Subclasses should assume the mapname, windowName, and compName currently stored 
-	 * for the instance hold the information needed to identify and locate the Component 
+	 * Subclasses should assume the mapname, windowName, and compName currently stored
+	 * for the instance hold the information needed to identify and locate the Component
 	 * on the screen or in the system.
 	 * <br>
 	 * This method is called by {@link #deduceImageRect(String)} to get a subarea rectangle.
@@ -3213,7 +3213,7 @@ public abstract class ComponentFunction extends Processor{
 	 * It depends on what is returned by {@link #getComponentRectangle()}.<br>
 	 * This method assume the rectangle is absolute on screen, so get the image on screen within the rectangle.<br>
 	 * Sub class may override this method to get its own image.<br>
-	 * 
+	 *
 	 * @param imageRect Rectangle, within the rectangle to get image. <br>
 	 * @return BufferedImage
 	 * @throws SAFSException
@@ -3231,7 +3231,7 @@ public abstract class ComponentFunction extends Processor{
 	/**
 	 * To test if the component exists or not.<br>
 	 * The sub class may test the component's visibility also.<br>
-	 * 
+	 *
 	 * @return boolean, true if the component GUI exist; false otherwise.
 	 * @throws SAFSException
 	 */
@@ -3247,8 +3247,8 @@ public abstract class ComponentFunction extends Processor{
 	 * @return boolean, true if hover successful; false otherwise
 	 * @exception SAFSException
 	 **/
-	protected boolean performHoverMouse(Point point, int milliseconds) throws SAFSException{  	
+	protected boolean performHoverMouse(Point point, int milliseconds) throws SAFSException{
 		throw new SAFSException("Not supported yet.", SAFSException.CODE_ACTION_NOT_SUPPORTED);
 	}
-	
+
 }
