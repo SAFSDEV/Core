@@ -5585,13 +5585,18 @@ public abstract class SAFSPlus {
 		 * <ul>
 		 * <b>optionals[0] coordination</b> String, The offset from center of component,
 		 *                                       such as "200;400", or a mapKey defined under "ComponentName" or "ApplicationConstants" in map file.<br>
-		 * <b>optionals[1] hoverTime</b> int, milliseconds to hover<br>
+		 * <b>optionals[1] hoverTime</b> int, in milliseconds, the period to hover the mouse; the mouse will
+	     *                        			be moved out of screen if it expires.<br/>
+	     *                        			if it equals {@link Constants#TIMEOUT_HOVERMOUSE_STAY_FOREVER}, then
+	     *                        			the mouse will always stay there forever.
 		 * </ul>
 		 * @return true if hover succeeds, false otherwise.
 		 * @example
 		 * <pre>
+		 *
 		 * {@code
 		 * boolean success = Component.HoverMouse(Map.AUT.EditBox);//hover at the center of EditBox for 2 seconds
+		 * boolean success = Component.HoverMouse(Map.AUT.EditBox, "", String.valueOf({@link Constants#TIMEOUT_HOVERMOUSE_STAY_FOREVER}));//hover at the center of EditBox forever.
 		 * boolean success = Component.HoverMouse(Map.AUT.EditBox, "50, 30", "1000");//hover at (50,30) of EditBox for 1 second
 		 * boolean success = Component.HoverMouse(Map.AUT.EditBox, "locKey", "3000");//locKey="500, 300" defined in map file under "EditBox" or "ApplicationConstants"
 		 * }

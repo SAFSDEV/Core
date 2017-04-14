@@ -43,6 +43,7 @@ import java.util.Iterator;
 import java.util.MissingResourceException;
 import java.util.Vector;
 
+import org.safs.Constants;
 import org.safs.Log;
 import org.safs.SAFSException;
 import org.safs.StringUtils;
@@ -808,15 +809,20 @@ public class Robot {
 	/**
 	 * Move the mouse cursor to the specified Point, stay for a period and move out
 	 * @param point Point, the screen point to hover the mouse
-	 * @param millisStay int, the period the hover the mouse, in milliseconds
+	 * @param millisStay int, in milliseconds, the period to hover the mouse; the mouse will
+	 *                        be moved out of screen if it expires.<br/>
+	 *                        if it equals {@link Constants#TIMEOUT_HOVERMOUSE_STAY_FOREVER}, then
+	 *                        the mouse will always stay there forever.
 	 * @throws SAFSException if some error happens
 	 */
 	public static void mouseHover(Point point, int millisStay) throws SAFSException{
 		try{
 			java.awt.Robot bot = getRobot();
 			bot.mouseMove(point.x, point.y);
-			StringUtilities.sleep(millisStay);
-			bot.mouseMove(-SCREENSZIE.width, -SCREENSZIE.height);
+			if(Constants.TIMEOUT_HOVERMOUSE_STAY_FOREVER!=millisStay){
+				StringUtilities.sleep(millisStay);
+				bot.mouseMove(-SCREENSZIE.width, -SCREENSZIE.height);
+			}
 		}catch(Throwable th){
 			throw new SAFSException("Met "+StringUtils.debugmsg(th));
 		}
