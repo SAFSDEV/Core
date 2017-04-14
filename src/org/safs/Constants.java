@@ -44,6 +44,12 @@ public class Constants {
 	/** '<b>SAFSDIR</b>' environment storing the installation directory of SAFS. */
 	public static final String ENV_SAFSDIR 				= "SAFSDIR";
 
+	/** '<b>2000</b>' in milliseconds, the default time for the mouse to hover.
+	 * The mouse may move out of screen if this time expires. */
+	public static final int TIMEOUT_HOVERMOUSE_DEFAULT 					= 2000;
+	/** '<b>-1</b>' the timeout for the mouse to hover for ever */
+	public static final int TIMEOUT_HOVERMOUSE_STAY_FOREVER				= -1;
+
 	public static class BrowserConstants{
 		/**'<b>explorer</b>'*/
 		public static final String BROWSER_NAME_IE = "explorer";

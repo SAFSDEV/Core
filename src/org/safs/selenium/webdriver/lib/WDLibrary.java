@@ -104,6 +104,7 @@ import org.openqa.selenium.remote.RemoteWebElement;
 import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.safs.Constants;
 import org.safs.IndependantLog;
 import org.safs.Processor;
 import org.safs.SAFSException;
@@ -1552,7 +1553,11 @@ public class WDLibrary extends SearchObject {
 	/**
 	 * @param we WebElement, the component to hover mouse
 	 * @param point Point, the position relative to the component to hover the mouse
-	 * @param millisStay double, the period to hover the mouse, in milliseconds
+	 * @param millisStay int, in milliseconds, the period to hover the mouse; the mouse will
+	 *                        be moved out of screen if it expires.<br/>
+	 *                        if it equals {@link Constants#TIMEOUT_HOVERMOUSE_STAY_FOREVER}, then
+	 *                        the mouse will always stay there forever.
+	 *
 	 * @throws SeleniumPlusException if the hover fail
 	 */
 	public static void mouseHover(WebElement we, Point point, int millisStay) throws SeleniumPlusException {
@@ -1568,13 +1573,15 @@ public class WDLibrary extends SearchObject {
 			}
 			action.build().perform();
 
-			//Pause a while
-			StringUtilities.sleep(millisStay);
+			if(Constants.TIMEOUT_HOVERMOUSE_STAY_FOREVER!=millisStay){
+				//Pause a while
+				StringUtilities.sleep(millisStay);
 
-			//Move out the mouse
-			//action.moveByOffset(-Robot.SCREENSZIE.width, -Robot.SCREENSZIE.height);//This will throw exception
-			//action.build().perform();
-			Robot.getRobot().mouseMove(-Robot.SCREENSZIE.width, -Robot.SCREENSZIE.height);
+				//Move out the mouse
+				//action.moveByOffset(-Robot.SCREENSZIE.width, -Robot.SCREENSZIE.height);//This will throw exception
+				//action.build().perform();
+				Robot.getRobot().mouseMove(-Robot.SCREENSZIE.width, -Robot.SCREENSZIE.height);
+			}
 
 		}catch(Exception e) {
 			IndependantLog.warn(StringUtils.debugmsg(false)+"Failed to hover mouse by Selenium API: "+ StringUtils.debugmsg(e));

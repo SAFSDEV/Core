@@ -474,8 +474,9 @@ public abstract class ComponentFunction extends Processor{
 	 * </ol>
 	 * @return                    Collection
 	 **/
-	public Collection getAlternateParams () {
-		Collection alt = new ArrayList();
+	@SuppressWarnings("unchecked")
+	public Collection<String> getAlternateParams () {
+		Collection<String> alt = new ArrayList<String>();
 		alt.add(windowName);
 		alt.add(compName);
 		alt.addAll(getParams());
@@ -2526,7 +2527,7 @@ public abstract class ComponentFunction extends Processor{
 	protected void hoverMouse() throws SAFSException{
 		String debugmsg = StringUtils.debugmsg(false);
 		Point pointRelativeToComponent = null;//null is default, means the center to hover
-		int milliseconds = 2000;//default is 2000 milli seconds to hover
+		int milliseconds = Constants.TIMEOUT_HOVERMOUSE_DEFAULT;//default is 2000 milliseconds to hover
 
 		testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
 		//optional parameter 'coordination'
