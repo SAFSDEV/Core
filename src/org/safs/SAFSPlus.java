@@ -5596,7 +5596,7 @@ public abstract class SAFSPlus {
 		 *
 		 * {@code
 		 * boolean success = Component.HoverMouse(Map.AUT.EditBox);//hover at the center of EditBox for 2 seconds
-		 * boolean success = Component.HoverMouse(Map.AUT.EditBox, "", String.valueOf({@link Constants#TIMEOUT_HOVERMOUSE_STAY_FOREVER}));//hover at the center of EditBox forever.
+		 * boolean success = Component.HoverMouse(Map.AUT.EditBox, "", String.valueOf(Constants.TIMEOUT_HOVERMOUSE_STAY_FOREVER));//hover at the center of EditBox forever.
 		 * boolean success = Component.HoverMouse(Map.AUT.EditBox, "50, 30", "1000");//hover at (50,30) of EditBox for 1 second
 		 * boolean success = Component.HoverMouse(Map.AUT.EditBox, "locKey", "3000");//locKey="500, 300" defined in map file under "EditBox" or "ApplicationConstants"
 		 * }
