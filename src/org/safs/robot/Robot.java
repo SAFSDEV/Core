@@ -1,13 +1,13 @@
-/** 
+/**
  * Copyright (C) SAS Institute. All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
 
 /**
  * Developer history:
- * 
+ *
  * <br> JunwuMa SEP 23, 2008  Added doEvents(Robot, Vector) running RobotClipboardPasteEvent with proper delay time
- *                            for ctrl+v(paste) job done. 
+ *                            for ctrl+v(paste) job done.
  * <br> Carl Nagle  MAR 25, 2009  Added MouseDrag support
  * <br> Carl Nagle  APR 03, 2009  Enhance MouseDrag support to work for more apps.
  * <br> LeiWang JUL 04, 2011  Add methods to maximize, minimize, restore, close window by key-mnemonic.
@@ -17,7 +17,7 @@
  * <br> LeiWang SEP 18, 2015  Add waitReaction() and modify inputKeys()/inputChars(): wait reaction of browser
  *                            for input keys if the switch 'waitReaction' is on.
  *                            Add method to clear/set/get system clip-board, and testInputKeys().
- * <br> LeiWang SEP 30, 2016  Added leftDrag(), rightDrag(), centerDrag(): provide an extra parameter 'dndReleaseDelay'. 
+ * <br> LeiWang SEP 30, 2016  Added leftDrag(), rightDrag(), centerDrag(): provide an extra parameter 'dndReleaseDelay'.
  *                            Added property 'dndReleaseDelay', which controls the global setting.
  */
 package org.safs.robot;
@@ -57,46 +57,46 @@ import org.safs.tools.stringutils.StringUtilities;
 
 /**
  * Utility functions for common user interactions on the system.
- * 
+ *
  * @author Carl Nagle Sept 09, 2008
  * <br> SEP 30, 2015 Carl Nagle Add configurable delay between mouse down and mouse up.
  * @see java.awt.Robot
  * @see org.safs.tools.input.CreateUnicodeMap
  * @see org.safs.tools.input.InputKeysParser
- * 
+ *
  */
 public class Robot {
-	
+
 	private static java.awt.Robot robot = null;
 	private static InputKeysParser keysparser = null;
-	
+
 	/** 1 */
 	public static final int DEFAULT_MILLIS_BETWEEN_KEYSTROKES = 1;
 
 	private static int millisBetweenKeystrokes = DEFAULT_MILLIS_BETWEEN_KEYSTROKES;
-	
+
 	/** 800 */
 	public static final int DEFAULT_MILLIS_BETWEEN_MOUSE_RELEASE = 800;
 	/** The delay in millisecond before releasing mouse button when 'drag and drop'.*/
 	private static int dndReleaseDelay = DriverConstant.DEFAULT_SAFS_TEST_DND_RELEASE_DELAY;
-	
+
 	/**
-	 * To make mouse drag correctly, after mouse key is pressed down, 
+	 * To make mouse drag correctly, after mouse key is pressed down,
 	 * the mouse needs to be moved slightly so that the drag action will be triggered.<br>
-	 * If the drag action cannot be triggered, this field needs to be modified by 
+	 * If the drag action cannot be triggered, this field needs to be modified by
 	 * method {@link #setDragStartPointOffset(int, int)}.
 	 */
 	private static Point dragStartPointOffset = new Point(3, 3);
 	private static Point dragEndPointOffset = new Point(-3, -3);
-	
+
 	public final static Dimension SCREENSZIE = Toolkit.getDefaultToolkit().getScreenSize();
-	
+
 	public static final boolean DEFAULT_WAIT_REACTION = false;
 	/** If wait for reaction to "input keys/chars", the default is false */
 	private static boolean waitReaction = DEFAULT_WAIT_REACTION;
-	/** 
-	 * The length of a token. Only if the string is longer than this 
-	 * then we wait the reaction after input-keys a certain time 
+	/**
+	 * The length of a token. Only if the string is longer than this
+	 * then we wait the reaction after input-keys a certain time
 	 * indicated by waitReactionDelayInMillisecondForToken.
 	 * If the string is several times longer than this token, then we wait several
 	 * times of waitReactionDelayInMillisecondForToken.
@@ -106,10 +106,10 @@ public class Robot {
 	private static int waitReactionDelayInMillisecondForToken = 100;
 	/** The constant delay in millisecond to wait the reaction after input-keys. */
 	private static int waitReactionDelayInMillisecond = 1000;
-	
+
 	/** The system clip-board, it is a singleton, we keep it in a static field. */
 	public static final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-	
+
 	/**
 	 * Set if wait for reaction to "input keys/chars".
 	 * @param wait boolean, if wait or not.
@@ -120,10 +120,10 @@ public class Robot {
 	/**
 	 * Set if wait for reaction to "input keys/chars".
 	 * @param wait boolean, if wait or not.
-	 * @param tokenLength int, the length of a token. Only if the string is longer than this 
-	 *                         then we wait the reaction after input-keys a certain time 
+	 * @param tokenLength int, the length of a token. Only if the string is longer than this
+	 *                         then we wait the reaction after input-keys a certain time
 	 *                         indicated by the parameter dealyForToken.
-	 * @param dealyForToken int, The delay in millisecond to wait the reaction after input-keys 
+	 * @param dealyForToken int, The delay in millisecond to wait the reaction after input-keys
 	 *                           for the string as long as a token.
 	 * @param dealy int, The constant delay in millisecond to wait the reaction after input-keys.
 	 * @see #waitReactionDelayInMillisecond
@@ -136,7 +136,7 @@ public class Robot {
 		waitReactionDelayInMillisecondForToken = dealyForToken;
 		waitReactionDelayInMillisecond = dealy;
 	}
-	
+
 	/**
 	 * Set the delay in milliseconds between Robot key events.
 	 * @param msBetween >= 0
@@ -147,7 +147,7 @@ public class Robot {
 	public static void setMillisBetweenKeystrokes(int msBetween){
 		millisBetweenKeystrokes = msBetween >= 0 ? msBetween : millisBetweenKeystrokes;
 	}
-	
+
 	/**
 	 * Get the current delay in milliseconds between Robot key events.
 	 * @see #inputKeys(String)
@@ -157,7 +157,7 @@ public class Robot {
 	public static int getMillisBetweenKeystrokes(){
 		return millisBetweenKeystrokes;
 	}
-	
+
 	/**
 	 * @return int, The delay in millisecond before releasing mouse button when 'drag and drop'
 	 */
@@ -170,12 +170,12 @@ public class Robot {
 	public static void setDndReleaseDelay(int dndReleaseDelay) {
 		Robot.dndReleaseDelay = dndReleaseDelay;
 	}
-	
+
 	/**
 	 * Set the offset from the start point for dragging. The object will be firstly
 	 * dragged to the position (startPoint+dragStartPointOffset)
 	 * @param offsetx int, offset in x-axis
-	 * @param offsety int, offset in y-axis 
+	 * @param offsety int, offset in y-axis
 	 * @see #mouseDrag(Point, Point, int)
 	 */
 	public static void setDragStartPointOffset(int offsetx, int offsety){
@@ -185,13 +185,13 @@ public class Robot {
 	 * Set the offset from the end point for dragging. The object will be firstly
 	 * dragged to the position (endPoint+dragEndPointOffset)
 	 * @param offsetx int, offset in x-axis
-	 * @param offsety int, offset in y-axis 
+	 * @param offsety int, offset in y-axis
 	 * @see #mouseDrag(Point, Point, int)
 	 */
 	public static void setDragEndPointOffset(int offsetx, int offsety){
 		dragEndPointOffset = new Point(offsetx, offsety);
 	}
-	
+
 	/**
 	 * Retrieve the active java.awt.Robot from the JVM.
 	 * If one does not yet exist the routine will attempt to instantiate it.
@@ -236,7 +236,7 @@ public class Robot {
 	protected static URL getResourceURL(Class clazz, String aresource){
 		ClassLoader gcdloader = clazz.getClassLoader();
 		Log.info("Robot ClassLoader:"+ gcdloader.toString()); // C:\SAFS\lib\safs.jar
-		
+
 		URL domain = clazz.getProtectionDomain().getCodeSource().getLocation();
 		Log.info("Robot CodeSoure.Location Ptcl:"+ domain.getProtocol()); // file
 		Log.info("Robot CodeSoure.Location Path:"+ domain.getPath()); // ...com.rational.test.ft.core_7.0.2...jar
@@ -265,7 +265,7 @@ public class Robot {
 			jom = contextloader.getResource(aresource);
 			// !!! FINALLY WORKS !!! (as long as resource is in RFT project root directory :(
 		}
-		if(jom == null){ 
+		if(jom == null){
 			Log.info("Robot trying contextloader getSystemResource().");
 			jom = contextloader.getSystemResource(aresource);
 		}
@@ -294,19 +294,19 @@ public class Robot {
 		}
 		return jom;
 	}
-		
+
 	/**
 	 * Type keyboard input.
-	 * The input goes to the current keyboard focus target.  The String input 
-	 * can include all special characters and processing as documented in the  
+	 * The input goes to the current keyboard focus target.  The String input
+	 * can include all special characters and processing as documented in the
 	 * InputKeysParser class.
-	 * 
+	 *
 	 * @param input -- the String of characters to enter.
-	 * @return Object Currently we return a Boolean(true) object, but this may 
+	 * @return Object Currently we return a Boolean(true) object, but this may
 	 * be subject to change.
-	 * @throws AWTException -- if there is a problem instantiating or using the 
+	 * @throws AWTException -- if there is a problem instantiating or using the
 	 * java.awt.Robot
-	 * 
+	 *
 	 * @see org.safs.tools.input.InputKeysParser
 	 * @see java.awt.Robot
 	 * @see #setMillisBetweenKeystrokes(int)
@@ -321,18 +321,18 @@ public class Robot {
 	   	waitReaction(input);
 	   	return new Boolean(true);
 	}
-	
+
 	/**
 	 * Type keyboard input characters unmodified.  No special key processing.
-	 * The input goes to the current keyboard focus target.  The String input 
+	 * The input goes to the current keyboard focus target.  The String input
 	 * will be treated simply as literal text and typed as-is.
-	 * 
+	 *
 	 * @param input -- the String of characters to enter.
-	 * @return Object Currently we return a Boolean(true) object, but this may 
+	 * @return Object Currently we return a Boolean(true) object, but this may
 	 * be subject to change.
-	 * @throws AWTException -- if there is a problem instantiating or using the 
+	 * @throws AWTException -- if there is a problem instantiating or using the
 	 * java.awt.Robot
-	 * 
+	 *
 	 * @see org.safs.tools.input.InputKeysParser
 	 * @see java.awt.Robot
 	 * @see #setMillisBetweenKeystrokes(int)
@@ -347,10 +347,10 @@ public class Robot {
 	   	waitReaction(input);
 	   	return new Boolean(true);
 	}
-	
+
 	/**
-	 * After Robot input keys/chars into a browser or an application, 
-	 * the browser/application may need time to react. 
+	 * After Robot input keys/chars into a browser or an application,
+	 * the browser/application may need time to react.
 	 * Before that reaction, the EditBox may contain incomplete text.
 	 * And the next test action may fail and the verification will fail too.
 	 */
@@ -366,15 +366,15 @@ public class Robot {
 			Log.warn(debugmsg+" fail to wait reaction to input keys.");
 		}
 	}
-	
+
 	private static void doEvents(java.awt.Robot bot, Vector RobotKeys, int msBetweenEvents){
 	   	if(bot == null)
 	   		return;
 		if (msBetweenEvents < 0) msBetweenEvents = 0;
 	   	int pasteDelay = msBetweenEvents > 50 ? msBetweenEvents: 50;
-	   	
+
 		Iterator events = RobotKeys.iterator();
-	   	Object event;	   	
+	   	Object event;
 	   	while(events.hasNext()){
    			event = events.next();
    			if(event instanceof RobotClipboardPasteEvent)
@@ -382,26 +382,26 @@ public class Robot {
    				((RobotClipboardPasteEvent)event).doEvent(bot, pasteDelay);
    			else
    				((RobotKeyEvent)event).doEvent(bot, msBetweenEvents);
-   		}		
+   		}
 	}
 
 	private static void doEvents(java.awt.Robot bot, Vector RobotKeys){
 		doEvents(bot, RobotKeys, 0);
 	}
-	
+
 	/**
-	 * Workhorse Click routine.  
-	 * Allows us to Click--Press & Release--any combination of InputEvent.BUTTONn_MASK 
-	 * any number of times. 
-	 * 
+	 * Workhorse Click routine.
+	 * Allows us to Click--Press & Release--any combination of InputEvent.BUTTONn_MASK
+	 * any number of times.
+	 *
 	 * @param x screen X coordinate
 	 * @param y screen Y coordinate
-	 * @param buttonmask -- specific InputEvent.BUTTONn_MASK(s) 
+	 * @param buttonmask -- specific InputEvent.BUTTONn_MASK(s)
 	 * @param nclicks -- number of times to click (press and release)
 	 * @param dndReleaseDelay -- number of millis to wait before final Release.
-	 * @return Object Currently we return a Boolean(true) object, but this may 
+	 * @return Object Currently we return a Boolean(true) object, but this may
 	 * be subject to change.
-	 * 
+	 *
 	 * @throws java.awt.AWTException
 	 * @see java.awt.Robot#mousePress(int)
 	 * @see java.awt.event.InputEvent#BUTTON1_MASK
@@ -419,19 +419,19 @@ public class Robot {
 		}
 		return new Boolean(true);
 	}
-	
+
 	/**
-	 * Workhorse Click routine.  
-	 * Allows us to Click--Press & Release--any combination of InputEvent.BUTTONn_MASK 
-	 * any number of times. 
-	 * 
+	 * Workhorse Click routine.
+	 * Allows us to Click--Press & Release--any combination of InputEvent.BUTTONn_MASK
+	 * any number of times.
+	 *
 	 * @param x screen X coordinate
 	 * @param y screen Y coordinate
-	 * @param buttonmask -- specific InputEvent.BUTTONn_MASK(s) 
+	 * @param buttonmask -- specific InputEvent.BUTTONn_MASK(s)
 	 * @param nclicks -- number of times to click (press and release)
-	 * @return Object Currently we return a Boolean(true) object, but this may 
+	 * @return Object Currently we return a Boolean(true) object, but this may
 	 * be subject to change.
-	 * 
+	 *
 	 * @throws java.awt.AWTException
 	 * @see java.awt.Robot#mousePress(int)
 	 * @see java.awt.event.InputEvent#BUTTON1_MASK
@@ -439,21 +439,21 @@ public class Robot {
 	public static Object click(int x, int y, int buttonmask, int nclicks)throws java.awt.AWTException{
 		return click(x, y, buttonmask, nclicks, 1);
 	}
-	
+
 	/**
-	 * Workhorse Click with Keypress routine.  
-	 * Allows us to Click--Press & Release--any combination of InputEvent.BUTTONn_MASK 
-	 * any number of times with a single Key Press & Release. 
-	 * 
+	 * Workhorse Click with Keypress routine.
+	 * Allows us to Click--Press & Release--any combination of InputEvent.BUTTONn_MASK
+	 * any number of times with a single Key Press & Release.
+	 *
 	 * @param x screen X coordinate
 	 * @param y screen Y coordinate
-	 * @param buttonmask -- specific InputEvent.BUTTONn_MASK(s) 
-	 * @param keycode -- specific keycode to press & release. Ex: KeyEvent.VK_SHIFT 
+	 * @param buttonmask -- specific InputEvent.BUTTONn_MASK(s)
+	 * @param keycode -- specific keycode to press & release. Ex: KeyEvent.VK_SHIFT
 	 * @param nclicks -- number of times to click (press and release)
 	 * @param dndReleaseDelay -- number of millis to wait before final Release.
-	 * @return Object Currently we return a Boolean(true) object, but this may 
+	 * @return Object Currently we return a Boolean(true) object, but this may
 	 * be subject to change.
-	 * 
+	 *
 	 * @throws java.awt.AWTException
 	 * @see java.awt.Robot#mousePress(int)
 	 * @see java.awt.event.InputEvent#BUTTON1_MASK
@@ -469,18 +469,18 @@ public class Robot {
 	}
 
 	/**
-	 * Workhorse Click with Keypress routine.  
-	 * Allows us to Click--Press & Release--any combination of InputEvent.BUTTONn_MASK 
-	 * any number of times with a single Key Press & Release. 
-	 * 
+	 * Workhorse Click with Keypress routine.
+	 * Allows us to Click--Press & Release--any combination of InputEvent.BUTTONn_MASK
+	 * any number of times with a single Key Press & Release.
+	 *
 	 * @param x screen X coordinate
 	 * @param y screen Y coordinate
-	 * @param buttonmask -- specific InputEvent.BUTTONn_MASK(s) 
-	 * @param keycode -- specific keycode to press & release. Ex: KeyEvent.VK_SHIFT 
+	 * @param buttonmask -- specific InputEvent.BUTTONn_MASK(s)
+	 * @param keycode -- specific keycode to press & release. Ex: KeyEvent.VK_SHIFT
 	 * @param nclicks -- number of times to click (press and release)
-	 * @return Object Currently we return a Boolean(true) object, but this may 
+	 * @return Object Currently we return a Boolean(true) object, but this may
 	 * be subject to change.
-	 * 
+	 *
 	 * @throws java.awt.AWTException
 	 * @see java.awt.Robot#mousePress(int)
 	 * @see java.awt.event.InputEvent#BUTTON1_MASK
@@ -490,12 +490,12 @@ public class Robot {
 	}
 
 	/**
-	 * Move the mouse cursor to the specified x,y coordinates then perform a 
+	 * Move the mouse cursor to the specified x,y coordinates then perform a
 	 * single mousePress and Release to execute a Click.
 	 * @param x
 	 * @param y
 	 * @param dndReleaseDelay -- number of millis to wait before final Release.
-	 * @return Object Currently we return a Boolean(true) object, but this may 
+	 * @return Object Currently we return a Boolean(true) object, but this may
 	 * be subject to change.
 	 * @throws java.awt.AWTException if instantiating java.awt.Robot throws it.
 	 * @see java.awt.Robot
@@ -505,11 +505,11 @@ public class Robot {
 	}
 
 	/**
-	 * Move the mouse cursor to the specified x,y coordinates then perform a 
+	 * Move the mouse cursor to the specified x,y coordinates then perform a
 	 * single mousePress and Release to execute a Click.
 	 * @param x
 	 * @param y
-	 * @return Object Currently we return a Boolean(true) object, but this may 
+	 * @return Object Currently we return a Boolean(true) object, but this may
 	 * be subject to change.
 	 * @throws java.awt.AWTException if instantiating java.awt.Robot throws it.
 	 * @see java.awt.Robot
@@ -518,13 +518,13 @@ public class Robot {
 		return click(x,y,1);
 	}
 
-	
+
 	/**
-	 * Move the mouse cursor to the specified x,y coordinates then perform a 
+	 * Move the mouse cursor to the specified x,y coordinates then perform a
 	 * double mousePress and Release to execute a Click.
 	 * @param x
 	 * @param y
-	 * @return Object Currently we return a Boolean(true) object, but this may 
+	 * @return Object Currently we return a Boolean(true) object, but this may
 	 * be subject to change.
 	 * @throws java.awt.AWTException if instantiating java.awt.Robot throws it.
 	 * @see java.awt.Robot
@@ -534,11 +534,11 @@ public class Robot {
 	}
 
 	/**
-	 * Move the mouse cursor to the specified x,y coordinates then perform a 
+	 * Move the mouse cursor to the specified x,y coordinates then perform a
 	 * single mousePress and Release to execute a RightClick.
 	 * @param x
 	 * @param y
-	 * @return Object Currently we return a Boolean(true) object, but this may 
+	 * @return Object Currently we return a Boolean(true) object, but this may
 	 * be subject to change.
 	 * @throws java.awt.AWTException if instantiating java.awt.Robot throws it.
 	 * @see java.awt.Robot
@@ -548,12 +548,12 @@ public class Robot {
 	}
 
 	/**
-	 * Move the mouse cursor to the specified x,y coordinates then perform a 
+	 * Move the mouse cursor to the specified x,y coordinates then perform a
 	 * single mousePress and Release to execute a RightClick.
 	 * @param x
 	 * @param y
 	 * @param dndReleaseDelay millis between final release.
-	 * @return Object Currently we return a Boolean(true) object, but this may 
+	 * @return Object Currently we return a Boolean(true) object, but this may
 	 * be subject to change.
 	 * @throws java.awt.AWTException if instantiating java.awt.Robot throws it.
 	 * @see java.awt.Robot
@@ -562,9 +562,9 @@ public class Robot {
 		return click(x,y,InputEvent.BUTTON3_MASK,1, dndReleaseDelay);
 	}
 
-	
+
 	/**
-	 * Move the mouse cursor to the specified Point coordinates then perform a 
+	 * Move the mouse cursor to the specified Point coordinates then perform a
 	 * single mousePress and Release to execute a Click.
 	 * This routine simply calls click with the x,y coordinates in the Point.
 	 * @param Point
@@ -578,7 +578,7 @@ public class Robot {
 	}
 
 	/**
-	 * Move the mouse cursor to the specified Point coordinates then perform a 
+	 * Move the mouse cursor to the specified Point coordinates then perform a
 	 * single mousePress and Release to execute a Click.
 	 * This routine simply calls click with the x,y coordinates in the Point.
 	 * @param Point
@@ -592,7 +592,7 @@ public class Robot {
 	}
 
 	/**
-	 * Move the mouse cursor to the specified Point coordinates then perform a 
+	 * Move the mouse cursor to the specified Point coordinates then perform a
 	 * single mousePress and Release to execute a Click.
 	 * This routine simply calls click with the x,y coordinates in the Point.
 	 * @param Point
@@ -606,13 +606,13 @@ public class Robot {
 	}
 
 	/**
-	 * Move the mouse cursor to the specified start Point coordinates then perform a 
+	 * Move the mouse cursor to the specified start Point coordinates then perform a
 	 * single mousePress using buttonMasks and drag\move then Release the mouse button at the end point.
 	 * @param Point screen coordinates to start of mouse press and drag.
 	 * @param Point screen coordinates to end mouse drag and mouse release.
 	 * @param int button masks to use during drag
 	 * @param dndReleaseDelay millis before final release.
-	 * @return Object Currently we return a Boolean(true) object, but this may 
+	 * @return Object Currently we return a Boolean(true) object, but this may
 	 * be subject to change.
 	 * @throws java.awt.AWTException if instantiating java.awt.Robot throws it.
 	 * @see java.awt.Robot
@@ -635,12 +635,12 @@ public class Robot {
 	}
 
 	/**
-	 * Move the mouse cursor to the specified start Point coordinates then perform a 
+	 * Move the mouse cursor to the specified start Point coordinates then perform a
 	 * single mousePress using buttonMasks and drag\move then Release the mouse button at the end point.
 	 * @param Point screen coordinates to start of mouse press and drag.
 	 * @param Point screen coordinates to end mouse drag and mouse release.
 	 * @param int button masks to use during drag
-	 * @return Object Currently we return a Boolean(true) object, but this may 
+	 * @return Object Currently we return a Boolean(true) object, but this may
 	 * be subject to change.
 	 * @throws java.awt.AWTException if instantiating java.awt.Robot throws it.
 	 * @see java.awt.Robot
@@ -648,16 +648,16 @@ public class Robot {
 	public static Object mouseDrag(java.awt.Point start, java.awt.Point end, int buttonMasks) throws java.awt.AWTException{
 		return mouseDrag(start, end, buttonMasks, dndReleaseDelay);
 	}
-	
+
 	/**
-	 * Move the mouse cursor to the specified start Point coordinates then perform a 
+	 * Move the mouse cursor to the specified start Point coordinates then perform a
 	 * single mousePress using buttonMasks and drag\move then Release the mouse button at the end point.
 	 * During the mouse drag, there are a set of keys will be kept pressed.
 	 * @param Point screen coordinates to start of mouse press and drag.
 	 * @param Point screen coordinates to end mouse drag and mouse release.
 	 * @param int button masks to use during drag
 	 * @param int[] the keys kept pressed during mouse drag, the key can be {@link KeyEvent#VK_SHIFT}, {@link KeyEvent#VK_CONTROL} etc.
-	 * @return Object Currently we return a Boolean(true) object, but this may 
+	 * @return Object Currently we return a Boolean(true) object, but this may
 	 * be subject to change.
 	 * @throws java.awt.AWTException if instantiating java.awt.Robot throws it.
 	 * @see java.awt.Robot
@@ -665,24 +665,24 @@ public class Robot {
 	private static Object mouseDrag(java.awt.Point start, java.awt.Point end, int buttonMasks, int[] keys) throws java.awt.AWTException{
 		java.awt.Robot bot = getRobot();
 		Log.info("Robot mouseDrag from:"+ start +" to:"+ end +" using button mask "+ buttonMasks+ " with keys '"+Arrays.toString(keys)+"' pressed.");
-		
+
 		try{
 			for(int key:keys) bot.keyPress(key);
-			mouseDrag(start, end, buttonMasks);			
+			mouseDrag(start, end, buttonMasks);
 		}catch(Exception e){
 			if(e instanceof AWTException) throw (AWTException)e;
 			AWTException wrapper = new AWTException(e.getMessage());
 			wrapper.initCause(e);
 			throw wrapper;
 		}finally{
-			for(int key:keys) bot.keyRelease(key);			
+			for(int key:keys) bot.keyRelease(key);
 		}
 
 		return new Boolean(true);
 	}
-	
+
 	/**
-	 * Move the mouse cursor to the specified start Point coordinates then perform a 
+	 * Move the mouse cursor to the specified start Point coordinates then perform a
 	 * single mousePress (Button1) and drag\move then Release the mouse button at the end point.
 	 * During the drag, the key "ALT" is kept pressed.
 	 * @param Point screen coordinates to start of mouse press and drag.
@@ -697,7 +697,7 @@ public class Robot {
 		return mouseDrag(start, end, InputEvent.BUTTON1_MASK, keys);
 	}
 	/**
-	 * Move the mouse cursor to the specified start Point coordinates then perform a 
+	 * Move the mouse cursor to the specified start Point coordinates then perform a
 	 * single mousePress (Button1) and drag\move then Release the mouse button at the end point.
 	 * During the drag, the key "CONTROL" and "ALT" are kept pressed.
 	 * @param Point screen coordinates to start of mouse press and drag.
@@ -706,13 +706,13 @@ public class Robot {
 	 * @throws java.awt.AWTException if instantiating java.awt.Robot throws it.
 	 * @see java.awt.Robot
 	 * @see #mouseDrag(Point, Point, int, int[])
-	 */	
+	 */
 	public static Object ctrlAltLeftDrag(java.awt.Point start, java.awt.Point end) throws java.awt.AWTException{
 		int[] keys = {KeyEvent.VK_CONTROL, KeyEvent.VK_ALT};
 		return mouseDrag(start, end, InputEvent.BUTTON1_MASK, keys);
 	}
 	/**
-	 * Move the mouse cursor to the specified start Point coordinates then perform a 
+	 * Move the mouse cursor to the specified start Point coordinates then perform a
 	 * single mousePress (Button1) and drag\move then Release the mouse button at the end point.
 	 * During the drag, the key "CONTROL" is kept pressed.
 	 * @param Point screen coordinates to start of mouse press and drag.
@@ -727,7 +727,7 @@ public class Robot {
 		return mouseDrag(start, end, InputEvent.BUTTON1_MASK, keys);
 	}
 	/**
-	 * Move the mouse cursor to the specified start Point coordinates then perform a 
+	 * Move the mouse cursor to the specified start Point coordinates then perform a
 	 * single mousePress (Button1) and drag\move then Release the mouse button at the end point.
 	 * During the drag, the key "CONTROL" and "SHIFT" are kept pressed.
 	 * @param Point screen coordinates to start of mouse press and drag.
@@ -742,7 +742,7 @@ public class Robot {
 		return mouseDrag(start, end, InputEvent.BUTTON1_MASK, keys);
 	}
 	/**
-	 * Move the mouse cursor to the specified start Point coordinates then perform a 
+	 * Move the mouse cursor to the specified start Point coordinates then perform a
 	 * single mousePress (Button1) and drag\move then Release the mouse button at the end point.
 	 * During the drag, the key "SHIFT" is kept pressed.
 	 * @param Point screen coordinates to start of mouse press and drag.
@@ -772,7 +772,7 @@ public class Robot {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Press down a Key.
 	 * @param keycode int, keycode Key to press (e.g. <code>KeyEvent.VK_A</code>)
@@ -788,7 +788,7 @@ public class Robot {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Release a Key.
 	 * @param keycode int, keycode Key to release (e.g. <code>KeyEvent.VK_A</code>)
@@ -804,7 +804,7 @@ public class Robot {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Move the mouse cursor to the specified Point, stay for a period and move out
 	 * @param point Point, the screen point to hover the mouse
@@ -823,7 +823,7 @@ public class Robot {
 	}
 
 	/**
-	 * Move the mouse cursor to the specified start Point coordinates then perform a 
+	 * Move the mouse cursor to the specified start Point coordinates then perform a
 	 * single mousePress (Button1) and drag\move then Release the mouse button at the end point.
 	 * @param Point screen coordinates to start of mouse press and drag.
 	 * @param Point screen coordinates to end mouse drag and mouse release.
@@ -836,7 +836,7 @@ public class Robot {
 	}
 
 	/**
-	 * Move the mouse cursor to the specified start Point coordinates then perform a 
+	 * Move the mouse cursor to the specified start Point coordinates then perform a
 	 * single mousePress (Button3) and drag\move then Release the mouse button at the end point.
 	 * @param Point screen coordinates to start of mouse press and drag.
 	 * @param Point screen coordinates to end mouse drag and mouse release.
@@ -849,7 +849,7 @@ public class Robot {
 	}
 
 	/**
-	 * Move the mouse cursor to the specified start Point coordinates then perform a 
+	 * Move the mouse cursor to the specified start Point coordinates then perform a
 	 * single mousePress (Button2) and drag\move then Release the mouse button at the end point.
 	 * @param Point screen coordinates to start of mouse press and drag.
 	 * @param Point screen coordinates to end mouse drag and mouse release.
@@ -860,9 +860,9 @@ public class Robot {
 	public static Object centerDrag(java.awt.Point start, java.awt.Point end) throws java.awt.AWTException{
 		return mouseDrag(start, end, InputEvent.BUTTON2_MASK);
 	}
-	
+
 	/**
-	 * Move the mouse cursor to the specified start Point coordinates then perform a 
+	 * Move the mouse cursor to the specified start Point coordinates then perform a
 	 * single mousePress (Button1) and drag\move then Release the mouse button at the end point.
 	 * @param Point screen coordinates to start of mouse press and drag.
 	 * @param Point screen coordinates to end mouse drag and mouse release.
@@ -874,9 +874,9 @@ public class Robot {
 	public static Object leftDrag(java.awt.Point start, java.awt.Point end, int dndReleaseDelay) throws java.awt.AWTException{
 		return mouseDrag(start, end, InputEvent.BUTTON1_MASK, dndReleaseDelay);
 	}
-	
+
 	/**
-	 * Move the mouse cursor to the specified start Point coordinates then perform a 
+	 * Move the mouse cursor to the specified start Point coordinates then perform a
 	 * single mousePress (Button3) and drag\move then Release the mouse button at the end point.
 	 * @param Point screen coordinates to start of mouse press and drag.
 	 * @param Point screen coordinates to end mouse drag and mouse release.
@@ -888,9 +888,9 @@ public class Robot {
 	public static Object rightDrag(java.awt.Point start, java.awt.Point end, int dndReleaseDelay) throws java.awt.AWTException{
 		return mouseDrag(start, end, InputEvent.BUTTON3_MASK, dndReleaseDelay);
 	}
-	
+
 	/**
-	 * Move the mouse cursor to the specified start Point coordinates then perform a 
+	 * Move the mouse cursor to the specified start Point coordinates then perform a
 	 * single mousePress (Button2) and drag\move then Release the mouse button at the end point.
 	 * @param Point screen coordinates to start of mouse press and drag.
 	 * @param Point screen coordinates to end mouse drag and mouse release.
@@ -902,7 +902,7 @@ public class Robot {
 	public static Object centerDrag(java.awt.Point start, java.awt.Point end, int dndReleaseDelay) throws java.awt.AWTException{
 		return mouseDrag(start, end, InputEvent.BUTTON2_MASK, dndReleaseDelay);
 	}
-	
+
 	/**
 	 * Minimize all windows by the short cut 'Windows+M'<br>
 	 * This works only for windows system.
@@ -910,13 +910,13 @@ public class Robot {
 	 */
 	public static void minimizeAllWindows() throws AWTException{
 		java.awt.Robot robot = getRobot();
-		
+
 		robot.keyPress(KeyEvent.VK_WINDOWS);
 		robot.keyPress(KeyEvent.VK_M);
 		robot.keyRelease(KeyEvent.VK_M);
 		robot.keyRelease(KeyEvent.VK_WINDOWS);
 	}
-	
+
 	/**
 	 * get mouse screen location.
 	 * @return Point, the mouse screen location.
@@ -929,7 +929,7 @@ public class Robot {
 			throw new SAFSException("Fail to get mouse screen location, due to "+StringUtils.debugmsg(th));
 		}
 	}
-	
+
 	/**
 	 * <em>Pre-condition:</em> The window should be focused
 	 * Get the window system menu by short-cut 'Alt+Space'<br>
@@ -938,12 +938,12 @@ public class Robot {
 	 */
 	public static void getWindowSystemMenu() throws AWTException{
 		java.awt.Robot robot = getRobot();
-		
+
 		robot.keyPress(KeyEvent.VK_ALT);
 		robot.keyPress(KeyEvent.VK_SPACE);
 		robot.keyRelease(KeyEvent.VK_SPACE);
 		robot.keyRelease(KeyEvent.VK_ALT);
-		
+
 		//After the popup-menu is shown, delay for a while so that the following "key-press" will
 		//have time to trrigger the menu item.
 		StringUtilities.sleep(500);
@@ -988,7 +988,7 @@ public class Robot {
 		getWindowSystemMenu();
 		robot.keyPress(KeyEvent.VK_C);
 	}
-	
+
 	/**
 	 * Clear the system clip-board.
 	 */
@@ -1007,7 +1007,7 @@ public class Robot {
 		      }
 		}, null);
 	}
-	
+
 	/**
 	 * Set a string value to the clip-board.
 	 * @param content String, the content to set.
@@ -1016,7 +1016,7 @@ public class Robot {
 		StringSelection ss = new StringSelection(content);
 		clipboard.setContents(ss, ss);
 	}
-	
+
 	/**
 	 * Get content from system clip-board.
 	 * @param flavor DataFlavor, provides meta information about data.
@@ -1025,7 +1025,7 @@ public class Robot {
 	 */
 	public static Object getClipboard(DataFlavor flavor) throws SAFSException{
 		String debugmsg = StringUtils.debugmsg(false);
-		
+
 		try {
 			return clipboard.getData(flavor);
 		} catch (Exception e) {
@@ -1034,13 +1034,13 @@ public class Robot {
 			throw new SAFSException(msg);
 		}
 	}
-	
+
 	/**
 	 * Test if the Robot.inputKeys() can put all characters correctly into an edit box.<br>
 	 * Prerequisite: Have an application with Input Box focused<br>
-	 * 
+	 *
 	 * <br>
-	 * For example, 
+	 * For example,
 	 * open an IE browser and visit Google page, click the search box to let it have focus,
 	 * and this method will input a long string and verify if the string has been input correctly, it
 	 * will repeat this action in a loop for several times.<br>
@@ -1049,7 +1049,7 @@ public class Robot {
 	 *  1. Start the selenium-standalone-server<br>
 	 *  2. Visit page http://127.0.0.1:4444/wd/hub/<br>
 	 *  3. Click "Create Session", and choose browser as "Internet explorer"<br>
-	 * 
+	 *
 	 */
 	private static void testInputKeys(){
 		try {
@@ -1061,7 +1061,7 @@ public class Robot {
 			String result = null;
 			int loop = 100;
 			String errmsg = "Hello";
-						
+
 			for(int i=0;i<loop;i++){
 				//Clean the clip-board, we must wait a while before copying current text into the edit box
 				clearClipboard();
@@ -1074,7 +1074,7 @@ public class Robot {
 				//Get the content from the clip-board, we MUST wait a while before the clip-board is set correctly.
 				Thread.sleep(1000);
 				result = (String) getClipboard(DataFlavor.stringFlavor);
-				
+
 				if(!result.equals(string)){
 					errmsg = i+": fail to input keys:\nresult='"+result+"'\nstring='"+string+"'";
 					System.err.println(errmsg);
@@ -1085,7 +1085,7 @@ public class Robot {
 			System.err.println("Met Exception."+StringUtils.debugmsg(e));
 		}
 	}
-	
+
 	public static void main(String[] args){
 		testInputKeys();
 	}
