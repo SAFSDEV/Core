@@ -1769,6 +1769,49 @@ public abstract class SeleniumPlus extends SAFSPlus{
 			//TODO we could provide driver command 'GetCheckAlertTimeout' for traditional SAFS users later.
 			return WDLibrary.getTimeoutCheckAlertForClick();
 		}
+
+		/**
+		 * Authenticate an HTTP Basic Authentication prompt.<br>
+		 * The Authentication prompt is an Alert Dialog associated with a browser.<br>
+		 * This command will wait 2 seconds by default for the presence of Alert.<br>
+		 * @param user String, the user that will be passed to the Authentication prompt.
+		 * @param password String, the password that will be passed to the Authentication prompt.
+		 * @param optionals String
+		 * <ul>
+		 * <b>optionals[0] timeoutWaitAlertPresence</b> int, timeout in seconds to wait for the presence of Alert.
+		 *                                                   If not provided, default is 2 seconds.<br>
+		 * <b>optionals[0] browserID</b> String, the ID to get the browser on which the 'alert' will be closed.
+		 *                                       If not provided, the current browser will be used.<br>
+		 * </ul>
+		 * @return boolean true if the authentication succeeded.
+		 * @throws SeleniumPlusException if there is any un-expected error.
+		 * @example
+		 * <pre>
+		 * {@code
+		 * 1) boolean success = AlertAuthenticateUsingUserAndPassword(user, password);//Authenticate using an Alert (belongs to current browser) with 2 seconds timeout.
+		 * 2) boolean success = AlertAuthenticateUsingUserAndPassword(user, password, "0");//Authenticate using an Alert (belongs to current browser) immediately
+		 * 3) boolean success = AlertAuthenticateUsingUserAndPassword(user, password, "5", "browser-id");//Authenticate using an Alert (belongs to browser identified by "browser-id"),
+		 *                                                        //before that it will wait 5 seconds for the presence of the Alert
+		 * }
+		 * @see SAFSPlus#StartWebBrowser(String, String, String...)
+		 */
+		public static boolean AlertAuthenticateUsingUserAndPassword(String user, String password, String... optionals) throws SeleniumPlusException{
+			try{
+				//TODO we could provide driver command 'AlertAuthenticateUsingUserAndPassword' for traditional SAFS users later.
+				boolean success = WDLibrary.alertAuthenticateUsingUserAndPassword(user, password, optionals);
+				if(success){
+					Logging.LogTestSuccess("Authenticated using user and password.");
+				}else{
+					Logging.LogTestSuccess("Unable to authenticate using user and password.");
+				}
+				return success;
+			}catch(Exception e){
+				Logging.LogTestFailure("AlertAuthenticateUsingUserAndPassword Failed.");
+				if(e instanceof SeleniumPlusException) throw e;
+				throw new SeleniumPlusException("AlertAuthenticateUsingUserAndPassword Failed.", e);
+			}
+		}
+
 	}
 
 	/**

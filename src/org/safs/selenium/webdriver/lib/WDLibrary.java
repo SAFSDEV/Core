@@ -102,6 +102,7 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.openqa.selenium.safari.SafariDriver;
+import org.openqa.selenium.security.UserAndPassword;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.safs.Constants;
@@ -3152,6 +3153,45 @@ public class WDLibrary extends SearchObject {
 			}
 		} catch (SeleniumPlusException e) {
 			IndependantLog.warn(debugmsg+"Failed to wait for the Alert. Met "+StringUtils.debugmsg(e));
+			//If we didn't get the webdriver, then we will throw the exception out.
+			if(SeleniumPlusException.CODE_OBJECT_IS_NULL.equals(e.getCode())) throw e;
+		}
+		return false;
+	}
+
+	/**
+	 *
+	 * Authenticate an HTTP Basic Authentication prompt.  The Authentication prompt is
+	 * an Alert-Modal-Dialog associated with a certain browser identified by ID.<br>
+	 * It will get the cached webdriver according to the browser's id, and get the 'alert' through that webdriver.<br>
+	 * <b>Note:</b>This API will NOT change the current WebDriver. {@link #getWebDriver()} will still return the same object.<br>
+	 *
+	 * @param user String, the user that will be passed to the Authentication prompt.
+	 * @param password String, the password that will be passed to the Authentication prompt.
+	 * @param optionals String...
+	 * <ul>
+	 * <b>optionals[0] timeoutWaitAlertPresence</b> int, timeout in seconds to wait for the presence of Alert.
+	 *                                                   If not provided, default is 2 seconds.<br>
+	 *                                                   If it is provided as {@link #TIMEOUT_NOWAIT}, this method will try to get Alert without waiting.<br>
+	 * <b>optionals[1] browserID</b> String, the ID to get the browser on which the 'alert' will be closed.
+	 *                                       If not provided, the current browser will be used.<br>
+	 * </ul>
+	 * @return boolean, true if the Alert is present.
+	 * @throws SeleniumPlusException if the WebDriver is null
+	 * @see #waitAlert(String...)
+	 */
+	public static boolean alertAuthenticateUsingUserAndPassword(String user, String password, String... optionals) throws SeleniumPlusException{
+		String debugmsg = "WDLibrary.alertAuthenticateUsingUserAndPassword(): ";
+		try {
+			Alert alert = waitAlert(optionals);
+			if(alert!=null){
+				alert.authenticateUsing(new UserAndPassword(user, password));
+				return true;
+			}else{
+				IndependantLog.debug(debugmsg+"Failed to wait for the Alert. A null object was returned.");
+			}
+		} catch (SeleniumPlusException e) {
+			IndependantLog.warn(debugmsg+"Failed to authenticate. Met "+StringUtils.debugmsg(e));
 			//If we didn't get the webdriver, then we will throw the exception out.
 			if(SeleniumPlusException.CODE_OBJECT_IS_NULL.equals(e.getCode())) throw e;
 		}
