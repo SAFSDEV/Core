@@ -34,6 +34,7 @@
  * APR 04, 2017 (Carl Nagle)    Fixed visibility of iniIndependentLogByConsole used by HttpRequest.java.
  * APR 06, 2017 (Lei Wang) 	Added method wildcardToRegex().
  * APR 11, 2017 (Lei Wang) 	Removed the deprecated convertWindowPosition(): reduce the dependency of org.safs.ComponentFunction.Window.
+ * APR 27, 2017 (Lei Wang) 	Modified matchText(): fixed a bug when text is regex; added ability to compare as wildcard string.
  **/
 package org.safs;
 
@@ -1027,10 +1028,10 @@ public abstract class StringUtils extends StringUtilities{
   }
 
 	/**
-	 * match a text(provided as fullstring, substing, regex) against<br>
+	 * match a text(provided as fullstring, substing, regex, wildcard) against<br>
 	 * the actual text got from application component(list, menu, tree, tab etc.)<br>
 	 * @param actualText String, the actual text of the component's label
-	 * @param expectedText String, the expected text, it can be full-string, sub-string or regex.
+	 * @param expectedText String, the expected text, it can be full-string, sub-string, regex or wildcard string.
 	 * @param partialMatch boolean, if the expectedText is provided as sub-string
 	 * @param ignoreCase boolean, if the texts are case in-sensitive to compare
 	 * @return boolean, true if matched.
@@ -1040,20 +1041,37 @@ public abstract class StringUtils extends StringUtilities{
 		boolean matched = false;
 
 		try{
+			//Firstly, try to compare as a normal string.
+			//Don't corrupt the original parameters 'actualText' and 'expectedText', they may be compared as regex.
+			String actualTextTemp = null;
+			String expectedTextTemp = null;
 			if(ignoreCase){
-				actualText = actualText.toLowerCase();
-				expectedText = expectedText.toLowerCase();
+				actualTextTemp = actualText.toLowerCase();
+				expectedTextTemp = expectedText.toLowerCase();
+			}else{
+				actualTextTemp = actualText;
+				expectedTextTemp = expectedText;
+			}
+			if(partialMatch){
+				matched = actualTextTemp.contains(expectedTextTemp);
+			}else{
+				matched = actualTextTemp.equals(expectedTextTemp);
 			}
 
-			if(partialMatch){
-				matched = actualText.contains(expectedText);
-			}else{
-				matched = actualText.equals(expectedText);
-			}
+			//We try to compare it as regular expression.
 			if(!matched) matched = matchRegex(expectedText, actualText);
 
 		}catch(Exception e){
-			IndependantLog.debug(debugmsg+"fail to match '"+expectedText+"' against '"+actualText+"'",e);
+			IndependantLog.debug(debugmsg+"fail to match '"+expectedText+"' against '"+actualText+"'. partialMatch="+partialMatch+"; ignoreCase="+ignoreCase+". ",e);
+		}
+
+		//Maybe 'expectedText' is a wildcard string.
+		if(!matched){
+			try {
+				matched = matchRegex(wildcardToRegex(expectedText), actualText);
+			} catch (SAFSException e) {
+				IndependantLog.debug(debugmsg+"fail to match (as wildcard string) '"+expectedText+"' against '"+actualText+"'. partialMatch="+partialMatch+"; ignoreCase="+ignoreCase+". ",e);
+			}
 		}
 
 		return matched;
