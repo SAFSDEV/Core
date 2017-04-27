@@ -20,6 +20,7 @@ import java.awt.Rectangle;
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -1029,6 +1030,15 @@ public abstract class StringUtilities {
 		}
 
 		return StringUtilities.getDateString(date,dateFormat);
+	}
+
+	/**
+	 * @param isMilitary boolean, true to return date-time in format {@link #DATE_FORMAT_MILITARY_DATE_TIME};<br/>
+	 *                            otherwise in format {@link #DATE_FORMAT_AM_PM_DATE_TIME}
+	 * @return String, the current date-time string of format {@link #DATE_FORMAT_AM_PM_DATE_TIME} or {@link #DATE_FORMAT_MILITARY_DATE_TIME}
+	 */
+	public static String current(boolean isMilitary){
+		return StringUtils.getDateTimeString(new Date(System.currentTimeMillis()), isMilitary);
 	}
 
 	/** The default start index, it is 1 */

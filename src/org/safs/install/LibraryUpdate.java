@@ -10,6 +10,8 @@ package org.safs.install;
  *    JUL 15, 2015	(LeiWang)	Modify processArgs(): Catch Throwable to avoid infinite loop waiting.
  *    JAN 04, 2016	(LeiWang)	Add '-q' for quiet mode so that no dialog will prompt for confirmation.
  *    APR 12, 2017	(LeiWang)	Initialized unzipSkipPredicator (for skipping plugin files) if Eclipse version is not "4.5.2".
+ *    APR 27, 2017	(LeiWang)	Modified processArgs(): write message to ProgressIndicator according to its severity.
+ *                              Added a shared LibraryUpdater to expose the downloadURL() method as static method.
  **/
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -33,6 +35,7 @@ import java.util.Set;
 import javax.swing.JOptionPane;
 
 import org.safs.Constants.EclipseConstants;
+import org.safs.Constants.LogConstants;
 import org.safs.IndependantLog;
 import org.safs.SAFSException;
 import org.safs.StringUtils;
@@ -110,8 +113,10 @@ public class LibraryUpdate {
 	public static final String ARG_PREFIX_A = "-a";
 	public static final String ARG_PREFIX_Q = "-q";
 
-    // do not attempt to copy/replace files older than this date
-    public static final long OLDEST_DATE = Date.parse("01 Aug 2012");
+	//do not attempt to copy/replace files older than this date
+	//public static final long OLDEST_DATE = Date.parse("01 Aug 2012");
+	//Date.parse() has been deprecated, use DateFormat to do the work
+	public static final long OLDEST_DATE = StringUtils.getDate("08-01-2012", StringUtils.DATE_FORMAT_DATE/*MM-dd-yyyy*/).getTime();
 
 	PrintStream console = System.out;
 	PrintStream errors = System.err;
@@ -218,6 +223,10 @@ public class LibraryUpdate {
 
 	}
 
+	protected void close(){
+		progressor.close();
+	}
+
 	/**
 	 * Main entry point for an instance of the class not executing from the command-line.
 	 * @param args command-line args
@@ -246,7 +255,7 @@ public class LibraryUpdate {
 					progressor.setProgressInfo(progress+=10, "Evaluating URL Source: "+ sarg);
 
 					if(!quiet){
-						message = "Preparing to download a library update.\n\n"
+						message = "Preparing to download ...\n\n"
 								+ "Source: "+ sarg +"\n"
 								+ "\nThis may take a few minutes.\n"
 								+ "\nDo you wish to proceed?\n";
@@ -263,7 +272,7 @@ public class LibraryUpdate {
 								options,
 								options[1]);
 						if(selected == JOptionPane.CLOSED_OPTION || selected ==1){
-							progressor.setProgressMessage("Download cancelled by User.");
+							progressor.setProgressMessage("Download cancelled by User.", LogConstants.WARN);
 							canceled = true;
 							return false;
 						}
@@ -318,11 +327,11 @@ public class LibraryUpdate {
 					progress += 10;
 					if(canceled){
 						message = "Download of update content was not successful.";
-						progressor.setProgressInfo(progress,message);
+						progressor.setProgressInfo(progress,message, LogConstants.ERROR);
 						message = "\n"+ message +"\n";
 						if(canceledMSG != null) {
 							canceledMSG = "Update was canceled due to "+canceledMSG;
-							progressor.setProgressMessage(canceledMSG);
+							progressor.setProgressMessage(canceledMSG, LogConstants.ERROR);
 							message+= "\n"+ canceledMSG +"\n";
 						}
 						if(!quiet) JOptionPane.showMessageDialog(null, message, prompt, JOptionPane.ERROR_MESSAGE);
@@ -342,11 +351,11 @@ public class LibraryUpdate {
 					progress = 70;
 					if(canceled){
 						message = "Unzip of update content was not successful.";
-						progressor.setProgressInfo(progress,message);
+						progressor.setProgressInfo(progress,message, LogConstants.ERROR);
 						message = "\n"+ message +"\n";
 						if(canceledMSG != null) {
 							canceledMSG = "Update was canceled due to "+canceledMSG;
-							progressor.setProgressMessage(canceledMSG);
+							progressor.setProgressMessage(canceledMSG, LogConstants.ERROR);
 							message+= "\n"+ canceledMSG +"\n";
 						}
 						if(!quiet) JOptionPane.showMessageDialog(null, message, prompt, JOptionPane.ERROR_MESSAGE);
@@ -408,7 +417,7 @@ public class LibraryUpdate {
 		   (!dobackup || (backupdir != null && backupdir.canWrite()))){
 
 			if(!quiet){
-				message = "Preparing to perform a library update.\n\n"
+				message = "Preparing to perform an update.\n\n"
 						+ "Source: "+ sourcedir +"\n"
 						+ "Target: "+ targetdir +"\n"
 						+ "Recurse: "+ recurse +"\n"
@@ -429,7 +438,7 @@ public class LibraryUpdate {
 						options,
 						options[1]);
 				if(selected == JOptionPane.CLOSED_OPTION || selected ==1){
-					progressor.setProgressMessage("User has cancelled the update.");
+					progressor.setProgressMessage("User has cancelled the update.", LogConstants.WARN);
 					canceled = true;
 					return false;
 				}
@@ -443,7 +452,7 @@ public class LibraryUpdate {
 		return false;
 	}
 
-	public static final String help_string = "\n"
+	public static final String HELP_STRING = "\n"
 			   + "SAFS LibraryUpdate "+ _VERSION_ +"\n"
 			   + "\n"
 			   + "Command-line arguments: \n"
@@ -461,7 +470,7 @@ public class LibraryUpdate {
 			   + "** - only required if -nob not provided.\n\n";
 
 	static void help(PrintStream out){
-		out.print(help_string);
+		out.print(HELP_STRING);
 	}
 
 	static final String LC_JAR = ".jar";
@@ -497,7 +506,7 @@ public class LibraryUpdate {
 
 	// storage in-case we have to back out changes
 	// key = targetfile, value = backupfile
-	HashMap backups = new HashMap();
+	HashMap<File, File> backups = new HashMap<File, File>();
 
 	/**
 	 * Uses copyFile to backup a targetfile to a backup directory.
@@ -622,7 +631,7 @@ public class LibraryUpdate {
 				modifiedFiles++;
 			}
 			if (recurse){
-				Iterator it = sourcesubs.iterator();
+				Iterator<File> it = sourcesubs.iterator();
 				while(it.hasNext()){
 					File newsourcedir = (File)it.next();
 					File newtargetdir = new File(targetdir, newsourcedir.getName());
@@ -642,7 +651,7 @@ public class LibraryUpdate {
 			if(backups.size() > 0) {
 				errors.println("Attempting to restore from backups at "+ backupdir.getAbsolutePath());
 			}
-			Set keys = backups.keySet();
+			Set<File> keys = backups.keySet();
 			File target = null;
 			File backup = null;
 			for(Object key: keys){
@@ -691,7 +700,7 @@ public class LibraryUpdate {
 		return tempdir;
 	}
 
-	void downloadURL(String url, File outfile) throws MalformedURLException, IOException{
+	void downloadURL(String url, File outfile) throws IOException{
 		InputStream in = null;
 		BufferedOutputStream fout = null;
 		HttpURLConnection con = null;
@@ -699,7 +708,7 @@ public class LibraryUpdate {
 		try {
 			con = (HttpURLConnection) URI.create(url).toURL().openConnection();
 			int response = con.getResponseCode();
-			if(response != con.HTTP_OK)
+			if(response != HttpURLConnection.HTTP_OK)
 				throw new MalformedURLException("Bad Server Response ("+ response +") for "+ url);
 			long conlength = con.getContentLengthLong();
 			if(conlength < 1024)
@@ -733,12 +742,86 @@ public class LibraryUpdate {
 		return quiet;
 	}
 
-	private void __testUpzipSkipPredicator() throws SeleniumPlusException {
+	private static LibraryUpdate _sharedUpdater  = null;
+	private static synchronized void initSharedUpdater(){
+		if(_sharedUpdater==null){
+			_sharedUpdater  = new LibraryUpdate();
+			_sharedUpdater.progressor.setTitle("I AM THE SHARED LIBRARY UPDATER.");
+//			_sharedUpdater.progressor.minimize();
+		}
+	}
+	public static boolean download(String url, File outfile){
+		initSharedUpdater();
+		synchronized(_sharedUpdater){
+			boolean success = false;
+			try {
+				_sharedUpdater.progressor.setProgressMessage("SharedUpdater: ["+StringUtils.current(true)+"] started downloading URL '"+url+"' ... ");
+				_sharedUpdater.downloadURL(url, outfile);
+				_sharedUpdater.progressor.setProgressMessage("SharedUpdater: Successfully Donwloaded to file '"+outfile.getAbsolutePath()+"'");
+				success = true;
+				_sharedUpdater.progressor.setProgressMessage("SharedUpdater: ["+StringUtils.current(true)+"] done.\n");
+			} catch (IOException e) {
+				_sharedUpdater.progressor.setProgressMessage("SharedUpdater: ["+StringUtils.current(true)+"] Failed to donwload URL '"+url+"', due to "+e.toString()+"\n", LogConstants.ERROR);
+			}
+			return success;
+		}
+	}
 
+	private static void __testSharedUpdater(){
+		String[] urls = {
+				"https://github.com/SAFSDEV/UpdateSite/releases/download/seleniumplus/source_all.zip",
+				"https://github.com/SAFSDEV/UpdateSite/releases/download/seleniumplus/source_seplusplugin.zip",/* does not exist anymore, will fail to download */
+				"https://github.com/SAFSDEV/UpdateSite/releases/download/seleniumplus/SEPLUS.PLUGIN.UPDATE.ZIP"
+		};
+		Thread[] runners = new Thread[urls.length];
+		int i = 0;
+		for(final String url:urls){
+			runners[i++] = new Thread(new Runnable(){
+				@Override
+				public void run() {
+					File downloadedFile = null;
+					String file = null;
+					file = url.replaceAll(".*/", "");
+					int dotIndex = file.lastIndexOf(".");
+					String prefix = file;
+					String suffix = null;
+					if(dotIndex>0){
+						prefix = file.substring(0, dotIndex);
+						suffix = file.substring(dotIndex);
+					}
+
+					try {
+						downloadedFile = File.createTempFile(prefix, suffix);
+						download(url, downloadedFile);
+					} catch (IOException e) {
+						System.out.println("Failed to download URL '"+url+"'");
+					}
+				}
+			});
+		}
+
+		for(Thread runner: runners){
+			runner.start();
+		}
+
+		for(Thread runner: runners){
+			try {
+				runner.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private static void __testUpzipSkipPredicator() throws SeleniumPlusException {
 		String debugmsg = StringUtils.debugmsg(false);
 
+		SePlusInstallInfo productInfo = _sharedUpdater.productInfo;
+		ProgressIndicator progressor = _sharedUpdater.progressor;
+		Predicate<String> unzipSkipPredicator = _sharedUpdater.unzipSkipPredicator;
+
 		if(productInfo==null){
-			progressor.setProgressMessage(debugmsg+"Initilalize SePlusInstallInfo");
+			progressor.setProgressMessage(debugmsg+"Initilalize SePlusInstallInfo", LogConstants.WARN);
 			productInfo =SePlusInstallInfo.instance();
 		}
 		File eclipseDir = productInfo.getEclipseDir();
@@ -756,10 +839,10 @@ public class LibraryUpdate {
 					}
 				}
 			}else{
-				progressor.setProgressMessage(debugmsg+"unzip-skip-predicator has not been initialized.");
+				progressor.setProgressMessage(debugmsg+"unzip-skip-predicator has not been initialized.", LogConstants.ERROR);
 			}
 		}else{
-			progressor.setProgressMessage(debugmsg+"Cannot detect Eclipse installation directory.");
+			progressor.setProgressMessage(debugmsg+"Cannot detect Eclipse installation directory.", LogConstants.ERROR);
 		}
 
 		StringUtils.sleep(3000);
@@ -795,24 +878,33 @@ public class LibraryUpdate {
 	 *  0 - +N The number of files that were modified.
 	 */
 	public static void main(String[] args) {
+		//if the first argument is "-unittest"
+		if(args.length>0 && "-unittest".equalsIgnoreCase(args[0].trim())){
+			initSharedUpdater();
+
+			LibraryUpdate.__testSharedUpdater();
+			try {
+				LibraryUpdate.__testUpzipSkipPredicator();
+			} catch (SeleniumPlusException e) {
+				e.printStackTrace();
+			}
+
+			LibraryUpdate._sharedUpdater.close();
+			return;
+		}
+
 		LibraryUpdate updater = null;
 		int exitcode = 0;
 		try{
 			updater = new LibraryUpdate();
 
-			//if the first argument is "-unittest"
-			if(args.length>0 && "-unittest".equalsIgnoreCase(args[0].trim())){
-				updater.__testUpzipSkipPredicator();
-				return;
-			}
-
-			//sufficent valid args provided
+			//Sufficient valid args provided
 			if(!updater.processArgs(args)){
 				if(! updater.canceled){
 					String message = "Please provide all *required* parameters.";
 					updater.console.println(message);
 					help(updater.console);
-					if(!updater.isQuiet()) JOptionPane.showMessageDialog(null, message +"\n"+ updater.help_string, updater.prompt, JOptionPane.WARNING_MESSAGE);
+					if(!updater.isQuiet()) JOptionPane.showMessageDialog(null, message +"\n"+ LibraryUpdate.HELP_STRING, updater.prompt, JOptionPane.WARNING_MESSAGE);
 					exitcode = -1;
 				}else{
 					String message = "\nNo Download or Update will be attempted.";
@@ -829,8 +921,8 @@ public class LibraryUpdate {
 		}catch(Exception x){
 			updater.errors.println(x.getMessage());
 			help(updater.errors);
-			updater.progressor.setProgressInfo(100,x.getMessage());
-			if(!updater.isQuiet())  JOptionPane.showMessageDialog(null, x.getMessage()+"\n"+ updater.help_string, updater.prompt, JOptionPane.ERROR_MESSAGE);
+			updater.progressor.setProgressInfo(100,x.getMessage(), LogConstants.ERROR);
+			if(!updater.isQuiet())  JOptionPane.showMessageDialog(null, x.getMessage()+"\n"+ LibraryUpdate.HELP_STRING, updater.prompt, JOptionPane.ERROR_MESSAGE);
 			exitcode = -2;
 		}finally{
 			try{
