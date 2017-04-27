@@ -25,7 +25,7 @@ import javax.swing.text.DefaultCaret;
 public class ProgressIndicator extends JPanel{
 	private static final long serialVersionUID = 8138054266048245250L;
 	static final String EOL = System.getProperty("line.separator");
-	
+
 	private JProgressBar progressBar;
 	private JTextPane taskOutput;
 	private JTextField currentTask;
@@ -36,17 +36,17 @@ public class ProgressIndicator extends JPanel{
 	int screenWidth = screensize.width;
 	int screenHeight = screensize.height;
 	String title = "Robotium RC Installation.";
-	
+
 	public ProgressIndicator() {
 		super(new BorderLayout());
-		
+
 		progressBar = new JProgressBar(0, 100);
 		Dimension d = progressBar.getPreferredSize();
 		d.width = screenWidth/3;
 		progressBar.setPreferredSize(d);
 		progressBar.setIndeterminate(true);
 		progressBar.setStringPainted(true);
-		
+
 		currentTask = new JTextField();
 		currentTask.setPreferredSize(new Dimension(screenWidth/3, 28));
 		currentTask.setMargin(new Insets(5, 5, 2, 5));
@@ -57,8 +57,8 @@ public class ProgressIndicator extends JPanel{
 		taskOutput.setEditable(false);
 		// Set auto scroll
 		DefaultCaret caret = (DefaultCaret)taskOutput.getCaret();
-		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);		
-		
+		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+
 		JPanel panel = new JPanel();
 		panel.add(progressBar);
 		add(panel, BorderLayout.PAGE_START);
@@ -73,7 +73,7 @@ public class ProgressIndicator extends JPanel{
 		this();
 		setTitle(title);
 	}
-	
+
 	/**
 	 * Change the title to be used on the display ProgressIndicator titlebar.
 	 * @param title
@@ -82,7 +82,7 @@ public class ProgressIndicator extends JPanel{
 		this.title = title;
 		if(frame != null) frame.setTitle(title);
 	}
-	
+
 	/**
 	 * Create the GUI and show it. As with all GUI code, this must run on
 	 * the event-dispatching thread.
@@ -91,30 +91,30 @@ public class ProgressIndicator extends JPanel{
 		// Create and set up the window.
 		frame = new JFrame(title);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		
+
 		setOpaque(true); // content panes must be opaque
 		frame.setContentPane(this);
-		
+
 		// Display the window.
 		int frameWidth = (int) frame.getPreferredSize().getWidth();
 		int frameHeight = (int) frame.getPreferredSize().getHeight();
-		frame.setLocation((screenWidth-frameWidth)/2,(screenHeight-frameHeight)/2); 
+		frame.setLocation((screenWidth-frameWidth)/2,(screenHeight-frameHeight)/2);
 		frame.pack();
 		frame.setVisible(true);
-		
+
 		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 	}
-	
+
 	public void setProgress(int progress){
 		progressBar.setValue(progress);
 	}
-	
+
 	public void setProgressMessage(String message){
 		currentTask.setText(message);
 		taskOutput.setText(taskOutput.getText()+message+EOL);
 		System.out.println(message);
 	}
-	
+
 	/**
 	 * setProgress and setProgressMessage in one call.
 	 * @param progress
@@ -124,16 +124,16 @@ public class ProgressIndicator extends JPanel{
 		setProgress(progress);
 		setProgressMessage(message);
 	}
-	
+
 	public void close(){
 		if(frame!=null){
 			frame.dispose();
 		}
 	}
-	
+
 	/* for testing */
 	public static void main(String[] args){
-		
+
 		int delay = 300;
 		int index = 0;
 	    final ProgressIndicator progressor = new ProgressIndicator();
