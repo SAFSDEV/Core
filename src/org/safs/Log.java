@@ -1,21 +1,41 @@
 /** Copyright (C) (MSA, Inc) All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
-
+/**
+ *   <br>   AUG 01, 2003 (DBauman) Original Release
+ *   <br>   Aug 01, 2003 (Carl Nagle) Added GENERIC log level between INFO and PASS.
+ *   <br>   Sep 02, 2003 (DBauman) Added INDEX log level between INFO and GENERIC to give and indication of the index= levels used for recognition strings
+ *   <br>   Sep 16, 2003 (Carl Nagle) Removed references to defunct org.safs.LogUtilities
+ *   <br>   JUL 01, 2004 (Carl Nagle) Lotsa cleanup and user-friendly additions.
+ *   <br>   AUG 12, 2004 (Carl Nagle) Added file output option.
+ *   <br>   NOV 05, 2004 (Carl Nagle) Log.class disabled by default for performance.
+ *   <br>   APR 15, 2005 (Carl Nagle) Removed static initialization System.err.println
+ *   <br>   APR 15, 2005 (Carl Nagle) Added some clarifying documentation for non-Java clients
+ *                                    writing to this log.  Improved the displayed HELP accordingly.
+ *   <br>   JAN 08, 2007 (Carl Nagle) Added more clarifying documentation.
+ *   <br>   JUL 30, 2009 (Carl Nagle) Added Output Filename to debug console at startup.
+ *   <br>   MAY 12, 2014 (Carl Nagle) Added support for SUSPEND and RESUME of debug logging.
+ *   <br>   APR 27, 2017 (SBJLW) Moved/rewrote log-level-constants and methods to Constants.LogConstants.
+ *                               Gave meaningful name to some variables.
+ */
 package org.safs;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.nio.charset.Charset;
-
-import com.ibm.staf.STAFException;
-import com.ibm.staf.STAFResult;
-
-import java.util.Date;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
-import org.safs.staf.STAFProcessHelpers;
-import org.safs.staf.embedded.EmbeddedHandle;
-import org.safs.tools.*;
+import org.safs.Constants.LogConstants;
+import org.safs.tools.CaseInsensitiveFile;
+
+import com.ibm.staf.STAFResult;
 
 /**
  * <em>SAFS Debug Log</em>
@@ -126,19 +146,6 @@ import org.safs.tools.*;
  * @author  Doug Bauman
  * @since   JUN 03, 2003
  *
- *   <br>   AUG 01, 2003 (DBauman) Original Release
- *   <br>   Aug 01, 2003 (Carl Nagle) Added GENERIC log level between INFO and PASS.
- *   <br>   Sep 02, 2003 (DBauman) Added INDEX log level between INFO and GENERIC to give and indication of the index= levels used for recognition strings
- *   <br>   Sep 16, 2003 (Carl Nagle) Removed references to defunct org.safs.LogUtilities
- *   <br>   JUL 01, 2004 (Carl Nagle) Lotsa cleanup and user-friendly additions.
- *   <br>   AUG 12, 2004 (Carl Nagle) Added file output option.
- *   <br>   NOV 05, 2004 (Carl Nagle) Log.class disabled by default for performance.
- *   <br>   APR 15, 2005 (Carl Nagle) Removed static initialization System.err.println
- *   <br>   APR 15, 2005 (Carl Nagle) Added some clarifying documentation for non-Java clients
- *                                    writing to this log.  Improved the displayed HELP accordingly.
- *   <br>   JAN 08, 2007 (Carl Nagle) Added more clarifying documentation.
- *   <br>   JUL 30, 2009 (Carl Nagle) Added Output Filename to debug console at startup.
- *   <br>   MAY 12, 2014 (Carl Nagle) Added support for SUSPEND and RESUME of debug logging.
  **/
 public class Log {
 
@@ -193,35 +200,29 @@ public class Log {
   private static int suspendCounter = 0;
 
   /** "0" DEBUG log level.*/
-  public static final int DEBUG   = 0;
+  public static final int DEBUG   = LogConstants.DEBUG;
 
   /** "1" INFO log level.*/
-  public static final int INFO    = 1;
+  public static final int INFO    = LogConstants.INFO;;
 
   /** "2" INDEX log level.*/
-  public static final int INDEX   = 2;
+  public static final int INDEX   = LogConstants.INDEX;;
 
   /** "3" GENERIC log level.*/
-  public static final int GENERIC = 3;
+  public static final int GENERIC = LogConstants.GENERIC;;
 
   /** "4" PASS log level.*/
-  public static final int PASS    = 4;
+  public static final int PASS    = LogConstants.PASS;;
 
   /** "5" WARN log level.*/
-  public static final int WARN    = 5;
+  public static final int WARN    = LogConstants.WARN;;
 
   /** "6" ERROR log level.*/
-  public static final int ERROR   = 6;
+  public static final int ERROR   = LogConstants.ERROR;;
 
   static int level = GENERIC;
 
-  protected static final String[] strlevel = new String[]{ "DEBUG",
-  	                                                       "INFO",
-  	                                                       "INDEX",
-  	                                                       "GENERIC",
-  	                                                       "PASS" ,
-  	                                                       "WARN",
-  	                                                       "ERROR"};
+  protected static final String[] strlevel = LogConstants.getLogLevelNames();
 
   protected static String log_processname = SAFS_TESTLOG_CLIENT;
 
@@ -247,14 +248,7 @@ public class Log {
   /** Parse a string log level into its equivalent int log level value.
    * @return -1 if not a match, otherwise, 0 thru 6--the available log levels.*/
   protected static int getStrLevel(String slevel){
-  	 int match = -1;
-  	 int index = 0;
-  	 if (slevel == null) return match;
-  	 slevel = slevel.trim();
-  	 do{
-  	 	if (slevel.equalsIgnoreCase(strlevel[index])) match = index;
-  	 }while((match < 0) &&(++index < strlevel.length));
-  	 return match;
+	  return LogConstants.getLogLevel(slevel);
   }
 
   public static void setLogLevel (int loglevel){
@@ -272,14 +266,14 @@ public class Log {
 
   /** <br><em>Purpose:</em> logs using 'logmsg' if that fails, then does console.
    ** the format is [LEVEL: message], where LEVEL is one of DEBUG, INFO, INDEX, GENERIC, PASS, WARN, or ERROR.
-   * @param                     local, int
-   * @param                     levelMsg, String
-   * @param                     msg, Object, message to send (.toString() is used)
+   * @param                     logLevel int
+   * @param                     levelMsg String
+   * @param                     msg Object, message to send (.toString() is used)
    **/
-  static void message(int local, String levelMsg, Object msg) {
+  static void message(int logLevel, String levelMsg, Object msg) {
     String fullmsg = "["+levelMsg+" "+ time.format(new Date())+":"+log_processname+": "+(msg==null?(String)msg:msg.toString())+" ]";
-    if (!logmsg(local, fullmsg)) {
-      if (local >= level) {
+    if (!logmsg(logLevel, fullmsg)) {
+      if (logLevel >= level) {
        console(fullmsg);
       }
     }
@@ -288,13 +282,13 @@ public class Log {
 
   /** <br><em>Purpose:</em> logs using 'logmsg' if that fails, then does console.
    ** the format is [LEVEL: message], where LEVEL is one of DEBUG, INFO, INDEX, GENERIC, PASS, WARN, or ERROR.
-   * @param                     local, int
-   * @param                     msg, Object, message to send (.toString() is used)
+   * @param                     logLevel int, the log level
+   * @param                     msg Object, message to send (.toString() is used)
    **/
-  static public void message(int local, Object msg) {
+  static public void message(int logLevel, Object msg) {
   	if (!ENABLED) return;
     String levelMsg="??";
-    switch(local) {
+    switch(logLevel) {
       case DEBUG:
         levelMsg = strlevel[0];
         break;
@@ -317,7 +311,7 @@ public class Log {
         levelMsg = strlevel[6];
         break;
     }
-    message(local, levelMsg, msg);
+    message(logLevel, levelMsg, msg);
   }
 
   static public boolean suspend(){
@@ -453,13 +447,12 @@ public class Log {
   	       "\"HELP\"      this HELP message\n";
   }
 
-  private static BufferedWriter writer;
-  private static String filepath;
+  private static BufferedWriter writer = null;
+  private static String filepath = null;
   private static String slevel = null;
   private static void initDebugLog(String[] args){
     ENABLED= true;
     level = DEBUG;
-    String filepath = null;
     File outFile = null;
     if ((!(args==null))&&(args.length > 0)){
     	boolean filehappy = false;
@@ -470,16 +463,17 @@ public class Log {
 
 	    	// see if it is "-file:"
 	    	if (slevel.startsWith(SAFS_TESTLOG_FILE)){
-	    	    if ((slevel.length() > SAFS_TESTLOG_FILE.length()) &&
+	    		filepath = slevel;
+	    	    if ((filepath.length() > SAFS_TESTLOG_FILE.length()) &&
 	    	       (!filehappy)){
-	    		    slevel = slevel.substring(SAFS_TESTLOG_FILE.length());
+	    	    	filepath = filepath.substring(SAFS_TESTLOG_FILE.length());
 	    		    //try to open the file...delete if necessary.
 	    		    try{
-	    		    	outFile = new CaseInsensitiveFile(slevel).toFile();
+	    		    	outFile = new CaseInsensitiveFile(filepath).toFile();
 	    		    	writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile),Charset.forName("UTF-8")));
 	    		    }
 	    		    catch(IOException iox){
-	    		    	System.err.println ("Error opening output file "+ slevel);
+	    		    	System.err.println ("Error opening output file "+ filepath);
 	    		    	System.err.println (iox.getMessage());
 	    		    	writer = null;
 	    		    	outFile = null;
@@ -542,19 +536,19 @@ public class Log {
   }
   private static void doMessage(String testrecord){
       int i = testrecord.indexOf("|");
-      int local = DEBUG;
+      int logLevel = DEBUG;
       if (i>=0) {
       	slevel = testrecord.substring(0, i);
         try{
           Integer num = new Integer(slevel);
-          local = num.intValue();
+          logLevel = num.intValue();
         } catch (Exception ee) {
           int ilevel = getStrLevel(slevel);
-          if (ilevel != -1) local = ilevel;
+          if (ilevel != -1) logLevel = ilevel;
         }
         testrecord = testrecord.substring(i+1, testrecord.length());
       }
-      if ((local >= level) && !isSuspended) {
+      if ((logLevel >= level) && !isSuspended) {
         console(testrecord);
         if (writer != null) {
         	try{
@@ -717,10 +711,10 @@ public class Log {
   	}
   }
 
-  private static boolean logmsg(int local, String msg) {
+  private static boolean logmsg(int logLevel, String msg) {
 
     if (helper == null && !isEmbedded) {
-      if (local >= level) {
+      if (logLevel >= level) {
         //console(msg);
       }
       return false;
@@ -731,16 +725,16 @@ public class Log {
       else buf.append(msg.substring(i, i+1));
     }
     msg = buf.toString();
-    if (local >= GENERIC || doLogMsg) {
+    if (logLevel >= GENERIC || doLogMsg) {
       try {
         helper.setVariable(SAFS_TESTLOG_VARIABLE, msg);
       } catch (Throwable se) {} // ignore
     }
     if(isEmbedded){
-    	doMessage(Integer.toString(local) + "|" + msg);
+    	doMessage(Integer.toString(logLevel) + "|" + msg);
     	return true;
     }else{
-    	return helper.sendQueueMessage(SAFS_TESTLOG_PROCESS, Integer.toString(local) + "|" + msg);
+    	return helper.sendQueueMessage(SAFS_TESTLOG_PROCESS, Integer.toString(logLevel) + "|" + msg);
     }
   }
 }

@@ -422,5 +422,104 @@ public class Constants {
 		}
 	}
 
+	public static class LogConstants{
+
+		/** "-1" invalid log level.*/
+		public static final int INVALID_LEVEL   = -1;
+
+		/** "0" DEBUG log level.*/
+		public static final int DEBUG   = 0;
+
+		/** "1" INFO log level.*/
+		public static final int INFO    = 1;
+
+		/** "2" INDEX log level.*/
+		public static final int INDEX   = 2;
+
+		/** "3" GENERIC log level.*/
+		public static final int GENERIC = 3;
+
+		/** "4" PASS log level.*/
+		public static final int PASS    = 4;
+
+		/** "5" WARN log level.*/
+		public static final int WARN    = 5;
+
+		/** "6" ERROR log level.*/
+		public static final int ERROR   = 6;
+
+		/**
+		 * An array holding the log level names as
+		 * "DEBUG", "INFO", "INDEX", "GENERIC", "PASS", "WARN", "ERROR"
+		 */
+		private static final String[] logLevelNames = new String[]{
+			"DEBUG",
+			"INFO",
+			"INDEX",
+			"GENERIC",
+			"PASS" ,
+			"WARN",
+			"ERROR"
+		};
+
+		/**
+		 * @param level int, the log level, it can be
+		 * <ul>
+		 * <li>{@link #DEBUG}
+		 * <li>{@link #INFO}
+		 * <li>{@link #INDEX}
+		 * <li>{@link #GENERIC}
+		 * <li>{@link #PASS}
+		 * <li>{@link #WARN}
+		 * <li>{@link #ERROR}
+		 * </ul>
+		 * @return String, the string name of log level; or empty string if the log level is not valid.
+		 */
+		public static final String getLogLevelName(int level){
+			try{
+				return logLevelNames[level];
+			}catch(IndexOutOfBoundsException e ){
+				return "";
+			}
+		}
+
+		/**
+		 *
+		 * @return String[], An array holding the log level names as
+		 * "DEBUG", "INFO", "INDEX", "GENERIC", "PASS", "WARN", "ERROR"
+		 */
+		public static final String[] getLogLevelNames(){
+			return logLevelNames;
+		}
+
+		/**
+		 *
+		 * @param logLevelName String, the log level name, can be one of {@link #logLevelNames}
+		 * @return int, the log level; or {@link #INVALID_LEVEL} if the parameter logLevelName is not valid.
+		 */
+		public static final int getLogLevel(String logLevelName){
+			int level = INVALID_LEVEL;
+			if(logLevelName!=null && !logLevelName.isEmpty()){
+				for(int i=0;i<logLevelNames.length;i++){
+					if(logLevelNames[i].equalsIgnoreCase(logLevelName.trim())){
+						level = i;
+						break;
+					}
+				}
+			}
+			return level;
+		}
+
+		public static void main(String[] args){
+			String logLevelName = null;
+			int level = INVALID_LEVEL;
+			for(int i=0;i<logLevelNames.length;i++){
+				logLevelName = getLogLevelName(i);
+				System.out.println(i+" : "+logLevelName);
+				level = getLogLevel(logLevelName);
+				assert i==level: "For log level '"+logLevelName+"' original level '"+i+"'!='"+level+"', please check method getLogLevelName() and getLogLevel()!";
+			}
+		}
+	}
 
 }
