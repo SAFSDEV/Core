@@ -633,7 +633,7 @@ public class LibraryUpdate {
 			if (recurse){
 				Iterator<File> it = sourcesubs.iterator();
 				while(it.hasNext()){
-					File newsourcedir = (File)it.next();
+					File newsourcedir = it.next();
 					File newtargetdir = new File(targetdir, newsourcedir.getName());
 					if(!newtargetdir.isDirectory()) newtargetdir.mkdir();
 					File newbackupdir = null;
@@ -654,10 +654,10 @@ public class LibraryUpdate {
 			Set<File> keys = backups.keySet();
 			File target = null;
 			File backup = null;
-			for(Object key: keys){
+			for(File key: keys){
 				try{
-					target = (File) key;
-					backup = (File) backups.get(key);
+					target = key;
+					backup = backups.get(key);
 					copyFile(backup, target);
 				}catch(IOException y){
 					errors.println("Unable to restore backup file "+ backup.getAbsolutePath()+" to "+ target.getAbsolutePath());
@@ -753,15 +753,16 @@ public class LibraryUpdate {
 	public static boolean download(String url, File outfile){
 		initSharedUpdater();
 		synchronized(_sharedUpdater){
+			String debugmsg = "SharedUpdater: ";
 			boolean success = false;
 			try {
-				_sharedUpdater.progressor.setProgressMessage("SharedUpdater: ["+StringUtils.current(true)+"] started downloading URL '"+url+"' ... ");
+				_sharedUpdater.progressor.setProgressMessage(debugmsg+"["+StringUtils.current(true)+"] started downloading URL '"+url+"' ... ");
 				_sharedUpdater.downloadURL(url, outfile);
-				_sharedUpdater.progressor.setProgressMessage("SharedUpdater: Successfully Donwloaded to file '"+outfile.getAbsolutePath()+"'");
+				_sharedUpdater.progressor.setProgressMessage(debugmsg+"Successfully Donwloaded to file '"+outfile.getAbsolutePath()+"'");
 				success = true;
-				_sharedUpdater.progressor.setProgressMessage("SharedUpdater: ["+StringUtils.current(true)+"] done.\n");
+				_sharedUpdater.progressor.setProgressMessage(debugmsg+"["+StringUtils.current(true)+"] done.\n");
 			} catch (IOException e) {
-				_sharedUpdater.progressor.setProgressMessage("SharedUpdater: ["+StringUtils.current(true)+"] Failed to donwload URL '"+url+"', due to "+e.toString()+"\n", LogConstants.ERROR);
+				_sharedUpdater.progressor.setProgressMessage(debugmsg+"["+StringUtils.current(true)+"] Failed to donwload URL '"+url+"', due to "+e.toString()+"\n", LogConstants.ERROR);
 			}
 			return success;
 		}
@@ -777,7 +778,6 @@ public class LibraryUpdate {
 		int i = 0;
 		for(final String url:urls){
 			runners[i++] = new Thread(new Runnable(){
-				@Override
 				public void run() {
 					File downloadedFile = null;
 					String file = null;
@@ -789,12 +789,11 @@ public class LibraryUpdate {
 						prefix = file.substring(0, dotIndex);
 						suffix = file.substring(dotIndex);
 					}
-
 					try {
 						downloadedFile = File.createTempFile(prefix, suffix);
 						download(url, downloadedFile);
 					} catch (IOException e) {
-						System.out.println("Failed to download URL '"+url+"'");
+						System.out.println("Failed to download URL '"+url+"', due to "+e.toString());
 					}
 				}
 			});

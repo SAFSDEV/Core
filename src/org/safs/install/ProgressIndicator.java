@@ -145,7 +145,7 @@ public class ProgressIndicator extends JPanel{
 		try {
 			document.insertString(len, message+EOL, generateLookStyle(taskOutput, logLevel));
 		} catch (BadLocationException e) {
-			e.printStackTrace();
+			System.err.println("Failed to add message to TextArea, due to "+e.toString());
 		}
 		//3. output message to the console
 		if(LogConstants.ERROR==logLevel){
