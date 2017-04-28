@@ -36,7 +36,7 @@ import org.json.JSONArray;
 import org.safs.natives.NativeWrapper;
 import org.safs.persist.Persistable;
 
-public class Utils {
+public abstract class Utils{
 	/** '.java' the suffix of java source code. */
 	public static final String FILE_SUFFIX_JAVA 				= ".java";
 	/** '.groovy' the suffix of groovy source code. */
@@ -83,7 +83,6 @@ public class Utils {
 	 * @throws SAFSException if the compilation failed for any reason--including bad parameter values.
 	 */
 	public static void compile(String classnames) throws SAFSException{
-		String debugmsg = StringUtils.debugmsg(false);
 		if(!StringUtils.isValid(classnames)){
 			throw new SAFSException("The input parameter 'classnames' must NOT be null or empty!");
 		}
@@ -106,16 +105,17 @@ public class Utils {
 
 	/**
 	 * Compile java and/or groovy source code.<br>
-	 * 
+	 *
 	 * @param classnames String, the class names to compile separated by space, such as my.package.ClassA my.pack2.ClassB<br>
 	 *                           this parameter could be mixed with java and groovy class.<br>
 	 *                           <b>Note:</b> For groovy, we have to specify all dependency classes in order.<br>
 	 * @param sourceDIR String, the root directory off which the sourcecode files reside.<br>
 	 * @param outDIR String, the root directory off which the compiled classes will be stored. The directory will be created, if necessary.<br>
 	 * @param useClasspath String, the semi-colon separated CLASSPATH to be used for the compile.<br>
-	 *                          
+	 *
 	 * @throws SAFSException if the compilation failed for any reason--including bad parameter values.
 	 */
+	@SuppressWarnings("rawtypes")
 	public static void compile(String classnames, String sourceDIR, String outDIR, String useClasspath) throws SAFSException{
 		String debugmsg = StringUtils.debugmsg(false);
 		if(!StringUtils.isValid(classnames)){
@@ -219,7 +219,7 @@ public class Utils {
 		}
 	}
 
-	
+
 	/**
 	 * This special SecurityManager is used to avoid JVM to halt by System.exit().<br>
 	 */
@@ -237,13 +237,15 @@ public class Utils {
         }
     }
     /** a Runtime exception to throw in NoSystemExitSecurityManager. */
-    private static class NoSystemExitException extends SecurityException{
+    @SuppressWarnings("serial")
+	private static class NoSystemExitException extends SecurityException{
         private int status=0;
         public NoSystemExitException(int status){
             super("System.exit() has been called with code '"+status+"', but the JVM will not terminate!");
             this.status = status;
         }
-        public int getStatus(){
+        @SuppressWarnings("unused")
+		public int getStatus(){
         	return status;
         }
     }
