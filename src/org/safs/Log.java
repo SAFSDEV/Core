@@ -203,22 +203,22 @@ public class Log {
   public static final int DEBUG   = LogConstants.DEBUG;
 
   /** "1" INFO log level.*/
-  public static final int INFO    = LogConstants.INFO;;
+  public static final int INFO    = LogConstants.INFO;
 
   /** "2" INDEX log level.*/
-  public static final int INDEX   = LogConstants.INDEX;;
+  public static final int INDEX   = LogConstants.INDEX;
 
   /** "3" GENERIC log level.*/
-  public static final int GENERIC = LogConstants.GENERIC;;
+  public static final int GENERIC = LogConstants.GENERIC;
 
   /** "4" PASS log level.*/
-  public static final int PASS    = LogConstants.PASS;;
+  public static final int PASS    = LogConstants.PASS;
 
   /** "5" WARN log level.*/
-  public static final int WARN    = LogConstants.WARN;;
+  public static final int WARN    = LogConstants.WARN;
 
   /** "6" ERROR log level.*/
-  public static final int ERROR   = LogConstants.ERROR;;
+  public static final int ERROR   = LogConstants.ERROR;
 
   static int level = GENERIC;
 
