@@ -50,7 +50,7 @@ public class ProgressIndicator extends JPanel{
 	private Dimension screensize = getToolkit().getScreenSize();
 	private int screenWidth = screensize.width;
 	private int screenHeight = screensize.height;
-	private String title = "Robotium RC Installation.";
+	private String title = "ProgressIndicator Title: should be repalced with a specific one.";
 
 	public ProgressIndicator() {
 		super(new BorderLayout());
