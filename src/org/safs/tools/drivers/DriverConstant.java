@@ -557,7 +557,7 @@ public abstract class DriverConstant extends JavaConstant{
 	 *
 	 * @see org.safs.tools.mail.Mailer
 	 */
-	public static abstract class MailConstant{
+	public abstract static class MailConstant{
 
 		/** "OUT_MAILSERVER" define the mail server for sending mails. */
 		public static final String OUT_MAILSERVER 			="OUT_MAILSERVER";
@@ -588,7 +588,7 @@ public abstract class DriverConstant extends JavaConstant{
 	 *
 	 * Define some constant strings used under section {@link DriverConstant#SECTION_SAFS_SELENIUM} for SELENIUM.
 	 */
-	public static abstract class SeleniumConfigConstant extends SeleniumConstants{
+	public abstract static class SeleniumConfigConstant extends SeleniumConstants{
 
 		/** "SELENIUMHOST" define the host name where the SELENIUM "standalone server"/"grid hub" will run
 		 * @see #SELENIUMPORT
