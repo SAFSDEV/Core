@@ -50,7 +50,7 @@ public abstract class Constants {
 	/** '<b>-1</b>' the timeout for the mouse to hover for ever */
 	public static final int TIMEOUT_HOVERMOUSE_STAY_FOREVER				= -1;
 
-	public static abstract class BrowserConstants{
+	public abstract static class BrowserConstants{
 		/**'<b>explorer</b>'*/
 		public static final String BROWSER_NAME_IE = "explorer";
 		/**'<b>chrome</b>'*/
@@ -181,7 +181,7 @@ public abstract class Constants {
 		}
 	}
 
-	public static abstract class EclipseConstants{
+	public abstract static class EclipseConstants{
 
 		/** "version" the property in file ".eclipseproduct" indicating the Eclipse's version. */
 		public static final String PROPERTY_VERSION = "version";
@@ -201,7 +201,7 @@ public abstract class Constants {
 
 	}
 
-	public static abstract class SeleniumConstants{
+	public abstract static class SeleniumConstants{
 		/**'<b>selenium.host</b>'*/
 		public static final String SYSTEM_PROPERTY_SELENIUM_HOST = "selenium.host";
 		/**'<b>selenium.port</b>'*/
@@ -277,12 +277,12 @@ public abstract class Constants {
 		}
 	}
 
-	public static abstract class JSONConstants{
+	public abstract static class JSONConstants{
 		/** "<b>$classname</b>" special reserved key to track the Object class name.*/
 		public static final String PROPERTY_CLASSNAME = "$classname";
 	}
 
-	public static abstract class XMLConstants{
+	public abstract static class XMLConstants{
 		/**  "<b>&lt;![CDATA[</b>" */
 		public static final String CDATA_START = "<![CDATA[";
 		/** "<b>]]></b>" */
@@ -307,7 +307,7 @@ public abstract class Constants {
 		public static final String[] SYMBOL_TO_ESCAPE = {SYMBOL_AND, SYMBOL_APOS, SYMBOL_QUOTE, SYMBOL_LESS, SYMBOL_BIGGER};
 	}
 
-	public static abstract class RestConstants{
+	public abstract static class RestConstants{
 		/**
 		 * "<b>SAFS_REST</b>" is the section where the REST related information will be defined.
 		 */
@@ -334,7 +334,7 @@ public abstract class Constants {
 		public static final String PROPERTY_AUTH ="safs.rest.auth";
 	}
 
-	public static abstract class AutoItConstants{
+	public abstract static class AutoItConstants{
 	    /** "<b>:</b>" */
 	    public static final String AUTOIT_RSKEY_VALUE_DELIMITER = StringUtils.COLON;
 		/** "<b>=</b>" */
@@ -422,7 +422,7 @@ public abstract class Constants {
 		}
 	}
 
-	public static abstract class LogConstants{
+	public abstract static class LogConstants{
 
 		/** "-1" invalid log level.*/
 		public static final int INVALID_LEVEL   = -1;
