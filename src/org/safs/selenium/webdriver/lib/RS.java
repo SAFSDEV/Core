@@ -24,12 +24,12 @@ import org.safs.StringUtils;
  * It also provides "Recognition String" such as "xpath=xxx", "css=xxx", "id=xxx" etc. for SearchObject to find WebElement.<br>
  *
  */
-public class RS{
+public abstract class RS{
 
 	/**
 	 * This class contains methods returning an xpath.
 	 */
-	public static class XPATH{
+	public abstract static class XPATH{
 		/** <b>//*[</b>, it is used as beginning to construct an xpath for searching elements under ENTIRE document. */
 		public static final String MATCHING_ALL_START  			= "//*[";
 		/** <b>.//*[</b>, it is used as beginning to construct an xpath for searching elements under current WebElement. */
@@ -218,7 +218,7 @@ public class RS{
 	/**
 	 * This class contains methods returning an css-selector.
 	 */
-	public static class CSS{
+	public abstract static class CSS{
 
 		public static String from(String tagName, String className){
 			StringBuffer cssselector = new StringBuffer();
