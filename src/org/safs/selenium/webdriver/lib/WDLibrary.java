@@ -75,7 +75,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -2372,48 +2371,6 @@ public class WDLibrary extends SearchObject {
 			try{ refreshJSExecutor(); }catch(SeleniumPlusException ignored){ }
 		}
 		return webdriver;
-	}
-
-	/**
-	 * Switch to a certain window according to its title.<br/>
-	 * @param browserID String, the browser ID when calling {@link #startBrowser(String, String, String, int, boolean)}
-	 * @param title String, the title of the window to switch to. It can be a normal string, a regexp string or a wildcard string.
-	 *                      If it is regexp string, the optional parameters will be ignored.
-	 * @param optionals boolean[]
-	 * <ul>
-	 * <li>optionals[0] <b>partialMatch</b> boolean, if the title is provided as sub-string. The default value is false. It is valid ONLY when <b>title</b> is not regexp string;
-	 * <li>optionals[1] <b>ignoreCase</b> boolean, if the title are case in-sensitive to compare. The default value is true. It is valid ONLY when <b>title</b> is not regexp string;
-	 * </ul>
-	 * @return boolean true if successfully switched
-	 * @throws SeleniumPlusException
-	 */
-	public static boolean switchWindow(String browserID, String title, boolean... optionals) throws SeleniumPlusException{
-		String debugmsg = StringUtils.debugmsg(false);
-
-		WebDriver driver = getBrowserWithID(browserID);
-
-		boolean partialMatch = false;
-		boolean ignoreCase = true;
-
-		if(optionals!=null){
-			if(optionals.length>0) partialMatch = optionals[0];
-			if(optionals.length>1) ignoreCase = optionals[1];
-		}
-
-		Set<String> winHandles = driver.getWindowHandles();
-		String currentTitle = null;
-		boolean matched = false;
-		for(String winHandle:winHandles){
-			driver.switchTo().window(winHandle);
-			currentTitle = driver.getTitle();
-			matched = StringUtils.matchText(currentTitle, title, partialMatch, ignoreCase);
-			if(matched) break;
-		}
-
-		if(!matched)
-			IndependantLog.warn(debugmsg+" failed to switch '"+title+"' for browser indendified by '"+browserID+"'");
-
-		return matched;
 	}
 
 	/**
