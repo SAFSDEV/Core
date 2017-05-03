@@ -1,14 +1,14 @@
-/** 
+/**
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
 /**
- * 
+ *
  * History:
- * 
+ *
  *  Jun 25, 2014    (sbjlwa) Initial release.
  *  OCT 29, 2014    (sbjlwa) Move some XPATH related codes from SearchObject to here.
- *  FEB 03, 2016    (sbjlwa) Modify conditionXXX(): to avoid the InvalidSelectorException 
+ *  FEB 03, 2016    (sbjlwa) Modify conditionXXX(): to avoid the InvalidSelectorException
  *                           caused by apostrophe existing in the text/value.
  */
 package org.safs.selenium.webdriver.lib;
@@ -22,12 +22,12 @@ import org.safs.StringUtils;
 /**
  * A convenient class to create xpath, cssSelector to create a By searching criterion for Selenium to find WebElement.<br>
  * It also provides "Recognition String" such as "xpath=xxx", "css=xxx", "id=xxx" etc. for SearchObject to find WebElement.<br>
- * 
+ *
  */
 public class RS{
-	
+
 	/**
-	 * This class contains methods returning an xpath. 
+	 * This class contains methods returning an xpath.
 	 */
 	public static class XPATH{
 		/** <b>//*[</b>, it is used as beginning to construct an xpath for searching elements under ENTIRE document. */
@@ -57,7 +57,7 @@ public class RS{
 		public static String RELATIVE_MATCHING_TAG_START(String tag){
 			return ".//"+ tag.toUpperCase()+"[";
 		}
-		
+
 		/**
 		 * Create an xpath by text for searching webelement within direct and indirect children.
 		 * @param text	String, the text of a webelement. can be regex if XPATH2.0
@@ -116,7 +116,7 @@ public class RS{
 				return " @"+attribute+"="+normalizedText;
 			}
 		}
-		
+
 		/**
 		 * @param attribute String, the attribute name ending with "contains"
 		 * @param value String, the expected substring value of the attribute
@@ -127,7 +127,7 @@ public class RS{
 			if(attribute==null || value==null){
 				IndependantLog.warn(StringUtils.debugmsg(false)+"property or value is null, not valid!");
 			}
-			
+
 			String normalizedText = quote(value);
 			int i = attribute.toUpperCase().indexOf(SearchObject.SEARCH_CRITERIA_CONTAINS_SUFFIX);
 			if(i<1){
@@ -136,7 +136,7 @@ public class RS{
 			}
 			return " contains(@"+attribute.substring(0, i)+", "+normalizedText+")";
 		}
-		
+
 		/**
 		 * @param text String, the text value
 		 * @param partialMatch boolean, if the text's value will be matched partially (considered as a substring)
@@ -146,7 +146,7 @@ public class RS{
 			if(text==null){
 				IndependantLog.warn(StringUtils.debugmsg(false)+"text value is null, not valid!");
 			}
-			
+
 			String normalizedText = quote(text);
 			if(partialMatch){
 				return " contains(text(), "+normalizedText+")";
@@ -154,43 +154,43 @@ public class RS{
 				return " text()="+normalizedText;
 			}
 		}
-		
+
 		/**
 		 * Add single quote around the text (such as 'text'), and it will be used in XPATH for searching a web element in DOM.<br>
 		 * If the text (such as Tom's) contains single quote, we cannot simply quote the text with single quote, which will cause the error;<br>
 		 * instead we will use the function concat() to connect each part of the text, such as concat('Tom', "'", 's').<br>
-		 * 
+		 *
 		 * @param text String, the text of the web element.
 		 * @return String, the quoted text; or a string combined by function concat().
 		 */
 		protected static String quote(String text){
 			String normalized = "'" + text +"'";
-			
+
 			//if text contains single quote, we should not simply quote it with single quote.
 			//we will use the function concat()
 			if(text!=null){
 				int singleQuoteIndex = text.indexOf(StringUtils.QUOTE);
 				if(singleQuoteIndex>-1){
 					normalized="concat(";
-					
+
 					List<String> tokens = StringUtils.getTokenList(text, StringUtils.QUOTE);
-					String singleQuoteParam = ", "+StringUtils.DOUBLE_QUOTE+StringUtils.QUOTE+StringUtils.DOUBLE_QUOTE + ", ";// , "'", 
-					
+					String singleQuoteParam = ", "+StringUtils.DOUBLE_QUOTE+StringUtils.QUOTE+StringUtils.DOUBLE_QUOTE + ", ";// , "'",
+
 					for(String token:tokens){
 						normalized += StringUtils.QUOTE+token+StringUtils.QUOTE;// 'some string'
-						normalized += singleQuoteParam;// , "'", 
+						normalized += singleQuoteParam;// , "'",
 					}
-					
+
 					int index = normalized.lastIndexOf(singleQuoteParam);
 					normalized = normalized.substring(0, index);
-					
+
 					normalized += ")";
-				}				
+				}
 			}
-			
+
 			return normalized;
 		}
-		
+
 		public static boolean isRootHtml(SearchContext sc){
 			if(sc==null) return false;
 			String searchContext = sc.toString();
@@ -201,25 +201,25 @@ public class RS{
 			}
 			return false;
 		}
-		
-		
+
+
 	}
-	
+
 	/** Return a Recognition String of format "xpath=xxx" according to the text.*/
 	public static String text(String text, boolean partial, boolean relative){
 		return SearchObject.SEARCH_CRITERIA_XPATH+SearchObject.assignSeparator+XPATH.fromText(text, partial, relative);
 	}
-	
+
 	/** Return a Recognition String of format "xpath=xxx" according to the pair (attribute,value).*/
 	public static String attribute(String attribute, String value, boolean partial, boolean relative){
 		return SearchObject.SEARCH_CRITERIA_XPATH+SearchObject.assignSeparator+XPATH.fromAttribute(attribute, value, partial, relative);
 	}
 
 	/**
-	 * This class contains methods returning an css-selector. 
+	 * This class contains methods returning an css-selector.
 	 */
 	public static class CSS{
-		
+
 		public static String from(String tagName, String className){
 			StringBuffer cssselector = new StringBuffer();
 			cssselector.append(tagName);
@@ -227,7 +227,7 @@ public class RS{
 			return cssselector.toString();
 		}
 	}
-	
+
 	/** Return a Recognition String of format "css=xxx" according to the tagName and cssClassName.*/
 	public static String css(String tagName, String cssClassName){
 		return SearchObject.SEARCH_CRITERIA_CSS+SearchObject.assignSeparator+CSS.from(tagName, cssClassName);
@@ -237,7 +237,7 @@ public class RS{
 	public static String id(String id){
 		return SearchObject.SEARCH_CRITERIA_ID+SearchObject.assignSeparator+id;
 	}
-	
+
 	/** Return a Recognition String of format "xpath=xxx".*/
 	public static String xpath(String xpath){
 		return SearchObject.SEARCH_CRITERIA_XPATH+SearchObject.assignSeparator+xpath;
@@ -247,13 +247,13 @@ public class RS{
 		String text = "hello";
 		String expected = "'hello'";
 		String actual = XPATH.quote(text);
-		
+
 		if(!expected.equals(actual)){
 			System.err.println("We expect: "+expected+" | But actual: "+actual);
 		}else{
 			System.out.println(actual);
 		}
-		
+
 		text = "hello\"work";
 		expected = "'hello\"work'";
 		actual = XPATH.quote(text);
@@ -262,7 +262,7 @@ public class RS{
 		}else{
 			System.out.println(actual);
 		}
-		
+
 		text = " hello ' world ";
 		expected = "concat(' hello ', \"'\", ' world ')";
 		actual = XPATH.quote(text);
@@ -271,7 +271,7 @@ public class RS{
 		}else{
 			System.out.println(actual);
 		}
-		
+
 		text = "hello'e ll' word";
 		expected = "concat('hello', \"'\", 'e ll', \"'\", ' word')";
 		actual = XPATH.quote(text);
@@ -281,7 +281,7 @@ public class RS{
 			System.out.println(actual);
 		}
 	}
-	
+
 	public static void main(String[] args){
 		testNormalizeSingleQuote();
 	}
