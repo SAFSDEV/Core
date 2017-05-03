@@ -41,15 +41,24 @@ package org.safs.selenium.webdriver.lib;
  *                                  Modified js_getErrorCode(): enlarge the timeout to 5000 milliseconds.
  *  <br>  FEB 27, 2017    (SBJLWA)  Added setJsTimeout(): It is used to set timeout for javascript execution.
  *                                  Modified js_executeWithTimeout(): used local variable instead of global static variable.
+ *  <br>  MAY 03, 2017    (SBJLWA)  Added methods switchWindow().
+ *                                  Added the ability to delay javascript execution. NOT exposed yet.
+ *                                  Modified getAllWindowTitles(): return titles for all opened window for all WebDrivers.
  */
 import java.lang.reflect.Constructor;
 import java.net.URL;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.Stack;
 import java.util.Vector;
 import java.util.concurrent.TimeUnit;
@@ -59,9 +68,12 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.InvalidSelectorException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.NoSuchWindowException;
+import org.openqa.selenium.OutputType;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.TargetLocator;
 import org.openqa.selenium.WebDriver.Window;
@@ -338,6 +350,7 @@ public class SearchObject {
 	protected static BrowserWindow lastBrowserWindow = null;
 	public static BrowserWindow getLastBrowserWindow(){ return lastBrowserWindow;}
 
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static class BrowserWindow{
 		/**'height'*/
 		public static final String PROPERTY_HEIGHT = "height";
@@ -370,6 +383,7 @@ public class SearchObject {
 
 		/* the wrapped object, represents a browser window object.
 		 * This object SHOULD be a Map returned by a javascript function*/
+		@SuppressWarnings("unused")
 		private Object object = null;
 		/* convenient reference to wrapped object*/
 		private Map map = null;
@@ -692,6 +706,7 @@ public class SearchObject {
 		catch(Exception x){
 			IndependantLog.error(debugmsg+"RemoteDriver error during setLastSessionId().");
 		}
+		try{ refreshJSExecutor(); }catch(SeleniumPlusException ignored){}
 		return previous;
 	}
 
@@ -731,7 +746,7 @@ public class SearchObject {
 		String debugmsg = StringUtils.debugmsg(SearchObject.class, "getWebDriver");
 		WebDriver temp = null;
 
-		if(id != null) temp = (WebDriver)webDrivers.get(id);
+		if(id != null) temp = webDrivers.get(id);
 		else temp = lastUsedWD;
 
 		if(temp==null) IndependantLog.warn(debugmsg+"cannot get WebDriver for id '"+id+"'");
@@ -752,7 +767,7 @@ public class SearchObject {
 		String lctitle = null;
 		if(title != null && title.length()> 0) {
 			lctitle = title.toLowerCase().trim();
-			Enumeration e = webDrivers.elements();
+			Enumeration<WebDriver> e = webDrivers.elements();
 			while(e.hasMoreElements()){
 				temp = (WebDriver)e.nextElement();
 				try{
@@ -781,7 +796,7 @@ public class SearchObject {
 		String id = null;
 		String match = null;
 		if(wd == null) return null;
-		Enumeration e = webDrivers.keys();
+		Enumeration<String> e = webDrivers.keys();
 		while(e.hasMoreElements()){
 			id = (String)e.nextElement();
 			temp = webDrivers.get(id);
@@ -800,19 +815,41 @@ public class SearchObject {
 	 */
 	public synchronized static String[] getAllWindowTitles(){
 		String debugmsg = StringUtils.debugmsg(SearchObject.class, "getAllWindowTitles");
-		WebDriver temp = null;
 		if(webDrivers.isEmpty()) {
 			getWebDriver();
 			if(webDrivers.isEmpty()) return new String[0];
 		}
-		ArrayList<String> titles = new ArrayList();
-		Enumeration list = webDrivers.elements();
-		String browser = null;
-		for(int i=0;i<webDrivers.size();i++){
-			temp = (WebDriver)list.nextElement();
-			try{ titles.add(temp.getTitle());}	catch(Exception ignore){}
+
+		Entry<String/*Handle*/, String/*Title*/> originalWindow = null;
+		if(lastUsedWD!=null){
+			originalWindow = new SimpleEntry<>(lastUsedWD.getWindowHandle(), lastUsedWD.getTitle());
+		}
+
+		ArrayList<String> titles = new ArrayList<>();
+		Collection<WebDriver> driverList = webDrivers.values();
+		Set<String> winHandles = null;
+		for(WebDriver webdriver: driverList){
+			winHandles = webdriver.getWindowHandles();
+			for(String handle: winHandles){
+				try{
+					webdriver.switchTo().window(handle);
+					titles.add(webdriver.getTitle());
+				}catch(Exception ignore){
+					IndependantLog.warn(debugmsg+" failed to add title for window indentified by handle '"+handle+" for webdriver "+webdriver+", due to "+ignore);
+				}
+			}
 		}
 		IndependantLog.info(debugmsg+"retrieved "+ titles.size() +" window titles.");
+
+		if(originalWindow!=null){
+			try{
+				lastUsedWD.switchTo().window(originalWindow.getKey());
+				IndependantLog.debug(debugmsg+" switched back to original window '"+originalWindow.getValue()+"' by handle '"+originalWindow.getKey()+"'.");
+			}catch(Exception e){
+				IndependantLog.debug(debugmsg+" failed to switch back to original window '"+originalWindow.getValue()+"' by handle '"+originalWindow.getKey()+"', due to "+e);
+			}
+		}
+
 		return titles.toArray(new String[0]);
 	}
 
@@ -2421,6 +2458,7 @@ public class SearchObject {
 		String[] tokens = StringUtils.getTokenArray(RS, qulifierSeparator, escapeChar);
 		String xpathStr = XPATH.RELATIVE_MATCHING_ALL_START+XPATH.TRUE_CONDITION;
 		boolean isDojo = false;
+		@SuppressWarnings("unused")
 		boolean isSAP = false;
 
 		HashMap<String, String> qualifiers = new HashMap<String, String>();
@@ -2528,12 +2566,12 @@ public class SearchObject {
 		//search the target element within a frame (if exist) level by level
 
 		List<WebElement> list = new ArrayList<WebElement>();
-		WebElement obj = null;
 		String debugmsg = StringUtils.debugmsg(false);
 		IndependantLog.debug(debugmsg +"processing recognition fragment: "+ RS);
 		String[] tokens = StringUtils.getTokenArray(RS, qulifierSeparator, escapeChar);
 		String xpathStr = XPATH.RELATIVE_MATCHING_ALL_START+XPATH.TRUE_CONDITION;
 		boolean isDojo = false;
+		@SuppressWarnings("unused")
 		boolean isSAP = false;
 
 		HashMap<String, String> qualifiers = new HashMap<String, String>();
@@ -3305,6 +3343,7 @@ public class SearchObject {
 		private boolean keepRunning = true;
 		private String listenerID = null;
 
+		@SuppressWarnings("unused")
 		public PollingRunnable(){super();}
 
 		public PollingRunnable(String jsVariableName){
@@ -3501,6 +3540,34 @@ public class SearchObject {
 		return executeScript(false, script, args);
 	}
 
+	/** 0 */
+	public static final int DEFAULT_JS_EXECUTION_DELAY = 0;
+	private static int jsExecutionDelay = DEFAULT_JS_EXECUTION_DELAY;
+
+	/**
+	 * <b>NOTE:</b>Sometimes we needs to wait for the WEB page FULLY loaded so that the javascript code can
+	 *             return correctly.<br/>
+	 *             Please set this delay back to {@link #DEFAULT_JS_EXECUTION_DELAY} after a special javascript call,
+	 *             otherwise the performance of the SeleniumPlus framework will be slowed down.
+	 *
+	 * @param milliseconds int, the milliseconds to delay the javascript execution.
+	 * @see #executeScript(boolean, String, Object...)
+	 */
+	protected static void setJsExecutionDelay(int milliseconds){
+		if(milliseconds>0){
+			jsExecutionDelay = milliseconds;
+		}else{
+			throw new IllegalArgumentException("The delay time '"+milliseconds+"' is negative.");
+		}
+	}
+	/**
+	 * @return int, the millisecond to delay the javascript's execution.
+	 * @see #executeScript(boolean, String, Object...)
+	 */
+	public static int getJsExecutionDelay(){
+		return jsExecutionDelay;
+	}
+
 	/**
 	 * Execute a section of java-script code.<br>
 	 * It has the ability to detect a javascript error and throw an JSException.<br>
@@ -3517,9 +3584,14 @@ public class SearchObject {
 	 */
 	public static Object executeScript(boolean synch, String script, Object... args) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(false);
-		getJS();
+
+		if(jsExecutionDelay>0){
+			IndependantLog.debug(debugmsg+" Delay JS execution '"+jsExecutionDelay+"' milliseconds ...");
+			StringUtils.sleep(jsExecutionDelay);
+		}
 
 		try{
+			getJS();
 			//Reset the global error (code and message)
 			js_cleanError();
 			//Append the JS method 'throw_error()'
@@ -3555,7 +3627,7 @@ public class SearchObject {
 
 			return object;
 
-		}catch(JSException jse){
+		}catch(SeleniumPlusException jse){
 			IndependantLog.debug(debugmsg+ getThrowableMessages(jse));
 			throw jse;
 		}catch(Throwable th){
@@ -3851,7 +3923,7 @@ public class SearchObject {
 	 * used to store webelements in a cache when processing many elements for full xpathpaths
 	 * that might be processed many iterative times.
 	 */
-	private static Hashtable<WebElement, String> xpathObjectCache = new Hashtable();
+	private static Hashtable<WebElement, String> xpathObjectCache = new Hashtable<>();
 	/**
 	 * reset the internal xpath object cache for a new round of full xpath generation.
 	 * <p>
@@ -3925,7 +3997,7 @@ public class SearchObject {
 		    if(attID!=null && attID.length()>0)
 		    	att = "[@name='"+ attID +"']";
 		}
-		List sibs = element.findElements(By.xpath("preceding-sibling::"+ tag + att));
+		List<WebElement> sibs = element.findElements(By.xpath("preceding-sibling::"+ tag + att));
 		if(!sibs.isEmpty()){
 			att += "["+String.valueOf(sibs.size()+1)+"]";
 		}
@@ -3973,8 +4045,188 @@ public class SearchObject {
 		IndependantLog.info("SearchObject.generateSAFSFrameRecognition made "+ tag + att);
 		return tag + att;
 	}
+	/** <b>0</b> integer zero */
+	public static final int MATCHED_ZERO_TIMES 	= 0;
+	/** <b>1</b> integer one */
+	public static final int MATCHED_ONE_TIME 	= 1;
 
-	public static final class SAP{
+	/**
+	 * Switch to a certain window according to its title, this method will search it from all opened browsers.<br/>
+	 * <b>NOTE:</b> Once successfully switched, {@link #lastUsedWD}, {@link #lastJS} may probably get changed.<br/>
+	 * @param title String, the title of the window to switch to. It can be a normal string, a regexp string or a wildcard string.
+	 *                      If it is regexp string, the optional parameters will be ignored.
+	 * @param optionals boolean[]
+	 * <ul>
+	 * <li>optionals[0] <b>partialMatch</b> boolean, if the title is provided as sub-string. The default value is false. It is valid ONLY when <b>title</b> is not regexp string;
+	 * <li>optionals[1] <b>ignoreCase</b> boolean, if the title are case in-sensitive to compare. The default value is true. It is valid ONLY when <b>title</b> is not regexp string;
+	 * </ul>
+	 * @return boolean true if successfully switched to window matching parameter title
+	 * @throws SeleniumPlusException
+	 */
+	public static boolean switchWindow(String title, boolean... optionals) throws SeleniumPlusException{
+		return switchWindow(title, MATCHED_ONE_TIME, optionals);
+	}
+	/**
+	 * Switch to a certain window according to its title, this method will search it from all opened browsers.<br/>
+	 * <b>NOTE:</b> Once successfully switched, {@link #lastUsedWD}, {@link #lastJS} may probably get changed.<br/>
+	 * @param title String, the title of the window to switch to. It can be a normal string, a regexp string or a wildcard string.
+	 *                      If it is regexp string, the optional parameters will be ignored.
+	 * @param expectedMatchIndex int, the index of matched window if multiple windows match. These windows are ordered according to
+	 *                                their title alphabet order. It should be bigger than {@link #MATCHED_ZERO_TIMES}
+	 * @param optionals boolean[]
+	 * <ul>
+	 * <li>optionals[0] <b>partialMatch</b> boolean, if the title is provided as sub-string. The default value is false. It is valid ONLY when <b>title</b> is not regexp string;
+	 * <li>optionals[1] <b>ignoreCase</b> boolean, if the title are case in-sensitive to compare. The default value is true. It is valid ONLY when <b>title</b> is not regexp string;
+	 * </ul>
+	 * @return boolean true if successfully switched to window matching parameter title
+	 * @throws SeleniumPlusException
+	 */
+	public static boolean switchWindow(String title, int expectedMatchIndex, boolean... optionals) throws SeleniumPlusException{
+		List<String> browserIDList = new ArrayList<String>(webDrivers.keySet());
+		Collections.sort(browserIDList);
+
+		//The last-used-webdriver will be the first to search
+		String lastUsedID = null;
+		if(lastUsedWD!=null){
+			lastUsedID = getIDForWebDriver(lastUsedWD);
+		}
+		if(lastUsedID!=null){
+			browserIDList.remove(lastUsedID);
+			browserIDList.add(0, lastUsedID);
+		}
+
+		boolean matched = false;
+		int matchedTimes = MATCHED_ZERO_TIMES;
+
+		for(String browserID: browserIDList){
+			matchedTimes = switchWindow(browserID, title, expectedMatchIndex, optionals);
+			if(expectedMatchIndex==matchedTimes){
+				matched = true;
+				break;
+			}else{
+				//We have already matched the window for 'matchedTimes', so extract 'matchedTimes' from 'expectedMatchIndex'
+				//and try to find in another browser
+				expectedMatchIndex = expectedMatchIndex - matchedTimes;
+			}
+		}
+
+		return matched;
+	}
+
+	/**
+	 * Switch to a certain window according to its title within browser identified by parameter 'browserID'.<br/>
+	 * <b>NOTE:</b> Once successfully switched, {@link #lastUsedWD}, {@link #lastJS} may probably get changed.<br/>
+	 * @param browserID String, the browser ID when calling {@link #startBrowser(String, String, String, int, boolean)}
+	 * @param title String, the title of the window to switch to. It can be a normal string, a regexp string or a wildcard string.
+	 *                      If it is regexp string, the optional parameters will be ignored.
+	 * @param optionals boolean[]
+	 * <ul>
+	 * <li>optionals[0] <b>partialMatch</b> boolean, if the title is provided as sub-string. The default value is false. It is valid ONLY when <b>title</b> is not regexp string;
+	 * <li>optionals[1] <b>ignoreCase</b> boolean, if the title are case in-sensitive to compare. The default value is true. It is valid ONLY when <b>title</b> is not regexp string;
+	 * </ul>
+	 * @return boolean true if successfully switched
+	 * @throws SeleniumPlusException
+	 */
+	public static boolean switchWindow(String browserID, String title, boolean... optionals) throws SeleniumPlusException{
+		return switchWindow(browserID, title, MATCHED_ONE_TIME, optionals)==MATCHED_ONE_TIME;
+	}
+
+	/**
+	 * Switch to a certain window according to its title within browser identified by parameter 'browserID'.<br/>
+	 * <b>NOTE:</b> Once successfully switched, {@link #lastUsedWD}, {@link #lastJS} may probably get changed.<br/>
+	 * @param browserID String, the browser ID when calling {@link #startBrowser(String, String, String, int, boolean)}
+	 * @param title String, the title of the window to switch to. It can be a normal string, a regexp string or a wildcard string.
+	 *                      If it is regexp string, the optional parameters will be ignored.
+	 * @param expectedMatchIndex int, the index of matched window if multiple windows match. These windows are ordered according to
+	 *                                their title alphabet order. It should be bigger than {@link #MATCHED_ZERO_TIMES}
+	 * @param optionals boolean[]
+	 * <ul>
+	 * <li>optionals[0] <b>partialMatch</b> boolean, if the title is provided as sub-string. The default value is false. It is valid ONLY when <b>title</b> is not regexp string;
+	 * <li>optionals[1] <b>ignoreCase</b> boolean, if the title are case in-sensitive to compare. The default value is true. It is valid ONLY when <b>title</b> is not regexp string;
+	 * </ul>
+	 * @return int the matched times.
+	 * @throws SeleniumPlusException
+	 */
+	public static int switchWindow(String browserID, String title, int expectedMatchIndex, boolean... optionals) throws SeleniumPlusException{
+		String debugmsg = StringUtils.debugmsg(false);
+
+		if(expectedMatchIndex<=MATCHED_ZERO_TIMES){
+			throw new SeleniumPlusException("The expected Match Index should be bigger than "+MATCHED_ZERO_TIMES+".");
+		}
+
+		int matchedTimes = MATCHED_ZERO_TIMES;
+		Entry<String/*window Handle*/, String/*window Title*/> originalWindow = null;
+		if(lastUsedWD!=null){
+			originalWindow = new SimpleEntry<>(lastUsedWD.getWindowHandle(), lastUsedWD.getTitle());
+		}
+
+		WebDriver driver = null;
+		if(webDrivers.containsKey(browserID)){
+			driver = webDrivers.get(browserID);
+			if(driver==null){
+				throw new SeleniumPlusException("Failed to get WebDriver for ID '"+browserID+"'", SeleniumPlusException.CODE_OBJECT_IS_NULL);
+			}
+		}
+
+		boolean partialMatch = false;
+		boolean ignoreCase = true;
+
+		if(optionals!=null){
+			if(optionals.length>0) partialMatch = optionals[0];
+			if(optionals.length>1) ignoreCase = optionals[1];
+		}
+
+		Set<String> winHandles = driver.getWindowHandles();
+		//driver.switchTo().window(currentTitle); does NOT work for title :-(, I have to create a pair to switch by handle
+		List<Entry<String/*window Handle*/, String/*window Title*/>> windows = new ArrayList<>();
+		for(String winHandle:winHandles){
+			driver.switchTo().window(winHandle);
+			windows.add(new SimpleEntry<String, String>(winHandle, driver.getTitle()));
+		}
+		Collections.sort(windows, new Comparator<Entry<String,String>>(){
+			@Override
+			public int compare(Entry<String, String> o1, Entry<String, String> o2) {
+				return o1.getValue().compareTo(o2.getValue());
+			}
+		});
+		for(Entry<String, String> window: windows){
+			if(StringUtils.matchText(window.getValue(), title, partialMatch, ignoreCase)){
+				if(expectedMatchIndex==++matchedTimes){
+					driver.switchTo().window(window.getKey());
+					break;
+				}
+			}
+		}
+
+		if(expectedMatchIndex==matchedTimes){
+			//if we did get the matched window, we should switch the lastUsedWD, lastJS etc.
+			useBrowser(browserID);
+		}else{
+			IndependantLog.warn(debugmsg+" failed to switch window by title '"+title+"' for browser indendified by '"+browserID+"'.'"
+					+ "\n"+matchedTimes+"(matchedTimes)'!= '"+expectedMatchIndex+"'(expectedMatchIndex)");
+			if(originalWindow!=null){
+				try{
+					IndependantLog.warn(debugmsg+"switching back to original window '"+originalWindow.getValue()+"'");
+					lastUsedWD.switchTo().window(originalWindow.getKey());
+				}catch(NoSuchWindowException e){
+					IndependantLog.warn(debugmsg+" failed to switch back to original window '"+originalWindow.getValue()+"' by handle '"+originalWindow.getKey()+"', due to "+e.toString());
+				}
+			}
+		}
+
+		try{
+			//as WebDriver.TargetLocator.window(): Switch the focus of future commands for this driver to the window with the given name/handle.
+			//We have to call some command to get this window-switch happen immediately, TODO maybe we can use a method less time-consumed
+			((TakesScreenshot)driver).getScreenshotAs(OutputType.BYTES);
+		}catch(Exception e){
+			IndependantLog.warn(debugmsg+" Failed to call selenium commmand to get the window-switch happen immediately, due to "+e.toString());
+		}
+
+		return matchedTimes;
+	}
+
+
+	public abstract static class SAP{
 		/**
 		 * To test if the WebElement represents a SAP OpenUI5 component.<br>
 		 * @param element
@@ -4237,7 +4489,7 @@ public class SearchObject {
 	/*******************************************************
 	 * Inner class to handle DOJO-specific functionality.   *
 	 *******************************************************/
-	public static final class DOJO{
+	public abstract static class DOJO{
 
 		/** "DOJOTabControl" */
 		public static final String DOJOTABCONTROL = "DOJOTABCONTROL";
@@ -4253,6 +4505,7 @@ public class SearchObject {
 		 * whatever the mapped values are. Example: "dojo"="mappedDojo", "dijit"="mappedDijit", etc..
 		 * @return Map of dojo reference scopeMappings, or null if Dojo is not running in the browser.
 		 */
+		@SuppressWarnings("rawtypes")
 		public static Map getDojoScopemap(){
 
 			String script = JavaScriptFunctions.DOJO.getDojoScopemap()+"return getDojoScopemap();\n";
@@ -4585,7 +4838,7 @@ public class SearchObject {
 		return buffer.toString();
 	}
 
-	public static final class HTML{
+	public abstract static class HTML{
 		/** 'html' */
 		public static final String TAG_HTML = "html";
 		public static boolean isSupported(WebElement element, String[] supportedClassNames){
