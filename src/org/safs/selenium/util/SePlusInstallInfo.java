@@ -194,15 +194,22 @@ public class SePlusInstallInfo{
 		return cp;
 	}
 
+	/**
+	 * If the override property is set, then use of the installed product is not
+	 * desired.  This would especially be true during testing.  During testing
+	 * the use of the latest files is desired versus what might be installed.
+	 *
+	 * @return true if the override property is set to "true" (ex. SELENIUM_PLUS_OVERRIDE).
+	 */
 	public static boolean isOverridePropertySet(String env){
-		/*
-		 * If the override property is set, then use of the installed product is not
-		 * desired.  This would especially be true during testing, but it
-		 * also applies when the SeleniumPlusClient is being used.
-		 */
 		return Boolean.getBoolean(env + "_OVERRIDE");
 	}
 
+	/**
+	 * If the override property is set to true (ex. SELENIUM_PLUS_OVERRIDE),
+	 * use the value of the system property (ex. SELENIUM_PLUS).  Otherwise,
+	 * use the environment variable.
+	 */
 	public static String GetSystemPropertyOrEnvironmentVariable(String env){
 		String result = null;
 

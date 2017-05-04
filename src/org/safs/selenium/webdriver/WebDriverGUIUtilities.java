@@ -183,6 +183,9 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		return SePlusInstallInfo.IsSeleniumPlus();
 	}
 
+	/**
+	 * @return the location of the SeleniumPlus files.
+	 */
 	public static String getSeleniumPlusHome(){
 		return SePlusInstallInfo.GetSystemPropertyOrEnvironmentVariable(DriverConstant.SYSTEM_PROPERTY_SELENIUMPLUS_DIR);
 	}
