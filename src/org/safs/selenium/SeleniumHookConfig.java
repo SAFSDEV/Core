@@ -15,6 +15,7 @@ package org.safs.selenium;
 import org.safs.DefaultHookConfig;
 import org.safs.IndependantLog;
 import org.safs.StringUtils;
+import org.safs.selenium.webdriver.lib.RemoteDriver;
 import org.safs.selenium.webdriver.lib.SelectBrowser;
 import org.safs.tools.drivers.ConfigureInterface;
 import org.safs.tools.drivers.DriverConstant;
@@ -44,6 +45,11 @@ public class SeleniumHookConfig extends DefaultHookConfig {
 	 * <li> {@link SeleniumConfigConstant#SELENIUMSERVER_JVM_Xms}
 	 * <li> {@link SeleniumConfigConstant#SELENIUMSERVER_JVM_OPTIONS}
 	 * <li> {@link SeleniumConfigConstant#SELENIUMSERVER_JVM}
+	 * <li> {@link SeleniumConfigConstant#PROPERTY_CONSOLE_STATE}
+	 * <li> {@link SeleniumConfigConstant#PROPERTY_WEB_DRIVERS}
+	 * <li> {@link SeleniumConfigConstant#PROPERTY_CONNECTION_TEST_COMMAND}
+	 * <li> {@link SeleniumConfigConstant#PROPERTY_CONNECTION_TEST_MAX_DURATION}
+	 * <li> {@link SeleniumConfigConstant#PROPERTY_CONNECTION_TEST_MAX_TRY}
 	 * </ul>
 	 *
 	 * @see #setSystemProperties(ConfigureInterface)
@@ -71,6 +77,11 @@ public class SeleniumHookConfig extends DefaultHookConfig {
 	 * <li> {@link SeleniumConfigConstant#SELENIUMSERVER_JVM_Xms}
 	 * <li> {@link SeleniumConfigConstant#SELENIUMSERVER_JVM_OPTIONS}
 	 * <li> {@link SeleniumConfigConstant#SELENIUMSERVER_JVM}
+	 * <li> {@link SeleniumConfigConstant#PROPERTY_CONSOLE_STATE}
+	 * <li> {@link SeleniumConfigConstant#PROPERTY_WEB_DRIVERS}
+	 * <li> {@link SeleniumConfigConstant#PROPERTY_CONNECTION_TEST_COMMAND}
+	 * <li> {@link SeleniumConfigConstant#PROPERTY_CONNECTION_TEST_MAX_DURATION}
+	 * <li> {@link SeleniumConfigConstant#PROPERTY_CONNECTION_TEST_MAX_TRY}
 	 * </ul>
 	 * This method will be shared by EmbeddedSeleniumHookDriver.<br>
 	 * @param config ConfigureInterface, containing the configuration initial parameters
@@ -122,6 +133,14 @@ public class SeleniumHookConfig extends DefaultHookConfig {
 			//Set browser-drivers to start with selenium-server: explorer, chrome, MicrosoftEdge etc.
 			StringUtils.getSystemProperty(SeleniumConfigConstant.PROPERTY_WEB_DRIVERS,
 					config, DriverConstant.SECTION_SAFS_SELENIUM, SeleniumConfigConstant.ITEM_WEB_DRIVERS);
+
+			//Set browser-drivers to start with selenium-server: explorer, chrome, MicrosoftEdge etc.
+			StringUtils.getSystemProperty(SeleniumConfigConstant.PROPERTY_CONNECTION_TEST_COMMAND,
+					config, DriverConstant.SECTION_SAFS_SELENIUM, SeleniumConfigConstant.ITEM_CONNECTION_TEST_COMMAND, RemoteDriver.DEFAULT_CONNECTION_TEST_COMMAND);
+			StringUtils.getSystemProperty(SeleniumConfigConstant.PROPERTY_CONNECTION_TEST_MAX_DURATION,
+					config, DriverConstant.SECTION_SAFS_SELENIUM, SeleniumConfigConstant.ITEM_CONNECTION_TEST_MAX_DURATION, String.valueOf(SeleniumConfigConstant.DEFAULT_CONNECTION_TEST_MAX_DURATION));
+			StringUtils.getSystemProperty(SeleniumConfigConstant.PROPERTY_CONNECTION_TEST_MAX_TRY,
+					config, DriverConstant.SECTION_SAFS_SELENIUM, SeleniumConfigConstant.ITEM_CONNECTION_TEST_MAX_TRY, String.valueOf(SeleniumConfigConstant.DEFAULT_CONNECTION_TEST_MAX_TRY));
 
 		}catch(Exception e){
 			IndependantLog.warn(StringUtils.debugmsg(false)+" Fail. Met "+StringUtils.debugmsg(e));

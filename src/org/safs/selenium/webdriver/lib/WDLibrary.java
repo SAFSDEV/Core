@@ -55,6 +55,7 @@ package org.safs.selenium.webdriver.lib;
 *  <br>   MAR 29, 2016    (SBJLWA) Modify click() and doubleClick(): detect "Alert" after clicking.
 *  <br>   APR 19, 2016    (SBJLWA) Modify click() doubleClick() etc.: Handle the optional parameter 'autoscroll'.
 *  <br>   APR 27, 2016    (SBJLWA) Added switchWindow(): switch to a certain window according to its title.
+*  <br>   MAY 05, 2016    (SBJLWA) Modified startBrowser(): restart browser if the connection between WebDriver and BrowserDriver is not good.
 */
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -132,6 +133,7 @@ import org.safs.tools.CaseInsensitiveFile;
 import org.safs.tools.GenericProcessMonitor;
 import org.safs.tools.GenericProcessMonitor.ProcessInfo;
 import org.safs.tools.GenericProcessMonitor.WQLSearchCondition;
+import org.safs.tools.drivers.DriverConstant.SeleniumConfigConstant;
 import org.safs.tools.input.CreateUnicodeMap;
 import org.safs.tools.input.InputKeysParser;
 import org.safs.tools.input.RobotKeyEvent;
@@ -1901,6 +1903,26 @@ public class WDLibrary extends SearchObject {
 		startBrowser(BrowserName, Url, Id, timeout, isRemote, null);
 	}
 
+	private static String getSystemProperty(String property, String defaultValue){
+		String value = System.getProperty(property);
+		if (!StringUtils.isValid(value)) value = defaultValue;
+		return value;
+	}
+
+	private static long getSystemProperty(String property, long defaultValue){
+		long value = defaultValue;
+		String tempValue = null;
+		try{
+			tempValue = System.getProperty(property);
+			if(StringUtils.isValid(tempValue)){
+				value = Long.parseLong(tempValue);
+			}
+		}catch(NumberFormatException e){
+			IndependantLog.warn("Bad value '"+tempValue+"' is provided for property '"+property+"'");
+		}
+		return value;
+	}
+
 	/**
 	 * Start browser
 	 * <p>
@@ -1916,23 +1938,26 @@ public class WDLibrary extends SearchObject {
 	 * @throws SeleniumPlusException
 	 */
 	public static void startBrowser(String BrowserName, String Url, String Id, int timeout, boolean isRemote, Map<String, Object> extraParameters) throws SeleniumPlusException{
-		String debugmsg = StringUtils.debugmsg(WDLibrary.class, "startBrowser");
+		String debugmsg = StringUtils.debugmsg(false);
 		//previousDriver is the possible WebDriver with the same ID stored in the Cache.
 		WebDriver previousDriver = null;
 
-		String host = System.getProperty(SelectBrowser.SYSTEM_PROPERTY_SELENIUM_HOST);
-			if (host == null || host.isEmpty()) host = SelectBrowser.DEFAULT_SELENIUM_HOST;
-		String port = System.getProperty(SelectBrowser.SYSTEM_PROPERTY_SELENIUM_PORT);
-			if (port == null || port.isEmpty()) port = SelectBrowser.DEFAULT_SELENIUM_PORT;
+		String host = getSystemProperty(SelectBrowser.SYSTEM_PROPERTY_SELENIUM_HOST, SelectBrowser.DEFAULT_SELENIUM_HOST);
+		String port = getSystemProperty(SelectBrowser.SYSTEM_PROPERTY_SELENIUM_PORT, SelectBrowser.DEFAULT_SELENIUM_PORT);
+		String connectionTestCommand = getSystemProperty(SeleniumConfigConstant.PROPERTY_CONNECTION_TEST_COMMAND, RemoteDriver.DEFAULT_CONNECTION_TEST_COMMAND);
+		long connectionTestMaxDuration = getSystemProperty(SeleniumConfigConstant.PROPERTY_CONNECTION_TEST_MAX_DURATION, SeleniumConfigConstant.DEFAULT_CONNECTION_TEST_MAX_DURATION);
+		long connectionTestMaxTry = getSystemProperty(SeleniumConfigConstant.PROPERTY_CONNECTION_TEST_MAX_TRY, SeleniumConfigConstant.DEFAULT_CONNECTION_TEST_MAX_TRY);
 
-		if(BrowserName == null || BrowserName.length()==0){
-			BrowserName = System.getProperty(SelectBrowser.SYSTEM_PROPERTY_BROWSER_NAME);
-			if(BrowserName == null || BrowserName.length()==0){
-				BrowserName = SelectBrowser.BROWSER_NAME_FIREFOX;
-				System.setProperty(SelectBrowser.SYSTEM_PROPERTY_BROWSER_NAME, BrowserName);
-			}
+		IndependantLog.info(debugmsg+" VM parameters:\nhost="+host+
+				                                    "\nport="+port+
+				                                    "\n=connectionTestCommand"+connectionTestCommand+
+				                                    "\n=connectionTestMaxDuration"+connectionTestMaxDuration+
+				                                    "\n=connectionTestMaxTry"+connectionTestMaxTry);
+
+		if(!StringUtils.isValid(BrowserName)){
+			BrowserName = getSystemProperty(SelectBrowser.SYSTEM_PROPERTY_BROWSER_NAME, SelectBrowser.BROWSER_NAME_FIREFOX);
 		}
-		if(Id == null || Id.equals("")){
+		if(!StringUtils.isValid(Id)){
 			Id = String.valueOf("".hashCode());
 		}
 
@@ -1946,6 +1971,7 @@ public class WDLibrary extends SearchObject {
 		} else {
 			IndependantLog.warn(debugmsg+"attempting to start new session on remote server");
 			try {
+				URL seleniumHub = new URL("http://" + host + ":" + port +"/wd/hub");
 				DesiredCapabilities capabilities = SelectBrowser.getDesiredCapabilities(BrowserName, extraParameters);
 				capabilities.setJavascriptEnabled(true);
 				capabilities.setCapability(CapabilityType.TAKES_SCREENSHOT, true);
@@ -1953,7 +1979,23 @@ public class WDLibrary extends SearchObject {
 				capabilities.setCapability(RemoteDriver.CAPABILITY_RECONNECT, false); // custom id
 				capabilities.setCapability(RemoteDriver.CAPABILITY_REMOTESERVER, host); // custom id
 				//capabilities.setBrowserName(BrowserName); now it set from capabilities
-				previousDriver = addWebDriver(Id,new RemoteDriver(new URL("http://" + host + ":" + port +"/wd/hub"),capabilities));
+
+				RemoteDriver remotedriver = new RemoteDriver(seleniumHub,capabilities);
+
+				//Re-create RemoteWebDriver if the communication between WebDriver and browserDriver is not good
+				int triedTimes = 0;
+				while(!remotedriver.isConnectionFine(connectionTestCommand, connectionTestMaxDuration, Processor.getSecsWaitForComponent())){
+					if(++triedTimes>connectionTestMaxTry){
+						IndependantLog.warn(debugmsg+" the connection between WebDriver and BrowserDriver seems NOT good. "
+								+ "The execution time exceed the max accepted duration '"+connectionTestMaxDuration+"' for command '"+connectionTestCommand+"'.");
+						break;
+					}
+					remotedriver.quit();
+					StringUtils.sleep(500);
+					remotedriver = new RemoteDriver(seleniumHub, capabilities);
+				}
+
+				previousDriver = addWebDriver(Id,remotedriver);
 				lastUsedWD.manage().timeouts().implicitlyWait(timeout, TimeUnit.SECONDS);
 
 				try{
