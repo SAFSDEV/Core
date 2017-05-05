@@ -18,6 +18,7 @@ package org.safs.selenium.webdriver.lib;
 *                                   adjusted the java doc.
 *                                   Wrote debug message to a file on disk c.
 *  <br>   FEB 27, 2016	  (LeiWang) Modified startSession(): quit the appropriate webdriver when cleaning up.
+*  <br>   MAY 05, 2017	  (LeiWang) Added isConnectionFine(): test the connection according the execution time of a certain selenium driver command.
 */
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -35,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import org.json.JSONObject;
 import org.openqa.selenium.Capabilities;
@@ -71,6 +73,7 @@ import com.google.common.collect.Lists;
  */
 public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 
+	private static boolean logDriverCommand = false;
 	private static boolean newSession = true;
 	private boolean _quit = false;
 
@@ -433,6 +436,86 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 		}
 	}
 
+	/**
+	 * "<b>getAlertText</b>" defines the default <a href="https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/remote/DriverCommand.html">selenium-driver-command</a>
+	 * used to test the connection between WebDriver and BrowserDriver.<br>
+	 */
+	public static final String DEFAULT_CONNECTION_TEST_COMMAND 			= DriverCommand.GET_ALERT_TEXT;
+
+	/**
+	 * Test if the connection between WebDriver and the browser-driver is good enough to satisfy user's need.<br>
+	 * @param command String, the selenium driver command to use to test execution time
+	 * @param maxDuration long, the maximum execution duration that user can accept
+	 * @param timeoutWaitForComponent int, the original timeout to wait for a GUI component
+	 * @return boolean true if the connection is good enough
+	 * @throws SeleniumPlusException if the parameter command is null or empty
+	 */
+	public boolean isConnectionFine(String command, long maxDuration, int timeoutWaitForComponent) throws SeleniumPlusException{
+		long consumedTime = getExecutionTime(command, timeoutWaitForComponent);
+		return  maxDuration>consumedTime;
+	}
+
+	/**
+	 * @param command String, the selenium driver command to use to test execution time
+	 * @param timeoutWaitForComponent int, the original timeout to wait for a GUI component
+	 * @return long, the time (in milliseconds) consumed by the command execution
+	 * @throws SeleniumPlusException if the parameter command is null or empty
+	 */
+	public long getExecutionTime(String command, int timeoutWaitForComponent) throws SeleniumPlusException{
+		long consumedTime = 0;
+		if(command==null||command.isEmpty()){
+			throw new SeleniumPlusException("The command '"+command+"' is not valid.");
+		}
+
+		try{
+			//don't wait so that the NoAlertPresentException will be thrown out immediately
+			//and we know the time duration is the duration for executing command, not the timeout
+			manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS);
+			long start = System.currentTimeMillis();
+			execute(command);
+			consumedTime = System.currentTimeMillis()-start;
+		}catch(WebDriverException wde){
+//			Command duration or timeout: 12 milliseconds
+//			Build info: version: '2.52.0', revision: '4c2593c', time: '2016-02-11 19:06:42'
+//			System info: host: 'rdcesx05043', ip: '10.21.17.32', os.name: 'Windows 8.1', os.arch: 'amd64', os.version: '6.3', java.version: '1.7.0_79'
+//			Session ID: 7ee4e4f45bc4305704e49c93fbb4f382
+//			Driver info: org.openqa.selenium.chrome.ChromeDriver
+//
+//			Command duration or timeout: 85 milliseconds
+//			Build info: version: '2.52.0', revision: '4c2593c', time: '2016-02-11 19:06:42'
+//			System info: host: 'rdcesx05043', ip: '10.21.17.32', os.name: 'Windows 8.1', os.arch: 'amd64', os.version: '6.3', java.version: '1.7.0_79'
+//			Session ID: f6a006ab-48d1-4067-acc4-59217c36c179
+//			Driver info: org.safs.selenium.webdriver.lib.RemoteDriver
+
+			//This prefix may change if selenium source code change it.
+			String prefix = "Command duration or timeout:";
+			String message = wde.getMessage();
+			int beginIndex = message.indexOf(prefix);
+
+			if(beginIndex>-1){
+				beginIndex += prefix.length();
+				//skip the first duration, it is for browser driver such as "org.openqa.selenium.chrome.ChromeDriver"
+				beginIndex = message.indexOf(prefix, beginIndex);
+				if(beginIndex>-1){
+					beginIndex += prefix.length();
+					int endIndex = message.indexOf("milliseconds", beginIndex);
+					if(endIndex>-1 && endIndex>beginIndex){
+						try{
+							consumedTime = Long.parseLong(message.substring(beginIndex, endIndex).trim());
+						}catch(Exception e){}
+					}
+				}
+			}
+
+		}finally{
+			manage().timeouts().implicitlyWait(timeoutWaitForComponent, TimeUnit.SECONDS);
+		}
+
+		IndependantLog.debug("getExecutionTime(): time consumed '"+consumedTime+"' milliseconds for command '"+command+"'");
+
+		return  consumedTime;
+	}
+
 	/*
 	 * Trying to fix a problem with IE JSON values containing "-1.IND"
 	 * (non-Javadoc)
@@ -440,8 +523,10 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 	 */
 	@Override
     protected Response execute(String driverCommand, Map<String, ?> parameters) {
+		final String debugmsg = "RemoteDriver.execute(): ";
+		if(logDriverCommand) IndependantLog.debug(debugmsg+"starting '"+driverCommand+"' with parameters: "+parameters);
     	Response response = super.execute(driverCommand, parameters);
-    	final String debugmsg = "RemoteDriver.execute ";
+    	if(logDriverCommand) IndependantLog.debug(debugmsg+"ended '"+driverCommand+"' with response: "+response);
     	if((response != null) && (response.getValue() instanceof java.lang.String)){
     		String v = (String) response.getValue();
     		v = v.trim();
@@ -778,6 +863,7 @@ public class RemoteDriver extends RemoteWebDriver implements TakesScreenshot {
 		public boolean isCurrentSession = false;
 		public HashMap<String,Object> extraParameters = new HashMap<String,Object>();
 
+		@SuppressWarnings("unused")
 		private SessionInfo(){super();}
 
 		/**
