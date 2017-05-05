@@ -15,6 +15,7 @@ import java.awt.event.KeyEvent;
 
 import org.safs.JavaConstant;
 import org.safs.StatusCodes;
+import org.safs.Constants.BrowserConstants;
 import org.safs.logging.AbstractLogFacility;
 
 /**
@@ -668,6 +669,109 @@ public abstract class DriverConstant extends JavaConstant{
 		 * JVM command line: -Dsafs.selenium.console.state=MAX|MIN|NORMAL|MAXIMIZE|MINIMIZE **/
 		public static final String PROPERTY_CONSOLE_STATE ="safs.selenium.console.state";
 
+		/**
+		 * "<b>WEB_DRIVERS</b>" defines a set of drivers to start with the selenium-server.<br>
+		 * The value can be a combination (separated by a colon :) of<br>
+		 * <ul>
+		 * <li>{@link BrowserConstants#BROWSER_NAME_IE}
+		 * <li>{@link BrowserConstants#BROWSER_NAME_CHROME}
+		 * <li>{@link BrowserConstants#BROWSER_NAME_EDGE}
+		 * <li>BrowserConstants.BROWSER_NAME_XXX might be supported.
+		 * </ul>
+		 * It is an item under section {@link DriverConstant#SECTION_SAFS_SELENIUM}<br/>
+		 * <br>
+		 * Examples:<br>
+		 * [SAFS_SELENIUM]<br/>
+		 * WEB_DRIVERS=<b>explorer</b> Only IEDriver will start with the selenium-server.<br>
+		 * WEB_DRIVERS=<b>explorer:chrome:MicrosoftEdge</b> IEDriver, ChromeDriver and EdgeDriver will start with the selenium-server.<br>
+		 */
+		public static final String ITEM_WEB_DRIVERS ="WEB_DRIVERS";
+		/**
+		 * "<b>safs.selenium.web.drivers</b>" defines a set of drivers to start with the selenium-server.<br>
+		 * The value can be a combination (separated by a colon :) of<br>
+		 * <ul>
+		 * <li>{@link BrowserConstants#BROWSER_NAME_IE}
+		 * <li>{@link BrowserConstants#BROWSER_NAME_CHROME}
+		 * <li>{@link BrowserConstants#BROWSER_NAME_EDGE}
+		 * <li>BrowserConstants.BROWSER_NAME_XXX might be supported.
+		 * </ul>
+		 *
+		 * Examples:<br>
+		 * -Dsafs.selenium.web.drivers=<b>explorer</b> Only IEDriver will start with the selenium-server.<br>
+		 * -Dsafs.selenium.web.drivers=<b>explorer:chrome:MicrosoftEdge</b> IEDriver, ChromeDriver and EdgeDriver will start with the selenium-server.<br>
+		 */
+		public static final String PROPERTY_WEB_DRIVERS ="safs.selenium.web.drivers";
+
+		/**
+		 * "<b>connection.test.command</b>" defines the <a href="https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/remote/DriverCommand.html">selenium-driver-command</a>
+		 * used to test the connection between WebDriver and BrowserDriver.<br>
+		 * selenium-driver-command is a string understood by a remote server using the JSON wire protocol.<br>
+		 * Examples:<br>
+		 * -Dconnection.test.command=<b>getAlertText</b><br>
+		 * -Dconnection.test.command=<b>getCurrentWindowSize</b><br>
+		 */
+		public static final String PROPERTY_CONNECTION_TEST_COMMAND 		= "connection.test.command";
+		/**
+		 * "<b>connection.test.command</b>" defines the <a href="https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/remote/DriverCommand.html">selenium-driver-command</a>
+		 * used to test the connection between WebDriver and BrowserDriver.<br>
+		 * selenium-driver-command is a string understood by a remote server using the JSON wire protocol.<br>
+		 * It is an item under section {@link DriverConstant#SECTION_SAFS_SELENIUM}<br/>
+		 * <br>
+		 * Examples:<br>
+		 * [SAFS_SELENIUM]<br/>
+		 * connection.test.command=<b>getAlertText</b><br>
+		 * connection.test.command=<b>getCurrentWindowSize</b><br>
+		 */
+		public static final String ITEM_CONNECTION_TEST_COMMAND 			= PROPERTY_CONNECTION_TEST_COMMAND;
+
+		/**
+		 * "<b>connection.test.max.duration</b>" defines the maximum duration (in <b>milliseconds</b>) that user can accept when executing
+		 * <a href="https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/remote/DriverCommand.html">selenium-driver-command</a>
+		 * defined by {@link #PROPERTY_CONNECTION_TEST_COMMAND} or {@link #ITEM_CONNECTION_TEST_COMMAND}.<br>
+		 * <br>
+		 * Examples:<br>
+		 * -Dconnection.test.max.duration=<b>3000</b><br>
+		 */
+		public static final String PROPERTY_CONNECTION_TEST_MAX_DURATION 	= "connection.test.max.duration";
+		/**
+		 * "<b>connection.test.max.duration</b>" defines the maximum duration (in <b>milliseconds</b>) that user can accept when executing
+		 * <a href="https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/remote/DriverCommand.html">selenium-driver-command</a>
+		 * defined by {@link #PROPERTY_CONNECTION_TEST_COMMAND} or {@link #ITEM_CONNECTION_TEST_COMMAND}.<br>
+		 * It is an item under section {@link DriverConstant#SECTION_SAFS_SELENIUM}<br/>
+		 * <br>
+		 * Examples:<br>
+		 * [SAFS_SELENIUM]<br/>
+		 * connection.test.max.duration=<b>3000</b><br>
+		 */
+		public static final String ITEM_CONNECTION_TEST_MAX_DURATION 		= PROPERTY_CONNECTION_TEST_MAX_DURATION;
+		/**
+		 * <b>5000</b> defines the default maximum duration (in <b>milliseconds</b>) that user can accept when executing
+		 * <a href="https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/remote/DriverCommand.html">selenium-driver-command</a>
+		 * defined by {@link #PROPERTY_CONNECTION_TEST_COMMAND} or {@link #ITEM_CONNECTION_TEST_COMMAND}.<br>
+		 */
+		public static final int DEFAULT_CONNECTION_TEST_MAX_DURATION 		= 5000;
+
+		/**
+		 * "<b>connection.test.max.try</b>" defines the maximum times to try to get a good connection between WebDriver and BrowserDriver<br>
+		 * <br>
+		 * Examples:<br>
+		 * -Dconnection.test.max.try=<b>10</b><br>
+		 */
+		public static final String PROPERTY_CONNECTION_TEST_MAX_TRY 		= "connection.test.max.try";
+		/**
+		 * "<b>connection.test.max.try</b>" defines the maximum times to try to get a good connection between WebDriver and BrowserDriver<br>
+		 * <br>
+		 * It is an item under section {@link DriverConstant#SECTION_SAFS_SELENIUM}<br/>
+		 * <br>
+		 * Examples:<br>
+		 * [SAFS_SELENIUM]<br/>
+		 * connection.test.max.try=<b>10</b><br>
+		 */
+		public static final String ITEM_CONNECTION_TEST_MAX_TRY 			= PROPERTY_CONNECTION_TEST_MAX_TRY;
+		/**
+		 * <b>2</b> defines the maximum times to try to get a good connection.<b>
+		 */
+		public static final int DEFAULT_CONNECTION_TEST_MAX_TRY 			= 2;
 	}
 
 	/** "GATEWAYHOST" define the HTTP PROXY host name to connect Internet
