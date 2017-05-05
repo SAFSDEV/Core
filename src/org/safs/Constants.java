@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.safs.tools.drivers.DriverConstant.SeleniumConfigConstant;
+
 /**
  * Containing different kinds of Constant.<br>
  *
@@ -228,31 +230,14 @@ public abstract class Constants {
 		public static final String KEY_GRID_NODES_SETTING = SYSTEM_PROPERTY_SELENIUM_NODE;
 
 		/**
-		 * "<b>WEB_DRIVERS</b>" defines a set of drivers to start with the selenium-server.<br>
-		 * The value can be a combination (separated by a colon :) of<br>
-		 * <ul>
-		 * <li>{@link BrowserConstants#BROWSER_NAME_IE}
-		 * <li>{@link BrowserConstants#BROWSER_NAME_CHROME}
-		 * <li>{@link BrowserConstants#BROWSER_NAME_EDGE}
-		 * <li>BrowserConstants.BROWSER_NAME_XXX might be supported.
-		 * </ul>
-		 * Examples:<br>
-		 * <b>explorer</b> Only IEDriver will start with the selenium-server.<br>
-		 * <b>explorer:chrome:MicrosoftEdge</b> IEDriver, ChromeDriver and EdgeDriver will start with the selenium-server.<br>
-		 * */
+		 * @deprecated please use {@link SeleniumConfigConstant#ITEM_WEB_DRIVERS} instead.
+		 */
+		@Deprecated
 		public static final String ITEM_WEB_DRIVERS ="WEB_DRIVERS";
-		/** "<b>safs.selenium.web.drivers</b>" defines a set of drivers to start with the selenium-server.<br>
-		 * The value can be a combination (separated by a colon :) of<br>
-		 * <ul>
-		 * <li>{@link BrowserConstants#BROWSER_NAME_IE}
-		 * <li>{@link BrowserConstants#BROWSER_NAME_CHROME}
-		 * <li>{@link BrowserConstants#BROWSER_NAME_EDGE}
-		 * <li>BrowserConstants.BROWSER_NAME_XXX might be supported.
-		 * </ul>
-		 * Examples:<br>
-		 * -Dsafs.selenium.web.drivers=<b>explorer</b> Only IEDriver will start with the selenium-server.<br>
-		 * -Dsafs.selenium.web.drivers=<b>explorer:chrome:MicrosoftEdge</b> IEDriver, ChromeDriver and EdgeDriver will start with the selenium-server.<br>
-		 * **/
+		/**
+		 * @deprecated please use {@link SeleniumConfigConstant#PROPERTY_WEB_DRIVERS} instead.
+		 */
+		@Deprecated
 		public static final String PROPERTY_WEB_DRIVERS ="safs.selenium.web.drivers";
 
 		/**
