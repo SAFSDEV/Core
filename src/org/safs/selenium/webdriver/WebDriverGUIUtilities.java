@@ -1227,7 +1227,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		//Retrieve the console state
 		String state = JavaJVMConsole.PARAM_STATE + " " + System.getProperty(SeleniumConfigConstant.PROPERTY_CONSOLE_STATE, JavaJVMConsole.STATE_DEFAULT);
 		//Retrieve the browser drivers
-		String webdrivers = OPTION_BROWSER_DRIVERS+" "+System.getProperty(SeleniumConstants.PROPERTY_WEB_DRIVERS, "");
+		String webdrivers = OPTION_BROWSER_DRIVERS+" "+System.getProperty(SeleniumConfigConstant.PROPERTY_WEB_DRIVERS, "");
 
 		//if seleniumnode has been provided, we are going to launch grid-hub and grid-node, not standalone server.
 		boolean isGrid = StringUtils.isValid(nodesInfo);
