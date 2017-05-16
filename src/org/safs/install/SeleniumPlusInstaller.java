@@ -18,7 +18,7 @@ import org.safs.tools.CaseInsensitiveFile;
 import com.sun.jna.Platform;
 
 public class SeleniumPlusInstaller extends InstallerImpl implements DebugListener{
-	
+
 	private static final String s = File.separator;
 	public static final String SELENIUMDIREnv  = "SELENIUM_PLUS";
 	public static final String SELENIUMDIRAutomation = s+"extra"+s+"automation";
@@ -32,7 +32,7 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 	public static final String HKLM_RUN_KEY = "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run";
 	public static final String HKLM_RUN_MONITOR = "DesignerMon";
 	public static final String HKLM_RUN_SERVER = "SeleniumServer";
-	
+
 	static boolean installsafs = true;
 	static boolean removestaf = false;
 	static boolean removesafs = false;
@@ -47,13 +47,13 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 	static Console console = null;
 	/** progressbar is a swing panel to show the progress of installation.*/
 	static ProgressIndicator progresser = new ProgressIndicator();
-		
+
 	static int pctProgress = 0;
 	static int pctIncrement = 14;
 	static int pctSTAFUninstall = pctIncrement;                    // 14
 	static int pctSTAFInstall = 100;
 
-	
+
 	public SeleniumPlusInstaller() {
 		super();
 	}
@@ -67,15 +67,15 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 		}
 		System.out.println ("");
 		System.out.println ("Installing TestDesigner: "+ installsafs);
-		System.out.println ("TestDesigner InstallDir: "+ seleniumdir);		
+		System.out.println ("TestDesigner InstallDir: "+ seleniumdir);
 		System.out.println ("");
 		System.out.println ("Installing Harness: "+ installstaf);
 		if(installstaf){
-			System.out.println ("Harness  Installer: "+ installstafexe);		
+			System.out.println ("Harness  Installer: "+ installstafexe);
 			System.out.println ("Harness InstallDir: "+ stafdir);
 		}
 	}
-	
+
 	static void parseArgs(String[] args){
 		int argc = args.length;
 		for(int i = 0; i < argc; i++){
@@ -83,7 +83,7 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 
 			if (arg.equals(SilentInstaller.OPTION_NOSAFS)) { installsafs   = false; continue; }
 			if (arg.equals(SilentInstaller.OPTION_NOSTAF)) { installstaf   = false; continue; }
-			
+
 			if (arg.equals(SilentInstaller.OPTION_REMOVE_STAF)) {
 				if (i < argc -1){
 					installedstafdir = args[++i];
@@ -94,7 +94,7 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 				installsafs = false;
 				continue;
 			}
-			if (arg.equals(SilentInstaller.OPTION_ALTSTAF)) { 
+			if (arg.equals(SilentInstaller.OPTION_ALTSTAF)) {
 				if (i < argc -1) {
 					installstaf = true;
 					stafdir = args[++i];
@@ -102,20 +102,20 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 				continue;
 			}
 
-			if (arg.equals(SilentInstaller.OPTION_STAF_INSTALL_EXE)) { 
+			if (arg.equals(SilentInstaller.OPTION_STAF_INSTALL_EXE)) {
 				if (i < argc -1) {
 					installstaf = true;
 					installstafexe = args[++i];
 					installstafexe = installstafexe.trim();
 				}
 				continue;
-			}			
+			}
 			if (arg.equals(ARG_UNINSTALL)) {
 				uninstall = true;
 				installstaf = false;
 				installsafs = false;
 				removesafs = true;
-				progresser.setTitle("TestDesigner Uninstall");				
+				progresser.setTitle("TestDesigner Uninstall");
 			}else if(arg.equals("-np")) {
 				propogate = false;
 			}else if(seleniumdir==null) {
@@ -136,7 +136,7 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 		}else{
 			System.err.println("Operating System '"+Console.OS_NAME+"' not yet supported!");
 		}
-		
+
 		try{
 			console = Console.get();
 		}catch(UnsupportedOperationException e){
@@ -148,7 +148,7 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 	 * Perform STAF install.
 	 * If -silent parameter was specified then a silent install will be done.<br>
 	 * Currently all installs are silent.<br>
-	 * If -staf parameter was specified then the install will attempt to use any 
+	 * If -staf parameter was specified then the install will attempt to use any
 	 * provided user-specified directory for the install.
 	 **/
 	static int doSTAFInstall(){
@@ -160,7 +160,7 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 		if(installstafexe.indexOf("NoJVM")>0){
 			cmd += " "+SilentInstaller.STAF_LAX_VM+" "+"\""+ seleniumdir +SELENIUMEmbeddedJavaExe+"\"";
 		}
-		
+
 		if(Console.isWindowsOS()){
 			cmd += " "+ SilentInstaller.staf_3_silent + SilentInstaller.staf_3_set_install_dir+"\""+ stafdir +"\"";
 			cmd += " "+ SilentInstaller.staf_3_register_0 + SilentInstaller.staf_3_loginstart_0;
@@ -185,12 +185,12 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 		// Execute the installation command by shell
 		ConsumOutStreamProcess p = new ConsumOutStreamProcess(cmd, false, false);
 		status = p.start();
-		
+
 		File regFile = new CaseInsensitiveFile(stafdir +s+ SilentInstaller.STAF_REG_FILE).toFile();
 		if (regFile.exists()) { regFile.delete(); }
 		pctProgress += pctIncrement;
 		progresser.setProgress(pctProgress);
-		
+
 		STAFInstaller si = new STAFInstaller();
 		si.install(stafdir);
 		pctProgress += pctIncrement;
@@ -199,7 +199,7 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 
 		return status;
 	}
-	
+
 	/**
 	 * Perform uninstall STAF.
 	 * Uninstall STAF silently.<br>
@@ -212,7 +212,7 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 		if(installedstafdir.endsWith(s)){
 			installedstafdir = installedstafdir.substring(0, installedstafdir.length()-1);
 		}
-		
+
 		if(Console.isWindowsOS()){
 			cmd = installedstafdir+ SilentInstaller.staf_uninstall_3;
 		}else if(Console.isUnixOS()){
@@ -245,10 +245,10 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 
 		STAFInstaller si = new STAFInstaller();
 		si.uninstall(installedstafdir);
-		
+
 		pctProgress += pctIncrement;
 		progresser.setProgress(pctProgress);
-		
+
 		if(Console.isWindowsOS()){
 	    	try{
 	    		Hashtable results = NativeWrapper.runShortProcessAndWait("cscript.exe", seleniumdir+"\\uninstall\\UninstallSTAFProgramGroup.vbs");
@@ -278,22 +278,22 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 		progresser.setProgressMessage("TestDesigner Harness uninstalled.");
 		return 0;
 	}
-	
+
 	private void fixSubdirectoryFiles(String findstr, String replacestr, String rootdir){
 	    try{
 	    	FileUtilities.replaceAllSubdirectoryFilesSubstrings(
-	    	 		  rootdir, 
+	    	 		  rootdir,
 	    			  new String[]{".bat",".ini",".dat",".project",".classpath",".xml",".json",
 	    	 				       ".prefs",".launch",".xmi",".txt",".index",".history",
-	    	 				       ".location",".markers",".snap"}, 
-	    			  findstr, 
-	    			  replacestr, 
-	    			  false);		    	
+	    	 				       ".location",".markers",".snap"},
+	    			  findstr,
+	    			  replacestr,
+	    			  false);
 	    }catch(Exception x){
 	    	progresser.setProgressMessage(x.getClass().getSimpleName() +": "+x.getMessage() +" while processing "+ rootdir + " for "+ findstr);
 	    }
 	}
-	
+
 	static final String[] findStrings = new String[]{
 			"C:\\SeleniumPlus",
 			"C:\\\\SeleniumPlus",
@@ -303,7 +303,7 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 			"C\\:_SeleniumPlus",
 			"C:\\/SeleniumPlus"
 	};
-		
+
 	String convertWinReplaceString(String findStr, String replaceStr){
 		StringBuffer rc = new StringBuffer();
 		int cindex = replaceStr.indexOf(":");
@@ -313,24 +313,24 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 		String[] findarr = findStr.split(":");
 		String[] replarr = replaceStr.split(":");
 		String temp;
-		
+
 		// handle left of colon
-		
+
 		// start with drive letter--always first
 		rc.append(replarr[0]);
 		// add \\ backslashes if found before ":"
 		if(findarr[0].contains("\\")) rc.append("\\");
-		
+
 		// add the colon
 		rc.append(":");
-		
+
 		// handle right of colon
-		
+
 		if(findarr[1].contains("\\\\")) replarr[1] = replarr[1].replace("\\", "\\\\");
 		if(findarr[1].contains("/")) replarr[1] = replarr[1].replace("\\", "/");
 		if(findarr[1].startsWith("_")) replarr[1] = replarr[1].replace("\\", "_");
 		rc.append(replarr[1]);
-		
+
 		return rc.toString();
 	}
 
@@ -357,15 +357,15 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 	    	catch(Exception x){
 	    		progresser.setProgressMessage("Create Selenium Plus Program Group "+ x.getClass().getSimpleName()+": "+x.getMessage());
 	    		return false;
-	    	}	    
+	    	}
 		}
     	return true;
 	}
 	/**
 	 * Currently assumes SeleniumPlus has been installed (unzipped) and SELENIUM_PLUS is already set.
-	 * Can set SELENIUM_PLUS if args[0] is given a valid value to use.  
+	 * Can set SELENIUM_PLUS if args[0] is given a valid value to use.
 	 * If args[0] is provided, the path will be validated before it is used.
-	 * Adds SeleniumPlus paths to CLASSPATH and PATH Environment Variables as long as SeleniumPlus JAR 
+	 * Adds SeleniumPlus paths to CLASSPATH and PATH Environment Variables as long as SeleniumPlus JAR
 	 * is found to exist.
 	 */
 	public boolean install(String... args) {
@@ -385,7 +385,7 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 				}
 			}
 		}
-		if (safsdir == null) safsdir = getEnvValue(SELENIUMDIREnv);		
+		if (safsdir == null) safsdir = getEnvValue(SELENIUMDIREnv);
 		if (safsdir == null || safsdir.length() == 0) {
 			progresser.setProgressMessage("Failed to get "+SELENIUMDIREnv+" value to use for the install.");
 			return false;
@@ -405,7 +405,7 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 		if(file.isFile()) {
 			appendSystemEnvironment("CLASSPATH", stafembed, null);
 		}
-		
+
 		if(propogate){
 			InstallerImpl installer = null;
 			if(Platform.isWindows()){
@@ -440,7 +440,7 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 			progresser.setProgressMessage("processing "+ finddir+" for "+findstr);
 			fixSubdirectoryFiles(findstr, convertWinReplaceString(findstr, safsdir), finddir);
 		}
-	    
+
 	    if(Platform.isWindows()){
     		Hashtable results = null;
 	    	try{
@@ -466,13 +466,13 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 	    		progresser.setProgressMessage("CreateShortcut "+ x.getClass().getSimpleName()+": "+x.getMessage());
 	    		return false;
 	    	}
-	    	try { 
+	    	try {
 	    		progresser.setProgressMessage("Installing Windows DesignerMon support.");
 	    		NativeWrapper.SetRegistryKeyValue(HKLM_RUN_KEY, HKLM_RUN_MONITOR, "REG_SZ", "wscript.exe "+ safsdir +"\\extra\\ServiceMonitor.vbs -noprompt");
 	    	}catch(Throwable ignore){
 				progresser.setProgressMessage("WARNING: Installing Windows DesignerMon support was not successful at this time.");
 	    	}
-	    	try{ 
+	    	try{
 	    		progresser.setProgressMessage("Starting Windows DesignerMon.");
 	    		NativeWrapper.runAsynchBatchProcess(safsdir +"\\extra", "start "+ safsdir +"\\extra\\ServiceMonitor.vbs -noprompt");
 	    	}catch(Throwable ignore){
@@ -505,10 +505,10 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 		removeSystemEnvironmentSubstringContaining("CLASSPATH", libpath + "safsrational_ft_custom.jar", null);
 		removeSystemEnvironmentSubstringContaining("CLASSPATH", libpath + "safsrational_ft_enabler.jar", null);
 		removeSystemEnvironmentSubstringContaining("CLASSPATH", libpath + "safsrational_xde.jar", null);
-		
+
 		removeSystemEnvironmentSubstringContaining("CLASSPATH", libpath + "robotium-remotecontrol.jar", null);
 		removeSystemEnvironmentSubstringContaining("CLASSPATH", libpath + "robotium-serializable.jar", null);
-		
+
 		removeSystemEnvironmentSubstringContaining("CLASSPATH", libpath + "JSTAFEmbedded.jar", null);
 		removeSystemEnvironmentSubstringContaining("CLASSPATH", libpath + "jaccess.jar", null);
 		removeSystemEnvironmentSubstringContaining("CLASSPATH", libpath + "jakarta-regexp-1.3.jar", null);
@@ -536,11 +536,11 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 		setEnvValue("PATH_SAFSBAK", null);
 		return true;
 	}
-	
+
 	/**
 	 * Unset the System Environment Variables used by SeleniumPlus.
 	 * Remove SELENIUM_PLUS and paths from CLASSPATH and PATH Environment Variables.
-	 * Can unset SELENIUM_PLUS if args[0] is given a value to use.  
+	 * Can unset SELENIUM_PLUS if args[0] is given a value to use.
 	 * @param args
 	 * @return
 	 */
@@ -599,13 +599,13 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 		// remove AFTER all the other uninstallers have used it.
 		return true;
 	}
-	
+
 	/**
     * This Installer provides no GUI, but will accept some configuration parameters.
-    * Any user-specified directories must exist; or, we must not be denied the ability to 
+    * Any user-specified directories must exist; or, we must not be denied the ability to
     * create them and write/copy files to them.
     * <p>
-    * 
+    *
     * @param args[] The following parameters or arguments can be specified:<br>
     * <ul>
     *   <li>&lt;SeleniumPlusPath><br>
@@ -616,16 +616,16 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
     *     perform an uninstall instead of install.
     *     <p>
     *   <li>-np<br>
-	*     If the -np option is not provided, then the installer will propogate and execute 
+	*     If the -np option is not provided, then the installer will propogate and execute
 	*     other necessary Installers.
     *     <p>
     *   <li>-nostaf<br>
     *     Skip the installation of STAF.
     *     <p>
     *   <li>-staf "alternate STAF directory"<br>
-    *     Install STAF files and services to the user specified directory 
+    *     Install STAF files and services to the user specified directory
     *     instead of the default install directory.<br>
-    *     The -staf argument does not have to be specified to install to the 
+    *     The -staf argument does not have to be specified to install to the
     *     default directory (root\STAF).
     *     <p>
     *   <li>-removestaf installedstafdir<br>
@@ -637,14 +637,14 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
     *     This will override the STAF 3 or later default executable.
     *     <p>
     * </ul>
-    * 
+    *
 	 * Main Java executable.  Primarily to run standalone outside of a larger process.
 	 * <p>
 	 * %SELENIUMPLUSDIR%\Java\jre\bin\java org.safs.install.SeleniumPlusInstaller [C:\SeleniumPlus]
 	 * <p>
 	 * %SELENIUMPLUSDIR%\Java\jre\bin\java org.safs.install.SeleniumPlusInstaller -u [C:\SeleniumPlus]
 	 * <p>
-	 * If the -np option is not provided, then the installer will propogate and execute 
+	 * If the -np option is not provided, then the installer will propogate and execute
 	 * other necessary SAFS Framework Installers.
 	 * <p>
 	 * System.exit(0) on perceived success.<br>
@@ -652,9 +652,9 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 	 * @param args:
 	 * <p><ul>
 	 * "-u"  -- to perform an uninstall instead of install.<br>
-	 * "-np" -- do not propogate to other installers.<br> 
+	 * "-np" -- do not propogate to other installers.<br>
 	 * Any first arg other than (-u or -np) will be considered the path for SELENIUMPLUSDIR.<br>
-	 * The path for SELENIUMPLUSDIR does NOT need to be provided if the System Environment Variable 
+	 * The path for SELENIUMPLUSDIR does NOT need to be provided if the System Environment Variable
 	 * already exists with a valid setting.<br>
 	 * </ul>
 	 * @see org.safs.install.SilentInstaller
@@ -663,20 +663,20 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 	public static void main(String[] args) {
 		SeleniumPlusInstaller installer = new SeleniumPlusInstaller();
 		IndependantLog.setDebugListener(installer);
-		
+
 		initialize();
 		parseArgs(args);
 		printArgs(args);
-		
-		int status = -1;		
+
+		int status = -1;
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
             	progresser.createAndShowGUI();
             }
         });
-        		
+
 		boolean success = true;
-		
+
 		if(uninstall){
 			progresser.setProgressMessage("Uninstalling TestDesigner.");
 			if(removestaf){
@@ -690,13 +690,13 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 			pctProgress += pctIncrement;
 			progresser.setProgress(pctProgress);
 			progresser.setProgressMessage("Deleting assets at "+ seleniumdir);
-			
+
 			File aFile = new CaseInsensitiveFile(seleniumdir).toFile();
 			File[] files = aFile.listFiles();
 			for (int i=0; i<files.length; i++){
 				if(!isSelPlusProject(files[i]))
 					FileUtilities.deleteDirectoryRecursively(files[i].getAbsolutePath(), false);
-			}			
+			}
 			pctProgress += pctIncrement;
 			progresser.setProgress(pctProgress);
 			progresser.setProgressMessage("Removing Environment "+ SELENIUMDIREnv);
@@ -719,7 +719,7 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 					progresser.setProgressMessage("TestDesigner Failed install STAF Harness.");
 				}
 			}
-				
+
 			if(success) {
 				success = createSeleniumPlusProgramGroup();
 			}else{
@@ -739,21 +739,21 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 	@Override
 	public void onReceiveDebug(String message) {
 		System.out.println(message);
-	}	
-	
-	/** 
+	}
+
+	/**
 	 * Check if SeleniumPlus project or not
 	 * @param directory
 	 * @return -- true or false
 	 */
-	public static boolean isSelPlusProject(File directory) {		
+	public static boolean isSelPlusProject(File directory) {
 		String[] files = directory.list();
 		if (files != null) {
 			for(int i=0; i<files.length; i++){
 				if(files[i].equalsIgnoreCase(".project")){
 					return true;
 				}
-			}		
+			}
 		}
 		return false;
 	}
