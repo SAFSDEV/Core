@@ -4,12 +4,13 @@
 
 /**
  * History:
- * 		SEP 23, 2016, SCNTAX, Replace 'AutoItX' as SAFS version 'AutoItXPlus'.
+ * 		SEP 23, 2016 SCNTAX Replace 'AutoItX' as SAFS version 'AutoItXPlus'.
+ * 		MAY 16, 2017 SBJLWA Modified executeCommand(): return boolean to tell if command succeed or not.
+ *                          Modified AutoItObject(): only register the appropriate AutoItX3 DLL according to system bits.
  */
 package org.safs.autoit;
 
 import java.io.File;
-import java.util.Vector;
 
 import org.safs.IndependantLog;
 import org.safs.SAFSProcessorInitializationException;
@@ -36,20 +37,21 @@ public class AutoIt {
 
 		/** COM class instantiation method */
 		String methodName = StringUtils.getMethodName(0, false) + "() ";
+		boolean is32Bits = jvmBitVersion().contains("32");
 
 		if (it == null) {
 
 			String jacobDllVersionToUse;
 			String libdir = null;
 
-			if (jvmBitVersion().contains("32")){
+			if (is32Bits){
 				jacobDllVersionToUse = JACOB_DLL_32;
 			} else {
 				jacobDllVersionToUse = JACOB_DLL_64;
 			}
 
 			// ****************************************
-			// this test for SAFS or SeleniumPlus should become more centally located for all of SAFS.
+			// this test for SAFS or SeleniumPlus should become more centrally located for all of SAFS.
 			// See org.safs.install.InstallerImpl, or associated classes.
 			String root = null;
 			boolean found = false;
@@ -91,20 +93,21 @@ public class AutoIt {
 			} catch (ComFailException cfe) {
 				// register dll and re initiate object
 				IndependantLog.debug(methodName + "Registering AutoIt DLLs on the System.");
-
-				String cmd =  System.getenv("SYSTEMDRIVE") + "\\Windows\\SysWOW64\\regsvr32 /s "+libdir+"AutoItX3.dll";
-				executeCommand(cmd);
-				cmd = System.getenv("SYSTEMDRIVE") + "\\Windows\\System32\\regsvr32 /s "+libdir+"AutoItX3_x64.dll";
-				executeCommand(cmd);
-
-				IndependantLog.debug(methodName + "AutoItX DLLs should now be registered.");
+				String cmd = System.getenv("SYSTEMDRIVE") + "\\Windows\\SysWOW64\\regsvr32  "+libdir+"AutoItX3.dll";
+				if(!is32Bits){
+					cmd = System.getenv("SYSTEMDRIVE") + "\\Windows\\System32\\regsvr32  "+libdir+"AutoItX3_x64.dll";
+				}
+				if(executeCommand(cmd)){
+					IndependantLog.debug(methodName + "AutoItX DLLs should now be registered.");
+				}else{
+					IndependantLog.warn(methodName + "Failed to register AutoItX DLLs.");
+				}
 
 				try{
 					it = new AutoItXPlus();
 					IndependantLog.debug(methodName + "AutoItX object was finally created");
-				}
-				catch(ComFailException cf){
-					IndependantLog.debug(methodName + "still cannot instantiate AutoIt Object due to "+
+				}catch(ComFailException cf){
+					IndependantLog.error(methodName + "still cannot instantiate AutoIt Object due to "+
 				                         cf.getClass().getSimpleName()+", "+ cf.getMessage());
 				}
 			}
@@ -121,27 +124,28 @@ public class AutoIt {
 	/**
 	 * Used internally to register the DLLs if that has never been done.
 	 * @param command
-	 * @return Vector containing any data made available by the ProcessCapture console.
+	 * @return boolean true if the command has been successfully handled.
 	 * @see org.safs.tools.consoles.ProcessCapture
 	 */
-	private static Vector executeCommand(String command) {
-
-		StringBuffer output = new StringBuffer();
-
+	private static boolean executeCommand(String command) {
 		Process p;
 		ProcessCapture console;
-		Vector data = new Vector();
 
 		try {
 			p = Runtime.getRuntime().exec(command);
 			console = new ProcessCapture(p, null, true, true);
 			try{ console.thread.join(); }catch(InterruptedException x){;}
 			console.shutdown();
-			data = console.getData();
+
+			int exitcode = console.getExitValue();
+			if(exitcode!=0){
+				IndependantLog.debug("Failed to execute command '"+command+"'\n"+"exitcode="+exitcode);
+			}
+			return exitcode==0;
 		} catch (Exception e) {
 			IndependantLog.debug("AutoIt.executeCommand "+ e.getClass().getSimpleName()+", "+ e.getMessage(), e);
+			return false;
 		}
-		return data;
 	}
 
 	/**
