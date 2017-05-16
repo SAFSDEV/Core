@@ -1,3 +1,4 @@
+'Deprecated, please use CreateSeleniumPlusProgramGroup.wsf instead
 
 Sub createShortcut( oshell, programDir, targetfile, title, arguments )
     Dim pos, workingdir, oShellLink

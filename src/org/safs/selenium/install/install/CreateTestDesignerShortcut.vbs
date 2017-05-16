@@ -1,3 +1,4 @@
+'Deprecated, please use CreateSeleniumPlusProgramGroup.wsf instead
 
 Set oShell = CreateObject("WScript.Shell")
 Set env   = oShell.Environment("SYSTEM")
