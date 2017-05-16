@@ -1,10 +1,13 @@
 /** Copyright (C) SAS Institute, Inc. All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
+/**
+ * MAY 16, 2017	SBBLWA	Combined creating selenium-plus shortcuts to one script CreateSeleniumPlusProgramGroup.wsf
+ *                      Set on shortcuts' property "Run As Administrator".
+ */
 package org.safs.install;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -334,10 +337,14 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 		return rc.toString();
 	}
 
+	/**
+	 * Create SeleniumPlus Program Group and shortcuts.
+	 * @return boolean true if successful
+	 */
 	static boolean createSeleniumPlusProgramGroup(){
 		if(Console.isWindowsOS()){
 	    	try{
-	    		Hashtable results = NativeWrapper.runShortProcessAndWait("cscript.exe", seleniumdir +"\\install\\CreateSeleniumPlusProgramGroup.vbs");
+	    		Hashtable results = NativeWrapper.runShortProcessAndWait("cscript.exe", seleniumdir +"\\install\\CreateSeleniumPlusProgramGroup.wsf");
 	    		Integer rc = (Integer)results.get("Result");
 	    		Vector out;
 	    		if(rc.intValue()!= 0){
@@ -442,28 +449,8 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 		}
 
 	    if(Platform.isWindows()){
-    		Hashtable results = null;
-	    	try{
-    			progresser.setProgressMessage("Creating SeleniumPlus shortcut.");
-	    		results = NativeWrapper.runShortProcessAndWait("cscript.exe", safsdir +"\\install\\CreateTestDesignerShortcut.vbs");
-	    		Integer rc = (Integer)results.get("Result");
-	    		Vector out;
-	    		if(rc.intValue()!= 0){
-	    			progresser.setProgressMessage("CreateShortcut failed with status "+ rc.intValue());
-		    		out = (Vector)results.get("Vector");
-		    		for(int i=0;i<out.size();i++){
-		    			progresser.setProgressMessage(out.get(i).toString());
-		    		}
-		    		return false;
-	    		}
-    			progresser.setProgressMessage("Create SeleniumPlus Shortcut successful:");
-	    		out = (Vector)results.get("Vector");
-	    		for(int i=0;i<out.size();i++){
-	    			progresser.setProgressMessage(out.get(i).toString());
-	    		}
-	    	}
-	    	catch(Exception x){
-	    		progresser.setProgressMessage("CreateShortcut "+ x.getClass().getSimpleName()+": "+x.getMessage());
+	    	progresser.setProgressMessage("Creating SeleniumPlus Program Group and ShortCuts ... ");
+	    	if(!createSeleniumPlusProgramGroup()){
 	    		return false;
 	    	}
 	    	try {
@@ -720,11 +707,10 @@ public class SeleniumPlusInstaller extends InstallerImpl implements DebugListene
 				}
 			}
 
-			if(success) {
-				success = createSeleniumPlusProgramGroup();
-			}else{
+			if(!success){
 				progresser.setProgressMessage("Aborting the install.");
 			}
+
 			pctProgress = 100;
 			progresser.setProgress(pctProgress);
 		}
