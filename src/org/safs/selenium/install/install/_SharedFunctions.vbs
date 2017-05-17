@@ -106,35 +106,43 @@ Function SetLinkFileRunASAdmnistrator(lnkFile)
   srcStream.Position = 21 '0x15
   propertyByteArray = srcStream.Read(1)
   'propertyByteArrayis Byte(), which is really just byte strings, it is very hard to handle!!!
-  if(debug) then
-    WScript.Echo "propertyByteArray TypeName=" & TypeName(propertyByteArray) & " VarType="&VarType(propertyByteArray)
-    WScript.Echo "Err.Number " & Err.Number
-  end if
-  
   'Cannot modify propertyByteArray(0) ???
   'propertyByteArray(0) = propertyByteArray(0) or 32 '0x20
   'WScript.Echo "Err.Number " & Err.Number
-  
+  if(debug) then
+    WScript.Echo "propertyByteArray TypeName=" & TypeName(propertyByteArray) & " VarType="&VarType(propertyByteArray)
+  end if
+
   Dim xmldoc, node
   Set xmldoc = CreateObject("Msxml2.DOMDocument")
   Set node = xmldoc.CreateElement("binary")
   node.DataType = "bin.hex"
+  'node.Text will hold the byte array in string format (each byte is represented by an hex-decimal string)
+  node.NodeTypedValue = propertyByteArray
   if(debug) then
-    node.NodeTypedValue = propertyByteArray
-    WScript.Echo "the 21th byte, its original value is " & node.Text
+    WScript.Echo "the 21th byte, its original value is 0X" & node.Text
   end if
-  'Set the text to 0x20, it is 0010 0000, will set the 6 bit on
-  'so that node.NodeTypedValue will contain the Variant of type Byte() 
-  node.Text = "20" '0x20
+  
+  Dim hexPrefix, originalHex, sixBitOnHex
+  hexPrefix = "&H"
+  originalHex = hexPrefix & node.Text
+  sixBitOnHex = hexPrefix & "20" 'it is 0010 0000, will set the 6 bit on
+  'make a bit-OR between the original value and sixBitOnHex, and convert the result to an Hex string format
+  'and set it to node.Text so that node.NodeTypedValue will contain the Variant of type Byte() 
+  node.Text = CStr(Hex(CByte(originalHex) or CByte(sixBitOnHex)))
+  propertyByteArray = node.NodeTypedValue
+  if(debug) then
+    WScript.Echo "the 21th byte, its new value is 0X" & node.Text
+  end if
 
   srcStream.Position = 21
-  'srcStream.Write propertyByteArray
-  srcStream.Write node.NodeTypedValue
-  'WScript.Echo "Err.Number " & Err.Number
-  
+  srcStream.Write propertyByteArray
   srcStream.SaveToFile lnkFile, 2 'adSaveCreateOverWrite
+
   if(debug) then
+    'After calling srcStream.SaveToFile, the srcStream.Position should be reset to 0
     WScript.Echo "srcStream.Position: " & srcStream.Position
+    WScript.Echo "Err.Number " & Err.Number
   end if
   
   'Clean up resources
@@ -143,4 +151,22 @@ Function SetLinkFileRunASAdmnistrator(lnkFile)
   Err.Clear
 
   On Error Goto 0
+End Function
+
+Function Test
+    Dim hex1, hex2, hexPrefix
+    Dim byte1, byte2
+    
+    hexPrefix = "&H"
+    hex1 = "20"
+    hex2 = "40"
+    
+    byte1 = CByte(hexPrefix & hex1)
+    byte2 = CByte(hexPrefix & hex2)
+    
+    WScript.Echo "byte1=" & byte1 & " byte2=" & byte2 
+    WScript.Echo "byte1 or byte2 " & (byte1 or byte2) & " Hex(byte1 or byte2)=" & CStr(Hex(byte1 or byte2))
+    WScript.Echo "byte1 and byte2 " & (byte1 and byte2)
+    WScript.Echo "byte1 xor byte2 " & (byte1 xor byte2)
+    
 End Function
