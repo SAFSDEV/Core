@@ -18,6 +18,7 @@ import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
 import java.security.Permission;
@@ -530,6 +531,34 @@ public abstract class Utils{
 		}
 
 		return true;
+	}
+
+	/**
+	 * Change the windows .lnk file's property to make it "Run As Administrator".
+	 * @param lnkFileName String, the full path to a link file
+	 * @throws IOException
+	 */
+	public static void makeRunAsAdministrator(String lnkFileName) throws IOException{
+		//#set byte 21 (0x15) bit 6 (0x20) ON, which represents the "Run As Administrator" property
+		RandomAccessFile lnkFile = null;
+		try{
+			lnkFile = new RandomAccessFile(lnkFileName, "rw");
+			int propertyBytePos = 0x15;
+
+			//read the byte containing "Run As Administrator" property
+			lnkFile.seek(propertyBytePos);
+			byte propertyByte = lnkFile.readByte();
+
+			//Set the 6th bit on
+			propertyByte = (byte) (propertyByte | 0x20);
+
+			//write the byte back to the link file
+			lnkFile.seek(propertyBytePos);
+			lnkFile.writeByte(propertyByte);
+		}finally{
+			if(lnkFile!=null)
+				lnkFile.close();
+		}
 	}
 
 	private static void testArrays(){
