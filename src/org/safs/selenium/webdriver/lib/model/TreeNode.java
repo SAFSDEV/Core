@@ -1,4 +1,4 @@
-/** 
+/**
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
@@ -11,16 +11,16 @@ import org.safs.selenium.webdriver.lib.Tree;
 import org.safs.tools.stringutils.StringUtilities;
 
 /**
- * 
+ *
  * History:<br>
- * 
+ *
  *  <br>   May 30, 2014    (Lei Wang) Initial release.
  */
 public class TreeNode extends HierarchicalElement {
 
 	protected boolean expanded = false;
 	protected boolean selectable = false;
-	
+
 	protected TreeNode(){}
 	public TreeNode(Object object){ initialize(object);}
 
@@ -30,7 +30,7 @@ public class TreeNode extends HierarchicalElement {
 	public boolean isExpanded() {
 		return expanded;
 	}
-	
+
 	public boolean isSelectable() {
 		return selectable;
 	}
@@ -60,14 +60,14 @@ public class TreeNode extends HierarchicalElement {
 		String text = super._getLabel();
 		return StringUtils.getFirstLine(text);
 	}
-	
+
 	protected TreeNode newInstance(Object object){
 		return new TreeNode(object);
 	}
 	protected TreeNode[] newArray(int length){
 		return new TreeNode[length];
 	}
-	
+
 	public TreeNode getParent(){
 		String debugmsg = StringUtils.debugmsg(getClass(), "getParent");
 		if(parent!=null && (parent instanceof TreeNode)) return (TreeNode) parent;
@@ -76,7 +76,7 @@ public class TreeNode extends HierarchicalElement {
 			return null;
 		}
 	}
-	
+
 	public TreeNode[] getChildren() {
 		String debugmsg = StringUtils.debugmsg(getClass(), "getChildren");
 		if(children==null) return null;
@@ -100,11 +100,11 @@ public class TreeNode extends HierarchicalElement {
 			throw new SeleniumPlusException(message);
 		}
 	}
-	
+
 	public boolean equals(Object node){
 		if(node==null) return false;
 		if(!(node instanceof TreeNode)) return false;
-		
+
 		return super.equals(node);
 	}
 }

@@ -1,4 +1,4 @@
-/** 
+/**
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
@@ -18,10 +18,10 @@ import org.safs.StringUtils;
  * "expected matched indices" is an array of int value and it means the Nth matched node of each level in the path<br>
  * If {@link #matchIndexHierarchically()} return true, then it contains an array; otherwise it just contains a single int value.<br>
  * </ol>
- * 
+ *
  * <br>
  * History:<br>
- * 
+ *
  *  <br>   Jun 26, 2014    (Lei Wang) Initial release.
  *  <br>   Oct 29, 2014    (Lei Wang) Add constructor with only one int value, to match only the index.
  *                                  Overload method matchText(): to match text at certain level for hierarchical structure.
@@ -34,20 +34,20 @@ public class TextMatchingCriterion {
 	 * matchIndex allows to match item N in a list containing duplicate entries.<br>
 	 * when this value is provided as matchIndex, then verification will be ok if one<br>
 	 * of matched items is verified.<br>
-	 * 
+	 *
 	 * @see #verifyItemSelection(String, boolean, int, boolean)
 	 */
 	public static final int INDEX_TRY_ALL_MATCHED_ITEMS = -1000;
-	
+
 	/**The text/path string to match, it can also be a regex expression*/
 	private String text = null;
 	/**path array, parsed from field text*/
 	private String[] pathArray = null;
 	/**If the match of text is partial or full*/
 	private boolean partialMatch = false;
-	
+
 	private String separator = GuiObjectRecognition.DEFAULT_PATH_SEPARATOR;
-	
+
 	/**
 	 * <pre>
 	 * it is 0-based index.
@@ -61,11 +61,11 @@ public class TextMatchingCriterion {
 	private int expectedMatchedIndex = INVALID_INDEX;
 	/**it is 0-based indicies array, to match item N in a tree/menu containing duplicate entries for each level*/
 	private int[] expectedMatchedIndices = null;
-	
+
 	public TextMatchingCriterion(int expectedMatchedIndex){
 		this.expectedMatchedIndex = expectedMatchedIndex;
 	}
-	
+
 	/**
 	 * constructor of TextMatchingCriterion.
 	 * @param text String, the text to match
@@ -78,7 +78,7 @@ public class TextMatchingCriterion {
 		this.partialMatch = partialMatch;
 		this.expectedMatchedIndex = expectedMatchedIndex;
 	}
-	
+
 	/**
 	 * constructor of TextMatchingCriterion.
 	 * @param path String, the path to match
@@ -90,7 +90,7 @@ public class TextMatchingCriterion {
 		this.partialMatch = partialMatch;
 		this.expectedMatchedIndices = expectedMatchedIndices;
 	}
-	
+
 	/**
 	 * constructor of TextMatchingCriterion.
 	 * @param path String, the path to match
@@ -100,7 +100,7 @@ public class TextMatchingCriterion {
 	public TextMatchingCriterion(String path, boolean partialMatch, String indexPathStr){
 		this(path, partialMatch, indexPathStr, GuiObjectRecognition.DEFAULT_PATH_SEPARATOR);
 	}
-	
+
 	/**
 	 * constructor of TextMatchingCriterion.
 	 * @param path String, the path to match
@@ -114,7 +114,7 @@ public class TextMatchingCriterion {
 		setText(path);
 		this.separator = separator;
 		this.partialMatch = partialMatch;
-		
+
 		String[] nodes = StringUtils.getTokenArray(path, separator);
 
 		if(indexPathStr==null || indexPathStr.isEmpty()){
@@ -134,20 +134,20 @@ public class TextMatchingCriterion {
 				}
 			}
 		}
-		
+
 		if(!isHierarchical()) expectedMatchedIndex = expectedMatchedIndices[0];
 	}
-	
+
 	public String getSeparator(){
 		return separator;
 	}
-	
+
 	protected void setText(String text){
 		this.text = text;
 		if(text!=null && text.contains(separator))
 			pathArray = StringUtils.getTokenArray(text, separator, StringUtils.REGEX_ESCAPE_CHARACTER);
 	}
-	
+
 	/**
 	 * Test if the expected-index should be matched level by level.<br>
 	 * Be careful, even if {@link #isHierarchical()} is true, but this method may return false. In that situation,<br>
@@ -158,7 +158,7 @@ public class TextMatchingCriterion {
 	public boolean matchIndexHierarchically(){
 		return expectedMatchedIndices!=null;
 	}
-	
+
 	/**
 	 * Test if the criterion is hierarchical or not.<br>
 	 * @return boolean, true if the criterion is hierarchical
@@ -169,10 +169,10 @@ public class TextMatchingCriterion {
 			isHierarchical = (expectedMatchedIndices!=null && expectedMatchedIndices.length>1);
 			if(!isHierarchical) isHierarchical = text.indexOf(separator)>-1;//text contain ->
 		}catch(Exception e){}
-		
+
 		return isHierarchical;
 	}
-	
+
 	/**return 0-based indices array*/
 	public int[] getExpectedMatchedIndices(){
 		return expectedMatchedIndices;
@@ -192,7 +192,7 @@ public class TextMatchingCriterion {
 	public boolean isPartialMatch(){
 		return partialMatch;
 	}
-	
+
 	/**
 	 * Test if the actualText matches with the {@link #getText()}.<br>
 	 * Used for non-hierarchical structure, such as List, ComboBox etc.
@@ -201,7 +201,7 @@ public class TextMatchingCriterion {
 	public boolean matchText(String actualText){
 		return StringUtils.matchText(actualText, text, partialMatch, false);
 	}
-	
+
 	/**
 	 * Test if the actualText matches with the value of array {@link #pathArray} at index.<br>
 	 * Used for hierarchical structure, such as Tree, Menu etc.
@@ -215,10 +215,10 @@ public class TextMatchingCriterion {
 			return false;
 		}
 	}
-	
+
 	public String toString(){
 		StringBuffer sb = new StringBuffer();
-		
+
 		sb.append("text/path="+text+" ");
 		sb.append("partialMatch="+partialMatch+" ");
 		if(matchIndexHierarchically()){
@@ -233,7 +233,7 @@ public class TextMatchingCriterion {
 		}else{
 			sb.append("expectedMatchedIndex="+expectedMatchedIndex+" ");
 		}
-		
+
 		return sb.toString();
 	}
 }

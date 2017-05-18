@@ -1,13 +1,13 @@
-/** 
+/**
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
 package org.safs.selenium.webdriver.lib.model;
 
 /**
- * 
+ *
  * History:<br>
- * 
+ *
  *  <br>   Jun 6, 2014    (Lei Wang) Initial release.
  */
 public class MutableInteger {
@@ -17,7 +17,7 @@ public class MutableInteger {
 	public MutableInteger(int value){
 		this.value = value;
 	}
-	
+
 	public int getValue() {
 		return value;
 	}
@@ -52,5 +52,5 @@ public class MutableInteger {
 	public int decrementAfter(){
 		return --value;
 	}
-	
+
 }

@@ -1,11 +1,11 @@
-/** 
+/**
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
 /**
- * 
+ *
  * History:<br>
- * 
+ *
  *  <br>   JUN 23, 2014    (Lei Wang) Initial release.
  *  <br>   MAY 23, 2016    (Lei Wang) Override method waitAndVerifyItemSelected() with empty implementation so that the post-verification
  *                                  will be totally turned off for Menu.
@@ -27,7 +27,7 @@ public abstract class AbstractMenuSelectable extends AbstractHierarchicalSelecta
 	public AbstractMenuSelectable(Component parent) throws SeleniumPlusException {
 		super(parent);
 	}
-	
+
 	public MenuItem[] getContent() throws SeleniumPlusException{
 		try{
 			return (MenuItem[]) super.getContent();
@@ -39,7 +39,7 @@ public abstract class AbstractMenuSelectable extends AbstractHierarchicalSelecta
 			throw new SeleniumPlusException(msg);
 		}
 	}
-	
+
 	/**
 	 * According to the "hierarchical path" to get a MenuItem object.
 	 */
@@ -62,7 +62,7 @@ public abstract class AbstractMenuSelectable extends AbstractHierarchicalSelecta
 		if(!(element instanceof MenuItem)) throw new SeleniumPlusException("element is not a MenuItem object.");
 		return (MenuItem) element;
 	}
-	
+
 	/**
 	 * Override the method in super-class to turn off the post-verification, we just log a debug message.<br>
 	 * <p>
@@ -75,7 +75,7 @@ public abstract class AbstractMenuSelectable extends AbstractHierarchicalSelecta
 	protected void waitAndVerifyItemSelected(Element element) throws SeleniumPlusException {
 		IndependantLog.debug(StringUtils.debugmsg(false)+" will NOT VERIFY if the item has been selected until we override the method AbstractMenuSelectable.verifyItemSelected()!");
 	}
-	
+
 	/**
 	 * <p>
 	 * As it is hard to know if a MenuItem has been selected, it is so transient.
@@ -89,7 +89,7 @@ public abstract class AbstractMenuSelectable extends AbstractHierarchicalSelecta
 		String debugmsg = StringUtils.debugmsg(getClass(), "verifyItemSelected");
 		IndependantLog.debug(debugmsg+" What to check for a MenuItem being selected?");
 	}
-	
+
 	public void verifyMenuItem(TextMatchingCriterion criterion, String expectedStatus) throws SeleniumPlusException{
 		MenuItem menuitem = getMatchedElement(criterion);
 		if(menuitem==null){
@@ -101,5 +101,5 @@ public abstract class AbstractMenuSelectable extends AbstractHierarchicalSelecta
 			throw new SeleniumPlusException(msg, SeleniumPlusException.CODE_VERIFICATION_FAIL);
 		}
 	}
-	
+
 }

@@ -1,4 +1,4 @@
-/** 
+/**
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
@@ -11,9 +11,9 @@ import org.safs.selenium.webdriver.lib.SeleniumPlusException;
 import org.safs.selenium.webdriver.lib.WDLibrary;
 
 /**
- * 
+ *
  * History:<br>
- * 
+ *
  * <pre>
  *  Apr 25, 2014    (Lei Wang) Initial release.
  *  May 05, 2014    (Lei Wang) Modify methods selectItem and verifyItemSelection to accept one more parameter 'matchIndex'.
@@ -23,9 +23,9 @@ import org.safs.selenium.webdriver.lib.WDLibrary;
  * </pre>
  */
 public interface ISelectable extends IOperable{
-	
+
 	/**
-	 * Try to select (single-click) the item according to the item's text (fully or partially given), 
+	 * Try to select (single-click) the item according to the item's text (fully or partially given),
 	 * and then verify if the item has been really selected according to the parameter 'verify'.
 	 * If the parameter key is provided, the selection will happen with that key pressed at the same time.
 	 * If the parameter offset is provided, then click at offset relative to the top-left corner of view; otherwise at the center.
@@ -50,7 +50,7 @@ public interface ISelectable extends IOperable{
 	 */
 	public void selectItem(TextMatchingCriterion criterion, boolean verify, Keys key, Point offset, int mouseButtonNumber) throws SeleniumPlusException;
 	/**
-	 * Try to select (single-click) the item according to the index, and then verify if the item 
+	 * Try to select (single-click) the item according to the index, and then verify if the item
 	 * has been really selected according to the parameter 'verify'.
 	 * If the parameter key is provided, the selection will happen with that key pressed at the same time.
 	 * If the parameter offset is provided, then click at offset relative to the top-left corner of view; otherwise at the center.
@@ -75,7 +75,7 @@ public interface ISelectable extends IOperable{
 	 */
 	public void selectItem(int index, boolean verify, Keys key, Point offset, int mouseButtonNumber) throws SeleniumPlusException;
 	/**
-	 * Try to activate (double-click) the item according to the item's text (fully or partially given), 
+	 * Try to activate (double-click) the item according to the item's text (fully or partially given),
 	 * and then verify if the item has been really selected according to the parameter 'verify'.
 	 * If the parameter key is provided, the selection will happen with that key pressed at the same time.
 	 * <br>
@@ -90,7 +90,7 @@ public interface ISelectable extends IOperable{
 	 */
 	public void activateItem(TextMatchingCriterion criterion, boolean verify, Keys key, Point offset) throws SeleniumPlusException;
 	/**
-	 * Try to activate (double-click) the item according to the index, and then verify if the item 
+	 * Try to activate (double-click) the item according to the index, and then verify if the item
 	 * has been really selected according to the parameter 'verify'.
 	 * If the parameter key is provided, the selection will happen with that key pressed at the same time.
 	 * <br>
@@ -125,7 +125,7 @@ public interface ISelectable extends IOperable{
 	 * @throws SeleniumPlusException if the verification fails.
 	 */
 	public void verifyContains(TextMatchingCriterion criterion) throws SeleniumPlusException;
-	
+
 	/**
 	 * according to the element's label to get a Element object.
 	 * @param criterion TextMatchingCriterion, containing text, partialMatch, matchedIndex as search-criterion.

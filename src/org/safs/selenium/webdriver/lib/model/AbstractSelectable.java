@@ -1,4 +1,4 @@
-/** 
+/**
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
@@ -20,7 +20,7 @@ import org.safs.selenium.webdriver.lib.WDLibrary;
 import org.safs.tools.stringutils.StringUtilities;
 
 /**
- * 
+ *
  * History:<br>
  * <pre>
  *  Apr 25, 2014    (Lei Wang) Initial release.
@@ -47,7 +47,7 @@ public abstract class AbstractSelectable extends EmbeddedObject implements ISele
 	 * and put the content in the cache and return it.<br>
 	 * If subclass doesn't need this functionality, then just override this method.<br>
 	 * If subclass needs this functionality, then override method {@link #getCacheableContent()}<br>
-	 * @see #getCacheableContent() 
+	 * @see #getCacheableContent()
 	 */
 	public Element[] getContent() throws SeleniumPlusException{
 		WebElement element = webelement();
@@ -127,12 +127,12 @@ public abstract class AbstractSelectable extends EmbeddedObject implements ISele
 	public void verifyContains(TextMatchingCriterion criterion) throws SeleniumPlusException{
 		Element element = null;
 		try{
-			element = getMatchedElement(criterion);			
+			element = getMatchedElement(criterion);
 		}catch(SeleniumPlusException se){
 			//If we get this SeleniumPlusException, which means we cannot get the matched element.
 			element = null;
 		}
-		
+
 		if(element==null){
 			String msg = "verification error: does not contain element '"+criterion.getText()+"'";
 			throw new SeleniumPlusException(msg, SeleniumPlusException.CODE_VERIFICATION_FAIL);
@@ -170,7 +170,7 @@ public abstract class AbstractSelectable extends EmbeddedObject implements ISele
 		}
 	}
 	/**
-	 * 
+	 *
 	 * @param element	Element, the element to check.
 	 * @param expectSelected boolean, true if the element is expected 'selected'; false if expected 'unselected'.
 	 * @throws SeleniumPlusException if the verification fails.
@@ -208,7 +208,7 @@ public abstract class AbstractSelectable extends EmbeddedObject implements ISele
 	 * Atter calling this method, user may need to verify that element has been selected. Please call {@link #waitAndVerifyItemSelected(Element)}<br>
 	 * instead of {@link #verifyItemSelected(Element)}, as the first method will also try the wait for element<br>
 	 * to be ready and call {@link #refresh(boolean)}.<br>
-	 * 
+	 *
 	 * @param element Element, the element to select
 	 * @param key org.openqa.selenium.Keys, it is the key to press during selection.<br>
 	 *                  for example {@link Keys#SHIFT}, or {@link Keys#CONTROL}.<br>
@@ -230,7 +230,7 @@ public abstract class AbstractSelectable extends EmbeddedObject implements ISele
 			//If the elementElement is not visible on the page, click on it will throw exception
 			//Selenium should fix this!!!
 			//if(!element.isDisplayed()) showOnPage(element);
-			//sometimes elementElement.isDisplayed() will return true even if the element is not really shown, 
+			//sometimes elementElement.isDisplayed() will return true even if the element is not really shown,
 			//for example "node in Tree" out of scroll area, so we always to call showOnPage() to make sure the item is shown.
 			//Selenium should fix this!!!
 			if(!isShowOnPage(element)) showOnPage(element);
@@ -243,11 +243,11 @@ public abstract class AbstractSelectable extends EmbeddedObject implements ISele
 			}else if(numberOfClick==2){
 				WDLibrary.doubleClick(webelement, offset, key, mouseButtonNumber);
 			}
-			
+
 		} catch(Exception e) {
 			IndependantLog.error(debugmsg+" Met exception.",e);
 			throw new SeleniumPlusException("Fail to select element by id '"+element.getId()+"'. due to '"+e.getMessage()+"'");
-		} 
+		}
 	}
 
 	/**
@@ -273,7 +273,7 @@ public abstract class AbstractSelectable extends EmbeddedObject implements ISele
 			String message = "Fail to scroll to item '"+element.getLabel()+"'. Met "+StringUtils.debugmsg(e);
 			IndependantLog.warn(debugmsg+message);
 
-			try {			
+			try {
 				//make the item visible in the browser's viewport
 				Coordinates coordinate = ((Locatable) element.getWebElement()).getCoordinates();
 				coordinate.inViewPort();
@@ -287,10 +287,10 @@ public abstract class AbstractSelectable extends EmbeddedObject implements ISele
 	/**
 	 * Wait for element ready, means that element's attribute has been updated.<br>
 	 * This method just wait some time, subclass may give a more detail implementation.<br>
-	 * When this method will be called?<br> 
+	 * When this method will be called?<br>
 	 * For example, before calling {@link #verifyItemSelected(Element)}, because<br>
 	 * {@link #verifyItemSelected(Element)} needs to check element's attributes.<br>
-	 * 
+	 *
 	 * @param element Element, the element needs to be ready
 	 * @param milliseconds int, the time to wait
 	 * @throws SeleniumPlusException
@@ -302,14 +302,14 @@ public abstract class AbstractSelectable extends EmbeddedObject implements ISele
 	/**
 	 * Wait for element ready, means that element's attribute has been updated.<br>
 	 * This method just wait 200 milliseconds, subclass may give a more detail implementation.<br>
-	 * 
+	 *
 	 * @param element Element, the element needs to be ready
 	 * @throws SeleniumPlusException
 	 */
 	protected void waitElementReady(Element element) throws SeleniumPlusException {
 		waitElementReady(element, DEFAULT_WAIT_TIME);
 	}
-	
+
 	/**
 	 * Wait Item ready, and verify the item has been selected.<br>
 	 * Before verification, we need to refresh the parent if the page doesn't change.<br>
@@ -333,7 +333,7 @@ public abstract class AbstractSelectable extends EmbeddedObject implements ISele
 			throw new SeleniumPlusException(errmsg);
 		}
 	}
-	
+
 	/**
 	 * <b>Note:</b>In subclass, we need to update the 'selected' property of Element.<br>
 	 * Please call {@link #waitAndVerifyItemSelected(Element)} instead to verify selection,<br>
