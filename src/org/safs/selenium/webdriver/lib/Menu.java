@@ -1,10 +1,10 @@
-/** 
+/**
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
 /**
  * History:
- * 
+ *
  *  JAN 20, 2014    (DHARMESH4) Initial release.
  *  JUN 10, 2014    (Lei Wang) Implement keywords.
  *  JAN 08, 2015    (Lei Wang) Support "sas.hc.ui.commons.pushmenu.PushMenu"
@@ -39,7 +39,7 @@ import org.safs.selenium.webdriver.lib.model.MenuItem;
 import org.safs.selenium.webdriver.lib.model.TextMatchingCriterion;
 import org.safs.tools.stringutils.StringUtilities;
 
-/** 
+/**
  * A library class to handle different specific Menu.
  */
 public class Menu extends Component implements IMenuSelectable{
@@ -55,7 +55,7 @@ public class Menu extends Component implements IMenuSelectable{
 		super.castOperable();
 		menuSelectable = (IMenuSelectable) anOperableObject;
 	}
-	
+
 	protected IOperable createSAPOperable(){
 		String debugmsg = StringUtils.debugmsg(false);
 		IMenuSelectable operable = null;
@@ -63,7 +63,7 @@ public class Menu extends Component implements IMenuSelectable{
 			IndependantLog.debug(debugmsg+" Cannot create IMenuSelectable of "+Arrays.toString(SapSelectable_Menu.supportedClazzes));
 			try{ operable = new SAS_HC_PushMenu(this);}catch(SeleniumPlusException se1){
 				IndependantLog.warn(debugmsg+" Cannot create IMenuSelectable of "+Arrays.toString(SAS_HC_PushMenu.supportedClazzes));
-			}					
+			}
 		}
 		return operable;
 	}
@@ -75,17 +75,17 @@ public class Menu extends Component implements IMenuSelectable{
 		}
 		return operable;
 	}
-		
+
 	public static boolean isNodeSelected(WebElement menuitem){
 		return SearchObject.getBoolean(menuitem, ATTRIBUTE_ARIA_SELECTED);
 	}
-	
+
 	/**
 	 * TODO adjust for MenuItem
 	 * For menuitem, WebElement.getText() may return also the text of its children.<br>
 	 * These text are separated by '\n', this method tries to get the text before the first '\n', which<br>
 	 * should be text of this tree node.
-	 * 
+	 *
 	 * @param menuitem WebElement, represents the tree node.
 	 * @return String, the label of the MenuItem.
 	 */
@@ -93,10 +93,10 @@ public class Menu extends Component implements IMenuSelectable{
 		String text = menuitem.getText();
 		int indexofNewLine = text.indexOf("\n");
 		if(indexofNewLine!=-1) text = text.substring(0, indexofNewLine);
-		
+
 		return text;
 	}
-	
+
 	class DefaultSelectable_Menu extends AbstractMenuSelectable{
 		/**
 		 * @param parent
@@ -117,13 +117,13 @@ public class Menu extends Component implements IMenuSelectable{
 			//TODO How to get content of HTML-Menu???, what TAG???
 			throw new SeleniumPlusException("Not supported yet.");
 		}
-		
+
 		/**
 		 * This method override that of superclass. It will only try to find each node according to<br>
 		 * the path provided as parameter, and then return a simple-chain of MenuItem which contains only<br>
 		 * the nodes specified in the path. Not like the result return in superclass, which is a double-direction<br>
 		 * chain and the whole MenuBar can be accessed thought it.<br>
-		 * 
+		 *
 		 * <b>Note:</b>The parameter matchIndex is not used yet here. Need to be considered. TODO<br>
 		 */
 		public MenuItem getMatchedElement(TextMatchingCriterion criterion) throws SeleniumPlusException {
@@ -131,7 +131,7 @@ public class Menu extends Component implements IMenuSelectable{
 			MenuItem matchedNode = null;
 			String itempath = criterion.getText();
 			boolean partialMatch = criterion.isPartialMatch();
-			
+
 			//MenuItem[] elements = getContent();
 			String[] pathNodes = StringUtils.getTokenArray(itempath, GuiObjectRecognition.DEFAULT_PATH_SEPARATOR, null);
 			WebElement parentElement = webelement;
@@ -148,7 +148,7 @@ public class Menu extends Component implements IMenuSelectable{
 				if(isAccessible){
 					//Treate as a Menu, which follows the rules of 'Web Accessible Internet'
 					//Find the all nodes containing attribute role='treeitem', the result will include
-					//direct children, grand-children, grand-grand-children ..., is there a way to 
+					//direct children, grand-children, grand-grand-children ..., is there a way to
 					//get only the direct children???
 //					searchCriteria = "xpath=.//*[role='menuitem']";
 					searchCriteria = RS.XPATH.fromAttribute(ATTRIBUTE_WAI_ROLE, WAI_ROLE_MENUITEM, false, true);
@@ -173,7 +173,7 @@ public class Menu extends Component implements IMenuSelectable{
 					parentElement = SearchObject.getObject(webelement, searchCriteria);
 				}
 				level++;
-				
+
 				if(parentElement==null){
 					IndependantLog.error(debugmsg+"node '"+nodeText + "' not found. " + searchCriteria);
 					matchedNode = null;
@@ -184,25 +184,25 @@ public class Menu extends Component implements IMenuSelectable{
 					parentNode = matchedNode;
 				}
 			}
-			
+
 			if(matchedNode==null){
 				IndependantLog.error(debugmsg+"Fail to find element "+criterion.toString());
 				throw new SeleniumPlusException("Fail to find element '"+itempath+"'.");
 			}
 			return matchedNode;
 		}
-		
+
 		protected void showOnPage(Element element) throws SeleniumPlusException {
 			String debugmsg = StringUtils.debugmsg(this.getClass(), "showOnPage");
 			WDLibrary.checkNotNull(element);
-			
+
 			MenuItem node = convertTo(element);
-			
+
 			try {
 				expandItem(node, true);
 
 				//TODO Show the node, if the node is out of the scroll area.
-				
+
 			} catch(Exception e) {
 				IndependantLog.error(debugmsg+" Met exception.",e);
 				throw new SeleniumPlusException("Fail to show node '"+node.getLabel()+"'. due to '"+e.getMessage()+"'");
@@ -234,8 +234,8 @@ public class Menu extends Component implements IMenuSelectable{
 				}
 			}
 		}
-		/** 
-		 * For menu, the menuitem is usually NOT shown on page.<br> 
+		/**
+		 * For menu, the menuitem is usually NOT shown on page.<br>
 		 * The method {@link EmbeddedObject#isShowOnPage(Element)} in super-class will<br>
 		 * try to search the related web-element (which doesn't exist yet) and will waste<br>
 		 * a lot of time.<br>
@@ -247,14 +247,14 @@ public class Menu extends Component implements IMenuSelectable{
 			return false;
 		}
 	}
-	
+
 	public static class SapSelectable_Menu extends AbstractMenuSelectable{
 		public static final String CLASS_NAME_MENUBAR 			= "sap.ui.commons.MenuBar";
 		public static final String CLASS_NAME_MENU 				= "sap.ui.commons.Menu";
 		public static final String CLASS_NAME_UNIFIED_MENU 		= "sap.ui.unified.Menu";
 		public static final String[] supportedClazzes = {CLASS_NAME_MENUBAR, CLASS_NAME_MENU, CLASS_NAME_UNIFIED_MENU};
 		public static final String[] menuClazzes = {CLASS_NAME_MENU, CLASS_NAME_UNIFIED_MENU};
-		
+
 		public static final String CLASS_NAME_COMMONS_MENUITEM 		= "sap.ui.commons.MenuItem";
 		public static final String CLASS_NAME_UNIFIED_MENUITEM 		= "sap.ui.unified.MenuItem";
 		public static final String[] menuItemClazzes = {CLASS_NAME_COMMONS_MENUITEM, CLASS_NAME_UNIFIED_MENUITEM};
@@ -280,7 +280,7 @@ public class Menu extends Component implements IMenuSelectable{
 				jsScript.append(SAP.sap_ui_commons_Menu_getItems(true));
 				jsScript.append(" return sap_ui_commons_Menu_getItems(arguments[0]);");
 				Object result = WDLibrary.executeJavaScriptOnWebElement(jsScript.toString(), webelement());
-				
+
 				if(result instanceof Map){
 					root = new MenuItem(result);
 					return root.getChildren();
@@ -294,17 +294,17 @@ public class Menu extends Component implements IMenuSelectable{
 
 			return null;
 		}
-		
+
 		/**
 		 * Expand the menuitem by click their ancestor item on the path level by level.<br>
-		 * 
+		 *
 		 * @param item
 		 * @param expandChildren
 		 * @throws SeleniumPlusException
 		 */
 		protected void expandItem(MenuItem item, boolean expandChildren) throws SeleniumPlusException {
 			String debugmsg = StringUtils.debugmsg(this.getClass(), "expandItem");
-			
+
 			try {
 				//We need to expand from the top node level by level.
 				List<MenuItem> items = new ArrayList<MenuItem>();//a list of MenuItem, from this node to top node.
@@ -314,7 +314,7 @@ public class Menu extends Component implements IMenuSelectable{
 					if(parent.getParent()!=null) items.add(parent);
 					parent = parent.getParent();
 				}
-				
+
 				MenuItem tempItem = null;
 				for(int i=items.size()-1;i>=0;i--){
 					tempItem = items.get(i);
@@ -331,13 +331,13 @@ public class Menu extends Component implements IMenuSelectable{
 						break;
 					}
 				}
-				
+
 			} catch(Exception e) {
 				IndependantLog.error(debugmsg+" Met exception.",e);
 				throw new SeleniumPlusException("Fail to expand node '"+item.getLabel()+"'. due to '"+e.getMessage()+"'");
-			}	
+			}
 		}
-		
+
 		/**
 		 * In this implementation, we call {@link #expandItem(MenuItem, boolean)} to click<br>
 		 * item on the path level by level.<br>
@@ -347,20 +347,20 @@ public class Menu extends Component implements IMenuSelectable{
 		protected void showOnPage(Element element) throws SeleniumPlusException {
 			String debugmsg = StringUtils.debugmsg(this.getClass(), "showOnPage");
 			WDLibrary.checkNotNull(element);
-			
+
 			MenuItem item = convertTo(element);
-			
+
 			try {
 				expandItem(item, true);
-				
+
 			} catch(Exception e) {
 				IndependantLog.error(debugmsg+" Met exception.",e);
 				throw new SeleniumPlusException("Fail to show node '"+item.getLabel()+"'. due to '"+e.getMessage()+"'");
 			}
 		}
-		
-		/** 
-		 * For menu, the menuitem is usually NOT shown on page.<br> 
+
+		/**
+		 * For menu, the menuitem is usually NOT shown on page.<br>
 		 * The method {@link EmbeddedObject#isShowOnPage(Element)} in super-class will<br>
 		 * try to search the related web-element (which doesn't exist yet) and will waste<br>
 		 * a lot of time.<br>
@@ -371,18 +371,18 @@ public class Menu extends Component implements IMenuSelectable{
 		protected boolean isShowOnPage(Element element) throws SeleniumPlusException {
 			return false;
 		}
-		
+
 	}//End of SapSelectable_Menu
 
 	public static class SAS_HC_PushMenu extends AbstractMenuSelectable{
 		public static final String CLASS_NAME_PUSHMENU 	= "sas.hc.ui.commons.pushmenu.PushMenu";
 		public static final String[] supportedClazzes = {CLASS_NAME_PUSHMENU};
-		
+
 		//TODO If PushMenu has a PushMenuGroup, which is invisible. But this may change if the PushMenu changes it
 		//structure, PushMenu theoretically can contain multiple PushMenuGroups, and these PushMenuGroups can be
 		//set to visible or not
 		private boolean hasInvisibleRoot = true;
-		
+
 		public SAS_HC_PushMenu(Component component) throws SeleniumPlusException {
 			super(component);
 		}
@@ -400,7 +400,7 @@ public class Menu extends Component implements IMenuSelectable{
 				jsScript.append(SAP.sas_hc_ui_commons_pushmenu_PushMenu_getItems(true));
 				jsScript.append(" return sas_hc_ui_commons_pushmenu_PushMenu_getItems(arguments[0]);");
 				Object result = WDLibrary.executeJavaScriptOnWebElement(jsScript.toString(), webelement());
-				
+
 				if(result instanceof Map){
 					root = new MenuItem(result);
 					//If PushMenu has a PushMenuGroup, which is invisible, we have to return the PushMenuSuite contained in PushMenuGroup
@@ -423,7 +423,7 @@ public class Menu extends Component implements IMenuSelectable{
 
 			return null;
 		}
-		
+
 		/**
 		 * Goes back to the home page
 		 */
@@ -435,22 +435,22 @@ public class Menu extends Component implements IMenuSelectable{
 				jsScript.append(SAP.sas_hc_ui_commons_pushmenu_PushMenu_goHome(true));
 				jsScript.append(" sas_hc_ui_commons_pushmenu_PushMenu_goHome(arguments[0]);");
 				WDLibrary.executeJavaScriptOnWebElement(jsScript.toString(), webelement());
-				
+
 			} catch(Exception e) {
 				IndependantLog.debug(debugmsg+" Met exception.",e);
 			}
 		}
-		
+
 		/**
 		 * Expand the menuitem by click their ancestor item on the path level by level.<br>
-		 * 
+		 *
 		 * @param item
 		 * @param expandChildren
 		 * @throws SeleniumPlusException
 		 */
 		protected void expandItem(MenuItem item, boolean expandChildren) throws SeleniumPlusException {
 			String debugmsg = StringUtils.debugmsg(this.getClass(), "expandItem");
-			
+
 			try {
 				//We need to expand from the top node level by level.
 				List<MenuItem> items = new ArrayList<MenuItem>();//a list of MenuItem, from this node to top node.
@@ -463,7 +463,7 @@ public class Menu extends Component implements IMenuSelectable{
 				if(hasInvisibleRoot){
 					items.remove(items.size()-1);//remove the invisible PushMenuGroup
 				}
-				
+
 				MenuItem tempItem = null;
 				WebElement itemWebElement = null;
 				for(int i=items.size()-1;i>=0;i--){
@@ -486,13 +486,13 @@ public class Menu extends Component implements IMenuSelectable{
 						break;
 					}
 				}
-				
+
 			} catch(Exception e) {
 				IndependantLog.error(debugmsg+" Met exception.",e);
 				throw new SeleniumPlusException("Fail to expand node '"+item.getLabel()+"'. due to '"+e.getMessage()+"'");
-			}	
+			}
 		}
-		
+
 		/**
 		 * In this implementation, we call {@link #expandItem(MenuItem, boolean)} to click<br>
 		 * item on the path level by level.<br>
@@ -521,12 +521,12 @@ public class Menu extends Component implements IMenuSelectable{
 				super.selectItem(criterion, verify, key, offset, mouseButtonNumber);
 			}
 		}
-		
+
 	}//End of SAS_HC_PushMenu
-	
+
 	public void selectItem(TextMatchingCriterion criterion, boolean verify, Keys key, Point offset, int mouseButtonNumber) throws SeleniumPlusException {
 		String debugmsg = StringUtils.debugmsg(this.getClass(), "selectItem");
-		
+
 		try{
 			menuSelectable.selectItem(criterion, verify, key, offset, mouseButtonNumber);
 		}catch(Exception e){
@@ -545,7 +545,7 @@ public class Menu extends Component implements IMenuSelectable{
 
 	public void activateItem(TextMatchingCriterion criterion, boolean verify, Keys key, Point offset) throws SeleniumPlusException {
 		String debugmsg = StringUtils.debugmsg(this.getClass(), "activateItem");
-		
+
 		try{
 			menuSelectable.activateItem(criterion, verify, key, offset);
 		}catch(Exception e){
@@ -564,7 +564,7 @@ public class Menu extends Component implements IMenuSelectable{
 
 	public void verifyItemSelection(TextMatchingCriterion criterion, boolean expectSelected) throws SeleniumPlusException {
 		String debugmsg = StringUtils.debugmsg(this.getClass(), "verifyItemSelection");
-		
+
 		try{
 			menuSelectable.verifyItemSelection(criterion, expectSelected);
 		}catch(Exception e){
@@ -583,7 +583,7 @@ public class Menu extends Component implements IMenuSelectable{
 
 	public void verifyContains(TextMatchingCriterion criterion) throws SeleniumPlusException {
 		String debugmsg = StringUtils.debugmsg(this.getClass(), "verifyContains");
-		
+
 		try{
 			menuSelectable.verifyContains(criterion);
 		}catch(Exception e){
@@ -598,7 +598,7 @@ public class Menu extends Component implements IMenuSelectable{
 
 	public MenuItem[] getContent() throws SeleniumPlusException {
 		String debugmsg = StringUtils.debugmsg(this.getClass(), "getContent");
-		
+
 		try{
 			return menuSelectable.getContent();
 		}catch(Exception e){
@@ -613,7 +613,7 @@ public class Menu extends Component implements IMenuSelectable{
 
 	public MenuItem getMatchedElement(TextMatchingCriterion criterion) throws SeleniumPlusException {
 		String debugmsg = StringUtils.debugmsg(this.getClass(), "getMatchedElement");
-		
+
 		try{
 			return menuSelectable.getMatchedElement(criterion);
 		}catch(Exception e){
@@ -625,10 +625,10 @@ public class Menu extends Component implements IMenuSelectable{
 			}
 		}
 	}
-	
+
 	public void verifyMenuItem(TextMatchingCriterion criterion, String expectedStatus) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(this.getClass(), "verifyMenuItem");
-		
+
 		try{
 			menuSelectable.verifyMenuItem(criterion, expectedStatus);
 		}catch(Exception e){
@@ -639,6 +639,6 @@ public class Menu extends Component implements IMenuSelectable{
 				throw new SeleniumPlusException(debugmsg);
 			}
 		}
-		
+
 	}
 }

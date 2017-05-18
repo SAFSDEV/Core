@@ -1,10 +1,10 @@
-/** 
+/**
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
 /**
  * History:
- * 
+ *
  *  APR 21, 2014    (Lei Wang) Initial release.
  *  APR 23, 2014    (Lei Wang) Update to support DOJO domain.
  *  OCT 16, 2015    (Lei Wang) Refector to create IOperable object properly.
@@ -29,13 +29,13 @@ import org.safs.selenium.webdriver.lib.model.IOperable;
 import org.safs.selenium.webdriver.lib.model.Item;
 import org.safs.selenium.webdriver.lib.model.TextMatchingCriterion;
 
-/** 
+/**
  * A library class to handle different specific TabControl.
  */
 public class TabControl extends Component{
-	
+
 	IListSelectable tabbable = null;
-	
+
 	/**
 	 * @param tabcontrol	WebElement tabcontrol object, for example a sap.ui.commons.TabStrip object.
 	 */
@@ -45,9 +45,9 @@ public class TabControl extends Component{
 
 	protected void castOperable(){
 		super.castOperable();
-		tabbable = (IListSelectable) anOperableObject;			
+		tabbable = (IListSelectable) anOperableObject;
 	}
-		
+
 	protected IOperable createDOJOOperable(){
 		String debugmsg = StringUtils.debugmsg(false);
 		IListSelectable operable = null;
@@ -64,9 +64,9 @@ public class TabControl extends Component{
 		}
 		return operable;
 	}
-	
+
 	/**
-	 * Try to select the tab according to the name (fully or partially given), 
+	 * Try to select the tab according to the name (fully or partially given),
 	 * and then verify if the tab has been really selected according to the parameter 'verify'.
 	 * @param tabName String, the tab to select
 	 * @param partialMatch boolean, if the parameter tabName is given partially;
@@ -76,7 +76,7 @@ public class TabControl extends Component{
 	 */
 	public void selectTab(String tabName, boolean partialMatch, int matchIndex, boolean verify) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(this.getClass(), "selectTab");
-		
+
 		try{
 			TextMatchingCriterion criterion = new TextMatchingCriterion(tabName, partialMatch, matchIndex);
 			tabbable.selectItem(criterion, verify, null, null, WDLibrary.MOUSE_BUTTON_LEFT);
@@ -91,15 +91,15 @@ public class TabControl extends Component{
 	}
 
 	/**
-	 * Try to select the tab according to the index, and then verify if the tab 
+	 * Try to select the tab according to the index, and then verify if the tab
 	 * has been really selected according to the parameter 'verify'.
 	 * @param index int, the tab to select, it is 0-based index.
 	 * @param verify boolean, if true then verify the selection;
 	 * @throws SeleniumPlusException
-	 */	
+	 */
 	public void selectTab(int index, boolean verify) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(this.getClass(), "selectTab");
-		
+
 		try{
 			tabbable.selectItem(index, verify, null, null, WDLibrary.MOUSE_BUTTON_LEFT);
 		}catch(Exception e){
@@ -111,13 +111,13 @@ public class TabControl extends Component{
 			}
 		}
 	}
-	
+
 	/**
 	 * Get all items of the tabcontrol.
 	 */
 	public Item[] getContent() throws SeleniumPlusException {
 		String debugmsg = StringUtils.debugmsg(this.getClass(), "getContent");
-		
+
 		try{
 			return tabbable.getContent();
 		}catch(Exception e){
@@ -129,7 +129,7 @@ public class TabControl extends Component{
 			}
 		}
 	}
-	
+
 	protected static class SapTabbable_TabStrip extends AbstractListSelectable{
 		public static final String CLASS_NAME_TABSTRIP = "sap.ui.commons.TabStrip";
 		public static final String[] supportedClazzes = {CLASS_NAME_TABSTRIP};
@@ -176,10 +176,10 @@ public class TabControl extends Component{
 		protected void verifyItemSelected(Element element) throws SeleniumPlusException {
 			String debugmsg = StringUtils.debugmsg(getClass(), "verifyItemSelected");
 			String msg = null;
-			
+
 			WDLibrary.checkNotNull(element);
 			Item tab = convertToItem(element);
-			
+
 			int index = tab.getIndex();
 			if(index==Item.INVALID_INDEX){
 				msg = "Item's index is invalid, cannot verify.";
@@ -202,22 +202,22 @@ public class TabControl extends Component{
 					throw new SeleniumPlusException(msg, SeleniumPlusException.CODE_VERIFICATION_FAIL);
 				}
 			}
-			
+
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.safs.selenium.webdriver.lib.model.ISelectable#getContent()
 		 */
 		public Item[] getContent() throws SeleniumPlusException {
 			String debugmsg = StringUtils.debugmsg(this.getClass(), "getContent");
 			List<Item> tabs = new ArrayList<Item>();
-			
+
 			try {
 				StringBuffer jsScript = new StringBuffer();
 				jsScript.append(SAP.sap_ui_commons_TabStrip_getTabs(true));
 				jsScript.append(" return sap_ui_commons_TabStrip_getTabs(arguments[0]);");
 				Object result = WDLibrary.executeJavaScriptOnWebElement(jsScript.toString(), webelement());
-				
+
 				if(result instanceof List){
 					Object[] objects = ((List<?>) result).toArray();
 					Item tab = null;
@@ -236,14 +236,14 @@ public class TabControl extends Component{
 			}
 
 			return tabs.toArray(new Item[0]);
-			
+
 		}
 
 	}
-	
+
 	protected static class DojoTabbable_TabContainer extends AbstractListSelectable{
 		public static final String CLASS_NAME_TABCONTAINER = "dijit.layout.TabContainer";
-		public static final String[] supportedClazzes = {CLASS_NAME_TABCONTAINER};		
+		public static final String[] supportedClazzes = {CLASS_NAME_TABCONTAINER};
 
 		public DojoTabbable_TabContainer(Component component) throws SeleniumPlusException {
 			super(component);
@@ -277,18 +277,18 @@ public class TabControl extends Component{
 				}
 			}
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.safs.selenium.webdriver.lib.model.AbstractSelectable#verifyItemSelected(org.safs.selenium.webdriver.lib.model.Item)
 		 */
 		protected void verifyItemSelected(Element element) throws SeleniumPlusException {
 			String debugmsg = StringUtils.debugmsg(getClass(), "verifyTabSelected");
 			String msg = null;
-			
+
 			WDLibrary.checkNotNull(element);
 			Item tab = convertToItem(element);
 			int index = tab.getIndex();
-			
+
 			if(index==Item.INVALID_INDEX){
 				msg = "Item's index is invalid, cannot verify.";
 				IndependantLog.error(debugmsg+msg);
@@ -309,22 +309,22 @@ public class TabControl extends Component{
 					throw new SeleniumPlusException(msg, SeleniumPlusException.CODE_VERIFICATION_FAIL);
 				}
 			}
-			
+
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.safs.selenium.webdriver.lib.model.ISelectable#getContent()
 		 */
 		public Item[] getContent() throws SeleniumPlusException {
 			String debugmsg = StringUtils.debugmsg(this.getClass(), "getContent");
 			List<Item> tabs = new ArrayList<Item>();
-			
+
 			try {
 				StringBuffer jsScript = new StringBuffer();
 				jsScript.append(DOJO.dojo_dijit_layout_TabContainerBase_getChildren(true));
 				jsScript.append(" return dojo_dijit_layout_TabContainerBase_getChildren(arguments[0]);");
 				Object result = WDLibrary.executeJavaScriptOnWebElement(jsScript.toString(), webelement());
-				
+
 				if(result instanceof List){
 					Object[] objects = ((List<?>) result).toArray();
 					Item tab = null;
@@ -343,7 +343,7 @@ public class TabControl extends Component{
 			}
 
 			return tabs.toArray(new Item[0]);
-			
+
 		}
 
 	}

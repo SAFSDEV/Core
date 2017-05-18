@@ -1,10 +1,10 @@
-/** 
+/**
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
 /**
  * History:
- * 
+ *
  *  JAN 29, 2014    (Lei Wang) Initial release.
  *  FEB 12, 2014    (Lei Wang) Modify method SapCheckable_CheckBox.setChecked() to refresh the stale embedded webelement.
  *  JUN 12, 2015    (Lei Wang) Click to check/uncheck firstly, native-javascript will be a backup.
@@ -21,13 +21,13 @@ import org.safs.selenium.util.JavaScriptFunctions.SAP;
 import org.safs.selenium.webdriver.lib.model.EmbeddedObject;
 import org.safs.selenium.webdriver.lib.model.IOperable;
 
-/** 
+/**
  * A library class to handle different specific CheckBox.
  */
 public class CheckBox extends Component{
-	
+
 	Checkable checkable = null;
-	
+
 	/**
 	 * @param checkbox	WebElement combo box object, for example an HTML tag &lt;select&gt;.
 	 */
@@ -39,7 +39,7 @@ public class CheckBox extends Component{
 		super.castOperable();
 		checkable = (Checkable) anOperableObject;
 	}
-	
+
 	protected IOperable createSAPOperable(){
 		String debugmsg = StringUtils.debugmsg(false);
 		Checkable operable = null;
@@ -56,10 +56,10 @@ public class CheckBox extends Component{
 		}
 		return operable;
 	}
-	
+
 	public void check() throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(this.getClass(), "check");
-		
+
 		try{
 			checkable.check();
 		}catch(Exception e){
@@ -71,10 +71,10 @@ public class CheckBox extends Component{
 			}
 		}
 	}
-	
+
 	public void uncheck() throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(this.getClass(), "uncheck");
-		
+
 		try{
 			checkable.uncheck();
 		}catch(Exception e){
@@ -86,16 +86,16 @@ public class CheckBox extends Component{
 			}
 		}
 	}
-	
+
 	interface Checkable extends IOperable{
 		/**
-		 * Try to check the checkbox, and then verify if the checkbox 
+		 * Try to check the checkbox, and then verify if the checkbox
 		 * has been really checked.
 		 * @throws SeleniumPlusException
 		 */
 		public void check() throws SeleniumPlusException;
 		/**
-		 * Try to uncheck the checkbox, and then verify if the checkbox 
+		 * Try to uncheck the checkbox, and then verify if the checkbox
 		 * has been really unchecked.
 		 * @throws SeleniumPlusException
 		 */
@@ -106,18 +106,18 @@ public class CheckBox extends Component{
 		 */
 		public boolean isChecked() throws SeleniumPlusException;
 	}
-	
+
 	protected static abstract class AbstractCheckable extends EmbeddedObject implements Checkable{
-		
+
 		public void clearCache(){
 			String methodName = StringUtils.getCurrentMethodName(true);
 			IndependantLog.debug(methodName+" has not been implemented.");
 		}
-		
+
 		public AbstractCheckable(Component component)throws SeleniumPlusException {
 			super(component);
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.safs.selenium.webdriver.lib.CheckBox.Checkable#check()
 		 */
@@ -137,14 +137,14 @@ public class CheckBox extends Component{
 				throw new SeleniumPlusException("Check box is still checked.");
 			}
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.safs.selenium.webdriver.lib.CheckBox.Checkable#isChecked()
 		 */
 		public boolean isChecked() throws SeleniumPlusException {
 			return webelement().isSelected();
 		}
-		
+
 		/**
 		 * Set the value of property 'checked' for checkbox.<br>
 		 * Here we will just call click to check/uncheck, if it doesn't work,<br>
@@ -164,12 +164,12 @@ public class CheckBox extends Component{
 					//calling WDLibrary.click() may make the embedded element stale
 					//refresh the stale embedded webelement
 					refresh(false);
-					
+
 					//After clicking, if the status is not OK, we will try to call native method provided by special checkbox
 					if(!isStatusOk(bChecked)){
 						IndependantLog.debug(debugmsg+" Clicking on check-box doesn't work, try native method provided by special checkbox.");
 						nativeSetChecked(bChecked);
-					}					
+					}
 				}
 			}catch(Exception ex){
 				IndependantLog.error(debugmsg+" Met exception.",ex);
@@ -177,7 +177,7 @@ public class CheckBox extends Component{
 			}
 
 		}
-		
+
 		/**
 		 * Call the native method provide by special checkbox to check/incheck.<br>
 		 * <b>
@@ -191,7 +191,7 @@ public class CheckBox extends Component{
 		protected void nativeSetChecked(boolean bChecked)  throws SeleniumPlusException{
 			throw new SeleniumPlusException(StringUtils.debugmsg(false)+" has not been implementated yet.");
 		}
-		
+
 		/**
 		 * Check if the checkbox's status is the same as the 'expected status'.
 		 * @param bChecked boolean, the 'expected status' of the checkbox.
@@ -202,7 +202,7 @@ public class CheckBox extends Component{
 			return isChecked()==bChecked;
 		}
 	}
-	
+
 	protected static abstract class HtmlCheckable extends AbstractCheckable{
 
 		public HtmlCheckable(Component component) throws SeleniumPlusException {
@@ -220,9 +220,9 @@ public class CheckBox extends Component{
 			}
 			return supported;
 		}
-		
+
 	}
-	
+
 	protected static class SapCheckable_CheckBox extends AbstractCheckable{
 		public static final String CLASS_NAME_UI_COMMONS_COMBOBOX = "sap.ui.commons.CheckBox";
 		public static final String CLASS_NAME_M_COMBOBOX = "sap.m.CheckBox";
@@ -238,10 +238,10 @@ public class CheckBox extends Component{
 		public String[] getSupportedClassNames() {
 			return supportedClazzes;
 		}
-		
+
 		protected void nativeSetChecked(boolean bChecked)  throws SeleniumPlusException{
 			String debugmsg = StringUtils.debugmsg(false);
-			
+
 			StringBuffer jsScript = new StringBuffer();
 			jsScript.append(SAP.sap_ui_commons_CheckBox_setChecked(true));
 			jsScript.append("sap_ui_commons_CheckBox_setChecked(arguments[0],arguments[1]);");
@@ -255,7 +255,7 @@ public class CheckBox extends Component{
 			} catch(Exception e) {
 				IndependantLog.debug(debugmsg+" Met exception.",e);
 			}
-			
+
 			throw new SeleniumPlusException("Fail to set value of property 'checked'");
 		}
 
@@ -264,9 +264,9 @@ public class CheckBox extends Component{
 		 */
 		public boolean isChecked() throws SeleniumPlusException {
 			String debugmsg = StringUtils.debugmsg(false);
-			
+
 			if(super.isChecked()) return true;
-			
+
 			StringBuffer jsScript = new StringBuffer();
 			jsScript.append(SAP.sap_ui_commons_CheckBox_getChecked(true));
 			jsScript.append("return sap_ui_commons_CheckBox_getChecked(arguments[0]);");
@@ -284,11 +284,11 @@ public class CheckBox extends Component{
 			} catch(Exception e) {
 				IndependantLog.error(debugmsg+" Met exception.",e);
 			}
-			
+
 			throw new SeleniumPlusException("Fail to get value of property 'checked'");
 		}
 	}
-	
+
 	protected static class HtmlCheckable_InputCheckBox extends HtmlCheckable{
 		public static final String CLASS_NAME = TAG_HTML_INPUT;
 		public static final String[] supportedClazzes = {CLASS_NAME};
@@ -303,7 +303,7 @@ public class CheckBox extends Component{
 		public String[] getSupportedClassNames() {
 			return supportedClazzes;
 		}
-		
+
 	}
 }
 

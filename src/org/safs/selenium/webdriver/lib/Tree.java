@@ -1,10 +1,10 @@
-/** 
+/**
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
 /**
  * History:
- * 
+ *
  *  JAN 20, 2014    (DHARMESH4) Initial release.
  *  JUN 10, 2014    (Lei Wang) Implement keywords.
  *  OCT 16, 2015    (Lei Wang) Refector to create IOperable object properly.
@@ -42,7 +42,7 @@ import org.safs.selenium.webdriver.lib.model.TextMatchingCriterion;
 import org.safs.selenium.webdriver.lib.model.TreeNode;
 import org.safs.tools.stringutils.StringUtilities;
 
-/** 
+/**
  * A library class to handle different specific Tree.
  */
 public class Tree extends Component implements ITreeSelectable{
@@ -58,12 +58,12 @@ public class Tree extends Component implements ITreeSelectable{
 		super.castOperable();
 		treeListable = (ITreeSelectable) anOperableObject;
 	}
-	
+
 	protected IOperable createSAPOperable(){
 		String debugmsg = StringUtils.debugmsg(false);
 		ITreeSelectable operable = null;
 		try{ operable = new SapSelectable_Tree(this);}catch(SeleniumPlusException se0){
-			IndependantLog.debug(debugmsg+" Cannot create ITreeSelectable of "+Arrays.toString(SapSelectable_Tree.supportedClazzes));				
+			IndependantLog.debug(debugmsg+" Cannot create ITreeSelectable of "+Arrays.toString(SapSelectable_Tree.supportedClazzes));
 		}
 		return operable;
 	}
@@ -75,20 +75,20 @@ public class Tree extends Component implements ITreeSelectable{
 		}
 		return operable;
 	}
-	
+
 	public static boolean isTreeNodeExpanded(WebElement treenode){
 		return SearchObject.getBoolean(treenode, ATTRIBUTE_ARIA_EXPANDED, ATTRIBUTE_DATA_EXPANDED);
 	}
-	
+
 	public static boolean isTreeNodeSelected(WebElement treenode){
 		return SearchObject.getBoolean(treenode, ATTRIBUTE_ARIA_SELECTED);
 	}
-	
+
 	/**
 	 * For treenode, WebElement.getText() may return also the text of its children.<br>
 	 * These text are separated by '\n', this method tries to get the text before the first '\n', which<br>
 	 * should be text of this tree node.
-	 * 
+	 *
 	 * @param treenode WebElement, represents the tree node.
 	 * @return String, the label of the treenode, or null if the treenode is null
 	 */
@@ -97,7 +97,7 @@ public class Tree extends Component implements ITreeSelectable{
 		String text = TreeNode.parseWebElementText(treenode);
 		return StringUtils.getFirstLine(text);
 	}
-	
+
 	class DefaultSelectable_Tree extends AbstractTreeSelectable{
 		/**
 		 * @param parent
@@ -114,7 +114,7 @@ public class Tree extends Component implements ITreeSelectable{
 			//TODO What kind of HTML-TAG/CSS-CLASS can be considered as a Tree??? Just let isSupported() return true for now.
 			return null;
 		}
-		
+
 		public TreeNode[] getCacheableContent() throws SeleniumPlusException {
 			String debugmsg = StringUtils.debugmsg(false);
 			boolean setTimeoutLocally = false;
@@ -122,7 +122,7 @@ public class Tree extends Component implements ITreeSelectable{
 			if(!Tree.this.isAccessible()){
 				throw new SeleniumPlusException("Cannot get content from a tree, whihc is not Web Accessible!");
 			}
-			
+
 			try{
 				//If the tree's implementation follows the "Web Accessibilty Internet", we can use
 				//role="tree", role="treeitem" to get the items, but we need to know the hierarchy!!!
@@ -137,7 +137,7 @@ public class Tree extends Component implements ITreeSelectable{
 				List<WebElement> descendants = null;
 				//childrenElement contains all the items in a tree, but it is flat, we need to turn it into hierarchical tree
 				//Following algorithm has a pre-condition: selenium traverse the tree by 'depth-first-first' algorithm during searching
-				
+
 				//Create a map contain the pair (WebElement, TreeNode) Tree Node is created from WebElement
 				//We are going to find the parent-child relationship between these TreeNode
 				Map<Object, TreeNode> map = new HashMap<Object, TreeNode>(childrenElement.size());
@@ -145,7 +145,7 @@ public class Tree extends Component implements ITreeSelectable{
 					we = childrenElement.get(i);
 					map.put(we, new TreeNode(we));
 				}
-				
+
 				//we need to clear the implicit-wait timeout, otherwise findElements() will spend lot of time if there is no mathcing items.
 				//If other thread is using this timeout, we will be blocked here until the other thread finish.
 				if(!WDTimeOut.setImplicitlyWait(0, TimeUnit.SECONDS)){
@@ -201,29 +201,29 @@ public class Tree extends Component implements ITreeSelectable{
 				}
 			}
 		}
-		
+
 		/**
 		 * This method override that of superclass. It will only try to find each node in the tree according to<br>
 		 * the treepath provided as parameter, and then return a simple-chain of TreeNode which contains only<br>
 		 * the nodes specified in the treepath. Not like the result return in superclass, which is a double-direction<br>
 		 * chain and the whole tree can be accessed throught it.<br>
-		 * 
+		 *
 		 * <b>Note:</b>The parameter matchIndex is not used yet here. Need to be considered. TODO<br>
 		 */
 		public TreeNode getMatchedElement(TextMatchingCriterion criterion) throws SeleniumPlusException {
 			String debugmsg = StringUtils.debugmsg(false);
 			TreeNode matchedNode = null;
-			
+
 			try{
 				matchedNode = super.getMatchedElement(criterion);
 				if(matchedNode!=null) return matchedNode;
 			}catch(Exception e){
 				IndependantLog.debug(debugmsg+"Fail to find tree node ", e);
 			}
-			
+
 			String treepath = criterion.getText();
 			boolean partialMatch = criterion.isPartialMatch();
-			
+
 			String[] pathNodes = StringUtils.getTokenArray(treepath, GuiObjectRecognition.DEFAULT_PATH_SEPARATOR, null);
 			WebElement parentElement = webelement;
 			List<WebElement> childrenElement = null;
@@ -239,7 +239,7 @@ public class Tree extends Component implements ITreeSelectable{
 				if(isAccessible){
 					//Treate as a Tree, which follows the rules of 'Web Accessible Internet'
 					//Find the all nodes containing attribute role='treeitem', the result will include
-					//direct children, grand-children, grand-grand-children ..., is there a way to 
+					//direct children, grand-children, grand-grand-children ..., is there a way to
 					//get only the direct children???
 //					searchCriteria = "xpath=.//*[role='treeitem']";
 					searchCriteria = RS.XPATH.fromAttribute(ATTRIBUTE_WAI_ROLE, WAI_ROLE_TREEITEM, false, true);
@@ -261,7 +261,7 @@ public class Tree extends Component implements ITreeSelectable{
 					parentElement = SearchObject.getObject(webelement, searchCriteria);
 				}
 				level++;
-				
+
 				if(parentElement==null){
 					IndependantLog.error(debugmsg+"node '"+nodeText + "' not found. " + searchCriteria);
 					matchedNode = null;
@@ -272,25 +272,25 @@ public class Tree extends Component implements ITreeSelectable{
 					parentNode = matchedNode;
 				}
 			}
-			
+
 			if(matchedNode==null){
 				IndependantLog.error(debugmsg+"Fail to find tree node matching '"+criterion.toString()+"'");
 				throw new SeleniumPlusException("Fail to find tree node '"+treepath+"'.");
 			}
 			return matchedNode;
 		}
-		
+
 		protected void showOnPage(Element element) throws SeleniumPlusException {
 			String debugmsg = StringUtils.debugmsg(false);
 			WDLibrary.checkNotNull(element);
-			
+
 			TreeNode node = convertTo(element);
-			
+
 			try {
 				expandItem(node, true);
 
 				//TODO Show the node, if the node is out of the scroll area.
-				
+
 			} catch(Exception e) {
 				IndependantLog.error(debugmsg+" Met exception.",e);
 				throw new SeleniumPlusException("Fail to show node '"+node.getLabel()+"'. due to '"+e.getMessage()+"'");
@@ -337,7 +337,7 @@ public class Tree extends Component implements ITreeSelectable{
 				//TODO if 'double-click' cannot collapse the tree node
 			}
 		}
-		
+
 		protected boolean verifyItemExpanded(TreeNode node) throws SeleniumPlusException {
 			//As default tree doesn't have an ID, during refresh 'css class' will be used to
 			//find the WebElement, but it very probably find a WRONG one.
@@ -346,8 +346,8 @@ public class Tree extends Component implements ITreeSelectable{
 			node.refresh(true);
 			return super.verifyItemExpanded(node);
 		}
-		
-		protected void verifyItemSelected(Element element) throws SeleniumPlusException {		
+
+		protected void verifyItemSelected(Element element) throws SeleniumPlusException {
 			//As default tree doesn't have an ID, during refresh 'css class' will be used to
 			//find the WebElement, but it very probably find a WRONG one.
 			//Temprary fix: pass 'true' to refresh and hope it will not refresh the WebElement
@@ -356,7 +356,7 @@ public class Tree extends Component implements ITreeSelectable{
 			super.verifyItemSelected(element);
 		}
 	}
-	
+
 	protected static class SapSelectable_Tree extends AbstractTreeSelectable{
 		public static final String CLASS_NAME_TREE = "sap.ui.commons.Tree";
 		public static final String[] supportedClazzes = {CLASS_NAME_TREE};
@@ -378,7 +378,7 @@ public class Tree extends Component implements ITreeSelectable{
 				jsScript.append(SAP.sap_ui_commons_Tree_getNodes(true));
 				jsScript.append(" return sap_ui_commons_Tree_getNodes(arguments[0]);");
 				Object result = WDLibrary.executeJavaScriptOnWebElement(jsScript.toString(), webelement());
-				
+
 				if(result instanceof AbstractMap){
 					root = new TreeNode(result);
 					return root.getChildren();
@@ -392,15 +392,15 @@ public class Tree extends Component implements ITreeSelectable{
 
 			return null;
 		}
-		
+
 		protected void expandItem(TreeNode node, boolean expandChildren) throws SeleniumPlusException {
 			String debugmsg = StringUtils.debugmsg(false);
-			
+
 			try {
 				StringBuffer jsScript = new StringBuffer();
 				jsScript.append(SAP.sap_ui_commons_TreeNode_expand(true));
 				jsScript.append(" return sap_ui_commons_TreeNode_expand(arguments[0], arguments[1]);");
-				
+
 				//We need to expand from the top node level by level.
 				List<String> nodeIds = new ArrayList<String>();//a list of nodeID, from this node to top node.
 				nodeIds.add(node.getId());
@@ -410,33 +410,33 @@ public class Tree extends Component implements ITreeSelectable{
 					nodeIds.add(parent.getId());
 					parent = parent.getParent();
 				}
-				
+
 				for(int i=nodeIds.size()-1;i>0;i--){
 					//expand the ancestor nodes, do NOT expand their children
 					WDLibrary.executeScript(jsScript.toString(), nodeIds.get(i), false);
 				}
 				//expand this node
 				WDLibrary.executeScript(jsScript.toString(), nodeIds.get(0), expandChildren);
-				
+
 			} catch(Exception e) {
 				IndependantLog.error(debugmsg+" Met exception.",e);
 				throw new SeleniumPlusException("Fail to expand node '"+node.getLabel()+"'. due to '"+e.getMessage()+"'");
-			}	
+			}
 		}
 
 		protected void collapseItem(TreeNode node, boolean collpaseChildren) throws SeleniumPlusException {
 			String debugmsg = StringUtils.debugmsg(false);
-			
+
 			String nodeId = node.getId();
-			
+
 			if(nodeId==null) throw new SeleniumPlusException("TreeNode's id is null, cannot collapse it.");
-			
+
 			try {
 				StringBuffer jsScript = new StringBuffer();
 				jsScript.append(SAP.sap_ui_commons_TreeNode_collapse(true));
 				jsScript.append(" return sap_ui_commons_TreeNode_collapse(arguments[0], arguments[1]);");
 				WDLibrary.executeScript(jsScript.toString(), nodeId, collpaseChildren);
-				
+
 			} catch(Exception e) {
 				IndependantLog.error(debugmsg+" Met exception.",e);
 				throw new SeleniumPlusException("Fail to collapse node '"+node.getLabel()+"'. due to '"+e.getMessage()+"'");
@@ -447,9 +447,9 @@ public class Tree extends Component implements ITreeSelectable{
 			String debugmsg = StringUtils.debugmsg(false);
 			WDLibrary.checkNotNull(node);
 			String nodeId = node.getId();
-			
+
 			if(nodeId==null) throw new SeleniumPlusException("TreeNode's id is null, cannot verify its status.");
-			
+
 			try {
 				StringBuffer jsScript = new StringBuffer();
 				jsScript.append(SAP.sap_ui_commons_TreeNode_getExpanded(true));
@@ -458,16 +458,16 @@ public class Tree extends Component implements ITreeSelectable{
 
 				IndependantLog.debug(debugmsg+"node "+node.getFullPath()+" expanded="+result);
 				node.setExpanded(StringUtilities.convertBool(result));
-				
+
 				if(!node.isExpanded()){
 					WebElement treeNode = SearchObject.getObject(webelement(), "id=" + nodeId);
 					node.setExpanded(Tree.isTreeNodeExpanded(treeNode));
 				}
-				
+
 			} catch(Exception e) {
 				IndependantLog.debug(debugmsg+" Met exception.",e);
 			}
-			
+
 			return super.verifyItemExpanded(node);
 		}
 
@@ -476,7 +476,7 @@ public class Tree extends Component implements ITreeSelectable{
 		 * property to true. If we click that node again, this property 'selected' will be set to false,
 		 * which will cause the verification fail. So we just test the value in parameter element, which
 		 * is set before clicking the node.
-		 * 
+		 *
 		 * @see #selectItem(String, boolean, int, boolean, Keys, Point, int)
 		 * @see #clickElement(Element, Keys, Point, int, int)
 		 * @see #showOnPage(Element)
@@ -486,28 +486,28 @@ public class Tree extends Component implements ITreeSelectable{
 			WDLibrary.checkNotNull(element);
 			//TODO if the element's property 'selected' is true, we will not try to get the value from the
 			//real SAP TreeNode. The real SAP TreeNode very probably has a 'false' value for that property!!!
-			//"TreeNode.select() then click on node" cause this, we may need to modify method showOnPage()-> 
+			//"TreeNode.select() then click on node" cause this, we may need to modify method showOnPage()->
 			//don't call TreeNode.select() to show the node on page.
 			if(element.isSelected()) return;
 
 			TreeNode node = convertTo(element);
 			String nodeId = node.getId();
-			
+
 			if(nodeId==null) throw new SeleniumPlusException("TreeNode's id is null, cannot verify its status.");
-			
+
 			try {
 //				StringBuffer jsScript = new StringBuffer();
 //				jsScript.append(SAP.sap_ui_commons_TreeNode_refresh(true));
 //				jsScript.append(" return sap_ui_commons_TreeNode_refresh(arguments[0]);");
 //				Object result = WDLibrary.executeScript(jsScript.toString(), nodeId);
-//				
+//
 //				if(result instanceof AbstractMap){
 //					node = new TreeNode(result);
 //				}else if(result!=null){
 //					IndependantLog.warn("Need to hanlde javascript result whose type is '"+result.getClass().getName()+"'!");
 //					IndependantLog.warn("javascript result:\n"+result);
 //				}
-				
+
 				StringBuffer jsScript = new StringBuffer();
 				jsScript.append(SAP.sap_ui_commons_TreeNode_getIsSelected(true));
 				jsScript.append(" return sap_ui_commons_TreeNode_getIsSelected(arguments[0]);");
@@ -515,21 +515,21 @@ public class Tree extends Component implements ITreeSelectable{
 
 				IndependantLog.debug(debugmsg+"node "+node.getFullPath()+" selected="+result);
 				node.setSelected(StringUtilities.convertBool(result));
-				
+
 				//This may happen if we call TreeNode.select(), then click on treenode.
 				//Try to get the attribute 'aria-selected'
 				if(!node.isSelected()){
 					WebElement treeNode = SearchObject.getObject(webelement(), "id=" + nodeId);
 					node.setSelected(Tree.isTreeNodeSelected(treeNode));
 				}
-				
+
 			} catch(Exception e) {
 				IndependantLog.debug(debugmsg+" Met exception.",e);
 			}
-			
+
 			super.verifyItemSelected(node);
 		}
-		
+
 		/**
 		 * In this implementation, we call node.select() to show the node on page.
 		 * This API will also select the node of the tree, the 'selected' property will be
@@ -537,7 +537,7 @@ public class Tree extends Component implements ITreeSelectable{
 		 * will be set to false!!! So we set the value of 'selected' to the element parameter,
 		 * and in method {@link #verifyItemSelected(Element)}, if the element isSelected() then
 		 * we will not try to get the value for the real SAP TreeNode object.
-		 * 
+		 *
 		 * @see #selectItem(String, boolean, int, boolean, Keys, Point, int)
 		 * @see #clickElement(Element, Keys, Point, int, int)
 		 * @see #verifyItemSelected(Element)
@@ -545,14 +545,14 @@ public class Tree extends Component implements ITreeSelectable{
 		protected void showOnPage(Element element) throws SeleniumPlusException {
 			String debugmsg = StringUtils.debugmsg(false);
 			WDLibrary.checkNotNull(element);
-			
+
 			TreeNode node = convertTo(element);
 			String treeId = node.getRootId();
 			String nodeId = node.getId();
-			
+
 			if(treeId==null) throw new SeleniumPlusException("Tree's id is null, cannot show node on page.");
 			if(nodeId==null) throw new SeleniumPlusException("TreeNode's id is null, cannot show node on page.");
-			
+
 			try {
 				//Expand all nodes
 				StringBuffer jsScript = new StringBuffer();
@@ -567,16 +567,16 @@ public class Tree extends Component implements ITreeSelectable{
 				jsScript.append(" return sap_ui_commons_TreeNode_showOnPage(arguments[0]);");
 				WDLibrary.executeScript(jsScript.toString(), nodeId);
 				StringUtilities.sleep(500);
-				
-				//Get the value of property 'selected' 
+
+				//Get the value of property 'selected'
 				jsScript.delete(0, jsScript.length());
 				jsScript.append(SAP.sap_ui_commons_TreeNode_getIsSelected(true));
 				jsScript.append(" return sap_ui_commons_TreeNode_getIsSelected(arguments[0]);");
 				Object selected = WDLibrary.executeScript(jsScript.toString(), nodeId);
-				
+
 				IndependantLog.debug(debugmsg+"node "+node.getFullPath()+" selected="+selected);
 				element.setSelected((Boolean)selected);
-				
+
 			} catch(Exception e) {
 				IndependantLog.error(debugmsg+" Met exception.",e);
 				throw new SeleniumPlusException("Fail to show node '"+node.getLabel()+"'. due to '"+e.getMessage()+"'");
@@ -587,7 +587,7 @@ public class Tree extends Component implements ITreeSelectable{
 
 	public void selectItem(TextMatchingCriterion criterion, boolean verify, Keys key, Point offset, int mouseButtonNumber) throws SeleniumPlusException {
 		String debugmsg = StringUtils.debugmsg(false);
-		
+
 		try{
 			treeListable.selectItem(criterion, verify, key, offset, mouseButtonNumber);
 		}catch(Exception e){
@@ -606,7 +606,7 @@ public class Tree extends Component implements ITreeSelectable{
 
 	public void activateItem(TextMatchingCriterion criterion, boolean verify, Keys key, Point offset) throws SeleniumPlusException {
 		String debugmsg = StringUtils.debugmsg(false);
-		
+
 		try{
 			treeListable.activateItem(criterion, verify, key, offset);
 		}catch(Exception e){
@@ -625,7 +625,7 @@ public class Tree extends Component implements ITreeSelectable{
 
 	public void verifyItemSelection(TextMatchingCriterion criterion, boolean expectSelected) throws SeleniumPlusException {
 		String debugmsg = StringUtils.debugmsg(this.getClass(), "verifyItemSelection");
-		
+
 		try{
 			treeListable.verifyItemSelection(criterion, expectSelected);
 		}catch(Exception e){
@@ -644,7 +644,7 @@ public class Tree extends Component implements ITreeSelectable{
 
 	public void verifyContains(TextMatchingCriterion criterion) throws SeleniumPlusException {
 		String debugmsg = StringUtils.debugmsg(false);
-		
+
 		try{
 			treeListable.verifyContains(criterion);
 		}catch(Exception e){
@@ -659,7 +659,7 @@ public class Tree extends Component implements ITreeSelectable{
 
 	public TreeNode[] getContent() throws SeleniumPlusException {
 		String debugmsg = StringUtils.debugmsg(false);
-		
+
 		try{
 			return treeListable.getContent();
 		}catch(Exception e){
@@ -674,7 +674,7 @@ public class Tree extends Component implements ITreeSelectable{
 
 	public void expandItem(TextMatchingCriterion criterion, boolean expandChildren, boolean verify) throws SeleniumPlusException {
 		String debugmsg = StringUtils.debugmsg(false);
-		
+
 		try{
 			treeListable.expandItem(criterion, expandChildren, verify);
 		}catch(Exception e){
@@ -689,7 +689,7 @@ public class Tree extends Component implements ITreeSelectable{
 
 	public void collapseItem(TextMatchingCriterion criterion, boolean collpaseChildren, boolean verify) throws SeleniumPlusException {
 		String debugmsg = StringUtils.debugmsg(false);
-		
+
 		try{
 			treeListable.collapseItem(criterion, collpaseChildren, verify);
 		}catch(Exception e){
@@ -704,7 +704,7 @@ public class Tree extends Component implements ITreeSelectable{
 
 	public TreeNode getMatchedElement(TextMatchingCriterion criterion) throws SeleniumPlusException {
 		String debugmsg = StringUtils.debugmsg(false);
-		
+
 		try{
 			return treeListable.getMatchedElement(criterion);
 		}catch(Exception e){
@@ -716,7 +716,7 @@ public class Tree extends Component implements ITreeSelectable{
 			}
 		}
 	}
-	
+
 	//======================================= Some deprecated methods ===================================================//
 	/**
 	 * @param fullnode
@@ -726,7 +726,7 @@ public class Tree extends Component implements ITreeSelectable{
 	public void SelectTextNode(String fullnode) throws SeleniumPlusException{
 		node(fullnode,true);
 	}
-	
+
 	/**
 	 * @param fullnode
 	 * @throws SeleniumPlusException
@@ -735,7 +735,7 @@ public class Tree extends Component implements ITreeSelectable{
 	public void ExpandTextNode(String fullnode) throws SeleniumPlusException{
 		node(fullnode,false);
 	}
-	
+
 	/**
 	 * @param fullnode
 	 * @param isSelect
@@ -744,18 +744,18 @@ public class Tree extends Component implements ITreeSelectable{
 	 */
 	private void node(String fullnode, boolean isSelect) throws SeleniumPlusException{
 
-		StringTokenizer st = new StringTokenizer(fullnode, GuiObjectRecognition.DEFAULT_PATH_SEPARATOR);		
-		String node = null;		
+		StringTokenizer st = new StringTokenizer(fullnode, GuiObjectRecognition.DEFAULT_PATH_SEPARATOR);
+		String node = null;
 		while (st.hasMoreElements()) {
-			node = (String) st.nextElement();			
-			WebElement item = null; 			
+			node = (String) st.nextElement();
+			WebElement item = null;
 			try{
 				item = SearchObject.getObject(webelement, SearchObject.SEARCH_CRITERIA_TEXT+SearchObject.assignSeparator + node);
-			
+
 				if (item == null){
-					throw new SeleniumPlusException(node + " node not found" + "(text=" + node +")");					
+					throw new SeleniumPlusException(node + " node not found" + "(text=" + node +")");
 				}
-				
+
 				if (isSelect){
 					if (st.countTokens() == 0){
 						item.click();
@@ -765,18 +765,18 @@ public class Tree extends Component implements ITreeSelectable{
 				if (item.getAttribute(ATTRIBUTE_ARIA_EXPANDED).equals("false")){
 					Actions action = new Actions(SearchObject.getWebDriver());
 					Action doubleClick = action.doubleClick(item).build();
-					doubleClick.perform();					
+					doubleClick.perform();
 					try {
 						Thread.sleep(500); //slowdown,correct way?
 					} catch (InterruptedException e) {
 						// never happen ?
-					}					
-				}				
+					}
+				}
 			} catch (SeleniumPlusException spe){
 				throw spe;
 			} catch (Exception msee) {
-				throw new SeleniumPlusException("Click action failed on node " + node);				
-			}			
-		}		
+				throw new SeleniumPlusException("Click action failed on node " + node);
+			}
+		}
 	}
 }
