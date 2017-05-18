@@ -1,13 +1,13 @@
-/** 
+/**
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
 /**
  * History:
- * 
+ *
  *  DEC 26, 2013    (sbjlwa) Initial release.
  *  FEB 12, 2014    (sbjlwa) Add method refresh() to refresh the stale embedded webelement.
- *  OCT 16, 2015    (sbjlwa) Refector to create IOperable object properly. 
+ *  OCT 16, 2015    (sbjlwa) Refector to create IOperable object properly.
  */
 package org.safs.selenium.webdriver.lib;
 
@@ -30,7 +30,7 @@ import org.safs.selenium.webdriver.lib.model.IOperable;
 import org.safs.selenium.webdriver.lib.model.IWebAccessibleInternetRole;
 import org.safs.selenium.webdriver.lib.model.TextMatchingCriterion;
 
-/** 
+/**
  * A library class to handle generic functionalities, such as Click, HoverMouse, GetGUIImage etc. for
  * all kinds of component.
  */
@@ -55,7 +55,7 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 	public static final String VALUE_VISIBILITY_HIDDEN = "hidden";
 	/**value 'visible' for 'visibility' attribute*/
 	public static final String VALUE_VISIBILITY_VISIBLE = "visible";
-	
+
 	/**'type' a standard html attribute*/
 	public static final String ATTRIBUTE_TYPE = "type";
 	/**'text' a value for standard html attribute 'type'*/
@@ -68,17 +68,17 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 	public static final String VALUE_CHECKBOX_ATTRIBUTE_TYPE = "checkbox";
 	/**'submit' a value for standard html attribute 'type'*/
 	public static final String VALUE_SUBMIT_ATTRIBUTE_TYPE = "submit";
-	
+
 	/**'select' a standard html tag*/
 	public static final String TAG_HTML_SELECT = "select";
 	/**'input' a standard html tag*/
 	public static final String TAG_HTML_INPUT = "input";
-	
+
 	/**'widgetid' attribute used by dojo*/
 	public static final String ATTRIBUTE_WIDGETID = "widgetid";
 	/**'dijitpopupparent' attribute used by dojo*/
 	public static final String ATTRIBUTE_DIJITPOPUPPARENT = "dijitpopupparent";
-		
+
 	/**widgetid is the html-dojo object id for this web element, it may be null*/
 	protected String widgetid;
 	/**dijitpopupparent is an attribute of the html-dojo popup object for this web element
@@ -88,12 +88,12 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 	protected String waiRole;
 	/**indicate if this component follows the rules of 'Accessible Rich Internet Applications'*/
 	protected boolean accessible = false;
-	
+
 	/**Represents an object can be operated.*/
 	protected IOperable anOperableObject = null;
 	/**A cache containing IOperable objects for a certain WebElement.*/
 	protected Map<WebElement, IOperable> operableObjects = new HashMap<WebElement, IOperable>();
-	
+
 	protected Component(){}
 	/**
 	 * @param component	WebElement the component to operate.
@@ -102,7 +102,7 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 	public Component(WebElement component) throws SeleniumPlusException{
 		initialize(component);
 	}
-	
+
 	/**
 	 * According to WebElement, initialize necessary resources including 'embedded object', 'attribute'<br>
 	 * and 'operable object' etc. In this method, the {@link #initialize(Object)} will be called to<br>
@@ -118,8 +118,8 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 	public void initialize(WebElement component) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(false);
 		WDLibrary.checkNotNull(component);
-		
-		// CANAGL -- RE EVALUATE this.  
+
+		// CANAGL -- RE EVALUATE this.
 		// It may be desirable we want to interrogate properties of HIDDEN form controls
 		if(!WDLibrary.isVisible(component)){
 			String msg = "The web element is NOT visible! You should not operate it.";
@@ -133,12 +133,12 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 		}
 
 		super.initialize(component);
-		
+
 		if(anOperableObject==null){
 			throw new SeleniumPlusException("Can not create a proper Operable object.", SeleniumPlusException.CODE_OBJECT_IS_NULL);
 		}
 	}
-	
+
 	/**
 	 * This method will decide if the invisible web element is permitted to be operated.<br>
 	 * Subclass could override this method to provide the detail implementation.<br>
@@ -150,18 +150,18 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 		boolean permitted = false;
 
 		IndependantLog.debug(StringUtils.debugmsg(false)+" Trying to see if the invisible component is allowed to be handled.");
-		
+
 		return permitted;
 	}
-	
+
 	protected void updateFields(){
 		String debugmsg = StringUtils.debugmsg(false);
 		super.updateFields();
-		widgetid = getAttribute(ATTRIBUTE_WIDGETID);		
+		widgetid = getAttribute(ATTRIBUTE_WIDGETID);
 		dijitpopupparent = getAttribute(ATTRIBUTE_DIJITPOPUPPARENT);
 		waiRole = getAttribute(ATTRIBUTE_WAI_ROLE);
 		accessible = (waiRole!=null);
-		
+
 		//Update the Operable object, get from cache or create a new one.
 		synchronized(operableObjects){
 			if(!operableObjects.containsKey(webelement)){
@@ -172,7 +172,7 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 				}
 			}else{
 				anOperableObject = operableObjects.get(webelement);
-			}			
+			}
 		}
 
 		if(anOperableObject==null){
@@ -186,27 +186,27 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 			}
 		}
 	}
-	
+
 	/**
 	 * Cast the IOperable object to the specific one.<br>
 	 * The subclasses will override this method as they know what specific Operable to use.<br>
 	 * Here a void implementation is given, as not all subclass need the specific Operable, such as EditBox.<br>
 	 * Cast may throw Exception, we should catch it if calling this method.<br>
 	 * This method should be called after {@link #anOperableObject} has been initialized.<br>
-	 * 
+	 *
 	 * @see #anOperableObject
 	 * @see #updateFields()
 	 */
 	protected void castOperable(){
 		IndependantLog.info(StringUtils.debugmsg(false)+" Casting Operable ojbect '"+anOperableObject.getClass().getName()+"' to specific one.");
 	}
-	
+
 	/**
 	 * Create a IOperable object according to 'webelement'.<br>
 	 * User could to override this method to provide an IOperable object, but mostly<br>
 	 * user should override {@link #createDOJOOperable()}, {@link #createGenericOperable()}, <br>
 	 * {@link #createHTMLOperable()} and {@link #createSAPOperable()} to provide specific <br>
-	 * IOperable of certain domain.<br> 
+	 * IOperable of certain domain.<br>
 	 * @param webelement WebElement, from which the IOperable object will be created
 	 * @return IOperable
 	 * @see #createDOJOOperable()
@@ -217,7 +217,7 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 	protected IOperable createOperable(WebElement webelement){
 		String debugmsg = StringUtils.debugmsg(false);
 		IOperable operable = null;
-		try{			
+		try{
 			if(WDLibrary.isDojoDomain(webelement)){
 				IndependantLog.info(debugmsg+" trying to create IOperable for DOJO.");
 				operable = createDOJOOperable();
@@ -229,17 +229,17 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 				operable = createHTMLOperable();
 			}
 		}catch(Exception e){ IndependantLog.debug(debugmsg+" Met Exception ", e); }
-		
+
 		if(operable==null){
 			IndependantLog.info(debugmsg+" trying to create default IOperable for "+getClass().getName());
 			operable = createDefaultOperable();
 		}
-		
+
 		if(operable==null){
 			IndependantLog.warn(debugmsg+"Correct IOperable object support is missing in "+ getClass().getName());
 			operable = createGenericOperable();
 		}
-		
+
 		return operable;
 	}
 	/**
@@ -283,7 +283,7 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 		IndependantLog.warn(StringUtils.debugmsg(false)+" Cannot create Default IOperable at this time.");
 		return null;
 	}
-	
+
 	/**
 	 * Create the generic IOperable object to support the minimal generic functionalities, like GetGUIImage, Click, HoverMouse etc.<br>
 	 * This generic IOperable will be used if no other specific IOperable is available.<br>
@@ -293,7 +293,7 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 		IndependantLog.warn("Using generic IOperable Component with minimal functionalities.");
 		return this;
 	}
-	
+
 	/**
 	 * Clear the cache 'operableObjects'.<br>
 	 * Also clear the cache associated with the IOperable objects.<br>
@@ -304,15 +304,15 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 			Iterator<WebElement> keys = operableObjects.keySet().iterator();
 			while(keys.hasNext()){
 				operable = operableObjects.get(keys.next());
-				// (operable != this) to avoid reentrant infinite loop 
+				// (operable != this) to avoid reentrant infinite loop
 				if(operable!=null && operable!=this) operable.clearCache();
 			}
 			operableObjects.clear();
 		}
 	}
-	
+
 	public boolean isAccessible(){ return accessible;}
-	
+
 	public String getWaiRole(){ return waiRole; }
 
 	public String getWidgetid() {
@@ -339,22 +339,22 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 	public boolean setFocus() throws SeleniumPlusException{
 		return WDLibrary.windowSetFocus(getWebElement());
 	}
-	
+
 	/**
 	 * Does NOT clear any existing text in the control, but does attempt to insure the window/control has focus.
-	 * <br><em>Purpose:</em> 
+	 * <br><em>Purpose:</em>
 	 * <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumGenericMasterFunctionsReference.htm#detail_InputKeys" alt="inputKeys Keyword Reference" title="inputKeys Keyword Reference">inputKeys</a>
 	 * @throws SeleniumPlusException if we are unable to process the keystrokes successfully.
 	 * @see org.safs.robot.Robot#inputKeys(String)
 	 **/
 	public void inputKeys(String keystrokes) throws SeleniumPlusException{
 		WDLibrary.inputKeys(getWebElement(), keystrokes);
-	}	
-	
+	}
+
 	public void inputChars(String keystrokes) throws SeleniumPlusException{
 		WDLibrary.inputChars(getWebElement(), keystrokes);
-	}	
-	
+	}
+
 	/**
 	 * According to a certain 'search condition', get the matched subitem within this Component.<br>
 	 * This method just return a null. Its sublcass SHOULD give a detail implementation.<br>
@@ -365,23 +365,23 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 	public Element getMatchedElement(TextMatchingCriterion criterion) throws SeleniumPlusException {
 		return null;
 	}
-	
+
 	/**
 	 * <em>Purpose:</em> Remove the content from Component Box, like Edit Box, Combo box.<br>
-	 * 
+	 *
 	 * @param libName String,         the concrete Component name of class, which calls 'clearComponentBox()' method,
 	 * 						          like 'EditBox', 'ComboBox'.
-	 * 
+	 *
 	 */
 	public void clearComponentBox(String libName) throws SeleniumPlusException{
 		String debugmsg = getClass().getName() + ".clearComponentBox(): ";
-		
+
 		try {
 			try{
 				// chrome and ie are failing element.clear
 				webelement.clear();
 			}catch (StaleElementReferenceException sere){
-				IndependantLog.warn(debugmsg + "Met " + StringUtils.debugmsg(sere));			
+				IndependantLog.warn(debugmsg + "Met " + StringUtils.debugmsg(sere));
 				//fresh the element and clear again.
 				refresh(false);
 				webelement.clear();
@@ -414,22 +414,22 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 			WDLibrary.inputKeys(webelement, "^a{Delete}");
 		}
 	}
-	
+
 	/**
 	 * <em>Purpose:</em> Set the text as the content of Component Box. <br>
 	 * 					 This method will not deal with special keys as  + --> ShiftKey  ^ --> CtrlKey. <br>
 	 * 					 All text will be treated as literal characters. <br>
-	 * 
+	 *
 	 * For example: the special key "^(v)" will just be treated as literal "^(v)" without any interpretations. <br>
-	 * 
+	 *
 	 * @param libName String,         the concrete Component name of class, which calls 'inputComponentBoxChars()' method,
 	 * 						          like 'EditBox', 'ComboBox'.
 	 * @param text String,			  the content to be entered into Component box.
-	 * 
+	 *
 	 */
 	public void inputComponentBoxChars(String libName, String text) throws SeleniumPlusException {
 		String debugmsg = getClass().getName() + ".inputComponentBoxChars(): ";
-				
+
 		try {
 			WDLibrary.setWaitReaction(true);
 			try {
@@ -437,7 +437,7 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 			} catch (SeleniumPlusException sere) {
 				String msg = libName + " enter action failed" + "(input value = " + text + "): caused by " + StringUtils.debugmsg(sere);
 				IndependantLog.debug(debugmsg + msg);
-				
+
 				//fresh the element and input characters again
 				refresh(false);
 				WDLibrary.inputChars(webelement, text);
@@ -450,21 +450,21 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 			WDLibrary.setWaitReaction(Robot.DEFAULT_WAIT_REACTION);
 		}
 	}
-	
+
 	/**
 	 * <em>Purpose:</em> Set the text as the content of Component Box. <br>
 	 * 					 This method will deal with special keys. <br>
 	 * 					 For example: if the text is "^(v)", the content will be interpreted as "Ctrl + v", <br>
 	 * 					 which means PASTE the contents of clipboard. <br>
-	 * 
+	 *
 	 * @param libName String,         the concrete Component name of class, which calls 'inputComponentBoxKeys()' method,
 	 * 						          like 'EditBox', 'ComboBox'.
 	 * @param text String,			  the content to be entered into Component box.
-	 * 
+	 *
 	 */
 	public void inputComponentBoxKeys(String libName, String text) throws SeleniumPlusException {
 		String debugmsg = getClass().getName() + ".inputComponentBoxKeys(): ";
-				
+
 		try {
 			WDLibrary.setWaitReaction(true);
 			try {
@@ -484,10 +484,10 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 			WDLibrary.setWaitReaction(Robot.DEFAULT_WAIT_REACTION);
 		}
 	}
-	
+
 	/**
 	 * Get the contents of Component Box, like Edit Box, Combo Box.<br>
-	 * 
+	 *
 	 * @return String, the content of Component Box
 	 */
 	protected String getValue(){
@@ -495,32 +495,32 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 		Object result = WDLibrary.getValue(webelement, WDLibrary.TEXT_VALUE_ATTRIBUTES);
 		return result==null? "": result.toString();
 	}
-	
+
 	/**
 	 * Copy the Component box's value to clipboard and compare the clipboard's value with the text we try to input.<br>
-	 * 
+	 *
 	 * @param libName String,         the concrete Component name of class, which calls 'doubleCheckVerification()' method,
 	 * 						          like 'EditBox', 'ComboBox'.
 	 * @param expectedText String,	  the text to verify with.
-	 * 
+	 *
 	 * @return boolean, true if the component-box's value equals the text to input.
-	 * 
+	 *
 	 */
 	protected boolean doubleCheckVerification(String libName, String expectedText){
 		String debugmsg = StringUtils.debugmsg(false);
-		
+
 		try {
 			IndependantLog.debug(debugmsg + " copy " + libName + "'s value to clipboard, and compare clipboard's content with the text we want to input.");
-			
+
 			//Copy the component box's value so that it will be saved to the clipboard.
 			WDLibrary.clearClipboard();
 			try{ Thread.sleep(100);} catch(Exception ignore){}
-			
+
 			inputKeys("^a^c{END}");	// Ctrl+A, Ctrl+C, {End}
-			
+
 			//We MUST wait a while before the clip-board is set correctly.
 			try{ Thread.sleep(1000);} catch(Exception ignore){}
-			
+
 			//Get the content from the clipboard
 			String result = (String) WDLibrary.getClipboard(DataFlavor.stringFlavor);
 			IndependantLog.debug(debugmsg + " From RMI server, got clipboard's content \n'" + result + "' =? (expected value) \n'" + expectedText + "'");
@@ -529,33 +529,33 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 		} catch (Exception e) {
 			IndependantLog.debug(debugmsg + "Fail. due to " + StringUtils.debugmsg(e));
 		}
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * <em>Purpose:</em> Compare the contents of Component box to the original text.<br>
 	 * 					 If they are same, return true; otherwise, return false. <br>
-	 * 
+	 *
 	 * @param libName String,         the concrete Component name of class, which calls 'verifyComponentBox()' method,
 	 * 						          like 'EditBox', 'ComboBox'.
 	 * @param expectedText String,	  the text to to be compared to during verification.
-	 * 
+	 *
 	 * @return true if verification passes; false otherwise.
 	 */
 	public boolean verifyComponentBox(String libName, String expectedText){
 		String debugmsg = getClass().getName() + ".verifyComponentBox(): ";
-		boolean pass = false;		
+		boolean pass = false;
 		String contents = getValue();
-		
+
 		pass = expectedText.equals(contents);
-		
+
 		if(!pass){
 			String msg = libName + "Box verify errors: property:\n'" + contents + "'" + " does NOT equal to " + " expected value:\n'" + expectedText + "'.";
 			IndependantLog.debug(debugmsg + msg);
 			pass = doubleCheckVerification(libName, expectedText);
 		}
-		
+
 		return pass;
 	}
 }
