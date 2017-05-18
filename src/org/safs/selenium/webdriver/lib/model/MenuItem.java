@@ -1,4 +1,4 @@
-/** 
+/**
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
@@ -14,16 +14,16 @@ import org.safs.selenium.webdriver.lib.SearchObject;
 import org.safs.selenium.webdriver.lib.SeleniumPlusException;
 
 /**
- * 
+ *
  * History:<br>
- * 
+ *
  *  <br>   Jun 23, 2014    (sbjlwa) Initial release.
  */
 public class MenuItem extends HierarchicalElement {
-	
+
 	/**'submenuid' used to find the submenu WebElement of this menuitem*/
 	public static final String PROPERTY_SUBMENUID 			= "submenuid";
-	
+
 	//========================  Status Constants =============================================
 	public static final String STATUS_ENABLED	 	= "Enabled";
 	public static final String STATUS_UNGRAYED	 	= "Ungrayed";
@@ -34,7 +34,7 @@ public class MenuItem extends HierarchicalElement {
 	public static final String STATUS_SUBMENU_NUM 	= "Menu";
 	public static final String STATUS_BITMAP	 	= "Bitmap";
 	public static final String STATUS_SEPARATOR 	= "Separator";
-	//Future: "BarBreak" "Break" "Hilited" "Default" "Unhilited" "Normal" 
+	//Future: "BarBreak" "Break" "Hilited" "Default" "Unhilited" "Normal"
 	public static final String STATUS_BARBREAK	 	= "BarBreak";
 	public static final String STATUS_BREAK		 	= "Break";
 	public static final String STATUS_HILITED	 	= "Hilited";
@@ -42,12 +42,12 @@ public class MenuItem extends HierarchicalElement {
 	public static final String STATUS_DEFAULT	 	= "Default";
 	public static final String STATUS_NORMAL	 	= "Normal";
 	//========================  Status Constants =============================================
-	
+
 	protected String subMenuId = null;
-	
+
 	protected MenuItem(){}
 	public MenuItem(Object object){ initialize(object); }
-	
+
 	/**
 	 * set/update the class's fields through the underlying WebElement or Map.
 	 */
@@ -62,7 +62,7 @@ public class MenuItem extends HierarchicalElement {
 			//
 		}
 	}
-	
+
 	protected MenuItem newInstance(Object object){
 		return new MenuItem(object);
 	}
@@ -78,7 +78,7 @@ public class MenuItem extends HierarchicalElement {
 			return null;
 		}
 	}
-	
+
 	public MenuItem[] getChildren() {
 		String debugmsg = StringUtils.debugmsg(getClass(), "getChildren");
 		if(children==null) return null;
@@ -102,9 +102,9 @@ public class MenuItem extends HierarchicalElement {
 			throw new SeleniumPlusException(message);
 		}
 	}
-	
+
 	public void setSubMenuId(String subMenuId){
-		this.subMenuId = subMenuId; 
+		this.subMenuId = subMenuId;
 	}
 	public String getSubMenuId(){
 		return subMenuId;
@@ -116,7 +116,7 @@ public class MenuItem extends HierarchicalElement {
 		}
 		return hasSubMenu;
 	}
-	
+
 	/**
 	 * Make it private, some Menu structure may don't have this so called 'sub-menu' Object.<br>
 	 * For the traditional Menu, if a MenuItem has sub-items, the MenuItem will contain a SubMenu
@@ -129,33 +129,33 @@ public class MenuItem extends HierarchicalElement {
 	private WebElement getSubMenu(){
 		String debugmsg = StringUtils.debugmsg(getClass(), "getSubMenu");
 		WebElement submenu = null;
-		
+
 		if(hasSubMenu()){
 			String rs = RS.id(getSubMenuId());
 			//Search under the context of WebElement of MenuItem
 			if(getWebElement()!=null) submenu = SearchObject.getObject(getWebElement(), rs);
 			//Search under the context of WebDriver (the whole application)
 			if(submenu==null) submenu = SearchObject.getObject(rs);
-			if(submenu==null) IndependantLog.debug(debugmsg+"can NOT get SubMenu by RS '"+rs+"'"); 
+			if(submenu==null) IndependantLog.debug(debugmsg+"can NOT get SubMenu by RS '"+rs+"'");
 		}else{
 			IndependantLog.debug(debugmsg+"This MenuItem does NOT have a SubMenu.");
 		}
-		
+
 		return submenu;
 	}
-	
+
 	/**
 	 * <b>Note:</b>		The separator must be a blank " "
-	 * 
+	 *
 	 *  @param expectedStatus	A String contains status of the node item, can be an combination of followings:
 	 * 					<br>Supported: 	"Enabled" "Ungrayed" "Grayed" "Disabled" "Checked" "Unchecked" "Menu With N MenuItems" "BitMap" "Separator"
-	 * 					<br>Future:		"BarBreak" "Break" "Hilited" "Default" "Unhilited" "Normal" 
+	 * 					<br>Future:		"BarBreak" "Break" "Hilited" "Default" "Unhilited" "Normal"
 	 * 					<br><b>Example:</b>"Enabled Unchecked"
 	 * @return			If matched, return true
 	 */
 	public boolean matchStatus(String expectedStatus){
 		boolean matched = true;
-		
+
 		if(expectedStatus==null) return matched;
 		StringTokenizer tokens = new StringTokenizer(expectedStatus," ");
 		while(tokens.hasMoreTokens()){
@@ -189,15 +189,15 @@ public class MenuItem extends HierarchicalElement {
 			}else if(token.equalsIgnoreCase(STATUS_BREAK)){
 				//TODO
 			}else if(token.equalsIgnoreCase(STATUS_HILITED)){
-				//TODO	
+				//TODO
 			}else if(token.equalsIgnoreCase(STATUS_UNHILITEED)){
 				//TODO
 			}
 		}
-		
+
 		return matched;
 	}
-	
+
 	/**
 	 * Subclass may need to override this method to get a correct value.<br>
 	 * @return	boolean, Whether this menuItem is selected

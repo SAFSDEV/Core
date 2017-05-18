@@ -1,4 +1,4 @@
-/** 
+/**
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
@@ -14,12 +14,12 @@ import org.safs.selenium.webdriver.lib.SeleniumPlusException;
 import org.safs.selenium.webdriver.lib.WDLibrary;
 
 /**
- * 
+ *
  * History:<br>
- * 
+ *
  *  <br>   May 30, 2014    (sbjlwa) Initial release.
  *  <br>   Oct 15, 2014    (sbjlwa) Add isShowOnPage(): override the superclass method, just return false.
- *  <br>   Oct 29, 2014    (sbjlwa) Modify getMatchedElement(): if TextMatchingCriterion only contains 'index', 
+ *  <br>   Oct 29, 2014    (sbjlwa) Modify getMatchedElement(): if TextMatchingCriterion only contains 'index',
  *                                                              no text to match, get by index.
  *  <br>   Mar 27, 2015    (sbjlwa) Remove isShowOnPage(): the method in superclass has been fixed.
  */
@@ -70,7 +70,7 @@ abstract public class AbstractListSelectable extends AbstractSelectable implemen
 				}
 			}else{//criterion.getText()==null, only index is valid for searching
 				matchedItem = getMatchedItem(matchIndex);
-			}			
+			}
 		} catch (SeleniumPlusException e) {
 			IndependantLog.error(debugmsg+"Cannot get elements from container.", e);
 		}
@@ -143,7 +143,7 @@ abstract public class AbstractListSelectable extends AbstractSelectable implemen
 		return (Item) element;
 	}
 
-	protected void verifyItemSelected(Element element) throws SeleniumPlusException {	
+	protected void verifyItemSelected(Element element) throws SeleniumPlusException {
 		WDLibrary.checkNotNull(element);
 		//get all contents, and check is one of them can match the 'element' and is selected
 		String debugmsg = StringUtils.debugmsg(false);

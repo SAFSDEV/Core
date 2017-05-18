@@ -1,10 +1,10 @@
-/** 
+/**
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
 /**
  * History:
- * 
+ *
  *  May 30, 2014    (sbjlwa) Initial release.
  *  Oct 15, 2014    (sbjlwa) Add 'visible' property.
  *  Oct 29, 2015    (sbjlwa) Modify updateFields(): Trim the property 'label', the leading/ending spaces will be ignored.
@@ -16,7 +16,7 @@ import org.safs.tools.stringutils.StringUtilities;
 
 /**
  * It represents originally sap.ui.core.Element<br>
- * 
+ *
  */
 public class Element extends DefaultRefreshable{
 	/**'id' used to find the element on the page*/
@@ -43,8 +43,8 @@ public class Element extends DefaultRefreshable{
 	public static final String PROPERTY_CLASS	= "class";
 	/**'visible' if the element is visible.*/
 	public static final String PROPERTY_VISIBLE	= "visible";
-	
-	/**clickableWebElement represents the WebElement that is clickable. It may be different than 
+
+	/**clickableWebElement represents the WebElement that is clickable. It may be different than
 	 * webelement, which contain the element's properties.*/
 	protected WebElement clickableWebElement = null;
 	/**
@@ -52,18 +52,18 @@ public class Element extends DefaultRefreshable{
 	 * If the text containing leading/ending spaces, then it will be trimmed and stored in this property.<br>
 	 */
 	protected String label = null;
-	
+
 	protected String iconURL = null;
 	protected boolean disabled = false;
 	protected boolean selected = false;
 	protected boolean visible = false;
-	
+
 	protected Element(){}
-	
+
 	public Element(Object object){
 		initialize(object);
 	}
-	
+
 	/**
 	 * set/update the class's fields through the underlying WebElement or AbstractMap.
 	 */
@@ -73,7 +73,7 @@ public class Element extends DefaultRefreshable{
 		label = _getLabel();
 		//Trim the label if it contains leading/ending spaces
 		if(label!=null) label = StringUtilities.TWhitespace(label);
-		
+
 		if(map!=null){
 			id = getAttribute(PROPERTY_ID);
 			cssClass = getAttribute(PROPERTY_CLASS);
@@ -86,9 +86,9 @@ public class Element extends DefaultRefreshable{
 			}
 
 		}else if(webelement!=null){
-			try { disabled = !webelement.isEnabled(); } catch (Exception e) { /* IndependantLog.debug(debugmsg+StringUtils.debugmsg(e));*/}			
-			try { selected = webelement.isSelected(); } catch (Exception e) { /* IndependantLog.debug(debugmsg+StringUtils.debugmsg(e));*/}			
-			try { visible = webelement.isDisplayed(); } catch (Exception e) { /* IndependantLog.debug(debugmsg+StringUtils.debugmsg(e));*/}			
+			try { disabled = !webelement.isEnabled(); } catch (Exception e) { /* IndependantLog.debug(debugmsg+StringUtils.debugmsg(e));*/}
+			try { selected = webelement.isSelected(); } catch (Exception e) { /* IndependantLog.debug(debugmsg+StringUtils.debugmsg(e));*/}
+			try { visible = webelement.isDisplayed(); } catch (Exception e) { /* IndependantLog.debug(debugmsg+StringUtils.debugmsg(e));*/}
 		}
 	}
 
@@ -105,7 +105,7 @@ public class Element extends DefaultRefreshable{
 		}catch(Throwable ignore){}
 		return text;
 	}
-	
+
 	public static String parseWebElementText(WebElement aWebElement){
 		if(aWebElement==null) return null;
 		String text = aWebElement.getText();
@@ -114,7 +114,7 @@ public class Element extends DefaultRefreshable{
 		}
 		return text;
 	}
-	
+
 	/**
 	 * This method tries to return a precise WebElement to click at. Sometimes the WebElement<br>
 	 * containning the informations about 'label', 'disabled', 'selected' etc. may not be suitable<br>
@@ -122,27 +122,27 @@ public class Element extends DefaultRefreshable{
 	 * an appropriate WebElement occupying correct area for clicking.<br>
 	 * Refer to {@link HierarchicalElement#getClickableWebElement()} for a detail implementation.<br>
 	 * <b>NOTE:If you need to verify the status of this Element, please call {@link #getWebElement()} instead.</b><br>
-	 * 
+	 *
 	 * For example:<br>
 	 * For some implementations of tree, the tree node is implemented by &lt;li>, but this tag<br>
 	 * may very probably contain some child-nodes, in this case the area returned by Selenium for<br>
 	 * this tree node will be larger than it looks like, the area will include all its children.<br>
 	 * But for clicking, we will click the center of the tree node (area returned by Selenium), so it<br>
 	 * the center of that larger area that we click(not the center of the tree node itself), it's wrong!<br>
-	 * 
+	 *
 	 * @param webelement Element, the element to get WebElement
 	 * @return WebElement
-	 * @see HierarchicalElement#getClickableWebElement() 
+	 * @see HierarchicalElement#getClickableWebElement()
 	 */
 	protected WebElement getClickableWebElement(){
 		//Maybe we just need to move the implementation in HierarchicalElement to here.
 		return getWebElement();
 	}
-	
+
 	public String getIconURL(){
 		return iconURL;
 	}
-	
+
 	public String getLabel(){
 		return label;
 	}
@@ -164,35 +164,35 @@ public class Element extends DefaultRefreshable{
 	public boolean isVisible() {
 		return visible;
 	}
-	
+
 	/**
 	 * @return String, the content of this Element (the value of label).
 	 */
 	public String contentValue(){
 		return label;
 	}
-	
+
 	public String toString(){
 		return "id="+getId()+"; label="+label;
 	}
-	
+
 	public boolean equals(Object node){
 		if(node==null) return false;
 		if(!(node instanceof Element)) return false;
 		Element elementNode = (Element) node;
-		
+
 		//If id is availabe to compare
 		if(id!=null && !id.isEmpty()){
 			if(id.equals(elementNode.getId())) return true;
 			else return false;
 		}
-		
+
 		//If id is not available, then use a bunch of attributes to compare
 		boolean ok = true;
 		if(label!=null && !label.isEmpty()) ok &= label.equals(elementNode.getLabel());
 		if(ok && cssClass!=null && !cssClass.isEmpty()) ok &= cssClass.equals(elementNode.getCssClass());
 		if(ok && tagName!=null && !tagName.isEmpty()) ok &= tagName.equals(elementNode.getTagName());
-		
+
 		return ok;
 	}
 }

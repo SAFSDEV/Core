@@ -1,11 +1,11 @@
-/** 
+/**
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
 /**
- * 
+ *
  * History:
- * 
+ *
  *  May 30, 2014    (sbjlwa) Initial release.
  *  Jul 08, 2016    (sbjlwa) Add checkIfDisabled(): Log warning message instead of throwing Exception if the node is not enabled.
  */
@@ -17,7 +17,7 @@ import org.safs.selenium.webdriver.lib.Component;
 import org.safs.selenium.webdriver.lib.SeleniumPlusException;
 
 /**
- * 
+ *
  * May 30, 2014    (sbjlwa) Initial release.
  */
 public abstract class AbstractTreeSelectable extends AbstractHierarchicalSelectable implements ITreeSelectable{
@@ -29,7 +29,7 @@ public abstract class AbstractTreeSelectable extends AbstractHierarchicalSelecta
 	public AbstractTreeSelectable(Component parent) throws SeleniumPlusException {
 		super(parent);
 	}
-	
+
 	public TreeNode[] getContent() throws SeleniumPlusException{
 		try{
 			return (TreeNode[]) super.getContent();
@@ -41,7 +41,7 @@ public abstract class AbstractTreeSelectable extends AbstractHierarchicalSelecta
 			throw new SeleniumPlusException(msg);
 		}
 	}
-	
+
 	public void expandItem(TextMatchingCriterion criterion, boolean expandChildren, boolean verify) throws SeleniumPlusException {
 		TreeNode node = getMatchedElement(criterion);
 
@@ -50,26 +50,26 @@ public abstract class AbstractTreeSelectable extends AbstractHierarchicalSelecta
 
 		if(verify) verifyItemExpension(node, true);
 	}
-	
+
 	public void collapseItem(TextMatchingCriterion criterion, boolean collpaseChildren, boolean verify) throws SeleniumPlusException {
 		TreeNode node = getMatchedElement(criterion);
-		
+
 		checkIfDisabled(node, "This element is disabled, it cannot be selected.");
 		collapseItem(node, collpaseChildren);
 
 		if(verify) verifyItemExpension(node, false);
 	}
-	
+
 	/**
 	 * @param node TreeNode
 	 * @param expectExpended boolean, true then the node is expected as expended; false then the node is expected as collapsed.
 	 * @throws SeleniumPlusException
 	 */
 	protected void verifyItemExpension(TreeNode node, boolean expectExpended) throws SeleniumPlusException{
-		
+
 		checkIfDisabled(node, "This element is disabled, it cannot be expended or collapsed.");
 		boolean verificationOK = false;
-		
+
 		try{
 			verificationOK = (verifyItemExpanded(node)==expectExpended);
 		}catch(SeleniumPlusException spe){
@@ -79,7 +79,7 @@ public abstract class AbstractTreeSelectable extends AbstractHierarchicalSelecta
 				throw spe;
 			}
 		}
-		
+
 		if(!verificationOK){
 			String msg = "verification error: node='"+node+"' is "+(expectExpended?"collapsed":"expended");
 			throw new SeleniumPlusException(msg, SeleniumPlusException.CODE_VERIFICATION_FAIL);
@@ -89,9 +89,9 @@ public abstract class AbstractTreeSelectable extends AbstractHierarchicalSelecta
 	/**
 	 * Check if the node is disabled. Normally it could not be operated if the node is disabled, so
 	 * we should check this before doing any actions on it.
-	 * 
+	 *
 	 * @param node	TreeNode, the node to check.
-	 * @param msg	String, the error message to log or to 
+	 * @param msg	String, the error message to log or to
 	 * @throws SeleniumPlusException
 	 */
 	private void checkIfDisabled(TreeNode node, String msg) throws SeleniumPlusException{
@@ -102,8 +102,8 @@ public abstract class AbstractTreeSelectable extends AbstractHierarchicalSelecta
 			//throw new SeleniumPlusException(msg);
 		}
 	}
-	
-	
+
+
 	/**
 	 * @param node TreeNode, the node to expand.
 	 * @param expandChildren boolean, if true then expand all the children of this node.
@@ -128,7 +128,7 @@ public abstract class AbstractTreeSelectable extends AbstractHierarchicalSelecta
 	protected boolean verifyItemExpanded(TreeNode node) throws SeleniumPlusException {
 		return node.isExpanded();
 	}
-	
+
 	/**
 	 * According to the "hierarchical path" to get a TreeNode object.
 	 */
