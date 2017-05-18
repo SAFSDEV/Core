@@ -1,4 +1,4 @@
-/** 
+/**
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
@@ -6,10 +6,10 @@ package org.safs.selenium.webdriver.lib.model;
 
 /**
  * Contains the aria attributes and role's types, refer to <a href='http://www.w3.org/TR/wai-aria/rdf_model.svg'>RDF-MODEL</a>
- * 
+ *
  * <BR>
  * History:<br>
- * 
+ *
  *  <br>   Jun 16, 2014    (sbjlwa) Initial release.
  */
 public interface IWebAccessibleInternetRole {
@@ -32,12 +32,12 @@ public interface IWebAccessibleInternetRole {
 	public static final String ATTRIBUTE_ARIA_OWNS 				= "aria-owns";
 	public static final String ATTRIBUTE_ARIA_RELEVANT 			= "aria-relevant";
 	public static final String ATTRIBUTE_ARIA_ACTIVEDDESCENDANT	= "aria-activeddescendant";
-	
+
 	public static final String ATTRIBUTE_ARIA_VALUENOW			= "aria-valuenow";
 	public static final String ATTRIBUTE_ARIA_VALUEMIN			= "aria-valuemin";
 	public static final String ATTRIBUTE_ARIA_VALUEMAX			= "aria-valuemax";
 	public static final String ATTRIBUTE_ARIA_VALUETEXT			= "aria-valuetext";
-	
+
 	public static final String ATTRIBUTE_ARIA_EXPANDED			= "aria-expanded";
 	public static final String ATTRIBUTE_ARIA_SELECTED			= "aria-selected";
 	public static final String ATTRIBUTE_ARIA_READONLY 			= "aria-readonly";
@@ -51,18 +51,18 @@ public interface IWebAccessibleInternetRole {
 	public static final String ATTRIBUTE_ARIA_SETSIZE			= "aria-setsize";
 	public static final String ATTRIBUTE_ARIA_AUTOCOMPLETE		= "aria-autocomplete";
 	public static final String ATTRIBUTE_ARIA_SORT				= "aria-sort";
-	
-	
+
+
 	public static final String WAI_ROLE_SEPARATOR	 	= "separator";
 	public static final String WAI_ROLE_PRESENTATION	= "presentation";
 	public static final String WAI_ROLE_DOCUMENT	 	= "document";
 	public static final String WAI_ROLE_DIALOG		 	= "dialog";
-	
+
 	public static final String WAI_ROLE_PROGRESSBAR 	= "progressbar";
 	public static final String WAI_ROLE_SPINBUTTON 		= "spinbutton";
 	public static final String WAI_ROLE_SLIDER		 	= "slider";
 	public static final String WAI_ROLE_SCROLLBAR	 	= "scrollbar";
-	
+
 	public static final String WAI_ROLE_TEXTBOX 		= "textbox";
 	public static final String WAI_ROLE_OPTION		 	= "option";
 	public static final String WAI_ROLE_CHECKBOX	 	= "checkbox";
@@ -82,10 +82,10 @@ public interface IWebAccessibleInternetRole {
 	public static final String WAI_ROLE_GRIDCELL	 	= "gridcell";
 	public static final String WAI_ROLE_HEADING		 	= "heading";
 	public static final String WAI_ROLE_TAB			 	= "tab";
-	
+
 	public static final String WAI_ROLE_COLUMNHEADER 	= "columnheader";
 	public static final String WAI_ROLE_ROWHEADER	 	= "rowheader";
-	
+
 	public static final String WAI_ROLE_RADIO		 	= "radio";
 	public static final String WAI_ROLE_MENUITEMCHECKBOX 	= "menuitemcheckbox";
 	public static final String WAI_ROLE_MENUITEMRADIO 	= "menuitemradio";

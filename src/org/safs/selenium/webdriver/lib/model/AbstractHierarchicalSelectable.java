@@ -1,4 +1,4 @@
-/** 
+/**
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
@@ -20,7 +20,7 @@ import org.safs.selenium.webdriver.lib.SeleniumPlusException;
  *
  * <br>
  * History:<br>
- * 
+ *
  *  <br>   Jun 23, 2014    (sbjlwa) Initial release.
  */
 public abstract class AbstractHierarchicalSelectable extends AbstractSelectable{
@@ -44,7 +44,7 @@ public abstract class AbstractHierarchicalSelectable extends AbstractSelectable{
 	public void verifyItemSelection(int index, boolean expectSelected) throws SeleniumPlusException {
 		throw new SeleniumPlusException("Not supported.");
 	}
-	
+
 	/**
 	 *  According to the "hierarchical path" to get a Element object.<br>
 	 *  The sub-class needs to provide an appropriate implementation of method {@link #getContent()}, on which<br>
@@ -55,11 +55,11 @@ public abstract class AbstractHierarchicalSelectable extends AbstractSelectable{
 	public HierarchicalElement getMatchedElement(TextMatchingCriterion criteria) throws SeleniumPlusException {
 		String debugmsg = StringUtils.debugmsg(this.getClass(), "getMatchedElement");
 		HierarchicalElement matchedElement = null;
-		
+
 		try{
 			HierarchicalElement[] elements = (HierarchicalElement[]) getContent();
 			String[] pathNodes = StringUtils.getTokenArray(criteria.getText(), GuiObjectRecognition.DEFAULT_PATH_SEPARATOR, null);
-			
+
 			if(criteria.matchIndexHierarchically()){
 				matchedElement = this.getMatchedNode(elements, pathNodes, criteria.isPartialMatch(), criteria.getExpectedMatchedIndices());
 
@@ -68,11 +68,11 @@ public abstract class AbstractHierarchicalSelectable extends AbstractSelectable{
 				matchedElement = getMatchedNode(elements, pathNodes, criteria.isPartialMatch(), matchedTimes, criteria.getExpectedMatchedIndex());
 				IndependantLog.debug(debugmsg+" found "+matchedTimes.getValue()+" matches.");
 			}
-			
+
 		} catch (Exception e) {
 			IndependantLog.error(debugmsg+"Cannot get elements from container.", e);
 		}
-		
+
 		if(matchedElement==null){
 			IndependantLog.error(debugmsg+"Fail to find element "+criteria.toString());
 			throw new SeleniumPlusException("Fail to find element '"+criteria.getText()+"'.");
@@ -95,18 +95,18 @@ public abstract class AbstractHierarchicalSelectable extends AbstractSelectable{
 		String label = null;
 		String[] subPathNodes = null;
 		HierarchicalElement matchedNode = null;
-		
+
 		if(hierarchicalStructure==null || hierarchicalStructure.length<=0){
 			IndependantLog.error(debugmsg+" hierarchical structure (tree/menubar etc.) is null or has no nodes to match");
 			return null;
 		}
-		
+
 		if(pathNodes==null || pathNodes.length<=0){
 			IndependantLog.error(debugmsg+" pathNodes is null or has no nodes to match");
 			return null;
 		}
 		label = pathNodes[0];
-		
+
 		for(HierarchicalElement node: hierarchicalStructure){
 			if(StringUtils.matchText(node.getLabel(), label, partialMatch, false)){
 				if(pathNodes.length==1){//when the last node in the path has matched
@@ -118,13 +118,13 @@ public abstract class AbstractHierarchicalSelectable extends AbstractSelectable{
 					//there are nodes of deeper level to match
 					subPathNodes = Arrays.copyOfRange(pathNodes, 1, pathNodes.length);
 					matchedNode = getMatchedNode(node.getChildren(), subPathNodes, partialMatch, matchedTimes, expectedMatchTimes);
-					if(matchedNode!=null) break;//else contineu to search, matchedTimes will hold the latest number. 
+					if(matchedNode!=null) break;//else contineu to search, matchedTimes will hold the latest number.
 				}
 			}//else{//if not matched, try next sibling
 		}
 		return matchedNode;
 	}
-	
+
 	/**
 	 * According to a pathNodes (an array of path) and expectedMatchTimes (an array of int), find the matched node in a hierarchical structure.<br>
 	 * If at certain level, the expectedMatchedTime is not satisfied, then the search will fail and just return a null.<br>
@@ -142,12 +142,12 @@ public abstract class AbstractHierarchicalSelectable extends AbstractSelectable{
 		int[] subExpectedMatchTimes = null;
 		int expectedMatchTime = -1;
 		int matchedTimes=0;
-		
+
 		if(hierarchicalStructure==null || hierarchicalStructure.length<=0){
 			IndependantLog.error(debugmsg+" hierarchical structure (tree/menubar etc.) is null or has no nodes to match");
 			return null;
 		}
-		
+
 		if(pathNodes==null || pathNodes.length<=0){
 			IndependantLog.error(debugmsg+" pathNodes is null or has no nodes to match");
 			return null;
@@ -158,7 +158,7 @@ public abstract class AbstractHierarchicalSelectable extends AbstractSelectable{
 			return null;
 		}
 		expectedMatchTime = expectedMatchTimes[0];
-		
+
 		for(HierarchicalElement node: hierarchicalStructure){
 			if(StringUtils.matchText(node.getLabel(), label, partialMatch, false)){
 				if(matchedTimes++==expectedMatchTime){
@@ -172,10 +172,10 @@ public abstract class AbstractHierarchicalSelectable extends AbstractSelectable{
 					}
 				}
 				//else contienu to test the next sibling
-				
+
 			}//else{//if not matched, try next sibling
 		}
-		
+
 		return null;
 	}
 

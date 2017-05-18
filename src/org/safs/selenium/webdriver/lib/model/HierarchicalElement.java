@@ -1,4 +1,4 @@
-/** 
+/**
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
@@ -18,10 +18,10 @@ import org.safs.selenium.webdriver.lib.SeleniumPlusException;
 
 /**
  * This class represents a hierarchical structure like Tree or Menu etc.<br>
- * 
+ *
  * <br>
  * History:<br>
- * 
+ *
  *  <br>   Jun 23, 2014    (sbjlwa) Initial release.
  */
 public class HierarchicalElement extends Element{
@@ -33,11 +33,11 @@ public class HierarchicalElement extends Element{
 	protected HierarchicalElement parent = null;
 	protected HierarchicalElement[] children = null;
 	private Object lock = new Object();
-	
+
 	protected HierarchicalElement(){}
-	
+
 	public HierarchicalElement(Object object){ initialize(object); }
-	
+
 	/**
 	 * set/update the class's fields through the underlying WebElement or AbstractMap.
 	 */
@@ -50,16 +50,16 @@ public class HierarchicalElement extends Element{
 		}else if(webelement!=null){
 			//comment parseChildren(), as we don't know how to get children from webelement
 //			parseChildren(webelement);
-			
+
 		}
 	}
-	
+
 	protected void parseChildren(WebElement element){
 		String debugmsg = StringUtils.debugmsg(getClass(), "parseChildren");
 		IndependantLog.debug(debugmsg+" Need to handle WebElement to get children.");
 		//TODO But how to get children from a web-element???
 	}
-	
+
 	/**
 	 * parse the children of this element. To create the CORRECT child element, subclass<br>
 	 * MUST OVERRIDE {@link #newArray(int)}/{@link #newInstance(Object)} to provide their own instance/array.<br>
@@ -69,7 +69,7 @@ public class HierarchicalElement extends Element{
 	 */
 	protected void parseChildren(Map<?, ?> map){
 		String debugmsg = StringUtils.debugmsg(getClass(), "parseChildren");
-		
+
 		//analyze the 'children' field
 		try {
 			Object children = map.get(PROPERTY_CHILDREN);//List
@@ -85,9 +85,9 @@ public class HierarchicalElement extends Element{
 				if(children!=null) IndependantLog.error(debugmsg+" Need to handle "+children.getClass().getName());
 			}
 		} catch (Exception e) { IndependantLog.error(debugmsg+StringUtils.debugmsg(e));}
-		
+
 	}
-	
+
 	/**
 	 * Create an instance of HierarchicalElement.<br>
 	 * Sub class MUST OVERRIDE this method to provide its own instance.<br>
@@ -106,7 +106,7 @@ public class HierarchicalElement extends Element{
 	protected HierarchicalElement[] newArray(int length){
 		return new HierarchicalElement[length];
 	}
-	
+
 	public HierarchicalElement[] getChildren() {
 		return children;
 	}
@@ -152,7 +152,7 @@ public class HierarchicalElement extends Element{
 	public void setParent(HierarchicalElement parent) {
 		this.parent = parent;
 	}
-	
+
 	/**
 	 * Return the root's id (the root of this hierarchical structure like Tree or Menu)
 	 * @return String, the root's id.
@@ -166,23 +166,23 @@ public class HierarchicalElement extends Element{
 		}
 		return rootId;
 	}
-	
+
 	/**
 	 * Return the full path of this node in the hierarchical structure.
 	 * @return String, the full path.
 	 */
 	public String getFullPath(){
 		String fullPath = getLabel();
-		
+
 		HierarchicalElement node = getParent();
 		while(node!=null){
 			fullPath = node.getLabel()+GuiObjectRecognition.DEFAULT_PATH_SEPARATOR+fullPath;
 			node = node.getParent();
 		}
-		
+
 		return fullPath;
 	}
-	
+
 	/**
 	 * In this method, we are trying to get a WebElement occupying the precise area of the node.<br>
 	 * The node's text is often represented by a tag &lt;span>, which is what we want, we will<br>

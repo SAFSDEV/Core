@@ -1,4 +1,4 @@
-/** 
+/**
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
@@ -10,21 +10,21 @@ import org.safs.selenium.util.JavaScriptFunctions;
 
 
 /**
- * This provide a uniformed Option object to represent the option<br> 
+ * This provide a uniformed Option object to represent the option<br>
  * within a container such as ComboBox etc.<br>
- * 
+ *
  *  <br>   Jan 15, 2014    (sbjlwa) Initial release.
  */
 public class Option extends Item{
 	public static final String PROPERTY_NAME = "name";
-	
+
 	public Option(Object object){
 		super(object);
 		//If this class overrides the method updateFields(), don't forget the call it here.
 		//otherwise the local fileds will be initialized to default value.
 //		updateFields();
 	}
-	
+
 	public Option setIndex(int index){
 		this.index = index;
 		return this;

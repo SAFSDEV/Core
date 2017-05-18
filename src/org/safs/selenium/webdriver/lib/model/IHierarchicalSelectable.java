@@ -1,4 +1,4 @@
-/** 
+/**
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
@@ -15,9 +15,9 @@ import org.safs.selenium.webdriver.lib.SeleniumPlusException;
  * </ul>
  * <br>
  * History:<br>
- * 
+ *
  *  <br>   Aug 7, 2014    (sbjlwa) Initial release.
- *  @see 
+ *  @see
  */
 public interface IHierarchicalSelectable extends ISelectable{
 	public HierarchicalElement[] getContent() throws SeleniumPlusException;

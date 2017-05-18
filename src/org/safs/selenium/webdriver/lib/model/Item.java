@@ -1,10 +1,10 @@
-/** 
+/**
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
 /**
  * History:
- * 
+ *
  *  Apr 24, 2014    (sbjlwa) Initial release.
  *  Oct 29, 2015    (sbjlwa) Modify updateFields(): Trim the property 'value', the leading/ending spaces will be ignored.
  */
@@ -14,22 +14,22 @@ import org.safs.selenium.webdriver.lib.Component;
 import org.safs.tools.stringutils.StringUtilities;
 
 /**
- * This provides a uniformed Item object to represent the item<br> 
+ * This provides a uniformed Item object to represent the item<br>
  * within a container such as TabControl or ListView etc.<br>
  * It represents originally sap.ui.core.Item<br>
  *
  */
 public class Item extends Element{
-	
+
 	public static final int INVALID_INDEX = -1;
-	
+
 	protected int index = INVALID_INDEX;
 	protected String value = null;
-	
+
 	/**
 	 * Constructor used to create an uniformed Item object. User may override this one to parse their own object.
 	 * @param object Object, the item object. It may be a Map returned from javascript function; It maybe a WebElement.
-	 * 
+	 *
 	 */
 	public Item(Object object){
 		super(object);
@@ -37,7 +37,7 @@ public class Item extends Element{
 		//otherwise the local fileds will be initialized to default value. This is the nature of Java Language.
 		updateFields();
 	}
-	
+
 	/**
 	 * set/update the class's fields through the underlying WebElement or AbstractMap.
 	 */
@@ -54,11 +54,11 @@ public class Item extends Element{
 			value = getAttribute(Component.ATTRIBUTE_VALUE);
 			try{ index = Integer.parseInt(getAttribute(Component.ATTRIBUTE_INDEX)); }catch(Exception e){}
 		}
-		
+
 		//Trim the value if it contains leading/ending space
 		if(value!=null) value = StringUtilities.TWhitespace(value);
 	}
-	
+
 	public int getIndex(){
 		return index;
 	}
@@ -74,7 +74,7 @@ public class Item extends Element{
 		if(super.contentValue()==null) return value;
 		return super.contentValue();
 	}
-	
+
 	public String toString(){
 		return "id="+id+"; label="+label+" index="+index;
 	}
