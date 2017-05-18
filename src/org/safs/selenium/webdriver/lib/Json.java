@@ -45,7 +45,7 @@ public class Json {
                 Object obj1FieldValue = jsonObj1.get(fieldName);
 
                 Object obj2FieldValue = jsonObj2.get(fieldName);
-               
+
                 if (!jsonsEqual(obj1FieldValue, obj2FieldValue))
                 {
                     return false;
@@ -91,7 +91,7 @@ public class Json {
 
         return true;
     }
-	
+
 	/**
 	 * Read a JSON data file with UTF-8 encoding, and convert the data into a Java Map and return it.<br>
 	 * @param file String, the absolute JSON file.
@@ -114,7 +114,7 @@ public class Json {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Convert 'json object' to a certain type.
 	 * @param clazz Class<T>, the expected type to which the json object will be converted.
@@ -134,7 +134,7 @@ public class Json {
 			throw null;
 		}
 	}
-	
+
 	public static void main(String[] args){
 		//Test Json.convert();
 		//In the version later than selenium-server-standalone-2.47.1.jar, selenium has removed org.seleniumhq.jetty7.util.ajax.JSON
@@ -146,5 +146,5 @@ public class Json {
 			System.out.println(nv);
 		}
 	}
-	
+
 }
