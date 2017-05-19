@@ -2,6 +2,11 @@
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
+/**
+ * History:
+ *
+ *  MAY 19, 2017	(Lei Wang) Modified constructor Item(Object object): for better performance, call initialize(object) instead of super(object); updateFields();
+ */
 package org.safs.selenium.webdriver.lib.model;
 
 import java.util.Hashtable;
@@ -18,11 +23,10 @@ import org.safs.selenium.util.JavaScriptFunctions;
 public class Option extends Item{
 	public static final String PROPERTY_NAME = "name";
 
+	protected Option(){}
+
 	public Option(Object object){
-		super(object);
-		//If this class overrides the method updateFields(), don't forget the call it here.
-		//otherwise the local fileds will be initialized to default value.
-//		updateFields();
+		initialize(object);
 	}
 
 	public Option setIndex(int index){
@@ -42,4 +46,4 @@ public class Option extends Item{
 		properties.put(PROPERTY_NAME, label);
 		return JavaScriptFunctions.defineObject(properties);
 	}
-}//End of Option Class
+}

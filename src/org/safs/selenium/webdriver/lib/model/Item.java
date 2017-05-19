@@ -5,8 +5,9 @@
 /**
  * History:
  *
- *  Apr 24, 2014    (Lei Wang) Initial release.
- *  Oct 29, 2015    (Lei Wang) Modify updateFields(): Trim the property 'value', the leading/ending spaces will be ignored.
+ *  APR 24, 2014    (Lei Wang) Initial release.
+ *  OCT 29, 2015    (Lei Wang) Modify updateFields(): Trim the property 'value', the leading/ending spaces will be ignored.
+ *  MAY 19, 2017	(Lei Wang) Modified constructor Item(Object object): for better performance, call initialize(object) instead of super(object); updateFields();
  */
 package org.safs.selenium.webdriver.lib.model;
 
@@ -26,16 +27,15 @@ public class Item extends Element{
 	protected int index = INVALID_INDEX;
 	protected String value = null;
 
+	protected Item(){}
+
 	/**
 	 * Constructor used to create an uniformed Item object. User may override this one to parse their own object.
 	 * @param object Object, the item object. It may be a Map returned from javascript function; It maybe a WebElement.
 	 *
 	 */
 	public Item(Object object){
-		super(object);
-		//We need to call updateFields() again even it has been called in super constructor!!!
-		//otherwise the local fileds will be initialized to default value. This is the nature of Java Language.
-		updateFields();
+		initialize(object);
 	}
 
 	/**
@@ -46,11 +46,9 @@ public class Item extends Element{
 
 		if(map!=null){
 			value = getAttribute(PROPERTY_VALUE);
-//			try { index = StringUtilities.getInteger(map, PROPERTY_INDEX); } catch (Exception e) {}
 			try{ index = Integer.decode(getAttribute(PROPERTY_INDEX));} catch(Exception e){}
 
 		}else if(webelement!=null){
-			selected = webelement.isSelected();
 			value = getAttribute(Component.ATTRIBUTE_VALUE);
 			try{ index = Integer.parseInt(getAttribute(Component.ATTRIBUTE_INDEX)); }catch(Exception e){}
 		}
