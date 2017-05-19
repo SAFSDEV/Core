@@ -296,9 +296,6 @@ Line Options:</b><br>
               <dd>System property for the delay in milliseconds before releasing the mouse
               <p></p>
               </dd>
-              </dl>
-          </td><td>
-            <dl>
               <dt><b>-Dsafs.step.separator=string (1 char)</b>
               </dt><dd>Only the setting for the test level of the
               provided test name is required.
@@ -311,7 +308,11 @@ Line Options:</b><br>
               </dt><dd>Only the setting for the test level of the
               provided test name is required.
               <p></p>
-              </dd><dt><b>-Dsafs.log.level=ERROR|WARN|PASS|GENERIC|INDEX|INFO|DEBUG</b>
+              </dd>
+              </dl>
+          </td><td>
+            <dl>
+              <dt><b>-Dsafs.log.level=ERROR|WARN|PASS|GENERIC|INDEX|INFO|DEBUG</b>
               </dt><dd>The default log level is GENERIC.
               <p></p>
               </dd><dt><b>-Dsafs.log.overwrite=TRUE|YES|1 (anything else is
@@ -365,6 +366,23 @@ Line Options:</b><br>
               <dt><b>-D<a href="../doc/org/safs/Constants.RestConstants.html#PROPERTY_AUTH" target="api">safs.rest.auth</a>=config\<a href="../configure/auth2.xml" target="api">auth2.xml</a></b></dt>
               <dd>Defines file (relative to project or absolute) holding the authorization/authentication information for REST testing.<p></dd>
 
+              <dt><b>-D<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_CONNECTION_TEST_COMMAND" target="api">safs.selenium.connection.test.command</a></b>=
+                       one of <a href="https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/remote/DriverCommand.html">selenium-driver-command</a>
+                       (Default is <a href="../doc/org/safs/selenium/webdriver/lib/RemoteDriver.html#DEFAULT_CONNECTION_TEST_COMMAND" target="api">getAlertText</a>)</dt>
+              <dd>Specifies the command to test the connection between WebDriver and BrowserDriver.<p></dd>
+              
+              <dt><b>-D<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_CONNECTION_TEST_MAX_DURATION" target="api">safs.selenium.connection.test.max.duration</a>=Time in milliseconds</b>
+                       (Default is <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#DEFAULT_CONNECTION_TEST_MAX_DURATION" target="api">5000</a>)</dt>
+              <dd>Specifies the maximum duration (in <b>milliseconds</b>) that user can accept when executing command defined by <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_CONNECTION_TEST_COMMAND" target="api">safs.selenium.connection.test.command</a><p></dd>
+          
+              <dt><b>-D<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_CONNECTION_TEST_MAX_TRY" target="api">safs.selenium.connection.test.max.try</a>=Number</b>
+                       (Default is <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#DEFAULT_CONNECTION_TEST_MAX_TRY" target="api">2</a>)</dt>
+              <dd>Specifies the maximum times to try to get a good connection between WebDriver and BrowserDriver<p></dd>
+ 
+              <dt><b>-D<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_DELAY_GET_CONTENT" target="api">safs.selenium.delay.get.content</a>=Time in milliseconds</b>
+                       (Default is <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#DEFAULT_DELAY_GET_CONTENT" target="api">0</a>)</dt>
+              <dd>Specifies the delay (milliseconds) waiting for the refresh of a webelement before getting its content<p></dd>
+              
 </dl></td></tr></tbody></table></td></tr></tbody></table>
 </p><p>Enhancements, corrections, and more detail will be added as necessary.
 </p><hr>
@@ -469,9 +487,9 @@ PortForwarding=True
 ;JVM=JVMpath
 ;JVMARGS=JVM Args
 ;CLASSPATH=altClasspath
-;XBOOTCLASSPATH=&lt;CLASSPATH&gt;</pre>
+;XBOOTCLASSPATH=&lt;CLASSPATH&gt;
 
-</td><td><pre><b><a href="../doc/org/safs/ios/IJavaHook.html" target="api">[SAFS_IOS]</a></b>
+<b><a href="../doc/org/safs/ios/IJavaHook.html" target="api">[SAFS_IOS]</a></b>
 AUTOLAUNCH=FALSE
 Project=/Library/SAFS/samples/UICatalog/
 Template="UICatalogInstruments.tracetemplate"
@@ -482,6 +500,13 @@ Template="UICatalogInstruments.tracetemplate"
 ;JVMARGS=JVM Args
 ;CLASSPATH=altClasspath
 ;XBOOTCLASSPATH=&lt;CLASSPATH&gt;
+
+<b>[SAFS_REST]</b>
+<span class="comments">;= AUTH holds the authorization/authentication
+;= file (relative to project or absolute) for REST testing</span>
+<a href="../doc/org/safs/Constants.RestConstants.html#ITEM_AUTH" target="api">AUTH</a>=config\<a href="../configure/auth2.xml" target="api">auth2.xml</a>
+
+</pre></td><td><pre>
 
 <b>[SAFS_TC]</b>
 AUTOLAUNCH=FALSE
@@ -526,11 +551,6 @@ DATASTORE=&lt;FullPathTo&gt;\RFTProjectDir
 ;RFSMOnly=True|False
 ;RFSMCache=True|False
 
-<b>[SAFS_REST]</b>
-<span class="comments">;= AUTH holds the authorization/authentication
-;= file (relative to project or absolute) for REST testing</span>
-<a href="../doc/org/safs/Constants.RestConstants.html#ITEM_AUTH" target="api">AUTH</a>=config\<a href="../configure/auth2.xml" target="api">auth2.xml</a>
-
 <b><a href="../doc/org/safs/selenium/webdriver/SeleniumHook.html" target="api">[SAFS_SELENIUM]</a></b>
 AUTOLAUNCH=FALSE
 ;JVM=JVMPath to Java 1.5 or higher
@@ -540,7 +560,17 @@ AUTOLAUNCH=FALSE
 GATEWAYHOST=yourCorpGateway.net
 GATEWAYPORT=80
 
-<span class="comments">;= <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html" target="api">Selenium Server Settings</a>
+<span class="comments">;= Settings for Selnium1.0</span>
+;HOOK=org.safs.selenium.SeleniumJavaHook
+;BROWSER=*piiexplore | *firefox | *iexplore
+;DEBUGLOG=&lt;fullpathTo&gt;/SeleniumDebug.out
+
+<span class="comments">;= Settings for Selnium2.0 WebDriver</span>
+;HOOK=org.safs.selenium.webdriver.SeleniumHook
+;BROWSER=explorer | firefox | chrome
+PROXY_BYPASS_ADDRESS=localhost,127.0.0.1,host.not.thru.gateway
+BROWSER_REMOTE=false|true
+<span class="comments">;= Selenium Server Settings
 ;= SELENIUMHOST and SELENIUMPORT are used
 ;= to connect the Selenium Server (standalone or hub)</span>
 ;SELENIUMHOST=remote.server.com
@@ -567,20 +597,22 @@ GATEWAYPORT=80
 ;= drivers (separated by colon :) to start with the selenium server. 
 ;= IE and Chrome drivers will be started by Default.</span>
 ;<a href="../doc/org/safs/Constants.SeleniumConstants.html#ITEM_WEB_DRIVERS" target="api">WEB_DRIVERS</a>=explorer:chrome:MicrosoftEdge
+<span class="comments">;connection.test.command specifies the command to 
+test the connection between WebDriver and BrowserDriver.</span>
+;<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_CONNECTION_TEST_COMMAND" target="api">connection.test.command</a></b>=<a href="https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/remote/DriverCommand.html">selenium-driver-command</a> (Default:<a href="../doc/org/safs/selenium/webdriver/lib/RemoteDriver.html#DEFAULT_CONNECTION_TEST_COMMAND" target="api">getAlertText</a>)
+<span class="comments">;connection.test.max.duration specifies the maximum duration
+(in <b>milliseconds</b>) that user can accept when executing command 
+defined by <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_CONNECTION_TEST_COMMAND" target="api">connection.test.command</a></span>
+;<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_CONNECTION_TEST_MAX_DURATION" target="api">connection.test.max.duration</a>=Time in milliseconds</b>(Default: <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#DEFAULT_CONNECTION_TEST_MAX_DURATION" target="api">5000</a>)
+<span class="comments">;connection.test.max.try specifies the maximum times to try
+to get a good connection between WebDriver and BrowserDriver</span>
+;<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_CONNECTION_TEST_MAX_TRY" target="api">connection.test.max.try</a>=Number</b>(Default: <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#DEFAULT_CONNECTION_TEST_MAX_TRY" target="api">2</a>)
+<span class="comments">;delay.get.content specifies the delay (milliseconds) waiting for the 
+refresh of a webelement before getting its content</span>
+;<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_DELAY_GET_CONTENT" target="api">delay.get.content</a>=Time in milliseconds</b>(Default: <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#DEFAULT_DELAY_GET_CONTENT" target="api">0</a>)
 
-<span class="comments">;= Settings for Selnium1.0</span>
-;HOOK=org.safs.selenium.SeleniumJavaHook
-;BROWSER=*piiexplore | *firefox | *iexplore
-;DEBUGLOG=&lt;fullpathTo&gt;/SeleniumDebug.out
+</pre></td><td><pre>
 
-<span class="comments">;= Settings for Selnium2.0 WebDriver</span>
-;HOOK=org.safs.selenium.webdriver.SeleniumHook
-;BROWSER=explorer | firefox | chrome
-PROXY_BYPASS_ADDRESS=localhost,127.0.0.1,host.not.thru.gateway
-BROWSER_REMOTE=false|true
-</pre></td>
-
-<td><pre>
 <b>[SAFS_DRIVERCOMMANDS]</b>
 AUTOLAUNCH=TRUE
 ;STAFID="SAFS/DRIVERCOMMANDS"
