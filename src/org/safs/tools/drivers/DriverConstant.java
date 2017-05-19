@@ -591,6 +591,9 @@ public abstract class DriverConstant extends JavaConstant{
 	 */
 	public abstract static class SeleniumConfigConstant extends SeleniumConstants{
 
+		/** 'safs.selenium.' */
+		private static final String ENGINE_PREFIX = "safs.selenium.";
+
 		/** "SELENIUMHOST" define the host name where the SELENIUM "standalone server"/"grid hub" will run
 		 * @see #SELENIUMPORT
 		 * */
@@ -706,15 +709,6 @@ public abstract class DriverConstant extends JavaConstant{
 		 * "<b>connection.test.command</b>" defines the <a href="https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/remote/DriverCommand.html">selenium-driver-command</a>
 		 * used to test the connection between WebDriver and BrowserDriver.<br>
 		 * selenium-driver-command is a string understood by a remote server using the JSON wire protocol.<br>
-		 * Examples:<br>
-		 * -Dconnection.test.command=<b>getAlertText</b><br>
-		 * -Dconnection.test.command=<b>getCurrentWindowSize</b><br>
-		 */
-		public static final String PROPERTY_CONNECTION_TEST_COMMAND 		= "connection.test.command";
-		/**
-		 * "<b>connection.test.command</b>" defines the <a href="https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/remote/DriverCommand.html">selenium-driver-command</a>
-		 * used to test the connection between WebDriver and BrowserDriver.<br>
-		 * selenium-driver-command is a string understood by a remote server using the JSON wire protocol.<br>
 		 * It is an item under section {@link DriverConstant#SECTION_SAFS_SELENIUM}<br/>
 		 * <br>
 		 * Examples:<br>
@@ -722,17 +716,17 @@ public abstract class DriverConstant extends JavaConstant{
 		 * connection.test.command=<b>getAlertText</b><br>
 		 * connection.test.command=<b>getCurrentWindowSize</b><br>
 		 */
-		public static final String ITEM_CONNECTION_TEST_COMMAND 			= PROPERTY_CONNECTION_TEST_COMMAND;
-
+		public static final String ITEM_CONNECTION_TEST_COMMAND 			= "connection.test.command";
 		/**
-		 * "<b>connection.test.max.duration</b>" defines the maximum duration (in <b>milliseconds</b>) that user can accept when executing
-		 * <a href="https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/remote/DriverCommand.html">selenium-driver-command</a>
-		 * defined by {@link #PROPERTY_CONNECTION_TEST_COMMAND} or {@link #ITEM_CONNECTION_TEST_COMMAND}.<br>
-		 * <br>
+		 * "<b>safs.selenium.connection.test.command</b>" defines the <a href="https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/remote/DriverCommand.html">selenium-driver-command</a>
+		 * used to test the connection between WebDriver and BrowserDriver.<br>
+		 * selenium-driver-command is a string understood by a remote server using the JSON wire protocol.<br>
 		 * Examples:<br>
-		 * -Dconnection.test.max.duration=<b>3000</b><br>
+		 * -Dsafs.selenium.connection.test.command=<b>getAlertText</b><br>
+		 * -Dsafs.selenium.connection.test.command=<b>getCurrentWindowSize</b><br>
 		 */
-		public static final String PROPERTY_CONNECTION_TEST_MAX_DURATION 	= "connection.test.max.duration";
+		public static final String PROPERTY_CONNECTION_TEST_COMMAND 		= ENGINE_PREFIX+ITEM_CONNECTION_TEST_COMMAND;
+
 		/**
 		 * "<b>connection.test.max.duration</b>" defines the maximum duration (in <b>milliseconds</b>) that user can accept when executing
 		 * <a href="https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/remote/DriverCommand.html">selenium-driver-command</a>
@@ -743,7 +737,16 @@ public abstract class DriverConstant extends JavaConstant{
 		 * [SAFS_SELENIUM]<br/>
 		 * connection.test.max.duration=<b>3000</b><br>
 		 */
-		public static final String ITEM_CONNECTION_TEST_MAX_DURATION 		= PROPERTY_CONNECTION_TEST_MAX_DURATION;
+		public static final String ITEM_CONNECTION_TEST_MAX_DURATION 		= "connection.test.max.duration";
+		/**
+		 * "<b>safs.selenium.connection.test.max.duration</b>" defines the maximum duration (in <b>milliseconds</b>) that user can accept when executing
+		 * <a href="https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/remote/DriverCommand.html">selenium-driver-command</a>
+		 * defined by {@link #PROPERTY_CONNECTION_TEST_COMMAND} or {@link #ITEM_CONNECTION_TEST_COMMAND}.<br>
+		 * <br>
+		 * Examples:<br>
+		 * -Dsafs.selenium.connection.test.max.duration=<b>3000</b><br>
+		 */
+		public static final String PROPERTY_CONNECTION_TEST_MAX_DURATION 	= ENGINE_PREFIX+ITEM_CONNECTION_TEST_MAX_DURATION;
 		/**
 		 * <b>5000</b> defines the default maximum duration (in <b>milliseconds</b>) that user can accept when executing
 		 * <a href="https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/remote/DriverCommand.html">selenium-driver-command</a>
@@ -754,24 +757,50 @@ public abstract class DriverConstant extends JavaConstant{
 		/**
 		 * "<b>connection.test.max.try</b>" defines the maximum times to try to get a good connection between WebDriver and BrowserDriver<br>
 		 * <br>
-		 * Examples:<br>
-		 * -Dconnection.test.max.try=<b>10</b><br>
-		 */
-		public static final String PROPERTY_CONNECTION_TEST_MAX_TRY 		= "connection.test.max.try";
-		/**
-		 * "<b>connection.test.max.try</b>" defines the maximum times to try to get a good connection between WebDriver and BrowserDriver<br>
-		 * <br>
 		 * It is an item under section {@link DriverConstant#SECTION_SAFS_SELENIUM}<br/>
 		 * <br>
 		 * Examples:<br>
 		 * [SAFS_SELENIUM]<br/>
 		 * connection.test.max.try=<b>10</b><br>
 		 */
-		public static final String ITEM_CONNECTION_TEST_MAX_TRY 			= PROPERTY_CONNECTION_TEST_MAX_TRY;
+		public static final String ITEM_CONNECTION_TEST_MAX_TRY 			= "connection.test.max.try";
 		/**
-		 * <b>2</b> defines the maximum times to try to get a good connection.<b>
+		 * "<b>safs.selenium.connection.test.max.try</b>" defines the maximum times to try to get a good connection between WebDriver and BrowserDriver<br>
+		 * <br>
+		 * Examples:<br>
+		 * -Dsafs.selenium.connection.test.max.try=<b>10</b><br>
+		 */
+		public static final String PROPERTY_CONNECTION_TEST_MAX_TRY 		= ENGINE_PREFIX+ITEM_CONNECTION_TEST_MAX_TRY;
+		/**
+		 * <b>2</b> defines the maximum times to try to get a good connection.<br>
 		 */
 		public static final int DEFAULT_CONNECTION_TEST_MAX_TRY 			= 2;
+
+		/**
+		 * "<b>delay.get.content</b>" defines the delay (milliseconds) waiting for the refresh of a webelement before getting its content.
+		 * <br>
+		 * It is an item under section {@link DriverConstant#SECTION_SAFS_SELENIUM}<br/>
+		 * <br>
+		 * Examples:<br>
+		 * [SAFS_SELENIUM]<br/>
+		 * delay.get.content=<b>2000</b><br>
+		 */
+		public static final String ITEM_DELAY_WAIT_REFRESH		 			= "delay.get.content";
+		/**
+		 * "<b>safs.selenium.delay.get.content</b>" defines the delay (milliseconds) waiting for the refresh of a webelement before getting its content.<br>
+		 * <p>
+		 * Sometimes the Component's content will get refreshed (the html tag will be redrawn on page), we need to wait before it is ready.
+		 * Otherwise, the content is stale and StaleElementReferenceException will be thrown out if we try to operate the content.
+		 * </p>
+		 * <br>
+		 * Examples:<br>
+		 * -Dsafs.selenium.delay.get.content=<b>2000</b><br>
+		 */
+		public static final String PROPERTY_DELAY_GET_CONTENT 				= ENGINE_PREFIX+ITEM_DELAY_WAIT_REFRESH;
+		/**
+		 * <b>0</b> milliseconds delay waiting for the refresh of a webelement before getting its content.
+		 */
+		public static final int DEFAULT_DELAY_GET_CONTENT 			= 0;
 	}
 
 	/** "GATEWAYHOST" define the HTTP PROXY host name to connect Internet

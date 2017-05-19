@@ -142,6 +142,10 @@ public class SeleniumHookConfig extends DefaultHookConfig {
 			StringUtils.getSystemProperty(SeleniumConfigConstant.PROPERTY_CONNECTION_TEST_MAX_TRY,
 					config, DriverConstant.SECTION_SAFS_SELENIUM, SeleniumConfigConstant.ITEM_CONNECTION_TEST_MAX_TRY, String.valueOf(SeleniumConfigConstant.DEFAULT_CONNECTION_TEST_MAX_TRY));
 
+			//Set the delay (milliseconds) waiting for the refresh of a webelement before getting content from it.
+			StringUtils.getSystemProperty(SeleniumConfigConstant.PROPERTY_DELAY_GET_CONTENT,
+					config, DriverConstant.SECTION_SAFS_SELENIUM, SeleniumConfigConstant.ITEM_DELAY_WAIT_REFRESH, String.valueOf(SeleniumConfigConstant.DEFAULT_DELAY_GET_CONTENT));
+
 		}catch(Exception e){
 			IndependantLog.warn(StringUtils.debugmsg(false)+" Fail. Met "+StringUtils.debugmsg(e));
 		}
