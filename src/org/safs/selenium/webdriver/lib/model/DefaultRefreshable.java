@@ -22,9 +22,9 @@ import org.safs.tools.stringutils.StringUtilities;
  *
  * History:<br>
  *
- *  <br>   Jun 12, 2014    (Lei Wang) Initial release.
- *  <br>   Nov 05, 2014    (Lei Wang) Modify refresh(): if the 'id' is not null and we cannot get object by id, then stop searching.
- *                                                    if we cannot get fresh-webelement, we will not update fields like id, tagname etc.
+ *  <br>   JUN 12, 2014    (Lei Wang) Initial release.
+ *  <br>   NOV 05, 2014    (Lei Wang) Modify refresh(): if the 'id' is not null and we cannot get object by id, then stop searching.
+ *                                                    if we cannot get fresh-webelement, we will not update fields like id, tag-name etc.
  *  <br>   FEB 25, 2016    (Lei Wang) Modify refresh(): log a warning message instead of throwing out an Exception if we cannot get webelement by id.
  *                                  Modify searchWebElement(): Use WebDriver as SearchContext to find the object, if it cannot be found with given SearchContext.
  */
@@ -32,10 +32,10 @@ public class DefaultRefreshable implements IRefreshable {
 
 	/**
 	 * The wrapped object, represents a control object on the web application<br>
-	 * This object is refreshable, which means it can be reset if the control object<br>
+	 * This object is refresh-able, which means it can be reset if the control object<br>
 	 * of web application has changed its status.<br>
-	 * For now, 2 kinds of type can be accepted, Map returned from a javascript fucntion;<br>
-	 * WebElement returned by Selenium WebDriver (with certain search criterion). There are convinient<br>
+	 * For now, 2 kinds of type can be accepted, Map returned from a javascript function;<br>
+	 * WebElement returned by Selenium WebDriver (with certain search criterion). There are convenient<br>
 	 * references for them, {@link #map} and {@link #webelement}.<br>
 	 * For now, Only WebElement can be refreshed by method {@link #refresh(boolean)}.<br>
 	 *
@@ -67,15 +67,19 @@ public class DefaultRefreshable implements IRefreshable {
 	/**possibleRecognitionStrings is used to refresh the WebElement, it may be null. Example as "id=xxx", "text=xxx" etc.*/
 	protected String[] possibleRecognitionStrings;
 
-	/**Counstructor ONLY for subclass, cannot be used to create an instance outside.*/
+	/**Constructor ONLY for subclass, cannot be used to create an instance outside.*/
 	protected DefaultRefreshable(){}
 
 	/**
 	 * Constructor used to create an uniformed DefaultRefreshable object.<br>
-	 * User may override this one to parse their own object, if there are some new attritues<br>
+	 * User may override this one to parse their own object, if there are some new attributes<br>
 	 * to analyze, then user should override {@link #updateFields()} and he MUST TAKE CARE:<br>
-	 * in the overrided constructor, DO NOT forget to call {@link #updateFields()} after calling<br>
-	 * super(object), below is an exmaple of implementation in subclass.<br>
+	 * <br/>
+	 * There are 2 ways to write the overridden constructor:
+	 * <ul>
+	 * <li>
+	 * DO NOT forget to call {@link #updateFields()} after calling<br>
+	 * super(object), below is an example of implementation in subclass.<br>
 	 * <pre>
 	 * {@code
 	 * super(object);
@@ -87,15 +91,22 @@ public class DefaultRefreshable implements IRefreshable {
 	 * some fields of sub-class during instantiation of sub-class which overrides method {@link #updateFields()},<br>
 	 * but after calling of super(object) in the constructor of sub-class, all fields of sub-class will be<br>
 	 * initialized to the default value; What is set HERE will be LOST!!!<br>
-	 *
+	 * </li>
+	 * <li>
 	 * Or there is a better way, in the sub class's constructor user just need to call {@link #initialize(Object)}.<br>
+	 * <pre>
+	 * {@code
+	 * initialize(Object);
+	 * }
+	 * </pre>
 	 * in that constructor, the no-parameter constructor {@link #DefaultRefreshable()} will be called implicitly,<br>
-	 * and the fileds of subclass will be initialized, then the method {@link #initialize(Object)} will be called,<br>
-	 * no fileds of subclass will be reinitialized!<br>
-	 * But we should NEVER do anything except calling {@link #initialize(Object)} in the constructor, the reason is<br>
+	 * and the fields of subclass will be initialized, then the method {@link #initialize(Object)} will be called,<br>
+	 * no fields of subclass will be reinitialized!<br>
+	 * But we should NEVER do anything except calling {@link #initialize(Object)} in this constructor, the reason is<br>
 	 * that the no-parameter constructor will be called in subclass's constructor, and everything we added here will <br>
 	 * not be visible for constructor in subclass. We MUST do that work in the method {@link #initialize(Object)} or {@link #updateFields()}<br>
-	 *
+	 * </li>
+	 * </ul>
 	 * @param object Object, the element object. It may be a Map returned from javascript; it may be a WebElement.
 	 */
 	public DefaultRefreshable(Object object){
@@ -131,7 +142,7 @@ public class DefaultRefreshable implements IRefreshable {
 	/**
 	 * set/update the class's local fields through the underlying WebElement.<br>
 	 * Especially after calling {@link #refresh(boolean)}, the underlying WebElement may have been<br>
-	 * refreshed, and the associated attributes may have different value, it is recommanded<br>
+	 * refreshed, and the associated attributes may have different value, it is recommended<br>
 	 * to call this method to update the class's local field.<br>
 	 * @see #refresh(boolean)
 	 */
