@@ -1142,12 +1142,11 @@ public abstract class StringUtilities {
 		return returnDate;
 	}
 	/**
-	 *
 	 * @param milliseconds int, milliseconds to sleep
 	 */
 	public static void sleep(int milliseconds){
 		try {
-			Thread.sleep(milliseconds);
+			if(milliseconds>0) Thread.sleep(milliseconds);
 		} catch (InterruptedException e) { }
 	}
 
