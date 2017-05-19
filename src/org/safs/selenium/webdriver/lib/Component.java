@@ -8,6 +8,7 @@
  *  DEC 26, 2013    (sbjlwa) Initial release.
  *  FEB 12, 2014    (sbjlwa) Add method refresh() to refresh the stale embedded webelement.
  *  OCT 16, 2015    (sbjlwa) Refector to create IOperable object properly.
+ *  MAY 19, 2017    (sbjlwa) Get value of 'delay.get.content' from system properties.
  */
 package org.safs.selenium.webdriver.lib;
 
@@ -29,6 +30,7 @@ import org.safs.selenium.webdriver.lib.model.Element;
 import org.safs.selenium.webdriver.lib.model.IOperable;
 import org.safs.selenium.webdriver.lib.model.IWebAccessibleInternetRole;
 import org.safs.selenium.webdriver.lib.model.TextMatchingCriterion;
+import org.safs.tools.drivers.DriverConstant.SeleniumConfigConstant;
 
 /**
  * A library class to handle generic functionalities, such as Click, HoverMouse, GetGUIImage etc. for
@@ -94,6 +96,11 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 	/**A cache containing IOperable objects for a certain WebElement.*/
 	protected Map<WebElement, IOperable> operableObjects = new HashMap<WebElement, IOperable>();
 
+	/**
+	 * The delay (milliseconds) before getting content from this Component.<br>
+	 */
+	protected int delayGetContent = SeleniumConfigConstant.DEFAULT_DELAY_GET_CONTENT;
+
 	protected Component(){}
 	/**
 	 * @param component	WebElement the component to operate.
@@ -130,6 +137,13 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 				throw new SeleniumPlusException(msg, SeleniumPlusException.CODE_OBJECT_IS_INVISIBLE);
 			}
 
+		}
+
+		try{
+			String delay = System.getProperty(SeleniumConfigConstant.PROPERTY_DELAY_GET_CONTENT, String.valueOf(SeleniumConfigConstant.DEFAULT_DELAY_GET_CONTENT));
+			delayGetContent = Integer.parseInt(delay);
+		}catch(NumberFormatException e){
+			IndependantLog.warn(debugmsg+" Failed to set value for 'delayGettingContent', due to "+e);
 		}
 
 		super.initialize(component);

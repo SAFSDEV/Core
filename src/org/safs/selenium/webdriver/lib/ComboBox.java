@@ -10,6 +10,8 @@
  *  SEP 02, 2014    (LeiWang) Update to support sap.m.Select, sap.m.ComboBox
  *  OCT 16, 2015    (sbjlwa) Refector to create IOperable object properly.
  *  OCT 29, 2015    (sbjlwa) Modify HtmlSelect.setSelected(): refresh after selection.
+ *  MAY 19, 2017    (sbjlwa) Modified HtmlSelect.getOptions(): use OptionForHtmlSelect instead of Option.
+ *                           Modified AbstractSelect.getOptions() and HtmlSelect.getOptions(): pause a while before getting options.
  */
 package org.safs.selenium.webdriver.lib;
 
@@ -32,6 +34,7 @@ import org.safs.selenium.util.JavaScriptFunctions.SAP;
 import org.safs.selenium.webdriver.lib.model.EmbeddedObject;
 import org.safs.selenium.webdriver.lib.model.IOperable;
 import org.safs.selenium.webdriver.lib.model.Option;
+import org.safs.selenium.webdriver.lib.model.OptionForHtmlSelect;
 
 /**
  * A library class to handle different specific ComboBox.
@@ -160,6 +163,8 @@ public class ComboBox extends Component{
 		List<String> selectedOptions = null;
 
 		try{
+			IndependantLog.debug(debugmsg+"Searching item '"+item+"'");
+
 			//Check if the item exists in the options of the combo box
 			options = select.getOptionsVisibleText();
 			for(String option:options){
@@ -582,10 +587,13 @@ public class ComboBox extends Component{
 		public List<Option> getOptions() {
 			List<Option> options = new ArrayList<Option>();
 
+			//Delay a while before the combo-box get ready
+			StringUtils.sleep(parent.delayGetContent);
+
 			List<WebElement> elements = webelement().findElements(By.tagName("option"));
 			int i =0;
 			for(WebElement option:elements){
-				options.add(new Option(option).setIndex(i++));
+				options.add(new OptionForHtmlSelect(option).setIndex(i++));
 			}
 
 			return options;
@@ -1085,6 +1093,9 @@ public class ComboBox extends Component{
 			List<Option> options = new ArrayList<Option>();
 
 			try {
+				//Delay a while before the combo-box get ready
+				StringUtils.sleep(parent.delayGetContent);
+
 				Object result = getOptionsJSObject();
 
 				if(result instanceof List){
