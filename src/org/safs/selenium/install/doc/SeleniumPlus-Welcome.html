@@ -79,6 +79,36 @@ function hideAllContentPanels(){
 	document.getElementById("href-calling-javascript").style.fontWeight="normal";
 	document.getElementById("href-http-proxy").style.fontWeight="normal";
 }
+
+function checkForSubPanelUrl(){
+	var url = window.location.href.toLowerCase();
+	if(url.endsWith('#projectassets')){ projectAssets(); }
+	else if(url.endsWith('#sampleproject')){ newSample(); }
+	else if(url.endsWith('#createnewproject')){ newProject(); }
+	else if(url.endsWith('#importprojects')){ importProject(); }
+	else if(url.endsWith('#editappmaps')){ editAppMaps(); }
+	else if(url.endsWith('#expressions')){ expressions(); }
+	else if(url.endsWith('#edittests')){ editTests(); }
+	else if(url.endsWith('#autoconfig')){ autoConfig(); }
+	else if(url.endsWith('#runtests')){ runTests(); }
+	else if(url.endsWith('#logging')){ logging(); }
+	else if(url.endsWith('#cvscheckin')){ backupTests(); }
+	else if(url.endsWith('#cvscheckout')){ checkoutTests(); }
+	else if(url.endsWith('#advancedusers')){ showAdvanced(); }
+	else if(url.endsWith('#setupbrowser')){ showIESetup(); }
+	else if(url.endsWith('#startbrowser')){ startWebBrowser(); }
+	else if(url.endsWith('#updateseleniumplus')){ updateSoftware(); }
+	else if(url.endsWith('#enablesafs')){ enableSAFS(); }
+	else if(url.endsWith('#remoteservers')){ remoteServers(); }
+	else if(url.endsWith('#browserdrivers')){ browserDrivers(); }
+	else if(url.endsWith('#usingautoit')){ usingAutoIT(); }
+	else if(url.endsWith('#callingjavascript')){ callingJavascript(); }
+	else if(url.endsWith('#httpproxy')){ setHttpProxy(); }
+	else if(url.endsWith('#references')){ showReferences(); }
+	else{
+	    showWelcome();
+	}
+}
 function showWelcome(){
 	hideAllContentPanels();
     document.getElementById("welcome").style.display="block";
@@ -194,41 +224,45 @@ function browserDrivers(){
     document.getElementById("browser-drivers").style.display="block";
     document.getElementById("href-browser-drivers").style.fontWeight="900";
 }
+function usingAutoIT(){
+    // do nothing but launch a new page
+    window.location.href = "http://safsdev.sourceforge.net/sqabasic2000/UsingAutoIT.htm";
+}
 </script>
 
 </head>
 
-<body onload="showWelcome();">
+<body onload="checkForSubPanelUrl();">
 <span style="font-size: 32px;font-weight: bold">Intro to SeleniumPlus</span>
 <br>
-<small>Updated: 2017.04.12</small>
+<small>Updated: 2017.05.19</small>
 <br>
 <div id="menu" class="panelselector">
 <hr>
-<a href="#" onclick="showWelcome()" id ="href-welcome" >Welcome</a>&nbsp;&nbsp;|
-<a href="#" onclick="projectAssets()" id="href-assets" >Project Assets</a>&nbsp;&nbsp;|
-<a href="#" onclick="newSample()" id="href-sample-install" >Sample Project</a>&nbsp;&nbsp;|
-<a href="#" onclick="newProject()" id="href-project-create" >Create New Project</a>&nbsp;&nbsp;|
-<a href="#" onclick="importProject()" id="href-project-import">Import Projects</a>&nbsp;&nbsp;|
-<a href="#" onclick="editAppMaps()" id="href-appmaps" >Edit AppMaps</a>&nbsp;&nbsp;|
-<a href="#" onclick="expressions()" id="href-expressions">Expressions</a>&nbsp;&nbsp;|
-<a href="#" onclick="editTests()" id="href-project-edit">Edit Tests</a>&nbsp;&nbsp;|
-<a href="#" onclick="autoConfig()" id ="href-auto-config" >Auto Config</a>&nbsp;&nbsp;|
-<a href="#" onclick="runTests()" id ="href-tests-run" >Run Tests</a>&nbsp;&nbsp;|
-<a href="#" onclick="logging()" id ="href-logging" >Logging</a>&nbsp;&nbsp;|
-<a href="#" onclick="backupTests()" id ="href-tests-backup" >CVS/Check-in</a>&nbsp;&nbsp;|
-<a href="#" onclick="checkoutTests()" id ="href-tests-checkout" >CVS/Check-out</a>&nbsp;&nbsp;|
-<a href="#" onclick="showAdvanced()" id ="href-advanced" >Advanced Users</a>&nbsp;&nbsp;|
-<a href="#" onclick="showIESetup()" id="href-iesetup" >Setup Browser</a>&nbsp;&nbsp;|
-<a href="#" onclick="startWebBrowser()" id="href-startwebbrowser" >Start Browser</a>&nbsp;&nbsp;|
-<a href="#" onclick="updateSoftware()" id="href-updatesoftware" >Update SeleniumPlus</a>&nbsp;&nbsp;|
-<a href="#" onclick="enableSAFS()" id="href-enable-safs" >Enable SAFS</a>&nbsp;&nbsp;|
-<a href="#" onclick="remoteServers()" id="href-remote-servers" >Remote Servers</a>&nbsp;&nbsp;|
-<a href="#" onclick="browserDrivers()" id="href-browser-drivers" >Browser Drivers</a>&nbsp;&nbsp;|
-<a href="http://safsdev.sourceforge.net/sqabasic2000/UsingAutoIT.htm" id="href-using-autoit" onclick="usingAutoIT()">Using AutoIT</a>&nbsp;&nbsp;|
-<a href="#" onclick="callingJavascript()" id="href-calling-javascript" >Calling Javascript</a>&nbsp;&nbsp;|
-<a href="#" onclick="setHttpProxy()" id="href-http-proxy" >HTTP Proxy</a>&nbsp;&nbsp;|
-<a href="#" onclick="showReferences()" id="href-references" >References</a>&nbsp;&nbsp;
+<a href="#" onclick="showWelcome()" id ="href-welcome" title="#welcome">Welcome</a>&nbsp;&nbsp;|
+<a href="#" onclick="projectAssets()" id="href-assets" title="#projectassets">Project Assets</a>&nbsp;&nbsp;|
+<a href="#" onclick="newSample()" id="href-sample-install" title="#sampleproject">Sample Project</a>&nbsp;&nbsp;|
+<a href="#" onclick="newProject()" id="href-project-create" title="#createnewproject">Create New Project</a>&nbsp;&nbsp;|
+<a href="#" onclick="importProject()" id="href-project-import" title="#importprojects">Import Projects</a>&nbsp;&nbsp;|
+<a href="#" onclick="editAppMaps()" id="href-appmaps" title="#editappmaps">Edit AppMaps</a>&nbsp;&nbsp;|
+<a href="#" onclick="expressions()" id="href-expressions" title="#expressions">Expressions</a>&nbsp;&nbsp;|
+<a href="#" onclick="editTests()" id="href-project-edit" title="#edittests">Edit Tests</a>&nbsp;&nbsp;|
+<a href="#" onclick="autoConfig()" id ="href-auto-config" title="#autoconfig">Auto Config</a>&nbsp;&nbsp;|
+<a href="#" onclick="runTests()" id ="href-tests-run" title="#runtests">Run Tests</a>&nbsp;&nbsp;|
+<a href="#" onclick="logging()" id ="href-logging" title="#logging">Logging</a>&nbsp;&nbsp;|
+<a href="#" onclick="backupTests()" id ="href-tests-backup" title="#cvscheckin">CVS/Check-in</a>&nbsp;&nbsp;|
+<a href="#" onclick="checkoutTests()" id ="href-tests-checkout" title="#cvscheckout">CVS/Check-out</a>&nbsp;&nbsp;|
+<a href="#" onclick="showAdvanced()" id ="href-advanced" title="#advancedusers">Advanced Users</a>&nbsp;&nbsp;|
+<a href="#" onclick="showIESetup()" id="href-iesetup" title="#setupbrowser">Setup Browser</a>&nbsp;&nbsp;|
+<a href="#" onclick="startWebBrowser()" id="href-startwebbrowser" title="#startbrowser">Start Browser</a>&nbsp;&nbsp;|
+<a href="#" onclick="updateSoftware()" id="href-updatesoftware" title="#updateseleniumplus">Update SeleniumPlus</a>&nbsp;&nbsp;|
+<a href="#" onclick="enableSAFS()" id="href-enable-safs" title="#enablesafs">Enable SAFS</a>&nbsp;&nbsp;|
+<a href="#" onclick="remoteServers()" id="href-remote-servers" title="#remoteservers">Remote Servers</a>&nbsp;&nbsp;|
+<a href="#" onclick="browserDrivers()" id="href-browser-drivers" title="#browserdrivers">Browser Drivers</a>&nbsp;&nbsp;|
+<a href="http://safsdev.sourceforge.net/sqabasic2000/UsingAutoIT.htm" id="href-using-autoit" title="#usingautoit">Using AutoIT</a>&nbsp;&nbsp;|
+<a href="#" onclick="callingJavascript()" id="href-calling-javascript" title="#callingjavascript">Calling Javascript</a>&nbsp;&nbsp;|
+<a href="#" onclick="setHttpProxy()" id="href-http-proxy" title="#httpproxy">HTTP Proxy</a>&nbsp;&nbsp;|
+<a href="#" onclick="showReferences()" id="href-references" title="#references">References</a>&nbsp;&nbsp;
 <br>
 <hr>
 </div>
@@ -256,7 +290,8 @@ When meeting any problem, please<br/>
 The SAFS/SeleniumPlus Development Team
 <ul>
     Carl Nagle<br>
-    Lei Wang
+    Lei Wang</br>
+    John W. Lewis
 </ul>
 </div>
 
@@ -455,7 +490,7 @@ For more detailed information on each:
 <!--------------------------------->
 <div id="appmaps" style="display: none;">
 <p><h2>
-	App Maps provide a critical <span style="color:red;">single point of maintenance</span>
+	App Maps provide a critical <b style='color:red;'>single point of maintenance</b>
 	for important data and component recognition used throughout your tests.
 </h2>
 <p>
