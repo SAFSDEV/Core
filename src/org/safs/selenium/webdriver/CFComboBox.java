@@ -36,21 +36,7 @@ public class CFComboBox extends CFComponent {
 	/** "ComboBox" */
 	public static final String LIBRARY_NAME = CFComboBox.class.getSimpleName().substring("CF".length());
 
-//	public static final String CAPTUREITEMSTOFILE	= ComboBoxFunctions.CAPTUREITEMSTOFILE_KEYWORD;
-//	public static final String HIDELIST	= ComboBoxFunctions.HIDELIST_KEYWORD;
-//	public static final String SHOWLIST	= ComboBoxFunctions.SHOWLIST_KEYWORD;
-//
-//	public static final String SELECT	= ComboBoxFunctions.SELECT_KEYWORD;
-//	public static final String SELECTINDEX	= ComboBoxFunctions.SELECTINDEX_KEYWORD;
-//	public static final String SELECTPARTIALMATCH	= ComboBoxFunctions.SELECTPARTIALMATCH_KEYWORD;
-//	public static final String SELECTUNVERIFIED	= ComboBoxFunctions.SELECTUNVERIFIED_KEYWORD;
-//	public static final String VERIFYSELECTED	= ComboBoxFunctions.VERIFYSELECTED_KEYWORD;
-
-	//The following 2 keywords are not supported for now. Html combo-box doesn't accept setting value.
-//	public static final String SETTEXTVALUE	= ComboBoxFunctions.SETTEXTVALUE_KEYWORD;
-//	public static final String SETUNVERIFIEDTEXTVALUE	= ComboBoxFunctions.SETUNVERIFIEDTEXTVALUE_KEYWORD;
-
-	ComboBox combobox;
+	protected ComboBox combobox = null;
 
 	public CFComboBox() {
 		super();
