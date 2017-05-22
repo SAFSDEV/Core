@@ -44,6 +44,8 @@ package org.safs.selenium.webdriver.lib;
  *  <br>  MAY 03, 2017    (SBJLWA)  Added methods switchWindow().
  *                                  Added the ability to delay javascript execution. NOT exposed yet.
  *                                  Modified getAllWindowTitles(): return titles for all opened window for all WebDrivers.
+ *  <br>  MAY 22, 2017    (SBJLWA)  Added isValidBrowserID().
+ *                                  Modified removeWebDriver(): call isValidBrowserID() to check the validity of browser ID.                            
  */
 import java.lang.reflect.Constructor;
 import java.net.URL;
@@ -972,12 +974,21 @@ public class SearchObject {
 	}
 
 	/**
+	 * if the id is valid (not null and not empty).
+	 * @param ID String, the browser id.
+	 * @return boolean true if the browser id is valid (not null and not empty).
+	 */
+	public static boolean isValidBrowserID(String ID){
+		return (ID!=null && !ID.isEmpty());
+	}
+
+	/**
 	 * Removes the provided webdriver from internal storage and deletes the session info
 	 * in the RemoteDriver.  Will pop off the next "lastUsed" WebDriver off the stack and
 	 * set it as the new "lastUsed" WebDriver and sets the RemoteDriver "lastSessionId"
 	 * as needed.
-	 * @param id String, the ID for the WebDriver stored in the Hashtable.<br>
-	 *                   if user provides null, then the last used WebDriver will be removed.<br>
+	 * @param id String, the ID for the WebDriver to remove<br>
+	 *                   if it is NOT {@link #isValidBrowserID(String)}, then the last used WebDriver will be removed.<br>
 	 * @return	WebDriver, the WebDriver has been removed; null if no WebDriver is removed.
 	 */
 	protected synchronized static WebDriver removeWebDriver(String id){
@@ -986,8 +997,9 @@ public class SearchObject {
 		try{
 			org.safs.selenium.webdriver.CFComponent.clearInternalCache();
 
-			if(id!=null) obj = (WebDriver) webDrivers.remove(id);
+			if(isValidBrowserID(id)) obj = (WebDriver) webDrivers.remove(id);
 			else{
+				IndependantLog.warn(debugmsg+" the parameter id '"+id+"' is not a valid browser-ID, try to remove the last used web-driver.");
 				if(lastUsedWD!=null){
 					Enumeration<String> keys = webDrivers.keys();
 					String key = null;

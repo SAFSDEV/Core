@@ -1,7 +1,10 @@
-/** 
+/**
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
+/**
+ * MAY 22, 2017    (SBJLWA)  Modified run(): call WDLibrary.isValidBrowserID() to check the validity of browser ID.
+ */
 package org.safs.selenium.webdriver.lib.interpreter.selrunner.steptype;
 
 import org.safs.selenium.webdriver.lib.WDLibrary;
@@ -13,7 +16,7 @@ import com.sebuilder.interpreter.TestRun;
 
 /**
  * Requires a "url" parameter.<br>
- * Supports an 2nd optional "browserid" parameter which can be used to reference the specific browser instance 
+ * Supports an 2nd optional "browserid" parameter which can be used to reference the specific browser instance
  * in other commands, like Close.
  * @author canagl
  * @see Close
@@ -22,15 +25,15 @@ public class Open implements StepType, SRunnerType {
 
 	public static String URL_PARAM = "url";
 	public static String BROWSERID_PARAM = "browserid";
-	
+
 	/* (non-Javadoc)
 	 * @see com.sebuilder.interpreter.StepType#run(com.sebuilder.interpreter.TestRun)
 	 */
 	@Override
 	public boolean run(TestRun ctx) {
 		String bid = ctx.string(BROWSERID_PARAM);
-		String url = ctx.string(URL_PARAM);		
-		if(bid != null && bid.length()>0){
+		String url = ctx.string(URL_PARAM);
+		if(WDLibrary.isValidBrowserID(bid)){
 			try{
 				WDLibrary.startBrowser(null, url, bid, 90, true);
 				return true;
