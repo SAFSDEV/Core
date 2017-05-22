@@ -1,4 +1,4 @@
-/** 
+/**
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
@@ -25,21 +25,21 @@ import org.safs.text.GENKEYS;
 import org.safs.tools.CaseInsensitiveFile;
 
 /**
- * 
+ *
  * History:<br>
- * 
+ *
  *  <br>   DEC 18, 2013    (SBJLWA) Initial release.
  *  <br>   JAN 16, 2014    (SBJLWA) Add keywords support.
  */
 public class CFComboBox extends CFComponent {
-	
+
 	/** "ComboBox" */
 	public static final String LIBRARY_NAME = CFComboBox.class.getSimpleName().substring("CF".length());
 
 //	public static final String CAPTUREITEMSTOFILE	= ComboBoxFunctions.CAPTUREITEMSTOFILE_KEYWORD;
 //	public static final String HIDELIST	= ComboBoxFunctions.HIDELIST_KEYWORD;
 //	public static final String SHOWLIST	= ComboBoxFunctions.SHOWLIST_KEYWORD;
-//	
+//
 //	public static final String SELECT	= ComboBoxFunctions.SELECT_KEYWORD;
 //	public static final String SELECTINDEX	= ComboBoxFunctions.SELECTINDEX_KEYWORD;
 //	public static final String SELECTPARTIALMATCH	= ComboBoxFunctions.SELECTPARTIALMATCH_KEYWORD;
@@ -49,20 +49,20 @@ public class CFComboBox extends CFComponent {
 	//The following 2 keywords are not supported for now. Html combo-box doesn't accept setting value.
 //	public static final String SETTEXTVALUE	= ComboBoxFunctions.SETTEXTVALUE_KEYWORD;
 //	public static final String SETUNVERIFIEDTEXTVALUE	= ComboBoxFunctions.SETUNVERIFIEDTEXTVALUE_KEYWORD;
-	
+
 	ComboBox combobox;
-			
+
 	public CFComboBox() {
 		super();
 	}
-	
+
 	protected ComboBox newLibComponent(WebElement webelement) throws SeleniumPlusException{
 		return new ComboBox(webelement);
 	}
-	
+
 	protected void localProcess(){
 		String debugmsg = StringUtils.debugmsg(getClass(), "localProcess");
-		
+
 		if (action != null) {
 			String param1 = "";
 			String param2 = "";
@@ -71,14 +71,14 @@ public class CFComboBox extends CFComponent {
 			String label = "";
 			Iterator<?> iterator = null;
 			boolean originalRefreshStatus = false;
-			
+
 			try{
 				super.localProcess();
 				combobox = (ComboBox) libComponent;
-				
+
 				Log.debug(debugmsg+" processing command '"+action+"' with parameters "+params);
 				iterator = params.iterator();
-				
+
 				if(action.equalsIgnoreCase(ComboBoxFunctions.SELECT_KEYWORD)||
 				   action.equalsIgnoreCase(ComboBoxFunctions.SELECTINDEX_KEYWORD)||
 				   action.equalsIgnoreCase(ComboBoxFunctions.SELECTPARTIALMATCH_KEYWORD)||
@@ -87,7 +87,7 @@ public class CFComboBox extends CFComponent {
 				   action.equalsIgnoreCase(ComboBoxFunctions.VERIFYSELECTED_KEYWORD)||
 				   action.equalsIgnoreCase(ComboBoxFunctions.CAPTUREITEMSTOFILE_KEYWORD)||
 				   action.equalsIgnoreCase(ComboBoxFunctions.SETTEXTVALUE_KEYWORD)){
-					
+
 					if (params.size() < 1) {
 						testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
 						paramsFailedMsg(windowName, compName);
@@ -95,17 +95,17 @@ public class CFComboBox extends CFComponent {
 					}
 					param1 = (String) iterator.next();
 				}
-				
+
 				if(iterator.hasNext()){
 					if(param1.isEmpty()) param1 = (String)iterator.next();
 					else param2 = (String) iterator.next();
 				}
-				
+
 				originalRefreshStatus = combobox.getForceRefresh();
 				if(!param2.isEmpty()){
 					combobox.setForceRefresh(Boolean.parseBoolean(param2));
 				}
-				
+
 				if(action.equalsIgnoreCase(ComboBoxFunctions.SELECT_KEYWORD)){
 					try{
 						combobox.select(param1, true, false, true);
@@ -121,27 +121,27 @@ public class CFComboBox extends CFComponent {
 						if(ComboBoxException.CODE_FAIL_VERIFICATION.equals(spe.getCode())){
 							label = spe.getInfo();
 							detail = failedText.convert(FAILKEYS.SELECTION_NOT_MATCH, "Selection '"+ label +"' does not match expected value '"+ param1 +"'.",
-									                    label, param1);							
+									                    label, param1);
 						}
 						log.logMessage(testRecordData.getFac(), msg, detail, FAILED_MESSAGE);
 					}
-					
+
 				}else if(action.equalsIgnoreCase(ComboBoxFunctions.SELECTINDEX_KEYWORD)){
 					int offset = 0;
-					try{ 
+					try{
 						offset = Integer.parseInt(param1);
 						if (offset < 1){
 							detail = genericText.convert(GENKEYS.NOT_GREATER,
 							"IndexValue is not greater than 0.",
 							"IndexValue", "0");
-							throw new NumberFormatException("Less Than 0");      
+							throw new NumberFormatException("Less Than 0");
 						}
-						// test tables indices are 1-based but Selenium is 0-based 
-						offset--;					
+						// test tables indices are 1-based but Selenium is 0-based
+						offset--;
 					}catch(NumberFormatException nf){
 						testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
-						msg = failedText.convert(FAILKEYS.INVALID_MISSING, 
-							  "Invalid or Missing IndexValue in table "+ 
+						msg = failedText.convert(FAILKEYS.INVALID_MISSING,
+							  "Invalid or Missing IndexValue in table "+
 							  testRecordData.getFilename() +" at line "+
 							  testRecordData.getLineNumber() +".",
 							  "IndexValue",
@@ -150,10 +150,10 @@ public class CFComboBox extends CFComponent {
 						if (detail.length() > 0)
 							log.logMessage(testRecordData.getFac(), msg, detail, FAILED_MESSAGE);
 						else
-							log.logMessage(testRecordData.getFac(), msg, FAILED_MESSAGE);					
+							log.logMessage(testRecordData.getFac(), msg, FAILED_MESSAGE);
 						return;
 					}
-					
+
 					try{
 						combobox.selectIndex(offset, true, true);
 
@@ -161,7 +161,7 @@ public class CFComboBox extends CFComponent {
 						msg = genericText.convert(GENKEYS.SELECTED_INDEX_MATCHES, windowName +":"+ compName +" selected index matches expected value '"+ param1 +"'.",
 								                  windowName, compName, param1);
 						log.logMessage(testRecordData.getFac(), msg, PASSED_MESSAGE);
-						
+
 					}catch(SeleniumPlusException spe){
 						Log.debug(debugmsg+spe.getCode());
 						testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
@@ -173,7 +173,7 @@ public class CFComboBox extends CFComponent {
 						}
 						log.logMessage(testRecordData.getFac(), msg, detail, FAILED_MESSAGE);
 					}
-					
+
 				} else if(action.equalsIgnoreCase(ComboBoxFunctions.SELECTPARTIALMATCH_KEYWORD)){
 					try{
 						List<String> list = combobox.select(param1, true, true, true);
@@ -183,7 +183,7 @@ public class CFComboBox extends CFComponent {
 						msg = genericText.convert(GENKEYS.SELECTION_PARTIAL_MATCH, windowName +":"+ compName +" selection '"+ label +"' contains substring '"+ param1 +"'.",
 								                  windowName, compName, label, param1);
 						log.logMessage(testRecordData.getFac(), msg, PASSED_MESSAGE);
-						
+
 					}catch(SeleniumPlusException spe){
 						Log.debug(debugmsg+spe.getCode());
 						testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
@@ -192,7 +192,7 @@ public class CFComboBox extends CFComponent {
 							label = spe.getInfo();
 							detail = failedText.convert(FAILKEYS.SELECTION_NOT_PARTIAL_MATCH, "Selection '"+ label +"' does not contain substring '"+ param1 +"'.",
 									                    label, param1);
-						}						
+						}
 						log.logMessage(testRecordData.getFac(), msg, detail, FAILED_MESSAGE);
 					}
 
@@ -202,14 +202,14 @@ public class CFComboBox extends CFComponent {
 					msg = genericText.convert(GENKEYS.SUCCESS_3A, windowName+":"+compName+" "+action+" successful using "+param1,
 							                  windowName, compName, action, param1);
 					log.logMessage(testRecordData.getFac(), msg, PASSED_MESSAGE);
-					
+
 				} else if(action.equalsIgnoreCase(ComboBoxFunctions.SELECTUNVERIFIEDPARTIALMATCH_KEYWORD)){
 					combobox.select(param1, false, true, true);
 					testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
 					msg = genericText.convert(GENKEYS.SUCCESS_3A, windowName+":"+compName+" "+action+" successful using "+param1,
 							                  windowName, compName, action, param1);
 					log.logMessage(testRecordData.getFac(), msg, PASSED_MESSAGE);
-					
+
 				} else if(action.equalsIgnoreCase(ComboBoxFunctions.VERIFYSELECTED_KEYWORD)){
 					try{
 						List<String> list = combobox.verifySelected(param1);
@@ -219,7 +219,7 @@ public class CFComboBox extends CFComponent {
 						msg = genericText.convert(GENKEYS.IS_SELECTED, "'"+label+"' is selected in "+windowName +":"+ compName,
 								                  label, windowName +":"+ compName);
 						log.logMessage(testRecordData.getFac(), msg, PASSED_MESSAGE);
-						
+
 					}catch(SeleniumPlusException spe){
 						Log.debug(debugmsg+spe.getCode());
 						testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
@@ -235,20 +235,20 @@ public class CFComboBox extends CFComponent {
 				} else if(action.equalsIgnoreCase(ComboBoxFunctions.HIDELIST_KEYWORD)){
 					combobox.hidePopup();
 					testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
-					msg = genericText.convert(GENKEYS.SUCCESS_3, windowName+":"+compName+" "+action+" successful.", 
+					msg = genericText.convert(GENKEYS.SUCCESS_3, windowName+":"+compName+" "+action+" successful.",
 							                  windowName, compName, action);
 					log.logMessage(testRecordData.getFac(),msg, PASSED_MESSAGE);
-					
+
 				} else if(action.equalsIgnoreCase(ComboBoxFunctions.SHOWLIST_KEYWORD)){
 					combobox.showPopup();
 					testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
-					msg = genericText.convert(GENKEYS.SUCCESS_3, windowName+":"+compName+" "+action+" successful.", 
+					msg = genericText.convert(GENKEYS.SUCCESS_3, windowName+":"+compName+" "+action+" successful.",
 							                  windowName, compName, action);
 					log.logMessage(testRecordData.getFac(),msg, PASSED_MESSAGE);
-					
+
 				} else if(action.equalsIgnoreCase(ComboBoxFunctions.CAPTUREITEMSTOFILE_KEYWORD)){
 					captureItemsToFile(param1, param2);
-					
+
 				} else if(action.equalsIgnoreCase(ComboBoxFunctions.SETTEXTVALUE_KEYWORD)){
 					doSetText(LIBRARY_NAME, false, true);
 				}
@@ -265,14 +265,14 @@ public class CFComboBox extends CFComponent {
 			}
 		}
 	}
-	
+
 	/**
 	 * <br><em>Purpose:</em> captureItemsToFile
 	 * <p> example step commands:
 	 * <p>
 	 * <br> T, JavaWin, JList, CaptureItemsToFile, AFileName.txt
 	 * <br> Capture all items of Combo Box to file AFileName.txt
-	 * <br> 
+	 * <br>
 	 **/
 	protected void captureItemsToFile (String filename, String encoding) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(getClass(), "captureItemsToFile");
@@ -307,7 +307,7 @@ public class CFComboBox extends CFComponent {
 	protected Collection<String> captureObjectData() throws SAFSException {
 		String debugmsg = StringUtils.debugmsg(false);
 		Collection<String> data = null;
-		
+
 		try{
 			data = combobox.getDataList();
 		}catch(Exception e){
@@ -316,7 +316,7 @@ public class CFComboBox extends CFComponent {
 		if(data==null || data.isEmpty()){
 			data = super.captureObjectData();
 		}
-		
+
 		return data;
 	}
 }
