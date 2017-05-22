@@ -12,6 +12,9 @@
  *  OCT 29, 2015    (sbjlwa) Modify HtmlSelect.setSelected(): refresh after selection.
  *  MAY 19, 2017    (sbjlwa) Modified HtmlSelect.getOptions(): use OptionForHtmlSelect instead of Option.
  *                           Modified AbstractSelect.getOptions() and HtmlSelect.getOptions(): pause a while before getting options.
+ *  MAY 22, 2017    (sbjlwa) Modified ComboBox.select(): For unverified-selection, don't get the selected options from combo-box after selection,
+ *                                                       instead we use the option-text got in the pre-verification step as selected options to return.
+ *
  */
 package org.safs.selenium.webdriver.lib;
 
@@ -188,8 +191,17 @@ public class ComboBox extends Component{
 			//select.selectByValue(optionToSelect);//foo <option value="foo">Bar</option>
 			select.selectByVisibleText(optionToSelect);//Bar <option value="foo">Bar</option>
 
-			selectedOptions = getSelectedOptions(select);
-			if(verify) verifySelectedText(select, item, partialMatch);
+			if(verify){
+				selectedOptions= verifySelectedText(select, item, partialMatch);
+			}else{
+				//getSelectedOptions(select) will get all options and choose the selected-one from them
+				//This process will spend too much time. Comment it out.
+				//selectedOptions = getSelectedOptions(select);
+
+				//we simply add the optionToSelect to selectedOptions
+				selectedOptions = new ArrayList<>();
+				selectedOptions.add(optionToSelect);
+			}
 
 		}catch(Exception e){
 			if(e instanceof SeleniumPlusException) throw (SeleniumPlusException)e;
@@ -514,7 +526,7 @@ public class ComboBox extends Component{
 
 		public void showPopup() throws SeleniumPlusException;
 
-	}//End of Select Interface
+	}//End of Selectable Interface
 
 	/**
 	 * Modified from Source code of Selenium.<br>
