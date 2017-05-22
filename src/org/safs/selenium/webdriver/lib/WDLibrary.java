@@ -56,6 +56,8 @@ package org.safs.selenium.webdriver.lib;
 *  <br>   APR 19, 2016    (Lei Wang) Modify click() doubleClick() etc.: Handle the optional parameter 'autoscroll'.
 *  <br>   APR 27, 2016    (Lei Wang) Added switchWindow(): switch to a certain window according to its title.
 *  <br>   MAY 05, 2016    (Lei Wang) Modified startBrowser(): restart browser if the connection between WebDriver and BrowserDriver is not good.
+*  <br>   MAY 22, 2017    (Lei Wang) Modified startBrowser(): use isValidBrowserID() instead of StringUtils.isValid() to check the validity of parameter browser ID.
+*  
 */
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -1957,8 +1959,9 @@ public class WDLibrary extends SearchObject {
 		if(!StringUtils.isValid(BrowserName)){
 			BrowserName = getSystemProperty(SelectBrowser.SYSTEM_PROPERTY_BROWSER_NAME, SelectBrowser.BROWSER_NAME_FIREFOX);
 		}
-		if(!StringUtils.isValid(Id)){
-			Id = String.valueOf("".hashCode());
+		if(!isValidBrowserID(Id)){
+			Id = String.valueOf("".hashCode()+"_"+System.currentTimeMillis());
+			IndependantLog.warn(debugmsg+" the provided browser ID is NOT valid, generate a random ID '"+Id+"' to use.");
 		}
 
 		if (!isRemote) {
@@ -2035,12 +2038,12 @@ public class WDLibrary extends SearchObject {
 	 * the call to removeWebDriver will automatically "pop" the next WebDriver off
 	 * the stack to be the new "current" or "lastUsed" WebDriver.
 	 * @param ID	String, the id to identify the browser
-	 * @throws IllegalArgumentException if the provided browser ID is null or not known as a running instance.
+	 * @throws IllegalArgumentException if the provided browser ID is NOT {@link #isValidBrowserID(String)} or not known as a running instance.
 	 * @see #removeWebDriver(String)
 	 */
 	public static void stopBrowser(String ID) throws IllegalArgumentException{
 		String debugmsg = StringUtils.debugmsg(WDLibrary.class, "stopBrowser");
-		if (ID == null) throw new IllegalArgumentException("Browser ID provided was null.");
+		if (!isValidBrowserID(ID)) throw new IllegalArgumentException("Browser provided ID '"+ID+"' was NOT valid.");
 		WebDriver webdriver = removeWebDriver(ID);
 		if(webdriver==null){
 			IndependantLog.warn(debugmsg+"cannot get webdriver according to unknown id '"+ID+"'");
