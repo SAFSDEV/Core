@@ -4,33 +4,46 @@
 '* Returns 0:   when success 
 '*         76:  folder does not exist 
 '*         100: not found SeleniumPlus Program Group 
-'*************************************************************************************
-Const groupTitle = "SeleniumPlus 2014"     'title of group on Windows program menu 
+'************************************************************************************* 
+Const groupTitlePrefix = "SeleniumPlus"     'title prefix of group on Windows program menu 
+Const defaultYear = 2014
+
 Dim shell, fso
 Dim mainProgramsDir, safsProgramDir
-Dim year, firstSupportYear, lastSupportYear
+Dim firstSupportYear, lastSupportYear, annee
+Dim groupTitle, currentYear
 
 Set shell = WScript.CreateObject("WScript.Shell")
 Set fso   = WScript.CreateObject("Scripting.FileSystemObject")
+
 firstSupportYear = 2010
 lastSupportYear = 2050
 
+groupTitle = groupTitlePrefix & " " & defaultYear
+'Get the current year and create group title
+Err.Clear
+currentYear = Year(Date())
+If Err.Number=0 Then
+    lastSupportYear = currentYear
+    groupTitle = groupTitlePrefix & " " & currentYear    
+End If
+    
 'uninstall program groups
 mainProgramsDir   = shell.SpecialFolders("AllUsersPrograms")
 safsProgramDir    = mainProgramsDir & "\" & groupTitle
 
 'If not exist, then try to detect it
 If Not (fso.FolderExists(safsProgramDir)) Then
-    For year = firstSupportYear to lastSupportYear
-        safsProgramDir = mainProgramsDir & "\SeleniumPlus " & year
+    For annee = lastSupportYear to firstSupportYear Step -1
+        safsProgramDir = mainProgramsDir & "\SeleniumPlus " & annee
         'Once found, exit the loop
         If (fso.FolderExists(safsProgramDir)) Then Exit For
     Next
     
-    'WScript.Echo year
-    'If (year = lastSupportYear) And (Not fso.FolderExists(safsProgramDir)) Then
-    If (year = lastSupportYear+1) Then
-        WScript.Echo "The Selenium Group Folder can NOT be detected, the lastSupportYear '" &lastSupportYear& "' might need be increased."
+    'WScript.Echo annee
+    'If (annee = firstSupportYear) And (Not fso.FolderExists(safsProgramDir)) Then
+    If (annee = firstSupportYear-1) Then
+        WScript.Echo "The Selenium Group Folder can NOT be detected, the detection range [" &firstSupportYear& ","&lastSupportYear&"] might need be enlarged."
         WScript.Quit 100 'code for "not found SeleniumPlus Program Group"
     End If
 End If
