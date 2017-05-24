@@ -12,14 +12,25 @@
     '*     "Uninstall"                ------> <ROOTDIR>\uninstall\Uninstall.bat
     '*     "Keywords Reference"       ------> <ROOTDIR>\doc\SAFSReference.htm
     '*******************************************************************************
-    Const groupTitle = "SeleniumPlus 2017"     'title of group on Windows program menu 
+    Const groupTitlePrefix = "SeleniumPlus"     'title prefix of group on Windows program menu 
     Const docGroupTitle  = "Documentation"    'sub-group for documentation
+    Const defaultYear = 2017
     Dim file, shell, fso, env, installdir, stafdir
-    Dim mainProgramsDir, safsProgramDir, safsDocProgramDir 
+    Dim mainProgramsDir, safsProgramDir, safsDocProgramDir
+    Dim groupTitle, currentYear
 
     Set shell = WScript.CreateObject("WScript.Shell")
     Set env   = shell.Environment("SYSTEM")
     Set fso   = WScript.CreateObject("Scripting.FileSystemObject")
+
+    groupTitle = groupTitlePrefix & " " & defaultYear
+    'Get the current year and create group title
+    Err.Clear
+    currentYear = Year(Date())
+    If Err.Number=0 Then
+        'WScript.Echo "currentYear=" & currentYear
+         groupTitle = groupTitlePrefix & " " & currentYear
+    End If
 
     mainProgramsDir   = shell.SpecialFolders("AllUsersPrograms")
     safsProgramDir    = mainProgramsDir & "\" & groupTitle  
@@ -34,6 +45,7 @@
         WScript.Quit
     end if
 
+    WScript.Echo "Creating program group under folder '" & safsProgramDir & "'"
     'create program group and sub groups under it
     fso.CreateFolder(safsProgramDir)
     fso.CreateFolder(safsDocProgramDir) 
