@@ -1,9 +1,12 @@
 
 SeleniumPlus (Selenium+) is a Selenium WebDriver-enabled version of TestDesigner for Windows.
-Selenium by default uses the FireFox browser.  
-
+SeleniumPlus by default uses the FireFox browser.
 If you do not have FireFox you can download and install it from: www.mozilla.org
-Selenium 2.44 is delivered with SeleniumPlus.
+
+According to users experiences, the chrome browser is faster and more stable, you
+can download it from: https://www.google.com/chrome/browser/desktop/
+
+Selenium 2.52 is currently delivered with SeleniumPlus.
 
 1. Open the SeleniumPlus.ZIP (or TestDesigner.ZIP) file with WinZip or other appropriate program.
 
@@ -17,13 +20,13 @@ Selenium 2.44 is delivered with SeleniumPlus.
 
 4. Upon successful installation on Windows:
 
-       a. There should be a "SeleniumPlus 2014" Program Group in your Start Menu.
+       a. There should be a "SeleniumPlus 2017" Program Group in your Start Menu.
        b. There should be a new "SeleniumPlus" shortcut in your installation directory.
 
 5. Check the setup.log:
 
        After installation, there will be a setup.log under the folder <SeleniumPlus>\install\, if you met some
-       problem during the installation, you can send this file to "RDT SAFS-Support <safsdev@wnt.sas.com>" for help.
+       problem during the installation, you can send this file to "RDT SAFS-Support <safsdev@yourCompany.com>" for help.
        
 -------------------------------------------------------------------------------------------------------------
 **** IT IS RECOMMENDED TO LOGOFF AND THEN LOGON YOUR WINDOW'S USER ACCOUNT FOR ALL UPDATES TO COMPLETE.  ****
@@ -40,14 +43,14 @@ Selenium 2.44 is delivered with SeleniumPlus.
        
            i. "SeleniumPlus"
 
-7. Review "Getting Started" in the Documents folder of the SeleniumPlus Program Group Start Menu,
-   or the "SeleniumPlus" menu item in the Selenium+ -> Documents menu of the SeleniumPlus main menu.
+7. Review "Getting Started" in the "Documentation" folder of the SeleniumPlus Program Group Start Menu,
+   or the "SeleniumPlus" menu item in the "Selenium+" -> "Documents" menu of the SeleniumPlus main menu.
 
 
 Uninstall:
 
-1. The SeleniumnPlus 2014 Start Menu Program Group has an "Uninstall" link to perform the uninstall.
+1. The "SeleniumnPlus 2017" Start Menu Program Group has an "Uninstall" link to perform the uninstall.
 
-2. You can also run the "_Uninstall.wsf" program from the the "uninstall" subdirectory 
+2. You can also run the "Uninstall.bat" program from the the "uninstall" subdirectory 
    of your SeleniumPlus installation directory.
    
