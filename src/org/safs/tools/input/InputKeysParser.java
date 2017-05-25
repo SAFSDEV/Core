@@ -2,24 +2,7 @@
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
-package org.safs.tools.input;
-
-import java.awt.event.KeyEvent;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.Vector;
-
-import org.safs.Log;
-import org.safs.text.CaseInsensitiveHashtable;
-import org.safs.text.INIFileReader;
-
 /**
- * @author Carl Nagle FEB 13, 2007
  * @see java.awt.Robot
  * @see java.awt.event.KeyEvent
  *
@@ -38,6 +21,27 @@ import org.safs.text.INIFileReader;
  * 															 Otherwise {a 4} will not be treated as inputting 'aaaa' because special does not
  * 															 contains mapping of 'a'.
  * <br>	DEC 07, 2010  (LeiWang)	Add method antiParse(), parseKeyCode(), getReverseMap(): Convert a list of RobotKeyEvent to a SAFS's key string
+ * <br>	MAY 25, 2017  (LeiWang)	Modified method parseInput(): call clearModifiers(keys) after handling NLS chars to avoid holding special key problem.
+ */
+package org.safs.tools.input;
+
+import java.awt.event.KeyEvent;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
+
+import org.safs.IndependantLog;
+import org.safs.Log;
+import org.safs.text.CaseInsensitiveHashtable;
+import org.safs.text.INIFileReader;
+
+/**
+ * @author Carl Nagle FEB 13, 2007
  */
 public class InputKeysParser {
 
@@ -473,6 +477,8 @@ public class InputKeysParser {
 			}else if((nonStandardStr = getNonStdChars(input,cursor)) != null){
 				addEvents(keys, nonStandardStr);
 				cursor += nonStandardStr.length();
+				IndependantLog.debug("NLS characters '"+nonStandardStr+"' have been converted to RobotClipboardPasteEvents, and they will be handled later.");
+				clearModifiers(keys);
 				continue;
 			//process standard chars
 			}else{
@@ -702,12 +708,12 @@ public class InputKeysParser {
 		}
 	}
 
-	/** Check input string from the element at postion 'fromIdx' to get a "non-standard" sub-string.
+	/** Check input string from the element at position 'fromIdx' to get a "non-standard" sub-string.
 	 *  "non-standard" string means that every _char inside it has no mapping found in the stored "standard"
 	 *  keycode file, "SAFSKeyCodeMap.dat".
 	 * @param input,   a input string.
 	 * @param fromIdx, 0-based index started from.
-	 * @return: a "non-stardard" sub-string starting fromIdx; null, not found.
+	 * @return: a "non-standard" sub-string starting fromIdx; null, not found.
 	 * @see SAFSKeyCodeMap.dat
 	 */
 	private String getNonStdChars(String input, int fromIdx){
