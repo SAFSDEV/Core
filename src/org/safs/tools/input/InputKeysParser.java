@@ -1,4 +1,4 @@
-/** 
+/**
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
@@ -22,17 +22,17 @@ import org.safs.text.INIFileReader;
  * @author Carl Nagle FEB 13, 2007
  * @see java.awt.Robot
  * @see java.awt.event.KeyEvent
- * 
- * <br> SEP 22, 2008  (JunwuMa) Add NLS 'keyboard' input support. Actually it is not a REAL keyboard input support. 
- *                    Instead it uses an alternative way. NLS characters in an input string will NOT be translated 
- *                    to keystrokes in certain IME, for the reason of 1) too much code points in some Non-English 
- *                    languages (Chinese), 2)a NLS character owns different keystrokes in different IME and 3)keystrokes for a Chinese character relies 
+ *
+ * <br> SEP 22, 2008  (JunwuMa) Add NLS 'keyboard' input support. Actually it is not a REAL keyboard input support.
+ *                    Instead it uses an alternative way. NLS characters in an input string will NOT be translated
+ *                    to keystrokes in certain IME, for the reason of 1) too much code points in some Non-English
+ *                    languages (Chinese), 2)a NLS character owns different keystrokes in different IME and 3)keystrokes for a Chinese character relies
  *                    on IME too much.
  * 					  Two steps for inputting NLS characters.
  *					  1.	Copy NLS characters to system Clipboard. Add an event: SetClipboardEvent.
  *                    2.	Add 'Ctrl+V' keyboard event to paste the content in system Clipboard to focused control.
  *                    Possible drawbacks:
- *                    Not sure if it can be used by controls that prevents 'Ctrl+V' from Window OS. If yes, a REAL unique hot 
+ *                    Not sure if it can be used by controls that prevents 'Ctrl+V' from Window OS. If yes, a REAL unique hot
  *                    key (Ctrl+Shift+V ?) may be introduced for doing so on OS level.
  * <br>	JAN 06, 2009  (LeiWang)	Modify method parseBraces(): Use standards instead of special to get character mapping.
  * 															 Otherwise {a 4} will not be treated as inputting 'aaaa' because special does not
@@ -49,7 +49,7 @@ public class InputKeysParser {
 	private CharInfo paren_left = new CharInfo('(', KeyEvent.VK_LEFT_PARENTHESIS);
 	private CharInfo paren_right = new CharInfo(')', KeyEvent.VK_RIGHT_PARENTHESIS);
 	private CharInfo brace_right = new CharInfo('}', KeyEvent.VK_BRACERIGHT);
-	
+
 	//private Hashtable tokens = new Hashtable();
 	//specials and standards contain pair <charString , keycodeString>, got from SAFSKeycodeMap.dat
 	private Hashtable specials = new CaseInsensitiveHashtable();
@@ -69,38 +69,38 @@ public class InputKeysParser {
 	protected static String DEL = "DEL";
 	protected static String QUOTE = "\"";
 	protected static String SPACE = " ";
-			 
+
 	public InputKeysParser(INIFileReader config){
 
 		if (config==null) throw new IllegalArgumentException("INIFileReader must not be null!");
 		//override default parsing tokens if necessary.
 		setTokenInfo(config, alt, CreateUnicodeMap.ALT);
 		setTokenInfo(config, control, CreateUnicodeMap.CONTROL);
-		setTokenInfo(config, shift, CreateUnicodeMap.SHIFT);	
+		setTokenInfo(config, shift, CreateUnicodeMap.SHIFT);
 		setTokenInfo(config, enter, CreateUnicodeMap.ENTER);
-		
+
 		setTokenInfo(config, brace_left, CreateUnicodeMap.BRACELEFT);
 		setTokenInfo(config, brace_right, CreateUnicodeMap.BRACERIGHT);
 		setTokenInfo(config, paren_left, CreateUnicodeMap.PARENLEFT);
 		setTokenInfo(config, paren_right, CreateUnicodeMap.PARENRIGHT);
-		
+
 		//load in all special strings
 		setStringInfo(config, CreateUnicodeMap.SPECIAL, specials);
-		
+
 		//load in all standard strings
 		setStringInfo(config, CreateUnicodeMap.STANDARD, standards);
-		
+
 		//create reverse pair of specials and standards
 		specialsKeyToChar = getReverseMap(specials);
 		standardsKeyToChar = getReverseMap(standards);
-			
+
 		//create common strings
 		createCommonStrings();
 	}
-	
+
 	/**
 	 * <b>Purpose</b> Create a map containing reverse pair of the input map
-	 * 
+	 *
 	 * @param map
 	 * @return		A map containing reverse pair <value, key>
 	 */
@@ -121,7 +121,7 @@ public class InputKeysParser {
 
 		return reverseMap;
 	}
-	
+
 	public char getShiftChar(){return shift.char_char;}
 	public char getAltChar(){return alt.char_char;}
 	public char getCtrlChar(){return control.char_char;}
@@ -130,20 +130,20 @@ public class InputKeysParser {
 	public char getRightParenChar(){return paren_right.char_char;}
 	public char getLeftBraceChar(){return brace_left.char_char;}
 	public char getRightBraceChar(){return brace_right.char_char;}
-	
+
 	public String getSHIFT_END_DELETE(){ return SHIFT_END_DELETE;}
-	
+
 	protected void createCommonStrings(){
 		//create SHIFT_END_DELETE
 		SHIFT_END_DELETE = String.valueOf(getShiftChar()) +
 		                   String.valueOf(getLeftBraceChar()) +
-		                   END + 
-		                   String.valueOf(getRightBraceChar()) +			   	
+		                   END +
+		                   String.valueOf(getRightBraceChar()) +
 		                   String.valueOf(getLeftBraceChar()) +
-		                   DEL + 
-		                   String.valueOf(getRightBraceChar());			   			
+		                   DEL +
+		                   String.valueOf(getRightBraceChar());
 	}
-	
+
 	protected void addEvents(Vector keys, String keychar){
 		String keyvalue;
 		int _code = 0;
@@ -152,11 +152,11 @@ public class InputKeysParser {
 		if (tmpChar.equals(SPACE)){
 			tmpChar = QUOTE+ keychar +QUOTE;
 		}
-		
+
 		value = standards.get(tmpChar);
-		
+
 		if (value == null){
-			//to do with 'non-standard'(NLS) string 
+			//to do with 'non-standard'(NLS) string
 			Log.debug("InputKeysParser: No matching keycode for characters: '"+ keychar +"'");
 			Log.debug("...............: Treat it as 'non-standard' string, adding a RobotClipboardPasteEvent event.");
 			keys.add(new RobotClipboardPasteEvent(keychar, createPasteEvent()));
@@ -173,19 +173,19 @@ public class InputKeysParser {
 					if(! shift_on){
 						keys.add(new RobotKeyEvent(RobotKeyEvent.KEY_PRESS, shift.char_code));
 					}
-					
+
 					keys.add(new RobotKeyEvent(RobotKeyEvent.KEY_TYPE, _code));
-					
+
 					if(! shift_on){
 						keys.add(new RobotKeyEvent(RobotKeyEvent.KEY_RELEASE, shift.char_code));
-					}				
+					}
 				}
 				catch(NumberFormatException nfe){
-					Log.debug("InputKeysParser: Unknown keycode for character: "+ 
+					Log.debug("InputKeysParser: Unknown keycode for character: "+
 					keychar +" : "+ keyvalue);
 				}
 				catch(IndexOutOfBoundsException ioob){
-					Log.debug("InputKeysParser: Invalid keycode for character: "+ 
+					Log.debug("InputKeysParser: Invalid keycode for character: "+
 					keychar +" : "+ keyvalue);
 				}
 			}else{
@@ -193,19 +193,19 @@ public class InputKeysParser {
 				          " : "+ keyvalue);
 			}
 		}else{
-			Log.debug("InputKeysParser: Unexpected storage type for character: "+ 
+			Log.debug("InputKeysParser: Unexpected storage type for character: "+
 			          keychar +" : "+ value.getClass().getName());
 		}
 	}
-	
+
 	/**
 	 * <b>Note:</b>     This method do the opposite work of {@link #parseInput(String)}<br>
-	 * 
+	 *
 	 * @param keys		List of RobotKeyEvent
 	 * @return			String: the script string that user use to input<br>
-	 *                  The sring's format should be consistent with specification in 
+	 *                  The sring's format should be consistent with specification in
 	 *                  {@link org.safs.tools.input.CreateUnicodeMap}<br><br>
-	 * 
+	 *
 	 * Ex.<br>
 	 * keys = {
 	 * 			RobotKeyEvent(KEY_PRESS,KeyEvent.VK_SHIFT),
@@ -217,7 +217,7 @@ public class InputKeysParser {
 	 * 			RobotKeyEvent(KEY_TYPE,KeyEvent.VK_D),
 	 * 			RobotKeyEvent(KEY_RELEASE,KeyEvent.VK_SHIFT)
 	 * 	      }<br><br>
-	 * 
+	 *
 	 * Returned string will be AAAB{%}D
  	 */
 	public String antiParse(List<RobotKeyEvent> keys){
@@ -226,16 +226,13 @@ public class InputKeysParser {
 		int eventType = -1;
 		int vkcode = -1;
 		boolean shiftOn = false;
-		boolean controlOn = false;
-		boolean altOn = false;
-		
 		ListIterator<RobotKeyEvent> listIter = keys.listIterator();
-		
+
 		while(listIter.hasNext()){
 			event = listIter.next();
 			eventType = event.get_event();
 			vkcode = event.get_keycode();
-			
+
 			switch(eventType){
 			case RobotKeyEvent.KEY_PRESS:
 				if(KeyEvent.VK_SHIFT==vkcode){
@@ -243,10 +240,8 @@ public class InputKeysParser {
 					shiftOn = true;
 				}else if(KeyEvent.VK_ALT==vkcode){
 					script.append(""+alt.char_char);
-					altOn = true;
 				}else if(KeyEvent.VK_CONTROL==vkcode){
 					script.append(""+control.char_char);
-					controlOn = true;
 				}else{
 					parseKeyCode(script,vkcode,shiftOn);
 				}
@@ -256,9 +251,7 @@ public class InputKeysParser {
 					script.append(""+paren_right.char_char);//Add )
 					shiftOn = false;
 				}else if(KeyEvent.VK_ALT==vkcode){
-					altOn = false;
 				}else if(KeyEvent.VK_CONTROL==vkcode){
-					controlOn = false;
 				}
 				break;
 			case RobotKeyEvent.KEY_TYPE:
@@ -268,36 +261,36 @@ public class InputKeysParser {
 				break;
 			}
 		}
-		
+
 		//We need to remove the void script string "+()" from the StringBuffer
 		String original = script.toString();
 		String outString = original.replaceAll("\\+\\(\\)", "");
-		
+
 		Log.debug("InputKeysParser: original is "+original+"   ;  output is  "+outString);
-		
+
 		return outString;
 	}
-	
+
 	/**
 	 * <b>Purpose:</b>	    Translate the virtual key code to appropriate charString and append it to the buffer<br>
-	 * 
+	 *
 	 * @param script		StringBuffer	Buffer which contains the script string
 	 * @param vkcode		int				The virtual key code
 	 * @param shiftOn		boolean			If the shift key is pressed
-	 * 
+	 *
 	 * @return	void.       The parameter "script" will contain the result string
 	 */
 	private void parseKeyCode(StringBuffer script, int vkcode, boolean shiftOn){
 		String tempChar = null;
-		
+
 		//For those special chars INDEPENDENT with the ShiftKey, this means that the vkcode is same
-		//whether the ShiftKey is pressed or not. 
+		//whether the ShiftKey is pressed or not.
 		//These special chars, you can find in the section [SPECIAL] of file SAFSKeycodeMap.dat
 		//For example like following:
 		//		ALT=18
 		//		ENTER=10
 		//		SHIFT=16
-		
+
 		//Firstly, try to get the char from the map specialsKeyToChar by vkcode
 		Log.debug("InputKeysParser: Try to find the char for virtual key code : "+vkcode+" in the special map.");
 		tempChar = specialsKeyToChar.get(String.valueOf(vkcode));
@@ -343,7 +336,7 @@ public class InputKeysParser {
 	//				A=SHIFT+65
 	//				B=SHIFT+66
 	//				C=SHIFT+67
-	
+
 	//				!=SHIFT+49
 	//				@=SHIFT+50
 	//				#=SHIFT+51
@@ -385,21 +378,19 @@ public class InputKeysParser {
 			}
 		}
 	}
-	
-	
+
+
 	public Vector parseInput(String input){
 		Vector keys = new Vector();
 		int startgroup = -1;
 		int endgroup = -1;
 		int cursor = 0;
-		char _char;		
+		char _char;
 		String keychar;
-		String keyval;
-		
 		String nonStandardStr;
-		
-		//loop through the string one char at a time;one sub-string at a time for NLS(non-standard) characters 
-		while(cursor < input.length()){		
+
+		//loop through the string one char at a time;one sub-string at a time for NLS(non-standard) characters
+		while(cursor < input.length()){
 			_char = input.charAt(cursor);
 
 			// look for key modifier
@@ -420,15 +411,15 @@ public class InputKeysParser {
 			}else if (_char == enter.char_char){
 				keys.add(new RobotKeyEvent(RobotKeyEvent.KEY_TYPE, enter.char_code));
 				clearModifiers(keys);
-				
+
 			}else if (_char == brace_right.char_char){
 				keys.addAll(parseBraces(String.valueOf(brace_right.char_char)));
 				clearModifiers(keys);
-				
+
 			}else if (_char == paren_right.char_char){
 				keys.addAll(parseBraces(String.valueOf(paren_right.char_char)));
 				clearModifiers(keys);
-				
+
 			// process any brace grouping
 			}else if(_char == brace_left.char_char){
 				startgroup = cursor;
@@ -442,65 +433,65 @@ public class InputKeysParser {
 								endgroup++;
 								//keys.add(new RobotKeyEvent(RobotKeyEvent.KEY_TYPE, getKeyCode(String.valueOf(brace_right.char_char))));
 								keys.addAll(parseBraces(input.substring(startgroup+1, endgroup)));
-							}else{							
+							}else{
 								Log.debug("InputKeyParser does not handle EMPTY BRACES!");
 								// (invalid?) empty braces
-							}							
+							}
 						}catch(IndexOutOfBoundsException ib){
 							//end of string -- (invalid?) empty braces
-						}						
+						}
 					}else{
 						keys.addAll(parseBraces(input.substring(startgroup+1, endgroup)));
-					}					
-					cursor = endgroup;					
+					}
+					cursor = endgroup;
 					clearModifiers(keys);
 				}else{
 					//bad format -- no end brace.
 					//use single char as is?
 					keys.add(new RobotKeyEvent(RobotKeyEvent.KEY_TYPE, getKeyCode(input.substring(cursor, cursor+1))));				}
 					clearModifiers(keys);
-			
+
 			// process any parens
 			}else if(_char == paren_left.char_char){
 				startgroup = cursor;
 				endgroup = input.indexOf(paren_right.char_char, startgroup);
 				if (endgroup > startgroup){
-					if(endgroup > startgroup+1){					
+					if(endgroup > startgroup+1){
 						keys.addAll(parseParens(input.substring(startgroup+1, endgroup)));
 					}else{
 						// (invalid?) empty parens
 					}
-					cursor = endgroup;					
+					cursor = endgroup;
 				}else{
 					//bad format -- no end paren.
 					//use single char as is?
 					keys.add(new RobotKeyEvent(RobotKeyEvent.KEY_TYPE, getKeyCode(input.substring(cursor, cursor+1))));
 				}
 				clearModifiers(keys);
-			
-			//process non-standard (NLS) chars			
+
+			//process non-standard (NLS) chars
 			}else if((nonStandardStr = getNonStdChars(input,cursor)) != null){
 				addEvents(keys, nonStandardStr);
-				cursor += nonStandardStr.length();	
+				cursor += nonStandardStr.length();
 				continue;
-			//process standard chars 
+			//process standard chars
 			}else{
 				keychar=input.substring(cursor, cursor+1);
 				addEvents(keys, keychar);
-				clearModifiers(keys);	
+				clearModifiers(keys);
 			}
-			cursor++;		
-		} 
+			cursor++;
+		}
 		return keys;
 	}
-	
+
 	public Vector parseChars(String input){
 		Vector keys = new Vector();
 		int cursor = 0;
 		String keychar;
-				
-		//loop through the string one char at a time for standard char;one sub-string at a time for NLS(non-standard) charactars 
-		while(cursor < input.length()){		
+
+		//loop through the string one char at a time for standard char;one sub-string at a time for NLS(non-standard) charactars
+		while(cursor < input.length()){
 			String nonStandardStr = getNonStdChars(input,cursor);
 			if(nonStandardStr != null){
 				addEvents(keys, nonStandardStr);
@@ -508,23 +499,23 @@ public class InputKeysParser {
 			}else{
 				keychar =  input.substring(cursor, cursor+1);
 				addEvents(keys, keychar);
-				cursor++;		
+				cursor++;
 			}
-		} 
+		}
 		return keys;
 	}
 
-	
+
 	/**
-	 * Retrieve the stored "standard" keycode of the provided character.  
+	 * Retrieve the stored "standard" keycode of the provided character.
 	 * @param _char -- String of one char.
-	 * @return Integer of keycode OR'd with key modifiers. -1 OR'd with modifiers 
+	 * @return Integer of keycode OR'd with key modifiers. -1 OR'd with modifiers
 	 * if the char keycode is not found.
-	 */	
+	 */
 	protected int getKeyCode(String _char){
 		// some keycodes are going to be "SHIFT+code" ???
 		Object value = null;
-		try{ 
+		try{
 			//return ((Integer) standards.get( _char )).intValue();
 			value = standards.get(_char);
 			if( value instanceof Integer){
@@ -537,10 +528,10 @@ public class InputKeysParser {
 		catch(NullPointerException npe){
 			Log.debug("IKP: Ignoring getKeyCode NullPointerException for: "+_char, npe);
 		}
-		return -1;		
+		return -1;
 	}
-	
-	/** 
+
+	/**
 	 * Convert literal string characters into their corresponding keycodes.
 	 * This is normally a number of characters to which a modifier is applied.
 	 * @param content -- the string of characters to convert to keycodes.
@@ -558,22 +549,22 @@ public class InputKeysParser {
 		}catch(NullPointerException npe){ ; }
 		return keys;
 	}
-	
-	/** 
+
+	/**
 	 * Process the string previously extracted from between parens.
 	 * This is normally a number of characters to which a modifier is applied.
 	 * @param content -- the string in between parens ( )
 	 * @return Vector of Integer keycodes
 	 */
 	protected Vector parseParens(String content){
-		
+
 		return parseString(content);
 	}
-	
-	/** 
+
+	/**
 	 * Process the string previously extracted from between braces.
-	 * This is one special character String or a special character String followed by a 
-	 * space and the number of times to repeat it. 
+	 * This is one special character String or a special character String followed by a
+	 * space and the number of times to repeat it.
 	 * @param content -- the string in between braces { }
 	 * @return Vector of Integer keycodes
 	 */
@@ -585,7 +576,7 @@ public class InputKeysParser {
 		String key = null;
 		Object value = null;
 		RobotKeyEvent event = null;
-		
+
 		key = content.trim();
 		try{
 			//check for space separator
@@ -595,7 +586,7 @@ public class InputKeysParser {
 				key = key.substring(0, sep);
 				try{
 					repeat = Integer.parseInt(content.substring(sep+1).trim());
-					if (repeat < 1) repeat = 1; 
+					if (repeat < 1) repeat = 1;
 				}catch(IndexOutOfBoundsException ioob){
 					// what to do?  Report illegal format?
 					Log.debug("IKP: Ignoring bad or missing InputKeys REPEAT format.");
@@ -604,7 +595,7 @@ public class InputKeysParser {
 					Log.debug("IKP: Ignoring bad InputKeys REPEAT format. ");
 				}
 			}
-			//add key repeat 
+			//add key repeat
 			try{
 				value = specials.get(key);
 				if (value == null) value = standards.get(key);
@@ -613,7 +604,7 @@ public class InputKeysParser {
 					event = new RobotKeyEvent(RobotKeyEvent.KEY_TYPE, icode);
 					for(int i = 0; i < repeat;i++){
 						keys.add(event);
-					}					
+					}
 				}
 				else if (value instanceof String){
 					String keyvalue = (String)value;
@@ -631,23 +622,23 @@ public class InputKeysParser {
 							}
 						}
 						catch(NumberFormatException nfe){
-							Log.debug("InputKeysParser: Unknown keycode for special character: "+ 
+							Log.debug("InputKeysParser: Unknown keycode for special character: "+
 							key +" : "+ keyvalue);
 						}
 						catch(IndexOutOfBoundsException ioob){
-							Log.debug("InputKeysParser: Invalid keycode for special character: "+ 
+							Log.debug("InputKeysParser: Invalid keycode for special character: "+
 							key +" : "+ keyvalue);
 						}
 					}else{
-						Log.debug("InputKeysParser: Unsupported modifier for special character: "+ 
+						Log.debug("InputKeysParser: Unsupported modifier for special character: "+
 								key +" : "+ keyvalue);
 					}
 				}else{
 					if (value == null){
-						Log.debug("InputKeysParser: Unexpected NULL for special character: "+ 
+						Log.debug("InputKeysParser: Unexpected NULL for special character: "+
 						          key +".");
 					}else{
-						Log.debug("InputKeysParser: Unexpected storage type for special character: "+ 
+						Log.debug("InputKeysParser: Unexpected storage type for special character: "+
 					          key +" : "+ value.getClass().getName());
 					}
 				}
@@ -656,7 +647,7 @@ public class InputKeysParser {
 			}catch(ClassCastException cce){
 				Log.debug("IKP: Ignoring unknown InputKeys format. ", cce);
 			}
-			
+
 		}catch(NullPointerException npe){ ;	}
 		return keys;
 	}
@@ -670,23 +661,23 @@ public class InputKeysParser {
 			while(it.hasNext()){
 				item = (String) it.next();
 				value = config.getAppMapItem(section, item);
-				try{ 
+				try{
 					store.put(item, new Integer(value));
 				}
-				catch(NumberFormatException nfe){ 
+				catch(NumberFormatException nfe){
 					store.put(item, value );
 				}
-			}			
+			}
 		}catch(NullPointerException np){}
 	}
 
 	private void setTokenInfo(INIFileReader config, CharInfo info, String token){
-		String value = config.getAppMapItem(CreateUnicodeMap.TOKENS, token);		
+		String value = config.getAppMapItem(CreateUnicodeMap.TOKENS, token);
 		if ((!(value == null))&&(value.length() > 0)) {
 			info.char_char = value.charAt(0);
 			try{info.char_code = Integer.parseInt(config.getAppMapItem(CreateUnicodeMap.TOKENS, value));}
 			catch(NumberFormatException nfx){ info.char_code = -1; }
-		} 
+		}
 	}
 
 	/**
@@ -712,15 +703,15 @@ public class InputKeysParser {
 	}
 
 	/** Check input string from the element at postion 'fromIdx' to get a "non-standard" sub-string.
-	 *  "non-standard" string means that every _char inside it has no mapping found in the stored "standard" 
-	 *  keycode file, "SAFSKeyCodeMap.dat". 
+	 *  "non-standard" string means that every _char inside it has no mapping found in the stored "standard"
+	 *  keycode file, "SAFSKeyCodeMap.dat".
 	 * @param input,   a input string.
 	 * @param fromIdx, 0-based index started from.
 	 * @return: a "non-stardard" sub-string starting fromIdx; null, not found.
 	 * @see SAFSKeyCodeMap.dat
 	 */
 	private String getNonStdChars(String input, int fromIdx){
-		if(input == null) 
+		if(input == null)
 			return null;
 		int len = input.length();
 		if(fromIdx < 0 || fromIdx>=len)
@@ -730,7 +721,7 @@ public class InputKeysParser {
 			String tmpkeychar =  input.substring(endPos, endPos+1);
 			if(standards.get(tmpkeychar) != null)
 				break;
-		}	
+		}
 		if(endPos == fromIdx)
 			return null;
 		else
@@ -738,14 +729,14 @@ public class InputKeysParser {
 	}
 	/* create hot keys (Ctrl+v) to paste from system Clipboard */
 	protected Vector createPasteEvent(){
-		Vector pasteEvents = new Vector(3);		
+		Vector pasteEvents = new Vector(3);
 		clearModifiers(pasteEvents);
 		pasteEvents.add(new RobotKeyEvent(RobotKeyEvent.KEY_PRESS, control.char_code));
-		addEvents(pasteEvents,"v");		
+		addEvents(pasteEvents,"v");
 		pasteEvents.add(new RobotKeyEvent(RobotKeyEvent.KEY_RELEASE, control.char_code));
 		return pasteEvents;
 	}
-	
+
 	public class CharInfo {
 		public char char_char = ' ';
 		public int char_code = -1;
@@ -759,14 +750,14 @@ public class InputKeysParser {
 	public static void main(String[] args) {
 		INIFileReader reader = new INIFileReader(ClassLoader.getSystemResourceAsStream(CreateUnicodeMap.DEFAULT_FILE + CreateUnicodeMap.DEFAULT_FILE_EXT), 0, false);
 		InputKeysParser parser = new InputKeysParser(reader);
-		Vector input = parser.parseInput("a");
-		input = parser.parseInput("A");
-		input = parser.parseInput("0");
-		input = parser.parseInput("^");		
-		input = parser.parseInput("{");
-		input = parser.parseInput("}");
-		input = parser.parseInput("(");
-		input = parser.parseInput(")");
-		input = parser.parseInput("%");		
-	}	
+		parser.parseInput("a");
+		parser.parseInput("A");
+		parser.parseInput("0");
+		parser.parseInput("^");
+		parser.parseInput("{");
+		parser.parseInput("}");
+		parser.parseInput("(");
+		parser.parseInput(")");
+		parser.parseInput("%");
+	}
 }
