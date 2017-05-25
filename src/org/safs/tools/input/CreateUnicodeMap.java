@@ -1,4 +1,4 @@
-/** 
+/**
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
@@ -8,57 +8,57 @@ import java.awt.event.KeyEvent;
 import java.io.*;
 
 /**
- * Create a Unicode output file for the running version of Java that can be used 
- * during testing and test development to map SAFS keystroke definitions to the 
+ * Create a Unicode output file for the running version of Java that can be used
+ * during testing and test development to map SAFS keystroke definitions to the
  * Java keycodes needed by java.awt.Robot.
  * <p>
- * This class can be used to map the default US English 
- * character map and then may be copied and\or modified to generate keycode 
- * character maps for other locales or languages.  The generation of the US 
+ * This class can be used to map the default US English
+ * character map and then may be copied and\or modified to generate keycode
+ * character maps for other locales or languages.  The generation of the US
  * English map is already done and provided with the released package.
  * <p>
- * The class creates a file (SAFSKeycodeMap.dat) mapping text string sequences to the keycode 
+ * The class creates a file (SAFSKeycodeMap.dat) mapping text string sequences to the keycode
  * used by the AWT Robot.  For example:
  * <p><ul>
  * ENTER=10
  * </ul>
- * <p> 
- * The example shows that the literal text "ENTER" will be mapped to keycode integer 
- * 10.  These keycodes are generally those defined in the java.awt.event.KeyEvent 
+ * <p>
+ * The example shows that the literal text "ENTER" will be mapped to keycode integer
+ * 10.  These keycodes are generally those defined in the java.awt.event.KeyEvent
  * class.
  * <p>
  * SAFS text string sequences for commands like InputKeys are supported as follows.
- * In general, these are the same strings used by IBM Rational Robot and Microsoft 
+ * In general, these are the same strings used by IBM Rational Robot and Microsoft
  * standards for defining keystrokes in scripting languages:
  * <p><ul>
- * Some characters in the string are passed to the active window as literal characters, 
- * meaning that they are passed just as they appear in the string. For example, the 
- * letters a through z and the numbers 0 through 9. 
+ * Some characters in the string are passed to the active window as literal characters,
+ * meaning that they are passed just as they appear in the string. For example, the
+ * letters a through z and the numbers 0 through 9.
  * <p>
  * The following characters cause the associated keystroke to be performed:
  * <p><ul><pre>
  * ~	Causes the Enter key to be pressed.
- * +	Causes the Shift key to be pressed and held down while the next character 
+ * +	Causes the Shift key to be pressed and held down while the next character
  *      is pressed.
- * ^	Causes the Control key to be pressed and held down while the next character 
+ * ^	Causes the Control key to be pressed and held down while the next character
  *      is pressed.
  * %	Causes the Alt key to be pressed and held down while the next character is pressed.
  * </pre></ul>
  * <p>
- * If a group of characters is enclosed in parentheses, all the characters are affected 
- * by the special character that precedes the parentheses. For example, the following 
+ * If a group of characters is enclosed in parentheses, all the characters are affected
+ * by the special character that precedes the parentheses. For example, the following
  * string inserts ABCD into the active window:
  * <p><ul>
  * "+(abcd)"
  * <p></ul>
- * Keys associated with non-printable characters (such as the Escape key and arrow keys) 
- * and keys on the numeric and extended keypads are represented by descriptive names in 
- * curly braces ( {} ). Names are not case-sensitive. The valid key names you can specify 
+ * Keys associated with non-printable characters (such as the Escape key and arrow keys)
+ * and keys on the numeric and extended keypads are represented by descriptive names in
+ * curly braces ( {} ). Names are not case-sensitive. The valid key names you can specify
  * in curly braces are included in the table at the end of the Comments section.
  * <p>
- * To insert one of the above special characters, that is, ~+^%({ as itself rather 
- * than as the special activity that it represents, enclose the character in curly 
- * braces. For example, the following command inserts a plus sign (+) into the active 
+ * To insert one of the above special characters, that is, ~+^%({ as itself rather
+ * than as the special activity that it represents, enclose the character in curly
+ * braces. For example, the following command inserts a plus sign (+) into the active
  * window:
  * <p><ul>
  * "{+}"
@@ -67,9 +67,9 @@ import java.io.*;
  * <p><ul>
  * <table>
  * <tr>
- * <td>Keytext value	<td>Keyboard equivalent 
+ * <td>Keytext value	<td>Keyboard equivalent
  * <tr><td>Actual printable character.<br>Examples:  A1.&
- * <td>Letters A-Z, a-z, numbers 0-9, punctuation, other printable characters on the main 
+ * <td>Letters A-Z, a-z, numbers 0-9, punctuation, other printable characters on the main
  * keyboard.
  * <tr><td>{Alt}<td>Default Alt key (either left or right).
  * <tr><td>{BackSpace}<br>{BS}<br>{BkSp}<td>	Backspace.
@@ -118,7 +118,7 @@ import java.io.*;
  * Example:  {a 10}<td>Repeats the key press n number of times.
  * </table></ul>
  * </ul>
- * 
+ *
  * @author canagl FEB 13, 2007
  * @see java.awt.Robot
  * @see java.awt.event.KeyEvent
@@ -131,7 +131,7 @@ public class CreateUnicodeMap {
 	public static final String DEFAULT_FILE="SAFSKeycodeMap";
 	/** .dat */
 	public static final String DEFAULT_FILE_EXT=".dat";
-	
+
 	public static final String TOKENS = "TOKENS";
 	public static final String STANDARD = "STANDARD";
 	public static final String SPECIAL = "SPECIAL";
@@ -144,28 +144,28 @@ public class CreateUnicodeMap {
 	public static final String CONTROL = "CONTROL";
 	public static final String SHIFT = "SHIFT";
 	public static final String ENTER = "ENTER";
-	
-	
+
+
 	private static String newLine = System.getProperty("line.separator");
-	
+
 	/**
-	 * Return the current line separator used for file output.  By default 
+	 * Return the current line separator used for file output.  By default
 	 * this is the System line separator.
-	 * 
+	 *
 	 * @return  the current line separator used for file output.
 	 */
 	public static String getNewLine(){ return newLine;}
 	/**
-	 * Set a different file line separator.  By default the System default 
+	 * Set a different file line separator.  By default the System default
 	 * line separator is used.
-	 * 
-	 * @param lineseparator -- the String to use for line separation in the 
+	 *
+	 * @param lineseparator -- the String to use for line separation in the
 	 * output file.
 	 */
 	public static void setNewLine(String lineseparator){
 		newLine = lineseparator;
-	}	
-	
+	}
+
 	public static void addEntry(BufferedWriter outfile, String mapstring, int keycode)
 	                     throws IOException{
 		outfile.write(mapstring +"="+ String.valueOf(keycode));
@@ -183,11 +183,11 @@ public class CreateUnicodeMap {
     	java.awt.AWTKeyStroke keyinfo = java.awt.AWTKeyStroke.getAWTKeyStroke(schar);
     	int code = keyinfo.getKeyCode();
     	int mods = keyinfo.getModifiers();
-    	char c = keyinfo.getKeyChar();
-    	String smods = KeyEvent.getKeyModifiersText(mods);
+    	keyinfo.getKeyChar();
+    	KeyEvent.getKeyModifiersText(mods);
     	String smodsex = KeyEvent.getModifiersExText(mods);
     	String s = KeyEvent.getKeyText(code);
-    	
+
     	outfile.write(schar +"={char: "+ s +", code: "+ code +", mods: "+ mods +", smods: "+ ", smodsex: "+smodsex +", "+ schar+"}");
     	outfile.write(newLine);
     	}catch(Exception x){
@@ -195,12 +195,12 @@ public class CreateUnicodeMap {
     		outfile.write(newLine);
     	}
     }
-    
+
 	public static void main(String[] args) {
-		output1(args);		
-		//output2(args);//debugging only 
+		output1(args);
+		//output2(args);//debugging only
 	}
-	
+
 	public static void output1(String[] args) {
 		//open Unicode file for output
 		try{
@@ -209,12 +209,12 @@ public class CreateUnicodeMap {
 			                            (new File(DEFAULT_FILE + DEFAULT_FILE_EXT)
 			                             ), "UTF-8"
 			                             ));
-			                             
+
 			//parsing tokens
 			outfile.write(newLine);
 			outfile.write("["+ TOKENS +"]");
 			outfile.write(newLine);
-			
+
 			outfile.write(BRACELEFT +"={"+ newLine);
 			outfile.write(BRACERIGHT +"=}"+ newLine);
 			outfile.write(PARENLEFT +"=("+ newLine);
@@ -231,17 +231,17 @@ public class CreateUnicodeMap {
 			addEntry(outfile, "^", KeyEvent.VK_CONTROL);
 			addEntry(outfile, "+", KeyEvent.VK_SHIFT);
 			addEntry(outfile, "~", KeyEvent.VK_ENTER);
-						
+
 			addEntry(outfile, "{", KeyEvent.VK_BRACELEFT);
 			addEntry(outfile, "}", KeyEvent.VK_BRACERIGHT);
 			addEntry(outfile, "(", KeyEvent.VK_LEFT_PARENTHESIS);
 			addEntry(outfile, ")", KeyEvent.VK_RIGHT_PARENTHESIS);
-			
+
 			//standard keys
 			outfile.write(newLine);
 			outfile.write("["+ STANDARD +"]");
 			outfile.write(newLine);
-			
+
 		    addEntry(outfile, "0", KeyEvent.VK_0);
 			addEntry(outfile, "1", KeyEvent.VK_1);
 			addEntry(outfile, "2", KeyEvent.VK_2);
@@ -252,7 +252,7 @@ public class CreateUnicodeMap {
 			addEntry(outfile, "7", KeyEvent.VK_7);
 			addEntry(outfile, "8", KeyEvent.VK_8);
 			addEntry(outfile, "9", KeyEvent.VK_9);
-			
+
 			outfile.write(newLine);
 
 			addEntry(outfile, "a", KeyEvent.VK_A);
@@ -317,7 +317,7 @@ public class CreateUnicodeMap {
 			addEntry(outfile, "~", "SHIFT+"+ KeyEvent.VK_BACK_QUOTE);
 			addEntry(outfile, "!", "SHIFT+"+ KeyEvent.VK_1);//KeyEvent.VK_EXCLAMATION_MARK);
 			addEntry(outfile, "@", "SHIFT+"+ KeyEvent.VK_2);//KeyEvent.VK_AT);
-			addEntry(outfile, "#", "SHIFT+"+ KeyEvent.VK_3);//KeyEvent.VK_NUMBER_SIGN);			
+			addEntry(outfile, "#", "SHIFT+"+ KeyEvent.VK_3);//KeyEvent.VK_NUMBER_SIGN);
 			addEntry(outfile, "$", "SHIFT+"+ KeyEvent.VK_4);//KeyEvent.VK_DOLLAR);
 			addEntry(outfile, "%", "SHIFT+"+ KeyEvent.VK_5);
 			addEntry(outfile, "^", "SHIFT+"+ KeyEvent.VK_6);//KeyEvent.VK_CIRCUMFLEX);
@@ -330,7 +330,7 @@ public class CreateUnicodeMap {
 			addEntry(outfile, "_", "SHIFT+"+ KeyEvent.VK_MINUS);//KeyEvent.VK_UNDERSCORE);
 			addEntry(outfile, "=", KeyEvent.VK_EQUALS);
 			addEntry(outfile, "+", "SHIFT+"+ KeyEvent.VK_EQUALS);
-			
+
 			addEntry(outfile, "[", KeyEvent.VK_OPEN_BRACKET);
 			addEntry(outfile, "{", "SHIFT+"+ KeyEvent.VK_OPEN_BRACKET);//KeyEvent.VK_BRACELEFT);
 			addEntry(outfile, "]", KeyEvent.VK_CLOSE_BRACKET);
@@ -348,7 +348,7 @@ public class CreateUnicodeMap {
 			addEntry(outfile, "/", KeyEvent.VK_SLASH);
 			addEntry(outfile, "?", "SHIFT+"+ KeyEvent.VK_SLASH);
 			addEntry(outfile, "\" \"", KeyEvent.VK_SPACE);
-			
+
 			//special keys (inside braces)
 			outfile.write(newLine);
 			outfile.write("["+ SPECIAL +"]");
@@ -402,7 +402,7 @@ public class CreateUnicodeMap {
 			addEntry(outfile, "PRTSC", KeyEvent.VK_PRINTSCREEN);
 			addEntry(outfile, "SCROLLLOCK", KeyEvent.VK_SCROLL_LOCK);
 			addEntry(outfile, "TAB", KeyEvent.VK_TAB);
-			
+
 			outfile.write(newLine);
 
 			addEntry(outfile, "NUM/", KeyEvent.VK_DIVIDE);
@@ -467,7 +467,7 @@ public class CreateUnicodeMap {
 
 			//close file
 			outfile.flush();
-			outfile.close();	
+			outfile.close();
 		}
 		catch(UnsupportedEncodingException x){
 			System.out.println(x);
