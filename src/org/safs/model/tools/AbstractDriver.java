@@ -7,6 +7,7 @@ package org.safs.model.tools;
 /**
  * History:
  * JUN 11, 2015	(Lei Wang) 	Add method processExpression(): wrap JSAFSDriver.processExpression().
+ * JUN 11, 2015	(Lei Wang) 	Modified method processExpression(): take the same strategy as JSAFSDriver.processExpression(String testRecord, String separator)
  *
  */
 import java.io.File;
@@ -175,11 +176,14 @@ public abstract class AbstractDriver {
 			return jsafs().processExpression(expression);//Expression will turn off/on both "math" and "DDVariable"
 			//return jsafs().resolveExpression(expression);//Expression will turn off/on "math", while "DDVariable" will be kept all the time
 		}else{
-			//Use InputProcessor if JSAFSDriver not present.
-			String sep = processor().getTestRecordData().getSeparator();
-			String exp = processor().getVarsInterface().resolveExpressions(expression, sep);
-			// LeiWang: should we always remove the wrapping double-quote? If the original expression is double-quoted, then we should not remove them.
-			return StringUtils.removeWrappingDoubleQuotes(exp);
+			if(processor().isExpressionsEnabled()){
+				//Use InputProcessor if JSAFSDriver not present.
+				String sep = processor().getTestRecordData().getSeparator();
+				String resolvedExpression = processor().getVarsInterface().resolveExpressions(expression, sep);
+				return JSAFSDriver.handleWrappingDoubleQuotes(expression, sep, resolvedExpression);
+			}else{
+				return expression;
+			}
 		}
 	}
 

@@ -14,18 +14,21 @@
  * 						string will be "aaa"bbb", the single quote should be removed.
  *                      Modify removeInternalDoubleQuotes(): enclose the returned string with " in case its trailing
  *                  	blanks are missing while doing & operation again.
+ * MAY 26, 2017	WangLei Added method main(), _simple_test(), _verifyExpresion() for unit testing.
  */
 package org.safs.tools.expression;
 
-import java.util.Vector ;
-import java.lang.reflect.*;
-import java.math.BigDecimal ;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Vector;
 
 import org.safs.Log;
 import org.safs.SAFSStringTokenizer;
 import org.safs.StringUtils;
-import org.safs.tools.stringutils.* ;
-import org.safs.tools.vars.SimpleVarsInterface ;
+import org.safs.tools.stringutils.StringUtilities;
+import org.safs.tools.vars.SimpleVarsInterface;
 /**
  * <pre> (Copied from RRAFS StringUtilities -- the original implementation.)
  *
@@ -1185,5 +1188,80 @@ public class SafsExpression {
 
 		return strResult ;
 
+	}
+
+	private static class VariableServ implements SimpleVarsInterface{
+		private Map<String,String> varStore = new HashMap<>();
+
+		@Override
+		public String setValue(String var, String value) {
+			return varStore.put(var, value);
+		}
+
+		@Override
+		public String getValue(String var) {
+			return varStore.get(var);
+		}
+
+	}
+
+	private static void _verifyExpresion(String expression, String expectedResult, SafsExpression se){
+		try {
+			String result = null;
+			se.setExpression(expression);
+			result = se.evalExpression();
+			assert result.equals(expectedResult);
+		} catch (Exception e) {
+			System.err.println("Failed to eval '"+expression+"', due to "+e);
+		}
+	}
+
+	private static void _simple_test(SafsExpression se){
+		SimpleVarsInterface varServ = se.getVarInterface();
+		String expression = null;
+		String expectedResult = null;
+
+		expression = "6+9";//"6+9"
+		expectedResult = "15";//"15"
+		_verifyExpresion(expression, expectedResult, se);
+
+		expression = "\"6+9\"";//""6+9""
+		expectedResult = "6+9";//"6+9"
+		_verifyExpresion(expression, expectedResult, se);
+
+		String var = "var";
+		String operand1 = "5";
+		String operand2 = "6";
+
+		//Set "5" to variable "var"
+		varServ.setValue(var, operand1);
+
+		expression = "\"^"+var+"\"";//""^var""
+		expectedResult = "^"+var;//"^var"
+		_verifyExpresion(expression, expectedResult, se);
+
+		expression = "^"+var;//"^var"
+		expectedResult = operand1;//"5"
+		_verifyExpresion(expression, expectedResult, se);
+
+		expression = operand2+"+^"+var+"";//"6+^var"
+		expectedResult = String.valueOf(Integer.parseInt(operand1)+Integer.parseInt(operand2));
+		_verifyExpresion(expression, expectedResult, se);
+
+		expression = "\""+operand2+"+^"+var+"\"";//""6+^var""
+		expectedResult = operand2+"+^"+var+"";//"6+^var"
+		_verifyExpresion(expression, expectedResult, se);
+
+		expression = operand2+"+\"^"+var+"\"";//"6+"^var""
+		expectedResult = operand2;//"6"
+		_verifyExpresion(expression, expectedResult, se);
+
+	}
+
+	public static void main(String[] args){
+		VariableServ varServ = new VariableServ();
+		SafsExpression se = new SafsExpression(varServ);
+
+		_simple_test(se);
 	}
 }
