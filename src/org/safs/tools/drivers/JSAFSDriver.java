@@ -15,7 +15,9 @@ package org.safs.tools.drivers;
  * <br>	JUN 11, 2016	(SBJLWA) 	Added pushTestRecord(), popTestRecord() and modified processCommand(), processCommandDirect(): handle the
  *                                  test-record overwritten problem when executing CallJUnit.
  * <br>	AUG 05, 2016	(SBJLWA) 	Modified processDriverCommand: give AutoIT engine a chance to handle driver-command.
- *
+ * <br>	MAY 26, 2017	(SBJLWA) 	Modified processExpression(expression) and resolveExpression(expression): keep wrapping-double-quote if expression is originally double-quoted.
+ *                                           processExpression(expression, sep): keep wrapping-double-quote if expression contains only one field and is originally double-quoted.
+ *                                  Added _test_keeping_doubleQuote(): test above modifications.
  */
 import java.util.ListIterator;
 
@@ -290,14 +292,14 @@ public class JSAFSDriver extends DefaultDriver implements ITestRecordStackable{
 	 * character to pass to SAFS as an unused separator for the expression.
 	 *
 	 * @see #getVarsInterface()
+	 * @see #isExpressionsEnabled()
+	 * @see #resolveExpression(String)
 	 */
 	public String processExpression(String expression){
 		if(!isExpressionsEnabled()) return expression;
-
-		String result = resolveExpression(expression, StringUtils.deduceUnusedSeparatorString(expression));
-		//TODO LeiWang: should we always remove the wrapping double-quote? If the original expression is double-quoted, then we should not remove them.
-		return StringUtils.removeWrappingDoubleQuotes(result);
+		return resolveExpression(expression);
 	}
+
 	/**
 	 * This method is used to resolve the expressions within a test record,
 	 * something like ^var=Text or ^varPrefix & ^varSuffix will be processed
@@ -321,12 +323,25 @@ public class JSAFSDriver extends DefaultDriver implements ITestRecordStackable{
 //		log_self(StringUtils.debugmsg(false)+" original: "+testRecord+" resolved:"+result);
 		//expression processing often wraps the result in quotes
 
-		//TODO LeiWang: Currently, for a test-record like:  C, AppMapResolve, OFF
+		//LeiWang: Currently, for a test-record like:  "C, AppMapResolve, OFF"
 		//this method will return:                C", "AppMapResolve", "OFF
 		//This is NOT the result we want,
 		//maybe we should remove double-quote for each field.
 		//maybe we should keep these quotes
-		return StringUtils.removeWrappingDoubleQuotes(result);
+		return handleWrappingDoubleQuotes(testRecord, separator, result);
+	}
+
+	public static String handleWrappingDoubleQuotes(String originalExpression, String separator, String resolvedExpression){
+		//LeiWang: current strategy
+		//If originalExpression contains more than one field, we will NOT remove the wrapping double quote
+		//If originalExpression contains only one field,
+		//   if the original field is double-quoted, then do NOT remove the wrapping double quote
+		//   otherwise (single-field and not-double-quoted) , remove the wrapping double quote
+		boolean isDoubleQuoted = StringUtils.isQuoted(originalExpression);
+		boolean singleField = !originalExpression.contains(separator);
+		boolean removeWrappingDoubleQuote = (singleField && !isDoubleQuoted);
+
+		return removeWrappingDoubleQuote? StringUtils.removeWrappingDoubleQuotes(resolvedExpression):resolvedExpression;
 	}
 
 	/**
@@ -346,22 +361,28 @@ public class JSAFSDriver extends DefaultDriver implements ITestRecordStackable{
 	public String resolveExpression(String expression){
 		//If the original expression is not wrapped in double-quote,
 		//resolveExpression will warp the result in double-quote, so we need to remove them
-		boolean isQuoted = StringUtils.isQuoted(expression);
+		boolean isDoubleQuoted = StringUtils.isQuoted(expression);
 		String result = resolveExpression(expression, StringUtils.deduceUnusedSeparatorString(expression));
-		return isQuoted? result:StringUtils.removeWrappingDoubleQuotes(result);
+		return isDoubleQuoted? result:StringUtils.removeWrappingDoubleQuotes(result);
 	}
 
 	/**
 	 * Resolve a set of expressions delimited by separator. "DDVariable" will be always evaluated.<br>
+	 * <b>Note:</b> Be careful, if the expression has already been double-quoted, it will <b>NOT</b> be trimmed, evaluated and double-quoted (which means <b>untouched</b>).<br>
+	 *              For example, String result = resolveExpression("\" 3+5  \",\" >  \",\"9-3  \"", ",");<br>
+	 *              Whether {@link #isExpressionsEnabled()} is true or false, the result is always string "" 3+5  "," >  ","9-3  "", each field remain untouched.<br>
+	 *              <br>
 	 * <b>Note:</b> Only when {@link #isExpressionsEnabled()} is true, each expression will be resolved as "math string".<br>
 	 *              No mater what {@link #isExpressionsEnabled()} is, each expression will be resolved as "DDVariable"<br>
 	 *              For example, String result = resolveExpression("^var=3+5", ",");<br>
 	 *              If {@link #isExpressionsEnabled()} is false, the result is ""3+5"" (double-quoted string), and variable "var" contains string "3+5" (normal string)<br>
 	 *              If {@link #isExpressionsEnabled()} is true, the result is ""8"" (double-quoted string), and variable "var" contains string "8" (normal string)<br>
+	 *              <br>
 	 * <b>Note:</b> Be careful, each expression will be TRIMMED and then evaluated, the evaluated value will be WRAPPED in DOUBLE-QUOTE to return.<br>
 	 *              For example, String result = resolveExpression(" 3+5  , >  ,9-3  ", ",");<br>
 	 *              If {@link #isExpressionsEnabled()} is false, the result is string ""3+5",">","9-3"", each field has been wrapped in double quote.<br>
 	 *              If {@link #isExpressionsEnabled()} is true, the result is string ""8",">","6"", each field has been wrapped in double quote.<br>
+	 *
 	 * @param expressions String, a set of expression delimited by separator, such as "expression1, expression2, expression3"
 	 * @param separator String, the separator used to delimit expressions
 	 * @return String, the resolved expressions. Each field will be double quoted!
@@ -375,7 +396,14 @@ public class JSAFSDriver extends DefaultDriver implements ITestRecordStackable{
 			IndependantLog.error(StringUtils.debugmsg(false)+" separator is null, cannot resolve expressions: "+expressions);
 			return expressions;
 		}
-		//resolveExpressions will split expression by separator, and resolve each of them, and probable wrap them by double-quote
+		//The current implementation of getVarsInterface().resolveExpressions():
+		//1. split expressions by separator into fields
+		//2. if the field is double-quoted, it will be returned as it is.
+		//3. if not double-quoted
+		//     3.1 each field will be resolved as DDVariable No mater what {@link #isExpressionsEnabled()} is
+		//     3.2 each field will be resolved as Math expression if the isExpressionsEnabled() is true
+		//     3.3 the resolved field will be double-quoted
+
 		return getVarsInterface().resolveExpressions(expressions, separator);
 	}
 
@@ -1155,31 +1183,54 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 		return null;
 	}
 
-
-	private static void log_self(String message){
-		Log.info(message);System.out.println(message);}
+	/**
+	 * <p>
+	 * Push the current 'test record' into the Stack before the execution of a keyword.
+	 * This should be called after the 'test record' is properly set.
+	 * </p>
+	 *
+	 * @param trd TestRecordData, the test record to push into a stack
+	 * @see #processCommand(AbstractCommand, String)
+	 * @see #processCommandDirect(AbstractCommand, String)
+	 * @see #popTestRecord()
+	 */
+	public void pushTestRecord(TestRecordData trd) {
+		testrecordStackable.pushTestRecord(trd);
+	}
 
 	/**
-	 * Self-Test some JSAFSDriver functionality.
+	 * Retrieve the Test-Record from the the Stack after the execution of a keyword.<br>
 	 * <p>
-	 * java -Dsafs.project.config="C:\SAFS\Project\JSAFSExample.ini" _<br>
-	 *      -Dmain_map="NLSBridgeTest.MAP" _<br>
-	 *      -Dlocalized="NLSBridgeTest_en.MAP" or -Dlocalized="NLSBridgeTest_ja.MAP" _<br>
-	 *      org.safs.tools.drivers.JSAFSDriver
-	 * <p>
-	 * @param args
+	 * After execution of a keyword, pop the test record from Stack and return is as the result.
+	 * Replace the class field 'Test Record' by that popped from the stack if they are not same.
+	 * </p>
+	 *
+	 * @see #processCommand(AbstractCommand, String)
+	 * @see #processCommandDirect(AbstractCommand, String)
+	 * @see #pushTestRecord()
+	 * @return TestRecordData, the 'Test Record' on top of the stack
 	 */
-	public static void main(String[] args){
-		log_self("Commencing JSAFS Self-Test...");
-		JSAFSDriver jsafs = new JSAFSDriver("JSAFS");
-		Driver.setIDriver(jsafs);
-		String sep = ","; //default SAFS field separator
-		jsafs.run();
+	public TestRecordData popTestRecord() {
+		String debugmsg = StringUtils.debugmsg(false);
+		DefaultTestRecordStackable.debug(debugmsg+"Current test record: "+StringUtils.toStringWithAddress(testRecordHelper));
 
-		log_self("JSAFS Self-Test initializing App Map Chaining and Expression Processing...");
-		TestRecordHelper trd = jsafs.runDriverCommand(DDDriverCommands.appMapChaining("ON"), sep);
-		trd = jsafs.runDriverCommand(DDDriverCommands.appMapResolve("ON"), sep);
-		trd = jsafs.runDriverCommand(DDDriverCommands.expressions("ON"), sep);
+		TestRecordData history = testrecordStackable.popTestRecord();
+
+		if(!testRecordHelper.equals(history)){
+			DefaultTestRecordStackable.debug(debugmsg+"Reset current test record to: "+StringUtils.toStringWithAddress(history));
+			//The cast should be safe, as we push TestRecordHelper into the stack.
+			testRecordHelper = (TestRecordHelper) history;
+		}
+
+		return history;
+	}
+
+	private static void log_self(String message){
+		Log.info(message);
+		System.out.println(message);
+	}
+
+	private static void _general_test(JSAFSDriver jsafs, String sep){
 
 		log_self("JSAFS Self-Test evaluating -D App Map Properties passed in for NLS support...");
 		String mainmap = System.getProperty("main_map", "NLSBridgeTest.MAP");
@@ -1189,8 +1240,8 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 		log_self("JSAFS Self-Test local_map is: "+ localmap);
 
 		log_self("JSAFS Self-Test setting App Map chaining order...");
-		trd = jsafs.runDriverCommand(DriverCommands.setApplicationMap(mainmap), sep);
-		trd = jsafs.runDriverCommand(DriverCommands.setApplicationMap(localmap), sep);
+		jsafs.runDriverCommand(DriverCommands.setApplicationMap(mainmap), sep);
+		jsafs.runDriverCommand(DriverCommands.setApplicationMap(localmap), sep);
 
 		log_self("JSAFS Self-Test verifying variable to app map look-thru...");
 		String appconst = jsafs.getVariable("MainWin");
@@ -1261,50 +1312,116 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 		}catch(SAFSException x){
 			log_self("SAFSMonitor User-Initiated STOP!");
 		}
-		Driver.setIDriver(null);
-		jsafs.shutdown();
-		log_self("Ended JSAFS Self-Test...");
+	}
+
+	private static void _test_keeping_doubleQuote(JSAFSDriver jsafs, String sep){
+
+		String expression = null;
+		String result = null;
+
+		String varName = "_var_";
+		String varValue = "*** Value set by Variable service ***";
+		jsafs.setVariable(varName, varValue);
+
+		//Test processExpression(expression)
+		//originally double-quoted string will be return as it is
+		expression = "\"^ \"";
+		result = jsafs.processExpression(expression);
+		log_self("expression="+expression+"\nresult="+result+"\n");
+		//Expects ""^ ""
+		assert expression.equals(result);
+
+		expression = "\"6+8\"";
+		result = jsafs.processExpression(expression);
+		log_self("expression="+expression+"\nresult="+result+"\n");
+		//Expects ""6+8""
+		assert expression.equals(result);
+
+		expression = "\"^"+varName+"\"";
+		result = jsafs.processExpression(expression);
+		log_self("expression="+expression+"\nresult="+result+"\n");
+		//Expects ""^_var_""
+		assert expression.equals(result);
+
+		//originally non double-quoted string will be evaluated
+		expression = "6+8";
+		result = jsafs.processExpression(expression);
+		log_self("expression="+expression+"\nresult="+result+"\n");
+		//Expects "14"
+		assert "14".equals(result);
+
+		expression = "^"+varName+"";
+		result = jsafs.processExpression(expression);
+		log_self("expression="+expression+"\nresult="+result+"\n");
+		//Expects "*** Value set by Variable service ***"
+		assert varValue.equals(result);
+
+		//Test processExpression(expression, sep)
+		//single field and originally double-quoted string will be return as it is
+		expression = "\"6+8\"";
+		result = jsafs.processExpression(expression, sep);
+		log_self("expression="+expression+"\nresult="+result+"\n");
+		//Expects ""6+8""
+		assert expression.equals(result);
+
+		//single field, originally non double-quoted string will be evaluated
+		expression = "6+8";
+		result = jsafs.processExpression(expression, sep);
+		log_self("expression="+expression+"\nresult="+result+"\n");
+		//Expects "14"
+		assert "14".equals(result);
+
+		//multiple fields will be evaluated, the result will not be removed the leading/ending double-quote
+		expression = "6+8"+sep+ "\"6+8\"";
+		result = jsafs.processExpression(expression, sep);
+		log_self("expression="+expression+"\nresult="+result+"\n");
+		//Expects ""14","6+8""
+		assert ("\"14\""+sep+ "\"6+8\"").equals(result);
+
+		expression = "C"+sep+" AppMapResolve"+sep+" OFF";
+		result = jsafs.processExpression(expression, sep);
+		log_self("expression="+expression+"\nresult="+result+"\n");
+		//Expects ""C","AppMapResolve","OFF""
+		assert ("\"C\""+sep+"\"AppMapResolve\""+sep+"\"OFF\"").equals(result);
+
 	}
 
 	/**
+	 * Self-Test some JSAFSDriver functionality.
 	 * <p>
-	 * Push the current 'test record' into the Stack before the execution of a keyword.
-	 * This should be called after the 'test record' is properly set.
-	 * </p>
-	 *
-	 * @param trd TestRecordData, the test record to push into a stack
-	 * @see #processCommand(AbstractCommand, String)
-	 * @see #processCommandDirect(AbstractCommand, String)
-	 * @see #popTestRecord()
-	 */
-	public void pushTestRecord(TestRecordData trd) {
-		testrecordStackable.pushTestRecord(trd);
-	}
-
-	/**
-	 * Retrieve the Test-Record from the the Stack after the execution of a keyword.<br>
+	 * java -Dsafs.project.config="C:\SAFS\Project\tidtest.ini" <br>
+	 *      -Dmain_map="NLSBridgeTest.MAP" <br>
+	 *      -Dlocalized="NLSBridgeTest_en.MAP" or -Dlocalized="NLSBridgeTest_ja.MAP" <br>
+	 *      -ea<br>
+	 *      org.safs.tools.drivers.JSAFSDriver
 	 * <p>
-	 * After execution of a keyword, pop the test record from Stack and return is as the result.
-	 * Replace the class field 'Test Record' by that popped from the stack if they are not same.
-	 * </p>
-	 *
-	 * @see #processCommand(AbstractCommand, String)
-	 * @see #processCommandDirect(AbstractCommand, String)
-	 * @see #pushTestRecord()
-	 * @return TestRecordData, the 'Test Record' on top of the stack
+	 * @param args
 	 */
-	public TestRecordData popTestRecord() {
-		String debugmsg = StringUtils.debugmsg(false);
-		DefaultTestRecordStackable.debug(debugmsg+"Current test record: "+StringUtils.toStringWithAddress(testRecordHelper));
+	public static void main(String[] args){
+		log_self("Commencing JSAFS Self-Test...");
+		JSAFSDriver jsafs = new JSAFSDriver("JSAFS");
+		try{
 
-		TestRecordData history = testrecordStackable.popTestRecord();
+			Driver.setIDriver(jsafs);
+			String sep = ","; //default SAFS field separator
+			jsafs.run();
 
-		if(!testRecordHelper.equals(history)){
-			DefaultTestRecordStackable.debug(debugmsg+"Reset current test record to: "+StringUtils.toStringWithAddress(history));
-			//The cast should be safe, as we push TestRecordHelper into the stack.
-			testRecordHelper = (TestRecordHelper) history;
+			log_self("JSAFS Self-Test initializing App Map Chaining and Expression Processing...");
+			jsafs.runDriverCommand(DDDriverCommands.appMapChaining("ON"), sep);
+			jsafs.runDriverCommand(DDDriverCommands.appMapResolve("ON"), sep);
+			jsafs.runDriverCommand(DDDriverCommands.expressions("ON"), sep);
+
+			_general_test(jsafs, sep);
+
+			_test_keeping_doubleQuote(jsafs, sep);
+
+		}finally{
+
+			Driver.setIDriver(null);
+			jsafs.shutdown();
+			log_self("Ended JSAFS Self-Test...");
 		}
-
-		return history;
 	}
+
+
 }
