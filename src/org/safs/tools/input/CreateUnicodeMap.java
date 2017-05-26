@@ -145,6 +145,7 @@ public class CreateUnicodeMap {
 	public static final String SHIFT = "SHIFT";
 	public static final String ENTER = "ENTER";
 
+	public static final String KEY_SPACE = "\" \"";
 
 	private static String newLine = System.getProperty("line.separator");
 
@@ -347,7 +348,7 @@ public class CreateUnicodeMap {
 			addEntry(outfile, ">", "SHIFT+"+ KeyEvent.VK_PERIOD);//KeyEvent.VK_GREATER);
 			addEntry(outfile, "/", KeyEvent.VK_SLASH);
 			addEntry(outfile, "?", "SHIFT+"+ KeyEvent.VK_SLASH);
-			addEntry(outfile, "\" \"", KeyEvent.VK_SPACE);
+			addEntry(outfile, KEY_SPACE, KeyEvent.VK_SPACE);
 
 			//special keys (inside braces)
 			outfile.write(newLine);

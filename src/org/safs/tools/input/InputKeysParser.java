@@ -22,6 +22,7 @@
  * 															 contains mapping of 'a'.
  * <br>	DEC 07, 2010  (LeiWang)	Add method antiParse(), parseKeyCode(), getReverseMap(): Convert a list of RobotKeyEvent to a SAFS's key string
  * <br>	MAY 25, 2017  (LeiWang)	Modified method parseInput(): call clearModifiers(keys) after handling NLS chars to avoid holding special key problem.
+ * <br>	MAY 26, 2017  (LeiWang)	Modified InputKeysParser(): Add mapping (" ", space_keycode) to standards section.
  */
 package org.safs.tools.input;
 
@@ -43,6 +44,7 @@ import org.safs.text.INIFileReader;
 /**
  * @author Carl Nagle FEB 13, 2007
  */
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class InputKeysParser {
 
 	private CharInfo alt = new CharInfo('%', KeyEvent.VK_ALT);
@@ -93,6 +95,9 @@ public class InputKeysParser {
 
 		//load in all standard strings
 		setStringInfo(config, CreateUnicodeMap.STANDARD, standards);
+		//Add mapping (" ", space_keycode) to standards section. space_keycode is 32.
+		Object keycodeSpace = standards.get(CreateUnicodeMap.KEY_SPACE);
+		standards.put(SPACE, keycodeSpace);
 
 		//create reverse pair of specials and standards
 		specialsKeyToChar = getReverseMap(specials);
