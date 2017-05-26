@@ -1,9 +1,9 @@
 
 /*
  * Created on Feb 21, 2004 by Jack
- * OCT 04, 2004 Carl Nagle 	Added old-style substitute/extract variables processing for 
+ * OCT 04, 2004 Carl Nagle 	Added old-style substitute/extract variables processing for
  *                     	when EXPRESSIONS are not enabled.
- * OCT 27, 2004 Carl Nagle 	Fixed "0" conversion at end of evalPrimative.  Also the handling 
+ * OCT 27, 2004 Carl Nagle 	Fixed "0" conversion at end of evalPrimative.  Also the handling
  *                     	of whitespace for numeric and non-numeric processing.
  * SEP 08, 2008 WangLei	Modify method evalPrimative(), call method removeInternalDoubleQuotes() to
  * 						remove the double quote after concatenating two strings, see defect S0532438.
@@ -12,7 +12,7 @@
  * JAN 08, 2009	WangLei Modify method removeInternalDoubleQuotes(): remove also single quote, see defect S0532438.
  * 						For example, s2 is a variable whose value is "bbb", if concatenate "aaa" and s2 ("aaa" & ^s2)
  * 						string will be "aaa"bbb", the single quote should be removed.
- *                      Modify removeInternalDoubleQuotes(): enclose the returned string with " in case its trailing 
+ *                      Modify removeInternalDoubleQuotes(): enclose the returned string with " in case its trailing
  *                  	blanks are missing while doing & operation again.
  */
 package org.safs.tools.expression;
@@ -28,7 +28,7 @@ import org.safs.tools.stringutils.* ;
 import org.safs.tools.vars.SimpleVarsInterface ;
 /**
  * <pre> (Copied from RRAFS StringUtilities -- the original implementation.)
- * 
+ *
       Given an expression attempt to locate variable assignment references
       and other operators and process the expressions into a result string.
 
@@ -55,9 +55,9 @@ import org.safs.tools.vars.SimpleVarsInterface ;
 
       Groupings ( ) are processed first.  Within groupings, and after all groups
       have been processed, operators are processed in the following order:
-      
+
           &#42; / % + - &
-          
+
       The expression will be trimmed of leading and trailing whitespace on
       entry.  Use double-quote marks (literal text) to retain significant
       leading and trailing whitespace.
@@ -69,7 +69,7 @@ import org.safs.tools.vars.SimpleVarsInterface ;
 
       Variable names must conform to the SAFS standard (need link).
 
-      Variable lookups(GET) and assignments(SET) will be done via the current 
+      Variable lookups(GET) and assignments(SET) will be done via the current
       SAFSVARS service or its equivalent.
 
       If the proposed value is NOT another variable reference then the proposed
@@ -82,14 +82,14 @@ import org.safs.tools.vars.SimpleVarsInterface ;
       NOTE:
       Expressions containing groupings but no other legitimate operators may
       produce unexpected results that may not be the same on later versions of
-      these routines.      
+      these routines.
  * </pre>
  * @author Jack
  */
 public class SafsExpression {
 
 	public boolean debugPrint = false;
-	
+
 	protected String sExpression ;
 	protected int iExpressionlength ;
 	protected SimpleVarsInterface varinterface ;
@@ -103,10 +103,10 @@ public class SafsExpression {
 	protected boolean stripTrailingDecimalPoint = true ;
 	/** 14 **/
 	protected int numDecimalPlaces = 14 ;  // emperically set based upon tests on wxp
-	
+
 	/** "\"" **/
 	protected final String qt = "\"";
-	
+
 	/** (char) 11 **/
 	protected char quoteEncoded = (char) 11;
 	/** ((char) 11).toString() **/
@@ -119,7 +119,7 @@ public class SafsExpression {
 	public static final String NUMERIC_OPERATORS = "+-*/%" ;
 	/** + - * / % & =  **/
 	public static final String ALL_OPERATORS = "+-*/%&=" ;
-	
+
 	/**
 	 * Method SafsExpression.  Basic contstructor with no arguments.  Defaults sExpression to empty string.
 	 */
@@ -140,7 +140,7 @@ public class SafsExpression {
 			throw e ;
 		}
 	}
-	
+
 	/**
 	 * Method SafsExpression.
 	 * @param vi  Any object that implements org.safs.tools.vars.SimpleVarsInterface used to get and set SAFS variables.
@@ -228,7 +228,7 @@ public class SafsExpression {
 	public Vector getVariableNames() {
 		return vVariableNames ;
 	}
-	
+
 	/**
 	 * Method stripLeadZero.  Setter for the protected field stripLeadZero
 	 * <p>
@@ -306,7 +306,7 @@ public class SafsExpression {
 	}
 
 	/**
-	 * The main entry point to process the overall expression.  
+	 * The main entry point to process the overall expression.
 	 * @return String  The result of evaluating the expression
 	 * @see #evalExpression(String)
 	 */
@@ -321,7 +321,7 @@ public class SafsExpression {
 		// i.e. not in the original expression, should not be treated as a single literal
 		// double quote.
 		strResult = interpretInternalDoubleQuotes(strResult) ;
-		if((strResult.startsWith(qt)) && 
+		if((strResult.startsWith(qt)) &&
 		   (strResult.endsWith(qt))) strResult = qt + strResult + qt;
 		return strResult ;
 	}
@@ -365,21 +365,21 @@ public class SafsExpression {
 		}
 		vSubStrings = StringUtilities.getSubStrings(sExpression,vQuoteLocs) ;
 		vVariableNames = new Vector() ;
-		
+
 		setVariableNames() ;
 		if( ! validateParens() ) {
 			strErrors += "Expression: [" + sExpression + "] does not have correctly matched parentheses\n" ;
 			booErrors = true ;
 		}
 		validateVariableNames() ;
-		
+
 		validateVariableAssignments() ;
-		
+
 		if( booErrors ) {
 			throw new Exception(strErrors) ;
 		}
 	}
-	
+
 	/**
 	 * @param sOperator  The first char will be tested against known numeric operators
 	 * @return true if the first char in sOperator is a known numeric operator.
@@ -389,7 +389,7 @@ public class SafsExpression {
 			return (NUMERIC_OPERATORS.indexOf(sOperator.substring(0,1))> -1);
 		}catch(Exception x){ return false; }
 	}
-	
+
 	private String encodeLiteralDoubleQuotes(String sText) {
 		/* literal double quotes are represented by "".
 		 * there are problems with determining if adjacent double quotes
@@ -398,30 +398,30 @@ public class SafsExpression {
 		 * will encode literal double quotes as an unsupported and non-printing
 		 * ASCII character (vertical tab [char 11])
 		 */
-		
-		// return sText with literal double quotes replaced (encoded) with vtab		 
+
+		// return sText with literal double quotes replaced (encoded) with vtab
 
 		String strEncoded = "" ;
 		boolean quoted = false;
 		for( int str_idx = 0 ; str_idx < sText.length() ; str_idx++ ) {
-			
+
 			// if not inside a quote just keep the first quote
 			if( sText.charAt(str_idx) != '"'){
 				strEncoded += sText.substring(str_idx,str_idx+1) ;
 				continue;
 			}
-			
+
 			// if we are not in quotes then we begin a quoted substring
 			if(!quoted){
 				quoted=true;
 				strEncoded += sText.substring(str_idx,str_idx+1) ;
 				continue;
 			}
-			
+
 			// we are in now a quoted substring
-			
+
 			// if the next char is also a DQ then we stay quoted
-			if( StringUtilities.nextCharIsDQ(sText,str_idx) ) {				
+			if( StringUtilities.nextCharIsDQ(sText,str_idx) ) {
 				strEncoded += expVarEncodedQuote;
 				// skip over next character since it is a double quote
 				str_idx++ ;
@@ -432,12 +432,12 @@ public class SafsExpression {
 				strEncoded += sText.substring(str_idx,str_idx+1) ;
 			}
 		}
-		
+
 		if(debugPrint) Log.info("SAFSExpression encodeLiteralDoubleQuotes out: __"+ strEncoded +"__");
 		return strEncoded ;
 
 	}
-	
+
 	private String decodeLiteralDoubleQuotes(String sText) {
 		/* literal double quotes are represented by "".
 		 * there are problems with determining if adjacent double quotes
@@ -451,7 +451,7 @@ public class SafsExpression {
 		// consecutive double quotes
 
 		String strDecoded = "" ;
-		
+
 		for( int str_idx = 0 ; str_idx < sText.length() ; str_idx++ ) {
 			if( sText.charAt(str_idx) == quoteEncoded ) {
 				/* strDecoded += "\"\"" ; */
@@ -462,19 +462,19 @@ public class SafsExpression {
 				strDecoded += sText.substring(str_idx,str_idx+1) ;
 			}
 		}
-		
+
 		return strDecoded ;
-		
+
 	}
 
 	/**
 	 * Method setVariableNames.  Used to populate the protected field vVariableNames
 	 */
 	protected void setVariableNames() {
-		/* create the vector containing the variable names within sExpression as strings 
+		/* create the vector containing the variable names within sExpression as strings
 		 * within the vector keeping in mind that there may be quoted substrings
 		 * a variable in safs is any text between ^ and one of the following:
-		 * =, +, -, *, /, %, &, ), that is not quoted 
+		 * =, +, -, *, /, %, &, ), that is not quoted
 		 * set the vVariableNames data member (field) vector to contain the vars
 		 */
 
@@ -491,9 +491,9 @@ public class SafsExpression {
 			}
 			spos = StringUtilities.locateNextUnquotedSubstring(sExpression,"^", epos + 1,vQuoteLocs) ;
 		}
-		
+
 	}
-	
+
 	/**
 	 * Method validateParens.  Returns true or false specifying wheather or not the expression has correctly matched parentheses
 	 * @return boolean
@@ -515,7 +515,7 @@ public class SafsExpression {
 				}
 			}
 		}
-		
+
 		if( inParen == 0 ) {
 			return true ;
 		} else {
@@ -563,13 +563,13 @@ public class SafsExpression {
 				booErrors = true ;
 			}
 		}
-	
+
 	}
-	
+
 	protected void validateQuoteMatches() {
 		/* a basic validation that does not guarantee a well
 		 * quoted expression, but does catch some impropperly
-		 * quoted substrings is to check the vQuoteLocs vector 
+		 * quoted substrings is to check the vQuoteLocs vector
 		 * which must contain an even number of items otherwise
 		 * the expression is not well quoted
 		 */
@@ -580,7 +580,7 @@ public class SafsExpression {
 		 	booErrors = true ;
 		 }
 	}
-	
+
 	/**
 	 * Method getVarValue.  Retrieve the SAFS variable value
 	 * @param strVarName  The name of the variable to retrieve
@@ -588,10 +588,10 @@ public class SafsExpression {
 	 */
 	protected String getVarValue( String strVarName ) {
 		String strVarValue = varinterface.getValue(StringUtilities.TWhitespace(strVarName)) ;
-		if(debugPrint) System.out.println("Retrieved "+ StringUtilities.TWhitespace(strVarName) +"="+ strVarValue); 
+		if(debugPrint) System.out.println("Retrieved "+ StringUtilities.TWhitespace(strVarName) +"="+ strVarValue);
 		return strVarValue ;
 	}
-	
+
 	/**
 	 * Method setVarValue.  Set the specified variable to the specified value
 	 * @param strVarName  The name of the variable to set
@@ -599,7 +599,7 @@ public class SafsExpression {
 	 */
 	protected String setVarValue( String strVarName, String strVarValue ) {
 		//return varinterface.setValue(StringUtilities.TWhitespace(strVarName),StringUtilities.LTWhitespace(strVarValue)) ;
-		if(debugPrint) System.out.println("Setting "+ StringUtilities.TWhitespace(strVarName) +"="+ strVarValue); 
+		if(debugPrint) System.out.println("Setting "+ StringUtilities.TWhitespace(strVarName) +"="+ strVarValue);
 		return varinterface.setValue(StringUtilities.TWhitespace(strVarName),strVarValue) ;
 	}
 
@@ -611,18 +611,18 @@ public class SafsExpression {
 	 */
 	protected String evalExpression( String strExpr ) {
 		/* recursively called with each nested parenthetical expression */
-		
-		/* need to locate text between left and right parens matching the 
+
+		/* need to locate text between left and right parens matching the
 		 * parens so that nesting is allowed
 		 */
-		 
+
 		 // ( a + b ) + ( c * ( e - 3 ) ) - 1 for example
-		 
-		 /* for efficiency, determine the locations of quotes whenever strExpr is changed 
+
+		 /* for efficiency, determine the locations of quotes whenever strExpr is changed
 		  * so we can pass the vector to the string utilities that needs to deal with quotes
 		  */
 		 Vector vLocalQuoteLocs = StringUtilities.locateQuotedSubStrings(strExpr) ;
-		 
+
 		 int iLeftParenLoc = StringUtilities.locateNextUnquotedSubstring(strExpr,"(",0,vLocalQuoteLocs) ;
 
 		/* loop all left parens in expression so ( ) ( ) ( ) types are handled by
@@ -647,7 +647,7 @@ public class SafsExpression {
 			 	}
 				/* nested grouping found, recurse to evaluate */
 				String strRecurseExpr = strExpr.substring(iLeftParenLoc+1,iRightParenLoc) ;
-				if( debugPrint ) System.out.println("_____________Expr: " + strExpr + " RecurseExpr: " + strRecurseExpr) ;				
+				if( debugPrint ) System.out.println("_____________Expr: " + strExpr + " RecurseExpr: " + strRecurseExpr) ;
 				String strResult = evalExpression(strRecurseExpr) ;
 			 	strExpr = StringUtilities.replaceString(strExpr,strResult,iLeftParenLoc,iRightParenLoc) ;
 				vLocalQuoteLocs = StringUtilities.locateQuotedSubStrings(strExpr) ;
@@ -656,7 +656,7 @@ public class SafsExpression {
 				 * to evalSimple, substitue the results, and continue checking parens
 				 */
 				 String strSimple = strExpr.substring(iLeftParenLoc+1,iRightParenLoc) ;
-				 if( debugPrint ) System.out.println("_____________Expr: " + strExpr + " SimpleExpr: " + strSimple) ;				
+				 if( debugPrint ) System.out.println("_____________Expr: " + strExpr + " SimpleExpr: " + strSimple) ;
 				 String strResult = evalSimple(strSimple) ;
 				 strExpr = StringUtilities.replaceString(strExpr,strResult,iLeftParenLoc,iRightParenLoc) ;
 				 vLocalQuoteLocs = StringUtilities.locateQuotedSubStrings(strExpr) ;
@@ -667,9 +667,9 @@ public class SafsExpression {
 
 		// this means we have a simple expression
 		strExpr = evalSimple(strExpr) ;
-		 
+
 		return strExpr ;
-		
+
 	}
 
 	/** called internally by evalVariables **/
@@ -691,7 +691,7 @@ public class SafsExpression {
 		}catch(Exception npx){;}
 		return strExpr;
 	}
-	
+
 	/** called internally by evalVariables **/
 	protected String extractVariables( String strExpr )
 	{
@@ -704,38 +704,38 @@ public class SafsExpression {
 			String varvalue = "";
 			String infield  = "";
 			String outfield = "";
-			
+
 			if (varname.length() > 0){
-				
+
 				try{ infield  = strResult.substring(eq+1);}
 				catch(Exception iobx){;}
-				
+
 			    outfield = substituteVariables(infield);
 			    varvalue = StringUtils.getTrimmedUnquotedStr(outfield);
-			    
+
 			    setVarValue(varname, varvalue);
 			    strResult = '\"'+ varvalue +'\"';
 			}
-			
+
 			return strResult;
 		}catch(Exception npx){;}
 		return strExpr;
 	}
-	
+
 	/**
 	 * Method evalVariables.  Supports old-style variables processing when expressions are not enabled.
-	 * This essentially requires that the first char of strExpr is a CARET (^).  If not, the 
+	 * This essentially requires that the first char of strExpr is a CARET (^).  If not, the
 	 * input string is returned unaltered.
 	 * @param strExpr  The expression to evaluate
 	 * @return String  The result of the evaluation
 	 */
 	protected String evalVariables( String strExpr ) {
-		
+
 		String strResult = substituteVariables(strExpr);
 		return extractVariables(strResult);
 	}
 
-	
+
 	/**
 	 * Method evalSimple.  A simple expression is one without parentheses
 	 * @param strExpr  The simple expression to evaluate
@@ -743,7 +743,7 @@ public class SafsExpression {
 	 */
 	protected String evalSimple(String strExpr) {
 		/* Simple means an expression with no parentheses */
-		
+
 		/* result will be input expression of no operations to perform */
 		String strResult = strExpr ;
 
@@ -751,7 +751,7 @@ public class SafsExpression {
 		String trimExpr = StringUtilities.TWhitespace(strExpr) ;
 
     	if(debugPrint) Log.info("SAFSExpression evalSimple processing: __"+ trimExpr +"__");
-				
+
 		/* strAssignments will be created to contain variable assignment items */
 		String strAssignments = "" ;
 
@@ -776,10 +776,10 @@ public class SafsExpression {
 
 		strResult = handleOperators(trimExpr,"*/%") ;
 		strResult = handleOperators(strResult,"+-&") ;
-		
+
     	if(debugPrint) Log.info("SAFSExpression evalSimple operators processed: __"+ strResult +"__");
 		/* there is a chance that the expression is only a variable name
-		 * if so, we just dereference the variable and return the result */	
+		 * if so, we just dereference the variable and return the result */
 		try{
 			if( StringUtilities.TWhitespace(strResult).charAt(0) == '^' ) {
 				strResult = encodeDereferencedVariable(StringUtilities.TWhitespace(strResult)) ;
@@ -788,7 +788,7 @@ public class SafsExpression {
 		}catch(StringIndexOutOfBoundsException sob){;}
 
     	strResult = StringUtils.getTrimmedUnquotedStr(strResult);
-		
+
 		/* do the variable assignments if any are present */
 		if( ! strAssignments.equals("") ) {
 			String strVars [] = strAssignments.split("=") ;
@@ -798,25 +798,25 @@ public class SafsExpression {
 	        	strVName = strVName.substring(1);
 
 	        	String strVValue = decodeLiteralDoubleQuotes(strResult);
-	        	
+
 	        	if(debugPrint) Log.info("SAFSExpression setting assignment var: "+ strVName +"="+strVValue);
 				setVarValue(strVName,strVValue) ;
 			}
 		}
     	if(debugPrint) Log.info("SAFSExpression evalSimple returns: __"+ strResult +"__");
-		return strResult ;		
+		return strResult ;
 	}
-	
+
 
 	/**
 	 * Method handleOperators.  The grunt work of handling operators at the same precedence.
 	 * @param strExpr  The expression to evaluate
 	 * @param strOps  The operators to handle at the same precedence.  For example "+-&" are
-	 * evaluated at the same precedence. 
+	 * evaluated at the same precedence.
 	 * @return String  The result of the expression evaluation
 	 */
 	protected String handleOperators(String strExpr, String strOps) {
-		
+
 		int iOpStartidx = StringUtilities.locateNextUnquotedNonWhiteSpace(strExpr,0) ;
 		int iOperatorLoc = StringUtilities.locateNextUnquotedSingleChar(strExpr,strOps,iOpStartidx) ;
 		if( iOperatorLoc != -1 ) {
@@ -851,7 +851,7 @@ public class SafsExpression {
 				}
 				break;
 			}
-			
+
 			/* the operands may be variables.  replace variables with their values */
 			strLeftOperand = encodeDereferencedVariable(StringUtilities.TWhitespace(strLeftOperand));
 			strRightOperand = encodeDereferencedVariable(StringUtilities.TWhitespace(strRightOperand));
@@ -860,7 +860,7 @@ public class SafsExpression {
 				Log.info("SAFSExpression handleOperation __" + strLeftOperand + "___" + strOperator + "___" + strRightOperand +"__") ;
 				System.out.println("Left:" + strLeftOperand + " Operator:" + strOperator + " Right:" + strRightOperand) ;
 			}
-			
+
 			String strResult = evalPrimative(strLeftOperand,strOperator,strRightOperand) ;
 
 			if ( debugPrint ) System.out.println("Result Equals: " + strResult ) ;
@@ -886,7 +886,7 @@ public class SafsExpression {
 			}
 
 		}
-		
+
 		return strExpr ;
 
 	}
@@ -912,7 +912,7 @@ public class SafsExpression {
 	 * @return String  The string strText or the value of the variable if strText is a variable
 	 */
 	protected String encodeDereferencedVariable(String strText) {
-		// may or may not be a variable.  deref if var else return strText 
+		// may or may not be a variable.  deref if var else return strText
 		if((strText==null)||(strText.length()==0)) return "";
 		if( strText.charAt(0) == '^' ) {
 			strText = getVarValue(strText.substring(1)) ;
@@ -936,27 +936,27 @@ public class SafsExpression {
 		 * operator
 		 */
 		 Vector localQuoteLocs = StringUtilities.locateQuotedSubStrings(strExpr) ;
-		 
+
 		 int begin = StringUtilities.locateNextNonWhiteSpace(strExpr,iOperatorLoc + 1) ;
 		 int end = strExpr.length() - 1 ;
 		 if ( begin == end) begin = iOperatorLoc + 1 ;
 		 int nextOp = StringUtilities.locateNextUnquotedSingleChar(strExpr, "*/%+-&", begin, localQuoteLocs) ;
 		 /* check and handle case that a negative sign is found vs a minus sign */
 		 if ( nextOp != -1 && strExpr.charAt(nextOp) == '-' && nextOp == begin ) {
-			nextOp = StringUtilities.locateNextUnquotedSingleChar(strExpr, "*/%+-&", begin+1, localQuoteLocs) ;		 	
+			nextOp = StringUtilities.locateNextUnquotedSingleChar(strExpr, "*/%+-&", begin+1, localQuoteLocs) ;
 		 }
 		 if( nextOp > -1 ) end = nextOp - 1 ;
-		 
+
 		 /* we now know the location of the right operand as a substring within strExpr
 		  * it lies between begin and end inclusive
 		  */
-		  
+
 		 String strRightOperand = strExpr.substring(begin,end+1) ;
-		 
-		 return StringUtilities.LTWhitespace(strRightOperand) ;	 
+
+		 return StringUtilities.LTWhitespace(strRightOperand) ;
 
 	}
-	
+
 	private int getRightOperandEnd(String strExpr,String strRightOperand,int iOperatorLoc) {
 		/* return the string position of the end of the right operand within the expression */
 		int iStart = StringUtilities.locateNextSubstring(strExpr,strRightOperand,iOperatorLoc) ;
@@ -1003,7 +1003,7 @@ public class SafsExpression {
 		    }
 		}
 
-		return strLeftOperand ;	 
+		return strLeftOperand ;
 
 	}
 
@@ -1014,7 +1014,7 @@ public class SafsExpression {
 		String strRevExpr = StringUtilities.reverse(strExpr) ;
 		String strRevLeftOperand = StringUtilities.reverse(strLeftOperand) ;
 		int iOpLocRev = strExpr.length() - iOperatorLoc - 1 ;
-		
+
 		/* look forward in the reversed expression for the reversed left operand */
 		int iStart = StringUtilities.locateNextSubstring(strRevExpr,strRevLeftOperand,iOpLocRev) ;
 		int iEnd = iStart + strRevLeftOperand.length() -1 ;
@@ -1041,26 +1041,26 @@ public class SafsExpression {
 			return new BigDecimal(0);
 		}
 	}
-	
+
 	/**
-	 * Retrieve plain value with no scientific notation.  This was necessitated by a change in 
-	 * Java 1.5.0 where scientific notation is now used in the standard toString method.  Thus, 
-	 * this method allows us to still handle both 1.4 and 1.5 versions of the BigDecimal class. 
+	 * Retrieve plain value with no scientific notation.  This was necessitated by a change in
+	 * Java 1.5.0 where scientific notation is now used in the standard toString method.  Thus,
+	 * this method allows us to still handle both 1.4 and 1.5 versions of the BigDecimal class.
 	 * @param decimal BigDecimal to retrieve "plain" toString output without scientific notation.
 	 * @return
 	 */
 	private String toPlainString(BigDecimal decimal){
 		Method toPlainString = null;
-		try{ 
+		try{
 			Class bd = decimal.getClass();
 			toPlainString = bd.getMethod("toPlainString", new Class[0]);
 			return (String) toPlainString.invoke(decimal, new Object[0]);
-		}	
+		}
 		catch(Exception x){
 			return decimal.toString();
 		}
 	}
-	
+
 	/**
 	 * Method evalPrimative.  Primative means an expression in infix notation as "LeftOperand Operator RightOperand" only
 	 * @param strLeftOperand  The left operand
@@ -1073,7 +1073,7 @@ public class SafsExpression {
 		/* Primative means an infix expression as "LeftOperand Operator RightOperand" */
 
 		String strResult = "" ;
-		
+
 		BigDecimal bdLeft ;
 		BigDecimal bdRight ;
 		BigDecimal dbResult ;
@@ -1088,35 +1088,35 @@ public class SafsExpression {
 		strLeftOperand = StringUtils.getTrimmedUnquotedStr(strLeftOperand) ;
 		strRightOperand = StringUtils.getTrimmedUnquotedStr(strRightOperand) ;
 		Log.info("SAFSEXpression evaluating: "+ strLeftOperand + cOperator + strRightOperand );
-		
+
 		switch  (cOperator) {
 			case '&':
 				strResult = "\""+ strLeftOperand + strRightOperand +"\"";
-				break ;	
+				break ;
 			case '+':
-				bdLeft = bigDecimal(strLeftOperand);				
+				bdLeft = bigDecimal(strLeftOperand);
 				bdRight = bigDecimal(strRightOperand) ;
 				dbResult = bdLeft.add(bdRight) ;
 				strResult = toPlainString(dbResult) ;
-				break ;	
+				break ;
 			case '-':
 				bdLeft = bigDecimal(strLeftOperand) ;
 				bdRight = bigDecimal(strRightOperand) ;
 				dbResult = bdLeft.subtract(bdRight) ;
 				strResult = toPlainString(dbResult) ;
-				break ;	
+				break ;
 			case '*':
 				bdLeft = bigDecimal(strLeftOperand) ;
 				bdRight = bigDecimal(strRightOperand) ;
 				dbResult = bdLeft.multiply(bdRight) ;
 				strResult = toPlainString(dbResult) ;
-				break ;	
+				break ;
 			case '/':
 				bdLeft = bigDecimal(strLeftOperand) ;
 				bdRight = bigDecimal(strRightOperand) ;
 				dbResult = bdLeft.divide(bdRight,numDecimalPlaces,BigDecimal.ROUND_HALF_UP) ;
 				strResult = toPlainString(dbResult) ;
-				break ;	
+				break ;
 			case '%':
 				int ileft  = 0;
 				int iright = 0;
@@ -1125,9 +1125,9 @@ public class SafsExpression {
 				try{ iright = Integer.valueOf(strRightOperand).intValue();}
 				catch(NumberFormatException nfx){;}
 				strResult = Integer.toString(ileft % iright) ;
-				break ;	
+				break ;
 		}
-		
+
 		if(debugPrint) Log.debug("SAFSEXpression raw result: "+ strResult );
 
 		/* if the operation is not concatonation, strip lead/trailing zeros
@@ -1157,7 +1157,7 @@ public class SafsExpression {
 		}
 
 		if(debugPrint) Log.debug("SAFSEXpression strResult: "+ strResult );
-		return strResult ;		
+		return strResult ;
 	}
 
 	/**
@@ -1177,13 +1177,13 @@ public class SafsExpression {
 		 * i.e. not in the original expression, should not be treated as a single literal
 		 * double quote, they should be removed since they were not adjacent in the original expression
 		 */
-		 
+
 		// since literal double quotes have been encoded, replace all " with empty
-		
+
 		// decode the literal double quotes so can replace "" with " and do so
 		String strResult = decodeLiteralDoubleQuotes(strText) ;
 
 		return strResult ;
-		
+
 	}
 }
