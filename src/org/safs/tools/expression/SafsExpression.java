@@ -30,7 +30,7 @@ import org.safs.StringUtils;
 import org.safs.tools.stringutils.StringUtilities;
 import org.safs.tools.vars.SimpleVarsInterface;
 /**
- * <pre> (Copied from RRAFS StringUtilities -- the original implementation.)
+ * <pre> (Copied from <a href="http://safsdev.sourceforge.net/sqabasic2000/StringUtilities.htm#processexpression" target="_blank">RRAFS StringUtilities</a> -- the original implementation.)
  *
       Given an expression attempt to locate variable assignment references
       and other operators and process the expressions into a result string.
@@ -238,7 +238,7 @@ public class SafsExpression {
 	 * sets option to strip the leading zero from expression results.  For example,
 	 * if the expression evaluates to 0.1 and stripLeadZero is true, the result will
 	 * be formatted such that the leading zero is not shown, which would be .1
-	 * @param b  true or false specifying wheather or not leading zeros should be stripped
+	 * @param b  true or false specifying whether or not leading zeros should be stripped
 	 */
 	public void stripLeadZero( boolean b ) {
 		stripLeadZero = b ;
@@ -258,7 +258,7 @@ public class SafsExpression {
 	 * sets option to strip the trailing zeros from expression results.  For example,
 	 * if the expression evaluates to 1.100 and stripTrailingZeros is true, the result will
 	 * be formatted such that the trailing zeros are not shown, which would be 1.1
-	 * @param b  true or false specifying wheather or not trailing zeros should be stripped
+	 * @param b  true or false specifying whether or not trailing zeros should be stripped
 	 */
 	public void stripTrailingZeros( boolean b ) {
 		stripTrailingZeros = b ;
@@ -278,7 +278,7 @@ public class SafsExpression {
 	 * sets option to strip the trailing decimal points from expression results.  For example,
 	 * if the expression evaluates to 1. and stripTrailingDecimalPoint is true, the result will
 	 * be formatted such that the trailing zeros are not shown, which would be 1
-	 * @param b  true or false specifying wheather or not trailing decimal points should be stripped
+	 * @param b  true or false specifying whether or not trailing decimal points should be stripped
 	 */
 	public void stripTrailingDecimalPoint( boolean b ) {
 		stripTrailingDecimalPoint = b ;
@@ -320,7 +320,7 @@ public class SafsExpression {
 		// double quotes have special meaning and may be present in the result
 		// two consecutive double quotes represent a single literal double quote
 		// a double quote that is not adjacent to another double quote, should be removed
-		// special case:  two consecutive double quotes that appear due to concatonation
+		// special case:  two consecutive double quotes that appear due to concatenation
 		// i.e. not in the original expression, should not be treated as a single literal
 		// double quote.
 		strResult = interpretInternalDoubleQuotes(strResult) ;
@@ -341,7 +341,7 @@ public class SafsExpression {
 		// double quotes have special meaning and may be present in the result
 		// two consecutive double quotes represent a single literal double quote
 		// a double quote that is not adjacent to another double quote, should be removed
-		// special case:  two consecutive double quotes that appear due to concatonation
+		// special case:  two consecutive double quotes that appear due to concatenation
 		// i.e. not in the original expression, should not be treated as a single literal
 		// double quote, they should be removed since they were not adjacent in the original expression
 		strResult = interpretInternalDoubleQuotes(strResult) ;
@@ -498,7 +498,7 @@ public class SafsExpression {
 	}
 
 	/**
-	 * Method validateParens.  Returns true or false specifying wheather or not the expression has correctly matched parentheses
+	 * Method validateParens.  Returns true or false specifying whether or not the expression has correctly matched parentheses
 	 * @return boolean
 	 */
 	protected boolean validateParens() {
@@ -571,7 +571,7 @@ public class SafsExpression {
 
 	protected void validateQuoteMatches() {
 		/* a basic validation that does not guarantee a well
-		 * quoted expression, but does catch some impropperly
+		 * quoted expression, but does catch some improperly
 		 * quoted substrings is to check the vQuoteLocs vector
 		 * which must contain an even number of items otherwise
 		 * the expression is not well quoted
@@ -656,7 +656,7 @@ public class SafsExpression {
 				vLocalQuoteLocs = StringUtilities.locateQuotedSubStrings(strExpr) ;
 			 } else {
 				/* the grouping is found, drop the parens and pass the simple expr
-				 * to evalSimple, substitue the results, and continue checking parens
+				 * to evalSimple, substitute the results, and continue checking parens
 				 */
 				 String strSimple = strExpr.substring(iLeftParenLoc+1,iRightParenLoc) ;
 				 if( debugPrint ) System.out.println("_____________Expr: " + strExpr + " SimpleExpr: " + strSimple) ;
@@ -876,7 +876,7 @@ public class SafsExpression {
 			 * because we are parsing L-R at the operator precedence and we DO NOT want to
 			 * get tricked by string concats that result in text that looks like an expression
 			 * e.g if ^x=3 and ^y=-2, ^x&^y&"hithere" may resolve to 3-2&"hithere" -> 1hithere
-			 * if the concat gets performed and further expression evauations on its result
+			 * if the concat gets performed and further expression evaluations on its result
 			 */
 			iOpStartidx = StringUtilities.locateNextUnquotedNonWhiteSpace(strExpr,ibegin+strResult.length()-1) ;
 			iOperatorLoc = StringUtilities.locateNextUnquotedSingleChar(strExpr,strOps,iOpStartidx) ;
@@ -911,7 +911,7 @@ public class SafsExpression {
 	/**
 	 * Method encodeDereferencedVariable.  If strText is a variable, return its value.
 	 * Encode any embedded quotes with the non-printable encoding character.
-	 * @param strText  The string to check wich may or may not be a variable
+	 * @param strText  The string to check which may or may not be a variable
 	 * @return String  The string strText or the value of the variable if strText is a variable
 	 */
 	protected String encodeDereferencedVariable(String strText) {
@@ -1073,7 +1073,7 @@ public class SafsExpression {
 	 */
 	protected String evalPrimative(String strLeftOperand, String strOperator, String strRightOperand) {
 
-		/* Primative means an infix expression as "LeftOperand Operator RightOperand" */
+		/* Primitive means an infix expression as "LeftOperand Operator RightOperand" */
 
 		String strResult = "" ;
 
@@ -1083,7 +1083,7 @@ public class SafsExpression {
 
 		/* round the result to numDecimalPlaces which should likely ~O machine epsilon
 		 * on wxp.  there should be a better solution but this is the best
-		 * found at this time.  this rounding is only applicable to non-concatonation
+		 * found at this time.  this rounding is only applicable to non-concatenation
 		 * and non-modulus operations
 		 */
 
@@ -1133,11 +1133,11 @@ public class SafsExpression {
 
 		if(debugPrint) Log.debug("SAFSEXpression raw result: "+ strResult );
 
-		/* if the operation is not concatonation, strip lead/trailing zeros
+		/* if the operation is not concatenation, strip lead/trailing zeros
 		 * according to the boolean options stripLeadZero and stripTrailingZeros
 		 * and likewise strip trailing decimal points if desired
-		 * Note, we don't do this for concatonation because these items are important
-		 * for concatonation evaluation
+		 * Note, we don't do this for concatenation because these items are important
+		 * for concatenation evaluation
 		 */
 		if( stripLeadZero && cOperator != '&' ) {
 			strResult = strResult.replaceAll("^0", "") ;
@@ -1176,7 +1176,7 @@ public class SafsExpression {
 		 * two consecutive double quotes are interpreted as a single literal double quote
 		 * double quotes not adjacent to other double quotes are meant for quoting only
 		 * the interpretation replaces "" with " and replaces " with nothing and leaves other
-		 * characters unchanged.  special case:  two consecutive double quotes that appear due to concatonation
+		 * characters unchanged.  special case:  two consecutive double quotes that appear due to concatenation
 		 * i.e. not in the original expression, should not be treated as a single literal
 		 * double quote, they should be removed since they were not adjacent in the original expression
 		 */
