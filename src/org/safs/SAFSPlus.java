@@ -9,6 +9,9 @@
  * History:
  * NOV 07, 2016    (SBJLWA) Initial release: Moved codes from SeleniumPlus to here.
  * DEC 01, 2016    (SBJLWA) Added method Compare(): to compare with a regex.
+ * MAY 27, 2017    (SBJLWA) Added method normalizeTextForInput(): wrap text in double-quote
+ *                          if it contains leading/ending "whitespace".
+ *                          Added method setNormalizeTextForInput().
  */
 package org.safs;
 
@@ -257,6 +260,72 @@ public abstract class SAFSPlus {
 			Logging.LogTestFailure(msg, t.getMessage());
 			return false;
 		}
+	}
+
+	protected static boolean normalizeTextForInput = false;
+	/**
+	 * Please call this method to set a true value, if the leading/ending "whitespace"
+	 * needs to be kept when calling API (handles text input), such as
+	 * <ul>
+	 * <li> {@link Component#TypeKeys(String)}
+	 * <li> {@link Component#TypeChars(String)}
+	 * <li> {@link Component#InputKeys(org.safs.model.Component, String)}
+	 * <li> {@link Component#InputCharacters(org.safs.model.Component, String)}
+	 * <li> {@link EditBox#SetTextCharacters(org.safs.model.Component, String)}
+	 * <li> {@link EditBox#SetTextValue(org.safs.model.Component, String)}
+	 * <li> {@link EditBox#SetUnverifiedTextCharacters(org.safs.model.Component, String)}
+	 * <li> {@link EditBox#SetUnverifiedTextValue(org.safs.model.Component, String)}
+	 * </ul>
+	 *
+	 * @param bool boolean, if normalization is needed for text when inputing
+	 * @return boolean, the previous boolean value
+	 *
+	 * @see #normalizeTextForInput(String)
+	 */
+	public static boolean setNormalizeTextForInput(boolean bool){
+		boolean previous = normalizeTextForInput;
+		normalizeTextForInput = bool;
+		return previous;
+	}
+
+	/**
+	 * Normalize text string for input. Add wrapping double quotes if the text string contains
+	 * leading/ending "whitespace" (TABS, SPACE, and other chars that are considered "whitespace").
+	 * <br>
+	 * For example:<br>
+	 * " " will be returned as "" ""<br>
+	 * "^ " will be returned as ""^ ""<br>
+	 * <pre>
+	 * In SAFSPlus/SeleniumPlus, if the parameter contains leading/ending spaces, it will be trimmed.
+	 * For most methods, it is expected;
+	 * But for InputKeys, InputChars, TypeKeys and TypeChars, this implicit
+	 * action is <b>NOT expected</b>.
+	 * If user wants to input a space, he uses <b>Component.TypeChars(" ");</b> but the parameter is trimmed
+	 * and he will not get the result he expects.
+	 * If user wants to type a short-cut "Ctrl+Space", he uses <b>Component.TypeKeys("^ ");</b> but the parameter is trimmed
+	 * and he will not get the result he expects and even worse the "Ctrl key" will not be released!
+	 * At this situation, we use this method to double-quote the parameter to avoid these unexpected behaviors.
+	 * </pre>
+	 * @param text String, the text string to normalize.
+	 * @return String, the normalized text string.
+	 *
+	 * @see Component#TypeKeys(String)
+	 * @see Component#TypeChars(String)
+	 * @see Component#InputKeys(org.safs.model.Component, String)
+	 * @see Component#InputCharacters(org.safs.model.Component, String)
+	 * @see EditBox#SetTextCharacters(org.safs.model.Component, String)
+	 * @see EditBox#SetTextValue(org.safs.model.Component, String)
+	 * @see EditBox#SetUnverifiedTextCharacters(org.safs.model.Component, String)
+	 * @see EditBox#SetUnverifiedTextValue(org.safs.model.Component, String)
+	 */
+	protected static String normalizeTextForInput(String text){
+		if(!normalizeTextForInput) return text;
+
+		if(text==null) return null;
+
+		boolean containsLeadingEndingSpaces = text.trim().length()!=text.length();
+
+		return containsLeadingEndingSpaces? quote(text):text;
 	}
 
 	/**
@@ -5635,7 +5704,7 @@ public abstract class SAFSPlus {
 		 * </pre>
 		 */
 		public static boolean InputKeys(org.safs.model.Component comp, String textvalue){
-			return action(comp, GenericMasterFunctions.INPUTKEYS_KEYWORD, textvalue);
+			return action(comp, GenericMasterFunctions.INPUTKEYS_KEYWORD, normalizeTextForInput(textvalue));
 		}
 
 		/**
@@ -5664,7 +5733,7 @@ public abstract class SAFSPlus {
 		 * </pre>
 		 */
 		public static boolean TypeKeys(String textvalue){
-			String[] parms = textvalue == null ? new String[0] : new String[]{textvalue};
+			String[] parms = textvalue == null ? new String[0] : new String[]{normalizeTextForInput(textvalue)};
 			return action(new GenericObject("CurrentWindow", "CurrentWindow"), GenericMasterFunctions.TYPEKEYS_KEYWORD, parms);
 //			return actionGUILess(GenericMasterFunctions.TYPEKEYS_KEYWORD, keystrokes);
 		}
@@ -5687,7 +5756,7 @@ public abstract class SAFSPlus {
 		 * </pre>
 		 */
 		public static boolean InputCharacters(org.safs.model.Component comp, String textvalue){
-			return action(comp, GenericMasterFunctions.INPUTCHARACTERS_KEYWORD, textvalue);
+			return action(comp, GenericMasterFunctions.INPUTCHARACTERS_KEYWORD, normalizeTextForInput(textvalue));
 		}
 
 		/**
@@ -5708,7 +5777,7 @@ public abstract class SAFSPlus {
 		 * </pre>
 		 */
 		public static boolean TypeChars(String textvalue){
-			String[] parms = textvalue == null ? new String[0] : new String[]{textvalue};
+			String[] parms = textvalue == null ? new String[0] : new String[]{normalizeTextForInput(textvalue)};
 			return action(new GenericObject("CurrentWindow", "CurrentWindow"), GenericMasterFunctions.TYPECHARS_KEYWORD, parms);
 //			return actionGUILess(GenericMasterFunctions.TYPECHARS_KEYWORD, textvalue);
 		}
@@ -7251,7 +7320,7 @@ public abstract class SAFSPlus {
 		 * @see org.safs.TestRecordHelper#getStatusInfo()
 		 */
 		public static boolean SetTextCharacters(org.safs.model.Component editbox, String value) {
-			return action(editbox, EditBoxFunctions.SETTEXTCHARACTERS_KEYWORD, value);
+			return action(editbox, EditBoxFunctions.SETTEXTCHARACTERS_KEYWORD, normalizeTextForInput(value));
 		}
 
 		/**
@@ -7273,7 +7342,7 @@ public abstract class SAFSPlus {
 		 * @see org.safs.TestRecordHelper#getStatusInfo()
 		 */
 		public static boolean SetUnverifiedTextCharacters(org.safs.model.Component editbox, String value) {
-			return action(editbox,  EditBoxFunctions.SETUNVERIFIEDTEXTCHARACTERS_KEYWORD, value);
+			return action(editbox,  EditBoxFunctions.SETUNVERIFIEDTEXTCHARACTERS_KEYWORD, normalizeTextForInput(value));
 		}
 
 		/**
@@ -7300,7 +7369,7 @@ public abstract class SAFSPlus {
 		 * @see org.safs.TestRecordHelper#getStatusInfo()
 		 */
 		public static boolean SetTextValue(org.safs.model.Component editbox, String value){
-			return action(editbox, EditBoxFunctions.SETTEXTVALUE_KEYWORD, value);
+			return action(editbox, EditBoxFunctions.SETTEXTVALUE_KEYWORD, normalizeTextForInput(value));
 		}
 
 		/**
@@ -7327,7 +7396,7 @@ public abstract class SAFSPlus {
 		 * @see org.safs.TestRecordHelper#getStatusInfo()
 		 */
 		public static boolean SetUnverifiedTextValue(org.safs.model.Component editbox, String value) {
-			return action(editbox,  EditBoxFunctions.SETUNVERIFIEDTEXTVALUE_KEYWORD, value);
+			return action(editbox,  EditBoxFunctions.SETUNVERIFIEDTEXTVALUE_KEYWORD, normalizeTextForInput(value));
 		}
 	}
 

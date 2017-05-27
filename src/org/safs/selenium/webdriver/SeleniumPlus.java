@@ -380,7 +380,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 */
 	public static boolean TypeKeys(String keystrokes){
 		//call actionGUILess() instead of Component.TypeKeys(): to keep the log message consistent
-		return actionGUILess(GenericMasterFunctions.TYPEKEYS_KEYWORD, keystrokes);
+		return actionGUILess(GenericMasterFunctions.TYPEKEYS_KEYWORD, normalizeTextForInput(keystrokes));
 //		return Component.TypeKeys(keystrokes);
 	}
 
@@ -403,7 +403,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 */
 	public static boolean TypeChars(String textvalue){
 		//call actionGUILess() instead of Component.TypeChars(): to keep the log message consistent
-		return actionGUILess(GenericMasterFunctions.TYPECHARS_KEYWORD, textvalue);
+		return actionGUILess(GenericMasterFunctions.TYPECHARS_KEYWORD, normalizeTextForInput(textvalue));
 //		return Component.TypeChars(textvalue);
 	}
 
@@ -1816,14 +1816,14 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	public static class Counters extends SAFSPlus.Counters{}
 
 	/**
-	 * Wrapper class providing APIs to handle 
-	 * <a href="http://safsdev.github.io/sqabasic2000/TIDRestFunctionsIndex.htm">TIDRestFunctions Reference</a> and 
+	 * Wrapper class providing APIs to handle
+	 * <a href="http://safsdev.github.io/sqabasic2000/TIDRestFunctionsIndex.htm">TIDRestFunctions Reference</a> and
 	 * <a href="http://safsdev.github.io/sqabasic2000/DDDriverRestCommandsIndex.htm">DriverRestCommands Reference</a>, like RestGetBinary, RestStoreResponse etc.<br>
-	 * 
+	 *
 	 * @see SAFSPlus.Rest
 	 */
 	public static class Rest extends SAFSPlus.Rest{}
-	
+
 	/**
 	 * Click on any visible component without verification.<br>
 	 * This API will not guarantee that the click does happen, it simply clicks. If user wants<br>
