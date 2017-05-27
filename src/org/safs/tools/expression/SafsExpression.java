@@ -1244,6 +1244,10 @@ public class SafsExpression {
 		expectedResult = operand1;//"5"
 		_verifyExpresion(expression, expectedResult, se);
 
+		expression = " ^"+var+" ";//" ^var "
+		expectedResult = operand1;//"5"
+		_verifyExpresion(expression, expectedResult, se);
+
 		expression = operand2+"+^"+var+"";//"6+^var"
 		expectedResult = String.valueOf(Integer.parseInt(operand1)+Integer.parseInt(operand2));
 		_verifyExpresion(expression, expectedResult, se);
@@ -1253,7 +1257,7 @@ public class SafsExpression {
 		_verifyExpresion(expression, expectedResult, se);
 
 		expression = operand2+"+\"^"+var+"\"";//"6+"^var""
-		expectedResult = operand2;//"6"
+		expectedResult = operand2;//The result should be "6", as "^var" will be evaluated to 0
 		_verifyExpresion(expression, expectedResult, se);
 
 	}
