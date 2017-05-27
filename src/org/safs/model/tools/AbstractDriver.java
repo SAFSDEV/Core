@@ -173,14 +173,12 @@ public abstract class AbstractDriver {
 	 */
 	protected String processExpression(String expression){
 		if(jsafs() != null){
-			return jsafs().processExpression(expression);//Expression will turn off/on both "math" and "DDVariable"
-			//return jsafs().resolveExpression(expression);//Expression will turn off/on "math", while "DDVariable" will be kept all the time
+			return jsafs().processExpression(expression);
 		}else{
+			//Use InputProcessor if JSAFSDriver not present.
 			if(processor().isExpressionsEnabled()){
-				//Use InputProcessor if JSAFSDriver not present.
 				String sep = processor().getTestRecordData().getSeparator();
-				String resolvedExpression = processor().getVarsInterface().resolveExpressions(expression, sep);
-				return JSAFSDriver.handleWrappingDoubleQuotes(expression, sep, resolvedExpression);
+				return JSAFSDriver.resolveExpression(expression, sep, processor().getVarsInterface());
 			}else{
 				return expression;
 			}
@@ -325,7 +323,7 @@ public abstract class AbstractDriver {
 		    		processor().getDefaultSeparator());
 			trd.setCommand(command);
 			trd.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
-			long result = processor().processDriverCommand(trd);
+			processor().processDriverCommand(trd);
 			return trd;
 		}
 	}
@@ -387,7 +385,7 @@ public abstract class AbstractDriver {
 				trd.setWindowName(parent);
 				trd.setCompName(child);
 				trd.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
-				long result = processor().processTestRecord(trd);
+				processor().processTestRecord(trd);
 		    }finally{
 				processor().resetTestLevel();
 		    }

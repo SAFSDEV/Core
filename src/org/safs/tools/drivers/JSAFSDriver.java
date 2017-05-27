@@ -18,6 +18,8 @@ package org.safs.tools.drivers;
  * <br>	MAY 26, 2017	(SBJLWA) 	Modified processExpression(expression) and resolveExpression(expression): keep wrapping-double-quote if expression is originally double-quoted.
  *                                           processExpression(expression, sep): keep wrapping-double-quote if expression contains only one field and is originally double-quoted.
  *                                  Added _test_keeping_doubleQuote(): test above modifications.
+ * <br>	MAY 27, 2017	(SBJLWA) 	Added resolveExpression(expression, sep, varsInterface): other processExpression(), resolveExpression() will call this one so that
+ *                                  the resolve behavior will be the same and easy to maintain.
  */
 import java.util.ListIterator;
 
@@ -49,6 +51,7 @@ import org.safs.tools.input.UniqueStringItemInfo;
 import org.safs.tools.input.UniqueStringMapInfo;
 import org.safs.tools.status.StatusCounter;
 import org.safs.tools.status.StatusInterface;
+import org.safs.tools.vars.VarsInterface;
 
 /**
  * A class that provides easy access to SAFS functionality for non-SAFS programs and frameworks.
@@ -280,10 +283,14 @@ public class JSAFSDriver extends DefaultDriver implements ITestRecordStackable{
 	}
 
 	/**
-	 * Convenience routine to retrieve the value resulting from a <a href="http://safsdev.sourceforge.net/sqabasic2000/StringUtilities.htm#processexpression" target="_blank">standard SAFS Expression</a>.
-	 * <br>The routine provides support identical to SAFS InputRecord expression processing.
+	 * Convenience routine to retrieve the value resulting from
+	 * a <a href="http://safsdev.github.io/doc/org/safs/tools/expression/SafsExpression.html" target="_blank">standard SAFS Expression</a>,
+	 * <br>
+	 * The routine provides support identical to SAFS InputRecord expression processing.
 	 * However, it assumes (and requires) that only a single value/expression/field
-	 * is being processed.
+	 * is being processed.<br>
+	 * <b>Note:</b> if {@link #isExpressionsEnabled()} is false, the expression will be returned directly.<br>
+	 * <b>Note:</b> if the expression is double-quoted, then it will NOT be evaluated.<br>
 	 *
 	 * @param expression -- a standard SAFS expression to process.
 	 * @return String value after the expression has been processed.
@@ -309,7 +316,7 @@ public class JSAFSDriver extends DefaultDriver implements ITestRecordStackable{
 	 * One thing to take care: after the resolveExpression, each field will be
 	 * quoted by ", for example,
 	 * "C, AppMapResolve, OFF" --> ""C", "AppMapResolve", "OFF""
-	 * we should call method getTrimmedUnquotedInputRecordToken() of TestRecordHelper
+	 * we should call {@link TestRecordHelper#getTrimmedUnquotedInputRecordToken(int)}
 	 * to get each field.
 	 *
 	 * @param testRecord  a normal test record string
@@ -318,35 +325,12 @@ public class JSAFSDriver extends DefaultDriver implements ITestRecordStackable{
 	 */
 	protected String processExpression(String testRecord, String separator){
 		if(!isExpressionsEnabled()) return testRecord;
-
-		String result = resolveExpression(testRecord, separator);
-//		log_self(StringUtils.debugmsg(false)+" original: "+testRecord+" resolved:"+result);
-		//expression processing often wraps the result in quotes
-
-		//LeiWang: Currently, for a test-record like:  "C, AppMapResolve, OFF"
-		//this method will return:                C", "AppMapResolve", "OFF
-		//This is NOT the result we want,
-		//maybe we should remove double-quote for each field.
-		//maybe we should keep these quotes
-		return handleWrappingDoubleQuotes(testRecord, separator, result);
-	}
-
-	public static String handleWrappingDoubleQuotes(String originalExpression, String separator, String resolvedExpression){
-		//LeiWang: current strategy
-		//If originalExpression contains more than one field, we will NOT remove the wrapping double quote
-		//If originalExpression contains only one field,
-		//   if the original field is double-quoted, then do NOT remove the wrapping double quote
-		//   otherwise (single-field and not-double-quoted) , remove the wrapping double quote
-		boolean isDoubleQuoted = StringUtils.isQuoted(originalExpression);
-		boolean singleField = !originalExpression.contains(separator);
-		boolean removeWrappingDoubleQuote = (singleField && !isDoubleQuoted);
-
-		return removeWrappingDoubleQuote? StringUtils.removeWrappingDoubleQuotes(resolvedExpression):resolvedExpression;
+		return resolveExpression(testRecord, separator, getVarsInterface());
 	}
 
 	/**
-	 * Resolve an expression. "DDVariable" will be always evaluated.<br>
-	 * <b>Note:</b> Only when {@link #isExpressionsEnabled()} is true, the expression will be resolved as "math string".<br>
+	 * Resolve an expression, which is an <b>ONE-FIELD</b> expression. "DDVariable" will be always evaluated.<br>
+	 * <b>Note:</b> Only when {@link #isExpressionsEnabled()} is true, the expression will be resolved as "numeric/string expression".<br>
 	 *              No mater what {@link #isExpressionsEnabled()} is, the expression will be resolved as "DDVariable"<br>
 	 *              For example, String result = resolveExpression("^var=3+5");<br>
 	 *              If {@link #isExpressionsEnabled()} is false, the result is "3+5", and variable "var" contains string "3+5"<br>
@@ -359,43 +343,86 @@ public class JSAFSDriver extends DefaultDriver implements ITestRecordStackable{
 	 * @return String, the resolved expressions.
 	 */
 	public String resolveExpression(String expression){
-		//If the original expression is not wrapped in double-quote,
-		//resolveExpression will warp the result in double-quote, so we need to remove them
-		boolean isDoubleQuoted = StringUtils.isQuoted(expression);
-		String result = resolveExpression(expression, StringUtils.deduceUnusedSeparatorString(expression));
-		return isDoubleQuoted? result:StringUtils.removeWrappingDoubleQuotes(result);
+		String separator = StringUtils.deduceUnusedSeparatorString(expression);
+		return resolveExpression(expression, separator, getVarsInterface());
 	}
 
 	/**
 	 * Resolve a set of expressions delimited by separator. "DDVariable" will be always evaluated.<br>
-	 * <b>Note:</b> Be careful, if the expression has already been double-quoted, it will <b>NOT</b> be trimmed, evaluated and double-quoted (which means <b>untouched</b>).<br>
-	 *              For example, String result = resolveExpression("\" 3+5  \",\" >  \",\"9-3  \"", ",");<br>
-	 *              Whether {@link #isExpressionsEnabled()} is true or false, the result is always string "" 3+5  "," >  ","9-3  "", each field remain untouched.<br>
-	 *              <br>
-	 * <b>Note:</b> Only when {@link #isExpressionsEnabled()} is true, each expression will be resolved as "math string".<br>
-	 *              No mater what {@link #isExpressionsEnabled()} is, each expression will be resolved as "DDVariable"<br>
-	 *              For example, String result = resolveExpression("^var=3+5", ",");<br>
-	 *              If {@link #isExpressionsEnabled()} is false, the result is ""3+5"" (double-quoted string), and variable "var" contains string "3+5" (normal string)<br>
-	 *              If {@link #isExpressionsEnabled()} is true, the result is ""8"" (double-quoted string), and variable "var" contains string "8" (normal string)<br>
-	 *              <br>
-	 * <b>Note:</b> Be careful, each expression will be TRIMMED and then evaluated, the evaluated value will be WRAPPED in DOUBLE-QUOTE to return.<br>
-	 *              For example, String result = resolveExpression(" 3+5  , >  ,9-3  ", ",");<br>
-	 *              If {@link #isExpressionsEnabled()} is false, the result is string ""3+5",">","9-3"", each field has been wrapped in double quote.<br>
-	 *              If {@link #isExpressionsEnabled()} is true, the result is string ""8",">","6"", each field has been wrapped in double quote.<br>
+	 * Please refer to description of method {@link #resolveExpression(String, String, VarsInterface)}.
 	 *
 	 * @param expressions String, a set of expression delimited by separator, such as "expression1, expression2, expression3"
 	 * @param separator String, the separator used to delimit expressions
-	 * @return String, the resolved expressions. Each field will be double quoted!
+	 * @return String, the resolved expressions.
+	 *
+	 * @see #resolveExpression(String, String, VarsInterface)
 	 */
 	protected String resolveExpression(String expressions, String separator){
-		if(expressions==null){
-			IndependantLog.error(StringUtils.debugmsg(false)+" the expressions are null!");
+		return resolveExpression(expressions, separator, getVarsInterface());
+	}
+
+	/**
+	 * Resolve the testRecord for supported "numeric/string expressions" and "DDVariable".<br>
+	 * If {@link #isExpressionsEnabled()} is false, then "numeric/string expressions" will not
+	 * be resolved; But the "DDVariable" will be always evaluated.<br>
+	 * The input record fields are delimited by the provided separator, and each
+	 * field is separately processed for expressions.<br>
+	 * <br>
+	 * <b>Note: How the wrapping-double-quotes are handled after evaluation?</b>
+	 * <pre>
+	 *   After evaluation, each field will be double-quoted, but sometimes we don't want that wrapping double quote.
+	 *   Below is the strategy to handle the wrapping double quotes in the evaluated result.
+	 *   If testRecord contains more than one field, the wrapping double quote will be kept for each field.
+	 *   If testRecord contains only one field,
+	 *     if the original field is double-quoted, then do NOT remove the wrapping double quote
+	 *     otherwise (single-field and not-double-quoted) , remove the wrapping double quote
+	 * </pre>
+	 * <b>Note: How the double-quoted field is handled?</b>
+	 * <pre>
+	 *   If the field has already been double-quoted, it will <b>NOT</b> be trimmed and evaluated (which means <b>untouched</b>).
+	 *   For example, String result = resolveExpression("\" 3+5  \",\" >  \",\"9-3  \"", ",");
+	 *   Whether {@link #isExpressionsEnabled()} is true or false, the result is always string "" 3+5  "," >  ","9-3  "", each field remains untouched.
+	 * </pre>
+	 * <b>Note: How {@link #isExpressionsEnabled()} affects the result?</b>
+	 * <pre>
+	 *   Only when {@link #isExpressionsEnabled()} is true, each field will be resolved as "numeric/string expressions".
+	 *   No mater what {@link #isExpressionsEnabled()} is, each field will be resolved as "DDVariable".
+	 *   For example, String result = resolveExpression("^var=3+5", ",");
+	 *   If {@link #isExpressionsEnabled()} is false, the result is "3+5", and variable "var" contains string "3+5"
+	 *   If {@link #isExpressionsEnabled()} is true, the result is "8", and variable "var" contains string "8"
+	 * </pre>
+	 * <b>Note: How non-double-quoted field is handled?</b>
+	 * <pre>
+	 *   Each field will be TRIMMED and then evaluated, the evaluated value will be WRAPPED in DOUBLE-QUOTE to return.
+	 *   For example, String result = resolveExpression(" 3+5  , >  ,9-3  ", ",");
+	 *   If {@link #isExpressionsEnabled()} is false, the result is string ""3+5",">","9-3"", each field has been wrapped in double quote.
+	 *   If {@link #isExpressionsEnabled()} is true, the result is string ""8",">","6"", each field has been wrapped in double quote.
+	 * </pre>
+	 *
+	 * @param testRecord String, the test record. It can contain more than one field,
+	 *                           these fields are delimited by a separator indicated by the 2th parameter 'separator'.
+	 * @param separator String, the separator to split the testRecord
+	 * @param varService VarsInterface, the variable service instance used to resolve testRecord
+	 * @return String, the resolved expression.<br>
+	 *                 null if testRecord is null.<br>
+	 *                 testRecord itself if separator is null.<br>
+	 *
+	 * @see #isExpressionsEnabled()
+	 */
+	public static String resolveExpression(String testRecord, String separator, VarsInterface varService){
+		if(testRecord==null){
+			IndependantLog.error(StringUtils.debugmsg(false)+" the testRecord is null!");
 			return null;
 		}
 		if(separator==null){
-			IndependantLog.error(StringUtils.debugmsg(false)+" separator is null, cannot resolve expressions: "+expressions);
-			return expressions;
+			IndependantLog.error(StringUtils.debugmsg(false)+" separator is null, cannot resolve expressions: "+testRecord);
+			return testRecord;
 		}
+
+		boolean isDoubleQuoted = StringUtils.isQuoted(testRecord);
+		boolean singleField = !testRecord.contains(separator);
+		boolean removeWrappingDoubleQuote = (singleField && !isDoubleQuoted);
+
 		//The current implementation of getVarsInterface().resolveExpressions():
 		//1. split expressions by separator into fields
 		//2. if the field is double-quoted, it will be returned as it is.
@@ -403,8 +430,14 @@ public class JSAFSDriver extends DefaultDriver implements ITestRecordStackable{
 		//     3.1 each field will be resolved as DDVariable No mater what {@link #isExpressionsEnabled()} is
 		//     3.2 each field will be resolved as Math expression if the isExpressionsEnabled() is true
 		//     3.3 the resolved field will be double-quoted
+		String resolvedExpression = varService.resolveExpressions(testRecord, separator);
 
-		return getVarsInterface().resolveExpressions(expressions, separator);
+		//LeiWang: current strategy to handle the wrapping double quote in the result
+		//If originalExpression contains more than one field, we will NOT remove the wrapping double quote
+		//If originalExpression contains only one field,
+		//   if the original field is double-quoted, then do NOT remove the wrapping double quote
+		//   otherwise (single-field and not-double-quoted) , remove the wrapping double quote
+		return removeWrappingDoubleQuote? StringUtils.removeWrappingDoubleQuotes(resolvedExpression):resolvedExpression;
 	}
 
 	/**
@@ -1323,7 +1356,7 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 		String varValue = "*** Value set by Variable service ***";
 		jsafs.setVariable(varName, varValue);
 
-		//Test processExpression(expression)
+		//======      Test processExpression(expression)    =========================
 		//originally double-quoted string will be return as it is
 		expression = "\"^ \"";
 		result = jsafs.processExpression(expression);
@@ -1343,7 +1376,8 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 		//Expects ""^_var_""
 		assert expression.equals(result);
 
-		//originally non double-quoted string will be evaluated
+		//originally non double-quoted string will be evaluated,
+		//the wrapping double-quote will be removed from the result
 		expression = "6+8";
 		result = jsafs.processExpression(expression);
 		log_self("expression="+expression+"\nresult="+result+"\n");
@@ -1356,7 +1390,7 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 		//Expects "*** Value set by Variable service ***"
 		assert varValue.equals(result);
 
-		//Test processExpression(expression, sep)
+		//======      Test processExpression(expression, sep)    =====================
 		//single field and originally double-quoted string will be return as it is
 		expression = "\"6+8\"";
 		result = jsafs.processExpression(expression, sep);
@@ -1365,13 +1399,16 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 		assert expression.equals(result);
 
 		//single field, originally non double-quoted string will be evaluated
+		//the wrapping double-quote will be removed from the result
 		expression = "6+8";
 		result = jsafs.processExpression(expression, sep);
 		log_self("expression="+expression+"\nresult="+result+"\n");
 		//Expects "14"
 		assert "14".equals(result);
 
-		//multiple fields will be evaluated, the result will not be removed the leading/ending double-quote
+		//multiple fields, the field with wrapping double quotes will not be evaluated
+		//the field without wrapping double quotes will be evaluated
+		//the result will always keep the wrapping quotes for each field
 		expression = "6+8"+sep+ "\"6+8\"";
 		result = jsafs.processExpression(expression, sep);
 		log_self("expression="+expression+"\nresult="+result+"\n");
