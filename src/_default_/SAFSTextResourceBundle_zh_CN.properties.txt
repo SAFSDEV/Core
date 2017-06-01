@@ -1,9 +1,16 @@
+#Please don't modify this properties manually, it is generated from SAFSTextResourceBundle_zh_CN.properties.txt
+#native2ascii -encoding UTF-8 SAFSTextResourceBundle_zh_CN.properties.txt SAFSTextResourceBundle_zh_CN.properties
+
+#The dot "." and underscore "_" will be considered as the same separator, 
+#such as "same_name_key" and "same.name.key" will be considered as the same key.
+#Please avoid that naming conflict.
 
 success1   :%1% 成功.
 success2   :%1% %2% 成功.
-success2a  :使用参数 %2%， %1% 成功.
+success2a  :使用参数 '%2%'， %1% 成功.
 success3   :%1%:%2% %3% 成功.
-success3a  :使用参数 %4%， %1%:%2% %3% 成功. 
+success3a  :使用参数 '%4%'， %1%:%2% %3% 成功.
+success3b  :使用参数 '%3%'， %1% %2% 成功.
 success4   :%1%:%2% %3% 成功. %4%
 presuccess4:%1%, %2%:%3% %4% 成功.
 success5   :%1%:%2% %3% 成功. %4% %5%
@@ -16,7 +23,7 @@ perfnode4a :在 '%2%' 上, %1% 被执行了; 输出文件 '%3%'.
 item_open_write : %1% 被打开了用于写操作.
 item_open_read  : %1% 被打开了用于读操作.
 
-attempt3a  :使用参数 %4%, %1%:%2% %3% 被尝试执行了。
+attempt3a  :使用参数 '%4%', %1%:%2% %3% 被尝试执行了。
 
 activate_warn  :%1% 激活警告.  %1% 可能被禁用或阻塞.
 where_detail   :%1% 在文件 %2% 中, 在第 %3%行.
@@ -98,6 +105,8 @@ see_difference_file		:请在文件'%1%' 中查看不同点.
 
 eof_not_reached			:没有到达文件结尾(EOF).
 mouse_position_saved	:鼠标位置 %1%,%2% 被保存. 
+
+header_file_loaded_3    :使用参数 '%2%' '%3%'，头文件 '%1%' 被成功载入.
 
 file_protection			:File Protection
 file_read_only			:Read-Only
