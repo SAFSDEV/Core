@@ -57,7 +57,8 @@ package org.safs.selenium.webdriver.lib;
 *  <br>   APR 27, 2016    (Lei Wang) Added switchWindow(): switch to a certain window according to its title.
 *  <br>   MAY 05, 2016    (Lei Wang) Modified startBrowser(): restart browser if the connection between WebDriver and BrowserDriver is not good.
 *  <br>   MAY 22, 2017    (Lei Wang) Modified startBrowser(): use isValidBrowserID() instead of StringUtils.isValid() to check the validity of parameter browser ID.
-*  
+*  <br>   JUN 06, 2017    (Lei Wang) Modified focus(): catch exception separately so that each way will be tried to set focus.
+*
 */
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -1216,7 +1217,7 @@ public class WDLibrary extends SearchObject {
 	 */
 	public static void keyDown(Keys keycode) throws SeleniumPlusException{
 		try {
-			WebDriver wd = (WebDriver) getWebDriver();
+			WebDriver wd = getWebDriver();
 			Actions actions = new Actions(wd);
 			actions.keyDown(keycode);
 			actions.build().perform();
@@ -1233,7 +1234,7 @@ public class WDLibrary extends SearchObject {
 	 */
 	public static void keyUp(Keys keycode) throws SeleniumPlusException{
 		try {
-			WebDriver wd = (WebDriver) getWebDriver();
+			WebDriver wd = getWebDriver();
 			Actions actions = new Actions(wd);
 			actions.keyUp(keycode);
 			actions.build().perform();
@@ -2703,25 +2704,45 @@ public class WDLibrary extends SearchObject {
 	public static boolean focus(WebElement element)throws SeleniumPlusException{
 		boolean focused = false;
 		if(element==null) return false;
+		String debugmsg = "WDLibrary.focus() ";
 
 		try{
 			focused = windowSetFocus(element);
-			if(!focused) IndependantLog.warn("WDLibrary.focus fail to set focus to top window.");
-			else IndependantLog.info("WDLibrary.focus successfully set focus to top window.");
-			new Actions(getWebDriver()).moveToElement(element).perform();
-			if(WebDriverGUIUtilities.isTypeMatched(element, CFEditBox.LIBRARY_NAME)){
-				//Use Robot click to set focus. It is a little risky, it the click will invoke other reaction!
-				IndependantLog.info("WDLibrary.focus using Click to set focus.");
-				WDLibrary.click(element, null, null, WDLibrary.MOUSE_BUTTON_LEFT);
-			}else{
-				IndependantLog.info("WDLibrary.focus using sending empty String to set focus.");
-				element.sendKeys("");
-			}
-
+			if(!focused) IndependantLog.warn(debugmsg+"fail to set focus to top window.");
+			else IndependantLog.info(debugmsg+"successfully set focus to top window.");
 		}catch(Exception e){
-			IndependantLog.warn("Fail to set focus on WebElement due to "+ getThrowableMessages(e)+ ": "+ e.getMessage());
+			IndependantLog.warn(debugmsg+"Failed to set focus on top window due to "+ getThrowableMessages(e)+ ": "+ e.getMessage());
 			focused = false;
 		}
+
+		try{
+			new Actions(getWebDriver()).moveToElement(element).perform();
+			focused = true;
+		}catch(Exception e){
+			IndependantLog.warn(debugmsg+"Failed to set focus on WebElement due to "+ getThrowableMessages(e)+ ": "+ e.getMessage());
+			focused = false;
+		}
+
+		try{
+			//Try to set focus by click or by send empty string.
+			if(WebDriverGUIUtilities.isTypeMatched(element, CFEditBox.LIBRARY_NAME)){
+				//Use Robot click to set focus. It is a little risky, as the click might invoke other reaction of the AUT.
+				IndependantLog.info(debugmsg+"using Click to set focus.");
+				WDLibrary.click(element, null, null, WDLibrary.MOUSE_BUTTON_LEFT);
+			}else{
+				IndependantLog.info(debugmsg+"using sending empty String to set focus.");
+				element.sendKeys("");
+			}
+			focused = true;
+		}catch(Exception e){
+			IndependantLog.warn(debugmsg+"Failed to set focus on WebElement due to "+ getThrowableMessages(e)+ ": "+ e.getMessage());
+			focused = false;
+		}
+
+		if(!focused){
+			IndependantLog.error(debugmsg+"Failed to set focus on WebElement!");
+		}
+
 		return focused;
 	}
 
