@@ -19,6 +19,7 @@
  *   <br>   FEB 25, 2016    (SBJLWA) Modify localProcess(): Set 'SearchContext' and 'RecognitionString' to libComponent for refreshing.
  *   <br>   APR 19, 2016    (SBJLWA) Modify componentClick(): Handle the optional parameter 'autoscroll'.
  *   <br>   SEP 30, 2016    (SBJLWA) Modified dragTo(): support the extra parameter 'dndReleaseDelay'.
+ *   <br>   JUN 06, 2017    (SBJLWA) Modified doSetText(): Show more details in the Log message.
  */
 package org.safs.selenium.webdriver;
 
@@ -983,6 +984,7 @@ public class CFComponent extends ComponentFunction{
 	 * 										   i.e. isCharacter is false, there's no verification.)
 	 * 								  if false, no verification.
 	 */
+	@SuppressWarnings("unchecked")
 	protected void doSetText(String libName, boolean isCharacter, boolean needVerify) {
 		String dbg = StringUtils.debugmsg(false);
 		String msg = "";
@@ -1006,9 +1008,10 @@ public class CFComponent extends ComponentFunction{
 		try {
 			setText(libName, isCharacter, text);
 
+			boolean verified = false;
 			if (needVerify) {
 				IndependantLog.info("Verifying the " + libName + " ...");
-				boolean verified = libComponent.verifyComponentBox(libName, text);
+				verified = libComponent.verifyComponentBox(libName, text);
 				int count = 0;
 
 				//If verification fails, then try to reenter text.
@@ -1019,29 +1022,24 @@ public class CFComponent extends ComponentFunction{
 					verified = libComponent.verifyComponentBox(libName, text);
 				}
 
-				if (verified) {
-					testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
-					msg = genericText.convert(GENKEYS.SUCCESS_2,
-							action + " '"+ "verifying" + "' successful",
-							action,
-							"verifying");
-					log.logMessage(testRecordData.getFac(), msg, PASSED_MESSAGE);
-				} else {
-					testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
-					msg = failedText.convert(FAILKEYS.ERROR_PERFORMING_2,
-										"Error performing '" + "verification" + "' on " + action,
-										"verification",
-										action);
-					standardFailureMessage(msg, testRecordData.getInputRecord());
+				if (!verified) {
+					String actualValue = libComponent.getValue();
+					String winComp = testRecordData.getWinCompName();
+					msg = failedText.convert(FAILKEYS.SOMETHING_NOT_MATCH,
+							                 winComp+" value '"+actualValue+"' does not match expected value '"+text+"'",
+							                 winComp, actualValue, text);
+					issueActionFailure(msg);
 				}
-			}else{
-				//If we don't need to verify, we just set status as OK.
+			}
+
+			if(!needVerify || verified){
 				testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
-				msg = genericText.convert(GENKEYS.SUCCESS_3,
-						                  windowName +":"+ compName + " "+ action +" successful.",
-						                  windowName, compName, action);
+				msg = genericText.convert(GENKEYS.SUCCESS_3A,
+						windowName +":"+ compName + " "+action+" successful using '"+text+"'.",
+						windowName, compName, action, text);
 				log.logMessage(testRecordData.getFac(), msg, PASSED_MESSAGE);
 			}
+
 		} catch(SeleniumPlusException spe) {
 			IndependantLog.error(dbg + " failed due to: " + spe.getMessage());
 			issueActionOnXFailure(compName, spe.getMessage());
