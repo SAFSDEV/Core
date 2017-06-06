@@ -503,8 +503,9 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 	 * Get the contents of Component Box, like Edit Box, Combo Box.<br>
 	 *
 	 * @return String, the content of Component Box
+	 * @see #verifyComponentBox(String, String)
 	 */
-	protected String getValue(){
+	public String getValue(){
 		refresh(true);
 		Object result = WDLibrary.getValue(webelement, WDLibrary.TEXT_VALUE_ATTRIBUTES);
 		return result==null? "": result.toString();
