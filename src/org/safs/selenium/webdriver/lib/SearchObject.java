@@ -45,7 +45,7 @@ package org.safs.selenium.webdriver.lib;
  *                                  Added the ability to delay javascript execution. NOT exposed yet.
  *                                  Modified getAllWindowTitles(): return titles for all opened window for all WebDrivers.
  *  <br>  MAY 22, 2017    (Lei Wang)  Added isValidBrowserID().
- *                                  Modified removeWebDriver(): call isValidBrowserID() to check the validity of browser ID.                            
+ *                                  Modified removeWebDriver(): call isValidBrowserID() to check the validity of browser ID.
  */
 import java.lang.reflect.Constructor;
 import java.net.URL;
@@ -407,7 +407,7 @@ public class SearchObject {
 		private boolean maximized;
 
 		public void set(Map browserInfoMap){
-			map = (Map) browserInfoMap;
+			map = browserInfoMap;
 			Object rc = null;
 			IndependantLog.info("BrowserWindow set map processing: "+ browserInfoMap.getClass().getName());
 
@@ -771,7 +771,7 @@ public class SearchObject {
 			lctitle = title.toLowerCase().trim();
 			Enumeration<WebDriver> e = webDrivers.elements();
 			while(e.hasMoreElements()){
-				temp = (WebDriver)e.nextElement();
+				temp = e.nextElement();
 				try{
 					if(lctitle.equals(temp.getTitle().toLowerCase().trim())){
 						match = temp;
@@ -800,7 +800,7 @@ public class SearchObject {
 		if(wd == null) return null;
 		Enumeration<String> e = webDrivers.keys();
 		while(e.hasMoreElements()){
-			id = (String)e.nextElement();
+			id = e.nextElement();
 			temp = webDrivers.get(id);
 			if (temp.equals(wd)){
 				match = id;
@@ -997,7 +997,7 @@ public class SearchObject {
 		try{
 			org.safs.selenium.webdriver.CFComponent.clearInternalCache();
 
-			if(isValidBrowserID(id)) obj = (WebDriver) webDrivers.remove(id);
+			if(isValidBrowserID(id)) obj = webDrivers.remove(id);
 			else{
 				IndependantLog.warn(debugmsg+" the parameter id '"+id+"' is not a valid browser-ID, try to remove the last used web-driver.");
 				if(lastUsedWD!=null){
@@ -2264,7 +2264,7 @@ public class SearchObject {
 		String debugmsg = StringUtils.debugmsg(false);
 
 		if(itemContainer instanceof WebElement){
-			WebElement container = (WebElement) itemContainer;
+			WebElement container = itemContainer;
 			String type = WebDriverGUIUtilities.getLibraryType(container);
 			IndependantLog.debug(debugmsg+" itemContainer's library type is '"+type+"'.");
 			String classname = WebDriverGUIUtilities.getLibraryPackage()+"."+type;
@@ -4061,16 +4061,20 @@ public class SearchObject {
 	public static final int MATCHED_ZERO_TIMES 	= 0;
 	/** <b>1</b> integer one */
 	public static final int MATCHED_ONE_TIME 	= 1;
+	/** <b>false</b>*/
+	public static final boolean DEFAULT_PARTIAL_MATCH = false;
+	/** <b>true</b>*/
+	public static final boolean DEFAULT_IGNORE_CASE = true;
 
 	/**
 	 * Switch to a certain window according to its title, this method will search it from all opened browsers.<br/>
 	 * <b>NOTE:</b> Once successfully switched, {@link #lastUsedWD}, {@link #lastJS} may probably get changed.<br/>
 	 * @param title String, the title of the window to switch to. It can be a normal string, a regexp string or a wildcard string.
-	 *                      If it is regexp string, the optional parameters will be ignored.
+	 *                      If it is regexp/wildcard string, the optional parameters will be ignored.
 	 * @param optionals boolean[]
 	 * <ul>
-	 * <li>optionals[0] <b>partialMatch</b> boolean, if the title is provided as sub-string. The default value is false. It is valid ONLY when <b>title</b> is not regexp string;
-	 * <li>optionals[1] <b>ignoreCase</b> boolean, if the title are case in-sensitive to compare. The default value is true. It is valid ONLY when <b>title</b> is not regexp string;
+	 * <li>optionals[0] <b>partialMatch</b> boolean, if the title is provided as sub-string. The default value is false. It is valid ONLY when <b>title</b> is normal string;
+	 * <li>optionals[1] <b>ignoreCase</b> boolean, if the title are case in-sensitive to compare. The default value is true. It is valid ONLY when <b>title</b> is normal string;
 	 * </ul>
 	 * @return boolean true if successfully switched to window matching parameter title
 	 * @throws SeleniumPlusException
@@ -4082,13 +4086,13 @@ public class SearchObject {
 	 * Switch to a certain window according to its title, this method will search it from all opened browsers.<br/>
 	 * <b>NOTE:</b> Once successfully switched, {@link #lastUsedWD}, {@link #lastJS} may probably get changed.<br/>
 	 * @param title String, the title of the window to switch to. It can be a normal string, a regexp string or a wildcard string.
-	 *                      If it is regexp string, the optional parameters will be ignored.
+	 *                      If it is regexp/wildcard string, the optional parameters will be ignored.
 	 * @param expectedMatchIndex int, the index of matched window if multiple windows match. These windows are ordered according to
-	 *                                their title alphabet order. It should be bigger than {@link #MATCHED_ZERO_TIMES}
+	 *                                their title alphabet order. It is 1-based index and should be bigger than {@link #MATCHED_ZERO_TIMES}
 	 * @param optionals boolean[]
 	 * <ul>
-	 * <li>optionals[0] <b>partialMatch</b> boolean, if the title is provided as sub-string. The default value is false. It is valid ONLY when <b>title</b> is not regexp string;
-	 * <li>optionals[1] <b>ignoreCase</b> boolean, if the title are case in-sensitive to compare. The default value is true. It is valid ONLY when <b>title</b> is not regexp string;
+	 * <li>optionals[0] <b>partialMatch</b> boolean, if the title is provided as sub-string. The default value is false. It is valid ONLY when <b>title</b> is normal string;
+	 * <li>optionals[1] <b>ignoreCase</b> boolean, if the title are case in-sensitive to compare. The default value is true. It is valid ONLY when <b>title</b> is normal string;
 	 * </ul>
 	 * @return boolean true if successfully switched to window matching parameter title
 	 * @throws SeleniumPlusException
@@ -4130,11 +4134,11 @@ public class SearchObject {
 	 * <b>NOTE:</b> Once successfully switched, {@link #lastUsedWD}, {@link #lastJS} may probably get changed.<br/>
 	 * @param browserID String, the browser ID when calling {@link #startBrowser(String, String, String, int, boolean)}
 	 * @param title String, the title of the window to switch to. It can be a normal string, a regexp string or a wildcard string.
-	 *                      If it is regexp string, the optional parameters will be ignored.
+	 *                      If it is regexp/wildcard string, the optional parameters will be ignored.
 	 * @param optionals boolean[]
 	 * <ul>
-	 * <li>optionals[0] <b>partialMatch</b> boolean, if the title is provided as sub-string. The default value is false. It is valid ONLY when <b>title</b> is not regexp string;
-	 * <li>optionals[1] <b>ignoreCase</b> boolean, if the title are case in-sensitive to compare. The default value is true. It is valid ONLY when <b>title</b> is not regexp string;
+	 * <li>optionals[0] <b>partialMatch</b> boolean, if the title is provided as sub-string. The default value is false. It is valid ONLY when <b>title</b> is normal string;
+	 * <li>optionals[1] <b>ignoreCase</b> boolean, if the title are case in-sensitive to compare. The default value is true. It is valid ONLY when <b>title</b> is normal string;
 	 * </ul>
 	 * @return boolean true if successfully switched
 	 * @throws SeleniumPlusException
@@ -4148,13 +4152,13 @@ public class SearchObject {
 	 * <b>NOTE:</b> Once successfully switched, {@link #lastUsedWD}, {@link #lastJS} may probably get changed.<br/>
 	 * @param browserID String, the browser ID when calling {@link #startBrowser(String, String, String, int, boolean)}
 	 * @param title String, the title of the window to switch to. It can be a normal string, a regexp string or a wildcard string.
-	 *                      If it is regexp string, the optional parameters will be ignored.
+	 *                      If it is regexp/wildcard string, the optional parameters will be ignored.
 	 * @param expectedMatchIndex int, the index of matched window if multiple windows match. These windows are ordered according to
-	 *                                their title alphabet order. It should be bigger than {@link #MATCHED_ZERO_TIMES}
+	 *                                their title alphabet order. It is 1-based index and should be bigger than {@link #MATCHED_ZERO_TIMES}
 	 * @param optionals boolean[]
 	 * <ul>
-	 * <li>optionals[0] <b>partialMatch</b> boolean, if the title is provided as sub-string. The default value is false. It is valid ONLY when <b>title</b> is not regexp string;
-	 * <li>optionals[1] <b>ignoreCase</b> boolean, if the title are case in-sensitive to compare. The default value is true. It is valid ONLY when <b>title</b> is not regexp string;
+	 * <li>optionals[0] <b>partialMatch</b> boolean, if the title is provided as sub-string. The default value is false. It is valid ONLY when <b>title</b> is normal string;
+	 * <li>optionals[1] <b>ignoreCase</b> boolean, if the title are case in-sensitive to compare. The default value is true. It is valid ONLY when <b>title</b> is normal string;
 	 * </ul>
 	 * @return int the matched times.
 	 * @throws SeleniumPlusException
@@ -4169,7 +4173,11 @@ public class SearchObject {
 		int matchedTimes = MATCHED_ZERO_TIMES;
 		Entry<String/*window Handle*/, String/*window Title*/> originalWindow = null;
 		if(lastUsedWD!=null){
-			originalWindow = new SimpleEntry<>(lastUsedWD.getWindowHandle(), lastUsedWD.getTitle());
+			try{
+				originalWindow = new SimpleEntry<>(lastUsedWD.getWindowHandle(), lastUsedWD.getTitle());
+			}catch(NoSuchWindowException e){
+				IndependantLog.warn(debugmsg+"Failed to create original window, due to "+e.toString());
+			}
 		}
 
 		WebDriver driver = null;
@@ -4180,8 +4188,8 @@ public class SearchObject {
 			}
 		}
 
-		boolean partialMatch = false;
-		boolean ignoreCase = true;
+		boolean partialMatch = DEFAULT_PARTIAL_MATCH;
+		boolean ignoreCase = DEFAULT_IGNORE_CASE;
 
 		if(optionals!=null){
 			if(optionals.length>0) partialMatch = optionals[0];

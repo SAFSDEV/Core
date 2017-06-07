@@ -28,6 +28,7 @@ package org.safs.selenium.webdriver;
  *   <br>   APR 07, 2016    (Lei Wang) Refactor to handle OnGUIExistsGotoBlockID/OnGUINotExistGotoBlockID in super class DriverCommand
  *   <br>   AUT 05, 2016    (Lei Wang) Modified waitForGui/waitForGuiGone: if the RC is SCRIPT_NOT_EXECUTED (4) then stop handling here.
  *   <br>   SEP 27, 2016    (Lei Wang) Moved methods launchSeleniumServers() to class WebDriverGUIUtilities.
+ *   <br>   JUN 07, 2017    (Lei Wang) Handled keyword 'SwitchWindow'.
  */
 
 import java.io.File;
@@ -103,7 +104,7 @@ public class DCDriverCommand extends DriverCommand {
 
 	protected void commandProcess() {
 		String dbg = getClass().getName()+".commandProcess ";
-    	Log.info(dbg+"processing: "+ command);
+    	Log.info(dbg+"processing: '"+ command+ "' with parameters: "+this.params);
 
 		if(command.equalsIgnoreCase(DDDriverCommands.STARTWEBBROWSER_KEYWORD)){
 			startWebBrowser();
@@ -134,7 +135,71 @@ public class DCDriverCommand extends DriverCommand {
 				   command.equalsIgnoreCase(DDDriverCommands.VERIFYURLCONTENT_KEYWORD) ||
 				   command.equalsIgnoreCase(DDDriverCommands.VERIFYURLTOFILE_KEYWORD)) {
 			sendHttpGetRequest();
+		}else if(DDDriverCommands.SWITCHWINDOW_KEYWORD.equalsIgnoreCase(command)){
+			switchWindow();
 		}
+	}
+
+	protected void switchWindow(){
+		testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );
+		if ( params.size() < 1 ) {
+			this.issueParameterCountFailure();
+			return;
+		}
+		final String debugmsg = StringUtils.debugmsg(false);
+
+		String title = null;
+		String browserID = null;
+		int expectedMatchIndex = WDLibrary.MATCHED_ONE_TIME;
+		boolean partialMatch = WDLibrary.DEFAULT_PARTIAL_MATCH;
+		boolean ignoreCase = WDLibrary.DEFAULT_IGNORE_CASE;
+
+		title = iterator.next();
+
+		if(iterator.hasNext()){
+			browserID = iterator.next();
+		}
+		if(iterator.hasNext()){
+			try{
+				expectedMatchIndex = Integer.parseInt(iterator.next());
+			}catch(NumberFormatException e){
+				IndependantLog.warn(debugmsg+"ignore failure for parameter 'expectedMatchIndex': "+e);
+				expectedMatchIndex = WDLibrary.MATCHED_ONE_TIME;
+			}
+		}
+		if(iterator.hasNext()){
+			partialMatch = StringUtils.convertBool(iterator.next());
+		}
+		if(iterator.hasNext()){
+			ignoreCase = StringUtils.convertBool(iterator.next());
+		}
+
+		try {
+			boolean matched = false;
+
+			if(StringUtils.isValid(browserID)){
+				int matchedTime = WDLibrary.switchWindow(browserID, title, expectedMatchIndex, partialMatch, ignoreCase);
+				matched = (matchedTime==expectedMatchIndex);
+			}else{
+				IndependantLog.debug(debugmsg+"browserID '"+browserID+"' is not valid, try to search window from the last used browser firstly, "
+						+ "then from all opened browsers.");
+				matched = WDLibrary.switchWindow(title, expectedMatchIndex, partialMatch, ignoreCase);
+			}
+
+			if(matched){
+				testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
+				log.logMessage(testRecordData.getFac(),
+						genericText.convert(GENKEYS.SUCCESS_2A,
+								testRecordData.getCommand()+" successful using '"+title+"'",
+								testRecordData.getCommand(), title),
+								GENERIC_MESSAGE);
+			}else{
+				issueActionFailure("Failed to get window matching title '"+title+"'");
+			}
+		} catch (SeleniumPlusException e) {
+			issueActionFailure(e.toString());
+		}
+
 	}
 
 	public static final String SUFFIX_VARIABLE_READY_STATE 	= ".readyState";
@@ -1050,19 +1115,19 @@ holdloop:		while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 		iterator = params.iterator();
 
 		// get the window, component, property, expected value.
-		String windowName = (String)iterator.next();
-		String compName = (String)iterator.next();
-		String propertyName = (String)iterator.next();
-		String expectedValue = (String)iterator.next();
+		String windowName = iterator.next();
+		String compName = iterator.next();
+		String propertyName = iterator.next();
+		String expectedValue = iterator.next();
 
 		testRecordData.setWindowName(windowName);
 		testRecordData.setCompName(compName);
 
 		// get timeout, case sensitive parameters
 		if(params.size() > 4) {
-			seconds = (String)iterator.next();
+			seconds = iterator.next();
 			if(params.size() > 5)
-				caseInsensitive = (String)iterator.next();
+				caseInsensitive = iterator.next();
 		}
 
 		// timeout parsing
