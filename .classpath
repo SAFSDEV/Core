@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry excluding="install/*|org/safs/selenium/install/*" kind="src" path="src"/>
+	<classpathentry kind="src" path="test/groovy"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/SAFS-Android-Remote-Control"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/jna-4.2.2.jar"/>
@@ -52,5 +53,7 @@
 	<classpathentry kind="var" path="SAFS_BUILD/libs/spring-core/spring-core-4.3.4.RELEASE.jar"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/log4j/log4j-api-2.8.jar"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/log4j/log4j-core-2.8.jar"/>
+	<classpathentry kind="lib" path="test/lib/ant-launcher.jar"/>
+	<classpathentry kind="lib" path="test/lib/ant.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
