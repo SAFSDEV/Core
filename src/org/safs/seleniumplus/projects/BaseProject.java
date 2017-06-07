@@ -104,6 +104,17 @@ public class BaseProject {
 		assert companyName != null;
 		assert projectName.trim().length() > 0;
 
+		/*
+		 * This method was copied from the SeleniumPlus-Plugin project's BaseProject.
+		 * Parts unrelated to the SAMPLE project have been commented out.
+		 * Most importantly, the callback functionality has been added.
+		 * The idea is that outside the SeleniumPlus Eclipse environment, the callbacks will be null,
+		 * and the implementation will use POJO classes.
+		 * Within the SeleniumPlus Eclipse environment, the callbacks will be non-null,
+		 * and they will be called to get Eclipse to perform the operations.
+		 * These operations are things like creating projects, folders, paths, etc.
+		 */
+		// TODO: support the PROJECTTYPE_SELENIUM and PRJECTTYPE_ADVANCE.
 		if (/*projectType.equalsIgnoreCase(PROJECTTYPE_SELENIUM) ||*/
 			projectType.equalsIgnoreCase(PROJECTTYPE_SAMPLE)){
 
@@ -111,17 +122,21 @@ public class BaseProject {
 			testcaseDir = srcDir + "/"+ projectName.toLowerCase() +"/"+ SRC_TESTCASES_SUBDIR;
 			testrunDir =  srcDir + "/"+ projectName.toLowerCase() +"/"+ SRC_TESTRUNS_SUBDIR;
 
-		}/* else if (projectType.equalsIgnoreCase(PROJECTTYPE_ADVANCE)){
+		/*} else if (projectType.equalsIgnoreCase(PROJECTTYPE_ADVANCE)){
 
 			srcDir = SRC_SRC_DIR;
 			testcaseDir = srcDir + "/com/" + companyName.toLowerCase() + "/"+ projectName.toLowerCase()+ "/"+ SRC_TESTS_SUBDIR;
 			testrunDir = srcDir + "/com/" + companyName.toLowerCase() + "/"+ projectName.toLowerCase()+ "/"+ SRC_SUITES_SUBDIR;
-
+		*/
 		} else {
 			// internal error
+			throw new RuntimeException("Unsupported");
 		}
-*/
-		POJOProject project = callbacks != null ? callbacks.createProjectCallback.createProject() : new POJOProject(projectName);
+
+		POJOProject project =
+				callbacks != null ?
+				callbacks.createProjectCallback.createProject() :
+				new POJOProject(projectName);
 
 		try {
 
@@ -171,7 +186,10 @@ public class BaseProject {
 		 * Create sample test class
 		*/
 		String testClass = TESTCASECLASS_FILE;
-		POJOFolder testPkg = callbacks == null ? newProject.getFolder(paths[1]) : callbacks.getFolderCallback.getFolder(newProject, paths[1]);
+		POJOFolder testPkg =
+				callbacks == null ?
+				newProject.getFolder(paths[1]) :
+				callbacks.getFolderCallback.getFolder(newProject, paths[1]);
 
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
@@ -180,6 +198,7 @@ public class BaseProject {
 			InputStream testclassstream = null;
 			if (newProject.getName().equalsIgnoreCase(PROJECTNAME_SAMPLE)){
 				testclassstream = getResourceAsStream(loader, TESTCASECLASS_TXT_RESOURCE);
+			//TODO: support non-SAMPLE case.
 //			} else {
 //				testclassstream = FileTemplates.testClass(newProject.getName(),newPackage,mapPkg, testClass);
 			}
@@ -193,7 +212,10 @@ public class BaseProject {
 		 * Create run tests
 		 */
 		String testRunClass = TESTRUNCLASS_FILE;
-		testPkg = callbacks == null ? newProject.getFolder(paths[2]) : callbacks.getFolderCallback.getFolder(newProject, paths[2]);
+		testPkg =
+				callbacks == null ?
+				newProject.getFolder(paths[2]) :
+				callbacks.getFolderCallback.getFolder(newProject, paths[2]);
 
 
 		if (testPkg.exists()){
@@ -214,7 +236,11 @@ public class BaseProject {
 		/**
 		 * Map and Map order files
 		 */
-		POJOFolder mapFolder = callbacks == null ? newProject.getFolder(DATAPOOL_DIR) : callbacks.getFolderCallback.getFolder(newProject, DATAPOOL_DIR);
+		POJOFolder mapFolder =
+				callbacks == null ?
+				newProject.getFolder(DATAPOOL_DIR) :
+				callbacks.getFolderCallback.getFolder(newProject, DATAPOOL_DIR);
+
 		if (mapFolder.exists()) {
 
 			if (newProject.getName().equalsIgnoreCase(PROJECTNAME_SAMPLE)){
@@ -260,8 +286,12 @@ public class BaseProject {
 		 * create test.ini file
 		 */
 		POJOContainer container = mapFolder.getParent();
-		POJOFile iniFile = container.getFile(callbacks == null ? new POJOPath(TESTINI_FILE) : callbacks.createPathCallback.newPath(TESTINI_FILE));
-		InputStream inistream = FileTemplates.testINI(org.safs.seleniumplus.projects.BaseProject.SELENIUM_PLUS,newProject.getName());
+		POJOFile iniFile = container.getFile(
+				callbacks == null ?
+				new POJOPath(TESTINI_FILE) :
+				callbacks.createPathCallback.newPath(TESTINI_FILE)
+		);
+		InputStream inistream = FileTemplates.testINI(SELENIUM_PLUS,newProject.getName());
 		iniFile.create(inistream, true, null);
 		inistream.close();
 
@@ -274,7 +304,11 @@ public class BaseProject {
 		InputStream batstream = null;
 
 		if(isWin){
-			batfile = container.getFile(callbacks == null ? new POJOPath(RUNAUTOMATION_WIN_FILE) : callbacks.createPathCallback.newPath(RUNAUTOMATION_WIN_FILE));
+			batfile = container.getFile(
+					callbacks == null ?
+					new POJOPath(RUNAUTOMATION_WIN_FILE) :
+					callbacks.createPathCallback.newPath(RUNAUTOMATION_WIN_FILE)
+			);
 			batstream = getResourceAsStream(loader, RUNAUTOMATION_WIN_RESOURCE);
 		}
 		if (batstream != null) {

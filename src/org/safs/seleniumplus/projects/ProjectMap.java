@@ -4,6 +4,13 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The ProjectMap contains information for each project.  There should be only one
+ * per JVM.  Given a projectName, getProjectInfo(projectName) will return
+ * a Map that contains strings such as projectDir, binDir, etc. that hold
+ * information about the project.
+ *
+ */
 public class ProjectMap {
 	private final Map<String, Map<String, Object>> projectMap = new HashMap<String, Map<String, Object>>();
 	private File workspaceDir;
