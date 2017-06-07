@@ -2765,6 +2765,48 @@ public abstract class SAFSPlus {
 				throw new SeleniumPlusException("Met "+StringUtils.debugmsg(th));
 			}
 		}
+
+		/**
+		 * Switch to the window having title indicated by parameter <b>title</b>.<br>
+		 * The window can be searched from the last used browser if parameter <b>browserID</b> is not provided;<br>
+		 * Or the window can be searched from the browser indicated by the parameter <b>browserID</b>.<br>
+		 * @param title String, the title of the window to switch to. It can be a normal string, a regexp string or a wildcard string.
+		 *                      If it is regexp/wildcard string, the optional parameters 'partialMatch' and 'ignoreCase' will be ignored.
+		 * @param optionals
+		 * <ul>
+		 * <li>optionals[0] <b>browserID</b> String, The ID representing the opened browser from where to search the window.
+		 * <li>optionals[1] <b>expectedMatchIndex</b> int, the index of matched window if multiple windows match. These windows are ordered according to
+		 *                                their title alphabet order. It is 1-based index. The default index is 1.
+		 * <li>optionals[2] <b>partialMatch</b> boolean, if the title is provided as sub-string. The default value is false. It is valid ONLY when <b>title</b> is normal string;
+		 * <li>optionals[3] <b>ignoreCase</b> boolean, if the title is case in-sensitive to compare. The default value is true. It is valid ONLY when <b>title</b> is normal string;
+		 * </ul>
+		 * @return boolean true if window is found and switched successfully, false otherwise.<p>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode
+		 * @see org.safs.TestRecordHelper#getStatusInfo
+		 * <p>
+		 * @example
+		 * <pre>
+		 * {@code
+		 * //Switch to window with "Google" as title from within the last used browser.
+		 * Misc.SwitchWindow("Google");
+		 * //Switch to the first window with "Google" or "google" as title within the last used browser.
+		 * Misc.SwitchWindow("[G|g]oogle");
+		 * //Switch to the first window with "Google" as title within the browser opened with ID "TestGooglePage".
+		 * Misc.SwitchWindow("Google", "TestGooglePage");
+		 * //Switch to the 2th window with "Google" as title within the browser opened with ID "TestGooglePage".
+		 * Misc.SwitchWindow("Google", "TestGooglePage", "2");
+		 * //Switch to the 2th window with title containing "gle" within the browser opened with ID "TestGooglePage".
+		 * Misc.SwitchWindow("gle", "TestGooglePage", "2", "true");
+		 * //Switch to the 2th window with title containing "Goog" (case sensitive) within the browser opened with ID "TestGooglePage".
+		 * Misc.SwitchWindow("Goog", "TestGooglePage", "2", "true", "false");
+		 * }
+		 * </pre>
+		 */
+		public static boolean SwitchWindow(String title, String...optionals){
+			String[] args = combineParams(optionals, title);
+			return command(DDDriverCommands.SWITCHWINDOW_KEYWORD, args);
+		}
 	}
 
 	/**
