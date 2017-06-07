@@ -155,6 +155,8 @@ public class DriverCommands {
     static public final String STARTWEBBROWSER_KEYWORD = "StartWebBrowser";
     /** "StopWebBrowser" */
     static public final String STOPWEBBROWSER_KEYWORD = "StopWebBrowser";
+    /** "SwitchWindow" */
+    static public final String SWITCHWINDOW_KEYWORD = "SwitchWindow";
     /** "TakeScreenShot" */
     static public final String TAKESCREENSHOT_KEYWORD = "TakeScreenShot";
     /** "UseAbbotFunctions" */
@@ -555,7 +557,7 @@ public class DriverCommands {
           The above example shows two optional fields after NOTEPAD.EXE 
           which are given no value(skipped).
           
-          Note that the full availablility of all Driver Commands is now 
+          Note that the full availability of all Driver Commands is now 
           spread across several files.  Together, all of these files provide 
           all the Driver Commands available to the core framework.
           
@@ -3649,7 +3651,7 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
     </UL>
 
      @param browserID  Optional:YES  DefaultVal:MainApp 
-				The indentifier used to get the webdriver for the opened browser. This ID is assigned by user
+				The identifier used to get the webdriver for the opened browser. This ID is assigned by user
              	during calling keyword StartWebBrowser.
              
      **********/
@@ -3657,6 +3659,64 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
 
         DriverCommand dc = new DriverCommand(STOPWEBBROWSER_KEYWORD);
         dc.addParameter(browserID);
+        return dc;
+    }
+
+
+    /*********** <pre>Switch between multiple windows according to its title.    </pre>    Supporting Engines:
+    <P/><UL>
+        <LI>OpenQA Selenium</LI>
+    </UL>
+
+     @param title  Optional:NoThe Title of the window to switch to.
+     @param browserID  Optional:YesThe ID representing the opened browser from where to search the window.
+     @param expectedMatchIndex  Optional:YesIf more than one windows can be found according to the title, then this parameter
+		               will decide which one to return, the index is 1 based.
+		     
+     @param partialMatch  Optional:YesIf the parameter 'title' will match partially (be sub-string) with
+                          the title of the existing windows.
+              
+     @param ignoreCase  Optional:YesIf the parameter 'title' will match case-insentitively with
+                          the title of the existing windows.
+              
+     **********/
+    static public DriverCommand switchWindow (String title, String browserID, String expectedMatchIndex, String partialMatch, String ignoreCase) {
+
+        if ( title == null ) throw new IllegalArgumentException ( "switchWindow.title = null");
+        DriverCommand dc = new DriverCommand(SWITCHWINDOW_KEYWORD);
+        dc.addParameter(title);
+        dc.addParameter(browserID);
+        dc.addParameter(expectedMatchIndex);
+        dc.addParameter(partialMatch);
+        dc.addParameter(ignoreCase);
+        return dc;
+    }
+
+
+    /*********** <pre>Switch between multiple windows according to its title.    </pre>    
+    Supporting Engines:
+    <P/><UL>
+        <LI>OpenQA Selenium</LI>
+    </UL>
+
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>        title -- Optional:NoThe Title of the window to switch to.<BR/>        browserID -- Optional:YesThe ID representing the opened browser from where to search the window.<BR/>        expectedMatchIndex -- Optional:YesIf more than one windows can be found according to the title, then this parameter
+		               will decide which one to return, the index is 1 based.
+		     <BR/>        partialMatch -- Optional:YesIf the parameter 'title' will match partially (be sub-string) with
+                          the title of the existing windows.
+              <BR/>        ignoreCase -- Optional:YesIf the parameter 'title' will match case-insentitively with
+                          the title of the existing windows.
+              
+    </UL>
+
+     **********/
+    static public DriverCommand switchWindow (String[] parameters) {
+
+        if ( parameters == null ) throw new IllegalArgumentException ( "switchWindow.parameters = null");
+        DriverCommand dc = new DriverCommand(SWITCHWINDOW_KEYWORD);
+        dc.addParameters(parameters);
         return dc;
     }
 
@@ -3986,7 +4046,7 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
     </UL>
 
      @param browserID  Optional:YES  DefaultVal:MainApp 
-				The indentifier used to get the webdriver for the opened browser. This ID is assigned by user
+				The identifier used to get the webdriver for the opened browser. This ID is assigned by user
              	during calling keyword StartWebBrowser.
              
      **********/
