@@ -5,17 +5,17 @@ public class BaseProject {
 	public static String SELENIUM_PLUS;
 
 	/** "SELENIUM_PLUS" the system environment variable name holding the path where SeleniumPlus has been installed */
-	public static String SELENIUM_PLUS_ENV = org.safs.Constants.ENV_SELENIUM_PLUS;
+	public static final String SELENIUM_PLUS_ENV = org.safs.Constants.ENV_SELENIUM_PLUS;
 
 	/** "Tests" */
-	public static String SRC_TEST_DIR = "Tests";
+	public static final String SRC_TEST_DIR = "Tests";
 	/** "src" */
-	public static String SRC_SRC_DIR = "src";
+	public static final String SRC_SRC_DIR = "src";
 
 	/** "testcases" */
-	public static String SRC_TESTCASES_SUBDIR = "testcases";
+	public static final String SRC_TESTCASES_SUBDIR = "testcases";
 	/** "testruns" */
-	public static String SRC_TESTRUNS_SUBDIR = "testruns";
+	public static final String SRC_TESTRUNS_SUBDIR = "testruns";
 
 	/** "TestCase1" */
 	public static final String TESTCASECLASS_FILE = "TestCase1";
