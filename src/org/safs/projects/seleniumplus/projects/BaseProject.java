@@ -1,4 +1,4 @@
-package org.safs.seleniumplus.projects;
+package org.safs.projects.seleniumplus.projects;
 
 public class BaseProject {
 	/** holds path to SeleniumPlus install directory -- once validated. */

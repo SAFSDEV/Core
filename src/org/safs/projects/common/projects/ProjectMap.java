@@ -1,4 +1,4 @@
-package org.safs.seleniumplus.projects;
+package org.safs.projects.common.projects;
 
 import java.io.File;
 import java.util.HashMap;
