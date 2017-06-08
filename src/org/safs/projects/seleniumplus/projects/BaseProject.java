@@ -193,10 +193,7 @@ public class BaseProject {
 		 * Create sample test class
 		*/
 		String testClass = TESTCASECLASS_FILE;
-		POJOFolder testPkg =
-				callbacks == null ?
-				newProject.getFolder(paths[1]) :
-				callbacks.getFolderCallback.getFolder(newProject, paths[1]);
+		POJOFolder testPkg = newProject.getFolder(paths[1]);
 
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
@@ -219,10 +216,7 @@ public class BaseProject {
 		 * Create run tests
 		 */
 		String testRunClass = TESTRUNCLASS_FILE;
-		testPkg =
-				callbacks == null ?
-				newProject.getFolder(paths[2]) :
-				callbacks.getFolderCallback.getFolder(newProject, paths[2]);
+		testPkg = newProject.getFolder(paths[2]);
 
 
 		if (testPkg.exists()){
@@ -243,10 +237,7 @@ public class BaseProject {
 		/**
 		 * Map and Map order files
 		 */
-		POJOFolder mapFolder =
-				callbacks == null ?
-				newProject.getFolder(DATAPOOL_DIR) :
-				callbacks.getFolderCallback.getFolder(newProject, DATAPOOL_DIR);
+		POJOFolder mapFolder = newProject.getFolder(DATAPOOL_DIR);
 
 		if (mapFolder.exists()) {
 
