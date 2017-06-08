@@ -1,0 +1,36 @@
+#-------------------------------------------------------------------------------
+# Application recognition string and constant here 
+# constant can use inside testcase or application map
+# Please see example how constant defines
+#-------------------------------------------------------------------------------
+
+[ApplicationConstants]
+GoogleURL="http://www.google.com"
+GoogleUser="yourname@gmail.com"
+GooglePassword="yourpassword"
+GoogleBrowser="GoogleMain"
+SignInScreenshot="signIn"
+TopLeft="5,5"
+
+#-------------------------------------------------------------------------------
+# Application recognition string
+# [Google] : define section in app map
+# Google="", it is main window and name should be match in [Google]. 
+#-------------------------------------------------------------------------------
+
+[Google]
+Google="id=viewport"
+SignIn="Text={^nlsSignIn}"
+
+
+#-------------------------------------------------------------------------------
+# User can use any html attribute as recognition string 
+# Example: id, text, name, class, type. As long as it is unique
+#-------------------------------------------------------------------------------
+
+[LogIn]
+UserName="id=identifierId"
+UserNameNext="id=identifierNext"
+Passwd="name=password"
+SignIn="id=passwordNext"
+OneGoogle="alt=Google"
