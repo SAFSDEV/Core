@@ -1,4 +1,4 @@
-package org.safs.seleniumplus.popupmenu;
+package org.safs.projects.seleniumplus.popupmenu;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
