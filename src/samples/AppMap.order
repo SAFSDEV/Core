@@ -1,0 +1,9 @@
+# ------------------------------------------------------------------------
+# Define app map order
+# App.map
+# App_en.map
+# App.map loads first and App_en overwrite first map's common variables.
+#-------------------------------------------------------------------------
+
+SAMPLEApp.map
+SAMPLEApp_en.map
