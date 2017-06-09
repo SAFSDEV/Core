@@ -118,7 +118,7 @@ public class SeleniumPlusTestUtil {
 		def logFile = new File(projectDir, "log.txt")
 		def logFileUtil = new LogFileUtil()
 		def javaClassPath = System.getProperty("java.class.path")
-		def forkedJVMDebugPort = 0
+		def forkedJVMDebugPort = System.getProperty("org.safs.test.forked.jvm.debug.port", "")
 		def forkedJVMDebugSuspend = true
 		def result = logFileUtil.withLogFile(logFile) {
 			ant.java(
