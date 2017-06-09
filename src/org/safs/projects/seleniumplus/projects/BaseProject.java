@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
 
 import org.safs.projects.common.projects.callbacks.Callbacks;
 import org.safs.projects.common.projects.pojo.POJOContainer;
@@ -12,6 +14,7 @@ import org.safs.projects.common.projects.pojo.POJOFolder;
 import org.safs.projects.common.projects.pojo.POJOPath;
 import org.safs.projects.common.projects.pojo.POJOProject;
 import org.safs.projects.seleniumplus.popupmenu.FileTemplates;
+
 
 public class BaseProject {
 	/** holds path to SeleniumPlus install directory -- once validated. */
@@ -86,6 +89,8 @@ public class BaseProject {
 	public static final String APPMAP_ORDER_FILE = "AppMap.order";
 	/** /samples/AppMap.order */
 	public static final String APPMAP_ORDER_RESOURCE = SAMPLES_RESOURCE_PATH + "/AppMap.order";
+
+	private static JarFile jarFile;
 
 	/**
 	 * This method should only be called outside of the SeleniumPlus Eclipse environment.
@@ -211,6 +216,7 @@ public class BaseProject {
 
 			testclass.create(testclassstream, true, null);
 			if (testclassstream != null) testclassstream.close();
+			if (jarFile != null) jarFile.close();
 		}
 
 
@@ -232,6 +238,7 @@ public class BaseProject {
 
 			testruns.create(testrunstream, true, null);
 			if (testrunstream != null) testrunstream.close();
+			if (jarFile != null) jarFile.close();
 		}
 
 
@@ -250,18 +257,21 @@ public class BaseProject {
 				InputStream mapstream = getResourceAsStream(loader, APPMAP_RESOURCE);
 				appMap.create(mapstream, true, null);
 				if (mapstream != null) mapstream.close();
+				if (jarFile != null) jarFile.close();
 
 				appMap = mapFolder.getFile(newProject.getName()+APPMAP_EN_FILE);
 				//mapstream = BaseProject.class.getResourceAsStream("../../../../samples/App_zh.map");
 				mapstream = getResourceAsStream(loader, APPMAP_EN_RESOURCE);
 				appMap.create(mapstream, true, null);
 				if (mapstream != null) mapstream.close();
+				if (jarFile != null) jarFile.close();
 
 				appMap = mapFolder.getFile(APPMAP_ORDER_FILE);
 				//mapstream = BaseProject.class.getResourceAsStream("../../../../samples/AppMap.order");
 				mapstream = getResourceAsStream(loader, APPMAP_ORDER_RESOURCE);
 				appMap.create(mapstream, true, null);
 				if (mapstream != null) mapstream.close();
+				if (jarFile != null) jarFile.close();
 
 //			} else {
 
@@ -314,6 +324,7 @@ public class BaseProject {
 		if (batstream != null) {
 			batfile.create(batstream, true, null);
 			batstream.close();
+			if (jarFile != null) jarFile.close();
 		}
 
 	}
@@ -323,16 +334,30 @@ public class BaseProject {
 		try {
 			stream = loader.getResourceAsStream(resourcePath);
 			if (stream == null) {
-				/*
-				 * The file must be outside of a jar.  It is not clear why the classloader in
-				 * Eclipse is not finding resources in the bin directory.  So, look for the
-				 * resources under it now.
-				 */
 				URI uri = BaseProject.class.getProtectionDomain().getCodeSource().getLocation().toURI();
-				File binDir = new File(uri);
-				File file = new File(binDir, resourcePath);
-				if (file.isFile()) {
-					stream = new FileInputStream(file);
+				if (uri.getPath().endsWith(".jar")) {
+					/*
+					 * This is the case where PowerMock is being used.
+					 * For some reason the MockClassloader has problems finding resources.
+					 * So, read the entry directly from the jar.
+					 */
+					File file = new File(uri);
+					jarFile = new JarFile(file);
+					ZipEntry entry = jarFile.getEntry(resourcePath.substring(1));
+					if (entry != null) {
+						stream = jarFile.getInputStream(entry);
+					}
+				} else {
+					/*
+					 * The file must be outside of a jar.  It is not clear why the classloader in
+					 * Eclipse is not finding resources in the bin directory.  So, look for the
+					 * resources under it now.
+					 */
+					File binDir = new File(uri);
+					File file = new File(binDir, resourcePath);
+					if (file.isFile()) {
+						stream = new FileInputStream(file);
+					}
 				}
 			}
 		} catch (Exception e) {
