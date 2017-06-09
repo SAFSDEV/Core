@@ -1,5 +1,7 @@
 package org.safs.projects.seleniumplus.projects
 
+import static org.junit.Assert.*
+
 import static org.safs.Constants.ENV_SELENIUM_PLUS
 
 import org.safs.LogFileUtil
@@ -86,6 +88,7 @@ public class SeleniumPlusTestUtil {
 			projectType,
 			callbacks,
 		)
+		assertNotNull("Project is null - check console output", project)
 		project
 	}
 	
