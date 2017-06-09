@@ -30,18 +30,20 @@ public class BaseProject {
 	/** "testruns" */
 	public static final String SRC_TESTRUNS_SUBDIR = "testruns";
 
+	public static final String SAMPLES_RESOURCE_PATH = "/org/safs/projects/seleniumplus/projects/samples";
+
 	/** "TestCase1" */
 	public static final String TESTCASECLASS_FILE = "TestCase1";
 	/** "/samples/TestCase1.java" */
-	public static final String TESTCASECLASS_RESOURCE = "/samples/TestCase1.java";
+	public static final String TESTCASECLASS_RESOURCE = SAMPLES_RESOURCE_PATH + "/TestCase1.java";
 	/** "/samples/TestCase1.java.txt" */
-	public static final String TESTCASECLASS_TXT_RESOURCE = "/samples/TestCase1.java.txt";
+	public static final String TESTCASECLASS_TXT_RESOURCE = SAMPLES_RESOURCE_PATH + "/TestCase1.java.txt";
 	/** "TestRun1" */
 	public static final String TESTRUNCLASS_FILE = "TestRun1";
 	/** "/samples/TestRun1.java" */
-	public static final String TESTRUNCLASS_RESOURCE = "/samples/TestRun1.java";
+	public static final String TESTRUNCLASS_RESOURCE = SAMPLES_RESOURCE_PATH + "/TestRun1.java";
 	/** "/samples/TestRun1.java.txt" */
-	public static final String TESTRUNCLASS_TXT_RESOURCE = "/samples/TestRun1.java.txt";
+	public static final String TESTRUNCLASS_TXT_RESOURCE = SAMPLES_RESOURCE_PATH + "/TestRun1.java.txt";
 
 	public static String srcDir;
 	public static String testcaseDir;
@@ -70,20 +72,20 @@ public class BaseProject {
 	/** runAutomation.bat */
 	public static final String RUNAUTOMATION_WIN_FILE = "runAutomation.bat";
 	/** /samples/runautomation.bat */
-	public static final String RUNAUTOMATION_WIN_RESOURCE = "/samples/runautomation.bat";
+	public static final String RUNAUTOMATION_WIN_RESOURCE = SAMPLES_RESOURCE_PATH + "/runautomation.bat";
 
 	/** App.map */
 	public static final String APPMAP_FILE = "App.map";
 	/** /samples/App.map */
-	public static final String APPMAP_RESOURCE = "/samples/App.map";
+	public static final String APPMAP_RESOURCE = SAMPLES_RESOURCE_PATH + "/App.map";
 	/** App_en.map */
 	public static final String APPMAP_EN_FILE = "App_en.map";
 	/** /samples/App_en.map */
-	public static final String APPMAP_EN_RESOURCE = "/samples/App_en.map";
+	public static final String APPMAP_EN_RESOURCE = SAMPLES_RESOURCE_PATH + "/App_en.map";
 	/** AppMap.order */
 	public static final String APPMAP_ORDER_FILE = "AppMap.order";
 	/** /samples/AppMap.order */
-	public static final String APPMAP_ORDER_RESOURCE = "/samples/AppMap.order";
+	public static final String APPMAP_ORDER_RESOURCE = SAMPLES_RESOURCE_PATH + "/AppMap.order";
 
 	/**
 	 * This method should only be called outside of the SeleniumPlus Eclipse environment.
@@ -335,6 +337,9 @@ public class BaseProject {
 			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
+		}
+		if (stream == null) {
+			throw new RuntimeException("Resource " + resourcePath + " not found on classpath");
 		}
 		return stream;
 	}
