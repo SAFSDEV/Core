@@ -52,6 +52,7 @@ function hideAllContentPanels(){
     document.getElementById("remote-servers").style.display="none";
     document.getElementById("browser-drivers").style.display="none";
     document.getElementById("calling-javascript").style.display="none";
+    document.getElementById("using-seleniumscripts").style.display="none";
     document.getElementById("http-proxy").style.display="none";
 
     document.getElementById("href-welcome").style.fontWeight="normal";
@@ -77,6 +78,7 @@ function hideAllContentPanels(){
 	document.getElementById("href-browser-drivers").style.fontWeight="normal";
 	document.getElementById("href-using-autoit").style.fontWeight="normal";
 	document.getElementById("href-calling-javascript").style.fontWeight="normal";
+	document.getElementById("href-using-seleniumscripts").style.fontWeight="normal";
 	document.getElementById("href-http-proxy").style.fontWeight="normal";
 }
 
@@ -103,6 +105,7 @@ function checkForSubPanelUrl(){
 	else if(url.endsWith('#browserdrivers')){ browserDrivers(); }
 	else if(url.endsWith('#usingautoit')){ usingAutoIT(); }
 	else if(url.endsWith('#callingjavascript')){ callingJavascript(); }
+	else if(url.endsWith('#usingseleniumscripts')){ callingJavascript(); }
 	else if(url.endsWith('#httpproxy')){ setHttpProxy(); }
 	else if(url.endsWith('#references')){ showReferences(); }
 	else{
@@ -214,6 +217,11 @@ function callingJavascript(){
     document.getElementById("calling-javascript").style.display="block";
     document.getElementById("href-calling-javascript").style.fontWeight="900";
 }
+function usingSeleniumscripts(){
+	hideAllContentPanels();
+    document.getElementById("using-seleniumscripts").style.display="block";
+    document.getElementById("href-using-seleniumscripts").style.fontWeight="900";
+}
 function setHttpProxy(){
 	hideAllContentPanels();
     document.getElementById("http-proxy").style.display="block";
@@ -261,6 +269,7 @@ function usingAutoIT(){
 <a href="#" onclick="browserDrivers()" id="href-browser-drivers" title="#browserdrivers">Browser Drivers</a>&nbsp;&nbsp;|
 <a href="http://safsdev.sourceforge.net/sqabasic2000/UsingAutoIT.htm" id="href-using-autoit" title="#usingautoit">Using AutoIT</a>&nbsp;&nbsp;|
 <a href="#" onclick="callingJavascript()" id="href-calling-javascript" title="#callingjavascript">Calling Javascript</a>&nbsp;&nbsp;|
+<a href="#" onclick="usingSeleniumscripts()" id="href-using-seleniumscripts" title="#usingseleniumscripts">Using SeleniumScripts</a>&nbsp;&nbsp;|
 <a href="#" onclick="setHttpProxy()" id="href-http-proxy" title="#httpproxy">HTTP Proxy</a>&nbsp;&nbsp;|
 <a href="#" onclick="showReferences()" id="href-references" title="#references">References</a>&nbsp;&nbsp;
 <br>
@@ -2151,6 +2160,76 @@ We don't need to understand all of them  :) , the items below are listed by nece
 
 </div>
 
+
+<!--------------------------------->
+<!--    Using SeleniumScripts    -->
+<!--------------------------------->
+<div id="using-seleniumscripts" style="display: none" >
+<h2>Using SeleniumScripts</h2>
+<p>
+There are some tools can record "selenium test" and store it into a file.<br/>
+<a href="http://seleniumbuilder.github.io/se-builder/">Selenium Builder</a> will store it in JSON format.<br/>
+<a href="http://internal.server/saspedia/SelRunner">SelRunner</a> can store it in HTML format.<br/>
+This kind of file contains the "selenium test" and we call these files as "<b>Selenium Scripts</b>".<br/>
+This section explains how to execute "<b>Selenium Scripts</b>" through SeleniumPlus API <a href="http://safsdev.github.io/doc/org/safs/SAFSPlus.DriverCommand.html#CallScript(java.lang.String)">CallScript</a>.<br/>
+<ul>
+<li><a href="#sebuilder_json_script">SeBuilder JSON script</a>
+<li><a href="#selrunner_html_script">SelRunner HTML script</a>
+</ul>
+
+<h3 id="sebuilder_json_script">SeBuilder JSON script:</h3>
+<ol>
+  <li>The script is stored in <a href="https://github.com/SeleniumBuilder/se-builder/wiki/JSON-Format">Sebuilder JSON</a> file.</li>
+  <li>Run this JSON file by SeleniumPlus API <a href="http://safsdev.github.io/doc/org/safs/SAFSPlus.DriverCommand.html#CallScript(java.lang.String)">CallScript</a></li>
+</ol>
+<a href="#using-seleniumscripts">[go back]</a>
+
+
+<h3 id="selrunner_html_script">SelRunner HTML script:</h3>
+<p>
+The HTML script is stored as a Table.<br/> 
+the tag <b>&lt;tbody></b> means the begin of the test.
+the tag <b>&lt;/tbody></b> means the end of the test.<br/>
+the tag <b>&lt;tr></b> means the begin of one step.
+the tag <b>&lt;/tr></b> means the end of one step.<br/>
+each test step can contain multiple <b>&lt;td></b><b>&lt;/td></b>, they are used to hole the comand and parameters.<br/>
+
+Below is an example snippet, which is part of the real 
+<a href="https://raw.githubusercontent.com/SAFSDEV/SeleniumPlus-REGRESSION/master/SeBuilder/Scripts/FormsSRTest.htm">sebuild script</a> in 
+<a href="https://github.com/SAFSDEV/SeleniumPlus-REGRESSION">regression test</a>. 
+<pre>
+  &lt;tbody>
+    &lt;tr>
+        &lt;td>open&lt;/td>
+        &lt;td>${baseurl}&lt;/td>
+        &lt;td>${FormsBrowser}&lt;/td>
+    &lt;/tr>
+    &lt;tr>
+        &lt;td>pause&lt;/td>
+        &lt;td>2000&lt;/td>
+        &lt;td> &lt;/td>
+    &lt;/tr>
+    &lt;tr>
+        &lt;td>captureEntirePageScreenshot&lt;/td>
+        &lt;td>Actuals/FormsSRTest/formsSRTest-1.png&lt;/td>
+        &lt;td>&lt;/td>
+    &lt;/tr>
+    &lt;tr>
+        &lt;td>click&lt;/td>
+        &lt;td>${Map:FormsMain:CheckBox2}&lt;/td>
+        &lt;td>&lt;/td>
+    &lt;/tr>
+    &lt;tr>
+        &lt;td>close&lt;/td>
+        &lt;td>${FormsBrowser}&lt;/td>
+        &lt;td> &lt;/td>
+    &lt;/tr>
+  &lt;/tbody>
+</pre>
+
+<a href="#using-seleniumscripts">[go back]</a>
+
+</div>
 
 <!--------------------------------->
 <!--    Setting HTTP Proxy       -->
