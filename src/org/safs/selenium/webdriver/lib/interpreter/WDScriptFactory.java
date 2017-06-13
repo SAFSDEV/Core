@@ -2,6 +2,9 @@
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
+/**
+ * JUN 13, 2017 (Lei Wang) Modified processNativeStep(): Let pass the command without parameter like 'AcceptAlert' and 'AlertPresent'.
+ */
 package org.safs.selenium.webdriver.lib.interpreter;
 
 import java.io.BufferedReader;
@@ -35,6 +38,8 @@ import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.factory.DataSourceFactory;
 import com.sebuilder.interpreter.factory.ScriptFactory;
 import com.sebuilder.interpreter.factory.StepTypeFactory;
+import com.sebuilder.interpreter.steptype.AcceptAlert;
+import com.sebuilder.interpreter.steptype.AlertPresent;
 
 /**
  * Support the creation of Scripts from both JSON and HTML Fit Tables.
@@ -244,16 +249,20 @@ public class WDScriptFactory extends ScriptFactory {
 //    		step.locatorParams.put(LOCATOR_PARAM, new WDLocator(loc));
 //    	}
 //
-		//              handle default SeInterpreter StepTypes here (like Pause)
-		if( PAUSE_CLASS.equalsIgnoreCase(stepName)){
+    	if(step.type instanceof AcceptAlert ||
+    	   step.type instanceof AlertPresent){
+    		//For command without parameter, just let it go.
+    	}
+		//handle default SeInterpreter StepTypes here (like Pause)
+    	else if( PAUSE_CLASS.equalsIgnoreCase(stepName)){
 			step.stringParams.put(WAITTIME_PARAM, params[1]);
 		}
-		else
-		if( STORE_CLASS.equalsIgnoreCase(stepName)){
+		else if( STORE_CLASS.equalsIgnoreCase(stepName)){
 			step.stringParams.put(TEXT_PARAM, params[1]);
 			step.stringParams.put(VARIABLE_PARAM, params[2]);
-		}else{
-			IndependantLog.debug("WDScriptFactory.processNativeStep "+ step.type.getClass().getName()+" is not yet supported.");
+		}
+		else{
+			IndependantLog.error("WDScriptFactory.processNativeStep "+ step.type.getClass().getName()+" is not yet supported.");
 			throw new RuntimeException("Native SeInterpreter StepType '"+ stepName +" is not yet supported!");
 		}
     }
