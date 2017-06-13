@@ -1,4 +1,4 @@
-/** 
+/**
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
@@ -38,14 +38,14 @@ import com.sebuilder.interpreter.steptype.SwitchToFrameByIndex;
 import com.sebuilder.interpreter.webdriverfactory.WebDriverFactory;
 
 /**
- * The primary purpose of this class is to extend the TestRun support to include Step peeking, skipping, 
+ * The primary purpose of this class is to extend the TestRun support to include Step peeking, skipping,
  * and Retry of specific Script Steps.
  * <p>
  * We also provide WDLocator instances using enhanced SearchObject search algorithms.
  * <p>
- * We've added the ability for embedded variable references in Scripts [ex: ${var}] to be handled sought 
+ * We've added the ability for embedded variable references in Scripts [ex: ${var}] to be handled sought
  * in SAFSVARS if they are not found in the local variable Map.
- *    
+ *
  * @author Carl Nagle
  */
 public class WDTestRun extends TestRun {
@@ -53,7 +53,7 @@ public class WDTestRun extends TestRun {
 	public static final String VARREF_START = "${";
 	public static final String VARREF_END   = "}";
 	public static final String MAPREF_PREFIX   = "map:";
-	
+
 	public WDTestRun(Script script, int implicitlyWaitDriverTimeout,
 			int pageLoadDriverTimeout, Map<String, String> initialVars) {
 		super(script, implicitlyWaitDriverTimeout, pageLoadDriverTimeout, initialVars);
@@ -118,7 +118,7 @@ public class WDTestRun extends TestRun {
 	public static String getAppMapItem(String map, String win, String item){
 		return WebDriverGUIUtilities._LASTINSTANCE.getSTAFHelper().getAppMapItem(map, win, item);
 	}
-	
+
 	/**
 	 * @param varName variable value to retrieve
 	 * @return String value or null if no value exists.
@@ -129,10 +129,10 @@ public class WDTestRun extends TestRun {
 		} catch (SAFSException e) {}
 		return null;
 	}
-	
+
 	/**
 	 * Process any ${var} references.
-	 * Lookup potential variable values stored in the local Java Map object and, if not present there, 
+	 * Lookup potential variable values stored in the local Java Map object and, if not present there,
 	 * see if it is available via SAFSVARS or SAFSMAPS.
 	 * <p>
      * Valid possible App Map Reference formats:
@@ -146,7 +146,7 @@ public class WDTestRun extends TestRun {
 	 * @see WebDriverGUIUtilities#_LASTINSTANCE
 	 * @see STAFHelper#getVariable(String)
 	 */
-	public String replaceVariableReferences(String value){		
+	public String replaceVariableReferences(String value){
 		int start = -1;
 		int end   = -1;
 		do{
@@ -155,10 +155,10 @@ public class WDTestRun extends TestRun {
 			   // there must be a var name between the braces
 			   end = value.indexOf(VARREF_END, start + VARREF_START.length() +1);
 			   if(end > start){
-				   String key = value.substring(start+VARREF_START.length(), end);				   
+				   String key = value.substring(start+VARREF_START.length(), end);
 				   String val = null;
 				   getLog().debug("WDTestRun seeking embedded variable reference '"+ key+"'.");
-				   try{ 
+				   try{
 					   if(vars().containsKey(key)){
 						   val = vars().get(key);
 					   }else{
@@ -171,7 +171,7 @@ public class WDTestRun extends TestRun {
 							   String win = null;
 							   String comp = null;
 							   int col = map.lastIndexOf(':');
-							   if(col < 0){ 
+							   if(col < 0){
 								   //only a COMP (or constant) name is provided
 								   comp = map;
 								   map = null;
@@ -195,16 +195,16 @@ public class WDTestRun extends TestRun {
 						   }
 					   }
 				   }catch(Exception ignore){}
-				   value = val == null ? 
-						   value       : 
+				   value = val == null ?
+						   value       :
 						   value.replace(VARREF_START + key + VARREF_END, val);
 				   getLog().debug("WDTestRun replacing variable reference '"+ key+"' as '"+ value +"'.");
 			   }
 		   }
-		}while(start > -1 && end > start);		
+		}while(start > -1 && end > start);
 		return value;
 	}
-	
+
 	/**
 	 * Fetches a Locator parameter from the current step.
 	 * @param paramName The parameter's name.
@@ -214,11 +214,11 @@ public class WDTestRun extends TestRun {
 	@Override
 	public Locator locator(String paramName) {
 		if(paramName == null)
-			throw new RuntimeException("WDTestRun.locator() paramName is null!");		
+			throw new RuntimeException("WDTestRun.locator() paramName is null!");
 		Step step = currentStep();
 		if(step == null)
 			throw new RuntimeException("WDTestRun.locator() currentStep() #" +
-					(stepIndex + 1) + " is coming back null!");		
+					(stepIndex + 1) + " is coming back null!");
 		Locator loc = step.locatorParams.get(paramName);
 		if(loc == null)
 			throw new RuntimeException("WDTestRun.locator() step.locatorParams is coming back null!");
@@ -248,18 +248,18 @@ public class WDTestRun extends TestRun {
 		}
 		return replaceVariableReferences(s);
 	}
-	
 
-	/** 
-	 * Retrieve the next Step that would be executed by this TestRun without incrementing the 
+
+	/**
+	 * Retrieve the next Step that would be executed by this TestRun without incrementing the
 	 * stepIndex counter.
 	 * <p>
 	 * Does NOT use hasNext()--which can prematurely shutdown the WebDriver.
 	 * <p>
-	 * If avoiding hasNext() the user should make sure cleanup() is called when finished to perform 
-	 * the normal cleanup operations done by hasNext() when it detects there are no more Steps to 
+	 * If avoiding hasNext() the user should make sure cleanup() is called when finished to perform
+	 * the normal cleanup operations done by hasNext() when it detects there are no more Steps to
 	 * execute.
-	 * @return Step -- null if there are no more steps. 
+	 * @return Step -- null if there are no more steps.
 	 */
 	public Step peekNext(){
 		try{
@@ -269,17 +269,17 @@ public class WDTestRun extends TestRun {
 			getLog().debug("WDTestRun: There are no more Steps to Peek. null.");
 			return null;
 		}
-		return getScript().steps.get(stepIndex + 1); 
+		return getScript().steps.get(stepIndex + 1);
 	}
-	
+
 	/**
 	 * Increment the stepIndex counter and return the Step that can be skipped or executed by this TestRun.
-	 * Uses peekNext() to check for a valid next Step.  
+	 * Uses peekNext() to check for a valid next Step.
 	 * <p>
 	 * Does NOT use hasNext()--which can prematurely shutdown the WebDriver.
 	 * <p>
-	 * If avoiding hasNext() the user should make sure cleanup() is called when finished to perform 
-	 * the normal cleanup operations done by hasNext() when it detects there are no more Steps to 
+	 * If avoiding hasNext() the user should make sure cleanup() is called when finished to perform
+	 * the normal cleanup operations done by hasNext() when it detects there are no more Steps to
 	 * execute.
 	 * @return Step -- null if there are no more steps.
 	 * @see #cleanup()
@@ -294,7 +294,7 @@ public class WDTestRun extends TestRun {
 		getLog().debug("WDTestRun: retrieved step "+ (stepIndex + 1));
 		return step;
 	}
-	
+
 	/**
 	 * Perform the normal cleanup done at the end of script execution.
 	 * Essentially, calls hasNext() with stepIndex indicating all steps have been executed.
@@ -310,27 +310,27 @@ public class WDTestRun extends TestRun {
 			}
 		}
 	}
-	
+
 	/** @return True if there is another step to execute. */
 	public boolean hasNext() {
 		return stepIndex < getScript().steps.size() - 1;
 	}
-		
+
 	/**
 	 * Execute the action represented in the Step.
-	 * This does NOT change or increment any counters of what Step is being executed 
+	 * This does NOT change or increment any counters of what Step is being executed
 	 * in the Script.
 	 * <p>
-	 * If the StepType is an instanceof ClickElement we will use our own WDClickElement 
+	 * If the StepType is an instanceof ClickElement we will use our own WDClickElement
 	 * which uses our enhanced WDLibrary to perform the click.<br>
-	 * 
+	 *
 	 * @param step
 	 * @return
 	 */
 	public boolean runStep(Step step){
 
 		initRemoteWebDriver();
-		
+
 		try {
 			StepType type = step.type;
 			if(type instanceof ClickElement){
@@ -348,17 +348,17 @@ public class WDTestRun extends TestRun {
 			}
 			return type.run(this);
 		} catch (Throwable e) {
-			
-			this.log().debug("WDTestRun.runStep() "+ e.getClass().getName()+": "+ e.getMessage(),e); 
+
+			this.log().debug("WDTestRun.runStep() "+ e.getClass().getName()+": "+ e.getMessage(),e);
 			RuntimeException t = new RuntimeException(currentStep() + " failed.", e);
 			t.fillInStackTrace();
 			throw t;
 		}
 	}
-	
+
 	/**
-	 * Executes the next step.  
-	 * Extracts the Step and executes via runStep for enhanced 
+	 * Executes the next step.
+	 * Extracts the Step and executes via runStep for enhanced
 	 * handling of some StepTypes.
 	 * @return True on success.
 	 * @see #runStep(Step)
@@ -433,7 +433,7 @@ public class WDTestRun extends TestRun {
 		int timeout = 30; // TODO get from parameters in this object!
 		String browserID = "sebuilder_run"+System.currentTimeMillis();
 		try{ WDLibrary.startBrowser(null, null, browserID, timeout, true);}
-		catch(Throwable th){			
+		catch(Throwable th){
 			try {
 				WebDriverGUIUtilities.launchSeleniumServers();
 				try{
@@ -447,5 +447,5 @@ public class WDTestRun extends TestRun {
 			}
 		}
 	}
-	
+
 }

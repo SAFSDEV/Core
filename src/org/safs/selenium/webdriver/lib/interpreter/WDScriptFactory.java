@@ -1,4 +1,4 @@
-/** 
+/**
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
@@ -8,12 +8,9 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,14 +24,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.safs.IndependantLog;
-import org.safs.selenium.webdriver.lib.interpreter.selrunner.SRUtilities;
 import org.safs.selenium.webdriver.lib.interpreter.selrunner.SRunnerType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.sebuilder.interpreter.Getter;
-import com.sebuilder.interpreter.Locator;
 import com.sebuilder.interpreter.Script;
 import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.factory.DataSourceFactory;
@@ -53,7 +48,7 @@ public class WDScriptFactory extends ScriptFactory {
 
 	/** "org.safs.selenium.webdriver.lib.interpreter.selrunner.steptype" */
 	public static final String SRSTEPTYPE_PACKAGE = "org.safs.selenium.webdriver.lib.interpreter.selrunner.steptype";
-	
+
 	/* SeRunner HTML Table Tags of Interest */
 	public static final String SR_TABLE_TBODY = "tbody";
 	public static final String SR_TABLE_TR    = "tr";
@@ -74,11 +69,11 @@ public class WDScriptFactory extends ScriptFactory {
 	public static final String VALUE_LOCATORTYPE = "value";
 	public static final String CSS_LOCATORTYPE = "css";
 	public static final String CSSSELECTOR_LOCATORTYPE = "css selector";
-	
+
 	public static final String ANDWAIT_CLASS  = "AndWait";
 	public static final String PAUSE_CLASS    = "Pause";
 	public static final String STORE_CLASS    = "Store";
-	
+
 	/**
 	 * @param script -- One of two possible formats:<br>
 	 * A JSON string describing a script or suite, or an HTML Fit Table format.
@@ -104,7 +99,7 @@ public class WDScriptFactory extends ScriptFactory {
 	}
 
 	/**
-	 * Parse a XML/HTML Fit Table Document into a Script object. 
+	 * Parse a XML/HTML Fit Table Document into a Script object.
 	 * @param d the Document object parsed from the HTML source File.
 	 * @param f the File the HTML file was sourced from.
 	 * @param stepTypeFactory
@@ -115,7 +110,7 @@ public class WDScriptFactory extends ScriptFactory {
 		String debugmsg = "WDScriptFactory.parse(Document) ";
 		NodeList table = d.getElementsByTagName(SR_TABLE_TBODY);
 		if(table == null || table.getLength()==0) throw new IOException("Unsupported HTML table format missing 'tbody'!");
-		
+
 		NodeList stepsA = table.item(0).getChildNodes();
 		ArrayList<Node> rows = new ArrayList<Node>();
 		for(int i=0;i<stepsA.getLength();i++){
@@ -124,11 +119,11 @@ public class WDScriptFactory extends ScriptFactory {
 				rows.add(n);
 			}
 		}
-		
+
 		if(rows.isEmpty())throw new IOException("Unsupported HTML table format missing children of 'tbody'!");
-		
+
 		IndependantLog.info(debugmsg +"found "+ rows.size()+" ROWS of FIT data to process...");
-		
+
 		ArrayList<Script> scripts = new ArrayList<Script>();
 		Script script = new Script();
 		if (f != null) {
@@ -138,18 +133,18 @@ public class WDScriptFactory extends ScriptFactory {
 		for(int i=0; i< rows.size(); i++){
 			Node step0 = rows.get(i);
 			IndependantLog.info(debugmsg +"processing nodeName "+ step0.getNodeName()+"...");
-			NodeList cells = step0.getChildNodes();				
+			NodeList cells = step0.getChildNodes();
 			ArrayList<Node> cols = new ArrayList<Node>();
 			for(int c = 0;c< cells.getLength();c++){
 				Node cn = cells.item(c);
 				if(cn.getNodeName().equalsIgnoreCase(SR_TABLE_TD)) cols.add(cn);
 			}
 			IndependantLog.info(debugmsg +"found "+ cols.size()+" COLS of FIT data to process...");
-			
+
 			if(cols.size()==0) continue;
-			
+
 			String[] params = new String[cols.size()];
-			
+
 			for(int c=0;c < cols.size();c++){
 				params[c] = "";
 				Node cell = cols.get(c);
@@ -157,7 +152,7 @@ public class WDScriptFactory extends ScriptFactory {
 				NodeList text = cell.getChildNodes();
 				IndependantLog.info(debugmsg +"found "+ text.getLength()+" nodes of data in cell...");
 				for(int t=0; t<text.getLength(); t++){
-					Node t0 = text.item(t);							
+					Node t0 = text.item(t);
 					IndependantLog.info(debugmsg +"processing nodeName:"+ t0.getNodeName()+", nodeType:"+ t0.getNodeType()+", nodeValue:"+ t0.getNodeValue()+"...");
 					if(t0.getNodeType()==Node.TEXT_NODE){
 						params[c] = params[c].concat(t0.getNodeValue());
@@ -165,13 +160,13 @@ public class WDScriptFactory extends ScriptFactory {
 				}
 			}
 			// params[0] = action;
-			// params[1] = locator, other param, or empty; 
+			// params[1] = locator, other param, or empty;
 			// params[2] = other param, or empty.
-			
-			stepTypeFactory.setSecondaryPackage(SRSTEPTYPE_PACKAGE);				
+
+			stepTypeFactory.setSecondaryPackage(SRSTEPTYPE_PACKAGE);
 			Step step = null;
 			try{
-				step = new Step(stepTypeFactory.getStepTypeOfName(params[0]));			
+				step = new Step(stepTypeFactory.getStepTypeOfName(params[0]));
 			}catch(Throwable x){
 				if(params[0].endsWith(ANDWAIT_CLASS)){
 					IndependantLog.info(debugmsg +"stripping 'unecessary' AndWait class suffix fro "+ params[0] +"...");
@@ -190,7 +185,7 @@ public class WDScriptFactory extends ScriptFactory {
 				IndependantLog.info(debugmsg +"Step Type "+ step.type.getClass().getName()+" is NOT a SRunnerType.  Seeking Getter...");
 				// check for Steps that are implied (WaitFor, Verify, Assert, Store, etc..)and contain us as Getters
 				boolean hadGetter = false;
-				try{					
+				try{
 					Field[] fields = step.type.getClass().getFields();
 					for(int g=0;g<fields.length;g++){
 						Field field = fields[g];
@@ -222,7 +217,7 @@ public class WDScriptFactory extends ScriptFactory {
 									throw new RuntimeException("SelRunner Getter '"+ newClass +"' must implement the SRunnerType Interface.");
 								} catch (IllegalArgumentException ix){
 									throw new RuntimeException("SelRunner Getter '" + newClass + "' could not be set into "+step.type.getClass().getName()+"!");
-								}								
+								}
 							}
 						}
 					}
@@ -230,30 +225,30 @@ public class WDScriptFactory extends ScriptFactory {
 						IndependantLog.info(debugmsg +"Step Type "+ step.type.getClass().getName()+" processing as a simple, native (non-SRunnerType)...");
 						processNativeStep(step, params);
 					}else{
-						
+
 					}
 				}catch(IllegalAccessException ignore){
 					IndependantLog.info("SelRunner SRunnerType for Step or Getter cannot be acquired for "+ step.type.getClass().getName()+"!");
 					throw new RuntimeException("SelRunner SRunnerType for Step or Getter cannot be acquired for "+ step.type.getClass().getName()+"!");
-				}								
+				}
 			}
-		}		
+		}
 		return scripts;
 	}
 
     protected void processNativeStep(Step step, String[] params){
     	String stepName = step.type.getClass().getSimpleName();
-    	
+
 //    	Locator loc = step.locatorParams.get("locator");
 //    	if(loc != null && !(loc instanceof WDLocator)){
 //    		step.locatorParams.put(LOCATOR_PARAM, new WDLocator(loc));
 //    	}
-//    	
+//
 		//              handle default SeInterpreter StepTypes here (like Pause)
 		if( PAUSE_CLASS.equalsIgnoreCase(stepName)){
 			step.stringParams.put(WAITTIME_PARAM, params[1]);
 		}
-		else 
+		else
 		if( STORE_CLASS.equalsIgnoreCase(stepName)){
 			step.stringParams.put(TEXT_PARAM, params[1]);
 			step.stringParams.put(VARIABLE_PARAM, params[2]);
@@ -262,7 +257,7 @@ public class WDScriptFactory extends ScriptFactory {
 			throw new RuntimeException("Native SeInterpreter StepType '"+ stepName +" is not yet supported!");
 		}
     }
-		
+
 	/**
 	 * @param reader A Reader pointing to one of 2 possible script formats:<br>
 	 * a JSON stream describing a script or suite, or an HTML Fit Table.
@@ -273,7 +268,7 @@ public class WDScriptFactory extends ScriptFactory {
 	 */
 	public List<Script> parse(Reader reader, File sourceFile) throws IOException{
 		String message = "WDScriptFactory.parse(Reader)";
-		try{ 
+		try{
 			return parse(new JSONObject(new JSONTokener(reader)), sourceFile);
 		}catch(Exception x){
 			message += ", "+ x.getClass().getSimpleName()+" "+ x.getMessage();
@@ -282,14 +277,14 @@ public class WDScriptFactory extends ScriptFactory {
 				reader = getUTF8Reader(sourceFile);
 				return parse(getDocumentBuilder().parse(new ReaderInputStream(reader)), sourceFile, stepTypeFactory);
 			}catch(Exception px){
-				message += ", "+ px.getClass().getSimpleName()+" "+ px.getMessage();				
+				message += ", "+ px.getClass().getSimpleName()+" "+ px.getMessage();
 				throw new IOException(message);
 			}finally{
 				try{ reader.close();}catch(Exception fx){}
 			}
 		}
 	}
-	
+
 	/**
 	 * @return DocumentBuilder if one can successfully be created.
 	 * @throws ParserConfigurationException
@@ -298,16 +293,16 @@ public class WDScriptFactory extends ScriptFactory {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		return dbf.newDocumentBuilder();
 	}
-	
+
 	/**
 	 * @param sourceFile
 	 * @return BufferedReader opened with UTF-8 encoding.
 	 * @throws IOException
 	 */
 	protected BufferedReader getUTF8Reader(File sourceFile) throws IOException{
-		return new BufferedReader(new InputStreamReader(new FileInputStream(sourceFile), "UTF-8"));		
+		return new BufferedReader(new InputStreamReader(new FileInputStream(sourceFile), "UTF-8"));
 	}
-	
+
 	/**
 	 * @param f A File pointing to a JSON file describing a script or suite.
 	 * @return A list of scripts, ready to run.
@@ -322,5 +317,5 @@ public class WDScriptFactory extends ScriptFactory {
 		} finally {
 			try { r.close(); } catch (Exception e) {}
 		}
-	}	
+	}
 }
