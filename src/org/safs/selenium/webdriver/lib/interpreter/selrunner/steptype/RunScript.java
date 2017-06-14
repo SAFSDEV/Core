@@ -8,10 +8,8 @@
  */
 package org.safs.selenium.webdriver.lib.interpreter.selrunner.steptype;
 
-import java.util.Map;
-
-import org.safs.selenium.webdriver.lib.interpreter.selrunner.Constants;
 import org.safs.selenium.webdriver.lib.interpreter.selrunner.SRunnerType;
+import org.safs.selenium.webdriver.lib.interpreter.selrunner.Utils;
 
 import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.StepType;
@@ -23,46 +21,14 @@ public class RunScript implements StepType, SRunnerType {
 
 	@Override
 	public boolean run(TestRun ctx) {
-		String jscode = defineStoredVars(ctx) + ctx.string(SCRIPT_PARAM);
-		ctx.driver().executeScript(jscode);
+		Utils.executeScript(ctx, ctx.string(SCRIPT_PARAM));
 		// what can we do with result?
 		return true;
 	}
 
 	@Override
 	public void processParams(Step step, String[] params) {
-		//strip the embedding prefix "javascript{" and suffix "}".
-		String jscode = params[1];
-
-		int start = jscode.toLowerCase().indexOf(Constants.PARAM_SCRIPT_PREFIX);
-		int end = jscode.toLowerCase().indexOf(Constants.PARAM_SCRIPT_SUFFIX);
-
-		if(start>-1 && end>-1 && end>start){
-			jscode = jscode.substring(start+Constants.PARAM_SCRIPT_PREFIX.length(), end);
-		}
-
-		step.stringParams.put(SCRIPT_PARAM, jscode);
-	}
-
-	/**
-	 * @param ctx TestRun, the context object.
-	 * @return String, the javascript code to define the 'associate array' holding
-	 *                 variables in the variable store of context (TestRun).
-	 */
-	public static String defineStoredVars(TestRun ctx){
-		Map<String, String> storedVariables = ctx.vars();
-
-		StringBuilder jscode = new StringBuilder();
-
-		//Define a javascript object to represent the 'associate array'.
-		//var storedVars = {};
-		jscode.append("var "+Constants.PARAM_STOREDVARS_ARRAY+" = {};\n");
-		for(String key:storedVariables.keySet()){
-			//storedVars.key='value';
-			jscode.append(Constants.PARAM_STOREDVARS_ARRAY+"."+key+"='"+storedVariables.get(key)+"';\n");
-		}
-
-		return jscode.toString();
+		step.stringParams.put(SCRIPT_PARAM, Utils.normalize(params[1]));
 	}
 
 }

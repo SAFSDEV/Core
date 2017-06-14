@@ -1,21 +1,26 @@
 /**
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+ */
 
+/**
+ * Logs for developers, not published to API DOC.
+ *
+ * History:
+ * 2017年6月14日    (SBJLWA) Initial release.
+ */
 package org.safs.selenium.webdriver.lib.interpreter.selrunner.steptype;
 
-import org.safs.selenium.webdriver.lib.interpreter.WDScriptFactory;
-import org.safs.selenium.webdriver.lib.interpreter.selrunner.SRUtilities;
 import org.safs.selenium.webdriver.lib.interpreter.selrunner.SRunnerType;
 
 import com.sebuilder.interpreter.Step;
-import com.sebuilder.interpreter.steptype.SendKeysToElement;
 
-public class Type extends SendKeysToElement implements SRunnerType {
+/**
+ * @author sbjlwa
+ */
+public class AlertText extends com.sebuilder.interpreter.steptype.AlertText implements SRunnerType{
 	@Override
 	public void processParams(Step step, String[] params) {
-		SRUtilities.setLocatorParam(step, params[1]);
-		step.stringParams.put(WDScriptFactory.TEXT_PARAM, params[2]);
+		step.stringParams.put(cmpParamName(), params[1]);
 	}
 }

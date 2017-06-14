@@ -8,6 +8,7 @@
  * MAR 01, 2016 CANAGL Added Support for SAFSVARS variable lookups if local Map has no reference.
  * SEP 27, 2016 SBJLWA Modified initRemoteWebDriver(): Launch selenium server set in the .ini configuration file.
  *                                                     Close the browser after getting RemoteDriver.
+ * JUN 14, 2017 SBJLWA Modified string(): evaluate the the parameter as javascript if it is embedded by "javascript{}"
  */
 package org.safs.selenium.webdriver.lib.interpreter;
 
@@ -23,6 +24,7 @@ import org.safs.StringUtils;
 import org.safs.selenium.webdriver.WebDriverGUIUtilities;
 import org.safs.selenium.webdriver.lib.SeleniumPlusException;
 import org.safs.selenium.webdriver.lib.WDLibrary;
+import org.safs.selenium.webdriver.lib.interpreter.selrunner.steptype.Eval;
 
 import com.sebuilder.interpreter.Locator;
 import com.sebuilder.interpreter.Script;
@@ -241,12 +243,23 @@ public class WDTestRun extends TestRun {
 	 */
 	@Override
 	public String string(String paramName) {
-		String s = currentStep().stringParams.get(paramName);
-		if (s == null) {
+		String parameter = currentStep().stringParams.get(paramName);
+		if (parameter == null) {
 			throw new RuntimeException("Missing parameter \"" + paramName + "\" at step #" +
 					(stepIndex + 1) + ".");
 		}
-		return replaceVariableReferences(s);
+		parameter = replaceVariableReferences(parameter);
+
+		//evaluate the parameter as javascript expression
+		Object evaluatedValue = Eval.eval(this, parameter);
+		if(evaluatedValue==null){
+			getLog().error("The evaluated result is null, for expression\n"+parameter);
+			//should we throw an Exception, or return null, or just return the parameter itself?
+		}else{
+			parameter = evaluatedValue.toString();
+		}
+
+		return parameter;
 	}
 
 
