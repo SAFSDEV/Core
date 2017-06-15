@@ -13,6 +13,8 @@ package org.safs.selenium.webdriver.lib.interpreter.selrunner;
 
 import java.util.Map;
 
+import org.safs.SAFSRuntimeException;
+
 import com.sebuilder.interpreter.Getter;
 import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.Store;
@@ -91,6 +93,9 @@ public class Utils {
 	 *                          or a variable name to hold the returned value.<br>
 	 */
 	public static void setParam(Step step, Getter getter, String parameter){
+		if(step==null || getter==null || parameter==null){
+			throw new SAFSRuntimeException("Parameter is null.\nstep="+step+"\ngetter="+getter+"\nparameter="+parameter);
+		}
 		if(step.type instanceof Store){
 			//Store will always use "variable" to get the parameter
 			step.stringParams.put(Constants.PARAM_VARIABLE/*"variable"*/, parameter);
@@ -98,7 +103,9 @@ public class Utils {
 			//verify, waitFor, assert, the second parameter is the value to compare
 			//the getter provides the parameter's name we should store the parameter as
 			//later the Verify, WaitFor, Assert will use that name to get this parameter
-			step.stringParams.put(getter.cmpParamName(), parameter);
+			if(getter.cmpParamName()!=null){
+				step.stringParams.put(getter.cmpParamName(), parameter);
+			}//else if getter.cmpParamName() is null, that means this setter (such as ElementNotPresent, TextPresent etc.) doesn't need that parameter.
 		}
 	}
 }
