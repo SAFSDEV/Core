@@ -13,6 +13,9 @@ package org.safs.selenium.webdriver.lib.interpreter.selrunner;
 
 import java.util.Map;
 
+import com.sebuilder.interpreter.Getter;
+import com.sebuilder.interpreter.Step;
+import com.sebuilder.interpreter.Store;
 import com.sebuilder.interpreter.TestRun;
 
 /**
@@ -76,5 +79,26 @@ public class Utils {
 		String jscode = Utils.defineStoredVars(ctx) + script;
 		ctx.getLog().debug("interpreter.selrunner.Utils.executeScript() javascript\n"+jscode);
 		return ctx.driver().executeScript(jscode);
+	}
+
+	/**
+	 * According the step type, set the parameter into the step's variable store.
+	 *
+	 * @param step Step, for which to set the parameter
+	 * @param getter Getter, from which to get the parameter's name
+	 * @param parameter String, the parameter to store. <br>
+	 *                          It may be literal string to compare;<br>
+	 *                          or a variable name to hold the returned value.<br>
+	 */
+	public static void setParam(Step step, Getter getter, String parameter){
+		if(step.type instanceof Store){
+			//Store will always use "variable" to get the parameter
+			step.stringParams.put(Constants.PARAM_VARIABLE/*"variable"*/, parameter);
+		}else{
+			//verify, waitFor, assert, the second parameter is the value to compare
+			//the getter provides the parameter's name we should store the parameter as
+			//later the Verify, WaitFor, Assert will use that name to get this parameter
+			step.stringParams.put(getter.cmpParamName(), parameter);
+		}
 	}
 }
