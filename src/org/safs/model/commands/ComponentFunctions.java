@@ -540,6 +540,151 @@ public class ComponentFunctions {
      public static ToolBarFunctions _ToolBarFunctions = ToolBarFunctions.getInstance();
 
     /*************************************************************
+     static reference to TIDRestFunctions.class 
+
+     
+				Actions for REST request such as GET, PUT, POST, DELETE etc.
+			
+
+     
+                
+                    This keyword library provides REST Actions that
+                    can be used by all three DDE Drivers--CycleDriver,
+                    SuiteDriver, and StepDriver. That means they can be
+                    used in any keyword driven test tables regardless of
+                    the test tables level--Cycle, Suite, or Step.
+                
+                
+                    Each different action has different
+                    parameters as described in its documentation. For
+                    reference, the first fields of ALL REST Action
+                    test records are defined below:
+                
+                First Fields Description
+                
+                    Field #1
+                    The "T" = Component Action record type specifier.
+
+                    Field #2
+                    The "SAFSREST" = Flag for REST action.
+                        It can be
+                        
+                        a literal string "SAFSREST"
+                        a map item of any name given by user, but the value MUST be "SAFSREST", such as
+                        --------- Map file example  -------
+                        [RestServiceTest]
+                        RestServiceTest=SAFSREST
+                        -----------------------------------
+                        
+                        
+                    
+                    
+                    Field #3
+                    
+                        The "SessionIDItem" = The map item storing the Session ID.
+                        How to define SessionIDItem
+                        The variable "SessionIDItem" can be defined in the map file under section [ApplicationConstant] or 
+                        section specified by Field #2, examples as below:
+                        --------- Map file example  -------
+                        
+                        
+                        #T, SAFSREST, SessionIDItem, RestAction
+                        #For above test record, SessionIDItem can be defined under section "SAFSREST"
+                        
+                        [SAFSREST]
+                        SessionIDItem=UserAssignedSessionID
+
+                        
+                        #Or SessionIDItem can be defined under section "ApplicationConstant"
+                        
+                        [ApplicationConstant]
+                        SessionIDItem=UserAssignedSessionID
+                        
+                        
+                        
+                        #T, RestServiceTest, SessionIDItem, RestAction
+                        #For above test record, SessionIDItem is defined under section "RestServiceTest"
+                        
+                        [RestServiceTest]
+                        RestServiceTest=SAFSREST
+                        SessionIDItem=UserAssignedSessionID
+
+                        
+                        #Or SessionIDItem can be defined under section "ApplicationConstant"
+                        
+                        [ApplicationConstant]
+                        SessionIDItem=UserAssignedSessionID
+                        
+                        -----------------------------------
+                        
+                        Notes of SessionIDItem
+                        This ID is assigned by user, who needs to guarantee it is unique.
+                        If the SessionIDItem is provided, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing each other action keyword, which will be handled within a session, within which:
+                        1. The base URL is stored, and it will be prepended to a relative URI to form a full REST service URL. 
+                        2. The authentication information is also stored for later rest action execution.
+                        
+                        Otherwise (no SessionIDItem is provided), it will be considered as a one-shot connection, and NO RestStartServiceSession
+                        needs to be called and user may need to provide authentication information.
+                        The parameter relativeURI should be provided with a full-path URL
+                        
+                    
+                    
+                    Field #4
+                    The REST Action keyword.
+                
+
+                Authentication/Authorization settings
+                Some REST service needs Authentication/Authorization before requesting.
+                It can be globally set via .ini configuration file or VM parameter as below:
+                
+                .ini configuration file
+                    #The auth-config file should be assigned to key AUTH under section SAFS_REST
+                    [SAFS_REST]
+                    AUTH=config\auth2.xml
+                
+                
+                VM parameter
+                    #The auth-config file should be assigned to parameter safs.rest.auth
+                    java -Dsafs.rest.auth=config\auth2.xml aTest
+                
+                
+                It can also be set via keyword parameter as below:
+                
+                    T, SAFSREST, sessionIDItem, RestGetXML, relativeURI, responseIDVar [, body] [, headers]  , config\auth2.xml
+                
+                
+                Auth setting via keyword parameter will only take effect during this keyword execution, and it will override the global auth setting.
+                
+                Examples:
+
+                
+                    T, SAFSREST, sessionIDItem, RestStartServiceSession, baseURL  [, authentication]
+                
+                
+                    T, SAFSREST, sessionIDItem, RestGetXML, relativeURI, responseIDVar [, body] [, headers]  [, authentication]
+                
+                
+                    T, SAFSREST, sessionIDItem, RestEndServiceSession
+                
+                
+                    Note:
+                    
+                    REST Action parameters must be placed in the test
+                    record in the field position specified in the
+                    documentation. Some parameters are optional.
+                    However, the field associated with that parameter
+                    must be honored. If you wish to skip an optional
+                    parameter you must still provide an empty field for
+                    that parameter.
+                
+
+            
+
+     **************************************************************/
+     public static TIDRestFunctions _TIDRestFunctions = TIDRestFunctions.getInstance();
+
+    /*************************************************************
      static reference to TimePickerFunctions.class 
 
       
