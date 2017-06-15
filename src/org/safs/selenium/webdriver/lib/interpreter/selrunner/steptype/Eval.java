@@ -51,7 +51,7 @@ public class Eval extends com.sebuilder.interpreter.steptype.Eval implements SRu
 	@Override
 	public void processParams(Step step, String[] params) {
 		step.stringParams.put(PARAM_SCRIPT, params[1]/*javascript expression*/);
-		step.stringParams.put(cmpParamName()/*"value"*/, params[2]);
+		if(params.length>2) Utils.setParam(step, this, params[2]);
 	}
 
 	/**
