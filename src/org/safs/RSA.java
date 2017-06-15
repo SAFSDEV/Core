@@ -1,4 +1,4 @@
-/** 
+/**
  ** Copyright (C) SAS Institute, All rights reserved.
  ** General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
@@ -31,7 +31,7 @@ import org.w3c.tools.codec.Base64Encoder;
 
 
 /**
- * 
+ *
 <pre>
 Usage:
 java org.safs.RSA -gen
@@ -42,7 +42,7 @@ java org.safs.RSA -decrypt -data data/file -key privatekey/file
 java org.safs.RSA -decrypt -data data/file -key privatekey/file -out outputfile
 </pre>
  * History:<br>
- * 
+ *
  *  <br>   Mar 31, 2014    (sbjlwa) Initial release.
  */
 public class RSA {
@@ -51,7 +51,7 @@ public class RSA {
 	public static final String UTF8_CHARSET = "UTF-8";
 	/**The default length of generated key, it is 1024*/
 	public static final int ENGRYPT_KEY_LENGHT = 1024;//512 Minimum
-	
+
 	/**The algorithm of encryption, it is 'RSA'*/
 	public static final String KEY_ALGORITHM = "RSA";
 	/**The algorithm of signature, it is 'MD5withRSA'*/
@@ -61,17 +61,17 @@ public class RSA {
 	/**The map key for storing a private key in the map, it is '__RSAPrivateKey__'*/
 	public static final String MAPKEY_FOR_PRIVATEKEY = "__RSAPrivateKey__";
 	public static final String SAFS_ENCRYPTED_STRING_PREFIX = "__SAFS_ENCRYPTED_STRING__";
-	
+
 	public static final String PARAM_TEST 	= "-test";
-	
+
 	public static final String PARAM_GENERATE_KEY 	= "-gen";
 	public static final String PARAM_OUT_FILE 		= "-out";
-	
+
 	public static final String PARAM_ENCRYPT 		= "-encrypt";
 	public static final String PARAM_DECRYPTE 		= "-decrypt";
 	public static final String PARAM_DATA 			= "-data";
 	public static final String PARAM_KEY 			= "-key";
-	
+
 	/**
 	 * @param encodedPrivateKey	String the base64-encoded private key.
 	 * @return PrivateKey the private key
@@ -79,11 +79,11 @@ public class RSA {
 	 */
 	public static PrivateKey decodePrivateKey(String encodedPrivateKey) throws Exception{
 		byte[] keybytes = Base64Decoder.decodeBase64Bytes(encodedPrivateKey);
-		
+
 		PKCS8EncodedKeySpec keyspec = new PKCS8EncodedKeySpec(keybytes);
 		KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
 		PrivateKey privateKey = keyFactory.generatePrivate(keyspec);
-		
+
 		return privateKey;
 	}
 
@@ -94,14 +94,14 @@ public class RSA {
 	 */
 	public static PublicKey decodePublicKey(String encodedPublicKey) throws Exception{
 		byte[] keybytes = Base64Decoder.decodeBase64Bytes(encodedPublicKey);
-		
+
 		X509EncodedKeySpec keyspec = new X509EncodedKeySpec(keybytes);
 		KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
 		PublicKey publicKey = keyFactory.generatePublic(keyspec);
-		
+
 		return publicKey;
 	}
-	
+
 	/**
 	 * @param encodedKey	the base64-encoded key
 	 * @param isPrivate		if true, then encodedKey is private; otherwise, the encodedKey is public
@@ -110,18 +110,18 @@ public class RSA {
 	 */
 	public static Key decodeEncodedKey(String encodedKey, boolean isPrivate) throws Exception{
 		Key key = null;
-		
+
 		if(isPrivate){
 			key = decodePrivateKey(encodedKey);
 		}else{
 			key = decodePublicKey(encodedKey);
 		}
-		
+
 		return key;
 	}
-	
+
 	/**
-	 * Sign the data with private key, and base64-encode the signature. 
+	 * Sign the data with private key, and base64-encode the signature.
 	 * @param data byte[], the data to sign
 	 * @param encodedPrivateKey String, the base64 encoded private key string
 	 * @return String the base64-encoded signature.
@@ -129,7 +129,7 @@ public class RSA {
 	 */
 	public static String sign(byte[] data, String encodedPrivateKey) throws Exception{
 		PrivateKey privateKey = decodePrivateKey(encodedPrivateKey);
-		
+
 		//sign the data with private key
 		Signature worker = Signature.getInstance(SIGNATURE_ALGORITHM);
 		worker.initSign(privateKey);
@@ -138,7 +138,7 @@ public class RSA {
 		byte[] signature = worker.sign();
 		return Base64Encoder.encodeBase64Bytes(signature);
 	}
-	
+
 	/**
 	 * Use 'public key' to verify the data is signed (signed by 'private key') correclty.
 	 * @param data byte[], the signed data (by 'private key')
@@ -149,16 +149,16 @@ public class RSA {
 	 */
 	public static boolean verifySignature(byte[] data, String encodedPublicKey, String encodedSignature) throws Exception{
 		PublicKey publicKey = decodePublicKey(encodedPublicKey);
-		
+
 		//use 'public key' to verify the data is signed by the right person
 		Signature worker = Signature.getInstance(SIGNATURE_ALGORITHM);
 		worker.initVerify(publicKey);
 		worker.update(data);
-		
+
 		byte[] signature = Base64Decoder.decodeBase64Bytes(encodedSignature);
 		return worker.verify(signature);
 	}
-	
+
 	/**====================================================
 	 * ENCRYPT BY PRIVATE_KEY, DECRPT BY PUBLIC_KEY, user could sign the "encrypted data" before sending it out.
 	 * ====================================================*/
@@ -226,7 +226,7 @@ public class RSA {
 		return decryptByKey(data, encodedPublicKey, false);
 	}
 	/**========================================================================================================*/
-	
+
 	/**====================================================
 	 * ENCRYPT BY PUBLIC_KEY, DECRPT BY PRIVATE_KEY
 	 * ==================================================== */
@@ -299,7 +299,7 @@ public class RSA {
 	/**
 	 * Encrypt the 'data' by key (private or public).
 	 * @param data	byte[], the bytes to encrypt.
-	 * @param encodedKey	String, the key (base64-encoded) used to encrypt 
+	 * @param encodedKey	String, the key (base64-encoded) used to encrypt
 	 * @param usePrivateKey	boolean, if true, the encodedKey is considered as private key; otherwise it is public key.
 	 * @return	byte[], the "encrypted bytes"
 	 * @throws Exception
@@ -315,7 +315,7 @@ public class RSA {
 	/**
 	 * Decrypt the 'encrypted data' by key (private or public).
 	 * @param data	byte[], the bytes to decrypt.
-	 * @param encodedKey	String, the key (base64-encoded) used to decrypt 
+	 * @param encodedKey	String, the key (base64-encoded) used to decrypt
 	 * @param usePrivateKey	boolean, if true, the encodedKey is considered as private key; otherwise it is public key.
 	 * @return	byte[], the "decrypted bytes"
 	 * @throws Exception
@@ -327,10 +327,10 @@ public class RSA {
 		cipher.init(Cipher.DECRYPT_MODE, key);
 		//RSA has a limitation for the length of bytes to decrypt
 		System.out.println("data length "+data.length);
-		
+
 		return cipher.doFinal(data);
 	}
-	
+
 	/**
 	 * @param keyMap the map containing the base64-encoded private key.
 	 * @return String, the base64-encoded private key.
@@ -339,9 +339,9 @@ public class RSA {
 	 */
 	public static String getPrivateKey(Map<String, String> keyMap) throws Exception{
 		String key = keyMap.get(MAPKEY_FOR_PRIVATEKEY);
-		
+
 		if(key==null) throw new Exception("Cannot get the private key from map");
-		
+
 		return key;
 	}
 	/**
@@ -352,12 +352,12 @@ public class RSA {
 	 */
 	public static String getPublicKey(Map<String, String> keyMap) throws Exception{
 		String key = keyMap.get(MAPKEY_FOR_PUBLICKEY);
-		
+
 		if(key==null) throw new Exception("Cannot get the public key from map");
-		
+
 		return key;
 	}
-	
+
 	/**
 	 * Generate key-pair, the public-key and private-key; then base64-encode them and put them into a map.
 	 * @return	Map<String, String>, a map containing base64-encoded key pairs, <br>
@@ -371,7 +371,7 @@ public class RSA {
 		int pausetime = 50;
 		Point mousePreviousLocation = MouseInfo.getPointerInfo().getLocation();
 		Point mouseLocation = null;
-		
+
 		int seedsLength = 1024;
 		byte[] seeds = new byte[seedsLength];
 		byte[] coordinationBytes = null;
@@ -394,24 +394,24 @@ public class RSA {
 				try {Thread.sleep(pausetime);}catch(Exception e){}
 			}
 		}
-		
+
 		SecureRandom random = new SecureRandom(seeds);
 		keyPairGen.initialize(ENGRYPT_KEY_LENGHT, random);
 //		keyPairGen.initialize(ENGRYPT_KEY_LENGHT);
-		
+
 		KeyPair keyPair = keyPairGen.generateKeyPair();
-		
+
 		Map<String, String> keyMap = new HashMap<String, String>();
-		
+
 		keyMap.put(MAPKEY_FOR_PRIVATEKEY, Base64Encoder.encodeBase64Bytes(keyPair.getPrivate().getEncoded()));
 		keyMap.put(MAPKEY_FOR_PUBLICKEY, Base64Encoder.encodeBase64Bytes(keyPair.getPublic().getEncoded()));
-		
+
 		return keyMap;
 	}
-	
+
 	/**
 	 * Get the 4 bytes of an integer.
-	 * @param coordination	int, the 
+	 * @param coordination	int, the
 	 * @return	byte[], an array of byte for an integer
 	 */
 	private static byte[] getBytes(int coordination){
@@ -422,12 +422,12 @@ public class RSA {
 		}
 		return bytes;
 	}
-	
+
 	public static void main(String[] args) throws Exception{
 		Map<String, String> keyMap = null;
 		String pubkey = null;
 		String prikey = null;
-		
+
 		String arg = null;
 		boolean test = false;
 		boolean generateKey = false;
@@ -439,15 +439,15 @@ public class RSA {
 		String data = null;
 		/* The key used to encrypt data or to decrypt data*/
 		String key = null;
-		
+
 		String testfile = null;
-		
+
 		for(int i=0;i<args.length;i++){
 			arg = args[i];
 			if(PARAM_TEST.equals(arg)){
 				test = true;
 				if((i+1)<args.length && !args[i+1].startsWith("-")){
-					testfile = args[++i];					
+					testfile = args[++i];
 				}
 			}else if(PARAM_GENERATE_KEY.equals(arg)){
 				generateKey = true;
@@ -457,21 +457,21 @@ public class RSA {
 				decrypt = true;
 			}else if(PARAM_OUT_FILE.equals(arg)){
 				if(++i<args.length && !args[i].startsWith("-")){
-					outputFile = args[i];					
+					outputFile = args[i];
 				}else{
 					System.err.println("Error: miss outputfile. Usage: "+PARAM_OUT_FILE+" outputFile");
 					return;
 				}
 			}else if(PARAM_DATA.equals(arg)){
 				if(++i<args.length && !args[i].startsWith("-")){
-					data = args[i];					
+					data = args[i];
 				}else{
 					System.err.println("Error: miss data. Usage: "+PARAM_DATA+" data");
 					return;
 				}
 			}else if(PARAM_KEY.equals(arg)){
 				if(++i<args.length && !args[i].startsWith("-")){
-					key = args[i];					
+					key = args[i];
 				}else{
 					System.err.println("Error: miss key. Usage: "+PARAM_KEY+" key");
 					return;
@@ -480,12 +480,12 @@ public class RSA {
 				System.out.println("Warning: Unkonwn parameter: '"+arg+"'");
 			}
 		}
-		
+
 		if(test || generateKey){
 			keyMap = RSA.initKeys();
 			pubkey = RSA.getPublicKey(keyMap);
 			prikey = RSA.getPrivateKey(keyMap);
-			
+
 			StringBuffer sb = new StringBuffer();
 			sb.append(MAPKEY_FOR_PUBLICKEY+"\n");
 			sb.append(pubkey+"\n");
@@ -498,14 +498,14 @@ public class RSA {
 				System.out.println("Key Pairs have been saved to file '"+outputFile+"'");
 			}else{
 				System.out.println(sb.toString());
-				
+
 				if(test){
 					String text = "YouPassword123dfaderewafaDAEGEAEDGEWRVSfsdf598";
 //					byte[] bytes = text.getBytes();
 					byte[] bytes = text.getBytes(Charset.forName("UTF-8"));
 					testEncyptByPublicKeyAndDecryptByPrivateKey(bytes, pubkey, prikey);
 					testEncyptByPrivateKeyAndDecryptByPublicKey(bytes, pubkey, prikey);
-					
+
 					if(testfile!=null) readRemote(testfile);
 				}
 			}
@@ -522,7 +522,7 @@ public class RSA {
 			}catch(Exception e){
 				System.out.println("Info: key is provided directly");
 			}
-			
+
 			if(encrypt){
 				String encryptedString = RSA.encryptByPublicKey(data, key);
 				sb.append(encryptedString);
@@ -530,7 +530,7 @@ public class RSA {
 				String decryptedString = RSA.decryptByPrivateKey(data, key);
 				sb.append(decryptedString);
 			}
-			
+
 			if(outputFile!=null){
 				FileUtilities.writeStringToUTF8File(outputFile, sb.toString());
 				System.out.println("Encrypted/Decrypted string have been saved to file '"+outputFile+"'");
@@ -544,10 +544,10 @@ public class RSA {
 		}
 
 	}
-	
+
 	public static String getUsage(){
 		StringBuffer usage = new StringBuffer();
-		
+
 		usage.append("Usage:\n");
 		usage.append("java "+CLASS_NAME+" "+PARAM_GENERATE_KEY+"\n");
 		usage.append("java "+CLASS_NAME+" "+PARAM_GENERATE_KEY+" "+PARAM_OUT_FILE+" outputfile\n");
@@ -555,80 +555,80 @@ public class RSA {
 		usage.append("java "+CLASS_NAME+" "+PARAM_ENCRYPT+" "+PARAM_DATA+" data/file "+PARAM_KEY+" publickey/file "+PARAM_OUT_FILE+" outputfile\n");
 		usage.append("java "+CLASS_NAME+" "+PARAM_DECRYPTE+" "+PARAM_DATA+" data/file "+PARAM_KEY+" privatekey/file\n");
 		usage.append("java "+CLASS_NAME+" "+PARAM_DECRYPTE+" "+PARAM_DATA+" data/file "+PARAM_KEY+" privatekey/file "+PARAM_OUT_FILE+" outputfile\n");
-		
+
 		return usage.toString();
 	}
-	
+
 	public static void testEncyptByPublicKeyAndDecryptByPrivateKey(byte[] data, String pubkey, String prikey) throws Exception{
 		byte[] encryptedData = RSA.encryptByPublicKey(data, pubkey);
-		
-		
-		
+
+
+
 		byte[] decryptedData = RSA.decryptByPrivateKey(encryptedData, prikey);
 //		String t = Base64Encoder.encodeBase64Bytes(encryptedData);
 //		byte[] decryptedData = RSA.decryptByPrivateKey(Base64Decoder.decodeBase64Bytes(t), prikey);
-		
+
 		String originalStr = new String(data);
 		String encryptedStr = new String(encryptedData);
 		String decryptedStr = new String(decryptedData);
-		
+
 		System.out.println("originalStr="+originalStr);
 		System.out.println("encryptedStr="+encryptedStr);
 		System.out.println("decryptedStr="+decryptedStr);
-		
+
 		if(originalStr.equals(decryptedStr)){
 			System.out.print("Success");
 		}else{
 			System.err.print("Fail");
 		}
 	}
-	
+
 	public static void testEncyptByPrivateKeyAndDecryptByPublicKey(byte[] data, String pubkey, String prikey) throws Exception{
-		
+
 		byte[] encryptedData = RSA.encryptByPrivateKey(data, prikey);
-		
+
 		byte[] decryptedData = RSA.decryptByPublicKey(encryptedData, pubkey);
-		
+
 		String originalStr = new String(data);
 		String encryptedStr = new String(encryptedData);
 		String decryptedStr = new String(decryptedData);
-		
+
 		System.out.println("originalStr="+originalStr);
 		System.out.println("encryptedStr="+encryptedStr);
 		System.out.println("decryptedStr="+decryptedStr);
-		
+
 		if(originalStr.equals(decryptedStr)){
 			System.out.print("Success");
 		}else{
 			System.err.print("Fail");
 		}
-		
+
 		//Signature
 		String sign = RSA.sign(encryptedData, prikey);
 		System.out.println("Signature: \n"+sign);
-		
+
 		if(RSA.verifySignature(encryptedData, pubkey, sign)){
 			System.out.println("The encryptedData has correct signature.");
 		}else{
 			System.err.println("The encryptedData does not have correct signature.");
 		}
-		
+
 		//Anybody can decrypt the "private-key-encrypted data" with a public-key
 		RSA.decryptByPublicKey(encryptedData, pubkey);
-		
+
 		encryptedStr = new String(encryptedData);
 		decryptedStr = new String(decryptedData);
 		System.out.println("originalStr="+originalStr);
 		System.out.println("signed encryptedStr ="+encryptedStr);
 		System.out.println("signed decryptedStr="+decryptedStr);
-		
+
 		if(originalStr.equals(decryptedStr)){
 			System.out.print("Success");
 		}else{
 			System.err.print("Fail");
 		}
 	}
-	
+
 	public static void readRemote(String filename) throws FileNotFoundException, IOException{
 		String pass = FileUtilities.readStringFromUTF8File(filename);
 		System.out.println(pass);
