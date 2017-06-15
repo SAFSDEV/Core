@@ -31,16 +31,59 @@ import org.w3c.tools.codec.Base64Encoder;
 
 
 /**
+ * This class provides the functionality to
+ * <ul>
+ * <li>generate the RSA public/private key pair
+ * <li>encrypt the secrete data with public key
+ * <li>decrypt the encrypted data by private key
+ * </ul>
  *
+ * Usage:
+ * <ul>
+ * <br>//generate a pair (public-key and private-key) and print them to console
+ * <br>//user needs to move the mouse on the screen to provide random data for generating keys
+ * <li><b>java org.safs.RSA -gen</b>
+ * <br>//generate a pair (public-key and private-key) and print them to file 'outputfile'
+ * <li><b>java org.safs.RSA -gen -out outputfile</b>
 <pre>
-Usage:
-java org.safs.RSA -gen
-java org.safs.RSA -gen -out outputfile
-java org.safs.RSA -encrypt -data data/file -key publickey/file
-java org.safs.RSA -encrypt -data data/file -key publickey/file -out outputfile
-java org.safs.RSA -decrypt -data data/file -key privatekey/file
-java org.safs.RSA -decrypt -data data/file -key privatekey/file -out outputfile
+Below is an example of generated key pair, the public-key is in section <b>__RSAPublicKey__</b>
+and the private-key is in section <b>__RSAPrivateKey__</b>
+
+<b>__RSAPublicKey__</b>
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCU+Myd2Bax9lDac5fjvl8k4QUTXsBt37BF1h4M
+2eGs9HXapi6izJbrE+1/Y1iMtR+jvd/tMxEltbU9ZdfsAk1vC859O9pga6/+AeoYkS2Gh7tmmAUc
+PpafagY62A1ehrM9j0THvdNbyuQhnVh3ipKaMV4Cv4fMsZBPQhq3TZKLCwIDAQAB
+
+<b>__RSAPrivateKey__</b>
+MIICeAIBADANBgkqhkiG9w0BAQEFAASCAmIwggJeAgEAAoGBAJT4zJ3YFrH2UNpzl+O+XyThBRNe
+wG3fsEXWHgzZ4az0ddqmLqLMlusT7X9jWIy1H6O93+0zESW1tT1l1+wCTW8Lzn072mBrr/4B6hiR
+LYaHu2aYBRw+lp9qBjrYDV6Gsz2PRMe901vK5CGdWHeKkpoxXgK/h8yxkE9CGrdNkosLAgMBAAEC
+gYB6KbkqK50Y3SQasDY7hc7iIEEYTFhDAe+8pUTJRxdgzKuk3ShbSqjsJ9BX6bEg2hsTHM735ivG
+n8b7jXvOx2iVSgGHdwKECW94Vr3yACMbshFwwRssz4clAApAsgg+gruwVbEhXQH5oJcz0TxRLmkr
+tmvS9xuvW24kIOKBVQCQsQJBAM2v7REtTQdQmsM8cn9ehKvITpJ8J1zw+Z7otIjzGOa9qfqBUDiE
+Dmsr+0e9OQS1PeMGJ2scrtOE6DtqATH94ukCQQC5aWACxLAQz3jIsmFH33EbmP6omx6uiS8JM08Z
+hikgHi8qpZXy4YMaPHwhgOttLww3Sl1scSUaOR0+237K5z3TAkEArJN+Gdpjdc64ezTdcGaSdDs1
+SYynzkBVgHII/5rP+tGJq6gR8clC+8LEK3XlQED9Mtz399PyD4DFBQy1Agfd+QJBAK1RMWylC6hL
+KK8DACi9V+/iTnqxtjaVCiDhk5labesWDCUjcE4APBs0Wxy+dFQ13Id6vmX2RiaDKTFu4NEu4/0C
+QQCfmhqfQEaY1SrqLFf2aNmBvK312ggDBh9k/a+zzSbJa34U6TfuRmYcdo4/SAxY9WN5yTNW4lW7
+imrUc9d3yCll
 </pre>
+ *
+ * //encrypt the secret-data with public-key and print the encrypted-data to console
+ * <br>//-data can be followed by secret-data or a file holding secret-data
+ * <br>//-key can be followed by public-key or a file holding public-key
+ * <li><b>java org.safs.RSA -encrypt -data "secret data"/file -key "public key"/file</b>
+ * <br>//encrypt the secret-data with public-key and print the encrypted-data to 'outputfile'
+ * <li><b>java org.safs.RSA -encrypt -data "secret data"/file -key "public key"/file -out outputfile</b>
+ * <br>
+ * <br>//decrypt the encrypted-data with private-key and print the original-data to console
+ * <br>//-data can be followed by encrypted-data or a file holding encrypted-data
+ * <br>//-key can be followed by private-key or a file holding private-key
+ * <li><b>java org.safs.RSA -decrypt -data "encrypted data"/file -key "private key"/file</b>
+ * <br>//decrypt the encrypted-data with private-key and print the original-data to 'outputfile'
+ * <li><b>java org.safs.RSA -decrypt -data "encrypted data"/file -key "private key"/file -out outputfile</b>
+ * </ul>
+ *
  * History:<br>
  *
  *  <br>   Mar 31, 2014    (Lei Wang) Initial release.
