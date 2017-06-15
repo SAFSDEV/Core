@@ -423,6 +423,20 @@ public class DriverCommands {
     static public final String RESUMELOGGING_KEYWORD = "ResumeLogging";
     /** "SuspendLogging" */
     static public final String SUSPENDLOGGING_KEYWORD = "SuspendLogging";
+    /** "RestCleanResponseMap" */
+    static public final String RESTCLEANRESPONSEMAP_KEYWORD = "RestCleanResponseMap";
+    /** "RestDeleteResponse" */
+    static public final String RESTDELETERESPONSE_KEYWORD = "RestDeleteResponse";
+    /** "RestDeleteResponseStore" */
+    static public final String RESTDELETERESPONSESTORE_KEYWORD = "RestDeleteResponseStore";
+    /** "RestHeadersLoad" */
+    static public final String RESTHEADERSLOAD_KEYWORD = "RestHeadersLoad";
+    /** "RestStoreResponse" */
+    static public final String RESTSTORERESPONSE_KEYWORD = "RestStoreResponse";
+    /** "RestVerifyResponse" */
+    static public final String RESTVERIFYRESPONSE_KEYWORD = "RestVerifyResponse";
+    /** "RestVerifyResponseContains" */
+    static public final String RESTVERIFYRESPONSECONTAINS_KEYWORD = "RestVerifyResponseContains";
     /** "CleanString" */
     static public final String CLEANSTRING_KEYWORD = "CleanString";
     /** "Compare" */
@@ -956,6 +970,67 @@ public class DriverCommands {
 
      **************************************************************/
      public static DDDriverLogCommands _DDDriverLogCommands = DDDriverLogCommands.getInstance();
+
+    /*************************************************************
+     static reference to DDDriverRestCommands.class 
+
+     
+				REST Driver Commands for handling Response like store,
+				delete etc.
+			
+
+     
+				
+					This keyword library provides Driver Commands that
+					can be used by all three DDE Drivers--CycleDriver,
+					SuiteDriver, and StepDriver. That means they can be
+					used in any keyword driven test tables regardless of
+					the test tables level--Cycle, Suite, or Step.
+				
+				
+					Each different driver command has different
+					parameters as described in its documentation. For
+					reference, the first fields of ALL Driver Command
+					test records are defined below:
+				
+				
+					Field #1
+					
+						The "C" = DRIVER COMMAND record type specifier.
+					
+
+					Field #2
+					The Driver Command keyword.
+				
+				Example:
+
+				
+					C, RestStoreResponse, responseId, varnamePrefix
+				
+
+				
+					Driver Command parameters must be placed in the test
+					record in the field position specified in the
+					documentation. Some parameters are optional.
+					However, the field associated with that parameter
+					must be honored. If you wish to skip an optional
+					parameter you must still provide an empty field for
+					that parameter.
+				
+				Example:
+
+				
+					C, LaunchApplication, NOTEPAD, NOTEPAD.EXE, , , "AppMap.map"
+				
+
+				
+					The above example shows two optional fields after
+					NOTEPAD.EXE which are given no value(skipped).
+				
+			
+
+     **************************************************************/
+     public static DDDriverRestCommands _DDDriverRestCommands = DDDriverRestCommands.getInstance();
 
     /*************************************************************
      static reference to DDDriverStringCommands.class 
@@ -12382,6 +12457,412 @@ SAFSWebBrowserPath="C:\Program Files\Mozilla Firefox\firefox.exe"
 
         DriverCommand dc = new DriverCommand(SUSPENDLOGGING_KEYWORD);
         dc.addParameter(logName);
+        return dc;
+    }
+
+
+    /*********** <pre>
+                    Delete REST response (and request if it is stored) from the internal Map.
+                
+                    Delete a REST response (and request if it is stored) from the internal Map.
+                    The REST response/request is stored internally in a Map of pair (responsID, Response).
+                    
+                        BE CAREFUL WHNE CALLING THIS KEYWORD! It will clean Response from internal Map, and
+                        can cause other keyword failing to work.
+                    
+                    </pre>    Supporting Engines:
+    <P/><UL>
+        <LI>SAFS TIDDriverCommands</LI>
+    </UL>
+
+     @param responseID  Optional:YES
+                            The ID used to delete Response Object from internal Map.
+                        
+     **********/
+    static public DriverCommand restCleanResponseMap (String responseID) {
+
+        DriverCommand dc = new DriverCommand(RESTCLEANRESPONSEMAP_KEYWORD);
+        dc.addParameter(responseID);
+        return dc;
+    }
+
+
+    /*********** <pre>
+					Delete a REST response (and request if stored) from the persistent storages.
+				
+					Delete a REST response (and request if stored) from the persistent storages.
+					The REST response/request is supposed to be in the persistent storages.
+					The response/request can be in more than one type of persistence storage, and
+					it can be a series of variables, a file or something else, please refer to 
+					explanation of parameters of keyword RestStoreResponse.
+					For example, if the Response/Request is stored be in a XML file, a JSON file 
+					and "a series of variables" at the same time, then this keyword will delete 
+					all of them (XML file, JSON file and variables).
+				    </pre>    Supporting Engines:
+    <P/><UL>
+        <LI>SAFS TIDDriverCommands</LI>
+    </UL>
+
+     @param responseID  Optional:NO
+							The ID of the Response/Request (stored in persistence storages) to be deleted.
+						
+     **********/
+    static public DriverCommand restDeleteResponse (String responseID) {
+
+        if ( responseID == null ) throw new IllegalArgumentException ( "restDeleteResponse.responseID = null");
+        DriverCommand dc = new DriverCommand(RESTDELETERESPONSE_KEYWORD);
+        dc.addParameter(responseID);
+        return dc;
+    }
+
+
+    /*********** <pre>
+                    Delete ALL REST responses (and requests if stored) from the persistent storages.
+                
+                    Delete ALL REST responses (and requests if stored) from the persistent storages. 
+                    The REST response/request is supposed to be in the persistent storages.
+                    The response/request can be in more than one type of persistence storage, and
+                    it can be a series of variables, a file or something else, please refer to 
+                    explanation of parameters of keyword RestStoreResponse.
+                    For example, if there are 2 Responses/Requests have been persisted, 
+                    one is stored be in a XML file, a JSON file and "a series of variables" at the same time,
+                    the other is stored in JSON file and "a series of variables", then this keyword will delete 
+                    all of them (XML file, JSON file and variables of the first Response/Request, 
+                    JSON file and "a series of variables" of the second Response/Request).
+                    </pre>    Supporting Engines:
+    <P/><UL>
+        <LI>SAFS TIDDriverCommands</LI>
+    </UL>
+
+     **********/
+    static public DriverCommand restDeleteResponseStore () {
+
+        DriverCommand dc = new DriverCommand(RESTDELETERESPONSESTORE_KEYWORD);
+        return dc;
+    }
+
+
+    /*********** <pre>
+                    Load headers from a file.
+                
+                    This might be called before invoking a REST action, like RESTGetXML etc.
+                    And the loaded headers will be used when executing that REST action 
+                    if no headers are provided as parameter of that REST action.
+                    </pre>    Supporting Engines:
+    <P/><UL>
+        <LI>SAFS TIDDriverCommands</LI>
+    </UL>
+
+     @param headersFile  Optional:NO
+                            The path to file holding headers information.
+                        
+     @param method  Optional:YES
+                            The method is used to load the "headers" from a file.
+                            If this parameter is not provided, then "headers" of all methods will be loaded. 
+                        
+     @param type  Optional:YES
+                            The type is used to load the "headers" from a file.
+                            If this parameter is not provided, then "headers" of all types will be loaded. 
+                        
+     **********/
+    static public DriverCommand restHeadersLoad (String headersFile, String method, String type) {
+
+        if ( headersFile == null ) throw new IllegalArgumentException ( "restHeadersLoad.headersFile = null");
+        DriverCommand dc = new DriverCommand(RESTHEADERSLOAD_KEYWORD);
+        dc.addParameter(headersFile);
+        dc.addParameter(method);
+        dc.addParameter(type);
+        return dc;
+    }
+
+
+    /*********** <pre>
+                    Load headers from a file.
+                
+                    This might be called before invoking a REST action, like RESTGetXML etc.
+                    And the loaded headers will be used when executing that REST action 
+                    if no headers are provided as parameter of that REST action.
+                    </pre>    
+    Supporting Engines:
+    <P/><UL>
+        <LI>SAFS TIDDriverCommands</LI>
+    </UL>
+
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>        headersFile -- Optional:NO
+                            The path to file holding headers information.
+                        <BR/>        method -- Optional:YES
+                            The method is used to load the "headers" from a file.
+                            If this parameter is not provided, then "headers" of all methods will be loaded. 
+                        <BR/>        type -- Optional:YES
+                            The type is used to load the "headers" from a file.
+                            If this parameter is not provided, then "headers" of all types will be loaded. 
+                        
+    </UL>
+
+     **********/
+    static public DriverCommand restHeadersLoad (String[] parameters) {
+
+        if ( parameters == null ) throw new IllegalArgumentException ( "restHeadersLoad.parameters = null");
+        DriverCommand dc = new DriverCommand(RESTHEADERSLOAD_KEYWORD);
+        dc.addParameters(parameters);
+        return dc;
+    }
+
+
+    /*********** <pre>Save a REST response into a persistent storage.
+                    Retrieve a REST response according to the responseID, and store the response into
+                    a persistent storage. The persistent storage can be a series of variables, a file 
+                    or something else, please refer to explanation of parameters.
+                    </pre>    Supporting Engines:
+    <P/><UL>
+        <LI>SAFS TIDDriverCommands</LI>
+    </UL>
+
+     @param responseID  Optional:NO
+                            The ID used to retrieve Response Object from internal Map.
+                        
+     @param variablePrefix  Optional:NO
+                            The prefix of the variables to store the information of a REST response/request if parameter persistenceType is VARIABLE.
+                            Or the file name holding the information of a REST response/request if parameter persistenceType is FILE.
+                        
+     @param storeRequest  Optional:YES  DefaultVal:FalseStore the originating Request information if this parameter is true. The default value is false.
+     @param persistenceType  Optional:YES  DefaultVal:VARIABLEThe type of the persistence storage to save the Response/Request information.
+     @param fileType  Optional:YES  DefaultVal:JSONThe Type of file to save Response/Request, ONLY useful when persistenceType is "FILE"
+     **********/
+    static public DriverCommand restStoreResponse (String responseID, String variablePrefix, String storeRequest, String persistenceType, String fileType) {
+
+        if ( responseID == null ) throw new IllegalArgumentException ( "restStoreResponse.responseID = null");
+        if ( variablePrefix == null ) throw new IllegalArgumentException ( "restStoreResponse.variablePrefix = null");
+        DriverCommand dc = new DriverCommand(RESTSTORERESPONSE_KEYWORD);
+        dc.addParameter(responseID);
+        dc.addParameter(variablePrefix);
+        dc.addParameter(storeRequest);
+        dc.addParameter(persistenceType);
+        dc.addParameter(fileType);
+        return dc;
+    }
+
+
+    /*********** <pre>Save a REST response into a persistent storage.
+                    Retrieve a REST response according to the responseID, and store the response into
+                    a persistent storage. The persistent storage can be a series of variables, a file 
+                    or something else, please refer to explanation of parameters.
+                    </pre>    
+    Supporting Engines:
+    <P/><UL>
+        <LI>SAFS TIDDriverCommands</LI>
+    </UL>
+
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>        responseID -- Optional:NO
+                            The ID used to retrieve Response Object from internal Map.
+                        <BR/>        variablePrefix -- Optional:NO
+                            The prefix of the variables to store the information of a REST response/request if parameter persistenceType is VARIABLE.
+                            Or the file name holding the information of a REST response/request if parameter persistenceType is FILE.
+                        <BR/>        storeRequest -- Optional:YES  DefaultVal:FalseStore the originating Request information if this parameter is true. The default value is false.<BR/>        persistenceType -- Optional:YES  DefaultVal:VARIABLEThe type of the persistence storage to save the Response/Request information.<BR/>        fileType -- Optional:YES  DefaultVal:JSONThe Type of file to save Response/Request, ONLY useful when persistenceType is "FILE"
+    </UL>
+
+     **********/
+    static public DriverCommand restStoreResponse (String[] parameters) {
+
+        if ( parameters == null ) throw new IllegalArgumentException ( "restStoreResponse.parameters = null");
+        DriverCommand dc = new DriverCommand(RESTSTORERESPONSE_KEYWORD);
+        dc.addParameters(parameters);
+        return dc;
+    }
+
+
+    /*********** <pre>Verify a REST response is what is expected.
+                    Retrieve a REST response according to the responseID, and compare the response with
+                    the content stored in a bench file.
+                    The comparison should be defined by parameter verifyRequest, valueContains and valueCaseSensitive.
+                    </pre>    Supporting Engines:
+    <P/><UL>
+        <LI>SAFS TIDDriverCommands</LI>
+    </UL>
+
+     @param responseID  Optional:NO
+                            The ID used to retrieve Response Object from internal Map.
+                        
+     @param benchFile  Optional:NO
+                            The bench file for verifying a REST response.
+                        
+     @param fileType  Optional:YES  DefaultVal:JSONThe Type of file to save Response/Request, ONLY useful when persistenceType is "FILE"
+     @param result  Optional:YES  DefaultVal:<responseID>.verification.result
+                            The variable holding the verification result.
+                        
+     @param verifyRequest  Optional:YES  DefaultVal:FALSE
+                            If it is true, then verify also the Request; otherwise only the Response will be verified.
+                            The default value is 'false', which means only the Response will be verified.
+                        
+     @param valueContains  Optional:YES  DefaultVal:FALSE
+                            If true, then verify that Response/Request field's value contains that in benchFile;
+                            Otherwise, then verify that Response/Request field's value matches wholly with that in benchFile;
+                            The default value is false;
+                        
+     @param valueCaseSensitive  Optional:YES  DefaultVal:TRUE
+                            If true, then verify that Response/Request field's value matches case sensitively with that in benchFile;
+                            Otherwise, then verify that Response/Request field's value matches case insensitively with that in benchFile;
+                            The default value is true;
+                        
+     **********/
+    static public DriverCommand restVerifyResponse (String responseID, String benchFile, String fileType, String result, String verifyRequest, String valueContains, String valueCaseSensitive) {
+
+        if ( benchFile == null ) throw new IllegalArgumentException ( "restVerifyResponse.benchFile = null");
+        if ( responseID == null ) throw new IllegalArgumentException ( "restVerifyResponse.responseID = null");
+        DriverCommand dc = new DriverCommand(RESTVERIFYRESPONSE_KEYWORD);
+        dc.addParameter(responseID);
+        dc.addParameter(benchFile);
+        dc.addParameter(fileType);
+        dc.addParameter(result);
+        dc.addParameter(verifyRequest);
+        dc.addParameter(valueContains);
+        dc.addParameter(valueCaseSensitive);
+        return dc;
+    }
+
+
+    /*********** <pre>Verify a REST response is what is expected.
+                    Retrieve a REST response according to the responseID, and compare the response with
+                    the content stored in a bench file.
+                    The comparison should be defined by parameter verifyRequest, valueContains and valueCaseSensitive.
+                    </pre>    
+    Supporting Engines:
+    <P/><UL>
+        <LI>SAFS TIDDriverCommands</LI>
+    </UL>
+
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>        responseID -- Optional:NO
+                            The ID used to retrieve Response Object from internal Map.
+                        <BR/>        benchFile -- Optional:NO
+                            The bench file for verifying a REST response.
+                        <BR/>        fileType -- Optional:YES  DefaultVal:JSONThe Type of file to save Response/Request, ONLY useful when persistenceType is "FILE"<BR/>        result -- Optional:YES  DefaultVal:<responseID>.verification.result
+                            The variable holding the verification result.
+                        <BR/>        verifyRequest -- Optional:YES  DefaultVal:FALSE
+                            If it is true, then verify also the Request; otherwise only the Response will be verified.
+                            The default value is 'false', which means only the Response will be verified.
+                        <BR/>        valueContains -- Optional:YES  DefaultVal:FALSE
+                            If true, then verify that Response/Request field's value contains that in benchFile;
+                            Otherwise, then verify that Response/Request field's value matches wholly with that in benchFile;
+                            The default value is false;
+                        <BR/>        valueCaseSensitive -- Optional:YES  DefaultVal:TRUE
+                            If true, then verify that Response/Request field's value matches case sensitively with that in benchFile;
+                            Otherwise, then verify that Response/Request field's value matches case insensitively with that in benchFile;
+                            The default value is true;
+                        
+    </UL>
+
+     **********/
+    static public DriverCommand restVerifyResponse (String[] parameters) {
+
+        if ( parameters == null ) throw new IllegalArgumentException ( "restVerifyResponse.parameters = null");
+        DriverCommand dc = new DriverCommand(RESTVERIFYRESPONSE_KEYWORD);
+        dc.addParameters(parameters);
+        return dc;
+    }
+
+
+    /*********** <pre>Verify a REST response contains what is expected.
+                    Retrieve a REST response according to the responseID, and verify that the response contains
+                    the content stored in a bench file.
+                    The Contains in keyword RestVerifyResponseContains means the Response/Request contains the fields
+                    defined in the bench file, that is to say not all fields of Response/Request should be matched
+                    For the field's value, it should be defined by parameter valueContains and valueCaseSensitive.
+                    </pre>    Supporting Engines:
+    <P/><UL>
+        <LI>SAFS TIDDriverCommands</LI>
+    </UL>
+
+     @param responseID  Optional:NO
+                            The ID used to retrieve Response Object from internal Map.
+                        
+     @param benchFile  Optional:NO
+                            The bench file for verifying a REST response.
+                        
+     @param fileType  Optional:YES  DefaultVal:JSONThe Type of file to save Response/Request, ONLY useful when persistenceType is "FILE"
+     @param result  Optional:YES  DefaultVal:<responseID>.verification.result
+                            The variable holding the verification result.
+                        
+     @param verifyRequest  Optional:YES  DefaultVal:FALSE
+                            If it is true, then verify also the Request; otherwise only the Response will be verified.
+                            The default value is 'false', which means only the Response will be verified.
+                        
+     @param valueContains  Optional:YES  DefaultVal:FALSE
+                            If true, then verify that Response/Request field's value contains that in benchFile;
+                            Otherwise, then verify that Response/Request field's value matches wholly with that in benchFile;
+                            The default value is false;
+                        
+     @param valueCaseSensitive  Optional:YES  DefaultVal:TRUE
+                            If true, then verify that Response/Request field's value matches case sensitively with that in benchFile;
+                            Otherwise, then verify that Response/Request field's value matches case insensitively with that in benchFile;
+                            The default value is true;
+                        
+     **********/
+    static public DriverCommand restVerifyResponseContains (String responseID, String benchFile, String fileType, String result, String verifyRequest, String valueContains, String valueCaseSensitive) {
+
+        if ( benchFile == null ) throw new IllegalArgumentException ( "restVerifyResponseContains.benchFile = null");
+        if ( responseID == null ) throw new IllegalArgumentException ( "restVerifyResponseContains.responseID = null");
+        DriverCommand dc = new DriverCommand(RESTVERIFYRESPONSECONTAINS_KEYWORD);
+        dc.addParameter(responseID);
+        dc.addParameter(benchFile);
+        dc.addParameter(fileType);
+        dc.addParameter(result);
+        dc.addParameter(verifyRequest);
+        dc.addParameter(valueContains);
+        dc.addParameter(valueCaseSensitive);
+        return dc;
+    }
+
+
+    /*********** <pre>Verify a REST response contains what is expected.
+                    Retrieve a REST response according to the responseID, and verify that the response contains
+                    the content stored in a bench file.
+                    The Contains in keyword RestVerifyResponseContains means the Response/Request contains the fields
+                    defined in the bench file, that is to say not all fields of Response/Request should be matched
+                    For the field's value, it should be defined by parameter valueContains and valueCaseSensitive.
+                    </pre>    
+    Supporting Engines:
+    <P/><UL>
+        <LI>SAFS TIDDriverCommands</LI>
+    </UL>
+
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>        responseID -- Optional:NO
+                            The ID used to retrieve Response Object from internal Map.
+                        <BR/>        benchFile -- Optional:NO
+                            The bench file for verifying a REST response.
+                        <BR/>        fileType -- Optional:YES  DefaultVal:JSONThe Type of file to save Response/Request, ONLY useful when persistenceType is "FILE"<BR/>        result -- Optional:YES  DefaultVal:<responseID>.verification.result
+                            The variable holding the verification result.
+                        <BR/>        verifyRequest -- Optional:YES  DefaultVal:FALSE
+                            If it is true, then verify also the Request; otherwise only the Response will be verified.
+                            The default value is 'false', which means only the Response will be verified.
+                        <BR/>        valueContains -- Optional:YES  DefaultVal:FALSE
+                            If true, then verify that Response/Request field's value contains that in benchFile;
+                            Otherwise, then verify that Response/Request field's value matches wholly with that in benchFile;
+                            The default value is false;
+                        <BR/>        valueCaseSensitive -- Optional:YES  DefaultVal:TRUE
+                            If true, then verify that Response/Request field's value matches case sensitively with that in benchFile;
+                            Otherwise, then verify that Response/Request field's value matches case insensitively with that in benchFile;
+                            The default value is true;
+                        
+    </UL>
+
+     **********/
+    static public DriverCommand restVerifyResponseContains (String[] parameters) {
+
+        if ( parameters == null ) throw new IllegalArgumentException ( "restVerifyResponseContains.parameters = null");
+        DriverCommand dc = new DriverCommand(RESTVERIFYRESPONSECONTAINS_KEYWORD);
+        dc.addParameters(parameters);
         return dc;
     }
 

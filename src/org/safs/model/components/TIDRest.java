@@ -115,26 +115,159 @@ public class TIDRest extends UIComponent {
         table.add( TIDRestFunctions.restDeleteCSS(getWindow().getName(), getName()));
     }
 
-    /*********** <pre>    </pre>    Supporting Engines:
+    /*********** <pre>
+                    Perform the "DELETE" method on a REST service with headers defined by user.
+                
+                    
+                        This action will send the "DELETE" method with Headers defined by user.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    Supporting Engines:
     <P/><UL>
+    <LI>SAFS TIDComponent</LI>
     </UL>
 
+     @param relativeURI  Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.
+     @param responseIdVar  Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        
+     @param headers  Optional:NO
+                           The headers to be included in this REST request.
+                        
+     @param body  Optional:YESThe body to send with this REST request.
+     @param authentication  Optional:YES
+                           The custom authentication/authorization information.
+                        
      **********/
-    public ComponentFunction restDeleteCustom( ) {
-        return TIDRestFunctions.restDeleteCustom(getWindow().getName(), getName());
+    public ComponentFunction restDeleteCustom(String relativeURI, String responseIdVar, String headers, String body, String authentication ) {
+
+        if ( headers == null ) throw new IllegalArgumentException ( "restDeleteCustom.headers = null");
+        if ( relativeURI == null ) throw new IllegalArgumentException ( "restDeleteCustom.relativeURI = null");
+        if ( responseIdVar == null ) throw new IllegalArgumentException ( "restDeleteCustom.responseIdVar = null");
+        return TIDRestFunctions.restDeleteCustom(getWindow().getName(), getName(), relativeURI, responseIdVar, headers, body, authentication);
     }
 
-    /*********** <pre>    </pre>    Supporting Engines:
+    /*********** <pre>
+                    Perform the "DELETE" method on a REST service with headers defined by user.
+                
+                    
+                        This action will send the "DELETE" method with Headers defined by user.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    Supporting Engines:
     <P/><UL>
+    <LI>SAFS TIDComponent</LI>
     </UL>
 
      @param table  Optional:NO
             The table to add the record to.
+     @param relativeURI  Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.
+     @param responseIdVar  Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        
+     @param headers  Optional:NO
+                           The headers to be included in this REST request.
+                        
+     @param body  Optional:YESThe body to send with this REST request.
+     @param authentication  Optional:YES
+                           The custom authentication/authorization information.
+                        
      **********/
-    public void restDeleteCustom(StepTestTable table ) {
+    public void restDeleteCustom(StepTestTable table, String relativeURI, String responseIdVar, String headers, String body, String authentication ) {
 
         if ( table == null ) throw new IllegalArgumentException ( "restDeleteCustom.table = null");
-        table.add( TIDRestFunctions.restDeleteCustom(getWindow().getName(), getName()));
+
+        if ( headers == null ) throw new IllegalArgumentException ( "restDeleteCustom.headers = null");
+        if ( relativeURI == null ) throw new IllegalArgumentException ( "restDeleteCustom.relativeURI = null");
+        if ( responseIdVar == null ) throw new IllegalArgumentException ( "restDeleteCustom.responseIdVar = null");
+        table.add( TIDRestFunctions.restDeleteCustom(getWindow().getName(), getName(), relativeURI, responseIdVar, headers, body, authentication));
+    }
+
+    /*********** <pre>
+                    Perform the "DELETE" method on a REST service with headers defined by user.
+                
+                    
+                        This action will send the "DELETE" method with Headers defined by user.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    
+    Supporting Engines:
+    <P/><UL>
+    <LI>SAFS TIDComponent</LI>
+    </UL>
+
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>         relativeURI -- Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.<BR/>         responseIdVar -- Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        <BR/>         headers -- Optional:NO
+                           The headers to be included in this REST request.
+                        <BR/>         body -- Optional:YESThe body to send with this REST request.<BR/>         authentication -- Optional:YES
+                           The custom authentication/authorization information.
+                        
+    </UL>
+
+     **********/
+    public ComponentFunction restDeleteCustom(String[] parameters ) {
+
+        if ( parameters == null ) throw new IllegalArgumentException ( "restDeleteCustom.parameters = null");
+        return TIDRestFunctions.restDeleteCustom(getWindow().getName(), getName(), parameters);
+    }
+
+    /*********** <pre>
+                    Perform the "DELETE" method on a REST service with headers defined by user.
+                
+                    
+                        This action will send the "DELETE" method with Headers defined by user.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    
+    Supporting Engines:
+    <P/><UL>
+    <LI>SAFS TIDComponent</LI>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>         relativeURI -- Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.<BR/>         responseIdVar -- Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        <BR/>         headers -- Optional:NO
+                           The headers to be included in this REST request.
+                        <BR/>         body -- Optional:YESThe body to send with this REST request.<BR/>         authentication -- Optional:YES
+                           The custom authentication/authorization information.
+                        
+    </UL>
+
+     **********/
+    public void restDeleteCustom(StepTestTable table, String[] parameters ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restDeleteCustom.table = null");
+        if ( parameters == null ) throw new IllegalArgumentException ( "restDeleteCustom.parameters = null");
+        table.add( TIDRestFunctions.restDeleteCustom(getWindow().getName(), getName(), parameters));
     }
 
     /*********** <pre>    </pre>    Supporting Engines:
@@ -314,7 +447,7 @@ public class TIDRest extends UIComponent {
 						If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
 						before executing this action, which will be handled within a session.
 						Otherwise, it will be considered as a one-shot connection, 
-						and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+						and NO RestStartServiceSession needs to be called and user may need to provide authentication information by keyword's parameter.
 					
 				    </pre>    Supporting Engines:
     <P/><UL>
@@ -323,17 +456,14 @@ public class TIDRest extends UIComponent {
 
      @param relativeURI  Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.
      @param responseIdVar  Optional:NO
-                	       The name of the variable holding the ID (generated internally), which is used to
-                	       get the Response Object from the internal Map.
+                	      The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
                 	    
      @param body  Optional:YESThe body to send with this REST request.
      @param headers  Optional:YES
                 	       The headers to be included in this REST request.
-                	       Such as "If-Modified-Since: Sat, 29 OCT 1994 19:43:31 GMT".
                 	    
      @param authentication  Optional:YES
-                           The authentication information to guarantee the one-shot connection successful.
-                           It is ONLY useful for the situation without session; otherwise it is ignored.
+                           The custom authentication/authorization information.
                         
      **********/
     public ComponentFunction restGetBinary(String relativeURI, String responseIdVar, String body, String headers, String authentication ) {
@@ -354,7 +484,7 @@ public class TIDRest extends UIComponent {
 						If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
 						before executing this action, which will be handled within a session.
 						Otherwise, it will be considered as a one-shot connection, 
-						and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+						and NO RestStartServiceSession needs to be called and user may need to provide authentication information by keyword's parameter.
 					
 				    </pre>    Supporting Engines:
     <P/><UL>
@@ -365,17 +495,14 @@ public class TIDRest extends UIComponent {
             The table to add the record to.
      @param relativeURI  Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.
      @param responseIdVar  Optional:NO
-                	       The name of the variable holding the ID (generated internally), which is used to
-                	       get the Response Object from the internal Map.
+                	      The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
                 	    
      @param body  Optional:YESThe body to send with this REST request.
      @param headers  Optional:YES
                 	       The headers to be included in this REST request.
-                	       Such as "If-Modified-Since: Sat, 29 OCT 1994 19:43:31 GMT".
                 	    
      @param authentication  Optional:YES
-                           The authentication information to guarantee the one-shot connection successful.
-                           It is ONLY useful for the situation without session; otherwise it is ignored.
+                           The custom authentication/authorization information.
                         
      **********/
     public void restGetBinary(StepTestTable table, String relativeURI, String responseIdVar, String body, String headers, String authentication ) {
@@ -398,7 +525,7 @@ public class TIDRest extends UIComponent {
 						If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
 						before executing this action, which will be handled within a session.
 						Otherwise, it will be considered as a one-shot connection, 
-						and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+						and NO RestStartServiceSession needs to be called and user may need to provide authentication information by keyword's parameter.
 					
 				    </pre>    
     Supporting Engines:
@@ -410,14 +537,11 @@ public class TIDRest extends UIComponent {
             An array containing the following parameters:
     <UL>
 <BR/>         relativeURI -- Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.<BR/>         responseIdVar -- Optional:NO
-                	       The name of the variable holding the ID (generated internally), which is used to
-                	       get the Response Object from the internal Map.
+                	      The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
                 	    <BR/>         body -- Optional:YESThe body to send with this REST request.<BR/>         headers -- Optional:YES
                 	       The headers to be included in this REST request.
-                	       Such as "If-Modified-Since: Sat, 29 OCT 1994 19:43:31 GMT".
                 	    <BR/>         authentication -- Optional:YES
-                           The authentication information to guarantee the one-shot connection successful.
-                           It is ONLY useful for the situation without session; otherwise it is ignored.
+                           The custom authentication/authorization information.
                         
     </UL>
 
@@ -439,7 +563,7 @@ public class TIDRest extends UIComponent {
 						If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
 						before executing this action, which will be handled within a session.
 						Otherwise, it will be considered as a one-shot connection, 
-						and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+						and NO RestStartServiceSession needs to be called and user may need to provide authentication information by keyword's parameter.
 					
 				    </pre>    
     Supporting Engines:
@@ -453,14 +577,11 @@ public class TIDRest extends UIComponent {
             An array containing the following parameters:
     <UL>
 <BR/>         relativeURI -- Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.<BR/>         responseIdVar -- Optional:NO
-                	       The name of the variable holding the ID (generated internally), which is used to
-                	       get the Response Object from the internal Map.
+                	      The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
                 	    <BR/>         body -- Optional:YESThe body to send with this REST request.<BR/>         headers -- Optional:YES
                 	       The headers to be included in this REST request.
-                	       Such as "If-Modified-Since: Sat, 29 OCT 1994 19:43:31 GMT".
                 	    <BR/>         authentication -- Optional:YES
-                           The authentication information to guarantee the one-shot connection successful.
-                           It is ONLY useful for the situation without session; otherwise it is ignored.
+                           The custom authentication/authorization information.
                         
     </UL>
 
@@ -472,180 +593,1258 @@ public class TIDRest extends UIComponent {
         table.add( TIDRestFunctions.restGetBinary(getWindow().getName(), getName(), parameters));
     }
 
-    /*********** <pre>    </pre>    Supporting Engines:
+    /*********** <pre>
+                    Perform the "GET" method on a REST service, and try to get back the css text content.
+                
+                    
+                        This action will send the "GET" method with Headers containing "Accept : text/css".
+                        It only tells the server what type of content is expected, and it is not guarantee that the server will return it.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    Supporting Engines:
     <P/><UL>
+    <LI>SAFS TIDComponent</LI>
     </UL>
 
+     @param relativeURI  Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.
+     @param responseIdVar  Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        
+     @param body  Optional:YESThe body to send with this REST request.
+     @param headers  Optional:YES
+                           The headers to be included in this REST request.
+                        
+     @param authentication  Optional:YES
+                           The custom authentication/authorization information.
+                        
      **********/
-    public ComponentFunction restGetCSS( ) {
-        return TIDRestFunctions.restGetCSS(getWindow().getName(), getName());
+    public ComponentFunction restGetCSS(String relativeURI, String responseIdVar, String body, String headers, String authentication ) {
+
+        if ( relativeURI == null ) throw new IllegalArgumentException ( "restGetCSS.relativeURI = null");
+        if ( responseIdVar == null ) throw new IllegalArgumentException ( "restGetCSS.responseIdVar = null");
+        return TIDRestFunctions.restGetCSS(getWindow().getName(), getName(), relativeURI, responseIdVar, body, headers, authentication);
     }
 
-    /*********** <pre>    </pre>    Supporting Engines:
+    /*********** <pre>
+                    Perform the "GET" method on a REST service, and try to get back the css text content.
+                
+                    
+                        This action will send the "GET" method with Headers containing "Accept : text/css".
+                        It only tells the server what type of content is expected, and it is not guarantee that the server will return it.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    Supporting Engines:
     <P/><UL>
+    <LI>SAFS TIDComponent</LI>
     </UL>
 
      @param table  Optional:NO
             The table to add the record to.
+     @param relativeURI  Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.
+     @param responseIdVar  Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        
+     @param body  Optional:YESThe body to send with this REST request.
+     @param headers  Optional:YES
+                           The headers to be included in this REST request.
+                        
+     @param authentication  Optional:YES
+                           The custom authentication/authorization information.
+                        
      **********/
-    public void restGetCSS(StepTestTable table ) {
+    public void restGetCSS(StepTestTable table, String relativeURI, String responseIdVar, String body, String headers, String authentication ) {
 
         if ( table == null ) throw new IllegalArgumentException ( "restGetCSS.table = null");
-        table.add( TIDRestFunctions.restGetCSS(getWindow().getName(), getName()));
+
+        if ( relativeURI == null ) throw new IllegalArgumentException ( "restGetCSS.relativeURI = null");
+        if ( responseIdVar == null ) throw new IllegalArgumentException ( "restGetCSS.responseIdVar = null");
+        table.add( TIDRestFunctions.restGetCSS(getWindow().getName(), getName(), relativeURI, responseIdVar, body, headers, authentication));
     }
 
-    /*********** <pre>    </pre>    Supporting Engines:
+    /*********** <pre>
+                    Perform the "GET" method on a REST service, and try to get back the css text content.
+                
+                    
+                        This action will send the "GET" method with Headers containing "Accept : text/css".
+                        It only tells the server what type of content is expected, and it is not guarantee that the server will return it.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    
+    Supporting Engines:
     <P/><UL>
+    <LI>SAFS TIDComponent</LI>
+    </UL>
+
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>         relativeURI -- Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.<BR/>         responseIdVar -- Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        <BR/>         body -- Optional:YESThe body to send with this REST request.<BR/>         headers -- Optional:YES
+                           The headers to be included in this REST request.
+                        <BR/>         authentication -- Optional:YES
+                           The custom authentication/authorization information.
+                        
     </UL>
 
      **********/
-    public ComponentFunction restGetCustom( ) {
-        return TIDRestFunctions.restGetCustom(getWindow().getName(), getName());
+    public ComponentFunction restGetCSS(String[] parameters ) {
+
+        if ( parameters == null ) throw new IllegalArgumentException ( "restGetCSS.parameters = null");
+        return TIDRestFunctions.restGetCSS(getWindow().getName(), getName(), parameters);
     }
 
-    /*********** <pre>    </pre>    Supporting Engines:
+    /*********** <pre>
+                    Perform the "GET" method on a REST service, and try to get back the css text content.
+                
+                    
+                        This action will send the "GET" method with Headers containing "Accept : text/css".
+                        It only tells the server what type of content is expected, and it is not guarantee that the server will return it.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    
+    Supporting Engines:
     <P/><UL>
+    <LI>SAFS TIDComponent</LI>
     </UL>
 
      @param table  Optional:NO
             The table to add the record to.
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>         relativeURI -- Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.<BR/>         responseIdVar -- Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        <BR/>         body -- Optional:YESThe body to send with this REST request.<BR/>         headers -- Optional:YES
+                           The headers to be included in this REST request.
+                        <BR/>         authentication -- Optional:YES
+                           The custom authentication/authorization information.
+                        
+    </UL>
+
      **********/
-    public void restGetCustom(StepTestTable table ) {
+    public void restGetCSS(StepTestTable table, String[] parameters ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restGetCSS.table = null");
+        if ( parameters == null ) throw new IllegalArgumentException ( "restGetCSS.parameters = null");
+        table.add( TIDRestFunctions.restGetCSS(getWindow().getName(), getName(), parameters));
+    }
+
+    /*********** <pre>
+                    Perform the "GET" method on a REST service with headers defined by user.
+                
+                    
+                        This action will send the "GET" method with Headers defined by user.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    Supporting Engines:
+    <P/><UL>
+    <LI>SAFS TIDComponent</LI>
+    </UL>
+
+     @param relativeURI  Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.
+     @param responseIdVar  Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        
+     @param headers  Optional:NO
+                           The headers to be included in this REST request.
+                        
+     @param body  Optional:YESThe body to send with this REST request.
+     @param authentication  Optional:YES
+                           The custom authentication/authorization information.
+                        
+     **********/
+    public ComponentFunction restGetCustom(String relativeURI, String responseIdVar, String headers, String body, String authentication ) {
+
+        if ( headers == null ) throw new IllegalArgumentException ( "restGetCustom.headers = null");
+        if ( relativeURI == null ) throw new IllegalArgumentException ( "restGetCustom.relativeURI = null");
+        if ( responseIdVar == null ) throw new IllegalArgumentException ( "restGetCustom.responseIdVar = null");
+        return TIDRestFunctions.restGetCustom(getWindow().getName(), getName(), relativeURI, responseIdVar, headers, body, authentication);
+    }
+
+    /*********** <pre>
+                    Perform the "GET" method on a REST service with headers defined by user.
+                
+                    
+                        This action will send the "GET" method with Headers defined by user.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    Supporting Engines:
+    <P/><UL>
+    <LI>SAFS TIDComponent</LI>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     @param relativeURI  Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.
+     @param responseIdVar  Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        
+     @param headers  Optional:NO
+                           The headers to be included in this REST request.
+                        
+     @param body  Optional:YESThe body to send with this REST request.
+     @param authentication  Optional:YES
+                           The custom authentication/authorization information.
+                        
+     **********/
+    public void restGetCustom(StepTestTable table, String relativeURI, String responseIdVar, String headers, String body, String authentication ) {
 
         if ( table == null ) throw new IllegalArgumentException ( "restGetCustom.table = null");
-        table.add( TIDRestFunctions.restGetCustom(getWindow().getName(), getName()));
+
+        if ( headers == null ) throw new IllegalArgumentException ( "restGetCustom.headers = null");
+        if ( relativeURI == null ) throw new IllegalArgumentException ( "restGetCustom.relativeURI = null");
+        if ( responseIdVar == null ) throw new IllegalArgumentException ( "restGetCustom.responseIdVar = null");
+        table.add( TIDRestFunctions.restGetCustom(getWindow().getName(), getName(), relativeURI, responseIdVar, headers, body, authentication));
     }
 
-    /*********** <pre>    </pre>    Supporting Engines:
+    /*********** <pre>
+                    Perform the "GET" method on a REST service with headers defined by user.
+                
+                    
+                        This action will send the "GET" method with Headers defined by user.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    
+    Supporting Engines:
     <P/><UL>
+    <LI>SAFS TIDComponent</LI>
+    </UL>
+
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>         relativeURI -- Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.<BR/>         responseIdVar -- Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        <BR/>         headers -- Optional:NO
+                           The headers to be included in this REST request.
+                        <BR/>         body -- Optional:YESThe body to send with this REST request.<BR/>         authentication -- Optional:YES
+                           The custom authentication/authorization information.
+                        
     </UL>
 
      **********/
-    public ComponentFunction restGetHTML( ) {
-        return TIDRestFunctions.restGetHTML(getWindow().getName(), getName());
+    public ComponentFunction restGetCustom(String[] parameters ) {
+
+        if ( parameters == null ) throw new IllegalArgumentException ( "restGetCustom.parameters = null");
+        return TIDRestFunctions.restGetCustom(getWindow().getName(), getName(), parameters);
     }
 
-    /*********** <pre>    </pre>    Supporting Engines:
+    /*********** <pre>
+                    Perform the "GET" method on a REST service with headers defined by user.
+                
+                    
+                        This action will send the "GET" method with Headers defined by user.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    
+    Supporting Engines:
     <P/><UL>
+    <LI>SAFS TIDComponent</LI>
     </UL>
 
      @param table  Optional:NO
             The table to add the record to.
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>         relativeURI -- Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.<BR/>         responseIdVar -- Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        <BR/>         headers -- Optional:NO
+                           The headers to be included in this REST request.
+                        <BR/>         body -- Optional:YESThe body to send with this REST request.<BR/>         authentication -- Optional:YES
+                           The custom authentication/authorization information.
+                        
+    </UL>
+
      **********/
-    public void restGetHTML(StepTestTable table ) {
+    public void restGetCustom(StepTestTable table, String[] parameters ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restGetCustom.table = null");
+        if ( parameters == null ) throw new IllegalArgumentException ( "restGetCustom.parameters = null");
+        table.add( TIDRestFunctions.restGetCustom(getWindow().getName(), getName(), parameters));
+    }
+
+    /*********** <pre>
+                    Perform the "GET" method on a REST service, and try to get back the html text content.
+                
+                    
+                        This action will send the "GET" method with Headers containing "Accept : text/html".
+                        It only tells the server what type of content is expected, and it is not guarantee that the server will return it.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    Supporting Engines:
+    <P/><UL>
+    <LI>SAFS TIDComponent</LI>
+    </UL>
+
+     @param relativeURI  Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.
+     @param responseIdVar  Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        
+     @param body  Optional:YESThe body to send with this REST request.
+     @param headers  Optional:YES
+                           The headers to be included in this REST request.
+                        
+     @param authentication  Optional:YES
+                           The custom authentication/authorization information.
+                        
+     **********/
+    public ComponentFunction restGetHTML(String relativeURI, String responseIdVar, String body, String headers, String authentication ) {
+
+        if ( relativeURI == null ) throw new IllegalArgumentException ( "restGetHTML.relativeURI = null");
+        if ( responseIdVar == null ) throw new IllegalArgumentException ( "restGetHTML.responseIdVar = null");
+        return TIDRestFunctions.restGetHTML(getWindow().getName(), getName(), relativeURI, responseIdVar, body, headers, authentication);
+    }
+
+    /*********** <pre>
+                    Perform the "GET" method on a REST service, and try to get back the html text content.
+                
+                    
+                        This action will send the "GET" method with Headers containing "Accept : text/html".
+                        It only tells the server what type of content is expected, and it is not guarantee that the server will return it.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    Supporting Engines:
+    <P/><UL>
+    <LI>SAFS TIDComponent</LI>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     @param relativeURI  Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.
+     @param responseIdVar  Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        
+     @param body  Optional:YESThe body to send with this REST request.
+     @param headers  Optional:YES
+                           The headers to be included in this REST request.
+                        
+     @param authentication  Optional:YES
+                           The custom authentication/authorization information.
+                        
+     **********/
+    public void restGetHTML(StepTestTable table, String relativeURI, String responseIdVar, String body, String headers, String authentication ) {
 
         if ( table == null ) throw new IllegalArgumentException ( "restGetHTML.table = null");
-        table.add( TIDRestFunctions.restGetHTML(getWindow().getName(), getName()));
+
+        if ( relativeURI == null ) throw new IllegalArgumentException ( "restGetHTML.relativeURI = null");
+        if ( responseIdVar == null ) throw new IllegalArgumentException ( "restGetHTML.responseIdVar = null");
+        table.add( TIDRestFunctions.restGetHTML(getWindow().getName(), getName(), relativeURI, responseIdVar, body, headers, authentication));
     }
 
-    /*********** <pre>    </pre>    Supporting Engines:
+    /*********** <pre>
+                    Perform the "GET" method on a REST service, and try to get back the html text content.
+                
+                    
+                        This action will send the "GET" method with Headers containing "Accept : text/html".
+                        It only tells the server what type of content is expected, and it is not guarantee that the server will return it.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    
+    Supporting Engines:
     <P/><UL>
+    <LI>SAFS TIDComponent</LI>
+    </UL>
+
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>         relativeURI -- Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.<BR/>         responseIdVar -- Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        <BR/>         body -- Optional:YESThe body to send with this REST request.<BR/>         headers -- Optional:YES
+                           The headers to be included in this REST request.
+                        <BR/>         authentication -- Optional:YES
+                           The custom authentication/authorization information.
+                        
     </UL>
 
      **********/
-    public ComponentFunction restGetImage( ) {
-        return TIDRestFunctions.restGetImage(getWindow().getName(), getName());
+    public ComponentFunction restGetHTML(String[] parameters ) {
+
+        if ( parameters == null ) throw new IllegalArgumentException ( "restGetHTML.parameters = null");
+        return TIDRestFunctions.restGetHTML(getWindow().getName(), getName(), parameters);
     }
 
-    /*********** <pre>    </pre>    Supporting Engines:
+    /*********** <pre>
+                    Perform the "GET" method on a REST service, and try to get back the html text content.
+                
+                    
+                        This action will send the "GET" method with Headers containing "Accept : text/html".
+                        It only tells the server what type of content is expected, and it is not guarantee that the server will return it.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    
+    Supporting Engines:
     <P/><UL>
+    <LI>SAFS TIDComponent</LI>
     </UL>
 
      @param table  Optional:NO
             The table to add the record to.
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>         relativeURI -- Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.<BR/>         responseIdVar -- Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        <BR/>         body -- Optional:YESThe body to send with this REST request.<BR/>         headers -- Optional:YES
+                           The headers to be included in this REST request.
+                        <BR/>         authentication -- Optional:YES
+                           The custom authentication/authorization information.
+                        
+    </UL>
+
      **********/
-    public void restGetImage(StepTestTable table ) {
+    public void restGetHTML(StepTestTable table, String[] parameters ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restGetHTML.table = null");
+        if ( parameters == null ) throw new IllegalArgumentException ( "restGetHTML.parameters = null");
+        table.add( TIDRestFunctions.restGetHTML(getWindow().getName(), getName(), parameters));
+    }
+
+    /*********** <pre>
+                    Perform the "GET" method on a REST service, and try to get back the image content.
+                
+                    
+                        This action will send the "GET" method with Headers containing "Accept : image".
+                        It only tells the server what type of content is expected, and it is not guarantee that the server will return it.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    Supporting Engines:
+    <P/><UL>
+    <LI>SAFS TIDComponent</LI>
+    </UL>
+
+     @param relativeURI  Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.
+     @param responseIdVar  Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        
+     @param body  Optional:YESThe body to send with this REST request.
+     @param headers  Optional:YES
+                           The headers to be included in this REST request.
+                        
+     @param authentication  Optional:YES
+                           The custom authentication/authorization information.
+                        
+     **********/
+    public ComponentFunction restGetImage(String relativeURI, String responseIdVar, String body, String headers, String authentication ) {
+
+        if ( relativeURI == null ) throw new IllegalArgumentException ( "restGetImage.relativeURI = null");
+        if ( responseIdVar == null ) throw new IllegalArgumentException ( "restGetImage.responseIdVar = null");
+        return TIDRestFunctions.restGetImage(getWindow().getName(), getName(), relativeURI, responseIdVar, body, headers, authentication);
+    }
+
+    /*********** <pre>
+                    Perform the "GET" method on a REST service, and try to get back the image content.
+                
+                    
+                        This action will send the "GET" method with Headers containing "Accept : image".
+                        It only tells the server what type of content is expected, and it is not guarantee that the server will return it.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    Supporting Engines:
+    <P/><UL>
+    <LI>SAFS TIDComponent</LI>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     @param relativeURI  Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.
+     @param responseIdVar  Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        
+     @param body  Optional:YESThe body to send with this REST request.
+     @param headers  Optional:YES
+                           The headers to be included in this REST request.
+                        
+     @param authentication  Optional:YES
+                           The custom authentication/authorization information.
+                        
+     **********/
+    public void restGetImage(StepTestTable table, String relativeURI, String responseIdVar, String body, String headers, String authentication ) {
 
         if ( table == null ) throw new IllegalArgumentException ( "restGetImage.table = null");
-        table.add( TIDRestFunctions.restGetImage(getWindow().getName(), getName()));
+
+        if ( relativeURI == null ) throw new IllegalArgumentException ( "restGetImage.relativeURI = null");
+        if ( responseIdVar == null ) throw new IllegalArgumentException ( "restGetImage.responseIdVar = null");
+        table.add( TIDRestFunctions.restGetImage(getWindow().getName(), getName(), relativeURI, responseIdVar, body, headers, authentication));
     }
 
-    /*********** <pre>    </pre>    Supporting Engines:
+    /*********** <pre>
+                    Perform the "GET" method on a REST service, and try to get back the image content.
+                
+                    
+                        This action will send the "GET" method with Headers containing "Accept : image".
+                        It only tells the server what type of content is expected, and it is not guarantee that the server will return it.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    
+    Supporting Engines:
     <P/><UL>
+    <LI>SAFS TIDComponent</LI>
+    </UL>
+
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>         relativeURI -- Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.<BR/>         responseIdVar -- Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        <BR/>         body -- Optional:YESThe body to send with this REST request.<BR/>         headers -- Optional:YES
+                           The headers to be included in this REST request.
+                        <BR/>         authentication -- Optional:YES
+                           The custom authentication/authorization information.
+                        
     </UL>
 
      **********/
-    public ComponentFunction restGetJSON( ) {
-        return TIDRestFunctions.restGetJSON(getWindow().getName(), getName());
+    public ComponentFunction restGetImage(String[] parameters ) {
+
+        if ( parameters == null ) throw new IllegalArgumentException ( "restGetImage.parameters = null");
+        return TIDRestFunctions.restGetImage(getWindow().getName(), getName(), parameters);
     }
 
-    /*********** <pre>    </pre>    Supporting Engines:
+    /*********** <pre>
+                    Perform the "GET" method on a REST service, and try to get back the image content.
+                
+                    
+                        This action will send the "GET" method with Headers containing "Accept : image".
+                        It only tells the server what type of content is expected, and it is not guarantee that the server will return it.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    
+    Supporting Engines:
     <P/><UL>
+    <LI>SAFS TIDComponent</LI>
     </UL>
 
      @param table  Optional:NO
             The table to add the record to.
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>         relativeURI -- Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.<BR/>         responseIdVar -- Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        <BR/>         body -- Optional:YESThe body to send with this REST request.<BR/>         headers -- Optional:YES
+                           The headers to be included in this REST request.
+                        <BR/>         authentication -- Optional:YES
+                           The custom authentication/authorization information.
+                        
+    </UL>
+
      **********/
-    public void restGetJSON(StepTestTable table ) {
+    public void restGetImage(StepTestTable table, String[] parameters ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restGetImage.table = null");
+        if ( parameters == null ) throw new IllegalArgumentException ( "restGetImage.parameters = null");
+        table.add( TIDRestFunctions.restGetImage(getWindow().getName(), getName(), parameters));
+    }
+
+    /*********** <pre>
+                    Perform the "GET" method on a REST service, and try to get back the json text content.
+                
+                    
+                        This action will send the "GET" method with Headers containing "Accept : application/json".
+                        It only tells the server what type of content is expected, and it is not guarantee that the server will return it.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    Supporting Engines:
+    <P/><UL>
+    <LI>SAFS TIDComponent</LI>
+    </UL>
+
+     @param relativeURI  Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.
+     @param responseIdVar  Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        
+     @param body  Optional:YESThe body to send with this REST request.
+     @param headers  Optional:YES
+                           The headers to be included in this REST request.
+                        
+     @param authentication  Optional:YES
+                           The custom authentication/authorization information.
+                        
+     **********/
+    public ComponentFunction restGetJSON(String relativeURI, String responseIdVar, String body, String headers, String authentication ) {
+
+        if ( relativeURI == null ) throw new IllegalArgumentException ( "restGetJSON.relativeURI = null");
+        if ( responseIdVar == null ) throw new IllegalArgumentException ( "restGetJSON.responseIdVar = null");
+        return TIDRestFunctions.restGetJSON(getWindow().getName(), getName(), relativeURI, responseIdVar, body, headers, authentication);
+    }
+
+    /*********** <pre>
+                    Perform the "GET" method on a REST service, and try to get back the json text content.
+                
+                    
+                        This action will send the "GET" method with Headers containing "Accept : application/json".
+                        It only tells the server what type of content is expected, and it is not guarantee that the server will return it.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    Supporting Engines:
+    <P/><UL>
+    <LI>SAFS TIDComponent</LI>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     @param relativeURI  Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.
+     @param responseIdVar  Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        
+     @param body  Optional:YESThe body to send with this REST request.
+     @param headers  Optional:YES
+                           The headers to be included in this REST request.
+                        
+     @param authentication  Optional:YES
+                           The custom authentication/authorization information.
+                        
+     **********/
+    public void restGetJSON(StepTestTable table, String relativeURI, String responseIdVar, String body, String headers, String authentication ) {
 
         if ( table == null ) throw new IllegalArgumentException ( "restGetJSON.table = null");
-        table.add( TIDRestFunctions.restGetJSON(getWindow().getName(), getName()));
+
+        if ( relativeURI == null ) throw new IllegalArgumentException ( "restGetJSON.relativeURI = null");
+        if ( responseIdVar == null ) throw new IllegalArgumentException ( "restGetJSON.responseIdVar = null");
+        table.add( TIDRestFunctions.restGetJSON(getWindow().getName(), getName(), relativeURI, responseIdVar, body, headers, authentication));
     }
 
-    /*********** <pre>    </pre>    Supporting Engines:
+    /*********** <pre>
+                    Perform the "GET" method on a REST service, and try to get back the json text content.
+                
+                    
+                        This action will send the "GET" method with Headers containing "Accept : application/json".
+                        It only tells the server what type of content is expected, and it is not guarantee that the server will return it.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    
+    Supporting Engines:
     <P/><UL>
+    <LI>SAFS TIDComponent</LI>
+    </UL>
+
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>         relativeURI -- Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.<BR/>         responseIdVar -- Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        <BR/>         body -- Optional:YESThe body to send with this REST request.<BR/>         headers -- Optional:YES
+                           The headers to be included in this REST request.
+                        <BR/>         authentication -- Optional:YES
+                           The custom authentication/authorization information.
+                        
     </UL>
 
      **********/
-    public ComponentFunction restGetScript( ) {
-        return TIDRestFunctions.restGetScript(getWindow().getName(), getName());
+    public ComponentFunction restGetJSON(String[] parameters ) {
+
+        if ( parameters == null ) throw new IllegalArgumentException ( "restGetJSON.parameters = null");
+        return TIDRestFunctions.restGetJSON(getWindow().getName(), getName(), parameters);
     }
 
-    /*********** <pre>    </pre>    Supporting Engines:
+    /*********** <pre>
+                    Perform the "GET" method on a REST service, and try to get back the json text content.
+                
+                    
+                        This action will send the "GET" method with Headers containing "Accept : application/json".
+                        It only tells the server what type of content is expected, and it is not guarantee that the server will return it.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    
+    Supporting Engines:
     <P/><UL>
+    <LI>SAFS TIDComponent</LI>
     </UL>
 
      @param table  Optional:NO
             The table to add the record to.
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>         relativeURI -- Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.<BR/>         responseIdVar -- Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        <BR/>         body -- Optional:YESThe body to send with this REST request.<BR/>         headers -- Optional:YES
+                           The headers to be included in this REST request.
+                        <BR/>         authentication -- Optional:YES
+                           The custom authentication/authorization information.
+                        
+    </UL>
+
      **********/
-    public void restGetScript(StepTestTable table ) {
+    public void restGetJSON(StepTestTable table, String[] parameters ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restGetJSON.table = null");
+        if ( parameters == null ) throw new IllegalArgumentException ( "restGetJSON.parameters = null");
+        table.add( TIDRestFunctions.restGetJSON(getWindow().getName(), getName(), parameters));
+    }
+
+    /*********** <pre>
+                    Perform the "GET" method on a REST service, and try to get back the javascript text content.
+                
+                    
+                        This action will send the "GET" method with Headers containing "Accept : application/javascript".
+                        It only tells the server what type of content is expected, and it is not guarantee that the server will return it.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    Supporting Engines:
+    <P/><UL>
+    <LI>SAFS TIDComponent</LI>
+    </UL>
+
+     @param relativeURI  Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.
+     @param responseIdVar  Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        
+     @param body  Optional:YESThe body to send with this REST request.
+     @param headers  Optional:YES
+                           The headers to be included in this REST request.
+                        
+     @param authentication  Optional:YES
+                           The custom authentication/authorization information.
+                        
+     **********/
+    public ComponentFunction restGetScript(String relativeURI, String responseIdVar, String body, String headers, String authentication ) {
+
+        if ( relativeURI == null ) throw new IllegalArgumentException ( "restGetScript.relativeURI = null");
+        if ( responseIdVar == null ) throw new IllegalArgumentException ( "restGetScript.responseIdVar = null");
+        return TIDRestFunctions.restGetScript(getWindow().getName(), getName(), relativeURI, responseIdVar, body, headers, authentication);
+    }
+
+    /*********** <pre>
+                    Perform the "GET" method on a REST service, and try to get back the javascript text content.
+                
+                    
+                        This action will send the "GET" method with Headers containing "Accept : application/javascript".
+                        It only tells the server what type of content is expected, and it is not guarantee that the server will return it.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    Supporting Engines:
+    <P/><UL>
+    <LI>SAFS TIDComponent</LI>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     @param relativeURI  Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.
+     @param responseIdVar  Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        
+     @param body  Optional:YESThe body to send with this REST request.
+     @param headers  Optional:YES
+                           The headers to be included in this REST request.
+                        
+     @param authentication  Optional:YES
+                           The custom authentication/authorization information.
+                        
+     **********/
+    public void restGetScript(StepTestTable table, String relativeURI, String responseIdVar, String body, String headers, String authentication ) {
 
         if ( table == null ) throw new IllegalArgumentException ( "restGetScript.table = null");
-        table.add( TIDRestFunctions.restGetScript(getWindow().getName(), getName()));
+
+        if ( relativeURI == null ) throw new IllegalArgumentException ( "restGetScript.relativeURI = null");
+        if ( responseIdVar == null ) throw new IllegalArgumentException ( "restGetScript.responseIdVar = null");
+        table.add( TIDRestFunctions.restGetScript(getWindow().getName(), getName(), relativeURI, responseIdVar, body, headers, authentication));
     }
 
-    /*********** <pre>    </pre>    Supporting Engines:
+    /*********** <pre>
+                    Perform the "GET" method on a REST service, and try to get back the javascript text content.
+                
+                    
+                        This action will send the "GET" method with Headers containing "Accept : application/javascript".
+                        It only tells the server what type of content is expected, and it is not guarantee that the server will return it.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    
+    Supporting Engines:
     <P/><UL>
+    <LI>SAFS TIDComponent</LI>
+    </UL>
+
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>         relativeURI -- Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.<BR/>         responseIdVar -- Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        <BR/>         body -- Optional:YESThe body to send with this REST request.<BR/>         headers -- Optional:YES
+                           The headers to be included in this REST request.
+                        <BR/>         authentication -- Optional:YES
+                           The custom authentication/authorization information.
+                        
     </UL>
 
      **********/
-    public ComponentFunction restGetText( ) {
-        return TIDRestFunctions.restGetText(getWindow().getName(), getName());
+    public ComponentFunction restGetScript(String[] parameters ) {
+
+        if ( parameters == null ) throw new IllegalArgumentException ( "restGetScript.parameters = null");
+        return TIDRestFunctions.restGetScript(getWindow().getName(), getName(), parameters);
     }
 
-    /*********** <pre>    </pre>    Supporting Engines:
+    /*********** <pre>
+                    Perform the "GET" method on a REST service, and try to get back the javascript text content.
+                
+                    
+                        This action will send the "GET" method with Headers containing "Accept : application/javascript".
+                        It only tells the server what type of content is expected, and it is not guarantee that the server will return it.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    
+    Supporting Engines:
     <P/><UL>
+    <LI>SAFS TIDComponent</LI>
     </UL>
 
      @param table  Optional:NO
             The table to add the record to.
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>         relativeURI -- Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.<BR/>         responseIdVar -- Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        <BR/>         body -- Optional:YESThe body to send with this REST request.<BR/>         headers -- Optional:YES
+                           The headers to be included in this REST request.
+                        <BR/>         authentication -- Optional:YES
+                           The custom authentication/authorization information.
+                        
+    </UL>
+
      **********/
-    public void restGetText(StepTestTable table ) {
+    public void restGetScript(StepTestTable table, String[] parameters ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restGetScript.table = null");
+        if ( parameters == null ) throw new IllegalArgumentException ( "restGetScript.parameters = null");
+        table.add( TIDRestFunctions.restGetScript(getWindow().getName(), getName(), parameters));
+    }
+
+    /*********** <pre>
+                    Perform the "GET" method on a REST service, and try to get back the plain text content.
+                
+                    
+                        This action will send the "GET" method with Headers containing "Accept : text/plain".
+                        It only tells the server what type of content is expected, and it is not guarantee that the server will return it.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    Supporting Engines:
+    <P/><UL>
+    <LI>SAFS TIDComponent</LI>
+    </UL>
+
+     @param relativeURI  Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.
+     @param responseIdVar  Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        
+     @param body  Optional:YESThe body to send with this REST request.
+     @param headers  Optional:YES
+                           The headers to be included in this REST request.
+                        
+     @param authentication  Optional:YES
+                           The custom authentication/authorization information.
+                        
+     **********/
+    public ComponentFunction restGetText(String relativeURI, String responseIdVar, String body, String headers, String authentication ) {
+
+        if ( relativeURI == null ) throw new IllegalArgumentException ( "restGetText.relativeURI = null");
+        if ( responseIdVar == null ) throw new IllegalArgumentException ( "restGetText.responseIdVar = null");
+        return TIDRestFunctions.restGetText(getWindow().getName(), getName(), relativeURI, responseIdVar, body, headers, authentication);
+    }
+
+    /*********** <pre>
+                    Perform the "GET" method on a REST service, and try to get back the plain text content.
+                
+                    
+                        This action will send the "GET" method with Headers containing "Accept : text/plain".
+                        It only tells the server what type of content is expected, and it is not guarantee that the server will return it.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    Supporting Engines:
+    <P/><UL>
+    <LI>SAFS TIDComponent</LI>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     @param relativeURI  Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.
+     @param responseIdVar  Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        
+     @param body  Optional:YESThe body to send with this REST request.
+     @param headers  Optional:YES
+                           The headers to be included in this REST request.
+                        
+     @param authentication  Optional:YES
+                           The custom authentication/authorization information.
+                        
+     **********/
+    public void restGetText(StepTestTable table, String relativeURI, String responseIdVar, String body, String headers, String authentication ) {
 
         if ( table == null ) throw new IllegalArgumentException ( "restGetText.table = null");
-        table.add( TIDRestFunctions.restGetText(getWindow().getName(), getName()));
+
+        if ( relativeURI == null ) throw new IllegalArgumentException ( "restGetText.relativeURI = null");
+        if ( responseIdVar == null ) throw new IllegalArgumentException ( "restGetText.responseIdVar = null");
+        table.add( TIDRestFunctions.restGetText(getWindow().getName(), getName(), relativeURI, responseIdVar, body, headers, authentication));
     }
 
-    /*********** <pre>    </pre>    Supporting Engines:
+    /*********** <pre>
+                    Perform the "GET" method on a REST service, and try to get back the plain text content.
+                
+                    
+                        This action will send the "GET" method with Headers containing "Accept : text/plain".
+                        It only tells the server what type of content is expected, and it is not guarantee that the server will return it.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    
+    Supporting Engines:
     <P/><UL>
+    <LI>SAFS TIDComponent</LI>
+    </UL>
+
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>         relativeURI -- Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.<BR/>         responseIdVar -- Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        <BR/>         body -- Optional:YESThe body to send with this REST request.<BR/>         headers -- Optional:YES
+                           The headers to be included in this REST request.
+                        <BR/>         authentication -- Optional:YES
+                           The custom authentication/authorization information.
+                        
     </UL>
 
      **********/
-    public ComponentFunction restGetXML( ) {
-        return TIDRestFunctions.restGetXML(getWindow().getName(), getName());
+    public ComponentFunction restGetText(String[] parameters ) {
+
+        if ( parameters == null ) throw new IllegalArgumentException ( "restGetText.parameters = null");
+        return TIDRestFunctions.restGetText(getWindow().getName(), getName(), parameters);
     }
 
-    /*********** <pre>    </pre>    Supporting Engines:
+    /*********** <pre>
+                    Perform the "GET" method on a REST service, and try to get back the plain text content.
+                
+                    
+                        This action will send the "GET" method with Headers containing "Accept : text/plain".
+                        It only tells the server what type of content is expected, and it is not guarantee that the server will return it.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    
+    Supporting Engines:
     <P/><UL>
+    <LI>SAFS TIDComponent</LI>
     </UL>
 
      @param table  Optional:NO
             The table to add the record to.
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>         relativeURI -- Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.<BR/>         responseIdVar -- Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        <BR/>         body -- Optional:YESThe body to send with this REST request.<BR/>         headers -- Optional:YES
+                           The headers to be included in this REST request.
+                        <BR/>         authentication -- Optional:YES
+                           The custom authentication/authorization information.
+                        
+    </UL>
+
      **********/
-    public void restGetXML(StepTestTable table ) {
+    public void restGetText(StepTestTable table, String[] parameters ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restGetText.table = null");
+        if ( parameters == null ) throw new IllegalArgumentException ( "restGetText.parameters = null");
+        table.add( TIDRestFunctions.restGetText(getWindow().getName(), getName(), parameters));
+    }
+
+    /*********** <pre>
+                    Perform the "GET" method on a REST service, and try to get back the xml text content.
+                
+                    
+                        This action will send the "GET" method with Headers containing "Accept : text/xml".
+                        It only tells the server what type of content is expected, and it is not guarantee that the server will return it.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    Supporting Engines:
+    <P/><UL>
+    <LI>SAFS TIDComponent</LI>
+    </UL>
+
+     @param relativeURI  Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.
+     @param responseIdVar  Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        
+     @param body  Optional:YESThe body to send with this REST request.
+     @param headers  Optional:YES
+                           The headers to be included in this REST request.
+                        
+     @param authentication  Optional:YES
+                           The custom authentication/authorization information.
+                        
+     **********/
+    public ComponentFunction restGetXML(String relativeURI, String responseIdVar, String body, String headers, String authentication ) {
+
+        if ( relativeURI == null ) throw new IllegalArgumentException ( "restGetXML.relativeURI = null");
+        if ( responseIdVar == null ) throw new IllegalArgumentException ( "restGetXML.responseIdVar = null");
+        return TIDRestFunctions.restGetXML(getWindow().getName(), getName(), relativeURI, responseIdVar, body, headers, authentication);
+    }
+
+    /*********** <pre>
+                    Perform the "GET" method on a REST service, and try to get back the xml text content.
+                
+                    
+                        This action will send the "GET" method with Headers containing "Accept : text/xml".
+                        It only tells the server what type of content is expected, and it is not guarantee that the server will return it.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    Supporting Engines:
+    <P/><UL>
+    <LI>SAFS TIDComponent</LI>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     @param relativeURI  Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.
+     @param responseIdVar  Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        
+     @param body  Optional:YESThe body to send with this REST request.
+     @param headers  Optional:YES
+                           The headers to be included in this REST request.
+                        
+     @param authentication  Optional:YES
+                           The custom authentication/authorization information.
+                        
+     **********/
+    public void restGetXML(StepTestTable table, String relativeURI, String responseIdVar, String body, String headers, String authentication ) {
 
         if ( table == null ) throw new IllegalArgumentException ( "restGetXML.table = null");
-        table.add( TIDRestFunctions.restGetXML(getWindow().getName(), getName()));
+
+        if ( relativeURI == null ) throw new IllegalArgumentException ( "restGetXML.relativeURI = null");
+        if ( responseIdVar == null ) throw new IllegalArgumentException ( "restGetXML.responseIdVar = null");
+        table.add( TIDRestFunctions.restGetXML(getWindow().getName(), getName(), relativeURI, responseIdVar, body, headers, authentication));
+    }
+
+    /*********** <pre>
+                    Perform the "GET" method on a REST service, and try to get back the xml text content.
+                
+                    
+                        This action will send the "GET" method with Headers containing "Accept : text/xml".
+                        It only tells the server what type of content is expected, and it is not guarantee that the server will return it.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    
+    Supporting Engines:
+    <P/><UL>
+    <LI>SAFS TIDComponent</LI>
+    </UL>
+
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>         relativeURI -- Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.<BR/>         responseIdVar -- Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        <BR/>         body -- Optional:YESThe body to send with this REST request.<BR/>         headers -- Optional:YES
+                           The headers to be included in this REST request.
+                        <BR/>         authentication -- Optional:YES
+                           The custom authentication/authorization information.
+                        
+    </UL>
+
+     **********/
+    public ComponentFunction restGetXML(String[] parameters ) {
+
+        if ( parameters == null ) throw new IllegalArgumentException ( "restGetXML.parameters = null");
+        return TIDRestFunctions.restGetXML(getWindow().getName(), getName(), parameters);
+    }
+
+    /*********** <pre>
+                    Perform the "GET" method on a REST service, and try to get back the xml text content.
+                
+                    
+                        This action will send the "GET" method with Headers containing "Accept : text/xml".
+                        It only tells the server what type of content is expected, and it is not guarantee that the server will return it.
+                    
+                    
+                        If the field SessionIDItem is provided in the map, the keyword RestStartServiceSession SHOULD be executed 
+                        before executing this action, which will be handled within a session.
+                        Otherwise, it will be considered as a one-shot connection, 
+                        and NO RestStartServiceSession needs to be called and user may need to provide authentication information.
+                    
+                    </pre>    
+    Supporting Engines:
+    <P/><UL>
+    <LI>SAFS TIDComponent</LI>
+    </UL>
+
+     @param table  Optional:NO
+            The table to add the record to.
+     @param parameters  Optional:NO
+            An array containing the following parameters:
+    <UL>
+<BR/>         relativeURI -- Optional:NOThe relative URI combined with a base-URL (stored in a session) to form a REST service URL.<BR/>         responseIdVar -- Optional:NO
+                          The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.  
+                        <BR/>         body -- Optional:YESThe body to send with this REST request.<BR/>         headers -- Optional:YES
+                           The headers to be included in this REST request.
+                        <BR/>         authentication -- Optional:YES
+                           The custom authentication/authorization information.
+                        
+    </UL>
+
+     **********/
+    public void restGetXML(StepTestTable table, String[] parameters ) {
+
+        if ( table == null ) throw new IllegalArgumentException ( "restGetXML.table = null");
+        if ( parameters == null ) throw new IllegalArgumentException ( "restGetXML.parameters = null");
+        table.add( TIDRestFunctions.restGetXML(getWindow().getName(), getName(), parameters));
     }
 
     /*********** <pre>    </pre>    Supporting Engines:
@@ -1461,10 +2660,9 @@ public class TIDRest extends UIComponent {
      @param body  Optional:YESThe body to send with this REST request.
      @param headers  Optional:YES
                            The headers to be included in this REST request.
-                           Such as "If-Modified-Since: Sat, 29 OCT 1994 19:43:31 GMT".
                         
      @param authentication  Optional:YES
-                           The authentication information to guarantee this one-shot connection successful.
+                           The custom authentication/authorization information.
                         
      **********/
     public ComponentFunction restRequest(String hTTPMethod, String relativeURI, String responseIdVar, String body, String headers, String authentication ) {
@@ -1498,10 +2696,9 @@ public class TIDRest extends UIComponent {
      @param body  Optional:YESThe body to send with this REST request.
      @param headers  Optional:YES
                            The headers to be included in this REST request.
-                           Such as "If-Modified-Since: Sat, 29 OCT 1994 19:43:31 GMT".
                         
      @param authentication  Optional:YES
-                           The authentication information to guarantee this one-shot connection successful.
+                           The custom authentication/authorization information.
                         
      **********/
     public void restRequest(StepTestTable table, String hTTPMethod, String relativeURI, String responseIdVar, String body, String headers, String authentication ) {
@@ -1535,9 +2732,8 @@ public class TIDRest extends UIComponent {
                            get the Response Object from the internal Map.
                         <BR/>         body -- Optional:YESThe body to send with this REST request.<BR/>         headers -- Optional:YES
                            The headers to be included in this REST request.
-                           Such as "If-Modified-Since: Sat, 29 OCT 1994 19:43:31 GMT".
                         <BR/>         authentication -- Optional:YES
-                           The authentication information to guarantee this one-shot connection successful.
+                           The custom authentication/authorization information.
                         
     </UL>
 
@@ -1571,9 +2767,8 @@ public class TIDRest extends UIComponent {
                            get the Response Object from the internal Map.
                         <BR/>         body -- Optional:YESThe body to send with this REST request.<BR/>         headers -- Optional:YES
                            The headers to be included in this REST request.
-                           Such as "If-Modified-Since: Sat, 29 OCT 1994 19:43:31 GMT".
                         <BR/>         authentication -- Optional:YES
-                           The authentication information to guarantee this one-shot connection successful.
+                           The custom authentication/authorization information.
                         
     </UL>
 
@@ -1596,7 +2791,7 @@ public class TIDRest extends UIComponent {
 
      @param baseURL  Optional:NOThe base URL to be stored with a session.
      @param authentication  Optional:YES
-                           The authentication information to be used during this session.
+                           The file holding authentication information to be used during this session.
                         
      **********/
     public ComponentFunction restStartServiceSession(String baseURL, String authentication ) {
@@ -1618,7 +2813,7 @@ public class TIDRest extends UIComponent {
             The table to add the record to.
      @param baseURL  Optional:NOThe base URL to be stored with a session.
      @param authentication  Optional:YES
-                           The authentication information to be used during this session.
+                           The file holding authentication information to be used during this session.
                         
      **********/
     public void restStartServiceSession(StepTestTable table, String baseURL, String authentication ) {
@@ -1643,7 +2838,7 @@ public class TIDRest extends UIComponent {
             An array containing the following parameters:
     <UL>
 <BR/>         baseURL -- Optional:NOThe base URL to be stored with a session.<BR/>         authentication -- Optional:YES
-                           The authentication information to be used during this session.
+                           The file holding authentication information to be used during this session.
                         
     </UL>
 
@@ -1670,7 +2865,7 @@ public class TIDRest extends UIComponent {
             An array containing the following parameters:
     <UL>
 <BR/>         baseURL -- Optional:NOThe base URL to be stored with a session.<BR/>         authentication -- Optional:YES
-                           The authentication information to be used during this session.
+                           The file holding authentication information to be used during this session.
                         
     </UL>
 
