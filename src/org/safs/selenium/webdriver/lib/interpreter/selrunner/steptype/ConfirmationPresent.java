@@ -1,9 +1,6 @@
 package org.safs.selenium.webdriver.lib.interpreter.selrunner.steptype;
 
 import org.openqa.selenium.NoAlertPresentException;
-import org.safs.selenium.webdriver.lib.SearchObject;
-import org.safs.selenium.webdriver.lib.WDLibrary;
-import org.safs.selenium.webdriver.lib.interpreter.selrunner.SRUtilities;
 import org.safs.selenium.webdriver.lib.interpreter.selrunner.SRunnerType;
 
 import com.sebuilder.interpreter.Getter;
@@ -14,7 +11,7 @@ public class ConfirmationPresent implements Getter, SRunnerType {
 
 	@Override
 	public void processParams(Step step, String[] params) {
-		try{ 
+		try{
 			if(params[1].length() > 0){
 				step.stringParams.put("variable", params[1]);
 			}
@@ -23,7 +20,7 @@ public class ConfirmationPresent implements Getter, SRunnerType {
 
 	@Override
 	public String get(TestRun ctx) {
-		try{ 
+		try{
 			ctx.driver().switchTo().alert();
 			return "true";
 		}
