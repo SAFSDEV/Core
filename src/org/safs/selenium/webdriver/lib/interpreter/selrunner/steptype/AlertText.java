@@ -8,10 +8,12 @@
  *
  * History:
  * 2017年6月14日    (Lei Wang) Initial release.
+ * 2017年6月16日    (Lei Wang) Modified processParams(): properly set parameter, so that storeAlertText is supported.
  */
 package org.safs.selenium.webdriver.lib.interpreter.selrunner.steptype;
 
 import org.safs.selenium.webdriver.lib.interpreter.selrunner.SRunnerType;
+import org.safs.selenium.webdriver.lib.interpreter.selrunner.Utils;
 
 import com.sebuilder.interpreter.Step;
 
@@ -21,6 +23,6 @@ import com.sebuilder.interpreter.Step;
 public class AlertText extends com.sebuilder.interpreter.steptype.AlertText implements SRunnerType{
 	@Override
 	public void processParams(Step step, String[] params) {
-		step.stringParams.put(cmpParamName(), params[1]);
+		Utils.setParam(step, this, params[1]);
 	}
 }
