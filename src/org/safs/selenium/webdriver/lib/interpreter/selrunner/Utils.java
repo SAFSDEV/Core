@@ -108,4 +108,25 @@ public class Utils {
 			}//else if getter.cmpParamName() is null, that means this setter (such as ElementNotPresent, TextPresent etc.) doesn't need that parameter.
 		}
 	}
+
+	/**
+	 * Some command (such as 'assert', 'verify' and 'waitFor') can be
+	 * appended with a getter (such as 'Text', 'Location' etc.) to form
+	 * a positive command (assertText, verifyLocation); they can also be
+	 * appended '<b>Not</b>' before the getter to form a negative command
+	 * (assertNotText, verifyNotLocation).<br>
+	 * This method will tell us if the command is a negative command.<br>
+	 *
+	 * @param command String, the name of command
+	 * @return boolean, if the command is negative
+	 */
+	public static boolean isNegativeCommand(String command){
+		if(command==null){
+			throw new SAFSRuntimeException("command is null.");
+		}
+		String trimmedCommand = command.trim();
+		return (trimmedCommand.startsWith(Constants.COMMAND_ASSERT_NOT) ||
+				trimmedCommand.startsWith(Constants.COMMAND_VERIFY_NOT) ||
+				trimmedCommand.startsWith(Constants.COMMAND_WAITFOR_NOT));
+	}
 }

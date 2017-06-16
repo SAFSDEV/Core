@@ -27,7 +27,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.safs.IndependantLog;
+import org.safs.selenium.webdriver.lib.interpreter.selrunner.Constants;
 import org.safs.selenium.webdriver.lib.interpreter.selrunner.SRunnerType;
+import org.safs.selenium.webdriver.lib.interpreter.selrunner.Utils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -170,15 +172,22 @@ public class WDScriptFactory extends ScriptFactory {
 
 			stepTypeFactory.setSecondaryPackage(SRSTEPTYPE_PACKAGE);
 			Step step = null;
+			String command = params[0];
 			try{
-				step = new Step(stepTypeFactory.getStepTypeOfName(params[0]));
+				step = new Step(stepTypeFactory.getStepTypeOfName(command));
 			}catch(Throwable x){
-				if(params[0].endsWith(ANDWAIT_CLASS)){
-					IndependantLog.info(debugmsg +"stripping 'unecessary' AndWait class suffix fro "+ params[0] +"...");
+				if(command.endsWith(ANDWAIT_CLASS)){
+					IndependantLog.info(debugmsg +"stripping 'unecessary' AndWait class suffix from "+ command +" ...");
 					//AndWait support should be implicit in WebDriver?
-					step = new Step(stepTypeFactory.getStepTypeOfName(params[0].substring(0, params[0].length() - ANDWAIT_CLASS.length())));
+					step = new Step(stepTypeFactory.getStepTypeOfName(command.substring(0, command.length() - ANDWAIT_CLASS.length())));
+				}else if(Utils.isNegativeCommand(command)){
+					int begin = command.indexOf(Constants.QULIFIER_NOT);
+					String positiveCommand = command.substring(0, begin)+command.substring(begin+Constants.QULIFIER_NOT.length());
+					IndependantLog.info(debugmsg +"stripped negative qualifier '"+Constants.QULIFIER_NOT+"' from "+ command +", creating step for "+positiveCommand+" ...");
+					step = new Step(stepTypeFactory.getStepTypeOfName(positiveCommand));
+					step.negated = true;//make this step negative
 				}else{
-					IndependantLog.debug(debugmsg +"rethrowing "+ x.getClass().getSimpleName()+"...");
+					IndependantLog.warn(debugmsg +"rethrowing "+ x.getClass().getSimpleName()+"...");
 					throw x;
 				}
 			}
