@@ -2,10 +2,6 @@ package org.safs.selenium.webdriver.lib.interpreter.selrunner.steptype;
 
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.NoAlertPresentException;
-import org.openqa.selenium.WebElement;
-import org.safs.selenium.webdriver.lib.SearchObject;
-import org.safs.selenium.webdriver.lib.WDLibrary;
-import org.safs.selenium.webdriver.lib.interpreter.selrunner.SRUtilities;
 import org.safs.selenium.webdriver.lib.interpreter.selrunner.SRunnerType;
 
 import com.sebuilder.interpreter.Getter;
@@ -16,7 +12,7 @@ public class Confirmation implements Getter, SRunnerType {
 
 	@Override
 	public void processParams(Step step, String[] params) {
-		try{ 
+		try{
 			if(params[1].length() > 0){
 				step.stringParams.put("text", params[1]);
 			}
