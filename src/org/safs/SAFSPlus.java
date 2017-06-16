@@ -900,9 +900,17 @@ public abstract class SAFSPlus {
 		}
 
 	    /***********
-        Execute a SeBuilder JSON script in the currently running WebDriver.
-		@param path -- full absolute path or project-relative path to an existing SeBuilder
-		JSON script to execute.
+        Execute an external <b>selenium script</b> in the currently running WebDriver.<br>
+		The external <b>selenium script</b> is recorded by a testing tool, such as "Selenium Builder" or "Selenium IDE".
+		<br>
+        Supported script types are
+        <ul>
+        <li><a href="http://seleniumbuilder.github.io/se-builder/">Selenium Builder</a> <a href="https://github.com/SeleniumBuilder/se-builder/wiki/JSON-Format">JSON</a> format.
+        <li><a href="http://www.seleniumhq.org/projects/ide/">Selenium IDE</a> or <a href="http://internal.server/saspedia/SelRunner">SelRunner</a> <a href="https://raw.githubusercontent.com/SAFSDEV/SeleniumPlus-REGRESSION/master/SeBuilder/Scripts/FormsSRTest.htm">HTML</a> format.
+        </ul>
+        Please refer to <a href="http://safsdev.github.io/selenium/doc/SeleniumPlus-Welcome.html#usingseleniumscripts">Using SeleniumScripts</a> for details.<br>
+        <br>
+		@param path -- full absolute path or project-relative path to an existing script to execute.
         @return true if successfully executed with a successful result,
         false if the script reports failure or an error occurred during execution.<p>
         * @see #prevResults
@@ -912,16 +920,23 @@ public abstract class SAFSPlus {
 		* @example
 		* <pre>
 		* {@code
-		*  //checkbox.json path is centrally stored in the App Map.
+		*  //Run a JSON script stored centrally in the App Map.
+		*  //-- Map File --------------
+		*  //[ApplicationConstants]
+		*  //CheckBoxJSONScript=C:\Automation\SharedStorage\Selenium\checkbox.json
+		*  //---------------------------
 		*  boolean success = Misc.CallScript(Map.CheckBoxJSONScript());
 		*
 		*  //Literal String examples (not recommended):
 		*
-		*  //checkbox.json is in a Scripts sub-directory for the Project.
+		*  //Run a JSON script (checkbox.json), which is in a Scripts sub-directory for the Project.
 		*  boolean success = Misc.CallScript("Scripts\checkbox.json");
 		*
-		*  //checkbox.json is provided using a full absolute path.
+		*  //Run a JSON script (checkbox.json), which is provided using a full absolute path.
 		*  boolean success = Misc.CallScript("C:\Automation\SharedStorage\Selenium\checkbox.json");
+		*
+		*  //Run an HTML script (checkbox.html), which is in Scripts sub-directory for the Project.
+		*  boolean success = Misc.CallScript("Scripts\checkbox.html");
 		* }
 		* </pre>
 		*/
