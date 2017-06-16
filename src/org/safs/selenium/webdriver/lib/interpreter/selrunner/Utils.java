@@ -8,6 +8,7 @@
  *
  * History:
  * 2017年6月14日    (SBJLWA) Initial release.
+ * 2017年6月16日    (SBJLWA) Modified Utils.setParam(): check the empty 'variable' parameter.
  */
 package org.safs.selenium.webdriver.lib.interpreter.selrunner;
 
@@ -98,7 +99,11 @@ public class Utils {
 		}
 		if(step.type instanceof Store){
 			//Store will always use "variable" to get the parameter
-			step.stringParams.put(Constants.PARAM_VARIABLE/*"variable"*/, parameter);
+			if(parameter.length()>0){
+				step.stringParams.put(Constants.PARAM_VARIABLE/*"variable"*/, parameter);
+			}else{
+				throw new SAFSRuntimeException("Parameter 'variable' is an empty string, cannot be used as a valid variable!");
+			}
 		}else{
 			//verify, waitFor, assert, the second parameter is the value to compare
 			//the getter provides the parameter's name we should store the parameter as
