@@ -18,7 +18,7 @@ Before you can successfully run any build, you need to install/verify the follow
 
 ### Step 2: Prepare Develop Environment
 Before you can successfully run any build, you need to install/verify the following:
-1. Clone the repository [build](git://github.com/SAFSDEV/build) into your local folder, for example: to *c:\SAFSDev*.
+1. Clone the repository **git://github.com/SAFSDEV/build** into your local folder, for example: to *c:\SAFSDev*.
 2. Create a **SAFS Build folder**, such as *c:\SAFSBuild*, which is used to build SAFS/SE+. Create an Environment Variable **%SAFS_BUILD%** pointing to "SAFS Build folder".
 3. Go to *c:\SAFSDev\build\safs*, copy the file *bootstrap.build.xml* to **%SAFS_BUILD%**.
 4. Call ```ant -f bootstrap.build.xml bootstrapbuild``` to get all latest ant build scripts.
