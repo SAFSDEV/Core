@@ -182,7 +182,7 @@ public class DocumentParser {
 
 			if (htmlSource == null) {
 				//If the url's content contains <HTML xmlns="http://www.w3.org/TR/REC-html40">, error occurs
-				//See defect at http://***REMOVED***/***REMOVED***?defectid=S0743322
+				//See defect at S0743322
 				//There are two approaches to get the content from an URL
 
 				//1. Remove the beginning and ending HTML tag from html source.

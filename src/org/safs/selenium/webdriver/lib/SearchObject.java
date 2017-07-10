@@ -1484,7 +1484,7 @@ public class SearchObject {
 
 		SearchContext wel = sc;
 
-		//3. Lei Wang, FIX http://***REMOVED***/***REMOVED***?defectid=S1138290
+		//3. Lei Wang, FIX S1138290
 		//Error 1: Map doesn't contain a window definition (under a frame)
 		//  [Window]
 		//  Child="FrameId=xxx;\;Id=xxx"
@@ -1593,7 +1593,7 @@ public class SearchObject {
 		SearchContext wel = sc;
 		SwitchFramesResults sfr =_switchFrames(recognitionString);
 
-		//3. Lei Wang, FIX http://***REMOVED***/***REMOVED***?defectid=S1138290
+		//3. Lei Wang, FIX S1138290
 		//Error 1: Map doesn't contain a window definition (under a frame)
 		//  [Window]
 		//  Child="FrameId=xxx;\;Id=xxx"
