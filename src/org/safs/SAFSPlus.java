@@ -906,7 +906,7 @@ public abstract class SAFSPlus {
         Supported script types are
         <ul>
         <li><a href="http://seleniumbuilder.github.io/se-builder/">Selenium Builder</a> <a href="https://github.com/SeleniumBuilder/se-builder/wiki/JSON-Format">JSON</a> format.
-        <li><a href="http://www.seleniumhq.org/projects/ide/">Selenium IDE</a> or <a href="http://internal.server/saspedia/SelRunner">SelRunner</a> <a href="https://raw.githubusercontent.com/SAFSDEV/SeleniumPlus-REGRESSION/master/SeBuilder/Scripts/FormsSRTest.htm">HTML</a> format.
+        <li><a href="http://www.seleniumhq.org/projects/ide/">Selenium IDE</a> <a href="https://raw.githubusercontent.com/SAFSDEV/SeleniumPlus-REGRESSION/master/SeBuilder/Scripts/FormsSRTest.htm">HTML</a> format.
         </ul>
         Please refer to <a href="http://safsdev.github.io/selenium/doc/SeleniumPlus-Welcome.html#usingseleniumscripts">Using SeleniumScripts</a> for details.<br>
         <br>
