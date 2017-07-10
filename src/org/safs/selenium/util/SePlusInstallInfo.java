@@ -194,10 +194,38 @@ public class SePlusInstallInfo{
 		return cp;
 	}
 
+	/**
+	 * If the override property is set, then use of the installed product is not
+	 * desired.  This would especially be true during testing.  During testing
+	 * the use of the latest files is desired versus what might be installed.
+	 *
+	 * @return true if the override property is set to "true" (ex. SELENIUM_PLUS_OVERRIDE).
+	 */
+	public static boolean isOverridePropertySet(String env){
+		return Boolean.getBoolean(env + "_OVERRIDE");
+	}
+
+	/**
+	 * If the override property is set to true (ex. SELENIUM_PLUS_OVERRIDE),
+	 * use the value of the system property (ex. SELENIUM_PLUS).  Otherwise,
+	 * use the environment variable.
+	 */
+	public static String GetSystemPropertyOrEnvironmentVariable(String env){
+		String result = null;
+
+		boolean override = isOverridePropertySet(env);
+		result = override ? System.getProperty(env) : null;
+
+		if (result==null){
+			result = System.getenv(env);
+		}
+		return result;
+	}
+
 	protected static String GetSystemEnvironmentVariable(String env){
 		Object result = null;
 
-		result = System.getenv(env);
+		result = GetSystemPropertyOrEnvironmentVariable(env);
 
 		String nativeWrapperClassName = "org.safs.natives.NativeWrapper";
 		Class<?> nativeWrapperClass = null;
@@ -493,7 +521,7 @@ public class SePlusInstallInfo{
 	private static boolean IsProduct(String environmentHome, String indicator){
 		String sourceLocation = getSourceLocation().toLowerCase();
 
-		String home = GetSystemEnvironmentVariable(environmentHome);
+		String home = GetSystemPropertyOrEnvironmentVariable(environmentHome);
 
 		if(home!=null){
 			//replace backslash "\" by slash "/"

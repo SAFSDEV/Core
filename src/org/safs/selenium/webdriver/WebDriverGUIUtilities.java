@@ -184,6 +184,13 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	}
 
 	/**
+	 * @return the location of the SeleniumPlus files.
+	 */
+	public static String getSeleniumPlusHome(){
+		return SePlusInstallInfo.GetSystemPropertyOrEnvironmentVariable(DriverConstant.SYSTEM_PROPERTY_SELENIUMPLUS_DIR);
+	}
+
+	/**
 	 * @return true if we detect we are running from a SAFS installation (/lib/safsselenium.jar)
 	 */
 	public static boolean isSAFS(){
@@ -357,7 +364,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 						if(isSAFS()){
 							safsdir = System.getenv(DriverConstant.SYSTEM_PROPERTY_SAFS_DIR)+ File.separator+"lib"+File.separator;
 						}else{//isSeleniumPlus
-							safsdir = System.getenv(DriverConstant.SYSTEM_PROPERTY_SELENIUMPLUS_DIR)+ File.separator +"libs"+File.separator;
+							safsdir = getSeleniumPlusHome()+ File.separator +"libs"+File.separator;
 						}
 						File custurl = new CaseInsensitiveFile(safsdir + CUSTOM_CLASS2TYPE_MAP).toFile();
 						if(custurl.isFile()) in = custurl.toURL().openStream();
@@ -1148,7 +1155,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		File executable = null;
 
 		if(isSeleniumPlus()){
-			root = System.getenv("SELENIUM_PLUS");
+			root = getSeleniumPlusHome();
 			server = root + "/extra/RemoteServer.bat";
 			executable = new File(server);
 		}
@@ -1164,7 +1171,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 			}else{
 				IndependantLog.warn("WDGU: startRemoteServer executable '"+executable.getAbsolutePath()+"' doesn't not exist.");
 			}
-			root = System.getenv("SELENIUM_PLUS");
+			root = getSeleniumPlusHome();
 			server = root + "/extra/RemoteServer.bat";
 			executable = new File(server);
 			if(!executable.exists()){
