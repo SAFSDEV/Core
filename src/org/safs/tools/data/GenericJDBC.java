@@ -51,7 +51,7 @@ import java.sql.*;
  * <p>
  * <li><b>-props</b> "librefs=mydata '/tst/tools/deploymentdetails/dev/shrdata';undoPolicyNone=True"<br>
  * Zero or more name=value pairs (separated by semi-colons) to be used during the connection request.<br>
- * This argument can appear more than once, if needed.<br> 
+ * This argument can appear more than once, if needed.<br>
  * Same as JVM Option: <b>-Dsafs.jdbc.connection.props</b>="&lt;name=value;name=value>"<br>
  * Ex: -Dsafs.jdbc.connection.props="librefs=mydata '/tst/tools/deploymentdetails/dev/shrdata';undoPolicyNone=True"
  * <p>
@@ -67,7 +67,7 @@ import java.sql.*;
  * </ul>
  * <p>
  * This class requires the JDBC Drivers be in the CLASSPATH already.<br>
- * For example: For SAS/Share, this generally means that both associated JAR files be in the 
+ * For example: For SAS/Share, this generally means that both associated JAR files be in the
  * System CLASSPATH ( or passed in the command-line):
  * <p>
  * <ul>
@@ -83,16 +83,16 @@ public class GenericJDBC {
 
 	/** "mydata" */
 	public static final String DEFAULT_SHRDATA_ID = "mydata";
-	
+
 	/** "'/tst/tools/deploymentdetails/shrdata'" */
 	public static final String DEFAULT_PROD_DATA = "'/tst/tools/deploymentdetails/shrdata'";
-	
+
 	/** "'/tst/tools/deploymentdetails/dev/shrdata'" */
 	public static final String DEFAULT_DEV_DATA = "'/tst/tools/deploymentdetails/dev/shrdata'";
-	
+
 	/** "com.sas.net.sharenet.ShareNetDriver" */
 	public static final String DEFAULT_DRIVERS = "com.sas.net.sharenet.ShareNetDriver";
-	
+
 	/** "sharenet://database.server:5011" */
 	public static final String DEFAULT_CONNECTION = "sharenet://database.server:5011";
 
@@ -104,45 +104,45 @@ public class GenericJDBC {
 	protected String _shrdataid = DEFAULT_SHRDATA_ID;
 	/** defaults to {@value #DEFAULT_PROD_DATA} */
 	protected String _datapath = DEFAULT_PROD_DATA;
-	/** 
-	 * defaults to null.  
+	/**
+	 * defaults to null.
 	 * Must be set by command-line arguments or API calls before a call to {@link #updateData()}. */
 	protected String _dataset = null;
-	/** 
-	 * defaults to null.  
+	/**
+	 * defaults to null.
 	 * Must be set by command-line arguments or API calls before a call to {@link #updateData()}. */
 	protected String _field = null;
-	/** 
-	 * defaults to null.  
+	/**
+	 * defaults to null.
 	 * Must be set by command-line arguments or API calls before a call to {@link #updateData()}. */
 	protected String _value = null;
-	/** 
-	 * defaults to null.  
-	 * Should be set by command-line arguments or API calls before a call to {@link #updateData()}. 
+	/**
+	 * defaults to null.
+	 * Should be set by command-line arguments or API calls before a call to {@link #updateData()}.
 	 * A generic value may be used internally if none is provided beforehand. */
 	protected String _opsource = null;
-	/** 
-	 * defaults to null.  
+	/**
+	 * defaults to null.
 	 * Must be set by command-line arguments or API calls before a call to {@link #updateData()}. */
 	protected String _where = null;
-	/** 
-	 * defaults to null.  
-	 * Should be set by command-line arguments or API calls before a call to {@link #updateData()}, 
+	/**
+	 * defaults to null.
+	 * Should be set by command-line arguments or API calls before a call to {@link #updateData()},
 	 * if needed.
 	 */
 	protected Properties _props = null;
-	
+
 	/**
-	 * default: true. 
+	 * default: true.
 	 * set to false and any call to updateData will be ignored. */
 	protected boolean _doUpdate = true;
-	
+
 	public static final String PROP_KEY_LIBREFS        = "librefs";
 	public static final String PROP_KEY_UNDOPOLICYNONE = "undoPolicyNone";
 	public static final String PROP_KEY_JDBC_DRIVERS   = "jdbc.drivers";
 
 	public static final String PROP_KEY_SAFS_JDBC_DRIVERS   ="safs.jdbc.drivers";
-	
+
 	public static final String PROP_KEY_SAFS_JDBC_NOUPDATE  ="safs.jdbc.noupdate";
 	public static final String PROP_KEY_SAFS_JDBC_DATAID    ="safs.jdbc.dataid";
 	public static final String PROP_KEY_SAFS_JDBC_DATAPATH  ="safs.jdbc.datapath";
@@ -152,8 +152,8 @@ public class GenericJDBC {
 	public static final String PROP_KEY_SAFS_JDBC_VALUE     ="safs.jdbc.value";
 	public static final String PROP_KEY_SAFS_JDBC_CONNECTION="safs.jdbc.connection";
 	public static final String PROP_KEY_SAFS_JDBC_PROPS     ="safs.jdbc.connection.props";
-	public static final String PROP_KEY_SAFS_JDBC_OPSOURCE  ="safs.jdbc.opsource";		
-	
+	public static final String PROP_KEY_SAFS_JDBC_OPSOURCE  ="safs.jdbc.opsource";
+
 	public static final String ARG_NOUPDATE  ="-noupdate";
 	public static final String ARG_DRIVERS    ="-drivers";
 	public static final String ARG_DATAID    ="-dataid";
@@ -164,15 +164,15 @@ public class GenericJDBC {
 	public static final String ARG_VALUE     ="-value";
 	public static final String ARG_CONNECTION="-connection";
 	public static final String ARG_PROPS     ="-props";
-	public static final String ARG_OPSOURCE  ="-opsource";		
-	
+	public static final String ARG_OPSOURCE  ="-opsource";
+
 	/** Currently logs to System.out.  Other options may be supported in the future. */
 	public static void log(String message){
 		System.out.println(message);
 	}
-	
+
 	/**
-	 * @param enabled -- Set true (default) to enable database updates.  
+	 * @param enabled -- Set true (default) to enable database updates.
 	 * False to disable/bypass database updates.
 	 */
 	public void enableUpdate(boolean enabled) {_doUpdate = enabled; }
@@ -180,7 +180,7 @@ public class GenericJDBC {
 	 * @return true if database updates are enabled.  false otherwise.
 	 */
 	public boolean isUpdateEnabled() {return _doUpdate; }
-	
+
 	/**
 	 * @return the current value of the JDBC connection string.
 	 */
@@ -218,7 +218,7 @@ public class GenericJDBC {
 	}
 
 	/**
-	 * @param _shrdataid -- Set/Change the Share data id to be used with JDBC.  
+	 * @param _shrdataid -- Set/Change the Share data id to be used with JDBC.
 	 * This might only apply to SAS Connect JDBC data connections.
 	 */
 	public void setShrdataid(String _shrdataid) {
@@ -304,7 +304,7 @@ public class GenericJDBC {
 	}
 
 	/**
-	 * @param _where -- Set/Change the where clause that will be used on the JDBC database.  
+	 * @param _where -- Set/Change the where clause that will be used on the JDBC database.
 	 * This setting should NOT include the "where " prefix.
 	 */
 	public void setWhere(String _where) {
@@ -312,7 +312,7 @@ public class GenericJDBC {
 	}
 
 	/**
-	 * @return the current Properties used for JDBC database connection, if any.  
+	 * @return the current Properties used for JDBC database connection, if any.
 	 * May return null.
 	 */
 	public Properties getProps() {
@@ -320,7 +320,7 @@ public class GenericJDBC {
 	}
 
 	/**
-	 * @param _props -- Set/Change the Properties used for JDBC database connection, if any.  
+	 * @param _props -- Set/Change the Properties used for JDBC database connection, if any.
 	 * May be null.
 	 */
 	public void setProps(Properties _props) {
@@ -328,7 +328,7 @@ public class GenericJDBC {
 	}
 
 	/**
-	 * Invokes {@link #updateData(String, Properties, String, String, String, String, String, String, String)} 
+	 * Invokes {@link #updateData(String, Properties, String, String, String, String, String, String, String)}
 	 * with all internal settings previously set or defaulted.
 	 */
 	public void updateData(){
@@ -343,23 +343,23 @@ public class GenericJDBC {
 				   _opsource
 				   );
 	}
-	
+
 	/**
 	 * The primary routine used to update the database.
 	 * <p>
 	 * The typical update:
 	 * <p><pre>
-	     String update = "update "+ dataid +"."+ dataset 
-		          + " set "+ field +" = '"+ value +"'"    / * <-- single quotes critical * /   
-		          + " where "+ where   
+	     String update = "update "+ dataid +"."+ dataset
+		          + " set "+ field +" = '"+ value +"'"    / * <-- single quotes critical * /
+		          + " where "+ where
 		          + " / * "+ opsource +" * /";
 
 	   </pre>
 	   <p>
 	   Then verification:
 	   <p><pre>
-	     String query = "select * from "+ dataid +"."+ dataset 
-			      +" where "+ where 
+	     String query = "select * from "+ dataid +"."+ dataset
+			      +" where "+ where
 			      + "  / * "+ opsource +"  * /";
 	 * </pre>
 	 * <p>
@@ -375,12 +375,12 @@ public class GenericJDBC {
 	 */
 	public void updateData( String connectURI,
 						    Properties prop,
-						    String dataid, 
-						    String datapath, 
-						    String dataset, 
-						    String field, 
-						    String value, 
-						    String where, 
+						    String dataid,
+						    String datapath,
+						    String dataset,
+						    String field,
+						    String value,
+						    String where,
 						    String opsource){
 	   int rc=0;
 	   Connection conn = null;
@@ -392,17 +392,17 @@ public class GenericJDBC {
 	       log("INFO: UpdateData Bypassed, doUpdate=\"False\"");
 		   return;
 	   }
-	   
+
 	   // Get the URI so we know if we are running in dev or prod
 	   //String uri=request.getRequestURI();
 	   //int x = uri.indexOf("/dev/");
 	   try {
-	   
+
 	     // Load the JDBC driver. Carl Nagle: not needed for JDBC 4.0 and later
 	     // Class.forName("com.sas.net.sharenet.ShareNetDriver");
 		 temp = System.getProperty(PROP_KEY_JDBC_DRIVERS);
 		 if(temp == null) System.setProperty(PROP_KEY_JDBC_DRIVERS, DEFAULT_DRIVERS);
-		 
+
 	     //SET UP OUR JDBC CONNECTION
 		 if(connectURI == null){
 			 connectURI = _connection;
@@ -410,25 +410,25 @@ public class GenericJDBC {
 			 _connection = connectURI;
 		 }
 		 log("INFO: Using connection at: "+ connectURI);
-		 
+
 		 if(dataid == null){
 			 dataid = _shrdataid;
 		 }else{
 			 _shrdataid = dataid;
 		 }
-		 
+
 		 if(datapath == null){
 			 datapath = _datapath;
 		 }
 		 _datapath = datapath;
-		 
+
 		 if(opsource == null){
 			 opsource = "Support:Carl Nagle:"+ this.getClass().getName();
 		 }
 		 _opsource = opsource;
-		 
+
 		 boolean abort = false;
-		 
+
 		 if(dataset == null || dataset.length()==0){
 	    	 log("ERROR, dataset \"-Dsafs.jdbc.dataset='adataset'\" or \"-dataset 'adataset'\" has not been specified.");
 	    	 abort=true;
@@ -441,17 +441,17 @@ public class GenericJDBC {
 	    	 log("ERROR, value \"-Dsafs.jdbc.value='avalue'\" or \"-value 'avalue'\" has not been specified.");
 	    	 abort=true;
 		 }
-		 
+
 		 if(where == null || where.length()==0){
 	    	 log("ERROR, where \"-Dsafs.jdbc.where='where clause'\" or \"-where 'where clause'\" has not been specified.");
 	    	 abort=true;
 		 }
-		 
+
 		 if(abort){
 	    	 log("ABORTED: Insufficient Arguments!");
 	    	 return;
 		 }
-		 
+
 	     // First, we get some data;
 		 if(prop == null){
 		     prop = _props;
@@ -463,48 +463,48 @@ public class GenericJDBC {
 		     }
 		 }
 		 log("INFO: connection props: "+ prop.toString());
-	     conn = java.sql.DriverManager.getConnection("jdbc:"+ connectURI, prop);	     
+	     conn = java.sql.DriverManager.getConnection("jdbc:"+ connectURI, prop);
 	     //conn = java.sql.DriverManager.getConnection("jdbc:sharenet://database.server:5011",prop);
-	     stmt = conn.createStatement(); 
-	     
-	     String update = "update "+ dataid +"."+ dataset 
-		          + " set "+ field +" = '"+ value +"'"    /* <-- single quotes critical */   
-		          + " where "+ where   
+	     stmt = conn.createStatement();
+
+	     String update = "update "+ dataid +"."+ dataset
+		          + " set "+ field +" = '"+ value +"'"    /* <-- single quotes critical */
+		          + " where "+ where
 		          + " /* "+ opsource +" */";
-	     
+
 	     log("INFO: Update Attempt: "+ update);
-	     
+
 	     rc = stmt.executeUpdate(update);
-	     
+
 	     //Our update was successful so continue
-	     if (rc <= 1 ) {	      
-	    	String query = "select * from "+ dataid +"."+ dataset 
-			           +" where "+ where 
+	     if (rc <= 1 ) {
+	    	String query = "select * from "+ dataid +"."+ dataset
+			           +" where "+ where
 					   + "  /* "+ opsource +"  */";
 	    	log("INFO: Update status: "+ query);
 			//Query to see if our update worked
-			rs = stmt.executeQuery(query);	 	
+			rs = stmt.executeQuery(query);
 			while(rs.next()) {
 			  temp=null;
 			  try{temp = rs.getString(field).trim();}
 			  catch(Exception x){}
 			  if(value.equals(temp)){ log("RESULT:  OK, Field: "+ field +"="+ temp ); }
 			  else                   { log("RESULT: ERR, Field: "+ field +"="+ temp +", Expected "+ value ); }
-			}			
+			}
 	     }else{
-	    	 log("ERROR RC: "+ rc );	     
+	    	 log("ERROR RC: "+ rc );
 	     }
-	     	 
+
 	     if (rs   != null) { rs.close(); }
-	     if (stmt != null) { stmt.close(); } 
+	     if (stmt != null) { stmt.close(); }
 	     if (conn != null) { conn.close(); }
 	   }
 
 	   // Detail the exception if we saw one.
-	   catch (Exception e) { 
+	   catch (Exception e) {
 	      log("ERROR: An error occurred when attempting to update the data: \n" + e );
 	   }
-	          
+
 	   // IMPORTANT:  Always close all Connection, Statement, and ResultSet objects
 	   // in a finally clause!
 	   finally {
@@ -513,10 +513,10 @@ public class GenericJDBC {
 	         if (stmt != null) { stmt.close(); }
 	         if (conn != null) { conn.close(); }
 	      }
-	      catch (java.sql.SQLException e) { 
+	      catch (java.sql.SQLException e) {
 	         log("ERROR: An error occurred when attempting to close data connections: \n" + e );
 	      }
-	   } 
+	   }
 	}
 
 	/** Used internally to return a valid System Property value, or null. */
@@ -526,9 +526,9 @@ public class GenericJDBC {
 		}catch(Throwable t){}
 		return null;
 	}
-	
+
 	/**
-	 * @param propsarg -- command-line -props value or JVM Option to be parsed and placed 
+	 * @param propsarg -- command-line -props value or JVM Option to be parsed and placed
 	 * into {@link #_props}.
 	 */
 	public void processPropsArg(String propsarg){
@@ -550,9 +550,9 @@ public class GenericJDBC {
 	}
 
 	/**
-	 * Create/Append a new JDBC Drivers value to any existing JDBC Drivers value stored in 
+	 * Create/Append a new JDBC Drivers value to any existing JDBC Drivers value stored in
 	 * System Properties.
-	 * @param driversarg -- one or more JDBC Driver class names separated by semi-colons as 
+	 * @param driversarg -- one or more JDBC Driver class names separated by semi-colons as
 	 * usually retrieved from the command-line arguments.
 	 */
 	protected void processDriversArg(String driversarg){
@@ -561,7 +561,7 @@ public class GenericJDBC {
 		val = (val == null) ? driversarg: val.concat(";"+ driversarg);
 		System.setProperty(PROP_KEY_JDBC_DRIVERS, val);
 	}
-	
+
 	/** (Re)Set any arguments passed in as JVM -D Options. */
 	public void processJVMOptions(){
 		if(getSystemProperty( PROP_KEY_SAFS_JDBC_NOUPDATE) != null) enableUpdate(false);
@@ -573,12 +573,12 @@ public class GenericJDBC {
 		if(getSystemProperty( PROP_KEY_SAFS_JDBC_VALUE) != null) setFieldValue(getSystemProperty( PROP_KEY_SAFS_JDBC_VALUE));
 		if(getSystemProperty( PROP_KEY_SAFS_JDBC_WHERE) != null) setWhere(getSystemProperty( PROP_KEY_SAFS_JDBC_WHERE));
 		if(getSystemProperty( PROP_KEY_SAFS_JDBC_OPSOURCE) != null) setOpsource(getSystemProperty( PROP_KEY_SAFS_JDBC_OPSOURCE));
-		
-		processPropsArg  ( getSystemProperty( PROP_KEY_SAFS_JDBC_PROPS   ) );	
+
+		processPropsArg  ( getSystemProperty( PROP_KEY_SAFS_JDBC_PROPS   ) );
 		processDriversArg( getSystemProperty( PROP_KEY_SAFS_JDBC_DRIVERS ) );
 	}
 
-	/** String[] args will override any processJVMOptions previously set-- 
+	/** String[] args will override any processJVMOptions previously set--
 	 * assuming JVM Options are processed BEFORE these args. */
 	public void processArgs(String[] args){
 		if(args == null) args = new String[0];
@@ -595,12 +595,12 @@ public class GenericJDBC {
 				if(ARG_FIELD.equalsIgnoreCase(arg))      { setFieldName(args[++i]); continue; }
 				if(ARG_VALUE.equalsIgnoreCase(arg))      { setFieldValue(args[++i]); continue; }
 				if(ARG_WHERE.equalsIgnoreCase(arg))      { setWhere(args[++i]); continue; }
-				if(ARG_OPSOURCE.equalsIgnoreCase(arg))   { setOpsource(args[++i]); continue; }				
+				if(ARG_OPSOURCE.equalsIgnoreCase(arg))   { setOpsource(args[++i]); continue; }
 
-				if(ARG_PROPS.equalsIgnoreCase(arg))      { processPropsArg(   args[++i])   ; continue; }				
-				if(ARG_DRIVERS.equalsIgnoreCase(arg))    { processDriversArg( args[++i])   ; continue; }				
+				if(ARG_PROPS.equalsIgnoreCase(arg))      { processPropsArg(   args[++i])   ; continue; }
+				if(ARG_DRIVERS.equalsIgnoreCase(arg))    { processDriversArg( args[++i])   ; continue; }
 			}catch(Exception x){}
-		}		
+		}
 	}
 
 	/**
@@ -611,7 +611,7 @@ public class GenericJDBC {
 	 * <ul><pre>
 		GenericJDBC process = new GenericJDBC();
 		process.processJVMOptions();
-		process.processArgs(args);		
+		process.processArgs(args);
 		process.updateData();
 	 * </pre></ul>
 	 * @param args
@@ -619,7 +619,7 @@ public class GenericJDBC {
 	public static void main(String[] args) {
 		GenericJDBC process = new GenericJDBC();
 		process.processJVMOptions();
-		process.processArgs(args);		
+		process.processArgs(args);
 		process.updateData();
 	}
 
