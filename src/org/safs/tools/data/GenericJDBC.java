@@ -1,7 +1,9 @@
 package org.safs.tools.data;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.Properties;
-import java.sql.*;
 
 /**
  * This class is intended to be a lightweight class with few additional SAFS dependencies.
@@ -44,10 +46,10 @@ import java.sql.*;
  * Same as JVM Option: <b>-Dsafs.jdbc.value</b>="&lt;value>"<br>
  * Ex: -Dsafs.jdbc.value="SUCCESS"
  * <p>
- * <li><b>-connection</b> "sharenet://database.server:5011"<br>
+ * <li><b>-connection</b> "protocol://database-server-hostname:port"<br>
  * The value to be used for the JDBC database connection.<br>
  * Same as JVM Option: <b>-Dsafs.jdbc.connection</b>="&lt;connection_uri>"<br>
- * Ex: -Dsafs.jdbc.connection="sharenet://database.server:5011"
+ * Ex: -Dsafs.jdbc.connection="protocol://database-server-hostname:port"
  * <p>
  * <li><b>-props</b> "librefs=mydata '/tst/tools/deploymentdetails/dev/shrdata';undoPolicyNone=True"<br>
  * Zero or more name=value pairs (separated by semi-colons) to be used during the connection request.<br>
@@ -93,11 +95,20 @@ public class GenericJDBC {
 	/** "com.sas.net.sharenet.ShareNetDriver" */
 	public static final String DEFAULT_DRIVERS = "com.sas.net.sharenet.ShareNetDriver";
 
-	/** "sharenet://database.server:5011" */
-	public static final String DEFAULT_CONNECTION = "sharenet://database.server:5011";
+	/**
+	 * @deprecated NO default connection will be provided. Please provide when running test.
+	 * <p>
+	 * parameter <b>-connection</b> "protocol://database-server-hostname:port"<br>
+	 * OR<br>
+	 * JVM Option: <b>-Dsafs.jdbc.connection</b>="&lt;connection_uri>"<br>
+	 * Ex: -Dsafs.jdbc.connection="protocol://database-server-hostname:port"
+	 * <p>
+	 */
+	@Deprecated
+	public static final String DEFAULT_CONNECTION = "protocol://database-server-hostname:port";
 
 	/** defaults to {@value #DEFAULT_CONNECTION} */
-	protected String _connection = DEFAULT_CONNECTION;
+	protected String _connection = null;
 	/** defaults to {@value #DEFAULT_DRIVERS} */
 	protected String _drivers = DEFAULT_DRIVERS;
 	/** defaults to {@value #DEFAULT_SHRDATA_ID} */
@@ -332,6 +343,14 @@ public class GenericJDBC {
 	 * with all internal settings previously set or defaulted.
 	 */
 	public void updateData(){
+		if(_connection==null){
+			throw new RuntimeException("Please set the jdbc connection uri by \n"
+					+ " parameter -connection \"protocol://database-server-hostname:port\" \n"
+					+ " or \n"
+					+ " JVM Option -Dsafs.jdbc.connection=\"protocol://database-server-hostname:port\" \n"
+					+ " or \n"
+					+ " this.setConnection(\"protocol://database-server-hostname:port\"); \n");
+		}
 		updateData(_connection,
 				   _props,
 				   _shrdataid,
@@ -464,7 +483,7 @@ public class GenericJDBC {
 		 }
 		 log("INFO: connection props: "+ prop.toString());
 	     conn = java.sql.DriverManager.getConnection("jdbc:"+ connectURI, prop);
-	     //conn = java.sql.DriverManager.getConnection("jdbc:sharenet://database.server:5011",prop);
+	     //conn = java.sql.DriverManager.getConnection("jdbc:protocol://database-server-hostname:port",prop);
 	     stmt = conn.createStatement();
 
 	     String update = "update "+ dataid +"."+ dataset

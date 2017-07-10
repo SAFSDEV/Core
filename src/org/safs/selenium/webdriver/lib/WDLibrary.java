@@ -3370,7 +3370,7 @@ public class WDLibrary extends SearchObject {
 				System.out.println("on host "+host+", process "+p.getId()+" has been terminated. The return code is "+p.getWmiTerminateRC());
 			}
 
-			host = "internal.server";
+			host = "tadsrv";
 			killedList = killChromeDriver(host);
 			for(ProcessInfo p:killedList){
 				System.out.println("on host "+host+", process "+p.getId()+" has been terminated. The return code is "+p.getWmiTerminateRC());
