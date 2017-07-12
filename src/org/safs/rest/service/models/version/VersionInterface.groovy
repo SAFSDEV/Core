@@ -11,7 +11,7 @@ package org.safs.rest.service.models.version
  * providing the interface will help with the clarity of the code for handling
  * the version.
  *
- * @author ***REMOVED***
+ * @author Bruce.Faulkner
  * @since August 12, 2015
  *
  */

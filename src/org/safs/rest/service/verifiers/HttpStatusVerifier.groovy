@@ -18,7 +18,7 @@ import org.springframework.http.HttpStatus
  * Provides convenience methods to check the status (integer) and httpStatus (enum) of a Response object
  * against an expected Spring HttpStatus code.
  *
- * @author ***REMOVED***
+ * @author Bruce.Faulkner
  * @since May 6, 2015
  *
  */

@@ -13,7 +13,7 @@ import org.safs.rest.service.models.version.VersionInterface
 
 /**
 *
-* @author ***REMOVED***
+* @author Bruce.Faulkner
 * @since August 12, 2015
 */
 class Banner {

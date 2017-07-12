@@ -13,8 +13,8 @@ import groovy.util.logging.Slf4j
  * in the past and will likely be used again in the future.
  * </p>
  *
- * @author ***REMOVED***
- * @author ***REMOVED***
+ * @author Bruce.Faulkner
+ * @author Barry.Myers
  */
 @Slf4j
 class ExceptionMessageProvider {

@@ -66,8 +66,8 @@ import org.springframework.http.MediaType
  * <a href="https://curl.haxx.se/">online cURL documentation</a>.
  * </p>
  *
- * @author ***REMOVED***
- * @author ***REMOVED***
+ * @author Bruce.Faulkner
+ * @author Barry.Myers
  *
  * @since 0.0.1
  */

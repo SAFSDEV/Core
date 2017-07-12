@@ -12,7 +12,7 @@ import org.safs.rest.service.commands.curl.Response
  * Provides convenience methods to verify the details returned from retrieving
  * the /apiMeta resource from a REST API service.
  *
- * @author ***REMOVED***
+ * @author Bruce.Faulkner
  * @since December 16, 2015
  */
 @Slf4j

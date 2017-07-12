@@ -9,8 +9,8 @@ import groovy.util.logging.Slf4j
 
 /**
  *
- * @author ***REMOVED***
- * @author ***REMOVED***
+ * @author Bruce.Faulkner
+ * @author Barry.Myers
  */
 @Slf4j
 @ToString(includeNames=true)

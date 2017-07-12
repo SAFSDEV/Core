@@ -22,8 +22,8 @@ import org.safs.rest.service.models.providers.http.SecureOptions
 
 /**
  *
- * @author ***REMOVED***
- * @author ***REMOVED***
+ * @author Bruce.Faulkner
+ * @author Barry.Myers
  */
 @Slf4j
 @ToString(includeNames = true, includeFields = true)

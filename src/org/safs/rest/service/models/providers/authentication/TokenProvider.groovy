@@ -14,8 +14,8 @@ import org.safs.rest.service.models.consumers.RestConsumer
 
 /**
  *
- * @author ***REMOVED***
- * @author ***REMOVED***
+ * @author Bruce.Faulkner
+ * @author Barry.Myers
  */
 @Slf4j
 class TokenProvider {

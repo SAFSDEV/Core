@@ -23,8 +23,8 @@ import org.springframework.http.MediaType
  * the check fails. An injected instance of HttpStatusVerifier provides methods to actually check the
  * status of the Response.
  *
- * @author ***REMOVED***
- * @author ***REMOVED***
+ * @author Bruce.Faulkner
+ * @author Barry.Myers
  * @See HttpStatusVerifier
  */
 class ResponseVerifier {

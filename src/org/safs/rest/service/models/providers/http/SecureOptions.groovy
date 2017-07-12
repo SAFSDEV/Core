@@ -22,7 +22,7 @@ package org.safs.rest.service.models.providers.http
  *         </li>
  *     </ul>
  *
- * @author ***REMOVED***
+ * @author Bruce.Faulkner
  * @since 0.8.6
  */
 enum SecureOptions {

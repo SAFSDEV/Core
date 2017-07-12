@@ -10,7 +10,7 @@ import org.safs.rest.service.commands.CommandResults
 /**
  * Provides specific details about a curl command that fails to execute successfully.
  *
- * @author ***REMOVED***
+ * @author Bruce.Faulkner
  * @since 0.7.3
  */
 class CurlErrorDetailsProvider {

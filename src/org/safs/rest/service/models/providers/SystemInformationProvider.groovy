@@ -12,8 +12,8 @@ import org.safs.rest.service.commands.ExecutableCommand
 
 /**
  *
- * @author ***REMOVED***
- * @author ***REMOVED***
+ * @author Bruce.Faulkner
+ * @author Barry.Myers
  */
 class SystemInformationProvider {
     public static final String UNAME_EXECUTABLE = 'uname'

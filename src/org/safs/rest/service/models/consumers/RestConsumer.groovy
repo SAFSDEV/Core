@@ -33,8 +33,8 @@ import org.springframework.http.HttpMethod
  * Use this class to interact with the REST API contract in simulating what a
  * third-party application developer might do when consuming REST services.
  *
- * @author ***REMOVED***
- * @author ***REMOVED***
+ * @author Bruce.Faulkner
+ * @author Barry.Myers
  *
  */
 @Slf4j

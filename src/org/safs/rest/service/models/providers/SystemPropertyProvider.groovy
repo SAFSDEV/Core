@@ -8,7 +8,7 @@ package org.safs.rest.service.models.providers
  * The SAFSREST properties can be true system properties, environment variables,
  * or system properties specified by the -D option when invoking the JVM.
  *
- * @author ***REMOVED***
+ * @author Bruce.Faulkner
  * @since September 8, 2015
  */
 class SystemPropertyProvider {

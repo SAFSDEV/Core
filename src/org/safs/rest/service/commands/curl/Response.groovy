@@ -23,7 +23,7 @@ import org.springframework.http.HttpStatus
 /**
  * Model a response received from a request made to a REST URL
  *
- * @author ***REMOVED***
+ * @author Bruce.Faulkner
  *
  * @see org.safs.rest.service.commands.CommandResults
  *

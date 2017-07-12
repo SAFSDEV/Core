@@ -20,8 +20,8 @@ package org.safs.rest.service.models.entrypoints
  *     def myEntrypoint = new Entrypoint(entrypointParameters)
  * </code>
  *
- * @author ***REMOVED***
- * @author ***REMOVED***
+ * @author Bruce.Faulkner
+ * @author Barry.Myers
  *
  */
 class Entrypoint {

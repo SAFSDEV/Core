@@ -49,7 +49,7 @@ import org.safs.rest.service.models.consumers.RestConsumer
  *      {@link RestConsumer} to interact with a REST API.
  * </p>
  *
- * @author ***REMOVED***
+ * @author Bruce.Faulkner
  * @since 0.0.1
  * @see RestConsumer
  *
