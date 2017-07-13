@@ -1,0 +1,2302 @@
+<html>
+<head>
+<title>Intro to SeleniumPlus</title>
+<link rel="stylesheet" type="text/css" href="../../sqabasic2000/rrafs.css" />
+<style>
+
+.appmap {
+    border:2px solid black;
+    background-color: #C0C0C0;
+    padding-left:6px;
+    color: black;
+    width: 700px;
+}
+
+pre.SourceCode { margin: 0; }
+pre.LineNumbers {
+    margin: 0;
+    float: left;
+    padding-right:2px;
+    border-right: solid 1px black;
+    margin-right:7px;
+}
+
+div.CodeBox {
+    border: solid 1px ;
+    padding:1px;
+    background-color: #BFD1E4;
+}
+
+</style>
+<script>
+function hideAllContentPanels(){
+    document.getElementById("welcome").style.display="none";
+    document.getElementById("sample-install").style.display="none";
+    document.getElementById("project-create").style.display="none";
+    document.getElementById("appmaps").style.display="none";
+    document.getElementById("project-import").style.display="none";
+    document.getElementById("project-edit").style.display="none";
+    document.getElementById("expressions").style.display="none";
+    document.getElementById("auto-config").style.display="none";
+    document.getElementById("tests-run").style.display="none";
+    document.getElementById("logging").style.display="none";
+    document.getElementById("tests-backup").style.display="none";
+    document.getElementById("tests-checkout").style.display="none";
+    document.getElementById("advanced").style.display="none";
+    document.getElementById("references").style.display="none";
+    document.getElementById("iesetup").style.display="none";
+    document.getElementById("startwebbrowser").style.display="none";
+    document.getElementById("updatesoftware").style.display="none";
+    document.getElementById("assets").style.display="none";
+    document.getElementById("enable-safs").style.display="none";
+    document.getElementById("remote-servers").style.display="none";
+    document.getElementById("browser-drivers").style.display="none";
+    document.getElementById("calling-javascript").style.display="none";
+    document.getElementById("using-seleniumscripts").style.display="none";
+    document.getElementById("http-proxy").style.display="none";
+
+    document.getElementById("href-welcome").style.fontWeight="normal";
+	document.getElementById("href-sample-install").style.fontWeight="normal";
+	document.getElementById("href-project-create").style.fontWeight="normal";
+	document.getElementById("href-appmaps").style.fontWeight="normal";
+    document.getElementById("href-project-import").style.fontWeight="normal";
+	document.getElementById("href-project-edit").style.fontWeight="normal";
+	document.getElementById("href-expressions").style.fontWeight="normal";
+    document.getElementById("href-auto-config").style.fontWeight="normal";
+	document.getElementById("href-tests-run").style.fontWeight="normal";
+	document.getElementById("href-logging").style.fontWeight="normal";
+	document.getElementById("href-tests-backup").style.fontWeight="normal";
+	document.getElementById("href-tests-checkout").style.fontWeight="normal";
+	document.getElementById("href-advanced").style.fontWeight="normal";
+	document.getElementById("href-references").style.fontWeight="normal";
+    document.getElementById("href-iesetup").style.fontWeight="normal";
+    document.getElementById("href-startwebbrowser").style.fontWeight="normal";
+    document.getElementById("href-updatesoftware").style.fontWeight="normal";
+	document.getElementById("href-assets").style.fontWeight="normal";
+	document.getElementById("href-enable-safs").style.fontWeight="normal";
+	document.getElementById("href-remote-servers").style.fontWeight="normal";
+	document.getElementById("href-browser-drivers").style.fontWeight="normal";
+	document.getElementById("href-using-autoit").style.fontWeight="normal";
+	document.getElementById("href-calling-javascript").style.fontWeight="normal";
+	document.getElementById("href-using-seleniumscripts").style.fontWeight="normal";
+	document.getElementById("href-http-proxy").style.fontWeight="normal";
+}
+
+function checkForSubPanelUrl(){
+	var url = window.location.href.toLowerCase();
+	if(url.endsWith('#projectassets')){ projectAssets(); }
+	else if(url.endsWith('#sampleproject')){ newSample(); }
+	else if(url.endsWith('#createnewproject')){ newProject(); }
+	else if(url.endsWith('#importprojects')){ importProject(); }
+	else if(url.endsWith('#editappmaps')){ editAppMaps(); }
+	else if(url.endsWith('#expressions')){ expressions(); }
+	else if(url.endsWith('#edittests')){ editTests(); }
+	else if(url.endsWith('#autoconfig')){ autoConfig(); }
+	else if(url.endsWith('#runtests')){ runTests(); }
+	else if(url.endsWith('#logging')){ logging(); }
+	else if(url.endsWith('#cvscheckin')){ backupTests(); }
+	else if(url.endsWith('#cvscheckout')){ checkoutTests(); }
+	else if(url.endsWith('#advancedusers')){ showAdvanced(); }
+	else if(url.endsWith('#setupbrowser')){ showIESetup(); }
+	else if(url.endsWith('#startbrowser')){ startWebBrowser(); }
+	else if(url.endsWith('#updateseleniumplus')){ updateSoftware(); }
+	else if(url.endsWith('#enablesafs')){ enableSAFS(); }
+	else if(url.endsWith('#remoteservers')){ remoteServers(); }
+	else if(url.endsWith('#browserdrivers')){ browserDrivers(); }
+	else if(url.endsWith('#usingautoit')){ usingAutoIT(); }
+	else if(url.endsWith('#callingjavascript')){ callingJavascript(); }
+	else if(url.endsWith('#usingseleniumscripts')){ usingSeleniumscripts(); }
+	else if(url.endsWith('#httpproxy')){ setHttpProxy(); }
+	else if(url.endsWith('#references')){ showReferences(); }
+	else{
+	    showWelcome();
+	}
+}
+function showWelcome(){
+	hideAllContentPanels();
+    document.getElementById("welcome").style.display="block";
+	document.getElementById("href-welcome").style.fontWeight="900";
+}
+function newSample(){
+	hideAllContentPanels();
+    document.getElementById("sample-install").style.display="block";
+    document.getElementById("href-sample-install").style.fontWeight="900";
+}
+function newProject(){
+	hideAllContentPanels();
+    document.getElementById("project-create").style.display="block";
+    document.getElementById("href-project-create").style.fontWeight="900";
+}
+function editAppMaps(){
+	hideAllContentPanels();
+    document.getElementById("appmaps").style.display="block";
+    document.getElementById("href-appmaps").style.fontWeight="900";
+}
+function importProject(){
+	hideAllContentPanels();
+    document.getElementById("project-import").style.display="block";
+    document.getElementById("href-project-import").style.fontWeight="900";
+}
+function editTests(){
+	hideAllContentPanels();
+    document.getElementById("project-edit").style.display="block";
+    document.getElementById("href-project-edit").style.fontWeight="900";
+}
+function expressions(){
+	hideAllContentPanels();
+    document.getElementById("expressions").style.display="block";
+    document.getElementById("href-expressions").style.fontWeight="900";
+}
+function autoConfig(){
+	hideAllContentPanels();
+    document.getElementById("auto-config").style.display="block";
+    document.getElementById("href-auto-config").style.fontWeight="900";
+}
+function runTests(){
+	hideAllContentPanels();
+    document.getElementById("tests-run").style.display="block";
+    document.getElementById("href-tests-run").style.fontWeight="900";
+}
+function logging(){
+	hideAllContentPanels();
+    document.getElementById("logging").style.display="block";
+    document.getElementById("href-logging").style.fontWeight="900";
+}
+function backupTests(){
+	hideAllContentPanels();
+    document.getElementById("tests-backup").style.display="block";
+    document.getElementById("href-tests-backup").style.fontWeight="900";
+}
+function checkoutTests(){
+	hideAllContentPanels();
+    document.getElementById("tests-checkout").style.display="block";
+    document.getElementById("href-tests-checkout").style.fontWeight="900";
+}
+function showAdvanced(){
+	hideAllContentPanels();
+    document.getElementById("advanced").style.display="block";
+    document.getElementById("href-advanced").style.fontWeight="900";
+}
+function showReferences(){
+	hideAllContentPanels();
+    document.getElementById("references").style.display="block";
+    document.getElementById("href-references").style.fontWeight="900";
+}
+function showIESetup(){
+	hideAllContentPanels();
+    document.getElementById("iesetup").style.display="block";
+    document.getElementById("href-iesetup").style.fontWeight="900";
+}
+function startWebBrowser(){
+	hideAllContentPanels();
+    document.getElementById("startwebbrowser").style.display="block";
+    document.getElementById("href-startwebbrowser").style.fontWeight="900";
+}
+function updateSoftware(){
+	hideAllContentPanels();
+    document.getElementById("updatesoftware").style.display="block";
+    document.getElementById("href-updatesoftware").style.fontWeight="900";
+}
+function projectAssets(){
+	hideAllContentPanels();
+    document.getElementById("assets").style.display="block";
+    document.getElementById("href-assets").style.fontWeight="900";
+}
+function enableSAFS(){
+	hideAllContentPanels();
+    document.getElementById("enable-safs").style.display="block";
+    document.getElementById("href-enable-safs").style.fontWeight="900";
+}
+function remoteServers(){
+	hideAllContentPanels();
+    document.getElementById("remote-servers").style.display="block";
+    document.getElementById("href-remote-servers").style.fontWeight="900";
+}
+function callingJavascript(){
+	hideAllContentPanels();
+    document.getElementById("calling-javascript").style.display="block";
+    document.getElementById("href-calling-javascript").style.fontWeight="900";
+}
+function usingSeleniumscripts(){
+	hideAllContentPanels();
+    document.getElementById("using-seleniumscripts").style.display="block";
+    document.getElementById("href-using-seleniumscripts").style.fontWeight="900";
+}
+function setHttpProxy(){
+	hideAllContentPanels();
+    document.getElementById("http-proxy").style.display="block";
+    document.getElementById("href-http-proxy").style.fontWeight="900";
+}
+function browserDrivers(){
+	hideAllContentPanels();
+    document.getElementById("browser-drivers").style.display="block";
+    document.getElementById("href-browser-drivers").style.fontWeight="900";
+}
+function usingAutoIT(){
+    // do nothing but launch a new page
+    window.location.href = "http://safsdev.sourceforge.net/sqabasic2000/UsingAutoIT.htm";
+}
+</script>
+
+</head>
+
+<body onload="checkForSubPanelUrl();">
+<span style="font-size: 32px;font-weight: bold">Intro to SeleniumPlus</span>
+<br>
+<small>Updated: 2017.05.19</small>
+<br>
+<div id="menu" class="panelselector">
+<hr>
+<a href="#" onclick="showWelcome()" id ="href-welcome" title="#welcome">Welcome</a>&nbsp;&nbsp;|
+<a href="#" onclick="projectAssets()" id="href-assets" title="#projectassets">Project Assets</a>&nbsp;&nbsp;|
+<a href="#" onclick="newSample()" id="href-sample-install" title="#sampleproject">Sample Project</a>&nbsp;&nbsp;|
+<a href="#" onclick="newProject()" id="href-project-create" title="#createnewproject">Create New Project</a>&nbsp;&nbsp;|
+<a href="#" onclick="importProject()" id="href-project-import" title="#importprojects">Import Projects</a>&nbsp;&nbsp;|
+<a href="#" onclick="editAppMaps()" id="href-appmaps" title="#editappmaps">Edit AppMaps</a>&nbsp;&nbsp;|
+<a href="#" onclick="expressions()" id="href-expressions" title="#expressions">Expressions</a>&nbsp;&nbsp;|
+<a href="#" onclick="editTests()" id="href-project-edit" title="#edittests">Edit Tests</a>&nbsp;&nbsp;|
+<a href="#" onclick="autoConfig()" id ="href-auto-config" title="#autoconfig">Auto Config</a>&nbsp;&nbsp;|
+<a href="#" onclick="runTests()" id ="href-tests-run" title="#runtests">Run Tests</a>&nbsp;&nbsp;|
+<a href="#" onclick="logging()" id ="href-logging" title="#logging">Logging</a>&nbsp;&nbsp;|
+<a href="#" onclick="backupTests()" id ="href-tests-backup" title="#cvscheckin">CVS/Check-in</a>&nbsp;&nbsp;|
+<a href="#" onclick="checkoutTests()" id ="href-tests-checkout" title="#cvscheckout">CVS/Check-out</a>&nbsp;&nbsp;|
+<a href="#" onclick="showAdvanced()" id ="href-advanced" title="#advancedusers">Advanced Users</a>&nbsp;&nbsp;|
+<a href="#" onclick="showIESetup()" id="href-iesetup" title="#setupbrowser">Setup Browser</a>&nbsp;&nbsp;|
+<a href="#" onclick="startWebBrowser()" id="href-startwebbrowser" title="#startbrowser">Start Browser</a>&nbsp;&nbsp;|
+<a href="#" onclick="updateSoftware()" id="href-updatesoftware" title="#updateseleniumplus">Update SeleniumPlus</a>&nbsp;&nbsp;|
+<a href="#" onclick="enableSAFS()" id="href-enable-safs" title="#enablesafs">Enable SAFS</a>&nbsp;&nbsp;|
+<a href="#" onclick="remoteServers()" id="href-remote-servers" title="#remoteservers">Remote Servers</a>&nbsp;&nbsp;|
+<a href="#" onclick="browserDrivers()" id="href-browser-drivers" title="#browserdrivers">Browser Drivers</a>&nbsp;&nbsp;|
+<a href="http://safsdev.sourceforge.net/sqabasic2000/UsingAutoIT.htm" id="href-using-autoit" title="#usingautoit">Using AutoIT</a>&nbsp;&nbsp;|
+<a href="#" onclick="callingJavascript()" id="href-calling-javascript" title="#callingjavascript">Calling Javascript</a>&nbsp;&nbsp;|
+<a href="#" onclick="usingSeleniumscripts()" id="href-using-seleniumscripts" title="#usingseleniumscripts">Using SeleniumScripts</a>&nbsp;&nbsp;|
+<a href="#" onclick="setHttpProxy()" id="href-http-proxy" title="#httpproxy">HTTP Proxy</a>&nbsp;&nbsp;|
+<a href="#" onclick="showReferences()" id="href-references" title="#references">References</a>&nbsp;&nbsp;
+<br>
+<hr>
+</div>
+<p>
+<!--------------------------------->
+<!-- Welcome Content -->
+<!--------------------------------->
+<div id="welcome" style="display:block" >
+<h2>SeleniumPlus Welcome</h2>
+<p>
+Thanks for giving SeleniumPlus a try!
+<p>
+Select any of the links above ("<b>Project Assets</b>", "<b>Sample Project</b>" etc.) to go directly to an area of interest.
+<p>
+We welcome any feedback (both good and bad) that can help us make the test automation experience better!
+<p>
+When meeting any problem, please<br/>
+<ol>
+<li>Visit <a href=" http://safsdev.freeforums.net/board/6/faq" target="_blank">SE+ FAQ</a>
+<li>Post thread at <a href="http://safsdev.freeforums.net/board/13/general-discussion" target="_blank">SE+ Discussion</a>
+<li>Contact us at <a href="mailto:safsdev@yourCompany.com">SAFS DEV Group</a>
+</ol>
+<br>
+<p>
+The SAFS/SeleniumPlus Development Team
+<ul>
+    Carl Nagle<br>
+    Lei Wang</br>
+    John W. Lewis
+</ul>
+</div>
+
+<!--------------------------------->
+<!-- Sample Project Instructions -->
+<!--------------------------------->
+<div id="sample-install"  style="display: none;">
+<h2>Try a SAMPLE Project</h2>
+<ol><h3>Create the Sample Project</h3>
+    <li>Right-click in the Package Explorer view.
+    <li>Select "New->Project..." in the popup menu.
+    <p><img src="images/PackageExplorer_NewProject.png"/>
+	<li>Select "Selenium+ ->Selenium+ Sample Project" in the New Project dialog and click "Next".
+    <p><img src="images/NewProject_SampleProject.png"/>
+	<li>Make sure "Use default location" is selected and click "Finish" in the dialog.
+	<li>If prompted to Associate the project with the Selenium+ perspective select the "Remember my decision" CheckBox and click "Yes".
+	<p><img src="images/AssociatePerspective.png"/>
+	<li>The SAMPLE project should now be installed for your review and experimentation.
+	<p>
+	<img src="images/SAMPLEProject_Installed.png"/>
+</ol>
+<p>
+<ol><h3>Review the Sample Project</h3>
+	The SAMPLE project shows one desirable way to put together a suite of tests.
+	<p>
+	<li>The root SAMPLE folder will contain the project's "test.ini" configuration file.
+	<li>The TestCases package can hold one or more classes of simple testcase actions as shown in the TestCase1.java class.
+	<li>The TestRuns package can hold one or more classes that piece together test suites that run testcases in any desired sequence as shown in the TestRun1.java class.
+	<li>The Actuals folder may receive captured runtime files, data, or images.
+	<li>The Benchmark folder will contain benchmark files, data, or images when required.
+	<li>The Diffs folder may receive runtime compare differences in files, data, or images.
+	<li>The Logs folder will receive test log(s) at the end of a test.
+	<li>The Maps folder will contain tester-defined App Map files and the AppMap.order file used during testing.
+	<p>
+	<img src="images/SAMPLEProject_Installed.png"/>
+</ol>
+<p>
+<ol><h3>Run the Sample Project</h3>
+	<li>In the Package Explorer, select "SAMPLE->Tests->sample.testruns->TestRun1.java"
+	<li>In the main menu, select "Run->Run As->Selenium+ Test".<br>
+	(The test should automatically start and run with Google in Firefox.)
+	<li>When the test completes, Package Explorer should show a "TestRun1.txt" file in the "SAMPLE->Logs" folder.<br>
+	(You may have to hit Refresh(F5) for the Package Explorer to update.)
+	<li>Double-click "TestRun1.txt" or right-click it to "Open With...->Text Editor" to see the test results.
+</ol>
+<hr>
+</div>
+
+<!--------------------------------->
+<!-- Create Project Instructions -->
+<!--------------------------------->
+<div id="project-create" style="display: none;">
+<h2>Create and Review a New Project</h2>
+<ol><h3>Create a New Project</h3>
+    <li>Right-click in the Package Explorer view.
+    <li>Select "New->Project..." in the popup menu.
+    <p><img src="images/PackageExplorer_NewProject.png"/>
+	<li>Select "Selenium+ ->Selenium+ Project" in the New Project dialog and click "Next".
+	<li>Enter a name for the project and click "Finish" in the dialog.
+	<li>If prompted to Associate the project with the Selenium+ perspective,<br>
+	select the "Remember my decision" CheckBox and click "Yes".
+	<p><img src="images/AssociatePerspective.png"/>
+	<li>The new project should now be created for your review and experimentation.
+	<p>
+	<img src="images/SAMPLEProject_Installed.png"/>
+</ol>
+<p>
+<ol><h3>Review the New Project</h3>
+	The new project provides a way to put together a suite of tests.
+	<p>
+	<li>The root project folder will contain the project's "test.ini" configuration file.
+	<li>The TestCases package can hold one or more classes of simple testcase actions.<br>
+	An empty TestCase1.java class is initially provided.
+	<li>The TestRuns package can hold one or more classes that piece together test suites that run testcases in any desired sequence.<br>
+	An empty TestRun1.java class is initially provided.
+	<li>The Actuals folder may receive captured runtime files, data, or images.
+	<li>The Benchmark folder will contain benchmark files, data, or images when required.
+	<li>The Diffs folder may receive runtime compare differences in files, data, or images.
+	<li>The Logs folder will receive test log(s) at the end of a test.
+	<li>The Maps folder will contain tester-defined App Map files and the AppMap.order file used during testing.
+	<p>
+	<img src="images/SAMPLEProject_Installed.png"/>
+</ol>
+<hr>
+</div>
+
+<!-------------------------------------->
+<!-- Import Projects Instructions     -->
+<!-------------------------------------->
+<div id="project-import" style="display: none;">
+<h2>Import Existing Projects</h2>
+<p>SeleniumPlus Projects, like the SAMPLE project, are intended to be portable for other users and machines with SeleniumPlus installed.  The entire Project should be saved--whether to CVS, GIT, or some othe storage medium.  Although the "bin" subdirectory for the Project is generally not stored since these are compiled assets.
+<p>
+For example, to Import a Project that has been copied or saved to the local file system:
+<p><ol>
+    <li>Select "<b>File->Import...</b>" from the Eclipse main menu,
+    <li>Select "<b>General->Existing Projects into Workspace</b>" in the Import dialog and press "<b>Next</b>",
+    <li>Press "<b>Browse</b>" on the "<b>Select root directory:</b>" item in the Import dialog and, <br>
+        Locate and select the root directory containing the Project folder in the local file system.<br>
+        The directory name should be the same name of the Project.
+    <li>Press "<b>OK</b>" to confirm your folder selection.
+    <li>Press "<b>Finish</b>" to complete the Import of the Project.
+    <p>
+	Note: Eclipse will NOT let you have/import two projects with the same name.
+</ol>
+<p>
+Importing older SeleniumPlus projects may require you to "fix" some of the paths in that Project's <b>Java Build Path</b> configuration and in each test configuration INI file (<b>Test.INI</b>) used for testing.
+<p>
+Newer SeleniumPlus projects have been created with the information that follows so they are already portable to different machines.  For these newer projects you should not have to "fix" anything.
+<p>
+<h2>Evaluating/Fixing Imported Projects</h2>
+<p>
+The latest versions of SeleniumPlus now support 2 features to maximize (or fix) Project portability:
+<p>
+<ol>
+    <li><b>SELENIUMPLUS_HOME</b>: Java Build Path Classpath Variable.
+    <li><b>%SELENIUM_PLUS%</b>: Test.INI &nbsp;[SAFS_DRIVER]&nbsp; <b>DriverRoot</b>.
+</ol>
+<p>
+For more detailed information on each:
+<p>
+<dl>
+    <dt>1. <b>SELENIUMPLUS_HOME</b>: Java Build Path Classpath Variable.
+    <p>
+    <dd>Automatically created by the latest version of the SeleniumPlus PlugIn.<br>
+        Defines the path to the SeleniumPlus install directory.  The value should be the same as the System's Environment Variable: %SELENIUM_PLUS%.
+        <p>
+        The setting can be found in the Eclipse main menu under:
+        <p>
+        <ul><b>Window->Preferences->Java->Build Path->Classpath Variables</b></ul>
+        <p>
+        New Projects created with the latest PlugIn will now automatically use this <b>SELENIUMPLUS_HOME</b> Classpath Variable for the Project's Java Build Paths.  You can see the Project's Java Build Paths by:
+        <p><ol>
+            <li>Right-Click on the Project in the Package Explorer,
+            <li>Select "Build Path->Configure Build Path.." in the popup menu,
+            <li>Select "Java Build Path" in the Properties Dialog for the project,
+            <li>Select the "Libraries" tab in the Java Build Path panel of the dialog.
+        </ol>
+        <p>
+        Currently, you should see settings using SELENIUMPLUS_HOME like:
+        <p>
+        <ul><b>Java Build Path</b> entries:
+        <p>
+        <b>SELENIUMPLUS_HOME</b>/libs/JSTAFEmbedded.jar<br>
+        <b>SELENIUMPLUS_HOME</b>/libs/selenium-server-standalone-2.44.0.jar<br>
+        <b>SELENIUMPLUS_HOME</b>/libs/seleniumplus.jar<br>
+        </ul>
+        <p>
+        <h4><u>Fixing the Java Build Path for Portability</u></h4>
+        If your existing projects instead have explicit hardcoded paths to these files then they are less portable.
+        The machine importing your project may have SeleniumPlus installed in a different location.
+        <p>
+        To fix such a portability issue, you can replace the explicit hardcoded library paths with new ones referencing and extending the SELENIUMPLUS_HOME Classpath Variable.  You can do this by:
+        <p><ol>
+            <li>Note the explicit hardcoded path for each listed JAR file coming from the SeleniumPlus /libs/ directory,
+            <li>Select "<b>Add Variable</b>" in the Java Build Path dialog,
+            <li>Select the "<b>SELENIUMPLUS_HOME</b>" Variable and then press "<b>Extend...</b>",
+            <li>Select the appropriate <b>JAR file in the "libs</b>" directory in the Variable Extension dialog,
+            <li>Press "<b>OK</b>" and the new Java Build Path entry like those above should now be present,
+            <li>Select the older explicit hardcoded path entry you just replaced and select "<b>Remove</b>" to delete it from the list.
+            <li>Do this until all old explicit hardcoded path entries to SeleniumPlus JAR files have been properly replaced.
+        </ol>
+        <p>
+    <dt>2. <b>%SELENIUM_PLUS%</b>: Test.INI &nbsp;[SAFS_DRIVER]&nbsp; <b>DriverRoot</b>.
+    <p>
+    <dd>Automatically created by the latest version of the SeleniumPlus PlugIn, Nov 18, 2014 or later.<br>
+       Defines the path to the SeleniumPlus install directory by retrieving it from the System Environment variable of the same name.  The value is used in the DriverRoot setting of the Test.INI file to dynamically get the path to SeleniumPlus--which might be different on different systems.
+       <p>
+       <b>NOTE: This setting will only work on SAFS or SeleniumPlus with installed or updated JARs dating Nov 18, 2014 or later.</b>
+       <p>
+       The JAR files in question are:</b>
+        <p><ul><table>
+            <tr><td>SAFS: <td>/lib/<b>safsselenium.jar</b>
+            <tr><td>SeleniumPlus: <td>/libs/<b>seleniumplus.jar</b>
+            </table>
+        </ul>
+       <p>
+       The portability setting can be found in the Test.INI as:
+       <p>
+       <ul><b>
+           [SAFS_DRIVER]<br>
+           DriverRoot="%SELENIUM_PLUS%\extra\automation"<br>
+       </b></ul>
+       <p>
+        <h4><u>Fixing the Test.INI file for Portability</u></h4>
+        If your existing projects instead have explicit hardcoded paths for this setting then they are less portable.
+        The machine importing your project may have SeleniumPlus installed in a different location.
+        <p>
+        To fix such a portability issue, you can replace the explicit hardcoded DriverRoot path in the Test.INI with the same setting as shown above.
+</dl>
+<hr>
+</div>
+
+<!--------------------------------->
+<!-- Edit AppMaps                -->
+<!--------------------------------->
+<div id="appmaps" style="display: none;">
+<p><h2>
+	App Maps provide a critical <b style='color:red;'>single point of maintenance</b>
+	for important data and component recognition used throughout your tests.
+</h2>
+<p>
+<ol><h3>Create new App Map file</h3>
+	<p>
+	 Right click on <b>Maps</b> folder of the project, click "Selenium+->Create Map" to create new App Map file.
+	 <br/>A new App Map will be created with .map extension.  User can create multiple map files to separate language-specific component recognition strings and/or test configuration data.
+	 <p>Examples:
+	 <p><ul>ProjectApp_en.map<br>
+	        ProjectApp_fr.map<br>
+	        ProjectApp_es-CO.map<br>
+	        ProjectApp_W7.map<br>
+	        ProjectApp_W8.map<br>
+	 </ul>
+</ol>
+<ol><h3>The AppMap.order File</h3>
+	<p>
+	In general, there is a "primary" ProjectApp.map file which holds the bulk of all recognition strings and Application Constants.  Then, there can be one or more App Map files containing language-specific values used by or overriding the primary App Map values.
+	<p>
+	The <b>AppMap.order</b> file is a means to chain multiple App Maps to be loaded in a specific order.
+	<p>
+	Example:
+<div class="appmap"><pre>
+;
+; Order App Maps Last In First Out (LIFO) for "chaining"
+;
+App.map
+App_fr.map
+</pre></div>
+</ol>
+
+<ol><h3>The App Map Details</h3>
+    Review: <a href="http://safsdev.sourceforge.net/sqabasic2000/CreateAppMap.htm" title="Detailed App Map Format Info" alt="Detailed App Map Format Info">App Map Format Info</a><br>
+	<p>
+	Normally, an App Map contains multiple "sections".  One of these is <b>[ApplicationConstants]</b> and the remaining user-defined sections are used to define "windows" or "containers" of components.
+	<p>
+	<b>ApplicationConstants</b> stores all test constants and data.
+	<div class="appmap"><pre>
+;
+; Constants and other data.
+;
+<b>[ApplicationConstants]</b>
+nlsSearch="Search"
+url="http://www.google.com"
+username="anonymous"
+password="newpassword"
+</pre></div>
+	<p>Window or Container sections hold recognition strings used to identify child components within those containers.
+	<p>
+	In a container section, the item with the same name as the container is optional.
+	<p>Example:
+	<b>Google="id=viewport"</b> is optional,<br>
+	See the <b>[Login]</b> section? There is no "Login" item in that section. The default will be assumed (See the Note below.)
+	</p>
+<div class="appmap"><pre>
+;
+; Component recognition:
+;
+; Google main page window/component recognition
+;
+<b>[Google]</b>
+Google="id=viewport"
+Apps="title=Apps"
+Search="text={^nlsSearch}"
+
+;
+; Google's Login window/component recognition
+;
+<b>[Login]</b>
+UserName="name=Email"
+Password="name=Passwd"
+SignIn="id=signIn"
+</pre></div>
+<p>
+Note:<br>
+The item with the same name as the container (ex. "Google" and "Login"), if present, MUST contain a recognition string that *will* find the parent container of the contained children. &nbsp;When searching for a child, the parent is sought first.<br>
+<b>If the parent is not found, then the search for the child will NOT occur.</b>
+<p>
+If the item with the same name as the container is NOT provided, the default container to search is assumed to be the topmost document of the webpage, or the topmost document in any frame or iframe that was last searched.
+</ol>
+
+<ol><h3>Component Recognition Strings or Object Locators</h3>
+	There are many ways to create component "recognition strings"(RS).
+	The RS must be unique for the page, or unique for the specific parent container, if that was provided.
+ <p>
+ <ul>Specify a <b>FRAME</b> RS for the parent container, if frames are in-use:
+    <p><ul>
+<pre>
+FRAMEID=my_content_frame_id
+FRAMENAME=my_content_frame_name
+FRAMEXPATH=//iframe[@id='frameId']
+FRAMEINDEX=N (1=first frame) RS by Index is not recommended.
+
+(note: parent/child hierarchy is separated by "<b>;\;</b>" )
+(note: If there is no frame-expression in a RS, the last visited frame
+	   will be searched to find child components.
+	   By default, the last viisited frame is the main frame.
+	   And that is why if we specify a frame container, the children
+	   do not need to specify the parent frame in their RS.
+
+For example:
+
+<div class="appmap"><b>[HelpPopup]</b>
+HelpPopup="FRAMEID=VisualAnalyticsHubLogon_iframe"
+BtnHelpCenter="id=__item23"</div>
+
+BtnHelpCenter is expected to be found in frame 'VisualAnalyticsHubLogon_iframe')
+    </pre></ul>
+
+ <p>For child components, use supported type, property and attribute <i><b>qualifiers</b></i>, as necessary:
+<p><ul><pre>
+<b>:PASM:</b>  (Property Attribute Search Mode -- Must be first, if present. See Notes.)
+<b>TYPE</b>="DOJO"|"SAP"; (See Notes.)
+<b>ID</b>=id;
+<b>CLASS</b>=class;
+<b>NAME</b>=name;
+<b>TEXT</b>=text;
+<b>TITLE</b>=title;
+<b>LINK</b>=linkInfo;
+<b>PARTIALLINK</b>=partialLinkInfo;
+<b>TAG</b>=tagname;
+<b>INDEX</b>=n;                         (1-based, NOT used alone, indicates the Nth matching item.)
+<b>ITEMINDEX</b>=n;                     (1-based, NOT used alone, indicates the Nth matching list item.)
+<b>PATH</b>=parent->child->grandchild;  (NOT used alone. Path to a subitem in a List, ComboBox, Menu, Tree)
+<b>PROPERTY</b>=propname:propvalue;             (can be used with others to provide more uniqueness)
+<b>PROPERTYCONTAINS</b>=propname:partialValue;  (can be used with others to provide more uniqueness)
+
+<u>Notes</u>:
+Multiple qualifiers should be separated by semi-colons ("<b>;</b>").
+<b>TYPE</b>= is experimental and only supports "DOJO" and "SAP" at this time. Do not use.
+<b>:PASM:</b> if used, means everything that follows is explicitly property=value pairs.
+
+<b>No PASM: Example 1</b>:
+
+<div class="appmap">
+MyObject="Text=Some Text;enabled=true;ItemIndex=2;"<br>
+</div>
+
+"TEXT" and "ITEMINDEX" are known <i><b>qualifiers</b></i>--not property names,
+while "enabled"--which is NOT a known qualifier--will be treated
+as a native object property/attribute to match.
+
+<b>PASM: Example 2</b>:
+
+<div class="appmap">
+MyObject="<b>:PASM:</b>text=Some Text;enabled=true;itemindex=2;"<br>
+</div>
+
+With "<b>:PASM:</b>" leading; "text", "enabled", and "itemindex" are all sought as native object
+property/attribute values that must be matched.
+
+</pre></ul>
+ <p>Identify child elements by multiple native properties or attributes:
+<p><ul><pre>
+<div class="appmap">
+MyObject="<b>aproperty</b>=xxx;<b>someattribute</b>=yyy;<b>anotherone</b>=zzz"<br>
+</div>
+
+You don't need <b>:PASM:</b> if none of the properties or attributes have the same
+names as our <i><b>qualifiers</b></i> above.
+</pre></ul>
+ <p>Identify child objects using explicit XPATH or CSS RS:
+<p><ul><pre>
+<div class="appmap">
+MyObject="<b>XPATH</b>=.//div[contains(text(),'foo')]"
+MyObject="<b>CSS</b>=div:contains('foo')"<br>
+</div>
+</pre></ul>
+ </ul>
+ <p>
+</ol>
+
+<ol><h3>Capture Recognition Strings - Browser Tools</h3>
+	<p>
+	Generally, the 3 major browsers seem to support the same or similar mechanism for inspecting web page elements.
+	<p>
+	<li>Navigate to the desired application in the browser.
+	<li>Press <b>"F12"</b> to display the browser Object Inspector.<br>
+	If "F12" does not do it then try <b>Ctrl+Shift+C</b> or <b>Ctrl+Shift+I</b> or
+	consult your browser documentation for launching the Inspector.
+	<li>Click the Inspector tool and then Click the desired application component.
+	<p>FireFox:<br><img src="images/FireFoxInspector.png"/>
+	<p>Chrome:<br><img src="images/ChromeInspector.png"/>
+	<p>IExplore:<br><img src="images/IExploreInspector.png"/>
+	<li>The Inspector panels should now show detailed information about the selected application component highlighted in the console.
+	<li>If present, click the Inspector's "Attributes" tab (or equivalent) to see attributes (name="value" properties) for the component.
+	<p>
+	<li>Common attributes to use for recognition are:<b> name, type, id, title, value, and text</b>.<br>
+	<ul>
+		<li>'text' is not a real 'attribute', but we support it as such.
+		<li>Whenever using visible (and localizable) text as part of the recognition string, be sure to parameterize the recognition string in the App Map as discussed in the <a href="http://safsdev.sourceforge.net/sqabasic2000/TestDesignGuidelines.htm" title="App Map Test Design Guidelines" alt="App Map Test Design Guidelines">Test Design Guidelines</a>.
+	</ul>
+	<p>
+	<li>Identify one or more attributes that together uniquely identify the component.
+	<li>Multiple attributes can be used in the AppMap recognition string when separated by a semi-colon:
+	<p><ul>
+	    Format:<br>
+		ComponentName=<b>"&lt;recognition>"</b>
+		<p>
+		<li>OK=<b>"id=btnK"</b>
+	    <li>OK=<b>"id=btnK;class=btn;name=OK"</b>
+	</ul>
+<p>
+A Primary App Map hypothetically for Google (<b>App.map</b>):<br>
+<div class="appmap"><pre>
+;
+; Constants and other data.
+;
+[ApplicationConstants]
+nlsSearch="Search"
+
+;
+; Main Google window/component recognition
+;
+[Google]
+Google="id=viewport"
+Apps="title=Apps"
+Search="text={^nlsSearch}"
+
+;
+; Google's Login window/compoent recognition
+;
+[Login]
+Login="id=viewport"
+UserName="name=Email"
+Password="name=Passwd"
+SignIn="id=signIn"
+</pre></div>
+<p>
+A French App Map to override the "Search" text in the Primary App Map (<b>App_fr.map</b>):<br>
+<div class="appmap"><pre>
+;
+; Constants and other data.
+;
+[ApplicationConstants]
+nlsSearch="Recherche"
+</pre></div>
+<p>
+</ol>
+<p>
+<ol><h3>Capture Recognition Strings - Selenium ProcessContainer</h3>
+	<p>
+	There is a <a href="UsingSeleniumProcessContainer.html" target="_blank" alt="Selenium ProcessContainer Doc" title="Selenium ProcessContainer Doc">SeleniumPlus ProcessContainer</a> tool that can be used to interactively capture,
+	modify, and test recognition strings natively using the SAFS/Selenium engine with the Selenium WebDriver.
+	This can be used instead of--or in addition to--the Browser Tools mentioned above.
+	<p>
+	<img src="./images/WebDriverProcessContainer.png" alt="Selenium ProcessContainer Tool" title="Selenium ProcessContainer Tool"/>
+	<p>
+	Review the <a href="UsingSeleniumProcessContainer.html" target="_blank" alt="Selenium ProcessContainer Doc" title="Selenium ProcessContainer Doc">SeleniumPlus ProcessContainer</a> doc for more complete usage notes.
+	<p>
+	In particular, note that Selenium and SeleniumPlus only seek components ("<b>Find Element</b>") in the currently identified Frame or iFrame, if frames exist. &nbsp;If you get "No Such Element" or "...not found." for a particular <b>Recognition:</b> string you believe is good, it may be we are looking in the wrong Frame.
+	<p>
+	So, when attempting "<b>Find Element</b>" with ProcessContainer, you must do one of the following:
+	<ul>
+	    <li>Search and then select the appropriate <b>Frame</b> in ProcessContainer before finding elements in it.
+	    <p>Example:<br>
+	    <b>Recognition:</b> XPATH=.//*[@id='aChildComponent_id']
+	    <p>or<p>
+	    <li>Properly prepend the FRAMEID in the Recognition string for the elements.
+	    <p>Example:<br>
+	    <b>Recognition:</b> FRAMEID=myApps_iframe;\;XPATH=.//*[@id='aChildComponent_id']
+	</ul>
+</ol>
+<p>
+
+<ul><p>
+<a href="http://safsdev.sourceforge.net/sqabasic2000/TestDesignGuidelines.htm" title="App Map Test Design Guidelines" alt="App Map Test Design Guidelines">Test Design Guidelines</a><br>
+<a href="http://safsdev.sourceforge.net/sqabasic2000/CreateAppMap.htm" title="Detailed App Map Info" alt="Detailed App Map Info">App Map Format Info</a><br>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/GuiObjectRecognition.html" title="Generic Object-Based Recognition Info" alt="Generic Object-Based Recognition Info">Historic App Map Info</a>
+<p>
+Specific "Categories" and "Qualifiers" in the above docs may not (yet) be supported by SeleniumPlus.
+</ul>
+<hr>
+</div>
+
+
+<!--------------------------------->
+<!--        Expressions          -->
+<!--------------------------------->
+<div id="expressions" style="display: none;">
+<h2>SAFS Expressions</h2>
+<p>
+A fundamental overview of <a href="http://safsdev.sourceforge.net/doc/org/safs/tools/expression/SafsExpression.html" title="SAFS Expression Processing" alt="SAFS Expression Processing" target="_blank">SAFS Expression Processing</a>.
+<p>
+Historically, <b>expression processing</b> happens on every "field" for every action or command in a SAFS "inputrecord".  The JSAFS Java code that SeleniumPlus is based upon retained that functionality.
+<p>
+Expression processing is "ON" by default.
+<p>
+That is, for any String argument or parameter passed to a SeleniumPlus class "action" or "command" there will be an attempt to process that String argument for possible expressions. (Note, that calls to other libaries that are NOT in the SeleniumPlus class--like WDLibrary, SearchObject, or WebDriver--do NOT have arguments processed for expressions.)
+<p><ul>
+<b>If the action/command String argument is <br>
+NOT enclosed in double-quotes, and <br>
+DOES contain expression operators, <br>
+THEN it will get processed and changed accordingly.<br>
+</b></ul>
+<p>
+Operators that trigger String changes in action/command arguments:
+<ul><pre>
+       ^                    '(Caret) Variable Prefix
+       =                    'Assignment operator
+       "                    'A single Double-Quote mark
+       &                    'String concatenate operator
+       +                    'Addition operator
+       -                    'Subtraction operator
+       *                    'Multiplication operator
+       /                    'Division operator
+       %                    'Modulus/Remainder operator
+       (                    'Open Group operator
+       )                    'Close Group operator
+</pre></ul>
+<p>
+We have found that most SeleniumPlus users DO NOT need or want Expression processing enabled for the majority of their "action" or "comand" calls.  Until an easy "fix" is available that does not break tests for existing JSAFS and SeleniumPlus users there are two options for controlling this:
+<p>
+<ol>
+<li><b>Enclose these String arguments in double-quotes.</b>
+<p>
+There is a (somewhat) convenient <a href="http://safsdev.sourceforge.net/doc/org/safs/selenium/webdriver/SeleniumPlus.html#quote(java.lang.String)" target="_blank">quote()</a> method available in your TestCase or TestRun for doing this.<br>
+<p>
+Example:
+<p>
+<ul>
+<b>Click(Map.Content.Canvas, quote("15,-20"));</b>
+</ul>
+<p>Because the (-) subtraction operator exists in the string we have to quote() it to avoid expression processing.
+<p>
+<li><b>Alternatively/As needed--or at the very beginning of all your tests--disable Expressions:</b>
+    <p>
+    <ul><a href="http://safsdev.sourceforge.net/doc/org/safs/selenium/webdriver/SeleniumPlus.Misc.html#Expressions(boolean)" alt="Misc.Expressions JavaDoc" title="Misc.Expressions JavaDoc" target="_blank">Misc.Expressions</a>(false);</ul>
+    <p>
+    This should make enclosing these String arguments with quote() unnecessary.
+<p>
+Example:
+<p>
+<ul><b>
+Misc.Expressions(false);<br>
+...<br>
+Click(Map.Content.Canvas, "15,-20");</b>
+</ul>
+<p>Because Expressions are OFF, the (-) subtraction operator should not trigger expression processing and the argument should not need to be quoted.
+</ol>
+<hr>
+</div>
+
+
+<!--------------------------------->
+<!-- Edit Tests Instructions     -->
+<!--------------------------------->
+<div id="project-edit" style="display: none;">
+<h2>Adding and Editing Tests</h2>
+<p>
+<ol><h3>Adding TestCase Classes</h3>
+	<li>In the Package Explorer,<br>
+	right-click on the <b>TestCases</b> package folder in your Project and select "Selenium+ ->Create Test File" in the popup menu.
+	<li>Enter a unique Test Class name (Ex: "Login") for the new class and click OK.
+	<li>A new TestCase class (Ex: "Login.java") should now exist in the <b>TestCases</b> package folder.
+</ol>
+<p>
+<ol><h3>Adding TestCase Methods</h3>
+	<li>Make sure the target TestCase class is open for editing in the main content view of Eclipse.
+	<li>Click inside the TestCase class file on the line where you wish to insert the new testcase method.<br>
+	(Do NOT insert it in the ignored runTest() method of the the TestCase class!)
+	<li>Right-click on the insertion line and select "Selenium+ ->Insert Test".
+	<li>A new test method is inserted ("Test01" by default).
+	<li>Rename the method as desired. (Ex: EnterUserID() instead of Test01())
+</ol>
+<p>
+<ol><h3>Referencing AppMap Constants</h3>
+    <li>There is a <b>Map</b> class that provides access to the ApplicationConstants stored in your AppMaps.
+    <li>Sample AppMap ApplicationConstants entry:
+    <p>
+<div class="appmap"><pre>
+;
+; Constants and other data.
+;
+[ApplicationConstants]
+GoogleURL="http://www.google.com"
+</pre></div>
+    <p>
+    <li>To reference the <b>NAME</b> of the GoogleURL variable (not the value):
+    <p>
+    <ul><b>Map.GoogleURL</b></ul>
+    <p>
+    <li>To reference the <b>VALUE</b> of the GoogleURL variable (not the name):
+    <p>
+    <ul><b>Map.GoogleURL()</b></ul>
+    <p>
+    <li>Note: The value of a given item is retrieved at runtime via GetVariableValue calls.
+    <li>It is possible for a test to alter the value of these "constants" at runtime.
+    <li>Thus, at runtime, the value might NOT be the value as originally stored in the AppMap.
+</ol>
+<p>
+<ol><h3>Calling SeleniumPlus Actions and Commands</h3>
+	<li>To see a list of ALL available SeleniumPlus Actions and Commands:
+	<p>
+	<ol>
+	    <li>Place the edit cursor where you wish to insert the call in your TestCase method.
+	    <li>Type "SeleniumPlus."  (the dot is explicitly needed to show the list.)
+	    <li>A list of commands and subclasses of commands will display.
+	    <li>Single-click an item in the list to get detailed help and information.
+	    <li>Click inside the displayed help to scroll and view all available information.
+	    <li>Double-click the item in the list to insert the call into your code.
+	    <li>If selecting a subclass of commands (ComboBox, EditBox, Files, etc..),<br>you will need to press the dot (.) again to see and select from the list of commands provided by the subclass.<br>
+	    Example: "SeleniumPlus.EditBox." to show the list of EditBox commands.
+	    <p>
+	    (Note: Once you are familiar with the commands and subclasses, you don't have to type the "SeleniumPlus." prefix.<br>
+	    You can just type the command name or subclass name directly.)
+	    <li>Provide the needed values or variables to any parameters needed by the command.
+	    <li>Remember, every program statement must end with a semi-colon.
+	</ol>
+	<p>
+	<li>To see a list of only the immediate SeleniumPlus Actions and Commands:
+	<p>
+	<ol>
+	    <li>Place the edit cursor where you wish to insert the call.
+	    <li>Hold down the Ctrl key and press SPACE.
+	    <li>A list of commands and subclasses of commands will display.
+	    <li>Single-click an item in the list to get detailed help and information.
+	    <li>Click inside the displayed help to be able to scroll or view all information.
+	    <li>Double-click the item in the list to insert the call into your code.
+	    <li>Provide the needed values or variables to any parameters needed by the command.
+	    <li>Remember, every program statement must end with a semi-colon.
+	</ol>
+</ol>
+<p>
+<ol><h3>Adding TestRun Classes</h3>
+	<li>In the Package Explorer,<br>
+	right-click on the <b>TestRuns</b> package folder in your Project and select "Selenium+ ->Create Test File" in the popup menu.
+	<li>Enter a unique Test Class name (Ex: "SmokeTest") for the new class and click OK.
+	<li>A new TestRun class (Ex: "SmokeTest.java") should now exist in the <b>TestRuns</b> package folder.
+	<br/>(Note: TestRun class calls many TestCase's methods, like main file)
+</ol>
+<p>
+<ol><h3>Calling TestCases from your TestRun classes</h3>
+	<li>
+	<li>To see a list of ALL methods in a given TestCase class:
+	<p>
+	<ol>
+	    <li>Place the edit cursor where you wish to insert the TestCase call in your TestRun runTest() method.
+	    <li>Type "&lt;testcaseclass>."  (the dot is explicitly needed to show the list.)<br>
+	    Ex: "TestCase1."
+	    <li>A list of testcases (methods) of the TestCase1 class will display.
+	    <li>Single-click an item in the list to get detailed help and information.
+	    <li>Click inside the displayed help to scroll and view all available information.
+	    <li>Double-click the item in the list to insert the call into your runTest() method.
+	    <li>Provide the needed values or variables to any parameters needed by the command.
+	    <li>Remember, every program statement must end with a semi-colon.
+	</ol>
+</ol>
+<hr>
+</div>
+
+<!--------------------------------->
+<!-- Auto Config Instructions      -->
+<!--------------------------------->
+<div id="auto-config" style="display: none;">
+<h2>Automatic Configuration</h2>
+<p>
+Classes in your "<b>current</b>" project will automatically receive <a href="http://safsdev.sourceforge.net/doc/org/safs/model/tools/RuntimeDataAware.html" target="_blank" title="RuntimeDataAware Class Reference">RuntimeDataAware</a>-ness at Runtime (i.e. when the test is run.)  These classes will receive required object instances at runtime for doing things like retrieving values out of the runtime App Maps.
+<p>
+You normally don't have to think or worry about this because it happens for you behind the scenes every time you run a test. If you only use classes in your current Project, and don't reference Maps or Utility classes from other SeleniumPlus projects, then you can stop reading this and explore other sections of the Intro.
+<p>
+However, if you DO reference "<b>other</b>" SeleniumPlus projects in your current project--like an external "<b>helper</b>" project--or other projects that have runtime functionality you want to share and NOT duplicate--then you do need to consider the following.
+<p>
+Classes in those "<b>other</b>" projects that are not the "<b>current</b>" project will NOT receive their normal RuntimeDataAware-ness at runtime.  This can present a problem if your try to use another project's testcases, or if you try to use those other projects' Map classes:<pre>
+    <b>String val = helper.Map.SomeConstant();</b>
+</pre>
+<p>
+The call will work normally when that project is the "current" project, but it may not work correctly if it is the "other" project. You can verify this by reviewing the Debug Log after a run.  The Debug Log will show which packages and classes were checked for automatic injection of RuntimeDataAware-ness.  The classes in the "other" project will NOT be listed in the log.
+<p>
+To fix this runtime issue:
+<p>
+<ul>
+<li>Any Class--usually any one testcase or testrun (except the dynamically generated Map class)--you have in the "<b>current</b>" project can be modified to support automatic injection of <a href="http://safsdev.sourceforge.net/doc/org/safs/model/tools/RuntimeDataAware.html" target="_blank" title="RuntimeDataAware Class Reference">RuntimeDataAware</a> classes in other projects referenced at runtime. Those other project classes <b>must</b> be in the Classpath (or BuildPath) of the <b>current</b> project. In other words, those <b>other</b> external classes have to be <b>findable</b> at runtime.
+<p>
+<li>To the desired Class in the <b>current</b> project, you add a Java annotation right above the Class definition.  Below I show a sample.Utilities class as an example of enabling:
+<p><ul>
+@<b><a href="http://safsdev.sourceforge.net/doc/org/safs/model/annotations/AutoConfigureJSAFS.html"
+target="_blank" title="AutoConfigureJSAFS Class Reference">AutoConfigureJSAFS</a></b>(include="mypackage.Map;another.package.Map")<br>
+<b>public class</b> Utilities <b>extends</b> SeleniumPlus {<br>
+<b>...</b><br>
+<p>
+The above example tells SeleniumPlus to check all classes in:
+<p><ul>
+    <li>"mypackage" package and all its subpackages, and<br>
+    <li>"another.package" package and all its subpackages.
+    </ul>
+    </ul>
+<p>
+<li>You only have to place this annotation on any one class in your <b>current</b> project--perhaps a Utilities class?<br>
+(But not the dynamically generated Map class.)
+<p>
+<li>The annotation will enable this for all tests in the <b>current</b> project.<br>
+This is because when we check to auto-inject dependencies for a test/Class we check all classes in the same packages and all subpackages of that test/Class.
+<p>
+<li>The compiler may warn/inform you that you need to import the <a href="http://safsdev.sourceforge.net/doc/org/safs/model/annotations/AutoConfigureJSAFS.html"
+target="_blank" title="AutoConfigureJSAFS Class Reference">AutoConfigureJSAFS</a> annotation class:
+<p><ul>
+   <b>import</b> org.safs.model.annotations.AutoConfigureJSAFS;
+   </ul>
+</ul>
+<p>
+Recompile and Run and the issues encountered in the "other" project(s) should be resolved.
+<p>
+You can review the Debug Log after the Run and you should see where injecting the RuntimeDataAware classes in the "other" project(s) was attempted.
+<hr>
+</div>
+
+<!--------------------------------->
+<!-- Run Tests Instructions      -->
+<!--------------------------------->
+<div id="tests-run" style="display: none;">
+<h2>Running Tests</h2>
+<p>
+<ol><h3>Run a Project TestRun Class</h3>
+	<li>Only SeleniumPlus subclasses with executable content in the runTest() method can be executed as tests.
+	<li>In the Package Explorer, select the desired <b>TestRun</b> or <b>TestCase</b> Java file in your Project.
+	<li>In the main menu, select "Run->Run As->Selenium+ Test".<br>
+	(The test should automatically start.)
+	<li>When the test completes, Package Explorer should show the resulting log file in the Project's <b>Logs</b> folder.<br>
+	(You may have to hit Refresh(F5) for the Package Explorer to update.)
+	<li>Double-click the log file or right-click it to "Open With...->Text Editor" to see the logged results.
+</ol>
+<ol><h3>Command-line TestRun</h3>
+	<li>Open your project's <b>runAutomation.bat</b> in text editor. (e.g: C:\SeleniumPlus\SAMPLE\runAutomation.bat)
+	<li>Verify/Replace "&lt; package name>" with actual package name. (e.g: sample.testruns.TestRun1)
+	<li>open command-line window.
+	<li>cd to the project dir.
+	<li>run runAutomation.bat file.
+	<p>
+	example:
+	<ul>From cmd window
+<pre>
+cd c:\SeleniumPlus\SAMPLE
+runAutomation.bat
+</pre>
+</ul>
+ <p>
+ Note: See runAutomation.bat file for how to override App Map variables and App Map order.
+</ol>
+<hr>
+</div>
+
+<!--------------------------------->
+<!-- Logging Instructions      -->
+<!--------------------------------->
+<div id="logging" style="display: none;">
+<h2>Logging</h2>
+<p>
+SAFS and SeleniumPlus normally log a significant amount of information into the test log.  This normally includes generic info as well as pass and fail information for test records.
+<p>
+The test INI file can be configured to change the LOGLEVEL for information sent to the logs.<br>
+The valid values for LOGLEVEL are:
+<p>
+<ol>
+<li>"<b>INFO</b>" &nbsp; -- the normal <b>default</b> setting.
+<li>"<b>WARN</b>" &nbsp;-- log only warnings and errors.
+<li>"<b>ERROR</b>" -- log only errors.
+</ol>
+<ul>
+<div class="appmap"><pre>
+;
+; Test Info
+;
+[SAFS_TEST]
+...
+LOGLEVEL="INFO"
+...
+</pre></div>
+</ul>
+<p>
+Note that "Counters" are still counting all records--including PASS and FAIL counts regardless of how the log is being filtered.  However, if the LOGLEVEL is set to WARN or ERROR then the traditional test count summary that normally appears in the log will NOT be logged since they are not WARNings or ERRORs. This is a good thing for those that don't like the summary.  It is a bad thing for those that do.
+<p>
+In SeleniumPlus we have provded some new Logging commands that allow the tester/developer to change the LOGLEVEL dynamically at runtime:
+<ul>
+<li><a href="http://safsdev.sourceforge.net/doc/org/safs/selenium/webdriver/SeleniumPlus.Logging.html">SeleniumPlus.Logging</a>
+<p><ul>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/selenium/webdriver/SeleniumPlus.Logging.html#SuspendLogging%28%29">SuspendLogging</a><br>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/selenium/webdriver/SeleniumPlus.Logging.html#ResumeLogging%28%29">ResumeLogging</a><br>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/selenium/webdriver/SeleniumPlus.Logging.html#SetLogAllInfoMode%28%29">SetLogAllInfoMode</a><br>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/selenium/webdriver/SeleniumPlus.Logging.html#SetLogWarningsAndFailuresMode%28%29">SetLogWarningsAndFailuresMode</a><br>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/selenium/webdriver/SeleniumPlus.Logging.html#SetLogFailuresOnlyMode%28%29">SetLogFailuresOnlyMode</a><br>
+</ul></ul>
+If you have reduced the logging by setting the LOGLEVEL in the INI file, or by one of the SeleniumPlus.Logging functions, you can return it to "normal" by calling:
+<p>
+<ul><b>Logging.SetLogAllInfoMode()</b></ul>
+<p>
+This will enable that end-of-log test summary to make it into the log.
+<h2>Asserts</h2>
+SeleniumPlus supports Assert-like functionality often seen in tools like jUnit.
+By default, Asserts <b>DO NOT automatically cause an abort of the running test</b>.<br>
+However the SeleniumPlus.Assert API does allow the tester to change this default behavior.
+<p>
+<ul>
+<li><a href="http://safsdev.sourceforge.net/doc/org/safs/selenium/webdriver/SeleniumPlus.Assert.html">SeleniumPlus.Assert</a>
+<p><ul>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/selenium/webdriver/SeleniumPlus.Assert.html#setAbortOnFailure%28boolean%29">setAbortOnFailure(true/false)</a>
+</ul></ul>
+<p>
+Only failed Asserts appear in the log.  However, just like all other tests, the PASS/FAIL information increments in the test record Counters--which can be queried--will print to the log if the LOGLEVEL is set to the default "INFO".
+<hr>
+</div>
+
+<!--------------------------------->
+<!-- Backup Tests Instructions      -->
+<!--------------------------------->
+<div id="tests-backup" style="display: none;">
+<h2>Backup Tests with CVS</h2>
+<p>
+<ol><h3>Check-in project into CVS repository</h3>
+    <li>Right click on the project to be checked-in.
+    <p><img src="images/share_project.png"/>
+	<li>Select "CVS"" and "Next".
+    <p><img src="images/cvs.png"/>
+	<li>Enter CVS host, repository path, uname, password and click "Next"".
+	<p><img src="images/enter_cvsinfo.png"/>
+	<li>Create or Use existing repository and click "Next".
+    <p><img src="images/create_cvs.png"/>
+	<li>Enter project name as module name.
+	<p><img src="images/enter_cvsinfo_module.png"/>
+	<li>Verify check in resources.
+	<p><img src="images/cvs_share_finished.png"/>
+	<li>Enter inital check-in comment and click "Finish".
+	<p><img src="images/cvs_share_finished_comment.png"/>
+</ol>
+<p>
+<ol><h3>Exmaple: Check-in, Check-out or Compare tests against CVS</h3>
+	<li> Right click on File or Project.
+	<p><img src="images/cvs_checkin_out.png"/>
+</ol>
+<p>
+<hr>
+</div>
+
+<!--------------------------------->
+<!-- Checkout Tests Instructions      -->
+<!--------------------------------->
+<div id="tests-checkout" style="display: none;">
+<h2>Check-out Tests from CVS</h2>
+<p>
+<ol><h3>Check-out project from CVS repository</h3>
+    <li>Right click on the Package Explorer area to import the project.
+    <p><img src="images/import.png"/>
+	<li>Select "CVS->Projects from CVS" and "Next".
+    <p><img src="images/import_cvs.png"/>
+	<li>Enter CVS host, repository path, uname, password and click "Next"".
+	<p><img src="images/enter_cvsinfo.png"/>
+	<li>Select module/project and click "Next".
+    <p><img src="images/import_cvs_module.png"/>
+	<li>Check-out project and click "Finish".
+	<p><img src="images/import_cvs_checkoutas.png"/>
+	<li>Check-out project assets .
+	<p><img src="images/import_cvs_project.png"/>
+	<li>(Optional) If the project shows compile error then correct java build path, Right click on the Project->Properties.
+	<p><img src="images/import_buidpath.png"/>
+	<li>Update or Verify DriverRoot location in test.ini file.
+
+		<pre>
+		[SAFS_DRIVER]
+		DriverRoot="c:\seleniumplus\extra\automation"
+		</pre>
+</ol>
+<p>
+<ol><h3>Exmaple: Check-in, Check-out or Compare tests against CVS</h3>
+	<li> Right click on File or Project.
+	<p><img src="images/cvs_checkin_out.png"/>
+</ol>
+<hr>
+</div>
+
+
+<!--------------------------------->
+<!-- Advanced Information        -->
+<!--------------------------------->
+<div id="advanced" style="display: none;">
+<h2>Advanced Users</h2>
+<p>
+The modified SeleniumPlus Eclipse IDE with the SeleniumPlus PlugIn provides many convenience features and a simplified interface for novice programmers.  This includes certain levels of Eclipse interface filtering or hiding that may not be desirable for developers already comfortable with the Eclipse IDE--or even some other Java development environments.
+<p>
+It is possible to develop SeleniumPlus tests without these conveniences in your existing Eclipse environment or other Java IDE.
+<p>
+<h3>Primary concerns for standard IDE <u>development</u>:</h3>
+<ol>
+    <li>Appropriate SeleniumPlus and Selenium JAR files included in the Build Path for the project.
+    <li>Ideally, App Map text files to be visible and editable within the IDE.
+    <li>The manual or automatic execution of the <a href="http://safsdev.sourceforge.net/doc/org/safs/model/tools/ComponentGenerator.html" title="Dynamic Map.java Generator" alt="Dynamic Map.java Generator">Dynamic Map.java Generator</a> program any time the text App Map files are edited or modified.
+</ol>
+<p>
+<h3>Primary concerns for test <u>execution</u>:</h3>
+<ol>
+    <li>SeleniumPlus--or SAFS and its STAF dependency--must be installed and configured for proper SAFS execution.
+    <li>A SeleniumPlus Project or comparable SAFS Project must exist with all necessary test files--primarily:
+    <ul>
+        <li>AppMap and AppMap.order files,
+        <li>test.ini, or other test configuration file.
+    </ul>
+    <li>The test configuration file (test.ini) must be configured to match the SeleniumPlus or SAFS Project location to be used.
+    <li>The command-line invocation must invoke the desired SeleniumPlus subclass to execute and the test configuration file (test.ini) to be used for test configuration.
+</ol>
+<hr>
+</div>
+
+<p>
+<!--------------------------------->
+<!-- Setup Internet Explorer     -->
+<!--------------------------------->
+<div id="iesetup" style="display: none;">
+<h2>Setup Internet Explorer</h2>
+<p>
+For Internet Explorer the user should make sure "Protected Mode" and the Status Bar are disabled.
+<h3>Disable "Protected Mode"</h3>
+<p><ol>
+	<li>In the Internet Explorer Tools menu, or via the Internet Options in Control Panel,<br>
+	access the Internet Options dialog.
+	<li>Select the Security Tab.
+	<li>Make sure the <b>"Enable Protected Mode"</b> item is disabled--NOT selected.
+	<li>Click "OK" to save the setting and close the dialog.
+	<li>This may require a restart of Internet Explorer if the mode was changed.
+    <p>
+    <img src="images/IExploreProtectedMode.png">
+</ol>
+<p>
+<h3>Disable the Status Bar</h3>
+For accurate coordinate calculations of components the Status Bar in Internet Explorer should also be disabled.
+<p><ol>
+	<li>In the Internet Explorer View menu, access and disable (uncheck) the Toolbars->Status Bar option.
+	<li>This may require a restart of Internet Explorer if the mode was changed.
+    <p>
+    <img src="images/IExploreStatusBar.png">
+</ol>
+<h3><a href="https://github.com/SeleniumHQ/selenium/wiki/InternetExplorerDriver#required-configuration">For IE 11 only</a></h3>
+you will need to set a registry entry on the target computer so that the driver can maintain a connection to the instance of Internet Explorer it creates.
+<p>
+<ul>
+    <li>For 32-bit Windows installations, the key you must examine in the registry editor is: <code>HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_BFCACHE</code>.</li>
+    <li>For 64-bit Windows installations, the key is: <code>HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_BFCACHE</code>.</li>
+</ul>
+Please note that the <code>FEATURE_BFCACHE</code> subkey may or may not be present, and should be created if it is not present. Important: Inside this key, create a <code>DWORD</code> value named iexplore.exe with the value of 0.
+<h3>Appendix: Selenium Offical settings of InternetExplorerDriver</h3>
+Usually, the above settings can make you run SeleniumPlus with IE browser successfully. But if you still have problems, you'd better reference 3rd party software Selenium official setting webpage: <a href="https://github.com/SeleniumHQ/selenium/wiki/InternetExplorerDriver">https://github.com/SeleniumHQ/selenium/wiki/InternetExplorerDriver</a>.
+<hr>
+</div>
+
+<!--------------------------------->
+<!-- Start Web Browser           -->
+<!--------------------------------->
+<div id="startwebbrowser" style="display: none;">
+<h2>About Profile and Preferences</h2>
+The Profile/Preferences is used to control the browser's looks, behaviors etc.
+Normally, SeleniumPlus will start browser with a new default profile, which means any preferences user sets manually will not be kept, this default profile is temporary.
+If user wants to start browser with some specific settings, SeleniumPlus provides 2 ways.
+<ol>
+    <li>Start web browser with <a href="#startwebbrowser_profile">persistent custom profile</a>.
+    <li>Start web browser with default profile and <a href="#startwebbrowser_preferences">set the preferences at runtime</a>.
+</ol>
+
+<h3 id="startwebbrowser_profile">Using custom profile</h3>
+<ol>
+	<li><h3>Start Firefox</h3>
+	   <ul>
+	   <li>Prepare the profile
+            <ol>
+                <li>Run "<b>firefox.exe -ProfileManager -no-remote</b>" in Windows Start "Search" input box.
+                <li>Create custom profile "<b>myprofile</b>" and <a href="https://support.mozilla.org/en-US/kb/profile-manager-create-and-remove-firefox-profiles">configure custom setting</a>
+                    <br><img src="images/firefox_create_profile.png"/>
+           </ol>
+        <li>Examples:<br>
+            <ol>
+                <li>Start Firefox with the custom profile "<b>myprofile</b>"
+                    <div class="CodeBox">
+<pre class="LineNumbers">
+1
+2
+</pre>
+<pre class="SourceCode">
+String profile = "myprofile";
+StartWebBrowser(URL, ID, SelectBrowser.BROWSER_NAME_FIREFOX, "30", "true", SelectBrowser.<b>KEY_FIREFOX_PROFILE</b>, profile);
+</pre>
+                    </div>
+            </ol>
+        </ul><p>
+	<li><h3>Start Chrome</h3>
+        Chrome's profile is a little different from Firefox's. There is a "user data pool" and under that "data pool" there are multiple users.
+        Among these users, there is a <b>Default</b> user. SeleniumPlus can start browser with a "user data pool" and a certain "user". If the "user" is
+        not specified, then the <b>Last Active</b> user will be used.<p>
+        <ul>
+        <li>Prepare the profile
+            <ol>
+                <li><a href="http://www.chromium.org/developers/creating-and-using-profiles">Create custom data pool</a> by running "<b>chrome.exe --user-data-dir=c:\chrome_custom_data</b>".
+                    This command will start up a chrome browser and a new folder c:\chrome_custom_data will be created.
+                    Under that folder there is a sub folder <b>Default</b>, which is for the default user.
+                <li>Create multiple users, then under folder c:\chrome_custom_data, there will be sub folder "Profile 1", "Profile 2" etc. for those new added users.<br>
+                    <ul>
+                    <li>Open chrome settings: click the button <img src="images/chrome_customize_control_button.png"/> to show a pop-up menu, and then click the item "Settings".<br>
+                        <img src="images/chrome_open_settings.png"/>
+                    <li>Add new person: click the button "Add person..." <br>
+                        <img src="images/chrome_add_person.png">
+                    </ul>
+                <li>Modify chrome settings (chrome://settings/ or chrome://flags/) manually, and the new settings will be kept in this custom profile for <b>current active user</b>.
+                    As this chrome is started the first time by "<b>chrome.exe --user-data-dir=c:\chrome_custom_data</b>", the current active user will be <b>Default</b> user. Refer to
+                    the following snapshot, the <b>Default</b> user is "Person 1" marked with <b>(current)</b>, which means it is active. Later, with more users added, the active user could be anyone.
+                    <br>
+                    <img src="images/current_active_user.png"><br>
+                    If we want to change the settings for another user, we need to start chrome with the option <b>profile-directory</b>, for example,
+                    run <b>chrome.exe --user-data-dir=c:\chrome_custom_data <font color="red">--profile-directory</font>="Profile 1"</b>, and then modify the chrome settings manually for him.<br>
+                <p>
+            </ol>
+        <li>Examples:<br>
+            <ol>
+                <li>Start Chrome with the custom data pool "c:\chrome_custom_data" and <b>Last Active</b> user, the <b>Last Active</b> could be "Default User" or any other one.
+                    <div class="CodeBox">
+<pre class="LineNumbers">
+1
+2
+</pre>
+<pre class="SourceCode">
+String datapool = "c:\\chrome_custom_data";
+StartWebBrowser(URL, ID, SelectBrowser.BROWSER_NAME_CHROME, "30", "true", quote(SelectBrowser.<b>KEY_CHROME_USER_DATA_DIR</b>), datapool);
+</pre>
+                    </div>
+                <p>
+                <li>Start Chrome with the custom data pool "c:\chrome_custom_data" and <b>Default</b> user
+                    <div class="CodeBox">
+<pre class="LineNumbers">
+1
+2
+3
+</pre>
+<pre class="SourceCode">
+String datapool = "c:\\chrome_custom_data";
+String user = "Default";
+StartWebBrowser(URL, ID, SelectBrowser.BROWSER_NAME_CHROME, "30", "true", quote(SelectBrowser.<b>KEY_CHROME_USER_DATA_DIR</b>), datapool, quote(SelectBrowser.<b>KEY_CHROME_PROFILE_DIR</b>), user);
+</pre>
+                    </div>
+                <p>
+                <li>Start Chrome with the custom data pool "c:\chrome_custom_data" and the second user "<b>Profile 1</b>".
+                    <div class="CodeBox">
+<pre class="LineNumbers">
+1
+2
+3
+</pre>
+<pre class="SourceCode">
+String datapool = "c:\\chrome_custom_data";
+String user = "Profile 1";
+StartWebBrowser(URL, ID, SelectBrowser.BROWSER_NAME_CHROME, "30", "true", quote(SelectBrowser.<b>KEY_CHROME_USER_DATA_DIR</b>), datapool, quote(SelectBrowser.<b>KEY_CHROME_PROFILE_DIR</b>), user);
+</pre>
+                    </div>
+                <p>
+            </ol>
+        </ul>
+
+</ol>
+
+<h3 id="startwebbrowser_preferences">Using preferences</h3>
+<ol>
+    <li><h3>Start Firefox</h3>
+       <ul>
+       <li>Prepare the json data file
+            <ol>
+                <li>Create a new json data file, for example c:\Pref.json.dat
+                <li>Write the preferences into this json file, for example,
+<pre>
+{
+    #The line begins with # is considered as comment
+    #The <b>preference</b> is given as key:value, <b>there are 3 kinds of value: string, boolean and integer</b>.
+    #The string value is quoted with double-quote, while boolean and integer are not quoted.
+    "intl.accept_languages":"zh-cn",
+    "accessibility.accesskeycausesactivation":false,
+    "browser.download.folderList":2
+}
+</pre>
+           </ol>
+        <li>Examples:<br>
+            <ol>
+                <li>Start Firefox with the custom preferences data file "<b>c:\Pref.json.dat</b>"
+                    <div class="CodeBox">
+<pre class="LineNumbers">
+1
+2
+</pre>
+<pre class="SourceCode">
+String preferenceDataFile = "c:\\Pref.json.dat";
+StartWebBrowser(URL, ID, SelectBrowser.BROWSER_NAME_FIREFOX, "30", "true", SelectBrowser.<b>KEY_FIREFOX_PROFILE_PREFERENCE</b>, preferenceDataFile);
+</pre>
+                    </div>
+            </ol>
+        </ul><p>
+    <li><h3>Start Chrome</h3>
+        Chrome's json data file is a little different from Firefox's. There are 2 kinds of settings:
+        <a href="http://peter.sh/experiments/chromium-command-line-switches/"><b>command line options</b></a> and
+        <a href="https://src.chromium.org/viewvc/chrome/trunk/src/chrome/common/pref_names.cc"><b>chrome preferences</b></a>.<br>
+        The <b>command line options</b> will be defined normally as key : value pair in the json file, while <b>chrome preferences</b>
+        will be defined as value of key "<b>seplus.chrome.preference.json.key</b>".
+        <p>
+        <ul>
+        <li>Prepare the json data file
+            <ol>
+                <li>Create a new json data file, for example c:\Pref.json.dat
+                <li>Write the preferences and/or command-line-options into this json file, for example,
+<pre>
+{
+    #The line begins with # is considered as comment
+    #Define <b>command-line-options</b> as key:value
+    "lang":"en",
+    #If the command-line-options doesn't need a value, then provide an empty value as key:""
+    "start-maximized":"",
+    #"disable-smooth-scrolling":"",
+
+    #Define <b>preferences</b> as value of key "seplus.chrome.preference.json.key"
+    "<b>seplus.chrome.preference.json.key</b>":
+    {
+        #The preferences are given as key:value
+        "intl.accept_languages" :"zh-CN-pseudo",
+        "intl.charset_default"  :"utf-8"
+    }
+}
+</pre>
+           </ol>
+        <li>Examples:<br>
+            <ol>
+                <li>Start Chrome with the custom preferences data file "<b>c:\Pref.json.dat</b>"
+                    <div class="CodeBox">
+<pre class="LineNumbers">
+1
+2
+</pre>
+<pre class="SourceCode">
+String preferenceDataFile = "c:\\Pref.json.dat";
+StartWebBrowser(URL, ID, SelectBrowser.BROWSER_NAME_CHROME, "30", "true", quote(SelectBrowser.<b>KEY_CHROME_PREFERENCE</b>), preferenceDataFile);
+</pre>
+                    </div>
+                <p>
+            </ol>
+        </ul>
+
+</ol>
+    <p>
+<hr>
+</div>
+
+<!--------------------------------->
+<!-- References                  -->
+<!--------------------------------->
+<div id="references" style="display: none;">
+<h2>Important References</h2>
+<p>
+<a href="http://safsdev.sourceforge.net/doc/org/safs/selenium/webdriver/SeleniumPlus.html" title="SeleniumPlus Class JavaDoc" alt="SeleniumPlus Class JavaDoc">SeleniumPlus Class JavaDoc</a><br>
+<a href="http://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/WebDriver.html" title="Selenium WebDriver API" alt="Selenium WebDriver API">Selenium WebDriver API</a><br>
+<p>
+<a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php" title="SAFS Keyword Reference" alt="SAFS Keyword Reference">SAFS Keywords Reference</a><br>
+<a href="http://safsdev.sourceforge.net" title="SAFS SourceForge Home" alt="SAFS SourceForge Home">SAFS Homepage on SourceForge</a><br>
+<a href="http://safsdev.sourceforge.net/sqabasic2000/TestDesignGuidelines.htm" title="SAFS Test Design Guidelines" alt="SAFS Test Design Guidelines">SAFS Test Design Guidelines</a><br>
+<a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSImageBasedRecognition.htm" title="SAFS Image-Based Testing" alt="SAFS Image-Based Testing">SAFS Image-Based Testing</a><br>
+<hr>
+</div>
+<p>
+<!--------------------------------->
+<!-- Update SeleniumPlus         -->
+<!--------------------------------->
+<div id="updatesoftware" style="display: none;">
+<p>
+"Update" expects that "SeleniumPlus" has already successfully installed, so the system environment %<b>SELENUM_PLUS</b>% has been defined correctly.<br/>
+Update SelenumPlus jars and SeleniumPlus eclipse plugin to the latest level. During the update, %<b>SELENUM_PLUS</b>%/update_bak and %<b>SELENIUM_PLUS</b>%/eclipse/plugins/update_bak are created so user can revert the changes back.<br/>
+There are 3 ways:
+<ul>
+<li><a href="#updatesoftware_from_ide">Update From SeleniumPlus IDE</a>
+<li><a href="#updatesoftware_by_script">Update by script</a>
+<li><a href="#updatesoftware_manually">Manual SeleniumPlus update steps</a>
+</ul>
+<h2 id="updatesoftware_from_ide">Update From SeleniumPlus IDE</h2>
+<p><ol>
+	Before update, make sure correct Selenium+ preference are enable.
+	<li>From the Eclipse main menu.
+	<li>Select Windows->Preferences.
+	<li>Expand Selenium+ preference and click on Update Site.
+	<li>Make sure desired update types are enabled or disabled.<br>
+	For example: if user want both Library Updates and the PlugIn Update then enable both check boxes.<br>
+	<li>Adjust the timeout value(s) if your network (or the internet) seem to be slow.
+</ol>
+<p><img src="images/preferences.png"/>
+<ol>
+	<p>
+	<p>
+	For Update SeleniumPlus, following are the steps.
+	<li>From the Eclipse main menu.
+	<li>Select Selenium+->Update->Update SeleniumPlus.
+	<li>A window will popup, click Proceed with Download.
+	<li>Click on Procced with Update.
+	<li>When Update finish, Jars will be updated into build path.
+	<li>Close the Update Complete window.
+	</ol>
+<a href="#updatesoftware">[go back]</a>
+
+<p>
+<h2 id="updatesoftware_by_script">Update by script</h2>
+	The batch script "<b>updateRuntime.bat</b>" can be used to update SeleniumPlus/SAFS.<br/>
+	This script expects that "SeleniumPlus"/"SAFS" has already successfully installed, so the system environment SELENIUM_PLUS/SAFSDIR has been defined correctly.<br/>
+	<p>
+	This script should be in folder %SELENIUM_PLUS%\extra or %SAFSDIR%\extra.<br/>
+	<ol>
+	<li>If it exists and is latest<br/>
+	    The script usage is <span class="sourcecodes">updateRuntime.bat [ALL|SE|SAFS]</span>, with parameter "SE" it updates SeleniumPlus, with "SAFS" it updates SAFS, with "ALL" it updates both "SeleniumPlus" and "SAFS".<br/>
+	    So call <span class="commandline">updateRuntime.bat SE</span> to update SeleniumPlus.<br/>
+	<li>If it exists but is not latest<br/>
+	    No parameter is needed, call <span class="commandline">updateRuntime.bat</span> directly to get latest version of SeleniumPlus.
+	<li>If it does not exist<br/>
+	    Please get its <a href="https://github.com/SAFSDEV/Core/blob/master/src/org/safs/selenium/install/extra/updateRuntime.bat" target="blank">sourcecode</a> manually. The latest script should be dated 11/30/2016.<br/>
+	    Then call <span class="commandline">updateRuntime.bat SE</span>.
+	</ol>
+
+	<p>
+	In the script, we are using the internal update resource which is faster. If you prefer using external update resource, then comment "internal resource" and un-comment "external resource".
+	<div class="CodeBox">
+    <pre class="SourceCode">
+    <span class="comments">REM External update resource
+    REM SET SE_LIB_UPDATE=https://github.com/SAFSDEV/UpdateSite/releases/download/seleniumplus/SEPLUS.LIB.UPDATE.ZIP
+    REM SET SE_PLUGIN_UPDATE=https://github.com/SAFSDEV/UpdateSite/releases/download/seleniumplus/SEPLUS.PLUGIN.UPDATE.ZIP
+    REM SET SAFS_LIB_UPDATE=https://github.com/SAFSDEV/UpdateSite/releases/download/safs/SAFS.LIB.UPDATE.ZIP</span>
+
+    <span class="comments">REM Internal update resource</span>
+    SET SE_LIB_UPDATE=http://***REMOVED***:81/jenkins/job/SeleniumPlus/ws/updatesite/lib/latest/SEPLUS.LIB.UPDATE.ZIP
+    SET SE_PLUGIN_UPDATE=http://***REMOVED***:81/jenkins/job/SeleniumPlus/ws/updatesite/plugin/latest/SEPLUS.PLUGIN.UPDATE.ZIP
+    SET SAFS_LIB_UPDATE=http://***REMOVED***:81/jenkins/job/SAFS/ws/updatesite/lib/latest/SAFS.LIB.UPDATE.ZIP
+    </pre>
+    </div>
+<a href="#updatesoftware">[go back]</a>
+
+<p>
+If automated update fails then use manual steps to update SeleniumPlus environment.
+<h2 id="updatesoftware_manually">Manual SeleniumPlus update steps</h2>
+	<p>
+	SeleniumPlus library update:
+	<ol>
+	<li>Shutdown Selenium+->RemoteServer->Stop and close Eclipse IDE.
+	<li>Go to <a href="http://sourceforge.net/projects/safsdev/files/SeleniumPlusUpdates"
+	           alt="SeleniumPlus Update Download Site" title="SeleniumPlus Update Download Site">
+	           SeleniumPlusUpdates</a> website.
+	<li>Click on LibraryUpdates/latest and download SEPLUS.LIB.UPDATE.ZIP.
+	<li>Extract the SELPLUS.LIB.UPDATE.ZIP and copy dir/files to the c:\seleniumplus\lib dir.
+	<li>Example: copy extra/* to c:\seleniumplus\extra\ and lib/* to c:\seleniumplus\lib\.
+	    (Note: Please back-up dir/files before update).
+	<li>Click Selenium+->Update->Refresh Build Path.
+	</ol>
+	<p>
+	SeleniumPlus eclipse plugin update:
+	<ol>
+	<li>Shutdown Selenium+->RemoteServer->Stop and close Eclipse IDE.
+	<li>Go to <a href="http://sourceforge.net/projects/safsdev/files/SeleniumPlusUpdates"
+	           alt="SeleniumPlus Update Download Site" title="SeleniumPlus Update Download Site">
+	           SeleniumPlusUpdates</a> website.
+	<li>Click on PlugInUpdates/latest and download SEPLUS.LIB.UPDATE.ZIP.
+	<li>Extract the SELPLUS.LIB.UPDATE.ZIP and copy Seleniumplus.xxxx.jar to the c:\SeleniumPlus\eclipse\plugins\ dir.
+	<li>Example: copy extra/* to c:\seleniumplus\extra\ and lib/* to c:\seleniumplus\lib\.
+	    (Note: Please back-up dir/files before update).
+	<li>Click Selenium+->Update->Refresh Build Path.
+	</ol>
+<a href="#updatesoftware">[go back]</a>
+
+<hr>
+</div>
+
+<!--------------------------------->
+<!-- Project Assets info         -->
+<!--------------------------------->
+
+<div id="assets" style="display: none;">
+<h2>Project's Assets</h2>
+<p>
+<img src="images/project_assets.png">
+<hr>
+</div>
+
+<!--------------------------------->
+<!-- Enable SAFS info         -->
+<!--------------------------------->
+
+<div id="enable-safs" style="display: none;">
+<h2>Enable SAFS</h2>
+<small>Since Feb 03, 2015</small>
+<p>
+SeleniumPlus is packaged and delivered for a small-footprint, fast execution environment when compared to a full SAFS install. &nbsp;It has been optimized to provide targetted test automation support for HTML applications using Selenium WebDriver. &nbsp;The traditional capability to interface to other test automation tools capable of testing other technologies is intentionally removed from the SeleniumPlus install.
+<p>
+However, individual SeleniumPlus Projects can be configured to take advantage of SAFS and other testing tools if a full SAFS installation exists on the runtime machine. &nbsp;For example, if you have a hybrid application that needs both HTML <b>*and*</b> Flex support then you might wish to enable SAFS within the project used to test that application.
+<h3>
+So how do you enable this coolness?
+</h3>
+<ul>
+    <li>SAFS must be properly installed and configured on the machine.
+    <p><li>The SeleniumPlus Project <b>Build Path</b> must be modified:
+    <p><ol>
+        <li><b>REMOVE</b>: Library reference for <b>JSTAFEmbedded.jar</b>
+        <li><b>ADD</b>: Library reference for <b>JSTAF.jar</b><br>
+            <small>( Typically found at C:\STAF\bin\JSTAF.JAR, or wherever STAF was installed. )</small>
+    </ol>
+    <p><li>The SeleniumPlus Project <b>TEST.INI</b> must be modified as shown below.<br>
+           You must add the [&lt;section&gt;] and/or Item if it does not already exist,
+           or overwrite the existing item if it does already exist.
+    <p><ol>
+        <li>The NOSTAF option must be set to FALSE:
+        <p><b>
+        <ul>[STAF]<br>
+            NOSTAF=FALSE
+        </ul></b>
+        <p><li>The DriverRoot must be changed to use SAFS:
+        <p><b>
+        <ul>[SAFS_DRIVER]<br>
+            DriverRoot="%SAFSDIR%"
+        </ul></b>
+        <p>Note how the setting uses the <B>SAFSDIR</b> Environment variable that MUST exist at runtime.
+    </ol>
+</ul>
+The above changes by themselves will simply change the SeleniumPlus Project from running as a single "embedded" test automation process into a multi-process SAFS execution environment coordinating test automation across many different tools.
+<p>
+Your test execution won't look any different, and you should get the exact same results.<br> By reviewing the running processes in Task Manager you would find 2 additional processes at runtime:
+<p>
+<ul><li><b>java</b> -- with a command-line "<b>STAFJVM1</b>" housing SAFS services:
+       <p><ul>SAFSLOGS<br>SAFSMAPS<br>SAFSVARS<br></ul>
+    <p><li><b>STAFProc</b> -- The inter-process communication layer to those services.
+</ul>
+<p>
+Other tools, scripting languages, Command(CMD) prompts, and COM-enabled applications or languages can now:
+<p><ul>
+    <li>Log to the same test log (SAFSLOGS) and any Debug Log at runtime.
+    <li>Monitor the Application Map (AppMap) data at runtime using SAFSMAPS.
+    <li>Monitor and modify the SAFS/SeleniumPlus Variables at runtime using SAFSVARS.
+    <li>Pause/Step/Resume/Stop the running test using SAFSVARS.
+    <li>Add automation support beyond Selenium WebDriver HTML support.<br>
+        (Example: Native windows, Java, Flex or hybrid HTML/Flex apps.)
+</ul>
+<h3>Adding another SAFS Engine into the mix:</h3>
+<p>
+With SAFS enabled, you can now add automation support provided by other SAFS engines like:
+<p>
+<ul><li>IBM Rational <b>Functional Tester</b>: Java, .NET, WPF, Native Win, and some HTML support.
+    <li>SmartBear <b>TestComplete</b>: Flex, .NET, WPF, Native Win, and some HTML support.
+</ul>
+<p>
+At this time, the most recommended alternative SAFS Engine would be the SmartBear TestComplete engine. &nbsp;It has received the most development support in recent years along with the SAFS/Selenium Engine.
+<p>
+In order to use an alternative SAFS Engine, the underlying tool--like SmartBear's TestComplete--must be properly installed on the runtime system. &nbsp;Consult the SAFS Install/Release Notes for information concerning configuring the particular tool for SAFS integration.
+<p>
+Then, we simply enable the use of the engine in the <b>TEST.INI</b> configuration file.  The SAFS/SeleniumPlus execution runtime will automatically handle the launching and shutdown of the tool during testing.
+<p>
+Below is an example of enabling the SmartBear TestComplete engine in the Project's <b>TEST.INI</b> configuration file:
+<p>
+<ul>
+    <li>Specify which engine(s) you want to enable:
+    <p><b>
+    <ul>[SAFS_ENGINES]<br>
+        First=org.safs.tools.engines.SAFSTC
+    </ul>
+    </b><p>
+    <li>Specify the specific engine's configuration information:
+    <p><b>
+    <ul>[SAFS_TC]<br>
+        AUTOLAUNCH=TRUE<br>
+        HOOK="%SAFSDIR%\TCAFS\TCAFS.vbs"<br>
+        ConvertSAFSInputKeysSyntax=TRUE<br>
+        ConvertSAFSItemPathSyntax=TRUE<br>
+    </ul>
+    </b>
+</ul><p>
+And that's it. &nbsp;The next time a test is run the newly configured Engine will be part of the available toolset. &nbsp;If the tool launches any startup window or Monitor of its own  you will likely see it during the course of test execution.
+<p>
+Note that different tools will likely require different component recognition string syntax in the App Map.  So, for example, an HTML XPATH recognition string that works for Selenium WebDriver will not work for SmartBear TestComplete. &nbsp;You will need to consult the information available for the chosen Engine to know how to acquire and specify App Map entries for that specific Engine.
+<hr>
+</div>
+
+<!--------------------------------->
+<!-- Remote Servers info         -->
+<!--------------------------------->
+
+<div id="remote-servers" style="display: none;">
+<h2>Remote Servers</h2>
+<h3>About Selenium Server (standalone or hub+nodes)</h3>
+The selenium server can be launched as a standalone-server or as a grid (hub and nodes).
+The servers could run locally or remotely. In the document we talk about launching them remotely.
+<ol>
+<li>standalone-server: the test actions will actually happen in the browser opened on the standalone-server.
+<li>grid-server: there is one hub connecting to multiple nodes, and the test actions will actually happen in the browser opened on nodes.
+</ol>
+
+<h3>Why we need test runs remotely</h3>
+There may be times when you want or need your tests to run on your local machine,
+but use the browsers and Selenium Server or Grid running on a remote machine.
+Examples of these scenarios include:
+<ul>
+<li>Testing browsers running on a Mac.
+<li>Testing browsers running on Linux.
+<li>Testing browsers running on iOS or Android devices.
+<li>Testing different browser versions hosted on different machines.
+</ul>
+
+<h3>Prerequisites:</h3>
+<h4>1. Get SeleniumPlus stuff ready on every machine</h4>
+If the machine is Windows, we could simply <a href="https://github.com/SAFSDEV/SeleniumPlus-Plugin/releases" target="_blank">install SeleniumPlus</a>.<br>
+If the machine is NOT a Windows machine with a installed SeleniumPlus:
+<ul>
+<li>All SeleniumPlus\libs assets (JARs and ZIPs, etc.) must be copied and available on the remote machine.
+<li>All Selenium Server OS-specific assets like specific browsers and browser drivers must be available on the remote machine.
+<li><a href="#launch_selenium_server">The Selenium Server should be launched</a>.<br>
+</ul>
+
+<h4 id="configure_staf">2. Install and configure STAF (Optional step, but recommended)</h4>
+<ol>
+<li>Firstly, download <a href="http://staf.sourceforge.net" title="IBM's OpenSource STAF Homepage" target="_blank">STAF</a> and install it on every machine (testing machine, server machine etc.)</li>
+<li>Then, Modify the <a href="http://staf.sourceforge.net/current/STAFUG.htm#HDRCONFIG" target="_blank">STAF config file</a> on server machine (standalone or hub+nodes) to let them <a href="http://staf.sourceforge.net/current/STAFUG.htm#HDRTRUSTCFG" target="_blank">trust your testing machine.</a><br>
+    For example, we have a testing machine named "<b>testing.machine</b>", remote server named "<b>remote.server</b>", and STAF has been installed on both machine at C:\STAF;<br>
+    We need to modify the STAF config file <b>C:\STAF\bin\STAF.cfg</b> of machine "<b>remote.server</b>" by add a line "<b>trust machine testing.machine level 5</b>"<br>
+</li>
+</ol>
+
+<h4>3. Configuration of Selenium Server</h4>
+The test's INI file should specify the remote Selenium Server to connect to.<br>
+Briefly, it requires a hostname and a port number for the remote machine. If the port is not provided, we will assume the default Selenium Server port of 4444.<br>
+For detail configurations, please refer to section  <a href="../../sqabasic2000/JSAFSFrameworkContent.htm#configfile" target="_blank">[SAFS_SELENIUM] of Configuration File Options</a>
+<p>
+Here are the critical settings in a test.ini:
+<ul><div class="appmap"><pre>
+<span class="comments"># Settings for a remote Selenium Server
+# SELENIUMHOST and SELENIUMPORT are used to connect Selenium Server (standalone or hub)</span>
+SELENIUMHOST=remote.server.name
+SELENIUMPORT=4444 (setting not required if default)
+<span class="comments"># SELENIUMNODE defines the selenium nodes to run.
+# If SELENIUMNODE is given, SELENIUMHOST will start as a selenium hub; otherwise as a stand-alone server.</span>
+SELENIUMNODE=node1:port:config1;node2:port:config2
+</pre></div>
+</ul>
+
+Here are some examples:
+<ul><div class="appmap"><pre>
+<span class="comments"># Selenium standalone server should run on local machine at default port 4444
+# [SAFS_SELENIUM]
+# If nothing is specified.</span>
+
+<span class="comments"># Selenium standalone server should run on local machine at port 6666
+[SAFS_SELENIUM]
+SeleniumPort=6666</span>
+
+<span class="comments"># Selenium standalone server should run on machine D99999.yourCompany.com at port 4444
+# test actions will actually happen in the browser opened on machine D99999.yourCompany.com</span>
+[SAFS_SELENIUM]
+SeleniumHost=D99999.yourCompany.com
+SeleniumPort=4444
+
+<span class="comments"># Selenium hub should run on machine selenium.hub.machine at port 5555
+# Selenium node should run on machine node.yourCompany.com at port 6666 and connecting to hub server
+# test actions will actually happen in the browser opened on machine node.yourCompany.com</span>
+[SAFS_SELENIUM]
+SeleniumHost=selenium.hub.machine
+SeleniumPort=5555
+SELENIUMNODE=node.yourCompany.com:6666
+
+<span class="comments"># Selenium hub should run on local machine at port 5555
+# Selenium node should run on machine node.yourCompany.com at port 6666 and connecting to hub server
+# test actions will actually happen in the browser opened on machine node.yourCompany.com</span>
+[SAFS_SELENIUM]
+SeleniumPort=5555
+SELENIUMNODE=node.yourCompany.com:6666
+</pre></div>
+</ul>
+
+<h4 id="configure_browser_driver">4. Configuration of browser drivers</h4>
+Selenium WebDriver needs specific browser-driver to communicate with a certain browser. When starting selenium server, <br>
+the browser drivers should also be specified so that the selenium WebDriver knows where to find them and <br>
+use them to talk to the browsers.<br>
+By default, the IE and Chrome driver will start with the selenium server; If user would like to use other browsers, he may<br>
+need to configure the browser driver in the .ini file or with VM parameter. As usual, the VM parameter has higher priority;<br>
+if browser drivers are set in both ways, VM parameter will be taken into account.<br>
+<b>NOTE:</b><span class="note">Some browser driver, such as firefox, is integrated into Selenium and does not need to be configured.</span><br>
+Examples as below:<br>
+
+<ul>
+<li>Configure in .ini file:
+<div class="appmap"><pre>
+[SAFS_SELENIUM]
+<span class="comments"># <a href="../../doc/org/safs/Constants.SeleniumConstants.html#ITEM_WEB_DRIVERS" target="api">WEB_DRIVERS</a> is used to set the specific browser
+# drivers (separated by colon :) to start with selenium server.
+# The following setting means 3 drivers, IE, chrome and edge will
+# start with the selenium server.</span>
+WEB_DRIVERS=explorer:chrome:MicrosoftEdge
+</pre></div>
+<p>
+
+<li>Configured by VM parameter:
+<pre><span class="comments">VM parameter '<a href="../../doc/org/safs/Constants.SeleniumConstants.html#PROPERTY_WEB_DRIVERS" target="api">safs.selenium.web.drivers</a>' is used to
+set the specific browser drivers (separated by colon :) to start with selenium server.
+The following setting means 2 drivers, IE and edge will start with the selenium server,
+and in the class SampleTest, the user can test with the chrome or edge browser.</span>
+java <b>-Dsafs.selenium.web.drivers=chrome:MicrosoftEdge</b> SampleTest
+</pre>
+</ul>
+
+<h4 id="launch_selenium_server">5. Launch Selenium Server</h4>
+The Selenium Server must be running during the SE+ Test.
+<ul>
+<li>Launch automatically by SE+.
+    If we <a href="#configure_staf">install and configure STAF</a>, SE+ <B>CAN start automatically servers remotely</B>.
+<li><a href="#manually_launch_server">Launch manually.</a>
+</ul>
+
+<h3>Start SeleniumPlus Test</h3>
+Now, we are happy to start SeleniumPlus Test as usual on the local machine, and the test actions will actually happen in the browser opened on
+selenium server (standalone or nodes).
+
+<h3 id="manually_launch_server">Reference</h3>
+
+<h4 id="manually_launch_server">Launch Selenium Server manually</h4>
+There are 3 ways listed as below:<br>
+<span class="comments">Suppose that <b>SELENIUM_PLUS</b> is the environment variable representing the location where SeleniumPlus has been installed</span>
+<ol>
+<li>The simplest way is to use <a href="../../doc/org/safs/selenium/webdriver/lib/RemoteDriverLauncher.html" target="_blank" title="RemoteDriverLauncher JavaDoc">RemoteDriverLauncher</a>.
+	Examples are listed below:
+	<ul>
+	<li>Start a selenium <b>standalone</b> server (<b>with</b> SeleniumPlus-<b>RMI</b>-Server).<br>
+	We could run the following command: <span class="comments">start a standalone server with RMI on port 4567 with minimum memory 512M and maximum memory 4g.</span><br>
+	<span class="commandline">"%SELENIUM_PLUS%\Java64\jre\bin\java.exe" org.safs.selenium.webdriver.lib.RemoteDriverLauncher -safs.rmi.server "-port 4567" "SELENIUMSERVER_JVM_OPTIONS=-Xms512m -Xmx4g"</span>
+	<li>Start a selenium <b>grid</b>.
+	    <ol>
+			<li style="list-style-type:lower-alpha">Start a selenium <b>hub</b><br>
+			Suppose the hub machine's name is <b>selenium.hub.machine</b>, on which we run the following command:
+			<span class="comments">start a hub server on default port 4444 with minimum memory 512M and maximum memory 2g.</span><br>
+			<span class="commandline">"%SELENIUM_PLUS%\Java64\jre\bin\java.exe" org.safs.selenium.webdriver.lib.RemoteDriverLauncher "-role hub" "SELENIUMSERVER_JVM_OPTIONS=-Xms512m -Xmx2g"</span>
+			<li style="list-style-type:lower-alpha">Start a selenium <b>node</b> (<b>with</b> SeleniumPlus-<b>RMI</b>-Server) connecting the hub (the same way, we can launch multiple nodes on different machine)<br>
+			On node machine, we could run the following command: <span class="comments">start a node server with RMI on port 5678 with minimum memory 256M and maximum memory 4g, and this node will register on hub running on port 4444 at machine <b>selenium.hub.machine</b></span><br>
+			<span class="commandline">"%SELENIUM_PLUS%\Java64\jre\bin\java.exe" org.safs.selenium.webdriver.lib.RemoteDriverLauncher -safs.rmi.server "-role node -hub http://<span style="color:yellow;">selenium.hub.machine</span>:4444/grid/register" "-port 5678"  "SELENIUMSERVER_JVM_OPTIONS=-Xms256m -Xmx4g"</span>
+	    </ol>
+	</ul>
+<p>
+<li>SeleniumPlus provides a Windows BATCH file for launching just such a remote Selenium Server on Windows.<br>
+	The batch file named "<b>RemoteServerWithRMI.bat</b>" should be in the <b>%SELENIUM_PLUS%\extra</b> directory.
+	It can serve as an example of the command-line syntax needed to launch a SeleniumPlus compatible remote Selenium Server.
+	The comments in that batch file should tell us how to launch different servers (standalone, hub, node).
+<p>
+<li id="using_seleniumserverrunner">The most powerful and complicated way is to call <a href="../../doc/org/safs/selenium/util/SeleniumServerRunner.html" target="_blank" title="Selenium Server Runner JavaDoc" alt="Selenium Server Runner JavaDoc">Selenium-Server-Runner</a>.<br>
+    In fact the first 2 ways, they both finally call Selenium-Server-Runner.
+	Whether launched on a command-line, or preparing an OS-specific batch file or script, a Windows sample command-line invocation of the augmented Selenium Server is shown below:
+	<span class="comments">
+	This command-line will launch the Selenium Server Runner (standalone) which will inject an RMI Server into the running JVM.
+    The Selenium Server Runner will also launch the Selenium Server found in the Selenium Server JAR file specified with the -jar command-line argument.
+	</span>
+	<div class="commandline"><pre>
+SET CLASSPATH=
+     &lt;pathTo>\seleniumplus.jar;
+     &lt;pathTo>\JSTAFEmbedded.jar;
+     &lt;pathTo>\selenium-server-standalone-&lt;version>.jar
+
+SET JAVA_EXE=&lt;pathTo>\java.exe  (JRE Java 7 minimum)
+
+%JAVA_EXE%
+     -Xms512m -Xmx1g
+     <span style="color:yellow;">-Djava.rmi.server.hostname=machine.intranet.com</span>
+     -Dwebdriver.chrome.driver=&lt;pathTo>\chromedriver.exe
+     -Dwebdriver.ie.driver=&lt;pathTo>\IEDriverServer.exe
+     -cp %CLASSPATH%
+
+     org.safs.selenium.util.SeleniumServerRunner
+
+     -jar &lt;pathTo>\selenium-server-standalone-&lt;version>.jar
+     -timeout=20
+     -browserTimeout=60
+     <span style="color:yellow;">-safs.rmi.server</span>
+</pre>
+	</div>
+	There are 2 special command-line parameters to enable the SeleniumPlus RMI Server:
+    <ol>
+        <li><b>-Djava.rmi.server.hostname=&lt;machine.intranet.com></b> or
+                           <b>&lt;123.456.789.10></b> ip address
+        <li><b>-safs.rmi.server</b>
+    </ol>
+</ol>
+
+<h4 id="details_seplus_rmi">About SeleninumPlus-RMI-Server.</h4>
+It is important to note that SeleniumPlus provides some advanced features beyond the scope of Selenium itself.
+For example, Selenium has particular difficulties consistently performing keyboard and mouse actions across all the different supported browsers and versions of browsers.
+For this reason, SeleniumPlus augments keyboard and mouse actions with additional support not found in Selenium.
+<p>
+In order for a remote Selenium Server to provide equivalent augmented support provided by SeleniumPlus,
+the remote Selenium Server must be launched in a manner that allows us to inject that support into the remote Java JVM running the Selenium Server.
+Consult <a href="#using_seleniumserverrunner" alt="Using Selenium Server Runner">Using Selenium Server Runner</a> to know how.
+
+<h4 id="details_seplus_rmi">Snapshots about launched Selenium Servers.</h4>
+<span class="comments">Selenium standalone Server with injected RMI server into the Selenium Server JVM.<br>
+The first 3 lines of the output tell us that RMI-server has been injected into the Selenium Server JVM;<br>
+while the 4th line tells us that a standalone selenium server is being started.</span><br>
+<img src="images/SeleniumServerRunner.png" alt="Selenium Standalone Server Runner Screenshot"/><br>
+<p>
+<span class="comments">Selenium hub Server.<br>
+The first line tells us that a selenium hub server is being started.</span><br>
+<img src="images/SeleniumServerRunner_Hub.png" alt="Selenium Hub Server Runner Screenshot"/>
+<p>
+<span class="comments">Selenium node Server with injected RMI server into the Selenium Server JVM.<br>
+The first 3 lines of the output tell us that RMI-server has been injected into the Selenium Server JVM;<br>
+while the 4th line tells us that a selenium node server is being started;<br>
+and the last 2th line tells us that the node has registered on hub server.</span><br>
+<img src="images/SeleniumServerRunner_Node.png" alt="Selenium Node Server Runner Screenshot"/><br>
+<hr>
+</div>
+
+<!--------------------------------->
+<!-- Browser Driers info         -->
+<!--------------------------------->
+<div id="browser-drivers" style="display: none;">
+<h2>Browser Drivers</h2>
+<h3>About Browser Drivers</h3>
+    Selenium needs a driver to communicate with a specific browser. On Windows for example,
+    <ul>
+    <li>chromedriver.exe is needed to run test on Chrome;
+    <li>IEDriverServer.exe is needed for IE;
+    <li>MicrosoftWebDriver.exe is needed for Edge
+    <li>etc.
+    </ul>
+    These drivers are provided by third party (NOT by selenium).
+    Only one exception, prior to "Selenium 3.0", the firefox driver is integrated in the selenium.
+    But after "Selenium 3.0", the firefox driver has been moved out of selenium, and it is independent as gecko-driver.
+
+<h3>Currently supported browsers</h3>
+    <ul>
+    <li>IE <b>11</b> or earlier
+    <li>Firefox <b>45.0</b> or earlier
+    <li>Chrome <b>v55-57</b>
+    <li>Edge <b>14.14393</b> or earlier
+    </ul>
+<h3>Update browser drivers</h3>
+    We have posted a thread talking about
+    <a href="http://safsdev.freeforums.net/thread/42/get-appropriate-drivers-specific-browser" target="_blank">get appropriate drivers for a specific browser</a><br/>
+    After getting the driver,
+    <ol>
+    <li>We can put it into the folder %SELENIUM_PLUS%/extra
+    <li>User may also need to update the <a href="http://selenium-release.storage.googleapis.com/index.html" target="_blank">selenium-server-standalone-xxx.jar</a> and
+    put it to %SELENIUM_PLUS%/libs
+    </ol>
+<h3>Configure browser drivers</h3>
+    Only <b>chrome</b>, <b>IE</b> and <b>firefox</b> are by default configured to start with "selenium server", and
+    the test can run on them.<br/>
+    User needs to <a href="http://safsdev.freeforums.net/thread/40/configure-browser-drivers-seleniumplus" target="_blank">configure drivers</a>
+    if he wants to run test against another browser.
+
+</div>
+
+<!--------------------------------->
+<!--    Calling Javascript       -->
+<!--------------------------------->
+<div id="calling-javascript" style="display: none" >
+<h2>Calling Javascript</h2>
+<p>
+During the test, sometimes users need to manipulate the object within the browser directly, which can be
+achieved by Javascript. This section explains how to execute Javascript through SeleniumPlus.<br/>
+<ul>
+<li><a href="#calling_javascript_apis">SE+ provides APIs</a>
+<li><a href="#before_calling_javascript">Before calling Javascript</a>
+<li><a href="#calling_javascript_examples">Examples</a>
+</ul>
+
+<h3 id="calling_javascript_apis">SE+ provides APIs:</h3>
+<ol>
+  <li>To execute a Javascript in the context of the currently selected frame or window:
+	<ul>
+	<li><a href="../../doc/org/safs/selenium/webdriver/SeleniumPlus.html#executeScript(java.lang.String,%20java.lang.Object...)" target="_blank">SeleniumPlus.executeScript()</a>
+	<li><a href="../../doc/org/safs/selenium/webdriver/SeleniumPlus.html#executeAsyncScript(java.lang.String,%20java.lang.Object...)" target="_target">SeleniumPlus.executeAsyncScript()</a>
+	</ul>
+  </li>
+  <li>To execute a Javascript on a certain <a href="../../doc/org/safs/model/Component.html">Component</a> (WebElement) in the context of the currently selected frame or window:
+	<ul>
+	<li><a href="../../doc/org/safs/selenium/webdriver/SeleniumPlus.html#ExecuteScript(org.safs.model.Component,%20java.lang.String,%20java.lang.String...)" target="_blank">SeleniumPlus.ExecuteScript()</a>
+	</ul>
+  </li>
+</ol>
+<a href="#calling-javascript">[go back]</a>
+
+
+<h3 id="before_calling_javascript">Before calling Javascript:</h3>
+<p>
+There are something we should understand. Such as the parameters of these APIs and how these Java-parameters are passed to Javascript as parameters, it is important!
+We don't need to understand all of them  :) , the items below are listed by necessity priority:
+<ol>
+  <li><b>"Javascript snippet"</b>:  It is passed in as first parameter for <span class="sourcecodes">executeScript()</span> and <span class="sourcecodes">executeAsyncScript()</span>;
+                                    While it is passed in as second parameter for <span class="sourcecodes">ExecuteScript()</span>.
+  <li><b>"Javascript parameters"</b>: They are defined by keyword arguments, so arguments[0], arguments[1] ... can be used in the Javascript snippet.
+                                      They are passed in as second, third ... parameters of <span class="sourcecodes">executeScript()</span> and <span class="sourcecodes">executeAsyncScript()</span>;
+                                      While for <span class="sourcecodes">ExecuteScript()</span>, the first parameter Component is arguments[0], and the third parameter is arguments[1], fourth parameter is arguments[2] etc.
+  <li><b>"callback method"</b>:     It is ONLY for <b>asynchronous</b> invocation <span class="sourcecodes">executeAsyncScript()</span>, this callback is always injected automatically as the last argument,
+                                    so it is always <b>arguments[arguments.length - 1]</b>. The Javascript snippet must explicitly signal it is finished by invoking this callback.
+                                    The first argument passed to the callback function will be used as the script's result.
+                                    <a href="https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/JavascriptExecutor.html#executeAsyncScript-java.lang.String-java.lang.Object...-" target="_blank">The conversion from Javascript object to Java object definition</a>.
+  <li><b>"script timeout"</b>:  It is ONLY for <b>asynchronous</b> invocation <span class="sourcecodes">executeAsyncScript()</span>, the default timeout for a script to be executed is 0ms.
+                                In most cases one must set the script timeout beforehand to a value sufficiently large enough by calling
+                                <a href="../../doc/org/safs/selenium/webdriver/SeleniumPlus.WDTimeOut.html#setScriptTimeout(long,%20java.util.concurrent.TimeUnit)" target="_blank">setScriptTimeout(long,TimeUnit)</a>.
+  <li><b>"debug() method"</b>:  For <b>synchronous</b> invocation <span class="sourcecodes">executeScript()</span> and <span class="sourcecodes">ExecuteScript()</span>,
+                                user can call debug(debug-message) in the Javascript snippet to write debug message into SE+ debug log.
+                                By default, this functionality is off, user can turn it on by setting <span class="sourcecodes">JavaScriptFunctions.jsDebugLogEnable=true</span>.
+                                Normally the debug message will be written to a file, we can also send debug message to browser's console by setting <span class="sourcecodes">JavaScriptFunctions.logToBrowserConsole=true</span>.
+  <li><b>"throw_error() method"</b>:    For <b>synchronous</b> invocation <span class="sourcecodes">executeScript()</span> and <span class="sourcecodes">ExecuteScript()</span>,
+                                        user can call throw_error(error-message) in the Javascript snippet so that a JSException will be thrown out in Java code. Below is how it is normally used in Javascript snippet.
+<div class="CodeBox">
+<pre class="SourceCode">
+ try{
+   <span class="comments">//do some javascript actions</span>
+ }catch(err){
+   throw_error(err);
+ }
+</pre>
+</div>
+
+  <li><b>"event listener"</b>:  Here we are NOT talking about the "event listener" inside Javascript, BUT about the Java listener reacting to the Javascript event.
+                                We can call
+                                <a href="../../doc/org/safs/selenium/webdriver/lib/SearchObject.html#addJavaScriptEventListener(org.openqa.selenium.WebElement,%20java.lang.String,%20org.safs.selenium.webdriver.lib.SearchObject.GenericJSEventListener)" target="_blank">addJavaScriptEventListener(WebElement, eventName, listener)</a>/
+                                <a href="../../doc/org/safs/selenium/webdriver/lib/SearchObject.html#removeJavaScriptEventListener(org.openqa.selenium.WebElement,%20java.lang.String,%20java.lang.String)" target="_blank">removeJavaScriptEventListener(WebElement, eventName, listenerID)</a>
+                                to add/remove listener. Below is an example how to add a <a href="../../doc/org/safs/selenium/webdriver/lib/SearchObject.DefaultJSEventListener.html" target="_blank">DefaultJSEventListener</a> for "mousedown" event on a WebElement.
+                                This DefaultJSEventListener is not public class, it is a protected inner class inside <a href="https://github.com/SAFSDEV/Core/blob/master/src/org/safs/selenium/webdriver/lib/SearchObject.java" target="_blank">SearchObject</a>,
+                                click this link and search "DefaultJSEventListener" to get the source code, you can imitate it to write your own listener.
+<div class="CodeBox">
+<pre class="SourceCode">
+ WebElement webelement = null;<span class="comments">//User must assign it with a valid value.</span>
+ String event = "mousedown";
+ int timeout = 1000;<span class="comments">//milliseconds</span>
+ DefaultJSEventListener listener = new DefaultJSEventListener(event);
+ <span class="comments">//add listener for event</span>
+ String listenerID = WDLibrary.addJavaScriptEventListener(webelement, event, listener);
+ <span class="comments">//do some mousedown related work, for example 'click'</span>
+ webelement.click();
+ <span class="comments">//wait for event happen</span>
+ if(listener.waitEventFired(timeout)){ <span class="comments">//ok, event has been fired.</span>}
+ <span class="comments">//remove the listener</span>
+ WDLibrary.removeJavaScriptEventListener(webelement, event, listenerID);
+</pre>
+</div>
+</ol>
+<a href="#calling-javascript">[go back]</a>
+
+<h3 id="calling_javascript_examples">Examples:</h3>
+<p>
+There are something we should understand. Such as the parameters of these APIs and how these Java-parameters are passed to Javascript as parameters, it is important!
+We don't need to understand all of them  :) , the items below are listed by necessity priority:
+<ol>
+<li>SeleniumPlus.executeScript()
+<div class="CodeBox">
+<pre class="SourceCode">
+ <span class="comments">//set "your text" to innerHTML of Component Map.Google.SignIn</span>
+ WebElement we = SeleniumPlus.getObject(Map.Google.SignIn);
+ String script = "arguments[0].innerHTML=arguments[1];";
+ List&lt;Object> params = new ArrayList&lt;Object>();
+ params.add(we);<span class="comments">//arguments[0]</span>
+ params.add("your text");<span class="comments">//arguments[1]</span>
+ SeleniumPlus.executeScript(script, params.toArray(new Object[0]));
+</pre>
+</div>
+<br/>
+<div class="CodeBox">
+<pre class="SourceCode">
+ <span class="comments">//get innerHTML of component Map.Google.SignIn</span>
+ script = "return arguments[0].innerHTML;";
+ params.clear();
+ params.add(we);<span class="comments">//arguments[0]</span>
+ Object result = SeleniumPlus.executeScript(script, params.toArray(new Object[0]));
+</pre>
+</div>
+</li>
+<br/>
+<li>SeleniumPlus.executeAsyncScript()
+<div class="CodeBox">
+<pre class="SourceCode">
+ <span class="comments">//Example #1: Performing a sleep in the browser under test.</span>
+ long start = System.currentTimeMillis();
+ String script = "var callback = arguments[arguments.length - 1];"+
+                 "window.setTimeout(callback, 500);";
+ SeleniumPlus.executeAsyncScript(script);
+ System.out.println("Elapsed time: " + System.currentTimeMillis() - start);
+</pre>
+</div>
+<br/>
+<div class="CodeBox">
+<pre class="SourceCode">
+ <span class="comments">//Example #2, call REST service to get a result.</span>
+ try{
+  WDTimeOut.setScriptTimeout(1, TimeUnit.SECONDS);
+  JavaScriptFunctions.DEBUG_OUTPUT_JAVASCRIPT_FUNCTIONS = true;
+  JavaScriptFunctions.setJsDebugLogEnable(true);
+
+  String script   = "try{ "
+              + "  var callback = arguments[arguments.length - 1];"
+              + "  debug('try to get registration service.');"
+              + "  var service = registry.getRegistrationService();"
+              + "  if(service==undefined){"
+              + "    debug('Failed to get service');"
+              + "  }else{"
+              + "    debug('we got registration service.'); "
+              + "  }"
+              + "  service.get({'user-id': 'administrator'}).done(callback).fail(callback);"
+              + "}catch(error){"
+              + "  debug('we met exception');"
+              + "  throw_error(error);"
+              + "}";
+
+  Object results = SeleniumPlus.executeAsyncScript(script);
+  System.out.println(results);
+ }catch(Exception e){
+  System.out.println(e.getMessage());
+ }finally{
+  WDTimeOut.resetScriptTimeout(0, TimeUnit.MILLISECONDS);
+ }
+</pre>
+</div>
+<br/>
+<div class="CodeBox">
+<pre class="SourceCode">
+ <span class="comments">//Example #3: Injecting a XMLHttpRequest and waiting for the result:</span>
+ String script =  "var callback = arguments[arguments.length - 1];" +
+                  "var xhr = new XMLHttpRequest();" +
+                  "xhr.open('GET', '/resource/data.json', true);" +
+                  "xhr.onreadystatechange = function() {" +
+                  "  if (xhr.readyState == 4) {" +
+                  "    callback(xhr.responseText);" +
+                  "  }" +
+                  "};" +
+                  "xhr.send();";
+ <span class="comments">//Wait result for at the most 5 seconds</span>
+ WDTimeOut.setScriptTimeout(5, TimeUnit.SECONDS);
+ Object result = SeleniumPlus.executeAsyncScript(script);
+ JsonObject json = new JsonParser().parse((String) result);
+</pre>
+</div>
+<br/>
+<div class="CodeBox">
+<pre class="SourceCode">
+ <span class="comments">//Example #4: Synchronizing a test with an AJAX application:</span>
+ Click(Map.Mail.ComposeButton);
+ String script = "var callback = arguments[arguments.length - 1];" +
+                 "mailClient.getComposeWindowWidget().onload(callback);";
+ Object result = SeleniumPlus.executeAsyncScript(script);
+ Component.InputCharacters(Map.Mail.To, "bog@example.com");
+</pre>
+</div>
+</li>
+<br/>
+<li>SeleniumPlus.ExecuteScript()
+<div class="CodeBox">
+<pre class="SourceCode">
+ SeleniumPlus.ExecuteScript(
+     Map.Google.SignIn,                       <span class="comments">// The WebElement passed as 'arguments[0]' to the script.</span>
+     "arguments[0].innerHTML=arguments[1];",  <span class="comments">// Script to set the WebElements innerHTML value.</span>
+     "my text value");                        <span class="comments">// The value passed as 'arguments[1]' to set to innerHTML.</span>
+</pre>
+</div>
+<br/>
+<div class="CodeBox">
+<pre class="SourceCode">
+ SeleniumPlus.ExecuteScript(
+     Map.Google.SignIn,                       <span class="comments">// The WebElement passed as 'arguments[0]' to the script.</span>
+     "return arguments[0].innerHTML;");       <span class="comments">// A script to return the WebElemenbts innerHTML.</span>
+ <span class="comments">//scriptResult should get the innerHTML value returned.</span>
+ String scriptResult = SeleniumPlus.prevResults.getStatusInfo();
+</pre>
+</div>
+</li>
+</ol>
+<a href="#calling-javascript">[go back]</a>
+
+</div>
+
+
+<!--------------------------------->
+<!--    Using SeleniumScripts    -->
+<!--------------------------------->
+<div id="using-seleniumscripts" style="display: none" >
+<h2>Using SeleniumScripts</h2>
+<p>
+There are some tools can record "selenium test" and store it into a file.<br/>
+<a href="http://seleniumbuilder.github.io/se-builder/">Selenium Builder</a> will store it in JSON format.<br/>
+<a href="http://www.seleniumhq.org/selenium-ide.jsp">Selenium IDE</a> can store it in HTML format.<br/>
+This kind of file contains the "selenium test" and we call these files as "<b>Selenium Scripts</b>".<br/>
+This section explains how to execute "<b>Selenium Scripts</b>" through SeleniumPlus API <a href="http://safsdev.github.io/doc/org/safs/SAFSPlus.DriverCommand.html#CallScript(java.lang.String)">CallScript</a>.<br/>
+<ul>
+<li><a href="#sebuilder_json_script">SeBuilder JSON script</a>
+<li><a href="#selrunner_html_script">SelRunner HTML script</a>
+</ul>
+
+<h3 id="sebuilder_json_script">SeBuilder JSON script:</h3>
+<ol>
+  <li>The script is stored in <a href="https://github.com/SeleniumBuilder/se-builder/wiki/JSON-Format">Sebuilder JSON</a> file.</li>
+  <li>Run this JSON file by SeleniumPlus API <a href="http://safsdev.github.io/doc/org/safs/SAFSPlus.DriverCommand.html#CallScript(java.lang.String)">CallScript</a></li>
+</ol>
+<a href="#using-seleniumscripts">[go back]</a>
+
+
+<h3 id="selrunner_html_script">SelRunner HTML script:</h3>
+<p>
+The HTML script is stored as a Table.<br/> 
+the tag <b>&lt;tbody></b> means the begin of the test.
+the tag <b>&lt;/tbody></b> means the end of the test.<br/>
+the tag <b>&lt;tr></b> means the begin of one step.
+the tag <b>&lt;/tr></b> means the end of one step.<br/>
+each test step can contain multiple <b>&lt;td></b><b>&lt;/td></b>, they are used to hole the comand and parameters.<br/>
+
+Below is an example snippet, which is part of the real 
+<a href="https://raw.githubusercontent.com/SAFSDEV/SeleniumPlus-REGRESSION/master/SeBuilder/Scripts/FormsSRTest.htm">sebuild script</a> in 
+<a href="https://github.com/SAFSDEV/SeleniumPlus-REGRESSION">regression test</a>. 
+<pre>
+  &lt;tbody>
+    &lt;tr>
+        &lt;td>open&lt;/td>
+        &lt;td>${baseurl}&lt;/td>
+        &lt;td>${FormsBrowser}&lt;/td>
+    &lt;/tr>
+    &lt;tr>
+        &lt;td>pause&lt;/td>
+        &lt;td>2000&lt;/td>
+        &lt;td> &lt;/td>
+    &lt;/tr>
+    &lt;tr>
+        &lt;td>captureEntirePageScreenshot&lt;/td>
+        &lt;td>Actuals/FormsSRTest/formsSRTest-1.png&lt;/td>
+        &lt;td>&lt;/td>
+    &lt;/tr>
+    &lt;tr>
+        &lt;td>click&lt;/td>
+        &lt;td>${Map:FormsMain:CheckBox2}&lt;/td>
+        &lt;td>&lt;/td>
+    &lt;/tr>
+    &lt;tr>
+        &lt;td>close&lt;/td>
+        &lt;td>${FormsBrowser}&lt;/td>
+        &lt;td> &lt;/td>
+    &lt;/tr>
+  &lt;/tbody>
+</pre>
+
+<a href="#using-seleniumscripts">[go back]</a>
+
+</div>
+
+<!--------------------------------->
+<!--    Setting HTTP Proxy       -->
+<!--------------------------------->
+<div id="http-proxy" style="display: none" >
+<h2>HTTP Proxy</h2>
+<p>
+In some testing environment, Internet access is not direct, but through a Proxy server.
+This section is talking about HTTP proxy settings in SeleniumPlus.<br/>
+There are 2 ways:
+<ul>
+<li><a href="#http_proxy_global_setting">Global setting</a>
+<li><a href="#http_proxy_set_by_api_param">By API parameters</a>
+</ul>
+If user sets the "HTTP proxy" in both ways, "API parameters" will override those in "Global setting".
+
+<h3 id="http_proxy_global_setting">Global setting:</h3>
+The HTTP proxy can be set globally in the INI configuration file.
+<pre class="appmap">
+[SAFS_SELENIUM]
+<span class="comments">;define the HTTP PROXY host name to connect Internet</span>
+<a href="../../doc/org/safs/tools/drivers/DriverConstant.html#GATEWAYHOST" target="_blank">GATEWAYHOST</a>=yourGateway.net
+<span class="comments">;define the HTTP PROXY port number to connect Internet</span>
+<a href="../../doc/org/safs/tools/drivers/DriverConstant.html#GATEWAYPORT" target="_blank">GATEWAYPORT</a>=80
+<span class="comments">;define the HTTP PROXY "bypass address" when connecting INTRANET</span>
+<a href="../../doc/org/safs/tools/drivers/DriverConstant.html#PROXY_BYPASS_ADDRESS" target="_blank">PROXY_BYPASS_ADDRESS</a>=localhost,127.0.0.1,host.not.thru.gateway
+</pre>
+<a href="#http-proxy">[go back]</a>
+
+<h3 id="http_proxy_set_by_api_param">By API parameters:</h3>
+<p>
+The HTTP proxy can also be set by the optional parameters of <a href="../../doc/org/safs/selenium/webdriver/SeleniumPlus.html#StartWebBrowser(java.lang.String,%20java.lang.String,%20java.lang.String...)" target="_blank">StartWebBrowser</a> API.
+The optional parameters are given as pair (key, value). The keys related to "HTTP proxy" are:
+<ol>
+  <li><a href="../../doc/org/safs/selenium/webdriver/lib/SelectBrowser.html#KEY_PROXY_SETTING" target="_blank">KEY_PROXY_SETTING</a>: the key for proxy string; The value is colon separated string as "proxyserver:port"
+  <li><a href="../../doc/org/safs/selenium/webdriver/lib/SelectBrowser.html#KEY_PROXY_BYPASS_ADDRESS" target="_blank">KEY_PROXY_BYPASS_ADDRESS</a>: the key for proxy bypass address string; The value is comma separated string as "localhost,tadsrv,rnd.yourCompany.com"
+</ol>
+
+Examples:
+<div class="CodeBox">
+<pre class="SourceCode">
+<span class="comments">//Start the firefox web browser with proxy server as "proxy.server" and proxy server port as "8080"</span>
+StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
+                                                        SelectBrowser.BROWSER_NAME_FIREFOX,
+                                                        "10",
+                                                        "true",
+                                                        <b>quote(SelectBrowser.KEY_PROXY_SETTING)</b>,
+                                                        <b>quote("proxy.server:8080")</b>
+                                                        });
+
+<span class="comments">//Start the firefox web browser with proxy server as "proxy.server" and proxy server port as "8080"</span>
+<span class="comments">//local.site1, local.site2 will not be routed through "proxy.server"</span>
+StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
+                                                        SelectBrowser.BROWSER_NAME_FIREFOX,
+                                                        "10",
+                                                        "true",
+                                                        <b>quote(SelectBrowser.KEY_PROXY_SETTING)</b>,
+                                                        <b>quote("proxy.server:8080")</b>,
+                                                        <b>quote(SelectBrowser.KEY_PROXY_BYPASS_ADDRESS)</b>,
+                                                        <b>quote("local.site1, local.site2")</b>
+                                                        });
+
+</pre>
+</div>
+<a href="#http-proxy">[go back]</a>
+
+</div>
+
+</body>
+</html>

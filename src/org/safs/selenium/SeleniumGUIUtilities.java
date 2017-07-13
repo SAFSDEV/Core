@@ -912,7 +912,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 	 *         For example:<br>
 	 *         1. The childXpath does NOT contain FRAME<br>
 	 *            Input frame:
-	 *            src="http://***REMOVED***/safs/"<br>
+	 *            src="http://tadsrv/safs/"<br>
 	 *            locator=""<br>
 	 *            fullXpath=""<br>
 	 *            recognitionString=""<br>
@@ -921,7 +921,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 	 *            
 	 *         2. The childXpath DOES contain some FRAMEs<br>
 	 *            Input frame:
-	 *            src="http://***REMOVED***/safs/"<br>
+	 *            src="http://tadsrv/safs/"<br>
 	 *            locator=""<br>
 	 *            fullXpath=""<br>
 	 *            recognitionString=""<br>
@@ -930,7 +930,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 	 *            We assume that the src of HTML/FRAMESET/FRAME[1] is 'framePage.htm'<br>
 	 *            We assume that the name of HTML/FRAMESET/FRAME[1] is 'frame1'<br>
 	 *            Output frame will be:
-	 *            src="http://***REMOVED***/safs/framePage.htm"<br>
+	 *            src="http://tadsrv/safs/framePage.htm"<br>
 	 *            locator="name=frame1"<br>
 	 *            fullXpath="HTML/FRAMESET/FRAME[1]"<br>
 	 *            recognitionString="Type=HTMLFrame;Index=1;\\;"<br>
