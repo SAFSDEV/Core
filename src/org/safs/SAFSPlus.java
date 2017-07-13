@@ -3391,7 +3391,7 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String directory = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory";
+		 * String directory = "C:\\Users\\someone\\TestDriverCommand\\New Directory";
 		 * String file = directory+File.separator+"new test file3.txt";
 		 * String dest = directory+File.separator+"copy of file3.txt";
 		 * Files.CopyFile(file, dest);
@@ -3416,8 +3416,8 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String directory = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory";
-		 * String toDirectory = "C:\\Users\\Lei Wang\\TestDriverCommand\\Copy Directory";
+		 * String directory = "C:\\Users\\someone\\TestDriverCommand\\New Directory";
+		 * String toDirectory = "C:\\Users\\someone\\TestDriverCommand\\Copy Directory";
 		 * Files.CopyMatchingFiles(directory, toDirectory, "[a-z ]*f.*", PatternFilterMode.REGEXP);
 		 * Files.CopyMatchingFiles(directory, toDirectory, "UTF*.*", PatternFilterMode.WILDCARD);
 		 * }
@@ -3438,7 +3438,7 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String directory = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory";
+		 * String directory = "C:\\Users\\someone\\TestDriverCommand\\New Directory";
 		 * if(Files.CreateDirectory(directory))
 		 *   System.out.println(directory+" is created.");
 		 * }
@@ -3473,7 +3473,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String result = "result";
-		 * String directory = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory";
+		 * String directory = "C:\\Users\\someone\\TestDriverCommand\\New Directory";
 		 * String file = directory+File.separator+"new test file3.txt";
 		 * if(Files.CreateFile(file, Mode.OUTPUT, Access.W, result)){
 		 *   System.out.println(file+" is created and opened with file number '"+GetVariableValue(result)+"'");
@@ -3497,7 +3497,7 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String directory = "C:\\Users\\Lei Wang\\TestDriverCommand\\Empty Folder";
+		 * String directory = "C:\\Users\\someone\\TestDriverCommand\\Empty Folder";
 		 * if(Files.CreateDirectory(directory)){
 		 *   if(Files.DeleteDirectory(directory)){
 		 *     System.out.println("directory '"+directory+"' has been deleted.");
@@ -3522,7 +3522,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String result = "result";
-		 * String directory = "C:\\Users\\Lei Wang\\TestDriverCommand\\To Delete Folder";
+		 * String directory = "C:\\Users\\someone\\TestDriverCommand\\To Delete Folder";
 		 * if(Files.CreateDirectory(directory)){
 		 *   String newFile = directory+File.separator+"\\test.file";
 		 *   Files.CreateFile(newFile, Mode.OUTPUT, Access.W, result);
@@ -3559,7 +3559,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String result = "result";
-		 * String directory = "C:\\Users\\Lei Wang\\TestDriverCommand\\To Delete Folder";
+		 * String directory = "C:\\Users\\someone\\TestDriverCommand\\To Delete Folder";
 		 * if(Files.CreateDirectory(directory)){
 		 *   String newFile = directory+File.separator+"\\test.file";
 		 *   Files.CreateFile(newFile, Mode.OUTPUT, Access.W, result);
@@ -3587,7 +3587,7 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String file = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\newFile.txt";
+		 * String file = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\newFile.txt";
 		 * if(Files.DeleteFile(file, true))
 		 *   System.out.println("file '"+file+"' has been deleted.");
 		 * }
@@ -3615,8 +3615,8 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String image = "C:\\Users\\Lei Wang\\TestDriverCommand\\keyword.png";
-		 * String subImage = "C:\\Users\\Lei Wang\\TestDriverCommand\\subimage.png";
+		 * String image = "C:\\Users\\someone\\TestDriverCommand\\keyword.png";
+		 * String subImage = "C:\\Users\\someone\\TestDriverCommand\\subimage.png";
 		 * List<SubArea> subareas = new ArrayList<SubArea>();
 		 * subareas.add(new SubArea(0,0,"20%","30%"));
 		 * subareas.add(new SubArea("50%", "50%", "60%", "70%"));
@@ -3654,11 +3654,11 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String image = "C:\\Users\\Lei Wang\\TestDriverCommand\\keyword.png";
-		 * String subImage = "C:\\Users\\Lei Wang\\TestDriverCommand\\subimage.png";
+		 * String image = "C:\\Users\\someone\\TestDriverCommand\\keyword.png";
+		 * String subImage = "C:\\Users\\someone\\TestDriverCommand\\subimage.png";
 		 * String coords = "0,0,70%,50%";//DO NOT put any space between coordinate
 		 * Files.FilterImage(image, subImage, coords);//filter 1 area
-		 * subImage = "C:\\Users\\Lei Wang\\TestDriverCommand\\subimage2.png";
+		 * subImage = "C:\\Users\\someone\\TestDriverCommand\\subimage2.png";
 		 * coords = "0,0,70%,50% 80%;80%;100%;100%";
 		 * Files.FilterImage(image, subImage, coords);//filter 2 areas
 		 * }
@@ -3706,7 +3706,7 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String file = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\newFile.txt";
+		 * String file = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\newFile.txt";
 		 * String regexPattern = "saturday|sat|sunday|sun";
 		 * String replace = "weekend";
 		 * Files.FilterTextFile(file, regexPattern, replace);
@@ -3735,7 +3735,7 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String file = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\newFile.txt";
+		 * String file = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\newFile.txt";
 		 * String regexPattern = "saturday|sat|sunday|sun";
 		 * String replace = "weekend";
 		 * Files.FilterTextFile(file, regexPattern, replace, false);
@@ -3789,7 +3789,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String result = "result";
-		 * String file = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\new test file3.txt";
+		 * String file = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\new test file3.txt";
 		 * if(Files.GetFileDateTime(file, result))
 		 *   System.out.println("file '"+file+"', LastModified time is "+GetVariableValue(result));
 		 * }
@@ -3815,7 +3815,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String result = "result";
-		 * String file = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\new test file3.txt";
+		 * String file = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\new test file3.txt";
 		 * if(Files.GetFileDateTime(file, result, true, DateType.LASTACCESSED))
 		 *   System.out.println("file '"+file+"', LastAccessed military time is "+GetVariableValue(result));
 		 * if(Files.GetFileDateTime(file, result, true, DateType.CREATED))
@@ -3842,7 +3842,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String result = "result";
-		 * file = "C:\\Users\\Lei Wang\\ntuser.pol";
+		 * file = "C:\\Users\\someone\\ntuser.pol";
 		 * Files.GetFileProtections(file, result);
 		 * int attributes = Integer.parseInt(GetVariableValue(result));
 		 * FileAttribute attribute = FileAttribute.instance(attributes);
@@ -3867,8 +3867,8 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String directory = "C:\\Users\\Lei Wang\\TestDriverCommand\\";
-		 * String directoryToCheck = "C:\\Users\\Lei Wang";
+		 * String directory = "C:\\Users\\someone\\TestDriverCommand\\";
+		 * String directoryToCheck = "C:\\Users\\someone";
 		 * Files.GetFiles(directoryToCheck, directory+"normalList2.txt");
 		 * Files.GetFiles(directoryToCheck, directory+"normalList.txt", FileAttribute.instance());
 		 * Files.GetFiles(directoryToCheck, directory+"archiveList.txt", new FileAttribute(Type.ARCHIVEFILE));
@@ -3894,8 +3894,8 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String directory = "C:\\Users\\Lei Wang\\TestDriverCommand\\";
-		 * String directoryToCheck = "C:\\Users\\Lei Wang";
+		 * String directory = "C:\\Users\\someone\\TestDriverCommand\\";
+		 * String directoryToCheck = "C:\\Users\\someone";
 		 * Files.GetFiles(directoryToCheck, directory+"normalList2.txt");
 		 * }
 		 * </pre>
@@ -3918,7 +3918,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String result = "result";
-		 * file = "C:\\Users\\Lei Wang\\ntuser.pol";
+		 * file = "C:\\Users\\someone\\ntuser.pol";
 		 * if(Files.GetFileSize(file, result))
 		 *   System.out.println("file '"+file+"', size is "+GetVariableValue(result));
 		 * }
@@ -4021,7 +4021,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * //List all methods name appeared in the file
-		 * String file = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\newFile.txt";
+		 * String file = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\newFile.txt";
 		 * String regexStart = "\\.";
 		 * String regexStop = "\\(";
 		 * String result = "Method";
@@ -4057,7 +4057,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String result = "result";
-		 * String image = "C:\\Users\\Lei Wang\\TestDriverCommand\\keyword.png";
+		 * String image = "C:\\Users\\someone\\TestDriverCommand\\keyword.png";
 		 * if(Files.GetTextFromImage(image, result, OCREngine.OCR_T_ENGINE_KEY, Locale.ENGLISH.getLanguage(), "3.0"))
 		 *   pass("image text (translated by TOCR) is '"+GetVariableValue(result)+"'");
 		 * if(Files.GetTextFromImage(image, result, OCREngine.OCR_G_ENGINE_KEY, Locale.ENGLISH.getLanguage(), "2.0"))
@@ -4084,8 +4084,8 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String toDirectory = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory";
-		 * String newdir = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\NewDirectory";
+		 * String toDirectory = "C:\\Users\\someone\\TestDriverCommand\\New Directory";
+		 * String newdir = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\NewDirectory";
 		 * String fileDriverCommand = "CreateDirectory";
 		 * if(Files.IfExistDir(directory, fileDriverCommand, newdir))
 		 *   pass("directory '"+directory+"' DOES exist, and '"+fileDriverCommand+"' has executed.");
@@ -4111,8 +4111,8 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String file = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\new test file3.txt";
-		 * String destination = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\second copy of file3.txt";
+		 * String file = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\new test file3.txt";
+		 * String destination = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\second copy of file3.txt";
 		 * String fileDriverCommand = "CopyFile";
 		 * if(Files.IfExistFile(file, fileDriverCommand, file, destination))
 		 *   pass("file '"+file+"' DOES exist and it has been copied to '"+destination+"'");
@@ -4136,7 +4136,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String result = "result";
-		 * String file = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\new test file3.txt";
+		 * String file = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\new test file3.txt";
 		 * String fileNo = null;
 		 * if(Files.OpenFile(file, Mode.INPUT, Access.R, result)){
 		 *   fileNo = GetVariableValue(result);
@@ -4182,7 +4182,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String result = "result";
-		 * String file = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\new test file3.txt";
+		 * String file = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\new test file3.txt";
 		 * if(Files.OpenFile(file, Mode.INPUT, Access.R, result))
 		 *   System.out.println(file+" has been opened with file number '"+GetVariableValue(result)+"' for input.");
 		 * }
@@ -4217,7 +4217,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String result = "result";
-		 * String file = C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\UTF8 FILE.txt";
+		 * String file = C:\\Users\\someone\\TestDriverCommand\\New Directory\\UTF8 FILE.txt";
 		 * if(Files.OpenUTF8File(file, Mode.OUTPUT, Access.W, result))
 		 *   System.out.println(file+" is opened with file number '"+GetVariableValue(result)+"' for output UTF8 strings.");
 		 * }
@@ -4241,7 +4241,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String result = "result";
-		 * String file = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\newFile.txt";
+		 * String file = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\newFile.txt";
 		 * String fileNo = null;//hold the file number for an opened file.
 		 * String content = "Print Output Placement Parameter determines where the next output to the same file should begin.";
 		 * String separator = "=================================================";
@@ -4283,7 +4283,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String result = "result";
-		 * String file = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\newFile.txt";
+		 * String file = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\newFile.txt";
 		 * String fileNo = null;//hold the file number for an opened file.
 		 * String content = "Print Output Placement Parameter determines where the next output to the same file should begin.";
 		 * String separator = "=================================================";
@@ -4338,7 +4338,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String result = "result";
-		 * String file = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\newFile.txt";
+		 * String file = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\newFile.txt";
 		 * String fileNo = null;//hold the file number for an opened file.
 		 * String content = null;
 		 * if(Files.OpenFile(file, Mode.INPUT, Access.R, result)){
@@ -4391,8 +4391,8 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String file = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\newFile.txt";
-		 * String newfile = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\renamed newFile.txt";
+		 * String file = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\newFile.txt";
+		 * String newfile = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\renamed newFile.txt";
 		 * Files.RenameFile(file, newfile, true);
 		 * }
 		 * </pre>
@@ -4424,10 +4424,10 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String image = "C:\\Users\\Lei Wang\\TestDriverCommand\\keyword.png";
-		 * String textFile = "C:\\Users\\Lei Wang\\TestDriverCommand\\image_T.txt";
+		 * String image = "C:\\Users\\someone\\TestDriverCommand\\keyword.png";
+		 * String textFile = "C:\\Users\\someone\\TestDriverCommand\\image_T.txt";
 		 * Files.SaveTextFromImage(image, textFile, OCREngine.OCR_T_ENGINE_KEY, Locale.ENGLISH.getLanguage(), "2.0");
-		 * textFile = "C:\\Users\\Lei Wang\\TestDriverCommand\\image_G.txt";
+		 * textFile = "C:\\Users\\someone\\TestDriverCommand\\image_G.txt";
 		 * Files.SaveTextFromImage(image, textFile, OCREngine.OCR_G_ENGINE_KEY, Locale.ENGLISH.getLanguage(), "2.5");
 		 * }
 		 * </pre>
@@ -4449,7 +4449,7 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String file = "C:\\Users\\Lei Wang\\New Text Document.txt";
+		 * String file = "C:\\Users\\someone\\New Text Document.txt";
 		 * FileAttribute attribute = FileAttribute.instance(FileAttribute.Type.SYSTEMFILE);
 		 * attribute.add(FileAttribute.Type.READONLYFILE);
 		 * attribute.add(FileAttribute.Type.ARCHIVEFILE);
@@ -4475,7 +4475,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String result = "result";
-		 * String file = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\newFile.txt";
+		 * String file = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\newFile.txt";
 		 * String fileNo = null;//hold the file number for an opened file.
 		 * String content = "Print Output Placement Parameter determines where the next output to the same file should begin.";
 		 * int charsToWrite = 10;
