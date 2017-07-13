@@ -78,7 +78,7 @@ class Response {
      */
     @Delegate CommandResults commandResults
 
-// TODO Bruce Faulkner 09 December 2016: Consider making httpHeaders a delegate to
+// TODO Bruce.Faulkner 09 December 2016: Consider making httpHeaders a delegate to
 // avoid having test authors have to call the get/set methods through it.
 // Make sure this is CAREFUL CONSIDERATION as given that HttpHeaders is a Map,
 // the convenience by making the instance a delegate MIGHT be far outweighed

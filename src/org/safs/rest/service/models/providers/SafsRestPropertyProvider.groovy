@@ -88,14 +88,14 @@ class SafsRestPropertyProvider {
     String rootUrl = DEFAULT_ROOT_URL
 
 
-// TODO Bruce Faulkner 08 February 2017: Might be moved to RestConsumer later
+// TODO Bruce.Faulkner 08 February 2017: Might be moved to RestConsumer later
     String protocol = HTTP_PROTOCOL
 
     String userName = DEFAULT_USER_NAME
     String trustedUser = DEFAULT_USER_NAME
     String tokenProviderServiceName
     String tokenProviderAuthTokenResource
-// TODO Bruce Faulkner Sep 24, 2015: Consider changing showStandardStreams to verbose?
+// TODO Bruce.Faulkner Sep 24, 2015: Consider changing showStandardStreams to verbose?
     boolean showStandardStreams
     boolean useLiveCurl = true
     String authToken
@@ -173,7 +173,7 @@ class SafsRestPropertyProvider {
     }
 
 
-// TODO Bruce Faulkner 07 February 2017: These need to be moved out of SAFSREST before
+// TODO Bruce.Faulkner 07 February 2017: These need to be moved out of SAFSREST before
 // releasing as open source.
     private void loadCasServerProperties() {
         casServerHost = customProperties."${SAFSREST_CAS_SERVER_HOST_KEY}"
