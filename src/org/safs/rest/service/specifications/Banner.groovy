@@ -23,12 +23,12 @@ class Banner {
     // Header generated from:
     //      http://patorjk.com/software/taag/#p=display&h=0&v=0&f=Big&t=SAFSREST
     public static final HEADER = $/\
-        ***REMOVED***
-        ***REMOVED***
-        ***REMOVED***
-        ***REMOVED***
-        ***REMOVED***
-        ***REMOVED***   /$.stripMargin('#')
+        #   _____              ______    _____   _____    ______    _____   _______
+        #  / ____|     /\     |  ____|  / ____| |  __ \  |  ____|  / ____| |__   __|
+        # | (___      /  \    | |__    | (___   | |__) | | |__    | (___      | |
+        #  \___ \    / /\ \   |  __|    \___ \  |  _  /  |  __|    \___ \     | |
+        #  ____) |  / ____ \  | |       ____) | | | \ \  | |____   ____) |    | |
+        # |_____/  /_/    \_\ |_|      |_____/  |_|  \_\ |______| |_____/     |_|      /$.stripMargin('#')
 
 
     public static final LONGEST_HEADER_LINE = HEADER.readLines().max { line ->
