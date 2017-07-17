@@ -146,7 +146,7 @@ IF DEFINED PUSH_TO_GIT (
     REM The OS should be configured correctly so that files can be pushed to remote automatically
     ECHO === Pushing files to github ...
     git config --global user.name "safsdev"
-    git config --global user.email safsdev@yourCompany.com
+    git config --global user.email safsdev@sas.com
     git commit -m "Updated by script automatically."
     REM The git repository remote url should be set the ssh url format
     REM git remote set-url origin git@github.com:SAFSDEV/safsdev.github.io.git

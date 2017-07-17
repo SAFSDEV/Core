@@ -19,12 +19,12 @@ REM SET SAFS_LIB_UPDATE=%GITHUB_UPDATE%/safs/SAFS.LIB.UPDATE.ZIP
 REM SET SE_SOURCE_UPDATE=%GITHUB_UPDATE%/safs/source_all.zip
 
 REM Internal update resource
-SET INTERNAL_SE_UPDATE=http://***REMOVED***:81/jenkins/job/SeleniumPlus/ws/updatesite
+SET INTERNAL_SE_UPDATE=http://safsbuild:81/jenkins/job/SeleniumPlus/ws/updatesite
 SET SE_LIB_UPDATE=%INTERNAL_SE_UPDATE%/lib/latest/SEPLUS.LIB.UPDATE.ZIP
 SET SE_PLUGIN_UPDATE=%INTERNAL_SE_UPDATE%/plugin/latest/SEPLUS.PLUGIN.UPDATE.ZIP
 SET SE_SOURCE_UPDATE=%INTERNAL_SE_UPDATE%/source/latest/source_all.zip
 
-SET INTERNAL_SAFS_UPDATE=http://***REMOVED***:81/jenkins/job/SAFS/ws/updatesite
+SET INTERNAL_SAFS_UPDATE=http://safsbuild:81/jenkins/job/SAFS/ws/updatesite
 SET SAFS_LIB_UPDATE=%INTERNAL_SAFS_UPDATE%/lib/latest/SAFS.LIB.UPDATE.ZIP
 SET SAFS_SOURCE_UPDATE=%INTERNAL_SAFS_UPDATE%/source/latest/source_all.zip
 

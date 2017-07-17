@@ -26,7 +26,7 @@ Selenium 2.52 is currently delivered with SeleniumPlus.
 5. Check the setup.log:
 
        After installation, there will be a setup.log under the folder <SeleniumPlus>\install\, if you met some
-       problem during the installation, you can send this file to "RDT SAFS-Support <safsdev@yourCompany.com>" for help.
+       problem during the installation, you can send this file to "RDT SAFS-Support <safsdev@sas.com>" for help.
        
 -------------------------------------------------------------------------------------------------------------
 **** IT IS RECOMMENDED TO LOGOFF AND THEN LOGON YOUR WINDOW'S USER ACCOUNT FOR ALL UPDATES TO COMPLETE.  ****

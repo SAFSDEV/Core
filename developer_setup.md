@@ -45,4 +45,4 @@ If the Internet connection is slow, the script running may stuck in DOS console,
 ### Help Me
 If you still have any problems or questions, please consult our forum at [SAFS Forum](http://safsdev.freeforums.net/). If you cannot find answers on this forum, you can post your questions there.
 
-You can write us an email at safsdev@yourCompany.com if you don't get support on [SAFS Forum](http://safsdev.freeforums.net/).
+You can write us an email at safsdev@sas.com if you don't get support on [SAFS Forum](http://safsdev.freeforums.net/).

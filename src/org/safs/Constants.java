@@ -81,7 +81,7 @@ public abstract class Constants {
 		 * The value is colon separated string as "proxyserver:port" */
 		public static final String KEY_PROXY_SETTING = "KEY_PROXY_SETTING";
 		/** '<b>KEY_PROXY_BYPASS_ADDRESS</b>' the key for proxy bypass address string;
-		 * The value is comma separated string as "localhost, ***REMOVED***" */
+		 * The value is comma separated string as "localhost, internal.server" */
 		public static final String KEY_PROXY_BYPASS_ADDRESS = "KEY_PROXY_BYPASS_ADDRESS";
 		/** '<b>FirefoxProfile</b>' the key for firefox profile name/filename string;
 		 * The value is something like "myprofile" or "&lt;AbsolutePath>/ppc2784x.default" */
