@@ -674,7 +674,7 @@ public class TIDComponent extends GenericEngine {
 	            this.issueParameterCountFailure("VarName");
 	            return;
 	        }
-            String varname = ( String ) iterator.next( );
+            String varname = iterator.next( );
             try{ if(varname.indexOf("^")==0) varname = varname.substring(1); }
             catch(Exception x){ varname = null; }
             if((varname==null)||(varname.length()==0)){
@@ -848,7 +848,7 @@ public class TIDComponent extends GenericEngine {
             // requires AppMapSubKey or literal text
             if (params.size() > 0){
             	try{
-            		mapitem = (String)iterator.next();
+            		mapitem = iterator.next();
             		if((mapitem==null)||(mapitem.length()==0)){
                 		Log.debug("TIDComponent "+ action +" will not use invalid AppMapSubKey param: "+ mapitem);
             			mapitem = null;
@@ -864,7 +864,7 @@ public class TIDComponent extends GenericEngine {
         	if(isMultiClick){
         		if(params.size() > 1){
                 	try{
-                		strcount = (String)iterator.next();
+                		strcount = iterator.next();
                 		if((strcount==null)||(strcount.length()==0)){
                     		Log.debug("TIDComponent "+ action +" will not use invalid 'ClickCount' param: "+ strcount);
                 			strcount = null;
@@ -1018,7 +1018,7 @@ public class TIDComponent extends GenericEngine {
             // possibly optional AppMapSubKey or literal text
             if (params.size() > 0){
             	try{
-            		mapitem = (String)iterator.next();
+            		mapitem = iterator.next();
             		if((mapitem==null)||(mapitem.length()==0)){
                 		Log.debug("TIDComponent "+ action +" will not use invalid AppMapSubKey param: "+ mapitem);
             			mapitem = null;
@@ -1049,7 +1049,7 @@ public class TIDComponent extends GenericEngine {
             // optional delay in milliseconds for hover
             if (action.equalsIgnoreCase(TIDComponent.COMMAND_HOVERSCREENLOCATION) && params.size() > 1){
             	try{
-            		delayitem = (String)iterator.next();
+            		delayitem = iterator.next();
             		if((delayitem==null)||(delayitem.length()==0)){
                 		Log.debug("TIDComponent "+ action +" will not use invalid HoverTime param: "+ delayitem);
             			delayitem = null;
@@ -1124,7 +1124,7 @@ public class TIDComponent extends GenericEngine {
             // optional AppMapSubKey or literal text
             if (params.size() > 0){
             	try{
-            		mapitem = (String)iterator.next();
+            		mapitem = iterator.next();
             		if((mapitem==null)||(mapitem.length()==0)){
                 		Log.debug("TIDComponent.hoverScreenImage will not use invalid AppMapSubKey param: "+ mapitem);
             			mapitem = null;
@@ -1155,7 +1155,7 @@ public class TIDComponent extends GenericEngine {
             // optional delay in milliseconds
             if (params.size() > 1){
             	try{
-            		delayitem = (String)iterator.next();
+            		delayitem = iterator.next();
             		if((delayitem==null)||(delayitem.length()==0)){
                 		Log.debug("TIDComponent.hoverScreenImage will not use invalid HoverTime param: "+ delayitem);
             			delayitem = null;
@@ -1269,7 +1269,7 @@ public class TIDComponent extends GenericEngine {
             	return;
             }else{
             	try{
-            		mapitem = (String)iterator.next();
+            		mapitem = iterator.next();
             		if((mapitem==null)||(mapitem.length()==0)){
                     	this.issueParameterCountFailure("AppMapSubKey");
                     	return;
@@ -1393,7 +1393,7 @@ public class TIDComponent extends GenericEngine {
 	            this.issueParameterCountFailure("ScreenPoint");
 	            return;
 	        }
-            String text = ( String ) iterator.next( );
+            String text = iterator.next( );
 			if((text==null)||(text.length()==0)){
 	            this.issueParameterValueFailure("ScreenPoint");
 	            return;
@@ -1468,7 +1468,7 @@ public class TIDComponent extends GenericEngine {
 	            this.issueParameterCountFailure("Insufficient parameters provided.");
 	            return;
 	        }
-            String text = ( String ) iterator.next( );
+            String text = iterator.next( );
 			if((text==null)||(text.length()==0)){
 	            this.issueParameterValueFailure("TextValue");
 	            return;
@@ -1512,12 +1512,12 @@ public class TIDComponent extends GenericEngine {
 	            this.issueParameterCountFailure("Insufficient parameters provided.");
 	            return;
 	        }
-            String dataPath = ( String ) iterator.next( );
+            String dataPath = iterator.next( );
 			if((dataPath==null)||(dataPath.length()==0)){
 	            this.issueParameterValueFailure("EncryptedDataPath");
 	            return;
 			}
-			String privatekeyPath = ( String ) iterator.next( );
+			String privatekeyPath = iterator.next( );
 			if((privatekeyPath==null)||(privatekeyPath.length()==0)){
 				this.issueParameterValueFailure("PrivateKeyPath");
 				return;
@@ -1572,8 +1572,8 @@ public class TIDComponent extends GenericEngine {
 				paramsFailedMsg( windowName, compName );
 			} else {
 				String altText = "";
-				String value = ( String ) iterator.next( );
-				String compare =  ( String ) iterator.next( );
+				String value = iterator.next( );
+				String compare =  iterator.next( );
 				boolean ignorecase = (action.equalsIgnoreCase(COMMAND_VERIFYVALUESIGNORECASE) ||
 						             (action.equalsIgnoreCase(COMMAND_VERIFYVALUECONTAINSIGNORECASE)));
 				boolean suppress = iterator.hasNext() ? iterator.next().equalsIgnoreCase(PARAM_SUPPRESSVALUE) : false;
@@ -1714,10 +1714,10 @@ public class TIDComponent extends GenericEngine {
 	        if ( params.size( ) < 2 ) {
 	            paramsFailedMsg( windowName, compName );
 	        } else {
-	            String benchfilename = ( String ) iterator.next( );
+	            String benchfilename = iterator.next( );
 	            benchfilename = deduceBenchFile(benchfilename).getAbsolutePath();
 
-	            String testfilename = ( String ) iterator.next( );
+	            String testfilename = iterator.next( );
 	            testfilename = deduceTestFile(testfilename).getAbsolutePath();
 
 	            String filterMode = iterator.hasNext()? (String) iterator.next(): null;
@@ -1842,25 +1842,25 @@ public class TIDComponent extends GenericEngine {
 
 		    //get the params
 		    //1st parameter is a variable name if keyword is GetTextFromImage, or a file name if keyword is SaveTextFromImage
-		    String outputVar  = (String) iterator.next();		    // 1st param, a variable name
+		    String outputVar  = iterator.next();		    // 1st param, a variable name
 		    String subareaKey = "";                        	     	// 2nd optional param, setting default.A subkey in appmap
 		    String ocrId      = OCREngine.OCR_DEFAULT_ENGINE_KEY;	 // 3th optional param, setting default
 		    String langId     = OCREngine.getOCRLanguageCode(staf);  // 4th optional param, setting the language defined in STAF as default
 		    float  scaleRatio  = -1; 							    // 5th optional param, setting default
 
 		    if (iterator.hasNext())
-		    	subareaKey = (String) iterator.next();
+		    	subareaKey = iterator.next();
 		    if (iterator.hasNext()) {
-		    	ocrId = (String) iterator.next();
+		    	ocrId = iterator.next();
 		      	if(ocrId.equals("")) ocrId = OCREngine.OCR_DEFAULT_ENGINE_KEY;
 		    }
 		    if (iterator.hasNext()) {
-		    	langId = (String) iterator.next();
+		    	langId = iterator.next();
 		      	if(langId.equals("")) langId = OCREngine.getOCRLanguageCode(staf);
 		    }
 		    if (iterator.hasNext())
 		    	try {
-		    		scaleRatio = (float)Double.parseDouble((String) iterator.next());
+		    		scaleRatio = (float)Double.parseDouble(iterator.next());
 		      	} catch(NumberFormatException nfe){}
 
 		    // search Component GUI
