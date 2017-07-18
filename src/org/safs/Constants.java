@@ -303,10 +303,12 @@ public abstract class Constants {
 		 * The file can be relative to the project root directory; or it can be an absolute path.<br>
 		 * Examples:<br>
 		 * [SAFS_REST]<br>
-		 * AUTH=<b>config\auth2.xml</b> The file &lt;projectRoot>\config\auth2.xml will be used as authorization/authentication information.<br>
+		 * #The file &lt;projectRoot>\config\auth2.xml will be used as authorization/authentication information.<br>
+		 * AUTH=<b>config\auth2.xml</b>
 		 * <br/>
 		 * [SAFS_REST]<br>
-		 * AUTH=<b>C:\Users\xxx\simpleAuth.xml</b> The file C:\Users\xxx\simpleAuth.xml will be used as authorization/authentication information.<br>
+		 * #The file C:\Users\xxx\simpleAuth.xml will be used as authorization/authentication information.<br>
+		 * AUTH=<b>C:\Users\xxx\simpleAuth.xml</b>
 		 *
 		 * */
 		public static final String ITEM_AUTH ="AUTH";
@@ -317,6 +319,21 @@ public abstract class Constants {
 		 * -Dsafs.rest.auth=<b>C:\Users\xxx\simpleAuth.xml</b> The file C:\Users\xxx\simpleAuth.xml will be used as authorization/authentication information.<br>
 		 * **/
 		public static final String PROPERTY_AUTH ="safs.rest.auth";
+
+		/**
+		 * "<b>PROXY</b>" is the "map item" (under section {@link #SECTION_SAFS_REST}) defining a proxy server for Internet connection.<br>
+		 * Examples:<br>
+		 * [SAFS_REST]<br>
+		 * #proxy.host.name:port will be used as proxy server for Internet connection.<br>
+		 * PROXY=<b>proxy.host.name:port</b>
+		 *
+		 * */
+		public static final String ITEM_PROXY ="PROXY";
+		/** "<b>safs.rest.proxy</b>" is the JVM property defining a proxy server for Internet connection.<br>
+		 * Examples:<br>
+		 * -Dsafs.rest.proxy=<b>proxy.host.name:port</b> proxy.host.name:port will be used as proxy server for Internet connection.<br>
+		 * **/
+		public static final String PROPERTY_PROXY ="safs.rest.proxy";
 	}
 
 	public abstract static class AutoItConstants{

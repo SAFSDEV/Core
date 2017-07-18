@@ -1,3 +1,25 @@
+/**
+ * History:
+ * <BR> Carl Nagle  MAR 25, 2009 Adding IBT support for mouse Drag operations and Click with coordinates.
+ * <BR> Carl Nagle  JUL 14, 2009 Fixed some logging issues in VerifyValues commands.
+ * <BR> LeiWang APR 07, 2010 Modify method CFComponent.process(): If the parent RS is specified in
+ * 							 OBT format, then set record status to SCRIPT_NOT_EXECUTED and return. Let
+ * 							 other engine (ex. RJ engine) to handle the parent RS.
+ *
+ * 							 Add method processIndependently(): If the parent RS is in OBT format, other
+ * 							 engine (ex. RJ engine) will handle the parent RS, and inside that engine, a
+ * 							 new TIDComponent object will be instantiated, you should pass the test-record
+ * 							 to the method processIndependently() of this new object.
+ * <BR> JunwuMa APR 14, 2010 Adding IBT support for GetTextFromGUI and SaveTextFromGUI.
+ *                           Move setRectVars() to its super(), ComponentFunction.
+ * <br>	LeiWang APR 20, 2010 Modify method getSaveTextFromGUI(): use static method of OCREngine to get
+ *                           an OCR engine to use.
+ * <br>	Carl Nagle MAY 10, 2012  Modify process() call to isMixedUse to gracefully handle missing App Map
+ *                           recognition entries.
+ * <br>	Lei Wang MAR 10, 2017  Modified RESTComponent to handle authorization/authentication information with/without session.
+ *                           The "custom header" can be provided as a file in a Map.
+ * <br>	Lei Wang JUL 18, 2017  Added __setProxyForService(), modified actionStartServiceSession() and __startSession().
+ */
 package org.safs.tools.engines;
 
 import java.awt.AWTException;
@@ -62,24 +84,6 @@ import org.safs.tools.stringutils.StringUtilities;
  * This engine does not assume the use of STAF. Instead, it uses the
  * various org.safs.tools Interfaces to talk with the rest of the framework (as made
  * available via the DriverInterface configuration).
- * <BR> Carl Nagle  MAR 25, 2009 Adding IBT support for mouse Drag operations and Click with coordinates.
- * <BR> Carl Nagle  JUL 14, 2009 Fixed some logging issues in VerifyValues commands.
- * <BR> LeiWang APR 07, 2010 Modify method CFComponent.process(): If the parent RS is specified in
- * 							 OBT format, then set record status to SCRIPT_NOT_EXECUTED and return. Let
- * 							 other engine (ex. RJ engine) to handle the parent RS.
- *
- * 							 Add method processIndependently(): If the parent RS is in OBT format, other
- * 							 engine (ex. RJ engine) will handle the parent RS, and inside that engine, a
- * 							 new TIDComponent object will be instantiated, you should pass the test-record
- * 							 to the method processIndependently() of this new object.
- * <BR> JunwuMa APR 14, 2010 Adding IBT support for GetTextFromGUI and SaveTextFromGUI.
- *                           Move setRectVars() to its super(), ComponentFunction.
- * <br>	LeiWang APR 20, 2010 Modify method getSaveTextFromGUI(): use static method of OCREngine to get
- *                           an OCR engine to use.
- * <br>	Carl Nagle MAY 10, 2012  Modify process() call to isMixedUse to gracefully handle missing App Map
- *                           recognition entries.
- * <br>	Lei Wang MAR 10, 2017  Modified RESTComponent to handle authorization/authentication information with/without session.
- *                           The "custom header" can be provided as a file in a Map.
  */
 public class TIDComponent extends GenericEngine {
 
@@ -2327,6 +2331,21 @@ public class TIDComponent extends GenericEngine {
 		}
 
 		/**
+		 * Get proxy (server:port) information from System properties or from the SAFS Map setting.
+		 * And set this proxy information to the REST Service.
+		 *
+		 * @param service Service, the REST Service used to execute an action
+		 */
+		private void __setProxyForService(Service service){
+			//set proxy server if it exists
+			String proxyServerURL = StringUtils.getSystemProperty(RestConstants.PROPERTY_PROXY, config, RestConstants.SECTION_SAFS_REST, RestConstants.ITEM_PROXY);
+			if(StringUtils.isValid(proxyServerURL)){
+				IndependantLog.debug(StringUtils.debugmsg(false)+" set proxy url to '"+proxyServerURL+"'.");
+				service.setProxyServerURL(proxyServerURL);
+			}
+		}
+
+		/**
 		 * Start the session <b>ONLY</b> for one-shot-connection.
 		 * @throws SAFSException
 		 */
@@ -2337,6 +2356,7 @@ public class TIDComponent extends GenericEngine {
 			sessionID = service.getServiceId();
 			//Register the service
 			Services.addService(service);
+			__setProxyForService(service);
 
 			//Load related assets for starting the session, like authentication information.
 			//Handle the authentication/authorization information, Read the auth info from the .ini and VM parameters
@@ -2624,6 +2644,7 @@ public class TIDComponent extends GenericEngine {
 				Services.addService(service);
 				//Handle the authentication/authorization information
 				handleAuth(service, authFile);
+				__setProxyForService(service);
 
 				message = GENStrings.convert(GENStrings.SUCCESS_3,
 						restFlag+":"+sessionID+" "+action+" successful.", restFlag, sessionID, action);

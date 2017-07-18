@@ -365,6 +365,9 @@ Line Options:</b><br>
               
               <dt><b>-D<a href="../doc/org/safs/Constants.RestConstants.html#PROPERTY_AUTH" target="api">safs.rest.auth</a>=config\<a href="../configure/auth2.xml" target="api">auth2.xml</a></b></dt>
               <dd>Defines file (relative to project or absolute) holding the authorization/authentication information for REST testing.<p></dd>
+              
+              <dt><b>-D<a href="../doc/org/safs/Constants.RestConstants.html#PROPERTY_PROXY" target="api">safs.rest.proxy</a>=proxy.host.name:port</b></dt>
+              <dd>Defines the proxy information (proxy-server and port) for REST testing.<p></dd>
 
               <dt><b>-D<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_CONNECTION_TEST_COMMAND" target="api">safs.selenium.connection.test.command</a></b>=
                        one of <a href="https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/remote/DriverCommand.html">selenium-driver-command</a>
@@ -505,7 +508,8 @@ Template="UICatalogInstruments.tracetemplate"
 <span class="comments">;= AUTH holds the authorization/authentication
 ;= file (relative to project or absolute) for REST testing</span>
 <a href="../doc/org/safs/Constants.RestConstants.html#ITEM_AUTH" target="api">AUTH</a>=config\<a href="../configure/auth2.xml" target="api">auth2.xml</a>
-
+<span class="comments">;= PROXY holds the proxy information for REST testing</span>
+<a href="../doc/org/safs/Constants.RestConstants.html#ITEM_PROXY" target="api">PROXY</a>=<b>proxy.host.name:port</b>
 </pre></td><td><pre>
 
 <b>[SAFS_TC]</b>
