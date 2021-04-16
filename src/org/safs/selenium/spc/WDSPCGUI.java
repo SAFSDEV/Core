@@ -1,3 +1,26 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
+/**
+ * SEP 26, 2017 (Lei Wang) Modified highlightSelectedNode(): check 'cssDisplay' and 'cssVisibility' of the tree node.
+ * DEC 05, 2018	(Lei Wang) Modified the constructor WDSPCGUI(): set the frame to SPCTreePanel 'stp_results' if the combobox 'jcb_frames' item changed.
+ *                        Modified valueChanged(): Set proper frame to combobox 'jcb_frames' when clicking on a tree node.
+ *                        Added method waitPropertiesPanel(): sleep when waiting for the properties frame to be ready in the loop.
+ */
 package org.safs.selenium.spc;
 
 import java.awt.BorderLayout;
@@ -5,7 +28,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -19,15 +41,12 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -40,47 +59,41 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 
-import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.safs.IndependantLog;
 import org.safs.StringUtils;
 //import org.safs.Log;
 import org.safs.selenium.spc.SPCElementInfoFrame.FrameThread;
 import org.safs.selenium.util.DocumentClickCapture;
-import org.safs.selenium.webdriver.WebDriverGUIUtilities;
 import org.safs.selenium.webdriver.lib.Component;
 import org.safs.selenium.webdriver.lib.SearchObject;
 import org.safs.selenium.webdriver.lib.SelectBrowser;
-import org.safs.selenium.webdriver.lib.SeleniumPlusException;
 import org.safs.selenium.webdriver.lib.WDLibrary;
 import org.safs.tools.stringutils.StringUtilities;
 
 public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,WindowListener,TreeSelectionListener{
 
-	private static String [] BrowserStrings = {SelectBrowser.BROWSER_NAME_FIREFOX, 
-		                                       SelectBrowser.BROWSER_NAME_IE, 
-		                                       SelectBrowser.BROWSER_NAME_CHROME}; 
-		                                       //SelectBrowser.BROWSER_NAME_SAFARI, 
-		                                       //SelectBrowser.BROWSER_NAME_IPAD_SAFARI, 
+	private static String [] BrowserStrings = {SelectBrowser.BROWSER_NAME_FIREFOX,
+		                                       SelectBrowser.BROWSER_NAME_IE,
+		                                       SelectBrowser.BROWSER_NAME_CHROME,
+		                                       SelectBrowser.BROWSER_NAME_EDGE};
+		                                       //SelectBrowser.BROWSER_NAME_SAFARI,
+		                                       //SelectBrowser.BROWSER_NAME_IPAD_SAFARI,
 		                                       //SelectBrowser.BROWSER_NAME_IPAD_SIMULATOR_SAFARI,
-		                                       //SelectBrowser.BROWSER_NAME_ANDROID_CHROME, 
+		                                       //SelectBrowser.BROWSER_NAME_ANDROID_CHROME,
 		                                       //SelectBrowser.BROWSER_NAME_HTMLUNIT
-	
+
 	private WDSPC spc;
 	private JButton btn_start;
 	private JButton btn_stop;
@@ -120,7 +133,7 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 	JPanel middle2 = new JPanel();
 	JPanel bottom = new JPanel(new BorderLayout());
 	JPanel statusPanel = new JPanel();
-	
+
 	private boolean clickModeOn = false;
 	private boolean findElementMode = false;
 	private boolean selectFrameMode = false;
@@ -131,7 +144,7 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
     private Color backgroundColor = null;
     private Color busyBackgroundColor = Color.YELLOW.brighter();
     private Color prepBackgroundColor = Color.GREEN.brighter();
-    
+
 	public WDSPCGUI(WDSPC spc){
 		this.spc = spc;
 		if(spc!=null) spc.setGUI(this);
@@ -143,7 +156,7 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 		fra_main.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		fra_main.addWindowListener(this);
 		this.setLayout(new BoxLayout(this,BoxLayout.PAGE_AXIS));
-		
+
 		BufferedReader br;
 		lines = new Vector();
 		lines.add("");
@@ -156,7 +169,7 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 		} catch (FileNotFoundException e) {
 		} catch (IOException e) {
 		}
-		
+
 		btn_start = new JButton("Start");
 		btn_start.addActionListener(this);
 		btn_start.setToolTipText("Launch the selected browser with the URL.");
@@ -174,9 +187,10 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 		btn_refresh.setToolTipText("Refresh the list of Current Window titles available.");
 		jcb_url = new JComboBox<String>(lines);
 		jcb_url.setEditable(true);
-		jcb_url.setToolTipText("Enter the complete URL to be opened in a new browser session.");		
+		jcb_url.setToolTipText("Enter the complete URL to be opened in a new browser session.");
 		jcb_url.setPreferredSize(new Dimension(400, jcb_url.getPreferredSize().height));
 		jcb_url.addItemListener(new ItemListener(){
+			@Override
 			public void itemStateChanged(ItemEvent evt) {
 				try{
 					Set<FrameRS> frames = getFrameRSSetFromCache((String)jcb_url.getSelectedItem());
@@ -187,27 +201,28 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 			}
 		});
 
-		
+
 		lbl_url = new JLabel("URL:");
 		jcb_browsers = new JComboBox(BrowserStrings);
 		jcb_browsers.setSelectedIndex(0);
 		jcb_browsers.addActionListener(this);
-		jcb_browsers.setToolTipText("List of supported Selenium browsers to use with new sessions.");		
+		jcb_browsers.setToolTipText("List of supported Selenium browsers to use with new sessions.");
 		lbl_curwindows = new JLabel("    Current Windows: ");
 		jcb_curwindows = new JComboBox<String>();
 		if(spc!=null) updateWindows(spc.getWindows());
 		jcb_curwindows.setPreferredSize(new Dimension(300, jcb_curwindows.getPreferredSize().height));
 		jcb_curwindows.setEnabled(false);
 		jcb_curwindows.addActionListener(this);
-		jcb_curwindows.setToolTipText("List of browser window titles for the currently available sessions.");		
+		jcb_curwindows.setToolTipText("List of browser window titles for the currently available sessions.");
 		lbl_frames = new JLabel("    Frames: ");
 		jcb_frames = new JComboBox<String>();
 		jcb_frames.setPreferredSize(new Dimension(300, jcb_frames.getPreferredSize().height));
 		jcb_frames.setEnabled(false);
 		jcb_frames.addItem("");
 		//jcb_frames.addActionListener(this);
-		jcb_frames.setToolTipText("List of Frames found in the recently processed Window.");		
+		jcb_frames.setToolTipText("List of Frames found in the recently processed Window.");
 		jcb_frames.addItemListener(new ItemListener(){
+			@Override
 			public void itemStateChanged(ItemEvent e) {
 				if(! findElementMode){
 					selectFrameMode = true;
@@ -216,34 +231,35 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 					if(frame!=jcb_html_frame_info_original_value){
 						IndependantLog.debug("Frames item "+ frame +" attempting Tree selection change...");
 						jcb_html_frame_info_original_value = frame;
-						
+
 						//highlight the frame
-						// find the item in the Panel and perform normal hightlight
+						// find the item in the Panel and perform normal highlight
 						if(frame.length()> 0){
-								SPCTreeNode frame_node = stp_results.getFrameNode(frame);
-								if(frame_node == null){
-									IndependantLog.debug("Frames item "+ frame +" was not found in the Tree Hierarchy.");
+							stp_results.setContextFrameRS(frame);
+							SPCTreeNode frame_node = stp_results.getFrameNode(frame);
+							if(frame_node == null){
+								IndependantLog.debug("Frames item "+ frame +" was not found in the Tree Hierarchy.");
+							}else{
+								IndependantLog.info("Tree frame node search found "+ frame_node.getXpath());
+								SPCTreeNode selected_item = stp_results.setSelectedComponentByXpath(frame_node.xpath);
+								if(selected_item == null){
+									IndependantLog.debug("TreePanel did NOT successfully select the frame node in the hierarchy.");
 								}else{
-									IndependantLog.info("Tree frame node search found "+ frame_node.getXpath());
-									SPCTreeNode selected_item = stp_results.setSelectedComponentByXpath(frame_node.xpath);
-									if(selected_item == null){
-										IndependantLog.debug("TreePanel did NOT successfully select the frame node in the hierarchy.");
+									IndependantLog.info("TreePanel selection now "+ selected_item.getXpath());
+									WebElement item = SearchObject.getObject(frame_node.xpath);
+									if(item!=null){
+										IndependantLog.info("TreePanel flashing webpage at "+ selected_item.getXpath());
+										System.out.println("highlighting "+frame);
+										SearchObject.highlight(item);
+										StringUtilities.sleep(2000);
+										SearchObject.clearHighlight();
 									}else{
-										IndependantLog.info("TreePanel selection now "+ selected_item.getXpath());
-										WebElement item = SearchObject.getObject(frame_node.xpath);
-										if(item!=null){
-											IndependantLog.info("TreePanel flashing webpage at "+ selected_item.getXpath());
-											System.out.println("highlighting "+frame);
-											SearchObject.highlight(item);
-											StringUtilities.sleep(2000);
-											SearchObject.clearHighlight();
-										}else{
-											IndependantLog.debug("Frames item "+ selected_item.getXpath() +" was NOT found on webpage!");
-										}
+										IndependantLog.debug("Frames item "+ selected_item.getXpath() +" was NOT found on webpage!");
 									}
 								}
+							}
 						}else{
-							IndependantLog.debug("Frames item change to empty (none) selected.");						
+							IndependantLog.debug("Frames item change to empty (none) selected.");
 						}
 					}else{
 						IndependantLog.info("Frames item change event same as last.");
@@ -252,7 +268,7 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 				selectFrameMode = false;
 			}
 		});
-		
+
 		stp_results = new SPCTreePanel();
 		stp_results.getTree().addTreeSelectionListener(this);
 		stp_results.getTree().addMouseListener(this);
@@ -263,7 +279,7 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 		btn_grab.setEnabled(false);
 		txt_rec = new JTextField(35);
 		txt_rec.setEnabled(false);
-		txt_rec.setToolTipText("Edit recognition string as needed to make more robust.");		
+		txt_rec.setToolTipText("Edit recognition string as needed to make more robust.");
 		btn_find = new JButton("Find Element");
 		btn_find.addActionListener(this);
 		btn_find.setEnabled(false);
@@ -295,53 +311,56 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 		btn_savemap.setEnabled(false);
 		btn_savemap.addActionListener(this);
 		btn_savemap.setToolTipText("Preview/Edit final subset of recognition strings to Save for an App Map.");
-		
+
 		chk_short = new JCheckBox("Short Strings");
 		chk_short.setToolTipText("Prefer short string recognition over fullpath recognition.");
 		chk_short.setSelected(useShortStrings);
 		chk_short.addActionListener((new ActionListener(){
+			@Override
 			public void actionPerformed(ActionEvent event){
 				useShortStrings = chk_short.isSelected();
 			}
 		}));
-		
+
 		chk_visible = new JCheckBox("Visible Only");
 		chk_visible.setToolTipText("Only process Visible elements--exclude Hidden elements and dialogs.");
 		chk_visible.setSelected(useVisibleOnly);
 		chk_visible.addActionListener((new ActionListener(){
+			@Override
 			public void actionPerformed(ActionEvent event){
 				useVisibleOnly = chk_visible.isSelected();
 			}
 		}));
-		
+
 		chk_properties = new JCheckBox("Click Mode Properties");
 		chk_properties.setToolTipText("Automatically Show Properties after Click Mode Selection");
 		chk_properties.setSelected(useClickModeProperties);
 		chk_properties.addActionListener((new ActionListener(){
+			@Override
 			public void actionPerformed(ActionEvent event){
 				useClickModeProperties = chk_properties.isSelected();
 			}
 		}));
-		
+
 		top.add(lbl_url);
 		top.add(jcb_url);
 		top.add(jcb_browsers);
 		top.add(btn_start);
 		top.add(btn_stop);
-		
+
 		middle.add(btn_refresh);
 		middle.add(lbl_curwindows);
 		middle.add(jcb_curwindows);
 		middle.add(lbl_frames);
 		middle.add(jcb_frames);
-		
+
 		middle1.add(chk_short);
 		middle1.add(chk_visible);
 		middle1.add(chk_properties);
 		middle1.add(btn_search);
 		middle1.add(btn_cancel);
 		middle1.add(btn_savemap);
-		
+
 		middle2.add(btn_grab);
 		middle2.add(lbl_rec);
 		middle2.add(txt_rec);
@@ -349,16 +368,16 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 		middle2.add(btn_set);
 		middle2.add(btn_children);
 		middle2.add(btn_properties);
-		
+
 		split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, scp_preview, stp_results);
 		split.setOneTouchExpandable(true);
 		split.setDividerLocation(400);
 		bottom.add(split,BorderLayout.CENTER);
-		
+
 		lbl_status = new JLabel("Status Bar.");
 		statusPanel.setLayout(new FlowLayout(FlowLayout.LEADING));
 		statusPanel.add(lbl_status);
-		
+
 		this.add(top);
 		this.add(middle);
 		this.add(middle1);
@@ -373,7 +392,7 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 		}
 		backgroundColor = this.getBackground();
 	}
-	
+
 	/**
 	 * @param status text message
 	 * @param foreground Color, can be null.
@@ -407,14 +426,14 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 		bottom.setBackground(backgroundColor);
 		statusPanel.setBackground(backgroundColor);
 	}
-	
+
 	public boolean useVisibleOnly(){ return useVisibleOnly; }
 	public boolean useShortStrings(){ return useShortStrings; }
-	
+
 	void setGUIForReady(){
 		btn_cancel.setEnabled(false);
 		jcb_curwindows.setEnabled(true);
-		jcb_frames.setEnabled(jcb_frames.getComponentCount()> 0);			
+		jcb_frames.setEnabled(jcb_frames.getComponentCount()> 0);
 		btn_savemap.setEnabled(true);
 		btn_search.setEnabled(true);
 		btn_search.setText("Search");
@@ -456,7 +475,7 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 		//cannot click to search correct WebElement, so disable the stp_results
 		stp_results.setEnabled(false);
 	}
-	
+
 	void setGUIForSearching(){
 		jcb_curwindows.setEnabled(false);
 		jcb_frames.setEnabled(false);
@@ -482,7 +501,7 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 		btn_cancel.setEnabled(true);
 		lbl_status.setText("Running");
 	}
-	
+
 	private Object lastSearchedTitle = null;
 
 
@@ -490,15 +509,29 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 		if(spc!=null){
 			SPCTreeNode node = stp_results.getSelectedComponent();
 			if(node != null && !node.xpath.equalsIgnoreCase("/Root")){
-				FrameThread runner =new FrameThread(node,spc);
-				runner.start();
-				while(runner.frame == null){}
-				frames.add(runner.frame);
-				runner.frame.addWindowListener(listener);
+				waitPropertiesPanel(node, spc, frames);
 			}
 		}
 	}
-	
+
+	/**
+	 * Wait the properties-panel (SPCElementInfoFrame) to be ready.
+	 *
+	 * @param node SPCTreeNode, for which to show the properties
+	 * @param spc WDSPC
+	 * @param frames Vector<JFrame>, the cache holding the properties-panels
+	 */
+	private void waitPropertiesPanel(SPCTreeNode node, WDSPC spc, Vector<JFrame> frames){
+		FrameThread runner =new FrameThread(node,spc);
+		runner.start();
+		while(runner.frame == null){
+			StringUtils.sleep(200);
+		}
+		StringUtils.sleep(100);
+		frames.add(runner.frame);
+		runner.frame.addWindowListener(this);
+	}
+
 	/**
 	 * @param rs
 	 * @return true if the item was added. false if not (already present)
@@ -509,20 +542,20 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 			if(jcb_frames.getItemAt(i).toString().equalsIgnoreCase(frameRS)) return false;
 		}
 		jcb_frames.addItem(frameRS);
-		
+
 		return true;
 	}
-	
-	/** 
+
+	/**
 	 * @return the current selected value in jcb_frames combo-box.
-	 * Can be null if no item is selected. 
+	 * Can be null if no item is selected.
 	 */
 	public String getFrameRS(){
 		Object item = jcb_frames.getSelectedItem();
 		if(item!=null) return item.toString();
 		return null;
 	}
-	
+
 	public String appendFrameRS(String rs){
 		if(!SearchObject.containFrameRS(rs)){
 			if(SearchObject.isValidFrameRS(getFrameRS())){
@@ -531,18 +564,19 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 		}
 		return rs;
 	}
-	
+
+	@Override
 	public void actionPerformed(ActionEvent e) {
-		String temp = null;	
+		String temp = null;
 		if(e.getSource()==btn_start){
 			if(spc != null)spc.enableSearch();
 			setGUIRunning();
 			String url = jcb_url.getSelectedItem().toString();
-			if(url == null) url = "";			
+			if(url == null) url = "";
 			url = url.trim();
 			if(url.length()==0)
 				url = jcb_url.getEditor().getItem().toString().trim();
-			
+
 			if(url.length()==0){
 				IndependantLog.debug("*** URL can not be null or void ***");
 				lbl_status.setText("URL must be 'set'");
@@ -557,14 +591,14 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 			}
 			if(!lines.contains(url)){
 				lines.add(url);
-				//jcb_url.addItem(url);  
+				//jcb_url.addItem(url);
 				jcb_url.updateUI();
 			}
 			try{
 				if(spc !=null) {
 					capture = null;
 					spc.initializeSelenium(jcb_browsers.getSelectedItem().toString(), url);
-				}				
+				}
 			}catch(Exception x){
 				setStatus("Start "+ x.getClass().getSimpleName()+" "+x.getMessage(),Color.RED);
 			}
@@ -580,7 +614,7 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 			}else{
 				resetClickModeUI();
 			}
-			
+
 		} else if (e.getSource()==btn_search) {
 			lastSearchedTitle = jcb_curwindows.getSelectedItem();
 			updatePreview();
@@ -589,7 +623,7 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 				spc.enableSearch();
 				spc.getAllElements(jcb_curwindows.getSelectedItem().toString(), getFrameRS());
 			}
-			
+
 		} else if(e.getSource()==btn_stop){
 			if(spc!=null){
 				capture = null;
@@ -628,9 +662,9 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 			findElementMode = true;
 			if(spc!=null){
 				spc.enableSearch();
-				
+
 				updatePreview();
-				
+
 				spc.getUtils().setWDTimeout(0);
 				//WebElement el = SearchObject.getObject(txt_rec.getText());
 				String searchRS = appendFrameRS(txt_rec.getText());
@@ -666,7 +700,7 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 			}
 			findElementMode=false;
 		} else if(e.getSource()==btn_set){
-			try{ 
+			try{
 				//stp_results.getSelectedComponent().setRecognitionString(txt_rec.getText());
 				stp_results.getSelectedComponent().setRecognitionString(appendFrameRS(txt_rec.getText()));
 				valueChanged(null);
@@ -690,7 +724,7 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 			}
 		} else if(e.getSource()==btn_properties){
 			showProperties(WDSPCGUI.this);
-			
+
 		} else if(e.getSource()==btn_cancel){
 			if(spc!=null) {
 				spc.cancelSearch();
@@ -709,11 +743,13 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 			btn_search.setEnabled(false);
 			btn_savemap.setEnabled(false);
 			Thread runner = new Thread(){
+				@Override
 				public void run(){
 					final SPCAppMapFrame jfr_pbar = new SPCAppMapFrame(stp_results.allNodes.size()-1, WDSPCGUI.this);
 					interruptProgressBar = false;
 					frames.add(jfr_pbar);
 					jfr_pbar.addWindowListener(new WindowAdapter(){
+						@Override
 						public void windowClosing(WindowEvent e) {
 							frames.remove(jfr_pbar);
 							interruptProgressBar = true;
@@ -732,14 +768,14 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 						}
 					}
 					SPCTreeNode.resetCompNamesCache();
-					
+
 					// won't continue til we the window is disposed by operation or user
 					while(!interruptProgressBar){
 						try{Thread.sleep(1000);}catch(Exception x){}
 					}
 					// may or may not be necessary.  May already be disposed.
 					try{ jfr_pbar.dispose();}catch(Throwable t){}
-					
+
 					btn_refresh.setEnabled(true);
 					btn_stop.setEnabled(true);
 					btn_find.setEnabled(true);
@@ -752,28 +788,28 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 				}
 			};
 			runner.setDaemon(true);
-			runner.start();			
+			runner.start();
 		}
 	}
 
 	/** Clear any HIGHLIGHTS and take a new app screenshot for the preview pane. */
 	private void updatePreview(){
-		WDLibrary.clearHighlight();	
+		WDLibrary.clearHighlight();
 		img_preview.clearHighlight();
 		if(spc!=null)img_preview.setImage(spc.getCurrentPreview());
 		split.revalidate();
 		split.repaint();
 	}
-	
+
 	private void highlightByWebElement(WebElement el){
 		updatePreview();
 		WDLibrary.highlight(el);
-		img_preview.setHighlight(new Rectangle(el.getLocation().x, el.getLocation().y, 
+		img_preview.setHighlight(new Rectangle(el.getLocation().x, el.getLocation().y,
 				                               el.getSize().width, el.getSize().height));
 	}
-	
+
 	private DocumentClickCapture capture = null;
-	
+
 	/** Change the UI to show Click Mode is reenabled. */
 	private void resetClickModeUI(){
 		clickModeOn = false;
@@ -782,7 +818,7 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 		btn_grab.setToolTipText("Click me then Click a Component in the Web App");
 		setBackgroundReady();
 	}
-	
+
 	/** Change the UI to show Click Mode Click is being processed. */
 	private void prepClickModeUI(){
 		btn_grab.setText("Processing Click");
@@ -790,14 +826,15 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 		btn_grab.setToolTipText("Click detected and being processed...");
 		setBackgroundPrep();
 	}
-	
+
 	/** Handle the UI request to begin Click mode processing. */
 	private void startClickMode(){
 		if(capture == null) capture = new DocumentClickCapture();
 		capture.setIgnoreEventInformation(false);
-		
+
 		updatePreview();
 		Thread runner = new Thread(){
+			@Override
 			public void run(){
 				boolean done = false;
 				boolean dirty = false;
@@ -822,7 +859,7 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 					prepClickModeUI();
 					if(dirty) updatePreview();
 					IndependantLog.info(event.toString());
-					
+
 					//check to see if the TreePanel represents a different window than the current one
 					if(lastSearchedTitle != null){
 						if(event.EVENT_TARGET instanceof RemoteWebElement){
@@ -834,7 +871,7 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 								}
 							}catch(Exception ignore){}
 						}
-					}									
+					}
 					spc.getUtils().setWDTimeout(0);
 					String rec = SearchObject.generateFullGenericXPath(event.EVENT_TARGET);
 
@@ -848,7 +885,7 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 						//WebElement element = SearchObject.getObject("XPATH="+rec);
 						if(element != null){
 						    IndependantLog.debug("WDSPCGUI.clickMode WebElement found with getObject XPATH: "+rec);
-							//DEBUG: JOptionPane.showMessageDialog(WDSPCGUI.this, "WebElement found for XPATH:\n"+ rec, "Found WebElement", JOptionPane.INFORMATION_MESSAGE);						    
+							//DEBUG: JOptionPane.showMessageDialog(WDSPCGUI.this, "WebElement found for XPATH:\n"+ rec, "Found WebElement", JOptionPane.INFORMATION_MESSAGE);
 							anode = stp_results.addSPCTreeNode(element, rec, null);
 							if(anode ==  null){
 							    IndependantLog.debug("WDSPCGUI.clickMode COULD NOT add Tree Node for XPATH: "+rec);
@@ -857,7 +894,7 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 							    IndependantLog.debug("WDSPCGUI.clickMode added Tree Node for XPATH: "+rec);
 								//DEBUG: JOptionPane.showMessageDialog(WDSPCGUI.this, "Tree Node successfully added for XPATH:\n"+ rec, "Added Tree Node", JOptionPane.INFORMATION_MESSAGE);
 							    stp_results.setSelectedComponentByXpath(rec);
-							    if( WDSPCGUI.this.chk_short.isSelected()) 
+							    if( WDSPCGUI.this.chk_short.isSelected())
 							    	showrec= "XPATH=.//"+anode.xpart;
 							}
 						}else{
@@ -879,7 +916,7 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 						//txt_rec.setText(RS);
 						setStatus("RS: "+ rec, Color.BLACK);
 					}
-					
+
 					if(highlightSelectedNode()==null){
 						highlightByWebElement(event.EVENT_TARGET);
 					}
@@ -899,9 +936,9 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 			}
 		};
 		runner.setDaemon(true);
-		runner.start();		
+		runner.start();
 	}
-	
+
 	/**
 	 * @param pframe  the Frame node for all web elements.  Can be null.
 	 * @param data
@@ -912,9 +949,9 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 		btn_cancel.setEnabled(false);
 		stp_results.setData(pframe, data, xpaths);
 		updatePreview();
-		
+
 		setGUIForReady();
-		
+
 	}
 
 	public void updateWindows(String [] titles){
@@ -923,15 +960,16 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 			jcb_curwindows.addItem(titles[i]);
 		}
 	}
-	
+
 	private class ImagePreview extends JComponent{
 		private BufferedImage img;
 		private ArrayList highlight;
-		
+
 		public ImagePreview(){
 			highlight = new ArrayList();
 		}
-		
+
+		@Override
 		public void paint(Graphics g){
 			if(img != null){
 				g.drawImage(img, 0, 0, null);
@@ -964,6 +1002,7 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 		}
 	}
 
+	@Override
 	public void mouseClicked(MouseEvent e) {
 		if(e.getSource() == img_preview){
 			java.awt.Point pt = e.getPoint();
@@ -974,30 +1013,33 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 			if(e.getClickCount()==2 && (spc!= null)){
 				SPCTreeNode node = stp_results.getSelectedComponent();
 				if(!node.xpath.equalsIgnoreCase("/Root")){
-					FrameThread runner =new FrameThread(node,spc);
-					runner.start();
-					while(runner.frame == null){}
-					frames.add(runner.frame);
-					runner.frame.addWindowListener(this);
+					waitPropertiesPanel(node, spc, frames);
 				}
 			}
 		}
 	}
 	Vector<JFrame> frames = new Vector();
+	@Override
 	public void mouseEntered(MouseEvent arg0) {}
 
+	@Override
 	public void mouseExited(MouseEvent arg0) {}
 
+	@Override
 	public void mousePressed(MouseEvent arg0) {}
 
+	@Override
 	public void mouseReleased(MouseEvent arg0) {}
 
+	@Override
 	public void windowActivated(WindowEvent arg0) {}
-	
+
+	@Override
 	public void windowClosed(WindowEvent arg0) {
-		
+
 	}
 
+	@Override
 	public void windowClosing(WindowEvent arg0) {
 		Window source = arg0.getWindow();
 		if(source == fra_main){
@@ -1026,36 +1068,40 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 		}
 	}
 
+	@Override
 	public void windowDeactivated(WindowEvent arg0) {}
 
+	@Override
 	public void windowDeiconified(WindowEvent arg0) {}
 
+	@Override
 	public void windowIconified(WindowEvent arg0) {}
 
+	@Override
 	public void windowOpened(WindowEvent arg0) {}
 
 	public boolean insertComponentInTree(WebElement element, String fullxpath, String parentNode){
 		if(useVisibleOnly()&& !element.isDisplayed()) return false;
-		
+
 		// Carl Nagle Frame Support
-		SPCTreeNode parentTreeNode = null;		
-		if(parentNode != null && parentNode.length() > 0){ 
+		SPCTreeNode parentTreeNode = null;
+		if(parentNode != null && parentNode.length() > 0){
 			parentTreeNode = stp_results.getFrameNode(parentNode);
 			IndependantLog.info("WDSPCGUI.insertComponent using FRAME "+ parentTreeNode.getRecognitionString());
 		}else{
 			IndependantLog.info("WDSPCGUI.insertComponent using default top-level document as Frame.");
 		}
-			
+
 		SPCTreeNode anode = stp_results.getNode(fullxpath, parentTreeNode);
-		
+
 		if(anode == null){
 		    IndependantLog.debug("WDSPCGUI.insertComponent Tree node DOES NOT exist for XPATH: "+fullxpath);
 		    String fullFrameRS = "XPATH="+fullxpath;
 
 		    // Carl Nagle Frame Support
-		    //if( parentTreeNode != null) 
+		    //if( parentTreeNode != null)
 		    //	fullFrameRS = parentTreeNode.getRecognitionString()+ SearchObject.childSeparator + fullFrameRS;
-			
+
 		    WebElement e = SearchObject.getObject(fullFrameRS);
 			if(e != null){
 			    IndependantLog.debug("WDSPCGUI.insertComponent WebElement found with getObject XPATH: "+fullxpath);
@@ -1076,35 +1122,44 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 		}
 		return true;
 	}
-	
+
 	/**
-	 * Attempts to highlight both the image preview and the browser element based on 
+	 * Attempts to highlight both the image preview and the browser element based on
 	 * the Tree node selected in the element hierarchy tree.
 	 * The routine also tries to scroll the selected tree node into view on the tree panel.
 	 * @return
 	 */
 	private SPCTreeNode highlightSelectedNode(){
-		try{ 
+		try{
 			stp_results.scrollRectToVisible(stp_results.getSelectedComponentDimensions());
 		}
 		catch(Exception x){
 			IndependantLog.error("WDSPCGUI.highlightSelectedNode "+ x.getClass().getName()+", "+x.getMessage());
 		}
-		
+
 		SPCTreeNode node = (SPCTreeNode)stp_results.getTree().getLastSelectedPathComponent();
 		if (node == null){
 			IndependantLog.error("WDSPCGUI.highlightSelectedNode: The SPC tree returned no selected Node!");
 			return null;
 		}
 		// HIGHLIGHT the component in the IMAGE PREVIEW
-		SearchObject.clearHighlight();
 		img_preview.clearHighlight();
-		img_preview.setHighlight(stp_results.getNodeDimensions(node));		
+		if("none".equalsIgnoreCase(node.getCssDisplay())){
+			IndependantLog.info("WDSPCGUI.highlightSelectedNode: The element's css dispaly is 'none', it is not on the page and it cannot be highlighted!");
+		}else{
+			img_preview.setHighlight(stp_results.getNodeDimensions(node));
+		}
 
-		//HIGHLIGHT the component on the HTML page		
+		//HIGHLIGHT the component on the HTML page
+		SearchObject.clearHighlight();
 		boolean highlighted = (spc==null)? false: spc.highlight(node);
 		if(!highlighted){
-			JOptionPane.showMessageDialog(this, "Can NOT highlight.", "NOT HIGHLIGHTED", JOptionPane.WARNING_MESSAGE);
+			String message = "Can NOT highlight.";
+			if("hidden".equalsIgnoreCase(node.getCssVisibility())){
+				IndependantLog.debug("WDSPCGUI.highlightSelectedNode: The element's css visibility is 'hidden', cannot highlight it on browser!");
+				message = "The element is on the page but NOT visible; It can NOT be highlighted on browser, it is ONLY highlighted on the screenshot.";
+			}
+			JOptionPane.showMessageDialog(this, message, "NOT HIGHLIGHTED", JOptionPane.WARNING_MESSAGE);
 		}
 		return node;
 	}
@@ -1112,11 +1167,14 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 	 *  AUG 10, 2012	(Lei Wang) During getting the Recognition String according to a node's xpath,
 	 *  						 try to get property value id and name of HTML element and set them to tree node.
 	 */
+	@Override
 	public void valueChanged(TreeSelectionEvent arg0) {
 		// try to make sure the selected node is visible onscreen
 		SPCTreeNode node = stp_results.getSelectedComponent();
 		if(node==null) return;
 		String rs = node.getRecognitionString();
+
+		//We should set the context frame to 'jcb_frames' if this node is under certain frame
 		if(! findElementMode){
 			//set the RECOGNITION STRING in the text box
 			if(rs==null||rs.length()==0){
@@ -1126,6 +1184,7 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 				}else{
 					txt_rec.setText("XPATH="+node.xpath);
 				}
+				jcb_frames.setSelectedItem(node.getParentFrameRS());
 			}else{
 				txt_rec.setForeground(Color.BLACK);
 				txt_rec.setText(rs);
@@ -1133,6 +1192,8 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 					jcb_frames.setSelectedItem(rs);
 				}else if(node.frame != null && SearchObject.isValidFrameRS(node.frame.getRecognitionString())){
 					jcb_frames.setSelectedItem(node.frame.getRecognitionString());
+				}else{
+					jcb_frames.setSelectedItem(node.getParentFrameRS());
 				}
 			}
 		}
@@ -1143,13 +1204,13 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 			IndependantLog.warn(warning);
 			setStatus("XPATH RS: "+node.xpath,Color.RED);
 		}else{
-			setStatus("Stored RS: "+ rs,Color.BLACK); 						
-		}		
+			setStatus("Stored RS: "+ rs,Color.BLACK);
+		}
 		if(useClickModeProperties){
 			showProperties(WDSPCGUI.this);
 		}
 	}
-	
+
 	private static class FrameRS implements Comparable<FrameRS>{
 		private String searchContext = null;
 		private String frameXpath = null;
@@ -1158,10 +1219,10 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 		private String frameXpathRS = null;
 		private String frameNameRS = null;
 		private String frameIDRS = null;
-		
+
 		//An empty constructor
 		public FrameRS(){}
-		
+
 		/**
 		 * NOT USED YET. Only called from addFrameRS which is NOT used yet.<br>
 		 * @param frame
@@ -1172,19 +1233,19 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 			frameXpath = xpath;
 			if(frameXpath!=null && !frameXpath.trim().isEmpty())
 				frameXpathRS = SearchObject.SEARCH_CRITERIA_FRAMEXPATH+SearchObject.assignSeparator+frameXpath;
-			
+
 			try{
 				frameName = WDLibrary.getProperty(frame, Component.ATTRIBUTE_NAME);
 				if(frameName!=null && !frameName.trim().isEmpty())
 					frameNameRS = SearchObject.SEARCH_CRITERIA_FRAMENAME+SearchObject.assignSeparator+frameName;
 			}catch(Exception ignore) {}
-			
+
 			try{
 				frameID = WDLibrary.getProperty(frame, Component.ATTRIBUTE_ID);
 				if(frameID!=null && !frameID.trim().isEmpty())
 					frameIDRS = SearchObject.SEARCH_CRITERIA_FRAMEID+SearchObject.assignSeparator+frameID;
 			}catch(Exception ignore) {}
-			
+
 			this.searchContext = searchContext;
 		}
 
@@ -1197,17 +1258,18 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 		public String getFrameID() {
 			return frameID;
 		}
-		
+
 		public String getToolTip(){
 			StringBuffer tooltip = new StringBuffer();
-			
+
 			if(frameXpathRS!=null) tooltip.append(frameXpathRS+"    ");
 			if(frameIDRS!=null) tooltip.append(frameIDRS+"    ");
 			if(frameNameRS!=null) tooltip.append(frameNameRS+"    ");
-			
+
 			return tooltip.toString();
 		}
-		
+
+		@Override
 		public String toString(){
 			StringBuffer frameRecognitionString = new StringBuffer();
 			//append the context
@@ -1220,17 +1282,18 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 			if(frameNameRS!=null) frameRecognitionString.append(frameNameRS);
 			else if(frameIDRS!=null) frameRecognitionString.append(frameIDRS);
 			else if(frameXpathRS!=null) frameRecognitionString.append(frameXpathRS);
-			
+
 			return frameRecognitionString.toString();
 		}
-				
+
+		@Override
 		public int compareTo(FrameRS o) {
 			return toString().compareTo(o.toString());
 		}
 	}
 	/**A HashMap cache containing a set of FrameRS according to URL as key*/
 	private HashMap<String/*URL*/, Set<FrameRS>> frameRSCache = new HashMap<String, Set<FrameRS>>();
-	
+
 	/**
 	 * According to the URL passed in, get the cached Set of FrameRS.
 	 * If no Set already exists, then create a new TreeSet and put it into the cache.
@@ -1241,16 +1304,16 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 			IndependantLog.debug(StringUtils.debugmsg(false)+" the provided url is null, cannot get frameRS from cache.");
 			return null;
 		}
-		//According to URL, get the related Frames 
+		//According to URL, get the related Frames
 		Set<FrameRS> frames = frameRSCache.get(urlContext);
 		if(frames==null){
 			frames = new TreeSet<FrameRS>();
 			frames.add(new FrameRS());
 			frameRSCache.put(urlContext, frames);
-		}		
+		}
 		return frames;
 	}
-	
+
 	public boolean addFrameRSToCache(WebElement element, String frameXpath, String windowContext){
 		Set<FrameRS> frames = getFrameRSSetFromCache(windowContext);
 		if(frames == null) return false;
@@ -1261,7 +1324,7 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 		frameRSCache.put(windowContext, frames);
 		return true;
 	}
-	
+
 	private Set<String> getFrameRSSetFromCombo(){
 		Set<String> frames = new TreeSet<String>();
 		for(int i=0;i<jcb_frames.getItemCount();i++){
@@ -1270,9 +1333,9 @@ public class WDSPCGUI extends JPanel implements ActionListener,MouseListener,Win
 		}
 		return frames;
 	}
-	
+
 	/**
-	 * Update the frame combo-box. 
+	 * Update the frame combo-box.
 	 * @param frames Set<FrameRS>, a set of FrameRS. Used to update the combo-box.
 	 */
 	private void updateFrameRSCombo(Set<FrameRS> frames){

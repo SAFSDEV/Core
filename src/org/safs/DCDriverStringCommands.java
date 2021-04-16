@@ -1,6 +1,20 @@
-/** Copyright (C) (MSA, Inc) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+/**
+ * Copyright (C) (MSA, Inc), All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * History:
  *   <br>   Sep 23, 2003    (DBauman) Original Release
@@ -17,11 +31,11 @@
  *   <br>   APR 20, 2005    (RLawler) Updated log messages for Index() and findSubstring() (RJL).<br>
  *   <br>   MAY 02, 2005    (Carl Nagle) Revampled GetSystemEnviron to use STAF/Env variables.
  * 									 Added GetSystemUser command.
- * 	 <br>	SEP 24, 2008	(LeiWang)	Modified method getNextDelimiterIndex(), treate the parameter startindex.
+ * 	 <br>	SEP 24, 2008	(Lei Wang)	Modified method getNextDelimiterIndex(), treate the parameter startindex.
  * 										See defect S0537064
- * 	 <br>	OCT 29, 2008	(LeiWang)	Add keyword GetMultiDelimitedFieldCount and GetMultiDelimitedField.
+ * 	 <br>	OCT 29, 2008	(Lei Wang)	Add keyword GetMultiDelimitedFieldCount and GetMultiDelimitedField.
  * 										See defect S0544477
- *   <br>	FEB 10, 2009	(JunwuMa)   Modify replace() to keep the source string unchanged if a substring for replacement 
+ *   <br>	FEB 10, 2009	(JunwuMa)   Modify replace() to keep the source string unchanged if a substring for replacement
  *   <br>                               is not found in it. Fix defect S0560893.
  *   <br>	APR 18, 2013	(Lei Wang)    Modify replace() to set source string to variable if no replacement occur. See S0963164.
  *   <br>	NOV 29, 2016	(Lei Wang)    Modified compare(): support regex comparison.
@@ -42,7 +56,7 @@ import org.safs.text.StringProcessor;
 /**
  * Process a string driver commands.
  * Instantiated by DCDriverCommand
- *   
+ *
  * @author Doug Bauman
  * @since   Sep 23, 2003
  **/
@@ -76,7 +90,7 @@ public class DCDriverStringCommands extends DriverCommand {
   public static final String GETSYSTEMUSER               = "GetSystemUser";
   public static final String GETMULTIDELIMITEDFIELDCOUNT = "GetMultiDelimitedFieldCount";
   public static final String GETMULTIDELIMITEDFIELD      = "GetMultiDelimitedField";
-  
+
   /** <br><em>Purpose:</em> constructor, calls super
    **/
   public DCDriverStringCommands () {
@@ -94,7 +108,8 @@ public class DCDriverStringCommands extends DriverCommand {
    * <br><em>State Read:</em>   {@link #testRecordData}, {@link #params}
    * <br><em>Assumptions:</em>  none
    **/
-  public void process() {
+  @Override
+public void process() {
     try {
       if (testRecordData.getCommand().equalsIgnoreCase(LENGTH)) {
         length();
@@ -175,7 +190,7 @@ public class DCDriverStringCommands extends DriverCommand {
     String val = (new Integer(src.length())).toString();
     String comment;
 	if (!setVar(varName, val)) return;
-    comment = genericText.convert("equals", 
+    comment = genericText.convert("equals",
                                    varName +" equals "+ val,
                                    varName, val);
     issueGenericSuccess(comment);
@@ -189,7 +204,7 @@ public class DCDriverStringCommands extends DriverCommand {
     String src = (String) iterator.next();
     String dest = (String) iterator.next();
     String varName = (String) iterator.next();
-    
+
     boolean regexMatch = false;
     if(iterator.hasNext()){
     	try{
@@ -198,12 +213,12 @@ public class DCDriverStringCommands extends DriverCommand {
     		Log.warn("DCDSC.compare(): the parameter regexMatch is wrong, met exception "+e.getMessage());
     	}
     }
-    
+
 
     Log.info(".............................params: "+params);
     boolean matched = false;
     String val = null;
-    
+
     if(regexMatch){
     	//the destination string is a regular expression
     	Pattern pattern = Pattern.compile(dest);
@@ -212,14 +227,14 @@ public class DCDriverStringCommands extends DriverCommand {
     }else{
     	matched = src.equals(dest);
     }
-    
+
     val = String.valueOf(matched);
 	if (!setVar(varName, val))return;
-    String comment = genericText.convert("equals", 
+    String comment = genericText.convert("equals",
                                    varName +" equals "+ val,
                                    varName, val);
     String detail =  StringUtils.quote(src)+ (matched? " matched ":" did not match ")+ StringUtils.quote(dest);
-    		
+
     issueGenericSuccess(comment, detail);
   }
 
@@ -236,7 +251,7 @@ public class DCDriverStringCommands extends DriverCommand {
     String val = src+str2;
     String comment;
 	if (!setVar(varName, val))return;
-    comment = genericText.convert("equals", 
+    comment = genericText.convert("equals",
                                    varName +" equals "+ val,
                                    varName, val);
     issueGenericSuccess(comment);
@@ -254,7 +269,7 @@ public class DCDriverStringCommands extends DriverCommand {
     String val = src.toUpperCase();
     String comment;
 	if (!setVar(varName, val)) return;
-    comment = genericText.convert("equals", 
+    comment = genericText.convert("equals",
                                    varName +" equals "+ val,
                                    varName, val);
     issueGenericSuccess(comment);
@@ -271,7 +286,7 @@ public class DCDriverStringCommands extends DriverCommand {
     String val = src.toLowerCase();
     String comment;
 	if (!setVar(varName, val))return;
-    comment = genericText.convert("equals", 
+    comment = genericText.convert("equals",
                                    varName +" equals "+ val,
                                    varName, val);
     issueGenericSuccess(comment);
@@ -294,7 +309,7 @@ public class DCDriverStringCommands extends DriverCommand {
         if (j >= 0) val = src.substring(j, src.length());
         else val = src;
 		if (!setVar(varName, val)) return;
-        comment = genericText.convert("equals", 
+        comment = genericText.convert("equals",
 	                                   varName +" equals "+ val,
 	                                   varName, val);
         issueGenericSuccess(comment);
@@ -322,7 +337,7 @@ public class DCDriverStringCommands extends DriverCommand {
       if (j >= 0) val = src.substring(0, j) + val;
       else val = src;
 		if (!setVar(varName, val))return;
-        comment = genericText.convert("equals", 
+        comment = genericText.convert("equals",
 	                                   varName +" equals "+ val,
 	                                   varName, val);
         issueGenericSuccess(comment);
@@ -344,10 +359,10 @@ public class DCDriverStringCommands extends DriverCommand {
     String val = src.trim();
     String comment;
 	if (!setVar(varName, val))return;
-    comment = genericText.convert("equals", 
+    comment = genericText.convert("equals",
                                    varName +" equals "+ val,
                                    varName, val);
-    issueGenericSuccess(comment);    
+    issueGenericSuccess(comment);
   }
 
   /** <br><em>Purpose:</em> left
@@ -363,7 +378,7 @@ public class DCDriverStringCommands extends DriverCommand {
         String val = src.substring(0, num);
         String comment;
 		if (!setVar(varName, val))return;
-        comment = genericText.convert("equals", 
+        comment = genericText.convert("equals",
 	                                   varName +" equals "+ val,
 	                                   varName, val);
         issueGenericSuccess(comment);
@@ -387,7 +402,7 @@ public class DCDriverStringCommands extends DriverCommand {
         String val = src.substring(src.length()-num, src.length());
         String comment;
 		if (!setVar(varName, val)) return;
-        comment = genericText.convert("equals", 
+        comment = genericText.convert("equals",
 	                                   varName +" equals "+ val,
 	                                   varName, val);
         issueGenericSuccess(comment);
@@ -453,17 +468,17 @@ public class DCDriverStringCommands extends DriverCommand {
     // get substring succeeded
     String comment;
 	if (! setVar(varname, substring))return;
-    comment = genericText.convert("equals", 
+    comment = genericText.convert("equals",
                                    varname +" equals "+ substring,
                                    varname, substring);
-    issueGenericSuccess(comment);   
+    issueGenericSuccess(comment);
   }
 
   /** <br><em>Purpose:</em> subString
    **/
   private void subString () throws SAFSException {
     //rld: added logic to handle length specification correctly.
-    if (!checkParams(4)) return;    
+    if (!checkParams(4)) return;
 
     Iterator iterator = params.iterator();
     String src = (String) iterator.next();
@@ -501,7 +516,7 @@ public class DCDriverStringCommands extends DriverCommand {
 	        val = src.substring(num, num+len);
 	    }
 		if (!setVar(varName, val))return;
-        comment = genericText.convert("equals", 
+        comment = genericText.convert("equals",
 	                                   varName +" equals "+ val,
 	                                   varName, val);
         issueGenericSuccess(comment);
@@ -516,7 +531,7 @@ public class DCDriverStringCommands extends DriverCommand {
    **/
   private void index () throws SAFSException {
     if (!checkParams(4)) return;
-    
+
     Iterator iterator = params.iterator();
     int start = getInt(iterator);
     String src = (String) iterator.next();
@@ -530,7 +545,7 @@ public class DCDriverStringCommands extends DriverCommand {
       if (j>=0) {
         val = (new Integer(j+start)).toString();
 		if (!setVar(varName, val))return;
-        comment = genericText.convert("equals", 
+        comment = genericText.convert("equals",
 	                                   varName +" equals "+ val,
 	                                   varName, val);
         issueGenericSuccess(comment);
@@ -538,10 +553,10 @@ public class DCDriverStringCommands extends DriverCommand {
       } else {
         val = (new Integer(j)).toString();
         if (!setVar(varName, val)) return;
-        comment = genericText.convert("equals", 
+        comment = genericText.convert("equals",
 	                                      varName +" equals "+ val,
 	                                      varName, val);
-	                                      
+
         comment += " "+ failedText.convert("substring_not_found_2",
                                      "Substring '"+ find +"' not found in '"+ src +"'.",
                                      find, src);
@@ -575,23 +590,23 @@ public class DCDriverStringCommands extends DriverCommand {
         didReplace = true;
         j = val.indexOf(find,j+replace.length());
       }
-      
+
       val = didReplace? val:src;
       Log.debug("Replacing substrings completed!");
 	  if (! setVar(varName, val)) return;
 	  Log.debug("The result "+val+" is set to varialbe "+varName);
-	  
-	  comment = genericText.convert("equals", 
+
+	  comment = genericText.convert("equals",
 			                        varName +" equals "+ val,
 			                        varName, val);
-	  
+
 	  //If nothing was replaced, add some extra comment to tell user.
       if (!didReplace) {
     	  comment += " "+ failedText.convert("substring_not_found_2",
     			  "Substring '"+ find +"' not found in '"+ src +"'.",
     			  find, src);
       }
-      
+
       issueGenericSuccess(comment);
       return;
     } catch (java.lang.StringIndexOutOfBoundsException sioobe) {
@@ -614,7 +629,7 @@ public class DCDriverStringCommands extends DriverCommand {
         String val = src.replaceAll ("[^ -~]", " ");
 	    String comment;
 		if (! setVar(varName, val))return;
-        comment = genericText.convert("equals", 
+        comment = genericText.convert("equals",
 	                                   varName +" equals "+ val,
 	                                   varName, val);
         issueGenericSuccess(comment);
@@ -646,7 +661,7 @@ public class DCDriverStringCommands extends DriverCommand {
         String val = sTmp.trim();
 	    String comment;
 		if (!setVar(varName, val)) return;
-        comment = genericText.convert("equals", 
+        comment = genericText.convert("equals",
 	                                   varName +" equals "+ val,
 	                                   varName, val);
         issueGenericSuccess(comment);
@@ -671,7 +686,7 @@ public class DCDriverStringCommands extends DriverCommand {
         String val = StringUtils.getInputToken(src, num, str2);
 	    String comment;
 		if (!setVar(varName, val)) return;
-        comment = genericText.convert("equals", 
+        comment = genericText.convert("equals",
 	                                   varName +" equals "+ val,
 	                                   varName, val);
         issueGenericSuccess(comment);
@@ -698,7 +713,7 @@ public class DCDriverStringCommands extends DriverCommand {
         String val = src.substring(sindex, sindex+fixedwidth);
 	    String comment;
 		if (! setVar(varName, val)) return;
-        comment = genericText.convert("equals", 
+        comment = genericText.convert("equals",
 	                                   varName +" equals "+ val,
 	                                   varName, val);
         issueGenericSuccess(comment);
@@ -713,7 +728,7 @@ public class DCDriverStringCommands extends DriverCommand {
    **/
   private void getNextDelimiterIndex () throws SAFSException {
 	String debugmsg = getClass().getName()+".getNextDelimiterIndex() ";
-	
+
     if (!checkParams(4)) return;
     Iterator iterator = params.iterator();
     String src = (String) iterator.next();
@@ -738,7 +753,7 @@ public class DCDriverStringCommands extends DriverCommand {
       int k= subsrc.indexOf(d);
       if (min < 0 || min > k) min = k;
     }
-    
+
     if(min>-1){
     	min += index;
     	Log.info(debugmsg+" Delimiter '"+delims+"' found at "+min);
@@ -752,7 +767,7 @@ public class DCDriverStringCommands extends DriverCommand {
     String val = Integer.toString(min);
     String comment;
 	if (! setVar(varName, val)) return;
-    comment = genericText.convert(GENStrings.EQUALS, 
+    comment = genericText.convert(GENStrings.EQUALS,
                                    varName +" equals "+ val,
                                    varName, val);
     issueGenericSuccess(comment);
@@ -773,7 +788,7 @@ public class DCDriverStringCommands extends DriverCommand {
     try {
       String val = Integer.toString(StringUtils.getFieldCount(src, start, delims));
 		if (! setVar(varName, val))return;
-        comment = genericText.convert("equals", 
+        comment = genericText.convert("equals",
 	                                   varName +" equals "+ val,
 	                                   varName, val);
         issueGenericSuccess(comment);
@@ -839,7 +854,7 @@ public class DCDriverStringCommands extends DriverCommand {
 		String[] sArray = sTmp.split(delims, -1);
 		String val = Integer.toString(Array.getLength(sArray));
 		if (! setVar(varName, val))return;
-        comment = genericText.convert("equals", 
+        comment = genericText.convert("equals",
 	                                   varName +" equals "+ val,
 	                                   varName, val);
         issueGenericSuccess(comment);
@@ -894,7 +909,7 @@ public class DCDriverStringCommands extends DriverCommand {
 		String[] sArray = src.split(delim, -1);
 		String val = sArray[index-1];
 		if (! setVar(varName, val)) return;
-        comment = genericText.convert("equals", 
+        comment = genericText.convert("equals",
 	                                   varName +" equals "+ val,
 	                                   varName, val);
         issueGenericSuccess(comment);
@@ -919,14 +934,14 @@ public class DCDriverStringCommands extends DriverCommand {
 
   private void getMultiDelimitedFieldCount() throws SAFSException {
 	  String debugmsg = getClass().getName()+".getMultiDelimitedFieldCount() ";
-		
+
 	    if (!checkParams(4)) return;
 	    Iterator iterator = params.iterator();
 	    String src = (String) iterator.next();
 	    int startIndex = getInt(iterator);
 	    String delim = (String) iterator.next();
 	    String varName = (String) iterator.next();
-	    
+
 	    Log.info(".............................params: "+params);
 		String comment;
 	    try {
@@ -950,9 +965,9 @@ public class DCDriverStringCommands extends DriverCommand {
 	        List tokens = StringUtils.getTokenList(subString, delim);
 			String val = String.valueOf(tokens.size());
 			Log.debug(debugmsg+" Set field count: "+val);
-			
+
 			if (! setVar(varName, val)) return;
-	        comment = genericText.convert(GENStrings.EQUALS, 
+	        comment = genericText.convert(GENStrings.EQUALS,
 		                                   varName +" equals "+ val,
 		                                   varName, val);
 	        issueGenericSuccess(comment);
@@ -976,7 +991,7 @@ public class DCDriverStringCommands extends DriverCommand {
 
   private void getMultiDelimitedField() throws SAFSException {
 	String debugmsg = getClass().getName()+".getMultiDelimitedField() ";
-	
+
     if (!checkParams(5)) return;
     Iterator iterator = params.iterator();
     String src = (String) iterator.next();
@@ -984,7 +999,7 @@ public class DCDriverStringCommands extends DriverCommand {
     int startIndex = getInt(iterator);
     String delim = (String) iterator.next();
     String varName = (String) iterator.next();
-    
+
     Log.info(".............................params: "+params);
 	String comment;
     try {
@@ -1018,10 +1033,10 @@ public class DCDriverStringCommands extends DriverCommand {
 		}else{
 			Log.debug(debugmsg+" index "+index+" should not be bigger than number of tokens "+tokens.size());
 		}
-		Log.debug(debugmsg+" Set field value: "+val);			
-		
+		Log.debug(debugmsg+" Set field value: "+val);
+
 		if (! setVar(varName, val)) return;
-        comment = genericText.convert(GENStrings.EQUALS, 
+        comment = genericText.convert(GENStrings.EQUALS,
 	                                   varName +" equals "+ val,
 	                                   varName, val);
         issueGenericSuccess(comment);
@@ -1042,20 +1057,20 @@ public class DCDriverStringCommands extends DriverCommand {
 	     setVar(varName, "");
     }
   }
-  
-	/** 
+
+	/**
 	 * getSTAFEnv
 	 * returns string value or an empty string
 	 */
 	private String getSTAFEnv(String env) {
 		STAFHelper stafHelper = testRecordData.getSTAFHelper();
 		String result = stafHelper.getSTAFEnv(env);
-		
+
 	    if (result == null) issueParameterValueFailure(env);
     	return result;
 	}
-	
-	/** 
+
+	/**
 	 * getSystemEnviron
 	 * Extract STAF/Env/VARIABLENAME from the STAF VAR service.
 	 * <p>
@@ -1073,13 +1088,13 @@ public class DCDriverStringCommands extends DriverCommand {
 		String comment;
     	String result = getSTAFEnv(src);
 	  	if (! setVar(varName, result)) return;
-      	comment = genericText.convert("equals", 
+      	comment = genericText.convert("equals",
 	                                   varName +" equals "+ result,
 	                                   varName, result);
       	issueGenericSuccess(comment);
     }
 
-	/** 
+	/**
 	 * getSystemUser
 	 * Extract STAF/Env/USERNAME from the STAF VAR service.
 	 * <p>
@@ -1097,7 +1112,7 @@ public class DCDriverStringCommands extends DriverCommand {
 		String comment;
     	String result = getSTAFEnv(src);
 	  	if (! setVar(varName, result)) return;
-      	comment = genericText.convert("equals", 
+      	comment = genericText.convert("equals",
 	                                   varName +" equals "+ result,
 	                                   varName, result);
       	issueGenericSuccess(comment);
@@ -1120,10 +1135,10 @@ public class DCDriverStringCommands extends DriverCommand {
     return true;
   }
 
-  /** <br><em>Purpose:</em> check if params are < expected, if so then unsuccessful, ok otherwise.
+  /** <br><em>Purpose:</em> check if parameter's size is smaller than expected, if so then unsuccessful, ok otherwise.
    ** if unsuccessful then sets statusCode to GENERAL_SCRIPT_FAILURE and logs warning
    * @param                     expected, int
-   * @return                    boolean, false if params.size() < expected, true otherwise
+   * @return                    boolean, false if parameter's size is smaller than expected, true otherwise
    **/
   public boolean checkParams (int expected) throws SAFSException {
     if (params.size() < expected) {

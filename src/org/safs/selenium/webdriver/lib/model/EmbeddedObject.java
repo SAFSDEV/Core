@@ -1,7 +1,31 @@
 /**
- ** Copyright (C) SAS Institute, All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
+/**
+ * <br>
+ * History:<br>
+ *
+ * APR 25, 2014    (Lei Wang) Initial release.
+ * OCT 15, 2014    (Lei Wang) Add method isShowOnPage().
+ * JUL 05, 2017    (Lei Wang) Modified isShowOnPage(): WebElement.isDisplayed() is not reliable, call WDLibrary.isShowOnPage() to check again.
+ * JUL 19, 2017    (Lei Wang) Modified isShowOnPage(): Don't call WDLibrary.isShowOnPage() to check again, it sometimes will prevent
+ *                                                   an item (within a container) from being scrolled into view.
+ *
+ */
 package org.safs.selenium.webdriver.lib.model;
 
 import org.openqa.selenium.WebElement;
@@ -18,10 +42,7 @@ import org.safs.selenium.webdriver.lib.WDLibrary;
  * Subclass needs to provide the method {@link #getSupportedClassNames()}.<br>
  *
  * <br>
- * History:<br>
- *
- *  <br>   Apr 25, 2014    (Lei Wang) Initial release.
- *  <br>   Oct 15, 2014    (Lei Wang) Add method isShowOnPage().
+ * @author Lei Wang 	APR 25, 2014 Initial release.
  */
 public abstract class EmbeddedObject implements Supportable{
 	/**
@@ -46,6 +67,7 @@ public abstract class EmbeddedObject implements Supportable{
 	/**
 	 * Test if the element is supported. Handle different domains such as SAP, DOJO, HTML etc.
 	 */
+	@Override
 	public boolean isSupported(WebElement element){
 		boolean rc = false;
 		try {
@@ -80,39 +102,58 @@ public abstract class EmbeddedObject implements Supportable{
 	}
 
 	/**
-	 * To check if an Element is visible on page.<br>
-	 * If the center of the element is in the container and is shown in the browser's client area, the<br>
-	 * element will be considered as visible on page.<br>
+	 * To check if an Element is visible on page. This method will check:<br>
+	 * <ul>
+	 * <li>If the element is considered as visible by Selenium
+	 * <li>If the center of the element is in the container
+	 * <li>If the item is shown in browser
+	 * </ul>
 	 * @param element Element, the element to check
 	 * @return boolean, true if the element is visible on page.
 	 * @throws SeleniumPlusException
 	 */
 	protected boolean isShowOnPage(Element element) throws SeleniumPlusException {
+		String debugmsg = StringUtils.debugmsg(false);
 		WDLibrary.checkNotNull(element);
+		boolean isShown = false;
+		WebElement item = null;
 
 		try{
-			WebElement item = element.getWebElement();
+			item = element.getWebElement();
 			org.openqa.selenium.Dimension itemD = item.getSize();
 			org.openqa.selenium.Point itemCenterOffset = new org.openqa.selenium.Point(itemD.width/2, itemD.height/2);
 			org.openqa.selenium.Point itemLoc = item.getLocation();
 			org.openqa.selenium.Point itemCenterLoc = itemLoc.moveBy(itemCenterOffset.x, itemCenterOffset.y);
 
-			WebElement container = webelement();
-			org.openqa.selenium.Dimension containerD = container.getSize();
-			org.openqa.selenium.Point containerLoc = container.getLocation();
-			org.openqa.selenium.Point itemCenterLocRelativeToContainer = itemCenterLoc.moveBy(-containerLoc.x, -containerLoc.y);
+			//Check if the item is considered displayed by Selenium
+			//WebElement.isDisplayed() is not reliable, sometimes it returns false even the element is totally visible on the page.
+			isShown = item.isDisplayed();
+			IndependantLog.debug(debugmsg+"WebElement.isDisplayed() returned '"+isShown+"'. But it is NOT reliable, "
+					+ "sometimes it returns false even the element is totally visible on the page.");
 
-			if( item.isDisplayed() //the item is considered displayed by Selenium
-					&& WDLibrary.isLocationInBounds(itemCenterLocRelativeToContainer, containerD) //the center of item is shown in the container
-					&& WDLibrary.isShowOnPage(item, itemCenterOffset) //the center of the item is shown in browser
-					){
-				return true;
+			//Check if the center of item is shown in the container
+			if(isShown){
+				WebElement container = webelement();
+				//WebElement.getSize() will not return the correct size, it is larger in most time and the element will be considered as 'visible' wrongly.
+				//The funny thing is that this api's document is "What is the width and height of the rendered element?".
+				org.openqa.selenium.Dimension containerD = container.getSize();
+				org.openqa.selenium.Point containerLoc = container.getLocation();
+				org.openqa.selenium.Point itemCenterLocRelativeToContainer = itemCenterLoc.moveBy(-containerLoc.x, -containerLoc.y);
+				isShown = WDLibrary.isLocationInBounds(itemCenterLocRelativeToContainer, containerD);
+				IndependantLog.debug(debugmsg+"Check if item center (relative to container) '"+itemCenterLocRelativeToContainer+"' is inside container '"+containerD+"', it is "+isShown+".");
 			}
+
+			//Check if the item is shown in browser
+			if(isShown){
+				isShown = WDLibrary.isShowOnPage(item, itemCenterOffset);
+				IndependantLog.debug(debugmsg+"Chech if item is shown on page, it is "+isShown+".");
+			}
+
 		}catch(Exception e){
-			IndependantLog.error(StringUtils.debugmsg(false)+"Met "+StringUtils.debugmsg(e));
+			IndependantLog.error(debugmsg+"Met "+StringUtils.debugmsg(e));
 		}
 
-		return false;
+		return isShown;
 	}
 
 	public WebElement webelement(){

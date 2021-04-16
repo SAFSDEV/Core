@@ -6,17 +6,17 @@
 <h1>Setup SmartBear TestComplete<br/>
 for SAFS on Windows<br/>
 </h1>
-Updated 2016.01.20
+Updated 2018.10.15
 </center>
 <hr>
 <b>Authors:</b>
-<ul>Carl Nagle, Eileen Taht, Cliff Bills, Xiaohui Zhang, Dharmesh Patel, Judy Rink</ul>
+<ul>Carl Nagle, Eileen Taht, Cliff Bills, Xiaohui Zhang, Dharmesh Patel, Judy Rink, Lei Wang</ul>
 <p>
 <b>Copyright (C) SAS Institute</b><br>
 <a href="http://www.opensource.org/licenses/gpl-license.php" target="reference">General Public License</a>: http://www.opensource.org/licenses/gpl-license.php
 <hr>
 <small>
-<a href="#top">Top</a>, <a href="#verify">Verify&nbsp;Install</a>, <a href="#updateold">Update&nbsp;Old&nbsp;SAFS</a>, <a href="#updates">Updates</a>, <a href="#usagetips">Configure</a>, <a href="#both">Both&nbsp;TestComplete/Execute</a>, <a href="#htmlflex">HTML&nbsp;&amp;&nbsp;Flex</a>, <a href="#recognition">Recognition&nbsp;Strings</a>, <a href="#tc9tc8">Both&nbsp;TC9&nbsp;&amp;&nbsp;TC10</a>,
+<a href="#top">Top</a>, <a href="#verify">Verify&nbsp;Install</a>, <a href="#updateold">Update&nbsp;Old&nbsp;SAFS</a>, <a href="#updates">Updates</a>, <a href="#usagetips">Configure</a>, <a href="#both">Both&nbsp;TestComplete/Execute</a>, <a href="#htmlflex">HTML&nbsp;&amp;&nbsp;Flex</a>, <a href="#recognition">Recognition&nbsp;Strings</a>, <a href="#tc9tc8">Both&nbsp;TC9&nbsp;&amp;&nbsp;TC10</a>, <a href="#windows10">Windows10</a>
 </small>
 <p>
 The TestComplete Project (installed at <b>C:\SAFS\TCAFS</b>) has been "upgraded" to TestComplete V10.
@@ -26,13 +26,50 @@ If you are running an earlier version of TestComplete you will need to:
     <li><b>Upgrade</b> to TestComplete 10, OR
     <li><b>Transfer</b> TCAFS Script and UserForms to your pre-V10 TestComplete Project repository, OR
     <li>You *might* be able to <b>Overwrite</b> this V10 TCAFS repository with an earlier version you already have.
-</ul><p>
-After the SAFS install, if you install a version of TestComplete that is newer than V10, you will need to manually open and convert the existing TCAFS project at C:<b>\SAFS\TCAFS\TCAFS.PJS</b> for your newer version of TestComplete. &nbsp;Open the TCAFS project and TestComplete will prompt for your approval to convert the project for you.
+</ul>
 <p>
-<center><b>Without proper conversion to match your version of TestComplete the TCAFS test automation will not be allowed to run.</b></center>
+After the SAFS install:
+   <ul> 
+	<li>If you install a version of TestComplete that is newer than V10, you will need to manually open and convert the existing TCAFS project at <b>C:\SAFS\TCAFS</b> 
+	    for your newer version of TestComplete. Open the TCAFS project (<b>C:\SAFS\TCAFS\TCAFS.PJS</b>) and TestComplete will prompt for your approval to convert the project for you.<br>
+	    For TestComplete 12, we have already provided the converted project files (they have the suffix .12, you can remove the suffix to replace the original file), listed as below:<br>
+	    <ul style="font-size:70%;color:gray">
+			<li>Events/Events.tcAX.12 
+			<li>LLCollection1/LLCollection.tcLLC.12 
+			<li>ProcessContainer.mds.12 
+			<li>Script/Script.tcScript.12 
+			<li>Stores/DBTables/DBTables.tcDB.12 
+			<li>Stores/Files.tcFiles.12 
+			<li>Stores/Objects.tcObjects.12 
+			<li>Stores/Regions.tcRegions.12 
+			<li>Stores/Stores.tcStores.12 
+			<li>Stores/Tables/Tables.tcTbls.12 
+			<li>Stores/WebTesting/WebTesting.tcWtc.12 
+			<li>Stores/XML/XML.tcXmls.12 
+			<li>TCAFS.PJS.12 
+			<li>TCAFS.TCCFGEXTENDER.12 
+			<li>TCAFS/Events/Events.TCAX.12 
+			<li>TCAFS/Script/Script.TCSCRIPT.12 
+			<li>TCAFS/Stores/Files.TCFILES.12 
+			<li>TCAFS/Stores/Objects.TCOBJECTS.12 
+			<li>TCAFS/Stores/Regions.TCREGIONS.12 
+			<li>TCAFS/Stores/Stores.TCSTORES.12 
+			<li>TCAFS/TCAFS.MDS.12 
+			<li>TestedApps/TestedApps.tcTAs.12 
+	    </ul>
+		<b>Without proper conversion to match your version of TestComplete the TCAFS test automation will not be allowed to run.</b>
+	<li>Run <b>cscript.exe C:\SAFS\install\SetupTCAFS.wsf</b> to setup the environments.
+  </ul>
+<b>NOTE:</b>
+	<ul>
+		<li>For "Test Complete 12", an error dialog with message "Cannot load data Activex Objects" will pop up when opening TCAFS project (<b>C:\SAFS\TCAFS\TCAFS.PJS</b>).<br>
+			We just click the "Ok" button to close this dialog. Currently this problem doesn't have any impact on our TCAFS Test.<br>
+	</ul>
+
+
 <p><a name="updates"/>
 <hr><small>
-<a href="#top">Top</a>, <a href="#verify">Verify Install</a>, <a href="#updateold">Update&nbsp;Old&nbsp;SAFS</a>, <a href="#usagetips">Configure</a>, <a href="#both">Both&nbsp;TestComplete/Execute</a>, <a href="#htmlflex">HTML&nbsp;&amp;&nbsp;Flex</a>, <a href="#recognition">Recognition&nbsp;Strings</a>, <a href="#tc9tc8">Both&nbsp;TC9&nbsp;&amp;&nbsp;TC10</a>
+<a href="#top">Top</a>, <a href="#verify">Verify Install</a>, <a href="#updateold">Update&nbsp;Old&nbsp;SAFS</a>, <a href="#usagetips">Configure</a>, <a href="#both">Both&nbsp;TestComplete/Execute</a>, <a href="#htmlflex">HTML&nbsp;&amp;&nbsp;Flex</a>, <a href="#recognition">Recognition&nbsp;Strings</a>, <a href="#tc9tc8">Both&nbsp;TC9&nbsp;&amp;&nbsp;TC10</a>, <a href="#windows10">Windows10</a>
 </small>
 <h3>Script Updates and Overlays:</h3>
 <p>
@@ -69,7 +106,7 @@ The new scripts are found in the <b>\SAFS\TCAFS\TCAFS\Script</b> directory.
 </ol>
 <p><a name="verify"/>
 <hr><small>
-<a href="#top">Top</a>, <a href="#updateold">Update&nbsp;Old&nbsp;SAFS</a>, <a href="#usagetips">Configure</a>, <a href="#both">Both&nbsp;TestComplete/Execute</a>, <a href="#htmlflex">HTML&nbsp;&amp;&nbsp;Flex</a>, <a href="#recognition">Recognition&nbsp;Strings</a>, <a href="#tc9tc8">Both&nbsp;TC9&nbsp;&amp;&nbsp;TC10</a>
+<a href="#top">Top</a>, <a href="#updateold">Update&nbsp;Old&nbsp;SAFS</a>, <a href="#usagetips">Configure</a>, <a href="#both">Both&nbsp;TestComplete/Execute</a>, <a href="#htmlflex">HTML&nbsp;&amp;&nbsp;Flex</a>, <a href="#recognition">Recognition&nbsp;Strings</a>, <a href="#tc9tc8">Both&nbsp;TC9&nbsp;&amp;&nbsp;TC10</a>, <a href="#windows10">Windows10</a>
 </small>
 <h3>Verify the SAFS/TCAFS Install:</h3>
 <p>
@@ -121,7 +158,7 @@ SmartBear TestComplete 9.0 or higher must be installed and connecting properly t
 </ol>
 <p><a name="updateold"/>
 <hr><small>
-<a href="#top">Top</a>, <a href="#verify">Verify&nbsp;Install</a>, <a href="#usagetips">Configure</a>, <a href="#both">Both&nbsp;TestComplete/Execute</a>, <a href="#htmlflex">HTML&nbsp;&amp;&nbsp;Flex</a>, <a href="#recognition">Recognition&nbsp;Strings</a>, <a href="#tc9tc8">Both&nbsp;TC9&nbsp;&amp;&nbsp;TC10</a>
+<a href="#top">Top</a>, <a href="#verify">Verify&nbsp;Install</a>, <a href="#usagetips">Configure</a>, <a href="#both">Both&nbsp;TestComplete/Execute</a>, <a href="#htmlflex">HTML&nbsp;&amp;&nbsp;Flex</a>, <a href="#recognition">Recognition&nbsp;Strings</a>, <a href="#tc9tc8">Both&nbsp;TC9&nbsp;&amp;&nbsp;TC10</a>, <a href="#windows10">Windows10</a>
 </small>
 <h3>Using TestExecute on older SAFS Installs</h3>
 <ol>
@@ -157,11 +194,11 @@ SmartBear TestComplete 9.0 or higher must be installed and connecting properly t
 		<p><ul>
 			<li>In <b>TestComplete</b>, select the TCAFS project. Then, select <b>Tools > Options > Engines > Log</b>
 			<p>
-			make sure the <b>‘Activate after test run’</b> option is not checked.
+			make sure the <b>ï¿½Activate after test runï¿½</b> option is not checked.
 			<p>
 			<li>In <b>TestExecute</b>--from the TaskBar--select <b>Options > Engines > Log</b>
 			<p>
-			make sure the <b>‘Activate after test run’</b> option is not checked.
+			make sure the <b>ï¿½Activate after test runï¿½</b> option is not checked.
 		</ul>
 		<p>
 		<li>If you plan to run the runTCAFSTest.bat file on a 64-bit machine, you do not need to follow the instructions in this file to point your tests to the 32-bit JVM.<br>
@@ -172,7 +209,7 @@ SmartBear TestComplete 9.0 or higher must be installed and connecting properly t
 </ol>
 <p><a name="usagetips"/>
 <hr><small>
-<a href="#top">Top</a>, <a href="#verify">Verify&nbsp;Install</a>, <a href="#updateold">Update&nbsp;Old&nbsp;SAFS</a>, <a href="#both">Both&nbsp;TestComplete/Execute</a>, <a href="#htmlflex">HTML&nbsp;&amp;&nbsp;Flex</a>, <a href="#recognition">Recognition&nbsp;Strings</a>, <a href="#tc9tc8">Both&nbsp;TC9&nbsp;&amp;&nbsp;TC10</a>
+<a href="#top">Top</a>, <a href="#verify">Verify&nbsp;Install</a>, <a href="#updateold">Update&nbsp;Old&nbsp;SAFS</a>, <a href="#both">Both&nbsp;TestComplete/Execute</a>, <a href="#htmlflex">HTML&nbsp;&amp;&nbsp;Flex</a>, <a href="#recognition">Recognition&nbsp;Strings</a>, <a href="#tc9tc8">Both&nbsp;TC9&nbsp;&amp;&nbsp;TC10</a>, <a href="#windows10">Windows10</a>
 </small>
 <h3>TestComplete / TestExecute: Configuration and Usage Tips</h3>
 <p>
@@ -187,18 +224,18 @@ SmartBear TestComplete 9.0 or higher must be installed and connecting properly t
 			<li>Open your project (for our purposes, this is the TCAFS project)
 			<li>Open the properties dialog for your project
 			<ul>
-			· In the Project Explorer on the left of the IDE, select your project (for example, TCAFS)<br>
-			· RMB (right-mouse-button) > Edit > Properties
+			ï¿½ In the Project Explorer on the left of the IDE, select your project (for example, TCAFS)<br>
+			ï¿½ RMB (right-mouse-button) > Edit > Properties
 			</ul>
 			<li>On the right side of the IDE, select Playback
 			<li>Under the Runtime category, check the box for Minimize TestComplete
 			<ul>
-			· For additional runtime options it is recommended you see Items 2 and 3 below.
+			ï¿½ For additional runtime options it is recommended you see Items 2 and 3 below.
 			</ul
 			<li>Save the project
 			<ul>
-			· In the Project Explorer on the left of the IDE, select your project (for example, TCAFS)
-			· RMB (right-mouse-button) > Save
+			ï¿½ In the Project Explorer on the left of the IDE, select your project (for example, TCAFS)
+			ï¿½ RMB (right-mouse-button) > Save
 			</ul>
 			<li>Exit TestComplete
 			<li>Next time you run the test (in this case the sample test at C:\SAFS\Project\runTCAFSTest.bat), TestComplete will run minimized.
@@ -225,19 +262,19 @@ SmartBear TestComplete 9.0 or higher must be installed and connecting properly t
 			<li>On the right side of the IDE, select Playback.
 			<li>Under the Runtime category, set the following options, as desired:
 			<ul>
-				· Auto-wait timeout, ms: 1000<br>
-				· Delay between events, ms: 0<br>
-				· Key pressing delay, ms: 0<br>
-				· Dragging delay, ms: 5<br>
-				· Mouse movement delay, ms: 0<br>
-				· Stop on Error: Uncheck this property<br>
-				· Minimize TestComplete Check this property<br>
-				· Leave all other settings at the default settings.
+				ï¿½ Auto-wait timeout, ms: 1000<br>
+				ï¿½ Delay between events, ms: 0<br>
+				ï¿½ Key pressing delay, ms: 0<br>
+				ï¿½ Dragging delay, ms: 5<br>
+				ï¿½ Mouse movement delay, ms: 0<br>
+				ï¿½ Stop on Error: Uncheck this property<br>
+				ï¿½ Minimize TestComplete Check this property<br>
+				ï¿½ Leave all other settings at the default settings.
 			</ul>
 			<li>Save the project
 			<ul>
-				· In the Project Explorer on the left of the IDE, select your project (for example, TCAFS)<br>
-				· RMB (right-mouse-button) > Save
+				ï¿½ In the Project Explorer on the left of the IDE, select your project (for example, TCAFS)<br>
+				ï¿½ RMB (right-mouse-button) > Save
 			</ul>
 			<li>Exit TestComplete
 		<p>
@@ -249,9 +286,9 @@ SmartBear TestComplete 9.0 or higher must be installed and connecting properly t
 			<p>
 			<li>To ensure TestExecute honors the TCAFS project properties:
 			<ul>
-				· Go to a machine where you have TestComplete installed.<br>
-				· Modify and save your TCAFS project properties per steps above.<br>
-				· Copy the project file from the TestComplete machine to the TestExecute machine.<br>
+				ï¿½ Go to a machine where you have TestComplete installed.<br>
+				ï¿½ Modify and save your TCAFS project properties per steps above.<br>
+				ï¿½ Copy the project file from the TestComplete machine to the TestExecute machine.<br>
 				(When the TCAFS project tests are run using TestExecute they should run using the desired properties.)
 				<ul>
 					- The project file to copy is found at C:\SAFS\TCAFS\TCAFS\<b>TCAFS.MDS</b>
@@ -269,13 +306,13 @@ SmartBear TestComplete 9.0 or higher must be installed and connecting properly t
 		<p>
 		setting for the "Number of recent logs to keep". If you set this value to 2, TestComplete will only keep the 2 most recent test run logs. Note that this setting can be set on machines with TestExecute as well.
 		<p>
-		<li>When testing .NET application (Outlook, etc.), you can enable the MSAA ‘*’ option: If you need TestComplete to see objects inside menus and trees of .NET applications, you may need to turn on the ‘*’ choice under the list of MSAA accepted windows. This is done as follows:
+		<li>When testing .NET application (Outlook, etc.), you can enable the MSAA ï¿½*ï¿½ option: If you need TestComplete to see objects inside menus and trees of .NET applications, you may need to turn on the ï¿½*ï¿½ choice under the list of MSAA accepted windows. This is done as follows:
 		<p><ul>
 			<li>In TestComplete, with your project open, select:
 			<p>
 			<b>Tools > Default Project Properties > Project > Open Applications > MSAA</b>
 			<p>
-			<li>Make sure the ‘*’ item is checked.
+			<li>Make sure the ï¿½*ï¿½ item is checked.
 			<li>Click OK.
 			<li>Exit TestComplete and, if prompted to save changes, accept the changes.
 			<p>
@@ -285,7 +322,7 @@ SmartBear TestComplete 9.0 or higher must be installed and connecting properly t
 				<p>
 				<b>Tools > Current Project Properties > Open Applications > MSAA</b>
 				<p>
-				<li>Make sure the ‘*’ item is checked.
+				<li>Make sure the ï¿½*ï¿½ item is checked.
 				<li>RMB on your project name and select Save.
 			</ul>
 		</ul>
@@ -294,7 +331,7 @@ SmartBear TestComplete 9.0 or higher must be installed and connecting properly t
 		</b>
 		<p>
 		The recognition strings are different for many windows.<br>
-		In the <b>Tools > Current Project Properties > Open Applications</b>, if NativeClrObject precedes NativeMSAA in the ‘Priority of objects’ list, then a lot of the recognition strings remain unchanged.
+		In the <b>Tools > Current Project Properties > Open Applications</b>, if NativeClrObject precedes NativeMSAA in the ï¿½Priority of objectsï¿½ list, then a lot of the recognition strings remain unchanged.
 		<p>
 		However, there are still some Microsoft Message dialogs that do have different strings and there may be other windows with different strings as well.
 		<p>
@@ -303,7 +340,7 @@ SmartBear TestComplete 9.0 or higher must be installed and connecting properly t
 	</ul>
 	<li><b>TCAFS Timeout</b> so TestComplete has time to open during SAFS test:
 	<p><ul>
-		Like the tcafs.ini file in C:\SAFS\Projects, your tests must also have a test configuration file.&nbsp;In your INI  file, in the [SAFS_TC] section, you can set a Timeout value. &nbsp; Something like: ‘Timeout=120’. &nbsp;This example gives TestComplete 120 seconds to open before SAFS begins to process test commands.
+		Like the tcafs.ini file in C:\SAFS\Projects, your tests must also have a test configuration file.&nbsp;In your INI  file, in the [SAFS_TC] section, you can set a Timeout value. &nbsp; Something like: ï¿½Timeout=120ï¿½. &nbsp;This example gives TestComplete 120 seconds to open before SAFS begins to process test commands.
 		<p>
 		An example mytest.ini file:
 	<p><pre>
@@ -338,7 +375,7 @@ ConvertSAFSInputKeysSyntax=TRUE
 </ol>
 <p><a name="both"/>
 <hr><small>
-<a href="#top">Top</a>, <a href="#verify">Verify&nbsp;Install</a>, <a href="#updateold">Update&nbsp;Old&nbsp;SAFS</a>, <a href="#usagetips">Configure</a>, <a href="#htmlflex">HTML&nbsp;&amp;&nbsp;Flex</a>, <a href="#recognition">Recognition&nbsp;Strings</a>, <a href="#tc9tc8">Both&nbsp;TC9&nbsp;&amp;&nbsp;TC10</a>
+<a href="#top">Top</a>, <a href="#verify">Verify&nbsp;Install</a>, <a href="#updateold">Update&nbsp;Old&nbsp;SAFS</a>, <a href="#usagetips">Configure</a>, <a href="#htmlflex">HTML&nbsp;&amp;&nbsp;Flex</a>, <a href="#recognition">Recognition&nbsp;Strings</a>, <a href="#tc9tc8">Both&nbsp;TC9&nbsp;&amp;&nbsp;TC10</a>, <a href="#windows10">Windows10</a>
 </small>
 <h3>Configuration for running either TestComplete or TestExecute on the same machine</h3>
 <p>
@@ -355,7 +392,7 @@ Read this entire section before deciding which method to use to set your machine
 </ol>
 <p><a name="htmlflex"/>
 <hr><small>
-<a href="#top">Top</a>, <a href="#verify">Verify&nbsp;Install</a>, <a href="#updateold">Update&nbsp;Old&nbsp;SAFS</a>, <a href="#usagetips">Configure</a>, <a href="#both">Both&nbsp;TestComplete/Execute</a>, <a href="#recognition">Recognition&nbsp;Strings</a>, <a href="#tc9tc8">Both&nbsp;TC9&nbsp;&amp;&nbsp;TC10</a>
+<a href="#top">Top</a>, <a href="#verify">Verify&nbsp;Install</a>, <a href="#updateold">Update&nbsp;Old&nbsp;SAFS</a>, <a href="#usagetips">Configure</a>, <a href="#both">Both&nbsp;TestComplete/Execute</a>, <a href="#recognition">Recognition&nbsp;Strings</a>, <a href="#tc9tc8">Both&nbsp;TC9&nbsp;&amp;&nbsp;TC10</a>, <a href="#windows10">Windows10</a>
 </small>
 <h3>Configuration for HTML and Flex playback (IMPORTANT!):</h3>
 <p>
@@ -376,7 +413,7 @@ Additional information for configuring the debug player for Internet Explorer:
 		(Below is an overview of the steps, see the full details in this <a href="http://smartbear.com/support/viewarticle/20003/" target="_blank">Smartbear Article</a>.)
 		<p>
 		<li>Create\Configure the ..\<b>mm.cfg</b> file
-		<li>Add the fully-qualified name of the <b>\Open Apps\Flex</b> folder to the list of trusted locations in the Flash Player’s <a href="http://www.macromedia.com/support/documentation/en/flashplayer/help/settings_manager04.html" target="_blank">Flash Player Settings Manager</a>.
+		<li>Add the fully-qualified name of the <b>\Open Apps\Flex</b> folder to the list of trusted locations in the Flash Playerï¿½s <a href="http://www.macromedia.com/support/documentation/en/flashplayer/help/settings_manager04.html" target="_blank">Flash Player Settings Manager</a>.
 	</ul>
 </ol><p>
 You also need to verify/edit your TestComplete Project Properties settings:
@@ -404,7 +441,7 @@ TestComplete / Execute Enablement:
 </ol>
 <p><a name="recognition"/>
 <hr><small>
-<a href="#top">Top</a>, <a href="#verify">Verify&nbsp;Install</a>, <a href="#updateold">Update&nbsp;Old&nbsp;SAFS</a>, <a href="#usagetips">Configure</a>, <a href="#both">Both&nbsp;TestComplete/Execute</a>, <a href="#htmlflex">HTML&nbsp;&amp;&nbsp;Flex</a>, <a href="#tc9tc8">Both&nbsp;TC9&nbsp;&amp;&nbsp;TC10</a>
+<a href="#top">Top</a>, <a href="#verify">Verify&nbsp;Install</a>, <a href="#updateold">Update&nbsp;Old&nbsp;SAFS</a>, <a href="#usagetips">Configure</a>, <a href="#both">Both&nbsp;TestComplete/Execute</a>, <a href="#htmlflex">HTML&nbsp;&amp;&nbsp;Flex</a>, <a href="#tc9tc8">Both&nbsp;TC9&nbsp;&amp;&nbsp;TC10</a>, <a href="#windows10">Windows10</a>
 </small>
 <h3>Determine recognition strings:</h3>
 <p><ol>
@@ -454,7 +491,7 @@ TestComplete / Execute Enablement:
 </ol>
 <p><a name="tc9tc8"/>
 <hr><small>
-<a href="#top">Top</a>, <a href="#verify">Verify&nbsp;Install</a>, <a href="#updateold">Update&nbsp;Old&nbsp;SAFS</a>, <a href="#usagetips">Configure</a>, <a href="#both">Both&nbsp;TestComplete/Execute</a>, <a href="#htmlflex">HTML&nbsp;&amp;&nbsp;Flex</a>, <a href="#recognition">Recognition&nbsp;Strings</a>
+<a href="#top">Top</a>, <a href="#verify">Verify&nbsp;Install</a>, <a href="#updateold">Update&nbsp;Old&nbsp;SAFS</a>, <a href="#usagetips">Configure</a>, <a href="#both">Both&nbsp;TestComplete/Execute</a>, <a href="#htmlflex">HTML&nbsp;&amp;&nbsp;Flex</a>, <a href="#recognition">Recognition&nbsp;Strings</a>, <a href="#windows10">Windows10</a>
 </small>
 
 <h3>TestComplete 9 and TestComplete 10 on the same machine:</h3>
@@ -466,7 +503,7 @@ The V10 conversion does not change many files, but does modify the .pjs and .mds
 	<li>Make a copy of <b>C:\SAFS\TCAFS</b>
 	<li>Install TestComplete 10 (it goes to a unique directory)
 	<li>Make sure your License Manager is pointing to appropriate licenses, if applicable.
-	<li>Bring up TestComplete 10, open up your existing TCAFS project (File->Open)
+	<li>Bring up TestComplete 10, open up your existing TCAFS project (File->Open) to open file "C:\SAFS\TCAFS\TCAFS.PJS"
 	<li>It will prompt to convert files (do so)
 	<li>Exit TestComplete
 </ol>
@@ -483,7 +520,7 @@ If you want/need to have both TestComplete 9 and 10 on the same machine, please 
 	<p>
 	<li>Updating the applicable V9 or V10 TCAFS.VBS file to execute TestComplete or TestExecute
 	<p><ul>
-		o example paths:
+		<li> example paths:
 		<p>
 		"C:\Program Files (x86)\<b>SmartBear\TestComplete 9</b>\Bin\TestComplete.exe"<br>
 		"C:\Program Files (x86)\<b>SmartBear\TestComplete 10</b>\Bin\TestComplete.exe"
@@ -494,7 +531,7 @@ If you want/need to have both TestComplete 9 and 10 on the same machine, please 
 	</ul>
 	<li>Updating the Adobe Debug Flash Player..\<b>mm.cfg</b> file to load the correct swf
 	<p><ul>
-		o example mm.cfg settings:
+		<li> example mm.cfg settings:
 		<p>
 		PreloadSwf=C:\Program Files (x86)\<b>SmartBear\TestComplete 9</b>\Open Apps\Flex\FlashInjector.swf<br>
 		PreloadSwf=C:\Program Files (x86)\<b>SmartBear\TestComplete 10</b>\Open Apps\Flex\FlashInjector.swf<br>
@@ -505,9 +542,29 @@ If you want/need to have both TestComplete 9 and 10 on the same machine, please 
 	<p>
 	If you want to run your tests with TestComplete 10, you will have to update your TCAFS.VBS script to point to TestComplete 10 instead of 9. Then let it rip.
 	<p>
-<p><hr>
+<p>
+<p><a name="windows10"/>
+<hr><small>
+<a href="#top">Top</a>, <a href="#verify">Verify&nbsp;Install</a>, <a href="#updateold">Update&nbsp;Old&nbsp;SAFS</a>, <a href="#updates">Updates</a>, <a href="#usagetips">Configure</a>, <a href="#both">Both&nbsp;TestComplete/Execute</a>, <a href="#htmlflex">HTML&nbsp;&amp;&nbsp;Flex</a>, <a href="#recognition">Recognition&nbsp;Strings</a>, <a href="#tc9tc8">Both&nbsp;TC9&nbsp;&amp;&nbsp;TC10</a>
+</small>
+<h3>Running TCAFS on Windows10:</h3>
+<p>
+We have experienced issues of SAFS working fine on Windows 7, and then immediately following an upgrade to Windows 10 having significant runtime problems.<br>
+We traced this down to new User Account Control (UAC) policies on Windows 10.<br>
+<a href="https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-overview?ranMID=24542&ranEAID=je6NUbpObpQ&ranSiteID=je6NUbpObpQ-7W_jUQ93W000B_CE.iBX1w&epi=je6NUbpObpQ-7W_jUQ93W000B_CE.iBX1w&irgwc=1&OCID=AID681541_aff_7593_1243925&tduid=(ir_95ad0124Ne03ff15f1b8aaf4e50d3621e)(7593)(1243925)(je6NUbpObpQ-7W_jUQ93W000B_CE.iBX1w)()&irclickid=95ad0124Ne03ff15f1b8aaf4e50d3621e">User Account Control Overview</a><br>
+<a href="https://www.tenforums.com/tutorials/3577-change-user-account-control-uac-settings-windows-10-a.html">User Account Control and How To Change It In Windows 10</a><br>
+To fix this issue, Administrator accounts must have Admin Approve Mode disabled. The simplest and most effective way to do this is to change the "EnableLUA" registry setting to make Admin Approve mode disabled (0).<br>
+The full path to the Registry setting enabling this change:<br>
+<b>HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System</b><br>
+    EnableLUA   1=Enabled; <b>0=Disabled</b><br>
+A reboot is required for these settings to take affect.<br>
+However, this can present new problems.<br>
+For details, please refer to <a href="https://safsdev.freeforums.net/thread/59/problems-running-seleniumplus-chrome-windows">problems-running-seleniumplus-chrome-windows</a><br>
+</p>
+
+<hr>
 <small>
-<a href="#top">Top</a>, <a href="#verify">Verify&nbsp;Install</a>, <a href="#updateold">Update&nbsp;Old&nbsp;SAFS</a>, <a href="#usagetips">Configure</a>, <a href="#both">Both&nbsp;TestComplete/Execute</a>, <a href="#htmlflex">HTML&nbsp;&amp;&nbsp;Flex</a>, <a href="#recognition">Recognition&nbsp;Strings</a>, <a href="#tc9tc8">Both&nbsp;TC9&nbsp;&amp;&nbsp;TC10</a>,
+<a href="#top">Top</a>, <a href="#verify">Verify&nbsp;Install</a>, <a href="#updateold">Update&nbsp;Old&nbsp;SAFS</a>, <a href="#usagetips">Configure</a>, <a href="#both">Both&nbsp;TestComplete/Execute</a>, <a href="#htmlflex">HTML&nbsp;&amp;&nbsp;Flex</a>, <a href="#recognition">Recognition&nbsp;Strings</a>, <a href="#tc9tc8">Both&nbsp;TC9&nbsp;&amp;&nbsp;TC10</a>, <a href="#windows10">Windows10</a>
 </small>
 <pre>
 Carl Nagle, <a href="http://www.sas.com"  >SAS</a>

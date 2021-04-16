@@ -1,0 +1,162 @@
+<html>
+<head>
+<title>Embedding SeleniumPlus</title>
+<style>
+.title {
+   font-size: 18px;
+   font-weight: bold;
+}
+</style>
+</head>
+<body>
+<center><H1>Embedding SeleniumPlus</H1></center>
+<p>
+<hr>
+Author: Carl Nagle<br/>
+Released: May 23, 2019
+<p>
+Copyright, SAS Institute
+<a href="http://www.sas.com" target="altwin">http://www.sas.com</a><br/>
+<hr>
+<dl>
+    <dt class="title">What does "Embedding" mean?
+    <p>
+    <dd>Traditionally, SeleniumPlus (<b>Se+</b>) is used as a standalone test automation framework extending the functionality of Selenium WebDriver and the JSAFS Test Automation Framework.  It includes Eclipse as a test development environment and can run tests either from that Se+ IDE or by launching specific tests using the Java command-line.
+    <p>
+    When "embedding" Se+, we are talking about embedding or inserting the Se+ runtime environment inside the JVM of another Java application or testing framework.  Thus, Se+ test execution is NOT the primary thread of execution, but Se+ features and functionality are available to the application or testing framework in which it is embedded.
+	<p>
+    <dt class="title">Where has this Se+ embedding worked?
+    <p>
+    <dd><ul>
+        <li>In a traditional Java application,
+        <li>In the Katalon testing framework using Groovy and the Groovy Scripting Engine.
+        </ul>
+    <p>
+    <dt class="title">What is required for Se+ to be embedded into my Java app or testing tool?
+    <dd><ul>
+        <li>The Java app or testing tool must be using a compatible Java VM, Version 8 or higher.
+        <li>Se+ must be successfully installed on the machine where the application will run.
+        <li>A Se+ Project must exist and be available for Se+ to access.
+        <li>The Se+ Project configuration file (INI file) must be available with a working configuration.
+        <li>The Java application/framework must have Se+ JAR files in the BuildPath/ClassPath.
+        <li>Appropriate command-line parameters, and/or Java System Properties, and/or String[] arguments required of the <a href="http://safsdev:8880/safs/doc/org/safs/selenium/spc/SPJVMInjector.html" target="_blank" title="Se+ SPJVMInjector JavaDoc">Se+ SPJVMInjector</a> must be set prior to embedding.
+        <li>Your application or test *must* invoke the SPJVMInjector to embed it prior to using any Se+ functionality.
+        <li>Your application *should* invoke the SPJVMInjector shutdown mechanism to gracefully shutdown Se+ prior to shutting down the JVM to make sure all logs and test results are properly captured.
+        </ul>
+    <dt>
+    <!-------------------------------------------------------------------------------------------->
+    <hr>
+    <hr>
+    <dt class="title">Specify Se+ project configuration file in JVM Arguments or System Properties:
+    <dd>
+    <ul>This MUST be done BEFORE calling the Se+ injection. Normally, Se+ will do this automatically.
+        But it cannot when another application/framework is in control.
+        <p>
+        <li>If you can pass it along via Java CLI VM arguments:
+        <ul><p>
+            <b>-Dsafs.project.config=&lt;path/To/My/test.ini></b>  (test.ini can have any name)<br>
+            <p>
+            Example:<br>
+            <b>-Dsafs.project.config=C:/MySeleniumPlusProject/SmokeTest.INI</b>
+        </ul><p>
+        <li>Otherwise, set the System Property in your Java code:
+        <ul><p>
+            <b>System.setProperty("safs.project.config", "&lt;path/To/My/test.ini>");</b>  (test.ini can have any name)<br>
+            <p>Example:<br>
+            <b>System.setProperty("safs.project.config", "C:/MySeleniumPlusProject/SmokeTest.INI");</b>
+        </ul><p>
+    </ul>
+    <p>
+    <dt class="title">Specify Se+ project classes and/or packages to be auto-configured (dependency injection):
+    <dd>
+    <ul>This MUST be done BEFORE calling the Se+ injection. Normally, Se+ will do this automatically.
+        But it cannot when another application/framework is in control.
+        <p>
+        <li>If you can pass it along via Java CLI VM arguments:
+        <ul><p>
+            <b>-Dsafs.test.data.aware.classes=&lt;project1.Map;project2.Map></b><br>
+            <b>-Dsafs.test.data.aware.packages=&lt;project1.package;project2.package></b><br>
+            <b>-Dsafs.test.data.aware.exclusions=&lt;notMy.package;notMyOther.package></b><br>
+            <p>Examples:<br>
+            <b>-Dsafs.test.data.aware.classes="myPackage.Map;helperPackage.Map"</b><br>
+            <b>-Dsafs.test.data.aware.packages="myPackage.testcases;helperPackage.testcases"</b><br>
+            <b>-Dsafs.test.data.aware.exclusions="commons.package;apache.package;someoneElse.package"</b><br>
+        </ul><p>
+        <li>Otherwise, set the System Property in your Java code:
+        <ul><p>
+            <b>System.setProperty("safs.test.data.aware.classes", "&lt;project1.Map;project2.Map>");</b><br>
+            <b>System.setProperty("safs.test.data.aware.packages", "&lt;project1.package;project2.package>");</b><br>
+            <b>System.setProperty("safs.test.data.aware.exclusions", "&lt;notMy.package;notMyOther.package>");</b><br>
+            <p>Example:<br>
+            <b>System.setProperty("safs.test.data.aware.classes", "myPackage.Map;helperPackage.Map");</b><br>
+            <b>System.setProperty("safs.test.data.aware.packages", "myPackage.testcases;helperPackage.testcases");</b><br>
+            <b>System.setProperty("safs.test.data.aware.exclusions", "commons.package;apache.package;someoneElse.package");</b><br>
+        </ul>
+        Depending on your Java runtime environment, not all of the above settings need to be used.<br>
+        Add or remove settings based on what the Se+ Debug Log is saying it "sees" and tries to auto-configure.<br>
+        Very often, only the "<b>safs.test.data.aware.classes</b>" needs to be specified with the package.Map class from each Se+ project you intend to use.
+    </ul>
+    <p>
+    <dt class="title">Specify optional Se+ CLI arguments to pass into the SPJVMInjector.inject(String[] args) method:
+    <dd>
+    <ul>For example, many Se+ users pass in one or more <b>-safsvar:name=value</b> command-line arguments.  These arguments are used to preset SAFSVARS variable values or override values that might be present in an App Map Constants section.  When embedding, these command-line arguments will not be passed to the SPJVMInjector automatically.  So the user needs to acquire these arguments as a String array by other means, or set them directly in Java code.
+    <p>
+    This optional String array is passed in at the time of Se+ injection.
+    <p>
+    <li>Assign a String[] from some method that retrieves the values:
+    <p><pre>
+        String[] args = myCustomArgumentsExtractor();
+        SPJVMInjector selplus = SPJVMInjector.inject( args );
+    </pre>
+    <li>Or build the optional String[] in Java code if desired:
+    <p><pre>
+        String[] args = new String[]{
+            "-safsvar:varname1=value",
+            "-safsvar:varnameX=anotherValue",
+            "-safsvar:varname=lastValue"
+        };
+        SPJVMInjector selplus = SPJVMInjector.inject( args );
+    </pre>
+    </ul>
+    <p>
+    <dt class="title">Provide access (BuildPath or ClassPath) to required Se+ JAR files:
+    <p>
+    <dd>For traditional Java applications (POJOs) the <a href="http://safsdev:8880/safs/doc/org/safs/selenium/spc/SPJVMInjector.html" target="_blank" title="SPJVMInjector JavaDoc">SPJVMInjector documentation</a> should suffice.
+    <p>
+    For more exotic runtimes--like running in a JVM primarily running Groovy, or some other runtime using non-standard ClassLoaders--the user will need to satisfy the ClassLoader environment presented to them.  A Groovy/Katalon case-in-point is mentioned below.
+    <p>
+    <dt class="title">Exotic Runtimes present ClassLoader Challenges:
+    <p>
+    <dd>The Groovy Scripting Engine and test frameworks like Katalon that use it provide additional challenges.  Primarily, their  ClassLoaders treat Groovy Scripts as though they were standard traditional Java packaged libraries.  For this reason, ClassLoader conflicts arise in which a Groovy Script might be called instead of an intended Java class library.
+    <p>
+    To avoid such conflicts, the test environment should conform to some library and class naming conventions:
+    <p>
+    <ul>
+        <li>Groovy script libraries must NOT have the same root names as any Se+ project packages or classes.
+        <p>
+        <ul>Example: Se+ HELPER project has package names:
+            <p>
+            <li>helper
+            <li>helper.testcases
+            <li>helper.testruns
+            <li>helper.utils
+        </ul>
+        <p>
+        <li>Thus, no Groovy Script/Library should have the same name as those Se+ classes.
+    </ul>
+    <p>
+    <dt class="title">Additional Issues with <b>Katalon</b> automation framework using Groovy:
+    <p>
+    <dd>I have not found a way to tell Katalon to find SeleniumPlus/libs JAR files where they reside.<br>
+    Katalon seems to require that ALL JAR dependencies to be used in a Project <b>*MUST*</b> be copied and stored with the Project in its "Driver" subdirectory.
+    <p>
+    <dt class="title">Doc still needed...
+    <p>
+    <dd>
+<pre>
+Full example of startup and shutdown.
+Links to sample Java App and sample Katalon injection need to be provided.
+</pre>
+</dl>
+</body>
+</html>

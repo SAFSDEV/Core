@@ -1,7 +1,28 @@
-/** Copyright (C) (MSA, Inc) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
+/**
+ * Copyright (C) (MSA, Inc), All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
+/**
+ *   <br>   JUN 15, 2003    dbauman: subclass is now in org.safs.rational
+ *          AUG 15, 2008    JunwuMa: Modify initializeUtilities() using REngineCommandProcessor
+ *                                   instead of EngineCommandProcessor.
+ *   <br>   MAR 26, 2009    (Carl Nagle) Added support for clearProxiesAlways.
+ *   <br>   MAR 08, 2011 (DharmeshPatel) Added RFSM support for search mode.
+ *   <br>   MAR 15, 2019 (Lei Wang) Modified initRuntimeParams(): read DynamicEnableTopWindows from configuration file.
+ */
 package org.safs.rational;
 
 import java.io.ByteArrayOutputStream;
@@ -19,11 +40,13 @@ import org.safs.SAFSException;
 import org.safs.SAFSRuntimeException;
 import org.safs.STAFHelper;
 import org.safs.TestRecordHelper;
+import org.safs.rational.ft.DynamicEnabler;
 import org.safs.rational.logging.RLogUtilities;
 import org.safs.tools.CaseInsensitiveFile;
 import org.safs.tools.drivers.ConfigureFile;
 import org.safs.tools.drivers.ConfigureInterface;
 import org.safs.tools.drivers.DriverConstant;
+import org.safs.tools.drivers.DriverConstant.SafsROBOTJ;
 import org.safs.tools.stringutils.StringUtilities;
 
 import com.rational.test.ft.UserStoppedScriptError;
@@ -34,13 +57,7 @@ import com.rational.test.ft.UserStoppedScriptError;
  * @author dbauman
  * @since   JUL 15, 2003
  *
- *   <br>   JUN 15, 2003    dbauman: subclass is now in org.safs.rational
- *          AUG 15, 2008    JunwuMa: Modify initializeUtilities() using REngineCommandProcessor 
- *                                   instead of EngineCommandProcessor. 
- *   <br>   MAR 26, 2009    (Carl Nagle) Added support for clearProxiesAlways.
- *   <br>   MAR 08, 2011 (DharmeshPatel) Added RFSM support for search mode.
  */
-
 public class RRobotJHook extends RobotJHook {
 
 
@@ -56,31 +73,32 @@ public class RRobotJHook extends RobotJHook {
   }
 
   public void setScript(Script script) {
-    log.logMessage(null, 
+    log.logMessage(null,
                         "Script: "+script.getClass().getName()+", "+script,
     					DEBUG_MESSAGE);
     this.script = script;
   }
 
   /**
-   * Overrides the superclass to add an EngineCommandProcessor to our 
+   * Overrides the superclass to add an EngineCommandProcessor to our
    * ProcessRequest object after normal initialization.
    * @see RobotJHook#initializeUtilities()
    */
-  protected void initializeUtilities(){
+  @Override
+protected void initializeUtilities(){
   	super.initializeUtilities();
     EngineCommandProcessor ecommands = new REngineCommandProcessor();
     RGuiObjectVector evector = new RGuiObjectVector("Window", "Child","");
     evector.setScript(script);
-    evector.setProcessMode(GuiObjectVector.MODE_EXTERNAL_PROCESSING);    
+    evector.setProcessMode(GuiObjectVector.MODE_EXTERNAL_PROCESSING);
     ecommands.setGuiObjectVector(evector);
     ecommands.setLogUtilities(log);
     processor.setEngineCommandProcessor(ecommands);
-    
+
     initConfigPaths();
     initRuntimeParams();
   }
-  
+
   protected void initConfigPaths(){
 		String path = System.getProperty("safs.config.paths");
 		String [] paths = new String[0];
@@ -91,7 +109,7 @@ public class RRobotJHook extends RobotJHook {
 			Log.info(msg);
 			return;
 		}
-		
+
 		ConfigureInterface config = null;
 		for(int i = 0; i < paths.length; i++){
 			File f = new CaseInsensitiveFile(paths[i]).toFile();
@@ -101,11 +119,11 @@ public class RRobotJHook extends RobotJHook {
 				} else {
 					config.addConfigureInterface(new ConfigureFile(f));
 				}
-			}			
+			}
 		}
-		((RTestRecordData)data).setConfig(config);	  
+		((RTestRecordData)data).setConfig(config);
   }
-  
+
   protected void initRuntimeParams(){
 	  ConfigureInterface config = null;
       String p = null;
@@ -189,8 +207,18 @@ public class RRobotJHook extends RobotJHook {
       }catch(Exception x){
     	  Log.debug("Ignoring RFSMCache Exception: "+x.getClass().getSimpleName());
       }
+      try{
+    	  p = config.getNamedValue(SafsROBOTJ.SECTION_NAME, SafsROBOTJ.ITEM_DYNAMIC_ENABLE_TOP_WINS);
+    	  if(p.length()>0){
+    		  DynamicEnabler.setEnableTopWindows(StringUtilities.convertBool(p));
+    		  Log.info("Config setting: DynamicEnableTopWindows = "+ p);
+    		  System.out.println("Overriding config setting: DynamicEnableTopWindows = "+ p);
+    	  }
+      }catch(Exception x){
+    	  Log.debug("Ignoring DynamicEnableTopWindows Exception: "+x.getClass().getSimpleName());
+      }
   }
-  
+
   public void start () {
 	boolean record_running = false;
     if (script == null) {
@@ -200,7 +228,7 @@ public class RRobotJHook extends RobotJHook {
     }
     //super.start();
     boolean shutdown = false;
-    String  testrecord = null;                
+    String  testrecord = null;
     int rc = 99;
     try {
       helper.resetHookEvents(ROBOTJ_PROCESS_NAME);
@@ -226,7 +254,7 @@ public class RRobotJHook extends RobotJHook {
           try{
             data.setInstanceName(STAFHelper.SAFS_HOOK_TRD);
             data.populateDataFromVar();
-            try{ 
+            try{
             	processor.doRequest();
                 if(clearProxiesAlways) {
                 	Log.info(ROBOTJ_PROCESS_NAME +" clearProxiesAlways initiating UnregisterAll for remote proxy references...");
@@ -242,33 +270,33 @@ public class RRobotJHook extends RobotJHook {
                 	data.setStatusCode(DriverConstant.STATUS_SCRIPT_NOT_EXECUTED);
                 	data.setStatusInfo(SHUTDOWN_RECORD);
                 }
-            } 
-            data.sendbackResponse();          
-          } 
+            }
+            data.sendbackResponse();
+          }
           catch (SAFSException ex) {
             Log.error("*** ERROR *** "+ ex.getMessage(),ex);
           }
         }
 
         helper.setTestResults();
-        helper.resetEvent(STAFHelper.ROBOTJ_EVENT_RUNNING);    
+        helper.resetEvent(STAFHelper.ROBOTJ_EVENT_RUNNING);
         System.gc();
-      } while(!shutdown);                
+      } while(!shutdown);
 
       helper.resetHookEvents(ROBOTJ_PROCESS_NAME);
       helper.postEvent(STAFHelper.ROBOTJ_EVENT_SHUTDOWN);
-    } 
+    }
     catch(SAFSException e){
       Log.error("Error talking with STAF subsystem; "+e.getMessage(), e);
-    } 
+    }
     catch(UserStoppedScriptError e){
     	Log.info(ROBOTJ_PROCESS_NAME +" processing user-initiated test abort shutdown...");
     	data.setStatusCode(DriverConstant.STATUS_SCRIPT_NOT_EXECUTED);
     	data.setStatusInfo(SHUTDOWN_RECORD);
-        try{ 
+        try{
             if (helper != null){
             	if(record_running) {
-            		data.sendbackResponse();         
+            		data.sendbackResponse();
     	            helper.setTestResults();
             	}
 	            helper.resetHookEvents(ROBOTJ_PROCESS_NAME);
@@ -278,12 +306,12 @@ public class RRobotJHook extends RobotJHook {
         }catch(SAFSException ex){
             Log.error("*** ERROR *** during User Abort Test processing: "+ ex.getMessage(),ex);
         }
-    	
+
     } catch(Error e){
     	ByteArrayOutputStream stream = new ByteArrayOutputStream();
     	PrintStream err = new PrintStream(stream);
     	e.printStackTrace();
-        e.printStackTrace(err);       
+        e.printStackTrace(err);
         Log.error("Error talking with STAF subsystem; "+e.getMessage()+"\n"+ err.toString());
     } finally {
       try {
@@ -291,26 +319,27 @@ public class RRobotJHook extends RobotJHook {
       } catch(SAFSException e){ }
       //System.out.println("RobotJ hook script shutting down.");
       // using the Clipboard class sometimes gets us stuck here, so doing this:
-      
+
       //System.exit(0); //(Carl Nagle) FEB 28, 2009
     }
 }
 
   /**
    * Overrides superclass.
-   * Evaluate if the runtime hook should shutdown, proceed, or some other action 
+   * Evaluate if the runtime hook should shutdown, proceed, or some other action
    * following the receipt of a RuntimeException.
    */
   protected long evaluateRuntimeException(Throwable ex){
   	  Throwable x = ex.getCause();
   	  if (x instanceof com.rational.test.ft.UserStoppedScriptError)
   	  	  return REQUEST_USER_STOPPED_SCRIPT_REQUEST;
-  	  	  
+
   	  return REQUEST_PROCEED_TESTING;
   }
-  
-  
-  protected DDGUIUtilities getUtilitiesFactory() {	  
+
+
+  @Override
+protected DDGUIUtilities getUtilitiesFactory() {
     return new RDDGUIUtilities(helper, script, log);
   }
 
@@ -318,7 +347,8 @@ public class RRobotJHook extends RobotJHook {
 	    return (RDDGUIUtilities) utils;
   }
 
-  protected TestRecordHelper getTestRecordDataFactory() {
+  @Override
+protected TestRecordHelper getTestRecordDataFactory() {
     return new RTestRecordData();
   }
 
@@ -329,7 +359,8 @@ public class RRobotJHook extends RobotJHook {
 	    return (RTestRecordData) data;
 	  }
 
-  protected TestRecordHelper getTestRecordDataFactory(DDGUIUtilities utils) {
+  @Override
+protected TestRecordHelper getTestRecordDataFactory(DDGUIUtilities utils) {
     return new RTestRecordData(helper, script, utils);
   }
 

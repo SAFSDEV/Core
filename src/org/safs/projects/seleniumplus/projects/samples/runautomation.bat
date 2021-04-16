@@ -1,12 +1,17 @@
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::
+@ECHO OFF
 
 setlocal enableDelayedExpansion
-set max=0
-for /f "tokens=1* delims=-.0" %%A in ('dir /b /a-d %SELENIUM_PLUS%\libs\selenium-server-standalone*.jar') do if %%B gtr !max! set max=%%B
-set SELENIUM_SERVER_JAR_LOC=%SELENIUM_PLUS%\libs\selenium-%max%
+REM set max=0
+REM for /f "tokens=1* delims=-.0" %%A in ('dir /b /a-d %SELENIUM_PLUS%\libs\selenium-server-standalone*.jar') do if %%B gtr !max! set max=%%B
+REM set SELENIUM_SERVER_JAR_LOC=%SELENIUM_PLUS%\libs\selenium-%max%
 
-set CMDCLASSPATH="%SELENIUM_PLUS%\libs\seleniumplus.jar;%SELENIUM_PLUS%\libs\JSTAFEmbedded.jar;%SELENIUM_SERVER_JAR_LOC%"
+REM Get the latest selenium-server-standalone jar, list the selenium-server-standalone jar in order (by date/time), the last one is the latest. 
+for /f %%A in ('dir %SELENIUM_PLUS%\libs\selenium-server-standalone*.jar /B /O:D') do set SELENIUM_SERVER_JAR_LOC=%%A
+set SELENIUM_SERVER_JAR_LOC=%SELENIUM_PLUS%\libs\%SELENIUM_SERVER_JAR_LOC%
+
+set CMDCLASSPATH=%SELENIUM_PLUS%\libs\seleniumplus.jar;%SELENIUM_PLUS%\libs\JSTAFEmbedded.jar;%SELENIUM_SERVER_JAR_LOC%
 set EXECUTE=%SELENIUM_PLUS%/Java/bin/java
 
 :: DON'T MODIFY ABOVE SETTING UNLESS NECESSARY
@@ -22,4 +27,4 @@ set EXECUTE=%SELENIUM_PLUS%/Java/bin/java
 :: How to send email result
 :: EXAMPLE:  %EXECUTE% -cp %CMDCLASSPATH% org.safs.tools.mail.Mailer -host mail.server.host -port 25 -from from@exmaple.com -to to1@exmaple.com;to2@example.com -subject "Test" -msg "Check msg in details" -attachment c:\seleniumplus\sample\logs\testcase1.xml;logs\testcase1.txt
 
-%EXECUTE% -cp %CMDCLASSPATH%;bin <package.name>.TestCase1
+%EXECUTE% -cp "%CMDCLASSPATH%;bin" <package.name>.TestCase1

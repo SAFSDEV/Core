@@ -2,7 +2,7 @@
 '*************************************************************************************
 ' Uninstall STAF Program Group
 '*************************************************************************************
-Const groupTitle = "STAF 3.4.11"     'title of group on Windows program menu 
+Const groupTitle = "STAF 3.4.26"     'title of group on Windows program menu 
 Dim shell, fso
 Dim mainProgramsDir, safsProgramDir
 

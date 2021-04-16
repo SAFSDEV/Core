@@ -1,7 +1,20 @@
-/** Copyright (C) (SAS) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs;
 
 import java.util.Hashtable;
@@ -9,18 +22,18 @@ import java.util.Hashtable;
 import org.safs.staf.service.map.AbstractSAFSAppMapService;
 
 /**
- * The Application Map (App Map) provides storage for Objects referencing the Application 
- * being tested.  These may be actual application objects, or object proxies.  This 
+ * The Application Map (App Map) provides storage for Objects referencing the Application
+ * being tested.  These may be actual application objects, or object proxies.  This
  * is dependent upon the implementation of the tools actually used for testing.
  * <p>
- * Each App Map represents one of any number of separate storage maps used 
- * for testing the application.  Each App Map is known by its mapname which is 
- * retrievable with getMapName().  The name of the App Map is expected to match a  
+ * Each App Map represents one of any number of separate storage maps used
+ * for testing the application.  Each App Map is known by its mapname which is
+ * retrievable with getMapName().  The name of the App Map is expected to match a
  * corresponding App Map opened and handled by the SAFSMAPS service in STAF.
  * <p>
- * A Valid STAFHelper object must have been provided by a subclass implementation 
+ * A Valid STAFHelper object must have been provided by a subclass implementation
  * or via a direct call to setSTAFHelper prior to using an instance of this class.
- * 
+ *
  * @author Carl Nagle
  * @since JUN 26, 2003
  *
@@ -31,23 +44,23 @@ public class ApplicationMap extends STAFRequester {
 	// each String Window key points to a Hashtable of named Child GuiTestObjects
 	private Hashtable map  = new Hashtable(20);
 	public void clearMap() {map.clear();}
-	
-	/** The name of this AppMap.  Must be identical to name used by SAFSMAPS service. **/	
+
+	/** The name of this AppMap.  Must be identical to name used by SAFSMAPS service. **/
 	protected String mapname = null;
-	
+
 
 	/**
 	 * Subclasses should call this constructor or insure mapname gets set.
 	 * <p>
-	 * @param mapname the name given to this AppMap.  This should be identical to 
+	 * @param mapname the name given to this AppMap.  This should be identical to
 	 *        the name of an AppMap handled by the SAFSMAPS service.
 	 **/
 	public ApplicationMap(String mapname)
-	{ 
-		this.mapname = mapname; 
+	{
+		this.mapname = mapname;
 	}
 
-	/** 
+	/**
 	 * @return String the stored name of this AppMap
 	 **/
 	public String getMapName() { return mapname; }
@@ -55,21 +68,21 @@ public class ApplicationMap extends STAFRequester {
 
 	/**
 	 * Retrieves the stored recognition string for the parent's child.
-	 * Uses the SAFSMAPS service via STAF.  
+	 * Uses the SAFSMAPS service via STAF.
 	 * <p>
-	 * A Valid STAFHelper object must have been provided by a subclass implementation 
+	 * A Valid STAFHelper object must have been provided by a subclass implementation
 	 * or via a direct call to setSTAFHelper prior to this call.
 	 * <p>
 	 * @param parentName the name of the parent object or section in the AppMap.
 	 * <p>
-	 * @param childName the name of the parent's child to retrieve.  
+	 * @param childName the name of the parent's child to retrieve.
 	 * <p>
 	 * @return String recognition string or null if not found or an error occurs.
 	 **/
 	public String getChildGUIID(String parentName, String childName){
 		try{ return staf.getAppMapItem(mapname, parentName, childName);}
 		catch(NullPointerException np){ return null; }
-	}			
+	}
 
 
 	/**
@@ -83,17 +96,17 @@ public class ApplicationMap extends STAFRequester {
 	public String getParentGUIID(String parentName){
 		return getChildGUIID(parentName, parentName);
 	}
-	
+
 	/**
 	 * Retrieves the stored recognition string for the parent's child.
-	 * Uses the SAFSMAPS service via STAF.  
+	 * Uses the SAFSMAPS service via STAF.
 	 * <p>
-	 * A Valid STAFHelper object must have been provided by a subclass implementation 
+	 * A Valid STAFHelper object must have been provided by a subclass implementation
 	 * or via a direct call to setSTAFHelper prior to this call.
 	 * <p>
 	 * @param parentName the name of the parent object or section in the AppMap.
 	 * <p>
-	 * @param childName the name of the parent's child to retrieve.  
+	 * @param childName the name of the parent's child to retrieve.
 	 * <p>
 	 * @param isDynamic determines whether recognition string should be checked to see if its dynamic
 	 * <p>
@@ -102,7 +115,7 @@ public class ApplicationMap extends STAFRequester {
 	public String getChildGUIID(String parentName, String childName, boolean isDynamic){
 		try{ return staf.getAppMapItem(mapname, parentName, childName,isDynamic);}
 		catch(NullPointerException np){ return null; }
-	}			
+	}
 
 
 	/**
@@ -121,14 +134,14 @@ public class ApplicationMap extends STAFRequester {
 
 	/**
 	 * Was the recognition string tagged by SAFSMAPS with ISDYNAMIC?
-	 * SAFSMAPS will now tag recognition strings with ISDYNAMIC if it is requested to 
+	 * SAFSMAPS will now tag recognition strings with ISDYNAMIC if it is requested to
 	 * do so by the caller:
 	 * <p>
-	 * ISDYNAMIC;RECOGNITION=&lt;GUIID recognition>
+	 * ISDYNAMIC;RECOGNITION=&lt;GUIID recognition&gt;
 	 * <p>
 	 * The routine will also return true if the recognition string is "CurrentWindow".
 	 * @param recognition -- the non-null, potentially tagged recognition string from getGUIID calls.
-	 * @return true if ";Recognition" and "ISDYNAMIC" is prefixed in the string of if the recognition 
+	 * @return true if ";Recognition" and "ISDYNAMIC" is prefixed in the string of if the recognition
 	 * string is "CurrentWindow"
 	 * @see org.safs.staf.service.map.SAFSAppMapService
 	 */
@@ -141,20 +154,20 @@ public class ApplicationMap extends STAFRequester {
 					isDynamic = true;
 			}else if (recParts[0].equalsIgnoreCase(AbstractSAFSAppMapService.SAM_CURRENTWINDOW_ITEM))
 					isDynamic = true;
-				
+
 		}catch(NullPointerException np){}
 		return isDynamic;
 	}
 
 	/**
 	 * Extract the recognition string portion of a GUIID "tagged" by SAFSMAPS.
-	 * SAFSMAPS will now tag recognition strings with flags like "ISDYNAMIC" if it is requested to 
+	 * SAFSMAPS will now tag recognition strings with flags like "ISDYNAMIC" if it is requested to
 	 * do so by the caller.  When tagged, the recognition portion of the string appears as below:
 	 * <p>
-	 * &lt;tags>;Recognition=&lt;GUIID recognition>
+	 * &lt;tags&gt;;Recognition=&lt;GUIID recognition&gt;
 	 * <p>
 	 * If the item is not "tagged" then it will be returned unmodified.
-	 * 
+	 *
 	 * @param recognition -- the non-null, potentially tagged recognition string from getGUIID calls.
 	 * @return the recognition portion of the string if tagged, or the unmodified input string if not.
 	 * @see org.safs.staf.service.map.SAFSAppMapService
@@ -166,15 +179,15 @@ public class ApplicationMap extends STAFRequester {
 		}catch(NullPointerException np){}
 		return recognition;
 	}
-	
+
 	/**
-	 * Stores the actual child Object for the named parent/child.  This object will 
-	 * be implementation specific for different tool-dependent subclasses. For example, 
+	 * Stores the actual child Object for the named parent/child.  This object will
+	 * be implementation specific for different tool-dependent subclasses. For example,
 	 * this will contain a TestObject reference for certain Rational implementations.
 	 * <p>
 	 * @param parentName the name of the parent as stored in the AppMap.
 	 * <p>
-	 * @param childName the name of the parent's child.  
+	 * @param childName the name of the parent's child.
 	 * <p>
 	 * @param child the actual child object.
 	 **/
@@ -190,16 +203,16 @@ public class ApplicationMap extends STAFRequester {
 
 
 	/**
-	 * Retrieves the object stored for the given parent's child.  This object will 
-	 * be implementation specific for different tool-dependent subclasses. For example, 
+	 * Retrieves the object stored for the given parent's child.  This object will
+	 * be implementation specific for different tool-dependent subclasses. For example,
 	 * this will contain a TestObject reference for certain Rational implementations.
 	 * The returned object will need to be cast to the appropriate type by the caller.
 	 * <p>
 	 * @param parentName the name of the parent as stored in the AppMap.
 	 * <p>
-	 * @param childName the name of the parent's child.  
+	 * @param childName the name of the parent's child.
 	 * <p>
-	 * @return Object the object if found, or null.  The returned object will 
+	 * @return Object the object if found, or null.  The returned object will
 	 *                need to be cast to the appropriate type by the caller.
 	 **/
 	public Object getChildObject (String parentName, String childName){
@@ -208,7 +221,7 @@ public class ApplicationMap extends STAFRequester {
 			String childUC = childName.toUpperCase();
 			Hashtable section = (Hashtable) map.get(parentUC);
 			if (section == null) return null;
-			
+
 			Object child = section.get(childUC);
 			return child;
 		}
@@ -218,14 +231,14 @@ public class ApplicationMap extends STAFRequester {
 
 
 	/**
-	 * Retrieves the actual parent Object for the given parentName.  This object will 
-	 * be implementation specific for different tool-dependent subclasses. For example, 
+	 * Retrieves the actual parent Object for the given parentName.  This object will
+	 * be implementation specific for different tool-dependent subclasses. For example,
 	 * this will contain a TestObject reference for certain Rational implementations.
 	 * The returned object will need to be cast to the appropriate type by the caller.
 	 * <p>
 	 * @param parentName the name of the parent object stored in the AppMap.
 	 * <p>
-	 * @return Object the parent object if found, or null.  The returned object will 
+	 * @return Object the parent object if found, or null.  The returned object will
 	 *                need to be cast to the appropriate type by the caller.
 	 **/
 	public Object getParentObject (String parentName){
@@ -234,15 +247,14 @@ public class ApplicationMap extends STAFRequester {
 
 
 	/**
-	 * Stores the actual parent Object for the given parentName.  This object will 
-	 * be implementation specific for different tool-dependent subclasses. For example, 
+	 * Stores the actual parent Object for the given parentName.  This object will
+	 * be implementation specific for different tool-dependent subclasses. For example,
 	 * this will contain a TestObject reference for certain Rational implementations.
 	 * <p>
 	 * @param parentName the name of the parent object to store in the AppMap.
 	 * <p>
 	 * @param parent the actual parent object.
 	 * <p>
-	 * @return String recognition string or null if not found or an error occurs.
 	 **/
 	public void setParentObject(String parentName, Object parent){
 		setChildObject(parentName, parentName, parent);

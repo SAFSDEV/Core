@@ -1,3 +1,20 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.selenium;
 
 import java.io.ByteArrayInputStream;
@@ -90,8 +107,10 @@ public class DocumentParser {
 	public DocumentParser(Selenium selenium, SeleniumGUIUtilities util) {
 		this.selenium = selenium;
 		this.util = util;
+//		setHTTPProxy();
 		nextIndex = new AtomicInteger(0);
 		setDocument(selenium.getLocation(), selenium.getHtmlSource(), true);
+//		setDocument(selenium.getLocation(), null, true);
 	}
 
 	/**
@@ -123,10 +142,8 @@ public class DocumentParser {
 	 * This is needed when we read the content from an URL<br>
 	 */
 	public void setHTTPProxy() {
-		//These parameters can be passed in by JVM parameter
-		//-Dhttp.proxyHost=your.proxy.host
-		//-Dhttp.proxyPort=80
-		System.setProperty("http.proxyHost", "your.proxy.host");
+		//TODO read this settings from configuration file, set the internet proxy server to connect internet
+		System.setProperty("http.proxyHost", "internet.proxy.server");
 		System.setProperty("http.proxyPort", "80");
 	}
 
@@ -182,7 +199,7 @@ public class DocumentParser {
 
 			if (htmlSource == null) {
 				//If the url's content contains <HTML xmlns="http://www.w3.org/TR/REC-html40">, error occurs
-				//See defect at S0743322
+				//See defect defect S0743322
 				//There are two approaches to get the content from an URL
 
 				//1. Remove the beginning and ending HTML tag from html source.

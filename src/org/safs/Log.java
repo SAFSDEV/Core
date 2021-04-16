@@ -1,6 +1,20 @@
-/** Copyright (C) (MSA, Inc) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+/**
+ * Copyright (C) (MSA, Inc), All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  *   <br>   AUG 01, 2003 (DBauman) Original Release
  *   <br>   Aug 01, 2003 (Carl Nagle) Added GENERIC log level between INFO and PASS.
@@ -15,7 +29,7 @@
  *   <br>   JAN 08, 2007 (Carl Nagle) Added more clarifying documentation.
  *   <br>   JUL 30, 2009 (Carl Nagle) Added Output Filename to debug console at startup.
  *   <br>   MAY 12, 2014 (Carl Nagle) Added support for SUSPEND and RESUME of debug logging.
- *   <br>   APR 27, 2017 (SBJLW) Moved/rewrote log-level-constants and methods to Constants.LogConstants.
+ *   <br>   APR 27, 2017 (Lei Wang) Moved/rewrote log-level-constants and methods to Constants.LogConstants.
  *                               Gave meaningful name to some variables.
  */
 package org.safs;
@@ -56,13 +70,13 @@ import com.ibm.staf.STAFResult;
  * <p>
  * <li>Launch the debug Log as a standalone application:
  * <p>
- * <ul><b>Example debug Log invocations:</b>
- * <p>
- * a) java org.safs.Log<p>
- * b) java org.safs.Log 1<p>
- * c) java org.safs.Log INFO<p>
- * d) java org.safs.Log -file:c:/safs/data/debuglog.txt<p>
- * e) java org.safs.Log DEBUG -file:c:/safs/data/debuglog.txt<p>
+ * <b>Example debug Log invocations:</b>
+ * <ul>
+ * <li>a) java org.safs.Log
+ * <li>b) java org.safs.Log 1
+ * <li>c) java org.safs.Log INFO
+ * <li>d) java org.safs.Log -file:c:/safs/data/debuglog.txt
+ * <li>e) java org.safs.Log DEBUG -file:c:/safs/data/debuglog.txt
  * </ul>
  * <p>
  * Example (a) shows launching the debug Log with the default DEBUG log level.<br>
@@ -89,12 +103,12 @@ import com.ibm.staf.STAFResult;
  * will send a specially formatted STAF QUEUE service message like this:
  * <p>
  * <ul>
- * QUEUE NAME SAFS/TESTLOG MESSAGE "&lt;formatted_message>"
+ * <li>QUEUE NAME SAFS/TESTLOG MESSAGE "&lt;formatted_message&gt;"
  * </ul>
  * <p>
  * The formatted_message is expected to be in the following format:
  * <ul>
- * "n|message"
+ * <li>"n|message"
  * </ul>
  * where 'n' is the loglevel intended for this message.
  * <ul>
@@ -572,9 +586,9 @@ public class Log {
    * Examples:
    * <p>
    * <ul>
-   * java org.safs.Log<p>
-   * java org.safs.Log 1<p>
-   * java org.safs.Log INFO<p>
+   * <li>java org.safs.Log
+   * <li>java org.safs.Log 1
+   * <li>java org.safs.Log INFO
    * </ul>
    * <p>
    * Also accepts a command line argument to write log messages to file.
@@ -582,7 +596,7 @@ public class Log {
    * Examples:
    * <p>
    * <ul>
-   * java org.safs.Log -file:afilepath<p>
+   * <li>java org.safs.Log -file:afilepath
    * </ul>
    * <p>
    * And, of course, both command-line arguments can be used in the same call.

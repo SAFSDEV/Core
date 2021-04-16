@@ -6,7 +6,7 @@
 '                                  Compressed JPG usually has noisy points in it.  These noisy points lower GOCR's accuracy.
 'Updated, JunwuMa, Jan 27, 2010    Add tesseract.exe (released by Tesseract) for accuracy, abandon using tessdllWrapper.dll/tessdll.dll.  
 'Updated, JunwuMa, Mar 31, 2010    Add SafsTessdll.exe (released by SAFS) that makes it work to locate text area according to the text in image.  
-'Updated, LeiWang, May 14, 2010    Some executable files are moved to c:/safs/bin/.
+'Updated, Lei Wang, May 14, 2010    Some executable files are moved to c:/safs/bin/.
 'Updated, Carl Nagle,  Oct 22, 2010    Corrected some command-line execution documentation.
 
 Assets for SAFS IBT OCR:

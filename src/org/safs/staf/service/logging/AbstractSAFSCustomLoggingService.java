@@ -1,3 +1,20 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.staf.service.logging;
 
 import java.util.Hashtable;
@@ -9,29 +26,28 @@ import org.safs.staf.service.InfoInterface;
 import org.safs.staf.service.ServiceDebugLog;
 
 import com.ibm.staf.STAFException;
-import com.ibm.staf.STAFHandle;
 import com.ibm.staf.STAFResult;
 import com.ibm.staf.service.STAFCommandParseResult;
 import com.ibm.staf.service.STAFCommandParser;
 
 
 /**
- * <code>AbstractSAFSCustomLoggingService</code> is an external STAF service that 
- * handles custom SAFS logging. 
- * This class is defined as an abstract class, for  different version of STAF, 
- * you may extends this class and implements the  staf-version-related interface 
+ * <code>AbstractSAFSCustomLoggingService</code> is an external STAF service that
+ * handles custom SAFS logging.
+ * This class is defined as an abstract class, for  different version of STAF,
+ * you may extends this class and implements the  staf-version-related interface
  * (STAFServiceInterfaceLevel or STAFServiceInterfaceLevel30).
  * We have implemented the class for version 2 and 3: SAFSCustomLoggingService and SAFSCustomLoggingService3
- * 
+ *
  * <p>
  * This class and {@link CustomLogFac} provide a sample implementation of custom
- * logging service that writes directly to the same STAF logs that standard 
+ * logging service that writes directly to the same STAF logs that standard
  * logging service writes to.
  * <p>
  * Registration of this service takes the following format:
  * <p>
  * <code>
- * SERVICE &lt;ServiceName> LIBRARY JSTAF EXECUTE &lt;ServiceJarFile> PARMS 
+ * SERVICE &lt;ServiceName> LIBRARY JSTAF EXECUTE &lt;ServiceJarFile> PARMS
  * SAFSLOGGING &lt;SAFSLoggingService>
  * </code>
  * <p>
@@ -39,7 +55,7 @@ import com.ibm.staf.service.STAFCommandParser;
  * unique STAF LOG service instance loaded by SAFS logging service to access
  * the running STAF logs.
  * <p>
- * Example: 
+ * Example:
  * <p>
  * <code>
  * SERVICE SAFSCustomLogs LIBRARY JSTAF EXECUTE
@@ -55,7 +71,7 @@ import com.ibm.staf.service.STAFCommandParser;
  * HELP
  * VERSION
  * </pre>
- * 
+ *
  * @see CustomLogFac
  * @see org.safs.staf.service.logging.v2.SAFSLoggingService
  * @see org.safs.staf.service.logging.v3.SAFSLoggingService3
@@ -66,13 +82,13 @@ import com.ibm.staf.service.STAFCommandParser;
 
 public abstract class AbstractSAFSCustomLoggingService {
 	public static final String SCLS_SERVICE_OPTION_SAFSLOGGING = "SAFSLOGGING";
-	
+
 	public static final String SCLS_SERVICE_REQUEST_INIT = "INIT";
 	public static final String SCLS_SERVICE_REQUEST_LOGMESSAGE = "LOGMESSAGE";
 	public static final String SCLS_SERVICE_REQUEST_CLOSE = "CLOSE";
 	public static final String SCLS_SERVICE_REQUEST_HELP = "HELP";
 	public static final String SCLS_SERVICE_REQUEST_VERSION = "VERSION";
-	
+
 	public static final String SCLS_SERVICE_PARM_MODE = "MODE";
 	public static final String SCLS_SERVICE_PARM_LINKEDFAC = "LINKEDFAC";
 
@@ -83,8 +99,8 @@ public abstract class AbstractSAFSCustomLoggingService {
 	public static final String SCLS_SERVICE_RESPONSE_BYPASS = "BYPASS";
 
 	private static final String VERSION_STR = "1.0";
-	private static final String HELP_STR = 
-		"SAFSCustomLoggingService HELP\n\n" + 
+	private static final String HELP_STR =
+		"SAFSCustomLoggingService HELP\n\n" +
 		"INIT        <facname> MODE <mode> [LINKEDFAC <name>]\n\n" +
 		"LOGMESSAGE  <facname> MESSAGE <msg> [DESCRIPTION <desc>] [MSGTYPE <msgType>]\n\n" +
 		"CLOSE       <facname>\n\n" +
@@ -113,7 +129,7 @@ public abstract class AbstractSAFSCustomLoggingService {
 	/**
 	 * Handles initializing this instance of the service for STAF.
 	 * <p>
-	 * This service is registered under process name 
+	 * This service is registered under process name
 	 * "STAF/Service/&lt;ServiceName>".
 	 * <p>
 	 */
@@ -147,7 +163,7 @@ public abstract class AbstractSAFSCustomLoggingService {
 
 		return new STAFResult(STAFResult.Ok);
 	}
-	
+
 	/**
 	 * Handles service request from STAF.
 	 * <p>
@@ -185,7 +201,7 @@ public abstract class AbstractSAFSCustomLoggingService {
 				"Unknown Request: " + info.request);
 		}
 	}
-	
+
 	/**
 	 * Handles removing this service from STAF.
 	 * <p>
@@ -232,11 +248,11 @@ public abstract class AbstractSAFSCustomLoggingService {
 	private void createInitParser()
 	{
 		initParser = new STAFCommandParser(0, false);
-		initParser.addOption(SCLS_SERVICE_REQUEST_INIT, 1, 
+		initParser.addOption(SCLS_SERVICE_REQUEST_INIT, 1,
 			STAFCommandParser.VALUEREQUIRED);
-		initParser.addOption(SCLS_SERVICE_PARM_MODE, 1, 
+		initParser.addOption(SCLS_SERVICE_PARM_MODE, 1,
 			STAFCommandParser.VALUEREQUIRED);
-		initParser.addOption(SCLS_SERVICE_PARM_LINKEDFAC, 1, 
+		initParser.addOption(SCLS_SERVICE_PARM_LINKEDFAC, 1,
 			STAFCommandParser.VALUEREQUIRED);
 		initParser.addOptionNeed(SCLS_SERVICE_REQUEST_INIT,
 			SCLS_SERVICE_PARM_MODE);
@@ -247,11 +263,11 @@ public abstract class AbstractSAFSCustomLoggingService {
 		logMessageParser = new STAFCommandParser(0, false);
 		logMessageParser.addOption(SCLS_SERVICE_REQUEST_LOGMESSAGE, 1,
 			STAFCommandParser.VALUEREQUIRED);
-		logMessageParser.addOption(SCLS_SERVICE_PARM_MESSAGE, 1, 
+		logMessageParser.addOption(SCLS_SERVICE_PARM_MESSAGE, 1,
 			STAFCommandParser.VALUEREQUIRED);
 		logMessageParser.addOption(SCLS_SERVICE_PARM_DESCRIPTION, 1,
 			STAFCommandParser.VALUEREQUIRED);
-		logMessageParser.addOption(SCLS_SERVICE_PARM_MSGTYPE, 1, 
+		logMessageParser.addOption(SCLS_SERVICE_PARM_MSGTYPE, 1,
 			STAFCommandParser.VALUEREQUIRED);
 		// MESSAGE option is required
 		logMessageParser.addOptionNeed(SCLS_SERVICE_REQUEST_LOGMESSAGE,
@@ -261,7 +277,7 @@ public abstract class AbstractSAFSCustomLoggingService {
 	private void createCloseParser()
 	{
 		closeParser = new STAFCommandParser(0, false);
-		closeParser.addOption(SCLS_SERVICE_REQUEST_CLOSE, 1, 
+		closeParser.addOption(SCLS_SERVICE_REQUEST_CLOSE, 1,
 			STAFCommandParser.VALUEREQUIRED);
 	}
 
@@ -273,7 +289,7 @@ public abstract class AbstractSAFSCustomLoggingService {
 		STAFCommandParseResult parsedRequest = initParser.parse(info.request);
 		if( parsedRequest.rc != STAFResult.Ok )
 		{
-			return new STAFResult( STAFResult.InvalidRequestString, 
+			return new STAFResult( STAFResult.InvalidRequestString,
 				parsedRequest.errorBuffer );
 		}
 
@@ -308,7 +324,7 @@ public abstract class AbstractSAFSCustomLoggingService {
 			info.request);
 		if( parsedRequest.rc != STAFResult.Ok )
 		{
-			return new STAFResult( STAFResult.InvalidRequestString, 
+			return new STAFResult( STAFResult.InvalidRequestString,
 				parsedRequest.errorBuffer );
 		}
 
@@ -347,7 +363,7 @@ public abstract class AbstractSAFSCustomLoggingService {
 		STAFCommandParseResult parsedRequest = closeParser.parse(info.request);
 		if( parsedRequest.rc != STAFResult.Ok )
 		{
-			return new STAFResult( STAFResult.InvalidRequestString, 
+			return new STAFResult( STAFResult.InvalidRequestString,
 				parsedRequest.errorBuffer );
 		}
 

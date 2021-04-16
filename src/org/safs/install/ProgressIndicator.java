@@ -1,6 +1,25 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.install;
 /**
  * APR 27, 2017 (Lei Wang) Improved to show message in different color according to log level.
+ * JUN 29, 2018 (Lei Wang) Added increaseProgress(). Used IndependantLog to
+ * JUL 04, 2018 (Lei Wang) Modified setProgressMessage(): Used IndependantLog to receive message.
  */
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -28,6 +47,7 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 
 import org.safs.Constants.LogConstants;
+import org.safs.IndependantLog;
 
 /**
  * A Panel to show the progress of the installation.<br>
@@ -129,6 +149,10 @@ public class ProgressIndicator extends JPanel{
 		progressBar.setValue(progress);
 	}
 
+	public void increaseProgress(int increase){
+		progressBar.setValue(progressBar.getValue()+increase);
+	}
+
 	public void setProgressMessage(String message){
 		setProgressMessage(message, LogConstants.PASS);
 	}
@@ -147,11 +171,23 @@ public class ProgressIndicator extends JPanel{
 		} catch (BadLocationException e) {
 			System.err.println("Failed to add message to TextArea, due to "+e.toString());
 		}
-		//3. output message to the console
+		//3. output message to the debug log
 		if(LogConstants.ERROR==logLevel){
-			System.err.println(message);
+			IndependantLog.error(message);
+		}else if(LogConstants.WARN==logLevel){
+			IndependantLog.warn(message);
+		}else if(LogConstants.INFO==logLevel){
+			IndependantLog.info(message);
+		}else if(LogConstants.DEBUG==logLevel){
+			IndependantLog.debug(message);
+		}else if(LogConstants.INDEX==logLevel){
+			IndependantLog.index(message);
+		}else if(LogConstants.PASS==logLevel){
+			IndependantLog.pass(message);
+		}else if(LogConstants.GENERIC==logLevel){
+			IndependantLog.generic(message);
 		}else{
-			System.out.println(message);
+			IndependantLog.debug(message);
 		}
 	}
 
@@ -261,7 +297,8 @@ public class ProgressIndicator extends JPanel{
 		int index = 0;
 	    final ProgressIndicator progressor = new ProgressIndicator();
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
+            @Override
+			public void run() {
             	progressor.createAndShowGUI();
             }
         });

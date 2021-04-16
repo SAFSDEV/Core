@@ -1,16 +1,26 @@
-/** 
- * Copyright (C) (MSA, Inc) All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.rational;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Vector;
 
 import org.safs.Domains;
@@ -28,15 +38,10 @@ import com.rational.test.ft.object.interfaces.DomainTestObject;
 import com.rational.test.ft.object.interfaces.GuiTestObject;
 import com.rational.test.ft.object.interfaces.ITopWindow;
 import com.rational.test.ft.object.interfaces.TestObject;
-import com.rational.test.ft.object.interfaces.TopLevelSubitemTestObject;
 import com.rational.test.ft.object.interfaces.flex.FlexObjectTestObject;
-import com.rational.test.ft.object.map.SpyMappedTestObject;
-import com.rational.test.ft.sys.SpyMap;
-import com.rational.test.ft.sys.TestContext.Reference;
-import com.sun.jna.Platform;
 
 
-/** 
+/**
  * @author Carl Nagle OCT 26, 2005 Catch unexpected Rational Exceptions in getParentObjects
  * @author Carl Nagle OCT 28, 2005 Catch another unexpected Rational Exceptions in getParentObjects
  * @author Carl Nagle JAN 30, 2006 Domain disabling added.
@@ -44,40 +49,40 @@ import com.sun.jna.Platform;
  *                             of each Top Object found.
  *        JunwuMa AUG 15, 2008 Add getTopTestObject() that returns a TestObject. Called by REngineCommandProcessor._highlightMatchingChildObject
  *        JunwuMa OCT 09, 2008 Add Flex domain support.
- *                             Open Flex domain in method getParentObjects(). 
- *                             Modify buildArray(ArrayList array, Object[] elements). For top TestObject found in Flex domain, it will be 
- *                             drilled down to find the REAL Flex application(top class) ignoring its classloader. 
+ *                             Open Flex domain in method getParentObjects().
+ *                             Modify buildArray(ArrayList array, Object[] elements). For top TestObject found in Flex domain, it will be
+ *                             drilled down to find the REAL Flex application(top class) ignoring its classloader.
  *                             buildArray only is called by getParentObjects().
- * LeiWang	Oct 14, 2008	Modified method isValidGuiObject(),we need to consider "System.Windows.Forms.ToolBarButton"
+ * Lei Wang	Oct 14, 2008	Modified method isValidGuiObject(),we need to consider "System.Windows.Forms.ToolBarButton"
  * 							as a valid GuiObject, see defect S0539954.
  * JunwuMa  Oct 21, 2008    Added method getChildren(TestObject) and modified getChildObjects(Object parent) supporting
- *                          Flex object, eliminating the duplicate in Flex object's children. 
+ *                          Flex object, eliminating the duplicate in Flex object's children.
  *                          See {@link FlexUtil#getChildren(TestObject)}
- * LeiWang	Nov 05, 2008	Modified method getChildren(): If there are some problems on AUT itself (for example, if the AUT 
+ * Lei Wang	Nov 05, 2008	Modified method getChildren(): If there are some problems on AUT itself (for example, if the AUT
  * 									contains null pointer), the RFT WrappedException will be thrown. At this situation
  * 									I catch the exception and let our program continue to work. This modification will
- * 									cause some branchs not to be processed if the root node of that branch contains this 
- * 									kind of problem. See defect S0543032. 
- * LeiWang	Nov 07, 2008	Added method addTopWindowsFromDomainToWindowList().
+ * 									cause some branchs not to be processed if the root node of that branch contains this
+ * 									kind of problem. See defect S0543032.
+ * Lei Wang	Nov 07, 2008	Added method addTopWindowsFromDomainToWindowList().
  * 							Modified method getParentObjects(): Move some codes to new added method addTopWindowsFromDomainToWindowList().
- * 							Modified method getParentsByDomainName(): When add top windows to a List parents, use method 
+ * 							Modified method getParentsByDomainName(): When add top windows to a List parents, use method
  * 								addTopWindowsFromDomainToWindowList() instead of DynamicEnabler.getRootTestObjectWindows()
- * LeiWang	Nov 11, 2008	Modified method getParentsByDomainName(): add also those top windows got from DynamicEnabler.getRootTestObjectWindows() if
+ * Lei Wang	Nov 11, 2008	Modified method getParentsByDomainName(): add also those top windows got from DynamicEnabler.getRootTestObjectWindows() if
  * 								we are seeking for a popupmenu.
- * LeiWang	Nov 20, 2008	Modified method getParentsByDomainName(): If we enable SWT domain and DOTNET domain the same time. Both of them will be enabled dynamically,
- * 																	  in our program the top windows of SWT domain will be put to a List firstly, so these windows and 
+ * Lei Wang	Nov 20, 2008	Modified method getParentsByDomainName(): If we enable SWT domain and DOTNET domain the same time. Both of them will be enabled dynamically,
+ * 																	  in our program the top windows of SWT domain will be put to a List firstly, so these windows and
  * 																	  windows owned by them (win.getOwnedObjects()) will be compared with the given RS 'Type=Window;Caption={List*}'.
  * 																	  And one of these windows match our RS.
  *																	  I guess a DOTNET window has two views for RFT one is under DOTNET domain, the other is under SWT domain.
  *																	  The view under DOTNET domain is what we want.
  *																	  Enable DotNet domain before Swt doamin. See defect S0549176
- * JunwuMa Dec 15, 2008     For supporting Flex in the migration from RFT7 to RFT8, modified getChildren(TestObject), removed the call that is 
+ * JunwuMa Dec 15, 2008     For supporting Flex in the migration from RFT7 to RFT8, modified getChildren(TestObject), removed the call that is
  *                          used to eliminate the duplicate in Flex object's children. RFT8 enhances its API getChildren that supports Flex object well.
- * Carl Nagle  Jun 04, 2009     Updates with DynamicEnabler and JNA to catch some RFT hangs. 
- * Carl Nagle  Aug 07, 2009     Updates with DynamicEnabler to enable only a specific process with Process=. 
+ * Carl Nagle  Jun 04, 2009     Updates with DynamicEnabler and JNA to catch some RFT hangs.
+ * Carl Nagle  Aug 07, 2009     Updates with DynamicEnabler to enable only a specific process with Process=.
  * JunwuMa SEP 04, 2009     Update getChildren(TestObject) to support mapped class search mode.
- * JunwuMa OCT 26, 2009     Added method getCachedKeysByValue(Object) to get keys in Hashtable cache by value. 
- * Lei Wang  AUG 13, 2013     Modify method getParentsByDomainName() and addTopWindowsFromDomainToWindowList() to catch UserStoppedScriptError. 
+ * JunwuMa OCT 26, 2009     Added method getCachedKeysByValue(Object) to get keys in Hashtable cache by value.
+ * Lei Wang  AUG 13, 2013     Modify method getParentsByDomainName() and addTopWindowsFromDomainToWindowList() to catch UserStoppedScriptError.
  **/
 public class RGuiObjectVector extends GuiObjectVector {
 
@@ -87,9 +92,9 @@ public class RGuiObjectVector extends GuiObjectVector {
 	static public final String DEFAULT_WIN_DOMAIN_NAME = Domains.WIN_DOMAIN;
 	static public final String DEFAULT_NET_DOMAIN_NAME = Domains.NET_DOMAIN;
 	static public final String DEFAULT_SWT_DOMAIN_NAME = Domains.SWT_DOMAIN;
-	static public final String DEFAULT_FLEX_DOMAIN_NAME = Domains.FLEX_DOMAIN;	
-	static public final String DEFAULT_ACTIVEX_DOMAIN_NAME = Domains.ACTIVEX_DOMAIN;	
-	
+	static public final String DEFAULT_FLEX_DOMAIN_NAME = Domains.FLEX_DOMAIN;
+	static public final String DEFAULT_ACTIVEX_DOMAIN_NAME = Domains.ACTIVEX_DOMAIN;
+
 	private String javaDomainName  = DEFAULT_JAVA_DOMAIN_NAME;
 	private String htmlDomainName  = DEFAULT_HTML_DOMAIN_NAME;
 	private String winDomainName   = DEFAULT_WIN_DOMAIN_NAME;
@@ -97,43 +102,43 @@ public class RGuiObjectVector extends GuiObjectVector {
 	private String swtDomainName   = DEFAULT_SWT_DOMAIN_NAME;
 	private String flexDomainName  = DEFAULT_FLEX_DOMAIN_NAME;
 	private String activeXDomainName  = DEFAULT_ACTIVEX_DOMAIN_NAME;
-	
+
 
 	private Script script     = null;
-	
+
 	/** @see deduceValidDomains */
 	protected static Vector bannedWinMailslots = new Vector();
 
 	private static String UC_MENUITEM="MENUITEM";
-	
+
 	static RGuiClassData classdata = new RGuiClassData();
 
 	/**
-	 * Calls the minimal RGuiObjectVector constructor. 
-	 * Instances created with this minimal constructor MUST still have 
-	 * windowName, childName, pathVector, and Script set prior to calling 
+	 * Calls the minimal RGuiObjectVector constructor.
+	 * Instances created with this minimal constructor MUST still have
+	 * windowName, childName, pathVector, and Script set prior to calling
 	 * initGuiObjectRecognition().
-	 * 
+	 *
 	 * @see #setWindowName(String)
 	 * @see #setChildName(String)
 	 * @see #setPathVector(String)
-	 * @see #script 
+	 * @see #script
 	 * @see #initGuiObjectRecognition()
 	 */
 	public RGuiObjectVector(){
 		super();
 	}
 
-	
+
 	/**
-	 * Calls the RGuiObjectVector constructor. 
-	 * Instances created with this constructor MUST still have 
+	 * Calls the RGuiObjectVector constructor.
+	 * Instances created with this constructor MUST still have
 	 * Script set prior to calling initGuiObjectRecognition().
-	 * 
+	 *
 	 * @param window
 	 * @param child
 	 * @param pathString
-	 * 
+	 *
 	 * @see #script
 	 * @see #initGuiObjectRecognition()
 	 * @see GuiObjectVector#GuiObjectVector(String, String, String)
@@ -143,9 +148,9 @@ public class RGuiObjectVector extends GuiObjectVector {
 		super(window, child, pathString);
 	}
 
-	
+
 	/**
-	 * Calls the GuiObjectVector constructor and then initGuiObjectRecognition(). 
+	 * Calls the GuiObjectVector constructor and then initGuiObjectRecognition().
 	 * @param window
 	 * @param child
 	 * @param pathString
@@ -169,36 +174,40 @@ public class RGuiObjectVector extends GuiObjectVector {
 	}
 
 	/**
-	 * Provide our RGuiChildIterator instance as required. 
+	 * Provide our RGuiChildIterator instance as required.
 	 * @see GuiObjectVector#createGuiChildIterator(Object, GuiObjectVector, List)
 	 */
+	@Override
 	public GuiChildIterator createGuiChildIterator(Object aparent, GuiObjectVector govVector, java.util.List gather){
 		return new RGuiChildIterator(aparent, govVector, gather);
 	}
 
 	/**
-	 * Provide our RGuiChildIterator instance as required. 
+	 * Provide our RGuiChildIterator instance as required.
 	 * @see GuiObjectVector#createGuiChildIterator(List)
 	 */
+	@Override
 	public GuiChildIterator createGuiChildIterator(java.util.List gather){
 		return new RGuiChildIterator(gather);
 	}
 
 	/**
 	 * Provide our RGuiObjectRecognition instance as required during initialization.
-	 * @see GuiObjectVector#createGuiObjectRecognition(String) 
+	 * @see GuiObjectVector#createGuiObjectRecognition(String)
 	 */
+	@Override
 	public GuiObjectRecognition createGuiObjectRecognition(String subpath, int govLevel){
 		return new RGuiObjectRecognition(subpath, script, govLevel);
 	}
 
     /** Return our RGuiClassData subclass as required. */
-    public GuiClassData getGuiClassData(){ return new RGuiClassData(); }
-    
-	/** Return the constructor-stored Script object. */			
+    @Override
+	public GuiClassData getGuiClassData(){ return new RGuiClassData(); }
+
+	/** Return the constructor-stored Script object. */
 	public Script getScript()       { return script;     }
 
-	/** 
+	/**
 	 * Casts the GuiObjectRecognition from getChildGuiObjectRecognition to
 	 * our subclass.
 	 * @see GuiObjectVector#getChildGuiObjectRecognition(int)
@@ -206,7 +215,7 @@ public class RGuiObjectVector extends GuiObjectVector {
 	public RGuiObjectRecognition getChildRecognition(int index){
 		return (RGuiObjectRecognition) getChildGuiObjectRecognition(index);
 	}
-	
+
 	/** Must be set by getTopTestObject prior to any call to getMatchingParentObject().*/
 	DomainTestObject domain = null;
 
@@ -226,11 +235,11 @@ public class RGuiObjectVector extends GuiObjectVector {
 			if (topobj == null) {
 				Log.debug("RGOV.ignoring null object in array...");
 				continue;
-			}			
-			// support Flex domain			
+			}
+			// support Flex domain
 			//if(isFlexDomain(topobj)){ //throws Exception in .NET WinForm!!!
 			if(domainname.equalsIgnoreCase(Domains.FLEX_DOMAIN)){
-				// get the REAL Flex Application other than Flex 'runtimeloading' or FlexLoader 
+				// get the REAL Flex Application other than Flex 'runtimeloading' or FlexLoader
 				topobj = FlexUtil.drillDownRealFlexObj(topobj);
 				if(topobj == null){
 					Log.debug("RGOV.evaluating RealFlexObj returns null...");
@@ -242,27 +251,27 @@ public class RGuiObjectVector extends GuiObjectVector {
 		return array;
 	}
 
-	/** 
-	 * return true if bannedWinMailslots contains this domains mailslot id. 
+	/**
+	 * return true if bannedWinMailslots contains this domains mailslot id.
 	 * The domain is assumed to be a WIN domain.  No domain name check is made.
 	 **/
 	public static boolean isBannedWinDomain(DomainTestObject domain){
 		return bannedWinMailslots.contains(domain.getTestContextReference().getMailslotName());
 	}
-	
+
 	/**
-	 * Attempts to remove WIN domains that are likely bad associations with other domains like NET 
-	 * and, maybe, HTML.  A "bad association" is assumed to be when a WIN domain communication 
-	 * MailSlot ID is the same as another domain.  Brief experience suggests that a WIN domain 
-	 * with the same Mailslot ID as a Net domain will hang or freeze RFT and produce ChannelSend 
-	 * Timeout exceptions.  These usually last up to 2 minutes for each "bad" TestObject found 
-	 * in the "bad" WIN domain.  
-	 * 
+	 * Attempts to remove WIN domains that are likely bad associations with other domains like NET
+	 * and, maybe, HTML.  A "bad association" is assumed to be when a WIN domain communication
+	 * MailSlot ID is the same as another domain.  Brief experience suggests that a WIN domain
+	 * with the same Mailslot ID as a Net domain will hang or freeze RFT and produce ChannelSend
+	 * Timeout exceptions.  These usually last up to 2 minutes for each "bad" TestObject found
+	 * in the "bad" WIN domain.
+	 *
 	 * This brief experience is on RFT V8.1.1.1 as of MAY 2010.
-	 * However, additional testing has shown that Excel has Net domains even when no 
-	 * Net domain window is exposed or open.  Thus, Excel will NOT be found if this 
+	 * However, additional testing has shown that Excel has Net domains even when no
+	 * Net domain window is exposed or open.  Thus, Excel will NOT be found if this
 	 * function is used AND the desired target is the Excel window itself.
-	 * 
+	 *
 	 * @param domains[]
 	 * @return domains[] with potentially invalid domains removed
 	 */
@@ -282,14 +291,14 @@ public class RGuiObjectVector extends GuiObjectVector {
 					if(old.getDomainname().equalsIgnoreCase(Domains.WIN_DOMAIN)){
 						Log.debug("RGOV.deduceValidDomain replacing Mailslot "+info.getMailslot()+" WIN domain with "+ info.getDomainname()+" domain.");
 						validdomains.put(info.getMailslot(), info);
-						
+
 						if(! bannedWinMailslots.contains(info.getMailslot())) bannedWinMailslots.add(info.getMailslot());
-					
+
 					}else if(info.getDomainname().equalsIgnoreCase(Domains.WIN_DOMAIN)){
-						Log.debug("RGOV.deduceValidDomain ignoring Mailslot "+ info.getMailslot()+" WIN domain in favor of "+ old.getDomainname()+" domain.");						
-						
+						Log.debug("RGOV.deduceValidDomain ignoring Mailslot "+ info.getMailslot()+" WIN domain in favor of "+ old.getDomainname()+" domain.");
+
 						if(! bannedWinMailslots.contains(info.getMailslot())) bannedWinMailslots.add(info.getMailslot());
-					
+
 					}else{
 						Log.debug("RGOV.deduceValidDomain DUPLICATE NON-WIN MAILSLOT "+ info.getMailslot() +
 								  " for "+ info.getDomainname()+" will be retained...");
@@ -318,7 +327,7 @@ public class RGuiObjectVector extends GuiObjectVector {
 			rc[index++] = info.getDomain();
 		}
 		Enumeration extra = extradomains.elements();
-		while(extra.hasMoreElements()){	rc[index++] = (DomainTestObject) extra.nextElement(); }		
+		while(extra.hasMoreElements()){	rc[index++] = (DomainTestObject) extra.nextElement(); }
 		return rc;
 	}
 	/**
@@ -328,7 +337,7 @@ public class RGuiObjectVector extends GuiObjectVector {
 	 *         retrieve.
 	 * @return Object array of ALL parent objects from all matching domains.
 	 * May return null if none are found.
-	 * NOV 06, 2008		(LeiWang)	After enable windows of some domains, we will try
+	 * NOV 06, 2008		(Lei Wang)	After enable windows of some domains, we will try
 	 * 								to get their parents from the DomainTestObject.
 	 * 								The method DynamicEnabler.getRootTestObjectWindows
 	 * 								will return some native windows of opreation system which
@@ -340,9 +349,9 @@ public class RGuiObjectVector extends GuiObjectVector {
 	 * 								2. Use DomainTestObject to get windows
 	 * 									We will get window's RS as Type=DotNetWindow, which means the matched window's
 	 * 									class is System.Windows.Forms.Form and is mapped to type "DotNetWindow" defined by us.
-	 * 									The number of children of this window is much smaller, they are children of 
+	 * 									The number of children of this window is much smaller, they are children of
 	 * 									window System.Windows.Forms.Form which are the objects that we really want.
-	 * 								
+	 *
 	 * 								So I will keep only those windows got from DomainTestObject.
 	 * 								If we need really the windows from DynamicEnabler.getRootTestObjectWindows(),
 	 * 								We can add them to the list also. I will not include them for now.
@@ -365,15 +374,15 @@ public class RGuiObjectVector extends GuiObjectVector {
 			if(domainname.equalsIgnoreCase(Domains.NET_DOMAIN)){
 				displaydomain = Domains.NET_DOMAIN+":"+Domains.NET_DOMAIN;
 				domainclasses = DynamicEnabler.enableNetWindows();
-			}			
+			}
 		}
 		catch(Exception x){Log.debug("RFT DynamicEnabler Exception:", x);}
 
-		//After calling DynamicEnabler.enableXXXWindows(), script.getDomains() should return 
+		//After calling DynamicEnabler.enableXXXWindows(), script.getDomains() should return
 		//the domain which contains the application window that we want
 		//Firstly we add windows got from DomainTestObject
 		DomainTestObject[] domains = script.getDomains();
-		
+
 		//DEBUGGING
 		//domains = deduceValidDomains(domains);
 		Log.debug("Got "+domains.length+" domains.");
@@ -382,16 +391,17 @@ public class RGuiObjectVector extends GuiObjectVector {
 		for (int i = 0; i < domains.length; i++) {
 			adomain = domains[i];
 			adomainname = (String) adomain.getName();
-			Log.debug("Try domain "+adomainname);
+			Log.debug("RGOV: Try domain "+adomainname);
 			try {
 				if (adomainname.equalsIgnoreCase(realdomain)) {
+					Log.debug("RGOV: adding top windows from domain '"+adomainname+"' to WindowList.");
 					parents = addTopWindowsFromDomainToWindowList(adomain, parents);
 				}
 			} catch (Throwable any) {
-				Log.debug("RGOV. error getting Top Objects from "+ displaydomain+"; Met "+any.getClass().getSimpleName()+": "+any.getMessage());
+				Log.debug("RGOV: error getting Top Objects from "+ displaydomain+"; Met "+any.getClass().getSimpleName()+": "+any.getMessage());
 			}
 		}
-		
+
 		//Maybe we need also add the window got from DynamicEnabler.getRootTestObjectWindows(domainclasses)
 		if(isSeekingPopupMenu()){
 			if (domainclasses != null && domainclasses.size() > 0) {
@@ -406,15 +416,16 @@ public class RGuiObjectVector extends GuiObjectVector {
 			}
 		}
 		// Fixed S0532729. Returning "null" if parents==null.
-		Log.info("RGOV. returning "+ (parents!=null? parents.size():0) +" Top Objects from "+ displaydomain);
+		Log.info("RGOV: returning "+ (parents!=null? parents.size():0) +" Top Objects from "+ displaydomain);
 		return parents;
 	}
-	
+
 	/**
-	 * Tries to see if we have an RFT Mapped Object before doing the standard search. 
+	 * Tries to see if we have an RFT Mapped Object before doing the standard search.
 	 * This is primarily when used by STAF Process Container.
 	 * @return Object or null if no match found. Will be a cached key if MODE_EXTERNAL_PROCESSING.
 	 */
+	@Override
 	public Object getMatchingParentObject(){
 		TestObject to = null;
 		if (path.isEmpty()){
@@ -425,7 +436,7 @@ public class RGuiObjectVector extends GuiObjectVector {
 			Log.info("RGOV.getMatchingParentObject parent path not Mappable...");
 			return super.getMatchingParentObject();
 		}
-		try{ 
+		try{
 			to = new GuiTestObject(script.getMappedTestObject(pathVector));
 			if (to != null){
 				try{
@@ -440,7 +451,7 @@ public class RGuiObjectVector extends GuiObjectVector {
 						return to;
 					}
 				}
-				catch(Exception npe){ 
+				catch(Exception npe){
 					Log.info("RGOV.getMatchingParentObject trying to ignore "+ npe.getClass().getSimpleName()+":"+npe.getMessage());
 				}
 			}
@@ -450,16 +461,16 @@ public class RGuiObjectVector extends GuiObjectVector {
 		}
 		return super.getMatchingParentObject();
 	}
-	
-	
-	/** 
+
+
+	/**
 	 * Return an array representing all known window objects.
-	 * This requires the "domain" be set by getTopTestObject, or some other 
-	 * means, prior to the call.  
-	 * If domain is not set, then parent objects from ALL supported 
+	 * This requires the "domain" be set by getTopTestObject, or some other
+	 * means, prior to the call.
+	 * If domain is not set, then parent objects from ALL supported
 	 * domains will be returned.  This can impact performance.
-	 * If getProcessMode()==MODE_EXTERNAL_PROCESSING then the routine will 
-	 * reset the internal cache and store all objects in the cache returning 
+	 * If getProcessMode()==MODE_EXTERNAL_PROCESSING then the routine will
+	 * reset the internal cache and store all objects in the cache returning
 	 * the keys for the objects instead of the objects themselves.
 	 * @author Carl Nagle OCT 26, 2005 Catch unexpected Rational Exceptions
 	 * @author Carl Nagle OCT 28, 2005 Catch another unexpected Rational Exception
@@ -470,8 +481,9 @@ public class RGuiObjectVector extends GuiObjectVector {
 	 * @see GuiObjectVector#getProcessMode()
 	 * @see GuiObjectVector#convertToKeys(Object[])
 	 **/
+	@Override
 	public Object[] getParentObjects(){
-	
+
 		ArrayList parents = null;
 		Log.info("RGOV:domain="+domain);
 
@@ -479,15 +491,15 @@ public class RGuiObjectVector extends GuiObjectVector {
 			Log.info("RGOV: evaluating enabled Domains...");
 			if (Domains.isJavaEnabled()) parents = getParentsByDomainName(parents, DEFAULT_JAVA_DOMAIN_NAME);
 			if (Domains.isHtmlEnabled()) parents = getParentsByDomainName(parents, DEFAULT_HTML_DOMAIN_NAME);
-			if (Domains.isNetEnabled())  parents = getParentsByDomainName(parents, DEFAULT_NET_DOMAIN_NAME);			
+			if (Domains.isNetEnabled())  parents = getParentsByDomainName(parents, DEFAULT_NET_DOMAIN_NAME);
 			if (Domains.isSwtEnabled())  parents = getParentsByDomainName(parents, DEFAULT_SWT_DOMAIN_NAME);
 			if (Domains.isWinEnabled())  parents = getParentsByDomainName(parents, DEFAULT_WIN_DOMAIN_NAME);
 			if (Domains.isFlexEnabled())  parents = getParentsByDomainName(parents, DEFAULT_FLEX_DOMAIN_NAME);
 		}
-		else{			
+		else{
 			parents = addTopWindowsFromDomainToWindowList(domain, parents);
 		}
-		
+
 		try{
 			if(getProcessMode()==MODE_EXTERNAL_PROCESSING){
 				Log.info("RGOV converting parents to unique keys for EXTERNAL_PROCESSING...");
@@ -498,29 +510,30 @@ public class RGuiObjectVector extends GuiObjectVector {
 				return parents.toArray();
 			}
 		}
-		catch(NullPointerException npe){ 
+		catch(NullPointerException npe){
 			Log.info("RGOV. top objects array is NULL.");
 			return null;}
 	}
-	
-	/** 
+
+	/**
 	 * Return an array representing all known window objects in the specified domain.
-	 * If getProcessMode()==MODE_EXTERNAL_PROCESSING then the routine will 
-	 * reset the internal cache and store all objects in the cache returning 
+	 * If getProcessMode()==MODE_EXTERNAL_PROCESSING then the routine will
+	 * reset the internal cache and store all objects in the cache returning
 	 * the keys for the objects instead of the objects themselves.
-     * @param domainname should be one of the supported org.safs.Domains constants like 
+     * @param domainname should be one of the supported org.safs.Domains constants like
      * "Java", "Html", "Win", etc..
 	 * @see GuiObjectVector#getDomainParentObjects(String)
 	 * @see GuiObjectVector#getProcessMode()
 	 * @see GuiObjectVector#convertToKeys(Object[])
 	 **/
+	@Override
 	public Object[] getDomainParentObjects(String domainname){
-	
+
 		ArrayList parents = null;
 		Log.info("RGOV:domainParents for domain: "+domainname);
 
 		parents = getParentsByDomainName(parents, domainname);
-		
+
 		try{
 			if(getProcessMode()==MODE_EXTERNAL_PROCESSING){
 				Log.info("RGOV converting parents to unique keys for EXTERNAL_PROCESSING...");
@@ -531,19 +544,19 @@ public class RGuiObjectVector extends GuiObjectVector {
 				return parents.toArray();
 			}
 		}
-		catch(NullPointerException npe){ 
+		catch(NullPointerException npe){
 			Log.info("RGOV. top objects array is NULL.");
 			return null;}
 	}
-	
+
 	protected boolean isOwnerSameTestContext(TestObject owner, TestObject owned){
 		boolean valid = owned.getObjectReference().getTestContextReference().equals(owner.getObjectReference().getTestContextReference());
 		if(! valid)	Log.info("    BAD Owned Window is not same TestContext as Owner.");
 		return valid;
 	}
-	
+
 	/**
-	 * <b>Note:</b> This method will add the top windows of a domain and also 
+	 * <b>Note:</b> This method will add the top windows of a domain and also
 	 * 				the owned windows by these top windows.
 	 * @param domain		An ojbect of class DomainTestObject which represents Java, Html, Net,Win ect.
 	 * @param windowList	A List contains those found windows
@@ -555,9 +568,9 @@ public class RGuiObjectVector extends GuiObjectVector {
 		Long pidL = null;
 		Integer pidI = null;
 		RDomainInfo info = new RDomainInfo(domain);
-		
+
 		//DEBUGGING
-		//if(info.getDomainname().equalsIgnoreCase(Domains.WIN_DOMAIN)){			
+		//if(info.getDomainname().equalsIgnoreCase(Domains.WIN_DOMAIN)){
 		//	Log.info(debugmsg +"evaluating WIN domain Mailslot "+ info.getMailslot());
 		//	if(isBannedWinDomain(domain)){
 		//		Log.info(debugmsg +"skipping banned WIN domain mailslot for "+domain);
@@ -577,25 +590,25 @@ public class RGuiObjectVector extends GuiObjectVector {
         	Log.info(debugmsg+" Evaluating windows of domain "+domain.getName());
         	// only do parents in the set domain, but...
         	// ... for each parent found, need to also include its owned objects
-    		
-        	//bypassing this call because we have run into the case where at least one 
-        	//machine is NOT properly returning USER object resource counts for windows 
+
+        	//bypassing this call because we have run into the case where at least one
+        	//machine is NOT properly returning USER object resource counts for windows
         	//known to have GUI components (i.e. CMD windows).
-        	//It is uncertain if modifying the routine to look for GDI objects instead 
+        	//It is uncertain if modifying the routine to look for GDI objects instead
         	//of USER objects will provide any filtering of undesirable domain objects.
         	/* ***TestObject[] wins = DynamicEnabler.getJNAProtectedDomainTopObjects(domain);*** */
-        	
+
         	TestObject[] wins = null;
         	//some WIN and FLEX domains (others?) throw WrappedExceptions
         	try{ wins = domain.getTopObjects();}catch(WrappedException w){
         		Log.info(debugmsg+ " ignoring a common WrappedException...");
         	}
         	if(wins==null||wins.length==0) return windowList;
-        	
+
         	//Add topObjects to our window list
         	Log.info(debugmsg+ " Checking "+ wins.length+" Parents (TopObjects)");
         	windowList = buildArray(windowList, wins, domain.getName().toString());
-        	
+
         	//Add the owned windows of each topObject
         	for(int j=0; j < wins.length; j++){
 				try{
@@ -604,7 +617,7 @@ public class RGuiObjectVector extends GuiObjectVector {
 						Log.info(debugmsg + " ignoring NULL Parent reference...");
 						continue;
 					}
-					
+
 					//getObjectClassName can produce hang or freeze in incomplete objects
 					//how do we find out the object might be bad before we try to use it?
 					//see deduceValidDomains for current attempts at this.
@@ -617,7 +630,7 @@ public class RGuiObjectVector extends GuiObjectVector {
 					Log.info(debugmsg+" Listing "+ owns.length+" Owned Windows");
 					for(int k=0; k < owns.length; k++){
 						TestObject ownedwin = null;
-						try{ 
+						try{
 							ownedwin = owns[k];// ??? try to get the objects in-place???
 							if(isOwnerSameTestContext(owned, ownedwin)){
 								//getObjectClassName can produce hang or freeze in incomplete objects
@@ -637,7 +650,7 @@ public class RGuiObjectVector extends GuiObjectVector {
 				}catch(Exception x){
 		        	Log.debug(debugmsg+" inner "+x.getClass().getSimpleName()+" ocurred. Ignore and continue looping...",x);
 				}
-			}		            
+			}
         } catch (Throwable e) {
             //1. The domain.getTopObjects() call throws a WrappedException when
             //   trying to work with some "Win" and "Flex" objects.  ignore and move on.
@@ -647,19 +660,20 @@ public class RGuiObjectVector extends GuiObjectVector {
         }
         return windowList;
 	}
-	
-	/** 
+
+	/**
 	 * Return an array representing all known window objects.
-	 * This requires the "domain" be set by getTopTestObject, or some other 
+	 * This requires the "domain" be set by getTopTestObject, or some other
 	 * means, prior to the call.
-	 * If getProcessMode()==MODE_EXTERNAL_PROCESSING then the routine will 
-	 * store all objects in the cache returning 
+	 * If getProcessMode()==MODE_EXTERNAL_PROCESSING then the routine will
+	 * store all objects in the cache returning
 	 * the keys for the objects instead of the objects themselves.
 	 * @param parent - will convert from key if MODE_EXTERNAL_PROCESSING
 	 * @return array of objects or an empty array of new Object[0].
 	 * */
+	@Override
 	public Object[] getChildObjects(Object parent){
-	
+
 		if (parent == null) return new Object[0];
 		if(getProcessMode()==MODE_EXTERNAL_PROCESSING){
 			Log.info("RGOV converting children to unique keys for EXTERNAL_PROCESSING...");
@@ -667,19 +681,19 @@ public class RGuiObjectVector extends GuiObjectVector {
 				TestObject to = (TestObject)getCachedItem(parent);
 			    String classname = to.getObjectClassName();// 2 min. timeout if TO is bad...
 			    String alttype = getGuiClassData().getMappedClassType(classname, to);
-			    
+
 			    if (alttype == null) {
 			    	return convertToKeys(getChildren(to));
-			    }			    
+			    }
 			    String compType = GuiClassData.deduceOneClassType((String)to.getDomain().getName(), alttype);
 			    String uccomp = compType.toUpperCase();
-			    
+
 			    boolean fullChildrenPath = ! ((uccomp.endsWith(UC_MENUITEM))   ||
 			    		                      (uccomp.startsWith(UC_MENUITEM)));
-			    
+
 			    if (! GuiObjectRecognition.isIgnoredTypeChild(compType)) {
 			    	TestObject[] children = (fullChildrenPath ? getChildren(to) : to.getMappableChildren());
-			    	
+
 			    	try{
 				    	// try alternate methods of getting the children for some components
 			    		if((children.length == 0)&&
@@ -695,7 +709,7 @@ public class RGuiObjectVector extends GuiObjectVector {
 			    	if((children==null)||(children.length==0)) return new Object[0];
 			    	return convertToKeys(children);
 			    }
-				
+
 		    	return convertToKeys(getChildren(to));
 			}
 			catch(ClassCastException cce){
@@ -711,9 +725,9 @@ public class RGuiObjectVector extends GuiObjectVector {
 	    	return getChildren((TestObject)parent);
 		}
 	}
-	
-	/* called by this.getChildObjects(Object) for supporting Flex domain. 
-	 * RFT8 enhances its API getChildren that supports Flex object well than in RFT7. It is no need to eliminate the 
+
+	/* called by this.getChildObjects(Object) for supporting Flex domain.
+	 * RFT8 enhances its API getChildren that supports Flex object well than in RFT7. It is no need to eliminate the
 	 * duplicate by calling FlexUtil.getChildren(flexobj)like in RFT7 we did before.
 	 * */
 	private TestObject[] getChildren(TestObject obj){
@@ -723,20 +737,21 @@ public class RGuiObjectVector extends GuiObjectVector {
 			if (isMappedClassSearchMode())
 				objects = obj.getMappableChildren();  // mapped-class-search-mode
 			else
-				objects = obj.getChildren();          
-							
+				objects = obj.getChildren();
+
 		}catch(Exception e){
 			Log.debug(debugmsg+" Exception occured. "+e.getClass().getSimpleName()+":"+e.getMessage(),e);
 			//e.printStackTrace();
 		}
 		return objects;
 	}
-	
+
     /** Return true if the object is a GuiTestObject.
      * @param object - will convert from key if MODE_EXTERNAL_PROCESSING.
-     * @see GuiObjectVector#isValidGuiObject(Object) 
-     **/	
-    public boolean isValidGuiObject(Object object){
+     * @see GuiObjectVector#isValidGuiObject(Object)
+     **/
+    @Override
+	public boolean isValidGuiObject(Object object){
     	Object item = object;
     	if(getProcessMode()==MODE_EXTERNAL_PROCESSING){
         	item = getCachedItem(object);
@@ -759,12 +774,13 @@ public class RGuiObjectVector extends GuiObjectVector {
     	}
     	return (item  instanceof GuiTestObject);
     }
-    
+
     /** Return true if the object is a gui container.
      * @param object - will convert from key if MODE_EXTERNAL_PROCESSING.
-     * @see GuiObjectVector#isValidGuiContainer(Object) 
-     **/	
-    public boolean isValidGuiContainer(Object object){
+     * @see GuiObjectVector#isValidGuiContainer(Object)
+     **/
+    @Override
+	public boolean isValidGuiContainer(Object object){
         boolean isContainerType = false;
         TestObject child;
         try{
@@ -774,7 +790,7 @@ public class RGuiObjectVector extends GuiObjectVector {
         		child = (TestObject) object;
         	}
         	String classname = child.getObjectClassName();
-            String alttype = 
+            String alttype =
                    classdata.getMappedClassType(classname, child);
         	if (alttype!=null) {
         		isContainerType = GuiObjectRecognition.isContainerType(alttype);
@@ -785,28 +801,28 @@ public class RGuiObjectVector extends GuiObjectVector {
         catch(ClassCastException ccx){;}
     	return isContainerType;
     }
-    
+
 	/**
 	 * Call this routine instead of getMatchingParentObject() directly.
-	 * This routine must set the Rational DomainTestObject domain and then 
-	 * invokes getMatchingParentObject().  
+	 * This routine must set the Rational DomainTestObject domain and then
+	 * invokes getMatchingParentObject().
 	 * <p>
-	 * It also casts the returned object to GuiTestObject--a subclass of 
+	 * It also casts the returned object to GuiTestObject--a subclass of
 	 * TestObject.
 	 * @see GuiObjectVector#getMatchingParentObject()
 	 * @see GuiTestObject
 	 */
 	public TestObject getTopTestObject (DomainTestObject domain){
-		
+
 		String domainname;
 		try{ domainname = ((String) domain.getName()).toUpperCase();}
 		catch(NullPointerException npe){ return null; }
-		
+
 		// validate domain type (Java, etc.)
 		if(! Domains.isDomainSupported(domainname)){
 		 	Log.info("RGOV: Unsupported DomainTestObject.");
 		 	return null;
-		}	
+		}
 		this.domain = domain; // Carl Nagle: this may no longer be needed?
 		try{
 			if(getProcessMode()==MODE_EXTERNAL_PROCESSING){
@@ -820,10 +836,10 @@ public class RGuiObjectVector extends GuiObjectVector {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Find the one parent object that matches the recognition string set by setPathVector(String).
-	 * Invokes getMatchingParentObject(), returns a TestObject. 
+	 * Invokes getMatchingParentObject(), returns a TestObject.
 	 * @return TestObject
 	 * @see getTopTestObject(DomainTestObject)
 	 */
@@ -840,11 +856,11 @@ public class RGuiObjectVector extends GuiObjectVector {
 			return null;
 		}
 	}
-	
-    /** 
+
+    /**
      * get matching child TestObject for this RGuiObjectVector.
-     * If getProcessMode()==MODE_EXTERNAL_PROCESSING the call to getMatchingChildObject 
-     * should be OK as getCachedItem should still return the aparent TestObject issued 
+     * If getProcessMode()==MODE_EXTERNAL_PROCESSING the call to getMatchingChildObject
+     * should be OK as getCachedItem should still return the aparent TestObject issued
      * and found NOT to be a valid key.
      * @param  aparent, TestObject
      * @param  gather, java.util.List
@@ -853,7 +869,7 @@ public class RGuiObjectVector extends GuiObjectVector {
      * @see GuiObjectVector#getCachedItem(Object)
      **/
 	public TestObject getChildTestObject(TestObject aparent, java.util.List gather) {
-		
+
 		try{
 			if(getProcessMode()==MODE_EXTERNAL_PROCESSING){
 				return (TestObject) getCachedItem(getMatchingChildObject(aparent, gather));
@@ -868,8 +884,9 @@ public class RGuiObjectVector extends GuiObjectVector {
 	 * @param _comp is expected to be of type Interface ITopWindow
 	 * @see org.safs.GuiObjectVector#setActiveWindow(java.lang.Object)
 	 */
+	@Override
 	public void setActiveWindow(Object _comp) {
-		
+
         ITopWindow win;
         try{
         	if (getProcessMode()==MODE_EXTERNAL_PROCESSING){
@@ -881,7 +898,7 @@ public class RGuiObjectVector extends GuiObjectVector {
         }
         catch(ClassCastException ccx){;}
 	}
-	
+
     public static boolean isJavaDomain(TestObject tobj) {
 		String domainName = tobj.getDomain().getName().toString();
 		return RGuiObjectVector.DEFAULT_JAVA_DOMAIN_NAME.equalsIgnoreCase(domainName);
@@ -915,50 +932,51 @@ public class RGuiObjectVector extends GuiObjectVector {
     	// .NET WinFrom getTestDomain throws Domain.ThreadChannel+ChannelSendFailureException
 		String domainName = tobj.getDomain().getName().toString();
 		return RGuiObjectVector.DEFAULT_FLEX_DOMAIN_NAME.equalsIgnoreCase(domainName);
-	}	
+	}
+	@Override
 	protected Object getCachedItem(Object key){
 		return super.getCachedItem(key);
 	}
-	
+
 	/**
 	 * Retrieve keys from the cache using a value item.
-	 * In RFT(RJ) engine, the cache is supposed to store pairs like <key, value(TestObject)> 
-	 * One same value may be put into the cache more than one time, and owns different keys. 
-	 * Return an ArrayList with all matching keys inside. 
-	 * 
+	 * In RFT(RJ) engine, the cache is supposed to store pairs like <key, value(TestObject)>
+	 * One same value may be put into the cache more than one time, and owns different keys.
+	 * Return an ArrayList with all matching keys inside.
+	 *
 	 * @param item, a cached TestObject for being looked up in cache.
-	 * @return ArrayList, all matching keys in cache stored in this ArrayList. 
+	 * @return ArrayList, all matching keys in cache stored in this ArrayList.
 	 * @see #makeUniqueCacheKey(Object)
 	 * @see #putCachedItem(Object, Object)
-	 * @see #removeCachedItem(Object)	
+	 * @see #removeCachedItem(Object)
 	 */
 	public ArrayList getCachedKeysByValue(Object item){
 		ArrayList keys = new ArrayList();
-		if (item == null || cache == null) 
+		if (item == null || cache == null)
 			return keys;
-		
+
 		java.awt.Rectangle targetSize = null;
 		java.awt.Rectangle curSize = null;
 		// FlexObjectTestObject can't be compared correctly by equals(), it is a RFT/FLEX'defect, which may be resolved in newer version.
-		// A workaround: Two Flex objects are considered same if their positions on the screen are same. 
+		// A workaround: Two Flex objects are considered same if their positions on the screen are same.
 		// maybe another cache <TestObject, key> is needed if objects can't be compared as expected. OCT 29 2009. Junwu
-		if (item instanceof FlexObjectTestObject)  
+		if (item instanceof FlexObjectTestObject)
 			targetSize = ((GuiTestObject)item).getScreenRectangle();
-		
+
 		// iterator the cache to find the matching pairs [key, TestObjectReference]
-    	java.util.Enumeration  eum = cache.keys(); 
+    	java.util.Enumeration  eum = cache.keys();
     	while (eum.hasMoreElements()) {
     		Object key = eum.nextElement();
     		Object value = cache.get(key);
-    		
-    		if (item instanceof FlexObjectTestObject) { // only for Flex objects 
+
+    		if (item instanceof FlexObjectTestObject) { // only for Flex objects
         		curSize = ((GuiTestObject)value).getScreenRectangle();
-        		if (targetSize.equals(curSize)) 
+        		if (targetSize.equals(curSize))
         			keys.add(key);
-    		} else { 
+    		} else {
     			if (item.equals(value))
     				keys.add(key);
-    		}	
+    		}
     	}
 		return keys;
 	}

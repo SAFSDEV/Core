@@ -1,7 +1,20 @@
-/** 
- * Copyright (C) SAS Institute. All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.tools.ocr;
 
 import java.awt.Graphics;
@@ -36,7 +49,7 @@ import org.safs.tools.ocr.tesseract.TesseractOCREngine;
  * <br>	JAN 27, 2009    (JunwuMa) Add method runCommandLine(String).    
  * <br>	JAN 29, 2009    (JunwuMa) Updates to use BICUBIC interpolation to resize images for better effect. 
  * <br> FEB 25, 2010    (JunwuMa) Refactoring for OCR keywords.
- * <br> APR 20, 2010    (LeiWang) Add static method getOCREngine(): get the OCREngine instance according 
+ * <br> APR 20, 2010    (Lei Wang) Add static method getOCREngine(): get the OCREngine instance according 
  *                                to the given engine name (by parameter or STAF variable).
  *                                Add static method getOCREngineKey(), setOCREngineKey(), getOCRLanguageCode(),
  *                                setOCRLanguageCode(): get or set STAF variables

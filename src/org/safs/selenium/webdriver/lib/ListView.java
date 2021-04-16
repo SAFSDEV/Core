@@ -1,12 +1,25 @@
 /**
- ** Copyright (C) SAS Institute, All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * History:
  *
  *  APR 2, 2014    (Lei Wang) Initial release.
- *  SEP 2, 2014    (LeiWang) Support sap.m.ListBase.
+ *  SEP 2, 2014    (Lei Wang) Support sap.m.ListBase.
  *  OCT 16, 2015   (Lei Wang) Refector to create IOperable object properly.
  */
 package org.safs.selenium.webdriver.lib;
@@ -106,7 +119,7 @@ public class ListView extends Component implements IListSelectable{
 	 * and then verify if the tab has been really selected according to the parameter 'verify'.
 	 */
 	public void selectItem(TextMatchingCriterion criterion, boolean verify, Keys key, Point offset, int mouseButtonNumber) throws SeleniumPlusException {
-		String debugmsg = StringUtils.debugmsg(this.getClass(), "selectItem");
+		String debugmsg = StringUtils.debugmsg(false);
 		try{
 			// prevent infinite loop
 			if(listable != this) {
@@ -119,9 +132,8 @@ public class ListView extends Component implements IListSelectable{
 		}catch(Exception e){
 			if(e instanceof SeleniumPlusException) throw (SeleniumPlusException)e;
 			else{
-				debugmsg = StringUtils.debugmsg(this.getClass(), "selectItem", e);
 				IndependantLog.error(debugmsg, e);
-				throw new SeleniumPlusException(debugmsg);
+				throw new SeleniumPlusException(StringUtils.debugmsg(e));
 			}
 		}
 	}
@@ -142,7 +154,7 @@ public class ListView extends Component implements IListSelectable{
 	 * has been really selected according to the parameter 'verify'.
 	 */
 	public void selectItem(int index, boolean verify, Keys key, Point offset, int mouseButtonNumber) throws SeleniumPlusException {
-		String debugmsg = StringUtils.debugmsg(this.getClass(), "selectItem");
+		String debugmsg = StringUtils.debugmsg(false);
 		try{
 			// prevent infinite loop
 			if(listable != this) {
@@ -155,16 +167,15 @@ public class ListView extends Component implements IListSelectable{
 		}catch(Exception e){
 			if(e instanceof SeleniumPlusException) throw (SeleniumPlusException)e;
 			else{
-				debugmsg = StringUtils.debugmsg(this.getClass(), "selectItem", e);
 				IndependantLog.error(debugmsg, e);
-				throw new SeleniumPlusException(debugmsg);
+				throw new SeleniumPlusException(StringUtils.debugmsg(e));
 			}
 		}
 
 	}
 
 	public void activateItem(TextMatchingCriterion criterion, boolean verify, Keys key, Point offset) throws SeleniumPlusException{
-		String debugmsg = StringUtils.debugmsg(this.getClass(), "activateItem");
+		String debugmsg = StringUtils.debugmsg(false);
 		try{
 			if(listable != this) {
 				listable.activateItem(criterion, verify, key, offset);
@@ -176,15 +187,14 @@ public class ListView extends Component implements IListSelectable{
 		}catch(Exception e){
 			if(e instanceof SeleniumPlusException) throw (SeleniumPlusException)e;
 			else{
-				debugmsg = StringUtils.debugmsg(this.getClass(), "activateItem", e);
 				IndependantLog.error(debugmsg, e);
-				throw new SeleniumPlusException(debugmsg);
+				throw new SeleniumPlusException(StringUtils.debugmsg(e));
 			}
 		}
 	}
 
 	public void activateItem(int index, boolean verify, Keys key, Point offset) throws SeleniumPlusException{
-		String debugmsg = StringUtils.debugmsg(this.getClass(), "activateItem");
+		String debugmsg = StringUtils.debugmsg(false);
 		try{
 			if(listable != this) {
 				listable.activateItem(index, verify, key, offset);
@@ -196,9 +206,8 @@ public class ListView extends Component implements IListSelectable{
 		}catch(Exception e){
 			if(e instanceof SeleniumPlusException) throw (SeleniumPlusException)e;
 			else{
-				debugmsg = StringUtils.debugmsg(this.getClass(), "activateItem", e);
 				IndependantLog.error(debugmsg, e);
-				throw new SeleniumPlusException(debugmsg);
+				throw new SeleniumPlusException(StringUtils.debugmsg(e));
 			}
 		}
 	}
@@ -207,7 +216,7 @@ public class ListView extends Component implements IListSelectable{
 	 * Verify the item (specified by text, partialMatch and matchIndex) is selected or un-selected in the listview.
 	 */
 	public void verifyItemSelection(TextMatchingCriterion criterion, boolean expectSelected) throws SeleniumPlusException{
-		String debugmsg = StringUtils.debugmsg(this.getClass(), "verifyItemSelection");
+		String debugmsg = StringUtils.debugmsg(false);
 
 		try{
 			if(listable != this) {
@@ -220,9 +229,8 @@ public class ListView extends Component implements IListSelectable{
 		}catch(Exception e){
 			if(e instanceof SeleniumPlusException) throw (SeleniumPlusException)e;
 			else{
-				debugmsg = StringUtils.debugmsg(this.getClass(), "verifyItemSelection", e);
 				IndependantLog.error(debugmsg, e);
-				throw new SeleniumPlusException(debugmsg);
+				throw new SeleniumPlusException(StringUtils.debugmsg(e));
 			}
 		}
 	}
@@ -231,7 +239,7 @@ public class ListView extends Component implements IListSelectable{
 	 * Verify the item (specified by text, partialMatch and matchIndex) is contained in the listview.
 	 */
 	public void verifyContains(TextMatchingCriterion criterion) throws SeleniumPlusException{
-		String debugmsg = StringUtils.debugmsg(this.getClass(), "verifyContains");
+		String debugmsg = StringUtils.debugmsg(false);
 
 		try{
 			if(listable != this) {
@@ -244,7 +252,6 @@ public class ListView extends Component implements IListSelectable{
 		}catch(Exception e){
 			if(e instanceof SeleniumPlusException) throw (SeleniumPlusException)e;
 			else{
-				debugmsg = StringUtils.debugmsg(this.getClass(), "verifyContains", e);
 				IndependantLog.error(debugmsg, e);
 				throw new SeleniumPlusException(debugmsg);
 			}
@@ -255,7 +262,7 @@ public class ListView extends Component implements IListSelectable{
 	 * Verify the item (specified by index) is selected or un-selected in the listview.
 	 */
 	public void verifyItemSelection(int index, boolean expectSelected) throws SeleniumPlusException {
-		String debugmsg = StringUtils.debugmsg(this.getClass(), "verifyItemSelection");
+		String debugmsg = StringUtils.debugmsg(false);
 
 		try{
 			if(listable != this) {
@@ -268,9 +275,8 @@ public class ListView extends Component implements IListSelectable{
 		}catch(Exception e){
 			if(e instanceof SeleniumPlusException) throw (SeleniumPlusException)e;
 			else{
-				debugmsg = StringUtils.debugmsg(this.getClass(), "verifyItemSelection", e);
 				IndependantLog.error(debugmsg, e);
-				throw new SeleniumPlusException(debugmsg);
+				throw new SeleniumPlusException(StringUtils.debugmsg(e));
 			}
 		}
 
@@ -280,7 +286,7 @@ public class ListView extends Component implements IListSelectable{
 	 * Get all items of the listview.
 	 */
 	public Item[] getContent() throws SeleniumPlusException {
-		String debugmsg = StringUtils.debugmsg(this.getClass(), "getContent");
+		String debugmsg = StringUtils.debugmsg(false);
 
 		try{
 			if(listable != this) {
@@ -293,15 +299,14 @@ public class ListView extends Component implements IListSelectable{
 		}catch(Exception e){
 			if(e instanceof SeleniumPlusException) throw (SeleniumPlusException)e;
 			else{
-				debugmsg = StringUtils.debugmsg(this.getClass(), "getContent", e);
 				IndependantLog.error(debugmsg, e);
-				throw new SeleniumPlusException(debugmsg);
+				throw new SeleniumPlusException(StringUtils.debugmsg(e));
 			}
 		}
 	}
 
 	public Element getMatchedElement(TextMatchingCriterion criterion) throws SeleniumPlusException {
-		String debugmsg = StringUtils.debugmsg(this.getClass(), "getMatchedElement");
+		String debugmsg = StringUtils.debugmsg(false);
 
 		try{
 			if(listable != this) {
@@ -314,9 +319,8 @@ public class ListView extends Component implements IListSelectable{
 		}catch(Exception e){
 			if(e instanceof SeleniumPlusException) throw (SeleniumPlusException)e;
 			else{
-				debugmsg = StringUtils.debugmsg(this.getClass(), "getMatchedElement", e);
 				IndependantLog.error(debugmsg, e);
-				throw new SeleniumPlusException(debugmsg);
+				throw new SeleniumPlusException(StringUtils.debugmsg(e));
 			}
 		}
 	}
@@ -340,7 +344,7 @@ public class ListView extends Component implements IListSelectable{
 		 * @see org.safs.selenium.webdriver.lib.model.ISelectable#getContent()
 		 */
 		public Item[] getContent() throws SeleniumPlusException {
-			String debugmsg = StringUtils.debugmsg(this.getClass(), "getContent");
+			String debugmsg = StringUtils.debugmsg(false);
 			List<Item> items = new ArrayList<Item>();
 
 			try {
@@ -370,7 +374,7 @@ public class ListView extends Component implements IListSelectable{
 		}
 
 		protected void clickElement(Element element, Keys key, Point offset, int mouseButtonNumber, int numberOfClick) throws SeleniumPlusException {
-			String debugmsg = StringUtils.debugmsg(getClass(), "clickElement");
+			String debugmsg = StringUtils.debugmsg(false);
 			try{
 				super.clickElement(element, key, offset, mouseButtonNumber, numberOfClick);
 			}catch(SeleniumPlusException spe){
@@ -393,7 +397,7 @@ public class ListView extends Component implements IListSelectable{
 		}
 
 		protected void showOnPage(Element element) throws SeleniumPlusException {
-			String debugmsg = StringUtils.debugmsg(this.getClass(), "showOnPage");
+			String debugmsg = StringUtils.debugmsg(false);
 			WDLibrary.checkNotNull(element);
 
 			Item item = convertToItem(element);
@@ -414,7 +418,7 @@ public class ListView extends Component implements IListSelectable{
 		}
 
 		protected void verifyItemSelected(Element element) throws SeleniumPlusException {
-			String debugmsg = StringUtils.debugmsg(getClass(), "verifyItemSelected");
+			String debugmsg = StringUtils.debugmsg(false);
 			WDLibrary.checkNotNull(element);
 
 			Item item = convertToItem(element);
@@ -473,7 +477,7 @@ public class ListView extends Component implements IListSelectable{
 		 * @see org.safs.selenium.webdriver.lib.model.ISelectable#getContent()
 		 */
 		public Item[] getContent() throws SeleniumPlusException {
-			String debugmsg = StringUtils.debugmsg(this.getClass(), "getContent");
+			String debugmsg = StringUtils.debugmsg(false);
 			List<Item> items = new ArrayList<Item>();
 
 			try {
@@ -503,7 +507,7 @@ public class ListView extends Component implements IListSelectable{
 		}
 
 		protected void clickElement(Element element, Keys key, Point offset, int mouseButtonNumber, int numberOfClick) throws SeleniumPlusException {
-			String debugmsg = StringUtils.debugmsg(getClass(), "clickElement");
+			String debugmsg = StringUtils.debugmsg(false);
 			try{
 				super.clickElement(element, key, offset, mouseButtonNumber, numberOfClick);
 			}catch(SeleniumPlusException spe){
@@ -513,6 +517,7 @@ public class ListView extends Component implements IListSelectable{
 				if(id==null || id.trim().isEmpty()) throw new SeleniumPlusException("Item's id is invalid, cannot click.");
 
 				try {
+					IndependantLog.debug(debugmsg+"Tried javascript sap_m_List_setSelectedItemById() to select item by id '"+id+"'.");
 					//Select by id
 					StringBuffer jsScript = new StringBuffer();
 					jsScript.append(SAP.sap_m_List_setSelectedItemById(true));
@@ -526,7 +531,7 @@ public class ListView extends Component implements IListSelectable{
 		}
 
 		protected void verifyItemSelected(Element element) throws SeleniumPlusException {
-			String debugmsg = StringUtils.debugmsg(getClass(), "verifyItemSelected");
+			String debugmsg = StringUtils.debugmsg(false);
 			WDLibrary.checkNotNull(element);
 
 			boolean selected = false;
@@ -598,7 +603,7 @@ public class ListView extends Component implements IListSelectable{
 		 * @see org.safs.selenium.webdriver.lib.model.ISelectable#getContent()
 		 */
 		public Item[] getContent() throws SeleniumPlusException {
-			String debugmsg = StringUtils.debugmsg(this.getClass(), "getContent");
+			String debugmsg = StringUtils.debugmsg(false);
 			List<Item> items = new ArrayList<Item>();
 
 			try {
@@ -646,7 +651,7 @@ public class ListView extends Component implements IListSelectable{
 		}
 
 		protected void clickElement(Element element, Keys key, Point offset, int mouseButtonNumber, int numberOfClick) throws SeleniumPlusException {
-			String debugmsg = StringUtils.debugmsg(getClass(), "clickElement");
+			String debugmsg = StringUtils.debugmsg(false);
 			try{
 				super.clickElement(element, key, offset, mouseButtonNumber, numberOfClick);
 			}catch(SeleniumPlusException spe){
@@ -672,7 +677,7 @@ public class ListView extends Component implements IListSelectable{
 		 * @see org.safs.selenium.webdriver.lib.model.ISelectable#getContent()
 		 */
 		public Item[] getContent() throws SeleniumPlusException {
-			String debugmsg = StringUtils.debugmsg(this.getClass(), "getContent");
+			String debugmsg = StringUtils.debugmsg(false);
 			List<Item> items = new ArrayList<Item>();
 
 			try {
@@ -702,7 +707,7 @@ public class ListView extends Component implements IListSelectable{
 		}
 
 		protected void verifyItemSelected(Element element) throws SeleniumPlusException {
-			String debugmsg = StringUtils.debugmsg(getClass(), "verifyItemSelected");
+			String debugmsg = StringUtils.debugmsg(false);
 			WDLibrary.checkNotNull(element);
 
 			boolean selected = false;

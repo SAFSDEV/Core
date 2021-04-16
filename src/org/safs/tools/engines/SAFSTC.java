@@ -1,10 +1,36 @@
-/** Copyright (C) (MSA, Inc) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
+/**
+ * <br/>@author Carl Nagle NOV 18, 2005 Modified CScript launch command for VBScript.
+ * <br/>@author Carl Nagle DEC 14, 2005 Refactored with DriverConfiguredSTAFInterface superclass
+ * <br/>@author JCRUNK AUG 01, 2006 Modified CScript launch command for VBScript.
+ * <br/>@author Carl Nagle MAR 18, 2011 Accept additional TC/VBS INI command-line parameters
+ * <br/>@author Lei Wang JAN 18, 2012 Modify to receive the console log messages from TC through STAF-Queue
+ * <br/>@author Lei Wang APR 25, 2019 Modify launchInterface(): Use TestComplete.exe/TestExecute.exe to start the TCAFS HOOk.
+ *                                          Avoid the problem that VBS cannot start the TestComplete correctly, see S1504632.
+ */
 package org.safs.tools.engines;
 
+import java.io.File;
+
+import org.safs.Constants;
+import org.safs.Constants.TestCompleteConstants;
 import org.safs.Log;
-import org.safs.SAFSException;
 import org.safs.SAFSSTAFRegistrationException;
 import org.safs.STAFHelper;
 import org.safs.StringUtils;
@@ -55,11 +81,6 @@ import org.safs.tools.stringutils.StringUtilities;
  * {@link <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/lang/Runtime.html#exec(java.lang.String)">Runtime.exec</a>}<br>
  * {@link <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/lang/Process.html">Runtime.exec Process</a>}<br>
  *
- * <br/>@author Carl Nagle NOV 18, 2005 Modified CScript launch command for VBScript.
- * <br/>@author Carl Nagle DEC 14, 2005 Refactored with DriverConfiguredSTAFInterface superclass
- * <br/>@author JCRUNK AUG 01, 2006 Modified CScript launch command for VBScript.
- * <br/>@author Carl Nagle MAR 18, 2011 Accept additional TC/VBS INI command-line parameters
- * <br/>@author Lei Wang JAN 18, 2012 Modify to receive the console log messages from TC through STAF-Queue
  * @see org.safs.tools.consoles.ProcessConsole
  */
 public class SAFSTC extends GenericEngine {
@@ -68,15 +89,19 @@ public class SAFSTC extends GenericEngine {
 	 * "SAFS/TC" -- The name of this engine as registered with STAF.
 	 */
 	static final String ENGINE_NAME = "SAFS/TC";
+	/** '10.0' */ //TestComplete 10.0
+	public static final String ENGINE_VERSION = "10.0";
+	/** 'The engine using 'Test Complete' to test GUI.' */
+	public static final String ENGINE_DESCRIPTION = "The engine using 'Test Complete' to test GUI.";
 
 	/**
-	 * "SAFS/TC/CONSOLEMSG" -- The name of the handle registered with STAF, 
+	 * "SAFS/TC/CONSOLEMSG" -- The name of the handle registered with STAF,
 	 * we use this handle's queue to receive TC's console message.
 	 * If you change it value, change the same constant defined in LogUtilities_X.SVB
 	 * to make sure they have the same value.
 	 */
 	static final String CONSOLE_MSG_QUEUE_NAME = "SAFS/TC/CONSOLEMSG";
-	
+
 	/**
 	 * CONSOLE_MSG_SEPARATOR is the separator defined in LogUtilities_X.SVB
 	 * From Test Complete, we combine the message and description by this separator,
@@ -91,6 +116,9 @@ public class SAFSTC extends GenericEngine {
 	public SAFSTC() {
 		super();
 		servicename = ENGINE_NAME;
+		productName = ENGINE_NAME;
+		version = ENGINE_VERSION;
+		description = ENGINE_DESCRIPTION;
 	}
 
 	/**
@@ -108,6 +136,7 @@ public class SAFSTC extends GenericEngine {
      * <br/>@author JCRUNK AUG 1, 2006 Modified CScript launch command for VBScript.
 	 * @see GenericEngine#launchInterface(Object)
 	 */
+	@Override
 	public void launchInterface(Object configInfo){
 		super.launchInterface(configInfo);
 
@@ -139,26 +168,52 @@ public class SAFSTC extends GenericEngine {
 					String safsconfig = "";
 					String passthru = "";
 
+					//"%TESTCOMPLETE_HOME%\bin\TestComplete.exe" C:\SAFS\TCAFS\TCAFS.pjs /r /p:TCAFS /u:StepDriver /rt:Main /e /SilentMode /ns /safs.project.config:C:\SAFS\project\TCAFS.ini;C:\SAFS\project\safstid.ini;C:\SAFS\safstid.ini
+					String testCompleteCmdParam = "";
+
 					// SuiteName
 				    tempstr   = config.getNamedValue(DriverConstant.SECTION_SAFS_TC, "SuiteName");
-					if(tempstr != null) suitename = " -suitename \""+ tempstr +"\"";
-					
+					if(tempstr != null){
+						suitename = " -suitename \""+ tempstr +"\"";
+						testCompleteCmdParam += tempstr;
+					}else{
+						testCompleteCmdParam += System.getenv(Constants.ENV_SAFSDIR)+"\\TCAFS\\"+TestCompleteConstants.DEFAULT_SUITENAME;
+					}
+
 					// ProjectName
 				    tempstr   = config.getNamedValue(DriverConstant.SECTION_SAFS_TC, "ProjectName");
-					if(tempstr != null) projectname = " -projectname \""+ tempstr +"\"";
-					
+					if(tempstr != null){
+						projectname = " -projectname \""+ tempstr +"\"";
+						testCompleteCmdParam += " /r /p:"+tempstr;
+					}else{
+						testCompleteCmdParam += " /r /p:"+TestCompleteConstants.DEFAULT_PROJECTNAME;
+					}
+
 					// ScriptName
 				    tempstr   = config.getNamedValue(DriverConstant.SECTION_SAFS_TC, "ScriptName");
-					if(tempstr != null) scriptname = " -scriptname \""+ tempstr +"\"";
-					
+					if(tempstr != null){
+						scriptname = " -scriptname \""+ tempstr +"\"";
+						testCompleteCmdParam += " /u:"+tempstr;
+					}else{
+						testCompleteCmdParam += " /u:"+TestCompleteConstants.DEFAULT_SCRIPTNAME;
+					}
+
+					testCompleteCmdParam += " "+TestCompleteConstants.DEFAULT_PARAMETERS+" ";
+
 					// safs.project.config
 					tempstr = config.getConfigurePaths();
-					if((tempstr != null) && (tempstr.length()> 0)) safsconfig = " -safs.project.config \""+ tempstr +"\"";
-					
+					if((tempstr != null) && (tempstr.length()> 0)){
+						safsconfig = " -safs.project.config \""+ tempstr +"\"";
+						testCompleteCmdParam += " /safs.project.config:"+tempstr;
+					}
+
 					// OPTIONS (PassThru)
 				    tempstr   = config.getNamedValue(DriverConstant.SECTION_SAFS_TC, "Options");
-					if(tempstr != null) passthru = " -passthru \""+ tempstr +"\"";
-					
+					if(tempstr != null){
+						passthru = " -passthru \""+ tempstr +"\"";
+						testCompleteCmdParam += " "+tempstr;
+					}
+
 					// HOOK script
 				    tempstr   = config.getNamedValue(DriverConstant.SECTION_SAFS_TC, "HOOK");
 				    if ((tempstr == null)||(tempstr.length()<4)) {
@@ -169,12 +224,17 @@ public class SAFSTC extends GenericEngine {
 
 						if (hookext.equalsIgnoreCase("VBS")){
 					    	array = "CMD /C start cscript.exe //B //NoLogo "+ "\""+ tempstr +"\"";
+					    	array += suitename + projectname + scriptname + safsconfig + passthru;
+						}else if (hookext.equalsIgnoreCase("EXE")){//TestComplete.exe or TestExecute.exe
+							if(!new File(tempstr).exists()){
+								tempstr = System.getenv(TestCompleteConstants.TCHomeEnv)+File.separator+"bin"+File.separator+tempstr;
+							}
+							array = "\""+ tempstr +"\" "+testCompleteCmdParam;
 						}else{
-					    	array = tempstr;
+					    	array = "\""+ tempstr +"\"";
+					    	array += suitename + projectname + scriptname + safsconfig + passthru;
 						}
 
-						array += suitename + projectname + scriptname + safsconfig + passthru;
-						
 						Log.info(ENGINE_NAME +" preparing to execute external process...");
 						Log.info(array);
 
@@ -191,7 +251,7 @@ public class SAFSTC extends GenericEngine {
 						try{
 							String t = config.getNamedValue(DriverConstant.SECTION_SAFS_TC,
 				         		              "TIMEOUT");
-							if((t !=null)&&(t.length()>0)) 
+							if((t !=null)&&(t.length()>0))
 								timeout = Integer.parseInt(t);
 						}catch(NumberFormatException nf){
 							Log.info(ENGINE_NAME +" ignoring invalid config info for TIMEOUT.");
@@ -200,9 +260,9 @@ public class SAFSTC extends GenericEngine {
 						//TC/TE sometimes doesn't start by first try. so try twice within timeout
 						//It could be TC/TE bug or Win2008 OS issue.
 						//Remove below restart code if the Issue# M0088464 fix from AutomatedQA.
-						
-						timeout = timeout/2; 
-						
+
+						timeout = timeout/2;
+
 						int loop    = 0;
 						running = false;
 
@@ -211,24 +271,24 @@ public class SAFSTC extends GenericEngine {
 							if(! running)
 							   try{Thread.sleep(1000);}catch(InterruptedException ix){}
 						}
-						
+
 						//second time try to start TC/TE
 						if (! running){
 							Log.info("Try to restart "+ ENGINE_NAME +
 					          " again within timeout!");
-							
+
 							console.shutdown();
 							process.destroy();
-							
+
 							Thread.sleep(5000); // wait allow to clean up
 							runtime = Runtime.getRuntime();
-							process = runtime.exec(array);							
+							process = runtime.exec(array);
 							console = new ProcessConsole(process);
 							athread = new Thread(console);
 							athread.start();
-							
+
 							loop = 0; // reset loop for remaining time
-							
+
 							for(;((loop < timeout)&&(! running));loop++){
 								running = isToolRunning();
 								if(! running)
@@ -252,21 +312,22 @@ public class SAFSTC extends GenericEngine {
 				// not supposed to autolaunch
 				else{
 					Log.generic(ENGINE_NAME +" AUTOLAUNCH is *not* enabled.");
-					
+
 					// ?we will hope the user is getting it online before we have to use it?
 				}
 			}
-			
+
 			//Try to get console message from Queue, these messages are generated by TestComplete and put into the queue.
 			if(running){
-				java.lang.Runnable runnable = new java.lang.Runnable(){					
+				java.lang.Runnable runnable = new java.lang.Runnable(){
+					@Override
 					public void run() {
 						String messageAndDesc = null;
 						String message = null;
 						boolean stop = false;
 						java.util.List<String> list = null;
 						STAFHelper consoleQueueHandle = null;
-						
+
 						try {
 							consoleQueueHandle = STAFProcessHelpers.registerHelper(CONSOLE_MSG_QUEUE_NAME);
 							while(!stop){
@@ -295,7 +356,7 @@ public class SAFSTC extends GenericEngine {
 				thread.setDaemon(true);
 				thread.start();
 			}
-			
+
 		}catch(Exception x){
 			Log.error(
 			ENGINE_NAME +" requires a valid DriverInterface object for initialization!  "+
@@ -305,6 +366,7 @@ public class SAFSTC extends GenericEngine {
 
 	// this may be more correctly refactored into the GenericEngine superclass.
 	/** Override superclass to catch unsuccessful initialization scenarios. */
+	@Override
 	public long processRecord(TestRecordHelper testRecordData) {
 		if (running) return super.processRecord(testRecordData);
 		running = isToolRunning();

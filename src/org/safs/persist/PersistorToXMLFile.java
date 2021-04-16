@@ -1,31 +1,31 @@
 /**
  * Copyright (C) SAS Institute, All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- */
-
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * Logs for developers, not published to API DOC.
  *
  * History:
  * DEC 05, 2016    (Lei Wang) Initial release.
+ * OCT 24, 2017    (Lei Wang) Moved most functionalities to class PersistorToXMLString.
  */
 package org.safs.persist;
 
-import java.io.IOException;
-import java.util.Stack;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
-import org.json.JSONArray;
 import org.safs.Constants.XMLConstants;
-import org.safs.SAFSException;
 import org.safs.tools.RuntimeDataInterface;
-import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * Write Persistable object to an XML file, such as:
@@ -53,10 +53,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * @author Lei Wang
  *
  */
-public class PersistorToXMLFile extends PersistorToHierarchialFile{
-	protected SAXParser saxParser = null;
-	protected InputSource inputSource = null;
-
+public class PersistorToXMLFile extends PersistorToFileDelegate{
 	/**
 	 * @param runtime
 	 * @param filename
@@ -66,225 +63,7 @@ public class PersistorToXMLFile extends PersistorToHierarchialFile{
 	}
 
 	@Override
-	protected void containerBegin(String className) throws IOException{
-		writer.write("<"+getTagName(className)+" "+XMLConstants.PROPERTY_CLASSNAME+"=\""+className+"\">\n");
+	protected void instantiateDelegatePersitor() {
+		delegatePersistor = new PersistorToXMLString();
 	}
-	@Override
-	protected void childBegin(String key, String value) throws IOException{
-		writer.write("<"+key+">"+value+"</"+key+">");
-	}
-	@Override
-	protected void containerEnd(String className) throws IOException{
-		writer.write("</"+getTagName(className)+">");
-	}
-
-	/**
-	 * Wrap the string in "<![CDATA[]]>" if it contains special symbols {@link XMLConstants#SYMBOL_TO_ESCAPE},
-	 * please refer to {@link #needEscape(String)}.
-	 *
-	 * @param value String, the value to be escaped if it contains special symbols
-	 * @return String, the escaped string
-	 */
-	@Override
-	protected String escape(String value){
-		String result = value;
-
-		if(needEscape(result)){
-			result = XMLConstants.CDATA_START+result+XMLConstants.CDATA_END;
-		}
-
-		return super.escape(result);
-	}
-
-	/**
-	 * Some symbols are not permitted in XML document and they need to be escaped.<br>
-	 * Such as "<?XML", ">", "<", "&", "'", "\"" etc.
-	 *
-	 * @param value String, the value to test
-	 * @return boolean if the value needs to be escaped.
-	 */
-	private boolean needEscape(String value){
-		if(value.toUpperCase().startsWith(XMLConstants.XML_START)){
-			return true;
-		}
-		for(String symbol: XMLConstants.SYMBOL_TO_ESCAPE){
-			if(value.contains(symbol)) return true;
-		}
-		return false;
-	}
-
-	@Override
-	protected void beforeUnpickle()  throws SAFSException, IOException{
-		super.beforeUnpickle();
-
-		try {
-			SAXParserFactory factory = SAXParserFactory.newInstance();
-			saxParser = factory.newSAXParser();
-			inputSource = new InputSource(reader);
-
-		} catch (ParserConfigurationException | SAXException e) {
-			throw new SAFSException("Failed to creat XML SAX Parser! Met "+e.toString());
-		}
-	}
-
-	@Override
-	protected Persistable doUnpickle()  throws SAFSException, IOException{
-		//The handler will create Persistable object.
-		try {
-			UnpickleHandler unpickle = new UnpickleHandler();
-			saxParser.parse(inputSource, unpickle);
-
-			return unpickle.getFreshFood();
-		} catch (SAXException e) {
-			throw new SAFSException("Failed to parse XML document with SAX Parser! Met "+e.toString());
-		}
-	}
-
-	private static class Tag{
-		/** The XML tag name */
-		String name = null;
-		/** The property 'classname' of this tag, not all tag has this property, it is ONLY for container tag. */
-		String classname = null;
-		/** If this Tag represents a container, this field will hold a Persistable object. */
-		Persistable container = null;
-		/** If this tag should be ignored during unpickle.*/
-		boolean ignored = false;
-	}
-
-	protected class UnpickleHandler extends DefaultHandler{
-		protected Persistable freshFood = null;
-		/** It will contain the string value of each document. */
-		protected StringBuilder value = null;
-		protected StringBuilder warnings = null;
-
-		protected Tag tag = null;
-		protected Stack<Tag> tagStack = new Stack<Tag>();
-
-		public Persistable getFreshFood(){
-			return freshFood;
-		}
-		public String getWarnings(){
-			return warnings.toString();
-		}
-
-		public void startDocument () throws SAXException{
-			value = new StringBuilder();
-			warnings = new StringBuilder();
-		}
-
-		public void startElement (String uri, String localName, String qName, Attributes attributes) throws SAXException{
-			cleanElementValue();
-			tag = new Tag();
-			tag.name = qName;
-			tag.classname = attributes.getValue(XMLConstants.PROPERTY_CLASSNAME);
-			if(tag.classname==null){
-				String packageName = attributes.getValue(XMLConstants.PROPERTY_PACKAGE);
-				if(packageName!=null){
-					tag.classname = packageName.isEmpty()? tag.name : packageName+"."+tag.name;
-				}
-			}
-
-			try{
-				Tag parent = null;
-				if(!tagStack.isEmpty()){
-					parent = tagStack.peek();
-				}
-
-				if(parent!=null && parent.ignored){
-					tag.ignored = true;
-				}
-
-				if(!tag.ignored){
-					if(tag.classname!=null){
-						try {
-							Object object = Class.forName(tag.classname).newInstance();
-							if(object instanceof Persistable){
-								//The first Persistable will be returned as freshFood.
-								if(freshFood==null) freshFood = (Persistable) object;
-								tag.container = (Persistable) object;
-								tag.ignored = false;
-							}else{
-								warnings.append("\nThis object '"+tag.classname+"' is not a Persistable, it and its children will be ignored.");
-								tag.ignored = true;
-							}
-						} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-							warnings.append("\nMet "+e.toString());
-							tag.ignored = true;
-						}
-					}else{
-						//we consider it as a field of it parent tag.
-						if(parent==null || parent.container==null){
-							warnings.append("\nThe parent is null for '"+tag.name+"', this tag will be ignored.");
-							tag.ignored = true;
-						}else{
-							tag.ignored = PersistorToXMLFile.this.isIgnoredFiled(parent.classname, qName);
-						}
-					}
-				}
-			}catch(Exception e){
-				tag.ignored = true;
-				throw new SAXException(e.toString());
-			}finally{
-				tagStack.push(tag);
-			}
-		}
-
-		public void characters (char ch[], int start, int length) throws SAXException{
-			if(!tag.ignored){
-				String chunk = new String(ch, start, length);
-				value.append(chunk);
-			}
-		}
-
-		public void endElement (String uri, String localName, String qName) throws SAXException{
-			//Finally the buffer 'value' holds the element's value, we can check it :-)
-			//pop the tag from the stack
-
-			try{
-				Tag me = tagStack.pop();
-
-				warnings.append("\nFailed match tag name: '"+me.name+"'!='"+qName+"'");
-				if(!me.ignored){
-					if(!tagStack.isEmpty()){
-						Tag parent = tagStack.peek();
-						if(!parent.ignored && parent.container!=null){
-							if(me.container==null){
-								//I am a simple field
-								if(!parent.container.setField(me.name, value.toString())){
-									warnings.append("\nFailed to set field '"+parent.name+"."+me.name+"' with value '"+value+"'");
-									String trimmedValue = value.toString().trim();
-									if(trimmedValue.startsWith("[") && trimmedValue.endsWith("]")){
-										//It is probably an array object in JSON format
-										JSONArray jsonArray = new JSONArray(trimmedValue);
-										if(!parent.container.setField(me.name, jsonArray)){
-											warnings.append("\nFailed to set field '"+parent.name+"."+me.name+"' with array value '"+value+"'");
-										}
-									}
-								}
-							}else{
-								//I am a container field, value doesn't hold any value, set my container to parent.
-								if(!parent.container.setField(me.name, me.container)){
-									warnings.append("\nFailed to set field "+parent.name+"."+me.name+"' with value "+me.container);
-								}
-							}
-						}
-					}else{
-						warnings.append("\nMissing parent for tag '"+tag.name+"'");
-					}
-				}
-
-			}catch(Exception e){
-				throw new SAXException(e.toString());
-			}finally{
-				cleanElementValue();
-			}
-
-		}
-
-		/** Clean the buffer holding the element's value. */
-		private void cleanElementValue(){
-			value.delete(0, value.length());
-		}
-	}
-
 }

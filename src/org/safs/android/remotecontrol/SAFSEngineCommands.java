@@ -1,11 +1,22 @@
-/** 
- ** Copyright (C) SAS Institute, All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.android.remotecontrol;
 
-import java.awt.Rectangle;
-import java.util.ArrayList;
 import java.util.Properties;
 import java.util.concurrent.TimeoutException;
 
@@ -21,11 +32,11 @@ import com.jayway.android.robotium.remotecontrol.solo.Solo;
  * Default usage:
  * <p><pre>
  * Instantiate *and* initialize Solo API object according to the Solo class, then:
- * 
+ *
  * SAFSEngineCommands engine = new SAFSEngineCommands(solo);
  * (use the API)
  * </pre>
- * Note: SAFSEngineCommands can use component UID references that have been acquired from either 
+ * Note: SAFSEngineCommands can use component UID references that have been acquired from either
  * the remote control Solo class APIs or the SAFSEngineCommands APIs.
  * <p>
  * @author Carl Nagle, SAS Institute, Inc.
@@ -35,24 +46,24 @@ public class SAFSEngineCommands extends SAFSWorker {
 
 	private Solo solo = null;
 	private static final String TAG = "SAFSEngineCommands.";
-	
+
 	/**
 	 * Default (required) public constructor.
 	 * @param solo Solo instance already created and initialized.
 	 */
 	public SAFSEngineCommands(Solo solo){
-		super();		
+		super();
 		setRemoteControl(solo.getRemoteControl(), true);
 	}
-	
+
 	/* hidden for non-use */
 	private SAFSEngineCommands() {
 		super();
 	}
 
 	/**
-	 * Used internally. 
-	 * Prepare a dispatchProps object targeting a remote "safs_engine" command instead of a remote "instrument" 
+	 * Used internally.
+	 * Prepare a dispatchProps object targeting a remote "safs_engine" command instead of a remote "instrument"
 	 * or "solo" command.
 	 * @param command
 	 * @return Properties ready to be populated with command-specific parameters.
@@ -62,13 +73,13 @@ public class SAFSEngineCommands extends SAFSWorker {
 		_props.setProperty(SAFSMessage.KEY_TARGET, SAFSMessage.target_safs_engine);
 		return _props;
 	}
-	
+
 	/**
 	 * Converts a delimited string representing an array of Strings as returned by several engine commands.
 	 * It treats the first character as the delimiter used to separate the remaining Strings.
-	 * @param svalue -- String value usually returned from a remote engine command.  A null value will result 
+	 * @param svalue -- String value usually returned from a remote engine command.  A null value will result
 	 * in a returned String[0].
-	 * @return String[] -- array of 0 or more Strings. 
+	 * @return String[] -- array of 0 or more Strings.
 	 */
 	private String[] convertDelimitedStrings(String svalue){
 		if(svalue == null || svalue.length() < 2) return new String[0];
@@ -76,26 +87,26 @@ public class SAFSEngineCommands extends SAFSWorker {
 		svalue = svalue.substring(1);
 		return svalue.split(sep);
 	}
-	
+
 	/**
-	 * <a href="http://safsdev.sourceforge.net/sqabasic2000/AndroidEngineComponentCommandsClearHighlightedDialog.html">ClearHighlightedDialog</a>
+	 * <a href="/sqabasic2000/AndroidEngineComponentCommandsClearHighlightedDialog.html">ClearHighlightedDialog</a>
 	 * @throws IllegalThreadStateException
-	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command 
+	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command
 	 * did not execute properly on the remote device or emulator.
 	 * @throws TimeoutException
 	 * @throws ShutdownInvocationException
 	 */
-	public void clearHighlightedDialog()throws IllegalThreadStateException, RemoteException, TimeoutException, ShutdownInvocationException{		
+	public void clearHighlightedDialog()throws IllegalThreadStateException, RemoteException, TimeoutException, ShutdownInvocationException{
 		Properties props = prepEngineDispatch(SAFSMessage.engine_clearhighlighteddialog);
 		_last_remote_result = control.performRemotePropsCommand(props, default_ready_stimeout, default_running_stimeout, default_result_stimeout);
 		RemoteResults results = new RemoteResults(_last_remote_result);
 		if(!results.isRemoteResult()||results.getStatusCode()!=SAFSMessage.STATUS_REMOTERESULT_OK) throw new RemoteException("clearHighlightedDialog did not execute properly on remote device.");
 	}
-	
+
 	/**
-	 * <a href="http://safsdev.sourceforge.net/sqabasic2000/AndroidEngineComponentCommandsClearReferenceCache.html">ClearReferenceCache</a>
+	 * <a href="/sqabasic2000/AndroidEngineComponentCommandsClearReferenceCache.html">ClearReferenceCache</a>
 	 * @throws IllegalThreadStateException
-	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command 
+	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command
 	 * did not execute properly on the remote device or emulator.
 	 * @throws TimeoutException
 	 * @throws ShutdownInvocationException
@@ -106,11 +117,11 @@ public class SAFSEngineCommands extends SAFSWorker {
 		RemoteResults results = new RemoteResults(_last_remote_result);
 		if(!results.isRemoteResult()||results.getStatusCode()!=SAFSMessage.STATUS_REMOTERESULT_OK) throw new RemoteException("clearreferencecache did not execute properly on remote device.");
 	}
-	
+
 	/**
-	 * <a href="http://safsdev.sourceforge.net/sqabasic2000/AndroidEngineComponentCommandsGetAccessibleName.html">GetAccessibleName</a>
+	 * <a href="/sqabasic2000/AndroidEngineComponentCommandsGetAccessibleName.html">GetAccessibleName</a>
 	 * @throws IllegalThreadStateException
-	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command 
+	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command
 	 * did not execute properly on the remote device or emulator.
 	 * @throws TimeoutException
 	 * @throws ShutdownInvocationException
@@ -120,17 +131,17 @@ public class SAFSEngineCommands extends SAFSWorker {
 		props.setProperty(SAFSMessage.PARAM_1, uID);
 		_last_remote_result = control.performRemotePropsCommand(props, default_ready_stimeout, default_running_stimeout, default_result_stimeout);
 		RemoteResults results = new RemoteResults(_last_remote_result);
-		if(!results.isRemoteResult()) 
+		if(!results.isRemoteResult())
 			throw new RemoteException("getAccessibleName did not execute properly on remote device.");
-		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK) 
+		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK)
 			throw new RemoteException("getAccessibleName did not return with success.");
 		return results.getStatusInfo();
 	}
-	
+
 	/**
-	 * <a href="http://safsdev.sourceforge.net/sqabasic2000/AndroidEngineComponentCommandsGetCaption.html">GetCaption</a>
+	 * <a href="/sqabasic2000/AndroidEngineComponentCommandsGetCaption.html">GetCaption</a>
 	 * @throws IllegalThreadStateException
-	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command 
+	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command
 	 * did not execute properly on the remote device or emulator.
 	 * @throws TimeoutException
 	 * @throws ShutdownInvocationException
@@ -140,17 +151,17 @@ public class SAFSEngineCommands extends SAFSWorker {
 		props.setProperty(SAFSMessage.PARAM_1, uID);
 		_last_remote_result = control.performRemotePropsCommand(props, default_ready_stimeout, default_running_stimeout, default_result_stimeout);
 		RemoteResults results = new RemoteResults(_last_remote_result);
-		if(!results.isRemoteResult()) 
+		if(!results.isRemoteResult())
 			throw new RemoteException("getCaption did not execute properly on remote device.");
-		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK) 
+		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK)
 			throw new RemoteException("getCaption did not return with success.");
 		return results.getStatusInfo();
 	}
-		
+
 	/**
-	 * <a href="http://safsdev.sourceforge.net/sqabasic2000/AndroidEngineComponentCommandsGetCurrentWindow.html">GetCurrentWindow</a>
+	 * <a href="/sqabasic2000/AndroidEngineComponentCommandsGetCurrentWindow.html">GetCurrentWindow</a>
 	 * @throws IllegalThreadStateException
-	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command 
+	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command
 	 * did not execute properly on the remote device or emulator.
 	 * @throws TimeoutException
 	 * @throws ShutdownInvocationException
@@ -159,17 +170,17 @@ public class SAFSEngineCommands extends SAFSWorker {
 		Properties props = prepEngineDispatch(SAFSMessage.engine_getcurrentwindow);
 		_last_remote_result = control.performRemotePropsCommand(props, default_ready_stimeout, default_running_stimeout, default_result_stimeout);
 		RemoteResults results = new RemoteResults(_last_remote_result);
-		if(!results.isRemoteResult()) 
+		if(!results.isRemoteResult())
 			throw new RemoteException("getCurrentWindow did not execute properly on remote device.");
-		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK) 		
+		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK)
 			throw new RemoteException("getCurrentWindow did not return with success.");
 		return results.getStatusInfo();
 	}
-	
+
 	/**
-	 * <a href="http://safsdev.sourceforge.net/sqabasic2000/AndroidEngineComponentCommandsGetChildCount.html">GetChildCount</a>
+	 * <a href="/sqabasic2000/AndroidEngineComponentCommandsGetChildCount.html">GetChildCount</a>
 	 * @throws IllegalThreadStateException
-	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command 
+	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command
 	 * did not execute properly on the remote device or emulator.
 	 * @throws TimeoutException
 	 * @throws ShutdownInvocationException
@@ -179,10 +190,10 @@ public class SAFSEngineCommands extends SAFSWorker {
 		props.setProperty(SAFSMessage.PARAM_1, uID);
 		_last_remote_result = control.performRemotePropsCommand(props, default_ready_stimeout, default_running_stimeout, default_result_stimeout);
 		RemoteResults results = new RemoteResults(_last_remote_result);
-		if(!results.isRemoteResult()) 
+		if(!results.isRemoteResult())
 			throw new RemoteException("getChildCount did not execute properly on remote device.");
 		try{
-			if(results.getStatusCode()==SAFSMessage.STATUS_REMOTERESULT_OK){ 
+			if(results.getStatusCode()==SAFSMessage.STATUS_REMOTERESULT_OK){
 				return Integer.parseInt(results.getStatusInfo());
 			}else{
 				throw new RemoteException("getChildCount did not return with success.");
@@ -191,11 +202,11 @@ public class SAFSEngineCommands extends SAFSWorker {
 			throw new RemoteException("getChildCount returned something other than an integer: "+ results.getStatusInfo());
 		}
 	}
-	
+
 	/**
-	 * <a href="http://safsdev.sourceforge.net/sqabasic2000/AndroidEngineComponentCommandsGetChildren.html">GetChildren</a>
+	 * <a href="/sqabasic2000/AndroidEngineComponentCommandsGetChildren.html">GetChildren</a>
 	 * @throws IllegalThreadStateException
-	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command 
+	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command
 	 * did not execute properly on the remote device or emulator.
 	 * @throws TimeoutException
 	 * @throws ShutdownInvocationException
@@ -205,17 +216,17 @@ public class SAFSEngineCommands extends SAFSWorker {
 		props.setProperty(SAFSMessage.PARAM_1, uID);
 		_last_remote_result = control.performRemotePropsCommand(props, default_ready_stimeout, default_running_stimeout, default_result_stimeout);
 		RemoteResults results = new RemoteResults(_last_remote_result);
-		if(!results.isRemoteResult()) 
+		if(!results.isRemoteResult())
 			throw new RemoteException("getChildren did not execute properly on remote device.");
-		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK) 
+		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK)
 			throw new RemoteException("getChildren did not return with success.");
 		return convertDelimitedStrings(results.getStatusInfo());
 	}
-	
+
 	/**
-	 * <a href="http://safsdev.sourceforge.net/sqabasic2000/AndroidEngineComponentCommandsGetClassIndex.html">GetClassIndex</a>
+	 * <a href="/sqabasic2000/AndroidEngineComponentCommandsGetClassIndex.html">GetClassIndex</a>
 	 * @throws IllegalThreadStateException
-	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command 
+	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command
 	 * did not execute properly on the remote device or emulator.
 	 * @throws TimeoutException
 	 * @throws ShutdownInvocationException
@@ -227,7 +238,7 @@ public class SAFSEngineCommands extends SAFSWorker {
 		RemoteResults results = new RemoteResults(_last_remote_result);
 		if(!results.isRemoteResult()) throw new RemoteException("getClassIndex did not execute properly on remote device.");
 		try{
-			if(results.getStatusCode()==SAFSMessage.STATUS_REMOTERESULT_OK){ 
+			if(results.getStatusCode()==SAFSMessage.STATUS_REMOTERESULT_OK){
 				return Integer.parseInt(results.getStatusInfo());
 			}else{
 				throw new RemoteException("getClassIndex did not return with success.");
@@ -236,11 +247,11 @@ public class SAFSEngineCommands extends SAFSWorker {
 			throw new RemoteException("getClassIndex returned something other than an integer: "+ results.getStatusInfo());
 		}
 	}
-	
+
 	/**
-	 * <a href="http://safsdev.sourceforge.net/sqabasic2000/AndroidEngineComponentCommandsGetClassname.html">GetClassname</a>
+	 * <a href="/sqabasic2000/AndroidEngineComponentCommandsGetClassname.html">GetClassname</a>
 	 * @throws IllegalThreadStateException
-	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command 
+	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command
 	 * did not execute properly on the remote device or emulator.
 	 * @throws TimeoutException
 	 * @throws ShutdownInvocationException
@@ -250,17 +261,17 @@ public class SAFSEngineCommands extends SAFSWorker {
 		props.setProperty(SAFSMessage.PARAM_1, uID);
 		_last_remote_result = control.performRemotePropsCommand(props, default_ready_stimeout, default_running_stimeout, default_result_stimeout);
 		RemoteResults results = new RemoteResults(_last_remote_result);
-		if(!results.isRemoteResult()) 
+		if(!results.isRemoteResult())
 			throw new RemoteException("getClassname did not execute properly on remote device.");
-		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK) 		
+		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK)
 			throw new RemoteException("getClassname did not return with success.");
 		return results.getStatusInfo();
 	}
-	
+
 	/**
-	 * <a href="http://safsdev.sourceforge.net/sqabasic2000/AndroidEngineComponentCommandsGetId.html">GetId</a>
+	 * <a href="/sqabasic2000/AndroidEngineComponentCommandsGetId.html">GetId</a>
 	 * @throws IllegalThreadStateException
-	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command 
+	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command
 	 * did not execute properly on the remote device or emulator.
 	 * @throws TimeoutException
 	 * @throws ShutdownInvocationException
@@ -270,38 +281,38 @@ public class SAFSEngineCommands extends SAFSWorker {
 		props.setProperty(SAFSMessage.PARAM_1, uID);
 		_last_remote_result = control.performRemotePropsCommand(props, default_ready_stimeout, default_running_stimeout, default_result_stimeout);
 		RemoteResults results = new RemoteResults(_last_remote_result);
-		if(!results.isRemoteResult()) 
+		if(!results.isRemoteResult())
 			throw new RemoteException("getId did not execute properly on remote device.");
-		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK) 		
+		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK)
 			throw new RemoteException("getId did not return with success.");
 		return results.getStatusInfo();
 	}
-	
+
 	/**
-	 * <a href="http://safsdev.sourceforge.net/sqabasic2000/AndroidEngineComponentCommandsGetMatchingChildObjects.html">GetMatchingChildObjects</a>
+	 * <a href="/sqabasic2000/AndroidEngineComponentCommandsGetMatchingChildObjects.html">GetMatchingChildObjects</a>
 	 * @throws IllegalThreadStateException
-	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command 
+	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command
 	 * did not execute properly on the remote device or emulator.
 	 * @throws TimeoutException
 	 * @throws ShutdownInvocationException
 	 */
-	public String getMatchingChildObjects(String parentUID, String recognition)throws IllegalThreadStateException, RemoteException, TimeoutException, ShutdownInvocationException{		
+	public String getMatchingChildObjects(String parentUID, String recognition)throws IllegalThreadStateException, RemoteException, TimeoutException, ShutdownInvocationException{
 		Properties props = prepEngineDispatch(SAFSMessage.engine_getmatchingchildobjects);
 		props.setProperty(SAFSMessage.PARAM_1, parentUID);
 		props.setProperty(SAFSMessage.PARAM_2, recognition);
 		_last_remote_result = control.performRemotePropsCommand(props, default_ready_stimeout, default_running_stimeout, default_result_stimeout);
 		RemoteResults results = new RemoteResults(_last_remote_result);
-		if(!results.isRemoteResult()) 
+		if(!results.isRemoteResult())
 			throw new RemoteException("getMatchingChildObjects did not execute properly on remote device.");
-		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK) 		
+		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK)
 			throw new RemoteException("getMatchingChildObjects did not return with success.");
 		return results.getStatusInfo();
 	}
-	
+
 	/**
-	 * <a href="http://safsdev.sourceforge.net/sqabasic2000/AndroidEngineComponentCommandsGetMatchingParentObject.html">GetMatchingParentObject</a>
+	 * <a href="/sqabasic2000/AndroidEngineComponentCommandsGetMatchingParentObject.html">GetMatchingParentObject</a>
 	 * @throws IllegalThreadStateException
-	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command 
+	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command
 	 * did not execute properly on the remote device or emulator.
 	 * @throws TimeoutException
 	 * @throws ShutdownInvocationException
@@ -311,17 +322,17 @@ public class SAFSEngineCommands extends SAFSWorker {
 		props.setProperty(SAFSMessage.PARAM_1, recognition);
 		_last_remote_result = control.performRemotePropsCommand(props, default_ready_stimeout, default_running_stimeout, default_result_stimeout);
 		RemoteResults results = new RemoteResults(_last_remote_result);
-		if(!results.isRemoteResult()) 
+		if(!results.isRemoteResult())
 			throw new RemoteException("getMatchingParentObject did not execute properly on remote device.");
-		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK) 		
+		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK)
 			throw new RemoteException("getMatchingParentObject did not return with success.");
 		return results.getStatusInfo();
 	}
-	
+
 	/**
-	 * <a href="http://safsdev.sourceforge.net/sqabasic2000/AndroidEngineComponentCommandsGetName.html">GetName</a>
+	 * <a href="/sqabasic2000/AndroidEngineComponentCommandsGetName.html">GetName</a>
 	 * @throws IllegalThreadStateException
-	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command 
+	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command
 	 * did not execute properly on the remote device or emulator.
 	 * @throws TimeoutException
 	 * @throws ShutdownInvocationException
@@ -331,17 +342,17 @@ public class SAFSEngineCommands extends SAFSWorker {
 		props.setProperty(SAFSMessage.PARAM_1, uID);
 		_last_remote_result = control.performRemotePropsCommand(props, default_ready_stimeout, default_running_stimeout, default_result_stimeout);
 		RemoteResults results = new RemoteResults(_last_remote_result);
-		if(!results.isRemoteResult()) 
+		if(!results.isRemoteResult())
 			throw new RemoteException("getName did not execute properly on remote device.");
-		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK) 		
+		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK)
 			throw new RemoteException("getName did not return with success.");
 		return results.getStatusInfo();
 	}
-	
+
 	/**
-	 * <a href="http://safsdev.sourceforge.net/sqabasic2000/AndroidEngineComponentCommandsGetNonAccessibleName.html">GetNonAccessibleName</a>
+	 * <a href="/sqabasic2000/AndroidEngineComponentCommandsGetNonAccessibleName.html">GetNonAccessibleName</a>
 	 * @throws IllegalThreadStateException
-	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command 
+	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command
 	 * did not execute properly on the remote device or emulator.
 	 * @throws TimeoutException
 	 * @throws ShutdownInvocationException
@@ -351,17 +362,17 @@ public class SAFSEngineCommands extends SAFSWorker {
 		props.setProperty(SAFSMessage.PARAM_1, uID);
 		_last_remote_result = control.performRemotePropsCommand(props, default_ready_stimeout, default_running_stimeout, default_result_stimeout);
 		RemoteResults results = new RemoteResults(_last_remote_result);
-		if(!results.isRemoteResult()) 
+		if(!results.isRemoteResult())
 			throw new RemoteException("getNonAccessibleName did not execute properly on remote device.");
-		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK) 		
+		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK)
 			throw new RemoteException("getNonAccessibleName did not return with success.");
 		return results.getStatusInfo();
 	}
-	
+
 	/**
-	 * <a href="http://safsdev.sourceforge.net/sqabasic2000/AndroidEngineComponentCommandsGetProperty.html">GetProperty</a>
+	 * <a href="/sqabasic2000/AndroidEngineComponentCommandsGetProperty.html">GetProperty</a>
 	 * @throws IllegalThreadStateException
-	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command 
+	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command
 	 * did not execute properly on the remote device or emulator.
 	 * @throws TimeoutException
 	 * @throws ShutdownInvocationException
@@ -372,17 +383,17 @@ public class SAFSEngineCommands extends SAFSWorker {
 		props.setProperty(SAFSMessage.PARAM_2, propertyName);
 		_last_remote_result = control.performRemotePropsCommand(props, default_ready_stimeout, default_running_stimeout, default_result_stimeout);
 		RemoteResults results = new RemoteResults(_last_remote_result);
-		if(!results.isRemoteResult()) 
+		if(!results.isRemoteResult())
 			throw new RemoteException("getProperty did not execute properly on remote device.");
-		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK) 		
+		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK)
 			throw new RemoteException("getProperty did not return with success.");
 		return results.getStatusInfo();
 	}
-	
+
 	/**
-	 * <a href="http://safsdev.sourceforge.net/sqabasic2000/AndroidEngineComponentCommandsGetPropertyNames.html">GetPropertyNames</a>
+	 * <a href="/sqabasic2000/AndroidEngineComponentCommandsGetPropertyNames.html">GetPropertyNames</a>
 	 * @throws IllegalThreadStateException
-	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command 
+	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command
 	 * did not execute properly on the remote device or emulator.
 	 * @throws TimeoutException
 	 * @throws ShutdownInvocationException
@@ -392,17 +403,17 @@ public class SAFSEngineCommands extends SAFSWorker {
 		props.setProperty(SAFSMessage.PARAM_1, uID);
 		_last_remote_result = control.performRemotePropsCommand(props, default_ready_stimeout, default_running_stimeout, default_result_stimeout);
 		RemoteResults results = new RemoteResults(_last_remote_result);
-		if(!results.isRemoteResult()) 
+		if(!results.isRemoteResult())
 			throw new RemoteException("getPropertyNames did not execute properly on remote device.");
-		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK) 		
+		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK)
 			throw new RemoteException("getPropertyNames did not return with success.");
 		return convertDelimitedStrings(results.getStatusInfo());
 	}
-	
+
 	/**
-	 * <a href="http://safsdev.sourceforge.net/sqabasic2000/AndroidEngineComponentCommandsGetSuperClassnames.html">GetSuperClassnames</a>
+	 * <a href="/sqabasic2000/AndroidEngineComponentCommandsGetSuperClassnames.html">GetSuperClassnames</a>
 	 * @throws IllegalThreadStateException
-	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command 
+	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command
 	 * did not execute properly on the remote device or emulator.
 	 * @throws TimeoutException
 	 * @throws ShutdownInvocationException
@@ -412,37 +423,38 @@ public class SAFSEngineCommands extends SAFSWorker {
 		props.setProperty(SAFSMessage.PARAM_1, uID);
 		_last_remote_result = control.performRemotePropsCommand(props, default_ready_stimeout, default_running_stimeout, default_result_stimeout);
 		RemoteResults results = new RemoteResults(_last_remote_result);
-		if(!results.isRemoteResult()) 
+		if(!results.isRemoteResult())
 			throw new RemoteException("getSuperclassNames did not execute properly on remote device.");
-		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK) 		
+		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK)
 			throw new RemoteException("getSuperclassNames did not return with success.");
 		return convertDelimitedStrings(results.getStatusInfo());
 	}
-	
+
 	/**
-	 * <a href="http://safsdev.sourceforge.net/sqabasic2000/AndroidEngineComponentCommandsGetText.html">GetText</a>
+	 * <a href="/sqabasic2000/AndroidEngineComponentCommandsGetText.html">GetText</a>
 	 * @throws IllegalThreadStateException
-	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command 
+	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command
 	 * did not execute properly on the remote device or emulator.
 	 * @throws TimeoutException
 	 * @throws ShutdownInvocationException
 	 */
+	@Override
 	public String getText(String uID)throws IllegalThreadStateException, RemoteException, TimeoutException, ShutdownInvocationException{
 		Properties props = prepEngineDispatch(SAFSMessage.engine_gettext);
 		props.setProperty(SAFSMessage.PARAM_1, uID);
 		_last_remote_result = control.performRemotePropsCommand(props, default_ready_stimeout, default_running_stimeout, default_result_stimeout);
 		RemoteResults results = new RemoteResults(_last_remote_result);
-		if(!results.isRemoteResult()) 
+		if(!results.isRemoteResult())
 			throw new RemoteException("getText did not execute properly on remote device.");
-		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK) 		
+		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK)
 			throw new RemoteException("getText did not return with success.");
 		return results.getStatusInfo();
 	}
-	
+
 	/**
-	 * <a href="http://safsdev.sourceforge.net/sqabasic2000/AndroidEngineComponentCommandsGetTopLevelCount.html">GetTopLevelCount</a>
+	 * <a href="/sqabasic2000/AndroidEngineComponentCommandsGetTopLevelCount.html">GetTopLevelCount</a>
 	 * @throws IllegalThreadStateException
-	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command 
+	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command
 	 * did not execute properly on the remote device or emulator.
 	 * @throws TimeoutException
 	 * @throws ShutdownInvocationException
@@ -451,19 +463,19 @@ public class SAFSEngineCommands extends SAFSWorker {
 		Properties props = prepEngineDispatch(SAFSMessage.engine_gettoplevelcount);
 		_last_remote_result = control.performRemotePropsCommand(props, default_ready_stimeout, default_running_stimeout, default_result_stimeout);
 		RemoteResults results = new RemoteResults(_last_remote_result);
-		if(!results.isRemoteResult()) 
+		if(!results.isRemoteResult())
 			throw new RemoteException("getTopLevelCount did not execute properly on remote device.");
-		if(results.getStatusCode()==SAFSMessage.STATUS_REMOTERESULT_OK)		
+		if(results.getStatusCode()==SAFSMessage.STATUS_REMOTERESULT_OK)
 			throw new RemoteException("getTopLevelCount did not return with success.");
 		try{ return Integer.parseInt(results.getStatusInfo());}catch(NumberFormatException x){
 			throw new RemoteException("getTopLevelCount returned something other than an integer: "+ results.getStatusInfo());
-		}		
+		}
 	}
-	
+
 	/**
-	 * <a href="http://safsdev.sourceforge.net/sqabasic2000/AndroidEngineComponentCommandsGetTopLevelWindows.html">GetTopLevelWindows</a>
+	 * <a href="/sqabasic2000/AndroidEngineComponentCommandsGetTopLevelWindows.html">GetTopLevelWindows</a>
 	 * @throws IllegalThreadStateException
-	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command 
+	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command
 	 * did not execute properly on the remote device or emulator.
 	 * @throws TimeoutException
 	 * @throws ShutdownInvocationException
@@ -472,17 +484,17 @@ public class SAFSEngineCommands extends SAFSWorker {
 		Properties props = prepEngineDispatch(SAFSMessage.engine_gettoplevelwindows);
 		_last_remote_result = control.performRemotePropsCommand(props, default_ready_stimeout, default_running_stimeout, default_result_stimeout);
 		RemoteResults results = new RemoteResults(_last_remote_result);
-		if(!results.isRemoteResult()) 
+		if(!results.isRemoteResult())
 			throw new RemoteException("getTopLevelWindows did not execute properly on remote device.");
-		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK) 		
+		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK)
 			throw new RemoteException("getTopLevelWindows did not return with success.");
 		return convertDelimitedStrings(results.getStatusInfo());
 	}
-	
+
 	/**
-	 * <a href="http://safsdev.sourceforge.net/sqabasic2000/AndroidEngineComponentCommandsHighlightMatchingChildObjectByKey.html">HighlightMatchingChildObjectByKey</a>
+	 * <a href="/sqabasic2000/AndroidEngineComponentCommandsHighlightMatchingChildObjectByKey.html">HighlightMatchingChildObjectByKey</a>
 	 * @throws IllegalThreadStateException
-	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command 
+	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command
 	 * did not execute properly on the remote device or emulator.
 	 * @throws TimeoutException
 	 * @throws ShutdownInvocationException
@@ -493,14 +505,14 @@ public class SAFSEngineCommands extends SAFSWorker {
 		props.setProperty(SAFSMessage.PARAM_2, childUID);
 		_last_remote_result = control.performRemotePropsCommand(props, default_ready_stimeout, default_running_stimeout, default_result_stimeout);
 		RemoteResults results = new RemoteResults(_last_remote_result);
-		if(!results.isRemoteResult()||results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK) 
+		if(!results.isRemoteResult()||results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK)
 			throw new RemoteException("highlightMatchingChildObjectByKey did not execute properly on remote device.");
 	}
-	
+
 	/**
-	 * <a href="http://safsdev.sourceforge.net/sqabasic2000/AndroidEngineComponentCommandsIsEnabled.html">IsEnabled</a>
+	 * <a href="/sqabasic2000/AndroidEngineComponentCommandsIsEnabled.html">IsEnabled</a>
 	 * @throws IllegalThreadStateException
-	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command 
+	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command
 	 * did not execute properly on the remote device or emulator.
 	 * @throws TimeoutException
 	 * @throws ShutdownInvocationException
@@ -510,17 +522,17 @@ public class SAFSEngineCommands extends SAFSWorker {
 		props.setProperty(SAFSMessage.PARAM_1, uID);
 		_last_remote_result = control.performRemotePropsCommand(props, default_ready_stimeout, default_running_stimeout, default_result_stimeout);
 		RemoteResults results = new RemoteResults(_last_remote_result);
-		if(!results.isRemoteResult()) 
+		if(!results.isRemoteResult())
 			throw new RemoteException("isEnabled did not execute properly on remote device.");
-		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK) 		
+		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK)
 			throw new RemoteException("isEnabled did not return with success.");
 		return Boolean.parseBoolean(results.getStatusInfo());
 	}
-	
+
 	/**
-	 * <a href="http://safsdev.sourceforge.net/sqabasic2000/AndroidEngineComponentCommandsIsShowing.html">IsShowing</a>
+	 * <a href="/sqabasic2000/AndroidEngineComponentCommandsIsShowing.html">IsShowing</a>
 	 * @throws IllegalThreadStateException
-	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command 
+	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command
 	 * did not execute properly on the remote device or emulator.
 	 * @throws TimeoutException
 	 * @throws ShutdownInvocationException
@@ -530,17 +542,17 @@ public class SAFSEngineCommands extends SAFSWorker {
 		props.setProperty(SAFSMessage.PARAM_1, uID);
 		_last_remote_result = control.performRemotePropsCommand(props, default_ready_stimeout, default_running_stimeout, default_result_stimeout);
 		RemoteResults results = new RemoteResults(_last_remote_result);
-		if(!results.isRemoteResult()) 
+		if(!results.isRemoteResult())
 			throw new RemoteException("isShowing did not execute properly on remote device.");
-		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK) 		
+		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK)
 			throw new RemoteException("isShowing did not return with success.");
 		return Boolean.parseBoolean(results.getStatusInfo());
 	}
-	
+
 	/**
-	 * <a href="http://safsdev.sourceforge.net/sqabasic2000/AndroidEngineComponentCommandsIsValid.html">IsValid</a>
+	 * <a href="/sqabasic2000/AndroidEngineComponentCommandsIsValid.html">IsValid</a>
 	 * @throws IllegalThreadStateException
-	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command 
+	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command
 	 * did not execute properly on the remote device or emulator.
 	 * @throws TimeoutException
 	 * @throws ShutdownInvocationException
@@ -550,17 +562,17 @@ public class SAFSEngineCommands extends SAFSWorker {
 		props.setProperty(SAFSMessage.PARAM_1, uID);
 		_last_remote_result = control.performRemotePropsCommand(props, default_ready_stimeout, default_running_stimeout, default_result_stimeout);
 		RemoteResults results = new RemoteResults(_last_remote_result);
-		if(!results.isRemoteResult()) 
+		if(!results.isRemoteResult())
 			throw new RemoteException("isValid did not execute properly on remote device.");
-		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK) 		
+		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK)
 			throw new RemoteException("isValid did not return with success.");
 		return Boolean.parseBoolean(results.getStatusInfo());
 	}
-	
+
 	/**
-	 * <a href="http://safsdev.sourceforge.net/sqabasic2000/AndroidEngineComponentCommandsIsTopLevelPopupContainer.html">IsTopLevelPopupContainer</a>
+	 * <a href="/sqabasic2000/AndroidEngineComponentCommandsIsTopLevelPopupContainer.html">IsTopLevelPopupContainer</a>
 	 * @throws IllegalThreadStateException
-	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command 
+	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command
 	 * did not execute properly on the remote device or emulator.
 	 * @throws TimeoutException
 	 * @throws ShutdownInvocationException
@@ -570,17 +582,17 @@ public class SAFSEngineCommands extends SAFSWorker {
 		props.setProperty(SAFSMessage.PARAM_1, uID);
 		_last_remote_result = control.performRemotePropsCommand(props, default_ready_stimeout, default_running_stimeout, default_result_stimeout);
 		RemoteResults results = new RemoteResults(_last_remote_result);
-		if(!results.isRemoteResult()) 
+		if(!results.isRemoteResult())
 			throw new RemoteException("isTopLevelPopupContainer did not execute properly on remote device.");
-		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK) 		
+		if(results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK)
 			throw new RemoteException("isTopLevelPopupContainer did not return with success.");
 		return Boolean.parseBoolean(results.getStatusInfo());
 	}
-	
+
 	/**
-	 * <a href="http://safsdev.sourceforge.net/sqabasic2000/AndroidEngineComponentCommandsSetActiveWindow.html">SetActiveWindow</a>
+	 * <a href="/sqabasic2000/AndroidEngineComponentCommandsSetActiveWindow.html">SetActiveWindow</a>
 	 * @throws IllegalThreadStateException
-	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command 
+	 * @throws RemoteException -- if a remote exception was thrown, or if the status indicates the command
 	 * did not execute properly on the remote device or emulator.
 	 * @throws TimeoutException
 	 * @throws ShutdownInvocationException
@@ -590,7 +602,7 @@ public class SAFSEngineCommands extends SAFSWorker {
 		props.setProperty(SAFSMessage.PARAM_1, uID);
 		_last_remote_result = control.performRemotePropsCommand(props, default_ready_stimeout, default_running_stimeout, default_result_stimeout);
 		RemoteResults results = new RemoteResults(_last_remote_result);
-		if(!results.isRemoteResult()||results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK) 
+		if(!results.isRemoteResult()||results.getStatusCode()!= SAFSMessage.STATUS_REMOTERESULT_OK)
 			throw new RemoteException("setActiveWindow did not execute properly on remote device.");
 	}
 }

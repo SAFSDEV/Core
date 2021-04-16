@@ -1,3 +1,36 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
+/**
+ * Logs for developers, not published to API DOC.
+ *
+ * History:
+ * MAY 25, 2018 (Lei Wang) Corrected the comments of some constant.
+ * MAY 10, 2018	(Lei Wang) Made some public static fields final because they are constants.
+ *                       Removed some public static fields which should be local variables inside a method; Only kept 'srcDir', which
+ *                       is used in class com.sas.seleniumplus.eclipse.EclipseCallbacks. TODO 'srcDir' should be removed too.
+ *                       Added some constants for 'cycle' 'suite' test level.
+ * MAY 18, 2018	(Lei Wang) Assigned DriverConstant.DEFAULT_CONFIGURE_FILENAME_TEST_INI to constant 'TESTINI_FILE'.
+ *                       DriverConstant.DEFAULT_CONFIGURE_FILENAME_TEST_INI is used by Runner as default .ini configuration file.
+ *                       TESTINI_FILE is used as the default .ini configuration file during generating project.
+ *                       To keep the consistency, I made them equal.
+ * SEP 27, 2018	(Lei Wang) Modified addToProjectStructure(): Add spring configuration file to this test project.
+ * NOV 23, 2018	(Lei Wang) Added constant SRC_SRC_DIRS.
+ */
 package org.safs.projects.seleniumplus.projects;
 
 import java.io.File;
@@ -7,6 +40,7 @@ import java.net.URI;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
+import org.safs.Constants;
 import org.safs.projects.common.projects.callbacks.Callbacks;
 import org.safs.projects.common.projects.pojo.POJOContainer;
 import org.safs.projects.common.projects.pojo.POJOFile;
@@ -14,11 +48,12 @@ import org.safs.projects.common.projects.pojo.POJOFolder;
 import org.safs.projects.common.projects.pojo.POJOPath;
 import org.safs.projects.common.projects.pojo.POJOProject;
 import org.safs.projects.seleniumplus.popupmenu.FileTemplates;
-
+import org.safs.tools.drivers.DriverConstant;
 
 public class BaseProject {
 	/** holds path to SeleniumPlus install directory -- once validated. */
 	public static String SELENIUM_PLUS;
+	public static String srcDir;
 
 	/** "SELENIUM_PLUS" the system environment variable name holding the path where SeleniumPlus has been installed */
 	public static final String SELENIUM_PLUS_ENV = org.safs.Constants.ENV_SELENIUM_PLUS;
@@ -28,29 +63,53 @@ public class BaseProject {
 	/** "src" */
 	public static final String SRC_SRC_DIR = "src";
 
+	/**
+	 * Possible source folder names, currently it has 2 items:
+	 * <ul>
+	 * <li>"Tests"
+	 * <li>"src"
+	 * </ul>
+	 */
+	public static final String[] SRC_SRC_DIRS = {SRC_TEST_DIR, SRC_SRC_DIR};
+
+	/** "testcycle" */
+	public static final String SRC_TESTCYCLE_SUBDIR = "testcycle";
+	/** "testsuite" */
+	public static final String SRC_TESTSUITE_SUBDIR = "testsuite";
+	/** "testcase" */
+	public static final String SRC_TESTCASE_SUBDIR = "testcase";
+
 	/** "testcases" */
 	public static final String SRC_TESTCASES_SUBDIR = "testcases";
 	/** "testruns" */
 	public static final String SRC_TESTRUNS_SUBDIR = "testruns";
 
+	/** "/org/safs/projects/seleniumplus/projects/samples" */
 	public static final String SAMPLES_RESOURCE_PATH = "/org/safs/projects/seleniumplus/projects/samples";
+
+	/** "Cycle" */
+	public static final String TESTCYCLE_FILE = "Cycle";
+
+	/** "Suite" */
+	public static final String TESTSUITE_FILE = "Suite";
+
+	/** "Cases1" */
+	public static final String TESTCASE_FILE = "Cases1";
+
+	private static final String SUFFIX_TXT = ".txt";
 
 	/** "TestCase1" */
 	public static final String TESTCASECLASS_FILE = "TestCase1";
-	/** "/samples/TestCase1.java" */
+	/** "/org/safs/projects/seleniumplus/projects/samples/TestCase1.java" */
 	public static final String TESTCASECLASS_RESOURCE = SAMPLES_RESOURCE_PATH + "/TestCase1.java";
-	/** "/samples/TestCase1.java.txt" */
-	public static final String TESTCASECLASS_TXT_RESOURCE = SAMPLES_RESOURCE_PATH + "/TestCase1.java.txt";
+	/** "/org/safs/projects/seleniumplus/projects/samples/TestCase1.java.txt" */
+	public static final String TESTCASECLASS_TXT_RESOURCE = TESTCASECLASS_RESOURCE+SUFFIX_TXT;
 	/** "TestRun1" */
 	public static final String TESTRUNCLASS_FILE = "TestRun1";
-	/** "/samples/TestRun1.java" */
+	/** "/org/safs/projects/seleniumplus/projects/samples/TestRun1.java" */
 	public static final String TESTRUNCLASS_RESOURCE = SAMPLES_RESOURCE_PATH + "/TestRun1.java";
-	/** "/samples/TestRun1.java.txt" */
-	public static final String TESTRUNCLASS_TXT_RESOURCE = SAMPLES_RESOURCE_PATH + "/TestRun1.java.txt";
-
-	public static String srcDir;
-	public static String testcaseDir;
-	public static String testrunDir;
+	/** "/org/safs/projects/seleniumplus/projects/samples/TestRun1.java.txt" */
+	public static final String TESTRUNCLASS_TXT_RESOURCE = TESTRUNCLASS_RESOURCE+SUFFIX_TXT;
 
 	/** "Maps" */
 	public static final String DATAPOOL_DIR = "Maps";
@@ -71,23 +130,23 @@ public class BaseProject {
 	/** Map */
 	public static final String MAPCLASS_FILE = "Map";
 	/** test.ini */
-	public static final String TESTINI_FILE = "test.ini";
+	public static final String TESTINI_FILE = DriverConstant.DEFAULT_CONFIGURE_FILENAME_TEST_INI;
 	/** runAutomation.bat */
 	public static final String RUNAUTOMATION_WIN_FILE = "runAutomation.bat";
-	/** /samples/runautomation.bat */
+	/** /org/safs/projects/seleniumplus/projects/samples/runautomation.bat */
 	public static final String RUNAUTOMATION_WIN_RESOURCE = SAMPLES_RESOURCE_PATH + "/runautomation.bat";
 
 	/** App.map */
 	public static final String APPMAP_FILE = "App.map";
-	/** /samples/App.map */
+	/** /org/safs/projects/seleniumplus/projects/samples/App.map */
 	public static final String APPMAP_RESOURCE = SAMPLES_RESOURCE_PATH + "/App.map";
 	/** App_en.map */
 	public static final String APPMAP_EN_FILE = "App_en.map";
-	/** /samples/App_en.map */
+	/** /org/safs/projects/seleniumplus/projects/samples/App_en.map */
 	public static final String APPMAP_EN_RESOURCE = SAMPLES_RESOURCE_PATH + "/App_en.map";
 	/** AppMap.order */
 	public static final String APPMAP_ORDER_FILE = "AppMap.order";
-	/** /samples/AppMap.order */
+	/** /org/safs/projects/seleniumplus/projects/samples/AppMap.order */
 	public static final String APPMAP_ORDER_RESOURCE = SAMPLES_RESOURCE_PATH + "/AppMap.order";
 
 	private static JarFile jarFile;
@@ -101,6 +160,11 @@ public class BaseProject {
 	 */
 	public static void init(File workspaceDir) {
 		POJOProject.init(workspaceDir);
+	}
+
+	public static void main(String[] args){
+		init(new File("c:\\temp"));
+		createProject(PROJECTNAME_SAMPLE, null, "sas", PROJECTTYPE_SAMPLE, null);
 	}
 
 	/**
@@ -118,6 +182,9 @@ public class BaseProject {
 		assert companyName != null;
 		assert projectName.trim().length() > 0;
 
+		String testrunDir = null;
+		String testcaseDir = null;
+
 		/*
 		 * This method was copied from the SeleniumPlus-Plugin project's BaseProject.
 		 * Parts unrelated to the SAMPLE project have been commented out.
@@ -133,18 +200,18 @@ public class BaseProject {
 			projectType.equalsIgnoreCase(PROJECTTYPE_SAMPLE)){
 
 			srcDir = SRC_TEST_DIR;
-			testcaseDir = srcDir + "/"+ projectName.toLowerCase() +"/"+ SRC_TESTCASES_SUBDIR;
-			testrunDir =  srcDir + "/"+ projectName.toLowerCase() +"/"+ SRC_TESTRUNS_SUBDIR;
+			testcaseDir = srcDir + File.separator + projectName.toLowerCase() +File.separator+ SRC_TESTCASES_SUBDIR;
+			testrunDir =  srcDir + File.separator+ projectName.toLowerCase() +File.separator+ SRC_TESTRUNS_SUBDIR;
 
 		/*} else if (projectType.equalsIgnoreCase(PROJECTTYPE_ADVANCE)){
 
 			srcDir = SRC_SRC_DIR;
-			testcaseDir = srcDir + "/com/" + companyName.toLowerCase() + "/"+ projectName.toLowerCase()+ "/"+ SRC_TESTS_SUBDIR;
-			testrunDir = srcDir + "/com/" + companyName.toLowerCase() + "/"+ projectName.toLowerCase()+ "/"+ SRC_SUITES_SUBDIR;
+			testcaseDir = srcDir + File.separator+"com"+File.separator + companyName.toLowerCase() + File.separator+ projectName.toLowerCase()+ File.separator+ SRC_TESTS_SUBDIR;
+			testrunDir = srcDir + File.separator+"com"+File.separator + companyName.toLowerCase() + File.separator+ projectName.toLowerCase()+ File.separator+ SRC_SUITES_SUBDIR;
 		*/
 		} else {
 			// internal error
-			throw new RuntimeException("Unsupported");
+			throw new RuntimeException("Unsupported Project type '"+projectType+"'!");
 		}
 
 		POJOProject project =
@@ -195,17 +262,33 @@ public class BaseProject {
 			}
 		}
 
+		ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-		/**
-		 * Create sample test class
-		*/
+		POJOFolder srcPkg = newProject.getFolder(paths[0]);
+		if (srcPkg.exists()){
+			/** Create spring configuration file */
+			POJOFile file = srcPkg.getFile(Constants.SPRING_CONFIG_CUSTOM_FILE);
+			//test's root package is the lower case of the project name
+			InputStream stream = FileTemplates.springConfig(newProject.getName().toLowerCase());
+			file.create(stream, true, null);
+			if (stream != null) stream.close();
+
+			/** Create log4j configuration file */
+			file = srcPkg.getFile(Constants.LOG4J2_CONFIG_FILE);
+			stream = FileTemplates.log4j2Config();
+			file.create(stream, true, null);
+			if (stream != null) stream.close();
+		}
+
+		/** Create sample test class */
 		String testClass = TESTCASECLASS_FILE;
 		POJOFolder testPkg = newProject.getFolder(paths[1]);
 
-		ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		POJOFile testclass = null;
+		String fullQualifiedTestClassName = null;
 
 		if (testPkg.exists()){
-			POJOFile testclass = testPkg.getFile(testClass + ".java");
+			testclass = testPkg.getFile(testClass + ".java");
 			InputStream testclassstream = null;
 			if (newProject.getName().equalsIgnoreCase(PROJECTNAME_SAMPLE)){
 				testclassstream = getResourceAsStream(loader, TESTCASECLASS_TXT_RESOURCE);
@@ -217,12 +300,42 @@ public class BaseProject {
 			testclass.create(testclassstream, true, null);
 			if (testclassstream != null) testclassstream.close();
 			if (jarFile != null) jarFile.close();
+
+			//generate the test package and full-qualified test class name.
+			String testPackage = null;
+			String srcPath = null;
+			String packagePath = null;
+			int index = -1;
+			try{
+				srcPath = srcPkg.getPath();
+				packagePath = testPkg.getPath();
+				index = packagePath.indexOf(srcPath);
+				if(index >-1){
+					testPackage = packagePath.substring(index+srcPath.length());
+				}
+			}catch(Exception e){}
+
+			try{
+				if(testPackage==null){
+					srcPath = paths[0];
+					packagePath = paths[1];
+					index = packagePath.indexOf(srcPath);
+					if(index >-1){
+						testPackage = packagePath.substring(index+srcPath.length());
+					}else{
+						testPackage = paths[1];
+					}
+				}
+			}catch(Exception e){}
+
+			if(testPackage!=null){
+				if(testPackage.startsWith(File.separator)) testPackage = testPackage.substring(1);
+				testPackage = testPackage.replace(File.separator, ".");
+				fullQualifiedTestClassName = testPackage+"."+testClass;
+			}
 		}
 
-
-		/**
-		 * Create run tests
-		 */
+		/** Create run tests */
 		String testRunClass = TESTRUNCLASS_FILE;
 		testPkg = newProject.getFolder(paths[2]);
 
@@ -241,11 +354,7 @@ public class BaseProject {
 			if (jarFile != null) jarFile.close();
 		}
 
-
-
-		/**
-		 * Map and Map order files
-		 */
+		/** Map and Map order files */
 		POJOFolder mapFolder = newProject.getFolder(DATAPOOL_DIR);
 
 		if (mapFolder.exists()) {
@@ -292,9 +401,7 @@ public class BaseProject {
 			}
 		}
 
-		/**
-		 * create test.ini file
-		 */
+		/** create test.ini file */
 		POJOContainer container = mapFolder.getParent();
 		POJOFile iniFile = container.getFile(
 				callbacks == null ?
@@ -319,14 +426,17 @@ public class BaseProject {
 					new POJOPath(RUNAUTOMATION_WIN_FILE) :
 					callbacks.createPathCallback.createPath(RUNAUTOMATION_WIN_FILE)
 			);
-			batstream = getResourceAsStream(loader, RUNAUTOMATION_WIN_RESOURCE);
+			if(testclass!=null && fullQualifiedTestClassName!=null){
+				batstream = FileTemplates.runAutomationBatch(fullQualifiedTestClassName);
+			}else{
+				batstream = getResourceAsStream(loader, RUNAUTOMATION_WIN_RESOURCE);
+			}
 		}
 		if (batstream != null) {
 			batfile.create(batstream, true, null);
 			batstream.close();
 			if (jarFile != null) jarFile.close();
 		}
-
 	}
 
 	private static InputStream getResourceAsStream(ClassLoader loader, String resourcePath) {

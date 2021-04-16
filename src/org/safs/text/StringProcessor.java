@@ -1,7 +1,24 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.text;
 
-import org.safs.*;
-import org.apache.regexp.*;
+import org.apache.regexp.RE;
+import org.safs.SAFSRegExNotFoundException;
 
 //needed for the Java 1.4 implementation
 //import java.util.regex.Pattern;
@@ -12,12 +29,12 @@ import org.apache.regexp.*;
  *
  * Methods to do special String Processing.
  *<p>
- * At this time the class uses Regular Expression support provided by the Jakarta/Apache 
+ * At this time the class uses Regular Expression support provided by the Jakarta/Apache
  * regexp project to avoid a requirement for Java V1.4.
  * <p>
  * The JAR file containing the required files should be provided by a standard SAFS install.<br>
  * <p>
- * Software Automation Framework Support (SAFS) http://safsdev.sourceforge.net<br>
+ * Software Automation Framework Support (SAFS) http://safsdev:8880<br>
  * Software Testing Automation Framework (STAF) http://staf.sourceforge.net<br>
  * Apache Jakarta Regexp Project (Regexp) http://jakarta.apache.org/regexp<br>
  * <p>
@@ -60,10 +77,10 @@ public class StringProcessor
  *						String[] s2 = p2.split(s1[1], 2);
  *						return s2[0];
  *					  }
- *      			}catch(NoClassDefFoundError no4){}						
+ *      			}catch(NoClassDefFoundError no4){}
  */
 
-		status = 0;		
+		status = 0;
 	    try{
 			/* Changed: April 31, 2004 by Ben Tomlinson
 			 * this line was removed and replaced with the following line to increase performance
@@ -80,26 +97,26 @@ public class StringProcessor
 				String clipped = string.substring(start);
 				RE p2 = new RE(regexStop);
 				boolean hasEnd = p2.match(clipped);
-				if(hasEnd){					
-					int end = p2.getParenStart(0);							
-				    clipped = clipped.substring(0, end);				    
+				if(hasEnd){
+					int end = p2.getParenStart(0);
+				    clipped = clipped.substring(0, end);
 			        return clipped;
 				}
 		    }
 		}
 		catch(NoClassDefFoundError no3){
 			status = 38; // Java Error
-			String regex  = GENStrings.text(GENStrings.REGULAR_EXPRESSIONS, 
+			String regex  = GENStrings.text(GENStrings.REGULAR_EXPRESSIONS,
 			                "Regular Expressions");
-			String nosupport = FAILStrings.convert(FAILStrings.SUPPORT_NOT_FOUND, 
-			                "Support for "+regex+" not found!", 
+			String nosupport = FAILStrings.convert(FAILStrings.SUPPORT_NOT_FOUND,
+			                "Support for "+regex+" not found!",
 			                regex);
-			String install = FAILStrings.convert(FAILStrings.ADD_TO_CLASSPATH, 
-			                "Install '"+JAKARTA_REGEX+"' in CLASSPATH", 
-			                JAKARTA_REGEX);						                
+			String install = FAILStrings.convert(FAILStrings.ADD_TO_CLASSPATH,
+			                "Install '"+JAKARTA_REGEX+"' in CLASSPATH",
+			                JAKARTA_REGEX);
 			String message = "StringProcessor.getEmbeddedSubstring:" +
 			                 nosupport+"  "+install;
-			                 
+
 			throw new SAFSRegExNotFoundException(message);
 		}catch(Exception ex){
 			ex.printStackTrace();
@@ -110,9 +127,9 @@ public class StringProcessor
 		return ""; // no match found
 	} /* function */
 
-    /** 
+    /**
      * returns the status code of the last function called.
-     * The status codes are STAF return codes. 
+     * The status codes are STAF return codes.
      * <p>
      * The following codes are implemented:<br>
      * 0  - Success<br>

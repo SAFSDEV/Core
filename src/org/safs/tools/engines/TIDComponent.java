@@ -1,8 +1,25 @@
 /**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
+/**
  * History:
  * <BR> Carl Nagle  MAR 25, 2009 Adding IBT support for mouse Drag operations and Click with coordinates.
  * <BR> Carl Nagle  JUL 14, 2009 Fixed some logging issues in VerifyValues commands.
- * <BR> LeiWang APR 07, 2010 Modify method CFComponent.process(): If the parent RS is specified in
+ * <BR> Lei Wang APR 07, 2010 Modify method CFComponent.process(): If the parent RS is specified in
  * 							 OBT format, then set record status to SCRIPT_NOT_EXECUTED and return. Let
  * 							 other engine (ex. RJ engine) to handle the parent RS.
  *
@@ -12,13 +29,23 @@
  * 							 to the method processIndependently() of this new object.
  * <BR> JunwuMa APR 14, 2010 Adding IBT support for GetTextFromGUI and SaveTextFromGUI.
  *                           Move setRectVars() to its super(), ComponentFunction.
- * <br>	LeiWang APR 20, 2010 Modify method getSaveTextFromGUI(): use static method of OCREngine to get
+ * <br>	Lei Wang APR 20, 2010 Modify method getSaveTextFromGUI(): use static method of OCREngine to get
  *                           an OCR engine to use.
  * <br>	Carl Nagle MAY 10, 2012  Modify process() call to isMixedUse to gracefully handle missing App Map
  *                           recognition entries.
  * <br>	Lei Wang MAR 10, 2017  Modified RESTComponent to handle authorization/authentication information with/without session.
  *                           The "custom header" can be provided as a file in a Map.
+ * <br>	Lei Wang JUN 29, 2017  Modified inputEncryptions(): accept file path relative to test project.
  * <br>	Lei Wang JUL 18, 2017  Added __setProxyForService(), modified actionStartServiceSession() and __startSession().
+ * <br>	Lei Wang FEB 07, 2018  Added method verifyResponse(): verify the response is expected.
+ * <br>	Lei Wang FEB 08, 2018  Modified method verifyResponse(): if the type is null then we don't check the content-type header.
+ *                                                               we check the status code (201 for put, 200 for others).
+ *                             Modified method actionHttpRequest(): call verifyResponse() to verify response.
+ *                             Modified method __request(): read 'body' content from a project relative file if it exists.
+ * <br>	Lei Wang FEB 24, 2018  Modified method verifyResponse(): accept more 'returned code' such as 204, 200 for different http method.
+ * <br>	Lei Wang FEB 26, 2018  Modified method __request(): Handle the body according the "Content-Type" header.
+ * <br>	Lei Wang JUN 26, 2018  Modified method verifyFileToFile(): compare 2 PDF files.
+ *                                                                 accept 2 more parameters 'alterImageStyle' and 'alterImageFactor' for creating diff image.
  */
 package org.safs.tools.engines;
 
@@ -32,6 +59,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -50,6 +79,7 @@ import org.safs.TestRecordHelper;
 import org.safs.TestStepProcessor;
 import org.safs.auth.Auth;
 import org.safs.image.ImageUtils;
+import org.safs.image.ImageUtils.AlterImageStyle;
 import org.safs.logging.AbstractLogFacility;
 import org.safs.logging.LogUtilities;
 import org.safs.model.commands.DriverCommands;
@@ -277,6 +307,7 @@ public class TIDComponent extends GenericEngine {
 	/**
 	 * @see GenericEngine#launchInterface(Object)
 	 */
+	@Override
 	public void launchInterface(Object configInfo){
 		super.launchInterface(configInfo);
 		log = new LogUtilities(this.staf);
@@ -289,6 +320,7 @@ public class TIDComponent extends GenericEngine {
 
 	}
 
+	@Override
 	public long processRecord (TestRecordHelper testRecordData){
 
 		Log.info("TIDC:processing \""+ testRecordData.getCommand() +"\".");
@@ -419,6 +451,7 @@ public class TIDComponent extends GenericEngine {
 		/**
 		 * Process the record present in the provided testRecordData.
 		 */
+		@Override
 		public void process(){
 			String debugmsg = getClass().getName()+".process(): ";
 			updateFromTestRecordData();
@@ -671,6 +704,7 @@ public class TIDComponent extends GenericEngine {
 		 *   varname.w=w
 		 *   varname.h=h
 		 */
+		@Override
 		protected void locateScreenImage(){
 	        testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );
 
@@ -739,7 +773,8 @@ public class TIDComponent extends GenericEngine {
 	     * This routine utilizes Java Advanced Imaging (JAI) to output the screen image to the file.
 	     * JAI must be installed at compile time and runtime.
 	     **/
-	    protected Rectangle getComponentRectangle (){
+	    @Override
+		protected Rectangle getComponentRectangle (){
 	      Rectangle compRect = null;;
           String who = windowName+":"+compName;
           try{
@@ -1518,14 +1553,28 @@ public class TIDComponent extends GenericEngine {
 	        }
             String dataPath = iterator.next( );
 			if((dataPath==null)||(dataPath.length()==0)){
-	            this.issueParameterValueFailure("EncryptedDataPath");
+	            this.issueParameterValueFailure("EncryptedDataPath: '"+dataPath+"'");
 	            return;
 			}
-			String privatekeyPath = iterator.next( );
-			if((privatekeyPath==null)||(privatekeyPath.length()==0)){
-				this.issueParameterValueFailure("PrivateKeyPath");
+			try {
+				dataPath = deduceProjectFile(dataPath).getAbsolutePath();
+			} catch (SAFSException e) {
+				this.issueParameterValueFailure("EncryptedDataPath: '"+dataPath+"'");
 				return;
 			}
+
+			String privatekeyPath = iterator.next( );
+			if((privatekeyPath==null)||(privatekeyPath.length()==0)){
+				this.issueParameterValueFailure("PrivateKeyPath: '"+privatekeyPath+"'");
+				return;
+			}
+			try {
+				privatekeyPath = deduceProjectFile(privatekeyPath).getAbsolutePath();
+			} catch (SAFSException e) {
+				this.issueParameterValueFailure("PrivateKeyPath: '"+privatekeyPath+"'");
+				return;
+			}
+
 		   	Log.info("TIDC "+action+" processing ... ");
 		   	//Turn off debug log before we decrypt the "encrypted text"
 		   	debuglogEnabled = Log.ENABLED;
@@ -1570,6 +1619,7 @@ public class TIDComponent extends GenericEngine {
 		 * VerifyValueContains, VerifyValueContainsIgnoreCase,
 		 * VerifyValueDoesNotContain
 		 */
+		@Override
 		protected void verifyValues() throws SAFSException {
 			testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );
 			if ( params.size( ) < 2 ) {
@@ -1710,6 +1760,7 @@ public class TIDComponent extends GenericEngine {
 	    /** <br><em>Purpose:</em> verifyFileToFile
 	     ** @param text, boolean, if true, then text files, else binary files
 	     **/
+		@Override
 		@SuppressWarnings("unchecked")
 		protected void verifyFileToFile( boolean text ) throws SAFSException {
 	        testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );
@@ -1726,27 +1777,67 @@ public class TIDComponent extends GenericEngine {
 
 	            String filterMode = iterator.hasNext()? (String) iterator.next(): null;
 	            String filterOptions = iterator.hasNext()? (String) iterator.next(): null;
-	            int bitTolerance = 100;
+	            String alterImageStyleOptions = iterator.hasNext()? (String) iterator.next(): null;
+	            String alterImageFactorOptions = iterator.hasNext()? (String) iterator.next(): null;
+	            String pdfOptions = iterator.hasNext()? (String) iterator.next(): null;
+
+	            //the tolerance to compare 2 images
+	            int bitTolerance = Constants.IMAGE_BIT_TOLERATION_DEFAULT;
+	            //the style (tint, shade) to change the pixel (of no difference) when creating diff image.
+	            AlterImageStyle alterImageStyle = null;
+	            //the factor to tint or shade the pixel (of no difference) when creating diff image.
+	            double alterImageFactor = Constants.IMAGE_ALTER_IMAGE_FACTOR_DEFAULT;
+	            //The resolution in DPI, it is used to convert PDF file to image file.
+	            int pdfResolution = Constants.IMAGE_PDF_CONVERSION_RESOLUTION_DEFAULT;
 
 	            boolean isImage = ImageUtils.isImageFormatSupported(benchfilename);
 
-	            if(!isImage){
-	            	Log.info(".....TIDComponent.process; ready to do the VFTF for bench file : "
-	            			+ benchfilename + ", test file: " + testfilename );
-	            }else{
+	            boolean isPDF = FileUtilities.isPDF(testfilename) && FileUtilities.isPDF(benchfilename);
+
+	            if(isImage || isPDF){
 	            	if(FileUtilities.FilterMode.TOLERANCE.name.equalsIgnoreCase(filterMode)){
 	            		try{
 	            			bitTolerance = Integer.parseInt(filterOptions);
 	            			if(bitTolerance<0) bitTolerance = 0;
-	            			if(bitTolerance>100) bitTolerance = 100;
+	            			if(bitTolerance>100) bitTolerance = Constants.IMAGE_BIT_TOLERATION_DEFAULT;
 	            		}catch(NumberFormatException nfe){
 	            			Log.warn(debugmsg+" ignore invalid filter options '"+filterOptions+"', it should be an integer.");
 	            		}
 	            	}else{
 	            		Log.warn(debugmsg+" ignore invalid filter mode '"+filterMode+"'");
 	            	}
-		            Log.info(".....TIDComponent.process; VFTF performing IMAGE comparison for bench file : "
-		                    + benchfilename + ", test file: " + testfilename );
+
+	            	if(alterImageStyleOptions!=null){
+	            		try{
+	            			alterImageStyle = AlterImageStyle.get(alterImageStyleOptions);
+	            		}catch(IllegalArgumentException ille){
+	            			Log.warn(debugmsg+" ignore invalid style option '"+alterImageStyleOptions+"', due to "+ille.getMessage());
+	            			alterImageStyle = AlterImageStyle.NONE;
+	            		}
+	            	}
+
+	            	if(alterImageFactorOptions!=null){
+	            		try{
+	            			alterImageFactor = Double.parseDouble(alterImageFactorOptions);
+	            		}catch(NumberFormatException nfe){
+	            			Log.warn(debugmsg+" ignore invalid factor options '"+alterImageFactorOptions+"', it should be a double.");
+	            		}
+	            	}
+
+	            	if(isPDF){
+	            		try{
+	            			pdfResolution = Integer.parseInt(pdfOptions);
+	            			if(pdfResolution<0) pdfResolution = Constants.IMAGE_PDF_CONVERSION_RESOLUTION_DEFAULT;
+	            		}catch(NumberFormatException nfe){
+	            			Log.warn(debugmsg+" ignore invalid pdf conversion resolution options '"+pdfOptions+"', it should be an integer.");
+	            		}
+	            	}
+
+	            	Log.info(".....TIDComponent.process; VFTF performing IMAGE comparison for bench file : "
+	            			+ benchfilename + ", test file: " + testfilename );
+	            }else{
+	            	Log.info(".....TIDComponent.process; ready to do the VFTF for bench file : "
+	            			+ benchfilename + ", test file: " + testfilename );
 	            }
 
 	            // now compare the two files
@@ -1755,12 +1846,17 @@ public class TIDComponent extends GenericEngine {
 	            BufferedImage bimage = null;
 	            BufferedImage timage = null;
 	            BufferedImage diffimage = null;
+
+	            List<BufferedImage> bimages = null;
+	            List<BufferedImage> timages = null;
+	            Map<BufferedImage, BufferedImage> diffImages = new LinkedHashMap<BufferedImage, BufferedImage>();
+
 	            try {
 	                boolean success = false;
 	                if(isImage){
 	                	try{
 	                		bimage = ImageUtils.getStoredImage(benchfilename);
-	                		timage = ImageUtils.getStoredImage(testfilename);
+	    	            	timage = ImageUtils.getStoredImage(testfilename);
 	                		success = ImageUtils.compareImage(bimage, timage, bitTolerance);
 	                	}catch(Exception x){
 	    		            Log.debug( ".....TIDComponent.process; VFTF IMAGE comparison failed due to "+
@@ -1773,6 +1869,36 @@ public class TIDComponent extends GenericEngine {
 	    		            	return;
 	    		            }
 	                	}
+	                }else if(isPDF){
+	                	//convert the PDF to images and then compare them
+	                	try{
+	                		bimages = ImageUtils.convertPDF(new File(benchfilename), pdfResolution);
+	                	}catch(Exception x){
+	    		            Log.debug( ".....TIDComponent.process; VFTF PDF comparison failed due to "+ x.getClass().getName()+", "+x.getMessage());
+	    		            issueFileErrorFailure("BenchmarkFile: "+ benchfilename);
+	    		            return;
+	                	}
+	                	try{
+	                		timages = ImageUtils.convertPDF(new File(testfilename), pdfResolution);
+	                	}catch(Exception x){
+	                		Log.debug( ".....TIDComponent.process; VFTF PDF comparison failed due to "+ x.getClass().getName()+", "+x.getMessage());
+	                		issueFileErrorFailure("ActualFile: "+ testfilename);
+	                		return;
+	                	}
+	                	if(bimages.size()==timages.size()){
+	                		for(int i=0;i<bimages.size();i++){
+	                			bimage = bimages.get(i);
+	                			timage = timages.get(i);
+	                			if(!ImageUtils.compareImage(bimage, timage, bitTolerance)){
+	                				diffImages.put(bimage, timage);
+	                			}
+	                		}
+	                		success = diffImages.size()==0;
+	                	}else{
+	                		Log.debug(".....TIDComponent.process; VFTF PDF comparison failed due to: BenchmarkFile page number '"+bimages.size()+"' doesn't equal "+" ActualFile page number '"+timages.size()+"'!");
+	                		success = false;
+	                	}
+
 	                }else if (text){
 	                    benchcontents = StringUtils.readfile( benchfilename );
 	                    testcontents = StringUtils.readfile( testfilename );
@@ -1790,7 +1916,7 @@ public class TIDComponent extends GenericEngine {
 	                	if(isImage){
 	                		File diffout = null;
 							try{
-								diffimage = ImageUtils.createDiffImage(timage, bimage);
+								diffimage = ImageUtils.createDiffImage(timage, bimage, alterImageStyle, alterImageFactor);
 								diffout = deduceDiffFile(FileUtilities.deduceMatchingUUIDFilename(benchfilename));
 								ImageUtils.saveImageToFile(diffimage, diffout);
 							}catch(Exception x){
@@ -1805,6 +1931,40 @@ public class TIDComponent extends GenericEngine {
 								message.append(" "+ GENStrings.convert(GENStrings.SEE_DIFFERENCE_FILE,
 										"Please see difference in file '"+ diffout.getAbsolutePath() +"'.",
 										diffout.getAbsolutePath()));
+							}
+							issueErrorPerformingActionOnX(testfilename, message.toString());
+
+	                	}else if(isPDF){
+	                		List<File> diffFiles = new ArrayList<File>();
+							try{
+								File diffFile = null;
+								String diffFilePrefix = FileUtilities.deduceMatchingUUIDFilename(benchfilename);
+								int i = 0;
+
+								for(BufferedImage benchImage: diffImages.keySet()){
+									timage = diffImages.get(benchImage);
+									diffimage = ImageUtils.createDiffImage(benchImage, timage, alterImageStyle, alterImageFactor);
+									diffFile = deduceDiffFile(diffFilePrefix+".diff."+(i++)+".png");
+									ImageUtils.saveImageToFile(diffimage, diffFile);
+									diffFiles.add(diffFile);
+								}
+
+							}catch(Exception x){
+								Log.info(debugmsg+action +" failed to create Diff Image due to: "+x.getClass().getName()+", "+ x.getMessage());
+							}
+
+							StringBuffer message = new StringBuffer();
+							message.append(GENStrings.convert(GENStrings.CONTENT_NOT_MATCHES_KEY,
+									"the content of '"+ testfilename +"' does not match the content of "+benchfilename,
+									testfilename,benchfilename));
+							//see difference files		: Please see difference in file '%1%'.
+							if(diffFiles.size()>0){
+								String diffout = "";
+								for(File file: diffFiles){
+									diffout += file.getAbsolutePath()+"\n";
+								}
+								message.append(" "+ GENStrings.convert(GENStrings.SEE_DIFFERENCE_FILE,
+										"Please see difference in file '"+ diffout +"'.", diffout));
 							}
 							issueErrorPerformingActionOnX(testfilename, message.toString());
 	                	}else{
@@ -2446,16 +2606,29 @@ public class TIDComponent extends GenericEngine {
 			String authFile = iterator.hasNext()? iterator.next():null;
 
 			try {
-				__request(method, relativeURI, responseIdVar, body, type, customHeaders, authFile);
+				Response response = __request(method, relativeURI, responseIdVar, body, type, customHeaders, authFile);
 
-				message = GENStrings.convert(GENStrings.SUCCESS_3,
-						restFlag+":"+sessionID+" "+action+" successful.",
-						restFlag, sessionID, action);
-				description = "relativeURI: "+relativeURI+"\n"+
-						      responseIdVar+": "+getVariable(responseIdVar);
+				boolean verified = verifyResponse(response, method, type);
 
-				logMessage( message, description, PASSED_MESSAGE);
-				setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
+				if(verified){
+					message = GENStrings.convert(GENStrings.SUCCESS_3,
+							restFlag+":"+sessionID+" "+action+" successful.",
+							restFlag, sessionID, action);
+					description = "relativeURI: "+relativeURI+"\n"+
+							responseIdVar+": "+getVariable(responseIdVar);
+
+					logMessage( message, description, PASSED_MESSAGE);
+					setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
+				}else{
+					message = FAILStrings.convert(FAILStrings.FAILURE_3,
+							"Unable to perform "+action+" on "+restFlag+" in "+sessionID+".",
+							sessionID, restFlag, action);
+					description = "relativeURI: "+relativeURI+"\n"+
+							responseIdVar+": "+getVariable(responseIdVar);
+
+					logMessage( message, description, FAILED_MESSAGE);
+					setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
+				}
 			}catch(Exception e){
 				String exceptionMsg = StringUtils.debugmsg(e);
 				message = FAILStrings.convert(FAILStrings.GENERIC_ERROR,
@@ -2463,6 +2636,101 @@ public class TIDComponent extends GenericEngine {
 				standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
 				setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
 			}
+		}
+
+		/**
+		 * @param response Response, the response returned from the server
+		 * @param method String, the http method that has been executed
+		 * @param type String, the type of content that is expected by user
+		 * @return boolean
+		 */
+		private boolean verifyResponse(Response response, String method, String type){
+			String debugmsg = StringUtils.debugmsg(false);
+			boolean verified = false;
+
+			//If the method is 'get' or 'head', check the header 'Content-Type' to match the expected type; and status code is 200
+			if (REST.GET_METHOD.equalsIgnoreCase(method) ||
+				REST.HEAD_METHOD.equalsIgnoreCase(method)) {
+
+				Map<String,String> headers = response.getHeaders();
+				String contentType = null;
+
+				if(headers==null){
+					IndependantLog.error(debugmsg+"The Response doesn't have any headers, cannot verify");
+					return false;
+				}
+
+				contentType = headers.get(Headers.CONTENT_TYPE);
+				if(contentType==null){
+					IndependantLog.error(debugmsg+"The Response headers don't contain header '"+Headers.CONTENT_TYPE+"', cannot verify");
+					return false;
+				}
+				contentType = contentType.toLowerCase();
+				IndependantLog.debug(debugmsg+"The response's content-type is '"+contentType+"', does it match with expected type '"+type+"'?");
+
+				if(type==null){
+					//type is null, which means that we don't care about the content-type
+					verified = true;
+
+				}else if(Headers.BINARY_TYPE.equalsIgnoreCase(type)){
+					verified = contentType.contains(Headers.APPL_OCTET_STREAM);
+
+				}else if(Headers.CSS_TYPE.equalsIgnoreCase(type)){
+					verified = contentType.contains(Headers.TEXT_CSS);
+
+				}else if(Headers.HTML_TYPE.equalsIgnoreCase(type)){
+					verified = contentType.contains(Headers.TEXT_HTML);
+
+				}else if(Headers.IMAGE_TYPE.equalsIgnoreCase(type)){
+					verified = contentType.contains(Headers.IMAGE);
+
+				}else if(Headers.JSON_TYPE.equalsIgnoreCase(type)){
+					verified = contentType.contains(Headers.APPL_JSON);
+
+				}else if(Headers.SCRIPT_TYPE.equalsIgnoreCase(type)){
+					verified = contentType.contains(Headers.APPL_JAVASCRIPT);
+
+				}else if(Headers.TEXT_TYPE.equalsIgnoreCase(type)){
+					verified = contentType.contains(Headers.TEXT_PLAIN);
+
+				}else if(Headers.XML_TYPE.equalsIgnoreCase(type)){
+					verified = contentType.contains(Headers.TEXT_XML)
+							|| contentType.contains(Headers.APPL_XML);
+
+				}
+
+				//code 200 means "success"
+				return verified = verified && (200 ==response.get_status_code());
+			}
+			else if(REST.POST_METHOD.equalsIgnoreCase(method)){
+				//code 201 means "created"
+				verified = (201 ==response.get_status_code());
+			}
+			else if(REST.PUT_METHOD.equalsIgnoreCase(method)){
+				//if entity doesn't exist
+				//code 201 means "created"
+
+				//if entity exists
+				//code 204 means update succeeds and "no content" is returned.
+				//code 200 means update succeeds and "content" is returned.
+				verified = (200 ==response.get_status_code() ||
+						    201 ==response.get_status_code() ||
+						    204 ==response.get_status_code());
+			}
+			else if(REST.PATCH_METHOD.equalsIgnoreCase(method)){
+				IndependantLog.debug(debugmsg+"For patch methods we verify the status code is 200 or 204");
+				verified = (200 ==response.get_status_code() ||
+				            204 ==response.get_status_code());
+			}
+			else if(REST.DELETE_METHOD.equalsIgnoreCase(method)){
+				IndependantLog.debug(debugmsg+"For delete methods we verify the status code is 200 or 204");
+				//code 200 means "success"
+				//code 204 means "success" without "content" returned in response
+				verified = (200 ==response.get_status_code() ||
+					        204 ==response.get_status_code());
+			}
+
+			return verified;
 		}
 
 		/**
@@ -2487,17 +2755,31 @@ public class TIDComponent extends GenericEngine {
 			String authFile = iterator.hasNext()? iterator.next():null;
 
 			try {
-				__request(method, relativeURI, responseIdVar, body, null, customHeaders, authFile);
+				Response response = __request(method, relativeURI, responseIdVar, body, null, customHeaders, authFile);
+
+				boolean verified = verifyResponse(response, method, null);
 
 				String actionMsg = action +" "+method;
-				message = GENStrings.convert(GENStrings.SUCCESS_3,
-						restFlag+":"+sessionID+" "+actionMsg+" successful.",
-						restFlag, sessionID, actionMsg);
-				description = "relativeURI: "+relativeURI+"\n"+
-						      responseIdVar+": "+getVariable(responseIdVar);
+				if(verified){
+					message = GENStrings.convert(GENStrings.SUCCESS_3,
+							restFlag+":"+sessionID+" "+actionMsg+" successful.",
+							restFlag, sessionID, actionMsg);
+					description = "relativeURI: "+relativeURI+"\n"+
+							      responseIdVar+": "+getVariable(responseIdVar);
 
-				logMessage( message, description, PASSED_MESSAGE);
-				setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
+					logMessage( message, description, PASSED_MESSAGE);
+					setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
+				}else{
+					message = FAILStrings.convert(FAILStrings.FAILURE_3,
+							"Unable to perform "+actionMsg+" on "+restFlag+" in "+sessionID+".",
+							sessionID, restFlag, actionMsg);
+					description = "relativeURI: "+relativeURI+"\n"+
+							responseIdVar+": "+getVariable(responseIdVar);
+
+					logMessage( message, description, FAILED_MESSAGE);
+					setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
+				}
+
 			}catch(Exception e){
 				String exceptionMsg = StringUtils.debugmsg(e);
 				message = FAILStrings.convert(FAILStrings.GENERIC_ERROR,
@@ -2544,7 +2826,8 @@ public class TIDComponent extends GenericEngine {
 		private Response __request(String method, String relativeURI, String responseIdVar, String...optionals /*body, type, customHeaders, authFile*/) throws Exception{
 			String debugmsg = StringUtils.debugmsg(false);
 			String type = null;
-			String body = null;
+			Object body = null;
+			String paramBody = null;
 			String customHeaders = null;
 			String customAuthFile = null;
 			Response response = null;
@@ -2553,7 +2836,7 @@ public class TIDComponent extends GenericEngine {
 			Auth sessionAuth = null;
 			boolean serviceModified = false;
 			try {
-				try{ body = optionals[0]; }catch(Exception e){}
+				try{ paramBody = optionals[0]; body = paramBody; }catch(Exception e){}
 				try{ type = optionals[1]; }catch(Exception e){}
 				try{ customHeaders = optionals[2]; }catch(Exception e){}
 				try{ customAuthFile = optionals[3]; }catch(Exception e){}
@@ -2572,6 +2855,30 @@ public class TIDComponent extends GenericEngine {
 					}
 					IndependantLog.debug(debugmsg+" appending custom headers \n"+customHeaders);
 					headers = headers==null? customHeaders: headers + "\n"+customHeaders;
+				}
+
+				//handle the body information 'paramBody'
+				if(StringUtils.isValid(paramBody)){
+					try{
+						//deduce it as a project-relative file, or test-directory-relative file
+						File tempFile = FileUtilities.deduceProjectFile(paramBody, this);
+						if(!tempFile.isFile()) tempFile = FileUtilities.deduceTestFile(paramBody, this);
+
+						if(tempFile.isFile()){
+							//The body's content type is defined by the headers "Content-Type", we will check it.
+							String contentType = Headers.getHeader(headers, Headers.CONTENT_TYPE);
+
+							//For binary/image file, we pass the File object as body
+							if(Headers.APPL_OCTET_STREAM.equalsIgnoreCase(contentType) ||
+							   Headers.IMAGE.equalsIgnoreCase(contentType)){
+								body = tempFile;
+							}else{//For non-binary file, we read string from the file and pass it as body
+								body = FileUtilities.readStringFromUTF8File(tempFile.getAbsolutePath());
+							}
+						}
+					}catch(SAFSException e){
+						IndependantLog.warn(debugmsg+" Failed to read body file due to "+e.toString());
+					}
 				}
 
 				//Handle the custom authentication/authorization information

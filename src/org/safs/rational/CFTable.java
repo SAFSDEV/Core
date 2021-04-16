@@ -1,7 +1,20 @@
-/** Copyright (C) (MSA, Inc) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
+/**
+ * Copyright (C) (MSA, Inc), All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.rational;
 
 import java.awt.MouseInfo;
@@ -58,14 +71,14 @@ import com.rational.test.ft.script.Row;
  *   <br>   OCT 28, 2005    (Carl Nagle) performClick extended to support Row=N;Col=N syntax for CFComponent
  *   <br>   FEB 08, 2006    (Carl Nagle) fixed getCellText to work with tables containing String primitives.
  *   <br>   FEB 12, 2006    (Carl Nagle) fixed actionVerify for HTMLTables. getModel method does NOT apply!
- * 	 <br>   APR 09, 2008    (LeiWang) 	Reorder keyword constant alphabetically;
+ * 	 <br>   APR 09, 2008    (Lei Wang) 	Reorder keyword constant alphabetically;
  * 										Change script to Script when calling static method of Script;
  * 										Use "triple click" to imitate "SELECT action", SELECTCELL SELECTCELLCONTAINSTEXTFIND 
  * 																						SELECTCELLTEXTFIND SELECTCELLTEXT
  * 																						SELECTFUZZYCELLTEXT SELECTFUZZYCELLTEXTFIND
- * 	 <br>   APR 11, 2008    (LeiWang) 	Added keyword ASSIGNCELLCONTAINSTEXTROW and ASSIGNCELLTEXTROW	
+ * 	 <br>   APR 11, 2008    (Lei Wang) 	Added keyword ASSIGNCELLCONTAINSTEXTROW and ASSIGNCELLTEXTROW	
  * 	 <br>   AUG 05, 2008    (Carl Nagle) 	Modified to use normal cell click for "SELECT" actions
- *   <br>	SEP 09, 2008	(LeiWang)	Modified method actionAssign(): if cell text is null, return "" instead of 
+ *   <br>	SEP 09, 2008	(Lei Wang)	Modified method actionAssign(): if cell text is null, return "" instead of 
  *   									considering the action is fail. See defect S0532491.
  *   									Modified method getCellText(TestObject,TestObject,int,int): if table cell contains
  *   									a java.util.Date object, it will be return as an object of com.rational.test.ft.value.DateWrapper,
@@ -1843,7 +1856,7 @@ public class CFTable extends CFComponent {
    * @param                     fuzzy, boolean
    * @param                     val, String
    * @author (Carl Nagle) 	Feb 12, 2006 	Put back old functionality for fallback.Some tables, like HTMLTables do not have models!
-   * <br>	 (LeiWang) 	Apr 11, 2008	Move some codes to method getCellText(guiObj,row,col).
+   * <br>	 (Lei Wang) 	Apr 11, 2008	Move some codes to method getCellText(guiObj,row,col).
    **/
   protected void actionVerify (GuiTestObject guiObj, int row, int col,
                                String rowval, String column,

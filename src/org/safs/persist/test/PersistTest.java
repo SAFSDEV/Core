@@ -1,15 +1,31 @@
 /**
  * Copyright (C) SAS Institute, All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- */
-
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * Logs for developers, not published to API DOC.
  *
  * History:
- * 2017年3月10日    (Lei Wang) Initial release.
- * 2017年3月15日    (Lei Wang) Added test of unpickle from JSON file.
- * 2017年4月14日    (Lei Wang) Added test for "filter fields according to their modifier".
+ * MAR 10, 2017 (Lei Wang) Initial release.
+ * MAR 15, 2017 (Lei Wang) Added test of unpickle from JSON file.
+ * APR 14, 2017 (Lei Wang) Added test for "filter fields according to their modifier".
+ * OCT 24, 2017	(Lei Wang) Modified code to persist/unpickle a list of Persistable objects.
+ * OCT 27, 2017	(Lei Wang) Removed inner class Pair, use Parameter to test persist/unpickle a list of Persistable objects.
+ *                        Added case to test the ability of ignoring a field when its field modifiers match any modifiers user provides.
+ * NOV 03, 2017	(Lei Wang) Added codes to test persist/unpickle a Map field of a Persistable object.
  */
 package org.safs.persist.test;
 
@@ -27,6 +43,7 @@ import org.safs.SAFSVerificationException;
 import org.safs.auth.AuthorizationServer;
 import org.safs.auth.Content;
 import org.safs.auth.OAuth2;
+import org.safs.auth.Parameter;
 import org.safs.auth.SimpleAuth;
 import org.safs.persist.Persistable;
 import org.safs.persist.PersistableDefault;
@@ -82,13 +99,13 @@ public class PersistTest {
 
 		private boolean debug = false;
 
-		@Override
 //		public static final String VAR_SAFSBENCHDIRECTORY    = "safsbenchdirectory";
 //		public static final String VAR_SAFSDATAPOOLDIRECTORY = "safsdatapooldirectory";
 //		public static final String VAR_SAFSDIFDIRECTORY      = "safsdifdirectory";
 //		public static final String VAR_SAFSLOGSDIRECTORY     = "safslogsdirectory";
 //		public static final String VAR_SAFSPROJECTDIRECTORY  = "safsprojectdirectory";
 //		public static final String VAR_SAFSTESTDIRECTORY     = "safstestdirectory";
+		@Override
 		public String getVariable(String varName) throws SAFSException {
 			String root = System.getProperty("user.dir");
 			String value = variables.get(varName);
@@ -286,6 +303,10 @@ public class PersistTest {
 		float[][] float2DimensionArray = {{19.0F, 17.45F}, {65.0F, 25.40F, 33.25F}, {78.23F}};
 		String[][] string2DimArray = {{"item1","item2"}, {"item3","item4"}, {"item5"}};
 		List<List<?>> list2DimObject = new ArrayList<List<?>>();
+		HashMap<String, String> mapObject = new HashMap<String, String>();
+		mapObject.put("name", "tom");
+		mapObject.put("password", "helloTom");
+
 		list2DimObject.add(listObject);
 		list2DimObject.add(listObject_bis);
 		Vector<Integer> vectorObject = new Vector<Integer>(4);
@@ -293,6 +314,10 @@ public class PersistTest {
 		vectorObject.addElement(new Integer(2));
 		vectorObject.addElement(new Integer(3));
 		vectorObject.addElement(new Integer(4));
+		List<Parameter> listpair = new ArrayList<Parameter>();
+		listpair.add(new Parameter("username", "IDToken1", "tom"));
+		listpair.add(new Parameter("password", "IDToken2", "******"));
+		listpair.add(new Parameter("realm", "realm", "/sww"));
 
 		MyPersistable myPersistable = new MyPersistable();
 		myPersistable.setByteField((byte)21);
@@ -309,6 +334,8 @@ public class PersistTest {
 		myPersistable.setListObject(listObject);
 		myPersistable.setList2DimObject(list2DimObject);
 		myPersistable.setVectorObject(vectorObject);
+		myPersistable.setListOfPersistable(listpair);
+		myPersistable.setMapObject(mapObject);
 
 		System.out.println("Original :\n"+myPersistable);
 
@@ -361,21 +388,26 @@ public class PersistTest {
 			e.printStackTrace();
 		}
 
-		//All "final" fields will be ignored
+		//All fields qualified with "final" will be ignored
 		myPersistable = new MyPersistable(Modifier.FINAL);
 		assert !myPersistable.getPersitableFields().containsKey("finalField");
 		assert !myPersistable.getPersitableFields().containsKey("finalStaticField");
 
-		//All "final & static" fields will be ignored
+		//All fields qualified with "final and static" will be ignored
 		myPersistable = new MyPersistable(Modifier.FINAL|Modifier.STATIC);
 		assert myPersistable.getPersitableFields().containsKey("finalField");
 		assert !myPersistable.getPersitableFields().containsKey("finalStaticField");
 
-		//All "final & static & transient" fields will be ignored
+		//All fields qualified with "final, static and transient" will be ignored
 		myPersistable = new MyPersistable(Modifier.FINAL|Modifier.STATIC|Modifier.TRANSIENT);
 		assert myPersistable.getPersitableFields().containsKey("finalField");
 		assert myPersistable.getPersitableFields().containsKey("finalStaticField");
 
+		//All fields qualified with "final, static or transient" will be ignored
+		//By default, we match all qualifiers to ignore a field. Here we create a Persistable to match any qualifiers to ignore a field
+		myPersistable = new MyPersistable(Modifier.FINAL|Modifier.STATIC|Modifier.TRANSIENT, false/* match any qualifiers */);
+		assert !myPersistable.getPersitableFields().containsKey("finalField");
+		assert !myPersistable.getPersitableFields().containsKey("finalStaticField");
 	}
 
 	public static class MyPersistable extends PersistableDefault{
@@ -391,10 +423,13 @@ public class PersistTest {
 		private Double[] doubleArray;
 		private List<?> listObject = null;
 		private Vector<?> vectorObject = null;
+		private List<Parameter> listOfPersistable = null;
 
 		private float[][] float2DimArray;
 		private String[][] string2DimArray;
 		private List<List<?>> list2DimObject = null;
+
+		private HashMap<String, String> mapObject = null;
 
 		public final int finalField = 100;
 		public static final int finalStaticField = 100;
@@ -409,6 +444,22 @@ public class PersistTest {
 		 */
 		public MyPersistable(int ignoredFiledTypes){
 			super(ignoredFiledTypes);
+		}
+		public MyPersistable(int ignoredFiledTypes, boolean matchAllFieldModifiers){
+			super(ignoredFiledTypes, matchAllFieldModifiers);
+		}
+
+		/**
+		 * @return the listOfPersistable
+		 */
+		public List<Parameter> getListOfPersistable() {
+			return listOfPersistable;
+		}
+		/**
+		 * @param listOfPersistable the listOfPersistable to set
+		 */
+		public void setListOfPersistable(List<Parameter> listOfPersistable) {
+			this.listOfPersistable = listOfPersistable;
 		}
 
 		public Vector<?> getVectorObject() {
@@ -495,6 +546,21 @@ public class PersistTest {
 		public void setDoubleArray(Double[] doubleArray) {
 			this.doubleArray = doubleArray;
 		}
+
+		/**
+		 * @return the mapObject
+		 */
+		public HashMap<String, String> getMapObject() {
+			return mapObject;
+		}
+
+		/**
+		 * @param mapObject the mapObject to set
+		 */
+		public void setMapObject(HashMap<String, String> mapObject) {
+			this.mapObject = mapObject;
+		}
+
 	}
 	/**
 	 * @param args refer to {@link #param_d} and {@link #param_vars}.

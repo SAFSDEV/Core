@@ -1,6 +1,20 @@
-/** Copyright (C) (MSA, Inc) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+/**
+ * Copyright (C) (MSA, Inc), All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * History:
  *   <br>   Sep 23, 2003    (DBauman) Original Release
@@ -12,8 +26,8 @@
  *   <br>   Nov 07, 2006    (Bob Lawler) Added DeleteDirectoryContents and CopyMatchingFiles. RJL
  *   <br>   Nov 07, 2006    (Bob Lawler) Updated copyFile() to use new actuallyCopyBytes() helper method. RJL
  *   <br>   Dec 19, 2006    (Carl Nagle) Updated openFile() to handle new OpenUTF8File command
- *   <br>	May 26, 2008	(LeiWang) Add keyword OnFileEOFGoToBlockId
- *   <br>	Sep 23, 2008	(LeiWang) Modified methods setFileProtections(),getFileProtections(),getFiles()
+ *   <br>	May 26, 2008	(Lei Wang) Add keyword OnFileEOFGoToBlockId
+ *   <br>	Sep 23, 2008	(Lei Wang) Modified methods setFileProtections(),getFileProtections(),getFiles()
  *   								  Add method isSomeFile()
  *   								  Add inner class RJFileFilter
  *   								  See defect S0536736
@@ -21,7 +35,7 @@
  *                                    whether a file on Windows is archive. Fix S0629544.
  *   <br>	FEB 25, 2010	(JunwuMa) Added two keywords GETTEXTFROMIMAGE and SAVETEXTFROMIMAGE 
  *                                    for detecting text in image file using OCR.  
- *   <br>	APR 20, 2010	(LeiWang) Modify method GetSaveTextFromImage(): use static method of OCREngine to get
+ *   <br>	APR 20, 2010	(Lei Wang) Modify method GetSaveTextFromImage(): use static method of OCREngine to get
  *                                    an OCR engine to use.                              
  *   <br>   Mar 20, 2013    (Carl Nagle) Fixed FilterImage to use ImageUtils and accept more formats.
  *   <br>   Nov 19, 2014    (Lei Wang) Refactor: move codes to FileUtilies, fix errors, model FileAttribute.
@@ -401,7 +415,7 @@ public class DCDriverFileCommands extends DriverCommand {
   }
 
   /** <br><em>Purpose:</em> findSqaFile.  Locate the specified sqa file from either absolute path or relative to datapool and store absolute path in specified variable
-   * @author (Jack Imbriani) Dec 22, 2004
+   * @author (jaimbr) Dec 22, 2004
    **/
   private void findSqaFile() throws SAFSException {
     if (params.size() < 2) {
@@ -487,7 +501,7 @@ public class DCDriverFileCommands extends DriverCommand {
   }
 
   /** <br><em>Purpose:</em> filterTextFile.  Filter the contents of a text file
-   * @author (Jack Imbriani) Dec 17, 2004
+   * @author (jaimbr) Dec 17, 2004
    * <br>	OCT 18, 2013	(Lei Wang)    Handle file encoding.
    **/
   private void filterTextFile() throws SAFSException {

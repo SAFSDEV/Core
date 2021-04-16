@@ -1,28 +1,28 @@
-/** 
+/**
  * Copyright (C) SAS Institute, All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.selenium.webdriver.lib.interpreter.selrunner.steptype;
 
-import java.util.List;
-
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
-import org.safs.robot.Robot;
-import org.safs.selenium.util.JavaScriptFunctions;
-import org.safs.selenium.webdriver.lib.ComboBox;
-import org.safs.selenium.webdriver.lib.SearchObject;
-import org.safs.selenium.webdriver.lib.SeleniumPlusException;
 import org.safs.selenium.webdriver.lib.WDLibrary;
-import org.safs.selenium.webdriver.lib.interpreter.WDLocator.WDType;
-import org.safs.selenium.webdriver.lib.interpreter.selrunner.SRUtilities;
 import org.safs.selenium.webdriver.lib.interpreter.selrunner.SRunnerType;
 
 import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
-import com.sebuilder.interpreter.steptype.SendKeysToElement;
-import com.sebuilder.interpreter.steptype.SetElementSelected;
 
 public class TypeKeys implements StepType, SRunnerType {
 

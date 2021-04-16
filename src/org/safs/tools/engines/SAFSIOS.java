@@ -1,27 +1,38 @@
-/** Copyright (C) SAS Institute All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.tools.engines;
 
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.safs.Log;
 import org.safs.TestRecordHelper;
 import org.safs.tools.CaseInsensitiveFile;
+import org.safs.tools.consoles.ProcessConsole;
 import org.safs.tools.drivers.DriverConstant;
 import org.safs.tools.drivers.DriverInterface;
 import org.safs.tools.stringutils.StringUtilities;
-import org.safs.tools.consoles.ProcessConsole;
-
-import org.safs.Log;
 
 /**
  * A wrapper to Apple's iOS Developer UIAutomation SAFS engine--the "IOS" engine.
- * This engine can only be used if you have a valid install of the iOS/XCode Developer 
- * SDK tools on an Apple Mac(or equivalent) computer.<p>This is intended for testing of 
+ * This engine can only be used if you have a valid install of the iOS/XCode Developer
+ * SDK tools on an Apple Mac(or equivalent) computer.<p>This is intended for testing of
  * iPhone and iPad iOS applications.
  * <p>
  * The default SAFSDRIVER Tool-Independent Driver (TID) does not provide for any
@@ -30,7 +41,7 @@ import org.safs.Log;
  * {@link <a href="http://safsdev.sf.net/sqabasic2000/JSAFSFrameworkContent.htm#configfile">SAFSTID Config Files</a>}
  * for more information.
  * <p>
- * The IOS supported config file items are listed below.  Remember, this engine executes on a Mac, 
+ * The IOS supported config file items are listed below.  Remember, this engine executes on a Mac,
  * so all file paths are in Unix/Mac format:
  * <p>
  * <ul><pre>
@@ -62,9 +73,13 @@ public class SAFSIOS extends GenericEngine {
 	 * "SAFS/IOS" -- The name of this engine as registered with STAF.
 	 */
 	static final String ENGINE_NAME = "SAFS/IOS";
-	
-	/** 
-	 * "org.safs.ios.JavaHook"  
+	/** '1.0' */ //iOS Developer UIAutomation
+	public static final String ENGINE_VERSION = "1.0";
+	/** 'The engine using IOS UIAutomation to test IOS mobile UI.' */
+	public static final String ENGINE_DESCRIPTION = "The engine using IOS UIAutomation to test IOS mobile UI.";
+
+	/**
+	 * "org.safs.ios.JavaHook"
 	 */
 	static final String HOOK_CLASS       = "org.safs.ios.IJavaHook";
 
@@ -85,6 +100,9 @@ public class SAFSIOS extends GenericEngine {
 	public SAFSIOS() {
 		super();
 		servicename = ENGINE_NAME;
+		productName = ENGINE_NAME;
+		version = ENGINE_VERSION;
+		description = ENGINE_DESCRIPTION;
 	}
 
 	/**
@@ -100,6 +118,7 @@ public class SAFSIOS extends GenericEngine {
 	 *
 	 * @see GenericEngine#launchInterface(Object)
 	 */
+	@Override
 	public void launchInterface(Object configInfo){
 		super.launchInterface(configInfo);
 
@@ -125,12 +144,12 @@ public class SAFSIOS extends GenericEngine {
 				}/***********************************************************/
 
 				Log.info(ENGINE_NAME +" attempting AUTOLAUNCH...");
-				
-				String array = "";				
+
+				String array = "";
 				String tempstr = null;
 
-				// JVM	
-			    String jvm = "java";				    
+				// JVM
+			    String jvm = "java";
 			    tempstr   = config.getNamedValue(DriverConstant.SECTION_SAFS_IOS, JVM_OPTION);
 			    if (tempstr != null) {
 			    	CaseInsensitiveFile afile = new CaseInsensitiveFile(tempstr);
@@ -143,28 +162,28 @@ public class SAFSIOS extends GenericEngine {
 			    }
 		    	Log.generic(ENGINE_NAME +" using 'JVM' path: "+ jvm);
 			    array = jvm +" ";
-			    
+
 				// JVMARGS -- append unmodified, if present
 			    tempstr   = config.getNamedValue(DriverConstant.SECTION_SAFS_IOS, JVMARGS_OPTION);
-			    if (tempstr != null) { 
+			    if (tempstr != null) {
 			    	array += tempstr +" ";
 			    }
 
-		    	// XBOOTCLASSPATH 
+		    	// XBOOTCLASSPATH
 			    // separate RJ JVM needs some jars to be in CLASSPATH, append them to end of bootstrap classpath.
-			    // When java.exe calls rational_ft.jar using option -jar, the JVM only takes rational_ft.jar as its classpath. 
+			    // When java.exe calls rational_ft.jar using option -jar, the JVM only takes rational_ft.jar as its classpath.
 			    tempstr   = config.getNamedValue(DriverConstant.SECTION_SAFS_IOS, XBOOTCLASSPATH_OPTION);
 			    if(tempstr != null){
-		    		array += "-Xbootclasspath/a:" + makeQuotedString(tempstr) + " ";	
-			    }			    
-			    
+		    		array += "-Xbootclasspath/a:" + makeQuotedString(tempstr) + " ";
+			    }
+
 			    //-Dsafs.config.paths=
 			    String cpaths = config.getConfigurePaths();
 			    cpaths = DriverConstant.PROPERTY_SAFS_CONFIG_PATHS +"="+ cpaths;
 			    //wrap in quotes if embedded space exists
 			    if (cpaths.indexOf(" ")>0) cpaths = "\""+ cpaths +"\"";
 			    array += "-D"+ cpaths +" ";
-			
+
 				// HOOK script
 				String hook = HOOK_CLASS;
 			    tempstr   = config.getNamedValue(DriverConstant.SECTION_SAFS_IOS, HOOK_OPTION);
@@ -237,6 +256,7 @@ public class SAFSIOS extends GenericEngine {
 
 	// this may be more correctly refactored into the GenericEngine superclass.
 	/** Override superclass to catch unsuccessful initialization scenarios. */
+	@Override
 	public long processRecord(TestRecordHelper testRecordData) {
 		if (running) return super.processRecord(testRecordData);
 		running = isToolRunning();

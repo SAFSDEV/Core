@@ -1,3 +1,20 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.selenium.spc;
 
 import java.awt.BorderLayout;
@@ -33,29 +50,29 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 	private WDSPC wdspc;
 	private String xpath;
 	private SPCTreeNode node;
-	
+
 	private JTextArea mapRectxt;
-	private JTextArea dmnRectxt;	
-	private JTextArea xpathRectxt;	
+	private JTextArea dmnRectxt;
+	private JTextArea xpathRectxt;
 	private JButton dmnSetbtn;
 	private JButton xpathSetbtn;
 	private JButton mapClrbtn;
-	
+
 	public SPCElementInfoFrame(String xpath,SPC spc){
 		this.spc = spc;
 		init(xpath);
 	}
-	
+
 	public SPCElementInfoFrame(String xpath,WDSPC wdspc){
 		this.wdspc = wdspc;
 		init(xpath);
 	}
-	
+
 	public SPCElementInfoFrame(SPCTreeNode anode, WDSPC wdspc){
 		this.wdspc = wdspc;
 		init(anode);
 	}
-	
+
 	/**
 	 * This routine is NOT used by the new WebDriver SPC.<p>
 	 * Retrieve the Element Info, which is historically made up of:
@@ -71,9 +88,9 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 	 * @return
 	 */
 	private String[] getElementInfo(String xpath){
-		return spc != null ? spc.getElementInfo(xpath): new String[4];		
+		return spc != null ? spc.getElementInfo(xpath): new String[4];
 	}
-	
+
 	/**
 	 * New WDSPC method
 	 * @param anode
@@ -90,10 +107,10 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		setTitle("Process Container Element Info");
 		setSize(540,600);
 		setMinimumSize(new Dimension(540,600));
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);	
-		
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
 		Dimension recMinimums = new Dimension(400,38);
-		
+
 		GridBagLayout layout = new GridBagLayout();
 		GridBagConstraints remainder = new GridBagConstraints();
 		remainder.gridx=0;
@@ -102,7 +119,7 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		remainder.gridwidth = GridBagConstraints.REMAINDER;
 		remainder.fill = GridBagConstraints.HORIZONTAL;
 		remainder.weightx = 0.0;
-		
+
 		JPanel pnl = new JPanel(layout);
 		JPanel coords = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JPanel attrs = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -124,15 +141,15 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 
 		remainder.weightx = 0.0;
 		layout.setConstraints(shrt_rec, remainder);
-		
+
 		remainder.weightx = 1.0;
 		layout.setConstraints(classes, remainder);
 		layout.setConstraints(full_rec, remainder);
-		
+
 		remainder.weighty = 1.0;
 		remainder.fill = GridBagConstraints.BOTH;
 		layout.setConstraints(properties, remainder);
-		
+
 		// COORDS panel
 		JLabel xlbl = new JLabel("X:", JLabel.LEFT);
 		JTextField xtxt = new JTextField(String.valueOf(node.bounds.x));
@@ -145,16 +162,16 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		wtxt.setEditable(false);
 		JLabel hlbl = new JLabel("H:", JLabel.LEFT);
 		JTextField htxt = new JTextField(String.valueOf(node.bounds.height));
-		htxt.setEditable(false);				
-		coords.add(xlbl); 
-		coords.add(xtxt);		
-		coords.add(ylbl); 
-		coords.add(ytxt);		
-		coords.add(wlbl); 
-		coords.add(wtxt);		
-		coords.add(hlbl); 
-		coords.add(htxt);		
-		
+		htxt.setEditable(false);
+		coords.add(xlbl);
+		coords.add(xtxt);
+		coords.add(ylbl);
+		coords.add(ytxt);
+		coords.add(wlbl);
+		coords.add(wtxt);
+		coords.add(hlbl);
+		coords.add(htxt);
+
 		// ATTRS panel
 		JLabel taglbl = new JLabel("Tag:", JLabel.LEFT);
 		JTextField tagtxt = new JTextField(node.getTag());
@@ -168,15 +185,15 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		JLabel titlelbl = new JLabel("Title:", JLabel.LEFT);
 		JTextField titletxt = new JTextField(node.getTitle());
 		titletxt.setEditable(false);
-		attrs.add(taglbl); 
+		attrs.add(taglbl);
 		attrs.add(tagtxt);
-		attrs.add(idlbl); 
+		attrs.add(idlbl);
 		attrs.add(idtxt);
-		attrs.add(namelbl); 
+		attrs.add(namelbl);
 		attrs.add(nametxt);
-		attrs.add(titlelbl); 
+		attrs.add(titlelbl);
 		attrs.add(titletxt);
-		
+
 		// DOMAIN panel
 		JLabel dmnlbl = new JLabel("Domain:", JLabel.LEFT);
 		JTextField dmntxt = new JTextField(node.getDomain());
@@ -187,11 +204,11 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		JLabel dmnTypelbl = new JLabel("Type:", JLabel.LEFT);
 		JTextField dmnTypetxt = new JTextField(node.getCompType());
 		dmnTypetxt.setEditable(false);
-		domain.add(dmnlbl); 
+		domain.add(dmnlbl);
 		domain.add(dmntxt);
-		domain.add(dmnClasslbl); 
+		domain.add(dmnClasslbl);
 		domain.add(dmnClasstxt);
-		domain.add(dmnTypelbl); 
+		domain.add(dmnTypelbl);
 		domain.add(dmnTypetxt);
 
 		// DOMAINREC panel
@@ -208,18 +225,18 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		dmnSetbtn = new JButton("Set");
 		dmnSetbtn.addActionListener(this);
 		dmnSetbtn.setToolTipText("Set Domain recognition string as Map recognition string.");
-		domainRec.add(dmnReclbl, BorderLayout.WEST); 
+		domainRec.add(dmnReclbl, BorderLayout.WEST);
 		domainRec.add(dmnRecscroll, BorderLayout.CENTER);
 		domainRec.add(dmnSetbtn, BorderLayout.EAST);
-		
+
 		// XPART RECOGNITION panel
 		JLabel shrtReclbl = new JLabel("XPart:", JLabel.LEFT);
 		JTextField shrtRectxt = new JTextField(node.xpart);
 		shrtRectxt.setEditable(false);
 		shrtRectxt.setToolTipText("Short 'last child' part of XPath recognition string.");
-		shrt_rec.add(shrtReclbl); 
+		shrt_rec.add(shrtReclbl);
 		shrt_rec.add(shrtRectxt);
-		
+
 		// CLASSES panel
 		JLabel classlbl = new JLabel(" Class:", JLabel.LEFT);
 		JTextArea classtxt = new JTextArea(node.getAttrClass());
@@ -230,7 +247,7 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		classscroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		classscroll.setMinimumSize(recMinimums);
 		classlbl.setLabelFor(classscroll);
-		classes.add(classlbl,BorderLayout.WEST); 
+		classes.add(classlbl,BorderLayout.WEST);
 		classes.add(classscroll, BorderLayout.CENTER);
 
 		// XPATH RECOGNITION panel
@@ -245,10 +262,10 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		xpathSetbtn = new JButton("Set");
 		xpathSetbtn.addActionListener(this);
 		xpathSetbtn.setToolTipText("Set XPath recognition string as Map recognition string.");
-		full_rec.add(xpathReclbl, BorderLayout.WEST); 
+		full_rec.add(xpathReclbl, BorderLayout.WEST);
 		full_rec.add(xpathscroll, BorderLayout.CENTER);
-		full_rec.add(xpathSetbtn, BorderLayout.EAST);	
-		
+		full_rec.add(xpathSetbtn, BorderLayout.EAST);
+
 		// MAP RECOGNITION panel
 		JLabel mapReclbl = new JLabel("  Map  :", JLabel.LEFT);
 		mapRectxt = new JTextArea(node.getRecognitionString());
@@ -262,13 +279,13 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		mapClrbtn = new JButton("Clr");
 		mapClrbtn.addActionListener(this);
 		mapClrbtn.setToolTipText("Clear Map recognition string.");
-		map_rec.add(mapReclbl, BorderLayout.WEST); 
+		map_rec.add(mapReclbl, BorderLayout.WEST);
 		map_rec.add(mapscroll, BorderLayout.CENTER);
 		map_rec.add(mapClrbtn, BorderLayout.EAST);
-		
+
 		// PROPERTIES panel
 		//JLabel propslbl = new JLabel("Properties:");
-		//propslbl.setHorizontalTextPosition(JLabel.LEFT);		
+		//propslbl.setHorizontalTextPosition(JLabel.LEFT);
 		//propslbl.setVerticalTextPosition(JLabel.TOP);
 		String rs = node.getRecognitionString();
 		if(rs==null||rs.length()==0)
@@ -277,7 +294,7 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 			rs = node.getXpath();
 			if(rs!=null&&rs.length()>0)
 				rs = "XPATH="+ rs;
-		}				    
+		}
 		WebElement element = null;
 		String propertyvalues = "Object or properties not found.\nCheck and Set a recognition string.";
 		if(rs!=null&&rs.length()>0){
@@ -288,7 +305,7 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 			Map<String,Object> map = null;
 			String eq = "=";
 			String nl = "\n";
-			try{ 
+			try{
 				map = WDLibrary.getProperties(element);
 				if(!map.isEmpty()){
 					SortedSet<String> keys = new TreeSet<String>(map.keySet());
@@ -297,10 +314,11 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 						propertyvalues += key + eq + map.get(key).toString()+ nl;
 					}
 				}
+				node.setAccessibilities(WDLibrary.SAP.getSAPAccessibleElementsInfo(element));
 			}
 			catch(Exception x){}
 		}
-		JTextArea propstxt = new JTextArea(propertyvalues);		
+		JTextArea propstxt = new JTextArea(propertyvalues);
 		propstxt.setEditable(false);
 		propstxt.setAutoscrolls(true);
 		propstxt.setToolTipText("The known properties of the Element.");
@@ -309,7 +327,7 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		propsscroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		propsscroll.setMinimumSize(new Dimension(500,230));
 		properties.add(propsscroll, BorderLayout.CENTER);
-				
+
 		pnl.add(coords);
 		pnl.add(attrs);
 		pnl.add(domain);
@@ -336,20 +354,20 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		setTitle("Element Info For "+xpath);
 		setSize(600,400);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		
+
 		String [] labels = {"X,Y,Width,Height:","XPath:","Robot:","Tag:","Inner HTML:"};
-		
+
 		String tag = xpath.substring(xpath.lastIndexOf("/")+1,xpath.lastIndexOf("["));
 		int index = 0;
-		
+
 		try{
 			index = Integer.parseInt(xpath.substring(xpath.lastIndexOf("[")+1,xpath.lastIndexOf("]")));
 		}catch(NumberFormatException e){
 			index = Integer.parseInt(xpath.substring(xpath.lastIndexOf("|")+1,xpath.lastIndexOf("]")));
 		}
-						
+
 		String [] data = getElementInfo(xpath);
-		
+
 		if(data == null || data.length == 1){
 			this.dispose();
 			JOptionPane.showMessageDialog(null,"Unable to retrieve element information.",
@@ -364,10 +382,10 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 			type = "HTML";
 		}
 		String rrec = "Type="+type+";";
-		
+
 		rrec += SPCUtilities.getRobotTag(robotparts[0])+"="+robotparts[1];
 		data[2] = rrec;
-		
+
 		//GET TAG HTML
 		Pattern p = Pattern.compile("(<"+tag+".*?>)",Pattern.CASE_INSENSITIVE);
 		Matcher m = p.matcher(data[3]);
@@ -378,10 +396,10 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		if(m.find())
 			data[3]=m.group(0);
 		else data[3]="Tag not available. (Probably <HTML> Tag)";
-		
-		
+
+
 		JPanel pnl = new JPanel(new SpringLayout());
-		
+
 		for (int i = 0; i < labels.length; i++) {
 			JLabel l = new JLabel(labels[i], JLabel.TRAILING);
 			pnl.add(l);
@@ -394,7 +412,7 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		SPCUtilities.makeCompactGrid(pnl,
                 labels.length, 2, //rows, cols
                 6, 6,        //initX, initY
-                6, 6); 
+                6, 6);
 		this.add(pnl);
 		setVisible(true);
 	}
@@ -411,7 +429,7 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		anode.xpart="div[@id='content']";
 		anode.setRecognitionString("SAPTabControl;id=myTabs");
 		SPCElementInfoFrame f = new SPCElementInfoFrame(anode, null);
-		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);		
+		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
 	/** Daemon Thread subclass */
@@ -424,6 +442,7 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 			this.aspc = aspc;
 			setDaemon(true);
 		}
+		@Override
 		public void run(){
 			frame = new SPCElementInfoFrame(anode,aspc);
 		}
@@ -440,7 +459,7 @@ public class SPCElementInfoFrame extends JFrame implements ActionListener{
 		}else if(event.getSource()==mapClrbtn){
 			mapRectxt.setText("");
 			node.setRecognitionString("");
-		}		
+		}
 	}
 
 }

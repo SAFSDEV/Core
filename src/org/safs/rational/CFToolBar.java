@@ -1,7 +1,20 @@
-/** Copyright (C) (MSA, Inc) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.rational;
 
 import java.awt.Point;
@@ -23,18 +36,18 @@ import com.rational.test.ft.object.interfaces.TestObject;
  * @author  Lei Wang
  * @since   OCT 30, 2008
  *
- *   <br>   OCT 30, 2008    (LeiWang) Original Release
- *   <br>	DEC 01, 2008	(LeiWang) Add method getObjectTooltip();
+ *   <br>   OCT 30, 2008    (Lei Wang) Original Release
+ *   <br>	DEC 01, 2008	(Lei Wang) Add method getObjectTooltip();
  *   								  Modify method clickButtonTooltip(): If RFT API toolbar.click(Script.atToolTipText(tooltip)) 
  *   								  can not work, then we will find the object ourself and perform a click on it. See defect S0539954
- *   <br>	DEC 08, 2008	(LeiWang) Add keywords ClickUnverifiedButtonText, ClickButtonText.
+ *   <br>	DEC 08, 2008	(Lei Wang) Add keywords ClickUnverifiedButtonText, ClickButtonText.
  *   								  Add methods getObjectText(), getObjectTooltip(), performClick(), clickButtonText() 
  *   								  isOnSelectedState(), getMatchedTestObjectFromChildren(), getFirstMatchingPathTestObject()
  *   								  to implement new added keywords.
  *   								  Modify method clickButtonTooltip(): call performClick() to click item.
- *   <br>	DEC	12, 2008	(LeiWang) Modify method performClick(): add a new parameter point to it.
+ *   <br>	DEC	12, 2008	(Lei Wang) Modify method performClick(): add a new parameter point to it.
  *   								  Modify method clickButtonText(): If the third parameter point exists, then try to click at this point.
- *   <br>	JAN 07, 2009	(LeiWang) Modify method clickButtonIndex(): If the parameter point exists, then try to click at this point. See defect S0551177.
+ *   <br>	JAN 07, 2009	(Lei Wang) Modify method clickButtonIndex(): If the parameter point exists, then try to click at this point. See defect S0551177.
  **/
 public class CFToolBar extends CFComponent {
 	public static final String CLICKBUTTONINDEX	 				= "ClickButtonIndex";

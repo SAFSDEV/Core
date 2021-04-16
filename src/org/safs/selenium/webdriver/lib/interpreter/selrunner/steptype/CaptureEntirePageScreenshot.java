@@ -1,36 +1,42 @@
-/** 
+/**
  * Copyright (C) SAS Institute, All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.selenium.webdriver.lib.interpreter.selrunner.steptype;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 
 import org.openqa.selenium.OutputType;
-import org.safs.SAFSException;
 import org.safs.STAFHelper;
 import org.safs.StringUtils;
-import org.safs.selenium.webdriver.WebDriverGUIUtilities;
-import org.safs.selenium.webdriver.lib.RemoteDriver;
-import org.safs.selenium.webdriver.lib.WDLibrary;
 import org.safs.selenium.webdriver.lib.interpreter.WDTestRun;
 import org.safs.selenium.webdriver.lib.interpreter.selrunner.SRunnerType;
-import org.safs.tools.drivers.DriverConstant;
 
 import com.google.common.io.Files;
 import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
-import com.sebuilder.interpreter.steptype.SaveScreenshot;
 
 /**
  * Requires one "file" parameter.
  * <p>
  * The file parameter must be an absolute file path, or relative to the runtime SAFS PROJECT DIRECTORY.
  * If the file already exists, it will be deleted before being replaced with the new screenshot.
- * <p> 
+ * <p>
  * @author Carl Nagle
  */
 public class CaptureEntirePageScreenshot implements StepType, SRunnerType {
@@ -64,7 +70,7 @@ public class CaptureEntirePageScreenshot implements StepType, SRunnerType {
 						}
 						tf = projectDir + tf;
 						target = new File(tf);
-						if(! target.isAbsolute()){ 
+						if(! target.isAbsolute()){
 							throw new IllegalArgumentException("File parameter does not resolve to an absolute filepath.");
 						}
 					}else{

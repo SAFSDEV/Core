@@ -1,12 +1,26 @@
-/** 
- ** Copyright (C) SAS Institute, All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * Developer History:
- * <br> Carl Nagle  MAY 29, 2015  Add support for remoteSetKeyDelay
+ * <br> Carl Nagle  MAY 29, 2015   Add support for remoteSetKeyDelay
  * <br> Lei Wang  SEP 18, 2015  Add support for setWaitReaction
  * <br> Lei Wang  DEC 10, 2015  Add support for clipboard related methods.
+ * <br> Lei Wang  DEC 02, 2019  Provided user a way to set "registry port" ohter than 1099.
  */
 package org.safs.selenium.rmi.agent;
 
@@ -25,15 +39,15 @@ import org.safs.selenium.rmi.server.SeleniumServer;
 /**
  * Default Selenium RMI Agent intended to communicate with a remote standalone Selenium Server JVM.
  * <p>
- * Because this is an RMI implementation, an additional Java rmic build process is necessary 
- * prior to creating the JAR file containing all classes.  The Java rmic program creates the 
+ * Because this is an RMI implementation, an additional Java rmic build process is necessary
+ * prior to creating the JAR file containing all classes.  The Java rmic program creates the
  * Skeletons and Stubs needed by Java RMI.
  * <p>
  * Execute Java rmic from the root directory of the Java project:
  * <p>
  *    rmic -d . org.safs.selenium.rmi.agent.SeleniumAgent
  * <p>
- * Note: For consistent operation the <code>safs.server.hostname</code> needs to be set in code or 
+ * Note: For consistent operation the <code>safs.server.hostname</code> needs to be set in code or
  * on the command line before launching an Agent connecting to a remote Selenium RMI Server:
  * <p><ul>
  * <li>In Code:
@@ -61,22 +75,22 @@ public class SeleniumAgent extends RemoteRoot implements SeleniumRMIAgent{
 	protected boolean shutdown = false;  	 // may require a sync object
 	protected ServerMonitor monitor = null;
 	protected ObjID objID = null;		     // set by the ServerMonitor
-	
+
 	/** If the user sets the serverHost then we won't look for System Properties.
 	 * @see #setServerHost(String) */
 	protected boolean hostOverride = false;
-	
+
 	/** Subclasses will override to seek out different RMI Server Objects. */
 	protected String serverName = SeleniumRMIServer.DEFAULT_RMI_SERVER;
 
-	/** Each Agent may have a different RMI Server (Mac, Unix, Windows, Android, etc..) 
+	/** Each Agent may have a different RMI Server (Mac, Unix, Windows, Android, etc..)
 	 *  This setting "overrides/hides" the static serverHost of the RemoteRoot superclass. */
 	protected String serverHost = RemoteRoot.DEFAULT_RMI_SERVER_HOST;
 
 	/** The separator to separate the command and parameters to form a string to be processed on
 	 * remote RMI server. Default separator is {@link #DEFAULT_COMMAND_SEPARATOR}*/
 	private String separator = DEFAULT_COMMAND_SEPARATOR;
-	
+
 	/**
 	 * @throws RemoteException
 	 */
@@ -98,7 +112,17 @@ public class SeleniumAgent extends RemoteRoot implements SeleniumRMIAgent{
 			serverHost = hostname;
 		}
 	}
-	/** 
+
+	/**
+	 * This overrides System Properties settings for 'registry.port'.<br>
+	 * MUST be called before initialize().
+	 * @param registryPort int, the port from where to get the registry for getting RMI server.
+	 */
+	public void setRegistryPort(int registryPort){
+		this.registryPort = registryPort;
+	}
+
+	/**
 	 * MUST be called by instances after object construction.<br>
 	 * If dynamically setting the desire selenium server host you must set that prior to initialization.
 	 * @see #setServerHost(String)
@@ -106,14 +130,14 @@ public class SeleniumAgent extends RemoteRoot implements SeleniumRMIAgent{
 	public void initialize(){
 		startServerMonitor();
 	}
-	
+
 	private void startServerMonitor(){
 		monitor = new ServerMonitor();
 		monitor.setName("ServerMonitor");
 		monitor.setDaemon(true);
-		monitor.start();		
+		monitor.start();
 	}
-	
+
 	/**
 	 * Does nothing but verify the integrity of the RMI connection and log entry.
 	 * The call normally comes from the RMI Server.
@@ -123,7 +147,7 @@ public class SeleniumAgent extends RemoteRoot implements SeleniumRMIAgent{
 	public void ping() throws RemoteException{
 		IndependantLog.info(remoteType +".ping");
 	}
-	
+
 	/**
 	 * @see org.safs.rmi.engine.Agent#getAgentID()
 	 */
@@ -140,7 +164,7 @@ public class SeleniumAgent extends RemoteRoot implements SeleniumRMIAgent{
 		return remoteType;
 	}
 
-	/** Used locally to cease all agent operations with any server and commence a complete RMI 
+	/** Used locally to cease all agent operations with any server and commence a complete RMI
 	 * disconnect.  This is necessary to allow the RMI threads to allow the JVM to exit.
 	 */
 	public void disconnect(){
@@ -148,10 +172,10 @@ public class SeleniumAgent extends RemoteRoot implements SeleniumRMIAgent{
 		try{server.unRegister(this);}catch(Exception x){}
 		try{unexportObject(this, true);}catch(Exception x){}
 	}
-	
+
 	/**
 	 * Called from the remote RMI Server.
-	 * Removes any RMI server reference we might already have and restarts a new 
+	 * Removes any RMI server reference we might already have and restarts a new
 	 * ServerMonitor to watch for a new RMI server object.
 	 * @see org.safs.rmi.engine.Agent#shutdown()
 	 */
@@ -159,7 +183,7 @@ public class SeleniumAgent extends RemoteRoot implements SeleniumRMIAgent{
 	public void shutdown() throws RemoteException {
 		IndependantLog.info(remoteType+".shutdown");
 		server = null;
-		
+
 		// with an active server, monitor should have already died.
 		if(! monitor.isAlive()) {
 			startServerMonitor();
@@ -172,13 +196,13 @@ public class SeleniumAgent extends RemoteRoot implements SeleniumRMIAgent{
 	}
 
 	/**
-	 * Set the separator to separate command and parameters. 
+	 * Set the separator to separate command and parameters.
 	 * @param separator
 	 */
 	public void setSeparator(String separator){
 		this.separator = separator;
 	}
-	
+
 	/**
 	 * @param screen_x
 	 * @param screen_y
@@ -189,14 +213,14 @@ public class SeleniumAgent extends RemoteRoot implements SeleniumRMIAgent{
 	 */
 	public void remoteClick(int screen_x, int screen_y, int mouseButtonNumber, int nclicks) throws ServerException, Exception{
 		//Robot.click(location.x, location.y, mouseButtonNumber, 1);
-		String s = separator;		
-		server.runCommand(s+ SeleniumServer.CMD_CLICK +s+ 
+		String s = separator;
+		server.runCommand(s+ SeleniumServer.CMD_CLICK +s+
 		                     String.valueOf(screen_x) +s+
 		                     String.valueOf(screen_y) +s+
 		                     String.valueOf(mouseButtonNumber) +s+
-		                     String.valueOf(nclicks));		
+		                     String.valueOf(nclicks));
 	}
-	
+
 	/**
 	 * @param screen_x
 	 * @param screen_y
@@ -210,14 +234,14 @@ public class SeleniumAgent extends RemoteRoot implements SeleniumRMIAgent{
 	                                    throws ServerException, Exception{
 		// Robot.clickWithKeyPress(location.x, location.y, mouseButtonNumber, toJavaKeyCode(specialKey), 1);
 		String s = separator;
-		server.runCommand(s+ SeleniumServer.CMD_CLICK_WITH_KEY +s+ 
+		server.runCommand(s+ SeleniumServer.CMD_CLICK_WITH_KEY +s+
 		                     String.valueOf(screen_x) +s+
 		                     String.valueOf(screen_y) +s+
 		                     String.valueOf(mouseButtonNumber) +s+
 		                     String.valueOf(keyCode) +s+
-		                     String.valueOf(nclicks));		
+		                     String.valueOf(nclicks));
 	}
-	
+
 	/**
 	 * @param keycode int, the key to press
 	 * @throws ServerException if the command did not execute successfully
@@ -225,7 +249,7 @@ public class SeleniumAgent extends RemoteRoot implements SeleniumRMIAgent{
 	 */
 	public void remoteKeyPress(int keycode) throws ServerException, Exception{
 		String s = separator;
-		server.runCommand(s+ SeleniumServer.CMD_KEYPRESS +s+ keycode); 
+		server.runCommand(s+ SeleniumServer.CMD_KEYPRESS +s+ keycode);
 	}
 	/**
 	 * @param keycode int, the key to release
@@ -234,7 +258,7 @@ public class SeleniumAgent extends RemoteRoot implements SeleniumRMIAgent{
 	 */
 	public void remoteKeyRelease(int keycode) throws ServerException, Exception{
 		String s = separator;
-		server.runCommand(s+ SeleniumServer.CMD_KEYRELEASE +s+ keycode); 
+		server.runCommand(s+ SeleniumServer.CMD_KEYRELEASE +s+ keycode);
 	}
 	/**
 	 * @param wheelAmt int, the mouse wheel to scroll
@@ -243,9 +267,9 @@ public class SeleniumAgent extends RemoteRoot implements SeleniumRMIAgent{
 	 */
 	public void remoteMouseWheel(int wheelAmt) throws ServerException, Exception{
 		String s = separator;
-		server.runCommand(s+ SeleniumServer.CMD_MOUSEWHEEL +s+ wheelAmt); 
+		server.runCommand(s+ SeleniumServer.CMD_MOUSEWHEEL +s+ wheelAmt);
 	}
-	
+
 	/**
 	 * @param keys
 	 * @throws ServerException if the command did not execute successfully
@@ -253,9 +277,9 @@ public class SeleniumAgent extends RemoteRoot implements SeleniumRMIAgent{
 	 */
 	public void remoteTypeKeys(String keys) throws ServerException, Exception{
 		String s = separator;
-		server.runCommand(s+ SeleniumServer.CMD_TYPEKEYS +s+ keys); 
+		server.runCommand(s+ SeleniumServer.CMD_TYPEKEYS +s+ keys);
 	}
-	
+
 	/**
 	 * @param millisDelay between keystrokes
 	 * @throws ServerException if the command did not execute successfully
@@ -263,9 +287,9 @@ public class SeleniumAgent extends RemoteRoot implements SeleniumRMIAgent{
 	 */
 	public void remoteSetKeyDelay(int millisDelay) throws ServerException, Exception{
 		String s = separator;
-		server.runCommand(s+ SeleniumServer.CMD_SET_KEY_DELAY +s+ String.valueOf(millisDelay)); 
+		server.runCommand(s+ SeleniumServer.CMD_SET_KEY_DELAY +s+ String.valueOf(millisDelay));
 	}
-	
+
 	/**
 	 * Set if wait for reaction to "input keys/chars" for remote server.
 	 * @param wait boolean if wait or not.
@@ -274,15 +298,15 @@ public class SeleniumAgent extends RemoteRoot implements SeleniumRMIAgent{
 	 **/
 	public void remoteWaitReaction(boolean wait) throws ServerException, Exception{
 		String s = separator;
-		server.runCommand(s+ SeleniumServer.CMD_SET_WAIT_REACTION +s+ String.valueOf(wait)); 
+		server.runCommand(s+ SeleniumServer.CMD_SET_WAIT_REACTION +s+ String.valueOf(wait));
 	}
 	/**
 	 * Set if wait for reaction to "input keys/chars" for remote server.
 	 * @param wait boolean, if wait or not.
-	 * @param tokenLength int, the length of a token. Only if the string is longer than this 
-	 *                         then we wait the reaction after input-keys a certain time 
+	 * @param tokenLength int, the length of a token. Only if the string is longer than this
+	 *                         then we wait the reaction after input-keys a certain time
 	 *                         indicated by the parameter dealyForToken.
-	 * @param dealyForToken int, The delay in millisecond to wait the reaction after input-keys 
+	 * @param dealyForToken int, The delay in millisecond to wait the reaction after input-keys
 	 *                           for the string as long as a token.
 	 * @param dealy int, The constant delay in millisecond to wait the reaction after input-keys.
 	 * @throws ServerException if the command did not execute successfully
@@ -294,9 +318,9 @@ public class SeleniumAgent extends RemoteRoot implements SeleniumRMIAgent{
 				          s+ String.valueOf(wait) +
 				          s+ String.valueOf(tokenLength) +
 				          s+ String.valueOf(dealyForToken) +
-				          s+ String.valueOf(dealy)); 
+				          s+ String.valueOf(dealy));
 	}
-	
+
 	/**
 	 * @param String char
 	 * @throws ServerException if the command did not execute successfully
@@ -304,16 +328,16 @@ public class SeleniumAgent extends RemoteRoot implements SeleniumRMIAgent{
 	 */
 	public void remoteTypeChars(String keys) throws ServerException, Exception{
 		String s = separator;
-		server.runCommand(s+ SeleniumServer.CMD_TYPECHARS +s+ keys); 
+		server.runCommand(s+ SeleniumServer.CMD_TYPECHARS +s+ keys);
 	}
-	
+
 	/**
 	 * Clear the clipboard on the machine where the RMI server is running.
 	 * @throws ServerException if the command did not execute successfully
 	 * @throws Exception for other problems
 	 */
 	public void clearClipboard() throws ServerException, Exception{
-		server.execute(SeleniumServer.CMD_CLIPBOARD_CLEAR, (Object)null); 
+		server.execute(SeleniumServer.CMD_CLIPBOARD_CLEAR, (Object)null);
 	}
 	/**
 	 * Set content to the clipboard on the machine where the RMI server is running.
@@ -322,9 +346,9 @@ public class SeleniumAgent extends RemoteRoot implements SeleniumRMIAgent{
 	 * @throws Exception for other problems
 	 */
 	public void setClipboard(String content) throws ServerException, Exception{
-		server.execute(SeleniumServer.CMD_CLIPBOARD_SET, content); 
+		server.execute(SeleniumServer.CMD_CLIPBOARD_SET, content);
 	}
-	
+
 	/**
 	 * Get content of the clipboard on the machine where the RMI server is running.
 	 * @param dataFlavor DataFlavor, the data flavor for the content in clipboard
@@ -333,18 +357,19 @@ public class SeleniumAgent extends RemoteRoot implements SeleniumRMIAgent{
 	 * @throws Exception for other problems
 	 */
 	public Object getClipboard(DataFlavor dataFlavor) throws ServerException, Exception{
-		return server.execute(SeleniumServer.CMD_CLIPBOARD_GET, dataFlavor); 
+		return server.execute(SeleniumServer.CMD_CLIPBOARD_GET, dataFlavor);
 	}
-	
+
 	/**
-	 * Polls the server host for a Java Registry every few seconds until one with the proper 
-	 * server object is found.  This is started at JVM bootup and remains running until 
+	 * Polls the server host for a Java Registry every few seconds until one with the proper
+	 * server object is found.  This is started at JVM bootup and remains running until
 	 * satisfied.  The thread will die once we have successfully registered with a server object.
-	 * The Thread will also terminate if it detects the JVM is running the RMI Server 
+	 * The Thread will also terminate if it detects the JVM is running the RMI Server
 	 * by polling the System Property 'safs.server.running'.
 	 */
 	protected class ServerMonitor extends Thread {
 		Registry registry = null;
+		@Override
 		public void run(){
 			while(!shutdown && (server==null)){
 				try{
@@ -363,14 +388,14 @@ public class SeleniumAgent extends RemoteRoot implements SeleniumRMIAgent{
 						if(host != null && host.length() > 0) serverHost = new String(host);
 					}
 					IndependantLog.info("Seeking SAFS RMI Server at "+ serverHost);
-					registry = LocateRegistry.getRegistry(serverHost, 1099);
+					registry = LocateRegistry.getRegistry(serverHost, registryPort);
 					server = (SeleniumRMIServer)(registry.lookup(serverName));
 					IndependantLog.info("SAFS RMI registry lookup provided SeleniumServer class "+ server.getClass().getName());
-					IndependantLog.info("Monitor registering "+remoteType);	
-					objID = new ObjID();				
+					IndependantLog.info("Monitor registering "+remoteType);
+					objID = new ObjID();
 					server.register((SeleniumRMIAgent)SeleniumAgent.this);
 				}
-				catch(Exception re){ 
+				catch(Exception re){
 					IndependantLog.info("SeleniumServer at "+ serverHost +" not found: "+ re.getClass().getName()+", "+re.getMessage());
 					//re.printStackTrace();
 					try{ sleep(3000);}
@@ -379,7 +404,7 @@ public class SeleniumAgent extends RemoteRoot implements SeleniumRMIAgent{
 			}
 		}
 	}
-	
+
 	/** For test purposes only.
 	 * @param args String[]
 	 * <ul>
@@ -387,7 +412,21 @@ public class SeleniumAgent extends RemoteRoot implements SeleniumRMIAgent{
 	 * <li>args[1] parameter
 	 * <li>args[2] parameter
 	 * </ul>
-	 * Use -Dsafs.server.hostname on command-line to specify the RMI host to contact.
+	 * For example we can call a "click" command by giving the following parameters:<br>
+	 * //screen_x, screen_y, mouseButtonNumber, nclicks<br>
+	 * <b>click 300 500 16 1</b><br>
+	 *
+	 * <p>
+	 * Use -Dsafs.server.hostname on command-line to specify the RMI host to contact.<br>
+	 * <ul><code>-Dsafs.server.hostname=&lt;Remote Server host&gt;</code></ul>
+	 *
+	 * <p>
+	 * Note: Normally Java creates a registry Object object using a konwn port  {@link Registry#REGISTRY_PORT 1099}.
+	 *       The "SAFS RMI server" has been registered on the RMI host by that registry. If the registry is created
+	 *       on an other port, we need to set <code>registry.port</code> in code or on the command line so that we
+	 *       can find the the "SAFS RMI server".
+	 * <p>
+	 * <ul><code>-Dregistry.port=&lt;Remote Registry port&gt;</code></ul>
 	 */
 	public static void main(String[] args) throws RemoteException{
 		SeleniumAgent agent = new SeleniumAgent();
@@ -396,7 +435,7 @@ public class SeleniumAgent extends RemoteRoot implements SeleniumRMIAgent{
 		try{
 			String commandStr = "";
 			for(String arg:args) commandStr += agent.separator+arg;
-			
+
 			System.out.println("Executing "+commandStr);
 			System.out.println("Return "+agent.server.runCommand(commandStr));
 		}catch(Exception x){

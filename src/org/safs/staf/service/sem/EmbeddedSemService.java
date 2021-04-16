@@ -1,29 +1,37 @@
 /**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
  * 
- */
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.staf.service.sem;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import org.safs.Log;
-import org.safs.staf.embedded.EmbeddedHandle;
 import org.safs.staf.embedded.EmbeddedServiceHandle;
 import org.safs.staf.embedded.ServiceInterface;
 import org.safs.staf.service.InfoInterface;
 import org.safs.staf.service.InfoInterface.RequestInfo;
-import org.safs.staf.service.input.SAFSFile;
 import org.safs.text.CaseInsensitiveHashtable;
 
-import com.gargoylesoftware.htmlunit.util.StringUtils;
 import com.ibm.staf.STAFException;
 import com.ibm.staf.STAFResult;
 import com.ibm.staf.service.STAFCommandParseResult;
 import com.ibm.staf.service.STAFCommandParser;
 
 /**
- * This class is intended to partially mimic and mirror the functionality used by SAFS from the STAF SEM service 
- * when STAF is not installed or otherwise being used.  This means not all features and scenarios of the STAF SEM 
+ * This class is intended to partially mimic and mirror the functionality used by SAFS from the STAF SEM service
+ * when STAF is not installed or otherwise being used.  This means not all features and scenarios of the STAF SEM
  * service are supported.  Only those features and scenarios already used inside SAFS are supported.
  * <p>
  * Handles SEM commands:
@@ -41,12 +49,12 @@ import com.ibm.staf.service.STAFCommandParser;
  * @author Carl Nagle JUL 14, 2014
  */
 public class EmbeddedSemService implements ServiceInterface {
-	
+
 	private boolean debug_enabled = true;  // set to false for production
-	
+
 	public static final String handleId    = "STAF/Service/SEM";
 	public static final String servicename = "SEM";
-	
+
 	public static final String SVS_SERVICE_REQUEST_POST    = "POST";
 	public static final String SVS_SERVICE_REQUEST_PULSE   = "PULSE";
 	public static final String SVS_SERVICE_REQUEST_RESET   = "RESET";
@@ -59,25 +67,25 @@ public class EmbeddedSemService implements ServiceInterface {
 	public static final String SVS_SERVICE_OPTION_EVENT   = "EVENT";
 	public static final String SVS_SERVICE_OPTION_MUTEX   = "MUTEX";
 	public static final String SVS_SERVICE_OPTION_TIMEOUT = "TIMEOUT";
-	
+
 	/**
 	 * a single space
 	 **/
 	protected static String s = " ";  // space
-	
+
 	protected EmbeddedServiceHandle fHandle;
-	
+
 	/** Assume CaseInsensitiveHashtable&lt;String eventnames, Vector eventwaiters&lt;SEMState>> */
 	private CaseInsensitiveHashtable events = new CaseInsensitiveHashtable();
 	/** Assume CaseInsensitiveHashtable&lt;String mutexs, Vector mutexwaiters&lt;MutexState>> */
 	private CaseInsensitiveHashtable mutexs = new CaseInsensitiveHashtable();
-	
+
  	protected STAFCommandParser parser = new STAFCommandParser(5);
 
 	/**
-	 * 
+	 *
 	 */
-	public EmbeddedSemService() { 
+	public EmbeddedSemService() {
 		debug("new EmbeddedSemService() Constructor.");
 	}
 
@@ -87,8 +95,8 @@ public class EmbeddedSemService implements ServiceInterface {
 	}
 	/**
 	 * Intercepts initializing the instance of the service to get servicename information.
-	 * However, "intercepts" isn't really the right terminology since STAF will NOT be running 
-	 * and will not initiate a call to the service initialization. 
+	 * However, "intercepts" isn't really the right terminology since STAF will NOT be running
+	 * and will not initiate a call to the service initialization.
 	 * <p>
 	 * Handles SEM commands:
 	 * <ul>
@@ -115,25 +123,25 @@ public class EmbeddedSemService implements ServiceInterface {
 		parser.addOption( SVS_SERVICE_REQUEST_POST     , 1, STAFCommandParser.VALUENOTALLOWED );
 		parser.addOption( SVS_SERVICE_REQUEST_PULSE    , 1, STAFCommandParser.VALUENOTALLOWED );
 		parser.addOption( SVS_SERVICE_REQUEST_RESET    , 1, STAFCommandParser.VALUENOTALLOWED );
-		
+
 		parser.addOption( SVS_SERVICE_OPTION_MUTEX     , 1, STAFCommandParser.VALUEREQUIRED );
 		parser.addOption( SVS_SERVICE_OPTION_EVENT     , 1, STAFCommandParser.VALUEREQUIRED );
 		parser.addOption( SVS_SERVICE_OPTION_TIMEOUT   , 1, STAFCommandParser.VALUEREQUIRED );
-		
+
 		parser.addOptionGroup(  SVS_SERVICE_REQUEST_REQUEST +s+
-				                     SVS_SERVICE_REQUEST_RELEASE +s+				 
-				                     SVS_SERVICE_REQUEST_DELETE  +s+				 
-				                     SVS_SERVICE_REQUEST_LIST    +s+				 
-				                     SVS_SERVICE_REQUEST_WAIT    +s+				 
-				                     SVS_SERVICE_REQUEST_POST    +s+				 
-				                     SVS_SERVICE_REQUEST_PULSE   +s+				 
+				                     SVS_SERVICE_REQUEST_RELEASE +s+
+				                     SVS_SERVICE_REQUEST_DELETE  +s+
+				                     SVS_SERVICE_REQUEST_LIST    +s+
+				                     SVS_SERVICE_REQUEST_WAIT    +s+
+				                     SVS_SERVICE_REQUEST_POST    +s+
+				                     SVS_SERVICE_REQUEST_PULSE   +s+
 				                     SVS_SERVICE_REQUEST_RESET,  1, 1);
-		
+
 		parser.addOptionNeed(SVS_SERVICE_OPTION_TIMEOUT, SVS_SERVICE_REQUEST_WAIT);
-		
+
 		parser.addOptionNeed(SVS_SERVICE_REQUEST_REQUEST, SVS_SERVICE_OPTION_MUTEX);
 		parser.addOptionNeed(SVS_SERVICE_REQUEST_RELEASE, SVS_SERVICE_OPTION_MUTEX);
-		
+
 		parser.addOptionNeed(SVS_SERVICE_REQUEST_DELETE, SVS_SERVICE_OPTION_EVENT);
 		parser.addOptionNeed(SVS_SERVICE_REQUEST_POST  , SVS_SERVICE_OPTION_EVENT);
 		parser.addOptionNeed(SVS_SERVICE_REQUEST_PULSE , SVS_SERVICE_OPTION_EVENT);
@@ -145,7 +153,7 @@ public class EmbeddedSemService implements ServiceInterface {
 			debug("EmbeddedSemService.init() registering handle '"+ handleId +"' for service '"+ servicename +"'");
 			fHandle = new EmbeddedServiceHandle(handleId, servicename, this);
 			fHandle.register();
-		}catch(STAFException ignore){ 
+		}catch(STAFException ignore){
 			/*  ? STAF should not be present ? */
 			debug("EmbeddedSemService.init() "+ignore.getClass().getName()+", "+ignore.getMessage());
 			System.out.println("EmbeddedSemService.init() "+ignore.getClass().getName()+", "+ignore.getMessage());
@@ -164,7 +172,7 @@ public class EmbeddedSemService implements ServiceInterface {
 			return new STAFResult(STAFResult.InvalidRequestString,
 					parsedData.errorBuffer);
 		}
-		
+
 		if (parsedData.optionTimes(SVS_SERVICE_REQUEST_LIST) > 0) {
 			return eventList();
 		}else if (parsedData.optionTimes(SVS_SERVICE_REQUEST_DELETE) > 0) {
@@ -208,11 +216,11 @@ public class EmbeddedSemService implements ServiceInterface {
 		debug("EmbeddedSemService().terminate() unregistering service handle.");
 		// TODO evaluate -- release (Interrupt) all waiting event and mutex threads ??!!
 		fHandle.unRegister();
-		return new STAFResult(STAFResult.Ok);				
+		return new STAFResult(STAFResult.Ok);
 	}
 
 	/**
-	 * DELETE an event.  Only works if there are no waiters for the event.  
+	 * DELETE an event.  Only works if there are no waiters for the event.
 	 * @returns STAFResult.OK, STAFResult.InvalidParam, STAFResult.SemaphoreDoesNotExist,
 	 * STAFResult.SemaphoreHasPendingRequests
 	 */
@@ -220,7 +228,7 @@ public class EmbeddedSemService implements ServiceInterface {
 		debug("EmbeddedSemService().eventDelete '"+eventname +"'");
 		if(eventname == null || eventname.length()== 0) {
 			debug("EmbeddedSemService().eventDelete invalid event param '"+eventname +"'");
-			return new STAFResult(STAFResult.InvalidParm, "EmbeddedSemService.eventDelete() event name invalid: "+ eventname);		
+			return new STAFResult(STAFResult.InvalidParm, "EmbeddedSemService.eventDelete() event name invalid: "+ eventname);
 		}
 		if(!events.containsKey(eventname)) {
 			debug("EmbeddedSemService().eventDelete '"+eventname +"' does not exits.");
@@ -260,7 +268,7 @@ public class EmbeddedSemService implements ServiceInterface {
 	 */
 	private STAFResult eventPost(String eventname) {
 		debug("EmbeddedSemService().eventPost '"+eventname +"'");
-		if(eventname == null || eventname.length()== 0){ 
+		if(eventname == null || eventname.length()== 0){
 			debug("EmbeddedSemService().eventPost '"+ eventname +"' is invalid.");
 			return new STAFResult(STAFResult.InvalidParm, "EmbeddedSemService.eventPost() event name invalid: "+ eventname);
 		}
@@ -274,7 +282,7 @@ public class EmbeddedSemService implements ServiceInterface {
 		state.releaseWaiters();
 		return new STAFResult(STAFResult.Ok);
 	}
-	
+
 	/**
 	 * PULSE and RESET the event.  Creates the event in the RESET state if necessary.
 	 * Releases all waiters that might have existed for the pre-existing event.
@@ -282,7 +290,7 @@ public class EmbeddedSemService implements ServiceInterface {
 	 */
 	private STAFResult eventPulse(String eventname) {
 		debug("EmbeddedSemService().eventPulse '"+eventname +"'");
-		if(eventname == null || eventname.length()== 0){ 
+		if(eventname == null || eventname.length()== 0){
 			debug("EmbeddedSemService().eventPulse '"+eventname +"' is invalid.");
 			return new STAFResult(STAFResult.InvalidParm, "EmbeddedSemService.eventPulse() event name invalid: "+ eventname);
 		}
@@ -296,7 +304,7 @@ public class EmbeddedSemService implements ServiceInterface {
 		state.setItemState(SEMState.STATE_RESET);
 		return new STAFResult(STAFResult.Ok);
 	}
-	
+
 	/**
 	 * RESET the event.  Creates the event in the RESET state if necessary.
 	 * There should be no waiters so no call to release waiters is made.
@@ -304,7 +312,7 @@ public class EmbeddedSemService implements ServiceInterface {
 	 */
 	private STAFResult eventReset(String eventname) {
 		debug("EmbeddedSemService().eventReset '"+eventname +"'");
-		if(eventname == null || eventname.length()== 0){ 
+		if(eventname == null || eventname.length()== 0){
 			debug("EmbeddedSemService().eventReset '"+eventname +"' is invalid.");
 			return new STAFResult(STAFResult.InvalidParm, "EmbeddedSemService.eventReset() event name invalid: "+ eventname);
 		}
@@ -317,12 +325,12 @@ public class EmbeddedSemService implements ServiceInterface {
 	}
 
 	/**
-	 * @returns STAFResult.OK, STAFResult.InvalidParam, 
+	 * @returns STAFResult.OK, STAFResult.InvalidParam,
 	 * STAFResult.RequestNotComplete if the waiting thread gets Interrupted while waiting.
 	 */
 	private STAFResult eventWait(String handleName, String eventname, long msTimeout) {
 		debug("EmbeddedSemService().eventWait '"+eventname +"', timeout: "+ msTimeout +", for '"+ handleName +"'");
-		if(eventname == null || eventname.length()== 0){ 
+		if(eventname == null || eventname.length()== 0){
 			debug("EmbeddedSemService().eventWait '"+eventname +"' is invalid.");
 			return new STAFResult(STAFResult.InvalidParm, "EmbeddedSemService.eventWait() event name invalid: "+ eventname);
 		}
@@ -356,22 +364,22 @@ public class EmbeddedSemService implements ServiceInterface {
 	 * <p>
 	 * Only the owner of the Mutex can successfully release it.
 	 * <p>
-	 * @returns STAFResult.OK, STAFResult.InvalidParam, 
+	 * @returns STAFResult.OK, STAFResult.InvalidParam,
 	 * STAFResult.RequestNotComplete if the waiting thread gets Interrupted while waiting.
 	 * @see #mutexRelease(RequestInfo, String)
-	 * @see MutexState#requestMutex(String) 
+	 * @see MutexState#requestMutex(String)
 	 */
 	private STAFResult mutexRequest(String handleName, String mutexname) {
 		debug("EmbeddedSemService().mutexRequest() '"+mutexname +"' for handle "+ handleName);
 		if(handleName == null || handleName.length()==0 ){
 			debug("EmbeddedSemService().mutexRequest() handle '"+handleName +"' is invalid.");
 			return new STAFResult(STAFResult.InvalidParm,
-					              "EmbeddedSemService.mutexRequest() handleName is invalid!");		
+					              "EmbeddedSemService.mutexRequest() handleName is invalid!");
 		}
 		if(mutexname == null || mutexname.length()== 0) {
 			debug("EmbeddedSemService().mutexRequest() '"+mutexname +"' is invalid.");
-			return new STAFResult(STAFResult.InvalidParm, 
-		                          "EmbeddedSemService.mutexRequest() mutexname is invalid!");		
+			return new STAFResult(STAFResult.InvalidParm,
+		                          "EmbeddedSemService.mutexRequest() mutexname is invalid!");
 		}
 		if(!mutexs.containsKey(mutexname)){
 			mutexs.put(mutexname, new MutexState(mutexname, MutexState.STATE_REQUESTED));
@@ -380,7 +388,7 @@ public class EmbeddedSemService implements ServiceInterface {
 		try{
 			debug("EmbeddedSemService().mutexRequest() '"+ mutexname +"' adding waiter "+ handleName);
 			state.addWaiterId(handleName);
-			STAFResult rc = state.requestMutex(handleName); 
+			STAFResult rc = state.requestMutex(handleName);
 			debug("EmbeddedSemService().mutexRequest() '"+ mutexname +"' removing waiter "+ handleName);
 			state.removeWaiterId(handleName);
 			return rc;
@@ -391,33 +399,33 @@ public class EmbeddedSemService implements ServiceInterface {
 			return new STAFResult(STAFResult.RequestNotComplete, "InterruptedException during Request for Mutex "+ mutexname);
 		}
 	}
-	
+
 	/**
 	 * Release the Mutex when finished with it.
 	 * <p>
 	 * Only the owner of the Mutex can successfully release it.
-	 * @return STAFResult.OK, STAFResult.InvalidParam, STAFResult.SemaphoreDoesNotExist 
+	 * @return STAFResult.OK, STAFResult.InvalidParam, STAFResult.SemaphoreDoesNotExist
 	 * @see #mutexRequest(RequestInfo, String)
-	 * @see MutexState#releaseMutex(String) 
+	 * @see MutexState#releaseMutex(String)
 	 */
 	private STAFResult mutexRelease(String handleName, String mutexname) {
 		debug("EmbeddedSemService().mutexRelease() '"+mutexname +"' for handle "+ handleName);
 		if(handleName == null || handleName.length()==0 ){
 			debug("EmbeddedSemService().mutexRequest() handle '"+handleName +"' is invalid.");
 			return new STAFResult(STAFResult.InvalidParm,
-					              "EmbeddedSemService.mutexRelease() handleName is invalid!");		
+					              "EmbeddedSemService.mutexRelease() handleName is invalid!");
 		}
 		if(mutexname == null || mutexname.length()== 0) {
 			debug("EmbeddedSemService().mutexRequest() '"+mutexname +"' is invalid.");
-			return new STAFResult(STAFResult.InvalidParm, 
-		                          "EmbeddedSemService.mutexRelease() mutexname is invalid!");		
+			return new STAFResult(STAFResult.InvalidParm,
+		                          "EmbeddedSemService.mutexRelease() mutexname is invalid!");
 		}
 		if(!mutexs.containsKey(mutexname)){
 			debug("EmbeddedSemService().mutexRequest() '"+mutexname +"' does not exist.");
-			return new STAFResult(STAFResult.SemaphoreDoesNotExist, mutexname);		
+			return new STAFResult(STAFResult.SemaphoreDoesNotExist, mutexname);
 		}
 		MutexState state = (MutexState) mutexs.get(mutexname);
-		return state.releaseMutex(handleName); 
+		return state.releaseMutex(handleName);
 	}
 
 	@Override

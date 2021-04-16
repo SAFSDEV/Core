@@ -1,7 +1,26 @@
 /**
- ** Copyright (C) SAS Institute, All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
+/**
+ * History:<br>
+ *
+ * JUN 23, 2014    (Lei Wang) Initial release.
+ * OCT 31, 2018    (Lei Wang) Modified getClickableWebElement(): wait the web-element to be click-able.
+ */
 package org.safs.selenium.webdriver.lib.model;
 
 import java.util.Arrays;
@@ -10,11 +29,16 @@ import java.util.Map;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.safs.GuiObjectRecognition;
 import org.safs.IndependantLog;
+import org.safs.Processor;
 import org.safs.StringUtils;
 import org.safs.selenium.webdriver.lib.RS;
 import org.safs.selenium.webdriver.lib.SeleniumPlusException;
+import org.safs.selenium.webdriver.lib.WDLibrary;
+import org.safs.tools.drivers.DriverConstant.SeleniumConfigConstant;
 
 /**
  * This class represents a hierarchical structure like Tree or Menu etc.<br>
@@ -41,6 +65,7 @@ public class HierarchicalElement extends Element{
 	/**
 	 * set/update the class's fields through the underlying WebElement or AbstractMap.
 	 */
+	@Override
 	public void updateFields(){
 		super.updateFields();
 
@@ -189,6 +214,7 @@ public class HierarchicalElement extends Element{
 	 * try to get it by the node's text.<br>
 	 * @return WebElement
 	 */
+	@Override
 	public WebElement getClickableWebElement(){
 		String debugmsg = StringUtils.debugmsg(getClass(), "getClickableWebElement");
 		if(clickableWebElement==null){
@@ -199,6 +225,11 @@ public class HierarchicalElement extends Element{
 				IndependantLog.warn(debugmsg+"Fail to get the clickable WebElement object due to"+StringUtils.debugmsg(e));
 				clickableWebElement = webelement;
 			}
+		}
+		//Wait that the web-element is click-able
+		if(clickableWebElement!=null && Boolean.parseBoolean(System.getProperty(SeleniumConfigConstant.PROPERTY_WAIT_READY))){
+			WebDriverWait wait = new WebDriverWait(WDLibrary.getWebDriver(), Processor.getSecsWaitForComponent());
+			clickableWebElement = wait.until(ExpectedConditions.elementToBeClickable(clickableWebElement));
 		}
 		return clickableWebElement;
 	}

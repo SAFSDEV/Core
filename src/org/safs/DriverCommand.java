@@ -1,14 +1,30 @@
-/** Copyright (C) (MSA, Inc) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+/**
+ * Copyright (C) (MSA, Inc), All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * Logs for developers, not published to API DOC.
  * History:<br>
- * 
+ *
  *   <br>   JUN 14, 2003    (DBauman) Original Release
  *   <br>   NOV 10, 2003    (Carl Nagle) Added isSupportedRecordType() implementation.
  *   <br>   NOV 14, 2003    (Carl Nagle) Refactor with changes to Processor.
  *   <br>   APR 07, 2016    (Lei Wang) Refactor to handle some driver commands generally like OnGUIExistsGotoBlockID/OnGUINotExistGotoBlockID.
+ *   <br>   AUG 06, 2018    (Lei Wang) Modified checkGUIExistence(): throw SAFSNotImplementedException.
+ *                                   Modified onGUIGotoCommands(): catch SAFSNotImplementedException and set status code to 'Not Executed'.
  */
 package org.safs;
 
@@ -45,12 +61,12 @@ public abstract class DriverCommand extends Processor {
    * The current command keyword being executed.
    */
   protected String command = null;
-	
+
   /**
    * Used to iterate over any params provided for a command.
    */
   protected Iterator<String> iterator = null;
-  
+
   /**
    * Provide the GUI Utilities, sub-class may has its own implementation.
    */
@@ -61,9 +77,10 @@ public abstract class DriverCommand extends Processor {
   public DriverCommand () {
     super();
   }
-  
+
    /** Supports standard DRIVER COMMAND record types (C, CW, CF) **/
-  public boolean isSupportedRecordType(String recordType){
+  @Override
+public boolean isSupportedRecordType(String recordType){
   	return isDriverCommandRecord(recordType);
   }
 
@@ -92,7 +109,7 @@ public abstract class DriverCommand extends Processor {
 	  nextElem = "command"; //..get the driver command, the second token (from 1)
 	  String command = testRecordData.getTrimmedUnquotedInputRecordToken(tokenIndex);
 	  testRecordData.setCommand(command);
-      
+
 	  for(tokenIndex = 2; tokenIndex < testRecordData.inputRecordSize(); tokenIndex++) {
 		nextElem = "param"; //..get the param, tokens #3 - N (from 1)
 		String param = testRecordData.getTrimmedUnquotedInputRecordToken(tokenIndex);
@@ -113,9 +130,10 @@ public abstract class DriverCommand extends Processor {
 	return params;
   }
 
-  public void process() {
+  @Override
+public void process() {
 	  String dbg = StringUtils.debugmsg(false);
-	  
+
 	  try{
 		  init();
 	  } catch (SAFSException ex) {
@@ -130,7 +148,7 @@ public abstract class DriverCommand extends Processor {
 	  if(testRecordData.getStatusCode()==StatusCodes.SCRIPT_NOT_EXECUTED){
 		  generalCommandProcess();
 	  }
-	  
+
 	  if(testRecordData.getStatusCode()==StatusCodes.SCRIPT_NOT_EXECUTED){
 		  commandProcess();
 	  }
@@ -139,24 +157,24 @@ public abstract class DriverCommand extends Processor {
 		  super.process();
 	  }
   }
-  
-  /** 
+
+  /**
    * Initialize test record, utilities. Subclass may override to provide more specific implementation.
    **/
   protected void init() throws SAFSException{
 	  IndependantLog.debug("DriverCommand.init() initializing test data ... ");
 	  // first interpret the fields of the test record and put them into the
-	  // appropriate fields of testRecordData		
+	  // appropriate fields of testRecordData
 	  setParams(interpretFields());
 
 	  //Initialize the status code to "Not Executed"
 	  testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
-	  
+
 	  //Initialize those protected fileds
 	  utils = testRecordData.getDDGUtils();
 	  command = testRecordData.getCommand();
 	  iterator = params.iterator();
-	  
+
 	  //Set the window and component name in test-record-data
 	  try{
 		  Iterator iter = params.iterator();
@@ -171,10 +189,10 @@ public abstract class DriverCommand extends Processor {
 		  IndependantLog.warn("DriverCommand.init() failed to set window/component name in testrecord-data. Ignore "+StringUtils.debugmsg(e));
 	  }
   }
-  
-  /** 
+
+  /**
    * This superclass implementation does absolutely nothing.
-   * Subclasses should implement this to provide their new or overriding functionality. 
+   * Subclasses should implement this to provide their new or overriding functionality.
    **/
   protected void localProcess(){ }
 
@@ -191,14 +209,14 @@ public abstract class DriverCommand extends Processor {
 		  onGUIGotoCommands(false);
 	  }
   }
-  
+
   /**
-   * Process the driver command specifically. 
+   * Process the driver command specifically.
    * Here an empty implementation is provided, sub-class will give the detail.
    */
   protected void commandProcess() { }
 
-  /** 
+  /**
    * issue OK status and generic message (not a PASSED message):<br>
    * [action] successful. [comment]<br>
    * [detail]<br>
@@ -206,61 +224,61 @@ public abstract class DriverCommand extends Processor {
    **/
   protected void issueGenericSuccess(String comment, String detail){
       testRecordData.setStatusCode(StatusCodes.OK);
-      String success = GENStrings.convert(GENStrings.SUCCESS_1, 
+      String success = GENStrings.convert(GENStrings.SUCCESS_1,
                        testRecordData.getCommand() +" successful.",
                        testRecordData.getCommand());
       success += comment != null ? " "+ comment : "";
       log.logMessage(testRecordData.getFac(), success, detail, GENERIC_MESSAGE);
   }
 
-  /** 
+  /**
    * issue OK status and Generic message (not a PASSED message):<br>
    * [action] successful using [x]. [Comment]<br>
    * Comment is expected to already be localized if present, but can be null.
    **/
   protected void issueGenericSuccessUsing(String x, String comment){
       testRecordData.setStatusCode(StatusCodes.OK);
-      String success = GENStrings.convert(GENStrings.SUCCESS_2A, 
+      String success = GENStrings.convert(GENStrings.SUCCESS_2A,
                        testRecordData.getCommand() +" successful using "+ x,
                        testRecordData.getCommand(), x);
       success += comment != null ? " "+ comment : "";
       log.logMessage(testRecordData.getFac(), success, GENERIC_MESSAGE);
   }
 
-  /** 
+  /**
    * issue OK status and PASSED message.<br>
    * [action] successful. [comment]<br>
    * string comment is expected to already be localized, but can be null.
    **/
   protected void issuePassedSuccess(String comment){
       testRecordData.setStatusCode(StatusCodes.OK);
-      String success = GENStrings.convert(GENStrings.SUCCESS_1, 
+      String success = GENStrings.convert(GENStrings.SUCCESS_1,
                        testRecordData.getCommand() +" successful.",
                        testRecordData.getCommand());
       success += comment != null ? " "+ comment : "";
-      log.logMessage(testRecordData.getFac(), success, PASSED_MESSAGE);	  
+      log.logMessage(testRecordData.getFac(), success, PASSED_MESSAGE);
   }
-  
+
   /** issue OK status and generic message (not a PASSED message)<br>
    * [action] successful. [comment]<br>
    * string comment is expected to already be localized, but can be null.
    **/
   protected void issueGenericSuccess(String comment){
       testRecordData.setStatusCode(StatusCodes.OK);
-      String success = GENStrings.convert(GENStrings.SUCCESS_1, 
+      String success = GENStrings.convert(GENStrings.SUCCESS_1,
                        testRecordData.getCommand() +" successful.",
                        testRecordData.getCommand());
       success += comment != null ? " "+ comment : "";
       log.logMessage(testRecordData.getFac(), success, GENERIC_MESSAGE);
   }
 
-  /** 
+  /**
    * Uses testRecordData to create standard failure text.
    * @return [command] failure in table [filename] at line [n].
-   * Called by other routines. 
+   * Called by other routines.
    */
   protected String getStandardFailureDetail(){
-      return FAILStrings.convert(FAILStrings.STANDARD_ERROR, 
+      return FAILStrings.convert(FAILStrings.STANDARD_ERROR,
               testRecordData.getCommand() +
               " failure in table "+ testRecordData.getFilename() +
               " at line "+ testRecordData.getLineNumber(),
@@ -268,14 +286,14 @@ public abstract class DriverCommand extends Processor {
               testRecordData.getFilename(),
               String.valueOf(testRecordData.getLineNumber()));
   }
-  
-  /** 
+
+  /**
    * Uses testRecordData to create standard warning text.
    * @return [command] warning in table [filename] at line [n].
-   * Called by other routines. 
+   * Called by other routines.
    */
   protected String getStandardWarningDetail(){
-      return FAILStrings.convert(FAILStrings.STANDARD_WARNING, 
+      return FAILStrings.convert(FAILStrings.STANDARD_WARNING,
               testRecordData.getCommand() +
               " warning in table "+ testRecordData.getFilename() +
               " at line "+ testRecordData.getLineNumber(),
@@ -283,8 +301,8 @@ public abstract class DriverCommand extends Processor {
               testRecordData.getFilename(),
               String.valueOf(testRecordData.getLineNumber()));
   }
-  
-  /** 
+
+  /**
    * Issue [command] was not successful. [warning]. <br>
    * [command warning in table filename at line n].
    * <p>
@@ -293,7 +311,7 @@ public abstract class DriverCommand extends Processor {
    **/
   protected void issueActionWarning(String warning){
       testRecordData.setStatusCode(StatusCodes.SCRIPT_WARNING);
-      String no_success = FAILStrings.convert(FAILStrings.NO_SUCCESS_1, 
+      String no_success = FAILStrings.convert(FAILStrings.NO_SUCCESS_1,
                        testRecordData.getCommand() +" was not successful.",
                        testRecordData.getCommand());
       String detail = getStandardWarningDetail();
@@ -302,47 +320,47 @@ public abstract class DriverCommand extends Processor {
 
   /** Issue parameter count error and failure message **/
   protected void issueParameterCountFailure(){
-      issueInputRecordFailure(FAILStrings.text(FAILStrings.PARAMSIZE, 
+      issueInputRecordFailure(FAILStrings.text(FAILStrings.PARAMSIZE,
                          "Insufficient Parameters."));
-  }    
-  
-  /** Issue parameter count error and failure message 
+  }
+
+  /** Issue parameter count error and failure message
    * @param detail detail about specific missing params or command format
    ***/
   protected void issueParameterCountFailure(String detail){
       issueInputRecordFailure(FAILStrings.text(FAILStrings.PARAMSIZE, detail));
-  }    
-  
-  /** Issue parameter value error and failure message along with a failure status. 
+  }
+
+  /** Issue parameter value error and failure message along with a failure status.
    * @param paramName -- the Name of the action parameter in error. **/
   protected void issueParameterValueFailure(String paramName){
       String error = FAILStrings.convert(FAILStrings.BAD_PARAM,
     	             "Invalid parameter value for "+ paramName +".",
     	             paramName);
       issueInputRecordFailure(error);
-  }    
-  
-  /** Issue a file error and failure message 
+  }
+
+  /** Issue a file error and failure message
    * Filename does not need to be localized. **/
   protected void issueFileErrorFailure(String filename){
-      issueActionFailure(FAILStrings.convert(FAILStrings.FILE_ERROR, 
+      issueActionFailure(FAILStrings.convert(FAILStrings.FILE_ERROR,
                          "Error opening or using "+filename,
                          filename));
-  }    
-  
-  /** Issue a generic error and failure message 
+  }
+
+  /** Issue a generic error and failure message
    * The cause parameter is expected to already be localized. **/
   protected void issueUnknownErrorFailure(String cause){
-      issueActionFailure(FAILStrings.convert(FAILStrings.GENERIC_ERROR, 
+      issueActionFailure(FAILStrings.convert(FAILStrings.GENERIC_ERROR,
                          "*** Error *** "+cause,
                          cause));
   }
-  
+
   /**
    * "Action processed with a negative result."<br>
    * "[detail]"
-   * <br><em>Purpose:</em> set failure status and log a simple failure message when a test record got processed with negative result. 
-   *            When an action intends to make a judgment, a negative result is gotten if the logical result of the judgment 
+   * <br><em>Purpose:</em> set failure status and log a simple failure message when a test record got processed with negative result.
+   *            When an action intends to make a judgment, a negative result is gotten if the logical result of the judgment
    *            is false; the test step will be logged as 'FAIL' although it got executed correctly. Called by some comparing actions.
    *
    * * @param detail -- a detail message already properly localized, if necessary.
@@ -352,7 +370,7 @@ public abstract class DriverCommand extends Processor {
 	String action = testRecordData.getCommand();
     String altMsg = action+" processed with a negative result.";
     String message = failedText.convert(FAILStrings.EXECUTED_WITH_NEGATIVERESULT, altMsg,"", "", action);
-    log.logMessage(testRecordData.getFac(), message,  FAILED_MESSAGE, detail);      
+    log.logMessage(testRecordData.getFac(), message,  FAILED_MESSAGE, detail);
   }
 
   /**
@@ -364,12 +382,12 @@ public abstract class DriverCommand extends Processor {
   protected void issueActionUsingNegativeMessage(String x, String detail) {
     testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
 	String action = testRecordData.getCommand();
-    String message = failedText.convert(FAILStrings.EXECUTED_USING_NEGATIVERESULT, 
-    		         action +" using " + x +" finished with a negative result.", 
+    String message = failedText.convert(FAILStrings.EXECUTED_USING_NEGATIVERESULT,
+    		         action +" using " + x +" finished with a negative result.",
     		         action, x);
-    log.logMessage(testRecordData.getFac(), message,  FAILED_MESSAGE, detail);      
+    log.logMessage(testRecordData.getFac(), message,  FAILED_MESSAGE, detail);
   }
-  
+
   /**
    * Check the existence of the window/component and return the satisfaction of the existence.<br>
    * The satisfaction depends on component's existence and our expectation of its existence.<br>
@@ -378,7 +396,7 @@ public abstract class DriverCommand extends Processor {
    * <li>OnGUIExistsGotoBlockID
    * <li>OnGUINotExistGotoBlockID
    * </ul>
-   * 
+   *
    * @param expectedExist		boolean, the expected existence of the window/component.<br>
    *                            	     when <b>true</b> is provided, if the component is present within timeout, then it return true; otherwise return false;<br>
    *                            	     when <b>false</b> is provided, if the component is not present or disappears within timeout, then it return true; otherwise return false;<br>
@@ -388,25 +406,25 @@ public abstract class DriverCommand extends Processor {
    * @param timeoutInSeconds	int, the timeout in seconds
    * @return					boolean, true if the expected presence is satisfied
    * @throws SAFSException		is thrown out if there is something wrong.
-   * 
+   *
    * @see #onGUIGotoCommands(boolean)
    */
   protected boolean checkGUIExistence(boolean expectedExist, String mapNam, String window, String component, int timeoutInSeconds) throws SAFSException{
-	  throw new SAFSException(StringUtils.debugmsg(false)+" has not been implemented!");
+	  throw new SAFSNotImplementedException(StringUtils.debugmsg(false)+" has not been implemented!");
   }
-  
+
   /** <br><em>Purpose:</em> OnGUI(Not)Exist(s)GotoBlockID
    * e.g. C, OnGUIExistsGotoBlockID, BlockID, Window, Component[, Timeout]
-   * 
-   * @author Bob Lawler	11.15.2005	Created (RJL) 
+   *
+   * @author Bob Lawler	11.15.2005	Created (RJL)
    * @author Lei Wang 04.05.1016	Refactor code: Move this method from package org.safs.rational to org.safs<br>
    *                                           Abstract some content to method {@link #checkGUIExistence(boolean, String, String, String, int)}, which is left to be implemented in subclass.
    * <p>
    * This method first determines if branching should occur based on whether or not the GUI is found. Then,
    * it sets the TestRecordData status to BRANCH_TO_BLOCKID so that the driver knows to attempt a branch when
-   * control returns to the driver.  This method utilizes the TestRecordData field statusinfo to store the 
+   * control returns to the driver.  This method utilizes the TestRecordData field statusinfo to store the
    * name of the blockID.
-   * 
+   *
    * @see #checkGUIExistence(boolean, String, String, String, int)
    **/
   private void onGUIGotoCommands(boolean expectedExist) {
@@ -443,16 +461,16 @@ public abstract class DriverCommand extends Processor {
 		  boolean satisfied = checkGUIExistence(expectedExist, testRecordData.getAppMapName(),windowName, compName, timeoutInSeconds);
 
 		  if (satisfied) {
-			  msg = GENStrings.convert(GENStrings.BRANCHING, 
-					  command +" attempting branch to "+ blockName +".", 
+			  msg = GENStrings.convert(GENStrings.BRANCHING,
+					  command +" attempting branch to "+ blockName +".",
 					  command, blockName);
 			  if(expectedExist){
-				  msg += "  "+ GENStrings.convert(GENStrings.FOUND_TIMEOUT, 
-						  compName +" found within timeout "+ seconds, 
-						  compName, seconds);					  
+				  msg += "  "+ GENStrings.convert(GENStrings.FOUND_TIMEOUT,
+						  compName +" found within timeout "+ seconds,
+						  compName, seconds);
 			  }else{
-				  msg += "  "+ GENStrings.convert(GENStrings.NOT_EXIST, 
-						  compName +" does not exist", 
+				  msg += "  "+ GENStrings.convert(GENStrings.NOT_EXIST,
+						  compName +" does not exist",
 						  compName);
 			  }
 			  //set statuscode and statusinfo fields so driver will know to branch
@@ -460,23 +478,26 @@ public abstract class DriverCommand extends Processor {
 			  testRecordData.setStatusInfo(blockName);
 		  }
 		  else {
-			  msg = GENStrings.convert(GENStrings.NOT_BRANCHING, 
-					  command +" not branching to "+ blockName +".", 
+			  msg = GENStrings.convert(GENStrings.NOT_BRANCHING,
+					  command +" not branching to "+ blockName +".",
 					  command, blockName);
 			  if(expectedExist){
-				  msg += "  "+ FAILStrings.convert(FAILStrings.NOT_FOUND_TIMEOUT, 
-						  compName +" not found within timeout "+ seconds, 
-						  compName, seconds);					  
+				  msg += "  "+ FAILStrings.convert(FAILStrings.NOT_FOUND_TIMEOUT,
+						  compName +" not found within timeout "+ seconds,
+						  compName, seconds);
 			  }else{
-				  msg += "  "+ GENStrings.convert(GENStrings.EXISTS, 
-						  compName +" exists", 
+				  msg += "  "+ GENStrings.convert(GENStrings.EXISTS,
+						  compName +" exists",
 						  compName);
 			  }
 			  testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
 		  }
 
-		  log.logMessage(testRecordData.getFac(), msg, GENERIC_MESSAGE); 
-	  } catch (SAFSException se) {
+		  log.logMessage(testRecordData.getFac(), msg, GENERIC_MESSAGE);
+	  }catch (SAFSNotImplementedException sne) {
+		  IndependantLog.warn(debugmsg +command+" failed. Met SAFSNotImplementedException "+sne.getMessage());
+		  testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
+	  }catch (SAFSException se) {
 		  IndependantLog.error(debugmsg +command+" failed. Met Exception", se);
 		  issueErrorPerformingAction(se.getMessage());
 	  }

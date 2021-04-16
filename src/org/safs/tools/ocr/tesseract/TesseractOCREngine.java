@@ -1,7 +1,20 @@
-/** 
- * Copyright (C) SAS Institute. All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.tools.ocr.tesseract;
 
 import java.awt.Rectangle;
@@ -65,7 +78,7 @@ import org.safs.tools.stringutils.StringUtilities;
  * <br> FEB 25, 2010    (JunwuMa) Add method getSelfDefinedLangId().
  * <br> MAR 19, 2010    (JunwuMa) Added method findTextRectFromImage() to support mode "ImageText=" in ImageUtils.java.
  * <br> MAR 25, 2010    (JunwuMa) Modified imageToText() to open the temporary file in proper format, UTF-8.
- * <br> APR 20, 2010    (LeiWang) Add a map languages to contain pairs (javaLangCode, OCRLangCode).
+ * <br> APR 20, 2010    (Lei Wang) Add a map languages to contain pairs (javaLangCode, OCRLangCode).
  *                                Modify method getSelfDefinedLangId(): get OCRLangCode from map languages.
  * <br> MAY 27, 2010    (Carl Nagle) changed temp output directory to System property "java.io.tmpdir"
  * <br> OCT 22, 2010    (Carl Nagle) added support for tesseract.exe text coordinate extraction

@@ -16,8 +16,8 @@
 
 package com.sebuilder.interpreter;
 
-import java.util.ArrayList;
 import java.util.List;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.openqa.selenium.WebElement;
@@ -32,12 +32,12 @@ public class Locator {
 	public String value;
 
 	public Locator(){}
-	
+
 	public Locator(Type type, String value) {
 		this.type = type;
 		this.value = value;
 	}
-	
+
 	public Locator(String type, String value) {
 		this.type = Type.ofName(type);
 		this.value = value;
@@ -47,27 +47,31 @@ public class Locator {
 		type = l.type;
 		value = l.value;
 	}
-	
+
 	public WebElement find(TestRun ctx) {
 		return type.find(value, ctx);
 	}
-	
+
 	public List<WebElement> findElements(TestRun ctx) {
 		return type.findElements(value, ctx);
 	}
-	
+
 	public JSONObject toJSON() throws JSONException {
 		JSONObject o = new JSONObject();
 		o.put("type", type.toString());
 		o.put("value", value);
 		return o;
 	}
-	
+
 	@Override
 	public String toString() {
 		try { return toJSON().toString(); } catch (JSONException e) { throw new RuntimeException(e); }
 	}
-	
+
+	public String toPrettyString() {
+		return type.name().toLowerCase() + ":" + value;
+	}
+
 	public enum Type {
 		ID {
 			@Override
@@ -119,15 +123,15 @@ public class Locator {
 				return ctx.driver.findElementsByXPath(value);
 			}
 		};
-				
+
 		public abstract WebElement find(String value, TestRun ctx);
 		public abstract List<WebElement> findElements(String value, TestRun ctx);
-		
+
 		@Override
 		public String toString() {
 			return name().toLowerCase().replace("_", " ");
 		}
-		
+
 		public static Type ofName(String name) {
 			return Type.valueOf(name.toUpperCase().replace(" ", "_"));
 		}

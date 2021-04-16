@@ -1,8 +1,20 @@
 /**
  * Copyright (C) SAS Institute, All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- */
-
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * Logs for developers, not published to API DOC.
  *
@@ -29,6 +41,26 @@ public class Constants {
 
 	/** '<b>variable</b>'*/
 	public static final String PARAM_VARIABLE  			= "variable";
+	/** '<b>name</b>'*/
+	public static final String PARAM_NAME	  			= "name";
+	/** '<b>attributeName</b>'*/
+	public static final String PARAM_ATTRIBUTE_NAME		= "attributeName";
+	/** '<b>propertyName</b>'*/
+	public static final String PARAM_PROPERTY_NAME		= "propertyName";
+	/** '<b>value</b>'*/
+	public static final String PARAM_VALUE				= "value";
+	/** '<b>file</b>'*/
+	public static final String PARAM_FILE				= "file";
+	/** '<b>width</b>'*/
+	public static final String PARAM_WIDTH				= "width";
+	/** '<b>height</b>'*/
+	public static final String PARAM_HEIGHT				= "height";
+	/** '<b>identifier</b>'*/
+	public static final String PARAM_IDENTIFIER			= "identifier";
+	/** '<b>index</b>'*/
+	public static final String PARAM_INDEX				= "index";
+	/** '<b>title</b>'*/
+	public static final String PARAM_TITLE				= "title";
 
 	/** '<b>assert</b>'*/
 	public static final String COMMAND_ASSERT	  			= "assert";

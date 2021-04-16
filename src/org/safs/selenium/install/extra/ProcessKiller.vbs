@@ -15,6 +15,10 @@ Option Explicit
 '*            Unique substring of command-line used to launch the process.
 '*            (We don't want to kill the wrong process, right?)
 '*
+'*     -ignoredCommand <command-line substring>   Ex: JSTAFEmbedded.jar
+'*     
+'*            Unique substring of command-line used to launch the process that should not be killed
+'*
 '*     -commandignorecase
 '*     
 '*            Ignore the command's case during the comparison with process's CommandLine
@@ -39,7 +43,8 @@ Option Explicit
 
 Dim WshShell, objWMIService, objProcess, colProcess, objLoc
 Dim process, command, title, killall
-Dim prompt, arg, args, lcarg, cr, returncode, commandignorecase
+Dim prompt, arg, args, lcarg, cr, returncode, commandignorecase, ignoredCommand
+Dim found
 
 title = "SAFS Process Killer"
 process = "java.exe"
@@ -48,6 +53,8 @@ cr = chr(13)  'carriage return
 prompt = True
 commandignorecase = False
 killall = False
+found = False
+ignoredCommand = ""
 
 Dim i
 Set WshShell = WScript.CreateObject("WScript.Shell")
@@ -67,6 +74,10 @@ For i = 0 to args.Count -1
     elseif (lcarg = "-command") then
         if ( i < args.Count -1) then
             command = args(i+1)
+        end if
+    elseif (lcarg = "-ignoredCommand") then
+        if ( i < args.Count -1) then
+            ignoredCommand = args(i+1)
         end if
     elseif (lcarg = "-commandignorecase") then
         commandignorecase = True
@@ -90,6 +101,8 @@ If (prompt = True) Then
    msg = msg &"Default: java.exe"& cr & cr
    msg = msg &"-command <cmdLine substring>"& cr
    msg = msg &"Default: com.ibm.staf.service.STAFServiceHelper"& cr & cr
+   msg = msg &"-ignoredCommand <cmdLine substring>"& cr
+   msg = msg &"Default: "", it is Empty."& cr & cr
    msg = msg &"-commandignorecase "& cr
    msg = msg &"Ignore case when matching the -command process."& cr & cr
    msg = msg &"-killall "& cr
@@ -110,11 +123,13 @@ Set colProcess = objWMIService.ExecQuery _
     ("Select * from Win32_Process WHERE Name = '"& process &"'")
 For Each objProcess in colProcess
 	if commandignorecase then
-		i = InStr(LCase(objProcess.CommandLine), LCase(command))
+		found = InStr(LCase(objProcess.CommandLine), LCase(command))>0
+		if not (StrComp(ignoredCommand, "")=0) then found = found and (not InStr(LCase(objProcess.CommandLine), LCase(ignoredCommand))>0)
 	else
-		i = InStr(objProcess.CommandLine, command)
+		found = InStr(objProcess.CommandLine, command)>0
+		if not (StrComp(ignoredCommand, "")=0) then found = found and (not InStr(objProcess.CommandLine, ignoredCommand)>0)
 	end if
-    if i > 0 then
+    if found then
         if (prompt = True) then
             msg = "Found process: "& objProcess.Name & cr & cr
             msg = msg &"with command-line:"& cr & cr

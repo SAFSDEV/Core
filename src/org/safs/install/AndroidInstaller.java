@@ -1,33 +1,47 @@
-/** Copyright (C) SAS Institute, Inc. All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.install;
 
-import java.io.*;
+import java.io.File;
 
-import com.sun.jna.Platform;
-import org.safs.natives.NativeWrapper;
 import org.safs.text.FileUtilities;
 import org.safs.tools.CaseInsensitiveFile;
 
+import com.sun.jna.Platform;
+
 /**
- * Handle Windows registration and Environment settings for Android SDK support.  
+ * Handle Windows registration and Environment settings for Android SDK support.
  * Intended to replace WSH install scripts.
  * @author Carl Nagle
  */
 public class AndroidInstaller extends InstallerImpl{
-	
+
 	private static final String ROBOTIUMRC_HOME = "ROBOTIUMRC_HOME";
 	private static final String ANDROID_HOME    = "ANDROID_HOME";
 	private static final String ANT_HOME        = "ANT_HOME";
 	// appends to safsdir
-	private static final String SamplesDroidDir   = s+"Samples"+s+"Droid"; 
+	private static final String SamplesDroidDir   = s+"Samples"+s+"Droid";
 	private static final String SAFSTestRunnerDir = SamplesDroidDir + s + "SAFSTestRunner";
 	private static final String SAFSMessengerDir  = SamplesDroidDir + s + "SAFSTCPMessenger";
 	private static final String SpinnerSampleDir  = SamplesDroidDir + s + "SpinnerSample";
-		
+
 	public AndroidInstaller() {super();}
-	
+
 	/**
 	 * Main processing routine.
 	 * Sets System Environment variables used by SAFS Android Support:
@@ -39,6 +53,7 @@ public class AndroidInstaller extends InstallerImpl{
 	 * @param args -- none used at this time
 	 * @return true if successful, false otherwise.
 	 */
+	@Override
 	public boolean install(String... args){
 		String safsdir = this.getEnvValue(SAFSInstaller.SAFSDIREnv);
 		if(safsdir == null || safsdir.length() == 0) {
@@ -64,7 +79,7 @@ public class AndroidInstaller extends InstallerImpl{
 				setProgressMessage("AndroidInstaller found '"+ ROBOTIUMRC_HOME +"' Environment Variable is NOT a valid directory.");
 			}
 		}
-		if(setHome){		
+		if(setHome){
 			val = safsdir + SamplesDroidDir;
 			rchome = new CaseInsensitiveFile(val).toFile();
 			if(rchome.isDirectory()){
@@ -77,7 +92,7 @@ public class AndroidInstaller extends InstallerImpl{
 				}
 			}else {
 				setProgressMessage("AndroidInstaller expected location '"+ val +"' is NOT a valid directory!");
-				return false;				
+				return false;
 			}
 		}
 		String sdkhome = getEnvValue(ANDROID_HOME);
@@ -115,10 +130,10 @@ public class AndroidInstaller extends InstallerImpl{
 	    	}
 		    String oldline = "C:\\Program Files\\Android\\android-sdk";
 		    try{ FileUtilities.replaceDirectoryFilesSubstrings(
-		    	 		  safsdir + SamplesDroidDir, 
-		    			  new String[]{".bat",".ini"}, 
-		    			  oldline, 
-		    			  sdkhome, 
+		    	 		  safsdir + SamplesDroidDir,
+		    			  new String[]{".bat",".ini"},
+		    			  oldline,
+		    			  sdkhome,
 		    			  false);
 		    }catch(Exception x){
 				setProgressMessage("Android BAT/INI installer "+ x.getClass().getSimpleName()+": "+ x.getMessage());
@@ -142,11 +157,11 @@ public class AndroidInstaller extends InstallerImpl{
 			setProgressMessage("Android support installer "+ x.getClass().getSimpleName()+": "+ x.getMessage());
 	    	return false;
 	    }
-	    
-	    // TODO: Perform automated first-time debug build 	    
+
+	    // TODO: Perform automated first-time debug build
 	    return true;
 	}
-	
+
 	/**
 	 * Unset the System Environment Variables used by SAFS.
 	 * <p>
@@ -155,10 +170,11 @@ public class AndroidInstaller extends InstallerImpl{
 	 * @param args
 	 * @return
 	 */
+	@Override
 	public boolean uninstall(String... args){
 		return setEnvValue(ROBOTIUMRC_HOME, null);
 	}
-	
+
 	/**
 	 * Main Java executable.  Primarily to run standalone outside of a larger process.
 	 * <p>
@@ -168,7 +184,7 @@ public class AndroidInstaller extends InstallerImpl{
 	 * <p>
 	 * System.exit(0) on perceived success.<br>
 	 * System.exit(-1) on perceived failure.
-	 * @param args --  -u to perform an uninstall instead of install. 
+	 * @param args --  -u to perform an uninstall instead of install.
 	 * @see org.safs.install.SilentInstaller
 	 */
 	public static void main(String[] args) {

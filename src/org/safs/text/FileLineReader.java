@@ -1,8 +1,30 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.text;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Method;
-import java.nio.charset.*;
+import java.nio.charset.Charset;
 
 /*******************************************************************************************
  * Copyright 2003 SAS Institute
@@ -21,7 +43,7 @@ import java.nio.charset.*;
  * @version 07/16/2010 (Carl Nagle) modified to support other Charset encodings.
  * @version 12/16/2014 (Carl Nagle) Fix NullPointerException on empty files in readLine.
  *
- * Software Automation Framework Support (SAFS) http://safsdev.sourceforge.net<br>
+ * Software Automation Framework Support (SAFS) http://safsdev:8880<br>
  * Software Testing Automation Framework (STAF) http://staf.sourceforge.net<br>
  ******************************************************************************************/
 public class FileLineReader {

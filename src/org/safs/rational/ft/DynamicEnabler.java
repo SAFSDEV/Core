@@ -1,7 +1,33 @@
 /**
- * Copyright (C) 2005 SAS  All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
+/**
+ * @author Carl Nagle  NOV 12, 2007 Added support for custom DAT files in Class & JAR directory.
+ * @author WangLei NOV 07, 2008 Added .net related field and methods enableNetWindows()
+ * @author Carl Nagle  APR 03, 2009 Refactored primarily removing need for ClassMap.dat files on Windows.
+ *                              Also added JNA usage to help find ALL processes that can be enabled.
+ * @author Carl Nagle  Jun 04, 2009 Added getJNAProtectedDomainTopObjects
+ * @author Carl Nagle  Aug 07, 2009 Added Process= support to enable only one or more specific processes.
+ * @author Carl Nagle  Apr 16, 2010 Handle NullPointerExceptions in loadWinEnabled when RFT starts to act up.
+ * @author Lei Wang Sep 14, 2011 Modify method simpleEnableTopWindows(): Don't enable 'System Idle Process'.
+ * @author Lei Wang Mar 15, 2019 Modify simpleEnableTopWindows(): don't enable top windows dynamically if 'enableTopWindows' is turned off.
+ * @author Lei Wang Mar 28, 2019 Modify simpleEnableTopWindows(): If the window's class name is not in the white list (WindowsClassMap.dat), we will not enable it.
+ *                                                               Comment out the enableUniqueWinsWithJNA temporarily, it wastes too much times.
+ */
 package org.safs.rational.ft;
 
 import java.awt.Rectangle;
@@ -10,7 +36,6 @@ import java.io.FileNotFoundException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -21,13 +46,13 @@ import org.safs.natives.NativeWrapper;
 import org.safs.rational.RGuiObjectVector;
 import org.safs.rational.Script;
 import org.safs.text.FileUtilities;
+import org.safs.tools.drivers.DriverConstant.SafsROBOTJ;
 
 import com.rational.test.ft.NotSupportedOnUnixException;
 import com.rational.test.ft.UnableToHookException;
 import com.rational.test.ft.WindowHandleNotFoundException;
 import com.rational.test.ft.object.TestObjectReference;
 import com.rational.test.ft.object.interfaces.DomainTestObject;
-import com.rational.test.ft.object.interfaces.GuiTestObject;
 import com.rational.test.ft.object.interfaces.IWindow;
 import com.rational.test.ft.object.interfaces.RootTestObject;
 import com.rational.test.ft.object.interfaces.TestObject;
@@ -35,31 +60,30 @@ import com.rational.test.ft.object.interfaces.TopLevelTestObject;
 import com.rational.test.ft.script.CaptionText;
 import com.rational.test.ft.script.RationalTestScript;
 import com.rational.test.ft.sys.TestContext.Reference;
-import com.rational.test.ft.sys.graphical.Window;
 import com.sun.jna.Platform;
 
 /**
- * IBM Rational Functional Tester V6 and later supports the testing of Win32 and .NET windows and 
- * applications.  However, these environments are not enabled for testing in the traditional 
- * means as seen for Java and other environments.  These environments require what Rational 
- * calls 'dynamic enabling'.  
+ * IBM Rational Functional Tester V6 and later supports the testing of Win32 and .NET windows and
+ * applications.  However, these environments are not enabled for testing in the traditional
+ * means as seen for Java and other environments.  These environments require what Rational
+ * calls 'dynamic enabling'.
  * <p>
- * Essentially, we must already know a window handle, process ID, or 
+ * Essentially, we must already know a window handle, process ID, or
  * process name before we can tell FT to inject itself into that process and enable testing.
- * Since a testing framework that is application-independent cannot be hard-coded to know the 
- * desired processname, and cannot readily make assumptions about the correct Window handle or 
- * process ID, we are going to effectively enable as many Win32 and .NET environments as we can 
+ * Since a testing framework that is application-independent cannot be hard-coded to know the
+ * desired processname, and cannot readily make assumptions about the correct Window handle or
+ * process ID, we are going to effectively enable as many Win32 and .NET environments as we can
  * properly identify.
  * <p>
- * There is an issue, of course, when attempting to distribute and use this new feature in older 
- * XDE Tester and RobotJ environments that do not have this functionality.  SAFS code attempting 
- * to use it must be wrapped in try\catch(Throwable) blocks because XDE Tester and RobotJ will 
- * NOT be able to properly load and initialize this class and they will issue an Error, not an 
- * Exception. 
+ * There is an issue, of course, when attempting to distribute and use this new feature in older
+ * XDE Tester and RobotJ environments that do not have this functionality.  SAFS code attempting
+ * to use it must be wrapped in try\catch(Throwable) blocks because XDE Tester and RobotJ will
+ * NOT be able to properly load and initialize this class and they will issue an Error, not an
+ * Exception.
  * <p>
- * This class uses external resource files (text files) to indicate which classes running on the 
- * system are to be enabled, and which classes are to be ignored.  These files do not represent an 
- * all-inclusive list and are subject to updates.  There are seperate text files for Windows and 
+ * This class uses external resource files (text files) to indicate which classes running on the
+ * system are to be enabled, and which classes are to be ignored.  These files do not represent an
+ * all-inclusive list and are subject to updates.  There are seperate text files for Windows and
  * Unix.  These text files are:
  * <ul>
  * <li>WindowsClassMap.dat
@@ -69,23 +93,14 @@ import com.sun.jna.Platform;
  * <li>UnixIgnoreClassMap.dat
  * </ul>
  * <p>
- * The WindowsClassMap and WindowsIgnoreClassMap files are provided in the distributed JAR file.  
- * The Unix files are not yet distributed as their contents has not yet been deduced.  
+ * The WindowsClassMap and WindowsIgnoreClassMap files are provided in the distributed JAR file.
+ * The Unix files are not yet distributed as their contents has not yet been deduced.
  * <p>
- * This class allows a user or tester to place an identically named resource file in the 
- * same directory where the JAR file is found and that external file will add additional 
+ * This class allows a user or tester to place an identically named resource file in the
+ * same directory where the JAR file is found and that external file will add additional
  * mappings and ignores to those in the JAR file.
- * <p>   
+ * <p>
  * @author Carl Nagle  SEP 02, 2005
- * @author Carl Nagle  NOV 12, 2007 Added support for custom DAT files in Class & JAR directory.
- * @author WangLei NOV 07, 2008 Added .net related field and methods enableNetWindows()
- * @author Carl Nagle  APR 03, 2009 Refactored primarily removing need for ClassMap.dat files on Windows.
- *                              Also added JNA usage to help find ALL processes that can be enabled.
- * @author Carl Nagle  Jun 04, 2009 Added getJNAProtectedDomainTopObjects 
- * @author Carl Nagle  Aug 07, 2009 Added Process= support to enable only one or more specific processes. 
- * @author Carl Nagle  Apr 16, 2010 Handle NullPointerExceptions in loadWinEnabled when RFT starts to act up. 
- * @author LeiWang Sep 14, 2011 Modify method simpleEnableTopWindows(): Don't enable 'System Idle Process'.
-
  * Copyright (C) (SAS) All rights reserved.
  * General Public License: http://www.opensource.org/licenses/gpl-license.php
  **/
@@ -93,16 +108,16 @@ public class DynamicEnabler {
 
 	/** "WindowsClassMap.dat" **/
 	public static final String DEFAULT_WINDOWS_CLASS_MAP        = "WindowsClassMap.dat";
-	
+
 	/** "WindowsIgnoreClassMap.dat" **/
 	public static final String DEFAULT_WINDOWS_IGNORE_CLASS_MAP = "WindowsIgnoreClassMap.dat";
 
 	/** "SWTClassMap.dat" **/
 	public static final String DEFAULT_SWT_CLASS_MAP        	= "SWTClassMap.dat";
-	
+
 	/** "DotNetClassMap.dat" **/
 	public static final String DEFAULT_DOTNET_CLASS_MAP        	= "DotNetClassMap.dat";
-	
+
 	// Unix support not yet coded or will use the same as for Windows
 	/** "UnixClassMap.dat" **/
 	public static final String DEFAULT_UNIX_CLASS_MAP           = "UnixClassMap.dat";
@@ -111,23 +126,23 @@ public class DynamicEnabler {
 
 	/** FT 6.x Unique Class object for dynamic enabling **/
 	static RootTestObject rto = null;
-	
+
 	/** Window classes or processes that should be ignored. **/
 	static Vector ignorewins = new Vector();
 	static boolean ignore_classmap_read = false;
-	
+
 	/** Window classes or processes that CAN be enabled. **/
 	static Vector enablewins = new Vector();
 	static boolean win_classmap_read = false;
-	
+
 	/** SWT classes that CAN be enabled. **/
 	static Vector enableswt = new Vector();
 	static boolean swt_classmap_read = false;
-	
+
 	/** .NET classes that CAN be enabled. **/
 	static Vector enablenet = new Vector();
 	static boolean net_classmap_read = false;
-		
+
 	/** Window classes or processes that HAVE already been enabled. **/
 	static Vector winenabled = new Vector();
 
@@ -135,30 +150,30 @@ public class DynamicEnabler {
 	static String mainmap   = DEFAULT_WINDOWS_CLASS_MAP;
 	static String netmap	= DEFAULT_DOTNET_CLASS_MAP;
 	static String ignoremap = DEFAULT_WINDOWS_IGNORE_CLASS_MAP;
-	
+
 	/** Strings. process names to enable. */
 	static Vector enableprocs = new Vector();
 	static Vector enabledomains = new Vector();
-	
-	static {		
-		
+
+	static {
+
 		//see if we should use Unix maps instead
 		if(! org.safs.jvmagent.Platform.isWindows()){
 			mainmap   = DEFAULT_UNIX_CLASS_MAP;
 			ignoremap = DEFAULT_UNIX_IGNORE_CLASS_MAP;
-		}		
+		}
 	}
 
-	public static void clearEnabledProcs(){ 
+	public static void clearEnabledProcs(){
 		Log.info("DynamicEnabler clearing process names storage...");
 		enableprocs.clear();
 	}
-	public static void clearEnabledDomains(){ 
+	public static void clearEnabledDomains(){
 		Log.info("DynamicEnabler clearing domain names storage...");
 		enabledomains.clear();
 	}
-	public static void addEnabledProc(String procname){ 
-		if(procname != null){ 
+	public static void addEnabledProc(String procname){
+		if(procname != null){
 			Log.info("DynamicEnabler adding '"+ procname +"' to process names storage...");
 			enableprocs.add(procname);
 		}
@@ -170,7 +185,7 @@ public class DynamicEnabler {
 		return enableprocs.contains(procname);
 	}
 	public static void addEnabledDomain(String domainname){
-		if(domainname != null){ 
+		if(domainname != null){
 			Log.info("DynamicEnabler adding '"+ domainname +"' to domain names storage...");
 			enabledomains.add(domainname.toUpperCase());
 		}
@@ -183,11 +198,11 @@ public class DynamicEnabler {
 	}
 	public static Vector enableSWTWindows(){
 		//find and load our swt class list for dynamic enabling
-		try{ 
+		try{
 			if(! swt_classmap_read) {
 				Log.info("DynamicEnabler loading SWT Class Map Data...");
-				enableswt = appendMapVector(swtmap, enableswt); 
-				swt_classmap_read = true;				
+				enableswt = appendMapVector(swtmap, enableswt);
+				swt_classmap_read = true;
 			}
 		}
 		catch(FileNotFoundException nf){;}
@@ -198,11 +213,11 @@ public class DynamicEnabler {
 
 	public static Vector enableWinWindows(){
 		//find and load our WIN class list for dynamic enabling
-		try{ 
+		try{
 			if(! win_classmap_read) {
 				Log.info("DynamicEnabler loading WIN Class Map Data...");
-				enablewins = appendMapVector(mainmap, enablewins); 
-				win_classmap_read = true;				
+				enablewins = appendMapVector(mainmap, enablewins);
+				win_classmap_read = true;
 			}
 		}
 		catch(FileNotFoundException nf){;}
@@ -213,11 +228,11 @@ public class DynamicEnabler {
 
 	public static Vector enableNetWindows(){
 		//find and load our Net class list for dynamic enabling
-		try{ 
+		try{
 			if(! net_classmap_read) {
 				Log.info("DynamicEnabler loading .NET Class Map Data...");
-				enablenet = appendMapVector(netmap, enablenet); 
-				net_classmap_read = true;				
+				enablenet = appendMapVector(netmap, enablenet);
+				net_classmap_read = true;
 			}
 		}
 		catch(FileNotFoundException nf){;}
@@ -225,14 +240,14 @@ public class DynamicEnabler {
 		simpleEnableTopWindows();
 		return enablenet;
 	}
-	
-	/** 
-	 * Returns all found matching classes in the provided domain as an ArrayList of 
+
+	/**
+	 * Returns all found matching classes in the provided domain as an ArrayList of
 	 * TestObjects.
-	 * As of RFT 2.0 the act of locating the matching class and converting it to a 
-	 * TestObject also "enables" that process.  So attempting to "enable" then "find" 
+	 * As of RFT 2.0 the act of locating the matching class and converting it to a
+	 * TestObject also "enables" that process.  So attempting to "enable" then "find"
 	 * is a duplicated effort.
-	 *  
+	 *
 	 * @param classes
 	 * @param domain
 	 * @return ArrayList of TestObjects or an empty ArrayList
@@ -252,17 +267,17 @@ public class DynamicEnabler {
 			if(vectorContainsRegexMatch(classes, classname)){
 
 				Long hwnd = new Long(iwin.getHandle());
-				
-				//this is bothersome. We need to be able to find by 
+
+				//this is bothersome. We need to be able to find by
 				//additional means besides text.
 				String text = iwin.getText();
 				boolean matchText =(text!=null)&&(text.length()>0);
-				
+
 				Log.info("DynamicEnabler matching '"+ classname +"' caption: "+ text);
 				enabled = iwin.isEnabled();
 				if(!enabled) enabled = rto.enableForTesting(hwnd.longValue());
 				Log.info("... successfully enabled for testing? "+ enabled);
-				
+
 				TestObject to[] = null;
 				Log.info("... "+ classname +" proxy class: "+ iwin.getClass().getName());
 				if(matchText){
@@ -279,22 +294,22 @@ public class DynamicEnabler {
 					}
 				}
 				if(to == null){
-					Log.info("... find returned null: matched 0 TestObjects.");				
+					Log.info("... find returned null: matched 0 TestObjects.");
 					return testObjects;
 				}
-				Log.info("... matched "+ to.length +" TestObjects.");				
+				Log.info("... matched "+ to.length +" TestObjects.");
 				try{ for(int j = 0;j< to.length;j++) {
 					testObjects.add(to[j]); }
 				}
 				catch(Exception x){;}
 			}
-		}		
+		}
 		return testObjects;
 	}
-	
+
 	/**
 	 * Try to "find" the TopLevelWindow associated with a processID and return true if it is the topmost window--
-	 * the one with keyboard focus.  In the process of "finding" the window the process should be enabled for 
+	 * the one with keyboard focus.  In the process of "finding" the window the process should be enabled for
 	 * testing.
 	 * @param script
 	 * @param processID
@@ -304,7 +319,7 @@ public class DynamicEnabler {
 	public static boolean isTopParentWinFocused(Script script, int processID){
 		boolean focused = false;
 		TopLevelTestObject parent = null;
-		RootTestObject rto = script.getRootTestObject();	
+		RootTestObject rto = script.getRootTestObject();
 		TestObject[] wins = script.find(script.atList(
 				                     script.atProperty(".processId", new Integer(processID)),
 				                     script.atProperty(".domain", "Win")
@@ -317,14 +332,14 @@ public class DynamicEnabler {
 		if (wins.length > 0) script.unregister(wins);
 		return focused;
 	}
-	
+
 	protected static void loadWinEnabled(){
-		Log.info("DynamicEnabler.loadWinEnabled loading of winenabled Vector.");		
+		Log.info("DynamicEnabler.loadWinEnabled loading of winenabled Vector.");
 		//don't do this too frequently
-		
+
 		//Carl Nagle 2009.08.25 believing this is causing instability
 		//winenabled.clear();
-		
+
 		DomainTestObject[] domains = rto.getDomains();
 		DomainTestObject idomain = null;
 		TestObject[] winobjects = null;
@@ -338,13 +353,13 @@ public class DynamicEnabler {
 		for(int i=0;i< domains.length;i++){
 			idomain = domains[i];
 			if(idomain.getName().toString().equalsIgnoreCase(PROCESS)){
-				Log.info("DynamicEnabler IGNORING '"+ idomain.getName()+"' domain...");				
+				Log.info("DynamicEnabler IGNORING '"+ idomain.getName()+"' domain...");
 				idomain.unregister();
 				continue;
 			}
 			if(hasEnabledDomain()){
 				if(!isEnabledDomain(idomain.getName().toString())){
-					Log.info("DynamicEnabler IGNORING undesired '"+ idomain.getName()+"' domain...");				
+					Log.info("DynamicEnabler IGNORING undesired '"+ idomain.getName()+"' domain...");
 					idomain.unregister();
 					continue;
 				}
@@ -355,7 +370,7 @@ public class DynamicEnabler {
 					Log.info("DynamicEnabler skipping banned WIN domain mailslot for "+idomain);
 					idomain.unregister();
 					continue;
-				}				
+				}
 			}
 			if(hasEnabledProc()){
 				pidL = new Long(idomain.getProcess().getProcessId());
@@ -372,17 +387,17 @@ public class DynamicEnabler {
 				}
 				Log.info("DynamicEnabler handling process '"+ procname +"' with pId "+ pidL.intValue()+" "+ idomain);
 			}
-        	//bypassing this call because we have run into the case where at least one 
-        	//machine is NOT properly returning USER object resource counts for windows 
+        	//bypassing this call because we have run into the case where at least one
+        	//machine is NOT properly returning USER object resource counts for windows
         	//known to have GUI components (i.e. CMD windows).
-        	//It is uncertain if modifying the routine to look for GDI objects instead 
+        	//It is uncertain if modifying the routine to look for GDI objects instead
         	//of USER objects will provide any filtering of undesirable domain objects.
 			/* winobjects = getJNAProtectedDomainTopObjects(idomain); */
-			
-			// this getTopObjects call can sometimes take a long time--especially if resource 
-			// issues and testobject cleanup are starting to make RFT unstable.			
+
+			// this getTopObjects call can sometimes take a long time--especially if resource
+			// issues and testobject cleanup are starting to make RFT unstable.
 			winobjects = idomain.getTopObjects();
-			
+
 			if(winobjects==null||winobjects.length==0){
 				Log.info("DynamicEnabler IGNORING '"+ procname +"' "+ idomain.getName()+" Domain with null or empty window objects...");
 				idomain.unregister();
@@ -390,7 +405,7 @@ public class DynamicEnabler {
 			}
 			for(int j=0;j<winobjects.length;j++) {
 				itestobject = winobjects[j];
-				
+
 				//Carl Nagle: new incidents of itestobject being null throwing NPE:
 				try{ itestref = itestobject.getObjectReference();}
 				catch(NullPointerException npx){
@@ -404,10 +419,10 @@ public class DynamicEnabler {
 					continue;
 				}
 				int iref = 0;
-				try{ 
+				try{
 					Reference ref = itestref.getTestContextReference();
 					if(ref==null){
-						Log.debug("...loadWinEnabled ignoring '"+ procname +"' NULL TestContext reference from "+ idomain.getName()+" domain test reference "+ itestref);						
+						Log.debug("...loadWinEnabled ignoring '"+ procname +"' NULL TestContext reference from "+ idomain.getName()+" domain test reference "+ itestref);
 						itestobject.unregister();
 						continue;
 					}
@@ -415,7 +430,7 @@ public class DynamicEnabler {
 					if(iref > 0){
 						Log.info("...loadWinEnabled evaluating '"+ procname +"' process "+ iref);
 						pidI = new Integer(iref);
-						if( !winenabled.contains(pidI)){ 
+						if( !winenabled.contains(pidI)){
 							winenabled.add(pidI);
 							Log.info("DynamicEnabler storing enabled '"+ idomain.getName()+"' "+ procname +" process with pId "+ iref +":"+pidL.intValue());
 						}
@@ -427,7 +442,7 @@ public class DynamicEnabler {
 					Log.debug("...loadWinEnabled getProcessId for '"+ procname +"' IGNORING "+ x.getClass().getSimpleName()+" on "+ itestobject);
 				}
 				// a BAD testobject will hit Exception
-				try{ 
+				try{
 					// itestobject.exists() is hitting timeout but NOT throwing exception!
 					// itestobject.isTopLevelTestObject() is returning FALSE on just about everything.
 					//   isTopLevelTestObject does not return TRUE on TopLevelSubitemTestObjects of any type.
@@ -439,13 +454,13 @@ public class DynamicEnabler {
 			}
 			idomain.unregister();
 		}
-		Log.info("DynamicEnabler.loadWinEnabled found "+ winenabled.size()+" unique processes enabled.");		
+		Log.info("DynamicEnabler.loadWinEnabled found "+ winenabled.size()+" unique processes enabled.");
 	}
-	
+
 	protected static int enableUniqueWinsWithJNA(){
 		Object[] iwins = NativeWrapper.EnumWindows();
 		if(iwins != null) {
-			Log.info("DynamicEnabler.enableWithJNA examining "+ iwins.length +" native Windows.");		
+			Log.info("DynamicEnabler.enableWithJNA examining "+ iwins.length +" native Windows.");
 		}else{
 			Log.info("DynamicEnabler.enableWithJNA received NULL from EnumWindows...");
 			return 0;
@@ -458,13 +473,13 @@ public class DynamicEnabler {
 		int pidi = 0;
 		int topcount = 0;
 		if(enableprocs.size()>0)
-    		Log.info("DynamicEnabler enableWithJNA limiting to specific process names...");			
-		
+    		Log.info("DynamicEnabler enableWithJNA limiting to specific process names...");
+
 	    for(int d=0; d<iwins.length; d++){
 	    	pidI = new Integer(0);
 	    	pidi = 0;
 	    	iwin = (Long)iwins[d];
-	    	try{ 
+	    	try{
 		    	pids = NativeWrapper.GetWindowThreadProcessId(iwin);
 	    		pidI = (Integer)pids[1];
 	    		pidi = pidI.intValue();
@@ -503,14 +518,14 @@ public class DynamicEnabler {
 					// So, until we know what to do on Unix....
 					}catch(NotSupportedOnUnixException nx){
 						Log.info("DynamicEnabler JNA handling "+ nx.getClass().getSimpleName());
-						try{ 
+						try{
 							rto.enableForTesting(iwin.longValue());
 							winenabled.add(pidI);
 							enabled=true;
 							topcount++;
 						}
 						catch(Exception x2){
-							Log.debug("DynamicEnabler JNA failed to enable Window "+ iwin +" due to "+ 
+							Log.debug("DynamicEnabler JNA failed to enable Window "+ iwin +" due to "+
 									  nx.getClass().getSimpleName()+" followed by "+ x2.getClass().getSimpleName());
 						}
 					}catch(UnableToHookException nx){
@@ -521,14 +536,14 @@ public class DynamicEnabler {
 						continue;
 					}catch(Exception nx){
 						Log.info("DynamicEnabler enableWithJNA enabling Window "+ iwin.toString() +" DESPITE "+ nx.getClass().getSimpleName());
-						try{ 
+						try{
 							rto.enableForTesting(iwin.longValue());
 							winenabled.add(pidI);
 							enabled=true;
 							topcount++;
 						}
 						catch(Exception x2){
-							Log.debug("DynamicEnabler JNA failed to enable Window "+ iwin +" due to "+ 
+							Log.debug("DynamicEnabler JNA failed to enable Window "+ iwin +" due to "+
 									  nx.getClass().getSimpleName()+" followed by "+ x2.getClass().getSimpleName());
 						}
 					}
@@ -542,24 +557,34 @@ public class DynamicEnabler {
  		    	Log.info("DynamicEnabler JNA invalid PID "+ pidi +" for Window "+ iwin);
 	    	}
 		}
-		Log.info("DynamicEnabler enableWithJNA found "+ topcount +" unique Windows to enable.");		
+		Log.info("DynamicEnabler enableWithJNA found "+ topcount +" unique Windows to enable.");
 	    return topcount;
 	}
 
-	
+
+	private static boolean enableTopWindows = SafsROBOTJ.DEFAULT_DYNAMIC_ENABLE_TOP_WINS;
+
+	public static void setEnableTopWindows(boolean enable){
+		enableTopWindows = enable;
+	}
+
 	/**
 	 * Dynamically enable all Top Windows or processes.
-	 * However, if enableprocs contains one or more process names then we will only 
+	 * However, if enableprocs contains one or more process names then we will only
 	 * enable windows and processes matching the names in enableprocs.
-	 * 
+	 *
 	 * @return long number of top windows enabled or 0 if not successful.
 	 * @see #getRootTestObjectWindows(Vector, String)
 	 * @see #enableprocs
 	 **/
 	protected static long simpleEnableTopWindows(){
+		int topcount = 0;
+		if(!enableTopWindows){
+			Log.info("DynamicEnabler simpleEnableTopWins has been disabled ...");
+			return topcount;
+		}
 		rto = RootTestObject.getRootTestObject();
 		IWindow[] iwins = rto.getTopWindows();
-	    int topcount = 0;
 		IWindow pwin;
 		IWindow owin;
 		long hWnd;
@@ -571,14 +596,14 @@ public class DynamicEnabler {
 		Integer pidI;
 		Long hwndL;
 		Rectangle rect;
-		String procname;		
+		String procname;
 		loadWinEnabled();
 		if(enableprocs.size()>0)
-    		Log.info("DynamicEnabler simpleEnableTopWins limiting to specific process names...");			
-		
+    		Log.info("DynamicEnabler simpleEnableTopWins limiting to specific process names...");
+
 	    for(int d=0; d<iwins.length; d++){
 	    	iwin = iwins[d];
- 		    classname = (String) iwin.getWindowClassName(); 		    
+ 		    classname = (String) iwin.getWindowClassName();
 
  		    pwin = iwin.getParent();
  		    owin = iwin.getOwner();
@@ -589,20 +614,28 @@ public class DynamicEnabler {
 			pidI = new Integer(pid);
 			hwndL = new Long(hWnd);
  		    procname = null;
- 		    
+
+ 		    Log.info("DynamicEnabler simpleEnableTopWins: find window with pid="+pid+"; classname="+classname+" .................  ");
+
  		    if(pid==0){
  		    	//The process whose pid is 0, is the 'System Idle process', after enable this process,
  		    	//it may block the program. As it is not necessay to enable this process, so just ignore it.
-				Log.info("================= Ignoring 'System Idle process', its pid="+pid+" continue!!! ");
-				continue;
+ 		    	Log.info("================= Ignoring 'System Idle process', its pid="+pid+" continue!!! ");
+ 		    	continue;
  		    }
- 		    
+
+ 		    //If the window's class name is not in the white list (WindowsClassMap.dat), we will not enable it.
+ 		    if(!vectorContainsRegexMatch(enablewins, classname)){
+ 		    	Log.info("DynamicEnabler simpleEnableTopWins: ignoring class '"+classname+"', its pid="+pid+", continue ...");
+ 		    	continue;
+ 		    }
+
  		    //if has no parent, but can be owned?
  		    //if ((pwin==null)&&(owin==null))
-			
+
  		   if (! winenabled.contains(pidI)){
 	 		    if(hasEnabledProc()){
-	 		    	procname = (String) NativeWrapper.GetProcessFileName(pidI);	 		    
+	 		    	procname = (String) NativeWrapper.GetProcessFileName(pidI);
 	 		    	//skip this iteration if the procname does not match
 	 		    	//the one(s) we are limited to.
 	 		    	if (procname==null ){
@@ -613,23 +646,23 @@ public class DynamicEnabler {
 	 		    		continue;
 	 		    	}
 	 		    	if(!isEnabledProc(procname)) {
-	 		    		Log.info("DynamicEnabler simpleEnableTopWins skipping process '"+ procname +"'");			
+	 		    		Log.info("DynamicEnabler simpleEnableTopWins skipping process '"+ procname +"'");
 	 		    		if(pwin instanceof TestObject) ((TestObject)pwin).unregister();
 	 		    		if(owin instanceof TestObject) ((TestObject)owin).unregister();
 	 		    		if(iwin instanceof TestObject) ((TestObject)iwin).unregister();
 	 		    		continue;
 	 		    	}
- 		    		Log.info("DynamicEnabler simpleEnableTopWins HANDLING process '"+ procname +"'");			
+ 		    		Log.info("DynamicEnabler simpleEnableTopWins HANDLING process '"+ procname +"'");
 	 		    }
  		    	topcount++;
  				boolean notEnabled = true;
 				// Handle for .NET does not seem to work on Windows
-				// or, it is that there are multiple window handles 
-				// thus the process is getting enabled multiple times 
+				// or, it is that there are multiple window handles
+				// thus the process is getting enabled multiple times
 				// and locking up Windows
 				try{
 					Log.info("==============   Try to enable pid="+pid+"; classname="+classname+" .................  ");
-					rto.enableForTesting(pid); //ORIGINAL					
+					rto.enableForTesting(pid); //ORIGINAL
 					winenabled.add(pidI); // ORIGINAL
 					notEnabled=false;
 		 		    Log.info("DynamicEnabler ENABLED process containing: "+ classname +"; pId: "+ pid+"; hWnd: "+ hWnd+"; IWIN: "+iwin);
@@ -638,29 +671,29 @@ public class DynamicEnabler {
 				// So, until we know what to do on Unix....
 				}catch(NotSupportedOnUnixException nx){
 					Log.info("DynamicEnabler handling "+ nx.getClass().getSimpleName());
-					try{ 
+					try{
 						rto.enableForTesting(hWnd);
 						winenabled.add(pidI);
 						notEnabled=false;
 			 		    Log.info("DynamicEnabler ENABLED process containing: "+ classname +"; pId: "+ pid+"; hWnd: "+ hWnd+"; IWIN: "+iwin);
 					}
 					catch(Exception x2){
-						Log.debug("DynamicEnabler failed to enable class "+ classname +" with pId "+ pid +" due to "+ 
+						Log.debug("DynamicEnabler failed to enable class "+ classname +" with pId "+ pid +" due to "+
 								  nx.getClass().getSimpleName()+" followed by "+ x2.getClass().getSimpleName());
 					}
 				}catch(UnableToHookException nx){
-					Log.debug("DynamicEnabler failed to enable class "+ classname +" with pId "+ pid +" due to "+ 
+					Log.warn("DynamicEnabler failed to enable class "+ classname +" with pId "+ pid +" due to "+
 							  nx.getClass().getSimpleName());
 				}catch(Exception nx){
 					Log.info("DynamicEnabler attempting to enable DESPITE "+ nx.getClass().getSimpleName());
-					try{ 
+					try{
 						rto.enableForTesting(hWnd);
 						winenabled.add(pidI);
 						notEnabled=false;
 			 		    Log.info("DynamicEnabler ENABLED process containing: "+ classname +"; pId: "+ pid+"; hWnd: "+ hWnd+"; IWIN: "+iwin);
 					}
 					catch(Exception x2){
-						Log.debug("DynamicEnabler failed to enable class "+ classname +" with pId "+ pid +" due to "+ 
+						Log.debug("DynamicEnabler failed to enable class "+ classname +" with pId "+ pid +" due to "+
 								  nx.getClass().getSimpleName()+" followed by "+ x2.getClass().getSimpleName());
 					}
 				}
@@ -672,22 +705,22 @@ public class DynamicEnabler {
     		if(iwin instanceof TestObject) ((TestObject)iwin).unregister();
 		}
 	    //DEBUGGING might be causing WIN and NET issues...
-	    topcount += enableUniqueWinsWithJNA();
+//	    topcount += enableUniqueWinsWithJNA();
 	    return topcount;
 	}
-	
+
 
 	/**
-	 * Determine if a particular classname is one we know to ignore.  For example, a class that is 
+	 * Determine if a particular classname is one we know to ignore.  For example, a class that is
 	 * always used by the true target class, like a tooltip class.
-	 * 
+	 *
 	 * @param classname of an object found within the list of all running classes.
 	 * @return true if the provided classname exists in our ignorewins list.
 	 */
     public static boolean ignoreTopWindow(String classname){
 		return vectorContainsRegexMatch(ignorewins,classname);
-	}	
-	
+	}
+
     /**
      * Attempt to match a target String to stored regex expressions.
      * The stored regex expressions are partial classnames in our case,
@@ -701,7 +734,7 @@ public class DynamicEnabler {
     	int sindex = -1;
     	boolean matched=false;
     	while((items.hasMoreElements())&&(!matched)){
-    		try{ 
+    		try{
     			source = (String) items.nextElement();
     			sindex = source.indexOf(REGEX_WILDCARD);
     			if(sindex > 0) matched = target.startsWith(source.substring(0, sindex));
@@ -713,18 +746,18 @@ public class DynamicEnabler {
     	}
     	return matched;
     }
-      
+
     /** ".*" */
     static String REGEX_WILDCARD = ".*";
     /** "*" */
     static String GENERIC_WILDCARD = "*";
-    
-	
+
+
 	/**
 	 * Attempts to load Standard and Custom resource files for the DymamicEnabler.
 	 * First we attempt to load the contents of the Standard resource in a JAR file.
-	 * Then we determine the location of that JAR file and attempt to load the contents 
-	 * of a user-customized version of the same resource contained in the directory where 
+	 * Then we determine the location of that JAR file and attempt to load the contents
+	 * of a user-customized version of the same resource contained in the directory where
 	 * the JAR file is located.
 	 * @param resource JAR resource (like "WindowsClassMap.DAT") to seek.
 	 * @param vector Vector containing classnames to Dynamically enable or suppress.
@@ -732,23 +765,23 @@ public class DynamicEnabler {
 	 * @throws FileNotFoundException
 	 */
 	private static Vector appendMapVector(String resource, Vector vector)throws FileNotFoundException{
-		//find and load our valid class list for dynamic enabling 			
+		//find and load our valid class list for dynamic enabling
 		URL mapurl = null;
 		Properties classmap = new Properties();
-		try{ 
+		try{
 			Log.info("DynamicEnabler try AgentClassLoader.locateResource");
 			mapurl = AgentClassLoader.locateResource(resource);
 		}catch(Exception x){
 			Log.info("DynamicEnabler ignoring AgentClassLoader.locateResource "+ x.getClass().getSimpleName());
 		}
 
-		if (mapurl == null){ 
+		if (mapurl == null){
 			try{
 				Log.info("DynamicEnabler try DynamicEnabler.class.getResource");
 				mapurl = DynamicEnabler.class.getResource(resource);}
 			catch(Exception x){ Log.info("DynamicEnabler ignoring DynamicEnabler.class.getResource "+ x.getClass().getSimpleName());}
 		}
-		if (mapurl == null){ 
+		if (mapurl == null){
 			try{
 				Log.info("DynamicEnabler try getSystemResource");
 				mapurl = ClassLoader.getSystemResource(resource);}
@@ -777,32 +810,32 @@ public class DynamicEnabler {
 		}
 		try{
 			URL mapurlcustom = AgentClassLoader.findCustomizedJARResource(mapurl, resource);
-			// see if there are local class list customizations for dynamic enabling (Windows) 
+			// see if there are local class list customizations for dynamic enabling (Windows)
 			// NullPointerException if custom mainmap not found
 			Log.info("RFT DynamicEnabler customized resource: "+ mapurlcustom.getPath());
 			classmap = FileUtilities.appendProperties(classmap, mapurlcustom);
 		}
 		catch(Exception anye){
 			Log.info("Problem loading (or missing) custom '"+ resource +"' file.");
-		}			
+		}
 
 		// init and fill enablewins
 		Enumeration classes = classmap.elements();
 		Object item = null;
-		while (classes.hasMoreElements()){					
+		while (classes.hasMoreElements()){
 			item = classes.nextElement();
 			if (item != null) vector.add(item);
-            Log.info("DynamicEnabler storing: "+item); 
+            Log.info("DynamicEnabler storing: "+item);
 		}
 		return vector;
 	}
-	
+
 	/**
-	 * Calls domain.getTopObjects() ONLY if the domain's process is determined to 
-	 * have active UI resources.  However, if there are any problems in determining 
-	 * if the process is using UI resources then we typically will just call 
+	 * Calls domain.getTopObjects() ONLY if the domain's process is determined to
+	 * have active UI resources.  However, if there are any problems in determining
+	 * if the process is using UI resources then we typically will just call
 	 * domain.getTopObjects() anyways.
-	 * 
+	 *
 	 * @param domain
 	 * @return
 	 */
@@ -812,7 +845,7 @@ public class DynamicEnabler {
     		Log.debug("DynamicEnabler cannot process a NULL domain.");
     		return wins;
     	}
-    	try{ 
+    	try{
     		if(Platform.isWindows()){
     			int uis = 0;
     			boolean tried = false;
@@ -844,7 +877,7 @@ public class DynamicEnabler {
     	}
     	catch(Exception x){
     		Log.info("DynamicEnabler skipping domain '"+ domain.getName()+"' due to "+ x.getClass().getSimpleName()+":"+ x.getMessage());
-    	}			
+    	}
     	return wins;
 	}
 }

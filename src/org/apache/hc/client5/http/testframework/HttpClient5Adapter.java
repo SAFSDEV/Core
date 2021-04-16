@@ -25,28 +25,37 @@
  *
  */
 
+/**
+ * OCT 13, 2017 (Lei Wang) Added code to handle SSO authentication.
+ * FEB 26, 2018 (Lei Wang) Modified execute(): Use EntityBuilder to handle body of more formats (than String).
+ */
 package org.apache.hc.client5.http.testframework;
 
+import java.io.File;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.entity.EntityBuilder;
 import org.apache.hc.client5.http.impl.routing.DefaultProxyRoutePlanner;
 import org.apache.hc.client5.http.impl.sync.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.sync.HttpClients;
 import org.apache.hc.client5.http.impl.sync.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.sync.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.sync.HttpClients;
 import org.apache.hc.client5.http.methods.RequestBuilder;
 import org.apache.hc.client5.http.routing.HttpRoutePlanner;
+import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.http.ProtocolVersion;
-import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
-import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.safs.IndependantLog;
+import org.safs.auth.SSOAuth;
+import org.safs.auth.SSOAuthentication;
 
 // TODO: can this be moved beside HttpClient?  If so, throw a better exception than HttpServerTestingFrameworkException.
 /**
@@ -61,6 +70,7 @@ public class HttpClient5Adapter extends HttpClientPOJOAdapter {
      */
     @Override
     public Map<String, Object> execute(final String defaultURI, final Map<String, Object> request) throws Exception {
+    	String debugmsg = "HttpClient5Adapter.execute(): ";
         // check the request for missing items.
         if (defaultURI == null) {
             throw new Exception("defaultURL cannot be null");
@@ -124,24 +134,48 @@ public class HttpClient5Adapter extends HttpClientPOJOAdapter {
         }
 
         // call setEntity if a body is specified.
-        final String requestBody = (String) request.get("body");
+        final Object requestBody = request.get("body");
         if (requestBody != null) {
-            final String requestContentType = (String) request.get("contentType");
-            final StringEntity entity = requestContentType != null ?
-                                          new StringEntity(requestBody, ContentType.parse(requestContentType)) :
-                                          new StringEntity(requestBody);
+//        	final String requestContentType = (String) request.get("contentType");
+//          final HttpEntity entity = requestContentType != null ?
+//                                          new StringEntity(requestBody, ContentType.parse(requestContentType)) :
+//                                          new StringEntity(requestBody);
+
+        	EntityBuilder entityBuilder = EntityBuilder.create();
+        	if(requestBody instanceof String){
+        		entityBuilder.setText((String)requestBody);
+        	}else if(requestBody instanceof File){
+        		entityBuilder.setFile((File)requestBody);
+        	}else if(requestBody instanceof InputStream){
+        		entityBuilder.setStream((InputStream)requestBody);
+        	}else if(requestBody instanceof byte[]){
+        		entityBuilder.setBinary((byte[]) requestBody);
+        	}else{
+        		IndependantLog.warn(debugmsg+"Unknown body "+requestBody.getClass().getSimpleName());
+        	}
+
+        	String requestContentType = (String) request.get("contentType");
+        	if(requestContentType!=null) entityBuilder.setContentType(ContentType.parse(requestContentType));
+
+        	HttpEntity entity = entityBuilder.build();
+
             builder = builder.setEntity(entity);
         }
 
          // Now execute the request.
         HttpRoutePlanner proxy = getProxyPlanner();
         CloseableHttpClient httpclient = null;
-        if(proxy==null){
-        	httpclient = HttpClients.createDefault();
-        }else{
-        	httpclient = HttpClients.custom().setRoutePlanner(proxy).build();
+        HttpClientBuilder clientBuilder = HttpClients.custom();
+
+        if(proxy!=null){
+        	clientBuilder = HttpClients.custom().setRoutePlanner(proxy);
         }
-        
+        if(auth instanceof SSOAuth){
+        	SSOAuthentication ssoAuth = SSOAuthentication.getInstance().init((SSOAuth) auth);
+        	ssoAuth.addCookies(clientBuilder);
+        }
+
+        httpclient = clientBuilder.build();
         final CloseableHttpResponse response = httpclient.execute(builder.build());
 
         // Prepare the response.  It will contain status, body, headers, and contentType.
@@ -172,14 +206,16 @@ public class HttpClient5Adapter extends HttpClientPOJOAdapter {
         return "HttpClient5";
     }
 
-    
+
     private HttpRoutePlanner getProxyPlanner(){
     	if(proxyServerURL==null){
     		return null;
     	}
-    	
-    	IndependantLog.debug("getProxyPlanner(): parsing proxy URL "+proxyServerURL);
-    	
+
+    	String debugmsg = "HttpClient5Adapter.getProxyPlanner(): ";
+
+    	IndependantLog.debug(debugmsg+"parsing proxy URL "+proxyServerURL);
+
     	//break proxyServerURL into "serverName", "port", "username", "password" etc.
     	//http://user:password@server:port
     	String HTTP = "http://";
@@ -187,11 +223,11 @@ public class HttpClient5Adapter extends HttpClientPOJOAdapter {
     	String COLON = ":";
     	int httpIndex = proxyServerURL.indexOf(HTTP);
     	int atIndex = proxyServerURL.indexOf(AT);
-    	
+
     	String serverPort = null;
     	String proxyServer = null;
     	int proxyPort = 80;
-    	
+
     	if(atIndex>-1){
     		serverPort = proxyServerURL.substring(atIndex+AT.length());
     	}else{
@@ -201,25 +237,25 @@ public class HttpClient5Adapter extends HttpClientPOJOAdapter {
     			serverPort = proxyServerURL;
     		}
     	}
-    	
+
     	if(serverPort!=null){
     		String[] serverPortArray = serverPort.split(COLON);
     		try{
     			proxyServer = serverPortArray[0];
     		}catch(Exception e){
-    			IndependantLog.warn("Failed to get proxy server due to "+e.getMessage());
+    			IndependantLog.warn(debugmsg+"Failed to get proxy server due to "+e.getMessage());
     		}
     		try{
     			proxyPort = Integer.parseInt(serverPortArray[1]);
     		}catch(Exception e){
-    			IndependantLog.warn("Failed to get proxy port due to "+e.getMessage());
-    		}    		
+    			IndependantLog.warn(debugmsg+"Failed to get proxy port due to "+e.getMessage());
+    		}
     	}
-    	
+
     	if(proxyServer==null){
     		return null;
     	}
     	HttpHost proxy = new HttpHost(proxyServer, proxyPort);
-    	return new DefaultProxyRoutePlanner(proxy);    		
+    	return new DefaultProxyRoutePlanner(proxy);
     }
 }

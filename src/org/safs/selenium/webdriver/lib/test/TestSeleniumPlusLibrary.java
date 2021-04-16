@@ -1,7 +1,20 @@
 /**
- ** Copyright (C) SAS Institute, All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.selenium.webdriver.lib.test;
 
 import java.util.Date;
@@ -27,59 +40,8 @@ import org.safs.selenium.webdriver.lib.WDLibrary;
  */
 public class TestSeleniumPlusLibrary {
 
-	/**
-	 * The <b>hostname[:port]</b> providing below services used by this test, such as
-	 * <ul>
-	 * <li>/openui5home/1.16.8/checkbox.htm
-	 * <li>/openui5home/1.16.8/combobox.htm
-	 * </ul>
-	 *
-	 */
-	static String testServer = null;
-	/** the http(s) proxy servername[:port] */
-	static String proxyServer = null;
-	/** the bypass server names, separated by comma, such as localhost,127.0.0.1*/
-	static String byPass = null;
-
-	/**
-	 * java org.safs.selenium.webdriver.lib.test.TestSeleniumPlusLibrary -ts testServer [-p proxy [-b bypass]]
-	 *
-	 * @param args
-	 */
 	public static void main(String[] args){
 		try{
-			boolean parseOK = true;
-			boolean testServerFed = false;
-
-			for(int i=0;i<args.length;i++){
-				if("-ts".equalsIgnoreCase(args[i])){
-					if(i+1<args.length){
-						testServer = args[++i];
-						testServerFed = true;
-					}
-				}else if("-p".equalsIgnoreCase(args[i])){
-					if(i+1<args.length){
-						proxyServer = args[++i];
-					}else{
-						parseOK = false;
-					}
-				}else if("-b".equalsIgnoreCase(args[i])){
-					if(i+1<args.length){
-						byPass = args[++i];
-					}else{
-						parseOK = false;
-					}
-				}else{
-					//ignore unknown parameters
-				}
-			}
-			parseOK = parseOK && testServerFed;
-
-			if(!parseOK){
-				System.out.println("Usage: java org.safs.selenium.webdriver.lib.test.TestSeleniumPlusLibrary -ts testServer [-p proxy [-b bypass]]");
-				return;
-			}
-
 			Domains.enableDomain(Domains.HTML_DOMAIN);
 			Domains.enableDomain(Domains.HTML_DOJO_DOMAIN);
 			Domains.enableDomain(Domains.HTML_SAP_DOMAIN);
@@ -107,12 +69,9 @@ public class TestSeleniumPlusLibrary {
 		int timeout = 15;
 
 		HashMap<String,Object> extraParameters = new HashMap<String, Object>();
-		if(proxyServer!=null){
-			extraParameters.put(SelectBrowser.KEY_PROXY_SETTING, proxyServer);
-			if(byPass!=null){
-				extraParameters.put(SelectBrowser.KEY_PROXY_BYPASS_ADDRESS, byPass);
-			}
-		}
+		//User needs to set the internet proxy server to connect the internet
+		extraParameters.put(SelectBrowser.KEY_PROXY_SETTING, "internet.proxy.server:80");
+		extraParameters.put(SelectBrowser.KEY_PROXY_BYPASS_ADDRESS, "localhost,127.0.0.1,tadsrv");
 
 		try{
 			WDLibrary.startBrowser(browser, url, id, timeout, true, extraParameters);
@@ -141,7 +100,7 @@ public class TestSeleniumPlusLibrary {
 	}
 
 	static void testSapCheckBox() throws SeleniumPlusException{
-		String id = startFireFoxBroswer("http://"+testServer+"/openui5home/1.16.8/checkbox.htm");
+		String id = startFireFoxBroswer("http://tadsrv/openui5home/1.16.8/checkbox.htm");
 		WebElement check = WDLibrary.getObject("id=state_check");
 
 		CheckBox checkbox = new CheckBox(check);
@@ -152,7 +111,7 @@ public class TestSeleniumPlusLibrary {
 	}
 
 	static void testHtmlCheckBox() throws SeleniumPlusException{
-		String id = startFireFoxBroswer("http://"+testServer+"/openui5home/1.16.8/checkbox.htm");
+		String id = startFireFoxBroswer("http://tadsrv/openui5home/1.16.8/checkbox.htm");
 		WebElement check = WDLibrary.getObject("id=normalCheckBox");
 
 		CheckBox checkbox = new CheckBox(check);
@@ -192,7 +151,7 @@ public class TestSeleniumPlusLibrary {
 	}
 
 	static void testNormalComboBox() throws SeleniumPlusException{
-		String id = startFireFoxBroswer("http://"+testServer+"/TestDojo/demo/combobox.php");
+		String id = startFireFoxBroswer("http://tadsrv/TestDojo/demo/combobox.php");
 		WebElement combo = WDLibrary.getObject("id=fruit");
 
 		ComboBox combobox = new ComboBox(combo);
@@ -251,7 +210,7 @@ public class TestSeleniumPlusLibrary {
 
 
 	static void testDojoSelect() throws SeleniumPlusException{
-		String id = startFireFoxBroswer("http://"+testServer+"/dojohome/demo/Select.php");
+		String id = startFireFoxBroswer("http://tadsrv/dojohome/demo/Select.php");
 
 		String RS = "id=stateSelect";
 		WebElement combo = WDLibrary.getObject(RS);
@@ -266,7 +225,7 @@ public class TestSeleniumPlusLibrary {
 	}
 
 	static void testDojoComboBox() throws SeleniumPlusException{
-		String id = startFireFoxBroswer("http://"+testServer+"/dojohome/demo/ComboBox.php");
+		String id = startFireFoxBroswer("http://tadsrv/dojohome/demo/ComboBox.php");
 		WebElement combo = WDLibrary.getObject("id=widget_stateSelect");
 
 		ComboBox combobox = new ComboBox(combo);
@@ -275,7 +234,7 @@ public class TestSeleniumPlusLibrary {
 		WDLibrary.stopBrowser(id);
 	}
 	static void testDojoFilteringSelect() throws SeleniumPlusException{
-		String id = startFireFoxBroswer("http://"+testServer+"/dojohome/demo/FilteringSelect.php");
+		String id = startFireFoxBroswer("http://tadsrv/dojohome/demo/FilteringSelect.php");
 		WebElement combo = WDLibrary.getObject("id=widget_stateSelect");
 
 		ComboBox combobox = new ComboBox(combo);
@@ -285,7 +244,7 @@ public class TestSeleniumPlusLibrary {
 	}
 
 	static void testSapComboBox() throws SeleniumPlusException{
-		String id = startFireFoxBroswer("http://"+testServer+"/openui5home/1.16.8/combobox.htm");
+		String id = startFireFoxBroswer("http://tadsrv/openui5home/1.16.8/combobox.htm");
 		WebElement combo = WDLibrary.getObject( "id=state_cb");
 
 		String clazz = WDLibrary.SAP.getSAPClassName(combo);
@@ -356,7 +315,7 @@ public class TestSeleniumPlusLibrary {
 	}
 
 	static void testJavaScriptOnDOJOApplication() throws SeleniumPlusException{
-		String id = startFireFoxBroswer("http://"+testServer+"/TestDojo/demo/combobox.php");
+		String id = startFireFoxBroswer("http://tadsrv/TestDojo/demo/combobox.php");
 
 		WDLibrary.js_initError();
 
@@ -398,7 +357,7 @@ public class TestSeleniumPlusLibrary {
 	}
 
 	static void testJavaScriptOnSAPApplication() throws SeleniumPlusException{
-		String id = startFireFoxBroswer("http://"+testServer+"/openui5home/1.16.8/combobox.htm");
+		String id = startFireFoxBroswer("http://tadsrv/openui5home/1.16.8/combobox.htm");
 
 		String RS = "id=state_cb";
 		WebElement combo = WDLibrary.getObject(RS);

@@ -6,7 +6,7 @@
 '*         -1: No SAFS detected
 '*          1: Uninstall finished
 '*************************************************************************************
-Const groupTitle = "SAFS 2014.01"     'title of group on Windows program menu 
+Const groupTitle = "SAFS 2018"     'title of group on Windows program menu 
 Dim shell, fso
 Dim mainProgramsDir, safsProgramDir
 

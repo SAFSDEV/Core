@@ -1,7 +1,20 @@
-/** Copyright (C) (MSA, Inc) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
+/**
+ * Copyright (C) (MSA, Inc), All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs;
 
 import java.util.AbstractList;
@@ -376,9 +389,7 @@ public abstract class TestRecordData implements java.io.Serializable {
    * @param                     n, int, the index of which token to return,
    * @return The n(th) token from the 'inputRecord' based on  'separator' is returned.
    * if either 'inputRecord' or 'separator' are null, then SAFSException is thrown
-   * @exception IndexOutOfBoundsException - if n is out of range
-   * (n < 0 || n >= inputRecordTokens.size()).
-   * @exception SAFSNullPointerException, if either 'inputRecord' or 'separator' are null
+   * @throws SAFSNullPointerException, if either 'inputRecord' or 'separator' are null
    **/
   public String getInputRecordToken (int n) throws SAFSNullPointerException {
     if (inputRecordTokens == null) {
@@ -394,6 +405,7 @@ public abstract class TestRecordData implements java.io.Serializable {
                                 "either 'inputRecord' or 'separator' are null");
       }
     }
+    //@throws IndexOutOfBoundsException - if n is out of range (n < 0 || n > inputRecordTokens.size()).
     return (String) inputRecordTokens.get(n);
   }
 
@@ -401,7 +413,7 @@ public abstract class TestRecordData implements java.io.Serializable {
    * <br><em>Assumptions:</em>  don't pass along IndexOutOfBoundsException, that is caught
    * and a length of zero is the correct size.
    * @return                    int, the number of tokens in the inputRecord
-   * @exception SAFSNullPointerException, if either 'inputRecord' or 'separator' are null
+   * @throws SAFSNullPointerException, if either 'inputRecord' or 'separator' are null
    **/
   public int inputRecordSize () throws SAFSNullPointerException {
     try {
@@ -416,9 +428,7 @@ public abstract class TestRecordData implements java.io.Serializable {
    * @param                     n, int, the index of which token to return,
    * @return The n(th) token from the 'inputRecord' based on  'separator' is returned.
    * if either 'inputRecord' or 'separator' are null, then SAFSException is thrown
-   * @exception IndexOutOfBoundsException - if n is out of range
-   * (n < 0 || n >= inputRecordTokens.size()).
-   * @exception SAFSNullPointerException, if either 'inputRecord' or 'separator' are null
+   * @throws SAFSNullPointerException, if either 'inputRecord' or 'separator' are null
    **/
   public String getTrimmedUnquotedInputRecordToken (int n) throws SAFSNullPointerException {
     String result = getInputRecordToken(n);
@@ -440,7 +450,8 @@ public abstract class TestRecordData implements java.io.Serializable {
 
   /** toString method
    **/
-  public String toString() {
+  @Override
+public String toString() {
     StringBuffer buf = new StringBuffer(768);
     buf.append(" [TestRecordData: ");
     buf.append("\n   fileID: ");

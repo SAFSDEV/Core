@@ -1,13 +1,26 @@
 /**
  * Copyright (C) SAS Institute, All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- */
-
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * Logs for developers, not published to API DOC.
  *
  * History:
  * DEC 13, 2016    (Lei Wang) Initial release.
+ * OCT 24, 2017    (Lei Wang) Deprecated it.
  */
 package org.safs.persist;
 
@@ -25,8 +38,16 @@ import org.safs.tools.RuntimeDataInterface;
 /**
  * Write the Persistable object to a persistence of hierarchical structure, such as JSON, XML file.<br/>
  *
+ * @deprecated The most functionalities has been moved to class {@link PersistorToHierarchialString}, those functionalities will be
+ *             decoupled from this class.<br>
+ *             Currently the class {@link PersistorToHierarchialString} has 2 sub-class {@link PersistorToJSONString} and {@link PersistorToXMLString}.<br>
+ *             The classes {@link PersistorToJSONFile} and {@link PersistorToXMLFile} will not extends from this class {@link PersistorToHierarchialFile} any more,
+ *             they will directly extends the class {@link PersistorToFile} and delegate the 'parse job' (Persistable <--> String)
+ *             to class and {@link PersistorToJSONString} and {@link PersistorToXMLString}.<br>
+ *
  * @author Lei Wang
  */
+@Deprecated
 public class PersistorToHierarchialFile extends PersistorToFile{
 
 	public PersistorToHierarchialFile(RuntimeDataInterface runtime, String filename){
@@ -47,8 +68,8 @@ public class PersistorToHierarchialFile extends PersistorToFile{
 	 * @throws SAFSException
 	 * @throws IOException
 	 */
+	@Override
 	protected final void write(Persistable persistable)  throws SAFSException, IOException{
-		validate(persistable);
 
 		Map<String, Object> contents = persistable.getContents();
 		String className = persistable.getClass().getName();

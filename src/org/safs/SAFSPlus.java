@@ -1,8 +1,20 @@
 /**
  * Copyright (C) SAS Institute, All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- */
-
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * Logs for developers, not published to API DOC.
  *
@@ -12,6 +24,21 @@
  * MAY 27, 2017    (Lei Wang) Added method normalizeTextForInput(): wrap text in double-quote
  *                          if it contains leading/ending "whitespace".
  *                          Added method setNormalizeTextForInput().
+ * SEP 12, 2017    (Lei Wang) Added AltClick keyword support.
+ * APR 18, 2018    (Lei Wang) Modified constructor SAFSPlus() to set product's name, version and description.
+ * MAY 07, 2018    (Lei Wang) Modified method main() added getInstance():
+ *                                    Try to load spring context (beans are loaded the same time) from file customerSpringConfig.xml and springConfig.xml;
+ *                                    Try to get test class (as spring bean) from the spring context if it exists.
+ * SEP 12, 2017    (Lei Wang) Added AltClick keyword support.
+ * AUG 01, 2018    (Lei Wang) Added back() and forward().
+ * SEP 25, 2018    (Lei Wang) Loaded the 'Runner' from spring context.
+ * FEB 12, 2019    (Carl Nagle) Support null String[] args coming into main.
+ * APR 18, 2019    (Lei Wang) Instantiate the 'Runner' in normal way if it is not loaded from spring context.
+ * JUN 17, 2019    (Lei Wang) Added SetNetworkConditions/DeleteNetworkConditions/GetNetworkConditions.
+ * JUL 30, 2019    (Lei Wang) Removed the specific Runner.jsafs() (JSAFSDriver).
+ *                           Added iDriver(), _getMappedValue(), _getVariable() and _setVariable().
+ * JUN 29, 2020    (Lei Wang) Added Misc.CallTestNG().
+ * JUL 03, 2020    (Lei Wang) Added field 'leveledTest': set it to true if user defines the leveled-test.
  */
 package org.safs;
 
@@ -21,6 +48,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.safs.Constants.BrowserConstants;
+import org.safs.image.ImageUtils.AlterImageStyle;
 import org.safs.image.ImageUtils.SubArea;
 import org.safs.model.annotations.Utilities;
 import org.safs.model.commands.CheckBoxFunctions;
@@ -48,6 +76,7 @@ import org.safs.model.tools.AbstractRunner;
 import org.safs.model.tools.DefaultRunner;
 //To keep backward compatibility, continue using SeleniumPlusException instead of SAFSException
 import org.safs.selenium.webdriver.lib.SeleniumPlusException;
+import org.safs.selenium.webdriver.lib.WDLibrary;
 import org.safs.staf.service.logging.AbstractSAFSLoggingService;
 import org.safs.staf.service.map.AbstractSAFSAppMapService;
 import org.safs.text.FAILStrings;
@@ -55,19 +84,28 @@ import org.safs.text.FileUtilities;
 import org.safs.text.FileUtilities.Access;
 import org.safs.text.FileUtilities.DateType;
 import org.safs.text.FileUtilities.FileAttribute;
+import org.safs.text.FileUtilities.FilterMode;
 import org.safs.text.FileUtilities.ImageFilterMode;
 import org.safs.text.FileUtilities.Mode;
 import org.safs.text.FileUtilities.PatternFilterMode;
 import org.safs.text.FileUtilities.Placement;
 import org.safs.text.GENStrings;
 import org.safs.tools.MainClass;
+import org.safs.tools.UniqueStringID;
 import org.safs.tools.counters.CountStatusInterface;
 import org.safs.tools.counters.CountersInterface;
 import org.safs.tools.counters.UniqueStringCounterInfo;
 import org.safs.tools.drivers.DriverConstant;
+import org.safs.tools.drivers.DriverInterface;
 import org.safs.tools.drivers.JSAFSDriver;
+import org.safs.tools.input.MapsInterface;
+import org.safs.tools.input.UniqueStringItemInfo;
 import org.safs.tools.logs.UniqueStringLogLevelInfo;
 import org.safs.tools.stringutils.StringUtilities;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * <pre>
@@ -111,7 +149,7 @@ import org.safs.tools.stringutils.StringUtilities;
  *     be used as base-directory.
  *
  *
- * <Font color="red">NOTE 3: <a href="http://safsdev.sourceforge.net/sqabasic2000/UsingDDVariables.htm">DDVariable</a></Font>
+ * <Font color="red">NOTE 3: <a href="/sqabasic2000/UsingDDVariables.htm">DDVariable</a></Font>
  * To use DDVariable ability, PLEASE remember to turn on the Expression by Misc.Expressions(true);
  * The DDVariable is a variable reference, it can be expressed by a leading symbol ^ and the "variable name".
  * For example:
@@ -144,7 +182,46 @@ public abstract class SAFSPlus {
 	 * and to gain references to more complex services like the running JSAFSDriver.
 	 * Subclass may provide a different Runner than this one.
 	 */
-	protected static AbstractRunner Runner = new DefaultRunner();
+//	protected static AbstractRunner Runner = new DefaultRunner();
+	protected static AbstractRunner Runner = null;
+	/** 'SAFSPlus'  */
+	public static final String PRODUCT_NAME = "SAFSPlus";
+	/** '1.0' */
+	public static final String PRODUCT_VERSION = "1.0";
+	/** 'The driver equipped with rich APIs to run test script in Java.' */
+	public static final String PRODUCT_DESCRIPTION = "The driver equipped with rich APIs to run test script in Java.";
+
+	/***
+	 * The spring application context from where we can get the beans.
+	 */
+	protected static ApplicationContext springApplicationContext = null;
+
+	static{
+		try{
+			System.out.println("SAFSPlus: Spring is looking for "+Constants.SPRING_CONFIG_DEFAULT_FILE);
+			springApplicationContext = new ClassPathXmlApplicationContext(Constants.SPRING_CONFIG_DEFAULT_FILE);
+			System.out.println("SAFSPlus: Spring found "+Constants.SPRING_CONFIG_DEFAULT_FILE);
+			Runner = (AbstractRunner) springApplicationContext.getBean(org.safs.model.tools.DefaultRunner.class.getName());
+			System.out.println("SAFSPlus: Spring got Runner"+Runner);
+
+		}catch(Exception e){
+			//If we didn't create the spring context properly, we cannot use the "annotations" designed for "SAFS Data Service". Refer to link
+			//http://safsdev:8880/safs/selenium/doc/SeleniumPlus-Welcome.html#usingsafsdataservice
+			debug("Failed to initialize the SAFSPlus.Runner by spring in the static clause! Met "+e.getClass().getSimpleName()+":"+e.getMessage());
+			Runner = new DefaultRunner();
+			System.out.println("SAFSPlus: got Runner"+Runner+" by normal instantiation.");
+		}
+
+		try{
+			//Set SAFSPlus product's name, version and description
+			Runner.iDriver().setProductName(PRODUCT_NAME);
+			Runner.iDriver().setVersion(PRODUCT_VERSION);
+			Runner.iDriver().setDescription(PRODUCT_DESCRIPTION);
+		}catch(Exception e){
+			System.err.println("SAFSPlus: Failed to initialize the SAFSPlus.Runner's driver in the static clause! Met "+e.getClass().getSimpleName()+":"+e.getMessage());
+		}
+	}
+
 	/**
 	 * Keep the reference to the default Runner.
 	 *
@@ -198,7 +275,21 @@ public abstract class SAFSPlus {
 	 */
 	protected static boolean _autorunClassProvided = false;
 
+	/** Set to true if we are running a Process Container type of process that does NOT
+	 * lookup a test to execute. */
 	protected static boolean _isSPC = false;
+
+	/** Set to true if we are injecting SAFS/Se+ into a 3rd party process.
+	 * We may be running like SPC, but we may need to lookup a test to execute,
+	 * or injectRuntimeDataAwareness */
+	protected static boolean _isInjected = false;
+
+	/** Set true if a 3rd party injection should still injectRuntimeDataAwareness classes into Maps, etc. */
+	protected static boolean _injectDataAwareness = false;
+
+	/**
+	 * junit class to execute if we are running a junit test instead of the traditional runTest method.
+	 */
 	protected static String _junit = null; //classname(s) to execute from -junit: command-line option
 
 	public SAFSPlus() {
@@ -230,6 +321,24 @@ public abstract class SAFSPlus {
 	 * This must be an "instance" method because subclasses cannot Override static superclass methods. */
 	public abstract void runTest() throws Throwable;
 
+	public static DriverInterface iDriver(){
+		return getRunner().iDriver();
+	}
+	public static void _setVariable(String varname, String value){
+		iDriver().getVarsInterface().setValue(varname, value);
+	}
+
+	public static String _getVariable(String varname){
+		return iDriver().getVarsInterface().getValue(varname);
+	}
+
+	public static String _getMappedValue(String mapid, String section, String item){
+		MapsInterface map = iDriver().getMapsInterface();
+		String realmap = (mapid==null) ? map.getDefaultMap().getUniqueID().toString():mapid;
+		String realsection = (section==null) ? map.getDefaultMapSection().getSectionName():section;
+		return map.getMapItem(new UniqueStringItemInfo(realmap, realsection, item));
+	}
+
 	/**
 	 * Convenience routine to set the value of a SAFS Variable stored in SAFSVARS.<br>
 	 * The act of logging success or failure will change prevResults.
@@ -245,7 +354,7 @@ public abstract class SAFSPlus {
 			if(variableName == null) throw new SeleniumPlusException("SetVariableValue variableName cannot be null!");
 			if(variableName.length()==0) throw new SeleniumPlusException("SetVariableValue variableName cannot be empty!");
 			if(variableValue == null) variableValue = "";
-			Runner.jsafs().setVariable(variableName, variableValue);
+			_setVariable(variableName, variableValue);
 			String msg = GENStrings.convert(GENStrings.SUCCESS_1, "SetVariableValue successful.", "SetVariableValue");
 			String detail = GENStrings.convert(GENStrings.SOMETHING_SET,
 					                        "'"+ variableName +"' set to '"+ variableValue +"'",
@@ -330,12 +439,12 @@ public abstract class SAFSPlus {
 
 	/**
 	 * Convenience routine to retrieve the value of a SAFS Variable stored in SAFSVARS.
-	 * <br>This will exploit the <a href="http://safsdev.github.io/sqabasic2000/CreateAppMap.htm#ddv_lookup" target="_blank">SAFSMAPS look-thru</a>
-	 * and <a href="http://safsdev.github.io/sqabasic2000/TestDesignGuidelines.htm#AppMapChaining" target="_blank">app map chaining</a> mechanism.
+	 * <br>This will exploit the <a href="/sqabasic2000/CreateAppMap.htm#ddv_lookup" target="_blank">SAFSMAPS look-thru</a>
+	 * and <a href="/sqabasic2000/TestDesignGuidelines.htm#AppMapChaining" target="_blank">app map chaining</a> mechanism.
 	 * <br>That is, any variable that does NOT exist in SAFSVARS will be sought as an
 	 * ApplicationConstant in the SAFSMAPS service.
 	 * <p>
-	 * See <a href="http://safsdev.github.io/sqabasic2000/TestDesignGuidelines.htm" target="_blank">Test Design Guidelines for Localization</a>.
+	 * See <a href="/sqabasic2000/TestDesignGuidelines.htm" target="_blank">Test Design Guidelines for Localization</a>.
 	 * @param variableName
 	 * @return String value, or an empty String.  Null if an Exception or Error was encountered.<p>
 	 * Does not change prevResults.
@@ -343,7 +452,7 @@ public abstract class SAFSPlus {
 	 */
 	public static String GetVariableValue(String variableName){
 		try{
-			return Runner.jsafs().getVariable(variableName);
+			return _getVariable(variableName);
 		}
 		catch(Throwable t){
 			// add failure info here
@@ -456,7 +565,7 @@ public abstract class SAFSPlus {
 
 		static void incrementCounters(boolean wasSuccessful){
 			long status = wasSuccessful ? CountersInterface.STATUS_TEST_PASS : CountersInterface.STATUS_TEST_FAILURE;
-			Runner.driver().iDriver().getCountersInterface().incrementAllCounters(new UniqueStringCounterInfo("STEP", "STEP"), status);
+			Runner.iDriver().getCountersInterface().incrementAllCounters(new UniqueStringCounterInfo("STEP", "STEP"), status);
 		}
 
 		/**
@@ -846,7 +955,7 @@ public abstract class SAFSPlus {
 	}
 
 	/**
-	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/DDDriverCommandsIndex.htm">Driver keywords</a>, like StartWebBrowser, UseWebBrowser, SetPosition etc.<br>
+	 * Wrapper class providing APIs to handle <a href="/sqabasic2000/DDDriverCommandsIndex.htm">Driver keywords</a>, like StartWebBrowser, UseWebBrowser, SetPosition etc.<br>
 	 */
 	public static class DriverCommand{
 
@@ -872,9 +981,9 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Invoke one or more JUnit tests using the provided Class name(s).
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/DDDriverFlowCommandsReference.htm#detail_CallJUnit">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/DDDriverFlowCommandsReference.htm#detail_CallJUnit">Detailed Reference</a><p>
 		 * @param clazzes String, the JUnit class names separated by semi-colon, colon, comma, or space.
-		 * @return true if successfully executed with a successful result, false if the execution fails.<br>
+		 * @return true if executed with a successful result, false if the execution fails.<br>
 		 *         The JUnit test result will be stored in "status info" of #prevResults, call {@link org.safs.TestRecordHelper#getStatusInfo()} to get it.<br>
 		 *
 		 * @see #prevResults
@@ -899,6 +1008,39 @@ public abstract class SAFSPlus {
 			return command(DDDriverFlowCommands.CALLJUNIT_KEYWORD, clazzes);
 		}
 
+		/**
+		 * Invoke TestNG tests using the provided <a href="https://javadoc.jitpack.io/com/github/cbeust/testng/master/javadoc/org/testng/TestNG.html">TestNG parameters</a>.
+		 * <p>See <a href="/sqabasic2000/DDDriverFlowCommandsReference.htm#detail_CallTestNG">Detailed Reference</a><p>
+		 * @param parameters String, the <a href="https://javadoc.jitpack.io/com/github/cbeust/testng/master/javadoc/org/testng/TestNG.html">TestNG parameters</a>.
+		 * @return true if executed with a successful result, false if the execution fails.<br>
+		 *         The TestNG.main() return code will be stored in "status info" of #prevResults, call {@link org.safs.TestRecordHelper#getStatusInfo()} to get it.<br>
+		 *
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode
+		 * @see org.safs.TestRecordHelper#getStatusInfo
+		 *
+		 * @example
+		 * <pre>
+		 * {@code
+		 *  //Execute a TestNG Test "testng.TestNGTest".
+		 *  boolean success = Misc.CallTestNG(quote("-testclass testng.TestNGTest"));
+		 *
+		 *  //Execute a TestNG Test "testng.TestNGTest", each test group will be executed exception "othertest".
+		 *  boolean success = Misc.CallTestNG(quote("-testclass testng.TestNGTest -excludegroups othertest"));
+		 *
+		 *  //Execute a TestNG Test "testng.TestNGTest", only test group "g1" and "g2" will be executed.
+		 *  boolean success = Misc.CallTestNG(quote("-testclass testng.TestNGTest -groups g1,g2"));
+		 *
+		 *  //Execute a TestNG Test defined by "testng.xml".
+		 *  boolean success = Misc.CallTestNG(quote("testng.xml"));
+		 *
+		 * }
+		 * </pre>
+		 */
+		public static boolean CallTestNG(String parameters){
+			return command(DDDriverFlowCommands.CALLTESTNG_KEYWORD, parameters);
+		}
+
 	    /***********
         Execute an external <b>selenium script</b> in the currently running WebDriver.<br>
 		The external <b>selenium script</b> is recorded by a testing tool, such as "Selenium Builder" or "Selenium IDE".
@@ -906,9 +1048,9 @@ public abstract class SAFSPlus {
         Supported script types are
         <ul>
         <li><a href="http://seleniumbuilder.github.io/se-builder/">Selenium Builder</a> <a href="https://github.com/SeleniumBuilder/se-builder/wiki/JSON-Format">JSON</a> format.
-        <li><a href="http://www.seleniumhq.org/projects/ide/">Selenium IDE</a> <a href="https://raw.githubusercontent.com/SAFSDEV/SeleniumPlus-REGRESSION/master/SeBuilder/Scripts/FormsSRTest.htm">HTML</a> format.
+        <li><a href="http://www.seleniumhq.org/projects/ide/">Selenium IDE</a> or SelRunner <a href="https://raw.githubusercontent.com/SAFSDEV/SeleniumPlus-REGRESSION/master/SeBuilder/Scripts/FormsSRTest.htm">HTML</a> format.
         </ul>
-        Please refer to <a href="http://safsdev.github.io/selenium/doc/SeleniumPlus-Welcome.html#usingseleniumscripts">Using SeleniumScripts</a> for details.<br>
+        Please refer to <a href="/selenium/doc/SeleniumPlus-Welcome.html#usingseleniumscripts">Using SeleniumScripts</a> for details.<br>
         <br>
 		@param path -- full absolute path or project-relative path to an existing script to execute.
         @return true if successfully executed with a successful result,
@@ -955,7 +1097,7 @@ public abstract class SAFSPlus {
         @param command -- the command to be issued to the the service or process.
         @param resultVar -- the DDVariable name to receive the results of the call.
 		@param params -- additional parameters (String or String[]), if any, to be passed with the command.
-        <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/DDDriverCommandsCallRemote.html">Detailed Reference</a><p>
+        <p>See <a href="/sqabasic2000/DDDriverCommandsCallRemote.html">Detailed Reference</a><p>
         @return true if successful, false otherwise.<p>
         * @see #prevResults
 		* @see org.safs.TestRecordHelper#getStatusCode
@@ -1023,6 +1165,72 @@ public abstract class SAFSPlus {
 			return command(DDDriverCommands.EXPRESSIONS_KEYWORD, String.valueOf(on));
 		}
 
+		/**
+		 * <b>NOTE: This only works for Chrome browser started with option 'setNetworkConditions'.</b>
+		 * @param networkConditions	String, JSON string contains the 'network conditions' to set.<br>
+		 *                                  This JSON can contain keys of "offline"(boolean), "latency"(integer ms), "download_throughput"(integer bps), "upload_throughput"(integer bps).
+		 *                                  such as <b>{"offline":false, "latency":5, "download_throughput":5000 , "upload_throughput":5000}</b>
+		 * @return boolean true if 'network conditions' have been set successfully<br>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode
+		 * @see org.safs.TestRecordHelper#getStatusInfo
+		 * <p>
+		 * @example
+		 * <pre>
+		 * {@code
+		 *   SetNetworkConditions("{ \"offline\":false, \"latency\":5, \"download_throughput\":5000 , \"upload_throughput\":5000}");
+		 * }
+		 * </pre>
+		 */
+		public static boolean SetNetworkConditions(String networkConditions){
+			return command(DDDriverCommands.SETNETWORKCONDITIONS_KEYWORD, networkConditions);
+		}
+
+		/**
+		 * <b>NOTE: This only works for Chrome browser started with option 'setNetworkConditions'.</b>
+		 * @return String, the current network conditions, it is normally a JSON string, such as <b>{"offline":false, "latency":5, "download_throughput":5000 , "upload_throughput":5000}</b>.<br>
+		 *                 it will be null if no 'network conditions' is set.
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode
+		 * @see org.safs.TestRecordHelper#getStatusInfo
+		 * <p>
+		 * @example
+		 * <pre>
+		 * {@code
+		 *   String networkConditions = GetNetworkConditions();
+		 * }
+		 * </pre>
+		 */
+		public static String GetNetworkConditions(){
+			String resultVar = "GetNetworkConditions_VAR";
+			if(command(DDDriverCommands.GETNETWORKCONDITIONS_KEYWORD, resultVar)){
+				String result = GetVariableValue(resultVar);
+				//if no 'network conditions' is set, the result will be null, and we store "null" into SAFS variable to get back the result
+				if("null".equalsIgnoreCase(result)) return null;
+				return result;
+			}else{
+				return null;
+			}
+		}
+
+		/**
+		 * <b>NOTE: This only works for Chrome browser started with option 'setNetworkConditions'.</b>
+		 * @return boolean true if the current 'network condition' has been removed.
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode
+		 * @see org.safs.TestRecordHelper#getStatusInfo
+		 * <p>
+		 * @example
+		 * <pre>
+		 * {@code
+		 *   boolean success = DeleteNetworkConditions();
+		 * }
+		 * </pre>
+		 */
+		public static boolean DeleteNetworkConditions(){
+			return command(DDDriverCommands.DELETENETWORKCONDITIONS_KEYWORD);
+		}
+
 	    /***********
         Capture the location of the mouse pointer relative to the screen and save the x and y components into variables.
 		@param variableX String, The name of the DDVariable to store the X component of the mouse position.
@@ -1071,7 +1279,7 @@ public abstract class SAFSPlus {
 
 		/***********
         Clear the internal application map cache.
-        <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/DDDriverCommandsReference.htm#detail_ClearAppMapCache">Detailed Reference</a><p>
+        <p>See <a href="/sqabasic2000/DDDriverCommandsReference.htm#detail_ClearAppMapCache">Detailed Reference</a><p>
         @return  true if successful, false otherwise.<p>
 		* @see #prevResults
 		* @see org.safs.TestRecordHelper#getStatusCode
@@ -1084,7 +1292,7 @@ public abstract class SAFSPlus {
 
 		/***********
         Clear storage of all SAFS variables containing a specific prefix.
-		<p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/DDDriverCommandsReference.htm#detail_ClearArrayVariables">Detailed Reference</a><p>
+		<p>See <a href="/sqabasic2000/DDDriverCommandsReference.htm#detail_ClearArrayVariables">Detailed Reference</a><p>
 		@param prefix String, The variable name prefix to use for the delete.
         @return  true if successful, false otherwise.<p>
 		* @see #prevResults
@@ -1116,7 +1324,7 @@ public abstract class SAFSPlus {
 
 	    /***********
 	    Close a named application process launched with LaunchApplication.
-        <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/DDDriverCommandsReference.htm#detail_CloseApplication">Detailed Reference</a><p>
+        <p>See <a href="/sqabasic2000/DDDriverCommandsReference.htm#detail_CloseApplication">Detailed Reference</a><p>
         @param ApplicationID String, A text ID to reference the application to close.
         @return true if successful, false otherwise.<p>
         * @see #prevResults
@@ -1135,8 +1343,8 @@ public abstract class SAFSPlus {
 		}
 
 		/**
-		 * By map ID, Close a opened Application Map in <a href="http://safsdev.sourceforge.net/sqabasic2000/TestDesignGuidelines.htm#AppMapChaining">App Map chain</a>.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_CloseApplicationMap">Detailed Reference</a><p>
+		 * By map ID, Close a opened Application Map in <a href="/sqabasic2000/TestDesignGuidelines.htm#AppMapChaining">App Map chain</a>.<br>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_CloseApplicationMap">Detailed Reference</a><p>
 		 * @param mapID String, the ID of the map to be closed. The ID is usually the map file name.<br>
 		 *                      It is the same ID that you provide when calling {@link Misc#SetApplicationMap(String)}.<br>
 		 * @return true if successful, false otherwise.<p>
@@ -1156,7 +1364,7 @@ public abstract class SAFSPlus {
 				throw new SeleniumPlusException("SetApplicationMap mapID cannot be null!");
 			}
 			if(command(DDDriverCommands.CLOSEAPPLICATIONMAP_KEYWORD, mapID)){
-				String defaultMapID2 = Runner.jsafs().getMapsInterface().getDefaultMap().getUniqueID().toString();
+				String defaultMapID2 = iDriver().getMapsInterface().getDefaultMap().getUniqueID().toString();
 				IndependantLog.debug("Current default map ID = "+defaultMapID2);
 				return true;
 			}else{
@@ -1166,7 +1374,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Copy the value of a (dynamic) DDVariable to another.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_CopyVariableValueEx">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_CopyVariableValueEx">Detailed Reference</a><p>
 		 * @param sourceVar String, The name of the variable to copy.
 		 * @param destVar String, The name of the variable to receive the copy.
 		 * @return true if successful, false otherwise.<p>
@@ -1200,7 +1408,7 @@ public abstract class SAFSPlus {
 
 		/***********
 	    Identify and Launch a specified application
-        <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/DDDriverCommandsReference.htm#detail_LaunchApplication">Detailed Reference</a><p>
+        <p>See <a href="/sqabasic2000/DDDriverCommandsReference.htm#detail_LaunchApplication">Detailed Reference</a><p>
         @param ApplicationID String, A text ID to reference the application
         @param ExecutablePath String, The path, filename, and parameters for the executable OR an ApplicationConstant.
 	    @param params -- <br>
@@ -1224,7 +1432,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Assign the value of the specified Registry Key to a variable.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_GetRegistryKeyValue">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_GetRegistryKeyValue">Detailed Reference</a><p>
 		 * @param key String, The registry Key to seek
 		 * @param keyValue String, The value name under the parent key to seek
 		 * @param result String, The name of the variable to receive the value of the registry key.
@@ -1249,7 +1457,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Send a "GET" HTTP Request by AJAX, and save the response to a variable.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_GetURL">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_GetURL">Detailed Reference</a><p>
 		 * @param url String, The URL to request.
 		 * @param variable String, The name of the variable holding the content of response<br>
 		 * 		  Some suffixes can be appended to the variable name to form new variable holding other values, suffixes list as below:<br>
@@ -1435,7 +1643,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Start WebBrowser
-		 * See <a href="http://safsdev.github.io/sqabasic2000/DDDriverCommandsReference.htm#detail_StartWebBrowser">Detailed Reference</a>
+		 * See <a href="/sqabasic2000/DDDriverCommandsReference.htm#detail_StartWebBrowser">Detailed Reference</a>
 		 * @param URL String,
 		 * @param BrowserID String, Unique application/browser ID.
 		 * @param params optional, currently <b>ONLY supported for Selenium WebDriver</b> Engine.
@@ -1477,7 +1685,7 @@ public abstract class SAFSPlus {
 		 *
 		 * <b>
 		 * The following gives some examples to start web browser with "custom profile" and "preferences".
-		 * For the detail explanation of starting browser with "custom profile" and/or "preferences", please visit the section "<font color="red">Start Browser</font>" at <a href="http://safsdev.github.io/selenium/doc/SAFSPlus-Welcome.html">Selenium Welcome Document</a>.
+		 * For the detail explanation of starting browser with "custom profile" and/or "preferences", please visit the section "<font color="red">Start Browser</font>" at <a href="/selenium/doc/SAFSPlus-Welcome.html">Selenium Welcome Document</a>.
 		 * </b>
 		 *
 		 * //Start firefox browser with custom profile "myprofile" ( <a href="https://support.mozilla.org/en-US/kb/profile-manager-create-and-remove-firefox-profiles">Create custom profile</a>)
@@ -1555,6 +1763,41 @@ public abstract class SAFSPlus {
 		 *                                                        "true",
 		 *                                                        quote(BrowserConstans.KEY_CHROME_PREFERENCE),
 		 *                                                        quote(absolutePreferenceFile)
+		 *                                                        });
+		 * //Start chrome browser out of sandbox (It is NOT suggested to use that way). But it can be used to avoid some chrome crash problem.
+		 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
+		 *                                                        SelectBrowser.BROWSER_NAME_CHROME,
+		 *                                                        "10",
+		 *                                                        "true",
+		 *                                                        quote(BrowserConstants.KEY_CHROME_NO_SANDBOX),
+		 *                                                        "true"
+		 *                                                        });
+		 * //Start chrome browser with the 'network-conditions' of <b>{"offline":false, "latency":5, "download_throughput":500000, "upload_throughput":500000}</b>
+		 * "latency" is in milliseconds, "download_throughput" is in bps, "upload_throughput" is in bps.<br>
+		 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
+		 *                                                        SelectBrowser.BROWSER_NAME_CHROME,
+		 *                                                        "10",
+		 *                                                        "true",
+		 *                                                        quote(BrowserConstants.KEY_SET_NETWORK_CONDITIONS),
+		 *                                                        "{ \"offline\":false, \"latency\":5, \"download_throughput\":500000 , \"upload_throughput\":500000}"
+		 *                                                        });
+		 *
+		 * //Start chrome browser with an empty 'network-conditions'. <b>This call is needed if you want to adjust (set, get, delete) the 'network-conditions'.</b>
+		 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
+		 *                                                        SelectBrowser.BROWSER_NAME_CHROME,
+		 *                                                        "10",
+		 *                                                        "true",
+		 *                                                        quote(BrowserConstants.KEY_SET_NETWORK_CONDITIONS),
+		 *                                                        ""
+		 *                                                        });
+		 *
+		 * //Start chrome browser with a custom-capabilities {"applicationName":"firstTest", "version","latest"}, which will be added to the standard capabilities.
+		 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
+		 *                                                        SelectBrowser.BROWSER_NAME_CHROME,
+		 *                                                        "10",
+		 *                                                        "true",
+		 *                                                        quote(BrowserConstants.KEY_CUSTOM_CAPABILITIES),
+		 *                                                        "{\"applicationName\":\"firstTest\", \"version\",\"latest\"}"
 		 *                                                        });
 		 * </pre>
 		 * @see #prevResults
@@ -1642,7 +1885,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Send a "GET" HTTP Request by AJAX, and save the response to a file.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_SaveURLToFile">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_SaveURLToFile">Detailed Reference</a><p>
 		 * @param url String, The URL to request.
 		 * @param file String, The file to save the response from the server.
 		 *                     This can be a full path, a relative path, or a file name.
@@ -1683,11 +1926,11 @@ public abstract class SAFSPlus {
 			return command(DDDriverCommands.SAVEURLTOFILE_KEYWORD, combineParams(optionals, url, file));
 		}
 		/**
-		 * Load/Set/Change an Application Map and put it on top of <a href="http://safsdev.sourceforge.net/sqabasic2000/TestDesignGuidelines.htm#AppMapChaining">App Map chain</a>.<br>
+		 * Load/Set/Change an Application Map and put it on top of <a href="/sqabasic2000/TestDesignGuidelines.htm#AppMapChaining">App Map chain</a>.<br>
 		 * No action or command relying on the contents of a particular Application Map will work properly if<br>
 		 * the Map has not been previously loaded by this command or similar test initialization processes--<br>
 		 * like an AppMap.order initialization file.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_SetApplicationMap">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_SetApplicationMap">Detailed Reference</a><p>
 		 * @param mapID String, the ID of the map to open.<br>
 		 *                      It is normally the map file name under the project datapool directory (the "Maps" folder).<br>
 		 *                      It can also be the map file name under the project directory.<br>
@@ -1710,7 +1953,7 @@ public abstract class SAFSPlus {
 				throw new SeleniumPlusException("SetApplicationMap mapID cannot be null!");
 			}
 			if(command(DDDriverCommands.SETAPPLICATIONMAP_KEYWORD, mapID)){
-				String defaultMapID2 = Runner.jsafs().getMapsInterface().getDefaultMap().getUniqueID().toString();
+				String defaultMapID2 = iDriver().getMapsInterface().getDefaultMap().getUniqueID().toString();
 				IndependantLog.debug("Current default map ID = "+defaultMapID2);
 				return true;
 			}else{
@@ -1719,7 +1962,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Save the clipboard contents to a text file.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_SaveClipboardToFile">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_SaveClipboardToFile">Detailed Reference</a><p>
 		 * @param file String, The file name to store the clipboard's content
 		 * <pre>
 		 *      Absolute file path.
@@ -1750,7 +1993,7 @@ public abstract class SAFSPlus {
 		/**
 		 * Move mouse wheel forward or backward. The 'mouse wheel scroll' will happen on the focused object, users<br>
 		 * needs to click the the object on which he wished the 'mouse wheel scroll' happens.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_ScrollWheel">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_ScrollWheel">Detailed Reference</a><p>
 		 * @param wheelAmount int, The amount of wheel to scroll
 		 * @return true if successful, false otherwise.<p>
 		 * @see #prevResults
@@ -1778,7 +2021,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Set a string content to the clipboard.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_SetClipboard">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_SetClipboard">Detailed Reference</a><p>
 		 * @param content String, The content to set to clipboard.
 		 * @return true if successful, false otherwise.<p>
 		 * @see #prevResults
@@ -1798,7 +2041,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Give a Window or Component input focus.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_SetContext">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_SetContext">Detailed Reference</a><p>
 		 * @param component org.safs.model.Component, The component to gain focus.
 		 * @return true if successful, false otherwise.<p>
 		 * @see #prevResults
@@ -1822,7 +2065,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Give a Window or Component input focus.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_SetFocus">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_SetFocus">Detailed Reference</a><p>
 		 * @param component org.safs.model.Component, The component to gain focus.
 		 * @return true if successful, false otherwise.<p>
 		 * @see #prevResults
@@ -1845,9 +2088,9 @@ public abstract class SAFSPlus {
 			return command(DDDriverCommands.SETFOCUS_KEYWORD, winName, comName);
 		}
 		/**
-		 * Enable/Disable verbose debug log during using <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSImageBasedRecognition.htm">IBT</a>.<br>
+		 * Enable/Disable verbose debug log during using <a href="/sqabasic2000/SAFSImageBasedRecognition.htm">IBT</a>.<br>
 		 * Normally, it is off. It is ONLY turned on when developer needs more information.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_SetImageDebug">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_SetImageDebug">Detailed Reference</a><p>
 		 * @param on boolean, true to turn on; false to turn off.
 		 * @return true if successful, false otherwise.<p>
 		 * @see #prevResults
@@ -1865,9 +2108,9 @@ public abstract class SAFSPlus {
 			return command(DDDriverCommands.SETIMAGEDEBUG_KEYWORD, String.valueOf(on));
 		}
 		/**
-		 * Enable/Disable <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSImageBasedRecognition.htm">IBT</a> Fuzzy Matching.<br>
+		 * Enable/Disable <a href="/sqabasic2000/SAFSImageBasedRecognition.htm">IBT</a> Fuzzy Matching.<br>
 		 * Normally, it is off.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_SetImageFuzzyMatching">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_SetImageFuzzyMatching">Detailed Reference</a><p>
 		 * @param on boolean, true to turn on; false to turn off.
 		 * @return true if successful, false otherwise.<p>
 		 * @see #prevResults
@@ -1885,9 +2128,9 @@ public abstract class SAFSPlus {
 			return command(DDDriverCommands.SETIMAGEFUZZYMATCHING_KEYWORD, String.valueOf(on));
 		}
 		/**
-		 * Enable/Disable <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSImageBasedRecognition.htm">IBT</a> MultiThread Matching.<br>
+		 * Enable/Disable <a href="/sqabasic2000/SAFSImageBasedRecognition.htm">IBT</a> MultiThread Matching.<br>
 		 * Normally, it is off.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_SetMultipleThreadSearch">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_SetMultipleThreadSearch">Detailed Reference</a><p>
 		 * @param on boolean, true to turn on; false to turn off.
 		 * @return true if successful, false otherwise.<p>
 		 * @see #prevResults
@@ -1908,7 +2151,7 @@ public abstract class SAFSPlus {
 		 * Set the value of a variable/DDVariable; for DDVariable, refer to {@link SAFSPlus} Note3.<br>
 		 * The different between this method and SAFSPlus#SetVariableValue(String, String) is that this method<br>
 		 * can take a variable or DDVariable as the first parameter, the later one can only take variable.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_SetVariableValueEx">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_SetVariableValueEx">Detailed Reference</a><p>
 		 * @param variable String, The name of variable or DDVariable that evaluates to a valid variable name.<br>
 		 * @param value String, The content to set to variable.
 		 * @return true if successful, false otherwise.<p>
@@ -1950,7 +2193,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Set the value of one or more DDVariables; for DDVariable, refer to {@link SAFSPlus} Note3.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_SetVariableValues">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_SetVariableValues">Detailed Reference</a><p>
 		 * @param varEqualVal String, The DDVariable along with its value.
 		 * @param optionals
 		 * <ul>
@@ -1997,7 +2240,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Take screenshot and save it to a test file.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_TakeScreenShot">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_TakeScreenShot">Detailed Reference</a><p>
 		 * @param testFile String, The test file name to save the screenshot.
 		 * <pre>
 		 *      Absolute file path.
@@ -2027,7 +2270,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Take screenshot and save it to a test file.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_TakeScreenShot">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_TakeScreenShot">Detailed Reference</a><p>
 		 * @param testFile String, The test file name to save the screenshot.
 		 * <pre>
 		 *      Absolute file path.
@@ -2056,7 +2299,7 @@ public abstract class SAFSPlus {
 		 * During test, multiple browsers can be opened by {@link #StartWebBrowser(String, int, String...)}<br>
 		 * If user wants to switch between these opened browser, use can call this method.<br>
 		 * This method requires a parameter 'ID', which is given by user when he calls {@link #StartWebBrowser(String, int, String...)}<br>
-		 * See <a href="http://safsdev.github.io/sqabasic2000/DDDriverCommandsReference.htm#detail_UseWebBrowser">Detailed Reference</a><br>
+		 * See <a href="/sqabasic2000/DDDriverCommandsReference.htm#detail_UseWebBrowser">Detailed Reference</a><br>
 		 * This is currently <b>ONLY supported for Selenium WebDriver Engine.</b>
 		 * @param ID String, the ID served as key to get the WebDriver from cache.<br>
 		 * @return true on success
@@ -2076,7 +2319,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Verify the current contents of the Windows clipboard with a benchmark file.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_VerifyClipboardToFile">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_VerifyClipboardToFile">Detailed Reference</a><p>
 		 * @param benchFile String, The bench file name to compare with the clipboard's content.<br>
 		 * <pre>
 		 *      Absolute file path.
@@ -2106,7 +2349,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Send a "GET" HTTP Request by AJAX, and Verify URL Content with a string content.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_VerifyURLContent">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_VerifyURLContent">Detailed Reference</a><p>
 		 * @param url String, The URL to request.
 		 * @param content String, The content to verify with.<br>
 		 * @param optionals
@@ -2144,7 +2387,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Send a "GET" HTTP Request by AJAX, and Verify URL Content with a file.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_VerifyURLToFile">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_VerifyURLToFile">Detailed Reference</a><p>
 		 * @param url String, The URL to request.
 		 * @param file String, The name of the bench file holding the content to be compared with the response sent back from the server.
 		 *                     The bench file can be a full path, a relative path, or a file name.
@@ -2186,16 +2429,27 @@ public abstract class SAFSPlus {
 		}
 
 		/**
-		 * Wait for object in seconds
+		 * Wait for a Window or Component to become valid.<br>
+		 * <b>Note:</b><br>
+		 * <font color=red>This API doesn't fit for switching according to GUI existence</font>, please use {@link Misc#IsComponentExists(org.safs.model.Component, String...)} instead.<br>
+		 * If the GUI doesn't become valid within timeout, this method will return false.<br>
+		 * If the execution doesn't end properly, this method will also return false.<br>
+		 * User cannot distinguish these 2 cases; and in the same time, a failure message will be written into Log.<br>
+		 *
 		 * @param comp -- Component (from generated Map.java)
 		 * @param time - time in second
-		 * @return
+		 * @return true if the GUI appear within the timeout.<br>
+		 *         false there 2 possibilities:<br>
+		 *               1. The execution finishes properly but the GUI doesn’t appear within the timeout.<br>
+		 *               2. The execution doesn't finish properly.<br>
 		 * @example
 		 * <pre>
 		 * {@code
 		 * WaitForGUI(Map.Google.SignIn,10);
 		 * }
 		 * </pre>
+		 *
+		 * @see Misc#IsComponentExists(org.safs.model.Component, String...)
 		 */
 		public static boolean WaitForGUI(org.safs.model.Component comp, long time){
 
@@ -2208,14 +2462,24 @@ public abstract class SAFSPlus {
 			return command(DDDriverCommands.WAITFORGUI_KEYWORD,params);
 		}
 		/**
-		 * Wait for a Window or Component to become valid.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_WaitForGUI">Detailed Reference</a><p>
+		 * Wait for a Window or Component to become valid.<br>
+		 * <b>Note:</b><br>
+		 * <font color=red>This API doesn't fit for switching according to GUI existence</font>, please use {@link Misc#IsComponentExists(org.safs.model.Component, String...)} instead.<br>
+		 * If the GUI doesn't become valid within timeout, this method will return false.<br>
+		 * If the execution doesn't end properly, this method will also return false.<br>
+		 * User cannot distinguish these 2 cases; and in the same time, a failure message will be written into Log.<br>
+		 *
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_WaitForGUI">Detailed Reference</a><p>
 		 * @param component Component, The component to wait.
 		 * @param optionals
 		 * <ul>
 		 * <b>optionals[0] timeout</b> int, timeout in seconds. Default is 15 seconds.
 		 * </ul>
-		 * @return true if successful, false otherwise.<p>
+		 * @return true if the GUI appear within the timeout.<br>
+		 *         false there 2 possibilities:<br>
+		 *               1. The execution finishes properly but the GUI doesn’t appear within the timeout.<br>
+		 *               2. The execution doesn't finish properly.<br>
+		 *
 		 * @see #prevResults
 		 * @see org.safs.TestRecordHelper#getStatusCode
 		 * @see org.safs.TestRecordHelper#getStatusInfo
@@ -2229,6 +2493,8 @@ public abstract class SAFSPlus {
 		 * Misc.WaitForGUI(Map.SAPDemoPage.Basc_Button, "2");
 		 * }
 		 * </pre>
+		 *
+		 * @see Misc#IsComponentExists(org.safs.model.Component, String...)
 		 */
 		public static boolean WaitForGUI(org.safs.model.Component component, String...optionals){
 			String winName = component.getParentName();
@@ -2239,7 +2505,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Goto the named block in the current table if a GUI component exists.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/DDDriverFlowCommandsReference.htm#detail_OnGUIExistsGotoBlockID">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/DDDriverFlowCommandsReference.htm#detail_OnGUIExistsGotoBlockID">Detailed Reference</a><p>
 		 * <b>Note: SAFSPlus user does not call this API directly.</b> If it is called, the return code could be used to tell if the component exist or not.<br>
 		 * @param component Component, The component to check
 		 * @param blockid String, the BLOCKID to branch
@@ -2267,7 +2533,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Goto the named block in the current table if a GUI component does not exist.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/DDDriverFlowCommandsReference.htm#detail_OnGUINotExistGotoBlockID">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/DDDriverFlowCommandsReference.htm#detail_OnGUINotExistGotoBlockID">Detailed Reference</a><p>
 		 * <b>Note: SAFSPlus user does not call this API directly.</b> If it is called, the return code could be used to tell if the component exist or not.<br>
 		 * @param component Component, The component to check
 		 * @param blockid String, the BLOCKID to branch
@@ -2293,14 +2559,26 @@ public abstract class SAFSPlus {
 		}
 
 		/**
-		 * Wait for a Window or Component to become invalid.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_WaitForGUIGone">Detailed Reference</a><p>
+		 * Wait for a Window or Component to disappear within timeout.<br>
+		 * <b>Note:</b><br>
+		 * <font color=red>This API doesn't fit for switching according to GUI existence</font>, please use {@link Misc#IsComponentExists(org.safs.model.Component, String...)} instead.<br>
+		 * If the GUI never exists, this method will return false, a failure message will be written into Log.<br>
+		 * If the GUI exists but doesn't disappear within timeout, this method will return false, a warning message will be written into Log.<br>
+		 * If the execution doesn't end properly, this method will also return false, a failure message will be written into Log.<br>
+		 * User cannot distinguish these cases.<br>
+		 *
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_WaitForGUIGone">Detailed Reference</a><p>
 		 * @param component Component, The component to wait its gone.
 		 * @param optionals
 		 * <ul>
 		 * <b>optionals[0] timeout</b> int, timeout in seconds. Default is 15 seconds.
 		 * </ul>
-		 * @return true if successful, false otherwise.<p>
+		 * @return true if the GUI disappear within the timeout.<br>
+		 *         false there 3 possibilities:<br>
+		 *               1. The execution finishes properly but the GUI doesn’t disappear within the timeout.<br>
+		 *               2. The execution finishes properly but the GUI never exists from the beginning.<br>
+		 *               3. The execution doesn't finish properly.<br>
+		 *
 		 * @see #prevResults
 		 * @see org.safs.TestRecordHelper#getStatusCode
 		 * @see org.safs.TestRecordHelper#getStatusInfo
@@ -2314,6 +2592,8 @@ public abstract class SAFSPlus {
 		 * Misc.WaitForGUIGone(Map.SAPDemoPage.Basc_Button, "2");
 		 * }
 		 * </pre>
+		 *
+		 * @see Misc#IsComponentExists(org.safs.model.Component, String...)
 		 */
 		public static boolean WaitForGUIGone(org.safs.model.Component component, String...optionals){
 			String winName = component.getParentName();
@@ -2325,7 +2605,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Wait for a specific Window or Component property value to match an expected value.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/DDDriverCommandsReference.htm#detail_WaitForPropertyValue">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/DDDriverCommandsReference.htm#detail_WaitForPropertyValue">Detailed Reference</a><p>
 		 * @param component Component, The component to wait for its property matching.
 		 * @param propertyName String, Case-sensitive name of object property to watch.
 		 * @param expectedValue String, Case-sensitive value of the object property to match.
@@ -2377,7 +2657,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Wait for a specific Window or Component property value to change from a known value.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/DDDriverCommandsReference.htm#detail_WaitForPropertyValueGone">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/DDDriverCommandsReference.htm#detail_WaitForPropertyValueGone">Detailed Reference</a><p>
 		 * @param component Component, The component to wait for its matching property gone.
 		 * @param propertyName String, Case-sensitive name of object property to watch.
 		 * @param expectedValue String, Case-sensitive value of the object property to match.
@@ -2429,7 +2709,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Wait for a Registry Key to become valid.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_WaitForRegistryKeyExists">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_WaitForRegistryKeyExists">Detailed Reference</a><p>
 		 * @param key String, The Registry Key name to seek.
 		 * @param optionals
 		 * <ul>
@@ -2458,7 +2738,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Wait for a specific Registry KeyValue to match an expected value.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_WaitForRegistryKeyValue">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverCommandsReference.htm#detail_WaitForRegistryKeyValue">Detailed Reference</a><p>
 		 * @param key String, The Registry Key name to seek.
 		 * @param value String, The value name under the parent key to seek.
 		 * @param expectedValue String,Case-sensitive value to match with the key value.
@@ -2502,7 +2782,7 @@ public abstract class SAFSPlus {
 	public static class Misc extends DriverCommand{
 		/**
 		 * According to the component, get its "recognition string" defined in App Map file.<br>
-		 * This component can be defined in one of the App Map file of a <a href="http://safsdev.sourceforge.net/sqabasic2000/TestDesignGuidelines.htm#AppMapChaining">App Map chain</a>.<br>
+		 * This component can be defined in one of the App Map file of a <a href="/sqabasic2000/TestDesignGuidelines.htm#AppMapChaining">App Map chain</a>.<br>
 		 * @param component org.safs.model.Component, The component to search.
 		 * @param optionals
 		 * <ul>
@@ -2533,7 +2813,7 @@ public abstract class SAFSPlus {
 			return _GetAppMapValue(null, section, item, optionals);
 		}
 		/**
-		 * Get the constant value defined in <a href="http://safsdev.sourceforge.net/sqabasic2000/TestDesignGuidelines.htm#AppMapChaining">App Map chain</a>
+		 * Get the constant value defined in <a href="/sqabasic2000/TestDesignGuidelines.htm#AppMapChaining">App Map chain</a>
 		 * @param contstant String, an constant name under the "ApplicationConstants"
 		 * @return String, the mapped constant value.
 		 * @example
@@ -2570,7 +2850,7 @@ public abstract class SAFSPlus {
 			return _GetAppMapValue(null, null, contstant);
 		}
 		/**
-		 * According to pair (section,item), get the value defined in <a href="http://safsdev.sourceforge.net/sqabasic2000/TestDesignGuidelines.htm#AppMapChaining">App Map chain</a>
+		 * According to pair (section,item), get the value defined in <a href="/sqabasic2000/TestDesignGuidelines.htm#AppMapChaining">App Map chain</a>
 		 * @param section String, a section name. If provide null, program will use default-section "ApplicationConstants".
 		 * @param item String, an item name under the section
 		 * @return String, the mapped value.
@@ -2614,7 +2894,7 @@ public abstract class SAFSPlus {
 		/**
 		 * According to a section name and a item name, get the value defined in App Map file (defined by mapID).<br>
 		 * <font color="red">Note: if the mapID is provided, program will ONLY search that map, NOT in the map chain!</font>
-		 * @param mapID String, the ID to decide which map will be used. If provided null, program will search in the <a href="http://safsdev.sourceforge.net/sqabasic2000/TestDesignGuidelines.htm#AppMapChaining">App Map chain</a><br>
+		 * @param mapID String, the ID to decide which map will be used. If provided null, program will search in the <a href="/sqabasic2000/TestDesignGuidelines.htm#AppMapChaining">App Map chain</a><br>
 		 *                      It is normally the map file name under the project datapool directory (the "Maps" folder).
 		 * @param section String, a section name. If provide null, program will use default-section "ApplicationConstants".
 		 * @param item String, an item name under the section
@@ -2663,11 +2943,11 @@ public abstract class SAFSPlus {
 			String message = (section==null?"ApplicationConstant":section)+":"+item+" in "+(mapID==null?"Map Chain":mapID);
 
 			try{
-				String value = Runner.jsafs().getMappedValue(mapID, section, item);
+				String value = _getMappedValue(mapID, section, item);
 				if(value==null) throw new SeleniumPlusException("The mapped value is null!");
 				boolean logMessage = true;
 				if(optionals != null){
-					if(optionals.length>0) Runner.jsafs().setVariable(optionals[0], value);
+					if(optionals.length>0) _setVariable(optionals[0], value);
 					if(optionals.length>1) logMessage = StringUtilities.convertBool(optionals[1]);
 				}
 				if(logMessage) Logging.LogTestSuccess("GetAppMapValue Success. " + message, "value is "+value);
@@ -2682,7 +2962,7 @@ public abstract class SAFSPlus {
 		 * @return int, pause time between records, in milliseconds.
 		 */
 		public static int GetMillisBetweenRecords(){
-			return Runner.jsafs().getMillisBetweenRecords();
+			return iDriver().getMillisBetweenRecords();
 		}
 		/**
 		 * Resolve a string as an expression.<br>
@@ -2713,6 +2993,8 @@ public abstract class SAFSPlus {
 			String action = "ResolveExpression";
 
 			try{
+				//TODO remove the specific JSAFSDriver
+//				Runner.getDriver().resolveExpression(parameter);
 				JSAFSDriver jsafs = Runner.jsafs();
 				String result = jsafs.resolveExpression(expression);
 				String msg = GENStrings.convert(GENStrings.SUCCESS_3B,
@@ -2775,7 +3057,7 @@ public abstract class SAFSPlus {
 		 */
 		public static boolean isExpressionsOn() throws SeleniumPlusException{
 			try{
-				return Runner.jsafs().isExpressionsEnabled();
+				return iDriver().isExpressionsEnabled();
 			}catch(Throwable th){
 				throw new SeleniumPlusException("Met "+StringUtils.debugmsg(th));
 			}
@@ -2825,7 +3107,7 @@ public abstract class SAFSPlus {
 	}
 
 	/**
-	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/DDDriverCounterCommandsIndex.htm">DriverCounter keywords</a>, like StartTestSuite, StartCounter, LogCounterInfo etc.<br>
+	 * Wrapper class providing APIs to handle <a href="/sqabasic2000/DDDriverCounterCommandsIndex.htm">DriverCounter keywords</a>, like StartTestSuite, StartCounter, LogCounterInfo etc.<br>
 	 * It also provides:<br>
 	 * some convenient APIs, like {@link Counters#PrintTestCaseSummary(String)}, {@link Counters#PrintTestSuiteSummary(String)} etc. by using combination of DriverCounter keywords.<br>
 	 * CountStatusInterface instance ( {@link Counters#GetCounterStatus(String)} ) through the underlying JSAFS<br>
@@ -2893,7 +3175,7 @@ public abstract class SAFSPlus {
 		 */
 		public static void IncrementCounts(boolean passed){
 			long status = passed ? CountersInterface.STATUS_TEST_PASS : CountersInterface.STATUS_TEST_FAILURE;
-			Runner.jsafs().getCountersInterface().incrementAllCounters(new UniqueStringCounterInfo("STEP", "STEP"), status);
+			iDriver().getCountersInterface().incrementAllCounters(new UniqueStringCounterInfo("STEP", "STEP"), status);
 		}
 
 		/**
@@ -2902,12 +3184,12 @@ public abstract class SAFSPlus {
      	 * @return CounterStatusInterface for the specified counter, or null if it does not exist.
 		 */
 		public static CountStatusInterface GetCounterStatus(String counterId){
-			return Runner.jsafs().getCounterStatus(counterId);
+			return iDriver().getCountersInterface().getStatus(new UniqueStringID(counterId));
 		}
 
 		/***********
         (Re)Start/Create an active tester-defined counter.
-		<a href="http://safsdev.github.io/sqabasic2000/DDDriverCounterCommandsReference.htm#detail_StartCounter">Detailed Reference</a>
+		<a href="/sqabasic2000/DDDriverCounterCommandsReference.htm#detail_StartCounter">Detailed Reference</a>
         @param counterId -- the unique Id of the counter.
         @param details -- optional -- any additional (String) details or description of the counter to be logged.
         @return true if successful, false otherwise.<p>
@@ -2931,18 +3213,18 @@ public abstract class SAFSPlus {
 			}
 		}
 		/**
-		 * Start capturing test activity counts for a specific application feature or test-case.
-		 * @param tcname The name of the test-case to start using a Counter on.
+		 * Start capturing test activity counts for the named test cycle.
+		 * @param cyclename The name of the cycle counter to start.
 		 * @return false only if a failure of some kind was reported in attempting to start the counter.<p>
 		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
 		 * @see #prevResults
 		 * @see org.safs.TestRecordHelper#getStatusCode()
 		 * @see org.safs.TestRecordHelper#getStatusInfo()
 		 */
-		public static boolean StartTestCase(String tcname){
+		public static boolean StartTestCycle(String cyclename){
 			try{
 				Runner.logGENERIC(" ", null);
-				prevResults = Runner.command(DDDriverCounterCommands.STARTTESTCASE_KEYWORD, tcname);}
+				prevResults = Runner.command(DDDriverCounterCommands.STARTCYCLE_KEYWORD, cyclename);}
 			catch(Throwable t){
 				// add failure info here
 				prevResults = null;
@@ -2968,9 +3250,28 @@ public abstract class SAFSPlus {
 				return false;}
 			return true;
 		}
+		/**
+		 * Start capturing test activity counts for a specific application feature or test-case.
+		 * @param tcname The name of the test-case to start using a Counter on.
+		 * @return false only if a failure of some kind was reported in attempting to start the counter.<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 */
+		public static boolean StartTestCase(String tcname){
+			try{
+				Runner.logGENERIC(" ", null);
+				prevResults = Runner.command(DDDriverCounterCommands.STARTTESTCASE_KEYWORD, tcname);}
+			catch(Throwable t){
+				// add failure info here
+				prevResults = null;
+				return false;}
+			return true;
+		}
 	    /***********
         Stop/Create a suspended tester-defined counter.
-		<a href="http://safsdev.github.io/sqabasic2000/DDDriverCounterCommandsReference.htm#detail_StopCounter">Detailed Reference</a>
+		<a href="/sqabasic2000/DDDriverCounterCommandsReference.htm#detail_StopCounter">Detailed Reference</a>
         @param counterId -- the unique Id of the counter.
         @param details -- optional -- any additional (String) details or description of the counter to be logged.
         @return true if successful, false otherwise.<p>
@@ -2992,6 +3293,48 @@ public abstract class SAFSPlus {
 			catch(ArrayIndexOutOfBoundsException x){
 				return counterCommand(DDDriverCounterCommands.STOPCOUNTER_KEYWORD, counterId, null);
 			}
+		}
+		/**
+		 * Stop capturing test activity counts for a specific application feature or test-cycle.
+		 * @param cyclename The name of the test-cycle to stop.  The name must match a counter that was
+		 * previously started.
+		 * @return false only if a failure of some kind was reported in attempting to stop the counter.<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @see #prevResults
+		 * @see #StartTestCase(String)
+		 * @see #PrintTestCaseSummary(String)
+		 */
+		public static boolean StopTestCycle(String cyclename){
+			try{
+				prevResults = Runner.command(DDDriverCounterCommands.STOPCYCLE_KEYWORD, cyclename);
+				Runner.logGENERIC(" ", null);
+			}
+			catch(Throwable t){
+				// add failure info here
+				prevResults = null;
+				return false;}
+			return true;
+		}
+		/**
+		 * Stop capturing test activity counts for a specific application feature or test-suite.
+		 * @param suitename The name of the test-suite to stop.  The name must match a counter that was
+		 * previously started.
+		 * @return false only if a failure of some kind was reported in attempting to stop the counter.<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @see #prevResults
+		 * @see #StartTestCase(String)
+		 * @see #PrintTestCaseSummary(String)
+		 */
+		public static boolean StopTestSuite(String suitename){
+			try{
+				prevResults = Runner.command(DDDriverCounterCommands.STOPSUITE_KEYWORD, suitename);
+				Runner.logGENERIC(" ", null);
+			}
+			catch(Throwable t){
+				// add failure info here
+				prevResults = null;
+				return false;}
+			return true;
 		}
 		/**
 		 * Stop capturing test activity counts for a specific application feature or test-case.
@@ -3016,7 +3359,7 @@ public abstract class SAFSPlus {
 		}
 	    /***********
         Suspend counting on all active counters.
-		<a href="http://safsdev.github.io/sqabasic2000/DDDriverCounterCommandsReference.htm#detail_SuspendStatusCounts">Detailed Reference</a>
+		<a href="/sqabasic2000/DDDriverCounterCommandsReference.htm#detail_SuspendStatusCounts">Detailed Reference</a>
         @param reason -- optional -- any additional (String) details or reason for the suspension to be logged.
         @return true on success, false otherwise.<p>
         * @see #prevResults
@@ -3040,7 +3383,7 @@ public abstract class SAFSPlus {
 	    /***********
         Resume counting on all active counters.  Counters previously stopped with StopCounter
         will remain stopped.
-		<a href="http://safsdev.github.io/sqabasic2000/DDDriverCounterCommandsReference.htm#detail_ResumeStatusCounts">Detailed Reference</a>
+		<a href="/sqabasic2000/DDDriverCounterCommandsReference.htm#detail_ResumeStatusCounts">Detailed Reference</a>
         @param reason -- optional -- any additional (String) details to be logged.
         @return true if successful, false otherwise.<p>
         * @see #prevResults
@@ -3063,7 +3406,7 @@ public abstract class SAFSPlus {
 		}
 	    /***********
         Log the counter info (counts) for a specific counter.
-        <a href="http://safsdev.github.io/sqabasic2000/DDDriverCounterCommandsReference.htm#detail_LogCounterInfo">Detailed Reference</a>
+        <a href="/sqabasic2000/DDDriverCounterCommandsReference.htm#detail_LogCounterInfo">Detailed Reference</a>
         @param counterId -- the unique Id of the counter.
         @return true if successful, false otherwise.<p>
         * @see #prevResults
@@ -3084,7 +3427,7 @@ public abstract class SAFSPlus {
 		}
 	    /***********
         Store the counter info (counts) for a specific counter into a DDVariable array.
-        <a href="http://safsdev.github.io/sqabasic2000/DDDriverCounterCommandsReference.htm#detail_StoreCounterInfo">Detailed Reference</a>
+        <a href="/sqabasic2000/DDDriverCounterCommandsReference.htm#detail_StoreCounterInfo">Detailed Reference</a>
         @param counterId -- the unique Id of the counter.
         @param varPrefix -- the unique root name for a list of DDVariables to hold the counter info.
         @return true if successfully executed, false otherwise.<p>
@@ -3112,7 +3455,7 @@ public abstract class SAFSPlus {
 	}
 
 	/**
-	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/DDDriverLogCommandsIndex.htm">Logging keywords</a>, like LogMessage, LogTestWarning etc.<br>
+	 * Wrapper class providing APIs to handle <a href="/sqabasic2000/DDDriverLogCommandsIndex.htm">Logging keywords</a>, like LogMessage, LogTestWarning etc.<br>
 	 */
 	public static class Logging{
 		private static boolean logCommand(String command, String message, String details){
@@ -3134,11 +3477,11 @@ public abstract class SAFSPlus {
 		 * @return true if no known errors occurred.
 		 */
 		private static boolean _setLogLevel(String level){
-			String facname = Runner.jsafs().getCycleLogName();
-			if(facname == null) facname = Runner.jsafs().getSuiteLogName();
-			if(facname == null) facname = Runner.jsafs().getStepLogName();
+			String facname = iDriver().getCycleLogName();
+			if(facname == null) facname = iDriver().getSuiteLogName();
+			if(facname == null) facname = iDriver().getStepLogName();
 			if(facname == null) return false;
-			Runner.jsafs().getLogsInterface().setLogLevel(new UniqueStringLogLevelInfo(facname, level));
+			iDriver().getLogsInterface().setLogLevel(new UniqueStringLogLevelInfo(facname, level));
 			return true;
 		}
 		/**
@@ -3347,7 +3690,7 @@ public abstract class SAFSPlus {
 	}
 
 	/**
-	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/DDDriverFileCommandsIndex.htm">File keywords</a>, like OpenFile, ReadFileLine etc.<br>
+	 * Wrapper class providing APIs to handle <a href="/sqabasic2000/DDDriverFileCommandsIndex.htm">File keywords</a>, like OpenFile, ReadFileLine etc.<br>
 	 * <pre>
 	 * If you meet some errors when calling these API, please try to run
 	 * {@link Misc#Expressions(boolean)} to turn off the expression as
@@ -3360,7 +3703,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Close an opened file.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_CloseFile">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_CloseFile">Detailed Reference</a><p>
 		 * @param fileNo String, the file number of an opened file.
 		 * @return true if successful, false otherwise.<p>
 		 * @see #prevResults
@@ -3380,7 +3723,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Copy the content of source file to target file.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_CopyFile">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_CopyFile">Detailed Reference</a><p>
 		 * @param source String, the name of source file.
 		 * @param dest String, the name of destination file.
 		 * @return true if successful, false otherwise.<p>
@@ -3391,7 +3734,7 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String directory = "C:\\Users\\someone\\TestDriverCommand\\New Directory";
+		 * String directory = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory";
 		 * String file = directory+File.separator+"new test file3.txt";
 		 * String dest = directory+File.separator+"copy of file3.txt";
 		 * Files.CopyFile(file, dest);
@@ -3403,7 +3746,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Copy multiple files/sub-directories, based on matching the provided pattern, from one directory to another.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_CopyMatchingFiles">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_CopyMatchingFiles">Detailed Reference</a><p>
 		 * @param fromDirectory String, the name of directory from where to find matching files.
 		 * @param toDirectory String, the name of directory to where to copy the matching files.
 		 * @param pattern String, the pattern used to find matching files.
@@ -3416,8 +3759,8 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String directory = "C:\\Users\\someone\\TestDriverCommand\\New Directory";
-		 * String toDirectory = "C:\\Users\\someone\\TestDriverCommand\\Copy Directory";
+		 * String directory = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory";
+		 * String toDirectory = "C:\\Users\\Lei Wang\\TestDriverCommand\\Copy Directory";
 		 * Files.CopyMatchingFiles(directory, toDirectory, "[a-z ]*f.*", PatternFilterMode.REGEXP);
 		 * Files.CopyMatchingFiles(directory, toDirectory, "UTF*.*", PatternFilterMode.WILDCARD);
 		 * }
@@ -3428,7 +3771,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Create a new directory.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_CreateDirectory">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_CreateDirectory">Detailed Reference</a><p>
 		 * @param directory String, the name of directory to create.
 		 * @return true if successful, false otherwise.<p>
 		 * @see #prevResults
@@ -3438,7 +3781,7 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String directory = "C:\\Users\\someone\\TestDriverCommand\\New Directory";
+		 * String directory = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory";
 		 * if(Files.CreateDirectory(directory))
 		 *   System.out.println(directory+" is created.");
 		 * }
@@ -3455,7 +3798,7 @@ public abstract class SAFSPlus {
 		 * <br> {@link Access#W}, {@link Mode#OUTPUT}
 		 * <br> {@link Access#W}, {@link Mode#APPEND}
 		 * <br> {@link Access#R}, {@link Mode#INPUT}
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_CreateFile">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_CreateFile">Detailed Reference</a><p>
 		 * @param file  String, the name of file to create.
 		 * @param mode Mode, the mode (input, output, append) used to create file
 		 * @param access Access, the access (write, read) used to create file
@@ -3473,7 +3816,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String result = "result";
-		 * String directory = "C:\\Users\\someone\\TestDriverCommand\\New Directory";
+		 * String directory = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory";
 		 * String file = directory+File.separator+"new test file3.txt";
 		 * if(Files.CreateFile(file, Mode.OUTPUT, Access.W, result)){
 		 *   System.out.println(file+" is created and opened with file number '"+GetVariableValue(result)+"'");
@@ -3487,7 +3830,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Delete the directory itself, ONLY EMPTY directory can be deleted.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_DeleteDirectory">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_DeleteDirectory">Detailed Reference</a><p>
 		 * @param directory  String, the name of directory to delete.
 		 * @return true if successful, false otherwise.<p>
 		 * @see #prevResults
@@ -3497,7 +3840,7 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String directory = "C:\\Users\\someone\\TestDriverCommand\\Empty Folder";
+		 * String directory = "C:\\Users\\Lei Wang\\TestDriverCommand\\Empty Folder";
 		 * if(Files.CreateDirectory(directory)){
 		 *   if(Files.DeleteDirectory(directory)){
 		 *     System.out.println("directory '"+directory+"' has been deleted.");
@@ -3511,7 +3854,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Delete recursively the contents (files and sub-directories), the directory itself is kept.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_DeleteDirectoryContents">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_DeleteDirectoryContents">Detailed Reference</a><p>
 		 * @param directory  String, the name of directory to delete.
 		 * @return true if successful, false otherwise.<p>
 		 * @see #prevResults
@@ -3522,7 +3865,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String result = "result";
-		 * String directory = "C:\\Users\\someone\\TestDriverCommand\\To Delete Folder";
+		 * String directory = "C:\\Users\\Lei Wang\\TestDriverCommand\\To Delete Folder";
 		 * if(Files.CreateDirectory(directory)){
 		 *   String newFile = directory+File.separator+"\\test.file";
 		 *   Files.CreateFile(newFile, Mode.OUTPUT, Access.W, result);
@@ -3547,7 +3890,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Delete recursively the contents (files and sub-directories) of a provided directory.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_DeleteDirectoryContents">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_DeleteDirectoryContents">Detailed Reference</a><p>
 		 * @param directory  String, the name of directory to delete.
 		 * @param delectDirectory boolean, true delete also the directory itself; otherwise the directory is kept.
 		 * @return true if successful, false otherwise.<p>
@@ -3559,7 +3902,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String result = "result";
-		 * String directory = "C:\\Users\\someone\\TestDriverCommand\\To Delete Folder";
+		 * String directory = "C:\\Users\\Lei Wang\\TestDriverCommand\\To Delete Folder";
 		 * if(Files.CreateDirectory(directory)){
 		 *   String newFile = directory+File.separator+"\\test.file";
 		 *   Files.CreateFile(newFile, Mode.OUTPUT, Access.W, result);
@@ -3576,7 +3919,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Delete file.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_DeleteFile">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_DeleteFile">Detailed Reference</a><p>
 		 * @param file  String, the name of file to delete.
 		 * @param verifyExistence boolean, true verify the existence of the file before deleting.
 		 * @return true if successful, false otherwise.<p>
@@ -3587,7 +3930,7 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String file = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\newFile.txt";
+		 * String file = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\newFile.txt";
 		 * if(Files.DeleteFile(file, true))
 		 *   System.out.println("file '"+file+"' has been deleted.");
 		 * }
@@ -3603,7 +3946,7 @@ public abstract class SAFSPlus {
 		/**
 		 * Filter out specific parts of an image by coordinates and save to an image file.<br>
 		 * The filtered area will be covered by black color.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_FilterImage">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_FilterImage">Detailed Reference</a><p>
 		 * @param source  String, the name of source image file.
 		 * @param dest String, the name of the destination image file.
 		 * @param subareas List<SubArea>, the subareas used to filter image
@@ -3615,8 +3958,8 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String image = "C:\\Users\\someone\\TestDriverCommand\\keyword.png";
-		 * String subImage = "C:\\Users\\someone\\TestDriverCommand\\subimage.png";
+		 * String image = "C:\\Users\\Lei Wang\\TestDriverCommand\\keyword.png";
+		 * String subImage = "C:\\Users\\Lei Wang\\TestDriverCommand\\subimage.png";
 		 * List<SubArea> subareas = new ArrayList<SubArea>();
 		 * subareas.add(new SubArea(0,0,"20%","30%"));
 		 * subareas.add(new SubArea("50%", "50%", "60%", "70%"));
@@ -3633,7 +3976,7 @@ public abstract class SAFSPlus {
 		/**
 		 * Filter out specific parts of an image by coordinates and save to an image file.<br>
 		 * The filtered area will be covered by black color.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_FilterImage">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_FilterImage">Detailed Reference</a><p>
 		 * @param source  String, the name of source image file.
 		 * @param dest String, the name of the destination image file.
 		 * @param subareas String, the subareas used to filter image, <br>
@@ -3654,11 +3997,11 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String image = "C:\\Users\\someone\\TestDriverCommand\\keyword.png";
-		 * String subImage = "C:\\Users\\someone\\TestDriverCommand\\subimage.png";
+		 * String image = "C:\\Users\\Lei Wang\\TestDriverCommand\\keyword.png";
+		 * String subImage = "C:\\Users\\Lei Wang\\TestDriverCommand\\subimage.png";
 		 * String coords = "0,0,70%,50%";//DO NOT put any space between coordinate
 		 * Files.FilterImage(image, subImage, coords);//filter 1 area
-		 * subImage = "C:\\Users\\someone\\TestDriverCommand\\subimage2.png";
+		 * subImage = "C:\\Users\\Lei Wang\\TestDriverCommand\\subimage2.png";
 		 * coords = "0,0,70%,50% 80%;80%;100%;100%";
 		 * Files.FilterImage(image, subImage, coords);//filter 2 areas
 		 * }
@@ -3669,7 +4012,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Filter out specific parts of an image and save to an image file.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_FilterImage">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_FilterImage">Detailed Reference</a><p>
 		 * @param source  String, the name of source image file.
 		 * @param dest String, the name of the destination image file.
 		 * @param mode ImageFilterMode, the mode of filter. For example, if it is {@link ImageFilterMode#COORD}, the filter means the coordinates.
@@ -3690,7 +4033,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Filter a text file based on the given parameters.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_FilterTextFile">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_FilterTextFile">Detailed Reference</a><p>
 		 * @param file  String, the name of file to filter.
 		 * @param regexPattern String, the regular expression used to find matching string
 		 * @param replace String, the token used to replace the matching string
@@ -3706,7 +4049,7 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String file = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\newFile.txt";
+		 * String file = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\newFile.txt";
 		 * String regexPattern = "saturday|sat|sunday|sun";
 		 * String replace = "weekend";
 		 * Files.FilterTextFile(file, regexPattern, replace);
@@ -3718,7 +4061,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Filter a text file based on the given parameters.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_FilterTextFile">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_FilterTextFile">Detailed Reference</a><p>
 		 * @param file  String, the name of file to filter.
 		 * @param regexPattern String, the regular expression used to find matching string
 		 * @param replace String, the token used to replace the matching string
@@ -3735,7 +4078,7 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String file = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\newFile.txt";
+		 * String file = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\newFile.txt";
 		 * String regexPattern = "saturday|sat|sunday|sun";
 		 * String replace = "weekend";
 		 * Files.FilterTextFile(file, regexPattern, replace, false);
@@ -3747,7 +4090,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Filter a text file based on the given parameters.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_FilterTextFile">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_FilterTextFile">Detailed Reference</a><p>
 		 * @param file  String, the name of file to filter.
 		 * @param mode PatternFilterMode, the pattern mode ("regex" or "wildcast")
 		 * @param pattern String, the pattern used to find matching string
@@ -3777,7 +4120,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Get the file's LastModified date time and save it to a variable, the time is in 12 AM PM format.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_GetFileDateTime">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_GetFileDateTime">Detailed Reference</a><p>
 		 * @param file String, The file to get attribute.
 		 * @param resultVariable String, The variable to save file date time.
 		 * @return true if successful, false otherwise.<p>
@@ -3789,7 +4132,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String result = "result";
-		 * String file = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\new test file3.txt";
+		 * String file = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\new test file3.txt";
 		 * if(Files.GetFileDateTime(file, result))
 		 *   System.out.println("file '"+file+"', LastModified time is "+GetVariableValue(result));
 		 * }
@@ -3801,7 +4144,7 @@ public abstract class SAFSPlus {
 		/**
 		 * Get the file date time and save it to a variable.<br>
 		 * <b>Note: For Operating System other than Windows, only "lastModified" time is supported.</b>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_GetFileDateTime">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_GetFileDateTime">Detailed Reference</a><p>
 		 * @param file String, The file to get attribute.
 		 * @param resultVariable String, The variable to save file date time.
 		 * @param isMilitaryFormat boolean, if true, time is in military format (24-hours), otherwise is 12-hours AM PM format.
@@ -3815,7 +4158,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String result = "result";
-		 * String file = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\new test file3.txt";
+		 * String file = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\new test file3.txt";
 		 * if(Files.GetFileDateTime(file, result, true, DateType.LASTACCESSED))
 		 *   System.out.println("file '"+file+"', LastAccessed military time is "+GetVariableValue(result));
 		 * if(Files.GetFileDateTime(file, result, true, DateType.CREATED))
@@ -3830,7 +4173,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Save the file attributes for the file name to the variable provided.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_GetFileProtections">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_GetFileProtections">Detailed Reference</a><p>
 		 * @param file String, The file to get attribute.
 		 * @param resultVariable String, The variable to save file attribute.
 		 * @return true if successful, false otherwise.<p>
@@ -3842,7 +4185,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String result = "result";
-		 * file = "C:\\Users\\someone\\ntuser.pol";
+		 * file = "C:\\Users\\Lei Wang\\ntuser.pol";
 		 * Files.GetFileProtections(file, result);
 		 * int attributes = Integer.parseInt(GetVariableValue(result));
 		 * FileAttribute attribute = FileAttribute.instance(attributes);
@@ -3855,7 +4198,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Search the directory for files according to file attribute and write the found filenames into an output file.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_GetFiles">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_GetFiles">Detailed Reference</a><p>
 		 * @param directory String, the name of directory where to search file.
 		 * @param outputFile String, the name of file to store the found files name.
 		 * @param attribute FileAttribute, the file attribute served as search condition.
@@ -3867,8 +4210,8 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String directory = "C:\\Users\\someone\\TestDriverCommand\\";
-		 * String directoryToCheck = "C:\\Users\\someone";
+		 * String directory = "C:\\Users\\Lei Wang\\TestDriverCommand\\";
+		 * String directoryToCheck = "C:\\Users\\Lei Wang";
 		 * Files.GetFiles(directoryToCheck, directory+"normalList2.txt");
 		 * Files.GetFiles(directoryToCheck, directory+"normalList.txt", FileAttribute.instance());
 		 * Files.GetFiles(directoryToCheck, directory+"archiveList.txt", new FileAttribute(Type.ARCHIVEFILE));
@@ -3883,7 +4226,7 @@ public abstract class SAFSPlus {
 		/**
 		 * Search the directory for normal files and write the found filenames into an output file.<br>
 		 * It is equivalent to call {@link #GetFiles(String, String, FileAttribute.instance())}<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_GetFiles">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_GetFiles">Detailed Reference</a><p>
 		 * @param directory String, the name of directory where to search file.
 		 * @param outputFile String, the name of file to store the found files name.
 		 * @return true if successful, false otherwise.<p>
@@ -3894,8 +4237,8 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String directory = "C:\\Users\\someone\\TestDriverCommand\\";
-		 * String directoryToCheck = "C:\\Users\\someone";
+		 * String directory = "C:\\Users\\Lei Wang\\TestDriverCommand\\";
+		 * String directoryToCheck = "C:\\Users\\Lei Wang";
 		 * Files.GetFiles(directoryToCheck, directory+"normalList2.txt");
 		 * }
 		 * </pre>
@@ -3906,7 +4249,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Determine the file size.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_GetFileSize">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_GetFileSize">Detailed Reference</a><p>
 		 * @param file String, the name of file to get size.
 		 * @param resultVariable String, The variable to store the size value.
 		 * @return true if successful, false otherwise.<p>
@@ -3918,7 +4261,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String result = "result";
-		 * file = "C:\\Users\\someone\\ntuser.pol";
+		 * file = "C:\\Users\\Lei Wang\\ntuser.pol";
 		 * if(Files.GetFileSize(file, result))
 		 *   System.out.println("file '"+file+"', size is "+GetVariableValue(result));
 		 * }
@@ -3937,7 +4280,7 @@ public abstract class SAFSPlus {
 		 * [Section2]<br>
 		 * Item1="value_D"<br>
 		 * Item2="value_E"<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_GetINIFileValue">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_GetINIFileValue">Detailed Reference</a><p>
 		 * @param section String, the name of section in INI file.
 		 * @param item String, the name of item in INI file.
 		 * @param resultVariable String, The variable to store the item value.
@@ -3969,7 +4312,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Count the number of occurrence of a token in a file and store that number in a variable.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_GetStringCountInFile">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_GetStringCountInFile">Detailed Reference</a><p>
 		 * @param file  String, the file in which the token will be searched.
 		 * @param token String, the token to search
 		 * @param optionals
@@ -4003,7 +4346,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Extract dynamic substrings from a file using regular expressions.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_GetSubstringsInFile">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_GetSubstringsInFile">Detailed Reference</a><p>
 		 * @param file String, the name of file to find string.
 		 * @param regexStart String, The starting regular expression. Should not be empty.
 		 * @param regexStop String, The stopping regular expression. Should not be empty.
@@ -4021,7 +4364,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * //List all methods name appeared in the file
-		 * String file = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\newFile.txt";
+		 * String file = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\newFile.txt";
 		 * String regexStart = "\\.";
 		 * String regexStop = "\\(";
 		 * String result = "Method";
@@ -4039,7 +4382,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Incorporate OCR technology to detect the text in an image file and save the text to a variable.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_GetTextFromImage">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_GetTextFromImage">Detailed Reference</a><p>
 		 * @param imageFileName String, the image file containing text to detect.
 		 * @param resultVar String, the variable to store the detected text.
 		 * @param optionals
@@ -4057,7 +4400,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String result = "result";
-		 * String image = "C:\\Users\\someone\\TestDriverCommand\\keyword.png";
+		 * String image = "C:\\Users\\Lei Wang\\TestDriverCommand\\keyword.png";
 		 * if(Files.GetTextFromImage(image, result, OCREngine.OCR_T_ENGINE_KEY, Locale.ENGLISH.getLanguage(), "3.0"))
 		 *   pass("image text (translated by TOCR) is '"+GetVariableValue(result)+"'");
 		 * if(Files.GetTextFromImage(image, result, OCREngine.OCR_G_ENGINE_KEY, Locale.ENGLISH.getLanguage(), "2.0"))
@@ -4070,7 +4413,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * If the specified directory exists, then execute the following driver command.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_IfExistDir">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_IfExistDir">Detailed Reference</a><p>
 		 * @param directory String, the name of directory to test the existence.
 		 * @param fileCommandAndParams
 		 * <br>fileCommandAndParams[0] driverComand String, The file driver-command to execute.
@@ -4084,8 +4427,8 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String toDirectory = "C:\\Users\\someone\\TestDriverCommand\\New Directory";
-		 * String newdir = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\NewDirectory";
+		 * String toDirectory = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory";
+		 * String newdir = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\NewDirectory";
 		 * String fileDriverCommand = "CreateDirectory";
 		 * if(Files.IfExistDir(directory, fileDriverCommand, newdir))
 		 *   pass("directory '"+directory+"' DOES exist, and '"+fileDriverCommand+"' has executed.");
@@ -4097,7 +4440,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * If the specified file exists, then execute the following driver command.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_IfExistFile">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_IfExistFile">Detailed Reference</a><p>
 		 * @param file String, the name of file to test the existence.
 		 * @param fileCommandAndParams
 		 * <br>fileCommandAndParams[0] driverComand String, The file driver-command to execute.
@@ -4111,8 +4454,8 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String file = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\new test file3.txt";
-		 * String destination = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\second copy of file3.txt";
+		 * String file = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\new test file3.txt";
+		 * String destination = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\second copy of file3.txt";
 		 * String fileDriverCommand = "CopyFile";
 		 * if(Files.IfExistFile(file, fileDriverCommand, file, destination))
 		 *   pass("file '"+file+"' DOES exist and it has been copied to '"+destination+"'");
@@ -4124,7 +4467,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Test if the opened file is at the end and store the result to a variable.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_IsEndOfFile">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_IsEndOfFile">Detailed Reference</a><p>
 		 * @param fileNo String, the file number of the opened file.
 		 * @param resultVar String, the variable to store the result.
 		 * @return true if successful, false otherwise.<p>
@@ -4136,7 +4479,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String result = "result";
-		 * String file = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\new test file3.txt";
+		 * String file = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\new test file3.txt";
 		 * String fileNo = null;
 		 * if(Files.OpenFile(file, Mode.INPUT, Access.R, result)){
 		 *   fileNo = GetVariableValue(result);
@@ -4164,7 +4507,7 @@ public abstract class SAFSPlus {
 		 * <br> {@link Access#W}, {@link Mode#OUTPUT}
 		 * <br> {@link Access#W}, {@link Mode#APPEND}
 		 * <br> {@link Access#R}, {@link Mode#INPUT}
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_OpenFile">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_OpenFile">Detailed Reference</a><p>
 		 * @param file String, the name of file to open.
 		 * @param mode Mode, the mode (input, output, append) used to open file
 		 * @param access Access, the access (write, read) used to open file
@@ -4182,7 +4525,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String result = "result";
-		 * String file = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\new test file3.txt";
+		 * String file = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\new test file3.txt";
 		 * if(Files.OpenFile(file, Mode.INPUT, Access.R, result))
 		 *   System.out.println(file+" has been opened with file number '"+GetVariableValue(result)+"' for input.");
 		 * }
@@ -4199,7 +4542,7 @@ public abstract class SAFSPlus {
 		 * <br> {@link Access#W}, {@link Mode#OUTPUT}
 		 * <br> {@link Access#W}, {@link Mode#APPEND}
 		 * <br> {@link Access#R}, {@link Mode#INPUT}
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_OpenUTF8File">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_OpenUTF8File">Detailed Reference</a><p>
 		 * @param file String, the name of file to open.
 		 * @param mode Mode, the mode (input, output, append) used to open file
 		 * @param access Access, the access (write, read) used to open file
@@ -4217,7 +4560,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String result = "result";
-		 * String file = C:\\Users\\someone\\TestDriverCommand\\New Directory\\UTF8 FILE.txt";
+		 * String file = C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\UTF8 FILE.txt";
 		 * if(Files.OpenUTF8File(file, Mode.OUTPUT, Access.W, result))
 		 *   System.out.println(file+" is opened with file number '"+GetVariableValue(result)+"' for output UTF8 strings.");
 		 * }
@@ -4229,7 +4572,7 @@ public abstract class SAFSPlus {
 		/**
 		 * Write a string directly to a opened file defined by file number.<br>
 		 * It is equivalent to call {@link #PrintToFile(String, String, Placement.NEWLINE)}<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_PrintToFile">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_PrintToFile">Detailed Reference</a><p>
 		 * @param fileNo String, The file number of the file to write.
 		 * @param content Strung, The string to write.
 		 * @return true if successful, false otherwise.<p>
@@ -4241,7 +4584,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String result = "result";
-		 * String file = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\newFile.txt";
+		 * String file = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\newFile.txt";
 		 * String fileNo = null;//hold the file number for an opened file.
 		 * String content = "Print Output Placement Parameter determines where the next output to the same file should begin.";
 		 * String separator = "=================================================";
@@ -4265,7 +4608,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Write a string to a opened file defined by file number.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_PrintToFile">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_PrintToFile">Detailed Reference</a><p>
 		 * @param fileNo String, The file number of the file to write.
 		 * @param content Strung, The string to write.
 		 * @param placement Placement, where to write the content. It can be one of
@@ -4283,7 +4626,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String result = "result";
-		 * String file = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\newFile.txt";
+		 * String file = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\newFile.txt";
 		 * String fileNo = null;//hold the file number for an opened file.
 		 * String content = "Print Output Placement Parameter determines where the next output to the same file should begin.";
 		 * String separator = "=================================================";
@@ -4325,7 +4668,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Read the number of characters from the file defined by file number and assign them to a variable.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_ReadFileChars">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_ReadFileChars">Detailed Reference</a><p>
 		 * @param fileNo String, The file number of the file to be read from.
 		 * @param charsToRead int, The number of characters to be read.
 		 * @param resultVar String, the variable to store the characters read from the file.
@@ -4338,7 +4681,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String result = "result";
-		 * String file = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\newFile.txt";
+		 * String file = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\newFile.txt";
 		 * String fileNo = null;//hold the file number for an opened file.
 		 * String content = null;
 		 * if(Files.OpenFile(file, Mode.INPUT, Access.R, result)){
@@ -4363,7 +4706,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Read a line from the file defined by file number and assign it to a variable.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_ReadFileLine">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_ReadFileLine">Detailed Reference</a><p>
 		 * @param fileNo String, The file number of the file to be read from.
 		 * @param resultVar String, the variable to store the line read from the file.
 		 * @return true if successful, false otherwise.<p>
@@ -4379,7 +4722,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Rename the file from the old file name to the new filename.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_RenameFile">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_RenameFile">Detailed Reference</a><p>
 		 * @param oldName String, the filename to be renamed.
 		 * @param newName String, the new name.
 		 * @param verifyExistence boolean, true verify the existence of the file before renaming.
@@ -4391,8 +4734,8 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String file = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\newFile.txt";
-		 * String newfile = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\renamed newFile.txt";
+		 * String file = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\newFile.txt";
+		 * String newfile = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\renamed newFile.txt";
 		 * Files.RenameFile(file, newfile, true);
 		 * }
 		 * </pre>
@@ -4407,7 +4750,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Incorporate OCR technology to detect the text in an image file and save the text to a text file.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_SaveTextFromImage">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_SaveTextFromImage">Detailed Reference</a><p>
 		 * @param imageFileName String, the image file containing text to detect.
 		 * @param resultFile String, the file to store the detected text.
 		 * @param optionals
@@ -4424,10 +4767,10 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String image = "C:\\Users\\someone\\TestDriverCommand\\keyword.png";
-		 * String textFile = "C:\\Users\\someone\\TestDriverCommand\\image_T.txt";
+		 * String image = "C:\\Users\\Lei Wang\\TestDriverCommand\\keyword.png";
+		 * String textFile = "C:\\Users\\Lei Wang\\TestDriverCommand\\image_T.txt";
 		 * Files.SaveTextFromImage(image, textFile, OCREngine.OCR_T_ENGINE_KEY, Locale.ENGLISH.getLanguage(), "2.0");
-		 * textFile = "C:\\Users\\someone\\TestDriverCommand\\image_G.txt";
+		 * textFile = "C:\\Users\\Lei Wang\\TestDriverCommand\\image_G.txt";
 		 * Files.SaveTextFromImage(image, textFile, OCREngine.OCR_G_ENGINE_KEY, Locale.ENGLISH.getLanguage(), "2.5");
 		 * }
 		 * </pre>
@@ -4438,7 +4781,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Change the file attribute to the value of the new file protection provided.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_SetFileProtections">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_SetFileProtections">Detailed Reference</a><p>
 		 * @param file String, The file to modify attribute.
 		 * @param attribute FileAttribute, The attribute to set to file.
 		 * @return true if successful, false otherwise.<p>
@@ -4449,7 +4792,7 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * String file = "C:\\Users\\someone\\New Text Document.txt";
+		 * String file = "C:\\Users\\Lei Wang\\New Text Document.txt";
 		 * FileAttribute attribute = FileAttribute.instance(FileAttribute.Type.SYSTEMFILE);
 		 * attribute.add(FileAttribute.Type.READONLYFILE);
 		 * attribute.add(FileAttribute.Type.ARCHIVEFILE);
@@ -4462,7 +4805,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Write the specified number of characters to a file already opened for writing.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_WriteFileChars">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverFileCommandsReference.htm#detail_WriteFileChars">Detailed Reference</a><p>
 		 * @param fileNo String, The file number/identifier of the file to be written to.
 		 * @param charsToWrite int, The number of characters to write to the file; A negative number means all chars.
 		 * @param content String, The content to write to file.
@@ -4475,7 +4818,7 @@ public abstract class SAFSPlus {
 		 * <pre>
 		 * {@code
 		 * String result = "result";
-		 * String file = "C:\\Users\\someone\\TestDriverCommand\\New Directory\\newFile.txt";
+		 * String file = "C:\\Users\\Lei Wang\\TestDriverCommand\\New Directory\\newFile.txt";
 		 * String fileNo = null;//hold the file number for an opened file.
 		 * String content = "Print Output Placement Parameter determines where the next output to the same file should begin.";
 		 * int charsToWrite = 10;
@@ -4498,7 +4841,7 @@ public abstract class SAFSPlus {
 	}
 
 	/**
-	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/DDDriverStringCommandsIndex.htm">String keywords</a>, like Compare, GetMultiDelimitedField etc.<br>
+	 * Wrapper class providing APIs to handle <a href="/sqabasic2000/DDDriverStringCommandsIndex.htm">String keywords</a>, like Compare, GetMultiDelimitedField etc.<br>
 	 * <pre>
 	 * If you meet some errors when calling these API, please try to run
 	 * {@link Misc#Expressions(boolean)} to turn off the expression as
@@ -4511,7 +4854,7 @@ public abstract class SAFSPlus {
 		/**
 		 * For each char in string: if ((char .gt. 31) and (char .lt. 127)) keep it,
 		 * otherwise turn it into a space.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_CleanString">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_CleanString">Detailed Reference</a><p>
 		 * @param source  String, (could come from a ^variable).
 		 * @param resultVar String, the variable to hold the result of the operation
 		 * @return true if successful, false otherwise.<p>
@@ -4535,7 +4878,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Compares two strings.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_Compare">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_Compare">Detailed Reference</a><p>
 		 * @param source String, string to compare
 		 * @param destination String, string to compare
 		 * @param resultVar String, the variable to hold the result of the operation
@@ -4555,7 +4898,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Compares a string with a normal string or a regular expression.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_Compare">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_Compare">Detailed Reference</a><p>
 		 * @param source String, string to compare
 		 * @param destination String, normal string to compare or the regex string to match
 		 * @param resultVar String, the variable to hold the result of the operation
@@ -4586,7 +4929,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Concatenate String1 with String2 and returns concatenated string.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_Concatenate">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_Concatenate">Detailed Reference</a><p>
 		 * @param str1 String, string to concatenate
 		 * @param str2 String, string to concatenate
 		 * @param resultVar String, the variable to hold the result of the operation
@@ -4607,7 +4950,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Get a field out of a string using specified delimiter(s).
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_GetField">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_GetField">Detailed Reference</a><p>
 		 * @param source String, The input string which contains the field to be returned
 		 * @param index int, 0-based index
 		 * @param delimiters String, one or more single characters used as delimiters
@@ -4631,7 +4974,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Finds the count of all fields within the string found from startindex to the end of the string.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_GetFieldCount">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_GetFieldCount">Detailed Reference</a><p>
 		 * @param source String, The input string to parse and count fields
 		 * @param index int, 0-based index, start-index for parsing the string
 		 * @param delimiters String, one or more single characters used as delimiters
@@ -4655,7 +4998,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Given an Input of fixed-width fields, return the nth(FieldID) Field in the record.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_GetFixedWidthField">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_GetFixedWidthField">Detailed Reference</a><p>
 		 * @param source String, The input string to parse
 		 * @param fieldID int, 0-based field to retrieve
 		 * @param fixedWidth int, the fixed width allotted for each field in the record
@@ -4680,7 +5023,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Given a sourceString of delimited fields, return the nth(FieldID) Field in the record from startIndex.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_GetMultiDelimitedField">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_GetMultiDelimitedField">Detailed Reference</a><p>
 		 * @param source String, The input string to parse
 		 * @param fieldID int, 1-based field to retrieve
 		 * @param startIndex int, 1-based start position for search in sourceString
@@ -4707,7 +5050,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Finds the count of all fields within the input string found from start-index to the end of the inputRecord.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_GetMultiDelimitedFieldCount">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_GetMultiDelimitedFieldCount">Detailed Reference</a><p>
 		 * @param source String, The input string to parse
 		 * @param startIndex int, 1-based start position for search in sourceString
 		 * @param delimiters String, 1-based start position for search in sourceString
@@ -4732,7 +5075,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Finds the index of the first character matching one of the provided delimiter characters.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_GetNextDelimiterIndex">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_GetNextDelimiterIndex">Detailed Reference</a><p>
 		 * @param source String, The input string to parse
 		 * @param startIndex int, 0-based start-index to begin parsing the string.
 		 * @param delimiters String, each character is treated as a separate delimiter
@@ -4757,7 +5100,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Returns the requested field contained in the input string using the passed in regular expression as the delimiter(s).
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_GetREDelimitedField">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_GetREDelimitedField">Detailed Reference</a><p>
 		 * @param source String, The input string to parse
 		 * @param index int, 1-based index of the field to return from the input string.
 		 * @param regexDelimiters String, regular expression used as the delimiter(s).
@@ -4782,7 +5125,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Get the number of fields contained in the input string using the passed in regular expression as the delimiter(s).
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_GetREDelimitedFieldCount">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_GetREDelimitedFieldCount">Detailed Reference</a><p>
 		 * @param source String, The input string to parse
 		 * @param startIndex int, 0-based index of where to start the analysis from.
 		 * @param regexDelimiters String, regular expression used as the delimiter(s).
@@ -4807,7 +5150,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Extract dynamic substring from a string using regular expressions.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_GetSubstringsInString">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_GetSubstringsInString">Detailed Reference</a><p>
 		 * @param source String, The input string to parse
 		 * @param regexStart String, The starting regular expression. Should not be empty.
 		 * @param regexStop String, The stopping regular expression. Should not be empty.
@@ -4832,7 +5175,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Get a system environment variable value.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_GetSystemEnviron">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_GetSystemEnviron">Detailed Reference</a><p>
 		 * @param systemVariable String, The system variable name.
 		 * @param resultVar String, the variable to hold the result of the operation
 		 * @return boolean true if successful, false otherwise.<p>
@@ -4852,7 +5195,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Get the USERID of the currently logged on user as stored in System Environment variables.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_GetSystemUser">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_GetSystemUser">Detailed Reference</a><p>
 		 * @param resultVar String, the variable to hold the result of the operation
 		 * @return boolean true if successful, false otherwise.<p>
 		 * @example
@@ -4870,7 +5213,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Get a trimmed field out of a string using specified delimiter(s).
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_GetTrimmedField">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_GetTrimmedField">Detailed Reference</a><p>
 		 * @param source String, The input string to parse
 		 * @param index int, 0-based index of which field to grab .
 		 * @param delimiters String, each character is treated as a separate delimiter.
@@ -4894,7 +5237,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Returns the position of the first occurrence of one string within another string. -1 if not found at all.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_Index">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_Index">Detailed Reference</a><p>
 		 * @param startIndex int, 0-based starting offset of the sourceString to search.
 		 * @param source String, The input string to parse
 		 * @param findString String, the string to find.
@@ -4918,7 +5261,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Returns a string of a specified number of characters copied from the beginning of another string.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_Left">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_Left">Detailed Reference</a><p>
 		 * @param source String, The input string to parse
 		 * @param length String, number of chars to copy
 		 * @param resultVar String, the variable to hold the result of the operation
@@ -4940,7 +5283,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 *  A new string trimmed of leading tabs and spaces.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_LeftTrim">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_LeftTrim">Detailed Reference</a><p>
 		 * @param source String, The input string to parse
 		 * @param resultVar String, the variable to hold the result of the operation
 		 * @return boolean true if successful, false otherwise.<p>
@@ -4960,7 +5303,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Returns the length of a string or variable.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_Length">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_Length">Detailed Reference</a><p>
 		 * @param source String, The input string to parse
 		 * @param resultVar String, the variable to hold the result of the operation
 		 * @return boolean true if successful, false otherwise.<p>
@@ -4980,7 +5323,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Replace 'find' substring with 'replace' substring.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_Replace">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_Replace">Detailed Reference</a><p>
 		 * @param source String, The input string to parse
 		 * @param find String, The string to find
 		 * @param replace String, The string used to replace
@@ -5004,7 +5347,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Returns a string of a specified number of characters copied from the end of another string.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_Right">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_Right">Detailed Reference</a><p>
 		 * @param source String, The input string to parse
 		 * @param length String, number of chars to copy
 		 * @param resultVar String, the variable to hold the result of the operation
@@ -5026,7 +5369,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * A new string trimmed of ending tabs and spaces.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_RightTrim">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_RightTrim">Detailed Reference</a><p>
 		 * @param source String, The input string to parse
 		 * @param resultVar String, the variable to hold the result of the operation
 		 * @return boolean true if successful, false otherwise.<p>
@@ -5048,7 +5391,7 @@ public abstract class SAFSPlus {
 		 * The substring to retrieve starts at the specified start character index and ends after <br>
 		 * the specified number of characters have been copied. If the number of characters to copy <br>
 		 * is not provided, then we will return all characters after the start index. <br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_SubString">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_SubString">Detailed Reference</a><p>
 		 * @param source String, The input string to parse
 		 * @param start int, 0-based offset character position
 		 * @param length int, number of chars to copy
@@ -5072,7 +5415,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Returns a copy of a string, with all letters converted to lowercase.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_ToLowerCase">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_ToLowerCase">Detailed Reference</a><p>
 		 * @param source String, The input string to parse
 		 * @param resultVar String, the variable to hold the result of the operation
 		 * @return boolean true if successful, false otherwise.<p>
@@ -5092,7 +5435,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Returns a copy of a string, with all letters converted to uppercase.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_ToUpperCase">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_ToUpperCase">Detailed Reference</a><p>
 		 * @param source String, The input string to parse
 		 * @param resultVar String, the variable to hold the result of the operation
 		 * @return boolean true if successful, false otherwise.<p>
@@ -5112,7 +5455,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Returns a new string trimmed of leading and trailing tabs and spaces.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_Trim">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/SeleniumDDDriverStringCommandsReference.htm#detail_Trim">Detailed Reference</a><p>
 		 * @param source String, The input string to parse
 		 * @param resultVar String, the variable to hold the result of the operation
 		 * @return boolean true if successful, false otherwise.<p>
@@ -5133,7 +5476,7 @@ public abstract class SAFSPlus {
 	}
 
 	/**
-	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io//sqabasic2000/WindowFunctionsIndex.htm">Window keywords</a>, like Maximize, Minimize, SetPosition etc.<br>
+	 * Wrapper class providing APIs to handle <a href="//sqabasic2000/WindowFunctionsIndex.htm">Window keywords</a>, like Maximize, Minimize, SetPosition etc.<br>
 	 */
 	public static class Window{
 		/**
@@ -5224,7 +5567,7 @@ public abstract class SAFSPlus {
 		 */
 		public static boolean SetPosition(org.safs.model.Component window, int x, int y, int width, int height){
 			StringBuffer parameter = new StringBuffer();
-			String separator = StringUtils.generatePositionSepeartor(Runner.jsafs().getStepSeparator());
+			String separator = StringUtils.generatePositionSepeartor(iDriver().getStepSeparator());
 
 			parameter.append(Integer.toString(x)+separator);
 			parameter.append(Integer.toString(y)+separator);
@@ -5236,7 +5579,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Set status of current WebBrowser window<br>
-		 * See <a href="http://safsdev.github.io/sqabasic2000/WindowFunctionsReference.htm#detail_SetPosition">Detailed Reference</a>
+		 * See <a href="/sqabasic2000/WindowFunctionsReference.htm#detail_SetPosition">Detailed Reference</a>
 		 * @param status String, window's status, it can be one of<br>
 		 * <ul>
 		 * <li>{@link org.safs.ComponentFunction.Window#MAXIMIZED}
@@ -5269,7 +5612,7 @@ public abstract class SAFSPlus {
 			   org.safs.ComponentFunction.Window.MINIMIZED.equalsIgnoreCase(status) ||
 			   org.safs.ComponentFunction.Window.NORMAL.equalsIgnoreCase(status)){
 
-				String separator = StringUtils.generatePositionSepeartor(Runner.jsafs().getStepSeparator());
+				String separator = StringUtils.generatePositionSepeartor(iDriver().getStepSeparator());
 				parameter.append(Integer.toString(0)+separator);
 				parameter.append(Integer.toString(0)+separator);
 				parameter.append(Integer.toString(200)+separator);
@@ -5285,52 +5628,1626 @@ public abstract class SAFSPlus {
 
 	/**
 	 * Wrapper class providing APIs to handle
-	 * <a href="http://safsdev.github.io/sqabasic2000/TIDRestFunctionsIndex.htm">TIDRestFunctions Reference</a> and
-	 * <a href="http://safsdev.github.io/sqabasic2000/DDDriverRestCommandsIndex.htm">DriverRestCommands Reference</a>, like RestGetBinary, RestStoreResponse etc.<br>
+	 * <a href="/sqabasic2000/TIDRestFunctionsIndex.htm">TIDRestFunctions Reference</a> and
+	 * <a href="/sqabasic2000/DDDriverRestCommandsIndex.htm">DriverRestCommands Reference</a>, like RestGetBinary, RestStoreResponse etc.<br>
 	 */
 	public static class Rest{
 
-		//REST actions
+		//Below are links about the method "POST", "PUT" AND "PATCH"
+		//https://restfulapi.net/rest-put-vs-post/
+		//https://stackoverflow.com/questions/28459418/rest-api-put-vs-patch-with-real-life-examples
+
+		@SuppressWarnings("unused")
+		private static boolean DeleteBinary(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTDELETEBINARY_KEYWORD, params);
+		}
+		@SuppressWarnings("unused")
+		private static boolean DeleteCSS(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTDELETECSS_KEYWORD, params);
+		}
+		/**
+		 * Perform the "DELETE" method with Headers (defined by customer) on a REST service.
+		 * See <a href="/sqabasic2000/TIDRestFunctionsReference.htm#detail_RestDeleteCustom">Detailed Reference</a><p>
+		 * @param comp org.safs.model.Component, it does not represent a real GUI component.<br>
+		 *                                       The window's value should always be <b>SAFSREST</b><br>
+		 *                                       The component's value should be the session-id that user assigns<br>
+		 * @param params String[], parameters
+		 * <ul>
+		 * <li><b>params[0] relativeURI, required</b>, The relative URI combined with a base-URL (stored in a session) to form a REST service URL.<br>
+		 *                                             But it should be full URL if it is executed out of a session.
+		 * <li><b>params[1] responseIdVar, required</b>, The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.
+		 * <li><b>params[2] body, optional</b>, The body to send with this REST request.
+		 * <li><b>params[3] headers , required</b>, The headers to be included in this REST request. It can be literal string, map item or file path.
+		 * <li><b>params[4] authentication , optional</b>, The custom authentication/authorization information.
+		 *                                                 It can be a file holding authentication/authorization information or a map item holding a file path.
+		 * </ul>
+		 * @return - true on success<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example
+		 * <pre>
+		 * We can define map file as below:
+		 * [BAYERREST]
+		 * BAYERREST=SAFSREST
+		 * BAYERSERVICE001=SESSION_ID_BAYERSERVICE001
+		 * BAYERSERVICE001_NONEXIST=
+		 *
+		 * Then we call as below
+		 * {@code
+		 * Rest.StartServiceSession(Map.BAYERREST.BAYERSERVICE001, "http://www.thomas-bayer.com/sqlrest/");
+		 * //within session, try to get content from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/",
+		 * //which is concatenated by parameter relativeURI "CUSTOMER/" and baseURL "http://www.thomas-bayer.com/sqlrest/" stored in session.
+		 * //The headers (sent with 'get' method) are defined in the project-relative file "customHeader.txt".
+		 * Rest.GetCustom(Map.BAYERREST.BAYERSERVICE001, "CUSTOMER/", "ResponseIDVariable", "", "customHeader.txt");
+		 * Rest.EndServiceSession(Map.BAYERREST.BAYERSERVICE001);
+		 *
+		 * //BAYERSERVICE001_NONEXIST is defined as empty string, which is not a valid session ID.
+		 * //out of session, try to get content from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/".
+		 * //The headers "If-Modified-Since: Sat, 29 OCT 1994 19:43:31 GMT" will be sent with 'get' method.
+		 * Rest.GetCustom(Map.BAYERREST.BAYERSERVICE001_NONEXIST, "http://www.thomas-bayer.com/sqlrest/CUSTOMER/", "ResponseIDVariable", "",  "If-Modified-Since: Sat, 29 OCT 1994 19:43:31 GMT");
+		 * }
+		 *
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 * @see #StartWebBrowser(String, String, String...)
+		 */
+		public static boolean DeleteCustom(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTDELETECUSTOM_KEYWORD, params);
+		}
+		@SuppressWarnings("unused")
+		private static boolean DeleteHTML(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTDELETEHTML_KEYWORD, params);
+		}
+		@SuppressWarnings("unused")
+		private static boolean DeleteImage(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTDELETEIMAGE_KEYWORD, params);
+		}
+		@SuppressWarnings("unused")
+		private static boolean DeleteJSON(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTDELETEJSON_KEYWORD, params);
+		}
+		@SuppressWarnings("unused")
+		private static boolean DeleteScript(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTDELETESCRIPT_KEYWORD, params);
+		}
+		@SuppressWarnings("unused")
+		private static boolean DeleteText(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTDELETETEXT_KEYWORD, params);
+		}
+		@SuppressWarnings("unused")
+		private static boolean DeleteXML(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTDELETEXML_KEYWORD, params);
+		}
+
+		/**
+		 * Stop a session for a REST service. See <a href="/sqabasic2000/TIDRestFunctionsReference.htm#detail_RestEndServiceSession">Detailed Reference</a><p>
+		 * @param comp org.safs.model.Component, it does not represent a real GUI component.<br>
+		 *                                       The window's value should always be <b>SAFSREST</b><br>
+		 *                                       The component's value should be the session-id that user assigns<br>
+		 * @param params String[], optional parameters, not used yet.
+		 * @return - true on success<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example
+		 * <pre>
+		 * We can define map file as below:
+		 * [BAYERREST]
+		 * BAYERREST=SAFSREST
+		 * BAYERSERVICE001=SESSION_ID_BAYERSERVICE001
+		 *
+		 * Then we call as below
+		 * {@code
+		 * Rest.StartServiceSession(Map.BAYERREST.BAYERSERVICE001, "baseURL");
+		 * //do some rest test ...
+		 * Rest.EndServiceSession(Map.BAYERREST.BAYERSERVICE001);
+		 * }
+		 *
+		 * Or, we can create Component in program and use it to start/stop session.
+		 * {@code
+		 * org.safs.model.Component safsrest = new org.safs.model.Component("SAFSREST");//the name must be "SAFSREST"
+		 * org.safs.model.Component bayerSession = new org.safs.model.Component(safsrest, "SESSION_ID_BAYERSERVICE001");
+		 * Rest.StartServiceSession(bayerSession, "http://www.thomas-bayer.com/sqlrest/");
+		 * //do some rest test ...
+		 * Rest.EndServiceSession(bayerSession);
+		 * }
+		 *
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 * @see #StartWebBrowser(String, String, String...)
+		 */
 		public static boolean EndServiceSession(org.safs.model.Component comp,String... params){
 			return action(comp, TIDRestFunctions.RESTENDSERVICESESSION_KEYWORD, params);
 		}
 
+		/**
+		 * Perform the "GET" method with Headers containing "Accept : application/octet-stream" on a REST service, and verify the returned content is binary before returning it.
+		 * See <a href="/sqabasic2000/TIDRestFunctionsReference.htm#detail_RestGetBinary">Detailed Reference</a><p>
+		 * @param comp org.safs.model.Component, it does not represent a real GUI component.<br>
+		 *                                       The window's value should always be <b>SAFSREST</b><br>
+		 *                                       The component's value should be the session-id that user assigns<br>
+		 * @param params String[], parameters
+		 * <ul>
+		 * <li><b>params[0] relativeURI, required</b>, The relative URI combined with a base-URL (stored in a session) to form a REST service URL.<br>
+		 *                                             But it should be full URL if it is executed out of a session.
+		 * <li><b>params[1] responseIdVar, required</b>, The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.
+		 * <li><b>params[2] body, optional</b>, The body to send with this REST request.
+		 * <li><b>params[3] headers , optional</b>, The headers to be included in this REST request. It can be literal string, map item or file path.
+		 * <li><b>params[4] authentication , optional</b>, The custom authentication/authorization information.
+		 *                                                 It can be a file holding authentication/authorization information or a map item holding a file path.
+		 * </ul>
+		 * @return - true on success<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example
+		 * <pre>
+		 * We can define map file as below:
+		 * [BAYERREST]
+		 * BAYERREST=SAFSREST
+		 * BAYERSERVICE001=SESSION_ID_BAYERSERVICE001
+		 * BAYERSERVICE001_NONEXIST=
+		 *
+		 * Then we call as below
+		 * {@code
+		 * Rest.StartServiceSession(Map.BAYERREST.BAYERSERVICE001, "http://www.thomas-bayer.com/sqlrest/");
+		 * //within session, try to get binary content from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/",
+		 * //which is concatenated by parameter relativeURI "CUSTOMER/" and baseURL "http://www.thomas-bayer.com/sqlrest/" stored in session.
+		 * Rest.GetBinary(Map.BAYERREST.BAYERSERVICE001, "CUSTOMER/", "ResponseIDVariable" );
+		 * Rest.EndServiceSession(Map.BAYERREST.BAYERSERVICE001);
+		 *
+		 * //BAYERSERVICE001_NONEXIST is defined as empty string, which is not a valid session ID.
+		 * //out of session, try to get binary content from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/"
+		 * Rest.GetBinary(Map.BAYERREST.BAYERSERVICE001_NONEXIST, "http://www.thomas-bayer.com/sqlrest/CUSTOMER/", "ResponseIDVariable" );
+		 * }
+		 *
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 * @see #StartWebBrowser(String, String, String...)
+		 */
 		public static boolean GetBinary(org.safs.model.Component comp,String... params){
 			return action(comp, TIDRestFunctions.RESTGETBINARY_KEYWORD, params);
 		}
+		/**
+		 * Perform the "GET" method with Headers containing "Accept : text/css" on a REST service, and verify the returned content is css before returning it.
+		 * See <a href="/sqabasic2000/TIDRestFunctionsReference.htm#detail_RestGetCSS">Detailed Reference</a><p>
+		 * @param comp org.safs.model.Component, it does not represent a real GUI component.<br>
+		 *                                       The window's value should always be <b>SAFSREST</b><br>
+		 *                                       The component's value should be the session-id that user assigns<br>
+		 * @param params String[], parameters
+		 * <ul>
+		 * <li><b>params[0] relativeURI, required</b>, The relative URI combined with a base-URL (stored in a session) to form a REST service URL.<br>
+		 *                                             But it should be full URL if it is executed out of a session.
+		 * <li><b>params[1] responseIdVar, required</b>, The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.
+		 * <li><b>params[2] body, optional</b>, The body to send with this REST request.
+		 * <li><b>params[3] headers , optional</b>, The headers to be included in this REST request.  It can be literal string, map item or file path.
+		 * <li><b>params[4] authentication , optional</b>, The custom authentication/authorization information.
+		 *                                                 It can be a file holding authentication/authorization information or a map item holding a file path.
+		 * </ul>
+		 * @return - true on success<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example
+		 * <pre>
+		 * We can define map file as below:
+		 * [BAYERREST]
+		 * BAYERREST=SAFSREST
+		 * BAYERSERVICE001=SESSION_ID_BAYERSERVICE001
+		 * BAYERSERVICE001_NONEXIST=
+		 *
+		 * Then we call as below
+		 * {@code
+		 * Rest.StartServiceSession(Map.BAYERREST.BAYERSERVICE001, "http://www.thomas-bayer.com/sqlrest/");
+		 * //within session, try to get css text content from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/",
+		 * //which is concatenated by parameter relativeURI "CUSTOMER/" and baseURL "http://www.thomas-bayer.com/sqlrest/" stored in session.
+		 * Rest.GetCSS(Map.BAYERREST.BAYERSERVICE001, "CUSTOMER/", "ResponseIDVariable" );
+		 * Rest.EndServiceSession(Map.BAYERREST.BAYERSERVICE001);
+		 *
+		 * //BAYERSERVICE001_NONEXIST is defined as empty string, which is not a valid session ID.
+		 * //out of session, try to get css text content from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/"
+		 * Rest.GetCSS(Map.BAYERREST.BAYERSERVICE001_NONEXIST, "http://www.thomas-bayer.com/sqlrest/CUSTOMER/", "ResponseIDVariable" );
+		 * }
+		 *
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 * @see #StartWebBrowser(String, String, String...)
+		 */
 		public static boolean GetCSS(org.safs.model.Component comp,String... params){
 			return action(comp, TIDRestFunctions.RESTGETCSS_KEYWORD, params);
 		}
+		/**
+		 * Perform the "GET" method with Headers (defined by customer) on a REST service, and get back the content.
+		 * See <a href="/sqabasic2000/TIDRestFunctionsReference.htm#detail_RestGetCustom">Detailed Reference</a><p>
+		 * @param comp org.safs.model.Component, it does not represent a real GUI component.<br>
+		 *                                       The window's value should always be <b>SAFSREST</b><br>
+		 *                                       The component's value should be the session-id that user assigns<br>
+		 * @param params String[], parameters
+		 * <ul>
+		 * <li><b>params[0] relativeURI, required</b>, The relative URI combined with a base-URL (stored in a session) to form a REST service URL.<br>
+		 *                                             But it should be full URL if it is executed out of a session.
+		 * <li><b>params[1] responseIdVar, required</b>, The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.
+		 * <li><b>params[2] body, optional</b>, The body to send with this REST request.
+		 * <li><b>params[3] headers , required</b>, The headers to be included in this REST request. It can be literal string, map item or file path.
+		 * <li><b>params[4] authentication , optional</b>, The custom authentication/authorization information.
+		 *                                                 It can be a file holding authentication/authorization information or a map item holding a file path.
+		 * </ul>
+		 * @return - true on success<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example
+		 * <pre>
+		 * We can define map file as below:
+		 * [BAYERREST]
+		 * BAYERREST=SAFSREST
+		 * BAYERSERVICE001=SESSION_ID_BAYERSERVICE001
+		 * BAYERSERVICE001_NONEXIST=
+		 *
+		 * Then we call as below
+		 * {@code
+		 * Rest.StartServiceSession(Map.BAYERREST.BAYERSERVICE001, "http://www.thomas-bayer.com/sqlrest/");
+		 * //within session, try to get content from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/",
+		 * //which is concatenated by parameter relativeURI "CUSTOMER/" and baseURL "http://www.thomas-bayer.com/sqlrest/" stored in session.
+		 * //The headers (sent with 'get' method) are defined in the project-relative file "customHeader.txt".
+		 * Rest.GetCustom(Map.BAYERREST.BAYERSERVICE001, "CUSTOMER/", "ResponseIDVariable", "", "customHeader.txt");
+		 * Rest.EndServiceSession(Map.BAYERREST.BAYERSERVICE001);
+		 *
+		 * //BAYERSERVICE001_NONEXIST is defined as empty string, which is not a valid session ID.
+		 * //out of session, try to get content from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/".
+		 * //The headers "If-Modified-Since: Sat, 29 OCT 1994 19:43:31 GMT" will be sent with 'get' method.
+		 * Rest.GetCustom(Map.BAYERREST.BAYERSERVICE001_NONEXIST, "http://www.thomas-bayer.com/sqlrest/CUSTOMER/", "ResponseIDVariable", "",  "If-Modified-Since: Sat, 29 OCT 1994 19:43:31 GMT");
+		 * }
+		 *
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 * @see #StartWebBrowser(String, String, String...)
+		 */
 		public static boolean GetCustom(org.safs.model.Component comp,String... params){
 			return action(comp, TIDRestFunctions.RESTGETCUSTOM_KEYWORD, params);
 		}
+		/**
+		 * Perform the "GET" method with Headers containing "Accept : text/html" on a REST service, and verify the returned content is html before returning it.
+		 * See <a href="/sqabasic2000/TIDRestFunctionsReference.htm#detail_RestGetHTML">Detailed Reference</a><p>
+		 * @param comp org.safs.model.Component, it does not represent a real GUI component.<br>
+		 *                                       The window's value should always be <b>SAFSREST</b><br>
+		 *                                       The component's value should be the session-id that user assigns<br>
+		 * @param params String[], parameters
+		 * <ul>
+		 * <li><b>params[0] relativeURI, required</b>, The relative URI combined with a base-URL (stored in a session) to form a REST service URL.<br>
+		 *                                             But it should be full URL if it is executed out of a session.
+		 * <li><b>params[1] responseIdVar, required</b>, The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.
+		 * <li><b>params[2] body, optional</b>, The body to send with this REST request.
+		 * <li><b>params[3] headers , optional</b>, The headers to be included in this REST request.  It can be literal string, map item or file path.
+		 * <li><b>params[4] authentication , optional</b>, The custom authentication/authorization information.
+		 *                                                 It can be a file holding authentication/authorization information or a map item holding a file path.
+		 * </ul>
+		 * @return - true on success<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example
+		 * <pre>
+		 * We can define map file as below:
+		 * [BAYERREST]
+		 * BAYERREST=SAFSREST
+		 * BAYERSERVICE001=SESSION_ID_BAYERSERVICE001
+		 * BAYERSERVICE001_NONEXIST=
+		 *
+		 * Then we call as below
+		 * {@code
+		 * Rest.StartServiceSession(Map.BAYERREST.BAYERSERVICE001, "http://www.thomas-bayer.com/sqlrest/");
+		 * //within session, try to get html text content from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/",
+		 * //which is concatenated by parameter relativeURI "CUSTOMER/" and baseURL "http://www.thomas-bayer.com/sqlrest/" stored in session.
+		 * Rest.GetHtml(Map.BAYERREST.BAYERSERVICE001, "CUSTOMER/", "ResponseIDVariable" );
+		 * Rest.EndServiceSession(Map.BAYERREST.BAYERSERVICE001);
+		 *
+		 * //BAYERSERVICE001_NONEXIST is defined as empty string, which is not a valid session ID.
+		 * //out of session, try to get html text content from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/"
+		 * Rest.GetHtml(Map.BAYERREST.BAYERSERVICE001_NONEXIST, "http://www.thomas-bayer.com/sqlrest/CUSTOMER/", "ResponseIDVariable" );
+		 * }
+		 *
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 * @see #StartWebBrowser(String, String, String...)
+		 */
 		public static boolean GetHtml(org.safs.model.Component comp,String... params){
 			return action(comp, TIDRestFunctions.RESTGETHTML_KEYWORD, params);
 		}
+		/**
+		 * Perform the "GET" method with Headers containing "Accept : image" on a REST service, and verify the returned content is image before returning it.
+		 * See <a href="/sqabasic2000/TIDRestFunctionsReference.htm#detail_RestGetImage">Detailed Reference</a><p>
+		 * @param comp org.safs.model.Component, it does not represent a real GUI component.<br>
+		 *                                       The window's value should always be <b>SAFSREST</b><br>
+		 *                                       The component's value should be the session-id that user assigns<br>
+		 * @param params String[], parameters
+		 * <ul>
+		 * <li><b>params[0] relativeURI, required</b>, The relative URI combined with a base-URL (stored in a session) to form a REST service URL.<br>
+		 *                                             But it should be full URL if it is executed out of a session.
+		 * <li><b>params[1] responseIdVar, required</b>, The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.
+		 * <li><b>params[2] body, optional</b>, The body to send with this REST request.
+		 * <li><b>params[3] headers , optional</b>, The headers to be included in this REST request.  It can be literal string, map item or file path.
+		 * <li><b>params[4] authentication , optional</b>, The custom authentication/authorization information.
+		 *                                                 It can be a file holding authentication/authorization information or a map item holding a file path.
+		 * </ul>
+		 * @return - true on success<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example
+		 * <pre>
+		 * We can define map file as below:
+		 * [BAYERREST]
+		 * BAYERREST=SAFSREST
+		 * BAYERSERVICE001=SESSION_ID_BAYERSERVICE001
+		 * BAYERSERVICE001_NONEXIST=
+		 *
+		 * Then we call as below
+		 * {@code
+		 * Rest.StartServiceSession(Map.BAYERREST.BAYERSERVICE001, "http://www.thomas-bayer.com/sqlrest/");
+		 * //within session, try to get image content from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/",
+		 * //which is concatenated by parameter relativeURI "CUSTOMER/" and baseURL "http://www.thomas-bayer.com/sqlrest/" stored in session.
+		 * Rest.GetImage(Map.BAYERREST.BAYERSERVICE001, "CUSTOMER/", "ResponseIDVariable" );
+		 * Rest.EndServiceSession(Map.BAYERREST.BAYERSERVICE001);
+		 *
+		 * //BAYERSERVICE001_NONEXIST is defined as empty string, which is not a valid session ID.
+		 * //out of session, try to get image content from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/"
+		 * Rest.GetImage(Map.BAYERREST.BAYERSERVICE001_NONEXIST, "http://www.thomas-bayer.com/sqlrest/CUSTOMER/", "ResponseIDVariable" );
+		 * }
+		 *
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 * @see #StartWebBrowser(String, String, String...)
+		 */
 		public static boolean GetImage(org.safs.model.Component comp,String... params){
 			return action(comp, TIDRestFunctions.RESTGETIMAGE_KEYWORD, params);
 		}
+		/**
+		 * Perform the "GET" method with Headers containing "Accept : application/json" on a REST service, and verify the returned content is json before returning it.
+		 * See <a href="/sqabasic2000/TIDRestFunctionsReference.htm#detail_RestGetJSON">Detailed Reference</a><p>
+		 * @param comp org.safs.model.Component, it does not represent a real GUI component.<br>
+		 *                                       The window's value should always be <b>SAFSREST</b><br>
+		 *                                       The component's value should be the session-id that user assigns<br>
+		 * @param params String[], parameters
+		 * <ul>
+		 * <li><b>params[0] relativeURI, required</b>, The relative URI combined with a base-URL (stored in a session) to form a REST service URL.<br>
+		 *                                             But it should be full URL if it is executed out of a session.
+		 * <li><b>params[1] responseIdVar, required</b>, The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.
+		 * <li><b>params[2] body, optional</b>, The body to send with this REST request.
+		 * <li><b>params[3] headers , optional</b>, The headers to be included in this REST request.  It can be literal string, map item or file path.
+		 * <li><b>params[4] authentication , optional</b>, The custom authentication/authorization information.
+		 *                                                 It can be a file holding authentication/authorization information or a map item holding a file path.
+		 * </ul>
+		 * @return - true on success<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example
+		 * <pre>
+		 * We can define map file as below:
+		 * [BAYERREST]
+		 * BAYERREST=SAFSREST
+		 * BAYERSERVICE001=SESSION_ID_BAYERSERVICE001
+		 * BAYERSERVICE001_NONEXIST=
+		 *
+		 * Then we call as below
+		 * {@code
+		 * Rest.StartServiceSession(Map.BAYERREST.BAYERSERVICE001, "http://www.thomas-bayer.com/sqlrest/");
+		 * //within session, try to get json text content from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/",
+		 * //which is concatenated by parameter relativeURI "CUSTOMER/" and baseURL "http://www.thomas-bayer.com/sqlrest/" stored in session.
+		 * Rest.GetJson(Map.BAYERREST.BAYERSERVICE001, "CUSTOMER/", "ResponseIDVariable" );
+		 * Rest.EndServiceSession(Map.BAYERREST.BAYERSERVICE001);
+		 *
+		 * //BAYERSERVICE001_NONEXIST is defined as empty string, which is not a valid session ID.
+		 * //out of session, try to get json text content from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/"
+		 * Rest.GetJson(Map.BAYERREST.BAYERSERVICE001_NONEXIST, "http://www.thomas-bayer.com/sqlrest/CUSTOMER/", "ResponseIDVariable" );
+		 * }
+		 *
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 * @see #StartWebBrowser(String, String, String...)
+		 */
 		public static boolean GetJson(org.safs.model.Component comp,String... params){
 			return action(comp, TIDRestFunctions.RESTGETJSON_KEYWORD, params);
 		}
+		/**
+		 * Perform the "GET" method with Headers containing "Accept : application/javascript" on a REST service, and verify the returned content is javascript before returning it.
+		 * See <a href="/sqabasic2000/TIDRestFunctionsReference.htm#detail_RestGetScript">Detailed Reference</a><p>
+		 * @param comp org.safs.model.Component, it does not represent a real GUI component.<br>
+		 *                                       The window's value should always be <b>SAFSREST</b><br>
+		 *                                       The component's value should be the session-id that user assigns<br>
+		 * @param params String[], parameters
+		 * <ul>
+		 * <li><b>params[0] relativeURI, required</b>, The relative URI combined with a base-URL (stored in a session) to form a REST service URL.<br>
+		 *                                             But it should be full URL if it is executed out of a session.
+		 * <li><b>params[1] responseIdVar, required</b>, The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.
+		 * <li><b>params[2] body, optional</b>, The body to send with this REST request.
+		 * <li><b>params[3] headers , optional</b>, The headers to be included in this REST request.  It can be literal string, map item or file path.
+		 * <li><b>params[4] authentication , optional</b>, The custom authentication/authorization information.
+		 *                                                 It can be a file holding authentication/authorization information or a map item holding a file path.
+		 * </ul>
+		 * @return - true on success<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example
+		 * <pre>
+		 * We can define map file as below:
+		 * [BAYERREST]
+		 * BAYERREST=SAFSREST
+		 * BAYERSERVICE001=SESSION_ID_BAYERSERVICE001
+		 * BAYERSERVICE001_NONEXIST=
+		 *
+		 * Then we call as below
+		 * {@code
+		 * Rest.StartServiceSession(Map.BAYERREST.BAYERSERVICE001, "http://www.thomas-bayer.com/sqlrest/");
+		 * //within session, try to get javascript text content from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/",
+		 * //which is concatenated by parameter relativeURI "CUSTOMER/" and baseURL "http://www.thomas-bayer.com/sqlrest/" stored in session.
+		 * Rest.GetScript(Map.BAYERREST.BAYERSERVICE001, "CUSTOMER/", "ResponseIDVariable" );
+		 * Rest.EndServiceSession(Map.BAYERREST.BAYERSERVICE001);
+		 *
+		 * //BAYERSERVICE001_NONEXIST is defined as empty string, which is not a valid session ID.
+		 * //out of session, try to get javascript text content from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/"
+		 * Rest.GetScript(Map.BAYERREST.BAYERSERVICE001_NONEXIST, "http://www.thomas-bayer.com/sqlrest/CUSTOMER/", "ResponseIDVariable" );
+		 * }
+		 *
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 * @see #StartWebBrowser(String, String, String...)
+		 */
 		public static boolean GetScript(org.safs.model.Component comp,String... params){
 			return action(comp, TIDRestFunctions.RESTGETSCRIPT_KEYWORD, params);
 		}
+		/**
+		 * Perform the "GET" method with Headers containing "Accept : text/plain" on a REST service, and verify the returned content is text before returning it.
+		 * See <a href="/sqabasic2000/TIDRestFunctionsReference.htm#detail_RestGetText">Detailed Reference</a><p>
+		 * @param comp org.safs.model.Component, it does not represent a real GUI component.<br>
+		 *                                       The window's value should always be <b>SAFSREST</b><br>
+		 *                                       The component's value should be the session-id that user assigns<br>
+		 * @param params String[], parameters
+		 * <ul>
+		 * <li><b>params[0] relativeURI, required</b>, The relative URI combined with a base-URL (stored in a session) to form a REST service URL.<br>
+		 *                                             But it should be full URL if it is executed out of a session.
+		 * <li><b>params[1] responseIdVar, required</b>, The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.
+		 * <li><b>params[2] body, optional</b>, The body to send with this REST request.
+		 * <li><b>params[3] headers , optional</b>, The headers to be included in this REST request.  It can be literal string, map item or file path.
+		 * <li><b>params[4] authentication , optional</b>, The custom authentication/authorization information.
+		 *                                                 It can be a file holding authentication/authorization information or a map item holding a file path.
+		 * </ul>
+		 * @return - true on success<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example
+		 * <pre>
+		 * We can define map file as below:
+		 * [BAYERREST]
+		 * BAYERREST=SAFSREST
+		 * BAYERSERVICE001=SESSION_ID_BAYERSERVICE001
+		 * BAYERSERVICE001_NONEXIST=
+		 *
+		 * Then we call as below
+		 * {@code
+		 * Rest.StartServiceSession(Map.BAYERREST.BAYERSERVICE001, "http://www.thomas-bayer.com/sqlrest/");
+		 * //within session, try to get plain text content from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/",
+		 * //which is concatenated by parameter relativeURI "CUSTOMER/" and baseURL "http://www.thomas-bayer.com/sqlrest/" stored in session.
+		 * Rest.GetText(Map.BAYERREST.BAYERSERVICE001, "CUSTOMER/", "ResponseIDVariable" );
+		 * Rest.EndServiceSession(Map.BAYERREST.BAYERSERVICE001);
+		 *
+		 * //BAYERSERVICE001_NONEXIST is defined as empty string, which is not a valid session ID.
+		 * //out of session, try to get plain text content from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/"
+		 * Rest.GetText(Map.BAYERREST.BAYERSERVICE001_NONEXIST, "http://www.thomas-bayer.com/sqlrest/CUSTOMER/", "ResponseIDVariable" );
+		 * }
+		 *
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 * @see #StartWebBrowser(String, String, String...)
+		 */
 		public static boolean GetText(org.safs.model.Component comp,String... params){
 			return action(comp, TIDRestFunctions.RESTGETTEXT_KEYWORD, params);
 		}
+		/**
+		 * Perform the "GET" method with Headers containing "Accept : text/xml" on a REST service, and verify the returned content is xml before returning it.
+		 * See <a href="/sqabasic2000/TIDRestFunctionsReference.htm#detail_RestGetXML">Detailed Reference</a><p>
+		 * @param comp org.safs.model.Component, it does not represent a real GUI component.<br>
+		 *                                       The window's value should always be <b>SAFSREST</b><br>
+		 *                                       The component's value should be the session-id that user assigns<br>
+		 * @param params String[], parameters
+		 * <ul>
+		 * <li><b>params[0] relativeURI, required</b>, The relative URI combined with a base-URL (stored in a session) to form a REST service URL.<br>
+		 *                                             But it should be full URL if it is executed out of a session.
+		 * <li><b>params[1] responseIdVar, required</b>, The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.
+		 * <li><b>params[2] body, optional</b>, The body to send with this REST request.
+		 * <li><b>params[3] headers , optional</b>, The headers to be included in this REST request.  It can be literal string, map item or file path.
+		 * <li><b>params[4] authentication , optional</b>, The custom authentication/authorization information.
+		 *                                                 It can be a file holding authentication/authorization information or a map item holding a file path.
+		 * </ul>
+		 * @return - true on success<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example
+		 * <pre>
+		 * We can define map file as below:
+		 * [BAYERREST]
+		 * BAYERREST=SAFSREST
+		 * BAYERSERVICE001=SESSION_ID_BAYERSERVICE001
+		 * BAYERSERVICE001_NONEXIST=
+		 *
+		 * Then we call as below
+		 * {@code
+		 * Rest.StartServiceSession(Map.BAYERREST.BAYERSERVICE001, "http://www.thomas-bayer.com/sqlrest/");
+		 * //within session, try to get xml text content from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/",
+		 * //which is concatenated by parameter relativeURI "CUSTOMER/" and baseURL "http://www.thomas-bayer.com/sqlrest/" stored in session.
+		 * Rest.GetXML(Map.BAYERREST.BAYERSERVICE001, "CUSTOMER/", "ResponseIDVariable" );
+		 * Rest.EndServiceSession(Map.BAYERREST.BAYERSERVICE001);
+		 *
+		 * //BAYERSERVICE001_NONEXIST is defined as empty string, which is not a valid session ID.
+		 * //out of session, try to get xml text content from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/"
+		 * Rest.GetXML(Map.BAYERREST.BAYERSERVICE001_NONEXIST, "http://www.thomas-bayer.com/sqlrest/CUSTOMER/", "ResponseIDVariable" );
+		 * }
+		 *
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 * @see #StartWebBrowser(String, String, String...)
+		 */
 		public static boolean GetXML(org.safs.model.Component comp,String... params){
 			return action(comp, TIDRestFunctions.RESTGETXML_KEYWORD, params);
 		}
 
-
-		public static boolean HeaderXML(org.safs.model.Component comp,String... params){
+		/**
+		 * Perform the "HEAD" method with Headers containing "Accept : application/octet-stream" on a REST service, and verify the returned content is binary before returning the header part.
+		 * See <a href="/sqabasic2000/TIDRestFunctionsReference.htm#detail_RestHeadBinary">Detailed Reference</a><p>
+		 * @param comp org.safs.model.Component, it does not represent a real GUI component.<br>
+		 *                                       The window's value should always be <b>SAFSREST</b><br>
+		 *                                       The component's value should be the session-id that user assigns<br>
+		 * @param params String[], parameters
+		 * <ul>
+		 * <li><b>params[0] relativeURI, required</b>, The relative URI combined with a base-URL (stored in a session) to form a REST service URL.<br>
+		 *                                             But it should be full URL if it is executed out of a session.
+		 * <li><b>params[1] responseIdVar, required</b>, The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.
+		 * <li><b>params[2] body, optional</b>, The body to send with this REST request.
+		 * <li><b>params[3] headers , optional</b>, The headers to be included in this REST request. It can be literal string, map item or file path.
+		 * <li><b>params[4] authentication , optional</b>, The custom authentication/authorization information.
+		 *                                                 It can be a file holding authentication/authorization information or a map item holding a file path.
+		 * </ul>
+		 * @return - true on success<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example
+		 * <pre>
+		 * We can define map file as below:
+		 * [BAYERREST]
+		 * BAYERREST=SAFSREST
+		 * BAYERSERVICE001=SESSION_ID_BAYERSERVICE001
+		 * BAYERSERVICE001_NONEXIST=
+		 *
+		 * Then we call as below
+		 * {@code
+		 * Rest.StartServiceSession(Map.BAYERREST.BAYERSERVICE001, "http://www.thomas-bayer.com/sqlrest/");
+		 * //within session, try to get binary content (only the head part) from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/",
+		 * //which is concatenated by parameter relativeURI "CUSTOMER/" and baseURL "http://www.thomas-bayer.com/sqlrest/" stored in session.
+		 * Rest.HeadBinary(Map.BAYERREST.BAYERSERVICE001, "CUSTOMER/", "ResponseIDVariable" );
+		 * Rest.EndServiceSession(Map.BAYERREST.BAYERSERVICE001);
+		 *
+		 * //BAYERSERVICE001_NONEXIST is defined as empty string, which is not a valid session ID.
+		 * //out of session, try to get binary content from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/"
+		 * Rest.HeadBinary(Map.BAYERREST.BAYERSERVICE001_NONEXIST, "http://www.thomas-bayer.com/sqlrest/CUSTOMER/", "ResponseIDVariable" );
+		 * }
+		 *
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 * @see #StartWebBrowser(String, String, String...)
+		 */
+		public static boolean HeadBinary(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTHEADBINARY_KEYWORD, params);
+		}
+		/**
+		 * Perform the "HEAD" method with Headers containing "Accept : text/css" on a REST service, and verify the returned content is css before returning the header part.
+		 * See <a href="/sqabasic2000/TIDRestFunctionsReference.htm#detail_RestHeadCSS">Detailed Reference</a><p>
+		 * @param comp org.safs.model.Component, it does not represent a real GUI component.<br>
+		 *                                       The window's value should always be <b>SAFSREST</b><br>
+		 *                                       The component's value should be the session-id that user assigns<br>
+		 * @param params String[], parameters
+		 * <ul>
+		 * <li><b>params[0] relativeURI, required</b>, The relative URI combined with a base-URL (stored in a session) to form a REST service URL.<br>
+		 *                                             But it should be full URL if it is executed out of a session.
+		 * <li><b>params[1] responseIdVar, required</b>, The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.
+		 * <li><b>params[2] body, optional</b>, The body to send with this REST request.
+		 * <li><b>params[3] headers , optional</b>, The headers to be included in this REST request. It can be literal string, map item or file path.
+		 * <li><b>params[4] authentication , optional</b>, The custom authentication/authorization information.
+		 *                                                 It can be a file holding authentication/authorization information or a map item holding a file path.
+		 * </ul>
+		 * @return - true on success<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example
+		 * <pre>
+		 * We can define map file as below:
+		 * [BAYERREST]
+		 * BAYERREST=SAFSREST
+		 * BAYERSERVICE001=SESSION_ID_BAYERSERVICE001
+		 * BAYERSERVICE001_NONEXIST=
+		 *
+		 * Then we call as below
+		 * {@code
+		 * Rest.StartServiceSession(Map.BAYERREST.BAYERSERVICE001, "http://www.thomas-bayer.com/sqlrest/");
+		 * //within session, try to get css content (only the head part) from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/",
+		 * //which is concatenated by parameter relativeURI "CUSTOMER/" and baseURL "http://www.thomas-bayer.com/sqlrest/" stored in session.
+		 * Rest.HeadCSS(Map.BAYERREST.BAYERSERVICE001, "CUSTOMER/", "ResponseIDVariable" );
+		 * Rest.EndServiceSession(Map.BAYERREST.BAYERSERVICE001);
+		 *
+		 * //BAYERSERVICE001_NONEXIST is defined as empty string, which is not a valid session ID.
+		 * //out of session, try to get binary content from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/"
+		 * Rest.HeadCSS(Map.BAYERREST.BAYERSERVICE001_NONEXIST, "http://www.thomas-bayer.com/sqlrest/CUSTOMER/", "ResponseIDVariable" );
+		 * }
+		 *
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 * @see #StartWebBrowser(String, String, String...)
+		 */
+		public static boolean HeadCSS(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTHEADCSS_KEYWORD, params);
+		}
+		/**
+		 * Perform the "HEAD" method (with Headers defined by user) on a REST service, and get back the header information.
+		 * See <a href="/sqabasic2000/TIDRestFunctionsReference.htm#detail_RestHeadCustom">Detailed Reference</a><p>
+		 * @param comp org.safs.model.Component, it does not represent a real GUI component.<br>
+		 *                                       The window's value should always be <b>SAFSREST</b><br>
+		 *                                       The component's value should be the session-id that user assigns<br>
+		 * @param params String[], parameters
+		 * <ul>
+		 * <li><b>params[0] relativeURI, required</b>, The relative URI combined with a base-URL (stored in a session) to form a REST service URL.<br>
+		 *                                             But it should be full URL if it is executed out of a session.
+		 * <li><b>params[1] responseIdVar, required</b>, The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.
+		 * <li><b>params[2] body, optional</b>, The body to send with this REST request.
+		 * <li><b>params[3] headers , optional</b>, The headers to be included in this REST request. It can be literal string, map item or file path.
+		 * <li><b>params[4] authentication , optional</b>, The custom authentication/authorization information.
+		 *                                                 It can be a file holding authentication/authorization information or a map item holding a file path.
+		 * </ul>
+		 * @return - true on success<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example
+		 * <pre>
+		 * We can define map file as below:
+		 * [BAYERREST]
+		 * BAYERREST=SAFSREST
+		 * BAYERSERVICE001=SESSION_ID_BAYERSERVICE001
+		 * BAYERSERVICE001_NONEXIST=
+		 *
+		 * Then we call as below
+		 * {@code
+		 * Rest.StartServiceSession(Map.BAYERREST.BAYERSERVICE001, "http://www.thomas-bayer.com/sqlrest/");
+		 * //within session, try to get css content (only the head part) from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/",
+		 * //which is concatenated by parameter relativeURI "CUSTOMER/" and baseURL "http://www.thomas-bayer.com/sqlrest/" stored in session.
+		 * Rest.HeadCSS(Map.BAYERREST.BAYERSERVICE001, "CUSTOMER/", "ResponseIDVariable" );
+		 * Rest.EndServiceSession(Map.BAYERREST.BAYERSERVICE001);
+		 *
+		 * //BAYERSERVICE001_NONEXIST is defined as empty string, which is not a valid session ID.
+		 * //out of session, try to get binary content from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/"
+		 * Rest.HeadCSS(Map.BAYERREST.BAYERSERVICE001_NONEXIST, "http://www.thomas-bayer.com/sqlrest/CUSTOMER/", "ResponseIDVariable" );
+		 * }
+		 *
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 * @see #StartWebBrowser(String, String, String...)
+		 */
+		public static boolean HeadCustom(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTHEADCUSTOM_KEYWORD, params);
+		}
+		/**
+		 * Perform the "HEAD" method with Headers containing "Accept : text/html" on a REST service, and verify the returned content is html before returning the header part.
+		 * See <a href="/sqabasic2000/TIDRestFunctionsReference.htm#detail_RestHeadHTML">Detailed Reference</a><p>
+		 * @param comp org.safs.model.Component, it does not represent a real GUI component.<br>
+		 *                                       The window's value should always be <b>SAFSREST</b><br>
+		 *                                       The component's value should be the session-id that user assigns<br>
+		 * @param params String[], parameters
+		 * <ul>
+		 * <li><b>params[0] relativeURI, required</b>, The relative URI combined with a base-URL (stored in a session) to form a REST service URL.<br>
+		 *                                             But it should be full URL if it is executed out of a session.
+		 * <li><b>params[1] responseIdVar, required</b>, The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.
+		 * <li><b>params[2] body, optional</b>, The body to send with this REST request.
+		 * <li><b>params[3] headers , optional</b>, The headers to be included in this REST request. It can be literal string, map item or file path.
+		 * <li><b>params[4] authentication , optional</b>, The custom authentication/authorization information.
+		 *                                                 It can be a file holding authentication/authorization information or a map item holding a file path.
+		 * </ul>
+		 * @return - true on success<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example
+		 * <pre>
+		 * We can define map file as below:
+		 * [BAYERREST]
+		 * BAYERREST=SAFSREST
+		 * BAYERSERVICE001=SESSION_ID_BAYERSERVICE001
+		 * BAYERSERVICE001_NONEXIST=
+		 *
+		 * Then we call as below
+		 * {@code
+		 * Rest.StartServiceSession(Map.BAYERREST.BAYERSERVICE001, "http://www.thomas-bayer.com/sqlrest/");
+		 * //within session, try to get html content (only the head part) from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/",
+		 * //which is concatenated by parameter relativeURI "CUSTOMER/" and baseURL "http://www.thomas-bayer.com/sqlrest/" stored in session.
+		 * Rest.HeadHTML(Map.BAYERREST.BAYERSERVICE001, "CUSTOMER/", "ResponseIDVariable" );
+		 * Rest.EndServiceSession(Map.BAYERREST.BAYERSERVICE001);
+		 *
+		 * //BAYERSERVICE001_NONEXIST is defined as empty string, which is not a valid session ID.
+		 * //out of session, try to get binary content from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/"
+		 * Rest.HeadHTML(Map.BAYERREST.BAYERSERVICE001_NONEXIST, "http://www.thomas-bayer.com/sqlrest/CUSTOMER/", "ResponseIDVariable" );
+		 * }
+		 *
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 * @see #StartWebBrowser(String, String, String...)
+		 */
+		public static boolean HeadHTML(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTHEADHTML_KEYWORD, params);
+		}
+		/**
+		 * Perform the "HEAD" method with Headers containing "Accept : image" on a REST service, and verify the returned content is image before returning the header part.
+		 * See <a href="/sqabasic2000/TIDRestFunctionsReference.htm#detail_RestHeadImage">Detailed Reference</a><p>
+		 * @param comp org.safs.model.Component, it does not represent a real GUI component.<br>
+		 *                                       The window's value should always be <b>SAFSREST</b><br>
+		 *                                       The component's value should be the session-id that user assigns<br>
+		 * @param params String[], parameters
+		 * <ul>
+		 * <li><b>params[0] relativeURI, required</b>, The relative URI combined with a base-URL (stored in a session) to form a REST service URL.<br>
+		 *                                             But it should be full URL if it is executed out of a session.
+		 * <li><b>params[1] responseIdVar, required</b>, The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.
+		 * <li><b>params[2] body, optional</b>, The body to send with this REST request.
+		 * <li><b>params[3] headers , optional</b>, The headers to be included in this REST request. It can be literal string, map item or file path.
+		 * <li><b>params[4] authentication , optional</b>, The custom authentication/authorization information.
+		 *                                                 It can be a file holding authentication/authorization information or a map item holding a file path.
+		 * </ul>
+		 * @return - true on success<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example
+		 * <pre>
+		 * We can define map file as below:
+		 * [BAYERREST]
+		 * BAYERREST=SAFSREST
+		 * BAYERSERVICE001=SESSION_ID_BAYERSERVICE001
+		 * BAYERSERVICE001_NONEXIST=
+		 *
+		 * Then we call as below
+		 * {@code
+		 * Rest.StartServiceSession(Map.BAYERREST.BAYERSERVICE001, "http://www.thomas-bayer.com/sqlrest/");
+		 * //within session, try to get image content (only the head part) from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/",
+		 * //which is concatenated by parameter relativeURI "CUSTOMER/" and baseURL "http://www.thomas-bayer.com/sqlrest/" stored in session.
+		 * Rest.HeadImage(Map.BAYERREST.BAYERSERVICE001, "CUSTOMER/", "ResponseIDVariable" );
+		 * Rest.EndServiceSession(Map.BAYERREST.BAYERSERVICE001);
+		 *
+		 * //BAYERSERVICE001_NONEXIST is defined as empty string, which is not a valid session ID.
+		 * //out of session, try to get binary content from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/"
+		 * Rest.HeadImage(Map.BAYERREST.BAYERSERVICE001_NONEXIST, "http://www.thomas-bayer.com/sqlrest/CUSTOMER/", "ResponseIDVariable" );
+		 * }
+		 *
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 * @see #StartWebBrowser(String, String, String...)
+		 */
+		public static boolean HeadImage(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTHEADIMAGE_KEYWORD, params);
+		}
+		/**
+		 * Perform the "HEAD" method with Headers containing "Accept : application/json" on a REST service, and verify the returned content is json before returning the header part.
+		 * See <a href="/sqabasic2000/TIDRestFunctionsReference.htm#detail_RestHeadJSON">Detailed Reference</a><p>
+		 * @param comp org.safs.model.Component, it does not represent a real GUI component.<br>
+		 *                                       The window's value should always be <b>SAFSREST</b><br>
+		 *                                       The component's value should be the session-id that user assigns<br>
+		 * @param params String[], parameters
+		 * <ul>
+		 * <li><b>params[0] relativeURI, required</b>, The relative URI combined with a base-URL (stored in a session) to form a REST service URL.<br>
+		 *                                             But it should be full URL if it is executed out of a session.
+		 * <li><b>params[1] responseIdVar, required</b>, The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.
+		 * <li><b>params[2] body, optional</b>, The body to send with this REST request.
+		 * <li><b>params[3] headers , optional</b>, The headers to be included in this REST request. It can be literal string, map item or file path.
+		 * <li><b>params[4] authentication , optional</b>, The custom authentication/authorization information.
+		 *                                                 It can be a file holding authentication/authorization information or a map item holding a file path.
+		 * </ul>
+		 * @return - true on success<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example
+		 * <pre>
+		 * We can define map file as below:
+		 * [BAYERREST]
+		 * BAYERREST=SAFSREST
+		 * BAYERSERVICE001=SESSION_ID_BAYERSERVICE001
+		 * BAYERSERVICE001_NONEXIST=
+		 *
+		 * Then we call as below
+		 * {@code
+		 * Rest.StartServiceSession(Map.BAYERREST.BAYERSERVICE001, "http://www.thomas-bayer.com/sqlrest/");
+		 * //within session, try to get json content (only the head part) from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/",
+		 * //which is concatenated by parameter relativeURI "CUSTOMER/" and baseURL "http://www.thomas-bayer.com/sqlrest/" stored in session.
+		 * Rest.HeadJSON(Map.BAYERREST.BAYERSERVICE001, "CUSTOMER/", "ResponseIDVariable" );
+		 * Rest.EndServiceSession(Map.BAYERREST.BAYERSERVICE001);
+		 *
+		 * //BAYERSERVICE001_NONEXIST is defined as empty string, which is not a valid session ID.
+		 * //out of session, try to get binary content from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/"
+		 * Rest.HeadJSON(Map.BAYERREST.BAYERSERVICE001_NONEXIST, "http://www.thomas-bayer.com/sqlrest/CUSTOMER/", "ResponseIDVariable" );
+		 * }
+		 *
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 * @see #StartWebBrowser(String, String, String...)
+		 */
+		public static boolean HeadJSON(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTHEADJSON_KEYWORD, params);
+		}
+		/**
+		 * Perform the "HEAD" method with Headers containing "Accept : application/javascript" on a REST service, and verify the returned content is javascript before returning the header part.
+		 * See <a href="/sqabasic2000/TIDRestFunctionsReference.htm#detail_RestHeadScript">Detailed Reference</a><p>
+		 * @param comp org.safs.model.Component, it does not represent a real GUI component.<br>
+		 *                                       The window's value should always be <b>SAFSREST</b><br>
+		 *                                       The component's value should be the session-id that user assigns<br>
+		 * @param params String[], parameters
+		 * <ul>
+		 * <li><b>params[0] relativeURI, required</b>, The relative URI combined with a base-URL (stored in a session) to form a REST service URL.<br>
+		 *                                             But it should be full URL if it is executed out of a session.
+		 * <li><b>params[1] responseIdVar, required</b>, The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.
+		 * <li><b>params[2] body, optional</b>, The body to send with this REST request.
+		 * <li><b>params[3] headers , optional</b>, The headers to be included in this REST request. It can be literal string, map item or file path.
+		 * <li><b>params[4] authentication , optional</b>, The custom authentication/authorization information.
+		 *                                                 It can be a file holding authentication/authorization information or a map item holding a file path.
+		 * </ul>
+		 * @return - true on success<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example
+		 * <pre>
+		 * We can define map file as below:
+		 * [BAYERREST]
+		 * BAYERREST=SAFSREST
+		 * BAYERSERVICE001=SESSION_ID_BAYERSERVICE001
+		 * BAYERSERVICE001_NONEXIST=
+		 *
+		 * Then we call as below
+		 * {@code
+		 * Rest.StartServiceSession(Map.BAYERREST.BAYERSERVICE001, "http://www.thomas-bayer.com/sqlrest/");
+		 * //within session, try to get javascript content (only the head part) from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/",
+		 * //which is concatenated by parameter relativeURI "CUSTOMER/" and baseURL "http://www.thomas-bayer.com/sqlrest/" stored in session.
+		 * Rest.HeadScript(Map.BAYERREST.BAYERSERVICE001, "CUSTOMER/", "ResponseIDVariable" );
+		 * Rest.EndServiceSession(Map.BAYERREST.BAYERSERVICE001);
+		 *
+		 * //BAYERSERVICE001_NONEXIST is defined as empty string, which is not a valid session ID.
+		 * //out of session, try to get binary content from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/"
+		 * Rest.HeadScript(Map.BAYERREST.BAYERSERVICE001_NONEXIST, "http://www.thomas-bayer.com/sqlrest/CUSTOMER/", "ResponseIDVariable" );
+		 * }
+		 *
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 * @see #StartWebBrowser(String, String, String...)
+		 */
+		public static boolean HeadScript(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTHEADSCRIPT_KEYWORD, params);
+		}
+		/**
+		 * Perform the "HEAD" method with Headers containing "Accept : text/plain" on a REST service, and verify the returned content is text before returning the header part.
+		 * See <a href="/sqabasic2000/TIDRestFunctionsReference.htm#detail_RestHeadText">Detailed Reference</a><p>
+		 * @param comp org.safs.model.Component, it does not represent a real GUI component.<br>
+		 *                                       The window's value should always be <b>SAFSREST</b><br>
+		 *                                       The component's value should be the session-id that user assigns<br>
+		 * @param params String[], parameters
+		 * <ul>
+		 * <li><b>params[0] relativeURI, required</b>, The relative URI combined with a base-URL (stored in a session) to form a REST service URL.<br>
+		 *                                             But it should be full URL if it is executed out of a session.
+		 * <li><b>params[1] responseIdVar, required</b>, The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.
+		 * <li><b>params[2] body, optional</b>, The body to send with this REST request.
+		 * <li><b>params[3] headers , optional</b>, The headers to be included in this REST request. It can be literal string, map item or file path.
+		 * <li><b>params[4] authentication , optional</b>, The custom authentication/authorization information.
+		 *                                                 It can be a file holding authentication/authorization information or a map item holding a file path.
+		 * </ul>
+		 * @return - true on success<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example
+		 * <pre>
+		 * We can define map file as below:
+		 * [BAYERREST]
+		 * BAYERREST=SAFSREST
+		 * BAYERSERVICE001=SESSION_ID_BAYERSERVICE001
+		 * BAYERSERVICE001_NONEXIST=
+		 *
+		 * Then we call as below
+		 * {@code
+		 * Rest.StartServiceSession(Map.BAYERREST.BAYERSERVICE001, "http://www.thomas-bayer.com/sqlrest/");
+		 * //within session, try to get text content (only the head part) from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/",
+		 * //which is concatenated by parameter relativeURI "CUSTOMER/" and baseURL "http://www.thomas-bayer.com/sqlrest/" stored in session.
+		 * Rest.HeadText(Map.BAYERREST.BAYERSERVICE001, "CUSTOMER/", "ResponseIDVariable" );
+		 * Rest.EndServiceSession(Map.BAYERREST.BAYERSERVICE001);
+		 *
+		 * //BAYERSERVICE001_NONEXIST is defined as empty string, which is not a valid session ID.
+		 * //out of session, try to get binary content from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/"
+		 * Rest.HeadText(Map.BAYERREST.BAYERSERVICE001_NONEXIST, "http://www.thomas-bayer.com/sqlrest/CUSTOMER/", "ResponseIDVariable" );
+		 * }
+		 *
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 * @see #StartWebBrowser(String, String, String...)
+		 */
+		public static boolean HeadText(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTHEADTEXT_KEYWORD, params);
+		}
+		/**
+		 * Perform the "HEAD" method with Headers containing "Accept : text/xml" on a REST service, and verify the returned content is xml before returning the header part.
+		 * See <a href="/sqabasic2000/TIDRestFunctionsReference.htm#detail_RestHeadXML">Detailed Reference</a><p>
+		 * @param comp org.safs.model.Component, it does not represent a real GUI component.<br>
+		 *                                       The window's value should always be <b>SAFSREST</b><br>
+		 *                                       The component's value should be the session-id that user assigns<br>
+		 * @param params String[], parameters
+		 * <ul>
+		 * <li><b>params[0] relativeURI, required</b>, The relative URI combined with a base-URL (stored in a session) to form a REST service URL.<br>
+		 *                                             But it should be full URL if it is executed out of a session.
+		 * <li><b>params[1] responseIdVar, required</b>, The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.
+		 * <li><b>params[2] body, optional</b>, The body to send with this REST request.
+		 * <li><b>params[3] headers , optional</b>, The headers to be included in this REST request. It can be literal string, map item or file path.
+		 * <li><b>params[4] authentication , optional</b>, The custom authentication/authorization information.
+		 *                                                 It can be a file holding authentication/authorization information or a map item holding a file path.
+		 * </ul>
+		 * @return - true on success<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example
+		 * <pre>
+		 * We can define map file as below:
+		 * [BAYERREST]
+		 * BAYERREST=SAFSREST
+		 * BAYERSERVICE001=SESSION_ID_BAYERSERVICE001
+		 * BAYERSERVICE001_NONEXIST=
+		 *
+		 * Then we call as below
+		 * {@code
+		 * Rest.StartServiceSession(Map.BAYERREST.BAYERSERVICE001, "http://www.thomas-bayer.com/sqlrest/");
+		 * //within session, try to get xml content (only the head part) from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/",
+		 * //which is concatenated by parameter relativeURI "CUSTOMER/" and baseURL "http://www.thomas-bayer.com/sqlrest/" stored in session.
+		 * Rest.HeadXML(Map.BAYERREST.BAYERSERVICE001, "CUSTOMER/", "ResponseIDVariable" );
+		 * Rest.EndServiceSession(Map.BAYERREST.BAYERSERVICE001);
+		 *
+		 * //BAYERSERVICE001_NONEXIST is defined as empty string, which is not a valid session ID.
+		 * //out of session, try to get binary content from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/"
+		 * Rest.HeadXML(Map.BAYERREST.BAYERSERVICE001_NONEXIST, "http://www.thomas-bayer.com/sqlrest/CUSTOMER/", "ResponseIDVariable" );
+		 * }
+		 *
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 * @see #StartWebBrowser(String, String, String...)
+		 */
+		public static boolean HeadXML(org.safs.model.Component comp,String... params){
 			return action(comp, TIDRestFunctions.RESTHEADXML_KEYWORD, params);
 		}
+		/**
+		 * @deprecated It has been renamed to {@link #HeadXML(org.safs.model.Component, String...)}
+		 */
+		@Deprecated
+		public static boolean HeaderXML(org.safs.model.Component comp,String... params){
+			return HeadXML(comp, params);
+		}
 
+		public static boolean PatchBinary(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTPATCHBINARY_KEYWORD, params);
+		}
+		public static boolean PatchCSS(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTPATCHCSS_KEYWORD, params);
+		}
+		public static boolean PatchCustom(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTPATCHCUSTOM_KEYWORD, params);
+		}
+		public static boolean PatchHTML(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTPATCHHTML_KEYWORD, params);
+		}
+		public static boolean PatchImage(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTPATCHIMAGE_KEYWORD, params);
+		}
+		public static boolean PatchJSON(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTPATCHJSON_KEYWORD, params);
+		}
+		public static boolean PatchScript(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTPATCHSCRIPT_KEYWORD, params);
+		}
+		public static boolean PatchText(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTPATCHTEXT_KEYWORD, params);
+		}
+		public static boolean PatchXML(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTPATCHXML_KEYWORD, params);
+		}
+
+		public static boolean PostBinary(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTPOSTBINARY_KEYWORD, params);
+		}
+		public static boolean PostCSS(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTPOSTCSS_KEYWORD, params);
+		}
+		public static boolean PostCustom(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTPOSTCUSTOM_KEYWORD, params);
+		}
+		public static boolean PostHTML(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTPOSTHTML_KEYWORD, params);
+		}
+		public static boolean PostImage(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTPOSTIMAGE_KEYWORD, params);
+		}
+		public static boolean PostJSON(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTPOSTJSON_KEYWORD, params);
+		}
+		public static boolean PostScript(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTPOSTSCRIPT_KEYWORD, params);
+		}
+		public static boolean PostText(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTPOSTTEXT_KEYWORD, params);
+		}
+		public static boolean PostXML(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTPOSTXML_KEYWORD, params);
+		}
+//		/**
+//		 * Perform the "PUT" method with Headers containing "Content-Type : application/octet-stream" on a REST service.
+//		 * See <a href="/sqabasic2000/TIDRestFunctionsReference.htm#detail_RestPutBinary">Detailed Reference</a><p>
+//		 * @param comp org.safs.model.Component, it does not represent a real GUI component.<br>
+//		 *                                       The window's value should always be <b>SAFSREST</b><br>
+//		 *                                       The component's value should be the session-id that user assigns<br>
+//		 * @param params String[], parameters
+//		 * <ul>
+//		 * <li><b>params[0] relativeURI, required</b>, The relative URI combined with a base-URL (stored in a session) to form a REST service URL.<br>
+//		 *                                             But it should be full URL if it is executed out of a session.<br>
+//		 *                                             This URL should point to an entity to be updated, such as "binaryContents/{id}".
+//		 * <li><b>params[1] responseIdVar, required</b>, The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.
+//		 * <li><b>params[2] body, optional</b>, The body to send with this REST request. It is a file path (project-relative path or full path) containing binary content.<br>
+//		 *                                      The content should be the ENTIRETY of the entity indicated by the parameter 'relativeURI'.<br>
+//		 * <li><b>params[3] headers , optional</b>, The headers to be included in this REST request. It can be literal string, map item or file path.
+//		 * <li><b>params[4] authentication , optional</b>, The custom authentication/authorization information.
+//		 *                                                 It can be a file holding authentication/authorization information or a map item holding a file path.
+//		 * </ul>
+//		 * @return - true on success<p>
+//		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+//		 * @example
+//		 * <pre>
+//		 * We can define map file as below:
+//		 * [SERVICETEST]
+//		 * SERVICETEST=SAFSREST
+//		 * SERVICE001=SESSION_ID_SERVICE001
+//		 * SERVICE001_NONEXIST=
+//		 *
+//		 * Then we call as below
+//		 * {@code
+//		 * Rest.StartServiceSession(Map.SERVICETEST.SERVICE001, "http://www.service.com/");
+//		 * //within session, try to put binary content (from project-relative file "file.bin") to URL "http://www.service.com/binaryContents/61/",
+//		 * //which is concatenated by parameter relativeURI "binaryContents/61/" and baseURL "http://www.service.com/" stored in session.
+//		 * Rest.PutBinary(Map.SERVICETEST.SERVICE001, "binaryContents/61/", "ResponseIDVariable", "file.bin" );
+//		 * Rest.EndServiceSession(Map.SERVICETEST.SERVICE001);
+//		 *
+//		 * //SERVICE001_NONEXIST is defined as empty string, which is not a valid session ID.
+//		 * //out of session, try to put binary content (from project-relative file "file.bin") to URL "http://www.service.com/binaryContents/61/"
+//		 * Rest.PutBinary(Map.SERVICETEST.SERVICE001_NONEXIST, "http://www.service.com/binaryContents/61/", "ResponseIDVariable", "file.bin");
+//		 * }
+//		 *
+//		 * </pre>
+//		 * @see #prevResults
+//		 * @see org.safs.TestRecordHelper#getStatusCode()
+//		 * @see org.safs.TestRecordHelper#getStatusInfo()
+//		 * @see #StartWebBrowser(String, String, String...)
+//		 */
+		public static boolean PutBinary(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTPUTBINARY_KEYWORD, params);
+		}
+		/**
+		 * Perform the "PUT" method with Headers containing "Content-Type : text/css" on a REST service.
+		 * See <a href="/sqabasic2000/TIDRestFunctionsReference.htm#detail_RestPutCSS">Detailed Reference</a><p>
+		 * @param comp org.safs.model.Component, it does not represent a real GUI component.<br>
+		 *                                       The window's value should always be <b>SAFSREST</b><br>
+		 *                                       The component's value should be the session-id that user assigns<br>
+		 * @param params String[], parameters
+		 * <ul>
+		 * <li><b>params[0] relativeURI, required</b>, The relative URI combined with a base-URL (stored in a session) to form a REST service URL.<br>
+		 *                                             But it should be full URL if it is executed out of a session.<br>
+		 *                                             This URL should point to an entity to be updated, such as "cssStyles/{id}".
+		 * <li><b>params[1] responseIdVar, required</b>, The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.
+		 * <li><b>params[2] body, optional</b>, The body to send with this REST request. It can be literal string or file path (project-relative path or full path).<br>
+		 *                                      The content should be the ENTIRETY of the entity indicated by the parameter 'relativeURI'.<br>
+		 * <li><b>params[3] headers , optional</b>, The headers to be included in this REST request. It can be literal string, map item or file path.
+		 * <li><b>params[4] authentication , optional</b>, The custom authentication/authorization information.
+		 *                                                 It can be a file holding authentication/authorization information or a map item holding a file path.
+		 * </ul>
+		 * @return - true on success<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example
+		 * <pre>
+		 * We can define map file as below:
+		 * [SERVICETEST]
+		 * SERVICETEST=SAFSREST
+		 * SERVICE001=SESSION_ID_SERVICE001
+		 * SERVICE001_NONEXIST=
+		 *
+		 * Then we call as below
+		 * {@code
+		 * Rest.StartServiceSession(Map.SERVICETEST.SERVICE001, "http://www.service.com/");
+		 * //within session, try to put css content to URL "http://www.service.com/cssStyles/61/",
+		 * //which is concatenated by parameter relativeURI "cssStyles/61/" and baseURL "http://www.service.com/" stored in session.
+		 * Rest.PutCSS(Map.SERVICETEST.SERVICE001, "cssStyles/61/", "ResponseIDVariable", "user.css" );
+		 * Rest.EndServiceSession(Map.SERVICETEST.SERVICE001);
+		 *
+		 * //SERVICE001_NONEXIST is defined as empty string, which is not a valid session ID.
+		 * //out of session, try to put css content to URL "http://www.service.com/cssStyles/61/"
+		 * Rest.PutCSS(Map.SERVICETEST.SERVICE001_NONEXIST, "http://www.service.com/cssStyles/61/", "ResponseIDVariable", "user.css");
+		 * }
+		 *
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 * @see #StartWebBrowser(String, String, String...)
+		 */
+		public static boolean PutCSS(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTPUTCSS_KEYWORD, params);
+		}
+		/**
+		 * Perform the "PUT" method with Headers (defined by customer) on a REST service.
+		 * See <a href="/sqabasic2000/TIDRestFunctionsReference.htm#detail_RestPutCustom">Detailed Reference</a><p>
+		 * @param comp org.safs.model.Component, it does not represent a real GUI component.<br>
+		 *                                       The window's value should always be <b>SAFSREST</b><br>
+		 *                                       The component's value should be the session-id that user assigns<br>
+		 * @param params String[], parameters
+		 * <ul>
+		 * <li><b>params[0] relativeURI, required</b>, The relative URI combined with a base-URL (stored in a session) to form a REST service URL.<br>
+		 *                                             But it should be full URL if it is executed out of a session.<br>
+		 *                                             This URL should point to an entity to be updated, such as "entities/{id}".
+		 * <li><b>params[1] responseIdVar, required</b>, The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.
+		 * <li><b>params[2] body, optional</b>, The body to send with this REST request. It can be literal string or file path (project-relative path or full path).<br>
+		 *                                      The content should be the ENTIRETY of the entity indicated by the parameter 'relativeURI'.<br>
+		 * <li><b>params[3] headers , optional</b>, The headers to be included in this REST request. It can be literal string, map item or file path.
+		 * <li><b>params[4] authentication , optional</b>, The custom authentication/authorization information.
+		 *                                                 It can be a file holding authentication/authorization information or a map item holding a file path.
+		 * </ul>
+		 * @return - true on success<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example
+		 * <pre>
+		 * We can define map file as below:
+		 * [SERVICETEST]
+		 * SERVICETEST=SAFSREST
+		 * SERVICE001=SESSION_ID_SERVICE001
+		 * SERVICE001_NONEXIST=
+		 *
+		 * Then we call as below
+		 * {@code
+		 * Rest.StartServiceSession(Map.SERVICETEST.SERVICE001, "http://www.service.com/");
+		 * //within session, try to put html content to URL "http://www.service.com/entities/61/",
+		 * //which is concatenated by parameter relativeURI "entities/61/" and baseURL "http://www.service.com/" stored in session.
+		 * //The headers (sent with 'put' method) are defined in the project-relative file "customHeader.txt".
+		 * //"entityFile" is a project-relative file containing the content to send with 'put' command, its content type should be defined in "customHeader.txt".
+		 * Rest.PutHTML(Map.SERVICETEST.SERVICE001, "entities/61/", "ResponseIDVariable", "entityFile", "customHeader.txt");
+		 * Rest.EndServiceSession(Map.SERVICETEST.SERVICE001);
+		 *
+		 * //SERVICE001_NONEXIST is defined as empty string, which is not a valid session ID.
+		 * //out of session, try to put html content to URL "http://www.service.com/entities/61/"
+		 * //The headers (sent with 'put' method) are defined in the project-relative file "customHeader.txt".
+		 * //"entityFile" is a project-relative file containing the content to send with 'put' command, its content type should be defined in "customHeader.txt".
+		 * Rest.PutHTML(Map.SERVICETEST.SERVICE001_NONEXIST, "http://www.service.com/entities/61/", "ResponseIDVariable", "entityFile", "customHeader.txt");
+		 * }
+		 *
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 * @see #StartWebBrowser(String, String, String...)
+		 */
+		public static boolean PutCustom(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTPUTCUSTOM_KEYWORD, params);
+		}
+		/**
+		 * Perform the "PUT" method with Headers containing "Content-Type : text/html" on a REST service.
+		 * See <a href="/sqabasic2000/TIDRestFunctionsReference.htm#detail_RestPutHTML">Detailed Reference</a><p>
+		 * @param comp org.safs.model.Component, it does not represent a real GUI component.<br>
+		 *                                       The window's value should always be <b>SAFSREST</b><br>
+		 *                                       The component's value should be the session-id that user assigns<br>
+		 * @param params String[], parameters
+		 * <ul>
+		 * <li><b>params[0] relativeURI, required</b>, The relative URI combined with a base-URL (stored in a session) to form a REST service URL.<br>
+		 *                                             But it should be full URL if it is executed out of a session.<br>
+		 *                                             This URL should point to an entity to be updated, such as "htmlContents/{id}".
+		 * <li><b>params[1] responseIdVar, required</b>, The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.
+		 * <li><b>params[2] body, optional</b>, The body to send with this REST request. It can be literal string or file path (project-relative path or full path).<br>
+		 *                                      The content should be the ENTIRETY of the entity indicated by the parameter 'relativeURI'.<br>
+		 * <li><b>params[3] headers , optional</b>, The headers to be included in this REST request. It can be literal string, map item or file path.
+		 * <li><b>params[4] authentication , optional</b>, The custom authentication/authorization information.
+		 *                                                 It can be a file holding authentication/authorization information or a map item holding a file path.
+		 * </ul>
+		 * @return - true on success<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example
+		 * <pre>
+		 * We can define map file as below:
+		 * [SERVICETEST]
+		 * SERVICETEST=SAFSREST
+		 * SERVICE001=SESSION_ID_SERVICE001
+		 * SERVICE001_NONEXIST=
+		 *
+		 * Then we call as below
+		 * {@code
+		 * Rest.StartServiceSession(Map.SERVICETEST.SERVICE001, "http://www.service.com/");
+		 * //within session, try to put html content to URL "http://www.service.com/htmlContents/61/",
+		 * //which is concatenated by parameter relativeURI "htmlContents/61/" and baseURL "http://www.service.com/" stored in session.
+		 * Rest.PutHTML(Map.SERVICETEST.SERVICE001, "htmlContents/61/", "ResponseIDVariable", "userEntity.html" );
+		 * Rest.EndServiceSession(Map.SERVICETEST.SERVICE001);
+		 *
+		 * //SERVICE001_NONEXIST is defined as empty string, which is not a valid session ID.
+		 * //out of session, try to put html content to URL "http://www.service.com/htmlContents/61/"
+		 * Rest.PutHTML(Map.SERVICETEST.SERVICE001_NONEXIST, "http://www.service.com/htmlContents/61/", "ResponseIDVariable", "userEntity.html");
+		 * }
+		 *
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 * @see #StartWebBrowser(String, String, String...)
+		 */
+		public static boolean PutHTML(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTPUTHTML_KEYWORD, params);
+		}
+//		/**
+//		 * Perform the "PUT" method with Headers containing "Content-Type : image" on a REST service.
+//		 * See <a href="/sqabasic2000/TIDRestFunctionsReference.htm#detail_RestPutImage">Detailed Reference</a><p>
+//		 * @param comp org.safs.model.Component, it does not represent a real GUI component.<br>
+//		 *                                       The window's value should always be <b>SAFSREST</b><br>
+//		 *                                       The component's value should be the session-id that user assigns<br>
+//		 * @param params String[], parameters
+//		 * <ul>
+//		 * <li><b>params[0] relativeURI, required</b>, The relative URI combined with a base-URL (stored in a session) to form a REST service URL.<br>
+//		 *                                             But it should be full URL if it is executed out of a session.<br>
+//		 *                                             This URL should point to an entity to be updated, such as "images/{id}".
+//		 * <li><b>params[1] responseIdVar, required</b>, The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.
+//		 * <li><b>params[2] body, optional</b>, The body to send with this REST request. It is file path (project-relative path or full path) containing the image.<br>
+//		 *                                      The content should be the ENTIRETY of the entity indicated by the parameter 'relativeURI'.<br>
+//		 * <li><b>params[3] headers , optional</b>, The headers to be included in this REST request. It can be literal string, map item or file path.
+//		 * <li><b>params[4] authentication , optional</b>, The custom authentication/authorization information.
+//		 *                                                 It can be a file holding authentication/authorization information or a map item holding a file path.
+//		 * </ul>
+//		 * @return - true on success<p>
+//		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+//		 * @example
+//		 * <pre>
+//		 * We can define map file as below:
+//		 * [SERVICETEST]
+//		 * SERVICETEST=SAFSREST
+//		 * SERVICE001=SESSION_ID_SERVICE001
+//		 * SERVICE001_NONEXIST=
+//		 *
+//		 * Then we call as below
+//		 * {@code
+//		 * Rest.StartServiceSession(Map.SERVICETEST.SERVICE001, "http://www.service.com/");
+//		 * //within session, try to put image content (from project-relative file "imageEntity.png") to URL "http://www.service.com/images/61/",
+//		 * //which is concatenated by parameter relativeURI "images/61/" and baseURL "http://www.service.com/" stored in session.
+//		 * Rest.PutImage(Map.SERVICETEST.SERVICE001, "images/61/", "ResponseIDVariable", "imageEntity.png" );
+//		 * Rest.EndServiceSession(Map.SERVICETEST.SERVICE001);
+//		 *
+//		 * //SERVICE001_NONEXIST is defined as empty string, which is not a valid session ID.
+//		 * //out of session, try to put image content (from project-relative file "imageEntity.png") to URL "http://www.service.com/images/61/"
+//		 * Rest.PutImage(Map.SERVICETEST.SERVICE001_NONEXIST, "http://www.service.com/images/61/", "ResponseIDVariable", "imageEntity.png");
+//		 * }
+//		 *
+//		 * </pre>
+//		 * @see #prevResults
+//		 * @see org.safs.TestRecordHelper#getStatusCode()
+//		 * @see org.safs.TestRecordHelper#getStatusInfo()
+//		 * @see #StartWebBrowser(String, String, String...)
+//		 */
+		public static boolean PutImage(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTPUTIMAGE_KEYWORD, params);
+		}
+		/**
+		 * Perform the "PUT" method with Headers containing "Content-Type : application/json" on a REST service.
+		 * See <a href="/sqabasic2000/TIDRestFunctionsReference.htm#detail_RestPutJSON">Detailed Reference</a><p>
+		 * @param comp org.safs.model.Component, it does not represent a real GUI component.<br>
+		 *                                       The window's value should always be <b>SAFSREST</b><br>
+		 *                                       The component's value should be the session-id that user assigns<br>
+		 * @param params String[], parameters
+		 * <ul>
+		 * <li><b>params[0] relativeURI, required</b>, The relative URI combined with a base-URL (stored in a session) to form a REST service URL.<br>
+		 *                                             But it should be full URL if it is executed out of a session.<br>
+		 *                                             This URL should point to an entity to be updated, such as "users/{id}".
+		 * <li><b>params[1] responseIdVar, required</b>, The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.
+		 * <li><b>params[2] body, optional</b>, The body to send with this REST request. It can be literal string or file path (project-relative path or full path).<br>
+		 *                                      The content should be the ENTIRETY of the entity indicated by the parameter 'relativeURI'.<br>
+		 * <li><b>params[3] headers , optional</b>, The headers to be included in this REST request. It can be literal string, map item or file path.
+		 * <li><b>params[4] authentication , optional</b>, The custom authentication/authorization information.
+		 *                                                 It can be a file holding authentication/authorization information or a map item holding a file path.
+		 * </ul>
+		 * @return - true on success<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example
+		 * <pre>
+		 * We can define map file as below:
+		 * [SERVICETEST]
+		 * SERVICETEST=SAFSREST
+		 * SERVICE001=SESSION_ID_SERVICE001
+		 * SERVICE001_NONEXIST=
+		 *
+		 * Then we call as below
+		 * {@code
+		 * Rest.StartServiceSession(Map.SERVICETEST.SERVICE001, "http://www.service.com/");
+		 * //within session, try to put json content to URL "http://www.service.com/users/61/",
+		 * //which is concatenated by parameter relativeURI "users/61/" and baseURL "http://www.service.com/" stored in session.
+		 * Rest.PutJSON(Map.SERVICETEST.SERVICE001, "users/61/", "ResponseIDVariable", "userEntity.json" );
+		 * Rest.EndServiceSession(Map.SERVICETEST.SERVICE001);
+		 *
+		 * //SERVICE001_NONEXIST is defined as empty string, which is not a valid session ID.
+		 * //out of session, try to put json content to URL "http://www.service.com/users/61/"
+		 * Rest.PutJSON(Map.SERVICETEST.SERVICE001_NONEXIST, "http://www.service.com/users/61/", "ResponseIDVariable", "userEntity.json");
+		 * }
+		 *
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 * @see #StartWebBrowser(String, String, String...)
+		 */
+		public static boolean PutJSON(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTPUTJSON_KEYWORD, params);
+		}
+		/**
+		 * Perform the "PUT" method with Headers containing "Content-Type : application/javascript" on a REST service.
+		 * See <a href="/sqabasic2000/TIDRestFunctionsReference.htm#detail_RestPutScript">Detailed Reference</a><p>
+		 * @param comp org.safs.model.Component, it does not represent a real GUI component.<br>
+		 *                                       The window's value should always be <b>SAFSREST</b><br>
+		 *                                       The component's value should be the session-id that user assigns<br>
+		 * @param params String[], parameters
+		 * <ul>
+		 * <li><b>params[0] relativeURI, required</b>, The relative URI combined with a base-URL (stored in a session) to form a REST service URL.<br>
+		 *                                             But it should be full URL if it is executed out of a session.<br>
+		 *                                             This URL should point to an entity to be updated, such as "scripts/{id}".
+		 * <li><b>params[1] responseIdVar, required</b>, The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.
+		 * <li><b>params[2] body, optional</b>, The body to send with this REST request. It can be literal string or file path (project-relative path or full path).<br>
+		 *                                      The content should be the ENTIRETY of the entity indicated by the parameter 'relativeURI'.<br>
+		 * <li><b>params[3] headers , optional</b>, The headers to be included in this REST request. It can be literal string, map item or file path.
+		 * <li><b>params[4] authentication , optional</b>, The custom authentication/authorization information.
+		 *                                                 It can be a file holding authentication/authorization information or a map item holding a file path.
+		 * </ul>
+		 * @return - true on success<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example
+		 * <pre>
+		 * We can define map file as below:
+		 * [SERVICETEST]
+		 * SERVICETEST=SAFSREST
+		 * SERVICE001=SESSION_ID_SERVICE001
+		 * SERVICE001_NONEXIST=
+		 *
+		 * Then we call as below
+		 * {@code
+		 * Rest.StartServiceSession(Map.SERVICETEST.SERVICE001, "http://www.service.com/");
+		 * //within session, try to put script content to URL "http://www.service.com/scripts/61/",
+		 * //which is concatenated by parameter relativeURI "scripts/61/" and baseURL "http://www.service.com/" stored in session.
+		 * Rest.PutScript(Map.SERVICETEST.SERVICE001, "scripts/61/", "ResponseIDVariable", "scriptEntity.txt" );
+		 * Rest.EndServiceSession(Map.SERVICETEST.SERVICE001);
+		 *
+		 * //SERVICE001_NONEXIST is defined as empty string, which is not a valid session ID.
+		 * //out of session, try to put script content to URL "http://www.service.com/scripts/61/"
+		 * Rest.PutScript(Map.SERVICETEST.SERVICE001_NONEXIST, "http://www.service.com/scripts/61/", "ResponseIDVariable", "scriptEntity.txt");
+		 * }
+		 *
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 * @see #StartWebBrowser(String, String, String...)
+		 */
+		public static boolean PutScript(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTPUTSCRIPT_KEYWORD, params);
+		}
+		/**
+		 * Perform the "PUT" method with Headers containing "Content-Type : text/plain" on a REST service.
+		 * See <a href="/sqabasic2000/TIDRestFunctionsReference.htm#detail_RestPutText">Detailed Reference</a><p>
+		 * @param comp org.safs.model.Component, it does not represent a real GUI component.<br>
+		 *                                       The window's value should always be <b>SAFSREST</b><br>
+		 *                                       The component's value should be the session-id that user assigns<br>
+		 * @param params String[], parameters
+		 * <ul>
+		 * <li><b>params[0] relativeURI, required</b>, The relative URI combined with a base-URL (stored in a session) to form a REST service URL.<br>
+		 *                                             But it should be full URL if it is executed out of a session.<br>
+		 *                                             This URL should point to an entity to be updated, such as "users/{id}".
+		 * <li><b>params[1] responseIdVar, required</b>, The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.
+		 * <li><b>params[2] body, optional</b>, The body to send with this REST request. It can be literal string or file path (project-relative path or full path).<br>
+		 *                                      The content should be the ENTIRETY of the entity indicated by the parameter 'relativeURI'.<br>
+		 * <li><b>params[3] headers , optional</b>, The headers to be included in this REST request. It can be literal string, map item or file path.
+		 * <li><b>params[4] authentication , optional</b>, The custom authentication/authorization information.
+		 *                                                 It can be a file holding authentication/authorization information or a map item holding a file path.
+		 * </ul>
+		 * @return - true on success<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example
+		 * <pre>
+		 * We can define map file as below:
+		 * [SERVICETEST]
+		 * SERVICETEST=SAFSREST
+		 * SERVICE001=SESSION_ID_SERVICE001
+		 * SERVICE001_NONEXIST=
+		 *
+		 * Then we call as below
+		 * {@code
+		 * Rest.StartServiceSession(Map.SERVICETEST.SERVICE001, "http://www.service.com/");
+		 * //within session, try to put text content to URL "http://www.service.com/users/61/",
+		 * //which is concatenated by parameter relativeURI "users/61/" and baseURL "http://www.service.com/" stored in session.
+		 * Rest.PutText(Map.SERVICETEST.SERVICE001, "users/61/", "ResponseIDVariable", "userEntity.txt" );
+		 * Rest.EndServiceSession(Map.SERVICETEST.SERVICE001);
+		 *
+		 * //SERVICE001_NONEXIST is defined as empty string, which is not a valid session ID.
+		 * //out of session, try to put text content to URL "http://www.service.com/users/61/"
+		 * Rest.PutText(Map.SERVICETEST.SERVICE001_NONEXIST, "http://www.service.com/users/61/", "ResponseIDVariable", "userEntity.txt");
+		 * }
+		 *
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 * @see #StartWebBrowser(String, String, String...)
+		 */
+		public static boolean PutText(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTPUTTEXT_KEYWORD, params);
+		}
+		/**
+		 * Perform the "PUT" method with Headers containing "Content-Type : text/xml" on a REST service.
+		 * See <a href="/sqabasic2000/TIDRestFunctionsReference.htm#detail_RestPutXML">Detailed Reference</a><p>
+		 * @param comp org.safs.model.Component, it does not represent a real GUI component.<br>
+		 *                                       The window's value should always be <b>SAFSREST</b><br>
+		 *                                       The component's value should be the session-id that user assigns<br>
+		 * @param params String[], parameters
+		 * <ul>
+		 * <li><b>params[0] relativeURI, required</b>, The relative URI combined with a base-URL (stored in a session) to form a REST service URL.<br>
+		 *                                             But it should be full URL if it is executed out of a session.<br>
+		 *                                             This URL should point to an entity to be updated, such as "users/{id}".
+		 * <li><b>params[1] responseIdVar, required</b>, The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.
+		 * <li><b>params[2] body, optional</b>, The body to send with this REST request. It can be literal string or file path (project-relative path or full path).<br>
+		 *                                      The content should be the ENTIRETY of the entity indicated by the parameter 'relativeURI'.<br>
+		 * <li><b>params[3] headers , optional</b>, The headers to be included in this REST request. It can be literal string, map item or file path.
+		 * <li><b>params[4] authentication , optional</b>, The custom authentication/authorization information.
+		 *                                                 It can be a file holding authentication/authorization information or a map item holding a file path.
+		 * </ul>
+		 * @return - true on success<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example
+		 * <pre>
+		 * We can define map file as below:
+		 * [BAYERREST]
+		 * BAYERREST=SAFSREST
+		 * BAYERSERVICE001=SESSION_ID_BAYERSERVICE001
+		 * BAYERSERVICE001_NONEXIST=
+		 *
+		 * Then we call as below
+		 * {@code
+		 * Rest.StartServiceSession(Map.BAYERREST.BAYERSERVICE001, "http://www.thomas-bayer.com/sqlrest/");
+		 * //within session, try to put xml content to URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/61/",
+		 * //which is concatenated by parameter relativeURI "CUSTOMER/61/" and baseURL "http://www.thomas-bayer.com/sqlrest/" stored in session.
+		 * Rest.PutXML(Map.BAYERREST.BAYERSERVICE001, "CUSTOMER/61/", "ResponseIDVariable", "customerEntity.xml" );
+		 * Rest.EndServiceSession(Map.BAYERREST.BAYERSERVICE001);
+		 *
+		 * //BAYERSERVICE001_NONEXIST is defined as empty string, which is not a valid session ID.
+		 * //out of session, try to put xml content to URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/61/"
+		 * Rest.PutXML(Map.BAYERREST.BAYERSERVICE001_NONEXIST, "http://www.thomas-bayer.com/sqlrest/CUSTOMER/61/", "ResponseIDVariable", "customerEntity.xml");
+		 * }
+		 *
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 * @see #StartWebBrowser(String, String, String...)
+		 */
+		public static boolean PutXML(org.safs.model.Component comp,String... params){
+			return action(comp, TIDRestFunctions.RESTPUTXML_KEYWORD, params);
+		}
+
+		/**
+		 * Perform an HTTP method with Headers (defined by customer) on a REST service.
+		 * See <a href="/sqabasic2000/TIDRestFunctionsReference.htm#detail_RestRequest">Detailed Reference</a><p>
+		 * @param comp org.safs.model.Component, it does not represent a real GUI component.<br>
+		 *                                       The window's value should always be <b>SAFSREST</b><br>
+		 *                                       The component's value should be the session-id that user assigns<br>
+		 * @param params String[], parameters
+		 * <ul>
+		 * <li><b>params[0] HTTPMethod, required</b>, The HTTP method, it can be one of "GET" "DELETE" "POST" "PUT" "PATCH" "HEAD".<br>
+		 * <li><b>params[1] relativeURI, required</b>, The relative URI combined with a base-URL (stored in a session) to form a REST service URL.<br>
+		 *                                             But it should be full URL if it is executed out of a session.
+		 * <li><b>params[2] responseIdVar, required</b>, The name of the variable holding "response ID", which is used by rest driver commands to verify/delete response.
+		 * <li><b>params[3] body, optional</b>, The body to send with this REST request.
+		 * <li><b>params[4] headers , required</b>, The headers to be included in this REST request. It can be literal string, map item or file path.
+		 * <li><b>params[5] authentication , optional</b>, The custom authentication/authorization information.
+		 *                                                 It can be a file holding authentication/authorization information or a map item holding a file path.
+		 * </ul>
+		 * @return - true on success<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example
+		 * <pre>
+		 * We can define map file as below:
+		 * [BAYERREST]
+		 * BAYERREST=SAFSREST
+		 * BAYERSERVICE001=SESSION_ID_BAYERSERVICE001
+		 * BAYERSERVICE001_NONEXIST=
+		 *
+		 * Then we call as below
+		 * {@code
+		 * Rest.StartServiceSession(Map.BAYERREST.BAYERSERVICE001, "http://www.thomas-bayer.com/sqlrest/");
+		 * //within session, try to GET XML content from URL "http://www.thomas-bayer.com/sqlrest/CUSTOMER/",
+		 * //which is concatenated by parameter relativeURI "CUSTOMER/" and baseURL "http://www.thomas-bayer.com/sqlrest/" stored in session.
+		 * Rest.Request(Map.BAYERREST.BAYERSERVICE001, "GET", "CUSTOMER/", "ResponseIDVariable", "", "Accept: text/xml");
+		 * Rest.EndServiceSession(Map.BAYERREST.BAYERSERVICE001);
+		 *
+		 * //BAYERSERVICE001_NONEXIST is defined as empty string, which is not a valid session ID.
+		 * //out of session, try to get content from URL "http://www.thomas-bayer.com/CUSTOMER/".
+		 * //The headers "If-Modified-Since: Sat, 29 OCT 1994 19:43:31 GMT" will be sent with 'get' method.
+		 * Rest.Request(Map.BAYERREST.BAYERSERVICE001_NONEXIST, "GET", "http://www.thomas-bayer.com/sqlrest/CUSTOMER/", "ResponseIDVariable", "",  "If-Modified-Since: Sat, 29 OCT 1994 19:43:31 GMT");
+		 * }
+		 *
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 * @see #StartWebBrowser(String, String, String...)
+		 */
 		public static boolean Request(org.safs.model.Component comp,String... params){
 			return action(comp, TIDRestFunctions.RESTREQUEST_KEYWORD, params);
 		}
+
+		/**
+		 * Start a session for a REST service.. See <a href="/sqabasic2000/TIDRestFunctionsReference.htm#detail_RestStartServiceSession">Detailed Reference</a><p>
+		 * @param comp org.safs.model.Component, it does not represent a real GUI component.<br>
+		 *                                       The window's value should always be <b>SAFSREST</b><br>
+		 *                                       The component's value should be the session-id that user assigns<br>
+		 * @param params String[], optional parameters.
+		 * <ul>
+		 * <li><b>params[0] baseURL, required</b>, The base-URL (stored in a session) to to be prepended in front of a relative URI to form a REST service URL.<br>
+		 * <li><b>params[1] authentication, optional</b>, The file holding authentication information to be used during this session, It can be project-relative path or full path.<br>
+		 *                                                If it is provided as NOAUTHENTICATION, then no authentication is needed during the session.
+		 * </ul>
+		 * @return - true on success<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example
+		 * <pre>
+		 * We can define map file as below:
+		 * [BAYERREST]
+		 * BAYERREST=SAFSREST
+		 * BAYERSERVICE001=SESSION_ID_BAYERSERVICE001
+		 *
+		 * Then we can start a session with <a href="/sqabasic2000/TIDRestFunctionsReference.htm#authSettings">global authentication</a> (VM parameter, Map) if exist.
+		 * {@code
+		 * //Start a session identified by 'SESSION_ID_BAYERSERVICE001', with base URL 'http://www.thomas-bayer.com/'.
+		 * Rest.StartServiceSession(Map.BAYERREST.BAYERSERVICE001, "http://www.thomas-bayer.com/sqlrest/");
+		 * //do some rest test ...
+		 * Rest.EndServiceSession(Map.BAYERREST.BAYERSERVICE001);
+		 * }
+		 *
+		 * Or, we can start a session with custom authentication
+		 * {@code
+		 * //Start a session identified by 'SESSION_ID_BAYERSERVICE001', with base URL 'http://www.thomas-bayer.com/'
+		 * //and a custom authentication stored in <project>/configure/simpleauth.xml.
+		 * Rest.StartServiceSession(Map.BAYERREST.BAYERSERVICE001, "http://www.thomas-bayer.com/sqlrest/", "configure/simpleauth.xml");
+		 * //do some rest test ...
+		 * Rest.EndServiceSession(Map.BAYERREST.BAYERSERVICE001);
+		 * }
+		 *
+		 * Or, we can start a session without any authentication even the <a href="/sqabasic2000/TIDRestFunctionsReference.htm#authSettings">global authentication</a> is defined.
+		 * {@code
+		 * //Start a session identified by 'SESSION_ID_BAYERSERVICE001', with base URL 'http://www.thomas-bayer.com/', and without any authentication.
+		 * Rest.StartServiceSession(Map.BAYERREST.BAYERSERVICE001, "http://www.thomas-bayer.com/sqlrest/", "NOAUTHENTICATION");
+		 * //do some rest test ...
+		 * Rest.EndServiceSession(Map.BAYERREST.BAYERSERVICE001);
+		 * }
+		 *
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 * @see #StartWebBrowser(String, String, String...)
+		 */
 		public static boolean StartServiceSession(org.safs.model.Component comp,String... params){
 			return action(comp, TIDRestFunctions.RESTSTARTSERVICESESSION_KEYWORD, params);
 		}
@@ -5361,8 +7278,8 @@ public abstract class SAFSPlus {
 
 	/**
 	 * Wrapper class providing APIs to handle
-	 * <a href="http://safsdev.github.io/sqabasic2000/GenericMasterFunctionsIndex.htm">GenericMasterFunctions Reference</a> and
-	 * <a href="http://safsdev.github.io/sqabasic2000/GenericObjectFunctionsIndex.htm">GenericObjectFunctions Reference</a>, like VerifyProperty, IsPropertyExist etc.<br>
+	 * <a href="/sqabasic2000/GenericMasterFunctionsIndex.htm">GenericMasterFunctions Reference</a> and
+	 * <a href="/sqabasic2000/GenericObjectFunctionsIndex.htm">GenericObjectFunctions Reference</a>, like VerifyProperty, IsPropertyExist etc.<br>
 	 */
 	public static class Component{
 		/**
@@ -5460,8 +7377,8 @@ public abstract class SAFSPlus {
 		}
 
 		/**
-		 * Click on any visible component.
-		 * <p>See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_Click">Detailed Reference</a>
+		 * Alt-Click on any visible component.
+		 * <p>See <a href="/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_AltClick">Detailed Reference</a>
 		 * @param comp -- Component (from App Map) to Click
 		 * @param params optional
 		 * <ul>
@@ -5469,17 +7386,64 @@ public abstract class SAFSPlus {
 		 * <b>For SE+</b>, params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
 		 * <li><b>params[1] auto-scroll boolean</b> if the component will be scrolled into view automatically before clicking.
 		 *                                        if not provided, the default value is true.
+		 * <li><b>params[2] verify boolean</b> check if the component is visible. We try several ways to scroll the component into view: if this
+		 *                                     parameter 'verify' is true then we will not try other ways if the component is already visible; otherwise
+		 *                                     we will try all the ways to show the element even the component may have already shown on the page.
+		 *                                     if not provided, the default value is true.
 		 * </ul>
 		 * @return true if successfully executed, false otherwise.<p>
 		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
 		 * @example
 		 * <pre>
 		 * {@code
-		 * 1) boolean success = Click(Map.Google.Apps);//Click at the center
-		 * 2) boolean success = Click(Map.Google.Apps,"20,20");//Click at the coordinate (20,20)
-		 * 3) boolean success = Click(Map.Google.Apps,"20%,30%"); // Click at the coordinate: its X value equals 20% width of component, its Y value equals 30% height of component.
-		 * 4) boolean success = Click(Map.Google.Apps,"AppMapSubkey");//Click at the coordinate defined by entry "AppMapSubkey" in App Map.
-		 * 5) boolean success = Click(Map.Google.Apps,"20,20", "false");//Click at the coordinate (20,20), and web-element will not be scrolled into view automatically
+		 * 1) boolean success = Component.AltClick(Map.Google.Apps);//Alt-Click at the center
+		 * 2) boolean success = Component.AltClick(Map.Google.Apps,"20,20");//Alt-Click at the coordinate (20,20)
+		 * 3) boolean success = Component.AltClick(Map.Google.Apps,"20%,30%"); // Alt-Click at the coordinate: its X value equals 20% width of component, its Y value equals 30% height of component.
+		 * 4) boolean success = Component.AltClick(Map.Google.Apps,"AppMapSubkey");//Alt-Click at the coordinate defined by entry "AppMapSubkey" in App Map.
+		 * 5) boolean success = Component.AltClick(Map.Google.Apps,"20,20", "false");//Alt-Click at the coordinate (20,20) and web-element will not be scrolled into view automatically
+		 * 5) boolean success = Component.AltClick(Map.Google.Apps,"", "", "false");//Alt-Click at the center and web-element will be scrolled into view automatically by all means
+		 *  // one of the above and then,
+		 * int rc = prevResults.getStatusCode();      // if useful
+		 * String info = prevResults.getStatusInfo(); // if useful
+		 * }
+		 *
+		 * Pay attention: If you use percentage format in SE+, you'd better use 'Misc.Expressions(false);' first.
+		 *
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 */
+		public static boolean AltClick(org.safs.model.Component comp, String... params){
+			return action(comp, GenericObjectFunctions.ALTCLICK_KEYWORD, replaceSeparator(params));
+		}
+
+		/**
+		 * Click on any visible component.
+		 * <p>See <a href="/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_Click">Detailed Reference</a>
+		 * @param comp -- Component (from App Map) to Click
+		 * @param params optional
+		 * <ul>
+		 * <li><b>params[0] X,Y coordinate</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
+		 * <b>For SE+</b>, params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
+		 * <li><b>params[1] auto-scroll boolean</b> if the component will be scrolled into view automatically before clicking.
+		 *                                        if not provided, the default value is true.
+		 * <li><b>params[2] verify boolean</b> check if the component is visible. We try several ways to scroll the component into view: if this
+		 *                                     parameter 'verify' is true then we will not try other ways if the component is already visible; otherwise
+		 *                                     we will try all the ways to show the element even the component may have already shown on the page.
+		 *                                     if not provided, the default value is true.
+		 * </ul>
+		 * @return true if successfully executed, false otherwise.<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example
+		 * <pre>
+		 * {@code
+		 * 1) boolean success = Component.Click(Map.Google.Apps);//Click at the center
+		 * 2) boolean success = Component.Click(Map.Google.Apps,"20,20");//Click at the coordinate (20,20)
+		 * 3) boolean success = Component.Click(Map.Google.Apps,"20%,30%"); // Click at the coordinate: its X value equals 20% width of component, its Y value equals 30% height of component.
+		 * 4) boolean success = Component.Click(Map.Google.Apps,"AppMapSubkey");//Click at the coordinate defined by entry "AppMapSubkey" in App Map.
+		 * 5) boolean success = Component.Click(Map.Google.Apps,"20,20", "false");//Click at the coordinate (20,20), and web-element will not be scrolled into view automatically
+		 * 6) boolean success = Component.Click(Map.Google.Apps,"", "", "false");//Click at the center, and web-element will be automatically scrolled into view by all means
 		 *  // one of the above and then,
 		 * int rc = prevResults.getStatusCode();      // if useful
 		 * String info = prevResults.getStatusInfo(); // if useful
@@ -5488,7 +7452,7 @@ public abstract class SAFSPlus {
 		 * Pay attention: If you use percentage format in SE+, you'd better use 'Misc.Expressions(false);' first.
 		 *
 		 * "AppMapSubkey" is expected to be an AppMap entry in an "Apps" section in the App Map.
-		 * See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_Click">Detailed Reference</a>
+		 * See <a href="/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_Click">Detailed Reference</a>
 		 * </pre>
 		 * @see #prevResults
 		 * @see org.safs.TestRecordHelper#getStatusCode()
@@ -5500,12 +7464,12 @@ public abstract class SAFSPlus {
 
 		/**
 		 * A left mouse drag is performed from one object to another object based on the offsets values.
-		 * <p>See <a href="http://safsdev.github.io/sqabasic2000/GenericObjectFunctionsReference.htm#detail_DragTo">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/GenericObjectFunctionsReference.htm#detail_DragTo">Detailed Reference</a>
 		 * @param from Component, the component (from App Map) relative to which to calculate start coordinates to drag
 		 * @param to Component, the component (from App Map) relative to which to calculate end coordinates to drag
 		 * @param params optional<ul>
 		 * <b>params[0] offsets</b> String, indicating the offset relative to component in percentage or in pixel,
-		 *                                  like "20%,10%, %50, %60", "30, 55, 70, 80", or even "20%,10%, 70, 80".
+		 *                                  like "20%,10%, 50%, 60%", "30, 55, 70, 80", or even "20%,10%, 70, 80".
 		 *                                  If not provided, then "50%, 50%, 50%, 50%" will be used as default value,
 		 *                                  which means the drag point is the center of the component.<br>
 		 * <b>params[1] fromSubItem</b> String, as text. e.g tree node or list item or any sub main component's item.<br>
@@ -5519,9 +7483,9 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * boolean success = DragTo(Map.Google.Apps, Map.Google.Area);//Left-Drag from center of component Map.Google.Apps to center of component Map.Google.Area
-		 * boolean success = DragTo(Map.Google.Apps, Map.Google.Area, "20%,10%, %50, %60");//Left-Drag from (20%,10%) of component Map.Google.Apps to (%50, %60) of component Map.Google.Area
-		 * boolean success = DragTo(Map.Google.Apps, Map.Google.Area, "", "", "", "2000");//Left-Drag from center of component Map.Google.Apps to center of component Map.Google.Area, and hold the mouse button for 2 seconds at the component Map.Google.Area
+		 * boolean success = Component.DragTo(Map.Google.Apps, Map.Google.Area);//Left-Drag from center of component Map.Google.Apps to center of component Map.Google.Area
+		 * boolean success = Component.DragTo(Map.Google.Apps, Map.Google.Area, "20%,10%, 50%, 60%");//Left-Drag from (20%,10%) of component Map.Google.Apps to (50%, 60%) of component Map.Google.Area
+		 * boolean success = Component.DragTo(Map.Google.Apps, Map.Google.Area, "", "", "", "2000");//Left-Drag from center of component Map.Google.Apps to center of component Map.Google.Area, and hold the mouse button for 2 seconds at the component Map.Google.Area
 		 * //one of the above and then,
 		 * int rc = prevResults.getStatusCode();      // if useful
 		 * String info = prevResults.getStatusInfo(); // if useful
@@ -5539,7 +7503,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Execute a simple piece of javascript on component synchronously.
-		 * See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_ExecuteScript">Detailed Reference</a><p>
+		 * See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_ExecuteScript">Detailed Reference</a><p>
 		 * If the script will return a string value, call SAFSPlus.prevResults.getStatusInfo() to get it. <br>
 		 * Object result is NOT supported yet.<br>
 		 * This is currently <b>ONLY supported for Selenium WebDriver Engine.</b>
@@ -5558,12 +7522,12 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * SAFSPlus.ExecuteScript(
+		 * Component.ExecuteScript(
 		 *     Map.Google.SignIn,                       // The DOM Element passed as 'arguments[0]' to the script.
 		 *     "arguments[0].innerHTML=arguments[1];",  // Script to set the DOM Elements innerHTML value.
 		 *     "my text value");                        // The value passed as 'arguments[1]' to set to innerHTML.
 		 *
-		 * SAFSPlus.ExecuteScript(
+		 * Component.ExecuteScript(
 		 *     Map.Google.SignIn,                       // The DOM Element passed as 'arguments[0]' to the script.
 		 *     "return arguments[0].innerHTML;");       // A script to return the DOM Elements innerHTML.
 		 *
@@ -5579,14 +7543,14 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Incorporate OCR technology to detect the text on a GUI component and save the text to a variable.
-		 * See <a href="http://safsdev.github.io/sqabasic2000/GenericMasterFunctionsReference.htm#detail_GetTextFromGUI">Detailed Reference</a>
+		 * See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_GetTextFromGUI">Detailed Reference</a>
 		 * <br>
 		 * This requires that SAFS-OCR has been installed.
 		 * @param comp Component (from App Map) from which to retrieve text.
 		 * @param variable String, The name of the variable to receive detected text.
 		 * @param params optional<ul>
 		 * <b>params[0] SubArea</b> String, indicating partial image of the component to capture,
-		 *                    it can be app map subkey referring a subarea or the subarea itself like "5,10, %50, %60"<br>
+		 *                    it can be app map subkey referring a subarea or the subarea itself like "5,10, 50%, 60%"<br>
 		 * <b>params[1] OCRId</b> String, indicating the OCR used to recognize text. TOCR or GORC<br>
 		 * <b>params[2] LangId</b> String, representing the language in use for selected OCR to recognize text. "en", "cn" etc.<br>
 		 * <b>params[3] ScaleRatio</b> float, indicating the scale ratio for resizing the original image. "1.5" <br>
@@ -5598,7 +7562,7 @@ public abstract class SAFSPlus {
 		 * Component.GetTextFromGUI(Map.Google.SignIn, "signinText");
 		 * String value = SAFSPlus.GetVariableValue("signinText");
 		 * Component.GetTextFromGUI(Map.Google.SignIn, "signinText", "", "GOCR");
-		 * Component.GetTextFromGUI(Map.Google.SignIn, "signinText", "5,10, %50, %60", "TOCR", "en", "1.5");
+		 * Component.GetTextFromGUI(Map.Google.SignIn, "signinText", "5,10, 50%, 60%", "TOCR", "en", "1.5");
 		 * Component.GetTextFromGUI(Map.Google.SignIn, quote("signin-partial"), "0, 0, 70%, 100%", "GOCR");
 		 * //"subarea" is defined in map file
 		 * //[SignIn]
@@ -5617,7 +7581,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Take a screenshot of windows or component.<br>
-		 * See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_GetGUIImage">Detailed Reference</a><p>
+		 * See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_GetGUIImage">Detailed Reference</a><p>
 		 * @param comp Component, the component to get its image.
 		 * @param fileName String, the file name to store image. Suggest to save as .png image.<br>
 		 *                         It can be relative or absolute. If it is relative, the file will be stored to TestDirectory "Actuals".<br>
@@ -5635,33 +7599,33 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * GetGUIImage(Map.Google.SignIn,"SignIn");//will be saved at <testProject>\Actuals\SignIn.bmp
-		 * GetGUIImage(Map.Google.SignIn,"c:/temp/SignIn.gif");
+		 * Component.GetGUIImage(Map.Google.SignIn,"SignIn");//will be saved at <testProject>\Actuals\SignIn.bmp
+		 * Component.GetGUIImage(Map.Google.SignIn,"c:/temp/SignIn.gif");
 		 *
 		 * //Following example will store part of the SingIn image,
-		 * GetGUIImage(Map.Google.SignIn,"SignInPartial.png", "0,0,50%,50%");
+		 * Component.GetGUIImage(Map.Google.SignIn,"SignInPartial.png", "0,0,50%,50%");
 		 * //"subarea" is defined in map file
 		 * //[SignIn]
 		 * //subarea="0,0,50%,50%"
-		 * GetGUIImage(Map.Google.SignIn,"SignInPartial.png", "subarea");
+		 * Component.GetGUIImage(Map.Google.SignIn,"SignInPartial.png", "subarea");
 		 * //or
 		 * //"subarea" is defined in map file
 		 * //[ApplicationConstants]
 		 * //subarea="0,0,50%,50%"
-		 * GetGUIImage(Map.Google.SignIn,"SignInPartial.png", Map.subarea);
-		 * GetGUIImage(Map.Google.SignIn,"SignInPartial.png", Map.subarea());
+		 * Component.GetGUIImage(Map.Google.SignIn,"SignInPartial.png", Map.subarea);
+		 * Component.GetGUIImage(Map.Google.SignIn,"SignInPartial.png", Map.subarea());
 		 *
 		 * //Filter the SingIn image and save it
-		 * GetGUIImage(Map.Google.SignIn,"SignInFiltered.gif", "", quote("Filter=0,0,10,10 60,60,10,10"));
+		 * Component.GetGUIImage(Map.Google.SignIn,"SignInFiltered.gif", "", quote("Filter=0,0,10,10 60,60,10,10"));
 		 * //"filterAreas" is defined in map file
 		 * //[SignIn]
 		 * //filterAreas="Filter=0,0,10,10 60,60,10,10"
-		 * GetGUIImage(Map.Google.SignIn,"SignInFiltered.gif", "", "filterAreas");
+		 * Component.GetGUIImage(Map.Google.SignIn,"SignInFiltered.gif", "", "filterAreas");
 		 * //"filterAreas" is defined in map file
 		 * //[ApplicationConstants]
 		 * //filterAreas="Filter=0,0,10,10 60,60,10,10"
-		 * GetGUIImage(Map.Google.SignIn,"SignInFiltered.gif", "", Map.filterAreas);
-		 * GetGUIImage(Map.Google.SignIn,"SignInFiltered.gif", "", Map.filterAreas());
+		 * Component.GetGUIImage(Map.Google.SignIn,"SignInFiltered.gif", "", Map.filterAreas);
+		 * Component.GetGUIImage(Map.Google.SignIn,"SignInFiltered.gif", "", Map.filterAreas());
 		 * }
 		 * </pre>
 		 *
@@ -5672,7 +7636,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Verify the visual existence of a particular window and/or component.
-		 * See <a href="http://safsdev.github.io/sqabasic2000/GenericMasterFunctionsReference.htm#detail_GUIDoesExist">Detailed Reference</a>
+		 * See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_GUIDoesExist">Detailed Reference</a>
 		 * <p>
 		 * @param comp -- Component (from App Map).
 		 * @return boolean, true if GUI exists; false if GUI does not exist or execution fail.
@@ -5688,7 +7652,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Verify the visual non-existence of a particular window and/or component.
-		 * See <a href="http://safsdev.github.io/sqabasic2000/GenericMasterFunctionsReference.htm#detail_GUIDoesNotExist">Detailed Reference</a>
+		 * See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_GUIDoesNotExist">Detailed Reference</a>
 		 * <p>
 		 * @param comp -- Component (from App Map).
 		 * @return boolean, true if GUI does not exist; false if GUI does exist or execution fail.
@@ -5705,7 +7669,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Hover the mouse over a component.
-		 * See <a href="http://safsdev.github.io/sqabasic2000/GenericMasterFunctionsReference.htm#detail_HoverMouse">Detailed Reference</a>
+		 * See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_HoverMouse">Detailed Reference</a>
 		 * @param comp org.safs.model.Component, the component to hover.
 		 * @param optionals
 		 * <ul>
@@ -5746,7 +7710,7 @@ public abstract class SAFSPlus {
 		 *     % = ALT Key with another key ( "%F" = ALT + F )
 		 *     + = SHIFT Key with another key ( "+{Enter}" = SHIFT + ENTER )
 		 * </pre>
-		 * We are generally providing this support through our generic <a href="http://safsdev.github.io/doc/org/safs/tools/input/CreateUnicodeMap.html">InputKeys Support</a>.
+		 * We are generally providing this support through our generic <a href="/doc/org/safs/tools/input/CreateUnicodeMap.html">InputKeys Support</a>.
 		 * <p>
 		 * @param comp -- Component (from App Map).
 		 * @param textvalue -- to send via input to the Component.
@@ -5776,7 +7740,7 @@ public abstract class SAFSPlus {
 		 *     % = ALT Key with another key ( "%F" = ALT + F )
 		 *     + = SHIFT Key with another key ( "+{Enter}" = SHIFT + ENTER )
 		 * </pre>
-		 * We are generally providing special key support through our generic <a href="http://safsdev.github.io/doc/org/safs/tools/input/CreateUnicodeMap.html">InputKeys Support</a>.
+		 * We are generally providing special key support through our generic <a href="/doc/org/safs/tools/input/CreateUnicodeMap.html">InputKeys Support</a>.
 		 * <p>
 		 * @param textvalue -- to send via Robot to the current keyboard focus.
 		 * @return
@@ -5841,10 +7805,12 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Sends secret-text (such as password) to the current focused Component.<br>
-		 * See <a href="http://safsdev.github.io/sqabasic2000/GenericMasterFunctionsReference.htm#detail_TypeEncryption">Detailed Reference</a>
+		 * See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_TypeEncryption">Detailed Reference</a>
 		 * <p>
 		 * @param encryptedDataFile String, the file containing 'encrypted data' to send to the current focused Component.
+		 *                                  It can be an absolute path, or a path relative the the test project's root.
 		 * @param privateKeyFile String, the file containing 'private key' to decrypt the 'encrypted data'
+		 *                               It can be an absolute path, or a path relative the the test project's root.
 		 * @return true on success
 		 * @see org.safs.robot.Robot#inputChars(String)
 		 * @see org.safs.RSA
@@ -5853,7 +7819,7 @@ public abstract class SAFSPlus {
 		 * //D:\secretPath\private.key contains "private key", which is generated by {@link org.safs.RSA}
 		 * //C:\safs\passwords\encrypted.pass contains the encrypted-data, which is encrypted by {@link org.safs.RSA} with publickey
 		 * {@code
-		 * SeleniumPlus.TypeEncryption("C:\safs\passwords\encrypted.pass", "D:\secretPath\private.key" );
+		 * Component.TypeEncryption("C:\safs\passwords\encrypted.pass", "D:\secretPath\private.key" );
 		 * }
 		 * </pre>
 		 */
@@ -5906,7 +7872,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Store the location and dimensions of a component.
-		 * See <a href="http://safsdev.github.io/sqabasic2000/GenericMasterFunctionsReference.htm#detail_LocateScreenImage">Detailed Reference</a>
+		 * See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_LocateScreenImage">Detailed Reference</a>
 		 * @param variable String, The root name of the collection of variables to receive the location and dimensions.
 		 *                         <br>variable=x y w h [space delimited values]
 		 *                         <br>variable.x=x
@@ -5941,7 +7907,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Incorporate OCR technology to detect the text on a GUI component and save the text to a file.
-		 * See <a href="http://safsdev.github.io/sqabasic2000/GenericMasterFunctionsReference.htm#detail_SaveTextFromGUI">Detailed Reference</a>
+		 * See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_SaveTextFromGUI">Detailed Reference</a>
 		 * <br>
 		 * This requires that SAFS-OCR has been installed.
 		 * @param comp Component (from App Map) from which to retrieve text.
@@ -5949,7 +7915,7 @@ public abstract class SAFSPlus {
 		 * @param params optional
 		 * <ul>
 		 * <b>params[0] SubArea</b> String, indicating partial image of the component to capture,
-		 *                    it can be app map subkey referring a subarea or the subarea itself like "5,10, %50, %60"<br>
+		 *                    it can be app map subkey referring a subarea or the subarea itself like "5,10, 50%, 60%"<br>
 		 * <b>params[1] OCRId</b> String, indicating the OCR used to recognize text. TOCR or GORC<br>
 		 * <b>params[2] LangId</b> String, representing the language in use for selected OCR to recognize text. "en", "cn" etc.<br>
 		 * <b>params[3] ScaleRatio</b> float, indicating the scale ratio for resizing the original image. "1.5" <br>
@@ -5961,7 +7927,7 @@ public abstract class SAFSPlus {
 		 * Component.SaveTextFromGUI(Map.Google.SignIn, "signin.txt");
 		 * Component.SaveTextFromGUI(Map.Google.SignIn, "D:\data\test\signin.txt");
 		 * Component.SaveTextFromGUI(Map.Google.SignIn, "signin.txt", "", "GOCR");
-		 * Component.SaveTextFromGUI(Map.Google.SignIn, "signin.txt", "5,10, %50, %60", "TOCR", "en", "1.5");
+		 * Component.SaveTextFromGUI(Map.Google.SignIn, "signin.txt", "5,10, 50%, 60%", "TOCR", "en", "1.5");
 		 * Component.SaveTextFromGUI(Map.Google.SignIn, quote("signin-partial.txt"), "0, 0, 70%, 100%", "GOCR");
 		 * //"subarea" is defined in map file
 		 * //[SignIn]
@@ -6018,7 +7984,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Verify the screen shot of a GUI component with a benchmark image file.
-		 * See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyGUIImageToFile">Detailed Reference</a><p>
+		 * See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyGUIImageToFile">Detailed Reference</a><p>
 		 * @param comp Component, the component to get its image.
 		 * @param benchFile String, the benchmark file name. Suggest to compare with .png image.<br>
 		 *                         It can be relative or absolute. If it is relative, the file will be found at BenchDirectory "Benchmarks".<br>
@@ -6041,35 +8007,35 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * VerifyGUIImageToFile(Map.Google.SignIn,"SignIn");//will be compared with file <testProject>\Benchmarks\SignIn.bmp
-		 * VerifyGUIImageToFile(Map.Google.SignIn,"c:/benchDir/SignIn.gif");
-		 * VerifyGUIImageToFile(Map.Google.SignIn,"c:/benchDir/SignIn.gif", "", "", quote("UUID=False"));// Simple output filename, no UUID.
-		 * VerifyGUIImageToFile(Map.Google.SignIn,"c:/benchDir/SignIn.gif", "", "95");//if 95% bits match, the verification will pass.
+		 * Component.VerifyGUIImageToFile(Map.Google.SignIn,"SignIn");//will be compared with file <testProject>\Benchmarks\SignIn.bmp
+		 * Component.VerifyGUIImageToFile(Map.Google.SignIn,"c:/benchDir/SignIn.gif");
+		 * Component.VerifyGUIImageToFile(Map.Google.SignIn,"c:/benchDir/SignIn.gif", "", "", quote("UUID=False"));// Simple output filename, no UUID.
+		 * Component.VerifyGUIImageToFile(Map.Google.SignIn,"c:/benchDir/SignIn.gif", "", "95");//if 95% bits match, the verification will pass.
 		 *
 		 * //Following example will verify part of the SingIn image,
 		 * GetGUIImage(Map.Google.SignIn,"SignInPartial.png", quote("0,0,50%,50%"));
 		 * //"subarea" is defined in map file
 		 * //[SignIn]
 		 * //subarea="0,0,50%,50%"
-		 * VerifyGUIImageToFile(Map.Google.SignIn,"SignInPartial.png", "subarea");
+		 * Component.VerifyGUIImageToFile(Map.Google.SignIn,"SignInPartial.png", "subarea");
 		 * //or
 		 * //"subarea" is defined in map file
 		 * //[ApplicationConstants]
 		 * //subarea="0,0,50%,50%"
-		 * VerifyGUIImageToFile(Map.Google.SignIn,"SignInPartial.png", Map.subarea);
-		 * VerifyGUIImageToFile(Map.Google.SignIn,"SignInPartial.png", Map.subarea());
+		 * Component.VerifyGUIImageToFile(Map.Google.SignIn,"SignInPartial.png", Map.subarea);
+		 * Component.VerifyGUIImageToFile(Map.Google.SignIn,"SignInPartial.png", Map.subarea());
 		 *
 		 * //Filter the SingIn image and the bench image at certain areas and compare them
-		 * VerifyGUIImageToFile(Map.Google.SignIn,"c:/benchDir/SignIn.gif", "", "", "", quote("Filter=0,0,10,10 60,60,10,10"));
+		 * Component.VerifyGUIImageToFile(Map.Google.SignIn,"c:/benchDir/SignIn.gif", "", "", "", quote("Filter=0,0,10,10 60,60,10,10"));
 		 * //"filterAreas" is defined in map file
 		 * //[SignIn]
 		 * //filterAreas="Filter=0,0,10,10 60,60,10,10"
-		 * VerifyGUIImageToFile(Map.Google.SignIn,"c:/benchDir/SignIn.gif", "", "", "", "filterAreas");
+		 * Component.VerifyGUIImageToFile(Map.Google.SignIn,"c:/benchDir/SignIn.gif", "", "", "", "filterAreas");
 		 * //"filterAreas" is defined in map file
 		 * //[ApplicationConstants]
 		 * //filterAreas="Filter=0,0,10,10 60,60,10,10"
-		 * VerifyGUIImageToFile(Map.Google.SignIn,"c:/benchDir/SignIn.gif", "", "", "", Map.filterAreas);
-		 * VerifyGUIImageToFile(Map.Google.SignIn,"c:/benchDir/SignIn.gif", "", "", "", Map.filterAreas());
+		 * Component.VerifyGUIImageToFile(Map.Google.SignIn,"c:/benchDir/SignIn.gif", "", "", "", Map.filterAreas);
+		 * Component.VerifyGUIImageToFile(Map.Google.SignIn,"c:/benchDir/SignIn.gif", "", "", "", Map.filterAreas());
 		 * }
 		 * </pre>
 		 */
@@ -6247,7 +8213,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Hover the mouse over a specified screen location.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_HoverScreenLocation">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_HoverScreenLocation">Detailed Reference</a>
 		 * @param coordination String, The screen location, such as "200;400", or a mapKey defined under "ApplicationConstants" in map file
 		 * @param optionals
 		 * <ul>
@@ -6257,8 +8223,8 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * boolean success = SAFSPlus.HoverScreenLocation("500, 300", "20");
-		 * boolean success = SAFSPlus.HoverScreenLocation("locKey", "20");//locKey="500, 300" defined in map file under "ApplicationConstants"
+		 * boolean success = Component.HoverScreenLocation("500, 300", "20");
+		 * boolean success = Component.HoverScreenLocation("locKey", "20");//locKey="500, 300" defined in map file under "ApplicationConstants"
 		 * }
 		 * </pre>
 		 * @see #prevResults
@@ -6269,26 +8235,36 @@ public abstract class SAFSPlus {
 			return actionGUILess(GenericMasterFunctions.HOVERSCREENLOCATION_KEYWORD, combineParams(optionals, replaceSeparator(coordination)));
 		}
 		/**
-		 * Verify the current contents of a binary (image) file with a benchmark file.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyBinaryFileToFile">Detailed Reference</a>
+		 * Verify the current contents of a binary (image, PDF) file with a benchmark file.
+		 * <p>See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyBinaryFileToFile">Detailed Reference</a>
 		 * @param benchFile String, File used as the comparison benchmark.
 		 * @param actualFile String, File used as the comparison file under test.
 		 * @param optionals
 		 * <ul>
-		 * <b>optionals[0] FilterMode</b> String, one of FileUtilities.FilterMode. FilterMode.TOLERANCE is valid only when the binary files are images.<br>
-		 * <b>optionals[1] FilterOptions</b> int, if the FilterMode is FilterMode.TOLERANCE, a number between 0 and 100,
+		 * <b>optionals[0] FilterMode</b> String, one of {@link FilterMode}. {@link FilterMode#TOLERANCE} is valid only when the binary files are images.<br>
+		 * <b>optionals[1] FilterOption</b>
+		 *                                  <ul>
+		 *                                  <li>int, if the {@link FilterMode} is {@link FilterMode#TOLERANCE}, a number between 0 and 100,
 		 *                                        the percentage of bits need to be the same.
 		 *                                        100 means only 100% match, 2 images will be considered matched;
 		 *                                        0 means even no bits match, 2 images will be considered matched.<br>
-		 *                                   other type, if the FilterMode is FilterMode.XXX<br>
+		 *                                   <li>other type, if the FilterMode is FilterMode.XXX<br>
+		 *                                   </ul>
+		 * <b>optionals[2] alterImageStyle</b> {@link AlterImageStyle}, it is used to alter the diff image when 2 image/PDF doesn't match.<br>
+		 * <b>optionals[3] alterImageFactor</b> double, how much lighter or darker to make the original pixel (with no difference), it is a number between 0 and 1.<br>
+		 *                                      It only takes effect if the parameter 'alterImageStyle' is {@link AlterImageStyle#TINT} or {@link AlterImageStyle#SHADE}.<br>
+		 *                                      For SHADE, the bigger the factor, the darker the shade.<br>
+		 *                                      For TINT, the bigger the factor, the lighter the tint.<br>
+		 * <b>optionals[4] pdfResolution</b> int, the resolution (DPI) used to convert PDF to image. The default is {@link Constants#IMAGE_PDF_CONVERSION_RESOLUTION_DEFAULT}.<br>
 		 * </ul>
 		 * @return true if the 2 files contain the same content, false otherwise.
 		 * @example
 		 * <pre>
 		 * {@code
-		 * boolean success = SAFSPlus.VerifyBinaryFileToFile("signIn.png", "signIn.png");
-		 * boolean success = SAFSPlus.VerifyBinaryFileToFile("c:\bench\signIn.png", "d:\test\signIn.png");
-		 * boolean success = SAFSPlus.VerifyBinaryFileToFile("c:\bench\signIn.png", "d:\test\signIn.png", FilterMode.TOLERANCE.name, "90");
+		 * boolean success = Component.VerifyBinaryFileToFile("signIn.png", "signIn.png");
+		 * boolean success = Component.VerifyBinaryFileToFile("c:\bench\signIn.png", "d:\test\signIn.png");
+		 * boolean success = Component.VerifyBinaryFileToFile("c:\bench\signIn.png", "d:\test\signIn.png", FilterMode.TOLERANCE.name, "90");
+		 * boolean success = Component.VerifyBinaryFileToFile("bench.pdf", "actual.pdf", FilterMode.TOLERANCE.name, "100", AlterImageStyle.TINT.name, "0.9", "100");
 		 * }
 		 * </pre>
 		 * @see #prevResults
@@ -6300,7 +8276,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Verify the current contents of a text file with a benchmark file (same as VerifyTextFileToFile).
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyFileToFile">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyFileToFile">Detailed Reference</a>
 		 * @param benchFile String, File used as the comparison benchmark.
 		 * @param actualFile String, File used as the comparison file under test.
 		 * @param optionals -- NOT used yet
@@ -6308,8 +8284,8 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * boolean success = SAFSPlus.VerifyFileToFile("benchFile.txt", "actualFile.txt");
-		 * boolean success = SAFSPlus.VerifyFileToFile("c:\bench\benchFile.txt", "d:\test\actualFile.txt");
+		 * boolean success = Component.VerifyFileToFile("benchFile.txt", "actualFile.txt");
+		 * boolean success = Component.VerifyFileToFile("c:\bench\benchFile.txt", "d:\test\actualFile.txt");
 		 * }
 		 * </pre>
 		 * @see #prevResults
@@ -6321,7 +8297,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Verify the current contents of a text file with a benchmark file (same as VerifyFileToFile).
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyTextFileToFile">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyTextFileToFile">Detailed Reference</a>
 		 * @param benchFile String, File used as the comparison benchmark.
 		 * @param actualFile String, File used as the comparison file under test.
 		 * @param optionals -- NOT used yet
@@ -6329,8 +8305,8 @@ public abstract class SAFSPlus {
 		 * @example
 		 * <pre>
 		 * {@code
-		 * boolean success = SAFSPlus.VerifyTextFileToFile("benchFile.txt", "actualFile.txt");
-		 * boolean success = SAFSPlus.VerifyTextFileToFile("c:\bench\benchFile.txt", "d:\test\actualFile.txt");
+		 * boolean success = Component.VerifyTextFileToFile("benchFile.txt", "actualFile.txt");
+		 * boolean success = Component.VerifyTextFileToFile("c:\bench\benchFile.txt", "d:\test\actualFile.txt");
 		 * }
 		 * </pre>
 		 * @see #prevResults
@@ -6342,7 +8318,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Verify that a string value contains a substring.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyValueContains">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyValueContains">Detailed Reference</a>
 		 * @param wholeString String, the string value to verify.
 		 * @param substring String, the substring
 		 * @param optionals
@@ -6355,10 +8331,10 @@ public abstract class SAFSPlus {
 		 * {@code
 		 * String labelVar = "labelVariable";
 		 * Component.AssignPropertyVariable(Map.AUT.Lable,"textContent", labelVar);
-		 * String label = SAFSPlus.GetVariableValue(labelVar);
-		 * boolean success = SAFSPlus.VerifyValueContains(label, "labelContent");
+		 * String label = Component.GetVariableValue(labelVar);
+		 * boolean success = Component.VerifyValueContains(label, "labelContent");
 		 * //or
-		 * boolean success = SAFSPlus.VerifyValueContains("^"+labelVar, "labelContent");
+		 * boolean success = Component.VerifyValueContains("^"+labelVar, "labelContent");
 		 * }
 		 * </pre>
 		 * @see #prevResults
@@ -6370,7 +8346,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Verify that a string value contains a substring, ignoring case.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyValueContainsIgnoreCase">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyValueContainsIgnoreCase">Detailed Reference</a>
 		 * @param wholeString String, the string value to verify.
 		 * @param substring String, the substring
 		 * @param optionals
@@ -6383,7 +8359,7 @@ public abstract class SAFSPlus {
 		 * {@code
 		 * String labelVar = "labelVariable";
 		 * Component.AssignPropertyVariable(Map.AUT.Lable,"textContent", labelVar);
-		 * boolean success = SAFSPlus.VerifyValueContainsIgnoreCase("^"+labelVar, "subcontent");
+		 * boolean success = Component.VerifyValueContainsIgnoreCase("^"+labelVar, "subcontent");
 		 * }
 		 * </pre>
 		 * @see #prevResults
@@ -6395,7 +8371,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Verify that a string value does NOT contain a substring.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyValueDoesNotContain">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyValueDoesNotContain">Detailed Reference</a>
 		 * @param wholeString String, the string value to verify.
 		 * @param substring String, the substring
 		 * @param optionals
@@ -6408,7 +8384,7 @@ public abstract class SAFSPlus {
 		 * {@code
 		 * String labelVar = "labelVariable";
 		 * Component.AssignPropertyVariable(Map.AUT.Lable,"textContent", labelVar);
-		 * boolean success = SAFSPlus.VerifyValueDoesNotContain("^"+labelVar, "substr");
+		 * boolean success = Component.VerifyValueDoesNotContain("^"+labelVar, "substr");
 		 * }
 		 * </pre>
 		 * @see #prevResults
@@ -6420,7 +8396,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Verify that two string values are identical.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyValues">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyValues">Detailed Reference</a>
 		 * @param value1 String, the first value to compare.
 		 * @param value2 String, the second value to compare.
 		 * @param optionals
@@ -6434,9 +8410,9 @@ public abstract class SAFSPlus {
 		 * String labelVar = "labelVariable";
 		 * Component.AssignPropertyVariable(Map.AUT.Lable,"textContent", labelVar);
 		 * String label = SAFSPlus.GetVariableValue(labelVar);
-		 * boolean success = SAFSPlus.VerifyValues(label, "labelContent");
+		 * boolean success = Component.VerifyValues(label, "labelContent");
 		 * //or
-		 * boolean success = SAFSPlus.VerifyValues("^"+labelVar, "labelContent");
+		 * boolean success = Component.VerifyValues("^"+labelVar, "labelContent");
 		 * }
 		 * </pre>
 		 * @see #prevResults
@@ -6448,7 +8424,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Verify that two string values are identical, ignoring case.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyValuesIgnoreCase">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyValuesIgnoreCase">Detailed Reference</a>
 		 * @param value1 String, the first value to compare.
 		 * @param value2 String, the second value to compare.
 		 * @param optionals
@@ -6461,7 +8437,7 @@ public abstract class SAFSPlus {
 		 * {@code
 		 * String labelVar = "labelVariable";
 		 * Component.AssignPropertyVariable(Map.AUT.Lable,"textContent", labelVar);
-		 * boolean success = SAFSPlus.VerifyValuesIgnoreCase("^"+labelVar, "labelcontent");
+		 * boolean success = Component.VerifyValuesIgnoreCase("^"+labelVar, "labelcontent");
 		 * }
 		 * </pre>
 		 * @see #prevResults
@@ -6473,7 +8449,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Verify that two string values are NOT identical.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyValuesNotEqual">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyValuesNotEqual">Detailed Reference</a>
 		 * @param value1 String, the first value to compare.
 		 * @param value2 String, the second value to compare.
 		 * @param optionals
@@ -6486,7 +8462,7 @@ public abstract class SAFSPlus {
 		 * {@code
 		 * String labelVar = "labelVariable";
 		 * Component.AssignPropertyVariable(Map.AUT.Lable,"textContent", labelVar);
-		 * boolean success = SAFSPlus.VerifyValuesNotEqual("^"+labelVar, "labelContent");
+		 * boolean success = Component.VerifyValuesNotEqual("^"+labelVar, "labelContent");
 		 * }
 		 * </pre>
 		 * @see #prevResults
@@ -6499,7 +8475,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Control-Click on any visible component.
-		 * <p>See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_CtrlClick">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_CtrlClick">Detailed Reference</a>
 		 * @param comp -- Component (from App Map) to Click
 		 * @param params optional
 		 * <ul>
@@ -6507,6 +8483,10 @@ public abstract class SAFSPlus {
 		 * <b>For SE+</b>, params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
 		 * <li><b>params[1] auto-scroll boolean</b> if the component will be scrolled into view automatically before clicking.
 		 *                                        if not provided, the default value is true.
+		 * <li><b>params[2] verify boolean</b> check if the component is visible. We try several ways to scroll the component into view: if this
+		 *                                     parameter 'verify' is true then we will not try other ways if the component is already visible; otherwise
+		 *                                     we will try all the ways to show the element even the component may have already shown on the page.
+		 *                                     if not provided, the default value is true.
 		 * </ul>
 		 * @return true if successfully executed, false otherwise.<p>
 		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
@@ -6518,6 +8498,7 @@ public abstract class SAFSPlus {
 		 * 3) boolean success = CtrlClick(Map.Google.Apps,"20%,30%"); // Control-Click at the coordinate: its X value equals 20% width of component, its Y value equals 30% height of component.
 		 * 4) boolean success = CtrlClick(Map.Google.Apps,"AppMapSubkey");//Control-Click at the coordinate defined by entry "AppMapSubkey" in App Map.
 		 * 5) boolean success = CtrlClick(Map.Google.Apps,"20,20", "false");//Control-Click at the coordinate (20,20) and web-element will not be scrolled into view automatically
+		 * 6) boolean success = CtrlClick(Map.Google.Apps,"", "", "false");//Control-Click at the center, and web-element will be automatically scrolled into view by all means
 		 *  // one of the above and then,
 		 * int rc = prevResults.getStatusCode();      // if useful
 		 * String info = prevResults.getStatusInfo(); // if useful
@@ -6536,7 +8517,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Control-Right-Click on any visible component.
-		 * <p>See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_CtrlRightClick">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_CtrlRightClick">Detailed Reference</a>
 		 * @param comp -- Component (from App Map) to Click
 		 * @param params optional
 		 * <ul>
@@ -6544,6 +8525,10 @@ public abstract class SAFSPlus {
 		 * <b>For SE+</b>, params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
 		 * <li><b>params[1] auto-scroll boolean</b> if the component will be scrolled into view automatically before clicking.
 		 *                                        if not provided, the default value is true.
+		 * <li><b>params[2] verify boolean</b> check if the component is visible. We try several ways to scroll the component into view: if this
+		 *                                     parameter 'verify' is true then we will not try other ways if the component is already visible; otherwise
+		 *                                     we will try all the ways to show the element even the component may have already shown on the page.
+		 *                                     if not provided, the default value is true.
 		 * </ul>
 		 * @return true if successfully executed, false otherwise.<p>
 		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
@@ -6555,6 +8540,7 @@ public abstract class SAFSPlus {
 		 * 3) boolean success = CtrlRightClick(Map.Google.Apps,"20%,30%"); // Control-Right-Click at the coordinate: its X value equals 20% width of component, its Y value equals 30% height of component.
 		 * 4) boolean success = CtrlRightClick(Map.Google.Apps,"AppMapSubkey");//Control-Right-Click at the coordinate defined by entry "AppMapSubkey" in App Map.
 		 * 5) boolean success = CtrlRightClick(Map.Google.Apps,"20,20", "false");//Control-Right-Click at the coordinate (20,20) and web-element will not be scrolled into view automatically
+		 * 5) boolean success = CtrlRightClick(Map.Google.Apps,"", "", "false");//Control-Right-Click at the center and web-element will be scrolled into view automatically by all means
 		 *  // one of the above and then,
 		 * int rc = prevResults.getStatusCode();      // if useful
 		 * String info = prevResults.getStatusInfo(); // if useful
@@ -6573,7 +8559,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Double-Click on any visible component.
-		 * <p>See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_DoubleClick">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_DoubleClick">Detailed Reference</a>
 		 * @param comp -- Component (from App Map) to Click
 		 * @param params optional
 		 * <ul>
@@ -6581,6 +8567,10 @@ public abstract class SAFSPlus {
 		 * <b>For SE+,</b> params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
 		 * <li><b>params[1] auto-scroll boolean</b> if the component will be scrolled into view automatically before clicking.
 		 *                                        if not provided, the default value is true.
+		 * <li><b>params[2] verify boolean</b> check if the component is visible. We try several ways to scroll the component into view: if this
+		 *                                     parameter 'verify' is true then we will not try other ways if the component is already visible; otherwise
+		 *                                     we will try all the ways to show the element even the component may have already shown on the page.
+		 *                                     if not provided, the default value is true.
 		 * </ul>
 		 * @return true if successfully executed, false otherwise.<p>
 		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
@@ -6592,6 +8582,7 @@ public abstract class SAFSPlus {
 		 * 3) boolean success = DoubleClick(Map.Google.Apps,"20%,30%"); // Double-Click at the coordinate: its X value equals 20% width of component, its Y value equals 30% height of component.
 		 * 4) boolean success = DoubleClick(Map.Google.Apps,"AppMapSubkey");//Double-Click at the coordinate defined by entry "AppMapSubkey" in App Map.
 		 * 5) boolean success = DoubleClick(Map.Google.Apps,"20,20", "false");//Double-Click at the coordinate (20,20) and web-element will not be scrolled into view automatically
+		 * 5) boolean success = DoubleClick(Map.Google.Apps,"", "", "false");//Double-Click at the center and web-element will be scrolled into view automatically by all means
 		 *  // one of the above and then,
 		 * int rc = prevResults.getStatusCode();      // if useful
 		 * String info = prevResults.getStatusInfo(); // if useful
@@ -6610,7 +8601,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Right-Click on any visible component.
-		 * <p>See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_RightClick">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_RightClick">Detailed Reference</a>
 		 * @param comp -- Component (from App Map) to Click
 		 * @param params optional
 		 * <ul>
@@ -6618,6 +8609,10 @@ public abstract class SAFSPlus {
 		 * <b>For SE+</b>, params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
 		 * <li><b>params[1] auto-scroll boolean</b> if the component will be scrolled into view automatically before clicking.
 		 *                                        if not provided, the default value is true.
+		 * <li><b>params[2] verify boolean</b> check if the component is visible. We try several ways to scroll the component into view: if this
+		 *                                     parameter 'verify' is true then we will not try other ways if the component is already visible; otherwise
+		 *                                     we will try all the ways to show the element even the component may have already shown on the page.
+		 *                                     if not provided, the default value is true.
 		 * </ul>
 		 * @return true if successfully executed, false otherwise.<p>
 		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
@@ -6629,6 +8624,7 @@ public abstract class SAFSPlus {
 		 * 3) boolean success = RightClick(Map.Google.Apps,"20%,30%"); // Right-Click at the coordinate: its X value equals 20% width of component, its Y value equals 30% height of component.
 		 * 4) boolean success = RightClick(Map.Google.Apps,"AppMapSubkey");//Right-Click at the coordinate defined by entry "AppMapSubkey" in App Map.
 		 * 5) boolean success = RightClick(Map.Google.Apps,"20,20", "false");//Right-Click at the coordinate (20,20) and web-element will not be scrolled into view automatically
+		 * 5) boolean success = RightClick(Map.Google.Apps,"", "", "false");//Right-Click at the center and web-element will be scrolled into view automatically by all means
 		 *  // one of the above and then,
 		 * int rc = prevResults.getStatusCode();      // if useful
 		 * String info = prevResults.getStatusInfo(); // if useful
@@ -6646,8 +8642,50 @@ public abstract class SAFSPlus {
 		}
 
 		/**
+		 * Shift-Click on any visible component.
+		 * <p>See <a href="/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_ShiftClick">Detailed Reference</a>
+		 * @param comp -- Component (from App Map) to Click
+		 * @param params optional
+		 * <ul>
+		 * <li><b>params[0] X,Y coordinate</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
+		 * <b>For SE+</b>, params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
+		 * <li><b>params[1] auto-scroll boolean</b> if the component will be scrolled into view automatically before clicking.
+		 *                                        if not provided, the default value is true.
+		 * <li><b>params[2] verify boolean</b> check if the component is visible. We try several ways to scroll the component into view: if this
+		 *                                     parameter 'verify' is true then we will not try other ways if the component is already visible; otherwise
+		 *                                     we will try all the ways to show the element even the component may have already shown on the page.
+		 *                                     if not provided, the default value is true.
+		 * </ul>
+		 * @return true if successfully executed, false otherwise.<p>
+		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+		 * @example
+		 * <pre>
+		 * {@code
+		 * 1) boolean success = ShiftClick(Map.Google.Apps);//Shift-Click at the center
+		 * 2) boolean success = ShiftClick(Map.Google.Apps,"20,20");//Shift-Click at the coordination (20,20)
+		 * 3) boolean success = ShiftClick(Map.Google.Apps,"20%,30%"); // Shift-Click at the coordinate: its X value equals 20% width of component, its Y value equals 30% height of component.
+		 * 4) boolean success = ShiftClick(Map.Google.Apps,"AppMapSubkey");//Shift-Click at the coordination defined by entry "AppMapSubkey" in App Map.
+		 * 5) boolean success = ShiftClick(Map.Google.Apps,"20,20", "false");//Shift-Click at the coordination (20,20) and web-element will not be scrolled into view automatically
+		 * 5) boolean success = ShiftClick(Map.Google.Apps,"", "", "false");//Shift-Click at the center and web-element will be scrolled into view automatically by all means
+		 *  // one of the above and then,
+		 * int rc = prevResults.getStatusCode();      // if useful
+		 * String info = prevResults.getStatusInfo(); // if useful
+		 * }
+		 *
+		 * Pay attention: If you use percentage format in SE+, you'd better use 'Misc.Expressions(false);' first.
+		 *
+		 * </pre>
+		 * @see #prevResults
+		 * @see org.safs.TestRecordHelper#getStatusCode()
+		 * @see org.safs.TestRecordHelper#getStatusInfo()
+		 */
+		public static boolean ShiftClick(org.safs.model.Component comp, String... params){
+			return action(comp, GenericObjectFunctions.SHIFTCLICK_KEYWORD, replaceSeparator(params));
+		}
+
+		/**
 		 * A left mouse drag is performed on the object based on the stored coordinates relative to this object.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericObjectFunctionsReference.htm#detail_LeftDrag">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/GenericObjectFunctionsReference.htm#detail_LeftDrag">Detailed Reference</a>
 		 * @param comp Component, the component (from App Map) relative to which to calculate coordinates to drag
 		 * @param coordinates String, the relative coordinates. Example: "Coords=3,10,12,20", or "coordsKey" defined in App Map<br>
 		 * @return true if successfully executed, false otherwise.<p>
@@ -6673,7 +8711,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * A Shift left mouse drag is performed on the object based on the stored coordinates relative to this object.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericObjectFunctionsReference.htm#detail_ShiftLeftDrag">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/GenericObjectFunctionsReference.htm#detail_ShiftLeftDrag">Detailed Reference</a>
 		 * @param comp Component, the component (from App Map) relative to which to calculate coordinates to drag
 		 * @param coordinates String, the relative coordinates. Example: "Coords=3,10,12,20", or "coordsKey" defined in App Map<br>
 		 * @return true if successfully executed, false otherwise.<p>
@@ -6699,7 +8737,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * A Ctrl Shift left mouse drag is performed on the object based on the stored coordinates relative to this object.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericObjectFunctionsReference.htm#detail_CtrlShiftLeftDrag">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/GenericObjectFunctionsReference.htm#detail_CtrlShiftLeftDrag">Detailed Reference</a>
 		 * @param comp Component, the component (from App Map) relative to which to calculate coordinates to drag
 		 * @param coordinates String, the relative coordinates. Example: "Coords=3,10,12,20", or "coordsKey" defined in App Map<br>
 		 * @return true if successfully executed, false otherwise.<p>
@@ -6725,7 +8763,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * A Ctrl left mouse drag is performed on the object based on the stored coordinates relative to this object.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericObjectFunctionsReference.htm#detail_CtrlLeftDrag">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/GenericObjectFunctionsReference.htm#detail_CtrlLeftDrag">Detailed Reference</a>
 		 * @param comp Component, the component (from App Map) relative to which to calculate coordinates to drag
 		 * @param coordinates String, the relative coordinates. Example: "Coords=3,10,12,20", or "coordsKey" defined in App Map<br>
 		 * @return true if successfully executed, false otherwise.<p>
@@ -6751,7 +8789,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * A Alt left mouse drag is performed on the object based on the stored coordinates relative to this object.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericObjectFunctionsReference.htm#detail_AltLeftDrag">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/GenericObjectFunctionsReference.htm#detail_AltLeftDrag">Detailed Reference</a>
 		 * @param comp Component, the component (from App Map) relative to which to calculate coordinates to drag
 		 * @param coordinates String, the relative coordinates. Example: "Coords=3,10,12,20", or "coordsKey" defined in App Map<br>
 		 * @return true if successfully executed, false otherwise.<p>
@@ -6777,7 +8815,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * A Ctrl Alt left mouse drag is performed on the object based on the stored coordinates relative to this object.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericObjectFunctionsReference.htm#detail_CtrlAltLeftDrag">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/GenericObjectFunctionsReference.htm#detail_CtrlAltLeftDrag">Detailed Reference</a>
 		 * @param comp Component, the component (from App Map) relative to which to calculate coordinates to drag
 		 * @param coordinates String, the relative coordinates. Example: "Coords=3,10,12,20", or "coordsKey" defined in App Map<br>
 		 * @return true if successfully executed, false otherwise.<p>
@@ -6803,7 +8841,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * A right mouse drag is performed on the object based on the stored coordinates relative to this object.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericObjectFunctionsReference.htm#detail_RightDrag">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/GenericObjectFunctionsReference.htm#detail_RightDrag">Detailed Reference</a>
 		 * @param comp Component, the component (from App Map) relative to which to calculate coordinates to drag
 		 * @param coordinates String, the relative coordinates. Example: "Coords=3,10,12,20", or "coordsKey" defined in App Map<br>
 		 * @return true if successfully executed, false otherwise.<p>
@@ -6827,53 +8865,15 @@ public abstract class SAFSPlus {
 		public static boolean RightDrag(org.safs.model.Component comp, String coordinates){
 			return action(comp, GenericObjectFunctions.RIGHTDRAG_KEYWORD, coordinates);
 		}
-
-		/**
-		 * Shift-Click on any visible component.
-		 * <p>See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_ShiftClick">Detailed Reference</a>
-		 * @param comp -- Component (from App Map) to Click
-		 * @param params optional
-		 * <ul>
-		 * <li><b>params[0] X,Y coordinate</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
-		 * <b>For SE+</b>, params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
-		 * <li><b>params[1] auto-scroll boolean</b> if the component will be scrolled into view automatically before clicking.
-		 *                                        if not provided, the default value is true.
-		 * </ul>
-		 * @return true if successfully executed, false otherwise.<p>
-		 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
-		 * @example
-		 * <pre>
-		 * {@code
-		 * 1) boolean success = ShiftClick(Map.Google.Apps);//Shift-Click at the center
-		 * 2) boolean success = ShiftClick(Map.Google.Apps,"20,20");//Shift-Click at the coordination (20,20)
-		 * 3) boolean success = ShiftClick(Map.Google.Apps,"20%,30%"); // Shift-Click at the coordinate: its X value equals 20% width of component, its Y value equals 30% height of component.
-		 * 4) boolean success = ShiftClick(Map.Google.Apps,"AppMapSubkey");//Shift-Click at the coordination defined by entry "AppMapSubkey" in App Map.
-		 * 5) boolean success = ShiftClick(Map.Google.Apps,"20,20", "false");//Shift-Click at the coordination (20,20) and web-element will not be scrolled into view automatically
-		 *  // one of the above and then,
-		 * int rc = prevResults.getStatusCode();      // if useful
-		 * String info = prevResults.getStatusInfo(); // if useful
-		 * }
-		 *
-		 * Pay attention: If you use percentage format in SE+, you'd better use 'Misc.Expressions(false);' first.
-		 *
-		 * </pre>
-		 * @see #prevResults
-		 * @see org.safs.TestRecordHelper#getStatusCode()
-		 * @see org.safs.TestRecordHelper#getStatusInfo()
-		 */
-		public static boolean ShiftClick(org.safs.model.Component comp, String... params){
-			return action(comp, GenericObjectFunctions.SHIFTCLICK_KEYWORD, replaceSeparator(params));
-		}
-
 	}
 
 	/**
-	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/ComboBoxFunctionsIndex.htm">ComboBox keywords</a>, like Select, ShowList, SetTextValue etc.<br>
+	 * Wrapper class providing APIs to handle <a href="/sqabasic2000/ComboBoxFunctionsIndex.htm">ComboBox keywords</a>, like Select, ShowList, SetTextValue etc.<br>
 	 */
 	public static class ComboBox extends Component{
 		/**
 		 * Select an item in Combo Box. Typically a verification that the item was selected is attempted.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ComboBoxFunctionsReference.htm#detail_Select">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/ComboBoxFunctionsReference.htm#detail_Select">Detailed Reference</a>
 		 * @param combobox Component (from App Map) to Select item from.
 		 * @param itemtext -- The combo box option to select.<br>
 		 * @param extraParams optional
@@ -6900,7 +8900,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Select an item in Combo Box without verification of the selected item.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ComboBoxFunctionsReference.htm#detail_SelectUnverified">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/ComboBoxFunctionsReference.htm#detail_SelectUnverified">Detailed Reference</a>
 		 * @param combobox Component (from App Map) to Select item from.
 		 * @param itemtext -- The combo box option to select.<br>
 		 * @param extraParams optional
@@ -6927,7 +8927,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Select a text item in Combo Box using a partial substring match.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ComboBoxFunctionsReference.htm#detail_SelectPartialMatch">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/ComboBoxFunctionsReference.htm#detail_SelectPartialMatch">Detailed Reference</a>
 		 * @param combobox Component (from App Map) to Select item from.
 		 * @param itemtext -- The combo box option to select, given as a substring of the option. Case Sensitive.<br>
 		 * @param extraParams optional
@@ -6954,7 +8954,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Select an item in Combo Box using a partial substring match, no verification of the 'selected item' will be attempted.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ComboBoxFunctionsReference.htm#detail_SelectUnverifiedPartialMatch">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/ComboBoxFunctionsReference.htm#detail_SelectUnverifiedPartialMatch">Detailed Reference</a>
 		 * @param combobox Component (from App Map) to Select item from.
 		 * @param itemtext -- The combo box option to select, given as a substring of the option. Case Sensitive.<br>
 		 * @param extraParams optional
@@ -6981,7 +8981,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Select an item in Combo Box by index.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ComboBoxFunctionsReference.htm#detail_SelectIndex">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/ComboBoxFunctionsReference.htm#detail_SelectIndex">Detailed Reference</a>
 		 * @param combobox Component (from App Map) to Select item from.
 		 * @param index -- the 1-based item index to select.<br>
 		 * @param extraParams optional
@@ -7007,7 +9007,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Verify specific item in Combo Box is selected.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ComboBoxFunctionsReference.htm#detail_VerifySelected">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/ComboBoxFunctionsReference.htm#detail_VerifySelected">Detailed Reference</a>
 		 * @param combobox Component (from App Map) to verify.
 		 * @param item -- text item expected to be selected.
 		 * @return true if successful, false otherwise.
@@ -7027,7 +9027,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Hide the combo box list.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ComboBoxFunctionsReference.htm#detail_HideList">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/ComboBoxFunctionsReference.htm#detail_HideList">Detailed Reference</a>
 		 * @param combobox Component (from App Map).
 		 * @return true if successful, false otherwise.
 		 * @example
@@ -7046,7 +9046,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Show the combo box list.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ComboBoxFunctionsReference.htm#detail_ShowList">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/ComboBoxFunctionsReference.htm#detail_ShowList">Detailed Reference</a>
 		 * @param combobox Component (from App Map).
 		 * @return true if successful, false otherwise.
 		 * @example
@@ -7065,7 +9065,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Capture all items in Combo Box to a file.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ComboBoxFunctionsReference.htm#detail_CaptureItemsToFile">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/ComboBoxFunctionsReference.htm#detail_CaptureItemsToFile">Detailed Reference</a>
 		 * @param combobox (from App Map) to get the content.
 		 * @param filename String, The filename to save the combo box's data
 		 * @param params optional
@@ -7092,7 +9092,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Set text value in Combo box.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php?lib=ComboBoxFunctions&cmd=SetTextValue">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/SAFSReference.php?lib=ComboBoxFunctions&cmd=SetTextValue">Detailed Reference</a>
 		 *
 		 * @param combobox org.safs.model.Component, 	the Combo box Component get from App map file.
 		 * @param value String, 					 	the value of content, which is entered into Combo box.
@@ -7118,12 +9118,12 @@ public abstract class SAFSPlus {
 	}
 
 	/**
-	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/ScrollBarFunctionsIndex.htm">ScrollBar keywords</a>, like OneDown, PageDown, PageUp etc.<br>
+	 * Wrapper class providing APIs to handle <a href="/sqabasic2000/ScrollBarFunctionsIndex.htm">ScrollBar keywords</a>, like OneDown, PageDown, PageUp etc.<br>
 	 */
 	public static class ScrollBar  extends Component{
 		/**
 		 * Attempts to perform a ScrollLineDown on a scrollbar.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ScrollBarFunctionsReference.htm#detail_OneDown">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/ScrollBarFunctionsReference.htm#detail_OneDown">Detailed Reference</a>
 		 * @param scrollbar Component (from App Map), a vertical scrollbar.
 		 * @param params optional
 		 * <ul>
@@ -7146,7 +9146,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Attempts to perform a ScrollLineUp on a scrollbar.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ScrollBarFunctionsReference.htm#detail_OneUp">Detailed Reference</a>
+		 * <p>See <a href="/sqabasic2000/ScrollBarFunctionsReference.htm#detail_OneUp">Detailed Reference</a>
 		 * @param scrollbar Component (from App Map), a vertical scrollbar.
 		 * @param params optional
 		 * <ul>
@@ -7169,7 +9169,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Attempts to perform a ScrollLeft on a scrollbar.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ScrollBarFunctionsReference.htm#detail_OneLeft">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ScrollBarFunctionsReference.htm#detail_OneLeft">Detailed Reference</a><p>
 		 * @param scrollbar Component (from App Map), a horizontal scrollbar.
 		 * @param params optional
 		 * <ul>
@@ -7193,7 +9193,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Attempts to perform a ScrollRight on a scrollbar.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ScrollBarFunctionsReference.htm#detail_OneRight">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ScrollBarFunctionsReference.htm#detail_OneRight">Detailed Reference</a><p>
 		 * @param scrollbar Component (from App Map), a horizontal scrollbar.
 		 * @param params optional
 		 * <ul>
@@ -7217,7 +9217,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Attempts to perform a ScrollPageDown on a scrollbar.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ScrollBarFunctionsReference.htm#detail_PageDown">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ScrollBarFunctionsReference.htm#detail_PageDown">Detailed Reference</a><p>
 		 * @param scrollbar Component (from App Map), a vertical scrollbar.
 		 * @param params optional
 		 * <ul>
@@ -7240,7 +9240,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Attempts to perform a ScrollPageUp on a scrollbar.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ScrollBarFunctionsReference.htm#detail_PageUp">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ScrollBarFunctionsReference.htm#detail_PageUp">Detailed Reference</a><p>
 		 * @param scrollbar Component (from App Map), a vertical scrollbar.
 		 * @param params optional
 		 * <ul>
@@ -7263,7 +9263,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Attempts to perform a ScrollPageLeft on a scrollbar.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ScrollBarFunctionsReference.htm#detail_PageLeft">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ScrollBarFunctionsReference.htm#detail_PageLeft">Detailed Reference</a><p>
 		 * @param scrollbar Component (from App Map), a horizontal scrollbar.
 		 * @param params optional
 		 * <ul>
@@ -7287,7 +9287,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Attempts to perform a ScrollPageRight on a scrollbar.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ScrollBarFunctionsReference.htm#detail_PageRight">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ScrollBarFunctionsReference.htm#detail_PageRight">Detailed Reference</a><p>
 		 * @param scrollbar Component (from App Map), a horizontal scrollbar.
 		 * @param params optional
 		 * <ul>
@@ -7312,12 +9312,12 @@ public abstract class SAFSPlus {
 	}
 
 	/**
-	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/CheckBoxFunctionsIndex.htm">CheckBox keywords</a>, like Check, UnCheck.<br>
+	 * Wrapper class providing APIs to handle <a href="/sqabasic2000/CheckBoxFunctionsIndex.htm">CheckBox keywords</a>, like Check, UnCheck.<br>
 	 */
 	public static class CheckBox extends Component{
 		/**
 		 * Check a check-box. Typically a verification that the checkbox was checked is attempted.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/CheckBoxFunctionsReference.htm#detail_Check">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/CheckBoxFunctionsReference.htm#detail_Check">Detailed Reference</a><p>
 		 * @param checkbox Component (from App Map).
 		 * @return true if successful, false otherwise.
 		 * @example
@@ -7336,7 +9336,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * UnCheck a check-box. Typically a verification that the checkbox was un-checked is attempted.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/CheckBoxFunctionsReference.htm#detail_UnCheck">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/CheckBoxFunctionsReference.htm#detail_UnCheck">Detailed Reference</a><p>
 		 * @param checkbox Component (from App Map).
 		 * @return true if successful, false otherwise.
 		 * @example
@@ -7355,14 +9355,14 @@ public abstract class SAFSPlus {
 	}
 
 	/**
-	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/EditBoxFunctionsIndex.htm">EditBox keywords</a>, like SetTextValue, SetTextCharacters etc.<br>
+	 * Wrapper class providing APIs to handle <a href="/sqabasic2000/EditBoxFunctionsIndex.htm">EditBox keywords</a>, like SetTextValue, SetTextCharacters etc.<br>
 	 */
 	public static class EditBox extends Component{
 
 		/**
 		 * Set the text of edit box with verifying. The text only be treated as
 		 * plain text, without special keywords dealing.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/EditBoxFunctionsReference.htm#detail_SetTextCharacters">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/EditBoxFunctionsReference.htm#detail_SetTextCharacters">Detailed Reference</a><p>
 		 * @param editbox org.safs.model.Component, the component(from App Map) editbox being set the content.
 		 * @param value text String, value of setting content.
 		 * @return true if successful, false otherwise.
@@ -7384,7 +9384,7 @@ public abstract class SAFSPlus {
 		/**
 		 * Set the text of edit box without verifying. The text only be treated as
 		 * plain text, without special keywords dealing.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/EditBoxFunctionsReference.htm#detail_SetUnverifiedTextCharacters">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/EditBoxFunctionsReference.htm#detail_SetUnverifiedTextCharacters">Detailed Reference</a><p>
 		 * @param editbox org.safs.model.Component, the component(from App Map) editbox being set the content.
 		 * @param value text String, value of setting content.
 		 * @return true if successful, false otherwise.
@@ -7405,7 +9405,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Enter text value to EditBox with verifying. The special key will be dealt. Moreover, if there's special key, verification will NOT happen.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/EditBoxFunctionsReference.htm#detail_SetTextValue">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/EditBoxFunctionsReference.htm#detail_SetTextValue">Detailed Reference</a><p>
 		 * @param editbox org.safs.model.Component, the component(from App Map) editbox being set the content.
 		 * @param value text String, value of setting content.
 		 * @return true if successful, false otherwise.
@@ -7432,7 +9432,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Enter text value to EditBox without verifying. The special key will be dealt. Moreover, if there's special key, verification will NOT happen.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/EditBoxFunctionsReference.htm#detail_SetUnverifiedTextValue ">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/EditBoxFunctionsReference.htm#detail_SetUnverifiedTextValue ">Detailed Reference</a><p>
 		 * @param editbox org.safs.model.Component, the component(from App Map) editbox being set the content.
 		 * @param value text String, value of setting content.
 		 * @return true if successful, false otherwise.
@@ -7459,7 +9459,7 @@ public abstract class SAFSPlus {
 	}
 
 	/**
-	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/TreeViewFunctionsIndex.htm">Tree keywords</a>, like ClickTextNode, ExpandTextNode etc.<br>
+	 * Wrapper class providing APIs to handle <a href="/sqabasic2000/TreeViewFunctionsIndex.htm">Tree keywords</a>, like ClickTextNode, ExpandTextNode etc.<br>
 	 * <pre>
 	 * By default, all parameters will be processed as an expression (math and string). As the parameter
 	 * tree-path may contain separator "->", for example "Root->Child1->GrandChild", it will be evaluated
@@ -7475,7 +9475,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Copy the current contents of a tree or a branch to a file.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_CaptureTreeDataToFile">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_CaptureTreeDataToFile">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param filename String, The filename to store the tree's content<br>
 		 * @param params Optional
@@ -7501,7 +9501,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Click a node according to a partial match of its path value.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_ClickPartial">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_ClickPartial">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to click, the string may be part of node text, it is case-sensitive.<br>
 		 * @return true if successful, false otherwise.
@@ -7518,7 +9518,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Click a node according to a partial match of its path value.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_ClickPartial">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_ClickPartial">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to click, the string may be part of node text, it is case-sensitive.<br>
 		 * @param matchIndex int, index of the Nth duplicate item to match.<br>
@@ -7537,7 +9537,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Click a node according to its path and verified the node has been selected.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_ClickTextNode">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_ClickTextNode">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to click.<br>
 		 * @return true if successful, false otherwise.
@@ -7554,7 +9554,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Click the Nth node according to its path and verified the node has been selected.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_ClickTextNode">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_ClickTextNode">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to click.<br>
 		 * @param matchIndex int, index of the Nth duplicate item to match.<br>
@@ -7573,7 +9573,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Click a node according to its path, but will not verify the node has been selected.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_ClickUnverifiedTextNode">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_ClickUnverifiedTextNode">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to click.<br>
 		 * @return true if successful, false otherwise.
@@ -7590,7 +9590,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Click the Nth node according to its path, but will not verify the node has been selected.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_ClickUnverifiedTextNode">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_ClickUnverifiedTextNode">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to click.<br>
 		 * @param matchIndex int, index of the Nth duplicate item to match.<br>
@@ -7609,7 +9609,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Collapse a node according to a partial match of its path value, and verify this node has been collapsed.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_CollapsePartial">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_CollapsePartial">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to collapse, the string may be part of node text, it is case-sensitive.<br>
 		 * @return true if successful, false otherwise.
@@ -7626,7 +9626,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Collapse a node according to a partial match of its path value, and verify this node has been collapsed.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_CollapsePartial">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_CollapsePartial">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to collapse, the string may be part of node text, it is case-sensitive.<br>
 		 * @param matchIndex int, index of the Nth duplicate item to match.<br>
@@ -7645,7 +9645,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Collapse a node according to its path, and verify this node has been collapsed.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_Collapse">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_Collapse">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to click.<br>
 		 * @return true if successful, false otherwise.
@@ -7662,7 +9662,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Collapse the Nth node according to its path, and verify this node has been collapsed.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_Collapse">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_Collapse">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to click.<br>
 		 * @param matchIndex int, index of the Nth duplicate item to match.<br>
@@ -7681,7 +9681,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Collapse a node according to its path, but will NOT verify this node has been collapsed.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_CollapseUnverifiedTextNode">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_CollapseUnverifiedTextNode">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to click.<br>
 		 * @return true if successful, false otherwise.
@@ -7699,7 +9699,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Click a node according to its path, at the same time the key 'CTRL' is pressed.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_CtrlClickUnverifiedTextNode">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_CtrlClickUnverifiedTextNode">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to click.<br>
 		 * @return true if successful, false otherwise.
@@ -7717,7 +9717,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Double click a node according to a partial match of its path value, and verify this node has been selected.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_DoubleClickPartial">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_DoubleClickPartial">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to click.<br>
 		 * @return true if successful, false otherwise.
@@ -7734,7 +9734,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Double click the Nth node according to a partial match of its path value, and verify this node has been selected.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_DoubleClickPartial">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_DoubleClickPartial">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to click.<br>
 		 * @param matchIndex int, index of the Nth duplicate item to match.<br>
@@ -7752,7 +9752,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Double click a node according to its path, and verify this node has been selected.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_DoubleClickTextNode">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_DoubleClickTextNode">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to click.<br>
 		 * @return true if successful, false otherwise.
@@ -7769,7 +9769,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Double Click the Nth node according to its path, and verify this node has been selected.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_DoubleClickTextNode">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_DoubleClickTextNode">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to click.<br>
 		 * @param matchIndex int, index of the Nth duplicate item to match.<br>
@@ -7787,7 +9787,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Double click a node according to its path, but will NOT verify this node has been selected.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_DoubleClickUnverifiedTextNode">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_DoubleClickUnverifiedTextNode">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to click.<br>
 		 * @return true if successful, false otherwise.
@@ -7804,7 +9804,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Double Click the Nth node according to its path, but will NOT verify this node has been selected.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_DoubleClickUnverifiedTextNode">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_DoubleClickUnverifiedTextNode">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to click.<br>
 		 * @param matchIndex int, index of the Nth duplicate item to match.<br>
@@ -7823,7 +9823,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Expand a node according to its path, and verify this node has been expanded.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_Expand">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_Expand">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to expand.<br>
 		 * @return true if successful, false otherwise.
@@ -7840,7 +9840,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Expand the Nth node according to its path, and verify this node has been expanded.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_Expand">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_Expand">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to expand.<br>
 		 * @param matchIndex int, index of the Nth duplicate item to match.<br>
@@ -7858,7 +9858,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Expand a node according to a partial match of its path value, and verify this node has been expanded.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_ExpandPartial">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_ExpandPartial">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to expand.<br>
 		 * @return true if successful, false otherwise.
@@ -7875,7 +9875,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Expand the Nth node according to a partial match of its path value, and verify this node has been expanded.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_ExpandPartial">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_ExpandPartial">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to expand.<br>
 		 * @param matchIndex int, index of the Nth duplicate item to match.<br>
@@ -7893,7 +9893,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Expand a node according to its path, but will NOT verify this node has been expanded.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_ExpandUnverifiedTextNode">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_ExpandUnverifiedTextNode">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to expand.<br>
 		 * @return true if successful, false otherwise.
@@ -7910,7 +9910,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Expand the Nth node according to its path, but will NOT verify this node has been expanded.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_ExpandUnverifiedTextNode">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_ExpandUnverifiedTextNode">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to expand.<br>
 		 * @param matchIndex int, index of the Nth duplicate item to match.<br>
@@ -7929,7 +9929,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Right click a node according to its path, and verify this node has been selected.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_RightClickTextNode">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_RightClickTextNode">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to click.<br>
 		 * @return true if successful, false otherwise.
@@ -7946,7 +9946,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Right click the Nth node according to its path, and verify this node has been selected.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_RightClickTextNode">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_RightClickTextNode">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to click.<br>
 		 * @param matchIndex int, index of the Nth duplicate item to match.<br>
@@ -7964,7 +9964,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Right click a node according to a partial match of its path value, and verify this node has been selected.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_RightClickPartial">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_RightClickPartial">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to click.<br>
 		 * @return true if successful, false otherwise.
@@ -7981,7 +9981,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Right click the Nth node according to a partial match of its path value, and verify this node has been selected.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_RightClickPartial">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_RightClickPartial">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to click.<br>
 		 * @param matchIndex int, index of the Nth duplicate item to match.<br>
@@ -7999,7 +9999,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Right click a node according to its path, but will NOT verify this node has been selected.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_RightClickUnverifiedTextNode">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_RightClickUnverifiedTextNode">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to click.<br>
 		 * @return true if successful, false otherwise.
@@ -8016,7 +10016,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Right click the Nth node according to its path, but will NOT verify this node has been selected.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_RightClickUnverifiedTextNode">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_RightClickUnverifiedTextNode">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to click.<br>
 		 * @param matchIndex int, index of the Nth duplicate item to match.<br>
@@ -8035,7 +10035,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Select a node according to its path, and verify this node has been selected.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_Select">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_Select">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to select.<br>
 		 * @return true if successful, false otherwise.
@@ -8052,7 +10052,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Select the Nth node according to its path, and verify this node has been selected.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_Select">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_Select">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to select.<br>
 		 * @param matchIndex int, index of the Nth duplicate item to match.<br>
@@ -8070,7 +10070,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Select a node according to a partial match of its path value, and verify this node has been selected.
-         * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_SelectPartial">Detailed Reference</a><p>
+         * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_SelectPartial">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to select.<br>
 		 * @return true if successful, false otherwise.
@@ -8087,7 +10087,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Select the Nth node according to a partial match of its path value, and verify this node has been selected.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_SelectPartial">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_SelectPartial">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to select.<br>
 		 * @param matchIndex int, index of the Nth duplicate item to match.<br>
@@ -8105,7 +10105,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Select a node according to its path, but will NOT verify this node has been selected.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_SelectUnverifiedTextNode">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_SelectUnverifiedTextNode">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to select.<br>
 		 * @return true if successful, false otherwise.
@@ -8122,7 +10122,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Select the Nth node according to its path, but will NOT verify this node has been selected.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_SelectUnverifiedTextNode">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_SelectUnverifiedTextNode">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to select.<br>
 		 * @param matchIndex int, index of the Nth duplicate item to match.<br>
@@ -8141,7 +10141,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Verify the existence of node according to its path, and set true to a variable if node exists, false if not.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_SetTreeContainsNode">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_SetTreeContainsNode">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to verify.<br>
 		 * @param variable String, the variable to store the existence of the node<br>
@@ -8159,7 +10159,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Verify the existence of node according to a partial match of its path value, and set true to a variable if node exists, false if not.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_SetTreeContainsPartialMatch">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_SetTreeContainsPartialMatch">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to verify.<br>
 		 * @param variable String, the variable to store the existence of the node<br>
@@ -8178,7 +10178,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Click a node according to its path, at the same time the key 'SHIFT' is pressed.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_ShiftClickUnverifiedTextNode">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_ShiftClickUnverifiedTextNode">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to click.<br>
 		 * @return true if successful, false otherwise.
@@ -8196,7 +10196,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Verify the selection of a node according to its path, node should be unselected.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_VerifyNodeUnselected">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_VerifyNodeUnselected">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to verify.<br>
 		 * @return true if successful, false otherwise.
@@ -8213,7 +10213,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Verify the selection of a node according to its path, node should be selected.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_VerifySelectedNode">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_VerifySelectedNode">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to verify.<br>
 		 * @return true if successful, false otherwise.
@@ -8230,7 +10230,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Verify the existence of a node according to its path.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_VerifyTreeContainsNode">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_VerifyTreeContainsNode">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to verify.<br>
 		 * @return true if successful, false otherwise.
@@ -8247,7 +10247,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Verify the selection of a node according to a partial match of its path value.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_VerifyTreeContainsPartialMatch">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_VerifyTreeContainsPartialMatch">Detailed Reference</a><p>
 		 * @param tree Component (from App Map).
 		 * @param treepath String, The tree path to verify.<br>
 		 * @return true if successful, false otherwise.
@@ -8265,7 +10265,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Select tree text node.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_SelectTextNode">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_SelectTextNode">Detailed Reference</a><p>
 		 * @param Tree Component (from App Map) to get the content.
 		 * @param Tree text node, separated by "->". ex: main node->child node.
 		 * @return
@@ -8283,7 +10283,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Expand tree text node.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TreeViewFunctionsReference.htm#detail_ExpandTextNode">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TreeViewFunctionsReference.htm#detail_ExpandTextNode">Detailed Reference</a><p>
 		 * @param Tree Component (from App Map) to get the content.
 		 * @param Tree text node, separated by "->". ex: main node->child node.
 		 * @return
@@ -8296,19 +10296,19 @@ public abstract class SAFSPlus {
 		 * </pre>
 		 */
 		public static boolean ExpandTextNode(org.safs.model.Component tree, String node){
-			return action(tree, TreeViewFunctions.EXPANDPARTIALTEXTNODE_KEYWORD, quotePath(node));
+			return action(tree, TreeViewFunctions.EXPANDTEXTNODE_KEYWORD, quotePath(node));
 		}
 
 	}
 
 	/**
-	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/TabControlFunctionsIndex.htm">TabControl keywords</a>, like ClickTab, SelectTabIndex etc.<br>
+	 * Wrapper class providing APIs to handle <a href="/sqabasic2000/TabControlFunctionsIndex.htm">TabControl keywords</a>, like ClickTab, SelectTabIndex etc.<br>
 	 */
 	public static class TabControl extends Component{
 
 		/**
 		 * Select a tab value in Tab Control and verify the value has been selected.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TabControlFunctionsReference.htm#detail_ClickTab">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TabControlFunctionsReference.htm#detail_ClickTab">Detailed Reference</a><p>
 		 * @param tabcontrol Component (from App Map) to select a tab from.
 		 * @param value String, text value
 		 * @return true if successful, false otherwise.
@@ -8327,7 +10327,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Select a tab value in Tab Control, the value will be matched partially.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TabControlFunctionsReference.htm#detail_ClickTabContains">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TabControlFunctionsReference.htm#detail_ClickTabContains">Detailed Reference</a><p>
 		 * @param tabcontrol Component (from App Map) to select a tab from.
 		 * @param value String, partial text value to match
 		 * @return true if successful, false otherwise.
@@ -8346,7 +10346,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Select a tab value in Tab Control and verify the value has been selected.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TabControlFunctionsReference.htm#detail_MakeSelection">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TabControlFunctionsReference.htm#detail_MakeSelection">Detailed Reference</a><p>
 		 * @param tabcontrol Component (from App Map) to select a tab from.
 		 * @param value String, text value
 		 * @return true if successful, false otherwise.
@@ -8365,7 +10365,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Select a tab value in Tab Control and verify the value has been selected.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TabControlFunctionsReference.htm#detail_SelectTab">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TabControlFunctionsReference.htm#detail_SelectTab">Detailed Reference</a><p>
 		 * @param tabcontrol Component (from App Map) to select a tab from.
 		 * @param value String, text value
 		 * @return true if successful, false otherwise.
@@ -8384,7 +10384,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Select a tab by index in Tab Control and verify the index has been selected.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TabControlFunctionsReference.htm#detail_SelectTabIndex">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TabControlFunctionsReference.htm#detail_SelectTabIndex">Detailed Reference</a><p>
 		 * @param tabcontrol Component (from App Map) to select a tab from.
 		 * @param index int, the index to select, it is 1-based.
 		 * @return true if successful, false otherwise.
@@ -8403,7 +10403,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Select a tab value in Tab Control without verification.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/TabControlFunctionsReference.htm#detail_UnverifiedClickTab">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/TabControlFunctionsReference.htm#detail_UnverifiedClickTab">Detailed Reference</a><p>
 		 * @param tabcontrol Component (from App Map) to select a tab from.
 		 * @param value String, text value
 		 * @return true if successful, false otherwise.
@@ -8424,7 +10424,7 @@ public abstract class SAFSPlus {
 	}
 
 	/**
-	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/ListViewFunctionsIndex.htm">ListView keywords</a>, like ClickIndex, VerifyListContains etc.<br>
+	 * Wrapper class providing APIs to handle <a href="/sqabasic2000/ListViewFunctionsIndex.htm">ListView keywords</a>, like ClickIndex, VerifyListContains etc.<br>
 	 */
 	public static class ListView extends Component{
 
@@ -8440,7 +10440,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Double click an item value in ListView according to an index.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_ActivateIndex">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_ActivateIndex">Detailed Reference</a><p>
 		 * @param listview Component (from App Map) to select an item from.
 		 * @param index int, the index to select, 1-based.
 		 * @return true if successful, false otherwise.
@@ -8459,7 +10459,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Double click an item value in ListView according to an index.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_ActivateIndexItem">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_ActivateIndexItem">Detailed Reference</a><p>
 		 * @param listview Component (from App Map) to select an item from.
 		 * @param index int, the index to select, 1-based.
 		 * @return true if successful, false otherwise.
@@ -8478,7 +10478,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Double click an item value in ListView according to an index.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_ClickIndex">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_ClickIndex">Detailed Reference</a><p>
 		 * @param listview Component (from App Map) to select an item from.
 		 * @param index int, the index to select, 1-based.
 		 * @return true if successful, false otherwise.
@@ -8497,7 +10497,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Double click an item value in ListView according to an index.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_ClickIndexItem">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_ClickIndexItem">Detailed Reference</a><p>
 		 * @param listview Component (from App Map) to select an item from.
 		 * @param index int, the index to select, 1-based.
 		 * @return true if successful, false otherwise.
@@ -8516,7 +10516,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Select (single click) an item value in ListView according to an index.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_SelectIndex">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_SelectIndex">Detailed Reference</a><p>
 		 * @param listview Component (from App Map) to select an item from.
 		 * @param index int, the index to select, 1-based.
 		 * @return true if successful, false otherwise.
@@ -8535,7 +10535,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Select (single click) an item value in ListView according to an index.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_SelectIndexItem">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_SelectIndexItem">Detailed Reference</a><p>
 		 * @param listview Component (from App Map) to select an item from.
 		 * @param index int, the index to select, 1-based.
 		 * @return true if successful, false otherwise.
@@ -8554,7 +10554,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Select (single click) an item value in ListView according to an index at specific coordinates.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_SelectIndexItemCoords">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_SelectIndexItemCoords">Detailed Reference</a><p>
 		 * @param listview Component (from App Map) to select an item from.
 		 * @param index int, the index to select, 1-based.
 		 * @param coords String, the coordinate relative to the top-left corner of the item.
@@ -8575,7 +10575,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Double click an item value in ListView according to a partial text.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_ActivatePartialMatch">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_ActivatePartialMatch">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) to select an item from.
 		 * @param partialText String, the case-sensitive substring of text item to select
 		 * @param matchIndex int, allows to match item N in a list containing duplicate entries, 1-based.
@@ -8597,7 +10597,7 @@ public abstract class SAFSPlus {
 		/**
 		 * Double click an item value in ListView according to a partial text. If there are more than one
 		 * matched item, select the first one.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_ActivatePartialMatch">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_ActivatePartialMatch">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) to select an item from.
 		 * @param partialText String, the case-sensitive substring of text item to select
 		 * @return true if successful, false otherwise.
@@ -8617,7 +10617,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Select (single click) an item value in ListView according to a partial text.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_SelectPartialMatch">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_SelectPartialMatch">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) to select an item from.
 		 * @param partialText String, the case-sensitive substring of text item to select
 		 * @param matchIndex int, allows to match item N in a list containing duplicate entries, 1-based.
@@ -8639,7 +10639,7 @@ public abstract class SAFSPlus {
 		/**
 		 * Select (single click) an item value in ListView according to a partial text. If there are more than one
 		 * matched item, select the first one.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_SelectPartialMatch">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_SelectPartialMatch">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) to select an item from.
 		 * @param partialText String, the case-sensitive substring of text item to select
 		 * @return true if successful, false otherwise.
@@ -8660,7 +10660,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Double click an item value in ListView according to a full text.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_ActivateTextItem">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_ActivateTextItem">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) to select an item from.
 		 * @param text String, the case-sensitive text item to select
 		 * @param matchIndex int, allows to match item N in a list containing duplicate entries, 1-based.
@@ -8682,7 +10682,7 @@ public abstract class SAFSPlus {
 		/**
 		 * Double click an item value in ListView according to a full text. If there are more than one
 		 * matched item, select the first one.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_ActivateTextItem">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_ActivateTextItem">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) to select an item from.
 		 * @param text String, the case-sensitive text item to select
 		 * @return true if successful, false otherwise.
@@ -8702,7 +10702,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Double click a text item at specific Coords.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_ActivateTextItemCoords">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_ActivateTextItemCoords">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) to select an item from.
 		 * @param text String, the case-sensitive text item to click
 		 * @param coords String, the coordinate relative to the top-left corner of the item
@@ -8724,7 +10724,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Double click a text item at specific Coords.If there are more than one matched item, select the first one.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_ActivateTextItemCoords">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_ActivateTextItemCoords">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) to select an item from.
 		 * @param text String, the case-sensitive text item to click
 		 * @param coords String, the coordinate relative to the top-left corner of the item
@@ -8745,7 +10745,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Select (single click) an item value in ListView according to a full text.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_SelectTextItem">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_SelectTextItem">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) to select an item from.
 		 * @param text String, the case-sensitive text item to select
 		 * @param matchIndex int, allows to match item N in a list containing duplicate entries, 1-based.
@@ -8767,7 +10767,7 @@ public abstract class SAFSPlus {
 		/**
 		 * Select (single click) an item value in ListView according to a full text. If there are more than one
 		 * matched item, select the first one.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_SelectTextItem">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_SelectTextItem">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) to select an item from.
 		 * @param text String, the case-sensitive text item to select
 		 * @return true if successful, false otherwise.
@@ -8787,7 +10787,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Select (single click) an item value in ListView according to a full text at specific coordinate.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_SelectTextItemCoords">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_SelectTextItemCoords">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) to select an item from.
 		 * @param text String, the case-sensitive text item to select
 		 * @param coords String, the coordinate relative to the top-left corner of the item
@@ -8810,7 +10810,7 @@ public abstract class SAFSPlus {
 		/**
 		 * Select (single click) an item value in ListView according to a full text at specific coordinate.<br>
 		 * If there are more than one matched item, select the first one.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_SelectTextItemCoords">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_SelectTextItemCoords">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) to select an item from.
 		 * @param text String, the case-sensitive text item to select
 		 * @param coords String, the coordinate relative to the top-left corner of the item
@@ -8832,7 +10832,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Double click an item value in ListView according to a full text without verification.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_ActivateUnverifiedTextItem">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_ActivateUnverifiedTextItem">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) to select an item from.
 		 * @param text String, the case-sensitive text item to select
 		 * @param matchIndex int, allows to match item N in a list containing duplicate entries, 1-based.
@@ -8854,7 +10854,7 @@ public abstract class SAFSPlus {
 		/**
 		 * Double click an item value in ListView according to a full text without verification. If there are more than one
 		 * matched item, select the first one.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_ActivateUnverifiedTextItem">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_ActivateUnverifiedTextItem">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) to select an item from.
 		 * @param text String, the case-sensitive text item to select
 		 * @return true if successful, false otherwise.
@@ -8874,7 +10874,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Double click an item at specific coordinate in ListView according to a full text without verification.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_ActivateUnverifiedTextItemCoords">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_ActivateUnverifiedTextItemCoords">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) to select an item from.
 		 * @param text String, the case-sensitive text item to click
 		 * @param coords String, the coordinate relative to the top-left corner of the item
@@ -8897,7 +10897,7 @@ public abstract class SAFSPlus {
 		/**
 		 * Double click an item at specific coordinate in ListView according to a full text without verification.<br>
 		 * If there are more than one matched item, select the first one.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_ActivateUnverifiedTextItemCoords">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_ActivateUnverifiedTextItemCoords">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) to select an item from.
 		 * @param text String, the case-sensitive text item to click
 		 * @param coords String, the coordinate relative to the top-left corner of the item
@@ -8919,7 +10919,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Select (single click) an item value in ListView according to a full text without verification.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_SelectUnverifiedTextItem">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_SelectUnverifiedTextItem">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) to select an item from.
 		 * @param text String, the case-sensitive text item to select
 		 * @param matchIndex int, allows to match item N in a list containing duplicate entries, 1-based.
@@ -8941,7 +10941,7 @@ public abstract class SAFSPlus {
 		/**
 		 * Select (single click) an item value in ListView according to a full text without verification. If there are more than one
 		 * matched item, select the first one.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_SelectUnverifiedTextItem">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_SelectUnverifiedTextItem">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) to select an item from.
 		 * @param text String, the case-sensitive text item to select
 		 * @return true if successful, false otherwise.
@@ -8961,7 +10961,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Select (single click) an item value in ListView according to a full text at specific coordinate without verification.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_SelectUnverifiedTextItemCoords">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_SelectUnverifiedTextItemCoords">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) to select an item from.
 		 * @param text String, the case-sensitive text item to select
 		 * @param coords String, the coordinate relative to the top-left corner of the item
@@ -8984,7 +10984,7 @@ public abstract class SAFSPlus {
 		/**
 		 * Select (single click) an item value in ListView according to a full text at specific coordinate without verification.<br>
 		 * If there are more than one matched item, select the first one.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_SelectUnverifiedTextItemCoords">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_SelectUnverifiedTextItemCoords">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) to select an item from.
 		 * @param text String, the case-sensitive text item to select
 		 * @param coords String, the coordinate relative to the top-left corner of the item
@@ -9006,7 +11006,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Get all text value of items in ListView, and save them to a file.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_CaptureItemsToFile">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_CaptureItemsToFile">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) to select an item from.
 		 * @param file String, the name of file to save list items. It can be absolute or relative to Test directory.
 		 * @param encoding String, the encoding used for output file
@@ -9029,7 +11029,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Get all text value of items in ListView, and save them to a file by system encoding.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_CaptureItemsToFile">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_CaptureItemsToFile">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) to select an item from.
 		 * @param file String, the name of file to save list items. It can be absolute or relative to Test directory.
 		 * @return true if successful, false otherwise.
@@ -9052,7 +11052,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Verify that an item is not selected in ListView.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_VerifyItemUnselected">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_VerifyItemUnselected">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) where to verify an item is not selected.
 		 * @param text String, the case-sensitive text item to verify
 		 * @return true if successful, false otherwise.
@@ -9073,7 +11073,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Verify that an item is contained in ListView.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_VerifyListContains">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_VerifyListContains">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) where to verify an item is contained.
 		 * @param text String, the case-sensitive text item to verify
 		 * @return true if successful, false otherwise.
@@ -9094,7 +11094,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Verify that an item is selected in ListView.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_VerifySelectedItem">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_VerifySelectedItem">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) where to verify an item is selected.
 		 * @param text String, the case-sensitive text item to verify
 		 * @return true if successful, false otherwise.
@@ -9114,7 +11114,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Shift+Click and Verify a selection according to its text value.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_ExtendSelectionToTextItem">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_ExtendSelectionToTextItem">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) where to select an item.
 		 * @param text String, the case-sensitive text item to select
 		 * @return true if successful, false otherwise.
@@ -9136,7 +11136,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * RightClick (single click) an item value in ListView according to a full text.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_RightClickTextItem">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_RightClickTextItem">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) to select an item from.
 		 * @param text String, the case-sensitive text item to click
 		 * @param matchIndex int, allows to match item N in a list containing duplicate entries, 1-based.
@@ -9158,7 +11158,7 @@ public abstract class SAFSPlus {
 		/**
 		 * RightClick (single click) an item value in ListView according to a full text. If there are more than one
 		 * matched item, select the first one.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_RightClickTextItem">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_RightClickTextItem">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) to select an item from.
 		 * @param text String, the case-sensitive text item to click
 		 * @return true if successful, false otherwise.
@@ -9178,7 +11178,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * RightClick (single click) an item value in ListView according to a full text at specific coordinate.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_RightClickTextItemCoords">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_RightClickTextItemCoords">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) to select an item from.
 		 * @param text String, the case-sensitive text item to click
 		 * @param coords String, the coordinate relative to the top-left corner of the item
@@ -9201,7 +11201,7 @@ public abstract class SAFSPlus {
 		/**
 		 * RightClick (single click) an item value in ListView according to a full text at specific coordinate.<br>
 		 * If there are more than one matched item, select the first one.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_RightClickTextItemCoords">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_RightClickTextItemCoords">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) to select an item from.
 		 * @param text String, the case-sensitive text item to click
 		 * @param coords String, the coordinate relative to the top-left corner of the item
@@ -9222,7 +11222,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Control+Click on an item according to a partial text match.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_SelectAnotherPartialMatch">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_SelectAnotherPartialMatch">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) where to select an item.
 		 * @param partialText String, the case-sensitive substring of text item to select
 		 * @return true if successful, false otherwise.
@@ -9244,7 +11244,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Control+Click on an item by its text value.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_SelectAnotherTextItem">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_SelectAnotherTextItem">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) where to select an item.
 		 * @param text String, the case-sensitive text item to select
 		 * @return true if successful, false otherwise.
@@ -9266,7 +11266,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Set a variable with the result of checking that a listview contains the provided item.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/ListViewFunctionsReference.htm#detail_SetListContains">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/ListViewFunctionsReference.htm#detail_SetListContains">Detailed Reference</a><p>
 		 * @param listview Component, (from App Map) where to verify an item.
 		 * @param text String, the case-sensitive text item to verify the existence
 		 * @param variable String, the variable name to store the existence of an item. true or false.
@@ -9291,12 +11291,12 @@ public abstract class SAFSPlus {
 	}
 
 	/**
-	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/JavaMenuFunctionsIndex.htm">MenuBar/Menu keywords</a>, like SelectMenuItem, VerifyMenuItemContains etc.<br>
+	 * Wrapper class providing APIs to handle <a href="/sqabasic2000/JavaMenuFunctionsIndex.htm">MenuBar/Menu keywords</a>, like SelectMenuItem, VerifyMenuItemContains etc.<br>
 	 */
 	public static class Menu extends Component{
 		/**
 		 * Select a menuItem according to its text value.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/JavaMenuFunctionsReference.htm#detail_SelectMenuItem">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/JavaMenuFunctionsReference.htm#detail_SelectMenuItem">Detailed Reference</a><p>
 		 * @param menu Component (from App Map) to select an item from.
 		 * @param path String, the path of the item to select
 		 * @return true if successful, false otherwise.
@@ -9316,7 +11316,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Select a menuItem according to its text value, without verification of menuItem's existance.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/JavaMenuFunctionsReference.htm#detail_SelectUnverifiedMenuItem">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/JavaMenuFunctionsReference.htm#detail_SelectUnverifiedMenuItem">Detailed Reference</a><p>
 		 * @param menu Component (from App Map) to select an item from.
 		 * @param path String, the path of the item to select
 		 * @return true if successful, false otherwise.
@@ -9336,7 +11336,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Select a menuItem according to its text value, it will select the Nth matched item.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/JavaMenuFunctionsReference.htm#detail_SelectMenuItem">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/JavaMenuFunctionsReference.htm#detail_SelectMenuItem">Detailed Reference</a><p>
 		 * @param menu Component (from App Map) to select an item from.
 		 * @param path String, the path of the item to select.
 		 * @param indexPath String, the index path for Nth matched item of each level.
@@ -9357,7 +11357,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Select a menuItem according to a partial match of its text value.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/JavaMenuFunctionsReference.htm#detail_SelectMenuItemContains">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/JavaMenuFunctionsReference.htm#detail_SelectMenuItemContains">Detailed Reference</a><p>
 		 * @param menu Component (from App Map) to select an item from.
 		 * @param path String, the path of the item to select
 		 * @return true if successful, false otherwise.
@@ -9377,7 +11377,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Select a menuItem according to a partial match of its text value, it will select the Nth matched item.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/JavaMenuFunctionsReference.htm#detail_SelectMenuItemContains">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/JavaMenuFunctionsReference.htm#detail_SelectMenuItemContains">Detailed Reference</a><p>
 		 * @param menu Component (from App Map) to select an item from.
 		 * @param path String, the path of the item to select.
 		 * @param indexPath String, the index path for Nth matched item of each level.
@@ -9398,7 +11398,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Verify the existence of a menuItem according to its text value.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/JavaMenuFunctionsReference.htm#detail_VerifyMenuItem">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/JavaMenuFunctionsReference.htm#detail_VerifyMenuItem">Detailed Reference</a><p>
 		 * @param menu Component (from App Map) to verify an item from.
 		 * @param path String, the path of the item to verify
 		 * @return true if successful, false otherwise.
@@ -9418,7 +11418,7 @@ public abstract class SAFSPlus {
 
 		/**
 		 * Verify the existence of a menuItem according to its text value, it will verify the Nth matched item.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/JavaMenuFunctionsReference.htm#detail_VerifyMenuItem">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/JavaMenuFunctionsReference.htm#detail_VerifyMenuItem">Detailed Reference</a><p>
 		 * @param menu Component (from App Map) to verify an item from.
 		 * @param path String, the path of the item to verify.
 		 * @param expectedStatus String, the status of the item to verify.
@@ -9445,7 +11445,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Verify the existence of a menuItem found by partial text match.
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/JavaMenuFunctionsReference.htm#detail_VerifyMenuItemContains">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/JavaMenuFunctionsReference.htm#detail_VerifyMenuItemContains">Detailed Reference</a><p>
 		 * @param menu Component (from App Map) to verify an item from.
 		 * @param path String, the path of the item to verify
 		 * @return true if successful, false otherwise.
@@ -9464,7 +11464,7 @@ public abstract class SAFSPlus {
 		}
 		/**
 		 * Verify the existence of a menuItem found by partial text match, it will verify the Nth matched item.<br>
-		 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/JavaMenuFunctionsReference.htm#detail_VerifyMenuItemContains">Detailed Reference</a><p>
+		 * <p>See <a href="/sqabasic2000/JavaMenuFunctionsReference.htm#detail_VerifyMenuItemContains">Detailed Reference</a><p>
 		 * @param menu Component (from App Map) to verify an item from.
 		 * @param path String, the path of the item to verify.
 		 * @param expectedStatus String, the status of the item to verify.
@@ -9493,6 +11493,22 @@ public abstract class SAFSPlus {
 	//======================================================  embedded_wrapper_class_end  =================================================//
 
 	/**
+	 * Navigate to the previous page.
+	 * @return boolean true if the navigation succeeds.
+	 */
+	public static boolean back(){
+		return WDLibrary.back();
+	}
+
+	/**
+	 * Navigate to the next page.
+	 * @return boolean true if the navigation succeeds.
+	 */
+	public static boolean forward(){
+		return WDLibrary.forward();
+	}
+
+	/**
 	 * Add double-quote around a string value. For "combine-word", the result is "\"combine-word\"";<br>
 	 * The purpose is to avoid the string parameter to be processed by SAFS.<br>
 	 * @param parameter String, the string to be double-quoted.
@@ -9515,7 +11531,7 @@ public abstract class SAFSPlus {
 	 * To replace the possible conflicted separator in parameters.<br>
 	 */
 	protected static String[] replaceSeparator(String... params){
-		String stepSep = Runner.jsafs().getStepSeparator();
+		String stepSep = iDriver().getStepSeparator();
 		return StringUtils.replaceSeparator(stepSep, params);
 	}
 	/**
@@ -9563,6 +11579,8 @@ public abstract class SAFSPlus {
 		List<String> parameters = new ArrayList<String>();
 
 		try{
+			//TODO remove the specific JSAFSDriver
+//			Runner.getDriver().resolveExpression(parameter);
 			JSAFSDriver jsafs = Runner.jsafs();
 			if(!jsafs.isExpressionsEnabled()){
 				parameters.add(jsafs.resolveExpression(parameter));
@@ -9741,10 +11759,10 @@ public abstract class SAFSPlus {
 	public static boolean getAllowExit() {return allowExit; }
 
 	public static void debug(String message){
-		AbstractRunner.debug(message);
+		IndependantLog.debug(message);
 	}
 	public static void error(String message){
-		AbstractRunner.error(message);
+		IndependantLog.error(message);
 	}
 
 	/**
@@ -9799,14 +11817,27 @@ public abstract class SAFSPlus {
 	 * @see org.safs.model.annotations.InjectJSAFS
 	 */
 	public static void main(String[] args) {
+		if(args == null) args = new String[0];
 		String theClass = MainClass.getMainClass();
 		if(theClass == null) theClass = MainClass.deduceMainClass();
 		debug("Executing Java Main Class: "+ theClass);
 		SAFSPlus test = null;
 		ClassCastException cce = null;
+		loadedFromSpringContext = false;
+
 		try{
 			try{
-				test = (SAFSPlus) Class.forName(theClass).newInstance();
+				springApplicationContext = new ClassPathXmlApplicationContext(Constants.SPRING_CONFIG_CUSTOM_FILE);
+			}catch(BeanDefinitionStoreException e){
+				try{
+					springApplicationContext = new ClassPathXmlApplicationContext(Constants.SPRING_CONFIG_DEFAULT_FILE);
+				}catch(BeanDefinitionStoreException e2){
+					debug("Cannot find the customerSpringConfig.xml or springConfig.xml on your classpath!");
+				}
+			}
+
+			try{
+				test = getInstance(springApplicationContext, theClass);
 			}catch(ClassCastException ccx){
 				cce = ccx;
 				StackTraceElement[] stack = Thread.currentThread().getStackTrace();
@@ -9816,12 +11847,18 @@ public abstract class SAFSPlus {
 					theClass = e.getClassName();
 					debug("SAFSPlus test search evaluating "+ theClass);
 					Class<?> c = Class.forName(theClass);
-					Class<?> sc = c.getSuperclass();
-					if(sc.getName().equals(SAFSPlus.class.getName())){
+					if(SAFSPlus.class.isAssignableFrom(c)){
 						MainClass.setMainClass(theClass);
 						debug("Executing SAFSPlus subclass: "+ theClass);
-						test = (SAFSPlus) c.newInstance();
+						test = getInstance(springApplicationContext, theClass);
 					}
+
+//					Class<?> sc = c.getSuperclass();
+//					if(sc.getName().equals(SAFSPlus.class.getName())){
+//						MainClass.setMainClass(theClass);
+//						debug("Executing SAFSPlus subclass: "+ theClass);
+//						test = (SAFSPlus) c.newInstance();
+//					}
 				}while(test == null && i < stack.length);
 			}
 			Runner.run();
@@ -9833,7 +11870,7 @@ public abstract class SAFSPlus {
 				new ClassCastException(theClass + " is not a subclass of SAFSPlus"+
 				                                  " and no alternative -junit arg was provided.");
 
-			if(!_isSPC) {
+			if( !_isSPC || _isInjected) {
 				ArrayList<String> altPackages = new ArrayList<String>();
 				String modclass = "."+theClass;
 				if(modclass.contains(".TestRuns.")) altPackages.add("TestCases");
@@ -9842,8 +11879,8 @@ public abstract class SAFSPlus {
 				if(modclass.contains(".testcases.")) altPackages.add("testruns");
 				if(modclass.contains(".tests.")) altPackages.add("suites");
 				if(modclass.contains(".suites.")) altPackages.add("tests");
-				Utilities.injectRuntimeDataAwareClasses(test, altPackages, Runner.jsafs().getCoreInterface());
-				Counters.StartTestSuite(test.getClass().getSimpleName());
+				if(!_isSPC || _injectDataAwareness) Utilities.injectRuntimeDataAwareClasses(test, altPackages, iDriver().getCoreInterface());
+				if(!_isSPC && !loadedFromSpringContext && !leveledTest) Counters.StartTestSuite(test.getClass().getSimpleName());
 			}
 			if(_autorun){
 				String[] adjustedArgs = args;
@@ -9867,13 +11904,64 @@ public abstract class SAFSPlus {
 		}catch(Throwable x){
 			x.printStackTrace();
 		}
-		if(!_isSPC) Counters.PrintTestSuiteSummary(test.getClass().getSimpleName());
+		if(!_isSPC && !loadedFromSpringContext && !leveledTest) Counters.PrintTestSuiteSummary(test.getClass().getSimpleName());
 		try {
 			Runner.terminate();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
 		if(getAllowExit()) System.exit(exitCode);
 	}
 
+	/**
+	 * Set this field to true if user defines the leveled-test.
+	 */
+	private static boolean leveledTest = false;
+
+	/**
+	 * Set this field to true if user defines the leveled-test with the following methods.
+	 *
+	 * @see Counters#StartTestCycle(String)
+	 * @see Counters#StopTestCycle(String)
+	 * @see Counters#StartTestSuite(String)
+	 * @see Counters#StopTestSuite(String)
+	 * @see Counters#StartTestCase(String)
+	 * @see Counters#StopTestCase(String)
+	 */
+	public static void setLeveledTest(boolean leveledTest){
+		SAFSPlus.leveledTest = leveledTest;
+	}
+
+	/**
+	 * If the SAFSPlus instance has been loaded from the spring context.
+	 */
+	private static boolean loadedFromSpringContext = false;
+	/**
+	 * To get the SAFSPlus instance.<br>
+	 * It will firstly try to get it from the spring context; If cannot find, then just call class.newInstance() to do it.
+	 * @param context ApplicationContext, the spring context.
+	 * @param mainClassName String, the name of the main class for the test.
+	 * @return SAFSPlus, an instance of SAFSPlus, it could be null
+	 * @throws BeansException
+	 * @throws ClassNotFoundException
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 */
+	private static SAFSPlus getInstance(ApplicationContext context, String mainClassName) throws ClassNotFoundException, InstantiationException, IllegalAccessException{
+		SAFSPlus test = null;
+		Class<?> mainClazz = Class.forName(mainClassName);
+
+		if(context!=null){
+			try{
+				test = (SAFSPlus) context.getBean(mainClazz);
+				loadedFromSpringContext = true;
+			}catch(BeansException nsbde){
+				debug("Cannot instantiate entry class by spring, some features like Counter annotation will not work!\n"+ nsbde.toString());
+			}
+		}
+		if(test==null) test = (SAFSPlus) mainClazz.newInstance();
+
+		return test;
+	}
 }

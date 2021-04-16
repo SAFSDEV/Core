@@ -1,10 +1,20 @@
 /**
  * Copyright (C) SAS Institute, All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
-package org.safs.selenium.webdriver;
-
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * History:<br>
  *
@@ -20,29 +30,48 @@ package org.safs.selenium.webdriver;
  *  <br>   FEB 27, 2015    (DHARMESH) Added -Xms512m -Xmx2g support to start server JVM.
  *  <br>   APR 08, 2015    (Lei Wang) Modify to permit user to set JVM options for starting SELENIUM server.
  *  <br>   JUN 23, 2015    (Tao Xie) Add waitForPropertyStatus(): wait for property value match or gone with expected value.
- *  <br>   JUN 29, 2015	   (LeiWang) Modify startRemoteServer(): handle selenium grid (hub+node). Output standard out/err message to console.
+ *  <br>   JUN 29, 2015	   (Lei Wang) Modify startRemoteServer(): handle selenium grid (hub+node). Output standard out/err message to console.
  *                                   Add methods to handle/test standalone server, grid server like isXXXRunning(), canConnectXXX(), waitXXXRunning() etc.
- *  <br>   JUL 14, 2015	   (LeiWang) Modify isTypeMatched(): try getCompType() firstly and make it more reliable.
+ *  <br>   JUL 14, 2015	   (Lei Wang) Modify isTypeMatched(): try getCompType() firstly and make it more reliable.
  *  <br>   JUL 14, 2015	   (Carl Nagle) Modify class/type mappings to automatically trim the class Type setting of any spaces and tabs.
- *  <br>   OCT 30, 2015	   (LeiWang) Modify waitForPropertyStatus(): highlight component.
+ *  <br>   OCT 30, 2015	   (Lei Wang) Modify waitForPropertyStatus(): highlight component.
  *  <br>   NOV 02, 2015	   (Carl Nagle) startRemoteServer on SAFS supporting jre/Java64/jre/bin 64-bit JVM.
- *  <br>   NOV 23, 2015	   (LeiWang) Modify waitForObject(): refresh the window object if it becomes stale during the searching of component object.
- *  <br>   DEC 24, 2015	   (LeiWang) Add methods to read content from url like "http://host:port/wd/hub/static"
- *  <br>   AUG 05, 2016	   (LeiWang) Modified waitForObject(): if RS is AutoIT or IBT, then return SCRIPT_NOT_EXECUTED (4).
- *  <br>   AUG 09, 2016	   (LeiWang) Modified setWDTimeoutxxx()/resetWDTimeoutxxx(): return a boolean value to tell if succeed.
- *  <br>   SEP 27, 2016	   (LeiWang) Moved methods launchSeleniumServers() from class DCDriverCommand.
+ *  <br>   NOV 23, 2015	   (Lei Wang) Modify waitForObject(): refresh the window object if it becomes stale during the searching of component object.
+ *  <br>   DEC 24, 2015	   (Lei Wang) Add methods to read content from url like "http://host:port/wd/hub/static"
+ *  <br>   AUG 05, 2016	   (Lei Wang) Modified waitForObject(): if RS is AutoIT or IBT, then return SCRIPT_NOT_EXECUTED (4).
+ *  <br>   AUG 09, 2016	   (Lei Wang) Modified setWDTimeoutxxx()/resetWDTimeoutxxx(): return a boolean value to tell if succeed.
+ *  <br>   SEP 27, 2016	   (Lei Wang) Moved methods launchSeleniumServers() from class DCDriverCommand.
  *                                   Modified method startRemoteServer(): moved some code to class SePlusInstallInfo.
- *  <br>   NOV 07, 2016	   (LeiWang) Modified method startRemoteServer(): Wait longer to get more information from STDOUT/STDERR, if no running server has been detected.
- *  <br>   MAR 07, 2017	   (LeiWang) Modified methods launchSeleniumServers(), startRemoteServer(): start selenium server with 'browser drivers' option.
- *  <br>   MAR 24, 2017	   (LeiWang) Modified startRemoteServer(): even we cannot determine the installed product, we still try to launch from default batch file.
+ *  <br>   NOV 07, 2016	   (Lei Wang) Modified method startRemoteServer(): Wait longer to get more information from STDOUT/STDERR, if no running server has been detected.
+ *  <br>   MAR 07, 2017	   (Lei Wang) Modified methods launchSeleniumServers(), startRemoteServer(): start selenium server with 'browser drivers' option.
+ *  <br>   MAR 24, 2017	   (Lei Wang) Modified startRemoteServer(): even we cannot determine the installed product, we still try to launch from default batch file.
+ *  <br>   AUG 10, 2017	   (Lei Wang) Modified startRemoteServer(): Handled default browsers for starting selenium server. Handled default timeout and browserTimeout.
+ *  <br>   AUG 25, 2017	   (Lei Wang) Modified setWDTimeout(), resetWDTimeout(): catch exception and return false.
+ *  <br>   SEP 21, 2017	   (Lei Wang) Modified launchSeleniumServers() and startRemoteServer(): handle parameter "-project projectRootPath".
+ *  <br>   SEP 22, 2017	   (Lei Wang) Modified launchSeleniumServers(...): wrap parameter by \" if launch-command is going to be executed by STAF.
+ *                                                                        pass STAF parameter "STDOUT" "STDERRTOSTDOUT" separately when using STAFHelper.startProcess().
+ *  <br>   SEP 28, 2017	   (Lei Wang) Modified waitForObject(): Check SAFS REST keyword execution.
+ *  <br>   APR 16, 2018	   (Lei Wang) Modified launchSeleniumServers(): use 'selenium server launch script' to start selenium server if it is detected.
+ *  <br>   MAR 19, 2019	   (Lei Wang) Modified waitForObject(): check the window's RS, if it doesn't contain any information about frame, we set the WDLibrary's lastFrame to null.
+ *  <br>   MAR 20, 2019	   (Lei Wang) Modified _getSwitchFrame(): Set the WDLibrary's lastFrame to null, if user defines RS with value {@link SearchObject#TOP_DOCUMENT_ID}.
+ *  <br>   FEB 26, 2020	   (Lei Wang) Modified startRemoteServer(): use array instead of string to serve method Runtime.getRuntime().exec() to avoid avoid the quote and space conflict problem on Windows and Linux. see S1562137
+ *  <br>   MAR 05, 2020	   (Lei Wang) Modified launchSeleniumServers(): add option "PARMS" to java command to launch "selenium server" by STAF remotely.
+ *  <br>   MAR 06, 2020	   (Lei Wang) Modified launchSeleniumServers(), startRemoteServer(), waitSeleniumNodeRunning(), waitSeleniumServerRunning(): wait more times for selenium server's ready.
+ *  <br>   OCT 27, 2020	   (Lei Wang) Modified launchSeleniumServers(): wait node's registration on hub.
+ *
+ *
  **/
+package org.safs.selenium.webdriver;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
+import java.net.Socket;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -51,12 +80,14 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.MissingResourceException;
 import java.util.Properties;
+import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.openqa.selenium.WebElement;
 import org.safs.ApplicationMap;
+import org.safs.Constants.BrowserConstants;
 import org.safs.Constants.SeleniumConstants;
 import org.safs.DDGUIUtilities;
 import org.safs.GuiClassData;
@@ -97,6 +128,7 @@ import org.safs.tools.consoles.JavaJVMConsole;
 import org.safs.tools.consoles.ProcessCapture;
 import org.safs.tools.drivers.DriverConstant;
 import org.safs.tools.drivers.DriverConstant.SeleniumConfigConstant;
+import org.safs.tools.engines.TIDComponent;
 
 import com.ibm.staf.STAFResult;
 
@@ -181,6 +213,13 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	 */
 	public static boolean isSeleniumPlus(){
 		return SePlusInstallInfo.IsSeleniumPlus();
+	}
+
+	/**
+	 * @return the location of the SeleniumPlus files.
+	 */
+	public static String getSeleniumPlusHome(){
+		return SePlusInstallInfo.GetSystemPropertyOrEnvironmentVariable(DriverConstant.SYSTEM_PROPERTY_SELENIUMPLUS_DIR);
 	}
 
 	/**
@@ -357,7 +396,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 						if(isSAFS()){
 							safsdir = System.getenv(DriverConstant.SYSTEM_PROPERTY_SAFS_DIR)+ File.separator+"lib"+File.separator;
 						}else{//isSeleniumPlus
-							safsdir = System.getenv(DriverConstant.SYSTEM_PROPERTY_SELENIUMPLUS_DIR)+ File.separator +"libs"+File.separator;
+							safsdir = getSeleniumPlusHome()+ File.separator +"libs"+File.separator;
 						}
 						File custurl = new CaseInsensitiveFile(safsdir + CUSTOM_CLASS2TYPE_MAP).toFile();
 						if(custurl.isFile()) in = custurl.toURL().openStream();
@@ -488,6 +527,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	 * @see #waitCompObject(WebElement, String, String, String, String, long)
 	 * @see #waitWinObject(String, String, long)
 	 */
+	@Override
 	public int waitForObject (String appMapName, String windowName, String compName, long secTimeout)
 	                           throws SAFSObjectNotFoundException, SAFSException{
 
@@ -500,7 +540,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 
 		    if (map == null) {
 		      if (registerAppMap(appMapName, appMapName)) {
-		        map = (ApplicationMap) getAppMap(appMapName);
+		        map = getAppMap(appMapName);
 		        if (map == null) {
 		          IndependantLog.debug("WDGU: WFO could NOT retrieve registered AppMap "+ appMapName);
 		          throw new SAFSException("Could not retrieve App Map "+ appMapName);
@@ -539,6 +579,8 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	    	trdata.setWindowGuiId(winRec);
 
             IndependantLog.info("WDGU: WFO winRec retrieved: "+ winRec);
+            WDLibrary.checkWindowRS(winRec);//To see if we need to reset the WDLibrary's lastFrame to null.
+
             WebElement winObj = null;
             //CACHE HANDLE
 //			if(!ignoreCache){
@@ -564,6 +606,14 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	    		trdata.setCompType("Component");
 	    		IndependantLog.info( "WDGU: WFO returning. Assuming Image-Based Testing for "+trdata.getCommand());
 	    		return StatusCodes.SCRIPT_NOT_EXECUTED;
+            }
+
+            // check for possible REST testing
+            if(TIDComponent.isRESTFunction(windowName) || TIDComponent.isRESTFunction(winRec)){
+            	IndependantLog.info( "WDGU: WFO returning. Assuming REST Testing for "+trdata.getCommand()+"\n"
+            			+ "'"+TIDComponent.FLAG_SAFSREST+"' is a reserved indicator for SAFS REST keywords and cannot be used as a window name or a window recognition string."
+            			+ "'"+trdata.getCommand()+"' will never be treated as a non-rest keyword until the window's name '"+windowName+"' or window RS '"+winRec+"' get changed.");
+            	return StatusCodes.SCRIPT_NOT_EXECUTED;
             }
 
 			//Try to get the Window TestObject dynamically
@@ -1019,9 +1069,14 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		StackTraceElement trace = Thread.currentThread().getStackTrace()[2];
 		String caller = trace.getClassName()+"."+trace.getMethodName();
 		if(! timeout_lock || caller.equals(timeout_lock_owner)) {
-			SeleniumPlus.WebDriver().manage().timeouts().implicitlyWait(timeout, TimeUnit.SECONDS);
-	        IndependantLog.info("WDGU: Timeout set value  to '"+ timeout +"' by: "+ caller);
-	        return true;
+			try{
+				SeleniumPlus.WebDriver().manage().timeouts().implicitlyWait(timeout, TimeUnit.SECONDS);
+				IndependantLog.info("WDGU: Timeout set value  to '"+ timeout +"' by: "+ caller);
+				return true;
+			}catch(Exception e){
+				IndependantLog.warn("WDGU: Failed to set Timeout, due to "+e.toString());
+				return false;
+			}
 		}else{
 	        IndependantLog.info("WDGU: *** WDTimeout cannot be changed due to lock owned by: "+ timeout_lock_owner +" ***");
 	        return false;
@@ -1066,11 +1121,16 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		StackTraceElement trace = Thread.currentThread().getStackTrace()[2];
 		String caller = trace.getClassName()+"."+trace.getMethodName();
 		if(! timeout_lock || caller.equals(timeout_lock_owner)) {
-			// use window timeout for reset
-			long timeout = Processor.getSecsWaitForWindow();
-			SeleniumPlus.WebDriver().manage().timeouts().implicitlyWait(timeout, TimeUnit.SECONDS);
-	        IndependantLog.info("WDGU: Reset timeout back  to '"+ timeout +"' by: "+caller);
-	        return true;
+			try{
+				// use window timeout for reset
+				long timeout = Processor.getSecsWaitForWindow();
+				SeleniumPlus.WebDriver().manage().timeouts().implicitlyWait(timeout, TimeUnit.SECONDS);
+				IndependantLog.info("WDGU: Reset timeout back  to '"+ timeout +"' by: "+caller);
+				return true;
+			}catch(Exception e){
+				IndependantLog.warn("WDGU: Failed to reset Timeout, due to "+e.toString());
+				return false;
+			}
 		}else{
 	        IndependantLog.info("WDGU: *** Timeout changes cannot be changed due to lock by: "+ timeout_lock_owner +" ***");
 	        return false;
@@ -1140,7 +1200,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	}
 
 	/**
-	 * Start the Selenium Remote Server
+	 * Start the Selenium Remote Server by the script 'RemoteServer.bat'.
 	 */
 	public static boolean startRemoteServer(){
 		String root = null;
@@ -1148,7 +1208,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		File executable = null;
 
 		if(isSeleniumPlus()){
-			root = System.getenv("SELENIUM_PLUS");
+			root = getSeleniumPlusHome();
 			server = root + "/extra/RemoteServer.bat";
 			executable = new File(server);
 		}
@@ -1164,7 +1224,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 			}else{
 				IndependantLog.warn("WDGU: startRemoteServer executable '"+executable.getAbsolutePath()+"' doesn't not exist.");
 			}
-			root = System.getenv("SELENIUM_PLUS");
+			root = getSeleniumPlusHome();
 			server = root + "/extra/RemoteServer.bat";
 			executable = new File(server);
 			if(!executable.exists()){
@@ -1179,11 +1239,16 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		}
 
 		try{
-			NativeWrapper.runAsynchExec(server);
+			//Use runAsynchBatchProcess() instead of runAsynchExec(),
+			//With runAsynchExec(), some user reported that the process (selenium server) will terminate if the main process stop.
+//			NativeWrapper.runAsynchExec(server);
+			NativeWrapper.runAsynchBatchProcess(executable.getParent(), executable.getCanonicalPath());
 		}catch(Throwable t){
 	        IndependantLog.error("WDGU: startRemoteServer failed with "+t.getClass().getSimpleName()+": "+t.getMessage());
 	        return false;
 		}
+
+		waitForLiveServer("localhost", 4444);
 
 		return true;
 	}
@@ -1211,23 +1276,41 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	 * <b>2.</b> If we want to launch "grid+nodes", we should also set the JVM property {@link SelectBrowser#SYSTEM_PROPERTY_SELENIUM_NODE}.<br>
 	 *
 	 * @throws SeleniumPlusException, if the server has not been started successfully.
-	 * @see #startRemoteServer(String, String...)
+	 * @see #launchSeleniumServers(String, String, String...)
 	 */
 	public static void launchSeleniumServers() throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(false);
 
-		//Retrieve seleniumhost, seleniumport, seleniumnode
-		//We have set them to system properties in EmbeddedSeleniumHookDriver#start(), We just need to get them from system properties.
+		//Retrieve selenium server's host, port and nodes information.
 		String host = System.getProperty(SelectBrowser.SYSTEM_PROPERTY_SELENIUM_HOST, SeleniumConfigConstant.DEFAULT_SELENIUM_HOST);
 		String port = System.getProperty(SelectBrowser.SYSTEM_PROPERTY_SELENIUM_PORT, SeleniumConfigConstant.DEFAULT_SELENIUM_PORT);
 		String nodesInfo = System.getProperty(SelectBrowser.SYSTEM_PROPERTY_SELENIUM_NODE);//There is no default value for seleniumnode
 		IndependantLog.info(debugmsg+" using selenium host name: "+ host);
 		IndependantLog.info(debugmsg+" using selenium port: "+ port);
 		IndependantLog.info(debugmsg+" using selenium nodes: "+ nodesInfo);
+
+		String serverLaunchScript = System.getProperty(SeleniumConfigConstant.PROPERTY_SERVER_LAUNCH_SCRIPT);
+		if(StringUtils.isValid(serverLaunchScript)){
+			try {
+				NativeWrapper.runAsynchBatchProcess(new File(serverLaunchScript).getParent(), serverLaunchScript);
+				IndependantLog.debug(debugmsg+" selenium server seems started by launch script '"+serverLaunchScript+"'.");
+			} catch (Exception e) {
+				IndependantLog.warn(debugmsg+"Failed to start selenium server with script '"+serverLaunchScript+"', Met "+e.toString());
+			}
+		}
+
 		//Retrieve the console state
 		String state = JavaJVMConsole.PARAM_STATE + " " + System.getProperty(SeleniumConfigConstant.PROPERTY_CONSOLE_STATE, JavaJVMConsole.STATE_DEFAULT);
 		//Retrieve the browser drivers
 		String webdrivers = OPTION_BROWSER_DRIVERS+" "+System.getProperty(SeleniumConfigConstant.PROPERTY_WEB_DRIVERS, "");
+
+		String timeout = SeleniumServerRunner.PARAM_TIMEOUT+SeleniumServerRunner.TIMEOUT_ASSIGN_SYMBOL+
+				         System.getProperty(SeleniumConfigConstant.PROPERTY_TIMEOUT, String.valueOf(SeleniumConfigConstant.DEFAULT_TIMEOUT));
+		String browserTimeout = SeleniumServerRunner.PARAM_BROWSER_TIMEOUT+SeleniumServerRunner.TIMEOUT_ASSIGN_SYMBOL+
+				                System.getProperty(SeleniumConfigConstant.PROPERTY_BROWSER_TIMEOUT, String.valueOf(SeleniumConfigConstant.DEFAULT_BROWSER_TIMEOUT));
+
+		//Handle the project root directory
+		String projectRoot = System.getProperty(DriverConstant.PROPERTY_SAFS_PROJECT_ROOT);
 
 		//if seleniumnode has been provided, we are going to launch grid-hub and grid-node, not standalone server.
 		boolean isGrid = StringUtils.isValid(nodesInfo);
@@ -1237,19 +1320,19 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		//we are going to launch nodes, they have to know where to register them (by hubRegisterUrl)
 		//but if the hub is stared with hostname as "localhost" or "127.0.0.1", the nodes (remote machines) will not able to register them on http://localhost or http://127.0.0.1
 		//we need to find the real IP address for localhost and use it to build the hubRegisterUrl
-		String hubRegisterUrl = "http://"+host+":"+port+WebDriverGUIUtilities.URL_PATH_GRID_REGISTER;
+		String hubRegisterUrl = "http://"+host+":"+port+URL_PATH_GRID_REGISTER;
 		if(isGrid && NetUtilities.isLocalHost(host)){
-			hubRegisterUrl = "http://"+NetUtilities.getLocalHostIP()+":"+port+WebDriverGUIUtilities.URL_PATH_GRID_REGISTER;
+			hubRegisterUrl = "http://"+NetUtilities.getLocalHostIP()+":"+port+URL_PATH_GRID_REGISTER;
 		}
 		//TODO We could simply use the IP address to build the hubRegisterUrl, it is easier.
-//		hubRegisterUrl = "http://"+NetUtilities.getHostIP(host)+":"+port+WebDriverGUIUtilities.URL_PATH_GRID_REGISTER;
+//		hubRegisterUrl = "http://"+NetUtilities.getHostIP(host)+":"+port+URL_PATH_GRID_REGISTER;
 
 		//Before starting server, we need to verify that the server/node is NOT running. Otherwise, we just return.
 		if(isGrid){
-			if(WebDriverGUIUtilities.isGridRunning(host, port)){
+			if(isGridRunning(host, port)){
 				IndependantLog.debug(debugmsg+" the selenium grid-hub server is already running on port '"+port+"' at '"+host+"'");
 				serverRunning = true;
-				if(WebDriverGUIUtilities.isNodesRunning(nodesInfo, true, host, port)){
+				if(isNodesRunning(nodesInfo, true, host, port)){
 					IndependantLog.debug(debugmsg+" the selenium grid-hub nodes are already running.");
 					return;
 				}else{
@@ -1257,7 +1340,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 				}
 			}
 		}else{
-			if(WebDriverGUIUtilities.isStandalongServerRunning(host, port)){
+			if(isStandalongServerRunning(host, port)){
 				IndependantLog.debug(debugmsg+" the selenium standalone server is already running on port '"+port+"' at '"+host+"'");
 				serverRunning = true;
 				return;
@@ -1269,17 +1352,28 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		//role contains parameter to determinate what server to start, "standalone", "hub"
 		String role = isGrid? " "+OPTION_ROLE+" "+ROLE_HUB+" ":" ";//"" for standalone, "-role hub" for grid-hub
 
+		List<String> extraParams = new ArrayList<String>();
+		extraParams.add(role);
+		extraParams.add(state);
+		extraParams.add(webdrivers);
+		extraParams.add(timeout);
+		extraParams.add(browserTimeout);
+		if(StringUtils.isValid(projectRoot)){
+			projectRoot = RemoteDriver.PARAM_PROJECT+" "+projectRoot;
+			extraParams.add(projectRoot);
+		}
+
 		if(!serverRunning){
 			//Start Server: standalone or grid-hub
-			IndependantLog.debug(debugmsg+" try to start the "+serverName+" at "+host+":"+port+" ... ");
-			if(!launchSeleniumServers(host, port, role, state, webdrivers)){
+			IndependantLog.debug(debugmsg+" try to start the "+serverName+" at "+host+":"+port+", with extra parameters "+extraParams);
+			if(!launchSeleniumServers(host, port, extraParams.toArray(new String[0]))){
 				//If server cannot be launched, throw exception.
 				throw new SeleniumPlusException(" Fail to start '"+serverName+"' at "+ host+":"+port);
 			}
 
 			IndependantLog.debug(debugmsg+" "+serverName+" seems started, try to connect it.");
 			//Wait for "standalone server" or "grid hub server" to be ready
-			if(!WebDriverGUIUtilities.waitSeleniumServerRunning(isGrid, false, false)){
+			if(!waitSeleniumServerRunning(isGrid, false, false)){
 				IndependantLog.warn(debugmsg+serverName+" can not be connected! If it is caused by SocketTimeoutException, you can enlarge timeout by WebDriverGUIUtilities.setTimeoutForHttpConnection(int/*default is 1000*/).");
 			}
 		}
@@ -1288,27 +1382,43 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 			//Need also to start the nodes, if some nodes fail to launch we just log a warning instead of throwing exception.
 			//prepare parameter to register node, something like "-role node -hub http://hubhost:hubport/grid/register"
 			role = " "+OPTION_ROLE+" "+ROLE_NODE+" "+OPTION_HUB+" "+hubRegisterUrl;
-			List<GridNode> nodes = WebDriverGUIUtilities.getGridNodes(nodesInfo);
+			extraParams.set(0, role);//replace the parameter 'role'
+			List<GridNode> nodes = getGridNodes(nodesInfo);
 			String nodehost = null;
 			String nodeport = null;
 
 			for(GridNode node:nodes){
 				nodehost = node.getHostname();
 				nodeport = node.getPort();
-				if(!WebDriverGUIUtilities.canConnectHubURL(nodehost, nodeport)){
-					IndependantLog.debug(debugmsg+" try to register the selenium node '"+node+"' to hub "+hubRegisterUrl);
-					if(launchSeleniumServers(nodehost, nodeport, role, state, webdrivers)){
+				if(!canConnectHubURL(nodehost, nodeport)){
+					IndependantLog.debug(debugmsg+" try to register the selenium node '"+node+"' to hub '"+hubRegisterUrl+"', with extra parameters "+extraParams);
+					//TODO We should start each node with its own parameters (such as role, state, webdrivers, timeout, browserTimeout)
+					//For now, we just use those of "selenium hub server"; Later we can use node.getConfig() to pass these parameters
+					if(launchSeleniumServers(nodehost, nodeport, extraParams.toArray(new String[0]))){
 						IndependantLog.debug(debugmsg+" '"+node+"' has been launched, waiting for its ready... ");
-						WebDriverGUIUtilities.waitSeleniumNodeRunning(nodehost, nodeport);
+						boolean success = waitSeleniumNodeRunning(nodehost, nodeport);
+						if(!success){
+							IndependantLog.warn(debugmsg+" failed to connect node '"+node+"', you may NOT be able to run test on it ... ");
+						}else{
+							IndependantLog.debug(debugmsg+" connected to node '"+node+"', before you can run test on it you need to wait its registry ready on hub '"+host+"' ...");
+						}
 					}else{
 						IndependantLog.warn(debugmsg+" Fail to register node '"+node+"'");
 					}
-				}else{
+				}
+				if(canConnectHubURL(nodehost, nodeport)){
 					//"connect to hub" is not enough to tell that this node has registered to hub
 					//We need to get the grid/console information to analyze the registered nodes
-					IndependantLog.debug(debugmsg+" selenium node '"+node+"' seems running.");
-					if(!WebDriverGUIUtilities.verifyNodesRegistered(host, port, node)){
+					IndependantLog.debug(debugmsg+" selenium node '"+node+"' seems running, but we need to verify its registration (on hub).");
+					int tries = 0;
+					int maxTries = 5;
+					while(!verifyNodesRegistered(host, port, node) && (tries++ < maxTries)){
+						StringUtils.sleep(500);
+					}
+					if(!verifyNodesRegistered(host, port, node)){
 						IndependantLog.error(debugmsg+" selenium node '"+node+"' has not registered to hub "+hubRegisterUrl);
+					}else{
+						IndependantLog.debug(debugmsg+" selenium node '"+node+"' has registered to hub "+hubRegisterUrl+", you can run test on it.");
 					}
 				}
 			}
@@ -1316,7 +1426,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 
 		//We only check if the server (standalone or grid-hub) is running
 		//if some nodes are not running, we will not throw exception; test may run on other running nodes.
-		if(!WebDriverGUIUtilities.isSeleniumServerRunning(host, port, isGrid, false, nodesInfo, false)){
+		if(!isSeleniumServerRunning(host, port, isGrid, false, nodesInfo, false)){
 			throw new SeleniumPlusException(" unable to connect to '"+serverName+"' at "+ host+":"+port+ (isGrid?", Grid Nodes are '"+nodesInfo+"'":""));
 		}
 	}
@@ -1330,13 +1440,14 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	 * <li>params[0] role String, the role option, it can be<br>
 	 *               "" for standalone server<br>
 	 *               "-role hub" for grid hub server<br>
-	 *               "-role node -hub HubRegisterUrl" for grid node<br>
+	 *               "-role node -hub HubRegisterUrl" for grid node, Ex: <b>"-role node -hub http://hub.machine:port/grid/register"</b><br>
 	 *
-	 * <li>params[1] state String, the state option, it can "-state MIN|MAX|NORMAL|MINIMIZE|MAXIMIZE"<br>
-	 * <li>params[2] drivers String, the drivers option, it can be "-drivers explorer:chrome:MicrosoftEdge"<br>
+	 * <li>params[1] <b>"-state state"</b>, the console state can be "MIN|MAX|NORMAL|MINIMIZE|MAXIMIZE", Ex: "-state MAX"<br>
+	 * <li>params[2] <b>"-drivers driver1:driver2"</b>, the drivers is a string of browser names separated by :,Ex: "-drivers explorer:chrome:MicrosoftEdge"<br>
+	 * <li>params[3] <b>"-timeout=N"</b>, The timeout (default is {@link SeleniumConfigConstant#DEFAULT_TIMEOUT}) in seconds before the hub automatically releases a node that hasn't received any requests for more than the specified number of seconds. Ex: "-timeout=120",
+	 * <li>params[4] <b>"-browserTimeout=N"</b>, The timeout (default is {@link SeleniumConfigConstant#DEFAULT_BROWSER_TIMEOUT} ) in seconds a node is willing to hang inside the browser. Ex: "-browserTimeout=120"
 	 * </ul>
 	 * @throws SeleniumPlusException
-	 * @see {@link #startRemoteServer()}
 	 * @see #startRemoteServer(String, String...)
 	 */
 	private static boolean launchSeleniumServers(String host, String port, String... params) throws SeleniumPlusException{
@@ -1352,7 +1463,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		}
 		IndependantLog.info(debugmsg+" port Option: "+ serverPort);
 		//2. JVM options for starting selenium server
-		String serverJVMOptions = WebDriverGUIUtilities.getRemoteServerJVMOptions();
+		String serverJVMOptions = getRemoteServerJVMOptions();
 		if(serverJVMOptions!=null && !serverJVMOptions.trim().isEmpty()){
 			//SELENIUMSERVER_JVM_OPTIONS=remoteServerJVMOptions
 			serverJVMOptions = SeleniumConfigConstant.SELENIUMSERVER_JVM_OPTIONS+GuiObjectRecognition.DEFAULT_ASSIGN_SEPARATOR+serverJVMOptions;
@@ -1367,46 +1478,65 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		//  b. "grid node" on remote machine with "grid hub" on local/remote machine
 		String rmiServer = "-"+DriverConstant.PROPERTY_RMISERVER;
 
+		String projectdir = null;
 		List<String> paramsList = new ArrayList<String>();
-		for(String param:params) paramsList.add(param);
+		for(String param:params){
+			if(param.toLowerCase().startsWith(RemoteDriver.PARAM_PROJECT)){
+				projectdir = param.substring(RemoteDriver.PARAM_PROJECT.length());
+			}else{
+				paramsList.add(param);
+			}
+		}
 		paramsList.add(serverPort);
 		paramsList.add(serverJVMOptions);
 
 		if(NetUtilities.isLocalHost(host)){
 			//Start the selenium server on the local machine
 			IndependantLog.info(debugmsg+" attempting to (re)start Server locally.");
-			String projectdir = null;
-			try{ projectdir = _LASTINSTANCE.getSTAFHelper().getVariable(STAFHelper.SAFS_VAR_PROJECTDIRECTORY);}
-			catch(SAFSException x){
+			try{
+				if(!StringUtils.isValid(projectdir)){
+					projectdir = _LASTINSTANCE.getSTAFHelper().getVariable(STAFHelper.SAFS_VAR_PROJECTDIRECTORY);
+				}
+			}catch(Exception x){
 				IndependantLog.info(debugmsg+" getProjectDir ignoring "+x.getClass().getName()+", "+x.getMessage());
 			}
 
 			IndependantLog.debug(debugmsg+" getProjectDir '"+projectdir+"'.");
 			//locally testing, we don't need RMI server.
-			serverStarted = WebDriverGUIUtilities.startRemoteServer(projectdir, paramsList.toArray(new String[0]));
+			serverStarted = startRemoteServer(projectdir, paramsList.toArray(new String[0]));
 
 			//TODO we need to modify the batch script for starting a selenium server (standalone, grid-hub, grid-node)
-			if(!serverStarted) serverStarted = WebDriverGUIUtilities.startRemoteServer();
+			if(!serverStarted) serverStarted = startRemoteServer();
 
 		}else{
 			//TODO pass the current JVM option to RemoteDriverLauncher
 			IndependantLog.debug(debugmsg+" Current properties: "+System.getProperties());
 			//Start the selenium server on the remote machine
-			Class remoteDriverLauncher = RemoteDriverLauncher.class;
-			String launchServerCommand = "java " + remoteDriverLauncher.getName();
+			Class<RemoteDriverLauncher> remoteDriverLauncher = RemoteDriverLauncher.class;
+			//In the STAF document, it says we need the "PARMS" to specify the command's parameters
+			//String launchServerCommand = "java " + remoteDriverLauncher.getName();
+			String launchServerCommand = "java PARMS " + remoteDriverLauncher.getName();
 
 			//pass parameters such as "port number", "JVM options", "rmiServer option", "server role" to start server on remote machine
 			//remotely testing, we need RMI server.
 			paramsList.add(rmiServer);
 
 			for(String param:paramsList){
-				if(!StringUtils.isQuoted(param)) param = StringUtils.quote(param);
+				//If the parameter contains spaces, then quote-once is not enough; As this command is going to be passed by STAF
+				//to the remote machine, this parameter will be considered as several parameters ("param a b c" --> "param" "a" "b" "c"), which can cause problems.
+				//We need to keep the quotes: adding back-slash and double-quote will make STAF keep the quotes, "\"param a b c\"" --> "param a b c"
+				if(!StringUtils.isQuoted(param)){
+					if(param.contains(" ") || param.contains("\t")){
+						//adding back-slash and double-quote around the parameter
+						param = "\\\""+param+ "\\\"";// \"param a b c\"
+					}
+					param = StringUtils.quote(param);// "\"param a b c\""
+				}
 				launchServerCommand += " "+param;
 			}
 			IndependantLog.info(debugmsg+" attempting to (re)start Server remotely at "+ host+":"+port+", with command \n"+ launchServerCommand);
 
-			String outputFile = "c:"+File.separator+"staf_launch_"+remoteDriverLauncher.getSimpleName()+"_standardoutput.txt";
-			String commandWithOutput = launchServerCommand + " STDOUT "+outputFile+" STDERRTOSTDOUT ";//Append STAF parameter 'STDOUT' and 'STDERRTOSTDOUT'
+			String outputFile = new File(System.getProperty("user.home"), "staf_launch_"+remoteDriverLauncher.getSimpleName()+"_standardoutput.txt").getAbsolutePath();
 			IndependantLog.debug(debugmsg+ remoteDriverLauncher.getName() + " starting, the debug message will be in file '"+outputFile+"' on machine '"+host+"'");
 			IndependantLog.debug(debugmsg+ RemoteDriver.class.getName() + " launching, the debug message will be in file '"+RemoteDriver.debugLogFile+"' on machine '"+host+"'");
 
@@ -1415,7 +1545,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 				//[STAF]
 				//NOSTAF=False
 				IndependantLog.debug(debugmsg+" Try to launch RemoteServer remotely by STAFHandle.");
-				STAFResult rc = _LASTINSTANCE.getSTAFHelper().startProcess(host, commandWithOutput, null);
+				STAFResult rc = _LASTINSTANCE.getSTAFHelper().startProcess(host, launchServerCommand, null, " STDOUT "+outputFile, "STDERRTOSTDOUT");//Append STAF parameter 'STDOUT' and 'STDERRTOSTDOUT'
 				IndependantLog.debug(debugmsg+" STAFHandle launch RemoteServer, returned RC: "+rc.rc+" and result: "+rc.result);
 				serverStarted = (rc.rc==STAFResult.Ok);
 				if(!serverStarted) IndependantLog.warn(debugmsg+" STAFHandle launch RemoteServer Failed with RC="+rc.rc+" !");
@@ -1424,12 +1554,13 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 			}
 
 			if(!serverStarted){
+				String commandWith_Output = launchServerCommand + " STDOUT "+outputFile+" STDERRTOSTDOUT ";//Append STAF parameter 'STDOUT' and 'STDERRTOSTDOUT'
 				Process process = null;
 				ProcessCapture console = null;
 				try {
 					//try to launch the server on remote machine by launching directly a "staf machine process start command ..." command
 					IndependantLog.debug(debugmsg+" Try to launch RemoteServer remotely by STAF process service.");
-					String stafCommand = "staf "+host+" process start command "+commandWithOutput;
+					String stafCommand = "staf "+host+" process start command "+commandWith_Output;
 					IndependantLog.debug(debugmsg+" Runtime exec STAF command: "+stafCommand);
 					process = Runtime.getRuntime().exec(stafCommand);
 					console = new ProcessCapture(process, null, true, false);
@@ -1469,20 +1600,36 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	}
 
 	/**
+	 * Break a string command line into pieces. For example "command p1 p2 p3" will break into a list of "command" "p1" "p2" "p3".
+	 */
+	public static List<String> breakCommandLine(String cmdline){
+		//below code about StringTokenizer things are copied from Runtime.getRuntime().exec(), we use it to break a string command line into pieces.
+        StringTokenizer st = new StringTokenizer(cmdline);
+        List<String> parameters = new ArrayList<String>();
+        while(st.hasMoreTokens())
+            parameters.add(st.nextToken());
+        return parameters;
+	}
+
+	/**
 	 *
 	 * @param projectdir
 	 * @param extraParams String[], the optional parameters
 	 * <pre>
-	 * <b>-port N</b>, optional, the port number for Selenium Server. If not provided, the default port will be used.
+	 * <b>"-port N"</b>, optional, the port number for Selenium Server. If not provided, the default port will be used.
 	 *                 For "standalone" and "hub" the default port number is 4444; While for "node", it is 5555.
-	 * <b>-role TheServerRole</b>, optional, if not provided, a standalone server will be launched.
+	 * <b>"-role TheServerRole"</b>, optional, if not provided, a standalone server will be launched.
 	 *                             TheServerRole could be <b>"hub"</b>, and selenium server will be launched
-	 *                             as a hub (in grid mode) for other node to connect.
+	 *                             as a hub (in grid mode) for other node to connect. Ex: <b>"-role hub"</b><br/>
 	 *                             TheServerRole could be <b>"node"</b>, and selenium server will be launched
 	 *                             as a node (in grid mode) to connect a hub. <b>**Note**</b> Hub's information must also
-	 *                             be provided. Ex: <b>-role node -hub http://hub.machine:port/grid/register</b>
-	 * <b>SELENIUMSERVER_JVM_OPTIONS=jvm options</b> Ex: SELENIUMSERVER_JVM_OPTIONS=-Xms256m -Xmx1g
-	 * <b>-drivers browser-drivers</b> Ex: -drivers=explorer:chrome:MicrosoftEdge
+	 *                             be provided. Ex: <b>"-role node -hub http://hub.machine:port/grid/register"</b>
+	 * <b>"SELENIUMSERVER_JVM_OPTIONS=jvm"</b>, optional, Ex: "SELENIUMSERVER_JVM_OPTIONS=-Xms256m -Xmx1g"
+	 * <b>"-drivers browser-names"</b>, optional, browser names separated by colon ':'. Ex: "-drivers explorer:chrome:MicrosoftEdge",
+	 *                             the browser name can be the value of a constant starting with <b>BROWSER_NAME</b> in class {@link BrowserConstants},
+	 *                             such as {@link BrowserConstants#BROWSER_NAME_CHROME}.<br>
+	 * <b>"-timeout=N"</b>, optional, The timeout (default is {@link SeleniumConfigConstant#DEFAULT_TIMEOUT}) in seconds before the hub automatically releases a node that hasn't received any requests for more than the specified number of seconds. Ex: "-timeout=120",
+	 * <b>"-browserTimeout=N"</b>, optional, The timeout (default is {@link SeleniumConfigConstant#DEFAULT_BROWSER_TIMEOUT} ) in seconds a node is willing to hang inside the browser. Ex: "-browserTimeout=120"
 	 *
 	 * </pre>
 	 * @return boolean, true if the server has been successfully started
@@ -1515,7 +1662,9 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 
 		boolean isGrid = false;//indicate the type (grid-hub or standalone) of the server to start
 		boolean isNode = false;//indicate that we are starting a node
-		String nodePort = SeleniumConfigConstant.DEFAULT_SELENIUM_NODE_PORT;
+		//the variable port can be standalone-server's port, or hub's port, or node's port.
+		//For standalone and hub, the default port is 4444; for node, the default port is 5555
+		String port = null;
 		String jvmOptions = null;
 		String webDrivers = null;
 
@@ -1528,7 +1677,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 				int sepLength = GuiObjectRecognition.DEFAULT_ASSIGN_SEPARATOR.length();
 				int index = param.indexOf(GuiObjectRecognition.DEFAULT_ASSIGN_SEPARATOR /* = */, prefixLength);
 				if(index>-1 && (index+sepLength)<param.length()) jvmOptions = param.substring(index+sepLength);
-				extraParamsList.remove(i);//Remove it, it will not be passed to SeleniumServerRunner
+				extraParamsList.remove(i--);//Remove it, it will not be passed to SeleniumServerRunner; meanwhile decrement the i, otherwise the next parameter will be skipped.
 			}else if(param.toLowerCase().startsWith(OPTION_ROLE)){
 				//try to get grid-hub, grid-node information
 				//-role hub
@@ -1536,77 +1685,136 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 				isGrid = true;
 				isNode = param.substring(OPTION_ROLE.length()).trim().startsWith(ROLE_NODE);
 			}else if(param.toLowerCase().startsWith(OPTION_PORT)){
-				//try to get the port information, -port portNumber
-				nodePort = param.substring(OPTION_PORT.length()).trim();
+				//try to get the port information, -port portNumber, can be
+				port = param.substring(OPTION_PORT.length()).trim();
 			}else if(param.toLowerCase().startsWith(OPTION_BROWSER_DRIVERS)){
 				//try to get the browser drivers, -drivers explorer:chrome:MicrosoftEdge
 				webDrivers = param.substring(OPTION_BROWSER_DRIVERS.length()).trim();
-				extraParamsList.remove(i);//Remove it, it will not be passed to SeleniumServerRunner
+				extraParamsList.remove(i--);//Remove it, it will not be passed to SeleniumServerRunner; meanwhile decrement the i, otherwise the next parameter will be skipped.
+			}else if(param.toLowerCase().startsWith(RemoteDriver.PARAM_PROJECT)){
+				//remove the parameter "-project projectPath", it should not be passed to SeleniumServerRunner
+				extraParamsList.remove(i--);
 			}
 		}
+
+		if(port == null){
+			//we need to set the default port
+			if(isGrid && isNode){//for node
+				port = SeleniumConfigConstant.DEFAULT_SELENIUM_NODE_PORT;
+			}else{//for standalone-server and hub
+				port = SeleniumConfigConstant.DEFAULT_SELENIUM_PORT;
+			}
+		}
+
+		//If we start a standalone server, we should set the system property SYSTEM_PROPERTY_SELENIUM_PORT
+		//so that we can use it to detect if the server has been started or not.
+		if(!isGrid){
+			System.setProperty(SelectBrowser.SYSTEM_PROPERTY_SELENIUM_PORT, port);
+		}
+
 		//try to get "JVM Options" from system properties
 		if(jvmOptions==null) jvmOptions = getRemoteServerJVMOptions();
 		IndependantLog.debug(debugmsg+" with JVM options : "+jvmOptions);
 		ProcessCapture console = null;
 
 		try{
-			String cp = " -cp "+ seinfo.getClassPath(false);
+			List<String> commandList = new ArrayList<String>();
+			//We put the "java executable" into an array to avoid the quote and space conflict problem. To avoid the space in "java executable", we quote it;
+			//on Windows the quotes can be handled smartly, but NOT on Linux. So we don't quote the "java executable" and put it directly into an array.
+			commandList.add(seinfo.getJavaexe());
+			//VM parameters
+			commandList.addAll(breakCommandLine(jvmOptions));
+			//classpath
+			commandList.add("-cp");
+			commandList.add(seinfo.getClassPath(false));
+			//main class
+			commandList.add(SeleniumServerRunner.class.getName());
+			//Below, we will add SeleniumServerRunner's parameters
+			commandList.add("-Dwebdriver.log.file="+consoledir+File.separator+"webdriver.console");
 
-			String cmdline = seinfo.getJavaexe() +" "+jvmOptions + cp +" "+SeleniumServerRunner.class.getName()+" "+
-					         " -Dwebdriver.log.file=\""+consoledir+File.separator+"webdriver.console\"";
+			String[] browserNames = null;
 
-			if(webDrivers!=null && !webDrivers.isEmpty()){
-				IndependantLog.debug(debugmsg+" Starting selenium server with browser drivers '"+webDrivers+"'.");
-				String[] driverNames = webDrivers.split(":");
-				File driverFile = null;
-				String driverShortName = null;
-				for(String driverName:driverNames){
-					driverName = driverName.trim();
-					driverFile = seinfo.getDriver(driverName);
-					driverShortName = SeleniumConstants.DRIVER_SHORT_NAME_MAP.get(driverName);
-					if(driverFile.isFile()){
-						cmdline += " -Dwebdriver."+driverShortName+".driver=\""+ driverFile.getAbsolutePath() +"\"";
-					}else{
-						IndependantLog.warn(debugmsg+" can NOT set driver '"+driverName+"' VM parameters! File '"+driverFile.getAbsolutePath()+"' doesn't exist!");
-					}
-					//Some driver is included inside the selenium-server, such as Firefox.
-					//Whether the driver executable exists or not, we will set the log file parameter.
-					cmdline += " -Dwebdriver."+driverShortName+".logfile=\""+consoledir+File.separator+driverShortName+".console\"";
-				}
+			if(webDrivers==null || webDrivers.isEmpty()){
+				browserNames = SeleniumConfigConstant.getDefaultSupportedBrowsers();
+				IndependantLog.debug(debugmsg+" User does NOT provide any browser drivers. Use default drivers '"+ Arrays.toString(browserNames)+"'.");
 			}else{
-				//Keep these settings for back-compatibility
-				cmdline += " -Dwebdriver.firefox.logfile=\""+consoledir+File.separator+"firefox.console\""+
-						" -Dwebdriver.safari.logfile=\""+consoledir+File.separator+"safari.console\""+
-						" -Dwebdriver.ie.logfile=\""+consoledir+File.separator+"ie.console\""+
-						" -Dwebdriver.opera.logfile=\""+consoledir+File.separator+"opera.console\""+
-						" -Dwebdriver.chrome.logfile=\""+consoledir+File.separator+"chrome.console\"";
+				browserNames = webDrivers.split(StringUtils.COLON);
+			}
 
-				if(seinfo.getChromeDriver().isFile()) cmdline += " -Dwebdriver.chrome.driver=\""+ seinfo.getChromeDriver().getAbsolutePath() +"\"";
-				if(seinfo.getIEDriver().isFile()) cmdline += " -Dwebdriver.ie.driver=\""+ seinfo.getIEDriver().getAbsolutePath() +"\"";
+			IndependantLog.debug(debugmsg+" Starting selenium server with drivers for browsers '"+Arrays.toString(browserNames)+"'.");
+			File driverFile = null;
+			String driverShortName = null;
+			for(String browserName:browserNames){
+				browserName = browserName.trim();
+				driverFile = seinfo.getDriver(browserName);
+				driverShortName = SeleniumConstants.DRIVER_SHORT_NAME_MAP.get(browserName);
+				if(driverFile.isFile() && driverShortName!=null){
+					//We should not add browser-driver for firefox if the selenium is not 3.X
+					//because that prior to selenium 3.X, the firefox driver is included in the Selenium
+					if(SeleniumServerRunner.isSelenium3X() || !BrowserConstants.BROWSER_NAME_FIREFOX.equalsIgnoreCase(browserName)){
+						commandList.add("-Dwebdriver."+driverShortName+".driver="+ driverFile.getAbsolutePath());
+					}
+				}else{
+					IndependantLog.warn(debugmsg+" can NOT set driver '"+browserName+"' VM parameters! File '"+driverFile.getAbsolutePath()+"' doesn't exist! Or driverShortName is null");
+				}
+
+				//Prior to Selenium 3.X, some driver is included inside the selenium-server, such as Firefox.
+				//Whether the driver executable exists or not, we will set the log file parameter.
+				if(BrowserConstants.BROWSER_NAME_FIREFOX.equalsIgnoreCase(browserName)){
+					IndependantLog.debug(debugmsg+"Started from Selenium 3.X, firefox driver should be specified by '-Dwebdriver.gecko.driver, But the"
+							+ "log file should still be specified by '-Dwebdriver.firefox.logfile', NOT '-Dwebdriver.gecko.logfile'");
+					driverShortName = "firefox";
+				}
+				if(driverShortName!=null){
+					commandList.add("-Dwebdriver."+driverShortName+".logfile="+consoledir+File.separator+driverShortName+".console");
+				}
 			}
 
 			//The other parameter will be passed directly to "org.safs.selenium.util.SeleniumServerRunner"
-			for(String parameter: extraParamsList) cmdline += " "+parameter;
-			cmdline += " -timeout=20 -browserTimeout=60 "+SeleniumServerRunner.PARAM_OUTPUTCONSOLE;
+			boolean timeoutAppended = false;
+			boolean browserTimeoutAppended = false;
+			for(String parameter: extraParamsList){
+				if(StringUtils.isValid(parameter)){
+					//parameter might contain space such as "-port N" or "-role TheServerRole", we should break them
+					commandList.addAll(breakCommandLine(parameter));
+				}
+				if(parameter.startsWith(SeleniumServerRunner.PARAM_TIMEOUT)){
+					timeoutAppended = true;
+				}
+				if(parameter.startsWith(SeleniumServerRunner.PARAM_BROWSER_TIMEOUT)){
+					browserTimeoutAppended = true;
+				}
+			}
+			if(!timeoutAppended){
+				commandList.add(SeleniumServerRunner.PARAM_TIMEOUT_DEFAULT);
+			}
+			if(!browserTimeoutAppended){
+				commandList.add(SeleniumServerRunner.PARAM_BROWSER_TIMEOUT_DEFAULT);
+			}
+			commandList.add(SeleniumServerRunner.PARAM_OUTPUTCONSOLE);
 
-			final String fcmd = cmdline;
 			final File workdir = projectroot == null ? seinfo.getRootDir(): projectroot;
-			IndependantLog.debug(debugmsg+" launching Selenium Server with cmdline: "+ fcmd);
+	        String[] cmdarray = commandList.toArray(new String[0]);
+	        IndependantLog.debug(debugmsg+" launching Selenium Server with cmdline: "+ Arrays.toString(cmdarray));
 
-			Process process = null;
-			//TODO we should not launch a "selenium server", if there is already one running.
-			process = Runtime.getRuntime().exec(fcmd,null,workdir);
+	        Process process = null;
+	        //TODO we should not launch a "selenium server", if there is already one running.
+			process = Runtime.getRuntime().exec(cmdarray,null,workdir);
 			console = new ProcessCapture(process, SeleniumServerRunner.TITLE , true, false/*will not write out/err message to debug log, it is already in SeleniumServerRunner*/);
 
 			if(isNode){
-				success = waitSeleniumNodeRunning(SeleniumConfigConstant.DEFAULT_SELENIUM_HOST, nodePort);
+				success = waitSeleniumNodeRunning(SeleniumConfigConstant.DEFAULT_SELENIUM_HOST, port);
 			}else{
 				success = waitSeleniumServerRunning(isGrid, false, false);
 			}
+			String servername = isGrid? (isNode? "node":"hub"):"standalone";
 			try{
 				if(!success){
 					//Wait longer to get more information from STDOUT/STDERR, if no running server has been detected.
+					IndependantLog.debug(debugmsg+" seleninum "+servername+" server seems not start up yet on port '"+port+"' on localhost, wait longer to get more conslole information.");
 					console.waitOutput(10*1000 /* milliseconds*/, 20 /* lines on STDOUT */, 20 /* lines on STDERR */);
+				}else{
+					IndependantLog.debug(debugmsg+" seleninum "+servername+" server has been started on port '"+port+"' on localhost.");
 				}
 			}catch(TimeoutException te){
 				IndependantLog.debug(debugmsg+" met "+StringUtils.debugmsg(te));
@@ -1625,7 +1833,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 //						}
 						//parse the output message to know if the server has been failed.
 						if(message.contains("Failed to start: SocketListener")){
-							throw new SAFSException("Failed to execute command: "+fcmd+" \n due to "+message);
+							throw new SAFSException("Failed to execute command: "+Arrays.toString(cmdarray)+" \n due to "+message);
 						}
 					}
 				}
@@ -1655,7 +1863,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	 */
 	public static boolean waitSeleniumNodeRunning(String host, String port, int... params){
 		int tries = 0;
-		int repeat = 5;
+		int repeat = 20;
 		int pause = 500;
 
 		if(params!=null){
@@ -1689,7 +1897,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	 */
 	public static boolean waitSeleniumServerRunning(boolean isGrid, boolean waitForNodes, boolean verifyRegistered, int... params){
 		int tries = 0;
-		int repeat = 5;
+		int repeat = 20;
 		int pause = 500;
 		boolean running = false;
 
@@ -1894,6 +2102,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 			return true;
 		}
 
+		@Override
 		public String toString(){
 			return hostname+StringUtils.COLON+port;
 		}
@@ -2098,7 +2307,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 				GridNode tempNode = null;
 				List<GridNode> registeredNodes = new ArrayList<GridNode>();
 				while((nodeInfo=br.readLine())!=null){
-					System.out.println(nodeInfo);
+					IndependantLog.debug(nodeInfo);
 					if(nodeInfo.contains(GRID_CONSOLE_RESPONSE_CONFIG)){
 						tempNode = parseNodeInfo(nodeInfo);
 						if(tempNode!=null) registeredNodes.add(tempNode);
@@ -2148,14 +2357,14 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		if(StringUtils.isValid(nodeInfo)){
 			if(nodeInfo.contains(GRID_CONSOLE_RESPONSE_HOST)){
 				beginIndex = nodeInfo.indexOf(GRID_CONSOLE_RESPONSE_HOST);
-				endIndex = nodeInfo.indexOf(GRID_CONSOLE_RESPONSE_TAG_BEGIN);
+				endIndex = nodeInfo.indexOf(GRID_CONSOLE_RESPONSE_TAG_BEGIN, beginIndex);
 				if(beginIndex>-1 && endIndex>-1 && beginIndex<endIndex){
 					host = nodeInfo.substring(beginIndex+GRID_CONSOLE_RESPONSE_HOST.length(), endIndex);
 				}
 			}
 			if(nodeInfo.contains(GRID_CONSOLE_RESPONSE_PORT)){
 				beginIndex = nodeInfo.indexOf(GRID_CONSOLE_RESPONSE_PORT);
-				endIndex = nodeInfo.indexOf(GRID_CONSOLE_RESPONSE_TAG_BEGIN);
+				endIndex = nodeInfo.indexOf(GRID_CONSOLE_RESPONSE_TAG_BEGIN, beginIndex);
 				if(beginIndex>-1 && endIndex>-1 && beginIndex<endIndex){
 					port = nodeInfo.substring(beginIndex+GRID_CONSOLE_RESPONSE_PORT.length(), endIndex);
 				}
@@ -2163,7 +2372,7 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 			if(host==null || port==null){
 				if(nodeInfo.contains(GRID_CONSOLE_RESPONSE_REMOTEHOST)){
 					beginIndex = nodeInfo.indexOf(GRID_CONSOLE_RESPONSE_REMOTEHOST);
-					endIndex = nodeInfo.indexOf(GRID_CONSOLE_RESPONSE_TAG_BEGIN);
+					endIndex = nodeInfo.indexOf(GRID_CONSOLE_RESPONSE_TAG_BEGIN, beginIndex);
 					if(beginIndex>-1 && endIndex>-1 && beginIndex<endIndex){
 						//http://10.121.19.24:5678
 						try {
@@ -2174,6 +2383,8 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 					}
 				}
 			}
+			if(StringUtils.isValid(host)) host = host.trim();
+			if(StringUtils.isValid(port)) port = port.trim();
 			IndependantLog.debug(debugmsg+" Create GridNode with host:"+host+" port:"+port);
 			node = new GridNode(host, port);
 		}
@@ -2185,18 +2396,18 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 	 * Retrieve the JVM options from system properties.<br>
 	 * Before calling this method, we may need to set some java system property.<br>
 	 * <ul>
-	 * <li> {@link SeleniumConfigConstant#SELENIUMSERVER_JVM_OPTIONS}
-	 * <li> {@link SeleniumConfigConstant#SELENIUMSERVER_JVM_Xms}
-	 * <li> {@link SeleniumConfigConstant#SELENIUMSERVER_JVM_Xmx}
+	 * <li> {@link SeleniumConfigConstant#PROPERTY_SELENIUMSERVER_JVM_OPTIONS}
+	 * <li> {@link SeleniumConfigConstant#PROPERTY_SELENIUMSERVER_JVM_Xms}
+	 * <li> {@link SeleniumConfigConstant#PROPERTY_SELENIUMSERVER_JVM_Xmx}
 	 * </ul>
 	 * If none of them exist in system properties, the minimum JVM option "-Xms512m -Xmx1g" will be provided.<br>
-	 * If {@link SeleniumConfigConstant#SELENIUMSERVER_JVM_OPTIONS} exist, but {@link SeleniumConfigConstant#SELENIUMSERVER_JVM_Xms}
-	 * and {@link SeleniumConfigConstant#SELENIUMSERVER_JVM_Xmx} do NOT exist, then we will add "-Xms512m -Xmx1g" to the JVM options if its
+	 * If {@link SeleniumConfigConstant#PROPERTY_SELENIUMSERVER_JVM_OPTIONS} exist, but {@link SeleniumConfigConstant#PROPERTY_SELENIUMSERVER_JVM_Xms}
+	 * and {@link SeleniumConfigConstant#PROPERTY_SELENIUMSERVER_JVM_Xmx} do NOT exist, then we will add "-Xms512m -Xmx1g" to the JVM options if its
 	 * value does not contain "-Xms" or "-Xmx".<br>
-	 * If {@link SeleniumConfigConstant#SELENIUMSERVER_JVM_OPTIONS} exist, and {@link SeleniumConfigConstant#SELENIUMSERVER_JVM_Xms}
-	 * and/or {@link SeleniumConfigConstant#SELENIUMSERVER_JVM_Xmx} exist, then we will add "-Xms512m -Xmx1g" to the JVM options if its
+	 * If {@link SeleniumConfigConstant#PROPERTY_SELENIUMSERVER_JVM_OPTIONS} exist, and {@link SeleniumConfigConstant#PROPERTY_SELENIUMSERVER_JVM_Xms}
+	 * and/or {@link SeleniumConfigConstant#PROPERTY_SELENIUMSERVER_JVM_Xmx} exist, then we will add "-Xms512m -Xmx1g" to the JVM options if its
 	 * value does not contain "-Xms" or "-Xmx", otherwise if its value contains ""-Xms" or "-Xmx", we will replace them by the value of
-	 * {@link SeleniumConfigConstant#SELENIUMSERVER_JVM_Xms} and/or {@link SeleniumConfigConstant#SELENIUMSERVER_JVM_Xmx}.<br>
+	 * {@link SeleniumConfigConstant#PROPERTY_SELENIUMSERVER_JVM_Xms} and/or {@link SeleniumConfigConstant#PROPERTY_SELENIUMSERVER_JVM_Xmx}.<br>
 	 *
 	 * @return String, the JVM options for starting SELENIUM Remote Server.
 	 * @see #startRemoteServer(String)
@@ -2205,10 +2416,10 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		String debugmsg = StringUtils.debugmsg(false);
 		//Get the JVM Options from system properties
 		//We have set them to system properties in EmbeddedSeleniumHookDriver#start()
-		String Xms = System.getProperty(SeleniumConfigConstant.SELENIUMSERVER_JVM_Xms);
-		String Xmx = System.getProperty(SeleniumConfigConstant.SELENIUMSERVER_JVM_Xmx);
+		String Xms = System.getProperty(SeleniumConfigConstant.PROPERTY_SELENIUMSERVER_JVM_Xms);
+		String Xmx = System.getProperty(SeleniumConfigConstant.PROPERTY_SELENIUMSERVER_JVM_Xmx);
 		IndependantLog.debug(debugmsg+" get JVM parameter : Xms="+ Xms+" Xmx="+Xmx);
-		String jvmOptions = System.getProperty(SeleniumConfigConstant.SELENIUMSERVER_JVM_OPTIONS);
+		String jvmOptions = System.getProperty(SeleniumConfigConstant.PROPERTY_SELENIUMSERVER_JVM_OPTIONS);
 		IndependantLog.debug(debugmsg+" get JVM Options : "+jvmOptions);
 		if(jvmOptions==null){
 			if(Xms==null) Xms = SeleniumConfigConstant.DEFAULT_JVM_MEMORY_MINIMUM;
@@ -2234,5 +2445,49 @@ public class WebDriverGUIUtilities extends DDGUIUtilities {
 		IndependantLog.debug(debugmsg+" return JVM options : "+jvmOptions);
 
 		return jvmOptions;
+	}
+
+	private static void waitForLiveServer(String hostname, int port) {
+		InetSocketAddress address = new InetSocketAddress(hostname, port);
+
+		IndependantLog.debug("Waiting up to 20 sec for server...");
+		long beginTime = System.currentTimeMillis();
+		long endTime = beginTime + (20 * 1000); // 20 sec
+		boolean portOpened = false;
+		while ((!portOpened) && (System.currentTimeMillis() < endTime)) {
+			portOpened = trySocket(address);
+
+			if (portOpened) {
+				IndependantLog.debug("Server has opened the port in " + (System.currentTimeMillis() - beginTime)/1000.0 + " sec.");
+			} else {
+				try {
+					Thread.sleep(2000);  //2 sec
+				} catch (InterruptedException e) {
+					IndependantLog.debug("Two second sleep was interrupted.", e);
+				}
+			}
+		}
+		if (!portOpened) {
+			IndependantLog.debug("Timed out waiting for server to initialize");
+		}
+	}
+
+	/**
+	 * Checks to see if a socket is opened.
+	 */
+	public static boolean trySocket(InetSocketAddress address) {
+		boolean success = false;
+
+		Socket socket = new Socket();
+		try {
+			socket.connect(address);
+			socket.close();
+			success = true;
+		} catch (ConnectException e) {
+			//this is expected
+		} catch (Throwable e) {
+			IndependantLog.debug("Problem while trying a socket.", e);
+		}
+		return success;
 	}
 }

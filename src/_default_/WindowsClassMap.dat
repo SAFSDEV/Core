@@ -8,19 +8,25 @@
 # allowed syntax for these entries.
 #
 
-VBWindows	:ThunderRT.*
-NETWindows	:WindowsForms.*
-CMDWindows	:ConsoleWindowClass
-Notepad		:Notepad
-TextPad		:TextPad.*
-Explorer	:ExploreWClass
-TaskBar		:Shell_TrayWnd
-SWTWindows      :SWT_Window.*
-DialogWin	:#32770
-Excel		:XLMAIN
-NETUIToolWin	:NET UI Tool Window
-NETHWnd		:NetUIHWND
-AfxWin		:Afx:.*
+# Mar 28, 2019 (Lei Wang) comment out all class mapping, as RFT wastes a lot of time when 
+#                        enabling these applications, user should use the 
+#                        custom  C:\SAFS\lib\WindowsClassMap.dat as a white list to decide 
+#                        what applications are needed.
+#                        So by default, no windows will be enabled.
+
+#VBWindows	:ThunderRT.*
+#NETWindows	:WindowsForms.*
+#CMDWindows	:ConsoleWindowClass
+#Notepad		:Notepad
+#TextPad		:TextPad.*
+#Explorer	:ExploreWClass
+#TaskBar		:Shell_TrayWnd
+#SWTWindows      :SWT_Window.*
+#DialogWin	:#32770
+#Excel		:XLMAIN
+#NETUIToolWin	:NET UI Tool Window
+#NETHWnd		:NetUIHWND
+#AfxWin		:Afx:.*
 
 #MediaPlayerHost :WMPAppHost
 #MediaPlayer     :WMPlayerApp

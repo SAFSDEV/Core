@@ -1,9 +1,29 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.staf.service.input;
 
-import com.ibm.staf.*;
-import com.ibm.staf.service.*;
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.util.Vector;
+
+import com.ibm.staf.STAFResult;
+import com.ibm.staf.service.STAFCommandParseResult;
+import com.ibm.staf.service.STAFCommandParser;
+import com.ibm.staf.service.STAFServiceInterfaceLevel1;
 
 
 /*******************************************************************************************
@@ -75,8 +95,8 @@ import java.util.*;
  * <p>
  * <h2>2.0 SAFSTextFileReader Commands</h2>
  * <p>
- * Note, there must be a uniquely qualified match for NAME/ID combinations listed below.  
- * If the same Process has opened two different files with the same ID from 2 different 
+ * Note, there must be a uniquely qualified match for NAME/ID combinations listed below.
+ * If the same Process has opened two different files with the same ID from 2 different
  * Handles, then you will have to use HANDLE, instead of NAME.
  * <p>
  * <h3>2.1 OPEN </h3>
@@ -302,7 +322,7 @@ import java.util.*;
  * <p>
  * HELP
  * <p>
- * Software Automation Framework Support (SAFS) http://safsdev.sourceforge.net<br>
+ * Software Automation Framework Support (SAFS) http://safsdev:8880<br>
  * Software Testing Automation Framework (STAF) http://staf.sourceforge.net<br>
  *********************************************************************************************/
 public class SAFSTextFileReader extends SAFSFileReader implements STAFServiceInterfaceLevel1 {
@@ -351,8 +371,9 @@ public class SAFSTextFileReader extends SAFSFileReader implements STAFServiceInt
 	/**********************************************************************
 	 * 	Add all our new keywords to the list of superclass keywords.
 	 **********************************************************************/
+	@Override
 	protected void addCommandOptions(STAFCommandParser aparser){
-		
+
 		aparser.addOption( SFR_SERVICE_REQUEST_NEXT , 1, STAFCommandParser.VALUENOTALLOWED );
 		aparser.addOption( SFR_SERVICE_REQUEST_PEEK , 1, STAFCommandParser.VALUENOTALLOWED );
 		aparser.addOption( SFR_SERVICE_REQUEST_MARK , 1, STAFCommandParser.VALUENOTALLOWED );
@@ -376,7 +397,8 @@ public class SAFSTextFileReader extends SAFSFileReader implements STAFServiceInt
 	/**********************************************************************
 	 * 	Add our new commands to the list of superclass commands.
 	 **********************************************************************/
-    protected String buildCommandList(String requestoptions) {
+    @Override
+	protected String buildCommandList(String requestoptions) {
 
 		// each request MUST have only 1 of these
 		requestoptions += s+ SFR_SERVICE_REQUEST_NEXT  +s+ SFR_SERVICE_REQUEST_RESET +s+
@@ -390,6 +412,7 @@ public class SAFSTextFileReader extends SAFSFileReader implements STAFServiceInt
 	/**********************************************************************
 	 * 	Add our new QUERY options to existing superclass QUERY options.
 	 **********************************************************************/
+	@Override
 	protected String buildQueryCommandList(String queryoptions) {
 
 		// QUERY parameters mutually exclusive
@@ -415,7 +438,7 @@ public class SAFSTextFileReader extends SAFSFileReader implements STAFServiceInt
 		// QUERY parameters exclusive to QUERY
 		aparser.addOptionNeed( SFR_SERVICE_PARM_LINEPOINTER , SFR_SERVICE_REQUEST_QUERY );
 		aparser.addOptionNeed( SFR_SERVICE_PARM_MARKPOINTER , SFR_SERVICE_REQUEST_QUERY );
-		
+
 		super.addCommandOptionNeeds( aparser );
 	}
 
@@ -423,6 +446,7 @@ public class SAFSTextFileReader extends SAFSFileReader implements STAFServiceInt
 	/**********************************************************************
 	 * 	Process any of the new commands we have added for this service.
 	 **********************************************************************/
+	@Override
 	protected STAFResult processRequest( STAFResult result, String machine, String process,
 	                                     int handle, STAFCommandParseResult parsedData) {
 
@@ -517,6 +541,7 @@ public class SAFSTextFileReader extends SAFSFileReader implements STAFServiceInt
 	/**********************************************************************
 	 * 	Prepend our HELP text to the superclass HELP.
 	 **********************************************************************/
+	@Override
 	protected String getHELPInfo(String info){
 
 		info += r+
@@ -535,10 +560,11 @@ public class SAFSTextFileReader extends SAFSFileReader implements STAFServiceInt
 	}
 
 
-	// OVERRIDE THE SAFSFILE TYPE 
+	// OVERRIDE THE SAFSFILE TYPE
 	/**********************************************************************
 	 * 	Overrides the superclass function to return our SAFSTextFile type.
 	 **********************************************************************/
+	@Override
 	protected String getLISTInfo () { return SFR_SERVICE_SAFSFILE_LISTINFO; }
 
 
@@ -546,6 +572,7 @@ public class SAFSTextFileReader extends SAFSFileReader implements STAFServiceInt
 	/**********************************************************************
 	 * 	Append our string response to the OPEN file request.
 	 **********************************************************************/
+	@Override
 	protected  String  getOPENInfo   (STAFCommandParseResult parsedData, String info){
 
 		int options = parsedData.optionTimes(SFR_SERVICE_PARM_COMMENT);
@@ -571,7 +598,8 @@ public class SAFSTextFileReader extends SAFSFileReader implements STAFServiceInt
 	/**********************************************************************
 	 * 	Handle the new QUERY options we have added for this service.
 	 **********************************************************************/
-	protected  String  getQUERYInfo  (SAFSFile textfile, 
+	@Override
+	protected  String  getQUERYInfo  (SAFSFile textfile,
 	                                  STAFCommandParseResult parsedData,
 	                                  String info){
 
@@ -591,6 +619,7 @@ public class SAFSTextFileReader extends SAFSFileReader implements STAFServiceInt
 	/**********************************************************************
 	 * 	Overrides the superclass function to instantiate SAFSTextFiles instead.
 	 **********************************************************************/
+	@Override
 	protected SAFSFile openFile (String machine, String process, int handle,
 	                             String fileid , File file, STAFCommandParseResult parsedData){
 

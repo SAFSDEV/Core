@@ -1,13 +1,31 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.staf.service.logging;
 
 import org.safs.staf.embedded.HandleInterface;
 
-import com.ibm.staf.*;
+import com.ibm.staf.STAFResult;
+import com.ibm.staf.STAFUtil;
 
 /**
  * This class and <code>AbstractSAFSCustomLoggingService</code> provide a sample custom
  * logging service implementation that writes directly to the STAF logs.
- * 
+ *
  * @see AbstractSAFSCustomLoggingService
  * @see org.safs.staf.service.logging.v2.SAFSCustomLoggingService
  * @see org.safs.staf.service.logging.v3.SAFSCustomLoggingService3
@@ -115,7 +133,7 @@ public class CustomLogFac
 	 * @param stafLog	the name of the STAF Log service loaded by standard
 	 * 					logging service.
 	 */
-	public CustomLogFac(String name, long mode, String linked, HandleInterface h, 
+	public CustomLogFac(String name, long mode, String linked, HandleInterface h,
 		String stafLog)
 	{
 		facName = name;
@@ -152,7 +170,7 @@ public class CustomLogFac
 	/**
 	 * Tests if the specified log mode is enabled.
 	 * <p>
-	 * @param mode	the mode to test. Must be one of the <code>LOGMODE</code> 
+	 * @param mode	the mode to test. Must be one of the <code>LOGMODE</code>
 	 * 				constants.
 	 * @return		<code>true</code> if <code>mode</code> is enabled;
 	 * 				<code>false</code> if not.
@@ -168,9 +186,9 @@ public class CustomLogFac
 	 * @param msg		the message to log.
 	 * @param desc		additional description to log.
 	 * @param msgType	the int identifier of the type of message being logged.
-	 * @return			a STAFResult indicating the result of the operation and 
+	 * @return			a STAFResult indicating the result of the operation and
 	 * 					whether normal logging is to be bypassed. Normal logging
-	 *                  will be bypassed if rc of the return value is 
+	 *                  will be bypassed if rc of the return value is
 	 *                  <code>STAFResult.Ok</code> and the result buffer is
 	 *                  "BYPASS".
 	 */
@@ -221,7 +239,7 @@ public class CustomLogFac
 	{
 		if (msgType >= CUSTOM_MESSAGE)
 			stafXmlLog("<CUSTOM_XML_MESSAGE>" +
-				"msg=" + msg + ";desc=" + desc + ";type=" + msgType + 
+				"msg=" + msg + ";desc=" + desc + ";type=" + msgType +
 				"</CUSTOM_XML_MESSAGE>");
 	}
 
@@ -233,7 +251,7 @@ public class CustomLogFac
 	 */
 	private STAFResult stafTextLog(String msg)
 	{
-		return handle.submit2("local", stafLogService, "log machine logname " + 
+		return handle.submit2("local", stafLogService, "log machine logname " +
 			txtLog + " level info message " + STAFUtil.wrapData(msg));
 	}
 
@@ -245,7 +263,7 @@ public class CustomLogFac
 	 */
 	private STAFResult stafXmlLog(String msg)
 	{
-		return handle.submit2("local", stafLogService, "log machine logname " + 
+		return handle.submit2("local", stafLogService, "log machine logname " +
 			xmlLog + " level info message " + STAFUtil.wrapData(msg));
 	}
 

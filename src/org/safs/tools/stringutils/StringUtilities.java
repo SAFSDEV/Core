@@ -1,10 +1,24 @@
-/** Copyright (C) (MSA, Inc) All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- */
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
 * History:
 * Created on Feb 21, 2004
-* <br>	Apr 07, 2010	(LeiWang)   Add method formRectangle(): create a Rectangle from a string x,y,w,h
+* <br>	Apr 07, 2010	(Lei Wang)   Add method formRectangle(): create a Rectangle from a string x,y,w,h
 * <br>	NOV 15, 2011	(Lei Wang)    Add methods as getDateString(), getTimeString() etc.
 *                                  to use SimpleDateFormat to convert Date to string.
 * <br>	NOV 18, 2011	(Lei Wang)    Add static field TimeBaseDifferenceFromFileTimeToJavaTimeInMillisecond.

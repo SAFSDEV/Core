@@ -1,6 +1,20 @@
-/** Copyright (C) (MSA, Inc) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+/**
+ * Copyright (C) (MSA, Inc), All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * Developer Histories:
  *
@@ -32,25 +46,25 @@
  *   <br>   AUG 08, 2006    (PHSABO) Moved getSubAreaRectangle and getClippedSubAreaRectangle
  *   								 helper functions to Processor superclass.
  *   <br>   MAR 11, 2008    (JunwuMa)Added HoverMouse,CtrlClick,CtrlRightClick and ShiftClick support
- *   <br>   MAR 11, 2008    (LeiWang)Added SetPropertyValue, VerifyGUIImageToFile support
- *   <br>   MAR 26, 2008    (LeiWang)Modified GetGuiImage, VerifyGUIImageToFile
- * 	 <br>   MAR 26, 2008    (LeiWang)Added HScrollTo, VScrollTo
+ *   <br>   MAR 11, 2008    (Lei Wang)Added SetPropertyValue, VerifyGUIImageToFile support
+ *   <br>   MAR 26, 2008    (Lei Wang)Modified GetGuiImage, VerifyGUIImageToFile
+ * 	 <br>   MAR 26, 2008    (Lei Wang)Added HScrollTo, VScrollTo
  *   <br>   APR 21, 2008    (JunwuMa)Added SelectMenuItem, SelectMenuItemContains
  *   <br>                            VerifyMenuItem, VerifyMenuItemContains 
  *   <br>   APR 22, 2008    (JunwuMa)Added SetPosition 
  *   <br>   MAY 8,  2008    (JunwuMa)Added LeftDrag and RightDrag
- *   <br>   JUL 11, 2008	(LeiWang)Add static method isJavaDomain(), isDotnetDomain(), isHtmlDomain(), isWinDomain(), isSwtDomain()
- *   <br>   JUL 31, 2008	(LeiWang)Modify method verifyMenuItem(),selectMenuItem()
+ *   <br>   JUL 11, 2008	(Lei Wang)Add static method isJavaDomain(), isDotnetDomain(), isHtmlDomain(), isWinDomain(), isSwtDomain()
+ *   <br>   JUL 31, 2008	(Lei Wang)Modify method verifyMenuItem(),selectMenuItem()
  *   								 Add method findMenuBars()
- *   <br>	AUG 11, 2008	(LeiWang)Modify method performScorll() to support .NET application
+ *   <br>	AUG 11, 2008	(Lei Wang)Modify method performScorll() to support .NET application
  *   <br>   AUG 11, 2008    (JunwuMa)Add .NET support for setPropertyValue,CaptureObjectDataToFile and VerifyObjectDataToFile.
- *   <br>	NOV 11, 2008	(LeiWang)Added method getAbsolutFileName(),capturePropertyToFile()
+ *   <br>	NOV 11, 2008	(Lei Wang)Added method getAbsolutFileName(),capturePropertyToFile()
  *   								 Modified method verifyArrayPropertyToFile(), see defect S0543643.
- *   <br>	JAN 12, 2009	(LeiWang)Modify method performScorll() to support FLEX application
+ *   <br>	JAN 12, 2009	(Lei Wang)Modify method performScorll() to support FLEX application
  *   <br>	JAN 20, 2009    (JunwuMa)Modify methods findMenuBars, selectMenuItem, matchedPathOfMenuItem and verifyMenuItem to support keywords on FLEX menu bar.
  *   <br>	FEB 20, 2009	(JunwuMa)Modify inputkeys() to support FLEX for keywords Inputkeys and InputCharacters.
  *   <br>   MAY 01, 2009    (Carl Nagle) Adding Float value support for numeric parameters.
- *   <br>   JUN 12, 2009    (LeiWang)Modify method:findMenuBars(),matchedPathOfMenuItem(),selectMenuItem(),verifyMenuItem().
+ *   <br>   JUN 12, 2009    (Lei Wang)Modify method:findMenuBars(),matchedPathOfMenuItem(),selectMenuItem(),verifyMenuItem().
  *    								 For supporting the menu (type is .Menubar) of win domain.
  *   <br>   JUN 30, 2009    (Girish Kolapkar) Added LeftDrag variations using MouseModifiers
  *   <br>   NOV 03, 2009    (JunwuMa)Added method findMenuBarsForWPF() as a workaround for finding the menu bars of a DotNet WPF application.
@@ -60,7 +74,7 @@
  *   <br>	FEB 25, 2010    (JunwuMa)Added keywords GetTextFromGUI and SaveTextFromGUI for detecting text on GUI 
  *                                   using OCR.
  *   <br>   APR 14, 2010    (JunwuMa)Adding keyword LocateScreenImage for RJ.
- *   <br>   APR 20, 2010    (LeiWang)Modify method action_GetSaveTextFromGUI(): use static method of OCREngine to get
+ *   <br>   APR 20, 2010    (Lei Wang)Modify method action_GetSaveTextFromGUI(): use static method of OCREngine to get
  *                                   an OCR engine to use.
  *   <br>   JUN 30, 2011	(Dharmesh4) Added new Keyword MouseClick for RJ. 
  *   <br>   SEP 07, 2015    (Lei Wang) Correct a typo, change method preformDrag to performDrag. Modify comments: developer history will not show in java doc.
@@ -131,8 +145,8 @@ import com.rational.test.ft.value.MethodInfo;
 
 /**
  * CFComponent, process a generic component to handle 
- * <a href="http://safsdev.github.io/sqabasic2000/GenericMasterFunctionsIndex.htm">Generic Master Keywords</a>
- * and <a href="http://safsdev.github.io/sqabasic2000/GenericObjectFunctionsIndex.htm">Generic Object Keywords</a><br>
+ * <a href="/sqabasic2000/GenericMasterFunctionsIndex.htm">Generic Master Keywords</a>
+ * and <a href="/sqabasic2000/GenericObjectFunctionsIndex.htm">Generic Object Keywords</a><br>
  **/
 public class CFComponent extends ComponentFunction {
 

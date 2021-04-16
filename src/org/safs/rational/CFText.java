@@ -1,7 +1,20 @@
-/** Copyright (C) (MSA, Inc) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
+/**
+ * Copyright (C) (MSA, Inc), All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.rational;
 
 import java.awt.AWTException;
@@ -34,11 +47,11 @@ import com.rational.test.ft.object.interfaces.TopLevelTestObject;
  * 														 For java domain: will not instance the specific class (this way can not work for custom
  * 														 class like com.sas.workspace.WATextField), just get the property "Text". If java class
  * 														 has method getText(), we can obtain "text" property.
- *	<br>	NOV 25, 2008	(LeiWang)	Modify method setText(): Call StringUtils.containsSepcialKeys() to test sepcial key. See defect S0546329.
- *	<br>	JAN	06, 2009	(LeiWang)	Add method setPropertyText(): set value to component's text.
+ *	<br>	NOV 25, 2008	(Lei Wang)	Modify method setText(): Call StringUtils.containsSepcialKeys() to test sepcial key. See defect S0546329.
+ *	<br>	JAN	06, 2009	(Lei Wang)	Add method setPropertyText(): set value to component's text.
  *										Modify method setText(): As Flex's top parent is FlexApplicationTestObject, it can not handle inputkeys
  *																 and inputchars, so use org.safs.robot.Robot to handle them.
- *  <br>	JAN 09, 2009	(LeiWang)	Modify method localProcess() and performAction(): If the keyword will not be processed here, should not
+ *  <br>	JAN 09, 2009	(Lei Wang)	Modify method localProcess() and performAction(): If the keyword will not be processed here, should not
  *  																					  let performAction() to process, as it check the number
  *  																					  of parameter, this will prevent CFComponent from handling
  *  																					  some keywords without parameter, like Click. 

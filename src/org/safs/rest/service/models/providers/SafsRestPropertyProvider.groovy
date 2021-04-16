@@ -1,4 +1,20 @@
-// Copyright (c) 2016 by SAS Institute Inc., Cary, NC, USA. All Rights Reserved.
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.rest.service.models.providers
 
 import static org.safs.rest.service.commands.curl.CurlCommand.DEFAULT_MAX_TIME
@@ -9,14 +25,13 @@ import static org.safs.rest.service.models.providers.authentication.TokenProvide
 import static org.safs.rest.service.models.providers.authentication.TokenProvider.TRUSTED_USER_PASSWORD
 import static org.safs.rest.service.models.providers.http.SecureOptions.NONE
 
-import groovy.transform.ToString
-import groovy.util.logging.Slf4j
-
-import org.safs.rest.service.commands.curl.CurlCommand
 import org.safs.rest.service.commands.curl.CurlInvoker
 import org.safs.rest.service.models.consumers.RestConsumer
 import org.safs.rest.service.models.providers.authentication.TokenProvider
 import org.safs.rest.service.models.providers.http.SecureOptions
+
+import groovy.transform.ToString
+import groovy.util.logging.Slf4j
 
 
 
@@ -88,14 +103,14 @@ class SafsRestPropertyProvider {
     String rootUrl = DEFAULT_ROOT_URL
 
 
-// TODO Bruce.Faulkner 08 February 2017: Might be moved to RestConsumer later
+// TODO brfaul 08 February 2017: Might be moved to RestConsumer later
     String protocol = HTTP_PROTOCOL
 
     String userName = DEFAULT_USER_NAME
     String trustedUser = DEFAULT_USER_NAME
     String tokenProviderServiceName
     String tokenProviderAuthTokenResource
-// TODO Bruce.Faulkner Sep 24, 2015: Consider changing showStandardStreams to verbose?
+// TODO brfaul Sep 24, 2015: Consider changing showStandardStreams to verbose?
     boolean showStandardStreams
     boolean useLiveCurl = true
     String authToken
@@ -173,7 +188,7 @@ class SafsRestPropertyProvider {
     }
 
 
-// TODO Bruce.Faulkner 07 February 2017: These need to be moved out of SAFSREST before
+// TODO brfaul 07 February 2017: These need to be moved out of SAFSREST before
 // releasing as open source.
     private void loadCasServerProperties() {
         casServerHost = customProperties."${SAFSREST_CAS_SERVER_HOST_KEY}"
@@ -242,7 +257,7 @@ class SafsRestPropertyProvider {
 		}
 		acquireAuthToken(password, trustedPassword)
 	}
-	
+
 	public def acquireAuthToken(password, trustedPassword) {
 
         def acquiredToken = FAKE_AUTH_TOKEN
@@ -341,7 +356,7 @@ class SafsRestPropertyProvider {
 		}
 	}
 
-    
+
     /**
      * Convenience method for setting the max time property (i.e. the
      * safsrestMaxTime system property). The max time property must be a

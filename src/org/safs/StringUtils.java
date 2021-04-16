@@ -1,6 +1,20 @@
-/** Copyright (C) (MSA, Inc) All rights reserved.
- *  General Public License: http://www.opensource.org/licenses/gpl-license.php
- */
+/**
+ * Copyright (C) (MSA, Inc), All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * <br><em>Purpose:</em> string utilities
  * <p>
@@ -10,8 +24,8 @@
  * JUN 04, 2003	(DBauman) 	Original Release
  * JUN 26, 2003	(Carl Nagle) 	Added convertWildcardsToRegularExpression
  * DEC 19, 2006	(Carl Nagle) 	Added readUTF8File support
- * OCT 29, 2008	(LeiWang)	Add method getTokenList().
- * NOV 25, 2008	(LeiWang)	Add method containsSepcialKeys(): See defect S0546329
+ * OCT 29, 2008	(Lei Wang)	Add method getTokenList().
+ * NOV 25, 2008	(Lei Wang)	Add method containsSepcialKeys(): See defect S0546329
  * JAN 26, 2009	(Carl Nagle) 	Fixed getTrimmedUnquotedString to trim appropriate whitespace
  * MAR 27, 2014	(Lei Wang) 	Add method getTokenList() getTokenArray(): get delimited tokens, token can contain delimiter.
  * FEB 17, 2015	(Lei Wang) 	Add method breakXpath(): break a slash-separated-xpath into an array.
@@ -35,6 +49,10 @@
  * APR 06, 2017 (Lei Wang) 	Added method wildcardToRegex().
  * APR 11, 2017 (Lei Wang) 	Removed the deprecated convertWindowPosition(): reduce the dependency of org.safs.ComponentFunction.Window.
  * APR 27, 2017 (Lei Wang) 	Modified matchText(): fixed a bug when text is regex; added ability to compare as wildcard string.
+ * DEC 27, 2017 (Lei Wang) 	Added method replaceChar().
+ * JUN 12, 2019 (Lei Wang) 	Added method processEmbeddedVariables(), stripFromEnv().
+ * JUN 26, 2019 (Lei Wang) 	Added method deduceUsedSeparatorString().
+ * NOV 19, 2019 (Lei Wang) 	Modified method convertCoords(): allow negative percentage format, such as -50%, -0.75 etc.
  **/
 package org.safs;
 
@@ -44,6 +62,7 @@ import java.awt.Rectangle;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -144,6 +163,8 @@ public abstract class StringUtils extends StringUtilities{
 	public static final String NUMBER = String.valueOf(CHAR_NUMBER);
 	/**string colon <b>:</b> */
 	public static final String COLON = String.valueOf(CHAR_COLON);
+	/**string dot <b>.</b> */
+	public static final String DOT = String.valueOf(CHAR_DOT);
 	/**string equal <b>=</b> */
 	public static final String EQUAL = String.valueOf(CHAR_EQUAL);
 	/**string and <b>&</b> */
@@ -714,6 +735,7 @@ public abstract class StringUtils extends StringUtilities{
    * @deprecated for DatabaseUtils.writefile(String, Collection, String)
    * @see DatabaseUtils#writefile(String, Collection, String)
    **/
+  @Deprecated
   public static  void writefile(String filename, Collection list, String delim) throws IOException {
   	DatabaseUtils.writefile(filename, list, delim);
   }
@@ -722,6 +744,7 @@ public abstract class StringUtils extends StringUtilities{
    * @deprecated for DatabaseUtils.getDBVal(Object)
    * @see DatabaseUtils#getDBVal(Object)
    **/
+  @Deprecated
   public static String getDBVal (Object m) {
   	return DatabaseUtils.getDBVal(m);
   }
@@ -741,8 +764,8 @@ public abstract class StringUtils extends StringUtilities{
 				int i = 0;
 			    for(;i<text.length();i++){
 			        char c = text.charAt(i);
-			        if (c == (int) 9) break;
-			        if (c > (int)32) break;
+			        if (c == 9) break;
+			        if (c > 32) break;
 			    }
 			    if( i < text.length()) lttext = text.substring(i);
 			}
@@ -764,8 +787,8 @@ public abstract class StringUtils extends StringUtilities{
 				int i = text.length();
 			    for(;i>0;i--){
 			        char c = text.charAt(i-1);
-			        if (c == (int) 9) break;
-			        if (c > (int)32) break;
+			        if (c == 9) break;
+			        if (c > 32) break;
 			    }
 			    if( i > 0) rttext = text.substring(0,i);
 			}
@@ -840,6 +863,22 @@ public abstract class StringUtils extends StringUtilities{
    **/
   public static String concat(String s1, String s2, String s3) {
     return s1+s2+s3;
+  }
+
+  /**
+   * @param baseURL String
+   * @param relativeURI String
+   * @return String the concatenated URL string.
+   */
+  public static String concatURL(String baseURL, String relativeURI){
+	  String url = null;
+	  if(isValid(baseURL) && isValid(relativeURI)){
+		  if(!baseURL.endsWith("/")) baseURL += "/";
+		  if(relativeURI.startsWith("/")) relativeURI = relativeURI.substring(1);
+		  url = baseURL+relativeURI;
+	  }
+
+	  return url;
   }
 
   /** convert ? and * wildcarding to regular expression wildcarding .? and .*
@@ -1550,6 +1589,7 @@ public abstract class StringUtils extends StringUtilities{
    * @return  String[], String pair if successful, null otherwise
    * @deprecated call {@link #convertCoordsToArray(String, int)}, which is more generic.
    */
+  @Deprecated
   public static String[] extractCoordStringPair(String coords) {
 	// Carl Nagle OCT 21, 2005 This function previously did NOT support the
   	// "Coords=" prefix and used to decrement 1 for all provided values.
@@ -1624,13 +1664,16 @@ public abstract class StringUtils extends StringUtilities{
    * The 'coordinate' could be provided in 2 formats:<br>
    * It could be <b>number, such as [12, 15], [5, 10]</b>. With this format
    * the second parameter 'compRect' is not needed (could be provided as null).<br>
-   * Or it could be in <b>percentage format, such as [30%, 45%], [0.25, 0.8]</b>. With this
+   * Or it could be in <b>percentage format, such as [30%, 45%], [0.25, 0.8], [-30%, -45%], [-0.25, -0.8]</b>. With this
    * format, the second parameter 'compRect' SHOULD be provided, and the width and
    * height of component rectangle are necessary.<br>
    *
    * @param coordsPair String[], the 2 dimension array representing the [x,y] coordinate.<br>
    * @param compRect Rectangle, it represents the component relative to which the coordinate will be calculated.<br>
    *                            Only the width and height will be counted, the rectangle x,y position will not be used.<br>
+   *                            <b>NOTE: If 'compRect' is not null, then the parameter 'coordsPair' will be considered as offset,
+   *                               if the offset is between -1 and 1, the offset will be considered as percentage;
+   *                               otherwise, the offset will be considered as an absolute coordinate to add or minus.</b>
    * @return java.awt.Point, the converted coordinate relative to the component
    */
   public static java.awt.Point convertCoords(String[] coordsPair, Rectangle compRect) {
@@ -1652,10 +1695,10 @@ public abstract class StringUtils extends StringUtilities{
 		  float yF = parseFloat(coordsPair[1]);
 		  //If the compRect is not null, we might provide a percentage for the coordinate
 		  if(compRect!=null){
-			  // If the coordinate value is between zero to one, it will be treated as percentage format;
+			  // If the coordinate value is between -1 to 1, it will be treated as percentage format;
 			  // otherwise, the casting int format of coordinate value will be used directly.
-			  x = (0<xF && xF<1) ? (int) (xF * compRect.getSize().width) : (int) xF;
-			  y = (0<yF && yF<1) ? (int) (yF * compRect.getSize().height) : (int) yF;
+			  x = (-1<xF && xF<1) ? (int) (xF * compRect.getSize().width) : (int) xF;
+			  y = (-1<yF && yF<1) ? (int) (yF * compRect.getSize().height) : (int) yF;
 		  }else{
 			  x = (int) xF;
 			  y = (int) yF;
@@ -1808,6 +1851,30 @@ public abstract class StringUtils extends StringUtilities{
     }
 
     /**
+     * Replace a certain char by a new char in the source string.
+     *
+     * @param source String, the source string
+     * @param toReplace char, the char to replace
+     * @param by char, the char used to replace the old char.
+     * @return String
+     */
+    public static String replaceChar(String source, char toReplace, char by){
+    	StringBuilder sb = new StringBuilder();
+
+    	char c;
+    	for(int i=0;i<source.length();i++){
+    		c = source.charAt(i);
+    		if(c==toReplace){
+    			sb.append(by);
+    		}else{
+    			sb.append(c);
+    		}
+    	}
+
+    	return sb.toString();
+    }
+
+    /**
      * If the params contain the originalSeparator, then replace it by a different separator.<br>
      *
      * @param originalSeparator String, the original separator to search in parameters
@@ -1938,6 +2005,21 @@ public abstract class StringUtils extends StringUtilities{
 		if(expression!=null){
 			for(String sep: TestRecordData.POSSIBLE_SEPARATOR){
 				if(expression.indexOf(sep)< 0) return sep;
+			}
+		}
+		IndependantLog.warn(debugmsg(false)+" cannot deduce a valid separator for expression: "+expression);
+		return null;
+	}
+
+	/**
+	 * Deduce the separator used in the expression, it tries each possible separator in list {@link TestRecordData#POSSIBLE_SEPARATOR} and return the first used one.<br>
+	 * @param expression String, to examine to find which separator does exist inside the expression.
+	 * @return a single String sep, or null if the expression does NOT contain any character of possible separators.
+	 */
+	public static String deduceUsedSeparatorString(String expression){
+		if(expression!=null){
+			for(String sep: TestRecordData.POSSIBLE_SEPARATOR){
+				if(expression.indexOf(sep)> -1) return sep;
 			}
 		}
 		IndependantLog.warn(debugmsg(false)+" cannot deduce a valid separator for expression: "+expression);
@@ -2546,6 +2628,62 @@ public abstract class StringUtils extends StringUtilities{
 		return sb.toString();
 	}
 
+	/**
+	 * Replace the embedded variables inside a string.<br>
+	 * Embedded variables are in the form %VARIABLE_NAME% and will be sought as System Properties,
+	 * or System Environment variables.
+	 * @param stringContainingVariables String
+	 * @return String, the new string with the variable replaced by its value.
+	 */
+	public static String processEmbeddedVariables(String stringContainingVariables){
+		final String P = "%";
+		if(stringContainingVariables == null || stringContainingVariables.length() < 3) return stringContainingVariables;
+		if(stringContainingVariables.indexOf(P)==stringContainingVariables.lastIndexOf(P)) return stringContainingVariables;
+		int s = stringContainingVariables.indexOf(P);
+		int e = stringContainingVariables.indexOf(P, s+1);
+		if(s>-1 && e >-1 && e>s){
+			String varname = stringContainingVariables.substring(s+1, e);
+			String varvalue = System.getProperty(varname);
+			if(varvalue == null) try{ varvalue = System.getenv(varname);}catch(Exception ignore){}
+			String result = new String(stringContainingVariables);
+			if(varvalue != null && varvalue.length() > 0){
+				try{
+					result = "";
+					if( s > 0 ) result += stringContainingVariables.substring(0, s);
+					result += varvalue;
+					if( (e+1) < stringContainingVariables.length()) result += stringContainingVariables.substring(e+1);
+				}catch(Exception ignore){}
+			}
+			return processEmbeddedVariables(result);
+		}else{
+			return stringContainingVariables;
+		}
+	}
+
+	/**
+	 * @param envVar String, the environment variable's name, like "CLASSPATH", "PATH" etc.
+	 * @param toRemoves String[], an array of items to strip. It is partial matched, for example {"rational_ft.jar", "bfg.jar"}.
+	 * @return String, the stripped value of the environment variable.
+	 */
+	public static String stripFromEnv(String envVar, String[] toRemoves){
+		String result = "";
+		String env = System.getenv(envVar);
+		try{
+			String[] items = env.split(File.pathSeparator);
+outer:		for(String item: items){
+				for(String toRemove:toRemoves){
+					if(item.contains(toRemove)) continue outer;
+				}
+				result += item+File.pathSeparator;
+			}
+		}catch(Exception e){
+			IndependantLog.error("stripEnv() failed, due to "+e.toString());
+			result = env;
+		}
+
+		return result;
+	}
+
 	private static void __test_converRegex(String wildcard, String expectedStr, boolean expectedMatch){
 		String regex = wildcardToRegex(wildcard);
 
@@ -2865,15 +3003,34 @@ public abstract class StringUtils extends StringUtilities{
 		assert mySimpleName.equals(ts.getcallerName(false));
 	}
 
+	private static void test_processEmbeddedVariables(){
+		String embeddedvarialbes = "A string with embedded variables %var1%, %var2% and %var3%";
+		String var1 = "abced";
+		String var2 = "fghij";
+		String var3 = "klmno";
+
+		System.setProperty("var1", var1);
+		System.setProperty("var2", var2);
+		System.setProperty("var3", var3);
+
+		System.out.println(embeddedvarialbes);
+		String value = processEmbeddedVariables(embeddedvarialbes);
+		System.out.println(value);
+
+		assert value.equals("A string with embedded variables "+var1+", "+var2+" and "+var3);
+	}
+
 	private static void debug(String message){
 		System.out.println(message);
 	}
 
 	public static void initIndependantLogByConsole(){
 		IndependantLog.setDebugListener(new DebugListener() {
+			@Override
 			public String getListenerName() {
 				return null;
 			}
+			@Override
 			public void onReceiveDebug(String arg0) {
 				System.out.println(arg0);
 			}
@@ -2899,6 +3056,7 @@ public abstract class StringUtils extends StringUtilities{
 
 		test_stacktrace();
 		test_converRegex();
+		test_processEmbeddedVariables();
 	}
 
 }

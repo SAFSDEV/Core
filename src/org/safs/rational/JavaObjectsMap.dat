@@ -10,7 +10,7 @@
 # 06/05/2008 Carl Nagle Added Html.Dialog and Html.DialogButton support
 # 06/06/2008 Carl Nagle Added Html.LI and Html.UL support
 # 07/11/2008 JunwuMa Added System.Windows.Forms.DataGridView support
-# 07/17/2008 LeiWang Added System.Windows.Forms.TableLayoutPanel
+# 07/17/2008 Lei Wang Added System.Windows.Forms.TableLayoutPanel
 #			   System.Windows.Forms.CheckBox
 #			   System.Windows.Forms.MenuStrip (ContextMenuStrip, ToolStripMenuItem)
 #			   System.Windows.Forms.MainMenu (ContextMenu, MenuItem)

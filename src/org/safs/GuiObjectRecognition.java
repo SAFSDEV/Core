@@ -1,7 +1,20 @@
-/** Copyright (C) (SAS) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs;
 
 import java.util.*;
@@ -103,7 +116,7 @@ import org.safs.tools.stringutils.StringUtilities;
  *         backwards compatability when retrieving Object name.
  * @author JunwuMa    JUN 17, 2008 Added "null.glassPane" to Array containerNamesIgnoredForRecognition. 
  *         When generating recognization string in STAFPC for Java apps, "null.glassPane" should be shown as 'Panel'.  	  
- * <br>		LeiWang		OCT 29, 2008	Modify method isMatchingClass(): when the category is class, we
+ * <br>		Lei Wang		OCT 29, 2008	Modify method isMatchingClass(): when the category is class, we
  * 										will use wildcast to match it with object's classname.
  * 										Example: {ClassN*} will be matched to ClassName
  * 										See defect S0543037.
@@ -722,10 +735,12 @@ public abstract class GuiObjectRecognition {
 			int i = pathInfo.indexOf(qualifierSeparator);
 			if (i > 0){
 				processInfo = pathInfo.substring(0, i);
+				Log.debug("GOR.initDomainInfo parsing processInfo: "+processInfo);
 				String[] tokens = processInfo.split("=");
 				processValue = tokens[1].trim();
 				try{
 					pathInfo = pathInfo.substring(i+1);
+					Log.debug("GOR.initDomainInfo the rest pathInfo (without process info): "+pathInfo);
 				}catch(Exception x){
 					Log.debug("GOR.initDomainInfo IGNORING invalid string: "+pathInfo);
 				}

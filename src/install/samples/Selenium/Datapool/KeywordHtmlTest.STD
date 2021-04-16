@@ -6,8 +6,11 @@ C, UseSeleniumFunctions, ON
 ;####################	Begin the main test #########################
 ;URL_Google is a variable defined in file google.map
 C, StartWebBrowser, ^URL_Google, WebBrowser
-T, SeleniumDriverCommandTest
+;T, SeleniumDriverTest
+;T, SeleniumGenericTest
+;T, SeleniumDriverCommandTest
 T, SeleniumEditBoxTest
+C, StopWebBrowser, WebBrowser
 
 ;####################	stop using RobotJ if available  #############
 C, UseSeleniumFunctions, OFF

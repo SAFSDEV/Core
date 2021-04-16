@@ -1,7 +1,20 @@
-/** Copyright (C) (MSA, Inc) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
+/**
+ * Copyright (C) (MSA, Inc), All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.rational;
 
 import java.awt.Rectangle;
@@ -54,14 +67,14 @@ import com.rational.test.ft.vp.ITestDataList;
  *   <br>   AUG 18, 2005    (Jeremy_J_Smith)  RightClickTextItem added.
  *   <br>   Nov 22, 2005    (RFiroz)          ExtendSelectionToTextItem added.
  *   <br>   MAR 25, 2008    (JunwuMa) Added   VerifyListContains,VerifyListContainsPartialMatch,VerifyListDoesNotContain and VerifyListContainsPartialMatch.
- *   <br>   JUN 27, 2008	(LeiWang) Add mehtod getListContents() to support the .NET application
- *   <br>   JUL 11, 2008	(LeiWang) Modify mehtod clickTextItem(),verifySelected() to support the .NET application.
+ *   <br>   JUN 27, 2008	(Lei Wang) Add mehtod getListContents() to support the .NET application
+ *   <br>   JUL 11, 2008	(Lei Wang) Modify mehtod clickTextItem(),verifySelected() to support the .NET application.
  *   								  Modify method selectIndex() for an index bug.
- *   <br>	JUL 22, 2008	(LeiWang) Modify method verifySelected(). Original version only take one selected item to compare.
+ *   <br>	JUL 22, 2008	(Lei Wang) Modify method verifySelected(). Original version only take one selected item to compare.
  *   								  Now we will compare with all selected items. Work for awt.List, swing.JList, Forms.ListBox, Forms.ListView and their subclass.  
  *									  Modify method verifyItem(), .NET List has "Text" property instead of "text"
  *   <br>   SEP 03, 2008    (JunwuMa)  Added SetListContains.
- *   <br>	SEP 11, 2008	(LeiWang) Add method clickTextItem2() to replace clickTextItem(). The old one try to find the rectangle
+ *   <br>	SEP 11, 2008	(Lei Wang) Add method clickTextItem2() to replace clickTextItem(). The old one try to find the rectangle
  *   								  of the item within the list, this will call application specific method to do that; The new one
  *   								  use RFT API and let RFT to handle locating the item in the list.
  *   								  Impacted keywords: ClickTextItem, RightClickTextItem, RightClickUnverifiedTextItem
@@ -71,15 +84,15 @@ import com.rational.test.ft.vp.ITestDataList;
  *                                    System.Windows.Forms.ListView, also is a DotNetTable and a DotNetTree. This class combines features of ListBox, Tree and Table. 
  *                                    Take the first column of this object as the ListBox treated as usual. Fix S0553625. 
  *                                    Modify getListContents() and treat SAS.Shared.SASFormatInfo (list item) specifically. Fix S0554094.
- *   <br>	FEB 24, 2009	(LeiWang) For supporting Flex list. Modify method activatePartialMatch(),clickTextItem2(),getListContents(),
+ *   <br>	FEB 24, 2009	(Lei Wang) For supporting Flex list. Modify method activatePartialMatch(),clickTextItem2(),getListContents(),
  *   																	modifiedClickTextItem(),selectTextItem(),verifyItem(),verifySelected()
  *   															Add method getListItem(),searchForListItem(),performDoubleClick(),scrollToIndex(),scrollToText()
  * 	 <br>	MAR 13, 2009    (Carl Nagle)  Renamed getListContents to be captureObjectData and refactored moving 
  *                                    SAS-specific class information into rational.custom.CFList.
  *   <br>   MAY 20, 2009    (Carl Nagle)  Removed extra stripping of quotes done to param. These quotes should already be 
  *                                    stripped in TestStepProcessor.interpretFields
- *   <br>	OCT 15, 2010	(LeiWang) Add keyword: ClickColumnIndex and ClickColumnLabel
- *   <br>	JUL 07, 2011	(LeiWang) Modify method captureObjectData(): get list data by verification point.
+ *   <br>	OCT 15, 2010	(Lei Wang) Add keyword: ClickColumnIndex and ClickColumnLabel
+ *   <br>	JUL 07, 2011	(Lei Wang) Modify method captureObjectData(): get list data by verification point.
  **/
 public class CFList extends CFComponent {
 
@@ -391,7 +404,7 @@ public class CFList extends CFComponent {
   
   
   /** <br><em>Purpose:</em> selectIndex
-   * <br>	17 JUL 2008 	(LeiWang)	Modify index setting. Because SAFS consider list's index start from 1;
+   * <br>	17 JUL 2008 	(Lei Wang)	Modify index setting. Because SAFS consider list's index start from 1;
    * 									while RFT consider list's index start from 0. We must minus 1 from the
    * 									index param and pass it to RFT.
    **/

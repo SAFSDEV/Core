@@ -38,15 +38,26 @@ End Sub
 '*     "Uninstall"                ------> <ROOTDIR>\uninstall\Uninstall.bat
 '*     "Keywords Reference"       ------> <ROOTDIR>\doc\SAFSReference.htm
 '*******************************************************************************
-Const groupTitle = "SAFS 2016"     'title of group on Windows program menu 
+Const groupTitlePrefix = "SAFS"     'title prefix of group on Windows program menu
 Const docGroupTitle  = "Documentation"    'sub-group for documentation
+Const defaultYear = 2017
 Dim file, shell, fso, env, installdir, stafdir
 Dim mainProgramsDir, safsProgramDir, safsDocProgramDir 
+Dim groupTitle, currentYear
 
 Set shell = WScript.CreateObject("WScript.Shell")
 Set env   = shell.Environment("SYSTEM")
 Set fso   = WScript.CreateObject("Scripting.FileSystemObject")
 
+groupTitle = groupTitlePrefix & " " & defaultYear
+'Get the current year and create group title
+Err.Clear
+currentYear = Year(Date())
+If Err.Number=0 Then
+    'WScript.Echo "currentYear=" & currentYear
+    groupTitle = groupTitlePrefix & " " & currentYear
+End If
+	
 mainProgramsDir   = shell.SpecialFolders("AllUsersPrograms")
 safsProgramDir    = mainProgramsDir & "\" & groupTitle	
 safsDocProgramDir = safsProgramDir & "\" & docGroupTitle	

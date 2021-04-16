@@ -1,17 +1,34 @@
-/** Copyright (C) (SAS) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.install;
 /**
  * History:
  *
- *    JUL 03, 2015	(LeiWang)	Modify prepareTempSourceDirectory(): Move the download and unzip functionality out of this method.
+ *    JUL 03, 2015	(Lei Wang)	Modify prepareTempSourceDirectory(): Move the download and unzip functionality out of this method.
  *                                                                   Call these functionalities in downloader thread directly, wait for unzip done before updateDiretory.
- *    JUL 15, 2015	(LeiWang)	Modify processArgs(): Catch Throwable to avoid infinite loop waiting.
- *    JAN 04, 2016	(LeiWang)	Add '-q' for quiet mode so that no dialog will prompt for confirmation.
- *    APR 12, 2017	(LeiWang)	Initialized unzipSkipPredicator (for skipping plugin files) if Eclipse version is not "4.5.2".
- *    APR 27, 2017	(LeiWang)	Modified processArgs(): write message to ProgressIndicator according to its severity.
+ *    JUL 15, 2015	(Lei Wang)	Modify processArgs(): Catch Throwable to avoid infinite loop waiting.
+ *    JAN 04, 2016	(Lei Wang)	Add '-q' for quiet mode so that no dialog will prompt for confirmation.
+ *    APR 12, 2017	(Lei Wang)	Initialized unzipSkipPredicator (for skipping plugin files) if Eclipse version is not "4.5.2".
+ *    APR 27, 2017	(Lei Wang)	Modified processArgs(): write message to ProgressIndicator according to its severity.
  *                              Added a shared LibraryUpdater to expose the downloadURL() method as static method.
+ *    AUG 21, 2017	(Lei Wang)	Modified to support parameter "-e:excludedFolder1;excludedFolder2".
+ *    JUN 29, 2018	(Lei Wang)	Modified processArgs(): install ghostscript.
+ *    JUL 04, 2018	(Lei Wang)	Added "-tools:t1;t2" to tell what tool will be installed/updated.
  **/
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -30,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import javax.swing.JOptionPane;
@@ -43,6 +61,7 @@ import org.safs.selenium.util.SePlusInstallInfo;
 import org.safs.selenium.webdriver.lib.SeleniumPlusException;
 import org.safs.text.FileUtilities;
 import org.safs.text.FileUtilities.Predicate;
+import org.safs.tools.CaseInsensitiveFile;
 
 /**
  * A generic customizable File directory updater for SAFS users wishing to update certain library assets
@@ -84,7 +103,10 @@ import org.safs.text.FileUtilities.Predicate;
  * <tr><td style="vertical-align: top;white-space:nowrap;">-t:targetdir <td>* (target dir receiving newer files)
  * <tr><td style="vertical-align: top;white-space:nowrap;">-f           <td>(force w/o prompting for each file)
  * <tr><td style="vertical-align: top;white-space:nowrap;">-r           <td>(recurse into sub-directories)
- * <tr><td style="vertical-align: top;white-space:nowrap;">-a           <td>(file of all types will be copy, default false)"
+ * <tr><td style="vertical-align: top;white-space:nowrap;">-a           <td>(file of all types will be copy, default false)
+ * <tr><td style="vertical-align: top;white-space:nowrap;">-e:dir1;dir2 <td><b>-e:</b> followed by excluded folders separated by semi-colon, such as jre;Java;Java64<br>
+ * These folders can be relative to the target directory or can be absolute directory.<br>
+ * These folders will be excluded when updating, which means they and their sub-folders will not be updated.<br>
  * <tr><td style="vertical-align: top;white-space:nowrap;">-nob         <td>(no file backups required)
  * <tr><td> &nbsp;&nbsp; <td> &nbsp;&nbsp;
  * <tr><td><td>*  - required parameter.
@@ -101,17 +123,33 @@ import org.safs.text.FileUtilities.Predicate;
  */
 public class LibraryUpdate {
 
+	/**<b>1.0</b> current version */
 	public static final String _VERSION_ = "1.0";
 
+	/**<b>-b:</b> followed by backup directory */
 	public static final String ARG_PREFIX_B = "-b:";
+	/**<b>-nob</b> Do NOT Backup older files */
 	public static final String ARG_PREFIX_NOB = "-nob";
+	/**<b>-prompt:</b> followed by Title */
 	public static final String ARG_PREFIX_P = "-prompt:";
+	/**<b>-t:</b> followed by target directory */
 	public static final String ARG_PREFIX_T = "-t:";
+	/**<b>-s:</b> followed by source (an URL or a file path)*/
 	public static final String ARG_PREFIX_S = "-s:";
+	/**<b>-r</b> Recurse Directories*/
 	public static final String ARG_PREFIX_R = "-r";
+	/**<b>-f</b> Force Overwrite*/
 	public static final String ARG_PREFIX_F = "-f";
+	/**<b>-a</b> all file types; if not specified, only .JAR, .SVB, and .DAT will be updated, see {@link #fileIncluded(File)} */
 	public static final String ARG_PREFIX_A = "-a";
+	/**<b>-q</b> quiet mode */
 	public static final String ARG_PREFIX_Q = "-q";
+	/** <b>-e:</b> followed by excluded folders (can be relative to target directory) separated by semi-colon, such as jre;Java;Java64  */
+	public static final String ARG_PREFIX_E = "-e:";
+	public static final String ARG_PREFIX_E_SEP = StringUtils.SEMI_COLON;
+
+	/** <b>-tools:</b> followed by tools' name separated by semi-colon, such as GhostScript;Tool2;Tool3, to be updated or installed  */
+	public static final String ARG_PREFIX_TOOLS = "-tools:";
 
 	//do not attempt to copy/replace files older than this date
 	//public static final long OLDEST_DATE = Date.parse("01 Aug 2012");
@@ -137,6 +175,9 @@ public class LibraryUpdate {
 	File backupdir = null;
 	int modifiedFiles = 0;
 	int backupFiles = 0;
+	String excludedFolderString = null;
+	List<File> excludedFolderList = new ArrayList<File>();
+	String[] toolsToUpdate = null;
 
 	/**
 	 * If we need to download zip file from Internet and unzip it in a separate thread,<br>
@@ -185,7 +226,8 @@ public class LibraryUpdate {
 
 	protected void init(){
 	    javax.swing.SwingUtilities.invokeLater(new Runnable() {
-	        public void run() {
+	        @Override
+			public void run() {
 	        	progressor.createAndShowGUI();
 	        }
 	    });
@@ -245,14 +287,14 @@ public class LibraryUpdate {
 			if(arg.startsWith(ARG_PREFIX_T)){
 				targetdir = new File(arg.substring(ARG_PREFIX_T.length()));
 				if(! targetdir.canWrite()) throw new Exception("Specified target directory '"+ targetdir.getAbsolutePath() +"' cannot be written.");
-				progressor.setProgressInfo(progress+=10, "Using Target Directory: "+ targetdir);
+				progressor.setProgressInfo(progress+=1, "Using Target Directory: "+ targetdir);
 			}
 			else if(arg.startsWith(ARG_PREFIX_S)){
 				String sarg = arg.substring(ARG_PREFIX_S.length());
 				final String encodedURL = sarg.replaceAll(" ", "%20");
 				if(sarg.toLowerCase().startsWith("http")){
 
-					progressor.setProgressInfo(progress+=10, "Evaluating URL Source: "+ sarg);
+					progressor.setProgressInfo(progress+=1, "Evaluating URL Source: "+ sarg);
 
 					if(!quiet){
 						message = "Preparing to download ...\n\n"
@@ -279,6 +321,7 @@ public class LibraryUpdate {
 					}
 
 					Thread downloader = new Thread(new Runnable(){
+						@Override
 						public void run(){
 							File zipfile = null;
 							String zipfileFullPath = null;
@@ -320,7 +363,7 @@ public class LibraryUpdate {
 					downloadDone = false;
 					canceled = false;
 					downloader.start();
-					progressor.setProgressInfo(progress+=10, "Download started and can take several minutes...");
+					progressor.setProgressInfo(progress+=1, "Download started and can take several minutes...");
 					while(!canceled && !downloadDone){
 						try{Thread.sleep(1000);}catch(Exception x){}
 					}
@@ -388,33 +431,74 @@ public class LibraryUpdate {
 					try{ backupdir.mkdir(); }catch(Exception ignore){}
 				}
 				if(! backupdir.canWrite()) throw new Exception("Specified backup directory '"+ backupdir.getAbsolutePath() +"' cannot be written.");
-				progressor.setProgressInfo(progress+=10, "Using Backup Directory: "+ backupdir);
+				progressor.setProgressInfo(progress+=1, "Using Backup Directory: "+ backupdir);
 			}
 			else if(arg.startsWith(ARG_PREFIX_F)){
 				force = true;
-				progressor.setProgressInfo(progress+=10, "Force Overwrite set: "+ force);
+				progressor.setProgressInfo(progress+=1, "Force Overwrite set: "+ force);
 			}
 			else if(arg.startsWith(ARG_PREFIX_R)){
 				recurse = true;
-				progressor.setProgressInfo(progress+=10, "Recurse Directories set: "+ recurse);
+				progressor.setProgressInfo(progress+=1, "Recurse Directories set: "+ recurse);
 			}
 			else if(arg.startsWith(ARG_PREFIX_NOB)){
 				dobackup = false;
-				progressor.setProgressInfo(progress+=10, "Do Backup set: "+ dobackup);
+				progressor.setProgressInfo(progress+=1, "Do Backup set: "+ dobackup);
 			}
 			else if(arg.startsWith(ARG_PREFIX_A)){
 				allfilecopy = true;
-				progressor.setProgressInfo(progress+=10, "All files type copy: "+ allfilecopy);
+				progressor.setProgressInfo(progress+=1, "All files type copy: "+ allfilecopy);
 			}
 			else if(arg.startsWith(ARG_PREFIX_Q)){
 				quiet = true;
 				progressor.setProgressInfo(progress+=1, "Quiet Mode: "+ quiet);
 			}
+			else if(arg.startsWith(ARG_PREFIX_E)){
+				excludedFolderString = arg.substring(ARG_PREFIX_E.length());
+				try{
+					excludedFolderString = excludedFolderString.trim();
+					if(excludedFolderString.startsWith(ARG_PREFIX_E_SEP)) excludedFolderString = excludedFolderString.substring(ARG_PREFIX_E_SEP.length());
+					if(excludedFolderString.endsWith(ARG_PREFIX_E_SEP)) excludedFolderString = excludedFolderString.substring(0, excludedFolderString.length()-ARG_PREFIX_E_SEP.length());
+				}catch(Exception e){}
+			}
+			else if(arg.startsWith(ARG_PREFIX_TOOLS)){
+				try{
+					String tools = arg.substring(ARG_PREFIX_TOOLS.length()).trim();
+					if(tools.startsWith(StringUtils.SEMI_COLON)) tools = tools.substring(StringUtils.SEMI_COLON.length());
+					if(tools.endsWith(StringUtils.SEMI_COLON)) tools = tools.substring(0, tools.length()-StringUtils.SEMI_COLON.length());
+					toolsToUpdate = tools.split(StringUtils.SEMI_COLON);
+				}catch(Exception e){}
+			}
 		}
-		progressor.setProgressInfo(progress+=10, "Preparing to perform the update...");
+		progressor.setProgressInfo(progress+=1, "Preparing to perform the update...");
 		if ((targetdir != null && targetdir.canWrite()) &&
 		   (sourcedir != null && sourcedir.canRead())  &&
 		   (!dobackup || (backupdir != null && backupdir.canWrite()))){
+
+			try{
+				//Turn the excludedFolderString (they are folders relative to 'targetdir') into an array of file.
+				if(StringUtils.isValid(excludedFolderString)){
+					String[] excludedFolders = excludedFolderString.split(ARG_PREFIX_E_SEP);
+					if(excludedFolders!=null && excludedFolders.length>0){
+						excludedFolderList = new ArrayList<File>();
+						String excludedFolder = null;
+						File tempFile = null;
+						for(int i=0;i<excludedFolders.length;i++){
+							excludedFolder = excludedFolders[i];
+							tempFile = new CaseInsensitiveFile(excludedFolder).toFile();
+							if(!tempFile.isAbsolute()){
+								tempFile = new CaseInsensitiveFile(targetdir, excludedFolder).toFile();
+							}
+							if(tempFile.isAbsolute()){
+								excludedFolderList.add(tempFile);
+							}else{
+								progressor.setProgressMessage("Could not add folder '"+excludedFolder+"' as ignored folder.", LogConstants.WARN);
+							}
+						}
+						progressor.setProgressMessage("Ignoring Folders: "+ excludedFolderList);
+					}
+				}
+			}catch(Exception e){}
 
 			if(!quiet){
 				message = "Preparing to perform an update.\n\n"
@@ -444,9 +528,27 @@ public class LibraryUpdate {
 				}
 			}
 
-			progressor.setProgressMessage("Updating...");
+			progressor.setProgressMessage("Updating directories ...");
 			updateDirectory(targetdir, sourcedir, backupdir);
-			progressor.setProgressMessage("Update complete.");
+			progressor.setProgressInfo(progress+=3, "Directory Update completed.");
+
+			if(toolsToUpdate!=null){
+				for(String tool:toolsToUpdate){
+					if(GhostScriptInstaller.PRODUCT_NAME.equalsIgnoreCase(tool)){
+						try{
+							//targetdir should be the home directory of SAFS or SeleniumPLus
+							InstallerImpl installer = new GhostScriptInstaller(progressor, targetdir.getAbsolutePath());
+							installer.install();
+						}catch(Throwable t){
+							progressor.setProgressMessage("Failed to install '"+tool+"', due to "+ t.getClass().getSimpleName()+": "+ t.getMessage(), LogConstants.ERROR);
+						}
+					}
+					else{
+						IndependantLog.warn("Please call new installer to install "+tool);
+					}
+				}
+			}
+
 			return !canceled;
 		}
 		return false;
@@ -466,6 +568,7 @@ public class LibraryUpdate {
 			   + "   -r                (recurse into subdirectories)\n"
 			   + "   -nob              (no file backups required)\n\n"
 			   + "   -a				   (file of all types will be copy, default false)\n\n"
+			   + "   -tools:t1;t2	   (tools to update or install, default \"\", example -tools:GHOSTSCRIPT;Tool2;Tool3 )\n\n"
 			   + "*  - required parameter.\n"
 			   + "** - only required if -nob not provided.\n\n";
 
@@ -567,6 +670,14 @@ public class LibraryUpdate {
 			"Yes to All",
 			"Cancel"
 		};
+
+		//If targetdir starts with one of folder in 'excludedFolderArray', then ignore it (don't update this folder).
+		for(File excludedFolder:excludedFolderList){
+			if(targetdir.toPath().startsWith(excludedFolder.toPath())){
+				progressor.setProgressInfo(progress, "Ignoring target directory '"+targetdir.getCanonicalPath()+"', which will NOT be updated.");
+				return;
+			}
+		}
 
 		SimpleDateFormat date = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
 		try{
@@ -778,6 +889,7 @@ public class LibraryUpdate {
 		int i = 0;
 		for(final String url:urls){
 			runners[i++] = new Thread(new Runnable(){
+				@Override
 				public void run() {
 					File downloadedFile = null;
 					String file = null;
@@ -865,8 +977,12 @@ public class LibraryUpdate {
 	 * <tr><td style="vertical-align: top;white-space:nowrap;">-t:targetdir <td>* (target dir receiving newer files)
 	 * <tr><td style="vertical-align: top;white-space:nowrap;">-f           <td>(force w/o prompting for each file)
 	 * <tr><td style="vertical-align: top;white-space:nowrap;">-r           <td>(recurse into sub-directories)
-	 * <tr><td style="vertical-align: top;white-space:nowrap;">-a           <td>(file of all types will be copy, default false)"
+	 * <tr><td style="vertical-align: top;white-space:nowrap;">-a           <td>(file of all types will be copy, default false)
+	 * <tr><td style="vertical-align: top;white-space:nowrap;">-e:dir1;dir2 <td><b>-e:</b> followed by excluded folders separated by semi-colon, such as jre;Java;Java64<br>
+	 * These folders can be relative to the target directory or can be absolute directory.<br>
+	 * These folders will be excluded when updating, which means they and their sub-folders will not be updated.<br>
 	 * <tr><td style="vertical-align: top;white-space:nowrap;">-nob         <td>(no file backups required)
+	 * <tr><td style="vertical-align: top;white-space:nowrap;">-tools:t1;t2         <td>(tools to update or install, default "", example -tools:GHOSTSCRIPT;Tool2;Tool3)
 	 * <tr><td> &nbsp;&nbsp; <td> &nbsp;&nbsp;
 	 * <tr><td><td>*  - required parameter.
 	 * <tr><td><td>** - only required if -nob not provided.

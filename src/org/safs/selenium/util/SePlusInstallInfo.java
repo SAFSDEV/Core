@@ -1,8 +1,20 @@
 /**
  * Copyright (C) SAS Institute, All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- */
-
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * Logs for developers, not published to API DOC.
  *
@@ -11,6 +23,12 @@
  * MAR 02, 2016    (Lei Wang) Refactored code to get driver file according to the browser name.
  *                          Changed the RELATIVE_DIR_EXTRA_SAFS: use 'extra' instead of 'samples/Selenium2.0/extra', all drivers have been put into the folder 'extra'.
  * APR 11, 2017    (Lei Wang) Added methods to detect embedded Eclipse, get Eclipse configuration info. Added IsProduct().
+ * JUL 12, 2017    (Lei Wang) Modified IsSeleniumPlus() and IsSAFS(): accepts VM parameter "PRODUCT_NAME".
+ * AUT 09, 2017    (Lei Wang) Added 'geckodriver.exe' as driver for firefox browser. (required by selenium 3.4.0)
+ * MAY 30, 2018    (Lei Wang) Modified IsSeleniumPlus() and IsSAFS(): get 'PRODUCT_NAME' from both 'System properties' and 'environment'.
+ * MAY 31, 2018    (Lei Wang) Modified GetSystemPropertyOrEnvironmentVariable(): We always prefer 'System property' over 'Environment'.
+ * FEB 26, 2020	   (Lei Wang) Modified validate(): don't quote the java executable for Linux system: see S1562137.
+ * OCT 10, 2020	   (Lei Wang) Modified static{}: use "geckodriver_64.exe" if the installed firefox is 64 bit.
  */
 package org.safs.selenium.util;
 
@@ -29,6 +47,7 @@ import org.safs.Constants;
 import org.safs.Constants.BrowserConstants;
 import org.safs.IndependantLog;
 import org.safs.StringUtils;
+import org.safs.android.auto.lib.Console;
 import org.safs.selenium.webdriver.lib.SeleniumPlusException;
 import org.safs.tools.CaseInsensitiveFile;
 import org.safs.tools.drivers.DriverConstant.SeleniumConfigConstant;
@@ -194,10 +213,27 @@ public class SePlusInstallInfo{
 		return cp;
 	}
 
+	/**
+	 * @deprecated we don't use this anymore, we always prefer 'System property' over 'Environment'.
+	 */
+	@Deprecated
+	public static boolean isOverridePropertySet(String env){
+		return Boolean.getBoolean(env + "_OVERRIDE");
+	}
+
+	/**
+	 * Get the value of the system property (ex. SELENIUM_PLUS),
+	 * if not found then get the value from the environment variables.
+	 */
+	public static String GetSystemPropertyOrEnvironmentVariable(String env){
+		String result = System.getProperty(env);
+		return result==null? System.getenv(env):result;
+	}
+
 	protected static String GetSystemEnvironmentVariable(String env){
 		Object result = null;
 
-		result = System.getenv(env);
+		result = GetSystemPropertyOrEnvironmentVariable(env);
 
 		String nativeWrapperClassName = "org.safs.natives.NativeWrapper";
 		Class<?> nativeWrapperClass = null;
@@ -205,7 +241,7 @@ public class SePlusInstallInfo{
 		if(result==null){
 			try {
 				nativeWrapperClass = Class.forName(nativeWrapperClassName);
-//				Method method = nativeWrapperClass.getMethod(StringUtils.getCurrentMethodName(false), env.getClass());
+				//				Method method = nativeWrapperClass.getMethod(StringUtils.getCurrentMethodName(false), env.getClass());
 				Method method = nativeWrapperClass.getMethod("GetSystemEnvironmentVariable", Object.class);
 				result = method.invoke(null, env);
 			} catch (Exception e) {
@@ -262,6 +298,10 @@ public class SePlusInstallInfo{
 
 	public File getEdgeDriver(){
 		return getDriver(BrowserConstants.BROWSER_NAME_EDGE);
+	}
+
+	public File getChromniumEdgeDriver(){
+		return getDriver(BrowserConstants.BROWSER_NAME_CHROMIUM_EDGE);
 	}
 
 	/**
@@ -355,7 +395,7 @@ public class SePlusInstallInfo{
 			//SAFS doesn't have the embedded Eclipse, so we will not
 			//throw new SeleniumPlusException(errmsg);
 		}
-		javaexe = System.getProperty(SeleniumConfigConstant.SELENIUMSERVER_JVM);
+		javaexe = System.getProperty(SeleniumConfigConstant.PROPERTY_SELENIUMSERVER_JVM);
 		if(javaexe==null){
 			File javabindir = new CaseInsensitiveFile(rootDir, javabin).toFile();
 			if(javabindir.isDirectory()) javaexe = javabindir.getAbsolutePath()+File.separator+"java";
@@ -364,7 +404,9 @@ public class SePlusInstallInfo{
 				javaexe = "java";
 			}
 		}
-		if(!StringUtils.isQuoted(javaexe)) javaexe=StringUtils.quote(javaexe);
+		if(Console.isWindowsOS()){
+			if(!StringUtils.isQuoted(javaexe)) javaexe=StringUtils.quote(javaexe);
+		}
 
 		libraryDir = new CaseInsensitiveFile(rootDir, library).toFile();
 		if(!libraryDir.isDirectory()){
@@ -374,9 +416,11 @@ public class SePlusInstallInfo{
 		}
 
 		//Find the latest selenium-server-standalone jar
-		File[] files = libraryDir.listFiles(new FilenameFilter(){ public boolean accept(File dir, String name){
-			try{ return name.toLowerCase().startsWith(NAME_PARTIAL_SELENIUM_SERVER_STDALONE);}catch(Exception x){ return false;}
-		}});
+		File[] files = libraryDir.listFiles(new FilenameFilter(){
+			@Override
+			public boolean accept(File dir, String name){
+				try{ return name.toLowerCase().startsWith(NAME_PARTIAL_SELENIUM_SERVER_STDALONE);}catch(Exception x){ return false;}
+			}});
 		if(files.length ==0){
 			errmsg = "cannot deduce "+ product +" "+NAME_PARTIAL_SELENIUM_SERVER_STDALONE+"* JAR file in library directory '"+libraryDir.getAbsolutePath()+"'.";
 			IndependantLog.debug(debugmsg+errmsg);
@@ -399,6 +443,7 @@ public class SePlusInstallInfo{
 		return this;
 	}
 
+	@Override
 	public String toString(){
 		StringBuffer sb = new StringBuffer();
 		sb.append(" \n");
@@ -443,12 +488,19 @@ public class SePlusInstallInfo{
 
 	public static final String CHOROMEDRIVER_WINDOWS 		= "chromedriver.exe";
 	public static final String CHOROMEDRIVER_UNIX	 		= "chromedriver";
+	public static final String GECKODRIVER_UNIX	 			= "geckodriver";
+	public static final String GECKODRIVER_UNIX_64	 		= "geckodriver_64";
 
 	public static final String IEDRIVER_WINDOWS	 			= "IEDriverServer.exe";
 
 	public static final String EDGEDRIVER_WINDOWS	 		= "MicrosoftWebDriver.exe";
 
+	public static final String CHROMIUM_EDGEDRIVER_WINDOWS	 = "msedgedriver.exe";
+
 	public static final String OPERADRIVER_WINDOWS	 		= "operadriver.exe";
+
+	public static final String GECKODRIVER_WINDOWS	 		= "geckodriver.exe";
+	public static final String GECKODRIVER_WINDOWS_64	 	= "geckodriver_64.exe";
 
 	public static final String FAKE_DRIVER_NAME	 			= "aFakeBrowserDriver.exe";
 
@@ -468,32 +520,72 @@ public class SePlusInstallInfo{
 	}
 
 	/**
-	 * To test if we are using product "SeleniumPlus". Needs satisfy:
+	 * The VM parameter "<b>PRODUCT_NAME</b>" to indicate the product being used.
+	 * It accepts
+	 * <ul>
+	 * <li>-D<b>PRODUCT_NAME</b>={@link #PRODUCT_SELENIUM_PLUS}
+	 * <li>-D<b>PRODUCT_NAME</b>={@link #PRODUCT_SAFS}
+	 * </ul>
+	 */
+	public static final String PROPERTY_PRODUCT_NAME = "PRODUCT_NAME";
+	/**
+	 * To test if we are using product "SeleniumPlus".<br/>
+	 * <b>Either</b> Satisfy:
 	 * <ul>
 	 * <li>The environment {@link Constants#ENV_SELENIUM_PLUS} must exist.
 	 * <li>We are running from a SeleniumPlus installation (/libs/selenium-plus*.jar or {@link Constants#ENV_SELENIUM_PLUS})
 	 * </ul>
+	 *
+	 * <b>OR</b><br/>
+	 * Indicate the product by VM parameter -D{@link #PROPERTY_PRODUCT_NAME}={@link #PRODUCT_SELENIUM_PLUS}
+	 *
+	 * <b>OR</b><br/>
+	 * The environment {@link #PROPERTY_PRODUCT_NAME} is {@link #PRODUCT_SELENIUM_PLUS}
+	 *
 	 * @return true if we are using product "SeleniumPlus"
 	 */
 	public static boolean IsSeleniumPlus(){
-		return IsProduct(ENV_SELENIUM_PLUS, INDICATOR_SEPLUS);
+		String PRODUCT_NAME =  GetSystemPropertyOrEnvironmentVariable(PROPERTY_PRODUCT_NAME);
+		IndependantLog.debug("PRODUCT_NAME: "+PRODUCT_NAME);
+
+		boolean isSeleniumPlus = PRODUCT_SELENIUM_PLUS.equalsIgnoreCase(PRODUCT_NAME);
+		if(!isSeleniumPlus){
+			isSeleniumPlus = IsProduct(ENV_SELENIUM_PLUS, INDICATOR_SEPLUS);
+		}else{
+			IndependantLog.debug("Product '"+PRODUCT_SELENIUM_PLUS+"' is indicated by VM parameter '"+PROPERTY_PRODUCT_NAME+"'.");
+		}
+		return isSeleniumPlus;
 	}
 	/**
-	 * To test if we are using product "SAFS". Needs satisfy:
+	 * To test if we are using product "SAFS".<br/>
+	 * <b>Either</b> Satisfy:
 	 * <ul>
 	 * <li>The environment {@link Constants#ENV_SAFSDIR} must exist.
 	 * <li>We are running from a SAFS installation (/lib/safsselenium.jar or {@link Constants#ENV_SAFSDIR})
 	 * </ul>
+	 *
+	 * <b>OR</b><br/>
+	 * Indicate the product by VM parameter -D{@link #PROPERTY_PRODUCT_NAME}={@link #PRODUCT_SAFS}
+	 *
 	 * @return boolean if we detect we are using product "SAFS"
 	 */
 	public static boolean IsSAFS(){
-		return IsProduct(ENV_SAFSDIR, INDICATOR_SAFS);
+		String PRODUCT_NAME =  GetSystemPropertyOrEnvironmentVariable(PROPERTY_PRODUCT_NAME);
+		IndependantLog.debug("PRODUCT_NAME: "+PRODUCT_NAME);
+
+		boolean isSAFS = PRODUCT_SAFS.equalsIgnoreCase(PRODUCT_NAME);
+		if(!isSAFS){
+			isSAFS = IsProduct(ENV_SAFSDIR, INDICATOR_SAFS);
+		}else{
+			IndependantLog.debug("Product '"+PRODUCT_SAFS+"' is indicated by VM parameter '"+PROPERTY_PRODUCT_NAME+"'.");
+		}
+		return isSAFS;
 	}
 
 	private static boolean IsProduct(String environmentHome, String indicator){
 		String sourceLocation = getSourceLocation().toLowerCase();
 
-		String home = GetSystemEnvironmentVariable(environmentHome);
+		String home = GetSystemPropertyOrEnvironmentVariable(environmentHome);
 
 		if(home!=null){
 			//replace backslash "\" by slash "/"
@@ -509,10 +601,26 @@ public class SePlusInstallInfo{
 	}
 
 	static{
-		browserToDriverFiles.put(BrowserConstants.BROWSER_NAME_CHROME, Arrays.asList(CHOROMEDRIVER_WINDOWS, CHOROMEDRIVER_UNIX));
-		browserToDriverFiles.put(BrowserConstants.BROWSER_NAME_IE, Arrays.asList(IEDRIVER_WINDOWS));
-		browserToDriverFiles.put(BrowserConstants.BROWSER_NAME_EDGE, Arrays.asList(EDGEDRIVER_WINDOWS));
-		browserToDriverFiles.put(BrowserConstants.BROWSER_NAME_OPERA, Arrays.asList(OPERADRIVER_WINDOWS));
+		if(Console.isWindowsOS()){
+			browserToDriverFiles.put(BrowserConstants.BROWSER_NAME_CHROME, Arrays.asList(CHOROMEDRIVER_WINDOWS));
+			browserToDriverFiles.put(BrowserConstants.BROWSER_NAME_IE, Arrays.asList(IEDRIVER_WINDOWS));
+			browserToDriverFiles.put(BrowserConstants.BROWSER_NAME_EDGE, Arrays.asList(EDGEDRIVER_WINDOWS));
+			browserToDriverFiles.put(BrowserConstants.BROWSER_NAME_CHROMIUM_EDGE, Arrays.asList(CHROMIUM_EDGEDRIVER_WINDOWS));
+			browserToDriverFiles.put(BrowserConstants.BROWSER_NAME_OPERA, Arrays.asList(OPERADRIVER_WINDOWS));
+			if(AbstractDriverUpdater.instance(BrowserConstants.BROWSER_NAME_FIREFOX).isBrowser32Bit()){
+				browserToDriverFiles.put(BrowserConstants.BROWSER_NAME_FIREFOX, Arrays.asList(GECKODRIVER_WINDOWS));
+			}else{
+				browserToDriverFiles.put(BrowserConstants.BROWSER_NAME_FIREFOX, Arrays.asList(GECKODRIVER_WINDOWS_64));
+			}
+		}else{//Unix, Linux, Mac
+			browserToDriverFiles.put(BrowserConstants.BROWSER_NAME_CHROME, Arrays.asList(CHOROMEDRIVER_UNIX));
+			//TODO we probably should check the installed-firefox's bitness, not the OS bitness. But it is not usual to install 32 bit application on 64 bit Linux.
+			if(Console.is64BitOS()){
+				browserToDriverFiles.put(BrowserConstants.BROWSER_NAME_FIREFOX, Arrays.asList(GECKODRIVER_UNIX_64));
+			}else{
+				browserToDriverFiles.put(BrowserConstants.BROWSER_NAME_FIREFOX, Arrays.asList(GECKODRIVER_UNIX));
+			}
+		}
 		//Add more drivers for other browser
 	}
 }

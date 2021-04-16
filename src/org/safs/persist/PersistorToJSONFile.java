@@ -1,30 +1,34 @@
 /**
  * Copyright (C) SAS Institute, All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- */
-
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * Logs for developers, not published to API DOC.
  *
  * History:
  * DEC 05, 2016    (Lei Wang) Initial release.
  * MAR 15, 2017    (Lei Wang) Supported the unpickle functionality.
+ * OCT 18, 2017    (Lei Wang) Modified unpickleParse(): Convert the each JSONObject (item in JSONArray) to Persistable.
+ * OCT 24, 2017    (Lei Wang) Moved most functionalities to class PersistorToJSONString.
  */
 package org.safs.persist;
 
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
-import org.safs.Constants.JSONConstants;
-import org.safs.IndependantLog;
 import org.safs.SAFSException;
-import org.safs.StringUtils;
 import org.safs.tools.RuntimeDataInterface;
 
 /**
@@ -50,10 +54,7 @@ import org.safs.tools.RuntimeDataInterface;
  * @author Lei Wang
  *
  */
-public class PersistorToJSONFile extends PersistorToHierarchialFile{
-
-	JSONObject jsonObject = null;
-
+public class PersistorToJSONFile extends PersistorToFileDelegate{
 	/**
 	 * @param runtime
 	 * @param filename
@@ -63,150 +64,16 @@ public class PersistorToJSONFile extends PersistorToHierarchialFile{
 	}
 
 	@Override
+	protected void instantiateDelegatePersitor() {
+		delegatePersistor = new PersistorToJSONString();
+	}
+
+	@Override
 	protected void writeHeader(Persistable persistable) throws SAFSException, IOException {
 		writer.write("{\n");
 	}
 	@Override
 	protected void writeTailer(Persistable persistable) throws SAFSException, IOException {
 		writer.write("}");
-	}
-
-	@Override
-	protected void containerBegin(String className) throws IOException{
-		writer.write(StringUtils.quote(getTagName(className))+" : {\n");
-		writer.write(StringUtils.quote(JSONConstants.PROPERTY_CLASSNAME)+" : "+StringUtils.quote(className)+",\n"/*The container should have more children, so add a comma after the field '$classname'*/);
-	}
-	@Override
-	protected void childBegin(String key, String value) throws IOException{
-		writer.write(StringUtils.quote(key)+" : "+value);
-	}
-	@Override
-	protected void childEnd(boolean lastTag) throws IOException{
-		if(lastTag){
-			writer.write("\n");
-		}else{
-			writer.write(",\n");
-		}
-	}
-	@Override
-	protected void containerEnd(String className) throws IOException{
-		writer.write("}\n");
-	}
-
-	protected void beforeUnpickle()  throws SAFSException, IOException{
-		super.beforeUnpickle();
-
-		try {
-			jsonObject = new JSONObject(new JSONTokener(reader));
-
-		} catch (JSONException e) {
-			throw new SAFSException("Failed to create JSON Object! Met "+e.toString());
-		}
-	}
-
-	protected Persistable doUnpickle()  throws SAFSException, IOException{
-		if(jsonObject==null || jsonObject.length()!=1){
-			throw new SAFSException("JsonObject is null or the size is not 1. JsonObject should contain only one field, which is a Persistable object.");
-		}
-		JSONObject persistableObj = null;
-		Iterator<String> keys = jsonObject.keys();
-		if(keys.hasNext()){
-			String persistableObject = keys.next();
-			String persistenceName = persistFile==null? getPersistenceName():persistFile.getAbsolutePath();
-			IndependantLog.debug("unpickling '"+persistableObject+"' of persistence '"+persistenceName+"'.");
-			persistableObj = jsonObject.getJSONObject(persistableObject);
-		}else{
-			throw new SAFSException("There are no more objects in JsonObject.");
-		}
-
-		return unpickleParse(persistableObj);
-	}
-
-	/**
-	 * Try to convert <a href="http://safsdev.github.io/configure/auth2.xml">JSON File</a> to a {@link Persistable} object.<br/>
-	 * In JSON file, the special JSON key {@link JSONConstants#PROPERTY_CLASSNAME} holds the name of the class which the
-	 * JSONObject represents; the other keys are the name of the fields of that class.<br/>
-	 *
-	 * @param body JSONObject
-	 * @return Persistable
-	 * @throws SAFSException
-	 */
-	public static Persistable unpickleParse(JSONObject body) throws SAFSException{
-		Persistable persistable = null;
-
-		try {
-			String className = body.getString(JSONConstants.PROPERTY_CLASSNAME);
-			Object object = Class.forName(className).newInstance();
-			if(object instanceof Persistable){
-				persistable = (Persistable) object;
-
-				body.remove(JSONConstants.PROPERTY_CLASSNAME);
-				Iterator<String> fields =  body.keys();
-				String field = null;
-				Object value = null;
-				JSONArray jsonArray = null;
-				while(fields.hasNext()){
-					field = fields.next();
-					value = body.get(field);
-					if(value instanceof JSONObject){
-						persistable.setField(field, unpickleParse((JSONObject)value));
-
-					}else if(value instanceof JSONArray){
-						jsonArray = (JSONArray) value;
-						persistable.setField(field, jsonArray);
-
-					}else{
-						persistable.setField(field, value);
-					}
-				}
-
-			}else{
-				throw new SAFSException(className+" is not a Persistable!");
-			}
-		} catch (ClassNotFoundException|JSONException | InstantiationException | IllegalAccessException e) {
-			throw new SAFSException(e.toString());
-		}
-
-		return persistable;
-	}
-
-	@Override
-	protected boolean stringNeedQuoted(){
-		return true;
-	}
-
-	/**
-	 * Escape special characters such as value occupying multiple lines, which should be escaped
-	 * as characters <font color="red">\n</font>; the double quote should be escaped as
-	 * <font color="red">\"</font>.<br/>
-	 *
-	 * @param value String, the value to escape
-	 * @return String, the escaped string
-	 */
-	protected String escape(String value){
-		String result = null;
-		//escape new line
-		Pattern pattern = Pattern.compile("(\\n|\\r|\\r\\n)");
-		Matcher m = pattern.matcher(value);
-		StringBuffer sb = new StringBuffer();
-		String nl = null;
-		String escapedNL = null;
-		while(m.find()){
-			nl = m.group(1);
-			if("\n".equals(nl)){
-				escapedNL = "\\\\n";
-			}else if("\r".equals(nl)){
-				escapedNL = "\\\\r";
-			}else if("\r\n".equals(nl)){
-				escapedNL = "\\\\r\\\\n";
-			}
-			m.appendReplacement(sb, escapedNL);
-		}
-		m.appendTail(sb);
-
-		//escape double quote, replace " by \"
-		result = sb.toString().replace("\"", "\\\"");
-
-		return super.escape(result);
 	}
 }

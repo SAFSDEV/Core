@@ -1,7 +1,67 @@
-/** Copyright (C) (MSA, Inc) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
+/**
+ * Copyright (C) (MSA, Inc), All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
+/**
+ *   <br>   Sep 23, 2003    (DBauman) Original Release
+ *   <br>   Oct 02, 2003    (DBauman) moved to package org.safs because no dependency on rational
+ *   <br>   Nov 14, 2003    (DBauman) adding breakpoint commands:<br>
+ *    BP  -- Breakpoint -- Set a line as a debugging breakpoint.  Debugger stops
+ *                         before processing of the next line if Breakpoints have
+ *                         been Enabled.
+ *    Breakpoints   ON  -- Enable/Disable stopping at BP records.
+ *    CommandDebug  ON  -- Enable/Disable stopping at Driver Command (C) records.
+ *    TestDebug     ON  -- Enable/Disable stopping at Test (T) records.
+ *    RecordsDebug  ON  -- Enable/Disable stopping at every record.
+ *   <br>   Nov 17, 2003    (DBauman) adding commands:<br>
+ *    CloseApplication, LaunchApplication,
+ *    CopyVariableValueEx, SetVariableValueEx,
+ *    GetSystemDate, GetSystemDateTime, GetSystemTime,
+ *    SetBenchDirectory, SetDifDirectory, SetProjectDirectory, SetTestDirectory,
+ *    SetRootVerifyDirectory
+ *   <br>   Nov 18, 2003    (DBauman) adding commands:<br>
+ *    SetVariableValues, StartWebBrowser, ClearClipboard, SaveClipboardToFile
+ *   <br>   Nov 19, 2003    (DBauman) adding commands:<br>
+ *    SetClipboard
+ *   <br>   Dec 9, 2003    (DBauman) adding commands:<br>
+ *    VerifyClipboardToFile
+ *   <br>   MAY 02, 2005    (Carl Nagle) adding command AssignClipboardVariable
+ *   <br>   JUL 27, 2005    (Carl Nagle) adding command CallRemote contributed by Steve Sampson
+ *   <br>   AUG 04, 2006    (Carl Nagle) adding commands AppMapChaining, AppMapResolve, GetAppMapValue
+ *   <br>   AUG 22, 2006    (Bob Lawler) updated application() to call Runtime.exec() with null env params for LaunchApplication
+ *   <br>   APR 15, 2008    (JunwuMa)added GetCompScreenResolution
+ *   <br>   MAY 27, 2008    (JunwuMa)added ClearAllVariables
+ *   <br>   AUG 26, 2008    (Carl Nagle)Fixed formatted output of GetSystemDate, GetSystemTime, GetSystemDateTime
+ *   <br>	NOV 12, 2008	(Lei Wang)	Modified method application(): if user want to start a batch file app.bat, but he just
+ *   									give the file name "app" without suffix .bat as parameter, Runtime.getRuntime().exce("app")
+ *   									will not work and throw an exception, so I catch this exception and use
+ *   									Runtime.getRuntime().exce("cmd /c app") to try again.
+ *   <br>	MAY 19, 2010	(Lei Wang) Modify method application(): Use ProcessConsole to deal the stream of stderr and stdout, and
+ *                                                                 exitValue for Process. Add a parameter timeout, use this timeout
+ *                                                                 to wait for the end of Process.
+ *   <br>	JUN 04, 2010	(Carl Nagle) In application(), check Process exitValue to check for success or failure in launching app.
+ *   									Reverting to correct use of reverted ProcessConsole.
+ *   <br>   NOV 15, 2011    (Lei Wang) Modify method getSystemDateTime(): Add an optional parameter to make it convert to the military time.
+ *                                   By default, the method will convert date to AM-PM time as before.
+ *   <br>   JAN 27, 2014    (Lei Wang) Modify method clearArrayVariables(): don't clear SAFS-reserved variables.
+ *   <br>   APR 29, 2014    (Lei Wang) Modify method getAppMapValue(): use default map if mapid is not provided;
+ *                                                                   set map item value to testrecord's statusinfo so jsafs user can get it easily.
+ *   <br>   NOV 26, 2014    (Lei Wang) Modify method saveClipboard()/verifyClipboard(): Call deduceXXXFile() to get test/bench file.
+ *   <br>   JAN 04, 2015    (Lei Wang) Add method scrollWheel().
+ */
 package org.safs;
 
 import java.awt.AWTError;
@@ -48,51 +108,6 @@ import com.ibm.staf.STAFResult;
  * @author  Doug Bauman
  * @since   Sep 23, 2003
  *
- *   <br>   Sep 23, 2003    (DBauman) Original Release
- *   <br>   Oct 02, 2003    (DBauman) moved to package org.safs because no dependency on rational
- *   <br>   Nov 14, 2003    (DBauman) adding breakpoint commands:<br><pre>
- *    BP  -- Breakpoint -- Set a line as a debugging breakpoint.  Debugger stops
- *                         before processing of the next line if Breakpoints have
- *                         been Enabled.
- *    Breakpoints   ON  -- Enable/Disable stopping at BP records.
- *    CommandDebug  ON  -- Enable/Disable stopping at Driver Command (C) records.
- *    TestDebug     ON  -- Enable/Disable stopping at Test (T) records.
- *    RecordsDebug  ON  -- Enable/Disable stopping at every record.
- *   <br>   Nov 17, 2003    (DBauman) adding commands:<br>
- *    CloseApplication, LaunchApplication,
- *    CopyVariableValueEx, SetVariableValueEx,
- *    GetSystemDate, GetSystemDateTime, GetSystemTime,
- *    SetBenchDirectory, SetDifDirectory, SetProjectDirectory, SetTestDirectory,
- *    SetRootVerifyDirectory
- *   <br>   Nov 18, 2003    (DBauman) adding commands:<br>
- *    SetVariableValues, StartWebBrowser, ClearClipboard, SaveClipboardToFile
- *   <br>   Nov 19, 2003    (DBauman) adding commands:<br>
- *    SetClipboard
- *   <br>   Dec 9, 2003    (DBauman) adding commands:<br>
- *    VerifyClipboardToFile
- *   <br>   MAY 02, 2005    (Carl Nagle) adding command AssignClipboardVariable
- *   <br>   JUL 27, 2005    (Carl Nagle) adding command CallRemote contributed by Steve Sampson
- *   <br>   AUG 04, 2006    (Carl Nagle) adding commands AppMapChaining, AppMapResolve, GetAppMapValue
- *   <br>   AUG 22, 2006    (Bob Lawler) updated application() to call Runtime.exec() with null env params for LaunchApplication
- *   <br>   APR 15, 2008    (JunwuMa)added GetCompScreenResolution
- *   <br>   MAY 27, 2008    (JunwuMa)added ClearAllVariables 
- *   <br>   AUG 26, 2008    (Carl Nagle)Fixed formatted output of GetSystemDate, GetSystemTime, GetSystemDateTime 
- *   <br>	NOV 12, 2008	(LeiWang)	Modified method application(): if user want to start a batch file app.bat, but he just
- *   									give the file name "app" without suffix .bat as parameter, Runtime.getRuntime().exce("app")
- *   									will not work and throw an exception, so I catch this exception and use 
- *   									Runtime.getRuntime().exce("cmd /c app") to try again.
- *   <br>	MAY 19, 2010	(LeiWang) Modify method application(): Use ProcessConsole to deal the stream of stderr and stdout, and
- *                                                                 exitValue for Process. Add a parameter timeout, use this timeout
- *                                                                 to wait for the end of Process.
- *   <br>	JUN 04, 2010	(Carl Nagle) In application(), check Process exitValue to check for success or failure in launching app.
- *   									Reverting to correct use of reverted ProcessConsole.
- *   <br>   NOV 15, 2011    (Lei Wang) Modify method getSystemDateTime(): Add an optional parameter to make it convert to the military time.
- *                                   By default, the method will convert date to AM-PM time as before.
- *   <br>   JAN 27, 2014    (Lei Wang) Modify method clearArrayVariables(): don't clear SAFS-reserved variables.
- *   <br>   APR 29, 2014    (Lei Wang) Modify method getAppMapValue(): use default map if mapid is not provided;
- *                                                                   set map item value to testrecord's statusinfo so jsafs user can get it easily.
- *   <br>   NOV 26, 2014    (Lei Wang) Modify method saveClipboard()/verifyClipboard(): Call deduceXXXFile() to get test/bench file.
- *   <br>   JAN 04, 2015    (Lei Wang) Add method scrollWheel().
  **/
 public class DCDriverMiscCommands extends DriverCommand {
 
@@ -100,7 +115,7 @@ public class DCDriverMiscCommands extends DriverCommand {
   public static final String BROWSER = "C:\\Program Files\\Internet Explorer\\iexplore.exe";
   /** "SAFSWebBrowserPath" */
   public static final String WEB_BROWSER_PATH_VAR	   	   = "SAFSWebBrowserPath";
-  
+
   public static final String APPMAPRESOLVE                 = "AppMapResolve";
   public static final String APPMAPCHAINING                = "AppMapChaining";
   public static final String GETAPPMAPVALUE                = "GetAppMapValue";
@@ -133,14 +148,14 @@ public class DCDriverMiscCommands extends DriverCommand {
   public static final String SAVECLIPBOARDTOFILE           = "SaveClipboardToFile";
   public static final String SETCLIPBOARD                  = "SetClipboard";
   public static final String VERIFYCLIPBOARDTOFILE         = "VerifyClipboardToFile";
-  public static final String CLEARALLVARIABLES             = "ClearAllVariables";     
-  public static final String CLEARARRAYVARIABLES           = "ClearArrayVariables";     
+  public static final String CLEARALLVARIABLES             = "ClearAllVariables";
+  public static final String CLEARARRAYVARIABLES           = "ClearArrayVariables";
   public static final String GETCOMPSCREENRESOLUTION       = "GetCompScreenResolution";
   public static final String GETREGISTRYKEYVALUE           = "GetRegistryKeyValue";
   public static final String WAITFORREGISTRYKEYEXISTS      = "WaitForRegistryKeyExists";
   public static final String WAITFORREGISTRYKEYVALUE       = "WaitForRegistryKeyValue";
   public static final String NOTIFYANDWAIT                 = "NotifyAndWait";
-  
+
   String _command = null; // _command
 
   /** <br><em>Purpose:</em> constructor, calls super
@@ -158,7 +173,8 @@ public class DCDriverMiscCommands extends DriverCommand {
    * <br>   JUL 27, 2005    (Carl Nagle) adding command CallRemote contributed by Steve Sampson
    * <br>   AUG 03, 2006    (Carl Nagle) Addition of AppMapResolve and AppMapChaining commands
    **/
-  public void process() {
+  @Override
+public void process() {
     try {
       _command = testRecordData.getCommand();
       if (_command.equalsIgnoreCase(PAUSE) || // pause expects seconds
@@ -236,7 +252,7 @@ public class DCDriverMiscCommands extends DriverCommand {
         clearAllVariables();
       } else if (_command.equalsIgnoreCase(CLEARARRAYVARIABLES)) {
           clearArrayVariables();
-      } 
+      }
       else if (_command.equalsIgnoreCase(SAVECLIPBOARDTOFILE)) {
         saveClipboard();
       } else if (_command.equalsIgnoreCase(SETCLIPBOARD)) {
@@ -266,7 +282,7 @@ public class DCDriverMiscCommands extends DriverCommand {
       } else {
         setRecordProcessed(false);
       }
-      
+
     } catch (SAFSException ex) {
       testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
       log.logMessage(testRecordData.getFac(),
@@ -279,7 +295,7 @@ public class DCDriverMiscCommands extends DriverCommand {
       if (params.size() < 2) {
     	  this.issueParameterCountFailure("X_VariableName, Y_VariableName");
           return;
-      }      
+      }
       Iterator iterator = params.iterator();
       String xVar = (String) iterator.next();
       String yVar = (String) iterator.next();
@@ -300,19 +316,19 @@ public class DCDriverMiscCommands extends DriverCommand {
 
       //turns the double values returned by getX() and getY() into strings and
       //then attempts to save the string to the variable names given as parameters
-      if (!setVariable(xVar, String.valueOf(mousePt.getX())) || 
+      if (!setVariable(xVar, String.valueOf(mousePt.getX())) ||
           !setVariable(yVar, String.valueOf(mousePt.getY()))) {
     	  this.issueErrorPerformingAction(FAILStrings.text(FAILStrings.COULD_NOT_SET_VARS,
     			  "Could not set one or more variable values."));
       }
       else {
-    	  this.issueGenericSuccess(GENStrings.convert(GENStrings.MOUSE_POSITION_SAVED, 
-    			  "Mouse position "+ mousePt.getX()+","+ mousePt.getY()+" saved.", 
+    	  this.issueGenericSuccess(GENStrings.convert(GENStrings.MOUSE_POSITION_SAVED,
+    			  "Mouse position "+ mousePt.getX()+","+ mousePt.getY()+" saved.",
     			  String.valueOf(mousePt.getX()), String.valueOf(mousePt.getY())));
       }
       return;
     }
-  
+
   /** <br><em>Purpose:</em> pause/delay
    **/
   private void pause () {
@@ -429,7 +445,7 @@ public class DCDriverMiscCommands extends DriverCommand {
     STAFResult rc = null;
     String appname = null;
     if(webBrowser){
-    	// attempt to locate a DDVariable (or ApplicationConstant) specifying a 
+    	// attempt to locate a DDVariable (or ApplicationConstant) specifying a
     	// non-default browser path
     	try{ appname = getVariable(WEB_BROWSER_PATH_VAR);}
     	catch(Exception x){
@@ -441,9 +457,9 @@ public class DCDriverMiscCommands extends DriverCommand {
     		// WIN32 "about:blank" works for both Firefox and IE in the case of an empty URL.
     		// WIN32 "about:home" works for IE to go to whatever the home page is, BUT
     		//       "about:home" does not work for Firefox.  It is considered "invalid".
-    		// Changing an empty URL to "about:blank" may be an issue where a few users might have  
-    		// launched IE with no URL and IE would go to the preset Home page.  
-    		// However, Firefox does NOT go to the default Home page if you simply launch it 
+    		// Changing an empty URL to "about:blank" may be an issue where a few users might have
+    		// launched IE with no URL and IE would go to the preset Home page.
+    		// However, Firefox does NOT go to the default Home page if you simply launch it
     		// with an empty URL.
     		if (url==null||url.length()==0) url="about:blank";
     		Object result = NativeWrapper.LaunchURLInDefaultWebBrowser(url);
@@ -452,11 +468,11 @@ public class DCDriverMiscCommands extends DriverCommand {
     		if(result instanceof Integer){//WIN32 returns an Integer 42, usually, on success
         		Log.info(_command +" using NativeWrapper for URL '"+ url +"' returned "+ String.valueOf(((Integer)result).intValue()));
 		        log.logMessage(testRecordData.getFac(),
-		                genericText.convert(TXT_SUCCESS_3, 
+		                genericText.convert(TXT_SUCCESS_3,
                 		_command+":"+idname +" '"+ url +"' successful.",
                         _command, idname, url), GENERIC_MESSAGE);
     	        testRecordData.setStatusCode(StatusCodes.OK);
-    	        return;    			
+    	        return;
     		}
     	}
     	// resort to original default hardcoded Internet Explorer implementation
@@ -471,7 +487,7 @@ public class DCDriverMiscCommands extends DriverCommand {
     File  thedir  = null;
     String ucappname = null;
     boolean isWinBatch = false;
-    
+
     if ( appname != null ) {
         if (launch) {
         	String appnamelookup = getAppMapItem( null, null, appname);
@@ -548,7 +564,7 @@ public class DCDriverMiscCommands extends DriverCommand {
     Log.info(".............................appname: "+appname);
     try {
       if (launch) {
-    	Log.info("DCDC.LaunchApplication attempting launch of:"+ appname);    	
+    	Log.info("DCDC.LaunchApplication attempting launch of:"+ appname);
         Runtime rt = Runtime.getRuntime();
         Process p = null;
         if (isWinBatch){
@@ -579,8 +595,8 @@ public class DCDriverMiscCommands extends DriverCommand {
 	        	}
 	        }catch(IOException io){
 	        	//Try to use "cmd /c commandString" to run
-	        	//This fixes problems like missing ".bat" extension, but does not fix other 
-	        	//issues that can generate an IOException.  We will need to put code here to 
+	        	//This fixes problems like missing ".bat" extension, but does not fix other
+	        	//issues that can generate an IOException.  We will need to put code here to
 	        	//better deduce WHAT kind of problem we really have that generated the IOException.
 	        	if( ! appname.toUpperCase().startsWith("CMD /C")){
 	            	Log.debug("IOException occured. We will try 'cmd /c commandString' to execute.");
@@ -607,13 +623,13 @@ public class DCDriverMiscCommands extends DriverCommand {
 	        	}
 	        }
         }
-    	try{ 
+    	try{
     		Log.info("DCDC.LaunchApplication process '"+ idname +"' created: "+p);
     	}
     	catch(NullPointerException np){
     		Log.debug("DCDC.LaunchApplication process '"+ idname +"' is NULL!");
     	}
-    	
+
     	if(p!=null){
 			Log.info("DCDC: "+ _command +" checking success for "+ appname);
 			ProcessCapture console = new ProcessCapture(p);
@@ -633,11 +649,11 @@ public class DCDriverMiscCommands extends DriverCommand {
 						Vector data = console.getData();
 						String lf = "\n";
 						StringBuffer message = new StringBuffer(lf);
-						for(int line=0;line < data.size();line++) 
+						for(int line=0;line < data.size();line++)
 							message.append(data.get(line) +lf);
 		    			Log.debug("DCDC: "+ _command +" Process may not have terminated successfully: "+ message.toString());
 		    		    testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
-		    		    log.logMessage(testRecordData.getFac(), 
+		    		    log.logMessage(testRecordData.getFac(),
 		    		    		genericText.convert(TXT_FAILURE_1, "Unable to perform "+_command+" : "+appname,
 		    		    				_command+" : "+appname), FAILED_MESSAGE);
 		    		    return;
@@ -649,7 +665,7 @@ public class DCDriverMiscCommands extends DriverCommand {
 					//if we got here, then the process is still running
 					//we will check it up to loopmax to be sure all is well
 				} catch(Exception e2){
-	    			Log.debug("DCDC: IGNORING "+ _command +" Process or Thread "+ 
+	    			Log.debug("DCDC: IGNORING "+ _command +" Process or Thread "+
 	    					  e2.getClass().getSimpleName()+"; "+e2.getMessage());
 	    			break;
 				}
@@ -658,21 +674,21 @@ public class DCDriverMiscCommands extends DriverCommand {
 			console.shutdown();
     	}
         pMap.put(idname, p);
-        
-        String pInfo = (rc == null) ? 
-        		        null : 
-        		        rc.rc == STAFResult.Ok ? 
-        		        null : 
+
+        String pInfo = (rc == null) ?
+        		        null :
+        		        rc.rc == STAFResult.Ok ?
+        		        null :
         		        rc.result;
-        
+
         if(thedir==null){
 	        log.logMessage(testRecordData.getFac(),
-	                genericText.convert(TXT_SUCCESS_3, 
+	                genericText.convert(TXT_SUCCESS_3,
 	                		_command+":"+idname +" '"+appname +"' successful.",
 	                        _command, idname, appname), GENERIC_MESSAGE, pInfo);
         }else{
 	        log.logMessage(testRecordData.getFac(),
-	                genericText.convert(TXT_SUCCESS_3a, 
+	                genericText.convert(TXT_SUCCESS_3a,
 	                		_command+":"+idname +" '"+appname +"' successful using '"+ thedir.getAbsolutePath() +"'",
 	                        _command, idname, appname, thedir.getAbsolutePath()), GENERIC_MESSAGE, pInfo);
         }
@@ -766,7 +782,7 @@ public class DCDriverMiscCommands extends DriverCommand {
 	boolean getMilitaryTime = false;
 	String currentTime = "";
 	java.util.Date ud = null;
-	
+
     if (params.size() <= 0) {
       testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
       log.logMessage(testRecordData.getFac(), getClass().getName()+", "+_command +
@@ -777,7 +793,7 @@ public class DCDriverMiscCommands extends DriverCommand {
     Iterator iterator = params.iterator();
     //Get the parameter 'variable name' where the time will be stored
     dst = (String) iterator.next();
-    
+
     //Get the optional parameter 'getMilitaryTime', if it is true, the converted
     //time will be in 24-hours format (0-23); otherwise, the time will be 12-hours
     //format (1-12)
@@ -788,9 +804,9 @@ public class DCDriverMiscCommands extends DriverCommand {
     if(getMilitaryTime){
     	Log.debug(debugmsg+" Time will be in military format.");
     }else{
-    	Log.debug(debugmsg+" Time will be in AM-PM format.");    	
+    	Log.debug(debugmsg+" Time will be in AM-PM format.");
     }
-    
+
     ud = new java.util.Date();
     if (type == 1) { //date only
     	currentTime = StringUtilities.getDateString(ud);
@@ -870,14 +886,14 @@ public class DCDriverMiscCommands extends DriverCommand {
                      GENERIC_MESSAGE);
       testRecordData.setStatusCode(StatusCodes.OK);
   }
-  
+
   /**
    * return a list of variable names, these variables are critical to SAFS and must exist.
    * @return List, a list of variable names, SAFS reserved variables' name.
    */
   private List<String> getReservedCriticalVariableNames(){
 	  List<String> variables = new ArrayList<String>();
-	  
+
 	  variables.add(STAFHelper.SAFS_VAR_PROJECTDIRECTORY);
 	  variables.add(STAFHelper.SAFS_VAR_DATAPOOLDIRECTORY);
 	  variables.add(STAFHelper.SAFS_VAR_BENCHDIRECTORY);
@@ -887,75 +903,75 @@ public class DCDriverMiscCommands extends DriverCommand {
 	  variables.add(STAFHelper.SAFS_VAR_SYSTEMUSERID);
 	  variables.add(DriverInterface.DRIVER_CONTROL_VAR);
 	  variables.add(DriverInterface.DRIVER_CONTROL_POF_VAR);
-	  
+
 	  return variables;
   }
-  
+
   /**
    * return a list of variable names, these variables are reserved to SAFS but can be void.
    * @return List, a list of variable names, SAFS reserved variables' name.
-   */  
+   */
   private List<String> getReservedNonCriticalVariableNames(){
 	  List<String> variables = new ArrayList<String>();
-	  
+
 	  variables.add(STAFHelper.SAFS_VAR_SECSWAITFORWINDOW);
 	  variables.add(STAFHelper.SAFS_VAR_SECSWAITFORCOMPONENT);
 	  variables.add(STAFHelper.SAFS_VAR_COMMANDLINEBREAKPOINT);
 	  variables.add(STAFHelper.SAFS_VAR_SAFSACTIVECYCLE);
 	  variables.add(STAFHelper.SAFS_VAR_SAFSACTIVESUITE);
 	  variables.add(STAFHelper.SAFS_VAR_SAFSACTIVESTEP);
-	  
+
 	  return variables;
   }
-  
+
   /**
    * @return List, a list of variable names, SAFS reserved variables' name.
-   */ 
+   */
   private List<String> getReservedVariableNames(){
 	  List<String> variables = new ArrayList<String>();
-	  
+
 	  variables.addAll(getReservedCriticalVariableNames());
 	  variables.addAll(getReservedNonCriticalVariableNames());
-	  
+
 	  return variables;
   }
-  
+
   private boolean isReservedVariable(String variable){
 	  for(String reservedVar: getReservedVariableNames()){
 		  if(reservedVar.equals(variable)) return true;
 	  }
 	  return false;
   }
-  
+
   /**
    * preform ClearAllVariables by resetting SAFSVARS service, after that reset initial preset variables.
    * @throws SAFSException
    */
   private void clearAllVariables() throws SAFSException {
       String debugMsg = getClass().getName()+".clearAllVariables() ";
-      
+
       Log.info("................clearAllVariables:");
-      // 1. backup initial preset variables 
-      Log.info("................... save the preset variables"); 
+      // 1. backup initial preset variables
+      Log.info("................... save the preset variables");
       Hashtable<String, String> reservedVariables = new Hashtable<String, String>();
       for(String var: getReservedVariableNames()){
     	  reservedVariables.put(var, getVariable(var));
       }
-      
-	  // 2. clear all variables by RESET 
-      Log.info("................... execute SAFSVARS RESET"); 
+
+	  // 2. clear all variables by RESET
+      Log.info("................... execute SAFSVARS RESET");
 	  STAFHelper helper = testRecordData.getSTAFHelper();
 	  String machine = helper.getMachine();
 
-	  STAFResult result = helper.submit2ForFormatUnchangedService(machine, STAFHelper.SAFS_VARIABLE_SERVICE, "RESET");	      
+	  STAFResult result = helper.submit2ForFormatUnchangedService(machine, STAFHelper.SAFS_VARIABLE_SERVICE, "RESET");
 	  // test the result
 	  if (result.rc != 0) {
 	     issueActionFailure("RC:"+ result.rc +":RESULT:"+result.result);
 	  	 return;
-	  }   
+	  }
 	  // 3. restore initial preset variables
-      Log.info("................... restore the preset variables"); 
-	  
+      Log.info("................... restore the preset variables");
+
       for(String var: getReservedCriticalVariableNames()){
     	  if(!setVariable(var, reservedVariables.get(var))){
               testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
@@ -977,7 +993,7 @@ public class DCDriverMiscCommands extends DriverCommand {
 				 genericText.convert("success1", _command +" successful.",
 									 _command ),
 				 GENERIC_MESSAGE);
-	  testRecordData.setStatusCode(StatusCodes.OK);      
+	  testRecordData.setStatusCode(StatusCodes.OK);
   }
 
   /**
@@ -996,7 +1012,7 @@ public class DCDriverMiscCommands extends DriverCommand {
           testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
           this.issueParameterValueFailure("ARRAYNAME");
           return;
-      }      
+      }
 
 	  STAFHelper helper = testRecordData.getSTAFHelper();
 	  String machine = helper.getMachine();
@@ -1028,13 +1044,13 @@ public class DCDriverMiscCommands extends DriverCommand {
       }
       Log.info("Preparing to DELETE "+ vars.size()+" SAFSVARS variables with Name prefix: "+ str);
       if(!vars.isEmpty()){
-    	  Iterator<String> it = vars.iterator();    	  
+    	  Iterator<String> it = vars.iterator();
     	  while(it.hasNext()){
     		  item = (String)it.next();
     		  helper.submit2ForFormatUnchangedService(machine, STAFHelper.SAFS_VARIABLE_SERVICE, "DELETE "+ item);
     	  }
       }
-	  
+
 	  // test the result
       // set status to ok
       testRecordData.setStatusCode(StatusCodes.OK);
@@ -1043,7 +1059,7 @@ public class DCDriverMiscCommands extends DriverCommand {
                                          _command, str),
                      GENERIC_MESSAGE);
   }
-  
+
   private void setClipboard() throws SAFSException{
       Toolkit tk = Toolkit.getDefaultToolkit();
       Clipboard cl = tk.getSystemClipboard();
@@ -1064,7 +1080,7 @@ public class DCDriverMiscCommands extends DriverCommand {
                      GENERIC_MESSAGE);
       testRecordData.setStatusCode(StatusCodes.OK);
   }
-    
+
   private String getClipboardText() throws SAFSException{
 	  String debugmsg = StringUtils.debugmsg(DCDriverMiscCommands.class, "getClipboardText");
 	  String val = null;
@@ -1084,15 +1100,15 @@ public class DCDriverMiscCommands extends DriverCommand {
 		  Log.error(debugmsg+"AWT Toolkit unavailable\n", ae);
 		  throw new SAFSException(ae);
 	  }
-	  
+
 	  try{
 		  Object requestor = null;// not used currently
 		  Transferable tf = cl.getContents(requestor);
-		  
+
 		  DataFlavor[] dfs = tf.getTransferDataFlavors();
 		  DataFlavor dataFlavorReader = null;
 		  DataFlavor dataFlavorPlainTextReader = DataFlavor.getTextPlainUnicodeFlavor();
-		  
+
 		  for(DataFlavor d:dfs){
 			  if(d.equals(DataFlavor.stringFlavor)){
 				  Log.debug(debugmsg+" using DataFlavor: "+ d.getHumanPresentableName()+" ("+ d.getMimeType()+")");
@@ -1102,7 +1118,7 @@ public class DCDriverMiscCommands extends DriverCommand {
 				  dataFlavorReader = d;
 			  }
 		  }
-		  
+
 		  if(val==null){
 			  char[] buffer = new char[1024*10];
 			  int nchars = 0;
@@ -1121,15 +1137,15 @@ public class DCDriverMiscCommands extends DriverCommand {
 	  }finally{
 		  try{ if(reader != null) reader.close();}catch(Exception x2){;}
 	  }
-	  
+
 	  if(val==null){
 		  Log.debug(debugmsg+" doesn't get any value from clipboard, set it to \"\"");
 		  val = "";
 	  }
 	  Log.debug(debugmsg+" returning: '"+ val +"'");
-	  return val;	 
+	  return val;
   }
-  
+
   private void saveClipboard() throws SAFSException{
       if (params.size() <= 0) {
           testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
@@ -1142,13 +1158,13 @@ public class DCDriverMiscCommands extends DriverCommand {
       File name = deduceTestFile((String) iterator.next());
       String path = name.getAbsolutePath();
       Log.info("path: "+path);
-      
+
       String encoding = "UTF-8";
       if(iterator.hasNext()){
     	  encoding = (String) iterator.next();
       }
       Log.info("encoding: "+encoding);
-      
+
       try {
     	String val = getClipboardText();
         FileUtilities.writeStringToFile(path, encoding, val);
@@ -1158,8 +1174,8 @@ public class DCDriverMiscCommands extends DriverCommand {
                        ", msg: "+ioe.getMessage(),
                        FAILED_MESSAGE);
         return;
-      }  
-      
+      }
+
       // set status to ok
       log.logMessage(testRecordData.getFac(),
                      genericText.convert(TXT_SUCCESS_2a, _command +" successful using '"+ path,
@@ -1167,8 +1183,8 @@ public class DCDriverMiscCommands extends DriverCommand {
                      GENERIC_MESSAGE);
       testRecordData.setStatusCode(StatusCodes.OK);
   }
-  
-  /** 
+
+  /**
    * verify clipboard to file
    **/
   private void verifyClipboard () throws SAFSException {
@@ -1180,11 +1196,11 @@ public class DCDriverMiscCommands extends DriverCommand {
         }
         Iterator iterator = params.iterator();
         Log.info("params: "+params);
-        
+
         File name = deduceBenchFile((String) iterator.next());
         String path = name.getAbsolutePath();
         Log.info("path: "+path);
-        
+
         String encoding = "UTF-8";
         if(iterator.hasNext()){
       	  encoding = (String) iterator.next();
@@ -1202,25 +1218,25 @@ public class DCDriverMiscCommands extends DriverCommand {
                          ", msg: "+ioe.getMessage(),
                          FAILED_MESSAGE);
           return;
-        }            
-        
+        }
+
         String benchString = FileUtilities.readStringFromEncodingFile(path, encoding);
         Log.info("realValue: "+val);
         Log.info("compValue: "+benchString);
         if (!val.equals(benchString)) {
-          this.issueActionFailure(genericText.convert("contents_do_not_match", 
+          this.issueActionFailure(genericText.convert("contents_do_not_match",
         		  "Contents of 'Clipboard' do not match contents of '"+ path,
                                            "Clipbaord", path));
           return;
         }
-        
+
         // set status to ok
         log.logMessage(testRecordData.getFac(),
                      genericText.convert(TXT_SUCCESS_2a, _command +" successful using '"+ path +"'.",
                                          _command, path),
                      GENERIC_MESSAGE);
         testRecordData.setStatusCode(StatusCodes.OK);
-      
+
     } catch (IllegalStateException ise) {
       ise.printStackTrace();
       throw new SAFSException("ise: "+ise.getMessage());
@@ -1447,8 +1463,8 @@ public class DCDriverMiscCommands extends DriverCommand {
 
 	  log.logMessage(testRecordData.getFac(), message, message2,  GENERIC_MESSAGE);
   }
-  
-  
+
+
   private void waitRegistryKeyExists () throws SAFSException {
 	  final String TIMEOUT_DEFAULT = "15";
 	  if ( params.size() < 1 ) {
@@ -1474,9 +1490,9 @@ public class DCDriverMiscCommands extends DriverCommand {
 	  }
       String msgval = new String(keyname);
       if(valuename != null) msgval+=": "+valuename;
-      
+
 	  if(iterator.hasNext()) strtimeout = ((String) iterator.next()).trim();
-      try{ 
+      try{
 		tseconds = Integer.parseInt(strtimeout);
 		if(tseconds < 0) {
 			tseconds = 0;
@@ -1487,23 +1503,23 @@ public class DCDriverMiscCommands extends DriverCommand {
 		Log.info("WaitForRegistryKeyExists IGNORING invalid TIMEOUT value. Using Default "+ TIMEOUT_DEFAULT);
 	  }
 	  boolean exists = false;
-	  for(int i=0;!exists && i<=tseconds;i++){ 
+	  for(int i=0;!exists && i<=tseconds;i++){
 		exists = NativeWrapper.DoesRegistryKeyExist(keyname, valuename);
-	  	if(!exists && i<tseconds) try{Thread.sleep(1000);}catch(Exception x){;}	  		
+	  	if(!exists && i<tseconds) try{Thread.sleep(1000);}catch(Exception x){;}
 	  }
 	  if(exists){
-  		String message = genericText.convert("found_timeout", 
-				msgval +" was found within timeout "+ strtimeout, 
+  		String message = genericText.convert("found_timeout",
+				msgval +" was found within timeout "+ strtimeout,
 				msgval, strtimeout);
   		issueGenericSuccess(message);
 	  }else{
-  		String warning = genericText.convert("not_found_timeout", 
-				msgval +" was not found within timeout "+ strtimeout, 
+  		String warning = genericText.convert("not_found_timeout",
+				msgval +" was not found within timeout "+ strtimeout,
 				msgval, strtimeout);
   		issueActionWarning(warning);
-      }		  
+      }
   }
-  
+
   private void waitRegistryKeyValue () throws SAFSException {
 	  final String TIMEOUT_DEFAULT = "15";
 	  if ( params.size() < 3 ) {
@@ -1532,7 +1548,7 @@ public class DCDriverMiscCommands extends DriverCommand {
 	  int tseconds = 15;
 	  boolean ignore_case = false;
 	  if(iterator.hasNext()) strtimeout = ((String) iterator.next()).trim();
-      try{ 
+      try{
 		tseconds = Integer.parseInt(strtimeout);
 		if(tseconds < 0) {
 			tseconds = 0;
@@ -1549,9 +1565,9 @@ public class DCDriverMiscCommands extends DriverCommand {
     	         (strignore_case.equalsIgnoreCase(CASE_INSENSITIVE_FLAG))||
     	         (strignore_case.equalsIgnoreCase(String.valueOf(false)))){
    		  Log.info("WaitForRegistryKeyValue IGNORING case-sensitivity...");
-    	  ignoreCase = true;	      	  
+    	  ignoreCase = true;
       }
-	  
+
 	  String actual = null;
 	  boolean matched = false;
 	  boolean exists = false;
@@ -1566,22 +1582,22 @@ public class DCDriverMiscCommands extends DriverCommand {
 				matched = actual.equals(expected);
 			}
 		}
-	  	if(!matched && i<tseconds) try{Thread.sleep(1000);}catch(Exception x){;}	  		
+	  	if(!matched && i<tseconds) try{Thread.sleep(1000);}catch(Exception x){;}
 	  }
 	  if(matched){
-  		String message = genericText.convert("found_timeout", 
-				msgval +" was found within timeout "+ strtimeout, 
+  		String message = genericText.convert("found_timeout",
+				msgval +" was found within timeout "+ strtimeout,
 				msgval, strtimeout);
   		issueGenericSuccess(message);
 	  }else{
-  		String warning = genericText.convert("not_found_timeout", 
-				msgval +" was not found within timeout "+ strtimeout, 
+  		String warning = genericText.convert("not_found_timeout",
+				msgval +" was not found within timeout "+ strtimeout,
 				msgval, strtimeout);
   		issueActionWarning(warning);
-      }		  
+      }
   }
 
-  
+
   private void getRegistryKeyValue () throws SAFSException {
 	  if ( params.size() < 3 ) {
 		  issueParameterCountFailure();
@@ -1628,10 +1644,10 @@ public class DCDriverMiscCommands extends DriverCommand {
   		String warning = genericText.convert(FAILStrings.COULD_NOT_GET,
   				"Could not get "+ msgval +".",msgval);
   		issueActionWarning(warning);
-      }		  
+      }
   }
 
-  
+
   /**
    *  perform getCompScreenResolution. Actually it get the screen size and write the width and height to two variables.
    * @throws SAFSException
@@ -1641,7 +1657,7 @@ public class DCDriverMiscCommands extends DriverCommand {
       Log.info("...start getting screen resolution");
       if (params.size() < 2) {
         testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
-        log.logMessage(testRecordData.getFac(), 
+        log.logMessage(testRecordData.getFac(),
                 		failedText.convert(FAILStrings.PARAMSIZE_1, ": wrong param number!",_command),
                        FAILED_MESSAGE);
         return;
@@ -1649,13 +1665,13 @@ public class DCDriverMiscCommands extends DriverCommand {
       Iterator iterator = params.iterator();
       String xres = (String) iterator.next();
       String yres = (String) iterator.next();
-      
-      Toolkit toolkit = java.awt.Toolkit.getDefaultToolkit();
-      java.awt.Dimension screensize = toolkit.getScreenSize (); 
 
-      if (!setVariable(xres, String.valueOf(screensize.width)) || 
+      Toolkit toolkit = java.awt.Toolkit.getDefaultToolkit();
+      java.awt.Dimension screensize = toolkit.getScreenSize ();
+
+      if (!setVariable(xres, String.valueOf(screensize.width)) ||
           !setVariable(yres, String.valueOf(screensize.height)) ) {
-        
+
           Log.debug(debugMsg+" failed to set variable "+xres+" or "+yres);
           log.logMessage(testRecordData.getFac(),
                   		"failed to set variable "+xres+" or "+yres,
@@ -1671,7 +1687,7 @@ public class DCDriverMiscCommands extends DriverCommand {
                      PASSED_MESSAGE);
       testRecordData.setStatusCode(StatusCodes.OK);
     }
-  
+
     private void notifyPrompt() throws SAFSException {
         String debugMsg = getClass().getName() + ".notifyPrompt: ";
         if (params.size() < 1) {
@@ -1682,7 +1698,7 @@ public class DCDriverMiscCommands extends DriverCommand {
         Iterator<String> iterator = params.iterator();
         String text = iterator.next();
         String title = iterator.hasNext() ? iterator.next() : _command;
-        try{ 
+        try{
         	Log.info(debugMsg +"'"+title+"' notification displaying.");
         	JOptionPane.showMessageDialog(null, text, title, JOptionPane.PLAIN_MESSAGE);
         	Log.info(debugMsg +"'"+title+"' notification dismissed.");
@@ -1692,7 +1708,7 @@ public class DCDriverMiscCommands extends DriverCommand {
         }
         issueGenericSuccess(title);
     }
-    
+
     private void scrollWheel() throws SAFSException {
     	String debugMsg = StringUtils.debugmsg(false);
     	if (params.size() < 1) {
@@ -1711,15 +1727,15 @@ public class DCDriverMiscCommands extends DriverCommand {
     		issueParameterValueFailure("Wheel Amount");
     		return;
     	}
-    	
+
     	boolean success = false;
     	try{
     		success = Robot.mouseWheel(wheelAmt);
-    		
+
     	}catch(Throwable th){
     		Log.info(debugMsg +"Met"+StringUtils.debugmsg(th));
     	}
-    	
+
     	if(success){
     		issueGenericSuccessUsing(amount, null);
     	}else{

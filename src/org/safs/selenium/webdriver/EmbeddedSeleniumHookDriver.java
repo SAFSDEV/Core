@@ -1,7 +1,20 @@
-/** 
- ** Copyright (C) SAS Institute, All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * History for developer:
  * APR 25, 2016    (Lei Wang) Remove start() and executeDismissUnexpectedAlerts(): Profit the configuration settings ability in JavaHook.
@@ -24,8 +37,8 @@ import org.safs.tools.drivers.EmbeddedHookDriver;
  * This is primarily a proof-of-concept at this time.
  * Users would use a subclass of this class for runtime execution inside the Selenium engine.
  * <p>
- * The class has the same config requirements as JSAFSDriver.  However, the new implementations of 
- * the EmbeddedHookDriver will attempt to use default values (test.ini) if 
+ * The class has the same config requirements as JSAFSDriver.  However, the new implementations of
+ * the EmbeddedHookDriver will attempt to use default values (test.ini) if
  * @author Carl Nagle
  * @see EmbeddedHookDriver
  * @see org.safs.tools.drivers.JSAFSDriver
@@ -33,12 +46,13 @@ import org.safs.tools.drivers.EmbeddedHookDriver;
 public class EmbeddedSeleniumHookDriver extends EmbeddedHookDriver {
 
 	static boolean enableLogs = false;
-	
+	public static final String HOOK_DRIVER_NAME = "WebDriver"+EmbeddedHookDriver.HOOK_DRIVER_NAME;
+
 	/**
 	 * Default Constructor
 	 */
 	public EmbeddedSeleniumHookDriver() {
-		super("WebDriver"+HOOK_DRIVER_NAME);
+		super(HOOK_DRIVER_NAME);
 	}
 
 	/**
@@ -59,22 +73,22 @@ public class EmbeddedSeleniumHookDriver extends EmbeddedHookDriver {
 	@Override
     public LogUtilities getLogUtilities(){
 		if(log == null){
-			try{log = new ApacheLogUtilities();}
+			try{log = new ApacheLogUtilities(null, getTRDData().getFac());}
 		    catch(Exception x){}
 		}
 		return log;
 	}
-	
+
 	@Override
 	public Processor getEngineDriverCommandProcessor() {
         return new DCDriverCommand();
 	}
-	
+
 	@Override
 	public Processor getEngineTestStepProcessor() {
         return new WDTestStepProcessor();
 	}
-	
+
 	@Override
 	public DDGUIUtilities getGUIUtilities() {
 		if(utils == null){
@@ -85,21 +99,22 @@ public class EmbeddedSeleniumHookDriver extends EmbeddedHookDriver {
 		return utils;
 	}
 
+	@Override
 	protected void instantiateHookConfig(){
 		hookconfig = new SeleniumHookConfig(TestRecordHelper.getConfig());
 	}
-	
+
 	@Override
 	public boolean shutdown(){
-		
+
 		/**
 		 * Shutdown browser must be done by user
-		 * 
+		 *
 		try{ SearchObject.shutdown(); }
 		catch(Throwable t){
 			Log.debug("WebDriver shutdown "+ t.getClass().getSimpleName()+": "+ t.getMessage());
-		}	
-		*/	
+		}
+		*/
 		return super.shutdown();
 	}
 }

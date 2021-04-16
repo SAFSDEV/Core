@@ -1,12 +1,27 @@
 /**
  * Copyright (C) SAS Institute, All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- */
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * Logs for developers, not published to API DOC.
  *
  * History:
  * DEC 02, 2016    (Lei Wang) Make this class persistable.
+ * NOV 03, 2017    (Lei Wang) Use empty string "" instead of "UNKONWN" as field's default value.
+ * FEB 07, 2018    (Lei Wang) Added getHeaders() to return headers as a Map.
  */
 package org.safs.rest.service;
 
@@ -25,15 +40,15 @@ public class Response extends PersistableDefault{
 
 	Request _request;
 	String ID = "TO BE ASSIGNED";
-	String _content_type = UNKNOWN_VALUE;
-	Object _entity_body = UNKNOWN_VALUE;
+	String _content_type = DEFAULT_VALUE;
+	Object _entity_body = DEFAULT_VALUE;
 	long _entity_length;
 	Map<String,String> _headers;
-	String _http_version = UNKNOWN_VALUE;
-	String _message_body = UNKNOWN_VALUE;
-	String _reason_phrase = UNKNOWN_VALUE;
+	String _http_version = DEFAULT_VALUE;
+	String _message_body = DEFAULT_VALUE;
+	String _reason_phrase = DEFAULT_VALUE;
 	int _status_code;
-	String _status_line = UNKNOWN_VALUE;
+	String _status_line = DEFAULT_VALUE;
 
 	static{
 		fieldToPersistKeyMap.put("_request", "Request");
@@ -110,17 +125,32 @@ public class Response extends PersistableDefault{
 		this._reason_phrase = _reason_phrase;
 	}
 	/**
-	 * @return the _response_header
+	 * @return String, the _response_header as a string
 	 */
 	public String get_headers() {
 
 		return Headers.convertHeadersMapToMultiLineString(_headers);
 	}
 	/**
+	 * @return Map, the _response_header as a Map
+	 */
+	public Map<String,String> getHeaders() {
+
+		return _headers;
+	}
+	/**
 	 * @param _response_header the _response_header to set
 	 */
 	void set_headers(Map<String,String> _header) {
 		this._headers = _header;
+	}
+
+	/**
+	 * Setting from stored external values.
+	 * @param _headers the multiline String headers to set
+	 */
+	public void set_headers(String _headers){
+		this._headers = Headers.convertHeadersMultiLineStringToMap(_headers);
 	}
 	/**
 	 * @return the _message_body

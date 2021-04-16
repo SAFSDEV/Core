@@ -1,7 +1,20 @@
-/** Copyright (C) (MSA, Inc) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
+/**
+ * Copyright (C) (MSA, Inc), All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs;
 /**
  * @author  Doug Bauman
@@ -11,9 +24,9 @@ package org.safs;
  * SEP 16, 2003 (Carl Nagle) Implemented use of new SAFSLOGS logging.
  * NOV 10, 2003 (Carl Nagle) Added isSupportedRecordType() implementation.
  * OCT 28, 2005 (Carl Nagle) Refactored to allow for override of convertCoords methods.
- * MAR 19, 2008	(LeiWang) Added componentSuccessMessage for common success message use.
+ * MAR 19, 2008	(Lei Wang) Added componentSuccessMessage for common success message use.
  * MAR 25, 2008	(JuwnuMa) Added componentExecutedFailureMessage
- * DEC 03, 2008	(LeiWang) Modify method action_getGuiImage() and action_verifyGuiImageToFile():
+ * DEC 03, 2008	(Lei Wang) Modify method action_getGuiImage() and action_verifyGuiImageToFile():
  *								  Call ImageUtils.saveImageToFile() to save image, instead of ImageIO.write();
  *								  Because using ImageIO.write() will loss quality of jpg image. Now we use full
  *								  quality to save jpg image, that is when call ImageUtils.saveImageToFile(), we
@@ -31,6 +44,8 @@ package org.safs;
  * SEP 07, 2015 (Lei Wang) Handle DragTo. Correct a typo, change method preformDrag to performDrag.
  * NOV 26, 2015 (Lei Wang) Modify methods checkForCoord() so that percentage coordinate will be accepted.
  * NOV 26, 2015 (Lei Wang) Moved StringUtils.convertWindowPosition() to this class and renamed it to ConvertWindowPosition.
+ * SEP 12, 2017 (Lei Wang) Added AltClick keyword support.
+ * NOV 28, 2017 (Lei Wang) Modified method showComponentAsMuchPossible()/action_showOnPage(): add one more parameter 'refresh'.
  */
 import java.awt.AWTException;
 import java.awt.Dimension;
@@ -312,27 +327,27 @@ import org.safs.tools.stringutils.StringUtilities;
  * <li>    click
  * <ul>
  * <li>      1st param: the node of the tree to click
- * <li>      Example: T,Frame,tree2Tree,click,Composers->Bach->Brandenburg Concertos Nos. 1 & 3
+ * <li>      Example: T,Frame,tree2Tree,click,Composers-&gt;Bach-&gt;Brandenburg Concertos Nos. 1 &amp; 3
  * </ul>
  * <li>    doubleclick
  * <ul>
  * <li>      1st param: the node of the tree to doubleclick
- * <li>      Example: T,Frame,tree2Tree,doubleclick,Composers->Bach
+ * <li>      Example: T,Frame,tree2Tree,doubleclick,Composers-&gt;Bach
  * </ul>
  * <li>    select/makeselection/selecttextnode/selectpartialtextnode
  * <ul>
  * <li>      1st param: the node of the tree to select
- * <li>      Example: T,Frame,tree2Tree,select,Composers->Bach->Violin Concertos
+ * <li>      Example: T,Frame,tree2Tree,select,Composers-&gt;Bach-&gt;Violin Concertos
  * </ul>
  * <li>    expand/expandtextnode/expandpartialtextnode
  * <ul>
  * <li>      1st param: the node of the tree to expand
- * <li>      Example: T,Frame,tree2Tree,expand,Composers->Schubert
+ * <li>      Example: T,Frame,tree2Tree,expand,Composers-&gt;Schubert
  * </ul>
  * <li>    collapse/collapsetextnode/collapsepartialtextnode
  * <ul>
  * <li>      1st param: the node of the tree to collapse
- * <li>      Example: T,Frame,tree2Tree,collapse,Composers->Haydn
+ * <li>      Example: T,Frame,tree2Tree,collapse,Composers-&gt;Haydn
  * </ul>
  * </ul>
  * </ul>
@@ -457,6 +472,7 @@ public abstract class ComponentFunction extends Processor{
 	}
 
 	/** Supports standard TEST STEP record types (T, TW, TF) **/
+	@Override
 	public boolean isSupportedRecordType(String recordType){
 		if (recordType == null) return false;
 		String rt = recordType.toUpperCase();
@@ -474,6 +490,7 @@ public abstract class ComponentFunction extends Processor{
 	 * </ol>
 	 * @return                    Collection
 	 **/
+	@Override
 	@SuppressWarnings("unchecked")
 	public Collection<String> getAlternateParams () {
 		Collection<String> alt = new ArrayList<String>();
@@ -501,7 +518,7 @@ public abstract class ComponentFunction extends Processor{
 		windowName = testRecordData.getWindowName();
 		compName = testRecordData.getCompName();
 		mapname = testRecordData.getAppMapName();
-		utils = ((TestRecordHelper)testRecordData).getDDGUtils();
+		utils = testRecordData.getDDGUtils();
 	}
 
 	/**
@@ -515,7 +532,7 @@ public abstract class ComponentFunction extends Processor{
 
 	/** <br><em>Purpose:</em> convertNum: convert into a number
 	 * <br><em>Assumptions:</em>  all exceptions are handled.
-	 * @param                     numStr, String
+	 * @param                     num, String
 	 * (indexed from 1, 1 will be subtracted from the number before returned)
 	 * @return                    Integer if successful, null otherwise (if alpha chars instead
 	 * of digits are encountered; or if number is less than one)
@@ -541,7 +558,7 @@ public abstract class ComponentFunction extends Processor{
 	 * @see #getComponentRectangle()
 	 **/
 	protected java.awt.Point checkForCoord(Iterator<String> iterator) {
-		if (iterator!=null && iterator.hasNext()) return checkForCoord((String) iterator.next());
+		if (iterator!=null && iterator.hasNext()) return checkForCoord(iterator.next());
 
 		return null;
 	}
@@ -821,6 +838,7 @@ public abstract class ComponentFunction extends Processor{
 			}
 		}
 
+		@Override
 		public String toString(){
 			StringBuffer sb = new StringBuffer();
 			if(position!=null) sb.append(" position:("+position.x+","+position.y+")");
@@ -1179,8 +1197,8 @@ public abstract class ComponentFunction extends Processor{
 	 *                               for example like (0, 0, %50, %90)
 	 * @return Rectangle, The subarea rectangle deduced from the 'Component Rectangle' and 'subarea'
 	 * @throws SAFSException
-	 * @see {@link #lookupAppMapReference(String)}
-	 * @see {@link #getComponentRectangle()}
+	 * @see #lookupAppMapReference(String)
+	 * @see #getComponentRectangle()
 	 */
 	protected Rectangle deduceImageRect(String subareaMapKey) throws SAFSException{
 
@@ -1270,7 +1288,7 @@ public abstract class ComponentFunction extends Processor{
 		//get optional FilteredAreas parameter
 		String filteredAreas = null;
 		if(iterator.hasNext()){
-			filteredAreas = (String) iterator.next();
+			filteredAreas = iterator.next();
 			filteredAreas = parseFilteredAreasParam(filteredAreas, warnings);
 		}
 
@@ -1408,7 +1426,7 @@ public abstract class ComponentFunction extends Processor{
 		int percentBitsTolerance = 100;
 		if(iterator.hasNext()){
 			try{
-				percentBitsTolerance = Integer.decode((String) iterator.next());
+				percentBitsTolerance = Integer.decode(iterator.next());
 			}catch(Exception e){
 				Log.info(debugmsg+action +" percentBitsTolerance does not appear to be valid: "+ e.getMessage());
 			}
@@ -1419,7 +1437,7 @@ public abstract class ComponentFunction extends Processor{
 		//get optional FilteredAreas parameter
 		String filteredAreas = null;
 		if(iterator.hasNext()){
-			filteredAreas = (String) iterator.next();
+			filteredAreas = iterator.next();
 			filteredAreas = parseFilteredAreasParam(filteredAreas, warnings);
 		}
 
@@ -1586,7 +1604,7 @@ public abstract class ComponentFunction extends Processor{
 	/**
 	 * Parse FilteredAreas Parameter.<br>
 	 * @param filteredAreasParam String, the "filtered areas parameter"
-	 * @param warnings List<String>, if the "filtered areas parameter" is not valid, this list will contain a warning message.
+	 * @param warnings List&lt;String&gt;, if the "filtered areas parameter" is not valid, this list will contain a warning message.
 	 * @return String, the parsed "filtered areas", or null if not valid.
 	 */
 	private String parseFilteredAreasParam(String filteredAreasParam, List<String> warnings){
@@ -1658,6 +1676,24 @@ public abstract class ComponentFunction extends Processor{
 	}
 
 	/**
+	 * @param action String, the action to handle.
+	 * @return boolean, if the action should be considered as an click action,
+	 *                  which will be handled in method {@link #componentClick()}.
+	 * @see #componentClick()
+	 */
+	protected boolean isClickAction(String action){
+		return ( COMPONENTCLICK.equalsIgnoreCase(action)
+				|| CLICK.equalsIgnoreCase(action)
+				|| CTRLCLICK.equalsIgnoreCase(action)
+				|| CTRLRIGHTCLICK.equalsIgnoreCase(action)
+				|| DOUBLECLICK.equalsIgnoreCase(action)
+				|| RIGHTCLICK.equalsIgnoreCase(action)
+				|| SHIFTCLICK.equalsIgnoreCase(action)
+				|| GenericObjectFunctions.ALTCLICK_KEYWORD.equalsIgnoreCase(action)
+				);
+	}
+
+	/**
 	 * Process generic actions on a component.
 	 */
 	@SuppressWarnings("unchecked")
@@ -1685,13 +1721,7 @@ public abstract class ComponentFunction extends Processor{
 
 			altText = windowName+":"+compName+" "+action+" Successful ";
 
-			if ( COMPONENTCLICK.equalsIgnoreCase(action)
-					|| CLICK.equalsIgnoreCase(action)
-					|| CTRLCLICK.equalsIgnoreCase(action)
-					|| CTRLRIGHTCLICK.equalsIgnoreCase(action)
-					|| DOUBLECLICK.equalsIgnoreCase(action)
-					|| RIGHTCLICK.equalsIgnoreCase(action)
-					|| SHIFTCLICK.equalsIgnoreCase(action)){
+			if(isClickAction(action)) {
 				componentClick();
 
 			} else if(GETGUIIMAGE.equalsIgnoreCase(action)){
@@ -1943,8 +1973,8 @@ public abstract class ComponentFunction extends Processor{
 		if (params.size() < 2) {
 			paramsFailedMsg(windowName, compName);
 		} else {
-			String prop = (String) iterator.next();
-			String propExistVar = (String) iterator.next();
+			String prop = iterator.next();
+			String propExistVar = iterator.next();
 			String  exist = "false";
 
 			Log.info(debugmsg+" ready to assign the existence of prop : "+prop+" to propExistVar: "+propExistVar);
@@ -2299,7 +2329,6 @@ public abstract class ComponentFunction extends Processor{
 
 	/**
 	 * <br><em>Purpose:</em> verifyPropertiesToFile
-	 * @param array boolean, if true, then array property, else scalar
 	 **/
 	@SuppressWarnings("unchecked")
 	protected void verifyPropertiesToFile () throws SAFSException {
@@ -2355,9 +2384,16 @@ public abstract class ComponentFunction extends Processor{
 							missingMessage = io.getMessage();
 						}
 					}
-					boolean success = action.equalsIgnoreCase(GenericMasterFunctions.VERIFYPROPERTIESSUBSETTOFILE_KEYWORD) ?
-					                  StringUtils.isMatchingTargetMapValues(properties, benchmark):
-							          StringUtils.isMatchingMaps(properties, benchmark);
+					boolean success = true;
+
+					if(!isMissing){
+						success = action.equalsIgnoreCase(GenericMasterFunctions.VERIFYPROPERTIESSUBSETTOFILE_KEYWORD) ?
+									StringUtils.isMatchingTargetMapValues(properties, benchmark):
+									StringUtils.isMatchingMaps(properties, benchmark);
+					}else{
+						success = false;
+					}
+
 					if(success){
 						issuePassedSuccessUsing(benchFile);
 					}else{
@@ -2835,11 +2871,15 @@ public abstract class ComponentFunction extends Processor{
 		testRecordData.setStatusCode( StatusCodes.GENERAL_SCRIPT_FAILURE );
 
 		boolean verify = false;
+		boolean refresh = false;
 		if(iterator.hasNext()){
 			verify = StringUtilities.convertBool(iterator.next());
 		}
+		if(iterator.hasNext()){
+			refresh = StringUtilities.convertBool(iterator.next());
+		}
 
-		if(showComponentAsMuchPossible(verify)){
+		if(showComponentAsMuchPossible(verify, refresh)){
 			String message = GENStrings.convert(GENStrings.SUCCESS_3,
 					windowName+":"+compName+" "+action+" successful.",
 					windowName, compName, action);
@@ -2993,7 +3033,7 @@ public abstract class ComponentFunction extends Processor{
 	}
 
 	protected int waitForObject(String mapname, String windowName, String compName, int secii) throws SAFSException{
-		DDGUIUtilities utils = ((TestRecordHelper)testRecordData).getDDGUtils();
+		DDGUIUtilities utils = testRecordData.getDDGUtils();
 		return utils.waitForObject(mapname,windowName, windowName, secii);
 	}
 
@@ -3008,9 +3048,9 @@ public abstract class ComponentFunction extends Processor{
 	 * Each of these values will be stored as an item in the new collection. (The old collection contains<br>
 	 * these values as ONE item containing all the various linebreaks.)<br>
 	 *
-	 * @param properties Collection<String>, a collection of properties to normalize
+	 * @param properties Collection&lt;String&gt;, a collection of properties to normalize
 	 * @param encoding String, the encoding used to write and read a collection of properties
-	 * @return Collection<String>, a normalized collection of properties
+	 * @return Collection&lt;String&gt;, a normalized collection of properties
 	 * @see #getPropertyCollection(List)
 	 * @see #getPropertyCollection(String)
 	 * @see #verifyPropertyToFile(boolean)
@@ -3053,7 +3093,7 @@ public abstract class ComponentFunction extends Processor{
 	/**
 	 * Get the value of a property, and return it as a Collection.<br>
 	 * @param property String, the property name
-	 * @return Collection<String>, a set containing the property's value
+	 * @return Collection&lt;String&gt;, a set containing the property's value
 	 */
 	protected Collection<String> getPropertyCollection(String property) throws SAFSException{
 		if(property==null || property.trim().isEmpty()) throw new SAFSException("property is null or empty, not valid.");
@@ -3068,8 +3108,8 @@ public abstract class ComponentFunction extends Processor{
 	 * If the property-list contains multiple properties, the collection will contain a set of string like "property:value".<br>
 	 * The assignment separator will actually be the current value of the testRecordData.separator.
 	 * If the property-list is null, then all the properties should be retrieved.<br>
-	 * @param propertyList List<String>, a list of property names
-	 * @return Collection<String>, a set of values
+	 * @param propertyList List&lt;String&gt;, a list of property names
+	 * @return Collection&lt;String&gt;, a set of values
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected Collection<String> getPropertyCollection(List<String> propertyList) throws SAFSException{
@@ -3125,27 +3165,34 @@ public abstract class ComponentFunction extends Processor{
 			return value.toString();
 		}
 	}
-	/**Get component's property string value*/
+	/**
+	 * @param propertyName String, property's name
+	 * @return String, property's value
+	 * @throws SAFSException
+	 */
 	protected String getProperty(String propertyName) throws SAFSException{
 		return getStringValue(getPropertyObject(propertyName));
 	}
 
 	//***================================ Followings MAY NEED to be overrided in subclass =====================****//
 	/**
-	 * @return Map<String, Object>, a map of (property, value) for all properties of the component. It may be null or empty.
+	 * @return Map&lt;String, Object&gt;, a map of (property, value) for all properties of the component. It may be null or empty.
+	 * @throws SAFSException "Not supported yet."
 	 */
 	protected Map<String, Object> getProperties() throws SAFSException{
 		throw new SAFSException("Not supported yet.", SAFSException.CODE_ACTION_NOT_SUPPORTED);
 	}
 	/**
 	 * @return Object, component's property object value
+	 * @throws SAFSException "Not supported yet."
 	 */
 	protected Object getPropertyObject(String propertyName) throws SAFSException{
 		throw new SAFSException("Not supported yet.", SAFSException.CODE_ACTION_NOT_SUPPORTED);
 	}
 
 	/**
-	 * @return Collection<String>, component's content. It may be null or empty.
+	 * @return Collection&lt;String&gt;, component's content. It may be null or empty.
+	 * @throws SAFSException "Not supported yet."
 	 */
 	protected Collection<String> captureObjectData() throws SAFSException {
 		throw new SAFSException("Not supported yet.", SAFSException.CODE_ACTION_NOT_SUPPORTED);
@@ -3177,10 +3224,11 @@ public abstract class ComponentFunction extends Processor{
 	 * If the component is not fully shown on the screen, try to make it visible on screen as much
 	 * as possible.
 	 * @param verify boolean, verify that the component is shown on page if verify is true.
+	 * @param refresh boolean, the component may need to be refreshed after scrolling into view.
 	 * @return boolean, true if the component is shown on page; false otherwise.
 	 * @throws SAFSException if some unexpected things happen.
 	 */
-	protected boolean showComponentAsMuchPossible(boolean verify) throws SAFSException{
+	protected boolean showComponentAsMuchPossible(boolean verify, boolean refresh) throws SAFSException{
 		String debugmsg = StringUtils.debugmsg(true);
 		IndependantLog.warn(debugmsg+"Not supported yet. Sub class '"+getClass()+"' SHOULD override me!");
 		throw new SAFSException("Not supported yet.", SAFSException.CODE_ACTION_NOT_SUPPORTED);
@@ -3218,7 +3266,7 @@ public abstract class ComponentFunction extends Processor{
 	 * @param imageRect Rectangle, within the rectangle to get image. <br>
 	 * @return BufferedImage
 	 * @throws SAFSException
-	 * @see {@link #getComponentRectangle()}
+	 * @see #getComponentRectangle()
 	 * @see #deduceImageRect(String)
 	 */
 	protected BufferedImage getRectangleImage(Rectangle imageRect) throws SAFSException{

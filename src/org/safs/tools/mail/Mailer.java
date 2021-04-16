@@ -1,14 +1,29 @@
 /**
- ** Copyright (C) SAS Institute, All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * History for developers:
  *
  * JUN 15, 2015 			Added SendMail call for and misc fixes.
- * SEP 23, 2015 (LeiWang) 	Add method send(): get transport from session so that "properties", "authentication" will be taken into account.
+ * SEP 23, 2015 (Lei Wang) 	Add method send(): get transport from session so that "properties", "authentication" will be taken into account.
  *                       	Modify other send() methods: throw out the Exception if there is something wrong.
- * MAY 05, 2016 (LeiWang) 	Fix the disorder problem of attachment.
+ * MAY 05, 2016 (Lei Wang) 	Fix the disorder problem of attachment.
+ * DEC 13, 2017 (Lei Wang) 	Modified method prepareProperties(): Set proxy server.
+ *                          Modified method main(): Modified the help message. Simplified the way to create Mailer.
  *
  */
 package org.safs.tools.mail;
@@ -46,31 +61,33 @@ import org.safs.tools.stringutils.StringUtilities;
 
 /**
  * Used to send email.<br>
+ * <b>Note:<br>
  * If the mail server is not in local network and "http proxy server" is needed to connect Internet,<br>
  * then the VM properties -Dhttp.proxyHost and -Dhttp.proxyPort are required to avoid the connection problem.<br>
+ * </b>
  *
  * <br>
  * Examples:<br>
  * <ol>
  * <LI>java org.safs.tools.logs.Mailer -h<br>
  * to get help information of this program
- * <li>java org.safs.tools.logs.Mailer -to user@yourCompany.com -sub "Don not  reply this email!" -msg "Helooooo mail coming" -type text/plain<br>
+ * <li>java org.safs.tools.logs.Mailer -to user@company.com -sub "Don not  reply this email!" -msg "Helooooo mail coming" -type text/plain<br>
  * send to user a plain text "Helooooo mail coming" with subject "Don not  reply this email!"
- * <li>java org.safs.tools.logs.Mailer -to user@yourCompany.com -sub "Don not  reply this email!" -msg "&lt;h1>Helooooo mail coming&lt;/h1>" -type text/html<br>
+ * <li>java org.safs.tools.logs.Mailer -to user@company.com -sub "Don not  reply this email!" -msg "&lt;h1>Helooooo mail coming&lt;/h1>" -type text/html<br>
  * send to user an html text "&lt;h1>Helooooo mail coming&lt;/h1>" with subject "Don not  reply this email!"
- * <li>java org.safs.tools.logs.Mailer -to user1@yourCompany.com;user2@yourCompany.com -sub "Don not  reply this email!" -msg "Helooooo mail coming" -type text/plain<br>
+ * <li>java org.safs.tools.logs.Mailer -to user1@company.com;user2@company.com -sub "Don not  reply this email!" -msg "Helooooo mail coming" -type text/plain<br>
  * send to user1 and user2 a plain text "Helooooo mail coming" with subject "Don not  reply this email!"
- * <li>java org.safs.tools.logs.Mailer -to user1@yourCompany.com -cc user2@yourCompany.com -sub "Don not  reply this email!" -msg "Helooooo mail coming" -type text/plain<br>
+ * <li>java org.safs.tools.logs.Mailer -to user1@company.com -cc user2@company.com -sub "Don not  reply this email!" -msg "Helooooo mail coming" -type text/plain<br>
  * send to user1 a plain text "Helooooo mail coming" with subject "Don not  reply this email!", at the same time this email will be cc to user2
- * <li>java org.safs.tools.logs.Mailer -to user@yourCompany.com -sub "Don not  reply this email!" -msg "Helooooo mail coming" -type text/plain -attach "C:\yourpath\afile.txt"<br>
+ * <li>java org.safs.tools.logs.Mailer -to user@company.com -sub "Don not  reply this email!" -msg "Helooooo mail coming" -type text/plain -attach "C:\yourpath\afile.txt"<br>
  * send to user a plain text "Helooooo mail coming" with subject "Don not  reply this email!" with attached file as "afile.txt"
- * <li>java org.safs.tools.logs.Mailer -to  user@yourCompany.com -sub "Don not  reply this email!" -msg "Helooooo mail coming" -type text/plain -attach "C:\yourpath\afile.txt=alias.txt"<br>
+ * <li>java org.safs.tools.logs.Mailer -to  user@company.com -sub "Don not  reply this email!" -msg "Helooooo mail coming" -type text/plain -attach "C:\yourpath\afile.txt=alias.txt"<br>
  * send to user a plain text "Helooooo mail coming" with subject "Don not  reply this email!" with attached file as "alias.txt"
- * <li>java org.safs.tools.logs.Mailer -to user@yourCompany.com -sub "Don not  reply this email!" -msg "Helooooo mail coming" -type text/plain –attach "C:\yourpath\test.bat=test.bat.remove;C:\safs\lib\safsmail.jar=mail.jar.removeme;C:\safs\lib\windowsclassmap.dat"<br>
+ * <li>java org.safs.tools.logs.Mailer -to user@company.com -sub "Don not  reply this email!" -msg "Helooooo mail coming" -type text/plain –attach "C:\yourpath\test.bat=test.bat.remove;C:\safs\lib\safsmail.jar=mail.jar.removeme;C:\safs\lib\windowsclassmap.dat"<br>
  * send to user a plain text "Helooooo mail coming" with subject "Don not  reply this email!" with multiple attached file as "test.bat.remove", "mail.jar.removeme" and "windowsclassmap.dat"
  * </ol>
  *
- * @author (LeiWang)
+ * @author (Lei Wang)
  */
 public class Mailer {
 
@@ -139,7 +156,7 @@ public class Mailer {
 	/** If true, the debug message will be output to console. */
 	public static boolean debug = false;
 
-	private String sender = "noreply@yourCompany.com";
+	private String sender = "noreply@safs.com";
 
 	private Properties props = new Properties();
 	private Authenticator auth = null;
@@ -214,6 +231,16 @@ public class Mailer {
 		//it can be smtp, smtps, but tls fails!!!
 		props.put("mail.transport.protocol", protocolLC);
 
+		//Set the proxy server
+		String proxyhost = System.getProperty(StringUtils.SYSTEM_PROPERTY_PROXY_HOST);
+		String proxyport = System.getProperty(StringUtils.SYSTEM_PROPERTY_PROXY_PORT);
+		if(StringUtils.isValid(proxyhost)){
+			props.put("mail."+protocolLC+".proxy.host", proxyhost);
+			if(StringUtils.isValid(proxyport)){
+				props.put("mail."+protocolLC+".proxy.port", proxyport);
+			}
+		}
+
 		switch (protocol) {
 		case SMTPS:
 			props.put("mail.smtp.ssl.enable", true);
@@ -240,6 +267,7 @@ public class Mailer {
 		props.put("mail."+protocolLC+".password", password);
 		auth = new Authenticator() {
 			private PasswordAuthentication pa = new PasswordAuthentication(user, password);
+			@Override
 			public PasswordAuthentication getPasswordAuthentication() {
 				return pa;
 			}
@@ -720,16 +748,9 @@ public class Mailer {
 
 		String usage = "\n" +
 					   "java org.safs.tools.logs.Mailer parameters\n\n" +
-					   "["+param_host+" mailServerName ]\n"+
-					   "["+param_from+" from@mail.address] \n"+
-					   "["+param_to+" to1@mail.address;to2@mail.address] \n" +
-					   "["+param_subject+" mailSubject] \n"+
-					   "["+param_msg_object+" emailMessage] \n"+
-					   "["+param_attachments+" attachedfile1[=alias1];attachedfile2[=alias2]] \n\n\n"+
 
-
-					   "------ Extra parameters are as followings: ------\n" +
-					   "["+param_host+" mailServerName "+param_port+" portNumber "+param_protocol+" protocol] \n" +
+					   "------ parameters are listed as below: ------\n" +
+					   param_host+" mailServerName ["+param_port+" mailServerPortNumber] ["+param_protocol+" mailProtocol] \n" +
 				       "["+param_user+" userMailAddress "+param_pass+" password] \n" +
 				       "["+param_subject+" mailSubject] \n"+
 				       "["+param_from+" from@mail.address] \n"+
@@ -888,29 +909,61 @@ public class Mailer {
 			}
 
 			//recipients to is required
-			if(to==null || to.isEmpty()){
-				System.out.println("Missing mail 'to' recepients, you must provide it!");
+			if(!StringUtils.isValid(to)){
+				System.out.println("Missing mail 'to' recepients, you must provide it by '"+param_to+" recepients'!");
 				System.out.println(usage);
 				return;
 			}
+			//As DEFAULT_HOST is set to empty string, so we need a mail server specified by parameter
+			if(!StringUtils.isValid(host)){
+				System.out.println("Missing mail server, you may need to provide it by '"+param_host+" mail.server.name'!");
+				System.out.println(usage);
+				host = DEFAULT_HOST;
+			}
+
+//			if(host!=null && portStr!=null && protocolStr!=null && user!=null && pass!=null){
+//				try{
+//					int port = Integer.parseInt(portStr);
+//					Protocol protocol = Protocol.get(protocolStr);
+//					mailer = new Mailer(host, port, protocol, user, pass);
+//				}catch(Exception e){
+//					IndependantLog.error("Fail create Mailer.", e);
+//					mailer = new Mailer(user, pass);
+//				}
+//			}else if(host !=null && portStr !=null){
+//				int port = Integer.parseInt(portStr);
+//				Protocol protocol = Protocol.get("SMTP");
+//				mailer = new Mailer(host, port, protocol);
+//			}else if(user!=null && pass!=null){
+//				mailer = new Mailer(user, pass);
+//			}else{
+//				mailer = new Mailer();
+//			}
 
 			//Handle host, port, protocol, user, password
-			if(host!=null && portStr!=null && protocolStr!=null && user!=null && pass!=null){
-				try{
-					int port = Integer.parseInt(portStr);
-					Protocol protocol = Protocol.get(protocolStr);
+			int port = DEFAULT_PORT;
+			Protocol protocol = DEFAULT_PROTOCOL;
+			try{
+				if(StringUtils.isValid(portStr)) port = Integer.parseInt(portStr);
+			}catch(Exception e){
+				IndependantLog.warn("Failed to get port number '"+portStr+"', met "+e);
+			}
+			try{
+				if(StringUtils.isValid(protocolStr)) protocol = Protocol.get(protocolStr);
+			}catch(Exception e){
+				IndependantLog.warn("Failed to get protocol '"+protocolStr+"', met "+e);
+			}
+
+			try{
+				if(StringUtils.isValid(user) && StringUtils.isValid(pass)){
 					mailer = new Mailer(host, port, protocol, user, pass);
-				}catch(Exception e){
-					IndependantLog.error("Fail create Mailer.", e);
-					mailer = new Mailer(user, pass);
+				}else{
+					mailer = new Mailer(host, port, protocol);
 				}
-			}else if(host !=null && portStr !=null){
-				int port = Integer.parseInt(portStr);
-				Protocol protocol = Protocol.get("SMTP");
-				mailer = new Mailer(host, port, protocol);
-			}else if(user!=null && pass!=null){
-				mailer = new Mailer(user, pass);
-			}else{
+			}catch(Exception e){
+				IndependantLog.warn("Fail create Mailer, met "+e);
+			}
+			if(mailer==null){
 				mailer = new Mailer();
 			}
 

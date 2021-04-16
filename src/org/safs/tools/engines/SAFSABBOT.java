@@ -1,25 +1,36 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.tools.engines;
 
-import org.safs.SAFSException;
+import org.safs.Log;
 import org.safs.TestRecordHelper;
+import org.safs.tools.consoles.ProcessConsole;
 import org.safs.tools.drivers.DriverConstant;
 import org.safs.tools.drivers.DriverInterface;
-import org.safs.tools.consoles.ProcessConsole;
-
-import org.safs.Log;
-import org.safs.STAFHelper;
-import org.safs.staf.STAFProcessHelpers;
-import com.ibm.staf.STAFResult;
-import java.util.ArrayList;
 
 /**
  * A wrapper to the Abbot SAFS engine--the "Abbot" engine.
  * This engine can only be used if you have a valid install of Abbot (http://abbot.sourceforge.net)
  * <p>
- * The default SAFSDRIVER Tool-Independent Driver (TID) does not provide for any 
- * command-line options to configure the Engine.  All configuration information must 
- * be provided in config files.  By default, these are SAFSTID.INI files.  See 
- * {@link <a href="http://safsdev.sf.net/doc/JSAFSFrameworkContent.htm#configfile">SAFSTID Config Files</a> 
+ * The default SAFSDRIVER Tool-Independent Driver (TID) does not provide for any
+ * command-line options to configure the Engine.  All configuration information must
+ * be provided in config files.  By default, these are SAFSTID.INI files.  See
+ * {@link <a href="http://safsdev.sf.net/doc/JSAFSFrameworkContent.htm#configfile">SAFSTID Config Files</a>
  * for more information.
  * <p>
  * The Abbot supported config file items:
@@ -36,23 +47,30 @@ import java.util.ArrayList;
  */
 public class SAFSABBOT extends GenericEngine {
 
-	/** 
-	 * "SAFS/RobotJ" -- The name of this engine as registered with STAF.
+	/**
+	 * "SAFS/Abbot" -- The name of this engine as registered with STAF.
 	 */
 	static final String ENGINE_NAME = "SAFS/Abbot";
+	/** '1.2.0' */ //What version is being used?
+	public static final String ENGINE_VERSION = "1.2.0";
+	/** 'The engine using Abbot to test Java UI.' */
+	public static final String ENGINE_DESCRIPTION = "The engine using Abbot to test Java UI.";
 
-	/** 
-	 * "com.rational.test.ft.rational_ft" -- The Rational class that is RobotJ/XDE Tester. 
+	/**
+	 * "com.rational.test.ft.rational_ft" -- The Rational class that is RobotJ/XDE Tester.
 	 */
 	static final String HOOK_CLASS  = "org.safs.abbot.AbbotJavaHook";
 
 	/**
-	 * Constructor for SAFSROBOTJ.  Call launchInterface with an appropriate DriverInterface 
+	 * Constructor for SAFSROBOTJ.  Call launchInterface with an appropriate DriverInterface
 	 * before attempting to use this minimally initialized object.
 	 */
 	public SAFSABBOT() {
 		super();
 		servicename = ENGINE_NAME;
+		productName = ENGINE_NAME;
+		version = ENGINE_VERSION;
+		description = ENGINE_DESCRIPTION;
 	}
 
 	/**
@@ -68,23 +86,24 @@ public class SAFSABBOT extends GenericEngine {
 	 * <p>
 	 * @see GenericEngine#launchInterface(Object)
 	 */
+	@Override
 	public void launchInterface(Object configInfo){
 		super.launchInterface(configInfo);
-		
-		try{ 
+
+		try{
 			// see if we are already running
 			// launch it if our config says AUTOLAUNCH=TRUE and it is not running
 			// otherwise don't AUTOLAUNCH it.
 			if( ! isToolRunning()){
-	
+
 				Log.info(ENGINE_NAME +" is not running. Evaluating AUTOLAUNCH...");
-				
+
 				//check to see if AUTOLAUNCH exists in ConfigureInterface
-				String setting = config.getNamedValue(DriverConstant.SECTION_SAFS_ABBOT, 
+				String setting = config.getNamedValue(DriverConstant.SECTION_SAFS_ABBOT,
            				                              "AUTOLAUNCH");
 
 				if (setting==null) setting = "";
-	
+
 				// launch it if we dare!
 				if ((setting.equalsIgnoreCase("TRUE"))||
 				    (setting.equalsIgnoreCase("YES")) ||
@@ -93,32 +112,32 @@ public class SAFSABBOT extends GenericEngine {
 					Log.info(ENGINE_NAME +" attempting AUTOLAUNCH...");
 
 					String array = "";
-					
+
 					String tempstr = null;
 
-					// JVM	
-				    String jvm = "java";				    
-				    tempstr   = config.getNamedValue(DriverConstant.SECTION_SAFS_ABBOT, 
+					// JVM
+				    String jvm = "java";
+				    tempstr   = config.getNamedValue(DriverConstant.SECTION_SAFS_ABBOT,
 				         		      "JVM");
 				    if (tempstr != null) jvm=tempstr;
 				    array = jvm +" ";
-				    
-					// CLASSPATH	
-				    tempstr   = config.getNamedValue(DriverConstant.SECTION_SAFS_ABBOT, 
+
+					// CLASSPATH
+				    tempstr   = config.getNamedValue(DriverConstant.SECTION_SAFS_ABBOT,
 				         		      "CLASSPATH");
 				    if (tempstr != null) {
 				    	array += "-cp "+ tempstr +" ";
 				    }
-				    
+
 					// HOOK CLASS  defaults to HOOK_CLASS
-				    tempstr   = config.getNamedValue(DriverConstant.SECTION_SAFS_ABBOT, 
+				    tempstr   = config.getNamedValue(DriverConstant.SECTION_SAFS_ABBOT,
 				         		      "HOOK");
 				    if (tempstr == null) tempstr = HOOK_CLASS;
 
 			    	array += tempstr +" ";
 
 					// OPTIONS
-				    tempstr   = config.getNamedValue(DriverConstant.SECTION_SAFS_ABBOT, 
+				    tempstr   = config.getNamedValue(DriverConstant.SECTION_SAFS_ABBOT,
 				         		      "OPTIONS");
 				    if (tempstr != null) array += tempstr +" ";
 
@@ -128,26 +147,26 @@ public class SAFSABBOT extends GenericEngine {
 				    // launch SAFSROBOTJ
 					Runtime runtime = Runtime.getRuntime();
 					process = runtime.exec(array);
-					
+
 					console = new ProcessConsole(process);
 					Thread athread = new Thread(console);
 					athread.start();
-					
+
 					int timeout = 45;
 					int loop    = 0;
 					running = false;
-					
+
 					for(;((loop < timeout)&&(! running));loop++){
 						running = isToolRunning();
 						if(! running)
-						   try{Thread.sleep(1000);}catch(InterruptedException ix){}					
+						   try{Thread.sleep(1000);}catch(InterruptedException ix){}
 					}
-					
+
 					if(! running){
 						Log.error("Unable to detect running "+ ENGINE_NAME +
 						          " within timeout period!");
 						console.shutdown();
-						process.destroy();          
+						process.destroy();
 						return;
 					}
 					else{
@@ -166,15 +185,16 @@ public class SAFSABBOT extends GenericEngine {
 			ENGINE_NAME +" requires a valid DriverInterface object for initialization!  "+
 			x.getMessage());
 		}
-	}		
+	}
 
 	// this may be more correctly refactored into the GenericEngine superclass.
 	/** Override superclass to catch unsuccessful initialization scenarios. */
+	@Override
 	public long processRecord(TestRecordHelper testRecordData) {
 		if (running) return super.processRecord(testRecordData);
 		running = isToolRunning();
 		if (running) return super.processRecord(testRecordData);
 		return DriverConstant.STATUS_SCRIPT_NOT_EXECUTED;
-	}	
+	}
 }
 

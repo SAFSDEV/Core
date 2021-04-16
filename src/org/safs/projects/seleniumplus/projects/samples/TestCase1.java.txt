@@ -6,55 +6,58 @@ import sample.Map;
 
 public class TestCase1 extends SeleniumPlus{
 
-	private static String browserID;
+	/** Holds the ID for starting and stopping the web browser. */
+	private static String browserID = null;
 
 	/**
-	 * Start WebBrowser, FireFox is default browser
-	 * URL: User must specify "http://.." protocol in URL.
-	 * BrowserID: Unique applicationid/browserid.
-	 * Browser : Default FF or specify one
-	 * Timeout : Timeout in seconds.
-	 * @throws Exception if the StartBrowser command did not work
+	 * Start WebBrowser, FireFox is default browser.<br>
+	 * URL: User must specify "http://.." protocol in URL.<br>
+	 * It is recommended to read the API document of {@link SeleniumPlus#StartWebBrowser(String, String, String...)} for details.<br>
+	 *
+	 * @throws Throwable if the StartWebBrowser command failed.
+	 * @see SeleniumPlus#StartWebBrowser(String, String, String...)
 	 */
 	public static void startBrowser() throws Throwable{
-		String url = GetVariableValue(Map.GoogleURL);
-		browserID = GetVariableValue(Map.GoogleBrowser);
-		if (! StartWebBrowser(url, browserID))
+		//Map.BrowserID represents the variable's name, we can call GetVariableValue() to get its value as below:
+		//browserID = GetVariableValue(Map.BrowserID);
+		//But it is preferred to call the simple method Map.BrowserID() to get its value
+		browserID = Map.BrowserID();
+		if (! StartWebBrowser(Map.URLSAPDemo(), browserID))
 			AbortTest("StartWebBrowser Unsuccessful. Cannot Proceed.");
-		//StartWebBrowser("http://www.google.com", browserID,SelectBrowser.BROWSER_NAME_FIREFOX,"20");
-		//StartWebBrowser("http://www.google.com",browserID,SelectBrowser.BROWSER_NAME_IE);
-		//StartWebBrowser("http://www.google.com",browserID,SelectBrowser.BROWSER_NAME_CHROME);
+
+		//StartWebBrowser(Map.URLSAPDemo(), browserID,SelectBrowser.BROWSER_NAME_FIREFOX, "20");
+		//StartWebBrowser(Map.URLSAPDemo(),browserID,SelectBrowser.BROWSER_NAME_IE);
+		//StartWebBrowser(Map.URLSAPDemo(),browserID,SelectBrowser.BROWSER_NAME_CHROME);
 	}
 
-
 	/**
-	 *  Take picture
-	 *  See Map.LogIn.SignIn for RS
+	 *  Take picture of the MortCalc page.
 	 */
 	public static void takeScreenshot(){
-		String filename = GetVariableValue(Map.SignInScreenshot);
-		GetGUIImage(Map.LogIn.OneGoogle, filename);
+		//Map.SAPDemoPage.SAPDemoPage is the component to capture image
+		//Map.TabMortCalcScreenshot() is the file name to store the image of component Map.SAPDemoPage.SAPDemoPage
+		GetGUIImage(Map.SAPDemoPage.SAPDemoPage, Map.TabMortCalcScreenshot());
 	}
-
-
 
 	/**
-	 * Log in
-	 * For Map.LogIn.UserName, see App.map file
+	 * Calculate Mortgage and verify the result.
 	 */
-	public static void LogIn() throws Throwable{
-		// Click call with literal coords is NOT as maintainable as the one at bottom
-		if(! Click(Map.Google.SignIn,"5,5"))
-			AbortTest("Google Not Found.  Test Aborting");
-		
-		EditBox.SetTextValue(Map.LogIn.UserName, GetVariableValue(Map.GoogleUser));
-		Click(Map.LogIn.UserNameNext,Map.TopLeft);
-		
-		EditBox.SetTextValue(Map.LogIn.Passwd, GetVariableValue(Map.GooglePassword));
-		// This is the preferred type of Click call using coords
-		Click(Map.LogIn.SignIn, Map.TopLeft);
-	}
+	public static void CalculateMortgage() throws Throwable{
+		if(! Click(Map.SAPDemoPage.TabMortCalc, Map.TopLeft()))
+			AbortTest("Failed to switch to tab Mortgage. Test Aborted!");
 
+		EditBox.SetTextValue(Map.SAPDemoPage.InputTerm, "50");
+		EditBox.SetTextValue(Map.SAPDemoPage.InputPrincipal, "50000");
+		EditBox.SetTextValue(Map.SAPDemoPage.InputRate, "0.04");
+
+		//Map.TopLeft() represents the coordinates relative to to click
+		if(! Click(Map.SAPDemoPage.ButtonSubmit, Map.TopLeft()))
+			AbortTest("Failed to click Submit Button. Test Aborted!");
+
+		//"value" is the property (for this input box) holding the component's text value
+		//other properties such as 'text', 'innerText' etc. can be tried to verify
+		Component.VerifyProperty(Map.SAPDemoPage.InputMonthlyPayment, "value", "$84");
+	}
 
 	/**
 	 * Stop the WebBrowser
@@ -68,31 +71,27 @@ public class TestCase1 extends SeleniumPlus{
 	 *
 	 * To run test
 	 * Right click on TestCase1.java
-	 * Run As Selenium+1 Test.
+	 * Run As Selenium+ Test.
 	 *
-	 * Always comment testcases once tested
+	 * Always comment test-cases once tested
 	 *
 	 */
-
 	@Override
 	public void runTest() throws Throwable {
-
 		try{
-		    startBrowser();
-		    
-		    //Turn on the "highlight" during debug so that the component will be circled with a red rectangle
-		    SeleniumPlus.Highlight(true);
-		    LogIn();		    
-		    //Turn off the "highlight" for better performance after debug.
-		    SeleniumPlus.Highlight(false);
-		    
-		    takeScreenshot();
-		    
-		}
-		catch(Throwable x){
-		    Logging.LogTestFailure(x.getMessage());
-		}
-		stopBrowser();
+			startBrowser();
 
+			//Turn on the "highlight" during debug so that the component will be circled with a red rectangle
+			SeleniumPlus.Highlight(true);
+			CalculateMortgage();
+			//Turn off the "highlight" for better performance after debug.
+			SeleniumPlus.Highlight(false);
+
+			takeScreenshot();
+		}catch(Throwable x){
+			Logging.LogTestFailure(x.getMessage());
+		}finally{
+			stopBrowser();
+		}
 	}
 }

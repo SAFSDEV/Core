@@ -1,7 +1,20 @@
 /**
- ** Copyright (C) SAS Institute, All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * @see java.awt.Robot
  * @see java.awt.event.KeyEvent
@@ -17,12 +30,12 @@
  *                    Possible drawbacks:
  *                    Not sure if it can be used by controls that prevents 'Ctrl+V' from Window OS. If yes, a REAL unique hot
  *                    key (Ctrl+Shift+V ?) may be introduced for doing so on OS level.
- * <br>	JAN 06, 2009  (LeiWang)	Modify method parseBraces(): Use standards instead of special to get character mapping.
+ * <br>	JAN 06, 2009  (Lei Wang)	Modify method parseBraces(): Use standards instead of special to get character mapping.
  * 															 Otherwise {a 4} will not be treated as inputting 'aaaa' because special does not
  * 															 contains mapping of 'a'.
- * <br>	DEC 07, 2010  (LeiWang)	Add method antiParse(), parseKeyCode(), getReverseMap(): Convert a list of RobotKeyEvent to a SAFS's key string
- * <br>	MAY 25, 2017  (LeiWang)	Modified method parseInput(): call clearModifiers(keys) after handling NLS chars to avoid holding special key problem.
- * <br>	MAY 26, 2017  (LeiWang)	Modified InputKeysParser(): Add mapping (" ", space_keycode) to standards section.
+ * <br>	DEC 07, 2010  (Lei Wang)	Add method antiParse(), parseKeyCode(), getReverseMap(): Convert a list of RobotKeyEvent to a SAFS's key string
+ * <br>	MAY 25, 2017  (Lei Wang)	Modified method parseInput(): call clearModifiers(keys) after handling NLS chars to avoid holding special key problem.
+ * <br>	MAY 26, 2017  (Lei Wang)	Modified InputKeysParser(): Add mapping (" ", space_keycode) to standards section.
  */
 package org.safs.tools.input;
 

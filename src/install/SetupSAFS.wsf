@@ -131,7 +131,7 @@
 '*         (Carl Nagle): JAN 04, 2006  Conversion to WSF script for new release mechanism.
 '*         (Carl Nagle): FEB 01, 2006  Adding install of DDVariableStore.DLL and STAFWrap.DLL
 '*         (Carl Nagle): APR 12, 2007  Adding install of ComponentFunctions.DLL
-'*         (LeiWang):JUL 10, 2009  Adding install of STAF3.3.3, two command options: -installstafversion and -removestaf.
+'*         (Lei Wang):JUL 10, 2009  Adding install of STAF3.3.3, two command options: -installstafversion and -removestaf.
 '*         (JunwuMa):JUL 21, 2009  Updates to modify hard-coded safs path in released files suffixed with '.ini' or '.bat'.
 '*         (Carl Nagle): OCT 06, 2009  Updates to use NoJVM version of STAF333 installer.
 '*         (Carl Nagle): JAN 15, 2010  Updates to invoke SAFS\ocr\setOCREnv.wsf as part of the install.

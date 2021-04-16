@@ -1,3 +1,20 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.staf.service.logging;
 
 import java.io.File;
@@ -16,7 +33,6 @@ import org.safs.staf.service.InfoInterface;
 import org.safs.staf.service.ServiceDebugLog;
 
 import com.ibm.staf.STAFException;
-import com.ibm.staf.STAFHandle;
 import com.ibm.staf.STAFResult;
 import com.ibm.staf.service.STAFCommandParseResult;
 import com.ibm.staf.service.STAFCommandParser;
@@ -28,59 +44,59 @@ import com.ibm.staf.service.STAFCommandParser;
  * you may extends this class and implements the staf-version-related interface
  * (STAFServiceInterfaceLevel30 or STAFServiceInterfaceLevel3).
  * We have implemented the class for version 2 and 3: SAFSLoggingService and SAFSLoggingService3
- *  
+ *
  * <p>
- * This service supports multiple processes (SAFS-aware testing tools) running 
- * in support of the same test at the same time to write to the same log 
- * facility (see <code>{@link org.safs.logging.AbstractLogFacility}</code>). It 
- * provides all standard SAFS logging functions, including creating new log 
- * facilities, interrogating and manipulating settings of existing log 
+ * This service supports multiple processes (SAFS-aware testing tools) running
+ * in support of the same test at the same time to write to the same log
+ * facility (see <code>{@link org.safs.logging.AbstractLogFacility}</code>). It
+ * provides all standard SAFS logging functions, including creating new log
+ * facilities, interrogating and manipulating settings of existing log
  * facilities, logging messages etc. This service also keeps track of all log
- * facilities that it created. All tools should perform standard SAFS logging 
+ * facilities that it created. All tools should perform standard SAFS logging
  * via this service so that their logging actions can be coordinated.
  * <p>
- * Internally this service uses STAF LOG service to store messages for running 
- * logs until they are closed, when the content of the STAF log is exported to 
+ * Internally this service uses STAF LOG service to store messages for running
+ * logs until they are closed, when the content of the STAF log is exported to
  * the destination. Upon initializing, this service will load a unique instance
  * of STAF LOG service to use for the temporary STAF logs (The name of this STAF
  * LOG service instance is "&lt;ServiceName>Log", where &lt;ServiceName> is the
  * registered name of this service).
  * <p>
- * This service can operate in two modes: local or remote, which is specified 
- * when this service is registered with STAF (statically via STAF.cfg file or 
- * dynamically using the SERVICE service). In local mode, logs are generated on 
- * the local machine. In remote mode, logs are generated on a remote machine. 
- * In this case, the remote machine must be running this service in local mode. 
+ * This service can operate in two modes: local or remote, which is specified
+ * when this service is registered with STAF (statically via STAF.cfg file or
+ * dynamically using the SERVICE service). In local mode, logs are generated on
+ * the local machine. In remote mode, logs are generated on a remote machine.
+ * In this case, the remote machine must be running this service in local mode.
  * Settings such as the default log directory are all with respect to the remote
- * machine. The local service simply serves as a proxy to the remote service. 
- * From a user's perspective, however, there is absolutely no difference at all 
+ * machine. The local service simply serves as a proxy to the remote service.
+ * From a user's perspective, however, there is absolutely no difference at all
  * in how to submit requests to this service.
  * <p>
  * This service can also invoke custom logging functions, which must be
  * implemented as a STAF service. A custom logging service is required to expose
- * certain commands that this service will call. Custom logging can only be 
+ * certain commands that this service will call. Custom logging can only be
  * enabled in local mode.
  * <p>
  * Registration of this service takes the following format:
  * <p>
  * <code>
- * SERVICE &lt;ServiceName> LIBRARY JSTAF EXECUTE &lt;ServiceJarFile> PARMS 
+ * SERVICE &lt;ServiceName> LIBRARY JSTAF EXECUTE &lt;ServiceJarFile> PARMS
  * [DIR &lt;LogDir>] [REMOTE &lt;RemoteMachine> [NAME &lt;RemoteServiceName>]]
  * [CUSTOMLOGGING &lt;CustomLoggingService>]
  * </code>
  * <p>
- * Example: 
+ * Example:
  * <p>
  * <code>
- * SERVICE SAFSLogs LIBRARY JSTAF EXECUTE c:\staf\services\SAFSLogs.jar PARMS 
+ * SERVICE SAFSLogs LIBRARY JSTAF EXECUTE c:\staf\services\SAFSLogs.jar PARMS
  * DIR c:\safslogs
  * </code><br>
  * <code>
- * SERVICE SAFSLogs LIBRARY JSTAF EXECUTE c:\staf\services\SAFSLogs.jar PARMS 
+ * SERVICE SAFSLogs LIBRARY JSTAF EXECUTE c:\staf\services\SAFSLogs.jar PARMS
  * DIR c:\safslogs CUSTOMLOGGING SAFSCustomLogs
  * </code><br>
  * <code>
- * SERVICE SAFSLogs LIBRARY JSTAF EXECUTE c:\staf\services\SAFSLogs.jar PARMS 
+ * SERVICE SAFSLogs LIBRARY JSTAF EXECUTE c:\staf\services\SAFSLogs.jar PARMS
  * REMOTE LogServer
  * </code>
  * <p>
@@ -97,12 +113,12 @@ import com.ibm.staf.service.STAFCommandParser;
  * RESUMELOG   &lt;facname> | ALL
  * LOGLEVEL    &lt;facname> [DEBUG | INFO | WARN | ERROR]
  * LOGMESSAGE  &lt;facname> MESSAGE &lt;msg> [DESCRIPTION &lt;desc>] [MSGTYPE &lt;msgType>]
- * TRUNCATE    [&lt;numchars | ON | OFF ] 
+ * TRUNCATE    [&lt;numchars | ON | OFF ]
  * CLOSE       &lt;facname> | ALL  [CAPXML]
  * HELP        [MSGTYPE]
  * VERSION
  * </pre>
- * 
+ *
  * @see org.safs.logging.AbstractLogFacility
  * @see SLSLogFacility
  * @see org.safs.staf.service.logging.v2.SAFSCustomLoggingService
@@ -110,7 +126,7 @@ import com.ibm.staf.service.STAFCommandParser;
  * @see "SAFSLogs Service User's Guide"
  * @see org.safs.staf.service.logging.v2.SAFSLoggingService
  * @see org.safs.staf.service.logging.v3.SAFSLoggingService3
- * 
+ *
  * @since   MAY 19, 2009	(LW)	Add two abstract methods getSTAFTextLogItem() and getSTAFXmlLogItem()
  * 									Modify method handleInit() so that the right STAF-version LogItem will be instantiated.
  */
@@ -125,7 +141,7 @@ public abstract class AbstractSAFSLoggingService {
 
 	public static final String SLS_SERVICE_MODE_LOCAL = "LOCAL";
 	public static final String SLS_SERVICE_MODE_REMOTE = "REMOTE";
-	
+
 	public static final String SLS_SERVICE_OPTION_DIR = "DIR";
 	public static final String SLS_SERVICE_OPTION_CUSTOMLOGGING = "CUSTOMLOGGING";
 	public static final String SLS_SERVICE_OPTION_REMOTE = "REMOTE";
@@ -145,7 +161,7 @@ public abstract class AbstractSAFSLoggingService {
 	public static final String SLS_SERVICE_REQUEST_TRUNCATE = "TRUNCATE";
 	public static final String SLS_SERVICE_PARM_ON = "ON";
 	public static final String SLS_SERVICE_PARM_OFF = "OFF";
-	
+
 	public static final String SLS_SERVICE_PARM_ALL = "ALL";
 	public static final String SLS_SERVICE_PARM_TEXTLOG = "TEXTLOG";
 	public static final String SLS_SERVICE_PARM_XMLLOG = "XMLLOG";
@@ -156,7 +172,7 @@ public abstract class AbstractSAFSLoggingService {
 	public static final String SLS_SERVICE_PARM_CAPXML = "CAPXML";
 
 	public static final String SLS_SERVICE_PARM_SETTINGS = "SETTINGS";
-	
+
 	public static final String SLS_SERVICE_PARM_DEBUG = "DEBUG";
 	public static final String SLS_SERVICE_PARM_INFO = "INFO";
 	public static final String SLS_SERVICE_PARM_WARN = "WARN";
@@ -167,32 +183,32 @@ public abstract class AbstractSAFSLoggingService {
 	public static final String SLS_SERVICE_PARM_MSGTYPE = "MSGTYPE";
 
 	/**
-	 * Prefix to the mode setting of this service in response to the LIST 
+	 * Prefix to the mode setting of this service in response to the LIST
 	 * SETTINGS command.
 	 */
 	public static final String SLS_SETTINGS_MODE_PREFIX =
 		"Mode           : ";
 	/**
-	 * Prefix to the remote machine setting of this service in response to the 
+	 * Prefix to the remote machine setting of this service in response to the
 	 * LIST SETTINGS command.
 	 */
-	public static final String SLS_SETTINGS_REMOTE_MACHINE_PREFIX = 
+	public static final String SLS_SETTINGS_REMOTE_MACHINE_PREFIX =
 		"Remote Machine : ";
 	/**
-	 * Prefix to the remote service setting of this service in response to the 
+	 * Prefix to the remote service setting of this service in response to the
 	 * LIST SETTINGS command.
 	 */
-	public static final String SLS_SETTINGS_REMOTE_SERVICE_PREFIX = 
+	public static final String SLS_SETTINGS_REMOTE_SERVICE_PREFIX =
 		"Remote Service : ";
 	/**
-	 * Prefix to the default directory setting of this service in response to 
+	 * Prefix to the default directory setting of this service in response to
 	 * the LIST SETTINGS command.
 	 */
 	public static final String SLS_SETTINGS_DEFAULT_DIR_PREFIX =
 		"Default Dir    : ";
 
 	/**
-	 * Prefix to the custom logging service setting of this service in response 
+	 * Prefix to the custom logging service setting of this service in response
 	 * to the LIST SETTINGS command.
 	 */
 	public static final String SLS_SETTINGS_CUSTOM_LOGGING_PREFIX =
@@ -215,11 +231,11 @@ public abstract class AbstractSAFSLoggingService {
 	public static final String SLS_STATES_LOGLEVEL_PREFIX = "LOGLEVEL=";
 
 	public static final int SLS_TRUNCATELENGTH_DEFAULT = 128;
-	
+
 	public static final String VERSION_STR = "1.1";
-	public static final String HELP_STR = 
-		"SAFSLoggingService HELP\n\n" + 
-		"HANDLEID\n\n" + 
+	public static final String HELP_STR =
+		"SAFSLoggingService HELP\n\n" +
+		"HANDLEID\n\n" +
 		"INIT        <facname> [TEXTLOG [<altname>]] [XMLLOG [<altname>]] [TOOLLOG]\n" +
 		"            [CONSOLELOG] [ALL] [LINKEDFAC <name>] [OVERWRITE] [CAPXML]\n"+
 		"            [TRUNCATE [<numchars> | ON | OFF ]]\n\n" +
@@ -280,7 +296,7 @@ public abstract class AbstractSAFSLoggingService {
 		"END_REQUIREMENT                128\n" +
 		"SKIPPED_TEST_MESSAGE           256\n" +
 		"CUSTOM_MESSAGE               10000\n";
-	
+
 	/**
 	 * Stores all open log facilities created by this service.
 	 */
@@ -307,8 +323,8 @@ public abstract class AbstractSAFSLoggingService {
 	protected String defaultDir;
 	protected String remoteMachine = null;
 	protected String remoteService = null;
-	protected String customService = null;	
-	
+	protected String customService = null;
+
 	protected boolean truncateLines = false;
 	protected int truncateLength = 128; // default when truncation enabled.
 
@@ -326,23 +342,23 @@ public abstract class AbstractSAFSLoggingService {
 	{
 		// build the parameter parser
 		STAFCommandParser registrar = new STAFCommandParser(0, false);
-		registrar.addOption(SLS_SERVICE_OPTION_DIR, 1, 
+		registrar.addOption(SLS_SERVICE_OPTION_DIR, 1,
 			STAFCommandParser.VALUEREQUIRED);
-		registrar.addOption(SLS_SERVICE_OPTION_REMOTE, 1, 
+		registrar.addOption(SLS_SERVICE_OPTION_REMOTE, 1,
 			STAFCommandParser.VALUEREQUIRED);
-		registrar.addOption(SLS_SERVICE_OPTION_NAME, 1, 
+		registrar.addOption(SLS_SERVICE_OPTION_NAME, 1,
 			STAFCommandParser.VALUEREQUIRED);
 		registrar.addOption(SLS_SERVICE_OPTION_CUSTOMLOGGING, 1,
 			STAFCommandParser.VALUEREQUIRED);
 		// if NAME is sepecified, REMOTE must be specified
-		registrar.addOptionNeed(SLS_SERVICE_OPTION_NAME, 
+		registrar.addOptionNeed(SLS_SERVICE_OPTION_NAME,
 			SLS_SERVICE_OPTION_REMOTE);
 
 		String parms = info.parms;
 		STAFCommandParseResult parsedData = registrar.parse(parms);
 		if (parsedData.rc != STAFResult.Ok)	return parsedData.rc;
 
-		if (parsedData.optionTimes(SLS_SERVICE_OPTION_REMOTE) >0) 
+		if (parsedData.optionTimes(SLS_SERVICE_OPTION_REMOTE) >0)
 		{
 			mode = SLS_SERVICE_MODE_REMOTE;
 			remoteMachine = parsedData.optionValue(SLS_SERVICE_OPTION_REMOTE);
@@ -365,7 +381,7 @@ public abstract class AbstractSAFSLoggingService {
 			if (defaultDir.length() == 0)
 			{
 				// use {STAF/Config/STAFRoot}\data\log as the default directory
-				STAFResult result = handle.submit2("local", "var", 
+				STAFResult result = handle.submit2("local", "var",
 					"resolve {STAF/Config/STAFRoot}\\data\\log");
 				if (result.rc != result.Ok) return result.rc;
 				defaultDir = result.result;
@@ -384,46 +400,46 @@ public abstract class AbstractSAFSLoggingService {
 	protected void createInitParser()
 	{
 		initParser = new STAFCommandParser(0, false);
-		initParser.addOption(SLS_SERVICE_REQUEST_INIT, 1, 
+		initParser.addOption(SLS_SERVICE_REQUEST_INIT, 1,
 			STAFCommandParser.VALUEREQUIRED);
-		initParser.addOption(SLS_SERVICE_PARM_TEXTLOG, 1, 
+		initParser.addOption(SLS_SERVICE_PARM_TEXTLOG, 1,
 			STAFCommandParser.VALUEALLOWED);
-		initParser.addOption(SLS_SERVICE_PARM_XMLLOG, 1, 
+		initParser.addOption(SLS_SERVICE_PARM_XMLLOG, 1,
 			STAFCommandParser.VALUEALLOWED);
-		initParser.addOption(SLS_SERVICE_PARM_TOOLLOG, 1,	
+		initParser.addOption(SLS_SERVICE_PARM_TOOLLOG, 1,
 			STAFCommandParser.VALUENOTALLOWED);
-		initParser.addOption(SLS_SERVICE_PARM_CONSOLELOG, 1,	
+		initParser.addOption(SLS_SERVICE_PARM_CONSOLELOG, 1,
 			STAFCommandParser.VALUENOTALLOWED);
-		initParser.addOption(SLS_SERVICE_PARM_ALL, 1, 
+		initParser.addOption(SLS_SERVICE_PARM_ALL, 1,
 			STAFCommandParser.VALUENOTALLOWED);
-		initParser.addOption(SLS_SERVICE_PARM_LINKEDFAC, 1, 
+		initParser.addOption(SLS_SERVICE_PARM_LINKEDFAC, 1,
 			STAFCommandParser.VALUEREQUIRED);
-		initParser.addOption(SLS_SERVICE_REQUEST_TRUNCATE, 1, 
+		initParser.addOption(SLS_SERVICE_REQUEST_TRUNCATE, 1,
 				STAFCommandParser.VALUEALLOWED);
-		initParser.addOption(SLS_SERVICE_PARM_OVERWRITE, 1,	
+		initParser.addOption(SLS_SERVICE_PARM_OVERWRITE, 1,
 			STAFCommandParser.VALUENOTALLOWED);
-		initParser.addOption(SLS_SERVICE_PARM_CAPXML, 1,	
+		initParser.addOption(SLS_SERVICE_PARM_CAPXML, 1,
 				STAFCommandParser.VALUENOTALLOWED);
 	}
 
 	protected void createQueryParser()
 	{
 		queryParser = new STAFCommandParser(0, false);
-		queryParser.addOption(SLS_SERVICE_REQUEST_QUERY, 1, 
+		queryParser.addOption(SLS_SERVICE_REQUEST_QUERY, 1,
 			STAFCommandParser.VALUEREQUIRED);
-		queryParser.addOption(SLS_SERVICE_PARM_TEXTLOG, 1, 
+		queryParser.addOption(SLS_SERVICE_PARM_TEXTLOG, 1,
 			STAFCommandParser.VALUENOTALLOWED);
-		queryParser.addOption(SLS_SERVICE_PARM_XMLLOG, 1, 
+		queryParser.addOption(SLS_SERVICE_PARM_XMLLOG, 1,
 			STAFCommandParser.VALUENOTALLOWED);
 		queryParser.addOption(SLS_SERVICE_PARM_TOOLLOG, 1,
 			STAFCommandParser.VALUENOTALLOWED);
 		queryParser.addOption(SLS_SERVICE_PARM_CONSOLELOG, 1,
 			STAFCommandParser.VALUENOTALLOWED);
-		queryParser.addOption(SLS_SERVICE_PARM_ALL, 1, 
+		queryParser.addOption(SLS_SERVICE_PARM_ALL, 1,
 			STAFCommandParser.VALUENOTALLOWED);
 		// log mode. none or only one allowed
-		queryParser.addOptionGroup(SLS_SERVICE_PARM_ALL + " "	+ 
-			SLS_SERVICE_PARM_TEXTLOG + " " + SLS_SERVICE_PARM_XMLLOG + " " + 
+		queryParser.addOptionGroup(SLS_SERVICE_PARM_ALL + " "	+
+			SLS_SERVICE_PARM_TEXTLOG + " " + SLS_SERVICE_PARM_XMLLOG + " " +
 			SLS_SERVICE_PARM_TOOLLOG + " " + SLS_SERVICE_PARM_CONSOLELOG, 0, 1);
 	}
 
@@ -459,17 +475,17 @@ public abstract class AbstractSAFSLoggingService {
 		logLevelParser = new STAFCommandParser(0, false);
 		logLevelParser.addOption(SLS_SERVICE_REQUEST_LOGLEVEL, 1,
 			STAFCommandParser.VALUEREQUIRED);
-		logLevelParser.addOption(SLS_SERVICE_PARM_DEBUG, 1, 
+		logLevelParser.addOption(SLS_SERVICE_PARM_DEBUG, 1,
 			STAFCommandParser.VALUENOTALLOWED);
-		logLevelParser.addOption(SLS_SERVICE_PARM_INFO, 1, 
+		logLevelParser.addOption(SLS_SERVICE_PARM_INFO, 1,
 			STAFCommandParser.VALUENOTALLOWED);
-		logLevelParser.addOption(SLS_SERVICE_PARM_WARN, 1, 
+		logLevelParser.addOption(SLS_SERVICE_PARM_WARN, 1,
 			STAFCommandParser.VALUENOTALLOWED);
-		logLevelParser.addOption(SLS_SERVICE_PARM_ERROR, 1, 
+		logLevelParser.addOption(SLS_SERVICE_PARM_ERROR, 1,
 			STAFCommandParser.VALUENOTALLOWED);
 		// none or only on of these levels allowed
 		logLevelParser.addOptionGroup(SLS_SERVICE_PARM_DEBUG + " " +
-			SLS_SERVICE_PARM_INFO + " " + SLS_SERVICE_PARM_WARN + " " + 
+			SLS_SERVICE_PARM_INFO + " " + SLS_SERVICE_PARM_WARN + " " +
 			SLS_SERVICE_PARM_ERROR, 0, 1);
 	}
 
@@ -478,11 +494,11 @@ public abstract class AbstractSAFSLoggingService {
 		logMessageParser = new STAFCommandParser(0, false);
 		logMessageParser.addOption(SLS_SERVICE_REQUEST_LOGMESSAGE, 1,
 			STAFCommandParser.VALUEREQUIRED);
-		logMessageParser.addOption(SLS_SERVICE_PARM_MESSAGE, 1, 
+		logMessageParser.addOption(SLS_SERVICE_PARM_MESSAGE, 1,
 			STAFCommandParser.VALUEREQUIRED);
 		logMessageParser.addOption(SLS_SERVICE_PARM_DESCRIPTION, 1,
 			STAFCommandParser.VALUEREQUIRED);
-		logMessageParser.addOption(SLS_SERVICE_PARM_MSGTYPE, 1, 
+		logMessageParser.addOption(SLS_SERVICE_PARM_MSGTYPE, 1,
 			STAFCommandParser.VALUEREQUIRED);
 		// MESSAGE option is required
 		logMessageParser.addOptionNeed(SLS_SERVICE_REQUEST_LOGMESSAGE,
@@ -492,7 +508,7 @@ public abstract class AbstractSAFSLoggingService {
 	protected void createCloseParser()
 	{
 		closeParser = new STAFCommandParser(0, false);
-		closeParser.addOption(SLS_SERVICE_REQUEST_CLOSE, 1, 
+		closeParser.addOption(SLS_SERVICE_REQUEST_CLOSE, 1,
 			STAFCommandParser.VALUEALLOWED);
 		closeParser.addOption(SLS_SERVICE_PARM_ALL, 1,
 			STAFCommandParser.VALUENOTALLOWED);
@@ -503,7 +519,7 @@ public abstract class AbstractSAFSLoggingService {
 	protected void createTruncateParser()
 	{
 		truncateParser = new STAFCommandParser(0, false);
-		truncateParser.addOption(SLS_SERVICE_REQUEST_TRUNCATE, 1, 
+		truncateParser.addOption(SLS_SERVICE_REQUEST_TRUNCATE, 1,
 			STAFCommandParser.VALUEALLOWED);
 	}
 
@@ -519,13 +535,13 @@ public abstract class AbstractSAFSLoggingService {
 	protected STAFResult handleHandleId(
 		InfoInterface.RequestInfo info)
 	{
-		return new STAFResult(STAFResult.Ok, 
+		return new STAFResult(STAFResult.Ok,
 			String.valueOf(handle.getHandle()));
 	}
 
 	abstract protected AbstractSTAFTextLogItem getSTAFTextLogItem(String name,String directory,String filename);
 	abstract protected AbstractSTAFXmlLogItem getSTAFXmlLogItem(String name,String directory,String filename);
-	
+
 	protected STAFResult handleInit(InfoInterface.RequestInfo info)
 	{
 		debugLog.debugPrintln("handleInit()");
@@ -534,7 +550,7 @@ public abstract class AbstractSAFSLoggingService {
 		STAFCommandParseResult parsedRequest = initParser.parse(info.request);
 		if( parsedRequest.rc != STAFResult.Ok )
 		{
-			return new STAFResult( STAFResult.InvalidRequestString, 
+			return new STAFResult( STAFResult.InvalidRequestString,
 				parsedRequest.errorBuffer );
 		}
 
@@ -550,7 +566,7 @@ public abstract class AbstractSAFSLoggingService {
 		AbstractSTAFXmlLogItem xmlLog = null;
 		boolean overwrite = (parsedRequest.optionTimes(SLS_SERVICE_PARM_OVERWRITE) > 0);
 		boolean capXML = (parsedRequest.optionTimes(SLS_SERVICE_PARM_CAPXML) > 0);
-		
+
 		if( parsedRequest.optionTimes(SLS_SERVICE_REQUEST_TRUNCATE) > 0 ){
 			String truncateval = parsedRequest.optionValue(SLS_SERVICE_REQUEST_TRUNCATE);
 			if(truncateval == null){
@@ -561,22 +577,22 @@ public abstract class AbstractSAFSLoggingService {
 				else if(SLS_SERVICE_PARM_OFF.equalsIgnoreCase(truncateval))
 					truncateLines = false;
 				else{
-					try{ 
+					try{
 						truncateLength = Integer.parseInt(truncateval);
 						if(truncateLength < 1){
 							truncateLength = SLS_TRUNCATELENGTH_DEFAULT;
-							return new STAFResult( STAFResult.InvalidRequestString, 
+							return new STAFResult( STAFResult.InvalidRequestString,
 									"TRUNCATE value cannot be < 1." );
 						}
 						truncateLines = true;
 					}catch(Exception x){
-						return new STAFResult( STAFResult.InvalidRequestString, 
+						return new STAFResult( STAFResult.InvalidRequestString,
 								"Optional TRUNCATE value must be > 0 | ON | OFF " );
 					}
-				}						
+				}
 			}
 		}
-		
+
 		if (parsedRequest.optionTimes(SLS_SERVICE_PARM_ALL) > 0)
 		{
 			// ALL specified. ignore other log mode options
@@ -605,7 +621,7 @@ public abstract class AbstractSAFSLoggingService {
 				xmlLog = getSTAFXmlLogItem(facname + ".xml", defaultDir, altname);
 				xmlLog.setCapXML(capXML);
 			}
-			// this service do not know how to handle tool-specific logs, so 
+			// this service do not know how to handle tool-specific logs, so
 			// just set the mode and do nothing else.
 			if( parsedRequest.optionTimes(SLS_SERVICE_PARM_TOOLLOG) > 0 )
 				logmode = logmode | SLSLogFacility.LOGMODE_TOOL;
@@ -640,24 +656,24 @@ public abstract class AbstractSAFSLoggingService {
 			if (mode == SLS_SERVICE_MODE_LOCAL)
 			{
 				if (!overwrite){
-				    fac = new LocalSLSLogFacility(facname, logmode, 
-					SLSLogFacility.LOGLEVEL_INFO, linkedfac, handle, defaultDir, 
+				    fac = new LocalSLSLogFacility(facname, logmode,
+					SLSLogFacility.LOGLEVEL_INFO, linkedfac, handle, defaultDir,
 					logfiles, customService,debugLog);
 				}else{
-				    fac = new LocalSLSLogFacility(facname, logmode, 
-					SLSLogFacility.LOGLEVEL_INFO, linkedfac, handle, defaultDir, 
+				    fac = new LocalSLSLogFacility(facname, logmode,
+					SLSLogFacility.LOGLEVEL_INFO, linkedfac, handle, defaultDir,
 					logfiles, customService, overwrite,debugLog);
 				}
 			}
 			else
 			{
 				if (!overwrite){
-   	     		    fac = new RemoteSLSLogFacility(facname, logmode, 
-					SLSLogFacility.LOGLEVEL_INFO, linkedfac, handle, defaultDir, 
+   	     		    fac = new RemoteSLSLogFacility(facname, logmode,
+					SLSLogFacility.LOGLEVEL_INFO, linkedfac, handle, defaultDir,
 					logfiles, remoteMachine, remoteService,debugLog);
 				}else{
-   	     		    fac = new RemoteSLSLogFacility(facname, logmode, 
-					SLSLogFacility.LOGLEVEL_INFO, linkedfac, handle, defaultDir, 
+   	     		    fac = new RemoteSLSLogFacility(facname, logmode,
+					SLSLogFacility.LOGLEVEL_INFO, linkedfac, handle, defaultDir,
 					logfiles, remoteMachine, remoteService, overwrite,debugLog);
 				}
 			}
@@ -675,15 +691,15 @@ public abstract class AbstractSAFSLoggingService {
 	/**
 	 * Makes sure the <code>altname</code> option value is a file.
 	 * <p>
-	 * The <code>altname</code> option in the INIT request can specify either a 
-	 * file or a directory. Directory spec ends with a name separator, e.g. "\" 
+	 * The <code>altname</code> option in the INIT request can specify either a
+	 * file or a directory. Directory spec ends with a name separator, e.g. "\"
 	 * for Win32. In this case, <code>altname + filename</code> is returned as
 	 * the file spec for the log file.
 	 * <p>
-	 * @param altname	the <code>altname</code> option value. Directory spec 
+	 * @param altname	the <code>altname</code> option value. Directory spec
 	 * 				 	ends with <code>File.separator</code>.
-	 * @param filename	the default file name to use to build the file spec in 
-	 * 					case <code>altname</code> is a directory. Ignored if 
+	 * @param filename	the default file name to use to build the file spec in
+	 * 					case <code>altname</code> is a directory. Ignored if
 	 * 					<code>altname</code> is a file.
 	 * @return			the normalized log file spec.
 	 */
@@ -706,7 +722,7 @@ public abstract class AbstractSAFSLoggingService {
 		STAFCommandParseResult parsedRequest = queryParser.parse(info.request);
 		if( parsedRequest.rc != STAFResult.Ok )
 		{
-			return new STAFResult( STAFResult.InvalidRequestString, 
+			return new STAFResult( STAFResult.InvalidRequestString,
 				parsedRequest.errorBuffer );
 		}
 
@@ -719,7 +735,7 @@ public abstract class AbstractSAFSLoggingService {
 		SLSLogFacility logfac = (SLSLogFacility)logfacs.get(facname);
 
 		String result = "FACNAME:              " + logfac.getFacName() + "\n" +
-						"LINKED FAC:           " + logfac.getLinkedFacName() + 
+						"LINKED FAC:           " + logfac.getLinkedFacName() +
 						"\n\n";
 		if( parsedRequest.optionTimes(SLS_SERVICE_PARM_TOOLLOG) > 0 )
 		{
@@ -754,11 +770,11 @@ public abstract class AbstractSAFSLoggingService {
 		STAFCommandParseResult parsedRequest = listParser.parse(info.request);
 		if( parsedRequest.rc != STAFResult.Ok )
 		{
-			return new STAFResult( STAFResult.InvalidRequestString, 
+			return new STAFResult( STAFResult.InvalidRequestString,
 				parsedRequest.errorBuffer );
 		}
 
-		if (parsedRequest.optionTimes(SLS_SERVICE_PARM_SETTINGS) > 0) 
+		if (parsedRequest.optionTimes(SLS_SERVICE_PARM_SETTINGS) > 0)
 		{
 			return new STAFResult(STAFResult.Ok,
 				SLS_SETTINGS_MODE_PREFIX + mode + "\n" +
@@ -787,11 +803,11 @@ public abstract class AbstractSAFSLoggingService {
 			info.request);
 		if( parsedRequest.rc != STAFResult.Ok )
 		{
-			return new STAFResult( STAFResult.InvalidRequestString, 
+			return new STAFResult( STAFResult.InvalidRequestString,
 				parsedRequest.errorBuffer );
 		}
 
-		if (parsedRequest.optionTimes(SLS_SERVICE_PARM_ALL) > 0) 
+		if (parsedRequest.optionTimes(SLS_SERVICE_PARM_ALL) > 0)
 		{
 			for (Enumeration e = logfacs.elements(); e.hasMoreElements();)
 			{
@@ -824,11 +840,11 @@ public abstract class AbstractSAFSLoggingService {
 			info.request);
 		if( parsedRequest.rc != STAFResult.Ok )
 		{
-			return new STAFResult( STAFResult.InvalidRequestString, 
+			return new STAFResult( STAFResult.InvalidRequestString,
 				parsedRequest.errorBuffer );
 		}
 
-		if (parsedRequest.optionTimes(SLS_SERVICE_PARM_ALL) > 0) 
+		if (parsedRequest.optionTimes(SLS_SERVICE_PARM_ALL) > 0)
 		{
 			for (Enumeration e = logfacs.elements(); e.hasMoreElements();)
 			{
@@ -861,7 +877,7 @@ public abstract class AbstractSAFSLoggingService {
 			info.request);
 		if( parsedRequest.rc != STAFResult.Ok )
 		{
-			return new STAFResult( STAFResult.InvalidRequestString, 
+			return new STAFResult( STAFResult.InvalidRequestString,
 				parsedRequest.errorBuffer );
 		}
 
@@ -875,14 +891,14 @@ public abstract class AbstractSAFSLoggingService {
 		String result = "";
 		if (parsedRequest.optionTimes(SLS_SERVICE_PARM_DEBUG) > 0)
 			logfac.setLogLevel(AbstractLogFacility.LOGLEVEL_DEBUG);
-		else if (parsedRequest.optionTimes(SLS_SERVICE_PARM_INFO) > 0) 
+		else if (parsedRequest.optionTimes(SLS_SERVICE_PARM_INFO) > 0)
 			logfac.setLogLevel(AbstractLogFacility.LOGLEVEL_INFO);
-		else if (parsedRequest.optionTimes(SLS_SERVICE_PARM_WARN) > 0) 
+		else if (parsedRequest.optionTimes(SLS_SERVICE_PARM_WARN) > 0)
 			logfac.setLogLevel(AbstractLogFacility.LOGLEVEL_WARN);
-		else if (parsedRequest.optionTimes(SLS_SERVICE_PARM_ERROR) > 0) 
+		else if (parsedRequest.optionTimes(SLS_SERVICE_PARM_ERROR) > 0)
 			logfac.setLogLevel(AbstractLogFacility.LOGLEVEL_ERROR);
 		else
-			switch (logfac.getLogLevel()) 
+			switch (logfac.getLogLevel())
 			{
 				case AbstractLogFacility.LOGLEVEL_DEBUG:
 					result = SLS_SERVICE_PARM_DEBUG;
@@ -901,7 +917,7 @@ public abstract class AbstractSAFSLoggingService {
 					break;
 			}
 
-		return new STAFResult(STAFResult.Ok, result);	
+		return new STAFResult(STAFResult.Ok, result);
 	}
 
 	protected STAFResult handleLogMessage(
@@ -912,7 +928,7 @@ public abstract class AbstractSAFSLoggingService {
 			info.request);
 		if( parsedRequest.rc != STAFResult.Ok )
 		{
-			return new STAFResult( STAFResult.InvalidRequestString, 
+			return new STAFResult( STAFResult.InvalidRequestString,
 				parsedRequest.errorBuffer );
 		}
 
@@ -942,7 +958,7 @@ public abstract class AbstractSAFSLoggingService {
 				return new STAFResult(STAFResult.InvalidValue, mts);
 			}
 		}
-		if(truncateLines){ 
+		if(truncateLines){
 			try{ if (msg  != null && msg.length() > truncateLength) msg = msg.substring(0, truncateLength);}catch(Exception ignore){}
 			try{ if (desc != null && desc.length()> truncateLength) desc=desc.substring(0, truncateLength);}catch(Exception ignore){}
 		}
@@ -958,7 +974,7 @@ public abstract class AbstractSAFSLoggingService {
 	 * @param message		String, the log message
 	 * @param description	String, the description for the log
 	 * @param msgType		int,	the type of the log message
-	 * 
+	 *
 	 * <br> SEP 10, 2013	(Lei Wang)	Warp message/description in format :len:var, before passing it to SAFSVARS.
 	 */
 	private void _saveMessageToGlobalVariable(String message, String description, int msgType){
@@ -969,11 +985,11 @@ public abstract class AbstractSAFSLoggingService {
 			    AbstractLogFacility.FAILED_OK_MESSAGE==msgType ||
 			    AbstractLogFacility.WARNING_MESSAGE==msgType ||
 			    AbstractLogFacility.WARNING_OK_MESSAGE==msgType){
-				
+
 				//Before storing the message/description to variable, replace the separator by spaces.
 				String separators = _getVariableValue(STAFHelper.SAFS_HOOK_TRD+STAFHelper.SAFS_VAR_SEPARATOR);
 				Log.debug("Current record separator is '"+separators+"'");
-				
+
 				_setVariableValue(STAFHelper.SAFS_VAR_GLOBAL_LAST_LOG_MSG, _replaceSeparator(message, separators));
 				_setVariableValue(STAFHelper.SAFS_VAR_GLOBAL_LAST_LOG_DESC, _replaceSeparator(description, separators));
 				_setVariableValue(STAFHelper.SAFS_VAR_GLOBAL_LAST_LOG_TYPE, String.valueOf(msgType));
@@ -1003,7 +1019,7 @@ public abstract class AbstractSAFSLoggingService {
 		}
 		return value;
 	}
-	
+
 	/**
 	 * Get a value to a variable in service {@link STAFHelper#SAFS_VARIABLE_SERVICE}
 	 * @param var, String, the variable name, must not be null.
@@ -1020,14 +1036,14 @@ public abstract class AbstractSAFSLoggingService {
 			debugLog.debugPrintln("Failed. The variable or value is null! variable="+var+" ;value="+value);
 		}
 	}
-	
+
 	/**
 	 * Replace the separator by spaces for string value.<br>
 	 * The separators may contain more than one character, each one represents a separator, see SAFSStringTokenizer#tokenize().<br>
 	 * Each separator needs to be replaced. If the separator is TAB, replace it by 4 spaces;<br>
 	 * For other separator, replace it by one space.<br>
-	 * 
-	 * 
+	 *
+	 *
 	 * @param value	String, the string value
 	 * @param separators String, the separator to be replaced
 	 * @return String the string value after the replacement.
@@ -1036,7 +1052,7 @@ public abstract class AbstractSAFSLoggingService {
 		String result = value;
 		String replacement = null;
 		String separator = null;
-		
+
 		if(value!=null && separators!=null){
 			separators.trim();
 			int len = separators.length();
@@ -1048,19 +1064,19 @@ public abstract class AbstractSAFSLoggingService {
 				result = value.replace(separator, replacement);
 			}
 		}
-		
+
 		return result;
 	}
-	
+
 	protected STAFResult handleTruncate(InfoInterface.RequestInfo info)
 	{
 		// validate the request
 		STAFCommandParseResult parsedRequest = truncateParser.parse(info.request);
 		if( parsedRequest.rc != STAFResult.Ok )
 		{
-			return new STAFResult( STAFResult.InvalidRequestString, 
+			return new STAFResult( STAFResult.InvalidRequestString,
 				parsedRequest.errorBuffer );
-		}		
+		}
 		String truncateval = parsedRequest.optionValue(SLS_SERVICE_REQUEST_TRUNCATE);
 		if(truncateval == null){
 			truncateLines = true;
@@ -1070,19 +1086,19 @@ public abstract class AbstractSAFSLoggingService {
 			else if(SLS_SERVICE_PARM_OFF.equalsIgnoreCase(truncateval))
 				truncateLines = false;
 			else{
-				try{ 
+				try{
 					truncateLength = Integer.parseInt(truncateval);
 					if(truncateLength < 1){
 						truncateLength = SLS_TRUNCATELENGTH_DEFAULT;
-						return new STAFResult( STAFResult.InvalidRequestString, 
+						return new STAFResult( STAFResult.InvalidRequestString,
 								"TRUNCATE value cannot be < 1." );
 					}
 					truncateLines = true;
 				}catch(Exception x){
-					return new STAFResult( STAFResult.InvalidRequestString, 
+					return new STAFResult( STAFResult.InvalidRequestString,
 							"Optional TRUNCATE value must be > 0 | ON | OFF " );
 				}
-			}						
+			}
 		}
 		String desc = truncateLines ? "TRUNCATE "+ truncateLength : "OFF";
 		return new STAFResult(STAFResult.Ok, desc);
@@ -1094,26 +1110,26 @@ public abstract class AbstractSAFSLoggingService {
 		STAFCommandParseResult parsedRequest = closeParser.parse(info.request);
 		if( parsedRequest.rc != STAFResult.Ok )
 		{
-			return new STAFResult( STAFResult.InvalidRequestString, 
+			return new STAFResult( STAFResult.InvalidRequestString,
 				parsedRequest.errorBuffer );
 		}
 
 		boolean capXML = (parsedRequest.optionTimes(SLS_SERVICE_PARM_CAPXML) > 0);
 
-		if (parsedRequest.optionTimes(SLS_SERVICE_PARM_ALL) > 0) 
+		if (parsedRequest.optionTimes(SLS_SERVICE_PARM_ALL) > 0)
 		{
 			String result = "";
 			for (Enumeration e = logfacs.elements(); e.hasMoreElements();)
 			{
 				SLSLogFacility logfac = (SLSLogFacility)e.nextElement();
-				try 
+				try
 				{
 					if(capXML){ logfac.setSAFSXmlLogCapXML(capXML);	}
 					// only remove a log fac if closed successfully
 					logfac.close();
 					logfacs.remove(logfac.getFacName());
 				}
-				catch (STAFLogException ex) 
+				catch (STAFLogException ex)
 				{
 					result += logfac.getFacName() + ";" + ex.result.rc + ";" +
 						ex.result.result + "\n";
@@ -1158,7 +1174,7 @@ public abstract class AbstractSAFSLoggingService {
 		STAFCommandParseResult parsedRequest = helpParser.parse(info.request);
 		if( parsedRequest.rc != STAFResult.Ok )
 		{
-			return new STAFResult( STAFResult.InvalidRequestString, 
+			return new STAFResult( STAFResult.InvalidRequestString,
 				parsedRequest.errorBuffer );
 		}
 
@@ -1173,13 +1189,13 @@ public abstract class AbstractSAFSLoggingService {
 	{
 		return new STAFResult(STAFResult.Ok, VERSION_STR);
 	}
-	
+
 	protected void registerHandle(String handleId)throws STAFException{
 		String debugmsg = getClass().getName() + ".registerHandle():";
     	debugLog.debugPrintln(debugmsg+" registering STAFHandle handleId: "+ handleId);
-		handle = new STAFHandleInterface(handleId);		
+		handle = new STAFHandleInterface(handleId);
 	}
-	
+
 	public STAFResult init(InfoInterface.InitInfo info) {
 		debugLog.debugInit();
 
@@ -1221,24 +1237,24 @@ public abstract class AbstractSAFSLoggingService {
 		createTruncateParser();
 		createHelpParser();
 
-		debugLog.debugPrintln("SAFSLoggingService.init(): mode=" + mode + ";dir=" + 
-			defaultDir + ";rmachine=" + remoteMachine + ";rservcie=" + 
+		debugLog.debugPrintln("SAFSLoggingService.init(): mode=" + mode + ";dir=" +
+			defaultDir + ";rmachine=" + remoteMachine + ";rservcie=" +
 			remoteService + ";custom=" + customService);
 
 		return new STAFResult(STAFResult.Ok);
 	}
-	
+
 	/**
-	 * Subclasses can override to change the STAFLog service initialization, or even 
+	 * Subclasses can override to change the STAFLog service initialization, or even
 	 * bypass it entirely if not used.
 	 * @return STAFResult
 	 */
 	protected STAFResult initSTAFLogService(){
-		// if running in local mode, load a separate instance of STAF LOG 
-		// service. we do not want to use the default instance because we 
+		// if running in local mode, load a separate instance of STAF LOG
+		// service. we do not want to use the default instance because we
 		// have special requirements for its settings.
-		STAFResult result = handle.submit2("local", "service", 
-			"add service " + SLS_STAF_LOG_SERVICE_NAME + 
+		STAFResult result = handle.submit2("local", "service",
+			"add service " + SLS_STAF_LOG_SERVICE_NAME +
 			" library STAFLog parms MAXRECORDSIZE 1048576");
 		if( result.rc != STAFResult.Ok )
 		{
@@ -1249,13 +1265,13 @@ public abstract class AbstractSAFSLoggingService {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Handles service request from STAF.
 	 * <p>
 	 */
 	public STAFResult acceptRequest(InfoInterface.RequestInfo info)
-	{	
+	{
 		String upperRequest = info.request.toUpperCase();
 		StringTokenizer requestTokenizer = new StringTokenizer(upperRequest);
 		String request = requestTokenizer.nextToken();
@@ -1264,7 +1280,7 @@ public abstract class AbstractSAFSLoggingService {
 		if (request.equals(SLS_SERVICE_REQUEST_HANDLEID))
 		{
 			return handleHandleId(info);
-			
+
 		}
 		else if (request.equals(SLS_SERVICE_REQUEST_INIT))
 		{

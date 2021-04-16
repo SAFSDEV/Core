@@ -1,8 +1,20 @@
-/** 
+/**
  * Copyright (C) SAS Institute, All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- */
-
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * org.safs.net.NetUtilities.java:
  * Logs for developers, not published to API DOC.
@@ -10,6 +22,8 @@
  * History:
  * Jul 10, 2015    (Lei Wang) Initial release.
  * Dec 24, 2015    (Lei Wang) Add method readHttpURL().
+ * SEP 03, 2018    (Lei Wang) Modified getLocalHostName(): try to return full qualified host name.
+ * JUN 06, 2019    (Lei Wang) Added method isHttpURLReachable().
  */
 package org.safs.net;
 
@@ -17,6 +31,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
@@ -31,7 +46,7 @@ import org.safs.natives.NativeWrapper;
  * @author Lei Wang
  */
 public class NetUtilities {
-	
+
 	/**'localhost'*/
 	public static final String LOCAL_HOST = StringUtils.LOCAL_HOST;
 	/** '127.0.0.1'*/
@@ -40,10 +55,10 @@ public class NetUtilities {
 	public static final String LOCAL_HOST_IPV6_PREFIX_1 = "::1";
 	/** 'fe80::'*/
 	public static final String LOCAL_HOST_IPV6_PREFIX_FE80 = "fe80::";
-	
+
 	/** "^([0-9A-F]{2}[:-]){5}([0-9A-F]{2})$" the regex pattern for a MAC address. */
 	public static final String PATTERN_MAC_ADDRESS = "^([0-9A-F]{2}[:-]){5}([0-9A-F]{2})$";
-	
+
 	/**
 	 * Test if the host is local according to the host's name.<br>
 	 * @param host String, the name/ip of the host
@@ -51,7 +66,7 @@ public class NetUtilities {
 	 */
 	public static boolean isLocalHost(String host){
 		boolean isLocalHost = LOCAL_HOST.equals(host) || LOCAL_HOST_IP.equals(host);
-		
+
 		if(!isLocalHost){
 			String localhostIP = getLocalHostIP();
 			//If the parameter host equals the localhost's IP?
@@ -73,12 +88,12 @@ public class NetUtilities {
 //				isLocalHost = hostip.equals(localhostIP);
 //			}
 		}
-		
+
 		return isLocalHost;
 	}
 
 	/**
-	 * 
+	 *
 	 * @param address String, the address to be tested
 	 * @return boolean true if address is a MAC address
 	 */
@@ -92,7 +107,7 @@ public class NetUtilities {
 		}
 	}
 
-	
+
 	/**
 	 * Get the host's IP address.<br>
 	 * @param hostname String, the name of a host
@@ -101,7 +116,7 @@ public class NetUtilities {
 	public static String getHostIP(String hostname){
 		String debugmsg = StringUtils.debugmsg(false);
 		String hostIP = null;
-		
+
 		if(StringUtils.isValid(hostname)){
 			if(isLocalHost(hostname)) hostIP = getLocalHostIP();
 			else{
@@ -114,12 +129,12 @@ public class NetUtilities {
 		}else{
 			IndependantLog.error(debugmsg+" parameter hostname '"+hostname+"' is not valid.");
 		}
-		
+
 		return hostIP;
 	}
-	
+
 	/**
-	 * Get the localhost's IP Address. Try Java's API to get it firstly, 
+	 * Get the localhost's IP Address. Try Java's API to get it firstly,
 	 * if it cannot be got the try command {@link NativeWrapper#COMMAND_IPCONFIG}.
 	 */
 	public static String getLocalHostIP(){
@@ -142,45 +157,50 @@ public class NetUtilities {
 
 		return hostIP;
 	}
-	
+
 	/**
 	 * @return String, the name of localhost
 	 */
 	public static String getLocalHostName(){
 		String debugmsg = StringUtils.debugmsg(false);
 		String hostName = null;
-		
+
 		try {
-			hostName = InetAddress.getLocalHost().getHostName();
+			InetAddress localhost = InetAddress.getLocalHost();
+			hostName = localhost.getCanonicalHostName();
+
+			if(hostName==null || hostName.trim().isEmpty()){
+				hostName = localhost.getHostName();
+			}
 		} catch (UnknownHostException e) {
 			IndependantLog.warn(debugmsg+" fail due to "+StringUtils.debugmsg(e));
 		}
-		
+
 		//Use command "hostname" to get the local host name
 		if(!StringUtils.isValid(hostName)){
 			IndependantLog.debug(debugmsg+"try NativeWrapper.getLocalHostName()");
 			hostName = NativeWrapper.getLocalHostName();
 		}
-		
+
 		if(hostName!=null) hostName = hostName.trim();
-		
+
 		return hostName;
 	}
-	
+
 	/**
 	 * Read from url connection.<br>
 	 * If the HTTP response code is 200, then the content is read from standard out stream.<br>
 	 * Otherwise, the content is read from the standard error stream.<br>
-	 * 
+	 *
 	 * @param url URL, the url from where to read content
 	 * @param encoding String, the encoding used to read the URL, such as "utf-8"
-	 * @param timeout int, the connect timeout in milliseconds 
+	 * @param timeout int, the connect timeout in milliseconds
 	 * @return String the content read from url connection.
 	 */
 	public static String readHttpURL(URL url, String encoding, int timeout){
 		String debugmsg = StringUtils.debugmsg(false);
 		boolean debug = false;
-		
+
 		HttpURLConnection con = null;
 		BufferedReader br = null;
 		try{
@@ -192,7 +212,7 @@ public class NetUtilities {
 				IndependantLog.debug(debugmsg+"respond message: "+con.getResponseMessage());
 				IndependantLog.debug(debugmsg+"content length: "+con.getContentLengthLong());
 			}
-			
+
 			if(con.getResponseCode()==HttpURLConnection.HTTP_OK){
 				IndependantLog.debug(debugmsg+"Succeed to connect to URL '"+url+"', reading from stdout stream ... ");
 				br = new BufferedReader(new InputStreamReader(con.getInputStream(), Charset.forName(encoding)), 1024);
@@ -200,12 +220,12 @@ public class NetUtilities {
 				IndependantLog.error(debugmsg+"Fail to connect to URL '"+url+"', reading from stderr stream ... ");
 				br = new BufferedReader(new InputStreamReader(con.getErrorStream(), Charset.forName(encoding)), 1024);
 			}
-			
+
 			StringBuffer sb = new StringBuffer();
 			String temp = null;
-			while((temp=br.readLine())!=null) sb.append(temp);				
+			while((temp=br.readLine())!=null) sb.append(temp);
 			return sb.toString();
-			
+
 		}catch(Exception e){
 			IndependantLog.error(debugmsg+StringUtils.debugmsg(e));
 		}finally{
@@ -214,7 +234,41 @@ public class NetUtilities {
 		}
 		return null;
 	}
-	
+
+	/**
+	 * Detect if url is reachable withing timeout.<br>
+	 *
+	 * @param url URL, the url from where to read content
+	 * @param timeout int, the connect timeout in milliseconds
+	 * @return booelan if the URL is reachable.
+	 */
+	//Don't know why this function doesn't work for https://www.google.com/
+	public static boolean isHttpURLReachable(URL url, int timeout){
+		String debugmsg = StringUtils.debugmsg(false);
+		boolean debug = false;
+
+		HttpURLConnection con = null;
+		try{
+			con = (HttpURLConnection) url.openConnection();
+			con.setConnectTimeout(timeout);
+			con.setRequestMethod("HEAD");
+			if(debug){
+				IndependantLog.debug(debugmsg+"request properties: "+con.getRequestProperties());
+				IndependantLog.debug(debugmsg+"respond code: "+con.getResponseCode());
+				IndependantLog.debug(debugmsg+"respond message: "+con.getResponseMessage());
+				IndependantLog.debug(debugmsg+"content length: "+con.getContentLengthLong());
+			}
+
+			return (con.getResponseCode()==HttpURLConnection.HTTP_OK);
+
+		}catch(Exception e){
+			IndependantLog.error(debugmsg+StringUtils.debugmsg(e));
+		}finally{
+			try{if(con!=null) con.disconnect();}catch(Exception x){}
+		}
+		return false;
+	}
+
 	/**
 	 * Get the host's IP Address by Java's API.
 	 * @see #getHostIPByPing(String)
@@ -228,12 +282,12 @@ public class NetUtilities {
 		} catch (UnknownHostException e) {
 			IndependantLog.warn(debugmsg+" fail due to "+StringUtils.debugmsg(e));
 		}
-		
+
 		if(hostIP!=null) hostIP = hostIP.trim();
-		
+
 		return hostIP;
 	}
-	
+
 	/**
 	 * test method {@link #getHostIP(String)} and {@link #isLocalHost(String)}.<br>
 	 * @param args String[], arguments array from which to get hostname used to test method {@link #isLocalHost(String)} and {@link #getHostIP(String)}<br>
@@ -250,7 +304,7 @@ public class NetUtilities {
 			}
 		}
 		System.out.println("local host IP: "+getLocalHostIP()+"\n");
-		
+
 		for(String host:hosts){
 			System.out.println(host+"'s IP: "+getHostIP(host));
 			System.out.println(host+ (isLocalHost(host)? " is ":" is not ")+"Localhost.");
@@ -258,23 +312,41 @@ public class NetUtilities {
 		}
 		System.out.println("-----------------------------------------------------------------");
 	}
-	
+
+	private static void self_test(String[] args){
+		System.out.println("-------------------------   self_test   -------------------------");
+
+		URL url;
+		try {
+			url = new URL("http://www.baidu.com/");
+			assert isHttpURLReachable(url, 1000);
+
+			url = new URL("http://not_exist_url");
+			assert !isHttpURLReachable(url, 1000);
+
+		} catch (MalformedURLException e) {
+			System.err.println("Met "+e.toString());
+		}
+
+		System.out.println("-----------------------------------------------------------------");
+	}
+
 	/**"-testhosts" followed by a series of hostname separated by semi-colon, such as "-testhosts host1;host2;host3;host4"*/
 	public static final String ARG_TEST_HOSTS = "-testhosts";
-	
+
 	/**
 	 * Test some implementations of this class.<br>
 	 * To test {@link #isLocalHost(String)} and {@link #getHostIP(String)}, call as following:<br>
 	 * {@code org.safs.net.NetUtilities -testhosts host1;host2;host3;host4}<br>
 	 * @param args String[], <br>
-	 *             -testhosts followed by a series of hostname separated by semi-colon, 
+	 *             -testhosts followed by a series of hostname separated by semi-colon,
 	 *             such as "-testhosts host1;host2;host3;host4", used to test method {@link #isLocalHost(String)} and {@link #getHostIP(String)}<br>
 	 *             if {@link IndependantLog#ARG_DEBUG} followed by host name such as machine.domain.com, then {@link #test_getHostIp(String[])}<br>
 	 */
 	public static void main(String[] args){
 		IndependantLog.parseArguments(args);
-		
+
 		test_HostIP(args);
-		
+		self_test(args);
 	}
 }

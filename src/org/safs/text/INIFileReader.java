@@ -1,6 +1,24 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.text;
 
-import java.io.*;
+import java.io.File;
+import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -12,37 +30,37 @@ import java.util.Vector;
  * <p>
  * This INIFileReader class is intended to read INI formatted text files.<br>
  * <p>
- * Physical INI files are expected to be in a particular format.  This is very much 
- * like the format for Windows INI files--which is the App Map format currently in use for the 
+ * Physical INI files are expected to be in a particular format.  This is very much
+ * like the format for Windows INI files--which is the App Map format currently in use for the
  * Rational Robot SAFS Engine (RRAFS).  (Though, there may be slight differences.)
  * <p>
- * The following characters are allowed to indicate commentlines or are otherwise ignored. Lines 
+ * The following characters are allowed to indicate commentlines or are otherwise ignored. Lines
  * are trimmed of leading whitespace before this check is made:
  * <p>
  * &nbsp; &nbsp; &#033; (bang - exclamation point)<br>
  * &nbsp; &nbsp; &#059; (semicolon)<br>
  * &nbsp; &nbsp; &#035; (hash or pound mark)<br>
  * <p>
- * However, if an equality character ('=') exists in the line the line will be treated as a 
- * valid text line.  The assumption is the comment indicators are actually part of the NAME 
+ * However, if an equality character ('=') exists in the line the line will be treated as a
+ * valid text line.  The assumption is the comment indicators are actually part of the NAME
  * in a NAME=VALUE pair.
  * <p>
- * Each INI "Section" is delimited with brackets ([ ])containing the name of the section.  
- * In SAFS automation parlance, these are the "Window" definition sections.  A section delimiter 
- * should appear all by itself on a line. There should be no additional text.  The line is 
+ * Each INI "Section" is delimited with brackets ([ ])containing the name of the section.
+ * In SAFS automation parlance, these are the "Window" definition sections.  A section delimiter
+ * should appear all by itself on a line. There should be no additional text.  The line is
  * first trimmed before the check for a section is made.
  * <p>
- * A section identifier is not case-sensitive.  
+ * A section identifier is not case-sensitive.
  * <p>
- * If an INI file contains a [ApplicationConstants] section, that will be considered the "default" 
- * section.  Otherwise, any first, unnamed section is the "default". 
+ * If an INI file contains a [ApplicationConstants] section, that will be considered the "default"
+ * section.  Otherwise, any first, unnamed section is the "default".
  * <p>
  * Items within a section have a NAME=VALUE format.<br>
- * To the left of the Equals sign is the NAME.  The substring is trimmed of leading or 
- * trailing whitespace and by default is not case-sensitive.  Enclose any space character(s) 
- * in double-quote characters.  
- * Everything to the right of the Equals sign is returned unmodified.  It is NOT trimmed 
- * of leading or trailing whitespace and the text is returned unmodified.  However, leading 
+ * To the left of the Equals sign is the NAME.  The substring is trimmed of leading or
+ * trailing whitespace and by default is not case-sensitive.  Enclose any space character(s)
+ * in double-quote characters.
+ * Everything to the right of the Equals sign is returned unmodified.  It is NOT trimmed
+ * of leading or trailing whitespace and the text is returned unmodified.  However, leading
  * and trailing quotes will be removed if they exist.
  * <p>
  * An example is below:
@@ -69,27 +87,27 @@ import java.util.Vector;
  * &nbsp; &nbsp; Another  = another value<br>
  * &nbsp; &nbsp; <br>
  * <p>
- * The file uses a java.io.BufferedReader for STORED memory mode, or a java.io.RandomAccessFile 
+ * The file uses a java.io.BufferedReader for STORED memory mode, or a java.io.RandomAccessFile
  * for MAPPED memory mode.  (MAPPED mode is not yet implemented.)
  * <p>
  * @author Carl Nagle, SAS Institute
  * @version 2.0, 02/23/2005
- * 
+ *
  * @author Carl Nagle, 02/23/2005 Modified for use of CaseInsensitiveHashtable
  * @author Carl Nagle, 02/23/2007 Modified for optional use of java.util.Hashtable
  * @author Carl Nagle, 07/16/2010 Mod to support other valid Charset encodings.
- * 
- * Software Automation Framework Support (SAFS) http://safsdev.sourceforge.net<br>
+ *
+ * Software Automation Framework Support (SAFS) http://safsdev:8880<br>
  * Software Testing Automation Framework (STAF) http://staf.sourceforge.net<br>
  ******************************************************************************************/
 public class INIFileReader extends FileLineReader {
 
 	protected boolean ignoreItemCase = true;
-	
-	// sections are always case-insensitive 
+
+	// sections are always case-insensitive
 	protected CaseInsensitiveHashtable sections = new CaseInsensitiveHashtable(20);
-	
-	
+
+
 	/*******************************************************************************************
 	 * Specifies to completely read and store the file in memory for performance. (DEFAULT)
 	 ******************************************************************************************/
@@ -101,7 +119,7 @@ public class INIFileReader extends FileLineReader {
 	 ******************************************************************************************/
 	public static final int IFR_MEMORY_MODE_MAPPED  = 1;
 
-	
+
 	/*******************************************************************************************
 	 * The text string that specifies to reference the "default" AppMap section in requests.
 	 ******************************************************************************************/
@@ -115,20 +133,20 @@ public class INIFileReader extends FileLineReader {
 
 	/*******************************************************************************************
 	 * Determines if the file should be fully loaded and stored in memory.
-	 * It would be more efficient to read and store relatively small files into object arrays.  
+	 * It would be more efficient to read and store relatively small files into object arrays.
 	 * For this, there is the IFR_MEMORY_MODE_STORED mode.
 	 * <p>
-	 * In this mode, a helper thread runs in the background populating our internal storage.  
-	 * The underlying file stream will actually be closed once the helper thread has loaded all 
-	 * values into memory.  Yet, this file instance remains valid servicing data requests until 
+	 * In this mode, a helper thread runs in the background populating our internal storage.
+	 * The underlying file stream will actually be closed once the helper thread has loaded all
+	 * values into memory.  Yet, this file instance remains valid servicing data requests until
 	 * it receives the official close() request from the object owner.
 	 * <p>
-	 * For much larger files, it may be more efficient to simply store pointers to key locations 
-	 * in the file and then map sections in and out of memory as needed.  For this there will be 
+	 * For much larger files, it may be more efficient to simply store pointers to key locations
+	 * in the file and then map sections in and out of memory as needed.  For this there will be
 	 * the IFR_MEMORY_MODE_MAPPED mode.
 	 * <p>
-	 * The initial release of this file handler only supports the STORED memorymode.  However, 
-	 * the MAPPED memory mode will be implemented using the RandomAccessFile and FileChannel 
+	 * The initial release of this file handler only supports the STORED memorymode.  However,
+	 * the MAPPED memory mode will be implemented using the RandomAccessFile and FileChannel
 	 * support in Java.
 	 ******************************************************************************************/
 	protected int       memorymode = 0;
@@ -136,8 +154,8 @@ public class INIFileReader extends FileLineReader {
 
 	protected JITLoader jit        = null;
 	protected boolean   jitstop    = false;  // set to true to stop the thread mid-process
-	
-	
+
+
 	/*******************************************************************************************
 	 * This constructor will create an inoperable (Closed) file object.  No use whatsoever. :)
 	 ******************************************************************************************/
@@ -146,7 +164,7 @@ public class INIFileReader extends FileLineReader {
 
 	/*******************************************************************************************
 	 * The constructor used by the SAFSAppMapReader.
-	 * 
+	 *
 	 * All subclasses MUST invoke this constructor prior to completing their initialization.<br>
 	 * Invoke this constructor from the subclass with:
 	 * <p>
@@ -154,20 +172,20 @@ public class INIFileReader extends FileLineReader {
 	 * <p>
 	 * @param file A valid File object for the file to be opened.
 	 * <p>
-	 * @param memorymode the memory model for this handler to use: STORED or MAPPED.  Currently 
+	 * @param memorymode the memory model for this handler to use: STORED or MAPPED.  Currently
 	 *                   only the STORED model is used.
 	 ******************************************************************************************/
 	public INIFileReader (File file, int memorymode){
 
 		super(file);
-		
+
 		if(memorymode == IFR_MEMORY_MODE_MAPPED) this.memorymode = memorymode;
 		tryJITLoader();
 	}
 
 	/*******************************************************************************************
 	 * The constructor used by the SAFSAppMapReader.
-	 * 
+	 *
 	 * All subclasses MUST invoke this constructor prior to completing their initialization.<br>
 	 * Invoke this constructor from the subclass with:
 	 * <p>
@@ -175,27 +193,27 @@ public class INIFileReader extends FileLineReader {
 	 * <p>
 	 * @param file A valid File object for the file to be opened.
 	 * <p>
-	 * @param memorymode the memory model for this handler to use: STORED or MAPPED.  Currently 
+	 * @param memorymode the memory model for this handler to use: STORED or MAPPED.  Currently
 	 *                   only the STORED model is used.
 	 * <p>
-	 * @param encoding a valid Charset encoding like "UTF-16", etc...                  
+	 * @param encoding a valid Charset encoding like "UTF-16", etc...
 	 ******************************************************************************************/
 	public INIFileReader (File file, int memorymode, String encoding){
 
 		super(file, encoding);
-		
+
 		if(memorymode == IFR_MEMORY_MODE_MAPPED) this.memorymode = memorymode;
 		tryJITLoader();
 	}
-	
+
 	/*******************************************************************************************
 	 * The constructor used to force Item case sensitivity.
-	 * 
+	 *
 	 * @param file A valid File object for the file to be opened.
 	 * <p>
-	 * @param memorymode the memory model for this handler to use: STORED or MAPPED.  Currently 
+	 * @param memorymode the memory model for this handler to use: STORED or MAPPED.  Currently
 	 *                   only the STORED model is used.
-	 * @param ignoreItemCase set to FALSE to make Item NAMES case-sensitive.  By default Item 
+	 * @param ignoreItemCase set to FALSE to make Item NAMES case-sensitive.  By default Item
 	 * names are not case-sensitive.
 	 ******************************************************************************************/
 	public INIFileReader (File file, int memorymode, boolean ignoreItemCase){
@@ -206,15 +224,15 @@ public class INIFileReader extends FileLineReader {
 		tryJITLoader();
 	}
 
-	
+
 	/*******************************************************************************************
 	 * The constructor used to force Item case sensitivity.
-	 * 
+	 *
 	 * @param file A valid File object for the file to be opened.
 	 * <p>
-	 * @param memorymode the memory model for this handler to use: STORED or MAPPED.  Currently 
+	 * @param memorymode the memory model for this handler to use: STORED or MAPPED.  Currently
 	 *                   only the STORED model is used.
-	 * @param ignoreItemCase set to FALSE to make Item NAMES case-sensitive.  By default Item 
+	 * @param ignoreItemCase set to FALSE to make Item NAMES case-sensitive.  By default Item
 	 * names are not case-sensitive.
 	 * @param encoding a valid Charset encoding like "UTF-16", etc...
 	 ******************************************************************************************/
@@ -228,15 +246,15 @@ public class INIFileReader extends FileLineReader {
 
 	/*******************************************************************************************
 	 * The constructor used to force Item case sensitivity while using an InputStream.
-	 * For example, resources or files stored in JARs loaded via ClassLoaders.  
-	 * Files can be loaded from the file system if the directory is in the System CLASSPATH 
+	 * For example, resources or files stored in JARs loaded via ClassLoaders.
+	 * Files can be loaded from the file system if the directory is in the System CLASSPATH
 	 * where getSystemResourceAsStream can find it.
-	 * 
+	 *
 	 * @param stream A valid InputStream object for the data to be read.
 	 * <p>
-	 * @param memorymode the memory model for this handler to use: STORED or MAPPED.  Currently 
+	 * @param memorymode the memory model for this handler to use: STORED or MAPPED.  Currently
 	 *                   only the STORED model is used.
-	 * @param ignoreItemCase set to FALSE to make Item NAMES case-sensitive.  By default Item 
+	 * @param ignoreItemCase set to FALSE to make Item NAMES case-sensitive.  By default Item
 	 * names are not case-sensitive.
 	 * @see ClassLoader#getSystemResourceAsStream(java.lang.String)
 	 ******************************************************************************************/
@@ -248,18 +266,18 @@ public class INIFileReader extends FileLineReader {
 		tryJITLoader();
 	}
 
-	
+
 	/*******************************************************************************************
 	 * The constructor used to force Item case sensitivity while using an InputStream.
-	 * For example, resources or files stored in JARs loaded via ClassLoaders.  
-	 * Files can be loaded from the file system if the directory is in the System CLASSPATH 
+	 * For example, resources or files stored in JARs loaded via ClassLoaders.
+	 * Files can be loaded from the file system if the directory is in the System CLASSPATH
 	 * where getSystemResourceAsStream can find it.
-	 * 
+	 *
 	 * @param stream A valid InputStream object for the data to be read.
 	 * <p>
-	 * @param memorymode the memory model for this handler to use: STORED or MAPPED.  Currently 
+	 * @param memorymode the memory model for this handler to use: STORED or MAPPED.  Currently
 	 *                   only the STORED model is used.
-	 * @param ignoreItemCase set to FALSE to make Item NAMES case-sensitive.  By default Item 
+	 * @param ignoreItemCase set to FALSE to make Item NAMES case-sensitive.  By default Item
 	 * names are not case-sensitive.
 	 * @param encoding a valid Charset encoding like "UTF-16", etc...
 	 * @see ClassLoader#getSystemResourceAsStream(java.lang.String)
@@ -272,16 +290,16 @@ public class INIFileReader extends FileLineReader {
 		tryJITLoader();
 	}
 
-	
+
 	/*******************************************************************************************
 	 * Will run the JITLoader to populate the cache if the memorymode is appropriate.
 	 * Currently, we only support the STORED memorymode; so the JITLoader will definitely run.
 	 ******************************************************************************************/
     protected void tryJITLoader(){
-		//if (memorymode == IFR_MEMORY_MODE_STORED){			
+		//if (memorymode == IFR_MEMORY_MODE_STORED){
 		jit = new JITLoader();
 		jit.run();
-		//}    	
+		//}
     }
 
 	/**
@@ -293,9 +311,9 @@ public class INIFileReader extends FileLineReader {
 			java.util.Hashtable items = (java.util.Hashtable) e.nextElement();
 			items.clear();
 		}
-		sections.clear();				
+		sections.clear();
 	}
-	
+
 	/**
 	 * Shutdown the JIT file processor.  The JIT will be nulled on exit.
 	 */
@@ -303,28 +321,29 @@ public class INIFileReader extends FileLineReader {
 		if ((jit != null)&&(jit.isAlive())){
 			jitstop = true;
 			for (int i = 0; i < 30; i++){
-				try{ 
+				try{
 					wait(1000);
 					if (!jitstop) break;
 				}
 				catch(Exception e) {;}
-			}			
+			}
 			if (jitstop) {
 				try{
 					jit.interrupt();
 				}catch(Exception e){;}
 			}
 		}
-		jit = null;		
+		jit = null;
 	}
-	
+
 	/*******************************************************************************************
 	 * Closes the file (if still open) and releases all stored resources via clearHashtables().
-	 * This is the call to shutdown for termination.  This also forwards the close request 
+	 * This is the call to shutdown for termination.  This also forwards the close request
 	 * to the superclass which will shutdown the file reader.
 	 * @see #closeJIT()
 	 * @see #clearHashtables()
 	 ******************************************************************************************/
+	@Override
 	public void close(){
 		try{
 			closeJIT();
@@ -341,56 +360,56 @@ public class INIFileReader extends FileLineReader {
 		super.close();
 	}
 
-		
+
 	/*******************************************************************************************
 	 * Lookup an item in a particular section of the map.
-	 * The section can be an empty string--the first, unnamed section.  You may also specify to 
+	 * The section can be an empty string--the first, unnamed section.  You may also specify to
 	 * use the "default" section by specifying "DefaultMapSection" for the section parameter.
-	 * The parameters are not case-sensitive.  If no "default" section has been set, the first 
+	 * The parameters are not case-sensitive.  If no "default" section has been set, the first
 	 * unnamed section is used.
 	 * <p>
-	 * @param section the section of the Map to find an item in.  If section is null, an empty 
-	 *                String will be used to identify the the first, unnamed section.  This is not 
-	 *                case-sensitive.  To use the "default" section, specify "DefaultMapSection" 
+	 * @param section the section of the Map to find an item in.  If section is null, an empty
+	 *                String will be used to identify the the first, unnamed section.  This is not
+	 *                case-sensitive.  To use the "default" section, specify "DefaultMapSection"
 	 *                for this parameter.  All "keys" are stored in lower-case.
 	 * <p>
-	 * @param item the item in the section to find a value on.  This is not case-sensitive.  
-	 *             If the item parameter is null or empty then a null value will be returned. 
+	 * @param item the item in the section to find a value on.  This is not case-sensitive.
+	 *             If the item parameter is null or empty then a null value will be returned.
 	 *             All "keys" are stored in lower-case.
 	 * <p>
 	 * @return the value of the item in the specified section.
-	 *         If the value appears to be a quoted string then any leading/trailing blanks 
+	 *         If the value appears to be a quoted string then any leading/trailing blanks
 	 *         outside the quotes and the quotes themselves will be removed.
 	 *         null if the item parameter is invalid or the item cannot be found.
 	 ******************************************************************************************/
 	public String getAppMapItem(String section, String item){
 
 		String mapitem = null;
-		
+
 		try{ mapitem = item.trim(); }
 		catch(NullPointerException e){ return null; }
-			
+
 		String lcsection = null;
-		
+
 		try{ lcsection = section.trim(); }
 		catch(NullPointerException e) { lcsection = new String(); }
 
 		if(lcsection.equalsIgnoreCase(IFR_DEFAULT_MAP_SECTION_COMMAND))
 			lcsection = defaultsection;
-		
+
 		if ((!(jit == null))&&(jit.isAlive())) {
 			for (int i = 0; i < 12; i++){
 				try{ wait(1000);
 					 if (!jit.isAlive()) break;
-				}catch(InterruptedException e){;}				
+				}catch(InterruptedException e){;}
 			}
 		}
-		
+
 		java.util.Hashtable items = null;
 		String theItem = null;
 		String tempItem = null;
 		try{//catch any NullPointerExceptions if theItem from the map is null.
-			items = (java.util.Hashtable) sections.get(lcsection);		
+			items = (java.util.Hashtable) sections.get(lcsection);
 			theItem = (String) items.get(mapitem);
 			tempItem = theItem.trim(); //do not trim original value in-case it is NOT quoted
 			if (tempItem.length() > 2){
@@ -401,58 +420,58 @@ public class INIFileReader extends FileLineReader {
 				}
 				if ((tempItem.endsWith("\""))||
 					(tempItem.endsWith("\'"))){
-						theItem=tempItem.substring(0, tempItem.length()-1); 
+						theItem=tempItem.substring(0, tempItem.length()-1);
 				}
 			}
 		}
 		catch(NullPointerException e){ theItem = null; }
 		return theItem;
 	}
-	
+
 	public String getItem(String section, String item){
 
 		String mapitem = null;
-		
+
 		try{ mapitem = item.trim(); }
 		catch(NullPointerException e){ return null; }
-			
+
 		String lcsection = null;
-		
+
 		try{ lcsection = section.trim(); }
 		catch(NullPointerException e) { lcsection = new String(); }
 
 		if(lcsection.equalsIgnoreCase(IFR_DEFAULT_MAP_SECTION_COMMAND))
 			lcsection = defaultsection;
-		
+
 		if ((!(jit == null))&&(jit.isAlive())) {
 			for (int i = 0; i < 12; i++){
 				try{ wait(1000);
 					 if (!jit.isAlive()) break;
-				}catch(InterruptedException e){;}				
+				}catch(InterruptedException e){;}
 			}
 		}
-		
+
 		java.util.Hashtable items = null;
 		String theItem = null;
 		try{
-			items = (java.util.Hashtable) sections.get(lcsection);		
+			items = (java.util.Hashtable) sections.get(lcsection);
 			theItem = (String) items.get(mapitem);
 			}catch(NullPointerException e){ theItem = null; }
-			
+
 		return theItem;
 	}
-	
+
 	/*******************************************************************************************
 	 * Retrieves the memorymode (STORED or MAPPED)
 	 ******************************************************************************************/
 	public int getMode(){ return memorymode;}
 
-	
+
 	/*******************************************************************************************
 	 * Retrieve the list of sections.
 	 * An object with no elements is returned if there are no sections in the map.
 	 ******************************************************************************************/
-	public Vector getSections(){ 
+	public Vector getSections(){
 		Vector list = new Vector();
 		if (sections.size() == 0) return list;
 		list = new Vector(sections.size());
@@ -460,47 +479,47 @@ public class INIFileReader extends FileLineReader {
 		return list;
 	}
 
-	
+
 	/*******************************************************************************************
 	 * Return the "default" section setting
 	 ******************************************************************************************/
 	public String getDefaultSection(){ return defaultsection; }
-	
-	
+
+
 	/*******************************************************************************************
-	 * Set the "default" section.  
-	 * @param section the section to set as default.  If the value is null or 0-length, 
+	 * Set the "default" section.
+	 * @param section the section to set as default.  If the value is null or 0-length,
 	 *                then we will set the default to be the first, unnamed section.
 	 * <p>
 	 * @return 0 on success. STAFResult.DoesNotExist (48) if the specified section does not exist.
 	 ******************************************************************************************/
-	public   int  setDefaultSection(String section){ 
+	public   int  setDefaultSection(String section){
 		if ((section == null)||(section.length() == 0)) {
 			defaultsection = new String();
 			return 0;
-			
+
 		}else if (sections.containsKey(section.trim().toLowerCase())){
 			defaultsection = section.trim().toLowerCase();
 			return 0;
-		
+
 		}else{
 			return 48; // STAFResult.DoesNotExist;
 		}
 	}
 
-	
+
 	/*******************************************************************************************
 	 * Returns the list of items in a section.
 	 * <p>
-	 * @param section the section to query for list items.  If the value is null or 0-length, 
-	 *                then we will get the list of items in the first, unnamed section.  If the 
-	 *                value is DEFAULTMAPSECTION, then we will get the list of items in the 
+	 * @param section the section to query for list items.  If the value is null or 0-length,
+	 *                then we will get the list of items in the first, unnamed section.  If the
+	 *                value is DEFAULTMAPSECTION, then we will get the list of items in the
 	 *                "default" section.
 	 * <p>
-	 * @return the list of items for the section. size() should be 0 if no items exist. A NULL 
+	 * @return the list of items for the section. size() should be 0 if no items exist. A NULL
 	 *         object is returned if the requested section does not exist in the map.
 	 ******************************************************************************************/
-	public Vector getItems(String section){ 
+	public Vector getItems(String section){
 
 		Vector list = new Vector();
 		String tsection = null;
@@ -514,27 +533,27 @@ public class INIFileReader extends FileLineReader {
 		java.util.Hashtable items = (java.util.Hashtable) sections.get(tsection);
 		if (items == null) return null;
 		if (items.size() == 0) return list;
-		
+
 		list = new Vector(items.size());
-		
+
 		for(Enumeration enumerator = items.keys(); enumerator.hasMoreElements(); list.addElement(enumerator.nextElement()));
 		return list;
 	}
-	
+
 
 	/*******************************************************************************************
-	 * Clears any internally stored cache of prefetched items.  This will cause the App Map 
-	 * to again be opened and read as necessary.  This is especially necessary for STORED memory 
+	 * Clears any internally stored cache of prefetched items.  This will cause the App Map
+	 * to again be opened and read as necessary.  This is especially necessary for STORED memory
 	 * mode after the user has made changes to the App Map file.
 	 ******************************************************************************************/
 	public void clearCache(){
 		close();
 		open();
 		tryJITLoader();
-	}	
+	}
 
 	/**
-	 * Instantiates a new Hashtable or CaseInsensitiveHashtable depending on the type of 
+	 * Instantiates a new Hashtable or CaseInsensitiveHashtable depending on the type of
 	 * storage to be used.
 	 * @return A Hashtable or CaseInsensitiveHashtable as needed to store items.
 	 */
@@ -544,7 +563,7 @@ public class INIFileReader extends FileLineReader {
 
 	// helper class the loads the map in the background
 	protected class JITLoader extends Thread {
-		
+
 		private String section = new String();
 		private char openb  = '[';
 		private char closeb = ']';
@@ -552,57 +571,58 @@ public class INIFileReader extends FileLineReader {
 		private char bang   = '!';
 		private char pound  = '#';
 		private char semi   = ';';
-		
+
+		@Override
 		public void run(){
-			
+
 			String    text  = null;
 			int       index = 0;
 			java.util.Hashtable items = getNewHashtable(20);
-			
+
 			if (reader == null) return;
-						
+
 			while(readLine() != null){
-					
+
 				text = linetext.trim();
 				if( text.length() == 0) continue;
-				
+
 				// if character, and an =, store it
 				index = linetext.indexOf(eq, 1);
 
 				char c1 = text.charAt(0);
-				
+
 				// skip comments and bang
 				if ((( c1 == bang )||( c1 == pound )||( c1 == semi ))&& (index < 1)) continue;
-				
+
 				// open bracket
 				if (c1 == openb){
-					
+
 					try{
 						if (text.charAt(text.length()-1) == closeb) {
 							text = text.substring(1, text.length()-1);
 							// store the previous section and start a new one
 							sections.put(section, items);
 							items = getNewHashtable(200);
-					
+
 							section = text.trim();
-					
+
 							// set applicationsconstants as default section if it is found
 							// and only if a different section has not already been set
 							if ((defaultsection.length()==0)&&
-								(section.equalsIgnoreCase(IFR_DEFAULT_MAP_SECTION))) 
+								(section.equalsIgnoreCase(IFR_DEFAULT_MAP_SECTION)))
 								defaultsection = section.toString();
 						}
 					}catch(IndexOutOfBoundsException e){ continue; }
-					
+
 				}
-				
+
 				if (index == -1) continue;
-				
+
 				text = linetext.substring(0, index).trim();
-				
+
 				try{items.put(text, linetext.substring(index+1));}
-				catch(IndexOutOfBoundsException e){ items.put(text, new String());}										
-			}			
+				catch(IndexOutOfBoundsException e){ items.put(text, new String());}
+			}
 			sections.put(section, items);
 		}
 	}

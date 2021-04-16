@@ -1,7 +1,20 @@
-/** Copyright (C) (MSA, Inc) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
+/**
+ * Copyright (C) (MSA, Inc), All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs;
 
 import org.safs.image.ImageUtils;
@@ -10,7 +23,7 @@ import org.safs.tools.drivers.ConfigureInterface;
 /**
  * <br><em>Purpose:</em>TestRecordHelper: helper class which can populate data in
  * TestRecordData
- * 
+ *
  * It can be populated from a STAF Variables pool.
  *
  * @author  Doug Bauman
@@ -18,7 +31,7 @@ import org.safs.tools.drivers.ConfigureInterface;
  *
  *  <br>    MAY 30, 2003    (DBauman) Original Release
  *  <br>    NOV 15, 2005    (Bob Lawler)  Added support for new TRD statusinfo field (RJL).
- *  <br>    APR 07, 2010    (LeiWang) Added method getRecognitionString(), isMixedRsUsed()
+ *  <br>    APR 07, 2010    (Lei Wang) Added method getRecognitionString(), isMixedRsUsed()
  *  								  Added method getWindowGuiId() getCompGuiId(): override method in super class.
  *  <br>    JUN 30, 2011    (CANAGAL) Moved config to this superclass for all Java engines.
  **/
@@ -28,41 +41,41 @@ public class TestRecordHelper extends TestRecordData {
   static class MySTAFRequester extends STAFRequester {}
 
   protected STAFRequester requester = new MySTAFRequester();
- 
+
   public STAFHelper getSTAFHelper() {return requester.getSTAFHelper();}
   protected STAFHelper getStaf() {return requester.getSTAFHelper();}
   public void setSTAFHelper(STAFHelper helper) { requester.setSTAFHelper(helper);}
 
 
   /** Hook's DDGUIUtilities when it is appropriate. **/
-  private DDGUIUtilities ddgutils = null;  
+  private DDGUIUtilities ddgutils = null;
   public DDGUIUtilities getDDGUtils() { return ddgutils; }
-  public void setDDGUtils(DDGUIUtilities ddgutils) { this.ddgutils = ddgutils; }  
-   
-  /** Stores interface to chained configuration settings. 
+  public void setDDGUtils(DDGUIUtilities ddgutils) { this.ddgutils = ddgutils; }
+
+  /** Stores interface to chained configuration settings.
    * @see org.safs.JavaHook#initConfigPaths()
    */
   private static ConfigureInterface config = null;
-  
+
 
   /** <br><em>Purpose:</em> no-arg constructor to make this fully qualified javabean
    **/
   public TestRecordHelper() {  super();  }
-  
-  /** 
+
+  /**
    * accessor method
    */
   public static void setConfig (ConfigureInterface c) {config = c;}
-  
-  /** 
+
+  /**
    * accessor method
    */
   public static ConfigureInterface getConfig () {return config;}
-  
+
 
   /** <br><em>Purpose:</em> populate data from the VAR pool using STAF, basically
    ** grabs the following fields in a TestRecordData instance from the VAR of STAF:
-   **   
+   **
    **   <br>- inputRecord
    **   <br>- filename
    **   <br>- lineNumber
@@ -73,13 +86,10 @@ public class TestRecordHelper extends TestRecordData {
    **   <br>- statusCode
    **   <br>- statusInfo
    **   <br>
-   * <br><em>Side Effects:</em> 
-   * <br><em>State Read:</em>   
+   * <br><em>Side Effects:</em>
+   * <br><em>State Read:</em>
    * <br><em>Assumptions:</em>  none
-   * @param                     helper, STAFHelper
-   * @param                     old, TestRecordData, if null then a new instance is returned.
-   * @return                    TestRecordData instance (modified 'old' or a new instance)
-   * @exception                 SAFSException, if not ok (since it used the method getVariable)
+   * @throws SAFSException STAFHelper.getVariable() will throw it
    **/
   public void populateDataFromVar () throws SAFSException {
 
@@ -88,7 +98,7 @@ public class TestRecordHelper extends TestRecordData {
 
     String next = getStaf().getVariable(getInstanceName() + STAFHelper.SAFS_VAR_LINENUMBER);
     int num = 0;
-    try { num = (new Integer(next)).intValue();} 
+    try { num = (new Integer(next)).intValue();}
     catch (NumberFormatException nfe) {}
     setLineNumber(num);
 
@@ -99,39 +109,37 @@ public class TestRecordHelper extends TestRecordData {
 
     next = getStaf().getVariable(getInstanceName() + STAFHelper.SAFS_VAR_STATUSCODE);
     num = 0;
-    try { num = (new Integer(next)).intValue();} 
+    try { num = (new Integer(next)).intValue();}
     catch (NumberFormatException nfe) {}
     setStatusCode(num);
-    
+
     setStatusInfo(getStaf().getVariable(getInstanceName() + STAFHelper.SAFS_VAR_STATUSINFO));
   }
-  
+
   /** <br><em>Purpose:</em> sendback response, the statusCode is sent back
    ** in the VAR:  getInstanceName() + "statuscode"
    * <br><em>Assumptions:</em>  none
-   * @param                     helper, STAFHelper
-   * @param                     data, TestRecordData
-   * @exception                 SAFSException, if STAF has a problem
+   * @throws                 SAFSException, if STAF has a problem
    **/
   public void sendbackResponse () throws SAFSException {
     int status = getStatusCode();
-    getStaf().setVariable(getInstanceName() + STAFHelper.SAFS_VAR_STATUSCODE, 
+    getStaf().setVariable(getInstanceName() + STAFHelper.SAFS_VAR_STATUSCODE,
                       (Integer.toString(status)).trim());
-    
+
     String info = getStatusInfo();
     //if statusinfo is null, reset it to ""
     if (info == null)
     	info = "";
-    getStaf().setVariable(getInstanceName() + STAFHelper.SAFS_VAR_STATUSINFO, info); 
+    getStaf().setVariable(getInstanceName() + STAFHelper.SAFS_VAR_STATUSINFO, info);
   }
 
-  /** 
+  /**
    * A method to return a default class package prefix used by some processors.
-   * This allows subclassing engines to create a subclass of TestRecordHelper and 
-   * provide a single package designation used to dynamically instance tool-specific 
-   * processors.  
+   * This allows subclassing engines to create a subclass of TestRecordHelper and
+   * provide a single package designation used to dynamically instance tool-specific
+   * processors.
    * <p>
-   * For example, RTestRecordData used by Rational RobotJ returns "org.safs.rational."  
+   * For example, RTestRecordData used by Rational RobotJ returns "org.safs.rational."
    * This enables default processors to location the following processors:
    * <p>
    *    org.safs.rational.DCDriverCommand<br>
@@ -140,19 +148,19 @@ public class TestRecordHelper extends TestRecordData {
    *    org.safs.rational.CFComponent<br>
    *    org.safs.rational.custom.CF[componentType]
    * <p>
-   * This requires that the subclassing implementations stick to this 
+   * This requires that the subclassing implementations stick to this
    * strict class naming convention.
    * <p>
-   * The org.safs.Processor class now allows users to specify any package and or 
-   * classname for use in dynamically locating classes at runtime.  This means that 
-   * subclasses like DriverCommandProcessor and TestStepProcessor can be given 
-   * alternative package or class names to search for.  
+   * The org.safs.Processor class now allows users to specify any package and or
+   * classname for use in dynamically locating classes at runtime.  This means that
+   * subclasses like DriverCommandProcessor and TestStepProcessor can be given
+   * alternative package or class names to search for.
    * <p>
-   * This method is no longer required, though it will be queried first to maintain 
+   * This method is no longer required, though it will be queried first to maintain
    * compatibility with processors using this feature.
    **/
   public String getCompInstancePath(){return null;}
-  
+
 	/**
 	 * <br><em>Purpose:</em> Retrieve window recognition info from current app map. <br>
 	 * 						 Issues ActionFailure and FAILED status if not retrievable.
@@ -162,7 +170,7 @@ public class TestRecordHelper extends TestRecordData {
 	 * 						 store the result to its super class.
 	 *                       Before calling this method, make sure the property windowName, compName
 	 *                       , mapName and stafHelper are correctly set.
-	 * 
+	 *
 	 * @param  boolean isWin if true, return window RS; otherwise, component RS.
 	 * @return recognition string
 	 * @throws SAFSException if there is a problem with STAF or the AppMap itself.
@@ -183,9 +191,9 @@ public class TestRecordHelper extends TestRecordData {
       //If winname equals compname, we should alternate isWin to true.
       isWin = isWin ? isWin: (winname==compname);
       String item = isWin ? winname : winname+":"+compname;
-      
+
       STAFHelper staf = getSTAFHelper();
-      
+
       if(isWin) rec = super.getWindowGuiId();
       else rec = super.getCompGuiId();
 
@@ -206,36 +214,38 @@ public class TestRecordHelper extends TestRecordData {
   	  }else{
   		Log.debug(debugmsg+" Got from super class: Recognition String for "+ item+" is "+rec);
   	  }
-  	  
+
       if((rec==null)||(rec.length()==0)){
     	  Log.debug(debugmsg+" Can NOT get Recognition String for "+ item+" from map: "+ mapname);
     	  throw new SAFSException("AppMap Error: Item '"+ item +"' was not found in '"+mapname+"'");
       }
       Log.debug(debugmsg+" Recognition String for "+ item+" is "+rec);
-      
+
       return rec;
 	}
-	
+
 	/**
 	 * <br><em>Note:</em>    Before calling this method, make sure the property windowName, compName
 	 *                       , mapName and stafHelper are correctly set.
 	 * @return	Window's Recognition String
 	 * @throws SAFSException
 	 */
+	@Override
 	public String getWindowGuiId () throws SAFSException{
 		return getRecognitionString(true);
 	}
-	
+
 	/**
 	 * <br><em>Note:</em>    Before calling this method, make sure the property windowName, compName
 	 *                       , mapName and stafHelper are correctly set.
 	 * @return	Component's Recognition String
 	 * @throws SAFSException
 	 */
+	@Override
 	public String getCompGuiId () throws SAFSException {
 		return getRecognitionString(false);
 	}
-	
+
 	/**
 	 * <br><em>Purpose:</em>	To test if the RS is specify in mixed mode. <br>
 	 * 							That is, parent in OBT format; Component in IBT format.
@@ -243,19 +253,19 @@ public class TestRecordHelper extends TestRecordData {
 	 */
 	public boolean isMixedRsUsed() throws SAFSException{
 		boolean mixedRsUsed = false;
-		
+
 		//Get window and component Recognition String
 		String winRs = getRecognitionString(true);
 		String compRs = getRecognitionString(false);
-		
+
 		//If the window Recognition String is not in IBT format (ex. in OBT format)
 		//and the component RS is in IBT format
 		if(!ImageUtils.isImageBasedRecognition(winRs) && ImageUtils.isImageBasedRecognition(compRs))
 			mixedRsUsed = true;
-		
+
 		return mixedRsUsed;
 	}
-	
+
 	/**
 	 * @return boolean, true if this record contains a window to handle.
 	 * @throws SAFSException if the window's name is null.
@@ -263,7 +273,7 @@ public class TestRecordHelper extends TestRecordData {
 	public boolean targetIsWindow() throws SAFSException{
 		return !targetIsComponent();
 	}
-	
+
 	/**
 	 * @return boolean, true if this record contains a component to handle.
 	 * @throws SAFSException if the window's name is null.
@@ -271,11 +281,11 @@ public class TestRecordHelper extends TestRecordData {
 	public boolean targetIsComponent() throws SAFSException{
 		String winname = getWindowName();
 		String compname = getCompName();
-		
+
 		if(winname==null){
 			throw new SAFSException("The window's name is null!");
 		}
-		
+
 		return !winname.equals(compname);
 	}
 

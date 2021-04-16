@@ -1,3 +1,20 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.staf.service.input;
 
 import java.io.File;
@@ -9,8 +26,6 @@ import java.util.ResourceBundle;
 
 import org.safs.Log;
 import org.safs.SAFSNullPointerException;
-import org.safs.STAFHelper;
-import org.safs.SingletonSTAFHelper;
 import org.safs.StringUtils;
 import org.safs.staf.STAFHandleInterface;
 import org.safs.staf.embedded.HandleInterface;
@@ -20,7 +35,6 @@ import org.safs.tools.CaseInsensitiveFile;
 import org.safs.tools.drivers.DriverConstant;
 
 import com.ibm.staf.STAFException;
-import com.ibm.staf.STAFHandle;
 import com.ibm.staf.STAFResult;
 import com.ibm.staf.service.STAFCommandParseResult;
 import com.ibm.staf.service.STAFCommandParser;
@@ -30,20 +44,20 @@ import com.ibm.staf.service.STAFCommandParser;
  * GNU General Public License (GPL) http://www.opensource.org/licenses/gpl-license.php
  * <p>
  * This AbstractSAFSInputService class is an external STAF service run by the JSTAF Service Proxy.<br>
- * The intention is to provide global services for reading the content of text files in a 
- * manner suitable for a SAFS Drivers(like SAFSDRIVER) and Engines. For example, two different 
- * processes (or machines?) can share the file read operations as necessary. However, there 
+ * The intention is to provide global services for reading the content of text files in a
+ * manner suitable for a SAFS Drivers(like SAFSDRIVER) and Engines. For example, two different
+ * processes (or machines?) can share the file read operations as necessary. However, there
  * will certainly be an array of other uses.
  * <p>
- * It is important to note that in a normal SAFS environment, Input services may make use of 
- * SAFS Variable services (SAFSVARS).  This is because some commands may need to evaluate 
+ * It is important to note that in a normal SAFS environment, Input services may make use of
+ * SAFS Variable services (SAFSVARS).  This is because some commands may need to evaluate
  * variable values or resolve expressions.
- * 
+ *
  * This class is defined as an abstract class, for different version of STAF,
  * you may extends this class and implements the staf-version-related interface
  * (STAFServiceInterfaceLevel30 or STAFServiceInterfaceLevel3).
  * We have implemented the class for version 2 and 3: SAFSInputService and SAFSInputService3
- * 
+ *
  * <p>
  * <b>The AbstractSAFSInputService service provides the following commands:</b>
  * <p>
@@ -69,16 +83,16 @@ import com.ibm.staf.service.STAFCommandParser;
  * <pre>
  * STAF LOCAL SERVICE ADD SERVICE SAFSINPUT LIBRARY JSTAF /
  *            EXECUTE c:/safs/lib/SAFSINPUT.JAR [PARMS &lt;Parameters>]
- * 
+ *
  * STAF LOCAL SERVICE ADD SERVICE SAFSINPUT LIBRARY JSTAF /
- *            EXECUTE c:/safs/lib/SAFSINPUT.JAR 
- * 
+ *            EXECUTE c:/safs/lib/SAFSINPUT.JAR
+ *
  * STAF LOCAL SERVICE ADD SERVICE SAFSINPUT LIBRARY JSTAF /
- *            EXECUTE c:/safs/lib/SAFSINPUT.JAR PARMS DIR "c:/repo/Datapool" 
+ *            EXECUTE c:/safs/lib/SAFSINPUT.JAR PARMS DIR "c:/repo/Datapool"
  *
  * </pre>
  * <p>
- * By default, the service expects a "SAFSVARS" SAFSVariableService to handle Variable calls.  
+ * By default, the service expects a "SAFSVARS" SAFSVariableService to handle Variable calls.
  * A future release may add a parameter allowing a different variable service handler.
  * <p>
  * <b>1.1</b> Valid Parameters when registering the service:
@@ -116,7 +130,7 @@ import com.ibm.staf.service.STAFCommandParser;
  * <p>
  * <b>Syntax:</b>
  * <p>
- * NEXT &lt;FileID> 
+ * NEXT &lt;FileID>
  * <p>
  * <b>2.2.1 FileID</b> is the unique ID for the file reader instance.<br>
  * <p>
@@ -125,7 +139,7 @@ import com.ibm.staf.service.STAFCommandParser;
  * <h3>2.3 GOTO </h3>
  * <p>
  * The GOTO command moves the file reader pointer to a defined place in the file.<br>
- * Currently, the "defined place" must take the form of a SAFS BlockID record.  Future 
+ * Currently, the "defined place" must take the form of a SAFS BlockID record.  Future
  * releases may allow you to specify specific line numbers.
  * <p>
  * A SAFS BlockID record is a line with two fields separated by a delimiter as shown below:
@@ -134,15 +148,15 @@ import com.ibm.staf.service.STAFCommandParser;
  *    B, MyBlockID
  * </pre>
  * <p>
- * The first field contains "B" which specifies a BlockID record.  The second field specifies 
- * the name or label of the BlockID record.  This label is the value identifying this "defined 
+ * The first field contains "B" which specifies a BlockID record.  The second field specifies
+ * the name or label of the BlockID record.  This label is the value identifying this "defined
  * place" in the file.
  * <p>
- * This command will use the variables service to evaluate SAFS variables and process 
- * SAFS expressions in field #1 and/or field #2 in order to accurately locate the target 
+ * This command will use the variables service to evaluate SAFS variables and process
+ * SAFS expressions in field #1 and/or field #2 in order to accurately locate the target
  * BlockID.
  * <p>
- * The command will return STAFResult.OK and a (linenum:record) result string if successful; or an error code 
+ * The command will return STAFResult.OK and a (linenum:record) result string if successful; or an error code
  * and error description upon failure.
  * <p>
  * <b>Syntax:</b>
@@ -163,7 +177,7 @@ import com.ibm.staf.service.STAFCommandParser;
  * <p>
  * <b>Syntax:</b>
  * <p>
- * BEGIN &lt;FileID> 
+ * BEGIN &lt;FileID>
  * <p>
  * <b>2.4.1 FileID</b> is the unique ID for the file reader instance.<br>
  * <p>
@@ -175,7 +189,7 @@ import com.ibm.staf.service.STAFCommandParser;
  * <p>
  * <b>Syntax:</b>
  * <p>
- * CLOSE &lt;FileID> 
+ * CLOSE &lt;FileID>
  * <p>
  * <b>2.5.1 FileID</b> is the unique ID for the file reader instance.<br>
  * <p>
@@ -205,7 +219,7 @@ import com.ibm.staf.service.STAFCommandParser;
  * <p>
  * <b>Syntax:</b>
  * <p>
- * LIST 
+ * LIST
  * <p>
  * Example: staf local safsinput list
  * <p><!-- ----------------------------------------------------------------------- -->
@@ -215,7 +229,7 @@ import com.ibm.staf.service.STAFCommandParser;
  * <p>
  * <b>Syntax:</b>
  * <p>
- * RESET 
+ * RESET
  * <p>
  * Example: staf local safsinput reset
  * <p><!-- ----------------------------------------------------------------------- -->
@@ -225,15 +239,15 @@ import com.ibm.staf.service.STAFCommandParser;
  * <p>
  * <b>Syntax:</b>
  * <p>
- * HELP 
+ * HELP
  * <p>
  * Example: staf local safsinput list
  * <p>
- * Software Automation Framework Support (SAFS) http://safsdev.sourceforge.net<br>
+ * Software Automation Framework Support (SAFS) http://safsdev:8880<br>
  * Software Testing Automation Framework (STAF) http://staf.sourceforge.net<br>
  * @see SAFSInputService
  * @see SAFSInputService3
- * 
+ *
  * @author Carl Nagle JUL 16, 2004 Inital Release of most functionality
  * @author Carl Nagle JAN 25, 2005 Fix to accept case-sensitive filenames
  ************************************************************************************/
@@ -259,19 +273,19 @@ public abstract class AbstractSAFSInputService {
 
 	/****
 	 * The fully qualified name of the localizable ResourceBundle for this class.
-	 * Subclasses are expected to provide their own additional ResourceBundle handling 
+	 * Subclasses are expected to provide their own additional ResourceBundle handling
 	 * file and subroutine when appropriate.
 	 ****/
 	public static final String SI_SERVICE_SAFSFILE_BUNDLE_NAME = "org.safs.staf.service.SAFSFileReaderResourceBundle";
 
-	
+
 	/****
 	 * The maximum number of options/parameters we expect a service initialization request to receive.
 	 * Subclasses are expected to override this value when appropriate.
 	 ****/
 	protected             int  SI_SERVICE_INIT_PARMS_MAX      = 2;	// DIR & EXT
 
-	
+
 	/****
 	 * The maximum number of options/parameters we expect a running service to receive in a request.
 	 * Subclasses are expected to override this value when appropriate.
@@ -282,9 +296,9 @@ public abstract class AbstractSAFSInputService {
 	// LOAD YOUR OWN RESOURCEBUNDLE FOR LOCALIZABLE TEXT
 	// ===================================================================================
 	protected static ResourceBundle safsfilereader_resources = null;
-	
+
 	static {
-		try{ 
+		try{
 			safsfilereader_resources = ResourceBundle.getBundle(SI_SERVICE_SAFSFILE_BUNDLE_NAME, Locale.getDefault(),ClassLoader.getSystemClassLoader());
 			Log.info("SAFSInputService loading "+ SI_SERVICE_SAFSFILE_BUNDLE_NAME);
 		}
@@ -294,23 +308,23 @@ public abstract class AbstractSAFSInputService {
 				safsfilereader_resources = ResourceBundle.getBundle(SI_SERVICE_SAFSFILE_BUNDLE_NAME, Locale.getDefault(),Thread.currentThread().getContextClassLoader());
 				Log.info("SAFSInputService loading "+ SI_SERVICE_SAFSFILE_BUNDLE_NAME);
 			}
-			catch(Exception e){ 
+			catch(Exception e){
 				Log.info("SAFSInputService retry to load "+ SI_SERVICE_SAFSFILE_BUNDLE_NAME, e);
 				System.err.println( e.getMessage()); }
 		}
-		catch(Exception e){ 
+		catch(Exception e){
 			Log.info("SAFSInputService to load "+ SI_SERVICE_SAFSFILE_BUNDLE_NAME, e);
 			System.err.println( e.getMessage()); }
 	}
-	
-	public static final String SI_RBKEY_NOT_IMPLEMENTED 	= "not_implemented";	
-	public static final String SI_RBKEY_OPEN_FILES          = "open_files";	
+
+	public static final String SI_RBKEY_NOT_IMPLEMENTED 	= "not_implemented";
+	public static final String SI_RBKEY_OPEN_FILES          = "open_files";
 	public static final String SI_RBKEY_UCPATH          	= "PATH";
 	public static final String SI_RBKEY_SYNC_ERROR      	= "storage_sync_error";
 	public static final String SI_RBKEY_REQUIRED        	= "required";
 	public static final String SI_RBKEY_ERROR_NOT_INTEGER 	= "not_integer";
 	// ===================================================================================
-	
+
 	public static final String SI_SERVICE_OPTION_DIR         	= "DIR";
 	public static final String SI_SERVICE_OPTION_EXT         	= "EXT";
 
@@ -346,10 +360,10 @@ public abstract class AbstractSAFSInputService {
  	protected STAFCommandParser nextParser  = null;
  	protected STAFCommandParser resetParser = null;
  	protected STAFCommandParser gotoParser  = null;
- 	
+
 
 	protected HandleInterface fHandle;
-	
+
 //	private int handle;
 	protected String servicename   = new String();
 	protected String serviceparams = new String();
@@ -375,13 +389,13 @@ public abstract class AbstractSAFSInputService {
 
 	//private Hashtable processes = new Hashtable(6);  //maps process names to handles (Vector)
 	private Hashtable handles   = new Hashtable(6);  //maps handles to fileids (Hashtable)
-	
+
 	// After debugging the service, we should set the 2th parameter to false.
 	protected ServiceDebugLog debugLog = new ServiceDebugLog(ServiceDebugLog.DEBUG_LOG_INPUT, false);
 
 
     public AbstractSAFSInputService() {}
-	
+
     /**
      * Subclasses may override to allow for future subclasses of STAFHandle.
      * @param handleId
@@ -392,7 +406,7 @@ public abstract class AbstractSAFSInputService {
     	debugLog.debugPrintln(debugmsg+" registering STAFHandle handleId: "+ handleId);
 		fHandle = new STAFHandleInterface(handleId);
     }
-    
+
 	public STAFResult init(InfoInterface.InitInfo info) {
 		String debugmsg = getClass().getName() + ".init ():";
 		debugLog.debugInit();
@@ -423,7 +437,7 @@ public abstract class AbstractSAFSInputService {
 		debugLog.debugPrintln(debugmsg + " End.");
 		return new STAFResult(STAFResult.Ok);
 	}
-	
+
 	public STAFResult acceptRequest(InfoInterface.RequestInfo info) {
 		String debugmsg = getClass().getName() + ".acceptRequest():";
 		debugLog.debugPrintln(debugmsg + " parsing request: "+ info.request);
@@ -455,12 +469,12 @@ public abstract class AbstractSAFSInputService {
 			return processRequest(info, parsedData);
 		}
 	}
-	  
+
 	// p/o Interface STAFServiceInterfaceLevel1
 	protected STAFResult terminate(){
 		String debugmsg = getClass().getName()+".terminate(): ";
 		debugLog.debugPrintln(debugmsg+" Begin.");
-		
+
 		if (!handles.isEmpty()){
 			for (Enumeration e = handles.elements(); e.hasMoreElements();){
 				SAFSFile textfile = (SAFSFile) e.nextElement();
@@ -469,7 +483,7 @@ public abstract class AbstractSAFSInputService {
 			handles.clear();
 		}
 		handles = null;
-		
+
 		debugLog.debugPrintln(debugmsg+" End.");
 		debugLog.debugTerm();
 
@@ -479,11 +493,11 @@ public abstract class AbstractSAFSInputService {
 			return new STAFResult(STAFResult.STAFRegistrationError);
 		}
 
-		return new STAFResult(STAFResult.Ok);				
+		return new STAFResult(STAFResult.Ok);
 	}
 
     // ROOT ROUTINE THAT INITIATES VALIDATING THE SERVICE INIT REQUEST
-	protected  final int validateBaseServiceParseResult (InfoInterface.InitInfo info){ 
+	protected  final int validateBaseServiceParseResult (InfoInterface.InitInfo info){
 		//Create the command parser
 		STAFCommandParser registrar = new STAFCommandParser(SI_SERVICE_INIT_PARMS_MAX);
 		registrar.addOption(SI_SERVICE_OPTION_DIR, 1,STAFCommandParser.VALUEREQUIRED);
@@ -497,14 +511,14 @@ public abstract class AbstractSAFSInputService {
 		Log.info("SAFSInputService EXT parameter received: "+ ext);
 
 		file_extension_available = (ext.length() > 0 );
-		
+
 		if (dir.length() > 0 ){
 
 			File f = new CaseInsensitiveFile(dir).toFile();
 
 			try{
 				if (f.isDirectory()){
-		
+
 					relative_path_allowed = true;
 					if (!dir.endsWith(File.separator)){ dir += File.separator;}
 				}
@@ -521,7 +535,7 @@ public abstract class AbstractSAFSInputService {
 				relative_path_allowed = false;
 				Log.debug("SAFSInputService Access Denied Exception: "+ e.getClass().getSimpleName()+": "+e.getMessage());
 				return STAFResult.AccessDenied;
-				
+
 			}catch(Exception x){
 				dir = new String();
 				relative_path_allowed = false;
@@ -601,14 +615,14 @@ public abstract class AbstractSAFSInputService {
 		       "RESET"                                                     +r+
 		                                                                    r+
 		       "HELP"                                                      +r;
-		       
+
 		String info = getHELPInfo(new String());
-		
+
 		if(info != null) helpinfo = info + helpinfo;
-		
+
 		return helpinfo;
 	}
-	
+
 	protected STAFResult handleHelp(InfoInterface.RequestInfo info) {
 		return new STAFResult(STAFResult.Ok, buildHELPInfo());
 	}
@@ -638,10 +652,10 @@ public abstract class AbstractSAFSInputService {
 			result.result = c + SI_SERVICE_FILE_STATE_EOF + c;
 		return result;
 	}
-	  
+
 	protected STAFResult handleClose(InfoInterface.RequestInfo info,STAFCommandParseResult parsedData) {
 		STAFResult result = new STAFResult(STAFResult.Ok);
-		
+
 	 	String fileid = parsedData.optionValue(SI_SERVICE_REQUEST_CLOSE).toLowerCase();
 		SAFSFile textfile = getParsedDataTextFile( result, fileid );
 		if (result.rc != STAFResult.Ok)  return result;
@@ -653,10 +667,10 @@ public abstract class AbstractSAFSInputService {
 		if (result.rc == STAFResult.Ok) result.result = "CLOSE:"+ fileid +c+ textfile.getFullpath();
 		return result;
 	}
-	
+
 	protected STAFResult handleOpen(InfoInterface.RequestInfo info,STAFCommandParseResult parsedData) {
 		STAFResult result = new STAFResult(STAFResult.Ok);
-		
+
 		String fileid = parsedData.optionValue(SI_SERVICE_REQUEST_OPEN).toLowerCase();
 		SAFSTextFile textfile = (SAFSTextFile) handles.get(fileid);
 
@@ -672,7 +686,7 @@ public abstract class AbstractSAFSInputService {
 
 		// try unmodified filename first
 		File file = new CaseInsensitiveFile(temp).toFile();
-				
+
 		try{
 			Log.info("SAFSINPUT:open trying "+ temp);
 			// if fails try adding any default extension
@@ -685,7 +699,7 @@ public abstract class AbstractSAFSInputService {
 
 			// if fails try adding any default directory path
 			if ((!file.isFile())&&(relative_path_allowed)){
-			
+
 				Log.info("SAFSINPUT:open trying "+ temp);
 				if (filename.startsWith(File.separator)){
 					temp = dir + filename.substring(2);
@@ -725,13 +739,13 @@ public abstract class AbstractSAFSInputService {
 		handles.put(fileid, textfile);
 
 		result.result = "OPEN:"+ fileid +c+ file.getPath();
-		
+
 		return result;
 	}
-	
+
 	protected STAFResult handleBegin(InfoInterface.RequestInfo info,STAFCommandParseResult parsedData) {
 		STAFResult result = new STAFResult(STAFResult.Ok);
-		
+
 	 	String fileid = parsedData.optionValue(SI_SERVICE_REQUEST_BEGIN).toLowerCase();
 		SAFSTextFile textfile = getParsedDataTextFile( result, fileid );
 		if (result.rc != 0)  return result;
@@ -745,28 +759,28 @@ public abstract class AbstractSAFSInputService {
 		}
 		return result;
 	}
-	
+
 	protected STAFResult handleGoto(InfoInterface.RequestInfo info,STAFCommandParseResult parsedData) {
 		STAFResult result = new STAFResult(STAFResult.Ok);
-		
+
 	 	String fileid = parsedData.optionValue(SI_SERVICE_REQUEST_GOTO).toLowerCase();
 		SAFSTextFile textfile = getParsedDataTextFile( result, fileid );
 		if (result.rc != 0)  return result;
-		
+
 		String location = parsedData.optionValue(SI_SERVICE_PARM_LOCATE);
 		String fieldsep = parsedData.optionValue(SI_SERVICE_PARM_SEPARATOR);
 
 		locateBlockID(result, textfile, location, fieldsep);
 		return result;
 	}
-	
+
 	protected STAFResult handleQuery(InfoInterface.RequestInfo info,STAFCommandParseResult parsedData) {
 		STAFResult result = new STAFResult(STAFResult.Ok);
-		
+
 	 	String fileid = parsedData.optionValue(SI_SERVICE_REQUEST_QUERY).toLowerCase();
 		SAFSTextFile textfile = getParsedDataTextFile( result, fileid );
 		if (result.rc != STAFResult.Ok)  return result;
-		
+
 		if(parsedData.optionTimes(SI_SERVICE_PARM_STATUS)>0){
 			StringBuffer sb = new StringBuffer();
 			sb.append("Machine: \t"+textfile.getMachine()+"\n");
@@ -778,7 +792,7 @@ public abstract class AbstractSAFSInputService {
 		}else if(parsedData.optionTimes(SI_SERVICE_PARM_FILENAME)>0){
 			result.result = textfile.getFilename();
 		}else if(parsedData.optionTimes(SI_SERVICE_PARM_FULLPATH)>0){
-			result.result = textfile.getFullpath();			
+			result.result = textfile.getFullpath();
 		}else if(parsedData.optionTimes(SI_SERVICE_PARM_LASTERROR)>0){
 			//Not implemented
 		}else{
@@ -787,7 +801,7 @@ public abstract class AbstractSAFSInputService {
 
 		return result;
 	}
-	
+
 	protected STAFResult handleList(InfoInterface.RequestInfo info) {
 		if(handles.isEmpty()){
 			return new STAFResult(STAFResult.Ok, SI_SERVICE_REQUEST_LIST + c+ " NO FILE EXIST.");
@@ -802,12 +816,12 @@ public abstract class AbstractSAFSInputService {
 		}
 	}
     /**************************************************************
-	 * Use to validate the Service initialization string after a request 
+	 * Use to validate the Service initialization string after a request
 	 * for initialization has been received.
 	 * <p>
-	 * This is where you check to see which options exist in the request, 
-	 * and act upon them.  Make sure you also forward the validation 
-	 * request up the food chain so the superclasses can validate their 
+	 * This is where you check to see which options exist in the request,
+	 * and act upon them.  Make sure you also forward the validation
+	 * request up the food chain so the superclasses can validate their
 	 * service init options, too.
 	 * <p>
 	 * &nbsp; &nbsp; return super.validateServiceParseResult( parsedData );<br>
@@ -818,10 +832,10 @@ public abstract class AbstractSAFSInputService {
 		// ADD YOUR SUBCLASS SERVICE INIT VALIDATION HERE
 		return STAFResult.Ok;
 	}
-	
+
     /**************************************************************
-	 * A subclass must override this function to handle requests not 
-	 * handled by the superclass.  The subclass must also forward any 
+	 * A subclass must override this function to handle requests not
+	 * handled by the superclass.  The subclass must also forward any
 	 * unhandled requests to the superclass function.
 	 * <p>
 	 * &nbsp; &nbsp; return super.processRequest(info, parsedData);<br>
@@ -830,8 +844,8 @@ public abstract class AbstractSAFSInputService {
 	 * machine the machine initiating the request.<br>
 	 * process the name of the Process initiating the request.<br>
 	 * handle the Handle of the Process initiating the request.<br>
-	 * 
-	 * @param parsedData the parsed result containing the command and the 
+	 *
+	 * @param parsedData the parsed result containing the command and the
 	 *                   user-supplied options provided.
 	 * <p>
 	 * @return the result object after processing the request.
@@ -842,17 +856,17 @@ public abstract class AbstractSAFSInputService {
 		STAFResult result = new STAFResult(STAFResult.InvalidRequestString,"Unknown Request: " + info.request);
 		return result;
 	}
-	
-	
-	
-	
-	
+
+
+
+
+
 
     /*******************************************************************************************
 	 * Retrieves potentially localized text from the resource bundle
-	 * 
-	 * Localized subclasses should provide a similar function or override this function. If the 
-	 * subclass function fails to locate the message in the subclass's ResourceBundle, then the 
+	 *
+	 * Localized subclasses should provide a similar function or override this function. If the
+	 * subclass function fails to locate the message in the subclass's ResourceBundle, then the
 	 * subclass should call the superclass function to look there.
 	 * <p>
 	 * &nbsp; &nbsp; text = super.text(resourceKey);
@@ -873,16 +887,16 @@ public abstract class AbstractSAFSInputService {
 
     /**************************************************************
 	 * Handle any added OPEN options here.
-	 * This root class has already added info to the string prior 
-	 * to the call into the subclass.  You may still forward the 
+	 * This root class has already added info to the string prior
+	 * to the call into the subclass.  You may still forward the
 	 * request to any superclass "just in case".
 	 * <p>
 	 * &nbsp; &nbsp; return super.getOPENInfo( parsedData, info );<br>
 	 * <p>
-	 * @param parsedData the parsed request to interrogate for OPEN option 
+	 * @param parsedData the parsed request to interrogate for OPEN option
 	 *        parameter values.
 	 * <p>
-	 * @param info the status string that will be displayed for the 
+	 * @param info the status string that will be displayed for the
 	 *             OPEN command.
 	 * <p>
 	 * @return any text to be added to the OPEN response.
@@ -893,13 +907,13 @@ public abstract class AbstractSAFSInputService {
 
     /**************************************************************
 	 * Add your HELP text response here.
-	 * The root class will handle its own HELP substring.  You will still forward the 
+	 * The root class will handle its own HELP substring.  You will still forward the
 	 * request to any superclass to have their HELP options displayed, too.
 	 * <p>
 	 * &nbsp; &nbsp; info += MY_LONG_INVOLVED_FORMATTED_HELP_TEXT;<br>
 	 * &nbsp; &nbsp; return super.getHELPInfo( info );<br>
 	 * <p>
-	 * @param info the response string that will be displayed for the 
+	 * @param info the response string that will be displayed for the
 	 *             HELP command.
 	 * <p>
 	 * @return any text to be prepend the superclass response.
@@ -908,8 +922,8 @@ public abstract class AbstractSAFSInputService {
 		// ADD YOUR SUBCLASS HELP COMMAND TEXT HERE
 		return (info == null) ? (new String()): info;
 	}
-	
-	
+
+
     /**************************************************************
 	 * A subclass must override this function to instantiate its own file type.
 	 * The file type, obviously, must be a extension of SAFSFile.
@@ -920,13 +934,13 @@ public abstract class AbstractSAFSInputService {
 	 * <p>
 	 * @param handle the Handle of the Process initiating the request to open the file.
 	 * <p>
-	 * @param fileid the unique fileid to be assigned the file.  fileids should be 
+	 * @param fileid the unique fileid to be assigned the file.  fileids should be
 	 *               uniquely identifiable among all Handles for a given Process.
 	 * <p>
 	 * @param file the File object used to open the file.
 	 * <p>
-	 * @param parsedData the parsed result containing the OPEN command and any 
-	 *                   of the user-supplied options that may be needed when 
+	 * @param parsedData the parsed result containing the OPEN command and any
+	 *                   of the user-supplied options that may be needed when
 	 *                   opening the file or setting options in the file handler.
 	 * <p>
 	 * @return the instance of the SAFSFile object that has been created.
@@ -934,7 +948,7 @@ public abstract class AbstractSAFSInputService {
 	protected SAFSTextFile openFile (String machine, String process, int handle,
 	                             String fileid , File file, STAFCommandParseResult parsedData){
 
-		return new SAFSTextFile ( machine, process, handle, fileid, file, 
+		return new SAFSTextFile ( machine, process, handle, fileid, file,
 		                          false,		// skipblanklines
 		                          false, 		// nolinenumbers
 	                 			  false,		// trimleading
@@ -948,17 +962,17 @@ public abstract class AbstractSAFSInputService {
 		try{
 			long len = expression.length();
 			String message = "RESOLVE "+ ":"+ String.valueOf(len).trim() +":"+ expression;
-			
+
 			// TODO: if STAFHandle is not an EmbeddedHandle then it will not seek embedded services via EmbeddedHandles class.
 			// Thus, it will not see SAFSVARS if it is running Embedded.
 			STAFResult varresult = fHandle.submit2("local", servicevars, message);
-			if (varresult.rc == STAFResult.Ok) return varresult.result;		
+			if (varresult.rc == STAFResult.Ok) return varresult.result;
 		}
 		catch(Exception x){;}
 		return expression;
 	}
 
-	
+
 	//returns True if a record matches the given block ID
 	// inputBlockID  the BlockID we are trying to match
 	// inputRecord   the test record to test. this should be the raw record before
@@ -968,7 +982,7 @@ public abstract class AbstractSAFSInputService {
 
 		String rtype = null;
 		String blockID = null;
-		
+
 	    //Get and process the RECORD TYPE (this field could be a variable/expression)
 	    //we don't want to process the whole record unless its record type is "B".
 	    //otherwise, we might accidentally perform variable assignments that might
@@ -977,19 +991,19 @@ public abstract class AbstractSAFSInputService {
 	    	rtype = StringUtils.getInputToken(inputRecord, 0, fieldsep).trim();
 
 		    if (! rtype.equalsIgnoreCase(DriverConstant.RECTYPE_B))
-		        rtype = processExpression (rtype);	
-		        
-		    //only deal with BLOCKID record 
+		        rtype = processExpression (rtype);
+
+		    //only deal with BLOCKID record
 		    if (! rtype.equalsIgnoreCase(DriverConstant.RECTYPE_B)) return false;
-		
+
 		    blockID = StringUtils.getInputToken(inputRecord, 1, fieldsep).trim();
-			
+
 			//Log.debug("isTargetBlock check:\""+ rtype +"\"  \""+ blockID +"\"");
-			
+
 		    if (blockID.equalsIgnoreCase(inputBlockID)) return true;
-		
+
 		    blockID = processExpression (blockID);
-		    if (blockID.equalsIgnoreCase(inputBlockID)) return true;	    
+		    if (blockID.equalsIgnoreCase(inputBlockID)) return true;
 		}
 	    catch(SAFSNullPointerException npx) {;}
 	    catch(StringIndexOutOfBoundsException six) {;}
@@ -1005,7 +1019,7 @@ public abstract class AbstractSAFSInputService {
 	    String inputRecord = null;
 	    String rtype;
 		String fileID = file.getFileID();
-		
+
 		// don't process a closed file
 		if (file.isClosed()) {
 			result.rc = STAFResult.FileReadError;
@@ -1016,7 +1030,7 @@ public abstract class AbstractSAFSInputService {
 		// store/mark where the file pointer is on entry
         long entryline  = file.getLineNumber();
         file.mark();
-        
+
         boolean blockFound = false;
         long currpos = -1;
 
@@ -1025,26 +1039,26 @@ public abstract class AbstractSAFSInputService {
 
 		// look from here to EOF
         while(! file.isEOF()){
-            
-            // Get next record and trim any leading spaces    
+
+            // Get next record and trim any leading spaces
             currpos = file.getLineNumber();
             inputRecord = file.readLine();
 			if (inputRecord == null) break;
             if (isTargetBlock(inputBlockID, inputRecord, fieldsep)){
                 blockFound = true;
                 break;
-            }            
+            }
         }
 
-		// if not found, try again from the beginning of the file        
+		// if not found, try again from the beginning of the file
         if (! blockFound) {
 
-			file.begin();	
+			file.begin();
 
 			// look from beginning to entryline
 	        while(! file.isEOF()){
-	            
-	            //Get next record and trim any leading spaces    
+
+	            //Get next record and trim any leading spaces
 	            currpos = file.getLineNumber();
 	            if (currpos == entryline) break;
 	            inputRecord = file.readLine();
@@ -1052,8 +1066,8 @@ public abstract class AbstractSAFSInputService {
 	            if (isTargetBlock(inputBlockID, inputRecord, fieldsep)){
 	                blockFound = true;
 	                break;
-	            }            
-	        }        
+	            }
+	        }
         }
 
         if (blockFound) {

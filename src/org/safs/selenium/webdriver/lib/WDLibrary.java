@@ -1,65 +1,120 @@
 /**
  * Copyright (C) SAS Institute, All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-package org.safs.selenium.webdriver.lib;
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
 *
 * History:<br>
 *
-*  <br>   NOV 19, 2013    (Carl Nagle) Initial release.
-*  <br>   DEC 18, 2013    (Lei Wang) Add codes to support ComboBox (HTML tag &lt;select&gt;).
-*  <br>   DEC 26, 2013    (Lei Wang) Move ComboBox class out; add methods useBrowser() and stopBrowser().
+* NOV 19, 2013    (Carl Nagle) Initial release.
+* DEC 18, 2013    (Lei Wang) Add codes to support ComboBox (HTML tag &lt;select&gt;).
+* DEC 26, 2013    (Lei Wang) Move ComboBox class out; add methods useBrowser() and stopBrowser().
 *                                  Modify startBrowser() to permit passing more browser parameters, such as proxy settings.
-*  <br>   JAN 16, 2014    (DHARMESH) Updated reconnection browser support.
-*  <br>   FEB 02, 2014	   (DHARMESH) Add Resize and Maximize WebBrowser window KW.
-*  <br>   MAR 05, 2014    (Lei Wang) Add some methods related to mouse-click (based on webdriver API).
-*  <br>   MAR 27, 2014    (Lei Wang) Get element's screen location and use SAFS-Robot to do click-related keywords firstly.
-*  <br>   APR 15, 2014    (Lei Wang) Listen to the 'mousedown' event for detecting if the click/double has happened.
-*  <br>   APR 15, 2014    (DHARMESH) Add HighLight keyword.
-*  <br>   AUG 29, 2014    (DHARMESH) Add selenium grid host and port support.
-*  <br>   DEC 02, 2014    (Carl Nagle) Fix SeBuilder Script imports to use UTF-8 Character Encoding.
-*  <br>   DEC 09, 2014    (Lei Wang) Modify isVisible(): catch the un-expected exception.
-*  <br>   JAN 06, 2015    (Lei Wang) Add method leftDrag().
-*  <br>   JAN 15, 2015    (Lei Wang) Add methods xxxDrag().
-*  <br>   JAN 20, 2015    (DHARMESH) Add mobile support.
-*  <br>   APR 16, 2015    (Carl Nagle) Try to fix Selenium Keyboard Actions in inputKeysSAFS2Selenium.
-*  <br>   APR 29, 2015    (Lei Wang) Modify inputKeys/inputChars: if webelement cannot be focused, just log a warning message.
+* JAN 16, 2014    (DHARMESH) Updated reconnection browser support.
+* FEB 02, 2014	   (DHARMESH) Add Resize and Maximize WebBrowser window KW.
+* MAR 05, 2014    (Lei Wang) Add some methods related to mouse-click (based on webdriver API).
+* MAR 27, 2014    (Lei Wang) Get element's screen location and use SAFS-Robot to do click-related keywords firstly.
+* APR 15, 2014    (Lei Wang) Listen to the 'mousedown' event for detecting if the click/double has happened.
+* APR 15, 2014    (DHARMESH) Add HighLight keyword.
+* AUG 29, 2014    (DHARMESH) Add selenium grid host and port support.
+* DEC 02, 2014    (Carl Nagle) Fix SeBuilder Script imports to use UTF-8 Character Encoding.
+* DEC 09, 2014    (Lei Wang) Modify isVisible(): catch the un-expected exception.
+* JAN 06, 2015    (Lei Wang) Add method leftDrag().
+* JAN 15, 2015    (Lei Wang) Add methods xxxDrag().
+* JAN 20, 2015    (DHARMESH) Add mobile support.
+* APR 16, 2015    (Carl Nagle) Try to fix Selenium Keyboard Actions in inputKeysSAFS2Selenium.
+* APR 29, 2015    (Lei Wang) Modify inputKeys/inputChars: if webelement cannot be focused, just log a warning message.
 *                                  instead of throwing an Exception.
-*  <br>   MAY 29, 2015    (Carl Nagle) Add support for setDelayBetweenKeystrokes
-*  <br>   JUN 05, 2015    (Lei Wang) Add checkBeforeOperation(): check if element is stale or invisible before clicking.
+* MAY 29, 2015    (Carl Nagle) Add support for setDelayBetweenKeystrokes
+* JUN 05, 2015    (Lei Wang) Add checkBeforeOperation(): check if element is stale or invisible before clicking.
 *                                  Add isDisplayed(): not like isVisible(), it will not check the value of attribute 'visibility'.
 *                                  Modify isVisible(), isStale(): set implicitWait directly, don't wait.
-*  <br>   JUN 14, 2015    (Lei Wang) Modify focus(): if the component is "EditBox", use Robot Click to set focus.
-*  <br>   JUN 15, 2015    (Carl Nagle) Add isPointInBounds to account for points that might be on the width & height edge.
-*  <br>   JUL 24, 2015    (Lei Wang) Create class WD_XMLHttpRequest and its static instance AJAX.
-*  <br>   JUL 25, 2015    (Lei Wang) Modify windowSetFocus(): remove the unnecessary parameter element.
+* JUN 14, 2015    (Lei Wang) Modify focus(): if the component is "EditBox", use Robot Click to set focus.
+* JUN 15, 2015    (Carl Nagle) Add isPointInBounds to account for points that might be on the width & height edge.
+* JUL 24, 2015    (Lei Wang) Create class WD_XMLHttpRequest and its static instance AJAX.
+* JUL 25, 2015    (Lei Wang) Modify windowSetFocus(): remove the unnecessary parameter element.
 *  <br>	  AUG 08, 2015    (Dharmesh) Added delayWaitReady for WaitOnClick.
-*  <br>   SEP 07, 2015    (Lei Wang) Add method getElementOffsetScreenLocation().
-*  <br>   OCT 12, 2015    (Lei Wang) Modify method getProperty(): get property by native SAP method.
-*  <br>   OCT 30, 2015    (Lei Wang) Move method isVisible(), isDisplayed and isStale() to SearchObject class.
-*  <br>   NOV 20, 2015    (Lei Wang) Add a unit test for "WDLibrary.AJAX.getURL".
-*  <br>   NOV 26, 2015    (Lei Wang) Move some content from getScreenLocation() to getLocation().
-*  <br>   DEC 02, 2015    (Lei Wang) Modify getLocation(): modify to get more accurate location.
-*  <br>   DEC 03, 2015    (Lei Wang) Move "code of fixing browser client area offset problem" from getLocation() to getScreenLocation().
-*  <br>   DEC 10, 2015    (Lei Wang) Add methods to handle clipboard on local machine or on RMI server machine.
-*  <br>   DEC 24, 2015    (Lei Wang) Add methods to get browser's name, version, and selenium-server's version etc.
+* SEP 07, 2015    (Lei Wang) Add method getElementOffsetScreenLocation().
+* OCT 12, 2015    (Lei Wang) Modify method getProperty(): get property by native SAP method.
+* OCT 30, 2015    (Lei Wang) Move method isVisible(), isDisplayed and isStale() to SearchObject class.
+* NOV 20, 2015    (Lei Wang) Add a unit test for "WDLibrary.AJAX.getURL".
+* NOV 26, 2015    (Lei Wang) Move some content from getScreenLocation() to getLocation().
+* DEC 02, 2015    (Lei Wang) Modify getLocation(): modify to get more accurate location.
+* DEC 03, 2015    (Lei Wang) Move "code of fixing browser client area offset problem" from getLocation() to getScreenLocation().
+* DEC 10, 2015    (Lei Wang) Add methods to handle clipboard on local machine or on RMI server machine.
+* DEC 24, 2015    (Lei Wang) Add methods to get browser's name, version, and selenium-server's version etc.
 *                                  Add method checkKnownIssue().
-*  <br>   FEB 05, 2016    (Lei Wang) Add method killChromeDriver().
-*  <br>   FEB 26, 2016    (Lei Wang) Modify click(), doubleClick(): if the offset is out of element's boundary, disable the click listener.
-*  <br>   FEB 29, 2016    (Lei Wang) Modify checkOffset(): if the offset is out of element's boundary, use the whole document as click event receiver.
-*  <br>   MAR 02, 2016    (Lei Wang) Add clickUnverified(), closeAlert().
+* FEB 05, 2016    (Lei Wang) Add method killChromeDriver().
+* FEB 26, 2016    (Lei Wang) Modify click(), doubleClick(): if the offset is out of element's boundary, disable the click listener.
+* FEB 29, 2016    (Lei Wang) Modify checkOffset(): if the offset is out of element's boundary, use the whole document as click event receiver.
+* MAR 02, 2016    (Lei Wang) Add clickUnverified(), closeAlert().
 *                                  Add class RBT: To encapsulate the local Robot and Robot RMI agent.
 *                                  Modify click() and doubleClick(): use RBT to do the click action.
-*  <br>   MAR 14, 2016    (Lei Wang) Add isAlertPresent(), waitAlert().
-*  <br>   MAR 29, 2016    (Lei Wang) Modify click() and doubleClick(): detect "Alert" after clicking.
-*  <br>   APR 19, 2016    (Lei Wang) Modify click() doubleClick() etc.: Handle the optional parameter 'autoscroll'.
-*  <br>   APR 27, 2016    (Lei Wang) Added switchWindow(): switch to a certain window according to its title.
-*  <br>   MAY 05, 2016    (Lei Wang) Modified startBrowser(): restart browser if the connection between WebDriver and BrowserDriver is not good.
-*  <br>   MAY 22, 2017    (Lei Wang) Modified startBrowser(): use isValidBrowserID() instead of StringUtils.isValid() to check the validity of parameter browser ID.
-*  <br>   JUN 06, 2017    (Lei Wang) Modified focus(): catch exception separately so that each way will be tried to set focus.
+* MAR 14, 2016    (Lei Wang) Add isAlertPresent(), waitAlert().
+* MAR 29, 2016    (Lei Wang) Modify click() and doubleClick(): detect "Alert" after clicking.
+* APR 19, 2016    (Lei Wang) Modify click() doubleClick() etc.: Handle the optional parameter 'autoscroll'.
+* APR 27, 2016    (Lei Wang) Added switchWindow(): switch to a certain window according to its title.
+* MAY 05, 2016    (Lei Wang) Modified startBrowser(): restart browser if the connection between WebDriver and BrowserDriver is not good.
+* MAY 22, 2017    (Lei Wang) Modified startBrowser(): use isValidBrowserID() instead of StringUtils.isValid() to check the validity of parameter browser ID.
+* JUN 06, 2017    (Lei Wang) Modified focus(): catch exception separately so that each way will be tried to set focus.
+* AUG 22, 2017    (Lei Wang) Added stopSeleniumServer(): clean up the SeleniumPlus testing environment.
+* SEP 19, 2017    (Lei Wang) Added method keyPress, keyRelease, inputKeys and inputChars to class RBT.
+* NOV 01, 2017    (Lei Wang) Modified showOnPage(): add Actions(driver).moveToElement() to show an element.
+*                                  Modified click(), doubleClick(), clickUnverified(): call showOnPage() before clicking by Robot.
+* NOV 01, 2017    (Lei Wang) Added method isTopLeftInBounds(): (0, 0) should be considered in bounds.
+*                                  Changed method's name isPointInBounds() to isBottomRightInBounds().
+* NOV 15, 2017    (Lei Wang) Added comments for method inputKeysSAFS2Selenium(): It doesn't work well with the Firefox 55/56 and geckodriver 0.18.0/0.19.0.
+* NOV 24, 2017    (Lei Wang) Modified showOnPage(): add optional parameter 'verify' and 'refresh'.
+*                                  Modified click related method to call showOnPage() with optional parameter 'verify' and 'refresh'.
+* NOV 28, 2017    (Lei Wang) Added comments for method inputKeysSAFS2Selenium(): It doesn't work well with the IE 11 and IEDriverServer 3.4.0
+* DEC 06, 2017    (Lei Wang) Added handleBasicAuthentication(): input 'user', 'password' and '{Enter}' with a certain delay.
+* DEC 06, 2017    (Lei Wang) Modified getElementOffsetScreenLocation(): Use the default offset (center) to calculate the location if we meet an exception.
+* DEC 04, 2018    (Carl Nagle) Modified focus(): Changed to not setFocus on the topmost frame window *IF* SearchObject’s bypassFramesReset is true.
+* DEC 21, 2018    (Lei Wang) Handle the 'bypass Robot' for some methods:
+*                                  1. Supported by selenium: inputKeys, inputChars, mouseHover, altLeftDrag, ctrlAltLeftDrag, ctrlLeftDrag, ctrlShiftLeftDrag, shiftLeftDrag, leftDrag
+*                                  2. Not supported by selenium: mouseWheel, setDelayBetweenKeystrokes, setWaitReaction, clearClipboard, setClipboard, getClipboard, rightDrag
+*                           Modified class RBT: throw SeleniumPlusException if 'bypass Robot' is true.
+* DEC 25, 2018    (Lei Wang) Modified method setWaitReaction(): log message instead of throwing out the exception when 'bypass Robot' is true.
+*                           Modified method inputChars(): WebElement.sendKeys() doesn't work, use Actions to input chars.
+* DEC 26, 2018    (Lei Wang) Modified method inputChars(): Use both WebElement.sendKeys() and Actions.sendKeys() to input chars.
+*                           Modified method inputKeys(): Still use robot to handle "{Esc}"/"{Escape}" even 'bypass Robot' is true. (Selenium cannot work)
+* DEC 29, 2018    (Lei Wang) Modified method keyRelease(), keyRelease(): Handle them by both Robot and Selenium.
+*                           Moved method mouseWheel() to RBT class, added a private mouseWheel() to send "MouseWheel Event" to DOM element by javascript.
+* JAN 11, 2019    (Carl Nagle)  Modified getLocation() to show results of Coordinates.onPage() and Element.getLocation()
+* JUN 04, 2019   (Lei Wang)  Modified startBrowser(): support 'setNetworkConditions' for chrome browser.
+*                           Added deleteNetworkConditions(), setNetworkConditions() and getNetworkConditions().
+* JUN 21, 2019   (Lei Wang)  Overload method setNetworkConditions(): provide the version with parameter WebDriver.
+* AUG 20, 2019   (Lei Wang)  Modified method checkKnownIssue(): check known issue with chrome 76.0.3809.100
+* SEP 19, 2019   (Lei Wang)  Moved getProperty(), getProperties() and getCssValues() to the parent class SearchObject.
+* SEP 25, 2019   (Lei Wang)  Modified isShowOnPage(): if we meet the StaleElementReferenceException, we will try to reset to the 'lastFrame'.
+* OCT 17, 2019   (Lei Wang)  Modified click(): if the web-element is not visible, we will wait for a while.
+* NOV 21, 2019   (Lei Wang)  Modified dragTo(), rightDrag(): give the implementation in selenium way.
+*                           Added moveToElement(): try to fix the in-consistency in W3C implementation, we need to set isW3Cimplementation to true to get this fix.
+* MAR 28, 2020   (Lei Wang)  Supported killProcess(), killExtraProcess(), killXXXDriver() in Linux.
+* APR 27, 2020   (Lei Wang)  Added loadModHeaderProfile(), modified startBrowser(): load the extension ModHeader's profile.
+* MAY 20, 2020   (Lei Wang)  Modified getScreenLocation(): If the selenium can return screen coordinates, then return it directly. Added more log messages.
+* OCT 12, 2020   (Lei Wang)  Modified killGeckoDriver(): kill both "geckodriver" and "geckodriver_64" processes, we don't know if 32 or 64 bit driver is running.
+*
 *
 */
+package org.safs.selenium.webdriver.lib;
+
+import static org.openqa.selenium.interactions.PointerInput.Kind.MOUSE;
+
+import java.awt.AWTException;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.datatransfer.DataFlavor;
@@ -72,9 +127,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.rmi.ServerException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -87,10 +144,13 @@ import javax.imageio.ImageIO;
 
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.Alert;
+import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.OutputType;
+import org.openqa.selenium.SessionNotCreatedException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -100,12 +160,17 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.interactions.Locatable;
+import org.openqa.selenium.interactions.PointerInput;
+import org.openqa.selenium.interactions.PointerInput.MouseButton;
 import org.openqa.selenium.interactions.internal.Coordinates;
-import org.openqa.selenium.internal.Locatable;
 import org.openqa.selenium.remote.CapabilityType;
+import org.openqa.selenium.remote.Command;
+import org.openqa.selenium.remote.CommandExecutor;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.RemoteWebElement;
+import org.openqa.selenium.remote.Response;
 import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -115,12 +180,15 @@ import org.safs.Processor;
 import org.safs.SAFSException;
 import org.safs.SAFSParamException;
 import org.safs.StringUtils;
+import org.safs.Utils;
+import org.safs.android.auto.lib.Console;
 import org.safs.image.ImageUtils;
 import org.safs.model.commands.DDDriverCommands;
 import org.safs.natives.NativeWrapper;
 import org.safs.net.IHttpRequest.Key;
 import org.safs.net.XMLHttpRequest;
 import org.safs.robot.Robot;
+import org.safs.selenium.util.AbstractDriverUpdater;
 import org.safs.selenium.util.DocumentClickCapture;
 import org.safs.selenium.util.JavaScriptFunctions;
 import org.safs.selenium.util.MouseEvent;
@@ -130,11 +198,15 @@ import org.safs.selenium.webdriver.SeleniumPlus.WDTimeOut;
 import org.safs.selenium.webdriver.WebDriverGUIUtilities;
 import org.safs.selenium.webdriver.lib.interpreter.WDScriptFactory;
 import org.safs.selenium.webdriver.lib.interpreter.WDTestRunFactory;
+import org.safs.selenium.webdriver.lib.model.Element;
+import org.safs.sockets.DebugListener;
 import org.safs.text.FileUtilities;
 import org.safs.text.INIFileReader;
 import org.safs.tools.CaseInsensitiveFile;
 import org.safs.tools.GenericProcessMonitor;
 import org.safs.tools.GenericProcessMonitor.ProcessInfo;
+import org.safs.tools.GenericProcessMonitor.SearchCondition;
+import org.safs.tools.GenericProcessMonitor.UnixProcessSearchCondition;
 import org.safs.tools.GenericProcessMonitor.WQLSearchCondition;
 import org.safs.tools.drivers.DriverConstant.SeleniumConfigConstant;
 import org.safs.tools.input.CreateUnicodeMap;
@@ -142,6 +214,7 @@ import org.safs.tools.input.InputKeysParser;
 import org.safs.tools.input.RobotKeyEvent;
 import org.safs.tools.stringutils.StringUtilities;
 
+import com.google.common.collect.ImmutableMap;
 import com.sebuilder.interpreter.Script;
 import com.sebuilder.interpreter.factory.StepTypeFactory;
 import com.sebuilder.interpreter.webdriverfactory.WebDriverFactory;
@@ -217,6 +290,13 @@ public class WDLibrary extends SearchObject {
      */
     public static boolean enableClickListenerFailures = true;
 
+    /**
+     * The indicator to tell SeleniumPlus to scroll an item (an item inside a scroll-able container) to make it visible.<br>
+     * It is recommended to turn it off if the force-auto-scroll is not needed anymore, it may cause the page jump up and down.<br>
+     * The default value is false.<br>
+     */
+    public static boolean enableForceScroll = false;//Used in EmbeddedObject.isShowOnPage().
+
     static {
 		if(keysparser == null){
 			try{
@@ -256,8 +336,12 @@ public class WDLibrary extends SearchObject {
 	 * @param clickable WebElement, as WebElement obj
 	 * @param optional String[], the optional parameters
 	 * <ul>
-	 * <li> optional[0] autoscroll boolean, if the component will be scrolled into view automatically before clicking.
+	 * <b>optional[0] autoscroll</b> boolean, if the component will be scrolled into view automatically before clicking.
 	 *                                      if not provided, the default value is true.
+	 * <b>optional[1] verify</b> boolean, verify if the component is shown on page. The default value is true.<br>
+	 * <b>optional[2] refresh</b> boolean, if the element will be refreshed after scrolling.
+	 *                                      Normally we should refresh the component so that selenium API will return correct coordinates of the component.
+	 *                                      But refresh will cost a lot of time and it will slow down the whole test, so we will not refresh the component by default.<br>
 	 * </ul>
 	 * @throws SeleniumPlusException
 	 */
@@ -265,15 +349,19 @@ public class WDLibrary extends SearchObject {
 		checkBeforeOperation(clickable, true);
 		try {
 			boolean autoscroll = parseAutoScroll(optional);
-			if(autoscroll){
-				try{new Actions(WDLibrary.getWebDriver()).moveToElement(clickable).perform();}
-				catch(Throwable t){
-					IndependantLog.error("Ignoring Selenium Click 'moveToElement' action failure caused by "+ t.getClass().getName());
-				}
+			if(autoscroll) showOnPage(clickable, removeFirstParameter(optional));
+			if(!clickable.isDisplayed()){
+				IndependantLog.debug("The web-element is not visible, we wait 2 seconds maximum.");
+				//If not visible, then we wait 2 seconds maximum.
+//				WebDriverWait wait = new WebDriverWait(getWebDriver(), Processor.getSecsWaitForComponent());
+				WebDriverWait wait = new WebDriverWait(getWebDriver(), 2);
+				wait.until(ExpectedConditions.visibilityOf(clickable));
+				IndependantLog.debug("clickable.isDisplayed()= "+clickable.isDisplayed());
 			}
+
 			clickable.click();
 		}catch (Throwable th){
-			IndependantLog.error("Selenium Click action failed.  Trying Robot...", th);
+			IndependantLog.warn("Selenium Click failed due to "+StringUtils.debugmsg(th)+"\nTrying Robot Click ...");
 			click(clickable, null, null, MOUSE_BUTTON_LEFT);
 		}
 	}
@@ -283,8 +371,12 @@ public class WDLibrary extends SearchObject {
 	 * @param specialKey	Keys, the special key to press during the click
 	 * @param optional String[], the optional parameters
 	 * <ul>
-	 * <li> optional[0] autoscroll boolean, if the component will be scrolled into view automatically before clicking.
+	 * <b>optional[0] autoscroll</b> boolean, if the component will be scrolled into view automatically before clicking.
 	 *                                      if not provided, the default value is true.
+	 * <b>optional[1] verify</b> boolean, verify if the component is shown on page. The default value is true.<br>
+	 * <b>optional[2] refresh</b> boolean, if the element will be refreshed after scrolling.
+	 *                                      Normally we should refresh the component so that selenium API will return correct coordinates of the component.
+	 *                                      But refresh will cost a lot of time and it will slow down the whole test, so we will not refresh the component by default.<br>
 	 * </ul>
 	 * @throws SeleniumPlusException
 	 */
@@ -297,8 +389,12 @@ public class WDLibrary extends SearchObject {
 	 * @param offset		Point, the coordination relative to this WebElement to click at
 	 * @param optional String[], the optional parameters
 	 * <ul>
-	 * <li> optional[0] autoscroll boolean, if the component will be scrolled into view automatically before clicking.
+	 * <b>optional[0] autoscroll</b> boolean, if the component will be scrolled into view automatically before clicking.
 	 *                                      if not provided, the default value is true.
+	 * <b>optional[1] verify</b> boolean, verify if the component is shown on page. The default value is true.<br>
+	 * <b>optional[2] refresh</b> boolean, if the element will be refreshed after scrolling.
+	 *                                      Normally we should refresh the component so that selenium API will return correct coordinates of the component.
+	 *                                      But refresh will cost a lot of time and it will slow down the whole test, so we will not refresh the component by default.<br>
 	 * </ul>
 	 * @throws SeleniumPlusException
 	 */
@@ -310,8 +406,12 @@ public class WDLibrary extends SearchObject {
 	 * @param clickable WebElement, as WebElement obj
 	 * @param optional String[], the optional parameters
 	 * <ul>
-	 * <li> optional[0] autoscroll boolean, if the component will be scrolled into view automatically before clicking.
+	 * <b>optional[0] autoscroll</b> boolean, if the component will be scrolled into view automatically before clicking.
 	 *                                      if not provided, the default value is true.
+	 * <b>optional[1] verify</b> boolean, verify if the component is shown on page. The default value is true.<br>
+	 * <b>optional[2] refresh</b> boolean, if the element will be refreshed after scrolling.
+	 *                                      Normally we should refresh the component so that selenium API will return correct coordinates of the component.
+	 *                                      But refresh will cost a lot of time and it will slow down the whole test, so we will not refresh the component by default.<br>
 	 * </ul>
 	 * @throws SeleniumPlusException
 	 */
@@ -324,8 +424,12 @@ public class WDLibrary extends SearchObject {
 	 * @param specialKey	Keys, the special key to presse during the click
 	 * @param optional String[], the optional parameters
 	 * <ul>
-	 * <li> optional[0] autoscroll boolean, if the component will be scrolled into view automatically before clicking.
+	 * <b>optional[0] autoscroll</b> boolean, if the component will be scrolled into view automatically before clicking.
 	 *                                      if not provided, the default value is true.
+	 * <b>optional[1] verify</b> boolean, verify if the component is shown on page. The default value is true.<br>
+	 * <b>optional[2] refresh</b> boolean, if the element will be refreshed after scrolling.
+	 *                                      Normally we should refresh the component so that selenium API will return correct coordinates of the component.
+	 *                                      But refresh will cost a lot of time and it will slow down the whole test, so we will not refresh the component by default.<br>
 	 * </ul>
 	 * @throws SeleniumPlusException
 	 */
@@ -338,8 +442,12 @@ public class WDLibrary extends SearchObject {
 	 * @param offset		Point, the coordination relative to this WebElement to click at
 	 * @param optional String[], the optional parameters
 	 * <ul>
-	 * <li> optional[0] autoscroll boolean, if the component will be scrolled into view automatically before clicking.
+	 * <b>optional[0] autoscroll</b> boolean, if the component will be scrolled into view automatically before clicking.
 	 *                                      if not provided, the default value is true.
+	 * <b>optional[1] verify</b> boolean, verify if the component is shown on page. The default value is true.<br>
+	 * <b>optional[2] refresh</b> boolean, if the element will be refreshed after scrolling.
+	 *                                      Normally we should refresh the component so that selenium API will return correct coordinates of the component.
+	 *                                      But refresh will cost a lot of time and it will slow down the whole test, so we will not refresh the component by default.<br>
 	 * </ul>
 	 * @throws SeleniumPlusException
 	 */
@@ -397,7 +505,7 @@ public class WDLibrary extends SearchObject {
 	private static boolean parseAutoScroll(String... optional){
 		boolean autoscroll = DEFAUT_AUTOSCROLL;
 
-		if(optional!=null && optional.length>0 && optional[0]!=null){
+		if(optional!=null && optional.length>0 && StringUtils.isValid(optional[0])){
 			try{
 				autoscroll = Boolean.parseBoolean(optional[0]);
 			}catch(Exception e){
@@ -406,6 +514,42 @@ public class WDLibrary extends SearchObject {
 		}
 
 		return autoscroll;
+	}
+
+	/**
+	 * @param optional String[], the optional parameters
+	 * @return String[] the rest parameters without the first one.
+	 */
+	private static String[] removeFirstParameter(String... optional){
+		if(optional!=null && optional.length>1){
+			String[] copy = new String[optional.length-1];
+			for(int i=1;i<optional.length;i++){
+				copy[i-1] = optional[i];
+			}
+			return copy;
+		}else{
+			return new String[0];
+		}
+	}
+
+	private static void lastWaitForClickListener(DocumentClickCapture listener, String debugmsg){
+		try{
+			listener.startListening();
+
+			// Dharmesh: Not report waitForClick failure due to listener event not capture
+			// if click coordination out of component size or background.
+			// It is hard to find sibling component.
+			try {listener.waitForClick(timeoutWaitClick);}
+			catch (Throwable the) {IndependantLog.debug(debugmsg+" waitForClick failed but will not be recorded as a failure.");};
+
+		}catch(StaleElementReferenceException x){
+			// the click probably was probably successful because the elements have changed!
+			IndependantLog.debug(debugmsg+"StaleElementException (not found) suggests the action has been performed successfully.");
+		}finally{
+			IndependantLog.debug(debugmsg+"selenium API click finally stopping listener and resetting timeouts.");
+			listener.stopListening();  // chrome is NOT stopping!
+			WDTimeOut.resetImplicitlyWait(Processor.getSecsWaitForComponent(), TimeUnit.SECONDS);
+		}
 	}
 
 	/**
@@ -426,8 +570,12 @@ public class WDLibrary extends SearchObject {
 	 * 								 {@link #MOUSE_BUTTON_MIDDLE} NOT supported yet.
 	 * @param optional String[], the optional parameters
 	 * <ul>
-	 * <li> optional[0] autoscroll boolean, if the component will be scrolled into view automatically before clicking.
+	 * <b>optional[0] autoscroll</b> boolean, if the component will be scrolled into view automatically before clicking.
 	 *                                      if not provided, the default value is true.
+	 * <b>optional[1] verify</b> boolean, verify if the component is shown on page. The default value is true.<br>
+	 * <b>optional[2] refresh</b> boolean, if the element will be refreshed after scrolling.
+	 *                                      Normally we should refresh the component so that selenium API will return correct coordinates of the component.
+	 *                                      But refresh will cost a lot of time and it will slow down the whole test, so we will not refresh the component by default.<br>
 	 * </ul>
 	 * @throws SeleniumPlusException
 	 */
@@ -439,12 +587,7 @@ public class WDLibrary extends SearchObject {
 		RemoteDriver rd = (wd instanceof RemoteDriver)? (RemoteDriver) wd : null;
 		boolean autoscroll = parseAutoScroll(optional);
 
-		if(autoscroll){
-			try{new Actions(wd).moveToElement(clickable).perform();}
-			catch(Throwable t){
-				IndependantLog.error(debugmsg+"Ignoring Selenium Robot Click 'moveToElement' action failure caused by "+ t.getClass().getName());
-			}
-		}
+		if(autoscroll) showOnPage(clickable, removeFirstParameter(optional));
 
 		MouseEvent event = null;
 		DocumentClickCapture listener = new DocumentClickCapture(true, clickable);
@@ -459,6 +602,7 @@ public class WDLibrary extends SearchObject {
 				location.translate(d.width/2, d.height/2);
 			}
 			listener.addListeners(false);
+			IndependantLog.debug(debugmsg+"RBT is going to click at screen location "+location);
 			RBT.click(rd, location, specialKey, mouseButtonNumber, 1);
 			listener.startListening();
 
@@ -480,7 +624,8 @@ public class WDLibrary extends SearchObject {
 			IndependantLog.warn(debugmsg+"Met Exception "+StringUtils.debugmsg(thr));
 
 			// let the failed listeners exit.
-			try{Thread.sleep(DocumentClickCapture.LISTENER_LOOP_DELAY + DocumentClickCapture.delayWaitReady);}catch(Exception x){
+			try{Thread.sleep(DocumentClickCapture.LISTENER_LOOP_DELAY + DocumentClickCapture.delayWaitReady);}
+			catch(Exception x){
 				IndependantLog.debug(debugmsg + StringUtils.debugmsg(x));
 			}
 
@@ -491,7 +636,8 @@ public class WDLibrary extends SearchObject {
 				Actions actions = new Actions(getWebDriver());
 
 				if(autoscroll){
-					if(offset!=null) actions.moveToElement(clickable, offset.x, offset.y);
+//					if(offset!=null) actions.moveToElement(clickable, offset.x, offset.y);
+					if(offset!=null) actions = moveToElement(actions, clickable, offset.x, offset.y);
 					else actions.moveToElement(clickable);
 				}
 
@@ -509,36 +655,13 @@ public class WDLibrary extends SearchObject {
 
 				//Perform the actions
 				listener.addListeners(false);
-				try{
-					//if the Robot click worked, but was not detected. If we clicked a link, original page has
-					//disappeared, so the link doesn't exist neither, the WebElement is stale. WebDriver will
-					//not throw StaleElementReferenceException until the 'implicit timeout' is reached.
-					//But we don't want to waste that time, so just set 'implicit timeout' to 0 and don't wait.
-					WDTimeOut.setImplicitlyWait(0, TimeUnit.SECONDS);
-					actions.build().perform();
-					listener.startListening();
-
-					// Dharmesh: Not report waitForClick failure due to listener event not capture
-					// if click coordination out of component size or background.
-					// It is hard to find sibling component.
-					try {event = listener.waitForClick(timeoutWaitClick);}
-					catch (Throwable the) {IndependantLog.debug(debugmsg+" waitForClick failed but not reported");};
-
-					/*if(event != null)
-						IndependantLog.debug(debugmsg+"click has been performed.");
-					else{
-						throw new SeleniumPlusException("Selenium Action.click failed to return the MouseEvent.");
-					}*/
-
-				}catch(StaleElementReferenceException x){
-					listener.stopListening();  // chrome is NOT stopping!
-					// the click probably was successful because the elements have changed!
-					IndependantLog.debug(debugmsg+"StaleElementException (not found) suggests the click has been performed successfully.");
-				}finally{
-					IndependantLog.debug(debugmsg+"selenium API click finally stopping listener and resetting timeouts.");
-					listener.stopListening();  // chrome is NOT stopping!
-					WDTimeOut.resetImplicitlyWait(Processor.getSecsWaitForComponent(), TimeUnit.SECONDS);
-				}
+				//if the Robot click worked, but was not detected. If we clicked a link, original page has
+				//disappeared, so the link doesn't exist neither, the WebElement is stale. WebDriver will
+				//not throw StaleElementReferenceException until the 'implicit timeout' is reached.
+				//But we don't want to waste that time, so just set 'implicit timeout' to 0 and don't wait.
+				WDTimeOut.setImplicitlyWait(0, TimeUnit.SECONDS);
+				actions.build().perform();
+				lastWaitForClickListener(listener, debugmsg);
 			} catch (Throwable th){
 				listener.stopListening();  // chrome is NOT stopping!
 				if(enableClickListenerFailures) {
@@ -550,7 +673,7 @@ public class WDLibrary extends SearchObject {
 				}
 			}
 		}finally{
-			IndependantLog.debug(debugmsg+"FINALLY stopping any ongoing listener, if any.");
+			IndependantLog.debug(debugmsg+"FINALLY stopping ongoing listener, if any.");
 			listener.stopListening();  // chrome is NOT stopping!
 		}
 	}
@@ -573,8 +696,12 @@ public class WDLibrary extends SearchObject {
 	 * 								 {@link #MOUSE_BUTTON_MIDDLE} and {@link #MOUSE_BUTTON_RIGHT} NOT supported yet.
 	 * @param optional String[], the optional parameters
 	 * <ul>
-	 * <li> optional[0] autoscroll boolean, if the component will be scrolled into view automatically before clicking.
+	 * <b>optional[0] autoscroll</b> boolean, if the component will be scrolled into view automatically before clicking.
 	 *                                      if not provided, the default value is true.
+	 * <b>optional[1] verify</b> boolean, verify if the component is shown on page. The default value is true.<br>
+	 * <b>optional[2] refresh</b> boolean, if the element will be refreshed after scrolling.
+	 *                                      Normally we should refresh the component so that selenium API will return correct coordinates of the component.
+	 *                                      But refresh will cost a lot of time and it will slow down the whole test, so we will not refresh the component by default.<br>
 	 * </ul>
 	 * @throws SeleniumPlusException
 	 */
@@ -587,6 +714,8 @@ public class WDLibrary extends SearchObject {
 		DocumentClickCapture listener = new DocumentClickCapture(true, clickable);
 		checkOffset(clickable, offset, listener);
 		boolean autoscroll = parseAutoScroll(optional);
+
+		if(autoscroll) showOnPage(clickable, removeFirstParameter(optional));
 
 		try {
 			//2. Perform the click action by Robot
@@ -614,7 +743,8 @@ public class WDLibrary extends SearchObject {
 				Actions actions = new Actions(WDLibrary.getWebDriver());
 
 				if(autoscroll){
-					if(offset!=null) actions.moveToElement(clickable, offset.x, offset.y);
+//					if(offset!=null) actions.moveToElement(clickable, offset.x, offset.y);
+					if(offset!=null) actions = moveToElement(actions, clickable, offset.x, offset.y);
 					else actions.moveToElement(clickable);
 				}
 
@@ -631,27 +761,23 @@ public class WDLibrary extends SearchObject {
 
 				//Perform the actions
 				listener.addListeners(false);
-				try{
-					//unfortunately, if the Robot click worked, but was not detected, we have to wait the full
-					//WebDriver implied timeout period for the perform() failure to occur.
-					actions.build().perform();
-					listener.startListening();
-					event = listener.waitForClick(timeoutWaitClick);
-					if(event != null)
-						IndependantLog.debug(debugmsg+"doubleclick has been peformed.");
-					else{
-						throw new SeleniumPlusException("Selenium Action.doubleclick failed to detect the MouseEvent.");
-					}
-				}catch(StaleElementReferenceException x){
-					// the click probably was successful because the elements have changed!
-					IndependantLog.debug(debugmsg+"StaleElementException (not found) suggests the click has been performed successfully.");
-				}
+				//unfortunately, if the Robot click worked, but was not detected, we have to wait the full
+				//WebDriver implied timeout period for the perform() failure to occur.
+				actions.build().perform();
+				lastWaitForClickListener(listener, debugmsg);
 			} catch (Throwable th){
-				IndependantLog.error(debugmsg, th);
-				throw new SeleniumPlusException("doubleclick action failed: "+StringUtils.debugmsg(th));
+				listener.stopListening();  // chrome is NOT stopping!
+				if(enableClickListenerFailures) {
+					IndependantLog.error(debugmsg, th);
+					throw new SeleniumPlusException("doubleclick action failed: "+StringUtils.debugmsg(th));
+				}
+				else{
+					IndependantLog.debug(debugmsg+"ignoring selenium API doubleclick failure caused by "+th.getClass().getName()+", "+th.getMessage());
+				}
 			}
 		}finally{
-			listener.stopListening();
+			IndependantLog.debug(debugmsg+"FINALLY stopping ongoing listener, if any.");
+			listener.stopListening();  // chrome is NOT stopping!
 		}
 	}
 
@@ -660,8 +786,12 @@ public class WDLibrary extends SearchObject {
 	 * @param clickable 	WebElement, the WebElement to click on
 	 * @param optional String[], the optional parameters
 	 * <ul>
-	 * <li> optional[0] autoscroll boolean, if the component will be scrolled into view automatically before clicking.
+	 * <b>optional[0] autoscroll</b> boolean, if the component will be scrolled into view automatically before clicking.
 	 *                                      if not provided, the default value is true.
+	 * <b>optional[1] verify</b> boolean, verify if the component is shown on page. The default value is true.<br>
+	 * <b>optional[2] refresh</b> boolean, if the element will be refreshed after scrolling.
+	 *                                      Normally we should refresh the component so that selenium API will return correct coordinates of the component.
+	 *                                      But refresh will cost a lot of time and it will slow down the whole test, so we will not refresh the component by default.<br>
 	 * </ul>
 	 * @throws SeleniumPlusException
 	 */
@@ -674,8 +804,12 @@ public class WDLibrary extends SearchObject {
 	 * @param specialKey	Keys, the special key to press during the click
 	 * @param optional String[], the optional parameters
 	 * <ul>
-	 * <li> optional[0] autoscroll boolean, if the component will be scrolled into view automatically before clicking.
+	 * <b>optional[0] autoscroll</b> boolean, if the component will be scrolled into view automatically before clicking.
 	 *                                      if not provided, the default value is true.
+	 * <b>optional[1] verify</b> boolean, verify if the component is shown on page. The default value is true.<br>
+	 * <b>optional[2] refresh</b> boolean, if the element will be refreshed after scrolling.
+	 *                                      Normally we should refresh the component so that selenium API will return correct coordinates of the component.
+	 *                                      But refresh will cost a lot of time and it will slow down the whole test, so we will not refresh the component by default.<br>
 	 * </ul>
 	 * @throws SeleniumPlusException
 	 */
@@ -688,8 +822,12 @@ public class WDLibrary extends SearchObject {
 	 * @param offset		Point, the coordination relative to this WebElement to click at
 	 * @param optional String[], the optional parameters
 	 * <ul>
-	 * <li> optional[0] autoscroll boolean, if the component will be scrolled into view automatically before clicking.
+	 * <b>optional[0] autoscroll</b> boolean, if the component will be scrolled into view automatically before clicking.
 	 *                                      if not provided, the default value is true.
+	 * <b>optional[1] verify</b> boolean, verify if the component is shown on page. The default value is true.<br>
+	 * <b>optional[2] refresh</b> boolean, if the element will be refreshed after scrolling.
+	 *                                      Normally we should refresh the component so that selenium API will return correct coordinates of the component.
+	 *                                      But refresh will cost a lot of time and it will slow down the whole test, so we will not refresh the component by default.<br>
 	 * </ul>
 	 * @throws SeleniumPlusException
 	 */
@@ -734,25 +872,30 @@ public class WDLibrary extends SearchObject {
 		try{
 			//1. Get the element's location relative to the frame
 			org.openqa.selenium.Point p=null;
-			if(useOnPageFirstly){
-				try{
-					Coordinates c = ((RemoteWebElement)webelement).getCoordinates();
-					p = c.onPage();
-				}catch(UnsupportedOperationException x){
-					IndependantLog.debug(debugmsg+"Selenium reports coordinates.onPage() is NOT yet supported.");
-				}
-				catch(Throwable t){
-					IndependantLog.debug(debugmsg+"ignoring "+ StringUtils.debugmsg(t));
-				}
+			Coordinates c = null;
+			try{
+				c = ((RemoteWebElement)webelement).getCoordinates();
+				IndependantLog.debug(debugmsg+"Selenium reports Coordinates.onPage(): "+ c.onPage().x +","+ c.onPage().y);
+			}catch(UnsupportedOperationException x){
+				IndependantLog.debug(debugmsg+"Selenium reports Coordinates.onPage() is NOT yet supported.");
 			}
-			if(p==null) p = webelement.getLocation();
-			IndependantLog.debug(debugmsg+"Selenium reports the WebElement 'CLIENT AREA' location as ("+p.x+","+p.y+")");
+			catch(Throwable t){
+				IndependantLog.debug(debugmsg+"ignoring "+ StringUtils.debugmsg(t));
+			}
+
+			p = webelement.getLocation();
+			IndependantLog.debug(debugmsg+"Selenium reports Element.getLocation(): "+ p.x +","+ p.y);
+
+			if(useOnPageFirstly && (c instanceof Coordinates)){
+				p = c.onPage();
+			}
+			IndependantLog.debug(debugmsg+"using WebElement 'CLIENT AREA' location as ("+p.x+","+p.y+")");
 
 			//2. Add the frame's location (relative to the the browser client area)
 			if(lastFrame!=null){
 				p.x += lastFrame.getLocation().x;
 				p.y += lastFrame.getLocation().y;
-				//IndependantLog.debug(debugmsg+"added lastFrame offsets, new tentative 'CLIENT AREA' location ("+p.x+","+p.y+")");
+				IndependantLog.debug(debugmsg+"added lastFrame offsets "+lastFrame.getLocation().toString()+", new tentative 'CLIENT AREA' location ("+p.x+","+p.y+")");
 			}
 
 			return new Point(p.x, p.y);
@@ -779,6 +922,7 @@ public class WDLibrary extends SearchObject {
 				Coordinates c = ((RemoteWebElement)webelement).getCoordinates();
 				org.openqa.selenium.Point screen = c.onScreen();
 				IndependantLog.debug(debugmsg+"Selenium reports the WebElement SCREEN location as ("+screen.x+","+screen.y+")");
+				return new Point(screen.x, screen.y);
 			}
 			catch(UnsupportedOperationException x){
 				IndependantLog.debug(debugmsg+"Selenium reports coordinates.onScreen() is NOT yet supported.");
@@ -791,20 +935,22 @@ public class WDLibrary extends SearchObject {
 			p = getLocation(webelement);
 
 			//2. Add the browser client area's location (relative to the browser's window), which is different according to browser
-			p.x += lastBrowserWindow.getClientX();
-			p.y += lastBrowserWindow.getClientY();
-			IndependantLog.debug(debugmsg+"added lastBrowserWindow ClientXY offsets, new tentative PAGE location ("+p.x+","+p.y+")");
+			float clientx = getLastBrowserWindow().getClientX();
+			float clienty = getLastBrowserWindow().getClientY();
+			p.x += clientx;
+			p.y += clienty;
+			IndependantLog.debug(debugmsg+"added lastBrowserWindow ClientXY offsets ("+clientx+","+clienty+"), new tentative PAGE location ("+p.x+","+p.y+")");
 
 			//2.1 Fix "client area LOCATION offset problem"
 			if(lastFrame==null){
-				//LEIWANG: I think that "client area LOCATION offset problem" is not related to the lastFrame.
+				//Lei Wang: I think that "client area LOCATION offset problem" is not related to the lastFrame.
 				//Even the lastFrame is not null, that problem might exist too and we should try to fix it.
 				//TODO remove the condition "if(lastFrame==null)" in future
-				if (lastBrowserWindow.getClientX()==0 &&
-					lastBrowserWindow.getBorderWidth()==0 &&
-					lastBrowserWindow.getPageXOffset()==0 &&
-					lastBrowserWindow.getWidth()>lastBrowserWindow.getClientWidth() ) {
-					int diff = Math.round(lastBrowserWindow.getWidth()- lastBrowserWindow.getClientWidth())/2;
+				if (getLastBrowserWindow().getClientX()==0 &&
+					getLastBrowserWindow().getBorderWidth()==0 &&
+					getLastBrowserWindow().getPageXOffset()==0 &&
+					getLastBrowserWindow().getWidth()>getLastBrowserWindow().getClientWidth() ) {
+					int diff = Math.round(getLastBrowserWindow().getWidth()- getLastBrowserWindow().getClientWidth())/2;
 					IndependantLog.debug(debugmsg + "detecting potential client area LOCATION offset problem of "+ diff +" pixels");
 					if (diff < 12) {
 						p.x += diff;
@@ -817,18 +963,24 @@ public class WDLibrary extends SearchObject {
 			}
 
 			//3. Add the browser window's location (relative to the screen)
-			p.x += lastBrowserWindow.getX();
-			p.y += lastBrowserWindow.getY();
-			//IndependantLog.debug(debugmsg+"added lastBrowserWindow XY offsets, new tentative SCREEN location ("+p.x+","+p.y+")");
+			float windowx = getLastBrowserWindow().getX();
+			float windowy = getLastBrowserWindow().getY();
+			p.x += windowx;
+			p.y += windowy;
+			IndependantLog.debug(debugmsg+"added lastBrowserWindow XY offsets ("+windowx+","+windowy+"), new tentative SCREEN location ("+p.x+","+p.y+")");
 
 			//4. minus scrollbar offset
-			p.x -= lastBrowserWindow.getPageXOffset();
-			p.y -= lastBrowserWindow.getPageYOffset();
-			//IndependantLog.debug(debugmsg+"added lastBrowserWindow PageXY offsets, new tentative SCREEN location ("+p.x+","+p.y+")");
+			float scrollbarx = getLastBrowserWindow().getPageXOffset();
+			float scrollbary = getLastBrowserWindow().getPageYOffset();
+			p.x -= scrollbarx;
+			p.y -= scrollbary;
+			IndependantLog.debug(debugmsg+"added lastBrowserWindow PageXY offsets ("+scrollbarx+","+scrollbary+"), new tentative SCREEN location ("+p.x+","+p.y+")");
 
 			if(debug){
-				Robot.getRobot().mouseMove(p.x, p.y);
-				Thread.sleep(500);
+				if(!getBypassRobot()){
+					Robot.getRobot().mouseMove(p.x, p.y);
+					Thread.sleep(500);
+				}
 			}
 			IndependantLog.debug(debugmsg+"The Left-Upper corner's SCREEN coordinate is ("+p.x+","+p.y+")");
 
@@ -1053,10 +1205,14 @@ public class WDLibrary extends SearchObject {
 	/**
 	 * Does NOT clear any existing text in the control, but does attempt to insure the window/control has focus.
 	 * <br><em>Purpose:</em>
-	 * <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumGenericMasterFunctionsReference.htm#detail_InputKeys" alt="inputKeys Keyword Reference" title="inputKeys Keyword Reference">inputKeys</a>
+	 * <a href="/sqabasic2000/SeleniumGenericMasterFunctionsReference.htm#detail_InputKeys" alt="inputKeys Keyword Reference" title="inputKeys Keyword Reference">inputKeys</a>
 	 * <p>
 	 * Bypasses attempts to use AWT Robot for keystrokes.
 	 * Attempts to convert SAFS keystrokes to Selenium low-level Actions keystrokes.
+	 *
+	 * <b>Note:</b> This method doesn't work well with the Firefox 55/56 and geckodriver 0.18.0/0.19.0.<br>
+	 * <b>Note:</b> This method doesn't work well with the IE 11 and IEDriverServer 3.4.0.<br>
+	 *
 	 * @param we WebElement to send SAFS keystrokes (or plain text).
 	 * @param keystrokes SAFS keystrokes or plain text to type.
 	 * @throws SeleniumPlusException if we are unable to process the keystrokes successfully.
@@ -1142,71 +1298,103 @@ public class WDLibrary extends SearchObject {
 	}
 
 	/**
-	 * Press down a Key by Java Robot. Call {@link #keyRelease(int)} to release the key.
-	 * @param keycode int, keycode to press (e.g. <code>KeyEvent.VK_A</code>)
+	 * Press down a Key. Call {@link #keyRelease(int)} to release the key.
+	 * @param keycode int, Java keycode to press (e.g. <code>KeyEvent.VK_A</code>)
 	 * @throws SeleniumPlusException if fail
 	 * @see #keyRelease(int)
 	 */
 	public static void keyPress(int keycode) throws SeleniumPlusException{
-		try {
-			RemoteDriver wd = null;
-			try{ wd = (RemoteDriver) getWebDriver();}catch(Exception x){}
+		boolean done = false;
+		String debugmsg = StringUtils.debugmsg(false);
 
-			if(wd == null || wd.isLocalServer()){
-				if(!Robot.keyPress(keycode)){
-					throw new SeleniumPlusException("SAFS Robot Fail to press key "+KeyEvent.getKeyText(keycode));
-				}
-			}else {
-				//try RMI server.
-				wd.rmiAgent.remoteKeyPress(keycode);
+		try{
+			done = RBT.keyPress(keycode);
+		}catch(SeleniumPlusException e){
+			IndependantLog.warn(debugmsg+" Failed to press key '"+keycode+"' by Robot, due to "+e.getMessage());
+		}
+		if(!done){
+			try{
+				keyDown(convertToKeys(keycode));
+			}catch(SeleniumPlusException e){
+				IndependantLog.warn(debugmsg+" Failed to press key '"+keycode+"' by Selenium, due to "+e.getMessage());
 			}
-		} catch (Exception e) {
-			throw new SeleniumPlusException("Unable to successfully complete keyPress due to "+ e.getMessage(), e);
 		}
 	}
+
 	/**
-	 * Release a Key by Java Robot. Release the key pressed by {@link #keyPress(int)}.
-	 * @param keycode int, keycode to release (e.g. <code>KeyEvent.VK_A</code>)
+	 * Release a Key. Release the key pressed by {@link #keyPress(int)}.
+	 * @param keycode int, Java keycode to release (e.g. <code>KeyEvent.VK_A</code>)
 	 * @throws SeleniumPlusException if fail
 	 * @see #keyPress(int)
 	 */
 	public static void keyRelease(int keycode) throws SeleniumPlusException{
-		try {
-			RemoteDriver wd = null;
-			try{ wd = (RemoteDriver) getWebDriver();}catch(Exception x){}
+		boolean done = false;
+		String debugmsg = StringUtils.debugmsg(false);
 
-			if(wd == null || wd.isLocalServer()){
-				if(!Robot.keyRelease(keycode)){
-					throw new SeleniumPlusException("SAFS Robot Fail to release key "+KeyEvent.getKeyText(keycode));
-				}
-			}else {
-				//try RMI server.
-				wd.rmiAgent.remoteKeyRelease(keycode);
+		try{
+			done = RBT.keyRelease(keycode);
+		}catch(SeleniumPlusException e){
+			IndependantLog.warn(debugmsg+" Failed to release key '"+keycode+"' by Robot, due to "+e.getMessage());
+		}
+
+		if(!done){
+			try{
+				keyUp(convertToKeys(keycode));
+			}catch(SeleniumPlusException e){
+				IndependantLog.warn(debugmsg+" Failed to release key '"+keycode+"' by Selenium, due to "+e.getMessage());
 			}
-		} catch (Exception e) {
-			throw new SeleniumPlusException("Unable to successfully complete keyRelease due to "+ e.getMessage(), e);
 		}
 	}
+
 	/**
-	 * Scroll the mouse wheel by Java Robot.
+	 * Scroll the mouse wheel.
 	 * @param wheelAmt int, the wheel amount to scroll.
 	 * @throws SeleniumPlusException if fail
 	 */
 	public static void mouseWheel(int wheelAmt) throws SeleniumPlusException{
-		try {
-			RemoteDriver wd = null;
-			try{ wd = (RemoteDriver) getWebDriver();}catch(Exception x){}
-			if(wd == null || wd.isLocalServer()){
-				if(!Robot.mouseWheel(wheelAmt)){
-					throw new SeleniumPlusException("SAFS Robot Fail to scroll mouse wheel.");
-				}
-			}else {
-				//try RMI server.
-				wd.rmiAgent.remoteMouseWheel(wheelAmt);
-			}
-		} catch (Exception e) {
-			throw new SeleniumPlusException("Unable to successfully complete mouseWheel due to "+ e.getMessage(), e);
+		boolean done = false;
+		String debugmsg = StringUtils.debugmsg(false);
+
+		try{
+			done = RBT.mouseWheel(wheelAmt);
+		}catch(SeleniumPlusException e){
+			IndependantLog.warn(debugmsg+" Failed to complete mouseWheel by Robot, due to "+e.getMessage());
 		}
+
+		if(!done){
+			try{
+				WebElement element = getObject("xpath=/html");
+				mouseWheel(element, wheelAmt);
+				done = true;
+			}catch(SeleniumPlusException e){
+				IndependantLog.warn(debugmsg+" Failed to complete mouseWheel by Javascript, due to "+e.getMessage());
+			}
+		}
+	}
+
+	/**
+	 * Send Mouse WheelEvent to the DOM element by javascript.<br>
+	 * <b>Note:</b> We can send the WheelEvent, but it is not guarantee that the DOM element will react as expected.<br>
+	 *
+	 * @param element WebElement, the target to receive the WheelEvent.
+	 * @param wheelAmt int, the wheel amount to scroll.
+	 * @throws SeleniumPlusException if fail
+	 */
+	private static void mouseWheel(WebElement element, int wheelAmt)  throws SeleniumPlusException{
+		String debugmsg = StringUtils.debugmsg(false);
+
+		StringBuffer jsScript = new StringBuffer();
+		jsScript.append(JavaScriptFunctions.mouseWheel());
+		jsScript.append("mouseWheel(arguments[0],arguments[1],arguments[2],arguments[3], arguments[4]);");
+
+		try {
+			WDLibrary.executeJavaScriptOnWebElement(jsScript.toString(), element, 0, wheelAmt, 0, 0);
+			return;
+		} catch(Exception e) {
+			IndependantLog.debug(debugmsg+" Met exception.",e);
+		}
+
+		throw new SeleniumPlusException("Failed to complete mouseWheel by Javascript");
 	}
 
 	/**
@@ -1251,6 +1439,8 @@ public class WDLibrary extends SearchObject {
 	 **/
 	public static void setDelayBetweenKeystrokes(int millisDelay) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(false);
+		if(getBypassRobot()) throw new SeleniumPlusException("setDelayBetweenKeystrokes is not supported by Selenium.");
+
 		try {
 			RemoteDriver wd = null;
 			try{ wd = (RemoteDriver) getWebDriver();}catch(Exception x){}
@@ -1290,19 +1480,24 @@ public class WDLibrary extends SearchObject {
 	 **/
 	public static void setWaitReaction(boolean wait) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(false);
+
 		try {
-			RemoteDriver wd = null;
-			try{ wd = (RemoteDriver) getWebDriver();}catch(Exception x){}
-			if(wd == null || wd.isLocalServer()){
-				IndependantLog.info(debugmsg+" sending SetWaitReaction  '"+String.valueOf(wait)+"' to local Robot.");
-				Robot.setWaitReaction(wait);
-			}else {
-				try{
-					IndependantLog.info(debugmsg+" sending RMI Agent SetWaitReaction '"+String.valueOf(wait)+"' to RMI Server");
-					wd.rmiAgent.remoteWaitReaction(wait);
-				}catch(Exception e){
-					IndependantLog.warn(debugmsg+" Fail RMI Agent SetWaitReaction '"+String.valueOf(wait)+"' due to "+StringUtils.debugmsg(e));
+			if(getBypassRobot()){
+				RemoteDriver wd = null;
+				try{ wd = (RemoteDriver) getWebDriver();}catch(Exception x){}
+				if(wd == null || wd.isLocalServer()){
+					IndependantLog.info(debugmsg+" sending SetWaitReaction  '"+String.valueOf(wait)+"' to local Robot.");
+					Robot.setWaitReaction(wait);
+				}else {
+					try{
+						IndependantLog.info(debugmsg+" sending RMI Agent SetWaitReaction '"+String.valueOf(wait)+"' to RMI Server");
+						wd.rmiAgent.remoteWaitReaction(wait);
+					}catch(Exception e){
+						IndependantLog.warn(debugmsg+" Fail RMI Agent SetWaitReaction '"+String.valueOf(wait)+"' due to "+StringUtils.debugmsg(e));
+					}
 				}
+			}else{
+				IndependantLog.info("setWaitReaction is not supported by Selenium.");
 			}
 		} catch (Exception e) {
 			throw new SeleniumPlusException("Unable to successfully complete setWaitReaction due to "+ e.getMessage(), e);
@@ -1322,19 +1517,24 @@ public class WDLibrary extends SearchObject {
 	 **/
 	public static void setWaitReaction(boolean wait, int tokenLength, int dealyForToken, int dealy) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(false);
+
 		try {
-			RemoteDriver wd = null;
-			try{ wd = (RemoteDriver) getWebDriver();}catch(Exception x){}
-			if(wd == null || wd.isLocalServer()){
-				IndependantLog.info(debugmsg+" sending SetWaitReaction  '"+String.valueOf(wait)+"' to local Robot.");
-				Robot.setWaitReaction(wait, tokenLength, dealyForToken, dealy);
-			}else {
-				try{
-					IndependantLog.info(debugmsg+" sending RMI Agent SetWaitReaction '"+String.valueOf(wait)+"' to RMI Server");
-					wd.rmiAgent.remoteWaitReaction(wait, tokenLength, dealyForToken, dealy);
-				}catch(Exception e){
-					IndependantLog.warn(debugmsg+" Fail RMI Agent SetWaitReaction '"+String.valueOf(wait)+"' due to "+StringUtils.debugmsg(e));
+			if(getBypassRobot()){
+				RemoteDriver wd = null;
+				try{ wd = (RemoteDriver) getWebDriver();}catch(Exception x){}
+				if(wd == null || wd.isLocalServer()){
+					IndependantLog.info(debugmsg+" sending SetWaitReaction  '"+String.valueOf(wait)+"' to local Robot.");
+					Robot.setWaitReaction(wait, tokenLength, dealyForToken, dealy);
+				}else {
+					try{
+						IndependantLog.info(debugmsg+" sending RMI Agent SetWaitReaction '"+String.valueOf(wait)+"' to RMI Server");
+						wd.rmiAgent.remoteWaitReaction(wait, tokenLength, dealyForToken, dealy);
+					}catch(Exception e){
+						IndependantLog.warn(debugmsg+" Fail RMI Agent SetWaitReaction '"+String.valueOf(wait)+"' due to "+StringUtils.debugmsg(e));
+					}
 				}
+			}else{
+				IndependantLog.info("setWaitReaction is not supported by Selenium.");
 			}
 		} catch (Exception e) {
 			throw new SeleniumPlusException("Unable to successfully complete setWaitReaction due to "+ e.getMessage(), e);
@@ -1344,7 +1544,7 @@ public class WDLibrary extends SearchObject {
 	/**
 	 * Does NOT clear any existing text in the control, but does attempt to insure the window/control has focus.
 	 * <br><em>Purpose:</em>
-	 * <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumGenericMasterFunctionsReference.htm#detail_InputKeys" alt="inputKeys Keyword Reference" title="inputKeys Keyword Reference">inputKeys</a>
+	 * <a href="/sqabasic2000/SeleniumGenericMasterFunctionsReference.htm#detail_InputKeys" alt="inputKeys Keyword Reference" title="inputKeys Keyword Reference">inputKeys</a>
 	 * <p>
 	 * Attempts to use AWT Robot for keystrokes for both local and remote servers.
 	 * If the remote server does NOT have an RMI Server running to receive the request, then we
@@ -1357,23 +1557,34 @@ public class WDLibrary extends SearchObject {
 	 **/
 	public static void inputKeys(WebElement we, String keystrokes) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(false);
-		try {
-			if(!focus(we)) IndependantLog.warn(debugmsg+" Fail to set focus to webelement "+we);
+		boolean done = false;
+		if(!focus(we)) IndependantLog.warn(debugmsg+" Fail to set focus to webelement "+we);
 
-			RemoteDriver wd = null;
-			try{ wd = (RemoteDriver) getWebDriver();}catch(Exception x){}
-			if(wd == null || wd.isLocalServer()){
-				IndependantLog.info(debugmsg+" sending '"+keystrokes+"' to local Robot.inputKeys.");
-				Robot.inputKeys(keystrokes);
-			}else {
-				try{
-					IndependantLog.info(debugmsg+" sending RMI Agent TypeKeys '"+keystrokes+"' to RMI Server");
-					wd.rmiAgent.remoteTypeKeys(keystrokes);
-				}catch(Exception e){
-					IndependantLog.warn(debugmsg+" Fail RMI Agent TypeKeys '"+keystrokes+"' due to "+StringUtils.debugmsg(e));
-					inputKeysSAFS2Selenium(we, keystrokes);
+		try {
+			try{
+				//Try Robot
+				RBT.inputKeys(keystrokes);
+				done = true;
+			}catch(SeleniumPlusException e){
+				IndependantLog.warn(debugmsg+" Failed TypeKeys '"+keystrokes+"' due to "+StringUtils.debugmsg(e));
+				String esc = "{esc}";
+				String escape = "{escape}";
+				String lc = keystrokes.toLowerCase();
+				if(lc.indexOf(esc)>-1 || lc.indexOf(escape)>-1){
+					IndependantLog.warn(debugmsg+" Selenium cannot handle "+esc+" properly!");
+					if(lc.equals(esc) || lc.equals(escape)){
+						IndependantLog.warn(debugmsg+" We risk to handle "+esc+" by Robot!");
+						RBT._typeKeys(esc);
+						done = true;
+					}
 				}
 			}
+
+			if(!done){
+				//Try selenium
+				inputKeysSAFS2Selenium(we, keystrokes);
+			}
+
 		} catch (Exception e) {
 			throw new SeleniumPlusException("Unable to successfully complete InputKeys due to "+ e.getMessage(), e);
 		}
@@ -1382,7 +1593,7 @@ public class WDLibrary extends SearchObject {
 	/**
 	 * Does NOT clear any existing text in the control, but does attempt to insure the window/control has focus.
 	 * <br><em>Purpose:</em>
-	 * <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumGenericMasterFunctionsReference.htm#detail_InputCharacters" alt="inputCharacters Keyword Reference" title="inputCharacters Keyword Reference">inputCharacters</a>
+	 * <a href="/sqabasic2000/SeleniumGenericMasterFunctionsReference.htm#detail_InputCharacters" alt="inputCharacters Keyword Reference" title="inputCharacters Keyword Reference">inputCharacters</a>
 	 * @param we WebElement to send characters; if null, the keystrokes will be sent to the focused element.
 	 * @param keystrokes/plain text to type.
 	 * @throws SeleniumPlusException if we are unable to process the keystrokes successfully.
@@ -1390,26 +1601,41 @@ public class WDLibrary extends SearchObject {
 	 **/
 	public static void inputChars(WebElement we, String keystrokes) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(false);
-		try{
-			if(!focus(we)) IndependantLog.warn(debugmsg+" Fail to set focus to webelement "+we);
+		boolean done = false;
 
-			RemoteDriver wd = null;
-			try{ wd = (RemoteDriver) getWebDriver();}catch(Exception x){}
-			if(wd == null || wd.isLocalServer()){
-				IndependantLog.info(debugmsg+" sending '"+keystrokes+"' to local Robot.inputChars.");
-				Robot.inputChars(keystrokes);
-			}else {
+		if(!focus(we)) IndependantLog.warn(debugmsg+" Fail to set focus to webelement "+we);
+
+		try{
+			//Try Robot
+			RBT.inputChars(keystrokes);
+			done = true;
+		}catch(Exception e){
+			IndependantLog.warn(debugmsg+" Fail InputChars '"+keystrokes+"' due to "+StringUtils.debugmsg(e));
+		}
+
+		if(!done){
+			IndependantLog.info(debugmsg+" InputChars '"+keystrokes+"' by selenium.");
+			try{
+				//WebElement.sendKeys() doesn't work sometimes.
+				we.sendKeys(keystrokes);
+				done =true;
+			}catch(Exception e){
+				IndependantLog.warn(debugmsg+" Failed to InputChars '"+keystrokes+"' by WebElement.sendKeys(), due to "+StringUtils.debugmsg(e));
+			}
+			if(!done){
 				try{
-					IndependantLog.info(debugmsg+" sending RMI Agent TypeChars '"+keystrokes+"' to RMI Server");
-					wd.rmiAgent.remoteTypeChars(keystrokes);
-				}catch(Exception e){
-					IndependantLog.warn(debugmsg+" Fail RMI Agent TypeChars '"+keystrokes+"' due to "+StringUtils.debugmsg(e));
-					IndependantLog.info(debugmsg+" sending '"+keystrokes+"' to via WebElement.sendKeys.");
-					we.sendKeys(keystrokes);
+					//Try another selenium way to send keys.
+					Actions actions = new Actions(getWebDriver());
+					actions.sendKeys(we, keystrokes).build().perform();
+					done = true;
+				}catch(Exception x){
+					IndependantLog.warn(debugmsg+" Failed to InputChars '"+keystrokes+"' by Actions.sendKeys(), due to "+StringUtils.debugmsg(x));
 				}
 			}
-		} catch (Exception e) {
-			throw new SeleniumPlusException("Unable to successfully complete InputCharacters due to "+ e.getMessage());
+		}
+
+		if(!done){
+			throw new SeleniumPlusException("Unable to successfully complete InputChars.");
 		}
 	}
 
@@ -1419,6 +1645,7 @@ public class WDLibrary extends SearchObject {
 	 */
 	public static void clearClipboard() throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(false);
+		if(getBypassRobot()) throw new SeleniumPlusException("clearClipboard is not supported by Selenium.");
 
 		try{
 			RemoteDriver wd = null;
@@ -1447,6 +1674,7 @@ public class WDLibrary extends SearchObject {
 	 */
 	public static void setClipboard(String content) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(false);
+		if(getBypassRobot()) throw new SeleniumPlusException("setClipboard is not supported by Selenium.");
 
 		try{
 			RemoteDriver wd = null;
@@ -1476,6 +1704,7 @@ public class WDLibrary extends SearchObject {
 	 */
 	public static Object getClipboard(DataFlavor dataFlavor) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(false);
+		if(getBypassRobot()) throw new SeleniumPlusException("getClipboard is not supported by Selenium.");
 
 		try{
 			RemoteDriver wd = null;
@@ -1584,20 +1813,26 @@ public class WDLibrary extends SearchObject {
 				StringUtilities.sleep(millisStay);
 
 				//Move out the mouse
-				//action.moveByOffset(-Robot.SCREENSZIE.width, -Robot.SCREENSZIE.height);//This will throw exception
-				//action.build().perform();
-				Robot.getRobot().mouseMove(-Robot.SCREENSZIE.width, -Robot.SCREENSZIE.height);
+				if(!getBypassRobot()){
+					Robot.getRobot().mouseMove(-Robot.SCREENSZIE.width, -Robot.SCREENSZIE.height);
+				}else{
+					//TODO by Selenium action
+					//action.moveByOffset(-Robot.SCREENSZIE.width, -Robot.SCREENSZIE.height);//This will throw exception
+					//action.build().perform();
+				}
 			}
 
 		}catch(Exception e) {
 			IndependantLog.warn(StringUtils.debugmsg(false)+"Failed to hover mouse by Selenium API: "+ StringUtils.debugmsg(e));
-			Point screenPoint = new Point(point.x, point.y);
-			try{
-				translatePoint(we, screenPoint);
-				IndependantLog.warn(StringUtils.debugmsg(false)+"Try SAFS Robot to hover mouse at screen point ["+screenPoint.x+","+screenPoint.y+"]");
-				Robot.mouseHover(screenPoint, millisStay);
-			}catch(Exception e2){
-				throw new SeleniumPlusException("Failed to hover mouse at point ["+point.x+","+point.y+"] relative to webelement.");
+			if(!getBypassRobot()){
+				Point screenPoint = new Point(point.x, point.y);
+				try{
+					translatePoint(we, screenPoint);
+					IndependantLog.warn(StringUtils.debugmsg(false)+"Try SAFS Robot to hover mouse at screen point ["+screenPoint.x+","+screenPoint.y+"]");
+					Robot.mouseHover(screenPoint, millisStay);
+				}catch(Exception e2){
+					throw new SeleniumPlusException("Failed to hover mouse at point ["+point.x+","+point.y+"] relative to webelement.");
+				}
 			}
 		}
 	}
@@ -1612,15 +1847,32 @@ public class WDLibrary extends SearchObject {
 	 */
 	public static void altLeftDrag(WebElement we, Point start, Point end) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(false);
+		boolean done = false;
+		IndependantLog.debug(debugmsg+" drag from "+start+" to "+end+" relative to webelement.");
 
 		try{
-			IndependantLog.debug(debugmsg+" drag from "+start+" to "+end+" relative to webelement.");
-			translatePoints(we, start, end);
-			Robot.altLeftDrag(start, end);
+			if(!getBypassRobot()){
+				IndependantLog.debug(debugmsg+"Try to drag by Robot.");
+				translatePoints(we, start, end);
+				Robot.altLeftDrag(start, end);
+				done = true;
+			}
 
 		}catch(Exception e){
 			IndependantLog.warn(debugmsg+"Failed to drag by SAFS Robot: "+ StringUtils.debugmsg(e));
-			throw new SeleniumPlusException("Failed to drag.");
+		}
+
+		if(!done){
+			try{
+				IndependantLog.debug(debugmsg+"Try to drag by Selenium API.");
+				Actions actions = new Actions(lastUsedWD);
+				actions = actions.keyDown(Keys.ALT);
+				actions = moveToElement(actions, we, start.x, start.y);
+				actions.clickAndHold().moveByOffset((end.x-start.x), (end.y-start.y)).release().keyUp(Keys.ALT).build().perform();
+			}catch(Exception e1){
+				IndependantLog.warn(debugmsg+"Failed to drag by Selenium API: "+ StringUtils.debugmsg(e1));
+				throw new SeleniumPlusException("Failed to drag.");
+			}
 		}
 	}
 	/**
@@ -1633,15 +1885,33 @@ public class WDLibrary extends SearchObject {
 	 */
 	public static void ctrlAltLeftDrag(WebElement we, Point start, Point end) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(false);
+		boolean done = false;
+		IndependantLog.debug(debugmsg+" drag from "+start+" to "+end+" relative to webelement.");
 
 		try{
-			IndependantLog.debug(debugmsg+" drag from "+start+" to "+end+" relative to webelement.");
-			translatePoints(we, start, end);
-			Robot.ctrlAltLeftDrag(start, end);
+			if(!getBypassRobot()){
+				IndependantLog.debug(debugmsg+"Try to drag by Robot.");
+				translatePoints(we, start, end);
+				Robot.ctrlAltLeftDrag(start, end);
+				done = true;
+			}
 
 		}catch(Exception e){
 			IndependantLog.warn(debugmsg+"Failed to drag by SAFS Robot: "+ StringUtils.debugmsg(e));
-			throw new SeleniumPlusException("Failed to drag.");
+		}
+
+		if(!done){
+			try{
+				IndependantLog.debug(debugmsg+"Try to drag by Selenium API.");
+				Actions actions = new Actions(lastUsedWD);
+				actions = actions.keyDown(Keys.CONTROL).keyDown(Keys.ALT);
+				actions = moveToElement(actions, we, start.x, start.y);
+				actions.clickAndHold().moveByOffset((end.x-start.x), (end.y-start.y)).release().keyUp(Keys.ALT).keyUp(Keys.CONTROL).build().perform();
+
+			}catch(Exception e1){
+				IndependantLog.warn(debugmsg+"Failed to drag by Selenium API: "+ StringUtils.debugmsg(e1));
+				throw new SeleniumPlusException("Failed to drag.");
+			}
 		}
 	}
 	/**
@@ -1654,15 +1924,33 @@ public class WDLibrary extends SearchObject {
 	 */
 	public static void ctrlLeftDrag(WebElement we, Point start, Point end) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(false);
+		boolean done = false;
 
+		IndependantLog.debug(debugmsg+" drag from "+start+" to "+end+" relative to webelement.");
 		try{
-			IndependantLog.debug(debugmsg+" drag from "+start+" to "+end+" relative to webelement.");
-			translatePoints(we, start, end);
-			Robot.ctrlLeftDrag(start, end);
+			if(!getBypassRobot()){
+				IndependantLog.debug(debugmsg+"Try to drag by Robot.");
+				translatePoints(we, start, end);
+				Robot.ctrlLeftDrag(start, end);
+				done = true;
+			}
 
 		}catch(Exception e){
 			IndependantLog.warn(debugmsg+"Failed to drag by SAFS Robot: "+ StringUtils.debugmsg(e));
-			throw new SeleniumPlusException("Failed to drag.");
+		}
+
+		if(!done){
+			try{
+				IndependantLog.debug(debugmsg+"Try to drag by Selenium API.");
+				Actions actions = new Actions(lastUsedWD);
+				actions = actions.keyDown(Keys.CONTROL);
+				actions = moveToElement(actions, we, start.x, start.y);
+				actions.clickAndHold().moveByOffset((end.x-start.x), (end.y-start.y)).release().keyUp(Keys.CONTROL).build().perform();
+
+			}catch(Exception e1){
+				IndependantLog.warn(debugmsg+"Failed to drag by Selenium API: "+ StringUtils.debugmsg(e1));
+				throw new SeleniumPlusException("Failed to drag.");
+			}
 		}
 	}
 	/**
@@ -1675,15 +1963,33 @@ public class WDLibrary extends SearchObject {
 	 */
 	public static void ctrlShiftLeftDrag(WebElement we, Point start, Point end) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(false);
+		boolean done = false;
+		IndependantLog.debug(debugmsg+" drag from "+start+" to "+end+" relative to webelement.");
 
 		try{
-			IndependantLog.debug(debugmsg+" drag from "+start+" to "+end+" relative to webelement.");
-			translatePoints(we, start, end);
-			Robot.ctrlShiftLeftDrag(start, end);
+			if(!getBypassRobot()){
+				IndependantLog.debug(debugmsg+"Try to drag by Robot.");
+				translatePoints(we, start, end);
+				Robot.ctrlShiftLeftDrag(start, end);
+				done = true;
+			}
 
 		}catch(Exception e){
 			IndependantLog.warn(debugmsg+"Failed to drag by SAFS Robot: "+ StringUtils.debugmsg(e));
-			throw new SeleniumPlusException("Failed to drag.");
+		}
+
+		if(!done){
+			try{
+				IndependantLog.debug(debugmsg+"Try to drag by Selenium API.");
+				Actions actions = new Actions(lastUsedWD);
+				actions = actions.keyDown(Keys.CONTROL).keyDown(Keys.SHIFT);
+				actions = moveToElement(actions, we, start.x, start.y);
+				actions.clickAndHold().moveByOffset((end.x-start.x), (end.y-start.y)).release().keyUp(Keys.SHIFT).keyUp(Keys.CONTROL).build().perform();
+
+			}catch(Exception e1){
+				IndependantLog.warn(debugmsg+"Failed to drag by Selenium API: "+ StringUtils.debugmsg(e1));
+				throw new SeleniumPlusException("Failed to drag.");
+			}
 		}
 	}
 	/**
@@ -1696,15 +2002,33 @@ public class WDLibrary extends SearchObject {
 	 */
 	public static void shiftLeftDrag(WebElement we, Point start, Point end) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(false);
+		boolean done = false;
 
+		IndependantLog.debug(debugmsg+" drag from "+start+" to "+end+" relative to webelement.");
 		try{
-			IndependantLog.debug(debugmsg+" drag from "+start+" to "+end+" relative to webelement.");
-			translatePoints(we, start, end);
-			Robot.shiftLeftDrag(start, end);
+			if(!getBypassRobot()){
+				IndependantLog.debug(debugmsg+"Try to drag by Robot.");
+				translatePoints(we, start, end);
+				Robot.shiftLeftDrag(start, end);
+				done = true;
+			}
 
 		}catch(Exception e){
 			IndependantLog.warn(debugmsg+"Failed to drag by SAFS Robot: "+ StringUtils.debugmsg(e));
-			throw new SeleniumPlusException("Failed to drag.");
+		}
+
+		if(!done){
+			try{
+				IndependantLog.debug(debugmsg+"Try to drag by Selenium API.");
+				Actions actions = new Actions(lastUsedWD);
+				actions = actions.keyDown(Keys.SHIFT);
+				actions = moveToElement(actions, we, start.x, start.y);
+				actions.clickAndHold().moveByOffset((end.x-start.x), (end.y-start.y)).release().keyUp(Keys.SHIFT).build().perform();
+
+			}catch(Exception e1){
+				IndependantLog.warn(debugmsg+"Failed to drag by Selenium API: "+ StringUtils.debugmsg(e1));
+				throw new SeleniumPlusException("Failed to drag.");
+			}
 		}
 	}
 
@@ -1717,15 +2041,33 @@ public class WDLibrary extends SearchObject {
 	 */
 	public static void rightDrag(WebElement we, Point start, Point end) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(false);
+		boolean done = false;
 
 		try{
-			IndependantLog.debug(debugmsg+" drag from "+start+" to "+end+" relative to webelement.");
-			translatePoints(we, start, end);
-			Robot.rightDrag(start, end);
+			if(!getBypassRobot()){
+				IndependantLog.debug(debugmsg+" drag from "+start+" to "+end+" relative to webelement.");
+				translatePoints(we, start, end);
+				Robot.rightDrag(start, end);
+				done = true;
+			}
 
 		}catch(Exception e){
 			IndependantLog.warn(debugmsg+"Failed to drag by SAFS Robot: "+ StringUtils.debugmsg(e));
-			throw new SeleniumPlusException("Failed to drag.");
+		}
+
+		if(!done){
+			try{
+				IndependantLog.debug(debugmsg+"Try to right drag by Selenium API.");
+				Actions actions = new Actions(lastUsedWD);
+				actions = moveToElement(actions, we, start.x, start.y);
+				actions = seleniumW3CMouseDown(actions, MouseButton.RIGHT);
+				actions = actions.moveByOffset((end.x-start.x), (end.y-start.y));
+				actions = seleniumW3CMouseUp(actions, MouseButton.RIGHT);
+				actions.build().perform();
+			}catch(Exception e1){
+				IndependantLog.warn(debugmsg+"Failed to drag by Selenium API: "+ StringUtils.debugmsg(e1));
+				throw new SeleniumPlusException("Failed to drag.");
+			}
 		}
 	}
 
@@ -1738,26 +2080,210 @@ public class WDLibrary extends SearchObject {
 	 */
 	public static void leftDrag(WebElement we, Point start, Point end) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(false);
+		boolean done = false;
 
+		IndependantLog.debug(debugmsg+" drag from "+start+" to "+end+" relative to webelement.");
 		try{
-			IndependantLog.debug(debugmsg+" drag from "+start+" to "+end+" relative to webelement.");
-			translatePoints(we, start, end);
-			Robot.leftDrag(start, end);
-
+			if(!getBypassRobot()){
+				IndependantLog.debug(debugmsg+"Try to drag by Robot.");
+				translatePoints(we, start, end);
+				Robot.leftDrag(start, end);
+				done = true;
+			}
 		}catch(Exception e){
 			IndependantLog.warn(debugmsg+"Failed to drag by SAFS Robot: "+ StringUtils.debugmsg(e));
-			IndependantLog.debug(debugmsg+"Try to drag by Selenium API.");
-
+			done = false;
+		}
+		if(!done){
 			try{
+				IndependantLog.debug(debugmsg+"Try to drag by Selenium API.");
 				Actions actions = new Actions(lastUsedWD);
-				actions = actions.moveToElement(we, start.x, start.y);
-				actions = actions.clickAndHold().moveByOffset((end.x-start.x), (end.y-start.y)).release();
-				actions.build().perform();
+				actions = moveToElement(actions, we, start.x, start.y);
+				actions.clickAndHold().moveByOffset((end.x-start.x), (end.y-start.y)).release().build().perform();
+
 			}catch(Exception e1){
 				IndependantLog.warn(debugmsg+"Failed to drag by Selenium API: "+ StringUtils.debugmsg(e1));
 				throw new SeleniumPlusException("Failed to drag.");
 			}
 		}
+	}
+
+	/**
+	 * @param fromElem WebElement, from where the drag begins
+	 * @param toElem WebElement, to where the drag stops
+	 * @param offsets String, the offsets relative to 'fromElem' and to 'toElem'<br>
+	 *                        in format x1;y1;x2;y2 or x1,y1,x2,y2 or Coords=x1;y1;x2;y2  or Coords=x1,y1,x2,y2<br>
+	 *                        each offset is in pixel or in percentage, for example 15 or 30%<br>
+	 *                        Example "40, 20, 5%, 5%", "6%, 6%, 21%, 21%, or "40, 25, 30, 45"<br>
+	 * @param dndReleaseDelay int, in milliseconds, the delay before releasing the mouse
+	 * @return Point[], 2 points for the screen location of the from-point and to-point
+	 * @throws SeleniumPlusException
+	 */
+	public static Point[] dragTo(WebElement fromElem, WebElement toElem, String[] offsets, int dndReleaseDelay /* milliseconds*/) throws SeleniumPlusException{
+		String debugmsg = StringUtils.debugmsg(false);
+		boolean done = false;
+
+		if(offsets==null || offsets.length<4){
+			throw new SeleniumPlusException(" Offsets '"+offsets+"' is not valid! The valid examples could be an array like ['20%','10%','%50','%60'], ['30','55','70','80'], or even ['20%','10%','70','80'].");
+		}
+
+		IndependantLog.debug(debugmsg+" drag from ("+offsets[0]+","+offsets[1]+") (relative to webelement "+fromElem+") to ("+offsets[2]+","+offsets[3]+") (relative to webelement "+toElem+").");
+		//calculate the 2 screen locations by adding the offset to fromElement and toElement
+		Point[] points = new Point[2];/* 0:fromPoint, 1:toPoint */
+		points[0] = getElementOffsetScreenLocation(fromElem, offsets[0], offsets[1]);
+		points[1] = getElementOffsetScreenLocation(toElem, offsets[2], offsets[3]);
+
+		try{
+			if(!getBypassRobot()){
+				IndependantLog.debug(debugmsg+"Try to drag by Robot.");
+				Robot.leftDrag(points[0], points[1], dndReleaseDelay);
+				done = true;
+			}
+		}catch(Exception e){
+			IndependantLog.warn(debugmsg+"Failed to drag by SAFS Robot: "+ StringUtils.debugmsg(e));
+			done = false;
+		}
+		if(!done){
+			try{
+				IndependantLog.debug(debugmsg+"Try to drag by Selenium API.");
+
+				Point relatvieStartPoint = StringUtils.convertCoords(Arrays.copyOfRange(offsets, 0, 2), toJavaRectangle(fromElem.getRect()));
+//				Point relatvieEndPoint = StringUtils.convertCoords(Arrays.copyOfRange(offsets, 2, 4), toJavaRectangle(toElem.getRect()));
+
+				//Calculate the offset moving from fromElement to toElement
+				Point offset = new Point(points[1].x-points[0].x, points[1].y-points[0].y);
+
+				Actions actions = new Actions(lastUsedWD);
+				actions = moveToElement(actions, fromElem, relatvieStartPoint.x, relatvieStartPoint.y);
+				actions.clickAndHold();
+				actions.moveByOffset(offset.x, offset.y).pause(dndReleaseDelay);
+				actions.release();
+				actions.build().perform();
+
+//				Actions actions = mouseDrag(points[0], points[1], MouseButton.LEFT, dndReleaseDelay);
+//				actions.build().perform();
+
+			}catch(Exception e1){
+				IndependantLog.warn(debugmsg+"Failed to drag by Selenium API: "+ StringUtils.debugmsg(e1));
+				throw new SeleniumPlusException("Failed to drag.");
+			}
+		}
+
+		return points;
+	}
+
+	public static java.awt.Rectangle toJavaRectangle(org.openqa.selenium.Rectangle rect){
+		java.awt.Rectangle javaRect = new java.awt.Rectangle(rect.x, rect.y, rect.getWidth(), rect.getHeight());
+		return javaRect;
+	}
+
+	/** W3C selenium mouse, be careful, this mouse is a mouse independant from the selenium's 'default mouse',
+	 *  user needs to handle everything including mouse-move, click etc. and it can not be used with the instance of
+	 *  Actions which is using the 'default mouse'.
+	 */
+	private static final PointerInput seleniumMouse = new PointerInput(MOUSE, "selenium mouse in SAFS");
+
+//	/**
+//	 * To make mouse drag correctly, after mouse key is pressed down,
+//	 * the mouse needs to be moved slightly so that the drag action will be triggered.<br>
+//	 * If the drag action cannot be triggered, this field needs to be modified by
+//	 * method {@link #setDragStartPointOffset(int, int)}.
+//	 */
+//	private static Point dragStartPointOffset = new Point(3, 3);
+//	private static Point dragEndPointOffset = new Point(-3, -3);
+//
+//	private static Actions mouseDrag(java.awt.Point start, java.awt.Point end, PointerInput.MouseButton button, int dndReleaseDelay) throws java.awt.AWTException{
+//		Log.info("Selenium mouseDrag from:"+ start +" to:"+ end +" using button mask "+ button.toString());
+//		Actions actions = new Actions(lastUsedWD);
+//		PointerInput mouse = getMouse(actions);
+//		if(mouse==null) mouse = seleniumMouse;
+//		actions.moveByOffset(start.x, start.y);
+//		actions.pause(400);
+//		actions.tick(mouse.createPointerDown(button.asArg()));
+//		actions.pause(400);
+//		actions.moveByOffset(start.x+dragStartPointOffset.x, start.y+dragStartPointOffset.y);
+//		actions.pause(150);
+//		actions.moveByOffset(end.x+dragEndPointOffset.x, end.y+dragEndPointOffset.y);
+//		actions.pause(150);
+//		actions.moveByOffset(end.x, end.y);
+//		actions.pause(dndReleaseDelay);
+//		actions.tick(mouse.createPointerUp(button.asArg()));
+//		return actions;
+//	}
+
+	private static Actions seleniumW3CMouseClick(Actions actions, PointerInput.MouseButton button) {
+
+		PointerInput mouse = getMouse(actions);
+		if(mouse==null) mouse = seleniumMouse;
+
+		actions.pause(100);
+		actions.tick(mouse.createPointerDown(button.asArg()));
+		actions.pause(100);
+		actions.tick(mouse.createPointerUp(button.asArg()));
+		actions.pause(100);
+		return actions;
+	}
+	private static Actions seleniumW3CMouseDown(Actions actions, PointerInput.MouseButton button) {
+		PointerInput mouse = getMouse(actions);
+		if(mouse==null) mouse = seleniumMouse;
+		actions.pause(100);
+		actions.tick(mouse.createPointerDown(button.asArg()));
+		actions.pause(100);
+		return actions;
+	}
+	private static Actions seleniumW3CMouseUp(Actions actions, PointerInput.MouseButton button) {
+		PointerInput mouse = getMouse(actions);
+		if(mouse==null) mouse = seleniumMouse;
+		actions.pause(100);
+		actions.tick(mouse.createPointerUp(button.asArg()));
+		actions.pause(100);
+		return actions;
+	}
+
+	/**
+	 * @param actions Actions
+	 * @return PointerInput, the Mouse (W3C implementation) in Actions
+	 */
+	private static PointerInput getMouse(Actions actions){
+		PointerInput mouse = null;
+		try {
+			Field field = actions.getClass().getDeclaredField("defaultMouse");
+			field.setAccessible(true);
+			Object result = field.get(actions);
+
+			if(result instanceof PointerInput){
+				mouse = (PointerInput) result;
+			}
+		} catch (Exception e) {
+			IndependantLog.error("Met "+e.toString());
+		}
+		return mouse;
+	}
+
+	public final static String BROWSER_DRIVER_IMPLEMENTATION_JSON = "JSON_WIRE_PROTOCOL";
+	public final static String BROWSER_DRIVER_IMPLEMENTATION_W3C  = "W3C_PROTOCOL";
+	public final static String DEFAULT_BROWSER_DRIVER_IMPLEMENTATION = BROWSER_DRIVER_IMPLEMENTATION_JSON;
+	/** If the browser's driver is implemented by W3C protocol */
+	public static boolean isW3Cimplementation = DEFAULT_BROWSER_DRIVER_IMPLEMENTATION.equals(BROWSER_DRIVER_IMPLEMENTATION_W3C);
+
+	/**
+	 * Move to web-element by some offsets.<br>
+	 * <b>NOTE: Normally the offset is calculate from the top-left corner.
+	 *          But with "W3C protocol", the start location becomes the center.
+	 *          To keep the compatibility, user can set {@link #isW3Cimplementation} to true.</b>
+	 */
+	private static Actions moveToElement(Actions actions, WebElement we, int xOffset, int yOffset){
+
+		if(isW3Cimplementation){
+			//with "w3c protocol", the moveToElement() will calculate the offset from the component's center
+			//this is not consistent with the selenium's API specification, we made this fix to get it consistent with selenium's API.
+			int topleftX =  (we.getSize().getWidth()/2) - we.getSize().getWidth();
+			int topleftY = ((we.getSize().getHeight()/2) - we.getSize().getHeight());
+			xOffset += topleftX;
+			yOffset += topleftY;
+		}
+
+		return actions.moveToElement(we, xOffset, yOffset);
 	}
 
 	/**
@@ -1807,19 +2333,31 @@ public class WDLibrary extends SearchObject {
      **/
     public static Point getElementOffsetScreenLocation(WebElement element, String offsetX, String offsetY){
     	String debugmsg = StringUtils.debugmsg(false);
+    	Point screenLoc = null;
+    	Dimension dimemsion = null;
+    	double dx, dy;
 
     	try {
-    		Point screenLoc = WDLibrary.getScreenLocation(element);
-    		Dimension dimemsion = element.getSize();
+    		screenLoc = WDLibrary.getScreenLocation(element);
+    		dimemsion = element.getSize();
 
     		//calc coords according to the offset and element's location and dimension
-    		double dx, dy;
     		dx = ImageUtils.calculateAbsoluteCoordinate(screenLoc.getX(), dimemsion.getWidth(), offsetX);
     		dy = ImageUtils.calculateAbsoluteCoordinate(screenLoc.getY(), dimemsion.getHeight(), offsetY);
 
     		return new Point((int)dx, (int)dy);
     	}catch (Exception e) {
-    		IndependantLog.error(debugmsg +": Exception", e);
+    		IndependantLog.debug(debugmsg +" (offsetX, offsetX)=("+offsetX+","+offsetY+"). Met Exception", e);
+
+    		try{
+    			IndependantLog.debug(debugmsg +" Use the default offset ("+Constants.OFFSET_FIFTY_PERCENT+","+Constants.OFFSET_FIFTY_PERCENT+")");
+        		dx = ImageUtils.calculateAbsoluteCoordinate(screenLoc.getX(), dimemsion.getWidth(), Constants.OFFSET_FIFTY_PERCENT);
+        		dy = ImageUtils.calculateAbsoluteCoordinate(screenLoc.getY(), dimemsion.getHeight(), Constants.OFFSET_FIFTY_PERCENT);
+        		return new Point((int)dx, (int)dy);
+    		}catch(Exception ex){
+    			IndependantLog.error(debugmsg +"Met Exception", e);
+    		}
+
     		return null;
     	}
     }
@@ -1932,7 +2470,7 @@ public class WDLibrary extends SearchObject {
 	 * Expects System Properties 'selenium.host' and 'selenium.port' to be set.<br>
 	 * Otherwise, defaults to 'localhost' on port '4444'.
 	 * <p>
-	 * @param BrowserName String, Browser name such as InternetExplorer, Chrome and FireFox.
+	 * @param browserName String, Browser name such as InternetExplorer, Chrome and FireFox.
 	 * @param Url String, Url including HTTP protocol prefix.
 	 * @param Id String, Id or Title of the Browser in case of two instances needs.
 	 * @param timeout String, Implicit time out to be waited before throw exception.
@@ -1940,7 +2478,7 @@ public class WDLibrary extends SearchObject {
 	 * @param extraParameters Map<String,Object>, can be used to pass more browser parameters, such as a firefox profile to use.
 	 * @throws SeleniumPlusException
 	 */
-	public static void startBrowser(String BrowserName, String Url, String Id, int timeout, boolean isRemote, Map<String, Object> extraParameters) throws SeleniumPlusException{
+	public static void startBrowser(String browserName, String Url, String Id, int timeout, boolean isRemote, Map<String, Object> extraParameters) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(false);
 		//previousDriver is the possible WebDriver with the same ID stored in the Cache.
 		WebDriver previousDriver = null;
@@ -1953,12 +2491,12 @@ public class WDLibrary extends SearchObject {
 
 		IndependantLog.info(debugmsg+" VM parameters:\nhost="+host+
 				                                    "\nport="+port+
-				                                    "\n=connectionTestCommand"+connectionTestCommand+
-				                                    "\n=connectionTestMaxDuration"+connectionTestMaxDuration+
-				                                    "\n=connectionTestMaxTry"+connectionTestMaxTry);
+				                                    "\nconnectionTestCommand="+connectionTestCommand+
+				                                    "\nconnectionTestMaxDuration="+connectionTestMaxDuration+
+				                                    "\nconnectionTestMaxTry="+connectionTestMaxTry);
 
-		if(!StringUtils.isValid(BrowserName)){
-			BrowserName = getSystemProperty(SelectBrowser.SYSTEM_PROPERTY_BROWSER_NAME, SelectBrowser.BROWSER_NAME_FIREFOX);
+		if(!StringUtils.isValid(browserName)){
+			browserName = getSystemProperty(SelectBrowser.SYSTEM_PROPERTY_BROWSER_NAME, SelectBrowser.BROWSER_NAME_FIREFOX);
 		}
 		if(!isValidBrowserID(Id)){
 			Id = String.valueOf("".hashCode()+"_"+System.currentTimeMillis());
@@ -1967,7 +2505,7 @@ public class WDLibrary extends SearchObject {
 
 		if (!isRemote) {
 			IndependantLog.warn(debugmsg+"attempting to start a local (not remote) browser instance...");
-			previousDriver = addWebDriver(Id,SelectBrowser.getBrowserInstance(BrowserName, extraParameters));
+			previousDriver = addWebDriver(Id,SelectBrowser.getBrowserInstance(browserName, extraParameters));
 			lastUsedWD.manage().timeouts().implicitlyWait(timeout, TimeUnit.SECONDS);
 			lastUsedWD.manage().window().setSize(new Dimension(1024,768)); // default window size
 			if(Url != null && Url.length()> 0) lastUsedWD.get(Url);
@@ -1976,15 +2514,14 @@ public class WDLibrary extends SearchObject {
 			IndependantLog.warn(debugmsg+"attempting to start new session on remote server");
 			try {
 				URL seleniumHub = new URL("http://" + host + ":" + port +"/wd/hub");
-				DesiredCapabilities capabilities = SelectBrowser.getDesiredCapabilities(BrowserName, extraParameters);
+				DesiredCapabilities capabilities = SelectBrowser.getDesiredCapabilities(browserName, extraParameters);
 				capabilities.setJavascriptEnabled(true);
 				capabilities.setCapability(CapabilityType.TAKES_SCREENSHOT, true);
 				capabilities.setCapability(RemoteDriver.CAPABILITY_ID, Id); // custom id for session tracking
 				capabilities.setCapability(RemoteDriver.CAPABILITY_RECONNECT, false); // custom id
 				capabilities.setCapability(RemoteDriver.CAPABILITY_REMOTESERVER, host); // custom id
-				//capabilities.setBrowserName(BrowserName); now it set from capabilities
 
-				RemoteDriver remotedriver = new RemoteDriver(seleniumHub,capabilities);
+				RemoteDriver remotedriver = RemoteDriver.instance(seleniumHub,capabilities);
 
 				//Re-create RemoteWebDriver if the communication between WebDriver and browserDriver is not good
 				int triedTimes = 0;
@@ -2003,6 +2540,9 @@ public class WDLibrary extends SearchObject {
 				lastUsedWD.manage().timeouts().implicitlyWait(timeout, TimeUnit.SECONDS);
 
 				try{
+					//load ModHeader's profile, Modheader is used to modify the http request/response heder's content
+					loadModHeaderProfile(lastUsedWD, capabilities.getCapability(SelectBrowser.KEY_CHROME_EXTENSION_MODHEADER_PROFILE));
+
 					//setSize() is not supported by "chromedriver" for "android chrome"
 					lastUsedWD.manage().window().setSize(new Dimension(1024,768)); // default window size
 				}catch(Exception e){
@@ -2020,6 +2560,15 @@ public class WDLibrary extends SearchObject {
 						IndependantLog.warn(debugmsg+"Caused By: "+ c.getClass().getName()+", "+ c.getMessage());
 					}
 				}while(c != null);
+
+				if(t instanceof SessionNotCreatedException){
+					//TODO Update the browser-driver to the latest matched one, what is the trigger for updating?
+					IndependantLog.debug(debugmsg+" Tried to update the browser driver.");
+					try{ AbstractDriverUpdater.instance(browserName).update();} catch(Exception e){
+						IndependantLog.warn(debugmsg+" Failed to update driver for "+browserName+", due to "+e.getMessage());
+					}
+				}
+
 				throw new SeleniumPlusException(t);
 			}
 		}
@@ -2031,6 +2580,241 @@ public class WDLibrary extends SearchObject {
 		}
 		//Initialize javascript's variables.
 		js_initialize();
+	}
+
+	/**
+	 * Prerequisite: the extension "ModHeader" should have been installed into the chrome browser.<br>
+	 *
+	 * This method is going to load ModHeader's profile.<br>
+	 * Currently it opens the ModHeader's setting page to load the profile.<br>
+	 * In the furture we probably find a better way to set profile.<br>
+	 *
+	 * @param driver WebDriver
+	 * @param modheaderProfile String, the "ModHeader" profile. It can be
+	 *                         <ol>
+	 *                         <li>a json file containing the profile, such as "C:\\SeleniumPlus\\extra\\ModHeader.json"
+	 *                         <li>a json string representing the profile
+	 *                         <li>an object representing the profile, it will be converted to "json" string.
+	 *                         <li>an "url" representing the profile, such as "https://bewisse.com/modheader/p/#NobwRAhgDlCmB2ATAsge0bMAuAZhANgM6wA0YARhAMYDWA5gE6oCuSAwqvqg9mAMQA2cgFYAzMIBMYMjgCW+AC6wGhbMAC6ZABawIGFWvBVUAWxMIFvaWAQRy+WImwKGzUmHgRzvAB4BaQghCPygmKAg6CCU-WScyADcCN15EUwhZeGZiHgBfTTAtWNgOMwtnV3cGWEIoAAldfVUsDTJCLW4FABVZBQdeAEZrJR8FDi4eLH4caZmhnr7JgAUmOQcAAkGyZgZ8ACVYKHxqWHN4BSaNPKA"
+	 *                         </ol>
+	 * @throws SeleniumPlusException
+	 */
+	public static void loadModHeaderProfile(WebDriver driver, Object modheaderProfile) throws SeleniumPlusException{
+
+		String profile = null;
+		String debugmsg = StringUtils.debugmsg(false);
+
+		if(modheaderProfile!=null){
+			IndependantLog.debug(debugmsg+"loading chrome extension ModHeader's profile "+modheaderProfile);
+			if(!(modheaderProfile instanceof String)){
+				profile = Utils.toJsonString(modheaderProfile);
+			}else{
+				profile = modheaderProfile.toString();
+			}
+		}
+
+		if(profile==null){
+			IndependantLog.warn(debugmsg+"the profile is null, cannot load it!");
+			return;
+		}
+
+		try{
+			// invoke the extensions popup settings page
+			driver.get("chrome-extension://idgpnmonknjnojddfkpgkljpfnnfcklj/popup.html");
+
+			//wait for the "ModHeader" settings page
+			StringUtils.sleep(5000);
+
+			//click the "..." button to show the pupup menu
+			driver.findElement(By.xpath("//button[@title='More']")).click();
+			StringUtils.sleep(3000);
+
+			//click the "import profile" menuitem
+			driver.findElement(By.xpath("//*[text()[contains(.,'Import profile')]]")).click();
+			StringUtils.sleep(3000);
+
+			if(new File(profile).exists()){
+				//click the button "load from file", this will bring a Windows "Open File Dialog"
+				driver.findElement(By.xpath("//*[text()[contains(.,'Load from file')]]")).click();
+				StringUtils.sleep(3000);
+
+				//"load from file" will bring a Windows "Open File Dialog", we have to use Robot to interact with it
+				//input the profile json file
+				RBT.inputChars(profile);
+				StringUtils.sleep(3000);
+
+				RBT.inputKeys("{Enter}");
+				StringUtils.sleep(3000);
+			}else{
+				//we suppose this profile is URL or a JSON string, input the profile json/url string into the textarea
+				driver.findElement(By.xpath("//*[@id='dialog-content']/textarea")).sendKeys(profile);
+				StringUtils.sleep(3000);
+
+				//selenium cannot find the "Import" button by text :-(, we have to find it by another xpath
+//				String importBthXpath = "//*[text()[contains(.,'Import')]]";
+//				String importBthXpath = "//button[text()[contains(.,'Import')]]";
+//				String importBthXpath = "//button[contains(text(),'Import')]";
+				String[] importBthXpaths = {"//div[@class='mdc-dialog mdc-dialog--open']//div[@class='mdc-dialog__actions']/button[2]",
+						                    "/html/body/div[2]/div[1]/div[3]/div[1]/div/div[2]/button[2]"};
+				WebElement importBth = null;
+
+				for(String importBthXpath: importBthXpaths){
+					try{
+						importBth = driver.findElement(By.xpath(importBthXpath));
+						if(importBth!=null) break;
+					}catch(NoSuchElementException nse){}
+				}
+
+				if(importBth!=null){
+					importBth.click();
+					IndependantLog.debug(debugmsg+" click button to import profile.");
+				}else{
+					//If the focus is not on page, the Robot keys will fail.
+					RBT.inputKeys("{Tab}");
+					RBT.inputKeys("{Tab}");
+					RBT.inputKeys("{Enter}");
+					IndependantLog.debug(debugmsg+" use robot keys to import profile.");
+				}
+
+				StringUtils.sleep(3000);
+			}
+
+			//This is important step: refresh to get the profile loaded.
+			driver.navigate().refresh();
+
+		}catch(Exception e){
+			IndependantLog.error(debugmsg+" met exception "+e.toString());
+			if(e instanceof SeleniumPlusException) throw e;
+			throw new SeleniumPlusException(e);
+		}
+	}
+
+	/**
+	 * <b>NOTE: This only works for Chrome browser started with option 'setNetworkConditions'.</b>
+	 * @return boolean true if the current 'network condition' has been removed.
+	 */
+	public static boolean deleteNetworkConditions(){
+		WebDriver webdriver = getWebDriver();
+		RemoteDriver remotedriver = null;
+
+		if(webdriver instanceof RemoteDriver){
+			remotedriver = ((RemoteDriver) webdriver);
+			CommandExecutor executor = remotedriver.getCommandExecutor();
+
+			try {
+				Response response = executor.execute(new Command(remotedriver.getSessionId(),"deleteNetworkConditions", ImmutableMap.of()));
+				IndependantLog.debug("deleteNetworkConditions finished with response: "+response.toString());
+				return response.getStatus()==0;
+			} catch (Exception e) {
+				IndependantLog.error("Met "+e.toString());
+			}
+		}else{
+			IndependantLog.error("The current webdriver is not RemoteDriver, cannot proceed 'deleteNetworkConditions'.");
+		}
+		return false;
+	}
+
+	/**
+	 * <b>NOTE: This only works for Chrome browser started with option 'setNetworkConditions'.</b>
+	 * @return Object, the current network conditions, it is normally a JSON string, such as <b>{"offline":false, "latency":5, "download_throughput":5000 , "upload_throughput":5000}</b>.<br>
+	 *                 it will be null if no 'network conditions' is set.
+	 */
+	public static Object getNetworkConditions(){
+		WebDriver webdriver = getWebDriver();
+		RemoteDriver remotedriver = null;
+
+		if(webdriver instanceof RemoteDriver){
+			remotedriver = ((RemoteDriver) webdriver);
+			CommandExecutor executor = remotedriver.getCommandExecutor();
+
+			try {
+				Response response = executor.execute(new Command(remotedriver.getSessionId(),"getNetworkConditions", ImmutableMap.of()));
+				IndependantLog.debug("getNetworkConditions finished with response: "+response.toString());
+				if(response.getStatus()==0){
+					return response.getValue();
+				}else{
+					IndependantLog.debug("getNetworkConditions failed with status: "+response.getStatus());
+				}
+			} catch (Exception e) {
+				IndependantLog.error("Met "+e.toString());
+			}
+		}else{
+			IndependantLog.error("The current webdriver is not RemoteDriver, cannot proceed 'getNetworkConditions'.");
+		}
+		return null;
+	}
+
+	/**
+	 * <b>NOTE: This only works for Chrome browser started with option 'setNetworkConditions'.</b>
+	 * @param networkConditions	String, JSON string contains the 'network conditions' to set.<br>
+	 *                                  This JSON can contain keys of "offline"(boolean), "latency"(integer ms), "download_throughput"(integer bps), "upload_throughput"(integer bps).
+	 *                                  such as <b>{"offline":false, "latency":5, "download_throughput":5000 , "upload_throughput":5000}</b>
+	 * @return boolean true if 'network conditions' have been set successfully.
+	 */
+	public static boolean setNetworkConditions(String networkConditions){
+		return setNetworkConditions(getWebDriver(), networkConditions);
+	}
+
+	/**
+	 * <b>NOTE: This only works for Chrome browser started with option 'setNetworkConditions'.</b>
+	 * @param webdriver	WebDriver, used to execute this command.<br>
+	 * @param networkConditions	String, JSON string contains the 'network conditions' to set.<br>
+	 *                                  This JSON can contain keys of "offline"(boolean), "latency"(integer ms), "download_throughput"(integer bps), "upload_throughput"(integer bps).
+	 *                                  such as <b>{"offline":false, "latency":5, "download_throughput":5000 , "upload_throughput":5000}</b>
+	 * @return boolean true if 'network conditions' have been set successfully.
+	 */
+	public static boolean setNetworkConditions(WebDriver webdriver, String networkConditions){
+		try {
+			Map<?, ?> map = Utils.fromJsonString(networkConditions, Map.class);
+			return setNetworkConditions(webdriver, map);
+		} catch (Exception e) {
+			IndependantLog.error("Met "+e.toString());
+		}
+		return false;
+	}
+
+	/**
+	 * <b>NOTE: This only works for Chrome browser started with option 'setNetworkConditions'.</b>
+	 * @param networkConditions	Map, contains the 'network conditions' to set.<br>
+	 *                               This map can contain keys of "offline"(boolean), "latency"(integer ms), "download_throughput"(integer bps), "upload_throughput"(integer bps).
+	 * @return boolean true if 'network conditions' have been set successfully.
+	 */
+	public static boolean setNetworkConditions(Map<?, ?> networkConditions){
+		return setNetworkConditions(getWebDriver(), networkConditions);
+	}
+
+	/**
+	 * <b>NOTE: This only works for Chrome browser started with option 'setNetworkConditions'.</b>
+	 * @param webdriver	WebDriver, used to execute this command.<br>
+	 * @param networkConditions	Map, contains the 'network conditions' to set.<br>
+	 *                               This map can contain keys of "offline"(boolean), "latency"(integer ms), "download_throughput"(integer bps), "upload_throughput"(integer bps).
+	 * @return boolean true if 'network conditions' have been set successfully.
+	 */
+	private static boolean setNetworkConditions(WebDriver webdriver, Map<?, ?> networkConditions){
+		RemoteDriver remotedriver = null;
+
+		if(webdriver instanceof RemoteDriver){
+			remotedriver = ((RemoteDriver) webdriver);
+			CommandExecutor executor = remotedriver.getCommandExecutor();
+
+			try {
+				IndependantLog.debug("setNetworkConditions "+networkConditions);
+				Command cmdSetNetworkConditions = new Command(remotedriver.getSessionId(), ChromeHttpCommandExecutor.SET_NETWORK_CONDITIONS,
+						ImmutableMap.of(ChromeHttpCommandExecutor.URI_NETWORK_CONDITIONS, ImmutableMap.copyOf(networkConditions)));
+				Response response = executor.execute(cmdSetNetworkConditions);
+				IndependantLog.debug("setNetworkConditions finished with response: "+response.toString());
+				if(response.getStatus()==0){
+					return true;
+				}else{
+					IndependantLog.debug("setNetworkConditions failed with status: "+response.getStatus());
+				}
+			} catch (Exception e) {
+				IndependantLog.error("Met "+e.toString());
+			}
+		}else{
+			IndependantLog.error("The current webdriver is not RemoteDriver, cannot proceed 'setNetworkConditions'.");
+		}
+		return false;
 	}
 
 	/**
@@ -2070,13 +2854,63 @@ public class WDLibrary extends SearchObject {
 	}
 
 	/**
-	 * Kill the process 'chromedriver.exe'.
+	 * Clean up the SeleniumSever and browser-drivers left behind the SeleniumPlus testing.
+	 *
+	 * @param host String, the name of the machine on which the process will be killed
+	 * @throws SAFSException
+	 */
+	public static void stopSeleniumServer(String host) throws SAFSException {
+
+		String javaProcess = "java";
+		if(Console.isWindowsOS()) javaProcess += ".exe";
+		killProcess(host, javaProcess, "org.safs.selenium.util.SeleniumServerRunner");//WebDriverGUIUtilities.startRemoteServer(String projectdir, String... extraParams)
+		String notJUnit = "JUnitTestRunner"; // don't kill JUnit process
+		killProcess(host, javaProcess, "selenium-server-standalone", notJUnit);//selenium-server-standalone-xxx.jar
+
+		if(Console.isWindowsOS()){
+			killProcess(host, "cmd.exe", File.separator+"extra"+File.separator+"RemoteServer.bat");
+		}else if(Console.isUnixOS() || Console.isMacOS()){
+			killProcess(host, "bash", File.separator+"extra"+File.separator+"RemoteServer.sh");
+		}
+
+		killChromeDriver(host);
+		killIEDriverServer(host);
+		killMicrosoftWebDriver(host);
+		killGeckoDriver(host);
+	}
+
+	/**
+	 * Kill the process 'geckodriver.exe/geckodriver_64.exe' on windows, or "geckodriver/geckodriver_64" on linux.
+	 * @param host String, the name of the machine on which the process 'geckodriver.exe' will be killed.
+	 * @return List<ProcessInfo>, a list containing the killed process's id and kill-execution-return-code.
+	 * @throws SAFSException
+	 */
+	public static List<ProcessInfo> killGeckoDriver(String host) throws SAFSException{
+		//kill both "geckodriver" and "geckodriver_64" processes, we don't know 32 or 64 bit driver is running.
+		List<ProcessInfo> killedProcesses = new ArrayList<ProcessInfo>();
+		String process = "geckodriver";
+		if(Console.isWindowsOS()) process += ".exe";
+		killedProcesses.addAll(killExtraProcess(host, process));
+
+		if(Console.is64BitOS()){
+			process = "geckodriver_64";
+			if(Console.isWindowsOS()) process += ".exe";
+			killedProcesses.addAll(killExtraProcess(host, process));
+		}
+
+		return killedProcesses;
+	}
+
+	/**
+	 * Kill the process 'chromedriver.exe' on windows, or "chromedrver" on linux.
 	 * @param host String, the name of the machine on which the process 'chromedriver.exe' will be killed.
 	 * @return List<ProcessInfo>, a list containing the killed process's id and kill-execution-return-code.
 	 * @throws SAFSException
 	 */
 	public static List<ProcessInfo> killChromeDriver(String host) throws SAFSException{
-		return killExtraProcess(host, "chromedriver.exe");
+		String process = "chromedriver";
+		if(Console.isWindowsOS()) process += ".exe";
+		return killExtraProcess(host, process);
 	}
 
 	/**
@@ -2090,22 +2924,147 @@ public class WDLibrary extends SearchObject {
 	}
 
 	/**
+	 * Kill the process 'MicrosoftWebDriver.exe'.
+	 * @param host String, the name of the machine on which the process 'MicrosoftWebDriver.exe' will be killed.
+	 * @return List<ProcessInfo>, a list containing the killed process's id and kill-execution-return-code.
+	 * @throws SAFSException
+	 */
+	public static List<ProcessInfo> killMicrosoftWebDriver(String host) throws SAFSException{
+		return killExtraProcess(host, "MicrosoftWebDriver.exe");
+	}
+
+	/**
+	 * Kill the process 'msedgedriver.exe'.
+	 * @param host String, the name of the machine on which the process 'msedgedriver.exe' will be killed.
+	 * @return List<ProcessInfo>, a list containing the killed process's id and kill-execution-return-code.
+	 * @throws SAFSException
+	 */
+	public static List<ProcessInfo> killMSEdgeDriver(String host) throws SAFSException{
+		return killExtraProcess(host, "msedgedriver.exe");
+	}
+
+	public static List<ProcessInfo> killBrowserDriver(String host, String browserName) throws SAFSException{
+		List<ProcessInfo> processList = null;
+		if(SelectBrowser.BROWSER_NAME_CHROME.equalsIgnoreCase(browserName)){
+			processList = killChromeDriver(host);
+		}else if(SelectBrowser.BROWSER_NAME_FIREFOX.equalsIgnoreCase(browserName)){
+			processList = killGeckoDriver(host);
+		}else if(SelectBrowser.BROWSER_NAME_IE.equalsIgnoreCase(browserName)){
+			processList = killIEDriverServer(host);
+		}else if(SelectBrowser.BROWSER_NAME_EDGE.equalsIgnoreCase(browserName)){
+			processList = killMicrosoftWebDriver(host);
+		}else if(SelectBrowser.BROWSER_NAME_CHROMIUM_EDGE.equalsIgnoreCase(browserName)){
+			processList = killMSEdgeDriver(host);
+		}else{
+			IndependantLog.warn(StringUtils.debugmsg(false)+"Not implemented for browser '"+browserName+"'.");
+		}
+
+		return processList;
+	}
+
+	/**
 	 * Kill the process launched from executables located in %SAFSDIR%\samples\Selenium2.0\extra\ or %SELENIUM_PLUS%\extra\
 	 * @param host String, the name of machine on which the process will be killed.
 	 * @param processName String, the name of process to kill. like chromedriver.exe, IEDriverServer.exe etc.
 	 * @return List<ProcessInfo>, a list containing the killed process's id and kill-execution-return-code.
 	 * @throws SAFSException
 	 */
-	private static List<ProcessInfo> killExtraProcess(String host, String processName) throws SAFSException{
+	public static List<ProcessInfo> killExtraProcess(String host, String processName) throws SAFSException{
 		if(!StringUtils.isValid(processName)){
 			throw new SAFSParamException("The value of parameter 'processName' is NOT valid: "+processName);
 		}
 		IndependantLog.debug("WDLibrary.killExtraProcess(): killing process '"+processName+"' on machine '"+host+"'.");
 
-		//wmic process where " commandline like '%d:\\seleniumplus\\extra\\chromedriver.exe%' and name = 'chromedriver.exe' "
-		String wmiSearchCondition = GenericProcessMonitor.wqlCondition("commandline", "\\extra\\"+processName, true, false);
-		wmiSearchCondition += " and "+ GenericProcessMonitor.wqlCondition("name", processName, false, false);
-		WQLSearchCondition condition = new WQLSearchCondition(wmiSearchCondition);
+		String searchCondition = null;
+		SearchCondition condition = null;
+		if(Console.isWindowsOS()){
+			//wmic process where " commandline like '%d:\\seleniumplus\\extra\\chromedriver.exe%' and name = 'chromedriver.exe' "
+			searchCondition = GenericProcessMonitor.wqlCondition("commandline", File.separator+"extra"+File.separator+processName, true, false);
+			searchCondition += " and "+ GenericProcessMonitor.wqlCondition("name", processName, false, false);
+			condition = new WQLSearchCondition(searchCondition);
+		}else if(Console.isUnixOS()){
+			//we use unix grep command to search process
+			//-f                   full-format, including command lines
+			//-C <command>         command name
+			searchCondition = " ps -f -C "+processName;
+			//the first line is "UID        PID  PPID  C STIME TTY          TIME CMD"
+			//We use the 'tail' command to remove the first heading line so that only process list is left
+			searchCondition += " | tail -n +2 ";
+			//-i, --ignore-case         ignore case distinctions
+			searchCondition += " | grep -i "+File.separator+"extra"+File.separator+processName;
+			//Finally, use the 'awk' to get the process id list, the second field is the 'PID'
+			searchCondition += " | awk '{print $2}' ";
+
+			//"ps -f -C command | tail -n +2 | grep -i commandline | grep -v notCommandline | awk '{print $2}'"
+			condition = new UnixProcessSearchCondition(searchCondition);
+		}else{
+			throw new SAFSException(Console.getOsFamilyName() +" has NOT been supported yet.");
+		}
+
+		return GenericProcessMonitor.shutdownProcess(host, condition);
+	}
+
+	/**
+	 * Kill the process according to the process name and partial command line.
+	 * @param host String, the name of machine on which the process will be killed.
+	 * @param processName String, the name of process to kill. like chromedriver.exe, IEDriverServer.exe, java.exe etc.
+	 * @param commandline String, the partial commandline of the process to be killed.
+	 * @return List<ProcessInfo>, a list containing the killed process's id and kill-execution-return-code.
+	 * @throws SAFSException
+	 */
+	public static List<ProcessInfo> killProcess(String host, String processName, String commandline) throws SAFSException{
+		return killProcess(host, processName, commandline, null);
+	}
+
+	/**
+	 * Kill the process according to the process name and partial command line.
+	 * @param host String, the name of machine on which the process will be killed.
+	 * @param processName String, the name of process to kill. like chromedriver.exe, IEDriverServer.exe, java.exe etc.
+	 * @param commandline String, the partial commandline of the process to be killed.
+	 * @param notCommandline String, the partial commandline of the process NOT to be killed.
+	 * @return List<ProcessInfo>, a list containing the killed process's id and kill-execution-return-code.
+	 * @throws SAFSException
+	 */
+	public static List<ProcessInfo> killProcess(String host, String processName, String commandline, String notCommandline) throws SAFSException{
+		if(!StringUtils.isValid(processName)){
+			throw new SAFSParamException("The value of parameter 'processName' is NOT valid: "+processName);
+		}
+		IndependantLog.debug("WDLibrary.killProcess(): killing process '"+processName+"' containing commandline '"+commandline+"' on machine '"+host+"'.");
+
+		SearchCondition condition = null;
+		String searchCondition = null;
+		if(Console.isWindowsOS()){
+			searchCondition = GenericProcessMonitor.wqlCondition("commandline", commandline, true, false);
+			if (notCommandline != null) {
+				searchCondition += " and not "+ GenericProcessMonitor.wqlCondition("commandline", notCommandline, true, false);
+			}
+			searchCondition += " and "+ GenericProcessMonitor.wqlCondition("name", processName, false, false);
+			condition = new WQLSearchCondition(searchCondition);
+
+		}else if(Console.isUnixOS()){
+			//we use unix grep command to search process
+			//-f                   full-format, including command lines
+			//-C <command>         command name
+			searchCondition = " ps -f -C "+processName;
+			//the first line is "UID        PID  PPID  C STIME TTY          TIME CMD"
+			//We use the 'tail' command to remove the first heading line so that only process list is left
+			searchCondition += " | tail -n +2 ";
+			//-i, --ignore-case         ignore case distinctions
+			searchCondition += " | grep -i "+commandline;
+			//-v, --invert-match        select non-matching lines
+			if (notCommandline != null) {
+				searchCondition += " | grep -v "+notCommandline;
+			}
+			//Finally, use the 'awk' to get the process id list
+			searchCondition += " | awk '{print $2}' ";
+
+			//"ps -f -C command | tail -n +2 | grep -i commandline | grep -v notCommandline | awk '{print $2}'"
+			condition = new UnixProcessSearchCondition(searchCondition);
+		}else{
+			throw new SAFSException(Console.getOsFamilyName() +" has NOT been supported yet.");
+		}
+
+		IndependantLog.debug("WDLibrary.killProcess(): searchCondition="+condition);
 
 		return GenericProcessMonitor.shutdownProcess(host, condition);
 	}
@@ -2181,26 +3140,18 @@ public class WDLibrary extends SearchObject {
 
 	/**
 	 * Try to show the webelement on the browser's page.<br>
-	 * @param element WebElement, the webelement to show.
-	 *
-	 * @return boolean, true if succeed
-	 */
-	public static boolean showOnPage(WebElement element){
-		return showOnPage(element, new String[0]);
-	}
-	/**
-	 * Try to show the webelement on the browser's page.<br>
-	 * First, try to see if the web-element is already shown on page, if not shown on the page<br>
-	 * then it will try to move the web-element to show it on page.<br>
-	 * Finally, if the passed in parameter verify is true, it will return true only if the element
-	 * is shown on the page;<br>
-	 * if the passed in parameter verify is false, it will always return true.<br>
+	 * Within this method, we try several ways to scroll the element into view:<br>
+	 * If the parameter 'verify' is true then we will stop try other ways if the element is already shown on the page.<br>
+	 * Else if 'verify' parameter is false then we will try all ways to show the element: our isShowOnPage() is not so reliable all the time.<br>
 	 * @param element WebElement, the webelement to show.
 	 * @param params optional<ul>
-	 * <b>optionals[0] verify</b> boolean, verify that the component is shown on page. The default value is false.<br>
+	 * <b>optionals[0] verify</b> boolean, verify if the component is shown on page. The default value is true.<br>
+	 * <b>optionals[1] refresh</b> boolean, if the element will be refreshed after scrolling.
+	 *                                      Normally we should refresh the component so that selenium API will return correct coordinates of the component.
+	 *                                      But refresh will cost a lot of time and it will slow down the whole test, so we will not refresh the component by default.<br>
 	 * </ul>
 	 *
-	 * @return boolean, true if succeed
+	 * @return boolean, true if the element has been shown on the page. If the passed in parameter 'verify' is false, it will always return true.
 	 *
 	 * @history
 	 * <br> May 18, 2015	Lei Wang	Get refreshed WebElement after moving it on the page.
@@ -2208,36 +3159,50 @@ public class WDLibrary extends SearchObject {
 	public static boolean showOnPage(WebElement element, String... optional){
 		String debugmsg = StringUtils.debugmsg(false);
 
-		if(isShowOnPage(element)) return true;
-
-		boolean verify = false;
-		if(optional!=null && optional.length>0){
-			verify = StringUtilities.convertBool(optional[0]);
+		boolean verify = true;
+		boolean refresh = false;
+		if(optional!=null){
+			if(optional.length>0 && StringUtils.isValid(optional[0])) verify = StringUtilities.convertBool(optional[0]);
+			if(optional.length>1 && StringUtils.isValid(optional[1])) refresh = StringUtilities.convertBool(optional[1]);
 		}
+
+		if(verify && isShowOnPage(element)) return true;
 
 		try {
 			IndependantLog.debug(debugmsg+"make element visible in brower viewport.");
 			Coordinates coordinate = ((Locatable) element).getCoordinates();
 			coordinate.inViewPort();
 			//after inViewPort(), the real element may move, but WebElement.getLocation() may still return the old value
-			if(verify) {
+			if(refresh) {
 				IndependantLog.debug(debugmsg+"refreshing element reference for verification.");
 				element = CFComponent.refresh(element);
 			}
-			if(isShowOnPage(element)) return true;
+			if(verify && isShowOnPage(element)) return true;
 		} catch (Exception e) {
 			IndependantLog.warn(debugmsg+"Fail to show webelement in browser's viewport, due to "+StringUtils.debugmsg(e));
+		}
+
+		try{
+			//Moves the mouse to the middle of the element. The element is scrolled into view and its location is calculated using getBoundingClientRect.
+			new Actions(WDLibrary.getWebDriver()).moveToElement(element).perform();
+			if(refresh) {
+				IndependantLog.debug(debugmsg+"refreshing element reference for verification.");
+				element = CFComponent.refresh(element);
+			}
+			if(verify && isShowOnPage(element)) return true;
+		}catch(Throwable t){
+			IndependantLog.warn("'moveToElement' action failure caused by "+ t.getClass().getName());
 		}
 
 		try {
 			IndependantLog.debug(debugmsg+"scroll browser to the top-left corner of this component.");
 			org.openqa.selenium.Point compLoc = element.getLocation();
 			WDLibrary.scrollBrowserWindowTo(compLoc.x, compLoc.y, element);
-			if(verify) {
+			if(refresh) {
 				IndependantLog.debug(debugmsg+"refreshing element reference again for verification.");
 				element = CFComponent.refresh(element);
 			}
-			if(isShowOnPage(element)) return true;
+			if(verify && isShowOnPage(element)) return true;
 		} catch (Exception e) {
 			IndependantLog.warn(debugmsg+"Fail to scroll browser to the top-left corner of webelement, due to "+StringUtils.debugmsg(e));
 		}
@@ -2245,11 +3210,11 @@ public class WDLibrary extends SearchObject {
 		try {
 			IndependantLog.debug(debugmsg+"align the top this component to top of browser's viewport.");
 			WDLibrary.alignToTop(element);
-			if(verify) {
+			if(refresh) {
 				IndependantLog.debug(debugmsg+"refreshing element reference yet again for verification.");
 				element = CFComponent.refresh(element);
 			}
-			if(isShowOnPage(element)) return true;
+			if(verify && isShowOnPage(element)) return true;
 		} catch (Exception e) {
 			IndependantLog.warn(debugmsg+"Fail to align top of webelement to browser-viewport-top, due to "+StringUtils.debugmsg(e));
 		}
@@ -2291,15 +3256,15 @@ public class WDLibrary extends SearchObject {
 			org.openqa.selenium.Point elementLTLoc = element.getLocation();
 			Dimension elementD = element.getSize();
 
-			int browserXOffset = (int) WDLibrary.lastBrowserWindow.getPageXOffset();
-			int browserYOffset = (int) WDLibrary.lastBrowserWindow.getPageYOffset();
+			int browserXOffset = (int) getLastBrowserWindow().getPageXOffset();
+			int browserYOffset = (int) getLastBrowserWindow().getPageYOffset();
 			//move the location according to the page-offset, get the location relative to the page
 			elementLTLoc = elementLTLoc.moveBy(-browserXOffset, -browserYOffset);
 			org.openqa.selenium.Point elementBRLoc = elementLTLoc.moveBy(elementD.width, elementD.height);
 
 			//Get the bounds of the browser's page
-			int browserClientW = (int) WDLibrary.lastBrowserWindow.getClientWidth();
-			int browserClientH = (int) WDLibrary.lastBrowserWindow.getClientHeight();
+			int browserClientW = (int) getLastBrowserWindow().getClientWidth();
+			int browserClientH = (int) getLastBrowserWindow().getClientHeight();
 			Dimension browserPageBounds = new Dimension(browserClientW, browserClientH);
 
 			IndependantLog.debug(debugmsg+" offset="+offset+"; element dimension="+elementD+"; ");
@@ -2312,11 +3277,15 @@ public class WDLibrary extends SearchObject {
 			}else{
 				//if Left-Top and Bottom-Right is in the browser, the element is fully shown
 				IndependantLog.debug(debugmsg+"check if 'element Top Left Corner'="+elementLTLoc+" and 'Bottom Right Corner'="+elementBRLoc+" are both in 'browser window dimension'="+browserPageBounds+"; ");
-				isShowOnPage = isLocationInBounds(elementLTLoc, browserPageBounds) && isPointInBounds(elementBRLoc, browserPageBounds);
+				isShowOnPage = isTopLeftInBounds(elementLTLoc, browserPageBounds) && isBottomRightInBounds(elementBRLoc, browserPageBounds);
 			}
 
 		}catch(Exception e){
 			IndependantLog.error(debugmsg+"Fail due to "+StringUtils.debugmsg(e));
+			if(e instanceof StaleElementReferenceException){
+				//If we met this stale exception, we probably lost the frame context (a bug with Selenium & Edge 44).
+				resetLastFrame();
+			}
 		}
 
 		IndependantLog.debug(debugmsg+" return "+isShowOnPage);
@@ -2324,9 +3293,8 @@ public class WDLibrary extends SearchObject {
 	}
 
 	/**
-	 * check if the point p locates in the Dimension.
-	 * @param p Point, relative to the Dimension. Usually the top-left point of an item.
-	 * see if the Point is inside bounds of 0,0,bounds.width, bounds.height.
+	 * Check if the point p locates in the Dimension.
+	 * @param p Point, relative to the Dimension. see if the Point is inside bounds of 0,0,bounds.width, bounds.height.
 	 * @param bounds Dimension, the boundary
 	 * @return boolean true if the point p locates in the Dimension.
 	 * A point p on the extreme width or height boundary is NOT in-bounds.
@@ -2337,16 +3305,29 @@ public class WDLibrary extends SearchObject {
 	}
 
 	/**
-	 * check if the Point p locates inside the Dimension.
-	 * @param p Point, point relative to 0,0, bounds.width, bounds.height.
-	 * Usually this is the bottom-right point test of a boundary.
+	 * Check if the topLeft Point p locates inside the Dimension.
+	 * @param topLeft Point, an element's top left point relative to 0,0, bounds.width, bounds.height.
 	 * @param bounds Dimension, the boundary
 	 * @return boolean true if the point p locates in the Dimension.
-	 * A point p on the extreme width or height boundary IS considered in-bounds.
+	 * A topLeft point p on the extreme (0, 0) boundary IS considered in-bounds.
+	 * A topLeft point p on the extreme width or height boundary is NOT considered in-bounds.
 	 */
-	public static boolean isPointInBounds(org.openqa.selenium.Point p, Dimension bounds){
-		if(p==null || bounds==null) return false;
-		return (0<p.x && p.x<=bounds.width) && (0<p.y && p.y<=bounds.height);
+	private static boolean isTopLeftInBounds(org.openqa.selenium.Point topLeft, Dimension bounds){
+		if(topLeft==null || bounds==null) return false;
+		return (0<=topLeft.x && topLeft.x<bounds.width) && (0<=topLeft.y && topLeft.y<bounds.height);
+	}
+
+	/**
+	 * Check if the bottomRight Point p locates inside the Dimension.
+	 * @param bottomRight Point, an element's bottom right point relative to 0,0, bounds.width, bounds.height.
+	 * @param bounds Dimension, the boundary
+	 * @return boolean true if the point p locates in the Dimension.
+	 * A bottomRight point p on the extreme (0, 0) boundary is NOT considered in-bounds.
+	 * A bottomRight point p on the extreme width or height boundary IS considered in-bounds.
+	 */
+	private static boolean isBottomRightInBounds(org.openqa.selenium.Point bottomRight, Dimension bounds){
+		if(bottomRight==null || bounds==null) return false;
+		return (0<bottomRight.x && bottomRight.x<=bounds.width) && (0<bottomRight.y && bottomRight.y<=bounds.height);
 	}
 
 	/**
@@ -2471,6 +3452,7 @@ public class WDLibrary extends SearchObject {
 	 *
 	 * @deprecated it is replaced by {@link #highlight(WebElement)}.
 	 */
+	@Deprecated
 	public static void highlightElement(WebElement element) throws SeleniumPlusException{
 
 		try{
@@ -2580,6 +3562,7 @@ public class WDLibrary extends SearchObject {
 	 */
 	public static WebDriverFactory getWebDriverAsWebDriverFactory(){
 		return (new WebDriverFactory(){
+				@Override
 				public RemoteWebDriver make(HashMap<String, String> config){
 					return (RemoteWebDriver) WDLibrary.getWebDriver();
 				}
@@ -2707,9 +3690,13 @@ public class WDLibrary extends SearchObject {
 		String debugmsg = "WDLibrary.focus() ";
 
 		try{
-			focused = windowSetFocus(element);
-			if(!focused) IndependantLog.warn(debugmsg+"fail to set focus to top window.");
-			else IndependantLog.info(debugmsg+"successfully set focus to top window.");
+			if(! SearchObject.getBypassFramesReset()){
+				focused = windowSetFocus(element);
+				if(!focused) IndependantLog.warn(debugmsg+"fail to set focus to top window.");
+				else IndependantLog.info(debugmsg+"successfully set focus to top window.");
+			}else{
+				IndependantLog.warn(debugmsg+ " skipping top window setFocus since bypassFramesReset is enabled.");
+			}
 		}catch(Exception e){
 			IndependantLog.warn(debugmsg+"Failed to set focus on top window due to "+ getThrowableMessages(e)+ ": "+ e.getMessage());
 			focused = false;
@@ -2744,164 +3731,6 @@ public class WDLibrary extends SearchObject {
 		}
 
 		return focused;
-	}
-
-	/**
-	 * Get css values of the object
-	 * @param element - WebElement
-	 * @return - return map as key and value pair
-	 */
-	public static Map<String, String> getCssValues(WebElement element){
-
-		String[] styleattr = {"color","display","float","font-family","font-size",
-								"font-weight","height","white-space","width",
-								"background-color","background-repeat",
-								"visibility"};
-
-		Map<String, String> map = new HashMap<String, String>();
-		String val = null;
-		for (int i = 0; i < styleattr.length; i++) {
-			try{
-				val = element.getCssValue(styleattr[i]);
-				map.put(styleattr[i], val);
-			}catch(Throwable t){}
-		}
-		return map;
-	}
-
-	/**
-	 * get the value of a property. The property can be an attribute, a css-attribute, a true property field, or certain property methods.
-	 * @param element WebElement, from which to retrieve the property
-	 * @param property String, the property name
-	 * @return String, the value of the property
-	 * @throws SeleniumPlusException if the attribute or property is not found.
-	 * @see #getProperties(WebElement)
-	 */
-	public static String getProperty(WebElement element, String property) throws SeleniumPlusException{
-		String value = null;
-		String dbg = "WDLibrary.getProperty() ";
-		try {
-			try{ value = element.getAttribute(property);}
-			catch(Throwable x){
-				IndependantLog.debug(dbg+ "getAttribute('"+property+"') threw "+ x.getClass().getName()+", "+x.getMessage());
-			}
-			if (value == null) {
-				IndependantLog.debug(dbg+ "getAttribute('"+property+"') returned null.  Trying getCssValue.");
-				try{ value = element.getCssValue(property); }
-				catch(Throwable x){
-					IndependantLog.debug(dbg+ "getCssValue('"+property+"') threw "+ x.getClass().getName()+", "+x.getMessage());
-				}
-				//for a non-exist css-property, SeleniumWebDriver will return "" instead of null
-				if(value!=null  && value.isEmpty()){
-					IndependantLog.debug(dbg+ "getCssValue('"+property+"') returned empty value. Resetting to null.");
-					value = null;
-				}
-			}
-			if (value == null){
-				IndependantLog.debug(dbg+ "trying wide getProperties() net.");
-				Map<String, Object> props = getProperties(element);
-				if(props.containsKey(property)){
-					value = props.get(property).toString();
-				}else{
-					IndependantLog.debug(dbg+ "getProperties() reports no property named '"+ property+"'.");
-					String keys = "";
-					for(String key:props.keySet()) keys += key +" ";
-					IndependantLog.debug(dbg+ "propertyNames: "+ keys);
-				}
-			}
-			if (value == null){
-				IndependantLog.debug(dbg+ "trying *NATIVE JS function* to get property '"+ property +"'");
-				StringBuffer script = new StringBuffer();
-				script.append(JavaScriptFunctions.SAP.sap_getProperty(true, property));
-				script.append("return sap_getProperty(arguments[0], arguments[1]);");
-				Object result = null;
-				try{
-					result = WDLibrary.executeJavaScriptOnWebElement(script.toString(), element, property);
-					if(result!=null){
-						IndependantLog.debug(dbg+" got '"+result+"' by *NATIVE JS function*.");
-						value = result.toString();
-						if(!(result instanceof String)){
-							IndependantLog.warn(dbg+" the result is not String, it is "+result.getClass().getName()+", may need more treatment.");
-						}
-					}
-				}catch(SeleniumPlusException se){
-					IndependantLog.error(dbg+ StringUtils.debugmsg(se));
-				}
-			}
-			if(value == null){
-				IndependantLog.error(dbg+ "got nothing but (null) for all getProperty attempts using '"+ property +"'");
-				throw new SeleniumPlusException(property+" not found.");
-			}
-			return value;
-		} catch(Exception e){
-			IndependantLog.error(dbg+ "caught "+ e.getClass().getName()+": "+ e.getMessage());
-			throw new SeleniumPlusException(property +" not found.", SeleniumPlusException.CODE_PropertyNotFoundException);
-		}
-	}
-
-	/**
-	 * Retrieve all properties of an element--attributes, css values, property fields and certain property methods.
-	 * @param element WebElement, from which to retrieve all properties
-	 * @return Map, a set of pair(property, value)
-	 * @throws SeleniumPlusException
-	 */
-	@SuppressWarnings("unchecked")
-	public static Map<String, Object> getProperties(WebElement element) throws SeleniumPlusException{
-		String debugmsg = StringUtils.debugmsg(false);
-
-		Map<String, Object> map = new HashMap<String, Object>();
-
-		WDTimeOut.setImplicitlyWait(100, TimeUnit.MILLISECONDS, 1000);
-
-		IndependantLog.debug(debugmsg+"calling getCssValues...");
-		map.putAll(getCssValues(element));
-		IndependantLog.debug(debugmsg+"returned from getCssValues...");
-		//ADD other attributes by javascript
-		StringBuffer jsScript = new StringBuffer();
-
-		try {
-			jsScript.append(JavaScriptFunctions.getAttributes());
-			jsScript.append("return getAttributes(arguments[0]);\n");
-			IndependantLog.debug(debugmsg+"DOM-attributes calling executeJavaScriptOnWebElement...");
-			Object attributes = WDLibrary.executeJavaScriptOnWebElement(jsScript.toString(), element);
-			IndependantLog.debug(debugmsg+"receieved DOM-attributes Object from executeJavaScriptOnWebElement...");
-			if(attributes instanceof Map){
-				IndependantLog.debug(debugmsg+"received attributes Object *IS* instanceof Map.");
-				Map<String, Object> attributesMap = (Map<String, Object>) attributes;
-				map.putAll(attributesMap);
-			}else{
-				if(attributes!=null) IndependantLog.debug(debugmsg+"received attributes object '"+attributes.getClass().getName()+"', needs to handle in code.");
-				else IndependantLog.debug(debugmsg+"received attributes object is "+null);
-			}
-		} catch(Exception ignore) {
-			IndependantLog.debug(debugmsg+" DOM-attributes, met "+StringUtils.debugmsg(ignore));
-		}
-
-		try{
-			jsScript = new StringBuffer();
-			jsScript.append(JavaScriptFunctions.getHtmlProperties());
-			jsScript.append("return getHtmlProperties(arguments[0]);\n");
-			IndependantLog.debug(debugmsg+"Htmlproperties calling executeJavaScriptOnWebElement...");
-			Object properties = WDLibrary.executeJavaScriptOnWebElement(jsScript.toString(), element);
-			IndependantLog.debug(debugmsg+"received Htmlproperties Object from executeJavaScriptOnWebElement.");
-			if(properties instanceof Map){
-				IndependantLog.debug(debugmsg+"received properties Object *IS* instanceof Map.");
-				try{
-					Map<String, ?> propertiesMap = (Map<String, ?>) properties;
-					map.putAll(propertiesMap);
-				}catch(Throwable t){
-					IndependantLog.debug(debugmsg+"returned properties object is "+null);				}
-			}else{
-				if(properties!=null) IndependantLog.debug("returned properties object '"+properties.getClass().getName()+"', needs to handle in code.");
-				else IndependantLog.debug(debugmsg+"returned properties object is "+null);
-			}
-
-		} catch(Exception ignore) {
-			IndependantLog.debug(debugmsg+"Htmlproperties, met "+StringUtils.debugmsg(ignore));
-		}
-
-		WDTimeOut.resetImplicitlyWait(Processor.getSecsWaitForComponent(), TimeUnit.SECONDS);
-		return map;
 	}
 
 	/**
@@ -2953,6 +3782,7 @@ public class WDLibrary extends SearchObject {
 		 * @throws SeleniumPlusException
 		 * @see {@link #getReadyState()}
 		 */
+		@Override
 		@SuppressWarnings({ "unchecked" })
 		public Map<String, Object> execute(HttpCommand command, String url, boolean async, Map<String, String> headers, String data) throws SeleniumPlusException {
 			if(!StringUtils.isValid(url)) throw new SeleniumPlusException("The request url is null or is empty!");
@@ -2995,36 +3825,42 @@ public class WDLibrary extends SearchObject {
 		/**
 		 * Get javascript global variable {@link #VARIABLE_READY_STATE}.
 		 */
+		@Override
 		public String getReadyState(){
 			return String.valueOf(js_getGlobalVariable(VARIABLE_READY_STATE));
 		}
 		/**
 		 * Get javascript global variable {@link #VARIABLE_RESPONSE_HEADERS}.
 		 */
+		@Override
 		public Object getResponseHeaders(){
 			return js_getGlobalVariable(VARIABLE_RESPONSE_HEADERS);
 		}
 		/**
 		 * Get javascript global variable {@link #VARIABLE_RESPONSE_TEXT}.
 		 */
+		@Override
 		public String getResponseText(){
 			return String.valueOf(js_getGlobalVariable(VARIABLE_RESPONSE_TEXT));
 		}
 		/**
 		 * Get javascript global variable {@link #VARIABLE_RESPONSE_XML}.
 		 */
+		@Override
 		public Object getResponseXml(){
 			return js_getGlobalVariable(VARIABLE_RESPONSE_XML);
 		}
 		/**
 		 * Get javascript global variable {@link #VARIABLE_STATUS}.
 		 */
+		@Override
 		public String getHttpStatus(){
 			return String.valueOf(js_getGlobalVariable(VARIABLE_STATUS));
 		}
 		/**
 		 * Get javascript global variable {@link #VARIABLE_STATUS_TEXT}.
 		 */
+		@Override
 		public String getHttpStatusText(){
 			return String.valueOf(js_getGlobalVariable(VARIABLE_STATUS_TEXT));
 		}
@@ -3076,10 +3912,15 @@ public class WDLibrary extends SearchObject {
 
 	/**
 	 * Check some known issue for a certain keyword.<br>
+	 * <b>NOTE: We should call {@link #startBrowser(String, String, String, int, boolean, Map)} before calling this method.
+	 *          so that we can get the browser's name and browser's version to check.</b>
 	 * @param keyword String, the keyword to check for, such like "GetURL"
-	 * @throws SeleniumPlusException will be thrown out if a known issue is checked.
+	 * @throws SeleniumPlusException will be thrown out if a known issue is checked.<br>
 	 */
 	public static void checkKnownIssue(String keyword) throws SeleniumPlusException{
+		String browserName = getBrowserName();
+		String browserVersion = getBrowserVersion();
+		IndependantLog.debug(StringUtils.debugmsg(false)+" browserName="+browserName+" browserVersion="+browserVersion);
 
 		if(DDDriverCommands.GETURL_KEYWORD.equalsIgnoreCase(keyword) ||
 		   DDDriverCommands.SAVEURLTOFILE_KEYWORD.equalsIgnoreCase(keyword) ||
@@ -3087,12 +3928,27 @@ public class WDLibrary extends SearchObject {
 		   DDDriverCommands.VERIFYURLTOFILE_KEYWORD.equalsIgnoreCase(keyword)){
 			//Check the known issue with selenium-standalone2.47.1 and Firefox 42.0
 			//These keywords will be skipped for FireFox until we find the reason why 'AJAX execution is stuck with FireFox'.
-			if(SelectBrowser.BROWSER_NAME_FIREFOX.equalsIgnoreCase(getBrowserName())
-//				&& "42.0".equals(getBrowserVersion())
+			//With Firefox 65.0.1 and gecko-driver 0.24.0, the keyword works!
+			if(SelectBrowser.BROWSER_NAME_FIREFOX.equalsIgnoreCase(browserName)
+				&& browserVersion.compareTo("65.0.1")<0
 //				&& "2.47.1".equals(getDriverVersion())
 				){
 //				throw new SeleniumPlusException("For keyword '"+keyword+"': known issue with selenium-standalone2.47.1 and Firefox ");
 				throw new SeleniumPlusException("For keyword '"+keyword+"': execution stuck : known issue with Firefox!");
+			}
+			//Check the known issue with Chrome 76.0.3809.100, see defect S1529467.
+			if(SelectBrowser.BROWSER_NAME_CHROME.equalsIgnoreCase(browserName)
+					&& browserVersion.startsWith("76.0.3809")
+//				&& "2.47.1".equals(getDriverVersion())
+					){
+				throw new SeleniumPlusException("For keyword '"+keyword+"': execution fails with stale element : known issue with Chrome '"+browserVersion+"'!");
+			}
+		}else if(DDDriverCommands.STARTWEBBROWSER_KEYWORD.equalsIgnoreCase(keyword)){
+			//Check the known issue with Chrome 77.0.3865.120 and 78.0.3904.70, see defect S1529467.
+			if(SelectBrowser.BROWSER_NAME_CHROME.equalsIgnoreCase(browserName)
+					&& (browserVersion.startsWith("77.0.3865")||browserVersion.startsWith("78.0.3904"))
+					){
+				throw new SeleniumPlusException("For keyword '"+keyword+"': execution fails to load page : known issue with Chrome '"+browserVersion+"'!");
 			}
 		}
 	}
@@ -3110,8 +3966,12 @@ public class WDLibrary extends SearchObject {
 	 * @param offset Point, the offset (relative to component) to click at
 	 * @param optional String[], the optional parameters
 	 * <ul>
-	 * <li> optional[0] autoscroll boolean, if the component will be scrolled into view automatically before clicking.
+	 * <b>optional[0] autoscroll</b> boolean, if the component will be scrolled into view automatically before clicking.
 	 *                                      if not provided, the default value is true.
+	 * <b>optional[1] verify</b> boolean, verify if the component is shown on page. The default value is true.<br>
+	 * <b>optional[2] refresh</b> boolean, if the element will be refreshed after scrolling.
+	 *                                      Normally we should refresh the component so that selenium API will return correct coordinates of the component.
+	 *                                      But refresh will cost a lot of time and it will slow down the whole test, so we will not refresh the component by default.<br>
 	 * </ul>
 	 * @return boolean true if succeed.
 	 * @see #click(WebElement, Point)
@@ -3119,14 +3979,16 @@ public class WDLibrary extends SearchObject {
 	public static boolean clickUnverified(WebElement component, Point offset, String... optional){
 		String debugmsg = StringUtils.debugmsg(false);
 
+		boolean autoscroll = parseAutoScroll(optional);
+
 		try {
 			IndependantLog.debug(debugmsg+" click with parameter componet:"+component+", offset:"+offset);
 			//Create a combined actions according to the parameters
 			Actions actions = new Actions(getWebDriver());
 
-			boolean autoscroll = parseAutoScroll(optional);
 			if(autoscroll){
-				if(offset!=null) actions.moveToElement(component, offset.x, offset.y);
+//				if(offset!=null) actions.moveToElement(component, offset.x, offset.y);
+				if(offset!=null) actions = moveToElement(actions, component, offset.x, offset.y);
 				else actions.moveToElement(component);
 			}
 			IndependantLog.debug(debugmsg+" Try Selenium API to click.");
@@ -3137,6 +3999,7 @@ public class WDLibrary extends SearchObject {
 			IndependantLog.warn(debugmsg+" Failed with Selenium API, met "+StringUtils.debugmsg(e)+". Try Robot click.");
 
 			try {
+				if(autoscroll) showOnPage(component, removeFirstParameter(optional));
 				Point p = WDLibrary.getScreenLocation(component);
 
 				if(offset!=null) p.translate(offset.x, offset.y);
@@ -3150,6 +4013,27 @@ public class WDLibrary extends SearchObject {
 			}
 			return false;
 		}
+	}
+
+	/**
+	 * Get the text of each element object in an array, and add it to a list, then return the list.
+	 * @param elements Element[], an array of element object
+	 * @return List<String>, a list of element's text
+	 */
+	public static List<String> convertElementArrayToList(Element[] elements){
+		String debugmsg = StringUtils.debugmsg(false);
+		List<String> content = new ArrayList<String>();
+		try{
+			String value = null;
+			for(Element element:elements){
+				value = element.contentValue();
+				if(value!=null) content.add(value);
+			}
+		}catch(Exception e){
+			IndependantLog.debug(debugmsg+StringUtils.debugmsg(e));
+		}
+
+		return content;
 	}
 
 	/**
@@ -3301,6 +4185,7 @@ public class WDLibrary extends SearchObject {
 			checkKnownIssue(DDDriverCommands.GETURL_KEYWORD);
 
 			Thread threadGetUrl = new Thread(new Runnable(){
+				@Override
 				public void run() {
 					try {
 						//For firefox42.0 with selenium2.47.1, following call will block for ever
@@ -3328,6 +4213,7 @@ public class WDLibrary extends SearchObject {
 			System.err.println(debugmsg+" Met "+StringUtils.debugmsg(e));
 		}finally{
 			Thread threadGetUrl = new Thread(new Runnable(){
+				@Override
 				public void run() {
 					try {
 						//For firefox42.0 with selenium2.47.1, following call will block for ever
@@ -3346,7 +4232,7 @@ public class WDLibrary extends SearchObject {
 	private static void test_ajax_call(){
 		String[] browsers = {
 				             SelectBrowser.BROWSER_NAME_CHROME,
-				             SelectBrowser.BROWSER_NAME_IE,
+				             SelectBrowser.BROWSER_NAME_EDGE,
 				             SelectBrowser.BROWSER_NAME_FIREFOX
 				             };
 		for(String browser:browsers){
@@ -3388,6 +4274,53 @@ public class WDLibrary extends SearchObject {
 	}
 
 	/**
+	 * This method will input 'user', 'password' and '{Enter}' into a Basic Authentication dialog.<br>
+	 * But the input action will be delayed amount of time, which is specified by parameter 'delayInSecond'.<br>
+	 * <b>Note: It is supposed that the focus is on the 'user name' input box. And TAB can switch focus between components.</b>
+	 *
+	 * @param user String, the user name
+	 * @param password String, the password
+	 * @param delayInSecond int, delay in second, before the thread starts
+	 */
+	public static void handleBasicAuthentication(final String user, final String password, final int delayInSecond){
+		Thread worker = new Thread(
+				new Runnable(){
+					@Override
+					public void run() {
+						int pause = 1000;
+						String debugmsg = "WDLibrary.handleBasicAuthentication(): ";
+						StringUtils.sleep(delayInSecond*1000);
+
+						Object result = null;
+						try{
+							result = RBT.inputKeys(user+"{Tab}");
+							if(StringUtils.convertBool(result)){
+								StringUtils.sleep(pause);
+								result = RBT.inputKeys(password+"{Tab}");
+								if(StringUtils.convertBool(result)){
+									StringUtils.sleep(pause);
+									result = RBT.inputKeys("{Enter}");
+									if(StringUtils.convertBool(result)){
+										StringUtils.sleep(pause);
+									}else{
+										IndependantLog.error(debugmsg+" Failed to input 'Enter'.");
+									}
+								}else{
+									IndependantLog.error(debugmsg+" Failed to input password.");
+								}
+							}else{
+								IndependantLog.error(debugmsg+" Failed to input user '"+user+"'.");
+							}
+						}catch(Exception e){
+							IndependantLog.error(debugmsg+" Failed due to "+e.getMessage());
+						}
+					}
+				}
+		);
+		worker.start();
+	}
+
+	/**
 	 * This class represents a Robot, which can do work locally (thru local org.safs.robot.Robot) or remotely (thru a RMI agent).<br>
 	 *
 	 * @author Lei Wang
@@ -3405,7 +4338,9 @@ public class WDLibrary extends SearchObject {
 		 *
 		 * @throws Exception
 		 */
-		protected static void click(Point location, Keys specialKey, int mouseButtonNumber, int nclicks) throws Exception{
+		public static void click(Point location, Keys specialKey, int mouseButtonNumber, int nclicks) throws Exception{
+			if(getBypassRobot()) throw new SeleniumPlusException("Bypass Robot, click action will be handled by other means, such as selenium.");
+
 			WebDriver wd = getWebDriver();
 			RemoteDriver rd = (wd instanceof RemoteDriver)? (RemoteDriver) wd : null;
 			click(rd, location, specialKey, mouseButtonNumber, nclicks);
@@ -3423,11 +4358,13 @@ public class WDLibrary extends SearchObject {
 		 * @throws Exception
 		 */
 		public static void click(RemoteDriver rd, Point location, Keys specialKey, int mouseButtonNumber, int nclicks) throws Exception{
+			if(getBypassRobot()) throw new SeleniumPlusException("Bypass Robot, click action will be handled by other means, such as selenium.");
+
 			if(rd==null || rd.isLocalServer()){
 				if(specialKey==null){
-					org.safs.robot.Robot.click(location.x, location.y, mouseButtonNumber, nclicks);
+					Robot.click(location.x, location.y, mouseButtonNumber, nclicks);
 				}else{
-					org.safs.robot.Robot.clickWithKeyPress(location.x, location.y, mouseButtonNumber, toJavaKeyCode(specialKey), nclicks);
+					Robot.clickWithKeyPress(location.x, location.y, mouseButtonNumber, toJavaKeyCode(specialKey), nclicks);
 				}
 			}
 			else{// handle remote selenium
@@ -3442,6 +4379,350 @@ public class WDLibrary extends SearchObject {
 				}
 			}
 		}
+
+		/**
+		 * Press down a Key locally if the current RemoteDriver is null or is local;
+		 * otherwise if the current RemoteDriver is remote, then press down a key remotely.
+		 *
+		 * @param keycode int, keycode Key to press (e.g. <code>KeyEvent.VK_A</code>)
+		 * @return boolean, true if success
+		 */
+		public static boolean keyPress(int keycode) throws SeleniumPlusException{
+			if(getBypassRobot()) throw new SeleniumPlusException("Bypass Robot, keyPress action will be handled by other means, such as selenium.");
+
+			WebDriver wd = getWebDriver();
+			RemoteDriver rd = (wd instanceof RemoteDriver)? (RemoteDriver) wd : null;
+			return keyPress(rd, keycode);
+		}
+
+		/**
+		 * Press down a Key locally if the RemoteDriver 'rd' is null or is local;
+		 * otherwise if the RemoteDriver 'rd' is remote, then press down a key remotely.
+		 *
+		 * @param rd	RemoteDriver, The Remote Driver with an RMI agent.
+		 * @param keycode int, keycode Key to press (e.g. <code>KeyEvent.VK_A</code>)
+		 * @return boolean, true if success
+		 */
+		public static boolean keyPress(RemoteDriver rd, int keycode) throws SeleniumPlusException{
+			if(getBypassRobot()) throw new SeleniumPlusException("Bypass Robot, keyPress action will be handled by other means, such as selenium.");
+
+			String debugmsg = "RBT.keyPress(): ";
+			boolean result = false;
+
+			if(rd==null || rd.isLocalServer()){
+				result = Robot.keyPress(keycode);
+			}else{// handle remote selenium
+				if(rd.rmiAgent != null){
+					try {
+						rd.rmiAgent.remoteKeyPress(keycode);
+						result = true;
+					} catch (Exception e) {
+						IndependantLog.error(debugmsg+"Met "+e.toString());
+						result = false;
+					}
+				}else{
+					IndependantLog.error(debugmsg+"RMI Agent is not available.");
+					result = false;
+				}
+			}
+
+			return result;
+		}
+
+		/**
+		 * Release a Key locally if the current RemoteDriver is null or is local;
+		 * otherwise if the current RemoteDriver is remote, then release a key remotely.
+		 *
+		 * @param keycode int, keycode Key to release (e.g. <code>KeyEvent.VK_A</code>)
+		 * @return boolean, true if success
+		 */
+		public static boolean keyRelease(int keycode) throws SeleniumPlusException{
+			if(getBypassRobot()) throw new SeleniumPlusException("Bypass Robot, keyRelease action will be handled by other means, such as selenium.");
+
+			WebDriver wd = getWebDriver();
+			RemoteDriver rd = (wd instanceof RemoteDriver)? (RemoteDriver) wd : null;
+			return keyRelease(rd, keycode);
+		}
+
+		/**
+		 * Release a Key locally if the RemoteDriver 'rd' is null or is local;
+		 * otherwise if the RemoteDriver 'rd' is remote, then release a key remotely.
+		 *
+		 * @param rd	RemoteDriver, The Remote Driver with an RMI agent.
+		 * @param keycode int, keycode Key to release (e.g. <code>KeyEvent.VK_A</code>)
+		 * @return boolean, true if success
+		 */
+		public static boolean keyRelease(RemoteDriver rd, int keycode) throws SeleniumPlusException{
+			if(getBypassRobot()) throw new SeleniumPlusException("Bypass Robot, keyRelease action will be handled by other means, such as selenium.");
+
+			String debugmsg = "RBT.keyRelease(): ";
+			boolean result = false;
+
+			if(rd==null || rd.isLocalServer()){
+				result = Robot.keyRelease(keycode);
+			}else{// handle remote selenium
+				if(rd.rmiAgent != null){
+					try {
+						rd.rmiAgent.remoteKeyRelease(keycode);
+						result = true;
+					} catch (Exception e) {
+						IndependantLog.error(debugmsg+"Met "+e.toString());
+						result = false;
+					}
+				}else{
+					IndependantLog.error(debugmsg+"RMI Agent is not available.");
+					result = false;
+				}
+			}
+
+			return result;
+		}
+
+		/**
+		 * Type keyboard input.
+		 * The input goes to the current keyboard focus target.  The String input
+		 * can include all special characters and processing as documented in the
+		 * {@link CreateUnicodeMap} class.<br>
+		 *
+		 * The input happens locally if the current RemoteDriver is null or is local;
+		 * otherwise if the current RemoteDriver is remote, then it happens remotely.
+		 *
+		 * @param keys String,  the keys to enter.
+		 * @return Object Currently we return a Boolean(true) object, but this may be subject to change.
+		 * @throws SeleniumPlusException if the "bypass robot" is set to true.
+		 */
+		public static Object inputKeys(String keys) throws SeleniumPlusException{
+			if(getBypassRobot()) throw new SeleniumPlusException("Bypass Robot, inputKeys action will be handled by other means, such as selenium.");
+
+			WebDriver wd = getWebDriver();
+			RemoteDriver rd = (wd instanceof RemoteDriver)? (RemoteDriver) wd : null;
+			return inputKeys(rd, keys);
+		}
+
+		/**
+		 * Type keyboard input.
+		 * The input goes to the current keyboard focus target.  The String input
+		 * can include all special characters and processing as documented in the
+		 * {@link CreateUnicodeMap} class.<br>
+		 *
+		 * The input happens locally if the current RemoteDriver is null or is local;
+		 * otherwise if the current RemoteDriver is remote, then it happens remotely.
+		 *
+		 * @param keys String,  the keys to enter.
+		 * @return Object Currently we return a Boolean(true) object, but this may be subject to change.
+		 */
+		private static Object _typeKeys(String keys) throws SeleniumPlusException{
+			WebDriver wd = getWebDriver();
+			RemoteDriver rd = (wd instanceof RemoteDriver)? (RemoteDriver) wd : null;
+			return _typeKeys(rd, keys);
+		}
+
+		/**
+		 * Type keyboard input.
+		 * The input goes to the current keyboard focus target.  The String input
+		 * can include all special characters and processing as documented in the
+		 * {@link CreateUnicodeMap} class.<br>
+		 *
+		 * The input happens locally if the RemoteDriver 'rd' is null or is local;
+		 * otherwise if the RemoteDriver 'rd' is remote, then it happens remotely.
+		 *
+		 * @param rd	RemoteDriver, The Remote Driver with an RMI agent.
+		 * @param keys String,  the keys to enter.
+		 * @return Object Currently we return a Boolean(true) object, but this may be subject to change.
+		 * @throws SeleniumPlusException if the "bypass robot" is set to true.
+		 */
+		public static Object inputKeys(RemoteDriver rd, String keys) throws SeleniumPlusException{
+			if(getBypassRobot()) throw new SeleniumPlusException("Bypass Robot, inputKeys action will be handled by other means, such as selenium.");
+			return _typeKeys(rd, keys);
+		}
+
+		/**
+		 * Type keyboard input.
+		 * The input goes to the current keyboard focus target.  The String input
+		 * can include all special characters and processing as documented in the
+		 * {@link CreateUnicodeMap} class.<br>
+		 *
+		 * The input happens locally if the RemoteDriver 'rd' is null or is local;
+		 * otherwise if the RemoteDriver 'rd' is remote, then it happens remotely.
+		 *
+		 * @param rd	RemoteDriver, The Remote Driver with an RMI agent.
+		 * @param keys String,  the keys to enter.
+		 * @return Object Currently we return a Boolean(true) object, but this may be subject to change.
+		 */
+		private static Object _typeKeys(RemoteDriver rd, String keys) throws SeleniumPlusException{
+
+			String debugmsg = "RBT._typeKeys(): ";
+			Object result = null;
+
+			if(rd==null || rd.isLocalServer()){
+				try {
+					result = Robot.inputKeys(keys);
+				} catch (AWTException e) {
+					IndependantLog.error(debugmsg+"Met "+e.toString());
+					result = false;
+				}
+			}else{// handle remote selenium
+				if(rd.rmiAgent != null){
+					try {
+						rd.rmiAgent.remoteTypeKeys(keys);
+						result = true;
+					} catch (Exception e) {
+						IndependantLog.error(debugmsg+"Met "+e.toString());
+						result = false;
+					}
+				}else{
+					IndependantLog.error(debugmsg+"RMI Agent is not available.");
+					result = false;
+				}
+			}
+
+			return result;
+		}
+
+		/**
+		 * Type keyboard input characters unmodified.  No special key processing.
+		 * The input goes to the current keyboard focus target.  The String input
+		 * will be treated simply as literal text and typed as-is.<br>
+		 *
+		 * The input happens locally if the current RemoteDriver is null or is local;
+		 * otherwise if the current RemoteDriver is remote, then it happens remotely.
+		 *
+		 * @param chars String,  the characters to enter.
+		 * @return Object Currently we return a Boolean(true) object, but this may be subject to change.
+		 */
+		public static Object inputChars(String chars) throws SeleniumPlusException{
+			if(getBypassRobot()) throw new SeleniumPlusException("Bypass Robot, inputChars action will be handled by other means, such as selenium.");
+
+			WebDriver wd = getWebDriver();
+			RemoteDriver rd = (wd instanceof RemoteDriver)? (RemoteDriver) wd : null;
+			return inputChars(rd, chars);
+		}
+
+		/**
+		 * Type keyboard input characters unmodified.  No special key processing.
+		 * The input goes to the current keyboard focus target.  The String input
+		 * will be treated simply as literal text and typed as-is.<br>
+		 *
+		 * The input happens locally if the RemoteDriver 'rd' is null or is local;
+		 * otherwise if the RemoteDriver 'rd' is remote, then it happens remotely.
+		 *
+		 * @param rd	RemoteDriver, The Remote Driver with an RMI agent.
+		 * @param chars String,  the characters to enter.
+		 * @return Object Currently we return a Boolean(true) object, but this may be subject to change.
+		 */
+		public static Object inputChars(RemoteDriver rd, String chars) throws SeleniumPlusException{
+			if(getBypassRobot()) throw new SeleniumPlusException("Bypass Robot, inputChars action will be handled by other means, such as selenium.");
+
+			String debugmsg = "RBT.inputChars(): ";
+			Object result = null;
+
+			if(rd==null || rd.isLocalServer()){
+				try {
+					result = Robot.inputChars(chars);
+				} catch (AWTException e) {
+					IndependantLog.error(debugmsg+"Met "+e.toString());
+					result = false;
+				}
+			}else{// handle remote selenium
+				if(rd.rmiAgent != null){
+					try {
+						rd.rmiAgent.remoteTypeChars(chars);
+						result = true;
+					} catch (Exception e) {
+						IndependantLog.error(debugmsg+"Met "+e.toString());
+						result = false;
+					}
+				}else{
+					IndependantLog.error(debugmsg+"RMI Agent is not available.");
+					result = false;
+				}
+			}
+
+			return result;
+		}
+
+		/**
+		 * Scroll the mouse wheel by Java Robot.<br>
+		 *
+		 * The scroll happens locally if the current RemoteDriver is null or is local;
+		 * otherwise if the current RemoteDriver is remote, then it happens remotely.
+		 *
+		 * @param wheelAmt int, the wheel amount to scroll.
+		 * @return boolean true, if the scroll succeeds.
+		 * @throws SeleniumPlusException if the "bypass robot" is set to true.
+		 */
+		public static boolean mouseWheel(int wheelAmt) throws SeleniumPlusException{
+			if(getBypassRobot()) throw new SeleniumPlusException("Bypass Robot, mouseWheel action will be handled by other means, such as selenium.");
+
+			return _mouseWheel(wheelAmt);
+		}
+
+		/**
+		 * Scroll the mouse wheel by Java Robot.<br>
+		 *
+		 * The scroll happens locally if the RemoteDriver 'rd' is null or is local;
+		 * otherwise if the RemoteDriver 'rd' is remote, then it happens remotely.
+		 *
+		 * @param rd	RemoteDriver, The Remote Driver with an RMI agent.
+		 * @param wheelAmt int, the wheel amount to scroll.
+		 * @return boolean true, if the scroll succeeds.
+		 * @throws SeleniumPlusException if the "bypass robot" is set to true.
+		 */
+		public static boolean mouseWheel(RemoteDriver rd, int wheelAmt) throws SeleniumPlusException{
+			if(getBypassRobot()) throw new SeleniumPlusException("Bypass Robot, mouseWheel action will be handled by other means, such as selenium.");
+
+			return _mouseWheel(rd, wheelAmt);
+		}
+
+		/**
+		 * Scroll the mouse wheel by Java Robot.<br>
+		 *
+		 * The scroll happens locally if the current RemoteDriver is null or is local;
+		 * otherwise if the current RemoteDriver is remote, then it happens remotely.
+		 *
+		 * @param wheelAmt int, the wheel amount to scroll.
+		 * @return boolean true, if the scroll succeeds.
+		 */
+		private static boolean _mouseWheel(int wheelAmt) throws SeleniumPlusException{
+			WebDriver wd = getWebDriver();
+			RemoteDriver rd = (wd instanceof RemoteDriver)? (RemoteDriver) wd : null;
+			return _mouseWheel(rd, wheelAmt);
+		}
+
+		/**
+		 * Scroll the mouse wheel by Java Robot.<br>
+		 *
+		 * The scroll happens locally if the RemoteDriver 'rd' is null or is local;
+		 * otherwise if the RemoteDriver 'rd' is remote, then it happens remotely.
+		 *
+		 * @param rd	RemoteDriver, The Remote Driver with an RMI agent.
+		 * @param wheelAmt int, the wheel amount to scroll.
+		 * @return boolean true, if the scroll succeeds.
+		 */
+		private static boolean _mouseWheel(RemoteDriver rd, int wheelAmt) throws SeleniumPlusException{
+			String debugmsg = "RBT._mouseWheel(): ";
+			boolean result = false;
+
+			if(rd==null || rd.isLocalServer()){
+				result = Robot.mouseWheel(wheelAmt);
+
+			}else{// handle remote selenium
+				if(rd.rmiAgent != null){
+					try {
+						rd.rmiAgent.remoteMouseWheel(wheelAmt);
+						result = true;
+					} catch (Exception e) {
+						IndependantLog.error(debugmsg+"Met "+e.toString());
+						result = false;
+					}
+				}else{
+					IndependantLog.error(debugmsg+"RMI Agent is not available.");
+					result = false;
+				}
+			}
+
+			return result;
+		}
 	}
 
 	/**
@@ -3449,7 +4730,26 @@ public class WDLibrary extends SearchObject {
 	 * @param args
 	 */
 	public static void main(String[] args){
+		IndependantLog.setDebugListener(new DebugListener(){
+
+			@Override
+			public String getListenerName() {
+				return null;
+			}
+
+			@Override
+			public void onReceiveDebug(String message) {
+				System.out.println(message);
+			}
+
+		});
 		test_ajax_call();
 		test_kill_extraProcess();
+
+		try {
+			stopSeleniumServer(null);
+		} catch (SAFSException e) {
+			IndependantLog.error("Met "+e.toString());
+		}
 	}
 }

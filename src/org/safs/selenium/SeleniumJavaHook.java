@@ -1,8 +1,20 @@
-/** 
- ** Copyright (C) SAS Institute, All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.selenium;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -31,21 +43,21 @@ import org.safs.tools.drivers.DriverConstant;
 
 /**
  * This class is our STAF-enabled JavaHook for the "SAFS/Selenium" Engine.
- * This is the class that registers with STAF and responds to the STAF-based 
- * SAFS Engine protocol defined at http://sourceforge.net/docman/display_doc.php?docid=17505&group_id=56751 
+ * This is the class that registers with STAF and responds to the STAF-based
+ * SAFS Engine protocol defined at http://sourceforge.net/docman/display_doc.php?docid=17505&group_id=56751
  * <p>
  * The STAF name predefined for this Selenium Engine is "SAFS/Selenium".
  * <p>
- * As of this writing, this hook uses standard org.safs.LogUtilities.  The TestStepProcessor 
+ * As of this writing, this hook uses standard org.safs.LogUtilities.  The TestStepProcessor
  * is the "standard" org.safs.TestStepProcessor.
  * <p>
- * The SAFS/Selenium engine does require Selenium-specific implementations of 
+ * The SAFS/Selenium engine does require Selenium-specific implementations of
  * <ul>
  * <li>org.safs.selenium.SeleniumGuiUtilities
  * <li>org.safs.selenium.STestRecordHelper
  * </ul>
  * <p>
- * If the engine is being launched manually or via a batch file or script then the following  
+ * If the engine is being launched manually or via a batch file or script then the following
  * Java System property must be set on the Java command line:
  * <p>
  * <ul>-Dsafs.config.paths=&lt;testpath>;&lt;projectpath>;&lt;driverpath></ul>
@@ -54,7 +66,7 @@ import org.safs.tools.drivers.DriverConstant;
  * <i>projectpath</i> is the file path to the project configuration INI file,<br>
  * <i>driverpath</i> is the file path to the SAFS driver configuration INI file.
  * <p>
- * At least one INI file path must be specified or the engine will abort due to insufficient 
+ * At least one INI file path must be specified or the engine will abort due to insufficient
  * configuration information being provided.
  * <p>
  * The configuration file(s) must minimally provide the following information:
@@ -70,31 +82,31 @@ import org.safs.tools.drivers.DriverConstant;
  * <li>DEBUGLOG=&lt;full_path_to>\ASeleniumDebugLog.txt
  * </ul>
  * <p>
- * <small><i>(PROXY and PORT options previously supported have been deprecated in favor of the 
+ * <small><i>(PROXY and PORT options previously supported have been deprecated in favor of the
  * GATEWAYHOST and GATEWAYPORT options. &nbsp;However, PROXY and PORT still work.)</i></small>
  * <p>
- * You can refer to the <a href="http://safsdev.sourceforge.net/sqabasic2000/JSAFSFrameworkContent.htm#configfile">[SAFS_SELENIUM]</a> 
+ * You can refer to the <a href="/sqabasic2000/JSAFSFrameworkContent.htm#configfile">[SAFS_SELENIUM]</a>
  * setion in SAFSDRIVER Configuration. <small><i>(See Settings for Selnium1.0)</i></small>
  * <p>
- * Assuming everything is properly CLASSPATHed and the config file(s) have proper settings 
+ * Assuming everything is properly CLASSPATHed and the config file(s) have proper settings
  * then the Engine can then be launched with:
  * <ul><p>
  * java -Dsafs.config.paths=&lt;paths> org.safs.selenium.SeleniumJavaHook
  * </ul>
  * <p>
- * There is also the ability to launch the engine in a "Process Container" mode by adding 
+ * There is also the ability to launch the engine in a "Process Container" mode by adding
  * a single command-line argument, "SPC" as in:
  * <ul><p>
  * java -Dsafs.config.paths=&lt;paths> org.safs.selenium.SeleniumJavaHook SPC
  * </ul>
- * 
+ *
  *   <br>   JAN 16, 2007    (Carl Nagle) Graceful abort when no config provided.
  *   <br>   JAN 16, 2007    (Carl Nagle) Update of use documentation.
  *   <br>   AUG 01, 2007    (Carl Nagle) Update documentation and faulty shutdown activities.
  *   <br>   FEB 19, 2008    (Carl Nagle) Support alternate Selenium Server ports and Selenium Debug Log.
  *   <br>   APR 18, 2008    (Carl Nagle) Primarily updated documentation.
  *   <br>   MAY 27, 2008    (Carl Nagle) Documented the "SPC" argument for Selenium Process Container.
- *   <br>   MAR 31, 2011    (LEIWANG) Modify to fit Selenium 1.0
+ *   <br>   MAR 31, 2011    (Lei Wang) Modify to fit Selenium 1.0
  *   <br>	AUG 08, 2012	(Lei Wang) Modify method stopJavaHOOK(): release the mutex "SAFS/Hook/TRD"
  * @see SeleniumGUIUtilities
  * @see STestRecordHelper
@@ -117,9 +129,9 @@ public class SeleniumJavaHook extends JavaHook {
 		public static final int    DEFAULT_SELENIUMTIMEOUT  = 1000*60*5;
 
 		public static boolean RUNNING_SPC = false;
-		
+
 		private SeleniumServer _server = null;
-		
+
 		/**
 		 * No-arg constructor for SeleniumJavaHook
 		 * Simply calls the super()
@@ -131,7 +143,7 @@ public class SeleniumJavaHook extends JavaHook {
 		/**
 		 * Constructor for SeleniumJavaHook
 		 * Simply calls super(process_name)
-		 * 
+		 *
 		 * @param process_name the ID to use when registering with STAF.
 		 * Normally this would be our predefined name "SAFS/Selenium".
 		 */
@@ -142,13 +154,13 @@ public class SeleniumJavaHook extends JavaHook {
 		/**
 		 * Constructor for SeleniumJavaHook
 		 * Simply calls super(process_name, logs)
-		 * 
+		 *
 		 * @param process_name the ID to use when registering with STAF.
 		 * Normally this would be our predefined name "SAFS/Selenium".
-		 * 
-		 * @param logs the LogUtilities to be used by the Engine.  Currently we can 
+		 *
+		 * @param logs the LogUtilities to be used by the Engine.  Currently we can
 		 * use the default org.safs.LogUtilities
-		 * 
+		 *
 		 * @see org.safs.LogUtilites
 		 */
 		public SeleniumJavaHook(String process_name, LogUtilities logs) {
@@ -158,14 +170,14 @@ public class SeleniumJavaHook extends JavaHook {
 		/**
 		 * Constructor for SeleniumJavaHook
 		 * Simply calls super(process_name, trd_name)
-		 * 
+		 *
 		 * @param process_name the ID to use when registering with STAF.
 		 * Normally this would be our predefined name "SAFS/Selenium".
-		 * 
-		 * @param trd_name -- The root name for specific TestRecordData to reference 
-		 * in STAF.  This should typically be STAFHelper.SAFS_HOOK_TRD which is used 
+		 *
+		 * @param trd_name -- The root name for specific TestRecordData to reference
+		 * in STAF.  This should typically be STAFHelper.SAFS_HOOK_TRD which is used
 		 * by default.
-		 * 
+		 *
 		 * @see org.safs.STAFHelper#SAFS_HOOK_TRD
 		 */
 		public SeleniumJavaHook(String process_name, String trd_name) {
@@ -176,49 +188,49 @@ public class SeleniumJavaHook extends JavaHook {
 		/**
 		 * Constructor for SeleniumJavaHook
 		 * Simply calls super(process_name, trd_name, logs)
-		 * 
+		 *
 		 * @param process_name the ID to use when registering with STAF.
 		 * Normally this would be our predefined name "SAFS/Selenium".
-		 * 
-		 * @param trd_name -- The root name for specific TestRecordData to reference 
-		 * in STAF.  This should typically be STAFHelper.SAFS_HOOK_TRD which is used 
+		 *
+		 * @param trd_name -- The root name for specific TestRecordData to reference
+		 * in STAF.  This should typically be STAFHelper.SAFS_HOOK_TRD which is used
 		 * by default.
-		 * 
-		 * @param logs the LogUtilities to be used by the Engine.  Currently we can 
+		 *
+		 * @param logs the LogUtilities to be used by the Engine.  Currently we can
 		 * use the default org.safs.LogUtilities
-		 * 
+		 *
 		 * @see org.safs.STAFHelper#SAFS_HOOK_TRD
 		 * @see org.safs.LogUtilites
 		 */
-		public SeleniumJavaHook(String process_name, String trd_name, 
+		public SeleniumJavaHook(String process_name, String trd_name,
 		                      LogUtilities logs) {
-		                      	
+
 			super(process_name, trd_name, logs);
 		}
 
 		/**
 		 * Advanced Constructor for SeleniumJavaHook.
 		 * Simply calls super(process_name, trd_name, logs, trd_data, gui_utils, aprocessor)
-		 * 
+		 *
 		 * @param process_name the ID to use when registering with STAF.
 		 * Normally this would be our predefined name "SAFS/Selenium".
-		 * 
-		 * @param trd_name -- The root name for specific TestRecordData to reference 
-		 * in STAF.  This should typically be STAFHelper.SAFS_HOOK_TRD which is used 
+		 *
+		 * @param trd_name -- The root name for specific TestRecordData to reference
+		 * in STAF.  This should typically be STAFHelper.SAFS_HOOK_TRD which is used
 		 * by default.
-		 * 
-		 * @param logs the LogUtilities to be used by the Engine.  Currently we can 
+		 *
+		 * @param logs the LogUtilities to be used by the Engine.  Currently we can
 		 * use the default org.safs.LogUtilities
-		 * 
-		 * @param trd_data -- ATestRecordHelper to hold TestRecordData.  
+		 *
+		 * @param trd_data -- ATestRecordHelper to hold TestRecordData.
 		 * The Selenium engine expects an instance of ATestRecordHelper.
-		 * 
+		 *
 		 * @param gui_utils -- SeleniumGuiUtilities the hook will use for handling components.
 		 * The Selenium engine expects an instance of SeleniumGuiUtilities.
-		 * 
+		 *
 		 * @param aprocessor -- ProcessRequest object the hook will use for routing records.
 		 * The Selenium engine uses the standard ProcessRequest class and a standard TestStepProcessor.
-		 * 
+		 *
 		 * @see org.safs.STAFHelper#SAFS_HOOK_TRD
 		 * @see org.safs.LogUtilites
 		 * @see STestRecordHelper
@@ -226,7 +238,7 @@ public class SeleniumJavaHook extends JavaHook {
 		 * @see org.safs.ProcessRequest
 		 * @see org.safs.TestStepProcessor
 		 */
-		public SeleniumJavaHook (String process_name, String trd_name, 
+		public SeleniumJavaHook (String process_name, String trd_name,
 		                     LogUtilities logs,
 		                     TestRecordHelper trd_data,
 		                     DDGUIUtilities gui_utils,
@@ -238,24 +250,25 @@ public class SeleniumJavaHook extends JavaHook {
 
 		/**
 		 * Use this method to retrieve/create the current/default TestRecordHelper instance.
-		 * If the TestRecordHelper has not been set this routine will instance a 
-		 * new org.safs.selenium.ATestRecordHelper and populate it with a STAFHelper via 
-		 * getHelper() and a DDGUIUtilities via getGUIUtilities.  Note that the call 
-		 * to getGUIUtilities may force the instantiation of the default SeleniumGuiUtilities 
-		 * if one has not already been set.  
+		 * If the TestRecordHelper has not been set this routine will instance a
+		 * new org.safs.selenium.ATestRecordHelper and populate it with a STAFHelper via
+		 * getHelper() and a DDGUIUtilities via getGUIUtilities.  Note that the call
+		 * to getGUIUtilities may force the instantiation of the default SeleniumGuiUtilities
+		 * if one has not already been set.
 		 * <p>
-		 * Note that there is a known circular execution between getTRDData and 
-		 * getGUIUtilities if neither was previously set.  Each routine 
-		 * calls the other which may result in a second call to the other. 
+		 * Note that there is a known circular execution between getTRDData and
+		 * getGUIUtilities if neither was previously set.  Each routine
+		 * calls the other which may result in a second call to the other.
 		 * This has not been a problem.
-		 * 
+		 *
 		 * @return TestRecordHelper which should be an instanceof org.safs.selenium.ATestRecordHelper
-		 * 
+		 *
 		 * @see STestRecordHelper
 		 * @see #getHelper()
 		 * @see #getGUIUtilities()
 		 * @see JavaHook#getTRDData()
 		 */
+		@Override
 		public TestRecordHelper getTRDData() {
 			if (data==null) {
 					data=new STestRecordHelper();
@@ -268,28 +281,29 @@ public class SeleniumJavaHook extends JavaHook {
 
 		/**
 		 * Use this method to retrieve/create the current/default DDGUIUtilities instance.
-		 * If the DDGUIUtilities has not been set this routine will instance a 
-		 * new org.safs.selenium.SeleniumGUIUtilities and populate it with a STAFHelper via 
-		 * getHelper() and a TestRecordHelper via getTRDData().  Note that the call 
-		 * to getTRDData() may force the instantiation of the default ATestRecordHelper 
-		 * if one has not already been set.  
+		 * If the DDGUIUtilities has not been set this routine will instance a
+		 * new org.safs.selenium.SeleniumGUIUtilities and populate it with a STAFHelper via
+		 * getHelper() and a TestRecordHelper via getTRDData().  Note that the call
+		 * to getTRDData() may force the instantiation of the default ATestRecordHelper
+		 * if one has not already been set.
 		 * <p>
-		 * The SeleniumGUIUtilities talk with our embedded proxies over a SAFS RMI bridge.  
+		 * The SeleniumGUIUtilities talk with our embedded proxies over a SAFS RMI bridge.
 		 * The local RMI server (AServerImpl) is instanced if not already set.
 		 * <p>
-		 * Note that there is a known circular execution between getTRDData and 
-		 * getGUIUtilities if neither was previously set.  Each routine 
-		 * calls the other which may result in a second call to the other. 
+		 * Note that there is a known circular execution between getTRDData and
+		 * getGUIUtilities if neither was previously set.  Each routine
+		 * calls the other which may result in a second call to the other.
 		 * This has not been a problem.
-		 * 
+		 *
 		 * @return DDGUIUtilities which should be an instanceof org.safs.selenium.SeleniumGUIUtilities.
-		 * 
+		 *
 		 * @see JavaHook#getGUIUtilities()
 		 * @see #getHelper()
 		 * @see #getTRDData()
 		 * @see SeleniumGUIUtilities
 		 * @see SServerImpl
 		 */
+		@Override
 		public DDGUIUtilities getGUIUtilities() {
 			if (utils==null) {
 				if(RUNNING_SPC){
@@ -306,17 +320,18 @@ public class SeleniumJavaHook extends JavaHook {
 
 		/**
 		 * Use this method to retrieve/create the current/default LogUtilities instance.
-		 * If the LogUtilities has not been set this routine will instance a 
-		 * new org.safs.LogUtilities.  
-		 * 
+		 * If the LogUtilities has not been set this routine will instance a
+		 * new org.safs.LogUtilities.
+		 *
 		 * @return LogUtilities which should be an instanceof org.safs.LogUtilities.
-		 * 
+		 *
 		 * @see JavaHook#getLogUtilities()
 		 * @see org.safs.LogUtilities
 		 */
+		@Override
 		public LogUtilities getLogUtilities() {
 			if(log==null) {
-				try { log=new LogUtilities();} 
+				try { log=new LogUtilities();}
 				catch(Exception e) {}
 			}
 			return log;
@@ -325,16 +340,16 @@ public class SeleniumJavaHook extends JavaHook {
 
 		/**
 		 * Use this method to retrieve/create the current/default ProcessRequest instance.
-		 * If the ProcessRequest has not been set this routine will instance a 
-		 * new org.safs.ProcessRequest and populate it with the LogUtilities via 
-		 * getLogUtilities(), a TestRecordHelper via getTRDData(), and a new TestStepProcessor.  
-		 * Note that the call to getTRDData() may force the instantiation of the default 
-		 * ATestRecordHelper if one has not already been set.  A call to getLogUtilities() 
-		 * may also force the instantiation of the default LogUtilities if one has not already 
+		 * If the ProcessRequest has not been set this routine will instance a
+		 * new org.safs.ProcessRequest and populate it with the LogUtilities via
+		 * getLogUtilities(), a TestRecordHelper via getTRDData(), and a new TestStepProcessor.
+		 * Note that the call to getTRDData() may force the instantiation of the default
+		 * ATestRecordHelper if one has not already been set.  A call to getLogUtilities()
+		 * may also force the instantiation of the default LogUtilities if one has not already
 		 * been set.
-		 * 
+		 *
 		 * @return ProcessRequest which should be an instanceof org.safs.ProcessRequest
-		 * 
+		 *
 		 * @see JavaHook#getRequestProcessor()
 		 * @see org.safs.ProcessRequest
 		 * @see STestRecordHelper
@@ -343,24 +358,26 @@ public class SeleniumJavaHook extends JavaHook {
 		 * @see org.safs.LogUtilities
 		 * @see org.safs.TestStepProcessor
 		 */
+		@Override
 		public ProcessRequest getRequestProcessor() {
 
 			if(processor==null){
 		    	processor = new ProcessRequest(
 	            getTRDData(),                 // TestRecordHelper
 	            getLogUtilities());           // no custom test step support
-	            
+
 	            Processor linked = processor.getDriverCommandProcessor();
 				linked.setLogUtilities(getLogUtilities());
 				linked.setTestRecordData(getTRDData());
-	            
+
 	            Processor dc = new DCDriverCommand();
 	            dc.setChainedProcessor(linked);
 	            processor.setDriverCommandProcessor(dc);
 			}
 			return processor;
 		}
-		
+
+		@Override
 		public void start(){
 			String path = System.getProperty("safs.config.paths");
 			String [] paths = new String[0];
@@ -372,7 +389,7 @@ public class SeleniumJavaHook extends JavaHook {
 				System.err.println(msg);
 				return;
 			}
-			
+
 			ConfigureInterface config = null;
 			for(int i = 0; i < paths.length; i++){
 				File f = new File(paths[i]);
@@ -383,7 +400,7 @@ public class SeleniumJavaHook extends JavaHook {
 						config.addConfigureInterface(new ConfigureFile(f));
 					}
 				}
-				
+
 			}
 			((STestRecordHelper)data).setConfig(config);
 
@@ -395,7 +412,7 @@ public class SeleniumJavaHook extends JavaHook {
 
 			if((gatewayhost!=null)&&(gatewayhost.length()>0)) System.setProperty("http.proxyHost",gatewayhost);
 			if((gatewayport!=null)&&(gatewayport.length()>0)) System.setProperty("http.proxyPort",gatewayport);
-			
+
 			int intPort = DEFAULT_INT_SELENIUMPORT;
 			String seleniumPort = config.getNamedValue(DriverConstant.SECTION_SAFS_SELENIUM,"SELENIUMPORT");
 			if ((seleniumPort!=null)&&(seleniumPort.length()>0)) {
@@ -404,7 +421,7 @@ public class SeleniumJavaHook extends JavaHook {
 					Log.warn("SAFS_SELENIUM SELENIUMPORT=\""+ seleniumPort +"\" invalid and ignored...");
 				}
 			}
-			
+
 			String debuglog = config.getNamedValue(DriverConstant.SECTION_SAFS_SELENIUM,"DEBUGLOG");
 			String templog = debuglog;
 			if((debuglog!=null)&&(debuglog.length()==0)) debuglog = null;
@@ -436,7 +453,7 @@ public class SeleniumJavaHook extends JavaHook {
 				seleConfig.setTimeoutInSeconds(1000*60*5);// 5 minutes?
 				seleConfig.setTrustAllSSLCertificates(true);
 				seleConfig.setPort(intPort);
-				
+
 				//Inject user custom javascript code
 				URL userExtensionsJS = ClassLoader.getSystemResource(SAFS_USER_EXTENSIONS);
 				if(userExtensionsJS==null){
@@ -444,12 +461,12 @@ public class SeleniumJavaHook extends JavaHook {
 				}else{
 					Log.debug("User Extensions JavaScript File: "+userExtensionsJS.getFile());
 					File user_extensions_js = new File(userExtensionsJS.getFile());
-					
+
 					if (user_extensions_js.exists()) {
 						seleConfig.setUserExtensions(user_extensions_js);
 					}else{
 						Log.warn("User Extensions file doesn't exist: " + user_extensions_js.getAbsolutePath());
-						
+
 						String tmpdir = System.getProperty("java.io.tmpdir");
 						if(tmpdir==null){
 							File tmpFile = File.createTempFile("user-extensions",".js");
@@ -462,7 +479,7 @@ public class SeleniumJavaHook extends JavaHook {
 						Log.debug("SeleniumJavaHook user-extensions injection commencing from: "+ temp_user_extensions.getAbsolutePath());
 						BufferedReader _reader = new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream(SAFS_USER_EXTENSIONS)));
 						BufferedWriter _writer = new BufferedWriter(new FileWriter(temp_user_extensions));
-						String _line = null;			
+						String _line = null;
 						while(_reader.ready()){
 							_line = _reader.readLine();
 							_writer.write(_line);
@@ -474,18 +491,18 @@ public class SeleniumJavaHook extends JavaHook {
 						_reader.close();
 						seleConfig.setUserExtensions(temp_user_extensions);
 					}
-					
+
 //					seleConfig.setProxyInjectionModeArg(true);
 //					seleConfig.setUserJSInjection(true);
 					Log.debug("user extensions: "+seleConfig.getUserExtensions().getAbsolutePath());
 				}
-				
+
 				_server = new SeleniumServer(seleConfig);
 				Log.debug("Proxy Injection Mode: "+_server.getConfiguration().getProxyInjectionModeArg());
-				
+
 				//We should call boot() instead of start(), so that the injected Javascript can be used.
 				_server.boot();
-				
+
 				//After the selenium has boot up, we set a STAF Variable to inform engine that we are ready
 				helper.setSTAFVariable(SAFS_SELENIUM_SERVER_BOOTUP_READY, "true");
 			}catch(Exception e){
@@ -495,7 +512,7 @@ public class SeleniumJavaHook extends JavaHook {
 			try{
 				if(RUNNING_SPC)
 					new SPCGUI((SPC)this.utils);
-				super.start();	
+				super.start();
 			}
 			// should never happen?
 			catch(Exception x){
@@ -514,7 +531,7 @@ public class SeleniumJavaHook extends JavaHook {
 	            if (helper != null){
 	            	//Tell the JavaHook to stop running
 	            	data.setInputRecord(SHUTDOWN_RECORD);
-	            	//If the service SAFSVAR has not been started, method postNextHookTestEvent() 
+	            	//If the service SAFSVAR has not been started, method postNextHookTestEvent()
 	            	//will throw exception, as it will store the test-record by SAFSVAR.
 	            	helper.postNextHookTestEvent(semaphore_name,STAFHelper.SAFS_HOOK_TRD, data);
 	            }
@@ -531,7 +548,7 @@ public class SeleniumJavaHook extends JavaHook {
 				if (hook_shutdown() && allowSystemExit()) System.exit(0);
 	        }
 		}
-		
+
 		  /**
 		   * Perform final hook shutdown activities.
 		   * This is called before allowSystemExit.
@@ -539,7 +556,8 @@ public class SeleniumJavaHook extends JavaHook {
 		   * @see JavaHook#hook_shutdown()
 		   * @see #allowSystemExit()
 		   */
-		  protected boolean hook_shutdown(){
+		  @Override
+		protected boolean hook_shutdown(){
 		  	//shutdown Selenium Server
 		  	Log.info("SAFS SeleniumJavaHook is shutting down.");
 		  	_server.stop();
@@ -551,14 +569,14 @@ public class SeleniumJavaHook extends JavaHook {
 			}
 		  	return super.hook_shutdown();
 		  }
-		  		
+
 		/**
 		 * Launches a default instance of the SAFS/Selenium engine.
 		 * The "hook" is instanced and registered with STAF--which must already be running.
-		 * The hook is started and will show up as "Ready" to SAFS Drivers once initialization 
+		 * The hook is started and will show up as "Ready" to SAFS Drivers once initialization
 		 * is complete.
 		 * <p>
-		 * Assuming everything is properly CLASSPATHed, the default SAFS/Selenium Engine can be 
+		 * Assuming everything is properly CLASSPATHed, the default SAFS/Selenium Engine can be
 		 * launched simply with:
 		 * <ul>
 		 * java org.safs.selenium.SeleniumJavaHook
@@ -567,7 +585,7 @@ public class SeleniumJavaHook extends JavaHook {
 		public static void main (String[] args) {
 			Log.ENABLED = true;
 			Log.setLogLevel(Log.DEBUG);
-			
+
 			if(args.length > 0 && args[0].equalsIgnoreCase("SPC")){
 				RUNNING_SPC = true;
 				System.out.println("Selenium Process Container starting...");
@@ -581,7 +599,7 @@ public class SeleniumJavaHook extends JavaHook {
 			} else {
 				System.out.println("SAFS/Selenium Hook starting...");
 				LogUtilities logs=new LogUtilities();
-				
+
 				SeleniumJavaHook hook = new SeleniumJavaHook(SELENIUM_COMMANDS, logs);
 				hook.setHelper(SELENIUM_COMMANDS);
 				hook.getTRDData();

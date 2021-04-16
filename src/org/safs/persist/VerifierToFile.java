@@ -1,8 +1,20 @@
 /**
  * Copyright (C) SAS Institute, All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- */
-
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * Logs for developers, not published to API DOC.
  *
@@ -45,6 +57,18 @@ public class VerifierToFile extends AbstractRuntimeDataVerifier{
 	 * The Reader object of the bench file. It contains the expected values.
 	 */
 	protected Reader reader = null;
+
+
+	/**
+	 * Contains pairs of (elementName, alternativeValue), which will be used to set the value for a certain element.<br>
+	 * It has been instantiated in the constructor {@link #VerifierToFile(RuntimeDataInterface, String)}.<br>
+	 * It can be initialized in the subclass's constructor.<br>
+	 *
+	 * @see Persistable#getContents(Map, Set, boolean)
+	 * @see PersistableDefault#getContents(Map, Set, boolean)
+	 * @see Persistable#CONTAINER_ELEMENT
+	 */
+	protected Map<String,String> defaultElementValues = null;
 
 	/**
 	 * Holding the actual contents to verify, they are pairs of (flatKey, content) such as
@@ -104,6 +128,9 @@ public class VerifierToFile extends AbstractRuntimeDataVerifier{
 		checkedFields = new HashSet<String>();
 		nonMatchedMessages = new StringBuilder();
 		expectedContents = new HashMap<String, Object>();
+		//the Map 'defaultElementValues' can initialized in the subclass's constructor
+		defaultElementValues = new HashMap<String, String>();
+		//defaultElementValues.put(key, value);
 	}
 
 	/**
@@ -270,6 +297,7 @@ public class VerifierToFile extends AbstractRuntimeDataVerifier{
 		return false;
 	}
 
+	@Override
 	public PersistenceType getType(){
 		return PersistenceType.FILE;
 	}

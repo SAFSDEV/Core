@@ -1,12 +1,37 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.staf.service.input;
 
-import com.ibm.staf.*;
-import com.ibm.staf.service.*;
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Locale;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+import java.util.Vector;
 
 import org.safs.Log;
-import org.safs.tools.*;
+import org.safs.tools.CaseInsensitiveFile;
+
+import com.ibm.staf.STAFResult;
+import com.ibm.staf.service.STAFCommandParseResult;
+import com.ibm.staf.service.STAFCommandParser;
+import com.ibm.staf.service.STAFServiceInterfaceLevel1;
 
 /*******************************************************************************************
  * Copyright 2003 SAS Institute
@@ -75,8 +100,8 @@ import org.safs.tools.*;
  * <p>
  * <h2>2.0 SAFSFileReader Commands</h2>
  * <p>
- * Note, there must be a uniquely qualified match for NAME/ID combinations listed below.  
- * If the same Process has opened two different files with the same ID from 2 different 
+ * Note, there must be a uniquely qualified match for NAME/ID combinations listed below.
+ * If the same Process has opened two different files with the same ID from 2 different
  * Handles, then you will have to use HANDLE, instead of NAME.
  * <p>
  * <h3>2.1 OPEN </h3>
@@ -98,7 +123,7 @@ import org.safs.tools.*;
  * <h3>2.2 READL </h3>
  * <p>
  * The READL command simply returns the next line of text from the file.<br>
- * No special processing or handling happens on the text.  If we have reached 
+ * No special processing or handling happens on the text.  If we have reached
  * the end of file, the request returns ":EOF:".
  * <p>
  * <b>Syntax:</b>
@@ -154,12 +179,12 @@ import org.safs.tools.*;
  * <p>
  * <b>2.3.4</b> STATUS returns one of "OPEN", "CLOSED", or "EOF".  If the "CLOSED"
  * status is returned, that generally means some type of critical failure has occurred.
- * A file that is at EOF is still open.  However, this basic reader does not support 
- * moving the file pointer backwards.  So, essentially, the object is not useful at 
+ * A file that is at EOF is still open.  However, this basic reader does not support
+ * moving the file pointer backwards.  So, essentially, the object is not useful at
  * this point.
  * <p>
- * <b>2.3.5</b> FILENAME is the short filename of the file without any path information.  
- * Due to the OPEN parameters DIR and EXT, the filename of the file may be different than 
+ * <b>2.3.5</b> FILENAME is the short filename of the file without any path information.
+ * Due to the OPEN parameters DIR and EXT, the filename of the file may be different than
  * any relative path information that was provided to the OPEN command.
  * <p>
  * <b>2.3.6</b> FULLPATH is the full path to the file.  Due to the OPEN parameters DIR and
@@ -192,7 +217,7 @@ import org.safs.tools.*;
  * <p>
  * HELP
  * <p>
- * Software Automation Framework Support (SAFS) http://safsdev.sourceforge.net<br>
+ * Software Automation Framework Support (SAFS) http://safsdev:8880<br>
  * Software Testing Automation Framework (STAF) http://staf.sourceforge.net<br>
  *********************************************************************************************/
 public class SAFSFileReader implements STAFServiceInterfaceLevel1 {
@@ -207,19 +232,19 @@ public class SAFSFileReader implements STAFServiceInterfaceLevel1 {
 
 	/****
 	 * The fully qualified name of the localizable ResourceBundle for this class.
-	 * Subclasses are expected to provide their own additional ResourceBundle handling 
+	 * Subclasses are expected to provide their own additional ResourceBundle handling
 	 * file and subroutine when appropriate.
 	 ****/
 	public static final String SFR_SERVICE_SAFSFILE_BUNDLE_NAME = "org.safs.staf.service.SAFSFileReaderResourceBundle";
 
-	
+
 	/****
 	 * The maximum number of options/parameters we expect a service initialization request to receive.
 	 * Subclasses are expected to override this value when appropriate.
 	 ****/
 	protected             int  SFR_SERVICE_INIT_PARMS_MAX      = 2;	// DIR & EXT
 
-	
+
 	/****
 	 * The maximum number of options/parameters we expect a running service to receive in a request.
 	 * Subclasses are expected to override this value when appropriate.
@@ -230,37 +255,37 @@ public class SAFSFileReader implements STAFServiceInterfaceLevel1 {
 	// LOAD YOUR OWN RESOURCEBUNDLE FOR LOCALIZABLE TEXT
 	// ===================================================================================
 	protected static ResourceBundle safsfilereader_resources = null;
-	
+
 	static {
-		try{ 
+		try{
 			safsfilereader_resources = ResourceBundle.getBundle(SFR_SERVICE_SAFSFILE_BUNDLE_NAME, Locale.getDefault(),ClassLoader.getSystemClassLoader());
 			Log.info("SAFSFileReader loading "+ SFR_SERVICE_SAFSFILE_BUNDLE_NAME);
 		}
-		catch(MissingResourceException mr){ 
+		catch(MissingResourceException mr){
 			Log.info("SAFSFileReader retrying load of "+ SFR_SERVICE_SAFSFILE_BUNDLE_NAME);
 			try{
-				safsfilereader_resources = ResourceBundle.getBundle(SFR_SERVICE_SAFSFILE_BUNDLE_NAME, Locale.getDefault(),Thread.currentThread().getContextClassLoader()); 
+				safsfilereader_resources = ResourceBundle.getBundle(SFR_SERVICE_SAFSFILE_BUNDLE_NAME, Locale.getDefault(),Thread.currentThread().getContextClassLoader());
 				Log.info("SAFSFileReader loading "+ SFR_SERVICE_SAFSFILE_BUNDLE_NAME);
 			}
-			catch(Exception e){ 
-				System.err.println( e.getMessage()); 
+			catch(Exception e){
+				System.err.println( e.getMessage());
 				Log.info("SAFSFileReader retry failed to load "+ SFR_SERVICE_SAFSFILE_BUNDLE_NAME, e);
 			}
 	    }
-		catch(Exception e){ 
-			System.err.println( e.getMessage()); 
+		catch(Exception e){
+			System.err.println( e.getMessage());
 			Log.info("SAFSFileReader failed to load "+ SFR_SERVICE_SAFSFILE_BUNDLE_NAME, e);
 		}
 	}
-	
-	public static final String SFR_RBKEY_NOT_IMPLEMENTED = "not_implemented";	
-	public static final String SFR_RBKEY_OPEN_FILES      = "open_files";	
+
+	public static final String SFR_RBKEY_NOT_IMPLEMENTED = "not_implemented";
+	public static final String SFR_RBKEY_OPEN_FILES      = "open_files";
 	public static final String SFR_RBKEY_UCPATH          = "PATH";
 	public static final String SFR_RBKEY_SYNC_ERROR      = "storage_sync_error";
 	public static final String SFR_RBKEY_REQUIRED        = "required";
 	public static final String SFR_RBKEY_ERROR_NOT_INTEGER = "not_integer";
 	// ===================================================================================
-	
+
 	public static final String SFR_SERVICE_OPTION_DIR          = "DIR";
 	public static final String SFR_SERVICE_OPTION_EXT          = "EXT";
 
@@ -317,20 +342,20 @@ public class SAFSFileReader implements STAFServiceInterfaceLevel1 {
 
 	/*******************************************************************************************
 	 * The constructor used by the SAFSFileReader.
-	 * 
+	 *
 	 * All subclasses MUST invoke this constructor prior to completing their initialization.<br>
 	 * Invoke this constructor from the subclass with:
 	 * <p>
 	 * &nbsp; &nbsp; super();
 	 * <p>
-	 * This constructor will initialize the STAFCommandParser that will be used for all requests 
+	 * This constructor will initialize the STAFCommandParser that will be used for all requests
 	 * sent to the service.
 	 ******************************************************************************************/
 	public SAFSFileReader (){
-		
-		// ALL SUBCLASSES MUST CALL THE SUPERCLASS CONSTRUCTOR		
+
+		// ALL SUBCLASSES MUST CALL THE SUPERCLASS CONSTRUCTOR
 		// super();
-		
+
  		if (parser == null) {
  			parser = new STAFCommandParser(SFR_SERVICE_REQUEST_ARGS_MAX);
 
@@ -342,12 +367,12 @@ public class SAFSFileReader implements STAFServiceInterfaceLevel1 {
  		}
 	}
 
-	
+
 	/*******************************************************************************************
 	 * Retrieves potentially localized text from the resource bundle
-	 * 
-	 * Localized subclasses should provide a similar function or override this function. If the 
-	 * subclass function fails to locate the message in the subclass's ResourceBundle, then the 
+	 *
+	 * Localized subclasses should provide a similar function or override this function. If the
+	 * subclass function fails to locate the message in the subclass's ResourceBundle, then the
 	 * subclass should call the superclass function to look there.
 	 * <p>
 	 * &nbsp; &nbsp; text = super.text(resourceKey);
@@ -366,8 +391,8 @@ public class SAFSFileReader implements STAFServiceInterfaceLevel1 {
 
 	/**************************************************************
 	 * Add your own command options in the STAFCommandParser.
-	 * The format of the call is the OPTION string, the maximum times 
-	 * it can appear in a single request, and whether it is standalone, or whether an 
+	 * The format of the call is the OPTION string, the maximum times
+	 * it can appear in a single request, and whether it is standalone, or whether an
 	 * associated option value is required, or optional.
 	 * <p>
 	 * &nbsp; &nbsp; aparser.addOption(A_COMMAND_CONSTANT, 1, STAFCommandParser.VALUENOTALLOWED);<br>
@@ -384,8 +409,8 @@ public class SAFSFileReader implements STAFServiceInterfaceLevel1 {
 
 
 	/**************************************************************
-	 * Add your primary command options to the list of mutually exclusive commands.  
-	 * You must feed these up the superclass chain to enable all superclass 
+	 * Add your primary command options to the list of mutually exclusive commands.
+	 * You must feed these up the superclass chain to enable all superclass
 	 * commands, too.
 	 * <p>
 	 * &nbsp; &nbsp; requestoptions += s+ COMMAND1 +s+ COMMAND2 +s+ COMMAND3 +s;<br>
@@ -394,13 +419,13 @@ public class SAFSFileReader implements STAFServiceInterfaceLevel1 {
 	 * @param requestoptions the space-delimited list of commands
 	 **************************************************************/
 	protected String buildCommandList(String requestoptions){
-		// ADD YOUR SUBCLASS REQUEST OPTION GROUP 
+		// ADD YOUR SUBCLASS REQUEST OPTION GROUP
 		return requestoptions;
 	}
 
 
 	/**************************************************************
-	 * Add command option groups as needed.  These are often command keywords 
+	 * Add command option groups as needed.  These are often command keywords
 	 * that are optional--grouped as one, or the other, but only a certain number (or 1)
 	 * of the options is valid for any given command.
 	 * <p>
@@ -418,16 +443,16 @@ public class SAFSFileReader implements STAFServiceInterfaceLevel1 {
 
 
 	/**************************************************************
-	 * Add command option "requirements.  This is where you specify which options 
-	 * or items MUST appear together.  For example, an OPEN command requires 
-	 * that the user specifies which FILE to open along with the ID 
+	 * Add command option "requirements.  This is where you specify which options
+	 * or items MUST appear together.  For example, an OPEN command requires
+	 * that the user specifies which FILE to open along with the ID
 	 * to give the new file.
 	 * <p>
 	 * &nbsp; &nbsp; aparser.addOptionNeeds( OPEN_COMMAND, FILE_OPTION );<br>
 	 * &nbsp; &nbsp; aparser.addOptionNeeds( OPEN_COMMAND, ID_OPTION );<br>
 	 * &nbsp; &nbsp; super.addCommandOptionNeeds( aparser );<br>
 	 * <p>
-	 * The example shows that the OPEN command needs a FILE specified, 
+	 * The example shows that the OPEN command needs a FILE specified,
 	 * and an ID specified.
 	 * <p>
 	 * @param aparser the parser instance that will process incoming requests.
@@ -438,8 +463,8 @@ public class SAFSFileReader implements STAFServiceInterfaceLevel1 {
 
 
 	/**************************************************************
-	 * Like primary commands, the QUERY command has a list of mutually 
-	 * exclusive options.  You must feed these up the chain so that 
+	 * Like primary commands, the QUERY command has a list of mutually
+	 * exclusive options.  You must feed these up the chain so that
 	 * all superclass QUERY options are made available, too.
 	 * <p>
 	 * &nbsp; &nbsp; queryoptions += s+ STATUS +s+ FILENAME +s+ FULLPATH +s;<br>
@@ -454,13 +479,13 @@ public class SAFSFileReader implements STAFServiceInterfaceLevel1 {
 
 
 	/**************************************************************
-	 * Add your initialization options for your service.  
-	 * These options are like the command options, but these are handled by a different 
-	 * parser.  Define what the valid options are for creating the 
+	 * Add your initialization options for your service.
+	 * These options are like the command options, but these are handled by a different
+	 * parser.  Define what the valid options are for creating the
 	 * service.
 	 * <p>
-	 * The format of the call is the OPTION string, the maximum times 
-	 * it can appear in a single request, and whether it is standalone, or whether an 
+	 * The format of the call is the OPTION string, the maximum times
+	 * it can appear in a single request, and whether it is standalone, or whether an
 	 * associated option value is required, or optional.
 	 * <p>
 	 * &nbsp; &nbsp; aparser.addOption(A_SERCICE_OPTION, 3, STAFCommandParser.VALUENOTALLOWED);<br>
@@ -469,18 +494,18 @@ public class SAFSFileReader implements STAFServiceInterfaceLevel1 {
 	 * <p>
 	 * @param registrar the parser handling the service init request.
 	 **************************************************************/
-	protected void addServiceInitOptions ( STAFCommandParser registrar ){	
+	protected void addServiceInitOptions ( STAFCommandParser registrar ){
 		// ADD YOUR SUBCLASS SERVICE STARTUP OPTIONS HERE
 	}
 
 
 	/**************************************************************
-	 * Use to validate the Service initialization string after a request 
+	 * Use to validate the Service initialization string after a request
 	 * for initialization has beenr received.
 	 * <p>
-	 * This is where you check to see which options exist in the request, 
-	 * and act upon them.  Make sure you also forward the validation 
-	 * request up the food chain so the superclasses can validate their 
+	 * This is where you check to see which options exist in the request,
+	 * and act upon them.  Make sure you also forward the validation
+	 * request up the food chain so the superclasses can validate their
 	 * service init options, too.
 	 * <p>
 	 * &nbsp; &nbsp; return super.validateServiceParseResult( parsedData );<br>
@@ -492,18 +517,18 @@ public class SAFSFileReader implements STAFServiceInterfaceLevel1 {
 		return STAFResult.Ok;
 	}
 
-			
+
 	/**************************************************************
 	 * Provide STATUS information for the QUERY STATUS command.
 	 * The subclass can also call the superclass for more information,
-	 * but this is not required.  This root class has already added 
+	 * but this is not required.  This root class has already added
 	 * info to the string prior to the call into the subclass.
 	 * <p>
 	 * &nbsp; &nbsp; return super.getSTATUSInfo( textfile, info );<br>
 	 * <p>
 	 * @param textfile the instance of the SAFSFile object to play with.
 	 * <p>
-	 * @param info the status string that will be displayed for the 
+	 * @param info the status string that will be displayed for the
 	 *             QUERY STATUS command.
 	 * <p>
 	 * @return the text to be displayed by the QUERY STATUS command.
@@ -516,52 +541,52 @@ public class SAFSFileReader implements STAFServiceInterfaceLevel1 {
 
 	/**************************************************************
 	 * Handle any added QUERY options here.
-	 * This root class has already added info to the string prior 
-	 * to the call into the subclass.  You may still forward the 
+	 * This root class has already added info to the string prior
+	 * to the call into the subclass.  You may still forward the
 	 * request to any superclass "just in case".
 	 * <p>
 	 * &nbsp; &nbsp; return super.getQUERYInfo( textfile, parsedData, info );<br>
 	 * <p>
 	 * @param textfile the instance of the SAFSFile object to play with.
 	 * <p>
-	 * @param parsedData the parsed request to interrogate for QUERY option 
+	 * @param parsedData the parsed request to interrogate for QUERY option
 	 *        parameter values.
 	 * <p>
-	 * @param info the status string that will be displayed for the 
+	 * @param info the status string that will be displayed for the
 	 *             QUERY STATUS command.
 	 * <p>
 	 * @return the text to be displayed by the QUERY STATUS command.
 	 **************************************************************/
-	protected String  getQUERYInfo  (SAFSFile               textfile, 
+	protected String  getQUERYInfo  (SAFSFile               textfile,
 	                                 STAFCommandParseResult parsedData,
 	                                 String                 info       ){
 		return (info == null) ? (new String()): info;
 	}
-									  
+
 
 	/**************************************************************
 	 * Override this function and return your version of SFR_SERVICE_SAFSFILE_LISTINFO.
-	 * You only have to call the superclass if you are not overriding the 
+	 * You only have to call the superclass if you are not overriding the
 	 * value for some reason.
 	 * <p>
-	 * @return the text substring to be inserted with the LIST response 
+	 * @return the text substring to be inserted with the LIST response
 	 *         for each file listed.
 	 **************************************************************/
 	protected String  getLISTInfo  (){ 	return SFR_SERVICE_SAFSFILE_LISTINFO; }
-									  
+
 
 	/**************************************************************
 	 * Handle any added OPEN options here.
-	 * This root class has already added info to the string prior 
-	 * to the call into the subclass.  You may still forward the 
+	 * This root class has already added info to the string prior
+	 * to the call into the subclass.  You may still forward the
 	 * request to any superclass "just in case".
 	 * <p>
 	 * &nbsp; &nbsp; return super.getOPENInfo( parsedData, info );<br>
 	 * <p>
-	 * @param parsedData the parsed request to interrogate for OPEN option 
+	 * @param parsedData the parsed request to interrogate for OPEN option
 	 *        parameter values.
 	 * <p>
-	 * @param info the status string that will be displayed for the 
+	 * @param info the status string that will be displayed for the
 	 *             OPEN command.
 	 * <p>
 	 * @return any text to be added to the OPEN response.
@@ -569,17 +594,17 @@ public class SAFSFileReader implements STAFServiceInterfaceLevel1 {
 	protected String  getOPENInfo   (STAFCommandParseResult parsedData, String info){
 		return (info == null) ? (new String()): info;
 	}
-	
+
 
 	/**************************************************************
 	 * Add your HELP text response here.
-	 * The root class will handle its own HELP substring.  You will still forward the 
+	 * The root class will handle its own HELP substring.  You will still forward the
 	 * request to any superclass to have their HELP options displayed, too.
 	 * <p>
 	 * &nbsp; &nbsp; info += MY_LONG_INVOLVED_FORMATTED_HELP_TEXT;<br>
 	 * &nbsp; &nbsp; return super.getHELPInfo( info );<br>
 	 * <p>
-	 * @param info the response string that will be displayed for the 
+	 * @param info the response string that will be displayed for the
 	 *             HELP command.
 	 * <p>
 	 * @return any text to be prepend the superclass response.
@@ -600,13 +625,13 @@ public class SAFSFileReader implements STAFServiceInterfaceLevel1 {
 	 * <p>
 	 * @param handle the Handle of the Process initiating the request to open the file.
 	 * <p>
-	 * @param fileid the unique fileid to be assigned the file.  fileids should be 
+	 * @param fileid the unique fileid to be assigned the file.  fileids should be
 	 *               uniquely identifiable among all Handles for a given Process.
 	 * <p>
 	 * @param file the File object used to open the file.
 	 * <p>
-	 * @param parsedData the parsed result containing the OPEN command and any 
-	 *                   of the user-supplied options that may be needed when 
+	 * @param parsedData the parsed result containing the OPEN command and any
+	 *                   of the user-supplied options that may be needed when
 	 *                   opening the file or setting options in the file handler.
 	 * <p>
 	 * @return the instance of the SAFSFile object that has been created.
@@ -617,15 +642,15 @@ public class SAFSFileReader implements STAFServiceInterfaceLevel1 {
 		return new SAFSFile ( machine, process, handle, fileid, file);
 	}
 
-	
+
 	/**************************************************************
-	 * A subclass must override this function to handle requests not 
-	 * handled by the superclass.  The subclass must also forward any 
+	 * A subclass must override this function to handle requests not
+	 * handled by the superclass.  The subclass must also forward any
 	 * unhandled requests to the superclass function.
 	 * <p>
 	 * &nbsp; &nbsp; return super.processRequest(result, machine, process, handle, parsedData);<br>
 	 * <p>
-	 * @param result the object containing the return code and response 
+	 * @param result the object containing the return code and response
 	 *               string for the request.
 	 * <p>
 	 * @param machine the machine initiating the request.
@@ -634,7 +659,7 @@ public class SAFSFileReader implements STAFServiceInterfaceLevel1 {
 	 * <p>
 	 * @param handle the Handle of the Process initiating the request.
 	 * <p>
-	 * @param parsedData the parsed result containing the command and the 
+	 * @param parsedData the parsed result containing the command and the
 	 *                   user-supplied options provided.
 	 * <p>
 	 * @return the result object after processing the request.
@@ -650,7 +675,7 @@ public class SAFSFileReader implements STAFServiceInterfaceLevel1 {
 
 	/**************************************************************
 	 * perform final termination cleanup operations for your service.
-	 * The service is being shutdown by STAF.  You must also forward 
+	 * The service is being shutdown by STAF.  You must also forward
 	 * this shutdown request to your superclass.
 	 * <p>
 	 * &nbsp; &nbsp; return super.shutdown();<br>
@@ -666,7 +691,7 @@ public class SAFSFileReader implements STAFServiceInterfaceLevel1 {
 	protected final String buildHELPInfo(){
 
 		String helpinfo =
-		
+
 		       r+
 		       "OPEN  ID <fileID> FILE <filename> "              +r+
 		                                                          r+
@@ -679,18 +704,18 @@ public class SAFSFileReader implements STAFServiceInterfaceLevel1 {
 		       "[HANDLE <handle> | NAME <process>] LIST"         +r+
 		                                                          r+
 		       "HELP  (you are here)"                            +r;
-		       
+
 		String info = getHELPInfo(new String());
-		
+
 		if(info != null) helpinfo = info + helpinfo;
-		
+
 		return helpinfo;
 	}
 
 
 	// ROOT ROUTINE THAT INITIATES THE ADDING OF COMMAND OPTIONS
 	protected final void addBaseCommandOptions(STAFCommandParser aparser){
-		
+
 		aparser.addOption( SFR_SERVICE_REQUEST_OPEN   , 1, STAFCommandParser.VALUENOTALLOWED );
 		aparser.addOption( SFR_SERVICE_REQUEST_READL  , 1, STAFCommandParser.VALUENOTALLOWED );
 		aparser.addOption( SFR_SERVICE_REQUEST_QUERY  , 1, STAFCommandParser.VALUENOTALLOWED );
@@ -707,23 +732,23 @@ public class SAFSFileReader implements STAFServiceInterfaceLevel1 {
 		aparser.addOption( SFR_SERVICE_PARM_FILENAME  , 1, STAFCommandParser.VALUENOTALLOWED );
 		aparser.addOption( SFR_SERVICE_PARM_FULLPATH  , 1, STAFCommandParser.VALUENOTALLOWED );
 		aparser.addOption( SFR_SERVICE_PARM_LASTERROR , 1, STAFCommandParser.VALUENOTALLOWED );
-		
+
 		addCommandOptions ( aparser );
 	}
-	
+
 
 	// ROOT ROUTINE THAT INITIATES ADDING THE SERVICE INIT OPTIONS
 	protected final void   addBaseServiceInitOptions  (STAFCommandParser registrar) {
 
 		registrar.addOption( SFR_SERVICE_OPTION_DIR, 1, STAFCommandParser.VALUEREQUIRED );
 		registrar.addOption( SFR_SERVICE_OPTION_EXT, 1, STAFCommandParser.VALUEREQUIRED );
-		
+
 		addServiceInitOptions ( registrar );
 	}
-	
+
 
 	// ROOT ROUTINE THAT INITIATES VALIDATING THE SERVICE INIT REQUEST
-	protected  final int validateBaseServiceParseResult (STAFCommandParseResult parsedData){ 
+	protected  final int validateBaseServiceParseResult (STAFCommandParseResult parsedData){
 
 		dir = parsedData.optionValue(SFR_SERVICE_OPTION_DIR);
 		ext = parsedData.optionValue(SFR_SERVICE_OPTION_EXT);
@@ -760,7 +785,7 @@ public class SAFSFileReader implements STAFServiceInterfaceLevel1 {
 	// ROOT ROUTINE THAT INITIATES THE BUILDING THE LIST OF EXCLUSIVE COMMANDS
 	protected final void buildBaseCommandList( STAFCommandParser aparser) {
 
-		// EACH SUBLCLASS MUST START THE BUILD OF requestoptions		
+		// EACH SUBLCLASS MUST START THE BUILD OF requestoptions
 		String requestoptions = SFR_SERVICE_REQUEST_OPEN  +s+
 			                    SFR_SERVICE_REQUEST_READL +s+
 			                    SFR_SERVICE_REQUEST_QUERY +s+
@@ -770,7 +795,7 @@ public class SAFSFileReader implements STAFServiceInterfaceLevel1 {
 
 		String options = buildCommandList(new String());
 		if(options != null) requestoptions += s+ options;
-		
+
 	    aparser.addOptionGroup(requestoptions, 1, 1);
 	}
 
@@ -792,10 +817,10 @@ public class SAFSFileReader implements STAFServiceInterfaceLevel1 {
 		                      SFR_SERVICE_PARM_FILENAME    +s+
 		                      SFR_SERVICE_PARM_FULLPATH    +s+
 		                      SFR_SERVICE_PARM_LASTERROR   +s;
-		
+
 		String options = buildQueryCommandList( new String() );
 		if (options != null) queryoptions += s+ options;
-		
+
 		aparser.addOptionGroup( queryoptions, 0, 1);
 	}
 
@@ -819,12 +844,13 @@ public class SAFSFileReader implements STAFServiceInterfaceLevel1 {
 		aparser.addOptionNeed( SFR_SERVICE_PARM_FILENAME    , SFR_SERVICE_REQUEST_QUERY );
 		aparser.addOptionNeed( SFR_SERVICE_PARM_FULLPATH    , SFR_SERVICE_REQUEST_QUERY );
 		aparser.addOptionNeed( SFR_SERVICE_PARM_LASTERROR   , SFR_SERVICE_REQUEST_QUERY );
-		
+
 		addCommandOptionNeeds( aparser );
 	}
 
 
 	// p/o STAFServiceInterfaceLevel1
+	@Override
 	public final int init (String name, String params){
 
 		servicename   = name;
@@ -842,6 +868,7 @@ public class SAFSFileReader implements STAFServiceInterfaceLevel1 {
 
 
 	// p/o STAFServiceInterfaceLevel1
+	@Override
 	public final STAFResult acceptRequest(String machine, String process, int handle, String request) {
 
 		String response = null;
@@ -1224,7 +1251,8 @@ public class SAFSFileReader implements STAFServiceInterfaceLevel1 {
 
 
 	// p/o Interface STAFServiceInterfaceLevel1
-	public final int term(){ 
+	@Override
+	public final int term(){
 
 		int rc = shutdown();
 
@@ -1245,7 +1273,7 @@ public class SAFSFileReader implements STAFServiceInterfaceLevel1 {
 		handles = null;
 		processes = null;
 
-		return rc;				
+		return rc;
 	}
 }
 

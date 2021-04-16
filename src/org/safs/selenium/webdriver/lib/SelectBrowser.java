@@ -1,7 +1,20 @@
 /**
- ** Copyright (C) SAS Institute, All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
 * History:<br>
 *
@@ -12,20 +25,33 @@
 *  FEB 19, 2014    (DHARMESH) Fixed local browser support.
 *  APR 15, 2014	   (DHARMESH) Fixed IE click issue to disable nativeEvents to false.
 *  AUG 29, 2014    (DHARMESH) Add selenium grid host and port support.
-*  SEP 04, 2014    (LeiWang) Handle FireFox's profile.
-*  MAR 17, 2015    (LeiWang) Handle Chrome's custom data, profile.
-*  APR 08, 2015    (LeiWang) Modify to turn off Chrome's starting options.
-*  MAR 07, 2016    (LeiWang) Handle preference setting for "chrome" and "firefox".
-*  MAR 23, 2016    (LeiWang) Modify setChromeCapabilities(): handle "command line options" and "preferences" for "chrome".
-*  APR 26, 2016    (LeiWang) Modify getDesiredCapabilities(): Get value of 'unexpectedAlertBehaviour' from Processor and 'System property'
+*  SEP 04, 2014    (Lei Wang) Handle FireFox's profile.
+*  MAR 17, 2015    (Lei Wang) Handle Chrome's custom data, profile.
+*  APR 08, 2015    (Lei Wang) Modify to turn off Chrome's starting options.
+*  MAR 07, 2016    (Lei Wang) Handle preference setting for "chrome" and "firefox".
+*  MAR 23, 2016    (Lei Wang) Modify setChromeCapabilities(): handle "command line options" and "preferences" for "chrome".
+*  APR 26, 2016    (Lei Wang) Modify getDesiredCapabilities(): Get value of 'unexpectedAlertBehaviour' from Processor and 'System property'
 *                                                             and set it for all browsers.
-*  NOV 09, 2016    (LeiWang) Copied constants to org.safs.Contants and refer to them.
-*  JAN 03, 2017    (LeiWang) Modified getBrowserInstance() and getDesiredCapabilities() and added prepareHttpProxy(): Handle the HTTP proxy setting.
-*  JAN 06, 2017    (LeiWang) Modified addFireFoxPreference(): catch IllegalArgumentException inside the loop for each FirefoxProfile.setPreference().
+*  NOV 09, 2016    (Lei Wang) Copied constants to org.safs.Contants and refer to them.
+*  JAN 03, 2017    (Lei Wang) Modified getBrowserInstance() and getDesiredCapabilities() and added prepareHttpProxy(): Handle the HTTP proxy setting.
+*  JAN 06, 2017    (Lei Wang) Modified addFireFoxPreference(): catch IllegalArgumentException inside the loop for each FirefoxProfile.setPreference().
+*  JAN 06, 2017    (Lei Wang) Modified getDesiredCapabilities(): ONLY set capability 'unexpectedAlertBehaviour' for IE browser.
+*                                     selenium 3.4 & firefox 53.0 & gecko v0.18.0 throw InvalidArgumentException: ignore was not a valid unhandledPromptBehavior value
+*  DEC 25, 2017    (Lei Wang) Added isBrowser(): compare current browser name with the expected browser's name.
+*  MAY 15, 2018    (Lei Wang) Modified setChromeCapabilities(): support option "--no-sandbox".
+*  JUN 04, 2019    (Lei Wang) Modified setChromeCapabilities(): support command "setNetworkConditions".
+*  JUL 06, 2019    (Lei Wang) Modified getDesiredCapabilities(): handle custom capabilities.
+*  OCT 09, 2019    (Lei Wang) Modified setChromeCapabilities(): handle 'experimental options',
+*                                                              accept also json string (instead of json file) for parameter 'KEY_CHROME_PREFERENCE', 'KEY_CHROME_EXPERIMENTAL_OPTIONS' and 'KEY_FIREFOX_PROFILE_PREFERENCE'.
+*  OCT 10, 2019    (Lei Wang) Modified setChromeCapabilities(), Added fromJsonString(): accept also CSV string (an array of key:value, such as "key:value, key:value, key:value") for parameter 'KEY_CHROME_PREFERENCE', 'KEY_CHROME_EXPERIMENTAL_OPTIONS' and 'KEY_FIREFOX_PROFILE_PREFERENCE'.
+*  OCT 11, 2019    (Lei Wang) Modified getDesiredCapabilities(): set the capability "unexpectedAlertBehaviour" for all browsers, user can turn if off if he wants.
+*  APR 14, 2020    (Lei Wang) Modified getDesiredCapabilities(): Allow user to add custom capabilities as a json file.
+*  APR 27, 2020    (Lei Wang) Modified setChromeCapabilities(): Load chrome's entensions.
 */
 package org.safs.selenium.webdriver.lib;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +62,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
-import org.openqa.selenium.firefox.internal.ProfilesIni;
+import org.openqa.selenium.firefox.ProfilesIni;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -63,7 +89,7 @@ public class SelectBrowser {
 	 * The value is colon separated string as "proxyserver:port" */
 	public static final String KEY_PROXY_SETTING = BrowserConstants.KEY_PROXY_SETTING;
 	/** 'KEY_PROXY_BYPASS_ADDRESS' the key for proxy bypass address string;
-	 * The value is comma separated string as "localhost, internal.server" */
+	 * The value is comma separated string as "localhost,tadsrv,rnd" */
 	public static final String KEY_PROXY_BYPASS_ADDRESS = BrowserConstants.KEY_PROXY_BYPASS_ADDRESS;
 	/** 'FirefoxProfile' the key for firefox profile name/filename string;
 	 * The value is something like "myprofile" or "&lt;AbsolutePath>/ppc2784x.default" */
@@ -79,19 +105,31 @@ public class SelectBrowser {
 	 * <li><b>command-line-options</b> json data, such as { "lang":"zh-cn", "disable-download-notification":"" },
 	 *     refer to <a href="http://peter.sh/experiments/chromium-command-line-switches/">detail options</a>
 	 * <li><b>preferences</b> json data, it is indicated by a special key {@link #KEY_CHROME_PREFERENCE_JSON_KEY},
-	 *     such as { "<b>seplus.chrome.preference.json.key</b>": { "intl.accept_languages":"zh-cn", intl.charset_default:"utf-8" } },
+	 *     such as { "<b>seplus.chrome.preference.json.key</b>": { "intl.accept_languages":"zh-cn", "intl.charset_default":"utf-8" } },
 	 *     refer to <a href="https://src.chromium.org/viewvc/chrome/trunk/src/chrome/common/pref_names.cc">detail preferences</a>
 	 * <ol>
 	 */
 	public static final String KEY_CHROME_PREFERENCE = BrowserConstants.KEY_CHROME_PREFERENCE;//"Chrome Command Line Options" and "Chrome Preferences" file
 
 	/** 'seplus.chrome.preference.json.key' the key for chrome preferences, which points to json data,
-	 * such as { "intl.accept_languages":"zh-cn", intl.charset_default:"utf-8" },
-	 * refer to <a href="https://src.chromium.org/viewvc/chrome/trunk/src/chrome/common/pref_names.cc">detail preferences</a>*/
+	 * such as { "intl.accept_languages":"zh-cn", "intl.charset_default":"utf-8" },
+	 * refer to <a href="https://src.chromium.org/viewvc/chrome/trunk/src/chrome/common/pref_names.cc">detail preferences</a><br>
+	 * <b>NOTE: We can also specify this by key "prefs" for {@link #KEY_CHROME_EXPERIMENTAL_OPTIONS}.</b>
+	 */
 	public static final String KEY_CHROME_PREFERENCE_JSON_KEY = BrowserConstants.KEY_CHROME_PREFERENCE_JSON_KEY;//Chrome Preferences
 
-	/** 'prefs' the key used to set chrome Experimental Option. Used internally. */
+	/** The chrome Experimental Option <b>prefs</b>. Used internally. */
 	private static final String KEY_CHROME_PREFS = BrowserConstants.KEY_CHROME_PREFS;//setExperimentalOption
+
+	/** '<b>experimentalOptions</b>' the key for chrome Experimental Options, it contains:
+	 * <ol>
+	 * <li><b>experimental options</b> json data, such as { "useAutomationExtension":"false",
+	 *                                                      "prefs": { "intl.accept_languages":"zh-cn", "intl.charset_default":"utf-8" },
+	 *                                                      "excludeSwitches": ["enable-automation", "disable-component-update", "ignore-certificate-errors"]}
+	 * </ol>
+	 */
+	public static final String KEY_CHROME_EXPERIMENTAL_OPTIONS = BrowserConstants.KEY_CHROME_EXPERIMENTAL_OPTIONS;//setExperimentalOption
+
 
 	/**'user-data-dir' the parameter name for chrome options, a general custom data settings.<br>
 	 * The value is specified in <a href="http://peter.sh/experiments/chromium-command-line-switches">chrome options</a><br>
@@ -115,7 +153,8 @@ public class SelectBrowser {
 	 * like "disable-component-update, ignore-certificate-errors" or "disable-component-update; ignore-certificate-errors",<br>
 	 * <b>be careful</b>, there are NO 2 hyphens before options, "--disable-component-update, --ignore-certificate-errors" is wrong.<br>
 	 * <b>Note:</b> As the value, excluded-options, may contain minus like "disable-component-update", it could be interpreted as an arithmetic expression,
-	 *             Use SeleniumPlus.quote("disable-component-update") to keep its value.
+	 *             Use SeleniumPlus.quote("disable-component-update") to keep its value.<br>
+	 * <b>NOTE: We can also specify this by key "excludeSwitches" for {@link #KEY_CHROME_EXPERIMENTAL_OPTIONS}.</b>
 	 */
 	public static final String KEY_CHROME_EXCLUDE_OPTIONS = BrowserConstants.KEY_CHROME_EXCLUDE_OPTIONS;
 
@@ -129,6 +168,21 @@ public class SelectBrowser {
 	 *
 	 */
 	public static final String KEY_CHROME_DISABLE_EXTENSIONS = BrowserConstants.KEY_CHROME_DISABLE_EXTENSIONS;
+
+	/**
+	 * @see BrowserConstants#KEY_CHROME_LOAD_EXTENSIONS
+	 */
+	public static final String KEY_CHROME_LOAD_EXTENSIONS = BrowserConstants.KEY_CHROME_LOAD_EXTENSIONS;
+
+	/**
+	 * @see BrowserConstants#KEY_CHROME_EXTENSIONS
+	 */
+	public static final String KEY_CHROME_EXTENSIONS = BrowserConstants.KEY_CHROME_EXTENSIONS;
+
+	/**
+	 * @see BrowserConstants#KEY_CHROME_EXTENSION_MODHEADER_PROFILE
+	 */
+	public static final String KEY_CHROME_EXTENSION_MODHEADER_PROFILE = BrowserConstants.KEY_CHROME_EXTENSION_MODHEADER_PROFILE;
 
 	/** 'selenium.node' the key for selenium grid node string;
 	 * The value is as "node1:port:nodeconfig;node2:port:nodeconfig;" */
@@ -171,6 +225,8 @@ public class SelectBrowser {
 	public static final String BROWSER_NAME_SAFARI = BrowserConstants.BROWSER_NAME_SAFARI;
 	/**'<b>MicrosoftEdge</b>'*/
 	public static final String BROWSER_NAME_EDGE = BrowserConstants.BROWSER_NAME_EDGE;
+	/**'<b>ChromiumEdge</b>'*/
+	public static final String BROWSER_NAME_CHROMIUM_EDGE = BrowserConstants.BROWSER_NAME_CHROMIUM_EDGE;
 	/**'<b>htmlunit</b>'*/
 	public static final String BROWSER_NAME_HTMLUNIT = BrowserConstants.BROWSER_NAME_HTMLUNIT;
 	/** '<b>android.chrome</b>' chrome browser on android */
@@ -298,6 +354,47 @@ public class SelectBrowser {
 	}
 
 	/**
+	 * @param currentBrowser String, the name of current browser where the test is running on.<br>
+	 *                               This is name is normally got from getDriver().getCapabilities().getBrowserName().<br>
+	 * @param expectedBrowser String, the expected browser's name.
+	 *                                It can be the simplified name such as<br>
+	 *                                {@link #BROWSER_NAME_CHROME}<br>
+	 *                                {@link #BROWSER_NAME_EDGE}<br>
+	 *                                {@link #BROWSER_NAME_FIREFOX}<br>
+	 *                                {@link #BROWSER_NAME_IE}<br>
+	 *                                Or it can be the browser name got from Capabilities, such as<br>
+	 *                                DesiredCapabilities.internetExplorer().getBrowserName()<br>
+	 *                                DesiredCapabilities.chrome().getBrowserName()<br>
+	 *                                DesiredCapabilities.edge().getBrowserName()<br>
+	 *                                DesiredCapabilities.firefox().getBrowserName()<br>
+	 *                                <br>
+	 *
+	 * @return boolean if currentBrowser equals expectedBrowser
+	 */
+	public static boolean isBrowser(String currentBrowser, String expectedBrowser) {
+		if(currentBrowser==null || expectedBrowser==null){
+			throw new IllegalArgumentException("Either currentBrowser is null or expectedBrowser is null.");
+		}
+
+		if(currentBrowser.trim().equalsIgnoreCase(expectedBrowser.trim())) return true;
+
+		//If the expectedBrowser is simplified name, then we need to get the "browser name" from Capabilities to compare with the currentBrowser's name
+		if(BROWSER_NAME_IE.equalsIgnoreCase(expectedBrowser)){
+			expectedBrowser = DesiredCapabilities.internetExplorer().getBrowserName();
+		}else if(BROWSER_NAME_CHROME.equalsIgnoreCase(expectedBrowser)){
+			expectedBrowser = DesiredCapabilities.chrome().getBrowserName();
+		}else if(BROWSER_NAME_EDGE.equalsIgnoreCase(expectedBrowser)){
+			expectedBrowser = DesiredCapabilities.edge().getBrowserName();
+		}else if(BROWSER_NAME_FIREFOX.equalsIgnoreCase(expectedBrowser)){
+			expectedBrowser = DesiredCapabilities.firefox().getBrowserName();
+		}
+
+		if(currentBrowser.trim().equalsIgnoreCase(expectedBrowser.trim())) return true;
+
+		return false;
+	}
+
+	/**
 	 *
 	 * @param browserName String, the browser name, such as "explorer"
 	 * @param extraParameters Map<String,Object>, can be used to pass more browser parameters, such as proxy settings.
@@ -315,23 +412,23 @@ public class SelectBrowser {
 			caps = DesiredCapabilities.internetExplorer();
 			caps.setCapability("nativeEvents", true);
 			caps.setCapability("requireWindowFocus", true);
-			//caps.setCapability("browserName", BROWSER_NAME_IE);
+
 		} else if (browserName.equals(BROWSER_NAME_CHROME)) {
+			// does this change if testing Chrome on Linux or Mac?
 			System.setProperty(SYSTEM_PROPERTY_WEBDRIVER_CHROME, "chromedriver.exe");
 			caps = DesiredCapabilities.chrome();
 
-			// Disable extensions to avoid popping up 'Disable developer mode extensions' message by default.
-			if(extraParameters!=null && !extraParameters.containsKey(KEY_CHROME_DISABLE_EXTENSIONS)) {
-				// Only execute if no user's setting
-				extraParameters.put(KEY_CHROME_DISABLE_EXTENSIONS, "true");
-			}
-
-			//caps.setCapability("browserName", BROWSER_NAME_CHROME);
 		} else if (browserName.equals(BROWSER_NAME_EDGE)) {
 			System.setProperty(SYSTEM_PROPERTY_WEBDRIVER_EDGE, "MicrosoftWebDriver.exe");
 			caps = DesiredCapabilities.edge();
-			//caps.setCapability("browserName", BROWSER_NAME_EDGE);
+
+		}  else if (browserName.equals(BROWSER_NAME_CHROMIUM_EDGE)) {
+			// does this change if testing Chromium Edge on Linux or Mac?  Is that supported?
+			System.setProperty(SYSTEM_PROPERTY_WEBDRIVER_EDGE, "msedgedriver.exe");
+			caps = DesiredCapabilities.edge();
+
 		} else if (browserName.equals(BROWSER_NAME_ANDROID_CHROME)) {
+			// does this change if testing Chrome on Linux or Mac?
 			System.setProperty(SYSTEM_PROPERTY_WEBDRIVER_CHROME, "chromedriver.exe");
 			caps = DesiredCapabilities.chrome();
 			ChromeOptions chromeOptions = new ChromeOptions();
@@ -342,15 +439,21 @@ public class SelectBrowser {
 			caps = new DesiredCapabilities();
 			caps.setCapability("device", "ipad");
 			caps.setCapability("simulator", "true");
-			caps.setCapability(CapabilityType.BROWSER_NAME, "safari");
+			caps.setCapability(CapabilityType.BROWSER_NAME, BROWSER_NAME_SAFARI);
+		} else if (browserName.equals(BROWSER_NAME_SAFARI)) {
+			caps = DesiredCapabilities.safari();
 		} else { // default browser always
 			caps = DesiredCapabilities.firefox();
 			caps.setCapability(CapabilityType.BROWSER_NAME, BROWSER_NAME_FIREFOX);
 		}
 
+		//Setting 'unexpectedAlertBehaviour' capability will cause error for FireFox with selenium3.4.0 and geckodriver-v0.18.0
+		//Set 'unexpectedAlertBehaviour' capability was fixing problem in IE browser
+		//So move these codes to be executed for IE browser ONLY
+		//Lei: set capability "unexpectedAlertBehaviour" for all browsers, user can turn if off for the error case (FireFox with selenium3.4.0 and geckodriver-v0.18.0).
 		String unexpectedAlertBehaviour = Processor.getUnexpectedAlertBehaviour();
 		if(unexpectedAlertBehaviour==null) unexpectedAlertBehaviour = System.getProperty(DriverConstant.PROPERTY_SAFS_TEST_UNEXPECTEDALERTBEHAVIOUR);
-		if(unexpectedAlertBehaviour!=null){
+		if(unexpectedAlertBehaviour!=null && !unexpectedAlertBehaviour.equalsIgnoreCase("off")){
 			IndependantLog.debug(debugmsg+" Set '"+unexpectedAlertBehaviour+"' to '"+CapabilityType.UNEXPECTED_ALERT_BEHAVIOUR+"'.");
 			caps.setCapability(CapabilityType.UNEXPECTED_ALERT_BEHAVIOUR, unexpectedAlertBehaviour);
 		}
@@ -397,6 +500,11 @@ public class SelectBrowser {
 
 					Map<?, ?> firefoxPreference = Json.readJSONFileUTF8(preferenceFile);
 					if(firefoxProfile==null) firefoxProfile = new FirefoxProfile();
+					if(firefoxPreference==null){
+						//preferenceFile is not a file, try it as JSON-string
+						IndependantLog.debug(debugmsg+"Try to Set firefox preference '"+preferenceFile+"' to Firefox Profile.");
+						firefoxPreference = fromJsonString(preferenceFile, Map.class);
+					}
 					addFireFoxPreference(firefoxProfile, firefoxPreference);
 				}
 
@@ -416,6 +524,32 @@ public class SelectBrowser {
 			if(gridnodes!=null && gridnodes instanceof String){
 				caps.setCapability(KEY_GRID_NODES_SETTING, gridnodes);
 			}
+
+			//put the custom-capabilities
+			try{
+				String custom_capabilities = StringUtilities.getString(extraParameters, BrowserConstants.KEY_CUSTOM_CAPABILITIES);
+				//custom_capabilities is probably provided as a file containing json data.
+				IndependantLog.debug(debugmsg+"User provided custom capabilities '"+custom_capabilities+"'.");
+				Map<?, ?> customCapabilitesMap = Json.readJSONFileUTF8(custom_capabilities);
+				if(customCapabilitesMap==null){
+					//custom_capabilities_file is not a file, try it as JSON-string
+					customCapabilitesMap = fromJsonString(custom_capabilities, Map.class);
+				}
+				IndependantLog.debug(debugmsg+"Try to add custom capabilities '"+customCapabilitesMap+"'.");
+
+				//used to store in session file
+				caps.setCapability(BrowserConstants.KEY_CUSTOM_CAPABILITIES, customCapabilitesMap);
+
+				//each key will also be stored separately in the capabilities
+				String[] keys = customCapabilitesMap.keySet().toArray(new String[0]);
+				for(String key:keys){
+					caps.setCapability(key, customCapabilitesMap.get(key));
+				}
+
+			}catch(Exception e){
+				IndependantLog.warn(debugmsg+"Fail to add custom capabilities: met "+e.getMessage());
+			}
+
 		}
 
 		return caps;
@@ -449,7 +583,7 @@ public class SelectBrowser {
 				options.addArguments(KEY_CHROME_USER_DATA_DIR+"="+chromeUserDataDir);
 			}
 		}catch(Exception e){
-			IndependantLog.warn(debugmsg+"Fail to Set chrome user data directory to ChromeOptions.");
+			IndependantLog.warn(debugmsg+"Fail to Set chrome user data directory to ChromeOptions: "+e.getMessage());
 		}
 		try{
 			//Get user-specific settings directory, it is for one user
@@ -461,19 +595,23 @@ public class SelectBrowser {
 				options.addArguments(KEY_CHROME_PROFILE_DIR+"="+profiledir);
 			}
 		}catch(Exception e){
-			IndependantLog.warn(debugmsg+"Fail to Set chrome profile directory to ChromeOptions.");
+			IndependantLog.warn(debugmsg+"Fail to Set chrome profile directory to ChromeOptions: "+e.getMessage());
 		}
 
 		try {
-			// Parse '--disable-extensions' parameters to add into ChromeOptions
+			// Disable extensions to avoid popping up 'Disable developer mode extensions' message.
 			String disableExtensionsOptions = StringUtilities.getString(extraParameters, KEY_CHROME_DISABLE_EXTENSIONS);
-			IndependantLog.debug(debugmsg + "Try to disable Chrome extensions: '" + disableExtensionsOptions + "'.");
-			if(options == null) options = new ChromeOptions();
-			if(!disableExtensionsOptions.isEmpty() && disableExtensionsOptions.toLowerCase().equals("true")){
+			boolean toDisable = BrowserConstants.DEFAULT_DISABLE_CHROME_EXTENSION;
+			if(StringUtils.isValid(disableExtensionsOptions)){
+				toDisable = disableExtensionsOptions.equalsIgnoreCase("true");
+			}
+			if(toDisable){
+				if(options == null) options = new ChromeOptions();
 				options.addArguments(KEY_CHROME_DISABLE_EXTENSIONS);
+				IndependantLog.debug(debugmsg + "Disabled Chrome extensions: '" + disableExtensionsOptions + "'.");
 			}
 		} catch(Exception e){
-			IndependantLog.warn(debugmsg + "Fail to set disable Chrome extensions for ChromeOptions.");
+			IndependantLog.warn(debugmsg + "Fail to set disable Chrome extensions for ChromeOptions: "+e.getMessage());
 		}
 
 		try{
@@ -481,6 +619,11 @@ public class SelectBrowser {
 			String commandLineOptions_preferenceFile = StringUtilities.getString(extraParameters, KEY_CHROME_PREFERENCE);
 			IndependantLog.debug(debugmsg+"Try to Set chrome command-line-options/preferences file '"+commandLineOptions_preferenceFile+"' to ChromeOptions.");
 			Map<?, ?> commandLineOptions = Json.readJSONFileUTF8(commandLineOptions_preferenceFile);
+			if(commandLineOptions==null){
+				//commandLineOptions_preferenceFile is not a file, try it as JSON-string
+				IndependantLog.debug(debugmsg+"Try to Set chrome command-line-options/preferences '"+commandLineOptions_preferenceFile+"' to ChromeOptions.");
+				commandLineOptions = fromJsonString(commandLineOptions_preferenceFile, Map.class);
+			}
 			if(options==null) options = new ChromeOptions();
 			caps.setCapability(KEY_CHROME_PREFERENCE, commandLineOptions_preferenceFile);//used to store in session file
 
@@ -503,7 +646,7 @@ public class SelectBrowser {
 			addChromeCommandLineOptions(options, commandLineOptions);
 
 		}catch(Exception e){
-			IndependantLog.warn(debugmsg+"Fail to Set chrome preference file to ChromeOptions.");
+			IndependantLog.warn(debugmsg+"Fail to Set chrome preference file to ChromeOptions: "+e.getMessage());
 		}
 
 		try{
@@ -523,9 +666,141 @@ public class SelectBrowser {
 				options.setExperimentalOption(KEY_CHROME_EXCLUDE_OPTIONS, excludeOptionsList);
 			}
 		}catch(Exception e){
-			IndependantLog.warn(debugmsg+"Fail to Set chrome excludeSwitches to ChromeOptions.");
+			IndependantLog.warn(debugmsg+"Fail to Set chrome excludeSwitches to ChromeOptions: "+e.getMessage());
 		}
+
+		try{
+			//Get experimental options, and set them to ChromeOptions
+			String experimentalOptionsFile = StringUtilities.getString(extraParameters, KEY_CHROME_EXPERIMENTAL_OPTIONS);
+			IndependantLog.debug(debugmsg+"Try to Set chrome experimental options file '"+experimentalOptionsFile+"' to ChromeOptions.");
+			caps.setCapability(KEY_CHROME_EXPERIMENTAL_OPTIONS, experimentalOptionsFile);//used to store in session file
+			Map<?, ?> experimentalOptions = Json.readJSONFileUTF8(experimentalOptionsFile);
+			if(experimentalOptions==null){
+				//experimentalOptionsFile is not a file, try it as JSON-string
+				IndependantLog.debug(debugmsg+"Try to Set chrome experimental options '"+experimentalOptionsFile+"' to ChromeOptions.");
+				experimentalOptions = fromJsonString(experimentalOptionsFile, Map.class);
+			}
+			if(options==null) options = new ChromeOptions();
+
+			//Set Chrome experimental options
+			IndependantLog.debug(debugmsg+"Setting experimental options "+ experimentalOptions +" to ChromeOptions.");
+			addChromeExperimentalOptions(options, experimentalOptions);
+
+		}catch(Exception e){
+			IndependantLog.warn(debugmsg+"Fail to Set chrome preference file to ChromeOptions: "+e.getMessage());
+		}
+
+		try{
+			String loadExtensionFile = StringUtilities.getString(extraParameters, KEY_CHROME_LOAD_EXTENSIONS);
+			IndependantLog.debug(debugmsg+"Try to Set chrome extensions file '"+loadExtensionFile+"' to ChromeOptions.");
+			//for session file
+			caps.setCapability(KEY_CHROME_LOAD_EXTENSIONS, loadExtensionFile);
+
+			Map<?, ?> loadExtensions = Json.readJSONFileUTF8(loadExtensionFile);
+
+			if(loadExtensions==null){
+				//loadExtensionFile is not a file, try it as JSON-string
+				IndependantLog.debug(debugmsg+"Try to Set chrome extensions '"+loadExtensionFile+"' to ChromeOptions.");
+				loadExtensions = fromJsonString(loadExtensionFile, Map.class);
+			}
+
+			//an array of .crx extension files
+			List<String> extensions = (List<String>) loadExtensions.get(KEY_CHROME_EXTENSIONS);
+			List<File> extensionFiles = new ArrayList<File>();
+			for(String extension: extensions){
+				extensionFiles.add(new File(extension));
+			}
+
+			Object extensionModheaderProfile = loadExtensions.get(KEY_CHROME_EXTENSION_MODHEADER_PROFILE);
+			if(extensionModheaderProfile!=null){
+				caps.setCapability(KEY_CHROME_EXTENSION_MODHEADER_PROFILE, extensionModheaderProfile);
+			}
+
+			if(options==null) options = new ChromeOptions();
+			options.addExtensions(extensionFiles);
+
+		}catch(Exception e){
+			IndependantLog.warn(debugmsg+"Fail to Set chrome extension to ChromeOptions: "+e.getMessage());
+		}
+
+		try {
+			//Parse '--no-sandbox' parameters to add into ChromeOptions
+			String sandboxOption = StringUtilities.getString(extraParameters, BrowserConstants.KEY_CHROME_NO_SANDBOX);
+			IndependantLog.debug(debugmsg + "Try to set Chrome --no-sandbox option '" + sandboxOption + "'.");
+			if(options == null) options = new ChromeOptions();
+			if(!sandboxOption.isEmpty() && sandboxOption.toLowerCase().equals("true")){
+				options.addArguments(BrowserConstants.KEY_CHROME_NO_SANDBOX);
+			}
+		} catch(Exception e){
+			IndependantLog.warn(debugmsg + "Fail to set Chrome --no-sandbox option for ChromeOptions: "+e.getMessage());
+		}
+
 		if(options!=null) caps.setCapability(ChromeOptions.CAPABILITY, options);
+
+		try {
+			//Parse 'setNetworkConditions' parameters to add into capabilities
+			String networkConditions = StringUtilities.getString(extraParameters, BrowserConstants.KEY_SET_NETWORK_CONDITIONS);
+			IndependantLog.debug(debugmsg + "Try to set Chrome networkConditions '" + networkConditions + "'.");
+			caps.setCapability(BrowserConstants.KEY_SET_NETWORK_CONDITIONS, networkConditions);
+		} catch(Exception e){
+			IndependantLog.warn(debugmsg + "Fail to set Chrome --no-sandbox option for ChromeOptions: "+e.getMessage());
+		}
+	}
+
+	/**
+	 * Convert json data or CSV data into a certain type.
+	 * @param jsonOrCSVData String, the json data or CSV data.
+	 * @param type the type to convert the data.
+	 * @return T
+	 */
+	private static <T> T fromJsonString(String jsonOrCSVData, Class<T> type){
+		T result = null;
+		String debugmsg = StringUtils.debugmsg(false);
+
+		try{
+			result = Json.fromJsonString(jsonOrCSVData, type);
+		}catch(Exception e){
+			IndependantLog.warn(debugmsg+ " For string "+jsonOrCSVData+"\nFailed to convert it to type "+type.getName()+", due to "+e.toString());
+			IndependantLog.debug(debugmsg+" Suppose user provides CSV data, convert it into json string.");
+			String[] pairs = StringUtils.getTokenArray(jsonOrCSVData, ",");
+			StringBuilder sb = new StringBuilder();
+			int index = -1;
+			String key = null;
+			String value = null;
+			sb.append("{");
+			for(String pair:pairs){
+				index = pair.indexOf(":");
+				if(index>0){
+					key = pair.substring(0, index);
+					value = pair.substring(index+1);
+					key = key.trim();
+					value = value.trim();
+					if(!StringUtils.isQuoted(key)) key = StringUtils.quote(key);
+					sb.append(key);
+					sb.append(":");
+					if(!StringUtils.isQuoted(value) &&
+					   !"true".equals(value.toLowerCase()) &&
+					   !"false".equals(value.toLowerCase()) &&
+					   !value.matches("-?\\d+\\.?\\d*") &&
+					   !value.startsWith("[") &&
+					   !value.startsWith("{")){
+						//don't quote "true", "false", number, array ([a,b,c]) or json-string
+						value = StringUtils.quote(value);
+					}
+					sb.append(value);
+					sb.append(",");
+				}else{
+					IndependantLog.warn(debugmsg+"skipped the non-valid pair "+pair);
+				}
+			}
+			//remove the last comma
+			sb.deleteCharAt(sb.length()-1);
+			sb.append("}");
+
+			result = Json.fromJsonString(sb.toString(), type);
+		}
+
+		return result;
 	}
 
 	/**
@@ -547,6 +822,32 @@ public class SelectBrowser {
 				//It seems that it still work even with "=", options.addArguments("--disable-logging=")
 				options.addArguments("--"+key.trim()+"="+commandLineOptions.get(key));
 			}
+		}catch(Exception e){
+			IndependantLog.error(StringUtils.debugmsg(false)+" failed, due to "+StringUtils.debugmsg(e));
+		}
+	}
+
+	private static void addChromeExperimentalOptions(ChromeOptions options, Map<?, ?> experimentalOptions){
+
+		try{
+			String[] keys = experimentalOptions.keySet().toArray(new String[0]);
+			for(String key:keys){
+				//TODO do we need to convert the value to a certain type? Probably NOT.
+				//for "prefs", it needs a Map
+				//for "excludeSwitches", it needs a List
+				/** 'experimentalOption.dat' file does work, they got set correctly into the ChromeOptions
+{
+    "useAutomationExtension" : false,
+    "prefs" : {
+    	"credentials_enable_service" : false,
+    	"profile" : { "password_manager_enabled" : false }
+    },
+    "excludeSwitches" : ["enable-automation"]
+}
+				 */
+				options.setExperimentalOption(key, experimentalOptions.get(key));
+			}
+
 		}catch(Exception e){
 			IndependantLog.error(StringUtils.debugmsg(false)+" failed, due to "+StringUtils.debugmsg(e));
 		}
@@ -620,21 +921,4 @@ public class SelectBrowser {
 		return profile;
 	}
 
-	/**
-	 * Return an array of keys for extra parameters.<br>
-	 * The format of value for each key is different, please refer to comment of the key.<br>
-	 *
-	 * @return String[], an array of keys used to pass extra parameter in SeleniumPlus
-	 * @see #KEY_PROXY_BYPASS_ADDRESS
-	 * @see #KEY_PROXY_SETTING
-	 * @see #KEY_FIREFOX_PROFILE
-	 * @see #KEY_FIREFOX_PROFILE_PREFERENCE
-	 * @see #KEY_CHROME_PREFERENCE
-	 * @see #KEY_CHROME_USER_DATA_DIR
-	 * @see #KEY_CHROME_PROFILE_DIR
-	 * @see #KEY_CHROME_EXCLUDE_OPTIONS
-	 */
-	public static String[] getExtraParameterKeys(){
-		return BrowserConstants.getExtraParameterKeys();
-	}
 }

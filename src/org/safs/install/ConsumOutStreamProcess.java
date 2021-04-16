@@ -1,3 +1,23 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
+/**
+ * JUL 05, 2018 (Lei Wang) Detect the timeout and return error code "-3".
+ */
 package org.safs.install;
 
 import java.io.BufferedReader;
@@ -9,15 +29,16 @@ public class ConsumOutStreamProcess {
 	public static final int PROCESS_NORMAL_END 				= 0;
 	public static final int PROCESS_COMMAND_NOT_INITIAL 	= -1;
 	public static final int PROCESS_COMMAND_EXECUTE_ERR	 	= -2;
-	
+	public static final int PROCESS_COMMAND_TIMEOUT	 		= -3;
+
 	public static final int WAIT_FOREVER				 	= 0;
-	
+
 	private String command;
 	//If printOutput is true, the process's stdout and stderr will be printed.
 	private boolean printOutput;
 	private int timeout=WAIT_FOREVER;
 	private boolean useTimeout;
-	
+
 	/**
 	 * @param command		The shell command to be executed.
 	 * @param printOutput	True, the process's stdout and stderr will be printed.
@@ -50,10 +71,10 @@ public class ConsumOutStreamProcess {
 	public void setTimeout(int timeout){
 		this.timeout = timeout;
 	}
-	
+
 	public int start(){
 		int executStatus = PROCESS_NORMAL_END;
-		
+
 		if(command==null || command.equals("")){
 			System.out.println("You should initial the command with constructor ProcessWithOutStreamConsum(command).");
 			return PROCESS_COMMAND_NOT_INITIAL;
@@ -84,12 +105,15 @@ public class ConsumOutStreamProcess {
 					i++;
 				    Thread.sleep(1000);
 				}
+				if(i>=timeout && timeout!=WAIT_FOREVER){
+					executStatus = PROCESS_COMMAND_TIMEOUT;
+				}
 			}else{
 				//The method waitFor() will block the current thread until the process terminate.
 				//If the process terminate normally, it will return 0.
 				executStatus = process.waitFor();
 			}
-			
+
 			if(stderrConsumer.isAlive())
 				stderrConsumer.interrupt();
 			if(stdoutConsumer.isAlive())
@@ -101,14 +125,14 @@ public class ConsumOutStreamProcess {
 			System.out.println("InterruptedException occur: "+e.getMessage());
 			executStatus = PROCESS_COMMAND_EXECUTE_ERR;
 		}
-		
+
 		return executStatus;
 	}
-	
+
 	class OutputBufferConsumer extends Thread{
 		public static final String FROM_STDOUT = "FROM_STDOUT";
 		public static final String FROM_STDERR = "FROM_STDERR";
-		
+
 		private InputStream in;
 		private String streamFromWhere;
 
@@ -116,7 +140,8 @@ public class ConsumOutStreamProcess {
 			this.in = in;
 			this.streamFromWhere = streamFromWhere;
 		}
-		
+
+		@Override
 		public void run(){
 			InputStreamReader isr = new InputStreamReader(in);
 			BufferedReader br = new BufferedReader(isr);
