@@ -21,3 +21,9 @@ ECLIPSE_WIN.ZIP filter=lfs diff=lfs merge=lfs -text
 JDK7_WIN.ZIP filter=lfs diff=lfs merge=lfs -text
 JRE7_64_WIN.ZIP filter=lfs diff=lfs merge=lfs -text
 JRE7_WIN.ZIP filter=lfs diff=lfs merge=lfs -text
+
+# Consider .sh file as binary so it will not be affected by "LF normalization"
+#*.sh binary
+
+#Tell git not to perform EOL conversions on *.sh shell script
+*.sh -text

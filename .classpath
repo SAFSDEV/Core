@@ -7,15 +7,12 @@
 	<classpathentry kind="var" path="SAFS_BUILD/libs/jna-4.2.2.jar"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/jna-platform-4.2.2.jar"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/org.json.jar"/>
-	<classpathentry kind="var" path="SAFS_BUILD/libs/cuke/cucumber-core-1.1.3.jar"/>
-	<classpathentry kind="var" path="SAFS_BUILD/libs/cuke/cucumber-java-1.1.3.jar"/>
-	<classpathentry kind="var" path="SAFS_BUILD/libs/cuke/gherkin-2.12.0.jar"/>
-	<classpathentry kind="var" path="SAFS_BUILD/libs/cuke/sas-gat-cukes.jar"/>
-	<classpathentry kind="var" path="SAFS_BUILD/libs/android/ddmlib.jar"/>
-	<classpathentry kind="var" path="SAFS_BUILD/libs/selenium/selenium-server-standalone-2.52.0.jar"/>
-	<classpathentry kind="var" path="SAFS_BUILD/libs/selenium/SeInterpreter.jar"/>
-	<classpathentry kind="var" path="SAFS_BUILD/libs/staf/JSTAF3.jar"/>
-	<classpathentry kind="var" path="SAFS_BUILD/libs/staf/JSTAF2.jar"/>
+	<classpathentry kind="lib" path="dependencies/cuke/gherkin-2.12.0.jar"/>
+	<classpathentry kind="lib" path="dependencies/cuke/sas-gat-cukes.jar"/>
+	<classpathentry kind="lib" path="dependencies/android/ddmlib.jar"/>
+	<classpathentry kind="lib" path="dependencies/selenium/SeInterpreter.jar"/>
+	<classpathentry kind="lib" path="dependencies/staf/JSTAF3.jar"/>
+	<classpathentry kind="lib" path="dependencies/staf/JSTAF2.jar"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/jai_imageio.jar"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/jai_core.jar"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/jai_codec.jar"/>
@@ -40,20 +37,51 @@
 	<classpathentry kind="var" path="SAFS_BUILD/libs/rft/com.ibm.rational.test.ft.domain.testobjects_8.3.0.v20121022_1402.jar"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/rft/com.ibm.rational.test.ft.domain.html.dojo.testobjects_8.3.0.v20130226_1842.jar"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/rft/com.ibm.rational.test.ft.clientbase_8.3.0.v20130117_1954.jar"/>
-	<classpathentry kind="var" path="SAFS_BUILD/libs/autoit/AutoItX4Java.jar"/>
-	<classpathentry kind="var" path="SAFS_BUILD/libs/autoit/jacob.jar"/>
+	<classpathentry kind="lib" path="dependencies/autoit/AutoItX4Java.jar"/>
+	<classpathentry kind="lib" path="dependencies/autoit/jacob.jar"/>
 	<classpathentry kind="var" path="SAFS_BUILD/libs/slf4j-api-1.7.21.jar"/>
-	<classpathentry exported="true" kind="var" path="SAFS_BUILD/libs/httpclient5/httpclient5-5.0-alpha2-SNAPSHOT.jar" sourcepath="/HTTPCLIENT5SOURCE"/>
-	<classpathentry exported="true" kind="var" path="SAFS_BUILD/libs/httpclient5/httpcore5-5.0-alpha2.jar" sourcepath="/HTTPCORE_SOURCE"/>
-	<classpathentry exported="true" kind="var" path="SAFS_BUILD/libs/httpclient5/httpcore5-testing-5.0-alpha2.jar" sourcepath="/HTTPCORE_SOURCE"/>
-	<classpathentry kind="var" path="SAFS_BUILD/libs/groovy/groovy-all-2.4.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/httpclient5/httpclient5-5.0-alpha2-SNAPSHOT.jar" sourcepath="/HTTPCLIENT5SOURCE"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/httpclient5/httpcore5-5.0-alpha2.jar" sourcepath="/HTTPCORE_SOURCE"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/httpclient5/httpcore5-testing-5.0-alpha2.jar" sourcepath="/HTTPCORE_SOURCE"/>
+	<classpathentry kind="lib" path="dependencies/groovy/groovy-all-2.4.7.jar"/>
 	<classpathentry kind="lib" path="dependencies/saxon/Saxon-HE-9.7.0-8.jar"/>
+	<classpathentry kind="lib" path="test/lib/jetty-6.1.14.jar"/>
+	<classpathentry kind="lib" path="test/lib/jetty-util-6.1.14.jar"/>
 	<classpathentry exported="true" kind="con" path="GROOVY_DSL_SUPPORT"/>
-	<classpathentry kind="var" path="SAFS_BUILD/libs/spring-web/spring-web-4.3.4.RELEASE.jar"/>
-	<classpathentry kind="var" path="SAFS_BUILD/libs/spring-core/spring-core-4.3.4.RELEASE.jar"/>
-	<classpathentry kind="var" path="SAFS_BUILD/libs/log4j/log4j-api-2.8.jar"/>
-	<classpathentry kind="var" path="SAFS_BUILD/libs/log4j/log4j-core-2.8.jar"/>
+	<classpathentry kind="lib" path="dependencies/spring-web/spring-web-4.3.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="dependencies/spring-core/spring-core-4.3.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="dependencies/log4j/log4j-api-2.8.1.jar"/>
+	<classpathentry kind="lib" path="dependencies/log4j/log4j-core-2.8.1.jar"/>
 	<classpathentry kind="lib" path="test/lib/ant-launcher.jar"/>
 	<classpathentry kind="lib" path="test/lib/ant.jar"/>
+	<classpathentry kind="var" path="SAFS_BUILD/libs/jaxen-1.1.1.jar"/>
+	<classpathentry kind="lib" path="dependencies/selenium/selenium-server-standalone-3.14.0.jar"/>
+	<classpathentry kind="lib" path="dependencies/selenium/selenium-server-safs-2.52.jar"/>
+	<classpathentry kind="lib" path="dependencies/hibernate/hibernate-jpa-2.1-api-1.0.0.Final.jar"/>
+	<classpathentry kind="lib" path="dependencies/commons/commons-beanutils-1.9.3.jar"/>
+	<classpathentry kind="lib" path="dependencies/aspectj/aspectjweaver.jar"/>
+	<classpathentry kind="lib" path="dependencies/spring/spring-beans.jar"/>
+	<classpathentry kind="lib" path="dependencies/spring/spring-context.jar"/>
+	<classpathentry kind="lib" path="dependencies/ghost4j/ghost4j-1.0.1.jar" sourcepath="/ghost4j"/>
+	<classpathentry kind="lib" path="dependencies/ghost4j/itext-2.1.7.jar"/>
+	<classpathentry kind="lib" path="dependencies/log4j/log4j-over-slf4j-1.7.25.jar"/>
+	<classpathentry kind="lib" path="dependencies/spring/spring-aop.jar"/>
+	<classpathentry kind="lib" path="dependencies/spring/spring-aspects.jar"/>
+	<classpathentry kind="lib" path="dependencies/spring/spring-expression.jar"/>
+	<classpathentry kind="lib" path="dependencies/ekspreso/ekspreso-event-creator-0.4.24-fat.jar" sourcepath="dependencies/ekspreso/ekspreso-event-creator-0.4.24-sources.jar"/>
+	<classpathentry kind="lib" path="dependencies/cucumber/cucumber-core-4.2.0.jar"/>
+	<classpathentry kind="lib" path="dependencies/cucumber/cucumber-expressions-6.2.0.jar"/>
+	<classpathentry kind="lib" path="dependencies/cucumber/cucumber-html-0.2.7.jar"/>
+	<classpathentry kind="lib" path="dependencies/cucumber/cucumber-java-4.2.0.jar"/>
+	<classpathentry kind="lib" path="dependencies/cucumber/cucumber-junit-4.2.0.jar"/>
+	<classpathentry kind="lib" path="dependencies/cucumber/cucumber-jvm-deps-1.0.6.jar"/>
+	<classpathentry kind="lib" path="dependencies/cucumber/datatable-1.1.7.jar"/>
+	<classpathentry kind="lib" path="dependencies/cucumber/datatable-dependencies-1.1.7.jar"/>
+	<classpathentry kind="lib" path="dependencies/cucumber/gherkin-5.0.0.jar"/>
+	<classpathentry kind="lib" path="dependencies/cucumber/gherkin-jvm-deps-1.0.4.jar"/>
+	<classpathentry kind="lib" path="dependencies/junit/junit-4.12.jar"/>
+	<classpathentry kind="lib" path="dependencies/hamcrest/hamcrest-all-1.3.jar"/>
+	<classpathentry kind="lib" path="dependencies/cglib/cglib-nodep-2.2.jar"/>
+	<classpathentry kind="lib" path="dependencies/testng/testng-6.7.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
