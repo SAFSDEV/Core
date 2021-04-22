@@ -102,7 +102,8 @@ REM The git repository remote url should be set the ssh url format
 REM git remote set-url origin git@github.com:SAFSDEV/safsdev.github.io.git
 git remote set-url origin %GIT_REPO_PREFIX%%GITHUB_REPO%.git
 ECHO Push committed files to git remote repository ...
-git push origin master
+REM "git push origin HEAD" is a handy way to push the current branch to the same name on the remote.
+git push origin HEAD
 
 
 POPD
