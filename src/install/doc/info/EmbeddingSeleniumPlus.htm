@@ -39,7 +39,7 @@ Copyright, SAS Institute
         <li>A Se+ Project must exist and be available for Se+ to access.
         <li>The Se+ Project configuration file (INI file) must be available with a working configuration.
         <li>The Java application/framework must have Se+ JAR files in the BuildPath/ClassPath.
-        <li>Appropriate command-line parameters, and/or Java System Properties, and/or String[] arguments required of the <a href="http://safsdev:8880/safs/doc/org/safs/selenium/spc/SPJVMInjector.html" target="_blank" title="Se+ SPJVMInjector JavaDoc">Se+ SPJVMInjector</a> must be set prior to embedding.
+        <li>Appropriate command-line parameters, and/or Java System Properties, and/or String[] arguments required of the <a href="https://safsdev.github.io/doc/org/safs/selenium/spc/SPJVMInjector.html" target="_blank" title="Se+ SPJVMInjector JavaDoc">Se+ SPJVMInjector</a> must be set prior to embedding.
         <li>Your application or test *must* invoke the SPJVMInjector to embed it prior to using any Se+ functionality.
         <li>Your application *should* invoke the SPJVMInjector shutdown mechanism to gracefully shutdown Se+ prior to shutting down the JVM to make sure all logs and test results are properly captured.
         </ul>
@@ -121,7 +121,7 @@ Copyright, SAS Institute
     <p>
     <dt class="title">Provide access (BuildPath or ClassPath) to required Se+ JAR files:
     <p>
-    <dd>For traditional Java applications (POJOs) the <a href="http://safsdev:8880/safs/doc/org/safs/selenium/spc/SPJVMInjector.html" target="_blank" title="SPJVMInjector JavaDoc">SPJVMInjector documentation</a> should suffice.
+    <dd>For traditional Java applications (POJOs) the <a href="https://safsdev.github.io/doc/org/safs/selenium/spc/SPJVMInjector.html" target="_blank" title="SPJVMInjector JavaDoc">SPJVMInjector documentation</a> should suffice.
     <p>
     For more exotic runtimes--like running in a JVM primarily running Groovy, or some other runtime using non-standard ClassLoaders--the user will need to satisfy the ClassLoader environment presented to them.  A Groovy/Katalon case-in-point is mentioned below.
     <p>

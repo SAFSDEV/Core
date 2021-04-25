@@ -223,7 +223,7 @@ import com.ibm.staf.service.STAFCommandParser;
  * <p>
  * HELP
  * <p>
- * Software Automation Framework Support (SAFS) http://safsdev:8880<br>
+ * Software Automation Framework Support (SAFS) https://safsdev.github.io/<br>
  * Software Testing Automation Framework (STAF) http://staf.sourceforge.net<br>
  *
  * @see SAFSVariableService SAFSVariableService3 SAFSAppMapService SAFSAppMapService3

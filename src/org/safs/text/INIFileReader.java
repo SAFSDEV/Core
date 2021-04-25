@@ -97,7 +97,7 @@ import java.util.Vector;
  * @author Carl Nagle, 02/23/2007 Modified for optional use of java.util.Hashtable
  * @author Carl Nagle, 07/16/2010 Mod to support other valid Charset encodings.
  *
- * Software Automation Framework Support (SAFS) http://safsdev:8880<br>
+ * Software Automation Framework Support (SAFS) https://safsdev.github.io/<br>
  * Software Testing Automation Framework (STAF) http://staf.sourceforge.net<br>
  ******************************************************************************************/
 public class INIFileReader extends FileLineReader {

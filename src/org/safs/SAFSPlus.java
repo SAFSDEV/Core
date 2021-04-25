@@ -206,7 +206,7 @@ public abstract class SAFSPlus {
 
 		}catch(Exception e){
 			//If we didn't create the spring context properly, we cannot use the "annotations" designed for "SAFS Data Service". Refer to link
-			//http://safsdev:8880/safs/selenium/doc/SeleniumPlus-Welcome.html#usingsafsdataservice
+			//https://safsdev.github.io/selenium/doc/SeleniumPlus-Welcome.html#usingsafsdataservice
 			debug("Failed to initialize the SAFSPlus.Runner by spring in the static clause! Met "+e.getClass().getSimpleName()+":"+e.getMessage());
 			Runner = new DefaultRunner();
 			System.out.println("SAFSPlus: got Runner"+Runner+" by normal instantiation.");

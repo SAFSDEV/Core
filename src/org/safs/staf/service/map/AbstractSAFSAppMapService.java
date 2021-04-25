@@ -398,7 +398,7 @@ import com.ibm.staf.service.STAFCommandParser;
  * <p>
  * HELP
  * <p>
- * Software Automation Framework Support (SAFS) http://safsdev:8880<br>
+ * Software Automation Framework Support (SAFS) https://safsdev.github.io/<br>
  * Software Testing Automation Framework (STAF) http://staf.sourceforge.net<br>
  * @author Carl Nagle JUL 03, 2003 Moved initialization into init, out of constructor.
  * @author Carl Nagle DEC 11, 2003 Added CLEARCACHE command.

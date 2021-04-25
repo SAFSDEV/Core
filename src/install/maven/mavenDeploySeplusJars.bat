@@ -1,24 +1,41 @@
 @ECHO OFF
 
-REM Deploy seleniumplus dependency jar files into local maven repository on artifactory server "http://safsdev:8082"
-REM This script should run in the folder 'libs' of installed SeleniumPlus or the 'libs' of the SeleniumPlus distribution during the build.
-REM Before running this script, we should probably modifiy the maven's setttings.xml config file to set user/passworkd for a certain repositoryID, something as below:
+REM ================================================================================
+REM Purpose:
+REM   Deploy seleniumplus dependency jar files into local maven repository on artifactory server.
+REM Parameter:
+REM   MAVEN_SERVER                 the full-path of the maven server, such as 'http://jfrog.server:8080/artifactory'.
+REM Prerequisite:
+REM   This script should run in the folder 'libs' of installed SeleniumPlus or the 'libs' of the SeleniumPlus distribution during the build.
+REM   Before running this script, we should probably modify the maven's setttings.xml config file to set user/passworkd for a certain repositoryID, something as below:
 REM   <server>
 REM     <id>repositoryID</id>
 REM     <username>username</username>
 REM     <password>******</password>
 REM   </server>
 REM
+REM ================================================================================
 
-SET LOCAL_ARTIFACTORY=http://safsdev:8082/artifactory
+
+SET MAVEN_SERVER=%1
+
+IF NOT DEFINED MAVEN_SERVER (
+	ECHO Missing parameter 'MAVEN_SERVER'
+    ECHO Usage:   mavenDeploySeplusJars.bat MAVEN_SERVER
+    ECHO Example: mavenDeploySeplusJars.bat http://jfrog.server:8080/artifactory
+    EXIT /B 1
+) ELSE (
+	ECHO Using maven server %MAVEN_SERVER%
+)
+
 SET RELEASE_REPOSITORY=libs-release-local
 SET SNAPSHOT_REPOSITORY=libs-snapshot-local
 
-SET LOCAL_RELEASE_REPOSITORY=%LOCAL_ARTIFACTORY%/%RELEASE_REPOSITORY%
-SET LOCAL_SNAPSHOT_REPOSITORY=%LOCAL_ARTIFACTORY%/%SNAPSHOT_REPOSITORY%
+SET LOCAL_RELEASE_REPOSITORY=%MAVEN_SERVER%/%RELEASE_REPOSITORY%
+SET LOCAL_SNAPSHOT_REPOSITORY=%MAVEN_SERVER%/%SNAPSHOT_REPOSITORY%
 
-ECHO "Pushing seleniumplus dependency release jar files into maven release repository %LOCAL_RELEASE_REPOSITORY% ..."
-ECHO "Pushing seleniumplus dependency snapshot jar files into maven snapshot repository %LOCAL_SNAPSHOT_REPOSITORY% ..."
+ECHO Pushing seleniumplus dependency release jar files into maven release repository %LOCAL_RELEASE_REPOSITORY% ...
+ECHO Pushing seleniumplus dependency snapshot jar files into maven snapshot repository %LOCAL_SNAPSHOT_REPOSITORY% ...
 
 call mvn --batch-mode deploy:deploy-file -DrepositoryId=%RELEASE_REPOSITORY% -Durl=%LOCAL_RELEASE_REPOSITORY% -Dfile=JSTAFEmbedded.jar -DgroupId=com.ibm.staf -DartifactId=JSTAFEmbedded -Dversion=1.0 -Dpackaging=jar
 call mvn --batch-mode deploy:deploy-file -DrepositoryId=%RELEASE_REPOSITORY% -Durl=%LOCAL_RELEASE_REPOSITORY% -Dfile=seleniumplus.jar -DgroupId=org.safs.selenium -DartifactId=seleniumplus -Dversion=1.0 -Dpackaging=jar
@@ -76,3 +93,4 @@ call mvn --batch-mode deploy:deploy-file -DrepositoryId=%RELEASE_REPOSITORY% -Du
 call mvn --batch-mode deploy:deploy-file -DrepositoryId=%RELEASE_REPOSITORY% -Durl=%LOCAL_RELEASE_REPOSITORY% -Dfile=junit-4.12.jar -DgroupId=org.safs.selenium.manifest -DartifactId=junit -Dversion=4.12 -Dpackaging=jar
 call mvn --batch-mode deploy:deploy-file -DrepositoryId=%RELEASE_REPOSITORY% -Durl=%LOCAL_RELEASE_REPOSITORY% -Dfile=cglib-nodep-2.2.jar -DgroupId=org.safs.selenium.manifest -DartifactId=cglib-nodep -Dversion=2.2 -Dpackaging=jar
 call mvn --batch-mode deploy:deploy-file -DrepositoryId=%RELEASE_REPOSITORY% -Durl=%LOCAL_RELEASE_REPOSITORY% -Dfile=ekspreso-event-creator-0.4.24-fat.jar -DgroupId=org.safs.selenium.manifest -DartifactId=ekspreso-event-creator -Dversion=0.4.24-fat -Dpackaging=jar
+

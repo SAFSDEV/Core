@@ -1696,7 +1696,7 @@ Before update, make sure correct Selenium+ "<b>Update Site</b>" preferences are 
 	        Make sure that the URL starts with "<b>http://safsbuild:81</b>" if you want to get the latest support.
 	    <li>Enable Javadoc<br>
 	        It is used to enable/disable Javadoc in SeleniumPlus project. There is an associate InputBox "Javadoc Location URL", where the Javadoc Location URL can be modified.<br>
-	        Make sure that the URL is "<b>http://safsdev:8880/safs/doc</b>" if you want to get the latest support.
+	        Make sure that the URL is "<b>https://safsdev.github.io/doc</b>" if you want to get the latest support.
 	    <li>Update JRE<br>
 	        It is used to enable/disable embedded JRE Update.
 	    </ol>
@@ -2656,7 +2656,7 @@ It provides the ability to store, update, delete and presents the safs data (run
 <a href="../../doc/org/safs/tools/drivers/DriverConstant.DataServiceConstant.html#ITEM_PORT" target="api">port</a>=8080
 <a href="../../doc/org/safs/tools/drivers/DriverConstant.DataServiceConstant.html#ITEM_BASE_NAME" target="api">base.name</a>=safsdata
 <span class="comments"># <a href="../../doc/org/safs/tools/drivers/DriverConstant.DataServiceConstant.html#ITEM_SERVER_URL" target="api">server.url</a> will override the 'protocol', 'host', 'port' and 'base.name' settings.
-#server.url=http://safsdev:8880/safsdata
+#server.url=http://localhost:8080/safsdata
 </span>
 </pre></div><br>
 
@@ -2665,7 +2665,7 @@ It provides the ability to store, update, delete and presents the safs data (run
 <span class="comments">VM parameter '<a href="../../doc/org/safs/tools/drivers/DriverConstant.DataServiceConstant.html#PROPERTY_PROTOCOL" target="api">safs.data.protocol</a>', '<a href="../../doc/org/safs/tools/drivers/DriverConstant.DataServiceConstant.html#PROPERTY_HOST" target="api">safs.data.host</a>',  '<a href="../../doc/org/safs/tools/drivers/DriverConstant.DataServiceConstant.html#PROPERTY_PORT" target="api">safs.data.port</a>', '<a href="../../doc/org/safs/tools/drivers/DriverConstant.DataServiceConstant.html#PROPERTY_BASE_NAME" target="api">safs.data.base.name</a>'.</span>
 java <b>-Dsafs.data.protocol=http</b> <b>-Dsafs.data.host=localhost</b> <b>-Dsafs.data.port=8080</b> <b>-Dsafs.data.base.name=safsdata</b>
 <span class="comments">VM parameter '<a href="../../doc/org/safs/tools/drivers/DriverConstant.DataServiceConstant.html#PROPERTY_SERVER_URL" target="api">safs.data.server.url</a>', it will override the 'safs.data.protocol', 'safs.data.host', 'safs.data.port' and 'safs.data.base.name' settings.</span>
-java <b>-Dsafs.data.server.url=http://safsdev:8880/safsdata</b>
+java <b>-Dsafs.data.server.url=http://localhost:8080/safsdata</b>
 </pre>
 </ul>
 
@@ -2833,7 +2833,7 @@ In SeleniumPlus we can import a "<b>Project with Test Level</b>", which has been
   <li id="push_test_data">Push test data (got from SAFS XML Log) to safs repository<br/>
     <ul>
 	    <li>By XMLSaxProcessor<br/>
-	      <span class="sourcecodes">java org.safs.tools.logs.processor.XMLSaxProcessor -s Logs\Cycle.xml -d http://safsdev:8880/safsdata</span>
+	      <span class="sourcecodes">java org.safs.tools.logs.processor.XMLSaxProcessor -s Logs\Cycle.xml -d http://localhost:8080/safsdata</span>
 	    </li>
 	  	<li>By SeleniumPlus<br/>
 	  	  At the end of test, a SAFS XML log will be created in the 'Logs' folder (if the XMLLOG format has been enabled in the .ini configuration file).<br/>

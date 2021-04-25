@@ -92,7 +92,7 @@ import org.safs.text.INIFileReader;
  * @author Carl Nagle  JUL 07, 2003 Strip single or double quotes from retrieved items.
  * @author Carl Nagle  DEC 11, 2003 Added clearCache capability to force reread of files.
  *
- * Software Automation Framework Support (SAFS) http://safsdev:8880<br>
+ * Software Automation Framework Support (SAFS) https://safsdev.github.io/<br>
  * Software Testing Automation Framework (STAF) http://staf.sourceforge.net<br>
  ******************************************************************************************/
 public class SAFSAppMapFile extends INIFileReader {

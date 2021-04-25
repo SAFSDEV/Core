@@ -39,7 +39,7 @@ import java.util.Vector;
  * @see SAFSTextFileReader
  * @see SAFSInputService
  *
- * Software Automation Framework Support (SAFS) http://safsdev:8880<br>
+ * Software Automation Framework Support (SAFS) https://safsdev.github.io/<br>
  * Software Testing Automation Framework (STAF) http://staf.sourceforge.net<br>
  ******************************************************************************************/
 public class SAFSTextFile extends SAFSFile{

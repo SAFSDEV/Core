@@ -43,7 +43,7 @@ import java.nio.charset.Charset;
  * @version 07/16/2010 (Carl Nagle) modified to support other Charset encodings.
  * @version 12/16/2014 (Carl Nagle) Fix NullPointerException on empty files in readLine.
  *
- * Software Automation Framework Support (SAFS) http://safsdev:8880<br>
+ * Software Automation Framework Support (SAFS) https://safsdev.github.io/<br>
  * Software Testing Automation Framework (STAF) http://staf.sourceforge.net<br>
  ******************************************************************************************/
 public class FileLineReader {

@@ -1,17 +1,17 @@
 /**
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
@@ -26,7 +26,7 @@ package org.safs.tools.drivers;
  * APR 16, 2018    (Lei Wang) Add constants of 'selenium server launch script' to SeleniumConfigConstant.
  * MAY 18, 2018    (Lei Wang) Added method getServiceURL() to DataServiceConstant.
  * JUL 11, 2018    (Lei Wang) Add SAFSLogsConstant.
- * OCT 09, 2018    (Lei Wang) Modified DataServiceConstant: changed the default data service url to "http://safsdev:8880/safsdata".
+ * OCT 09, 2018    (Lei Wang) Modified DataServiceConstant: changed the default data service url to "http://localhost:8080/safsdata".
  * OCT 09, 2018    (Lei Wang) Add SafsROBOTJ.
  */
 import java.awt.Toolkit;
@@ -704,18 +704,18 @@ public abstract class DriverConstant extends JavaConstant{
 		/** 'safs.data.' */
 		private static final String PREFIX = "safs.data.";
 
-		/** 8880 */
-		public static final int DEFAULT_PORT_INT = 8880;
+		/** 8080 */
+		public static final int DEFAULT_PORT_INT = 8080;
 
-		/**'safsdev' the default host on which the SAFS Data service runs. */
-		public static final String DEFAULT_HOST = "safsdev";
-		/**'8880' the default port number on which the SAFS Data service runs. */
+		/**'localhost' the default host on which the SAFS Data service runs. */
+		public static final String DEFAULT_HOST = "localhost";
+		/**'8080' the default port number on which the SAFS Data service runs. */
 		public static final String DEFAULT_PORT = String.valueOf(DEFAULT_PORT_INT);
 		/**'safsdata' the default relative URI on which the SAFS Data service runs. */
 		public static final String DEFAULT_BASE_NAME = "safsdata";
 		/**'http://' the default protocol with which the SAFS Data service runs. */
 		public static final String DEFAULT_PROTOCOL = "http://";
-		/**'http://safsdev:8880/safsdata' the default server URL on which the SAFS Data service runs. */
+		/**'http://localhost:8080/safsdata' the default server URL on which the SAFS Data service runs. */
 		public static final String DEFAULT_SERVER_URL = DEFAULT_PROTOCOL+DEFAULT_HOST+":"+DEFAULT_PORT+"/"+DEFAULT_BASE_NAME+"";
 
 		/**

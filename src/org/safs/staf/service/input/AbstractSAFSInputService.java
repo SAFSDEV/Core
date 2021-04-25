@@ -243,7 +243,7 @@ import com.ibm.staf.service.STAFCommandParser;
  * <p>
  * Example: staf local safsinput list
  * <p>
- * Software Automation Framework Support (SAFS) http://safsdev:8880<br>
+ * Software Automation Framework Support (SAFS) https://safsdev.github.io/<br>
  * Software Testing Automation Framework (STAF) http://staf.sourceforge.net<br>
  * @see SAFSInputService
  * @see SAFSInputService3

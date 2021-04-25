@@ -322,7 +322,7 @@ import com.ibm.staf.service.STAFServiceInterfaceLevel1;
  * <p>
  * HELP
  * <p>
- * Software Automation Framework Support (SAFS) http://safsdev:8880<br>
+ * Software Automation Framework Support (SAFS) https://safsdev.github.io/<br>
  * Software Testing Automation Framework (STAF) http://staf.sourceforge.net<br>
  *********************************************************************************************/
 public class SAFSTextFileReader extends SAFSFileReader implements STAFServiceInterfaceLevel1 {

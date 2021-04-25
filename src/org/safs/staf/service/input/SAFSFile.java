@@ -36,7 +36,7 @@ import java.io.File;
  * @version 1.0, 06/02/2003
  * @see SAFSFileReader
  *
- * Software Automation Framework Support (SAFS) http://safsdev:8880<br>
+ * Software Automation Framework Support (SAFS) https://safsdev.github.io/<br>
  * Software Testing Automation Framework (STAF) http://staf.sourceforge.net<br>
  ******************************************************************************************/
 public class SAFSFile extends org.safs.text.FileLineReader {
