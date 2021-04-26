@@ -1687,16 +1687,16 @@ Before update, make sure correct Selenium+ "<b>Update Site</b>" preferences are 
 	    <ol>
 	    <li>Enable Lib Update<br>
 	        It is used to enable/disable Library Update. There is an associate InputBox "Update Lib URL", where the Library Update URL can be modified.<br>
-	        Make sure that the URL starts with "<b>http://safsbuild:81</b>" if you want to get the latest support.
+	        Set the URL as "<b>https://github.com/SAFSDEV/UpdateSite/releases/download/seleniumplus/SEPLUS.LIB.UPDATE.ZIP</b>" if you want to get the latest support.
 	    <li>Enable Plugin Update<br>
 	        It is used to enable/disable Plugin Update. There is an associate InputBox "Update Plugin URL", where the Plugin Update URL can be modified.<br>
-	        Make sure that the URL starts with "<b>http://safsbuild:81</b>" if you want to get the latest support.
+	        Set the URL as "<b>https://github.com/SAFSDEV/UpdateSite/releases/download/seleniumplus/SEPLUS.PLUGIN.UPDATE.ZIP</b>" if you want to get the latest support.
 	    <li>Enable Source Code<br>
 	        It is used to enable/disable Source Code Update. There is an associate InputBox "Source Code URL", where the Source Code Update URL can be modified.<br>
-	        Make sure that the URL starts with "<b>http://safsbuild:81</b>" if you want to get the latest support.
+	        Set the URL as "<b>https://github.com/SAFSDEV/UpdateSite/releases/download/seleniumplus/source_all.zip</b>" if you want to get the latest support.
 	    <li>Enable Javadoc<br>
 	        It is used to enable/disable Javadoc in SeleniumPlus project. There is an associate InputBox "Javadoc Location URL", where the Javadoc Location URL can be modified.<br>
-	        Make sure that the URL is "<b>https://safsdev.github.io/doc</b>" if you want to get the latest support.
+	        Set the URL as "<b>http://safsdev.github.io/doc</b>" if you want to get the latest support.
 	    <li>Update JRE<br>
 	        It is used to enable/disable embedded JRE Update.
 	    </ol>
@@ -1738,24 +1738,19 @@ For Updating SeleniumPlus, following are the steps.
 	The batch script "<b>updateRuntime.bat</b>" can be used to update SeleniumPlus/SAFS.<br/>
 	This script expects that "SeleniumPlus"/"SAFS" has already successfully installed, so the system environment SELENIUM_PLUS/SAFSDIR has been defined correctly.<br/>
 	<p>
-	This script should be in folder %SELENIUM_PLUS%\extra or %SAFSDIR%\extra. If it does not exist, please get its <a href="http://safsbuild:81/jenkins/view/GITLAB_JOBS/job/SeleniumPlus/ws/source/common/org/safs/selenium/install/extra/updateRuntime.bat" target="blank">sourcecode</a> manually and copy it to "%SELENIUM_PLUS%\extra\".<br/>
+	This script should be in folder %SELENIUM_PLUS%\extra or %SAFSDIR%\extra. If it does not exist, please get its <a href="https://github.com/SAFSDEV/Core/blob/master/src/org/safs/selenium/install/extra/updateRuntime.bat" target="blank">sourcecode</a> manually and copy it to "%SELENIUM_PLUS%\extra\".<br/>
 	The script usage is <span class="sourcecodes">updateRuntime.bat [ALL|SE|SAFS]</span>, with parameter "SE" it updates SeleniumPlus, with "SAFS" it updates SAFS, with "ALL" it updates both "SeleniumPlus" and "SAFS".<br/>
 	So call <span class="commandline">updateRuntime.bat SE</span> to update SeleniumPlus. <span class="note">If the script is not latest, we might need to call <span class="commandline">updateRuntime.bat SE</span> twice to get SE+ really updated.</span><br/>
 
 	<p>
-	In the script, we are using the internal update resource which is faster. If you prefer using external update resource, then comment "internal resource" and un-comment "external resource".<br>
-	<span class="note">Currently user MUST use the internal site to get the latest update, as SAFS/SeleniumPlus development work will not be pushed to site out of SAS.</span>
+	In the script, we are using "github update resource".<br>
+	
 	<div class="CodeBox">
     <pre class="SourceCode">
-    <span class="comments">REM External update resource
-    REM SET SE_LIB_UPDATE=https://github.com/SAFSDEV/UpdateSite/releases/download/seleniumplus/SEPLUS.LIB.UPDATE.ZIP
-    REM SET SE_PLUGIN_UPDATE=https://github.com/SAFSDEV/UpdateSite/releases/download/seleniumplus/SEPLUS.PLUGIN.UPDATE.ZIP
-    REM SET SAFS_LIB_UPDATE=https://github.com/SAFSDEV/UpdateSite/releases/download/safs/SAFS.LIB.UPDATE.ZIP</span>
-
-    <span class="comments">REM Internal update resource</span>
-    SET SE_LIB_UPDATE=http://safsbuild:81/jenkins/job/SeleniumPlus/ws/updatesite/lib/latest/SEPLUS.LIB.UPDATE.ZIP
-    SET SE_PLUGIN_UPDATE=http://safsbuild:81/jenkins/job/SeleniumPlus/ws/updatesite/plugin/latest/SEPLUS.PLUGIN.UPDATE.ZIP
-    SET SAFS_LIB_UPDATE=http://safsbuild:81/jenkins/job/SAFS/ws/updatesite/lib/latest/SAFS.LIB.UPDATE.ZIP
+    <span class="comments">REM External github update resource</span>
+    SET SE_LIB_UPDATE=https://github.com/SAFSDEV/UpdateSite/releases/download/seleniumplus/SEPLUS.LIB.UPDATE.ZIP
+    SET SE_PLUGIN_UPDATE=https://github.com/SAFSDEV/UpdateSite/releases/download/seleniumplus/SEPLUS.PLUGIN.UPDATE.ZIP
+    SET SAFS_LIB_UPDATE=https://github.com/SAFSDEV/UpdateSite/releases/download/safs/SAFS.LIB.UPDATE.ZIP
     </pre>
     </div>
 <a href="#updatesoftware">[go back]</a>
@@ -1767,7 +1762,7 @@ If automated update fails then use manual steps to update SeleniumPlus environme
 	SeleniumPlus library update:
 	<ol>
 	<li>Shutdown Selenium+->RemoteServer->Stop and close Eclipse IDE.
-	<li>Go to <a href="http://safsbuild:81/jenkins/view/GITLAB_JOBS/job/SeleniumPlus/ws/updatesite/"
+	<li>Go to <a href="https://github.com/SAFSDEV/UpdateSite/releases/tag/seleniumplus"
 	           alt="SeleniumPlus Update Download Site" title="SeleniumPlus Update Download Site">
 	           SeleniumPlusUpdates</a> website.
 	<li>Click on lib/latest and download SEPLUS.LIB.UPDATE.ZIP.
@@ -1781,7 +1776,7 @@ If automated update fails then use manual steps to update SeleniumPlus environme
 	SeleniumPlus eclipse plugin update:
 	<ol>
 	<li>Shutdown Selenium+->RemoteServer->Stop and close Eclipse IDE.
-	<li>Go to <a href="http://safsbuild:81/jenkins/view/GITLAB_JOBS/job/SeleniumPlus/ws/updatesite/"
+	<li>Go to <a href="https://github.com/SAFSDEV/UpdateSite/releases/tag/seleniumplus"
 	           alt="SeleniumPlus Update Download Site" title="SeleniumPlus Update Download Site">
 	           SeleniumPlusUpdates</a> website.
 	<li>Click on plugin/latest and download SEPLUS.PLUGIN.UPDATE.ZIP.
