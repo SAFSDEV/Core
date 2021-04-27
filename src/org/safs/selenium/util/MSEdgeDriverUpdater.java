@@ -1,17 +1,17 @@
 /**
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
@@ -26,13 +26,13 @@ package org.safs.selenium.util;
 import java.io.File;
 import java.nio.file.Files;
 
+import org.safs.Constants.BrowserConstants;
 import org.safs.Constants.RegistryConstants;
 import org.safs.IndependantLog;
 import org.safs.StringUtils;
-import org.safs.Utils;
+import org.safs.UtilsIndependent;
 import org.safs.android.auto.lib.Console;
 import org.safs.natives.NativeWrapper;
-import org.safs.selenium.webdriver.lib.SelectBrowser;
 import org.safs.text.FileUtilities;
 
 /**
@@ -52,7 +52,7 @@ public class MSEdgeDriverUpdater extends AbstractDriverUpdater{
 	/** The prefix to create an URL for getting the latest driver. */
 	public static final String URL_PREFIX_MSEDGE_DRIVER_STORAGE = "https://msedgedriver.azureedge.net/";
 
-	public static final String VENDOR = SelectBrowser.BROWSER_NAME_CHROMIUM_EDGE;
+	public static final String VENDOR = BrowserConstants.BROWSER_NAME_CHROMIUM_EDGE;
 
 	public MSEdgeDriverUpdater(){
 		vendor = VENDOR;
@@ -116,7 +116,7 @@ public class MSEdgeDriverUpdater extends AbstractDriverUpdater{
 		//It seems that Microsoft provides a driver for each version of msedge browser, so we will try the browser's version as driver's version
 		//First we verify that we can use that browser's version to create a valid URL containing the driver to download
 		String driverURL = getDriverDownloadURL(matchedDriverVersion);
-		boolean driverURLExist = Utils.isURLExist(driverURL);
+		boolean driverURLExist = UtilsIndependent.isURLExist(driverURL);
 
 		//Use the browser's major version to try, below are example URLs to download a file containing the matched driver version
 		//https://msedgedriver.azureedge.net/LATEST_RELEASE_85
@@ -133,7 +133,7 @@ public class MSEdgeDriverUpdater extends AbstractDriverUpdater{
 			}
 			//From version 85, Microsoft provides separate URLs "majorVersion_WINDOWS" and "majorVersion_MACOS" for driver's version
 			//For previous version, that kind of URL doesn't exist, we need to check it.
-			if(!Utils.isURLExist(driverVersionFileURL)){
+			if(!UtilsIndependent.isURLExist(driverVersionFileURL)){
 				driverVersionFileURL = defaultDriverVersionFileURL;
 			}
 
@@ -154,7 +154,7 @@ public class MSEdgeDriverUpdater extends AbstractDriverUpdater{
 		try {
 			driverVersionFile = Files.createTempFile(vendor+"_driver", ".version").toFile();
 			IndependantLog.debug(debugmsg+" downloading URL '"+url+"' to file "+driverVersionFile.getCanonicalPath());
-			Utils.downloadURL(url, driverVersionFile, false);
+			UtilsIndependent.downloadURL(url, driverVersionFile, false);
 			IndependantLog.debug(debugmsg+" download completed");
 
 			String[] contents = FileUtilities.readLinesFromFile(driverVersionFile.getCanonicalPath());

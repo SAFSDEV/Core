@@ -1,17 +1,17 @@
 /**
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
@@ -27,11 +27,10 @@ package org.safs.selenium.util;
 import java.io.File;
 import java.nio.file.Files;
 
+import org.safs.Constants.BrowserConstants;
 import org.safs.IndependantLog;
 import org.safs.StringUtils;
-import org.safs.Utils;
-import org.safs.selenium.webdriver.lib.SelectBrowser;
-import org.safs.selenium.webdriver.lib.WDLibrary;
+import org.safs.UtilsIndependent;
 import org.safs.text.FileUtilities;
 
 /**
@@ -63,7 +62,7 @@ public abstract class AbstractDriverUpdater implements BrowserDriverUpdater{
 		try {
 			driverZipFile = Files.createTempFile(vendor+"_driver", ".zip").toFile();
 			IndependantLog.debug(debugmsg+" downloading URL '"+url+"' to file "+driverZipFile.getCanonicalPath());
-			Utils.downloadURL(url, driverZipFile);
+			UtilsIndependent.downloadURL(url, driverZipFile);
 			IndependantLog.debug(debugmsg+" download completed");
 
 			//Save the matched browser-driver in "SeleniumPlus\extra\drivers\<vendor>\<version>".
@@ -125,7 +124,7 @@ public abstract class AbstractDriverUpdater implements BrowserDriverUpdater{
 
 			//Copy the original driver to "SeleniumPlus\extra\drivers\<vendor>\backup".
 			//and copy the latest driver to the folder "SeleniumPlus\extra\" to replace the original one
-			WDLibrary.killBrowserDriver(null, vendor);//Kill the running process of the browser-driver, so that we can replace it by the latest driver.
+			UtilsIndependent.killBrowserDriver(null, vendor);//Kill the running process of the browser-driver, so that we can replace it by the latest driver.
 			SePlusInstallInfo seplusinfo = SePlusInstallInfo.instance();
 			File originalDriver = seplusinfo.getDriver(vendor);
 			String driverName = originalDriver.getName();
@@ -163,11 +162,11 @@ public abstract class AbstractDriverUpdater implements BrowserDriverUpdater{
 		String debugmsg = StringUtils.debugmsg(false);
 		BrowserDriverUpdater updater = null;
 
-		if(SelectBrowser.BROWSER_NAME_CHROME.equalsIgnoreCase(browserName)){
+		if(BrowserConstants.BROWSER_NAME_CHROME.equalsIgnoreCase(browserName)){
 			updater = new ChromeDriverUpdater();
-		}else if(SelectBrowser.BROWSER_NAME_FIREFOX.equalsIgnoreCase(browserName)){
+		}else if(BrowserConstants.BROWSER_NAME_FIREFOX.equalsIgnoreCase(browserName)){
 			updater = new FirefoxDriverUpdater();
-		}else if(SelectBrowser.BROWSER_NAME_CHROMIUM_EDGE.equalsIgnoreCase(browserName)){
+		}else if(BrowserConstants.BROWSER_NAME_CHROMIUM_EDGE.equalsIgnoreCase(browserName)){
 			updater = new MSEdgeDriverUpdater();
 		}else{
 			//TODO return updater for other browsers

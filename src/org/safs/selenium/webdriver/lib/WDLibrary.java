@@ -1,17 +1,17 @@
 /**
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
@@ -107,6 +107,7 @@
 * APR 27, 2020   (Lei Wang)  Added loadModHeaderProfile(), modified startBrowser(): load the extension ModHeader's profile.
 * MAY 20, 2020   (Lei Wang)  Modified getScreenLocation(): If the selenium can return screen coordinates, then return it directly. Added more log messages.
 * OCT 12, 2020   (Lei Wang)  Modified killGeckoDriver(): kill both "geckodriver" and "geckodriver_64" processes, we don't know if 32 or 64 bit driver is running.
+* APR 27, 2021   (Lei Wang) Moved some third-party-jar-independent-methods to 'org.safs.UtilsIndependent'.
 *
 *
 */
@@ -178,9 +179,9 @@ import org.safs.Constants;
 import org.safs.IndependantLog;
 import org.safs.Processor;
 import org.safs.SAFSException;
-import org.safs.SAFSParamException;
 import org.safs.StringUtils;
 import org.safs.Utils;
+import org.safs.UtilsIndependent;
 import org.safs.android.auto.lib.Console;
 import org.safs.image.ImageUtils;
 import org.safs.model.commands.DDDriverCommands;
@@ -203,11 +204,7 @@ import org.safs.sockets.DebugListener;
 import org.safs.text.FileUtilities;
 import org.safs.text.INIFileReader;
 import org.safs.tools.CaseInsensitiveFile;
-import org.safs.tools.GenericProcessMonitor;
 import org.safs.tools.GenericProcessMonitor.ProcessInfo;
-import org.safs.tools.GenericProcessMonitor.SearchCondition;
-import org.safs.tools.GenericProcessMonitor.UnixProcessSearchCondition;
-import org.safs.tools.GenericProcessMonitor.WQLSearchCondition;
 import org.safs.tools.drivers.DriverConstant.SeleniumConfigConstant;
 import org.safs.tools.input.CreateUnicodeMap;
 import org.safs.tools.input.InputKeysParser;
@@ -2863,103 +2860,93 @@ public class WDLibrary extends SearchObject {
 
 		String javaProcess = "java";
 		if(Console.isWindowsOS()) javaProcess += ".exe";
-		killProcess(host, javaProcess, "org.safs.selenium.util.SeleniumServerRunner");//WebDriverGUIUtilities.startRemoteServer(String projectdir, String... extraParams)
+		UtilsIndependent.killProcess(host, javaProcess, "org.safs.selenium.util.SeleniumServerRunner");//WebDriverGUIUtilities.startRemoteServer(String projectdir, String... extraParams)
 		String notJUnit = "JUnitTestRunner"; // don't kill JUnit process
-		killProcess(host, javaProcess, "selenium-server-standalone", notJUnit);//selenium-server-standalone-xxx.jar
+		UtilsIndependent.killProcess(host, javaProcess, "selenium-server-standalone", notJUnit);//selenium-server-standalone-xxx.jar
 
 		if(Console.isWindowsOS()){
-			killProcess(host, "cmd.exe", File.separator+"extra"+File.separator+"RemoteServer.bat");
+			UtilsIndependent.killProcess(host, "cmd.exe", File.separator+"extra"+File.separator+"RemoteServer.bat");
 		}else if(Console.isUnixOS() || Console.isMacOS()){
-			killProcess(host, "bash", File.separator+"extra"+File.separator+"RemoteServer.sh");
+			UtilsIndependent.killProcess(host, "bash", File.separator+"extra"+File.separator+"RemoteServer.sh");
 		}
 
-		killChromeDriver(host);
-		killIEDriverServer(host);
-		killMicrosoftWebDriver(host);
-		killGeckoDriver(host);
+		UtilsIndependent.killChromeDriver(host);
+		UtilsIndependent.killIEDriverServer(host);
+		UtilsIndependent.killMicrosoftWebDriver(host);
+		UtilsIndependent.killGeckoDriver(host);
 	}
 
 	/**
 	 * Kill the process 'geckodriver.exe/geckodriver_64.exe' on windows, or "geckodriver/geckodriver_64" on linux.
 	 * @param host String, the name of the machine on which the process 'geckodriver.exe' will be killed.
 	 * @return List<ProcessInfo>, a list containing the killed process's id and kill-execution-return-code.
+	 * @deprecated Please use {@link UtilsIndependent#killGeckoDriver(String)} instead.
 	 * @throws SAFSException
 	 */
+	@Deprecated
 	public static List<ProcessInfo> killGeckoDriver(String host) throws SAFSException{
-		//kill both "geckodriver" and "geckodriver_64" processes, we don't know 32 or 64 bit driver is running.
-		List<ProcessInfo> killedProcesses = new ArrayList<ProcessInfo>();
-		String process = "geckodriver";
-		if(Console.isWindowsOS()) process += ".exe";
-		killedProcesses.addAll(killExtraProcess(host, process));
-
-		if(Console.is64BitOS()){
-			process = "geckodriver_64";
-			if(Console.isWindowsOS()) process += ".exe";
-			killedProcesses.addAll(killExtraProcess(host, process));
-		}
-
-		return killedProcesses;
+		return UtilsIndependent.killGeckoDriver(host);
 	}
 
 	/**
 	 * Kill the process 'chromedriver.exe' on windows, or "chromedrver" on linux.
 	 * @param host String, the name of the machine on which the process 'chromedriver.exe' will be killed.
 	 * @return List<ProcessInfo>, a list containing the killed process's id and kill-execution-return-code.
+	 * @deprecated Please use {@link UtilsIndependent#killChromeDriver(String)} instead.
 	 * @throws SAFSException
 	 */
+	@Deprecated
 	public static List<ProcessInfo> killChromeDriver(String host) throws SAFSException{
-		String process = "chromedriver";
-		if(Console.isWindowsOS()) process += ".exe";
-		return killExtraProcess(host, process);
+		return UtilsIndependent.killChromeDriver(host);
 	}
 
 	/**
 	 * Kill the process 'IEDriverServer.exe'.
 	 * @param host String, the name of the machine on which the process 'IEDriverServer.exe' will be killed.
 	 * @return List<ProcessInfo>, a list containing the killed process's id and kill-execution-return-code.
+	 * @deprecated Please use {@link UtilsIndependent#killIEDriverServer(String)} instead.
 	 * @throws SAFSException
 	 */
+	@Deprecated
 	public static List<ProcessInfo> killIEDriverServer(String host) throws SAFSException{
-		return killExtraProcess(host, "IEDriverServer.exe");
+		return UtilsIndependent.killExtraProcess(host, "IEDriverServer.exe");
 	}
 
 	/**
 	 * Kill the process 'MicrosoftWebDriver.exe'.
 	 * @param host String, the name of the machine on which the process 'MicrosoftWebDriver.exe' will be killed.
 	 * @return List<ProcessInfo>, a list containing the killed process's id and kill-execution-return-code.
+	 * @deprecated Please use {@link UtilsIndependent#killMicrosoftWebDriver(String)} instead.
 	 * @throws SAFSException
 	 */
+	@Deprecated
 	public static List<ProcessInfo> killMicrosoftWebDriver(String host) throws SAFSException{
-		return killExtraProcess(host, "MicrosoftWebDriver.exe");
+		return UtilsIndependent.killExtraProcess(host, "MicrosoftWebDriver.exe");
 	}
 
 	/**
 	 * Kill the process 'msedgedriver.exe'.
 	 * @param host String, the name of the machine on which the process 'msedgedriver.exe' will be killed.
 	 * @return List<ProcessInfo>, a list containing the killed process's id and kill-execution-return-code.
+	 * @deprecated Please use {@link UtilsIndependent#killMSEdgeDriver(String)} instead.
 	 * @throws SAFSException
 	 */
+	@Deprecated
 	public static List<ProcessInfo> killMSEdgeDriver(String host) throws SAFSException{
-		return killExtraProcess(host, "msedgedriver.exe");
+		return UtilsIndependent.killExtraProcess(host, "msedgedriver.exe");
 	}
 
+	/**
+	 * Kill the driver process by browserName.
+	 * @param host String, the name of the machine on which the driver process will be killed.
+	 * @param browserName String, the name of the browser for which the driver process should be killed.
+	 * @return List<ProcessInfo>, a list containing the killed process's id and kill-execution-return-code.
+	 * @deprecated Please use {@link UtilsIndependent#killBrowserDriver(String, String)} instead.
+	 * @throws SAFSException
+	 */
+	@Deprecated
 	public static List<ProcessInfo> killBrowserDriver(String host, String browserName) throws SAFSException{
-		List<ProcessInfo> processList = null;
-		if(SelectBrowser.BROWSER_NAME_CHROME.equalsIgnoreCase(browserName)){
-			processList = killChromeDriver(host);
-		}else if(SelectBrowser.BROWSER_NAME_FIREFOX.equalsIgnoreCase(browserName)){
-			processList = killGeckoDriver(host);
-		}else if(SelectBrowser.BROWSER_NAME_IE.equalsIgnoreCase(browserName)){
-			processList = killIEDriverServer(host);
-		}else if(SelectBrowser.BROWSER_NAME_EDGE.equalsIgnoreCase(browserName)){
-			processList = killMicrosoftWebDriver(host);
-		}else if(SelectBrowser.BROWSER_NAME_CHROMIUM_EDGE.equalsIgnoreCase(browserName)){
-			processList = killMSEdgeDriver(host);
-		}else{
-			IndependantLog.warn(StringUtils.debugmsg(false)+"Not implemented for browser '"+browserName+"'.");
-		}
-
-		return processList;
+		return UtilsIndependent.killBrowserDriver(host, browserName);
 	}
 
 	/**
@@ -2967,41 +2954,12 @@ public class WDLibrary extends SearchObject {
 	 * @param host String, the name of machine on which the process will be killed.
 	 * @param processName String, the name of process to kill. like chromedriver.exe, IEDriverServer.exe etc.
 	 * @return List<ProcessInfo>, a list containing the killed process's id and kill-execution-return-code.
+	 * @deprecated Please use UtilsIndependent instead.
 	 * @throws SAFSException
 	 */
+	@Deprecated
 	public static List<ProcessInfo> killExtraProcess(String host, String processName) throws SAFSException{
-		if(!StringUtils.isValid(processName)){
-			throw new SAFSParamException("The value of parameter 'processName' is NOT valid: "+processName);
-		}
-		IndependantLog.debug("WDLibrary.killExtraProcess(): killing process '"+processName+"' on machine '"+host+"'.");
-
-		String searchCondition = null;
-		SearchCondition condition = null;
-		if(Console.isWindowsOS()){
-			//wmic process where " commandline like '%d:\\seleniumplus\\extra\\chromedriver.exe%' and name = 'chromedriver.exe' "
-			searchCondition = GenericProcessMonitor.wqlCondition("commandline", File.separator+"extra"+File.separator+processName, true, false);
-			searchCondition += " and "+ GenericProcessMonitor.wqlCondition("name", processName, false, false);
-			condition = new WQLSearchCondition(searchCondition);
-		}else if(Console.isUnixOS()){
-			//we use unix grep command to search process
-			//-f                   full-format, including command lines
-			//-C <command>         command name
-			searchCondition = " ps -f -C "+processName;
-			//the first line is "UID        PID  PPID  C STIME TTY          TIME CMD"
-			//We use the 'tail' command to remove the first heading line so that only process list is left
-			searchCondition += " | tail -n +2 ";
-			//-i, --ignore-case         ignore case distinctions
-			searchCondition += " | grep -i "+File.separator+"extra"+File.separator+processName;
-			//Finally, use the 'awk' to get the process id list, the second field is the 'PID'
-			searchCondition += " | awk '{print $2}' ";
-
-			//"ps -f -C command | tail -n +2 | grep -i commandline | grep -v notCommandline | awk '{print $2}'"
-			condition = new UnixProcessSearchCondition(searchCondition);
-		}else{
-			throw new SAFSException(Console.getOsFamilyName() +" has NOT been supported yet.");
-		}
-
-		return GenericProcessMonitor.shutdownProcess(host, condition);
+		return UtilsIndependent.killExtraProcess(host, processName);
 	}
 
 	/**
@@ -3010,10 +2968,12 @@ public class WDLibrary extends SearchObject {
 	 * @param processName String, the name of process to kill. like chromedriver.exe, IEDriverServer.exe, java.exe etc.
 	 * @param commandline String, the partial commandline of the process to be killed.
 	 * @return List<ProcessInfo>, a list containing the killed process's id and kill-execution-return-code.
+	 * @deprecated Please use {@link UtilsIndependent#killProcess(String, String, String)} instead.
 	 * @throws SAFSException
 	 */
+	@Deprecated
 	public static List<ProcessInfo> killProcess(String host, String processName, String commandline) throws SAFSException{
-		return killProcess(host, processName, commandline, null);
+		return UtilsIndependent.killProcess(host, processName, commandline);
 	}
 
 	/**
@@ -3023,50 +2983,12 @@ public class WDLibrary extends SearchObject {
 	 * @param commandline String, the partial commandline of the process to be killed.
 	 * @param notCommandline String, the partial commandline of the process NOT to be killed.
 	 * @return List<ProcessInfo>, a list containing the killed process's id and kill-execution-return-code.
+	 * @deprecated Please use {@link UtilsIndependent#killProcess(String, String, String, String)} instead.
 	 * @throws SAFSException
 	 */
+	@Deprecated
 	public static List<ProcessInfo> killProcess(String host, String processName, String commandline, String notCommandline) throws SAFSException{
-		if(!StringUtils.isValid(processName)){
-			throw new SAFSParamException("The value of parameter 'processName' is NOT valid: "+processName);
-		}
-		IndependantLog.debug("WDLibrary.killProcess(): killing process '"+processName+"' containing commandline '"+commandline+"' on machine '"+host+"'.");
-
-		SearchCondition condition = null;
-		String searchCondition = null;
-		if(Console.isWindowsOS()){
-			searchCondition = GenericProcessMonitor.wqlCondition("commandline", commandline, true, false);
-			if (notCommandline != null) {
-				searchCondition += " and not "+ GenericProcessMonitor.wqlCondition("commandline", notCommandline, true, false);
-			}
-			searchCondition += " and "+ GenericProcessMonitor.wqlCondition("name", processName, false, false);
-			condition = new WQLSearchCondition(searchCondition);
-
-		}else if(Console.isUnixOS()){
-			//we use unix grep command to search process
-			//-f                   full-format, including command lines
-			//-C <command>         command name
-			searchCondition = " ps -f -C "+processName;
-			//the first line is "UID        PID  PPID  C STIME TTY          TIME CMD"
-			//We use the 'tail' command to remove the first heading line so that only process list is left
-			searchCondition += " | tail -n +2 ";
-			//-i, --ignore-case         ignore case distinctions
-			searchCondition += " | grep -i "+commandline;
-			//-v, --invert-match        select non-matching lines
-			if (notCommandline != null) {
-				searchCondition += " | grep -v "+notCommandline;
-			}
-			//Finally, use the 'awk' to get the process id list
-			searchCondition += " | awk '{print $2}' ";
-
-			//"ps -f -C command | tail -n +2 | grep -i commandline | grep -v notCommandline | awk '{print $2}'"
-			condition = new UnixProcessSearchCondition(searchCondition);
-		}else{
-			throw new SAFSException(Console.getOsFamilyName() +" has NOT been supported yet.");
-		}
-
-		IndependantLog.debug("WDLibrary.killProcess(): searchCondition="+condition);
-
-		return GenericProcessMonitor.shutdownProcess(host, condition);
+		return UtilsIndependent.killProcess(host, processName, commandline, notCommandline);
 	}
 
 	/**
@@ -4246,23 +4168,23 @@ public class WDLibrary extends SearchObject {
 	private static void test_kill_extraProcess(){
 		try {
 			String host = "";
-			List<ProcessInfo> killedList = killChromeDriver(host);
+			List<ProcessInfo> killedList = UtilsIndependent.killChromeDriver(host);
 			for(ProcessInfo p:killedList){
 				System.out.println("on host "+host+", process "+p.getId()+" has been terminated. The return code is "+p.getWmiTerminateRC());
 			}
 
-			killedList = killIEDriverServer(host);
+			killedList = UtilsIndependent.killIEDriverServer(host);
 			for(ProcessInfo p:killedList){
 				System.out.println("on host "+host+", process "+p.getId()+" has been terminated. The return code is "+p.getWmiTerminateRC());
 			}
 
 			host = "tadsrv";
-			killedList = killChromeDriver(host);
+			killedList = UtilsIndependent.killChromeDriver(host);
 			for(ProcessInfo p:killedList){
 				System.out.println("on host "+host+", process "+p.getId()+" has been terminated. The return code is "+p.getWmiTerminateRC());
 			}
 
-			killedList = killIEDriverServer(host);
+			killedList = UtilsIndependent.killIEDriverServer(host);
 			for(ProcessInfo p:killedList){
 				System.out.println("on host "+host+", process "+p.getId()+" has been terminated. The return code is "+p.getWmiTerminateRC());
 			}

@@ -1,17 +1,17 @@
 /**
  * Copyright (C) SAS Institute, All rights reserved.
  * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
@@ -25,6 +25,7 @@ package org.safs.selenium.util;
 
 import java.util.Map;
 
+import org.safs.Constants.BrowserConstants;
 import org.safs.Constants.RegistryConstants;
 import org.safs.IndependantLog;
 import org.safs.StringUtils;
@@ -33,7 +34,6 @@ import org.safs.natives.NativeWrapper;
 import org.safs.net.HttpRequest;
 import org.safs.net.IHttpRequest;
 import org.safs.net.IHttpRequest.HttpCommand;
-import org.safs.selenium.webdriver.lib.SelectBrowser;
 
 /**
  * @author Lei Wang
@@ -52,7 +52,7 @@ public class ChromeDriverUpdater extends AbstractDriverUpdater{
 	/** The prefix to create an URL for getting the latest driver. */
 	public static final String URL_PREFIX_CHROME_DRIVER_STORAGE = "https://chromedriver.storage.googleapis.com/";
 
-	public static final String VENDOR = SelectBrowser.BROWSER_NAME_CHROME;
+	public static final String VENDOR = BrowserConstants.BROWSER_NAME_CHROME;
 
 	public ChromeDriverUpdater(){
 		vendor = VENDOR;
