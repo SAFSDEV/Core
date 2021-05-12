@@ -1,5 +1,25 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.staf.service.logging;
-
+/**
+ * JUN 05, 2018	(Lei Wang) Added method getInitMessages(), getCloseMessages(), writeInitMessages(), write() and writeCloseMessages().
+ *                        Modified init(): call writeInitMessages().
+ */
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.EOFException;
@@ -10,6 +30,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.util.List;
 
 import org.safs.STAFHelper;
 import org.safs.logging.FileLogItem;
@@ -24,12 +45,12 @@ import com.ibm.staf.STAFUtil;
  * This class represents a file log implemented using STAF LOG service. It
  * contains a STAF handle to interact with STAF.
  * <p>
- * The initialization of this log item clears existing STAF log with the same 
+ * The initialization of this log item clears existing STAF log with the same
  * name.
- * @author Carl Nagle 02/24/05 changed use of machine to effectiveMachine to avoid "localhost" 
+ * @author Carl Nagle 02/24/05 changed use of machine to effectiveMachine to avoid "localhost"
  *          when finding STAF logs to export to SAFS logs.
- * @author Carl Nagle 11/03/2006 modified to process mixed-mode UTF-8 strings. 
- * 
+ * @author Carl Nagle 11/03/2006 modified to process mixed-mode UTF-8 strings.
+ *
  * @since	MAY 19 2009		(LW)	Modify the method getSTAFLogDirectory() to abstract.
  * 									getSTAFLogDirectory() contains the STAF-version related code,
  * 									realize them in subclass can make the code more independent of STAF-version.
@@ -40,9 +61,9 @@ public abstract class STAFFileLogItem extends FileLogItem
 	protected static final int SAFSLOG_MINOR_VER = 1;
 	protected static final String LINEFEED = System.getProperty("line.separator");
 	protected String STAFVersion = "2.0";
-	
+
 	protected HandleInterface handle = null;
-	
+
 	//EffectiveMachine (v2) or MachineNickName (v3)
 	private String MACHINE_NAME;
 	private String LOGNAME_OPTION;
@@ -62,7 +83,7 @@ public abstract class STAFFileLogItem extends FileLogItem
 	 * @param parent	the parent directory for this log.
 	 * @param file		the file spec of this log.
 	 */
-	public STAFFileLogItem(String name, long mode, boolean enabled, 
+	public STAFFileLogItem(String name, long mode, boolean enabled,
 		String parent, String file)
 	{
 		super(name, mode, enabled, parent, file);
@@ -102,23 +123,72 @@ public abstract class STAFFileLogItem extends FileLogItem
 		STAFVersion =STAFHelper.getSTAFVersionString(handle);
 		MACHINE_NAME = this.getMachineName();
 		debugLog.debugPrintln("STAF version: "+STAFVersion+" ; STAF machine name: "+MACHINE_NAME);
-		
+
 		LOGNAME_OPTION = " logname " + STAFUtil.wrapData(this.name) + " ";
 		MACHINE_OPTION = " machine "+MACHINE_NAME+" ";
-		
+
 		stafLogRequest("delete" + MACHINE_OPTION + LOGNAME_OPTION + "confirm");
+		writeInitMessages();
 	}
-	
+
 	/**
 	 * Close this log.
 	 * <p>
 	 * @throws	STAFLogException
 	 * 			if this method failed for any reason.
 	 */
+	@Override
 	public abstract void close() throws STAFLogException;
 
+	/** Return the messages to write after the log is initialized. */
+	protected abstract List<String> getInitMessages();
+	/** Return the messages to write before the log is closed. */
+	protected abstract List<String> getCloseMessages();
+
+	/** Write a message to the log. */
+	protected void write(String msg){
+		stafLogLog(msg);
+	}
+
 	/**
-	 * Submits a request to the instance of STAF LOG service loaded by the SAFS 
+	 * Write messages to log after it is initialized. It should be called in method {@link #init()}.
+	 */
+	protected void writeInitMessages(){
+		for(String message:getInitMessages()){
+			write(message);
+		}
+	}
+
+	/**
+	 * Write message to log before it is closed. It should be called in method {@link #close()}.
+	 */
+	protected void writeCloseMessages(){
+		for(String message:getCloseMessages()){
+			write(message);
+		}
+	}
+
+	/**
+	 * Strip the suffix of the test file to get the test name.
+	 * @return String, the test's name.
+	 */
+	protected String getTestName(){
+		String testName = name;
+
+		if(testName!=null){
+			int ind = testName.lastIndexOf(".");
+			if(ind>-1){
+				testName = testName.substring(0, ind);
+			}
+		}else{
+			testName = "";
+		}
+
+		return testName;
+	}
+
+	/**
+	 * Submits a request to the instance of STAF LOG service loaded by the SAFS
 	 * logging service.
 	 * <p>
 	 * @param request	the service request to submit.
@@ -143,7 +213,7 @@ public abstract class STAFFileLogItem extends FileLogItem
 	 */
 	protected STAFResult stafLogLog(String message, String level)
 	{
-		return stafLogRequest("log machine" + LOGNAME_OPTION + 
+		return stafLogRequest("log machine" + LOGNAME_OPTION +
 			levelOption(level) + messageOption(message));
 	}
 
@@ -161,7 +231,7 @@ public abstract class STAFFileLogItem extends FileLogItem
 	 * Builds STAF-formatted text for LEVEL option.
 	 * <p>
 	 * @param	level	the raw LEVEL option value.
-	 * @return	the formatted LEVEL option, including both the option name and 
+	 * @return	the formatted LEVEL option, including both the option name and
 	 * 			value (e.g. " level :4:info ").
 	 */
 	private String levelOption(String level)
@@ -173,7 +243,7 @@ public abstract class STAFFileLogItem extends FileLogItem
 	 * Builds STAF-formatted text for MESSAGE option.
 	 * <p>
 	 * @param	message	the raw message.
-	 * @return	the formatted MESSAGE option, including both the option name and 
+	 * @return	the formatted MESSAGE option, including both the option name and
 	 * 			value (e.g. " message :11:how are you ").
 	 */
 	private String messageOption(String message)
@@ -186,7 +256,7 @@ public abstract class STAFFileLogItem extends FileLogItem
 	 * <p>
 	 * @throws	SAFSLogException
 	 * 			if failed to finalize the log file.
-	 * @author Carl Nagle 02/24/05 changed use of machine to effectiveMachine to avoid "localhost" when 
+	 * @author Carl Nagle 02/24/05 changed use of machine to effectiveMachine to avoid "localhost" when
 	 *          finding STAF logs to export as SAFS logs.
 	 */
 	protected void finalizeLogFile() throws STAFLogException
@@ -198,13 +268,13 @@ public abstract class STAFFileLogItem extends FileLogItem
 			if (!p.isDirectory())
 			{
 				debugLog.debugPrintln(
-					"STAFFileLogItem.finalizeLogFile(): '" + 
+					"STAFFileLogItem.finalizeLogFile(): '" +
 					p.getAbsolutePath() + "' is not directory.");
 				if (!p.mkdirs())
 				{
 					throw new STAFLogException(
 						"Failed to create directory " + p.getAbsolutePath(),
-						new STAFResult(STAFResult.DoesNotExist, 
+						new STAFResult(STAFResult.DoesNotExist,
 							p.getAbsolutePath()));
 				}
 			}
@@ -229,7 +299,7 @@ public abstract class STAFFileLogItem extends FileLogItem
 		{
 			debugLog.debugPrintln(
 				"STAFFileLogItem.finalizeLogFile():", e);
-			throw new STAFLogException(e.getMessage(), 
+			throw new STAFLogException(e.getMessage(),
 				new STAFResult(STAFResult.FileWriteError, getAbsolutePath()));
 		}
 	}
@@ -288,8 +358,8 @@ public abstract class STAFFileLogItem extends FileLogItem
 		//PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(getAbsolutePath()), Charset.forName("UTF-8")), false);
 		OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(getAbsolutePath()), Charset.forName("UTF-8"));
 		prependFinalLog(out);
-		
-		try 
+
+		try
 		{
 			do
 			{
@@ -313,20 +383,20 @@ public abstract class STAFFileLogItem extends FileLogItem
 				}
 				// this is the actual log message
 				s = readStringFromSTAFLog(in);
-				
+
 				//out.println(s);
 				out.write(s);
 				out.write(LINEFEED);
-				
+
 			} while (true);
 		}
 		catch (EOFException e) {}
-		finally 
+		finally
 		{
 			debugLog.debugPrintln(
 				"STAFFileLogItem.exportSTAFLog(): close io streams");
-			in.close();			
-			appendFinalLog(out);			
+			in.close();
+			appendFinalLog(out);
 			out.close();
 		}
 	}
@@ -334,7 +404,7 @@ public abstract class STAFFileLogItem extends FileLogItem
 	/**
 	 * Read the next string from the STAF log.
 	 * <p>
-	 * Strings are saved in the STAF log as byte data, with the number of bytes 
+	 * Strings are saved in the STAF log as byte data, with the number of bytes
 	 * (saved as 4-byte long unsigned integer) preceeding the actual data.
 	 * <p>
 	 * @param in	the STAF log input stream.
@@ -359,7 +429,7 @@ public abstract class STAFFileLogItem extends FileLogItem
 	/**
 	 * Reads the next "unsigned integer" from the input stream.
 	 * <p>
-	 * This method reads the next 4 bytes from the input stream, and convert 
+	 * This method reads the next 4 bytes from the input stream, and convert
 	 * them to a long (because java does not support unsigned data types), using
 	 * the first byte as the highest byte and treating each byte as unsigned.
 	 * For example:
@@ -369,13 +439,13 @@ public abstract class STAFFileLogItem extends FileLogItem
 	 * </pre>
 	 * <p>
 	 * @param in	the STAF log input stream.
-	 * @return		a <code>long</code> equal to the unsigned integer converted 
+	 * @return		a <code>long</code> equal to the unsigned integer converted
 	 * 				from the bytes.
 	 */
 	protected long readUIntFromSTAFLog(DataInputStream in) throws IOException
 	{
 		long[] l = new long[4];
-		for (int i = 0; i < 4; i++) 
+		for (int i = 0; i < 4; i++)
 		{
 			l[i] = in.readUnsignedByte();
 		}
@@ -390,9 +460,9 @@ public abstract class STAFFileLogItem extends FileLogItem
 	protected void setDebugLog(ServiceDebugLog debugLog){
 		this.debugLog = debugLog;
 	}
-	
+
 	/**
-	 * STAF version 2 will use {STAF/Config/EffectiveMachine} to make log. 
+	 * STAF version 2 will use {STAF/Config/EffectiveMachine} to make log.
 	 * While STAF version 3 use (STAF/Config/MachineNickName)
 	 * @return		EffectiveMachine (for version 2) of MachineNickName (for version 3)
 	 */
@@ -405,12 +475,12 @@ public abstract class STAFFileLogItem extends FileLogItem
 		}else{
 			debugLog.debugPrintln("Try to get EffectiveMachine.");
 		}
-		
+
 		STAFResult result = handle.submit2("local", "VAR", request);
 		if(result.rc==STAFResult.Ok){
 			machineName = result.result ;
 		}
-		
+
 		return machineName;
 	}
 }

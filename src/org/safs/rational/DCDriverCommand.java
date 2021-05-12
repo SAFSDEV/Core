@@ -1,6 +1,20 @@
-/** Copyright (C) (MSA, Inc) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+/**
+ * Copyright (C) (MSA, Inc), All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * Logs for developers, not published to API DOC.
  * History:<br>
@@ -12,17 +26,17 @@
  *   <br>   Dec 09, 2005	(Bob Lawler) 	Added SetContext command RJL.
  *   <br>   Oct 23, 2007	(Carl Nagle) 	Fixed NullPointerException in waitForPropertyValue
  *   <br>   May 05, 2008    (JunwuMa) 	Added OnMenuItemContainsStateGotoBlockID
- *   <br>   JUL 28, 2008    (LeiWang) 	Modify method OnMenuItemContainsStateGotoBlockID to adapt .NET application.
+ *   <br>   JUL 28, 2008    (Lei Wang) 	Modify method OnMenuItemContainsStateGotoBlockID to adapt .NET application.
  *   <br>   JUL 31, 2008    (Carl Nagle) 	Add CASEINSENSITIVE support to WaitForPropertyValue commands.
- *   <br>   JUN 12, 2008    (LeiWang)	Modify method: OnMenuItemContainsStateGotoCommand()
+ *   <br>   JUN 12, 2008    (Lei Wang)	Modify method: OnMenuItemContainsStateGotoCommand()
  *   								 	For supporting the menu (type is .Menubar) of win domain.
  *   <br>   JUL 20, 2009    (Carl Nagle) 	Added more significant cache clearing for some driver commands.
- *   <br>   AUG 05, 2008    (LeiWang)	Add keyword: SetSecsSeekComponent,SetSecsDelayRetryComponent,SetSecsAfterWindowActive
+ *   <br>   AUG 05, 2008    (Lei Wang)	Add keyword: SetSecsSeekComponent,SetSecsDelayRetryComponent,SetSecsAfterWindowActive
  *   												 GetSecsSeekComponent,GetSecsDelayRetryComponent,GetSecsAfterWindowActive
  *   <br>   DEC 14, 2009    (Girish Kolapkar)    Added keyword:ScrollWheel.  
  *   <br>   JAN 12, 2008    (Girish Kolapkar)	Added keyword: GetSecsBeforeMouseUp,GetSecsBeforeMouseDown,SetSecsBeforeMouseUp
  *   												   SetSecsBeforeMouseDown
- *   <br>   AUG 23, 2010	(LeiWang)	Modify method process(): If we use Mixed-Mode-RS, that is OBT-RS for window, IBT-RS for component,
+ *   <br>   AUG 23, 2010	(Lei Wang)	Modify method process(): If we use Mixed-Mode-RS, that is OBT-RS for window, IBT-RS for component,
  *                                                               we need to change the window's RS to IBT-RS and let the TIDDriverCommands to
  *                                                               process it. Only WaitForGUI, WaitForGUIGone, OnGUIExistsGotoBlockID and 
  *                                                               OnGUINotExistGotoBlockID will be affected as the other GUI-related keywords

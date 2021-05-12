@@ -1,8 +1,20 @@
 /**
  * Copyright (C) SAS Institute, All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- */
-
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * Logs for developers, not published to API DOC.
  *
@@ -13,7 +25,9 @@
  *                          Added caches holding result of getContents() and getPersitableFields().
  *                          Handled the field of type "array": setField(), equals().
  * APR FOOL, 2017  (Lei Wang) Modified getField(), setField(): make them work for superclass.
- * APR 14, 2017    (Lei Wang) Added the ability to filter the fields according to their modifier.
+ * APR 14, 2017    (Lei Wang) Added the ability to filter the fields according to their modifiers.
+ * OCT 26, 2017	   (Lei Wang) Added the ability to match all bits of modifier or match any bits of modifier to filter a field.
+ * NOV 03, 2017    (Lei Wang) Use empty string "" as the field's default value instead of string "UNKNOWN".
  *
  */
 package org.safs.persist;
@@ -32,12 +46,12 @@ import org.safs.Printable;
 import org.safs.StringUtils;
 import org.safs.Utils;
 
-
 /**
  * @author Lei Wang
  */
 public abstract class PersistableDefault implements Persistable, Printable{
 	protected static final String UNKNOWN_VALUE 		= "UNKNOWN";
+	protected static final String DEFAULT_VALUE 		= "";
 	protected static final String FAILED_RETRIEVE_VALUE = "FAILED_RETRIEVE";
 
 	/** a cache holding the Map of (fieldName, persistKey) */
@@ -60,12 +74,27 @@ public abstract class PersistableDefault implements Persistable, Printable{
 	protected int threshold = 0;
 	protected boolean thresholdEnabled = false;
 
-	private final static int MODIFIER_NONE = 0;//none modifier
+	protected final static int MODIFIER_NONE = 0;//none modifier
+	protected final static int MODIFIER_CONSTANT = Modifier.FINAL | Modifier.STATIC;//the modifier represents a constant field
 	/**
-	 * If the field's modifiers fit all bits set in 'ignoredFiledTypes', then ignore it.
-	 * Modifier such as Modifier.FINAL, Modifier.STATIC, Modifier.FINAL | Modifier.STATIC etc.
+	 * The field's modifiers to check to tell if this field will be ignored; The check depends also on {@link #matchAllFieldModifiers}.<br>
+	 * The filed's modifiers is a combination of bits, such as Modifier.FINAL | Modifier.STATIC etc.<br>
+	 *
+	 * If {@link #matchAllFieldModifiers} is true, then ignore the filed if the it's modifiers fit all bits set in {@link #ignoredFiledModifiers}.<br>
+	 * Otherwise, ignore the filed if the it's modifiers fit one of bits set in {@link #ignoredFiledModifiers}.<br>
+	 *
+	 * @see #matchAllFieldModifiers
 	 */
-	private int ignoredFiledModifiers = MODIFIER_NONE;
+	protected int ignoredFiledModifiers = MODIFIER_NONE;
+
+	protected final static boolean DEFAULT_MATCH_ALL_FIELD_MODIFIERS = true;
+	/**
+	 * If it is true, then ignore the filed if it's modifiers fit all bits set in {@link #ignoredFiledModifiers}.
+	 * Otherwise, ignore the filed if the it's modifiers fit one of bits set in {@link #ignoredFiledModifiers}.
+	 *
+	 * @see #ignoredFiledModifiers
+	 */
+	protected boolean matchAllFieldModifiers = DEFAULT_MATCH_ALL_FIELD_MODIFIERS;
 
 	public PersistableDefault(){}
 
@@ -85,8 +114,30 @@ public abstract class PersistableDefault implements Persistable, Printable{
 	 * @see #ignoredFiledModifiers
 	 */
 	protected PersistableDefault(int ignoredFiledModifiers/* filed modifiers, such as Modifier.FINAL, Modifier.STATIC etc.*/){
-		//Swipe away the non-field modifiers
+		//Sweep away the non-field modifiers
+		this(ignoredFiledModifiers, DEFAULT_MATCH_ALL_FIELD_MODIFIERS);
+	}
+
+	/**
+	 * Construct a PersistableDefault with modifier to filter the field for persisting.
+	 *
+	 * <pre>
+	 * <b>Note</b>:
+	 * This constructor is <b>protected</b>, and it is suggested to call it
+	 * in a constructor without parameter to keep the consistency between "pickle" and "unpickle".
+	 * If user makes it public in a child class and create a Persistable object with it,
+	 * then inconsistency may happen between "pickle" and "unpickle", because "unpickle" uses
+	 * the constructor without parameter, which is different than this one.
+	 * </pre>
+	 *
+	 * @param ignoredFiledModifiers int, the modifier used to filter the field for persisting.
+	 * @param matchAllFieldModifiers boolean, to match all bits or one of bits set in 'ignoredFiledModifiers'.
+	 * @see #ignoredFiledModifiers
+	 */
+	protected PersistableDefault(int ignoredFiledModifiers/* filed modifiers, such as Modifier.FINAL, Modifier.STATIC etc.*/, boolean matchAllFieldModifiers){
+		//Sweep away the non-field modifiers
 		this.ignoredFiledModifiers = ignoredFiledModifiers & Modifier.fieldModifiers();
+		this.matchAllFieldModifiers = matchAllFieldModifiers;
 	}
 
 	/**
@@ -119,9 +170,15 @@ public abstract class PersistableDefault implements Persistable, Printable{
 	 */
 	protected boolean ignoreFieldForPersist(Field field){
 		boolean ignore = false;
-		//If the field's modifiers fit all bits set in 'ignoredFiledTypes', then ignore it.
-		ignore = ignoredFiledModifiers!=MODIFIER_NONE &&
-				(ignoredFiledModifiers&field.getModifiers())==ignoredFiledModifiers;
+		if(ignoredFiledModifiers!=MODIFIER_NONE){
+			if(matchAllFieldModifiers){
+				//If the field's modifiers fit all bits set in 'ignoredFiledModifiers', then ignore it.
+				ignore = (ignoredFiledModifiers&field.getModifiers())==ignoredFiledModifiers;
+			}else{
+				//If the field's modifiers fit one of bits set in 'ignoredFiledModifiers', then ignore it.
+				ignore = (ignoredFiledModifiers&field.getModifiers())!=MODIFIER_NONE;
+			}
+		}
 		return ignore;
 	}
 
@@ -160,8 +217,8 @@ public abstract class PersistableDefault implements Persistable, Printable{
 			}
 
 			if(value==null){
-				IndependantLog.debug(debugmsg+" value is null for field '"+fieldName+"', set "+UNKNOWN_VALUE+" as its value.");
-				value = UNKNOWN_VALUE;
+				IndependantLog.debug(debugmsg+" value is null for field '"+fieldName+"', set "+DEFAULT_VALUE+" as its value.");
+				value = DEFAULT_VALUE;
 			}
 
 			persistKeyToFieldValueMap.put(fieldToPersistKeyMap.get(fieldName), value);
@@ -305,10 +362,12 @@ public abstract class PersistableDefault implements Persistable, Printable{
 		actualContents = new TreeMap<String, Object>();
 
 		if(includeContainer){
-			//The Persistable object itself doesn't have a real value, but it contains children;
-			//while the SAX XML parser will treat it as an Element and assign it a default string "\n" as value
-			//So we add the default string "\n" for Persistable object itself in the actualContents Map to
-			//get the verification pass. See VerifierToXMLFile#defaultElementValues and VerifierToXMLFile#beforeCheck().
+			//The Persistable object itself doesn't have a real string value, and it contains children; if we want to assign it a
+			//default string value for verification purpose, we can put the pair (CONTAINER_ELEMENT, defaultValue) into the parameter 'elementAlternativeValues' before calling this method.
+
+			//In class VerifierToXMLFile, we used to parse an "XML bench file" by a SAX XML parser which will assign string "\n" to Element (the Persistable object in XML format) as value;
+			//so we used to put (CONTAINER_ELEMENT, "\n") into map 'defaultElementValues' so that Persistable object will return also "\n" as value for Persistable object itself and verification can pass.
+			//Now we have refactored our code to use PersistorToXMLString to convert an "XML bench file" to a Persistable object, so we don't need string "\n" as value for Persistable object itself any more.
 			Object containerValue = Utils.getMapValue(elementAlternativeValues, CONTAINER_ELEMENT, "");
 			actualContents.put(flatKey, containerValue);
 		}
@@ -379,6 +438,7 @@ public abstract class PersistableDefault implements Persistable, Printable{
 		return sb.toString();
 	}
 
+	@Override
 	public String toString(){
 		String clazzname = getClass().getSimpleName();
 		Map<String, Object> contents = getContents();
@@ -424,6 +484,7 @@ public abstract class PersistableDefault implements Persistable, Printable{
 	 * </ul>
 	 * then they will be considered as equal.<br/>
 	 */
+	@Override
 	public boolean equals(Object obj){
 		if(obj==null) return false;
 		if(!(obj instanceof Persistable)) return false;

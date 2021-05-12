@@ -1,0 +1,92 @@
+<html>
+<head>
+<style type="text/css">
+<!--
+    div.b1{background-color:#E0E0E0;}
+-->
+</style>
+<meta http-equiv="Content-Language" content="en-us">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Software Automation Framework Support</title>
+</head>
+<body>
+<div class=b1>
+<img src="sqabasic2000/SAFS_Logo.png"  border="0" align="right" alt="SAFS Logo"/>
+<center>
+<h1>SAFS<br>
+Software Automation Framework Support</h1>
+<small>Updated 2017.06.22
+<p>Initially developed by Carl Nagle for <a href="http://www.sas.com" target="_blank" title="www.sas.com">SAS Institute</a><br>
+Evolves as Opensource with permission from SAS Institute</p>
+</small>
+<p>
+
+Visit our <b>Software Automation Framwork Support</b> at 
+<a href="https://github.com/SAFSDEV" target="_blank" title="Official SAFSDEV Project on GitHub"><b>GitHub</b></a>.
+It originally locates at <a href="http://sourceforge.net/projects/safsdev" target="_blank" title="Official SAFSDEV Project on SourceForge">SourceForge</a>.<br/>
+</center></div>
+<hr>
+<p>
+<i>Welcome to the SAFSDEV project!</i>&nbsp; &nbsp; See "<a href="WhatsNewInSAFS.htm" title="Summary of What's New In SAFS"><b>What's New!</b></a>". &nbsp;Including our latest releases for:
+<p><ul>
+<li><a href="https://github.com/SAFSDEV/SeleniumPlus-Plugin/releases" title="Offical SeleniumPlus Release Download" target="_blank" >SeleniumPlus Release</a> for Advanced HTML5/SAPUI5 testing with SAFS/Selenium RemoteWebDriver!
+<li><a href="https://github.com/SAFSDEV/Core/releases" title="Offical SAFS Win Release Download" target="_blank" >SAFS Win Release</a>--includes the full breadth of SAFS support on Windows!
+</ul><p>
+Our focus is on implementing tools and frameworks for strategic, long-term success in functional test automation.&nbsp; To that end we work on "<b>keyword-driven</b>" engines, also sometimes called "data-driven" engines.&nbsp;  What we are dealing with, actually, are tools and full implementations of testing frameworks for "<b>action-based testing</b>" or "the action word approach" for functional test automation.&nbsp;  Read more about the benefits of keyword-driven testing in the <a href="FRAMESDataDrivenTestAutomationFrameworks.htm" target="_blank" alt="Test Automation Frameworks Whitepaper">Test Automation Frameworks whitepaper</a>.
+<p>
+As an extension of keyword-driven testing, we also provide <a href="sqabasic2000/UsingJSAFS.htm">JSAFS Support</a> and <a href="selenium/doc/SeleniumPlus-Welcome.html">SeleniumPlus</a> for Java-savvy developers and testers that want to write <b>tool-independent</b> tests in Java that leverage the same keyword-driven framework environments.
+<p>
+Larger portions of our tools development are intended to benefit functional test automation in general.&nbsp;  This is an effort to provide functionality and tools that augment, or can be used independent of, the commercial automation solutions used by many automators.&nbsp;  These tools are not only suitable for the keyword-driven engines that are the focal point of our effort, but they are also useful for any number of other software test automation projects.
+<p>
+We have dubbed the "general-purpose" nature of our work, <b>Software Automation Framework Support</b>, or <b>SAFS</b>.
+<p>
+We take these general-purpose tools and apply them to specific keyword-driven engine implementations we call, <b>SAFS Engines.</b>&nbsp;  Our primary goal is to implement a common keyword-driven engine design across multiple tools and testing platforms for robust automation that can be immune to the course of any one particular testing tool.&nbsp;  This helps us realize the concept:
+<p>
+<center><i><b>"We must minimize the impact caused by changes in the applications we are testing,<br>and changes in the tools we use to test them."</b></i></center>
+<p>
+This strategy allows us to separate our tests from the automation tools that will execute them.&nbsp; So, we can actually migrate tests from one automation tool to another, or even use multiple automation tools simultaneously.&nbsp;  For example, we could use Selenium WebDriver and IBM Rational Functional Tester at the same time.&nbsp; Or Rational Functional Tester and AQA TestComplete!&nbsp; We could have Rational Functional Tester execute a test on Windows but use a different tool to run the same test on another platform.&nbsp;
+<p>
+We are experiencing explosive development in many different areas and platforms right now which makes frequent "official" releases very difficult.
+<p>
+<ul>The list of tool implementations currently supported:
+<p>
+<li><a href="http://www.seleniumhq.org/projects/webdriver/" alt="OpenQA's OpenSource Selenium WebDriver Homepage" target="_blank">Selenium WebDriver</a>
+<li><a href="http://developer.android.com/sdk/index.html" target="_blank" title="Android Test Automation">Android Test Automation</a>
+<li><a href="http://developer.apple.com/library/ios/" alt="Apple iOS Dev Center" target="_blank" title="Apple iPad and iPhone iOS Automation">Apple OSX iOS UIAutomation</a>
+<li><a href="doc/com/jayway/android/robotium/remotecontrol/solo/Solo.html" target="_blank" title="SAFS Robotium Remote Control Implementation">Robotium Remote Control</a>. &nbsp;(See also <a href="http://code.google.com/p/robotium/wiki/RemoteControl" title="Robotium Remote Control Wiki" target="_blank">Robotium Remote Control Concept</a>)
+<li><a href="http://www.ibm.com/software/awdtools/tester/functional/support/" alt="IBM Rational Functional Tester Homepage" target="_blank">IBM Rational Functional Tester</a>
+<li><a href="http://smartbear.com/product/testcomplete/overview/" target="_blank">SmartBear TestComplete</a>
+<li><a href="sqabasic2000/SAFSImageBasedRecognition.htm">SAFS Image-Based Testing</a>
+<li><a href="sqabasic2000/UsingJSAFS.htm">JSAFS Support</a>
+<li><a href="http://www.ibm.com/software/awdtools/tester/robot/support/index.html" alt="IBM Rational Robot Homepage" target="_blank">IBM Rational Robot</a>
+</ul>
+<p>
+<ul>List of implementations actively in development:
+<p>
+<li><a href="http://www.seleniumhq.org/projects/webdriver/" alt="OpenQA's OpenSource Selenium WebDriver Homepage" target="_blank">Selenium WebDriver</a> also supporting SeBuilder scripts.
+<li><a href="doc/com/jayway/android/robotium/remotecontrol/solo/Solo.html" target="_blank" title="SAFS Robotium Remote Control Implementation">SAFS Robotium Remote Control</a>. &nbsp;(See also <a href="http://code.google.com/p/robotium/wiki/RemoteControl" title="Robotium Remote Control Wiki" target="_blank">Robotium Remote Control Concept</a>)
+<li><a href="http://developer.android.com/sdk/index.html" target="_blank" title="Android Test Automation">Android Test Automation</a> &nbsp;(The Android SDK and Robotium Remote Control as a <a href="doc/org/safs/tools/engines/SAFSDROID.html" target="_blank" title="SAFS Android Engine JavaDoc">SAFS Android Engine</a>!)
+<li><a href="http://developer.apple.com/library/ios/" alt="Apple iOS Dev Center" target="_blank">Apple OSX iOS UIAutomation</a> &nbsp;(Apple XCode/iOS SDK and SAFS as a <a href="doc/org/safs/tools/engines/SAFSIOS.html" target="_blank" title="SAFS IOS Engine JavaDoc">SAFS IOS Engine</a>!)
+<li><a href="http://www.ibm.com/software/awdtools/tester/functional/support/" alt="IBM Rational Functional Tester Homepage" target="_blank">IBM Rational Functional Tester</a>
+<li><a href="sqabasic2000/SAFSImageBasedRecognition.htm">SAFS Image-Based Testing</a>
+<li><a href="sqabasic2000/UsingJSAFS.htm">JSAFS Support</a>
+<li><a href="http://smartbear.com/product/testcomplete/overview/" target="_blank">SmartBear TestComplete</a>
+<li><a href="http://www.ibm.com/software/awdtools/tester/robot/support/index.html" alt="IBM Rational Robot Homepage" target="_blank">IBM Rational Robot</a>
+</ul>
+<p>
+<ul>List of partially developed support needing development resources:
+<p>
+<li>Mercury's Quick Test Pro (need resources)
+<li>Perl API
+<li>Python API
+<li>TCL API
+</ul>
+<p>
+We want to acknowledge and present kudos to <b><a href="http://staf.sourceforge.net" target="_blank" alt="STAF Home Page">STAF</a></b>; another SourceForge project that has enabled us to develop many of our tool-independent pieces with minimal effort.&nbsp;  This is a wonderful project to investigate for ANY kind of test automation framework you might be considering or developing.
+<p>
+Thanks for visiting!&nbsp;  If you'd like to find out more, drop in on <a href="http://safsdev.freeforums.net/" target="_blank" alt="Discussion Forums">SAFS Forum</a> or <a href="mailto:safsdev@sas.com">Contact Us</a>.
+</p>
+<i>The SAFSDEV Users and Developers</i>
+</body>
+</html>
+ 

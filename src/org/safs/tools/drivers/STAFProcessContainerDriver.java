@@ -1,3 +1,24 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
+/**
+ * History:
+ * 	APR 18, 2018	(Lei Wang) Modified initializeDriver(): Phone home the general test data (machine, user, framework, engine etc.).
+ */
 package org.safs.tools.drivers;
 
 import java.io.File;
@@ -5,34 +26,26 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.ListIterator;
 import java.util.Vector;
+
 import org.safs.Log;
 import org.safs.text.FAILStrings;
-import org.safs.tools.GenericToolsInterface;
 import org.safs.tools.ConfigurableToolsInterface;
-import org.safs.tools.SimpleToolsInterface;
-import org.safs.tools.UniqueStringID;
+import org.safs.tools.GenericToolsInterface;
+import org.safs.tools.counters.CountersInterface;
 import org.safs.tools.engines.EngineInterface;
 import org.safs.tools.engines.TIDDriverCommands;
-import org.safs.tools.engines.TIDComponent;
-import org.safs.tools.engines.SAFSDRIVERCOMMANDS;
 import org.safs.tools.input.InputInterface;
 import org.safs.tools.input.MapsInterface;
-import org.safs.tools.input.UniqueStringFileInfo;
-import org.safs.tools.vars.VarsInterface;
 import org.safs.tools.logs.LogsInterface;
-import org.safs.tools.logs.UniqueStringLogInfo;
-import org.safs.tools.counters.CountersInterface;
-import org.safs.tools.status.SAFSSTATUS;
 import org.safs.tools.status.StatusInfo;
 import org.safs.tools.status.StatusInterface;
-import org.safs.tools.stacks.StacksInterface;
-import org.safs.tools.CaseInsensitiveFile;
+import org.safs.tools.vars.VarsInterface;
 
 /**
  * An implementation of AbstractDriver for use by STAFProcessContainer.
  * <p>
- * This class is intended to be used by STAFProcessContainer, but may be useful as a 
- * generic "driver" that can initialize and then shutdown tools needed by a 
+ * This class is intended to be used by STAFProcessContainer, but may be useful as a
+ * generic "driver" that can initialize and then shutdown tools needed by a
  * SAFS-like Driver that is NOT necessarily running tests.
  * <p>
  * Sample Usage:<br>
@@ -47,40 +60,40 @@ import org.safs.tools.CaseInsensitiveFile;
  * Command-line Options and Configuration File Options are linked below.
  * <p>
  * The default name of configuration files is "SAFSTID.INI".  There is a hierarchy of
- * configuration files that will be sought based on command-line parameters provided.  
- * This hierarchy is summarized in the Configuration File Options doc linked below and 
+ * configuration files that will be sought based on command-line parameters provided.
+ * This hierarchy is summarized in the Configuration File Options doc linked below and
  * detailed below:
  * <p>
  * <ol>
  * <li><b>-Dsafs.project.config=c:\SAFSProject\ProcessContainer.INI</b><br>
  * <b>command-line specified PROJECT config file</b><br>
- * a uniquely named config file, other than "SAFSTID.INI", containing config 
- * information intended to override settings in the default PROJECT config file located in the 
+ * a uniquely named config file, other than "SAFSTID.INI", containing config
+ * information intended to override settings in the default PROJECT config file located in the
  * PROJECT ROOT directory.
  * <p>
  * <li><b>default PROJECT config file</b><br>
- * "SAFSTID.INI" located in the PROJECT ROOT directory.  The PROJECT ROOT would normally 
- * be provided as a command-line parameter.  It may instead be provided in the previous 
- * specified UNIQUE config file.  This file will normally contain settings specific 
- * to an entire project and these override any similar settings in the DRIVER config 
+ * "SAFSTID.INI" located in the PROJECT ROOT directory.  The PROJECT ROOT would normally
+ * be provided as a command-line parameter.  It may instead be provided in the previous
+ * specified UNIQUE config file.  This file will normally contain settings specific
+ * to an entire project and these override any similar settings in the DRIVER config
  * files.
  * <p>
  * <li><b>command-line specified DRIVER config file</b><br>
- * Rarely used. A uniquely named config file, other than "SAFSTID.INI", intended to override settings 
+ * Rarely used. A uniquely named config file, other than "SAFSTID.INI", intended to override settings
  * in any SAFSTID.INI file located in the DRIVER ROOT directory.
  * <p>
  * <li><b>default DRIVER config file</b><br>
- * SAFSTID.INI located in the DRIVER ROOT directory.  The DRIVER ROOT would normally 
- * be provided in a previous config file or as a command-line parameter.  This config 
- * file will contain the bulk of the configuration information that is specific to 
+ * SAFSTID.INI located in the DRIVER ROOT directory.  The DRIVER ROOT would normally
+ * be provided in a previous config file or as a command-line parameter.  This config
+ * file will contain the bulk of the configuration information that is specific to
  * the driver and independent of any project or test being executed.
  * </ol>
  * <p>
- * In general, you want to provide the bare minimum of command-line parameters and 
- * place all remaining info in one or more configuration files.  The total of all 
- * command-line parameters and config file information must enable the driver to 
- * locate valid driver and project root directories, project subdirectories, and all 
- * other items necessary to find and configure tools.  See the #initializeDriver() link 
+ * In general, you want to provide the bare minimum of command-line parameters and
+ * place all remaining info in one or more configuration files.  The total of all
+ * command-line parameters and config file information must enable the driver to
+ * locate valid driver and project root directories, project subdirectories, and all
+ * other items necessary to find and configure tools.  See the #initializeDriver() link
  * below for all the neat things the driver will do during initialization!
  * <p>
  * An example invocation, providing the bare minimum command-line parameters:
@@ -88,9 +101,9 @@ import org.safs.tools.CaseInsensitiveFile;
  * <ul>
  *     java -Dsafs.project.config=c:\SAFSProject\ProcessContainer.INI SomeProcessContainerImplementation
  * </ul>
- * This then expects ProcessContainer.INI to contain the information concerning which engines 
- * to run, and where the PROJECT ROOT and maybe the DRIVER ROOT directories are located.  
- * The remaining configuration information can reside in SAFSTID.INI files located in 
+ * This then expects ProcessContainer.INI to contain the information concerning which engines
+ * to run, and where the PROJECT ROOT and maybe the DRIVER ROOT directories are located.
+ * The remaining configuration information can reside in SAFSTID.INI files located in
  * these directories.
  * <p>
  * Sample ProcessContainer.INI in c:\SAFSProject:
@@ -101,7 +114,7 @@ import org.safs.tools.CaseInsensitiveFile;
  *
  * [SAFS_ENGINES]
  * First=org.safs.tools.engines.SAFSSELENIUM
- * 
+ *
  * [SAFS_SELENIUM]
  * AUTOLAUNCH=TRUE;
  * </ul>
@@ -111,16 +124,16 @@ import org.safs.tools.CaseInsensitiveFile;
  * <ul><pre>
  * [SAFS_DRIVER]
  * DriverRoot="C:\safs"
- * 
+ *
  * [SAFS_MAPS]
  * AUTOLAUNCH=TRUE
- * 
+ *
  * [SAFS_INPUT]
  * AUTOLAUNCH=TRUE
- * 
+ *
  * [SAFS_VARS]
  * AUTOLAUNCH=TRUE
- * 
+ *
  * [SAFS_LOGS]
  * AUTOLAUNCH=TRUE
  * </pre>
@@ -128,8 +141,8 @@ import org.safs.tools.CaseInsensitiveFile;
  * <p>
  * And that is enough for the driver to configure the environment.
  * <p>
- * Of course, more of the configuration parameters necessary for desired engines 
- * will have to be in those configuration files once the engines actually become 
+ * Of course, more of the configuration parameters necessary for desired engines
+ * will have to be in those configuration files once the engines actually become
  * available.
  * <p>
  * @see #initializeDriver()
@@ -140,10 +153,10 @@ public class STAFProcessContainerDriver extends AbstractDriver {
 
 	/** "STAFProcessContainerDriver" **/
 	public final static String DEFAULT_STAF_PROCESS_CONTAINER_DRIVER = "STAFProcessContainerDriver";
-	
-	// Configuration Information	
+
+	// Configuration Information
 	protected ConfigureLocatorInterface locator = null;
-	
+
 	/** Stores ALL instanced EngineInterface objects in instanced order. */
 	protected Vector                    engines = new Vector(5,1);
 	/** Stores only active 'preferred' engine class names in preferred order. */
@@ -151,7 +164,7 @@ public class STAFProcessContainerDriver extends AbstractDriver {
 	/** Stores ALL instanced EngineInterface objects in classname=engine format. */
 	protected Hashtable                 engineObjects    = new Hashtable(5);
 
-	// Directory Information	
+	// Directory Information
 	protected String driverConfigPath  = DriverConstant.DEFAULT_CONFIGURE_FILENAME;
 	protected String projectConfigPath = DriverConstant.DEFAULT_CONFIGURE_FILENAME;
 
@@ -159,9 +172,9 @@ public class STAFProcessContainerDriver extends AbstractDriver {
 	 * Default Constructor used by STAFProcessContainer.
 	 * <p>
 	 * Once instantiated, the user must still call initializeDriver() to commence complete
-	 * initialization of the driver and configured tools for use. 
+	 * initialization of the driver and configured tools for use.
 	 * <p>
-	 * Once the user is finished with all driver functionality and tools the user must call 
+	 * Once the user is finished with all driver functionality and tools the user must call
 	 * shutdownDriver() to shutdown all configured tools and the driver itself.
 	 * <p>
 	 * Sample Usage:<br>
@@ -186,13 +199,15 @@ public class STAFProcessContainerDriver extends AbstractDriver {
 	/**
 	 * @see DriverInterface#getEngines()
 	 */
-	public ListIterator getEngines() { 
+	@Override
+	public ListIterator getEngines() {
 			return engines.listIterator();
 	}
 
 	/**
 	 * @see DriverInterface#getEnginePreferences()
 	 */
+	@Override
 	public ListIterator getEnginePreferences() { return enginePreference.listIterator();}
 
 	/**
@@ -212,7 +227,7 @@ public class STAFProcessContainerDriver extends AbstractDriver {
 				engindex++;
 			}
 		}catch(NullPointerException npx){;}
-		return -1;				
+		return -1;
 	}
 
 	/**
@@ -227,7 +242,7 @@ public class STAFProcessContainerDriver extends AbstractDriver {
 			String eng = null;
 			Enumeration list = engineObjects.keys();
 			while (list.hasMoreElements()){
-				eng = (String)list.nextElement();				
+				eng = (String)list.nextElement();
 				subindex = eng.indexOf(uckey);
 				if (subindex >= 0) return eng;
 			}
@@ -236,25 +251,28 @@ public class STAFProcessContainerDriver extends AbstractDriver {
 		String err = FAILStrings.convert("bad_param", "Invalid parameter value for "+text, text);
 		throw new IllegalArgumentException(err);
 	}
-	
+
 	/**
 	 * @see DriverInterface#getPreferredEngine(String)
 	 * @throw IllegalArgumentException if key value is null, invalid, or unknown
 	 */
+	@Override
 	public EngineInterface getPreferredEngine(String key) throws IllegalArgumentException{
 		String uckey = getFullEngineClass(key);
 		return (EngineInterface)engineObjects.get(uckey);
-	}	
-	
+	}
+
 	/**
 	 * @see DriverInterface#hasEnginePreferences()
 	 */
+	@Override
 	public boolean hasEnginePreferences() { return !(enginePreference.isEmpty());}
-	
+
 	/**
 	 * @see DriverInterface#startEnginePreference(String)
 	 * @throw IllegalArgumentException if key value is null, invalid, or unknown
 	 */
+	@Override
 	public void startEnginePreference(String key) throws IllegalArgumentException{
 		String uckey = null;
 		try{
@@ -264,7 +282,7 @@ public class STAFProcessContainerDriver extends AbstractDriver {
 			if (index >= 0){
 				Object eng = enginePreference.elementAt(index);
 				enginePreference.removeElementAt(index);
-				enginePreference.insertElementAt(eng, 0);			
+				enginePreference.insertElementAt(eng, 0);
 				return;
 			}
 			// see if the key matches known engine classes
@@ -281,6 +299,7 @@ public class STAFProcessContainerDriver extends AbstractDriver {
 	 * @see DriverInterface#endEnginePreference(String)
 	 * @throw IllegalArgumentException if key value is null, invalid, or unknown
 	 */
+	@Override
 	public void endEnginePreference(String key) throws IllegalArgumentException{
 		int index = getPreferredEngineIndex(key);
 		if (index < 0) {
@@ -294,12 +313,14 @@ public class STAFProcessContainerDriver extends AbstractDriver {
 	/**
 	 * @see DriverInterface#clearEnginePreferences()
 	 */
+	@Override
 	public void clearEnginePreferences(){ enginePreference.clear();}
 
 	/**
 	 * @see DriverInterface#isPreferredEngine(String)
 	 * @throw IllegalArgumentException if key value is invalid or unknown
 	 */
+	@Override
 	public boolean isPreferredEngine(String key) throws IllegalArgumentException{
 		if (enginePreference.isEmpty()) return false;
 		try{
@@ -307,18 +328,19 @@ public class STAFProcessContainerDriver extends AbstractDriver {
 			// try exact match
 			if (enginePreference.contains(uckey)) return true;
 			// try partial match
-			return(getPreferredEngineIndex(uckey) > -1);			
+			return(getPreferredEngineIndex(uckey) > -1);
 		}catch(NullPointerException npx){
 			String text = "Driver.isPreferredEngine(KEY)";
 			String err = FAILStrings.convert("bad_param", "Invalid parameter value for "+text, text);
 			throw new IllegalArgumentException(err);
 		}
 	}
-	
+
 	/**
 	 * @see DriverInterface#isPreferredEngine(EngineInterface)
 	 * @throw IllegalArgumentException if engine is null
 	 */
+	@Override
 	public boolean isPreferredEngine(EngineInterface engine) throws IllegalArgumentException{
 		if (enginePreference.isEmpty()) return false;
 		try{
@@ -334,23 +356,23 @@ public class STAFProcessContainerDriver extends AbstractDriver {
 			throw new IllegalArgumentException(err);
 		}
 	}
-	
 
-	/** 
-	 * Locate an EngineInterface given the engine priority string as defined in the 
+
+	/**
+	 * Locate an EngineInterface given the engine priority string as defined in the
 	 * documented Configuration File standard for SAFS_ENGINES. (Ex: "First", "Second", etc.)
 	 * <p>
 	 * @return an EngineInterface or null if not found or instantiated.**/
 	protected EngineInterface getEngineInterface(String itemName){
-		
+
 		EngineInterface engine = null;
 		Class engineClass = null;
 		String engineClassname = configInfo.getNamedValue(
     		                     DriverConstant.SECTION_SAFS_ENGINES, itemName);
 
 		if ((engineClassname==null)||(engineClassname.length()==0)) return null;
-		
-		try{		
+
+		try{
 			engineClass = Class.forName(engineClassname);
 			engine = (EngineInterface) engineClass.newInstance();
 			engineObjects.put(engineClassname.toUpperCase(), engine);
@@ -362,17 +384,18 @@ public class STAFProcessContainerDriver extends AbstractDriver {
 	}
 
 
-	/** 
-	 * Locate a ConfigureLocatorInterface given the locatorInfo, presumably 
+	/**
+	 * Locate a ConfigureLocatorInterface given the locatorInfo, presumably
 	 * provided from command-line options.
 	 * <p>
-	 * @exception IllegalArgumentException if appropriate locator class cannot be 
+	 * @exception IllegalArgumentException if appropriate locator class cannot be
 	 * instantiated.**/
+	@Override
 	protected ConfigureLocatorInterface getConfigureLocator(String locatorInfo){
-		
+
 		ConfigureLocatorInterface locator = null;
 		Class locatorClass = null;
-		try{		
+		try{
 			locatorClass = Class.forName(locatorInfo);
 			locator = (ConfigureLocatorInterface) locatorClass.newInstance();
 			return locator;
@@ -393,23 +416,24 @@ public class STAFProcessContainerDriver extends AbstractDriver {
 
 
 	/** Initialize or append a ConfigureInterface to existing ones in the search order.**/
+	@Override
 	protected void addConfigureInterfaceSource(ConfigureInterface source){
 		if (configInfo==null) { configInfo = source; }
-		else { if (source!=null) configInfo.addConfigureInterface(source);}		
+		else { if (source!=null) configInfo.addConfigureInterface(source);}
 	}
 
-	
+
 	/** Initialize or insert a ConfigureInterface at the start of the search order.**/
 	protected void insertConfigureInterfaceSource(ConfigureInterface source){
 		if (configInfo==null) { configInfo = source; }
-		else { if (source!=null) configInfo.insertConfigureInterface(source);}		
-	}	
-	
-	/*****************************************************************************  
+		else { if (source!=null) configInfo.insertConfigureInterface(source);}
+	}
+
+	/*****************************************************************************
 	 * Attempts to dynamically create a newInstance of a GenericToolsInterface object.
-	 * The process first tries to locate the fully qualified name of the Class through 
-	 * the ConfigureInterface using the provided configSection name and the value of 
-	 * "Item" in that config section.  Example below shows a config file containing 
+	 * The process first tries to locate the fully qualified name of the Class through
+	 * the ConfigureInterface using the provided configSection name and the value of
+	 * "Item" in that config section.  Example below shows a config file containing
 	 * a section called "ToolHelper":
 	 * <p>
 	 * <ul>
@@ -417,15 +441,15 @@ public class STAFProcessContainerDriver extends AbstractDriver {
 	 * Item="My.Generic.Tools.Interface.Helper"<br>
 	 * </ul>
 	 * <p>
-	 * If no such section exists in config, or no "Item" value is found, then the 
+	 * If no such section exists in config, or no "Item" value is found, then the
 	 * routine will attempt to instantiate the defaultInterface provided.
-	 *  
-	 * @param String configSection -- Named section of configuration file(s) potentially  
+	 *
+	 * @param String configSection -- Named section of configuration file(s) potentially
 	 * containing the Name=Value pair of Item=My.Full.Classname.
-	 * 
-	 * @param String defaultInterface -- fully qualified classname of class to 
+	 *
+	 * @param String defaultInterface -- fully qualified classname of class to
 	 * instantiate if no config file information is found.
-	 * 
+	 *
 	 * @throws java.lang.ClassNotFoundException, java.lang.IllegalAccessException, java.lang.InstantiationException
 	 * @see java.lang.Class#forName(String)
 	 */
@@ -437,11 +461,11 @@ public class STAFProcessContainerDriver extends AbstractDriver {
 		if (iName==null) iName = defaultInterface;
 		return ((GenericToolsInterface) (Class.forName(iName).newInstance()));
 	}
-	
 
-	/** Initialize all the Driver/Engine interfaces as specified by the config files or 
+
+	/** Initialize all the Driver/Engine interfaces as specified by the config files or
 	 * driver defaults.
-	 * This driver passes itself (a DriverInterface) to all Configurable tools it 
+	 * This driver passes itself (a DriverInterface) to all Configurable tools it
 	 * instances.
 	 * <p>
 	 * <ul>Calls:
@@ -473,36 +497,36 @@ public class STAFProcessContainerDriver extends AbstractDriver {
 			                                             DriverConstant.DEFAULT_COUNTERS_INTERFACE);
 
 			Log.info("Driver Interface initializing...");
-			
-			((ConfigurableToolsInterface)input).launchInterface(this);			
-			((ConfigurableToolsInterface)maps).launchInterface(this);			
-			((ConfigurableToolsInterface)vars).launchInterface(this);			
-			((ConfigurableToolsInterface)logs).launchInterface(this);			
-			((ConfigurableToolsInterface)counts).launchInterface(this);						
+
+			((ConfigurableToolsInterface)input).launchInterface(this);
+			((ConfigurableToolsInterface)maps).launchInterface(this);
+			((ConfigurableToolsInterface)vars).launchInterface(this);
+			((ConfigurableToolsInterface)logs).launchInterface(this);
+			((ConfigurableToolsInterface)counts).launchInterface(this);
 		}
 		catch(ClassNotFoundException cnfe){
 		    throw new IllegalArgumentException("\n"+
 		    "Unable to locate one or more runtime interface specifications.\n"+
-		    cnfe.getMessage() +"\n");}		
+		    cnfe.getMessage() +"\n");}
 
 		catch(IllegalAccessException iae){
 		    throw new IllegalArgumentException("\n"+
 		    "Unable to use one or more runtime interface specifications.\n"+
-		    iae.getMessage() +"\n");}		
+		    iae.getMessage() +"\n");}
 
 		catch(InstantiationException ie){
 		    throw new IllegalArgumentException("\n"+
 		    "Unable to create one or more runtime interface specifications.\n"+
-		    ie.getMessage() +"\n");}		
+		    ie.getMessage() +"\n");}
 
 		catch(ClassCastException cce){
 		    throw new IllegalArgumentException("\n"+
 		    "Unable to create one or more runtime interface specifications.\n"+
-		    cce.getMessage() +"\n");}		
+		    cce.getMessage() +"\n");}
 	}
-	
-	/** 
-	 * Instantiate and initialize any EngineInterface classes (up to 10)listed in the 
+
+	/**
+	 * Instantiate and initialize any EngineInterface classes (up to 10)listed in the
 	 * SAFS_ENGINE section of the Configuration Source.
 	 * <p>
 	 * Also instantiates internal tools.engines.TIDDriverCommands in-process support.
@@ -511,10 +535,10 @@ public class STAFProcessContainerDriver extends AbstractDriver {
 	 * @see org.safs.tools.engines.TIDDriverCommands(DriverInterface)
 	 ***/
 	protected void initializeRuntimeEngines(){
-		
+
 		if (tidcommands == null) tidcommands = new TIDDriverCommands(this);
-		
-		String[] items = {"First", "Second", "Third", "Fourth", "Fifth", 
+
+		String[] items = {"First", "Second", "Third", "Fourth", "Fifth",
 			              "Sixth", "Seventh", "Eighth", "Ninth", "Tenth"};
 		for(int i=0;i<items.length;i++){
 			EngineInterface engine = getEngineInterface(items[i]);
@@ -525,7 +549,7 @@ public class STAFProcessContainerDriver extends AbstractDriver {
 		}
 	}
 
-	/** 
+	/**
 	 * Initialize any preset variables such as known project directories, etc.
 	 * <p>
 	 * Known preset variables are:<br/>
@@ -547,17 +571,17 @@ public class STAFProcessContainerDriver extends AbstractDriver {
 			vars.setValue("safsbenchdirectory", benchSource + File.separatorChar);
 			vars.setValue("safstestdirectory", testSource + File.separatorChar);
 			vars.setValue("safsdifdirectory", difSource + File.separatorChar);
-			vars.setValue("safslogsdirectory", logsSource + File.separatorChar);	
+			vars.setValue("safslogsdirectory", logsSource + File.separatorChar);
 			vars.setValue("safssystemuserid", System.getProperty("user.name"));
 		}
 		catch(Exception x){;}
 	}
 
-	/** 
-	 * shutdown any engines started with initializeRuntimeEngines() 
+	/**
+	 * shutdown any engines started with initializeRuntimeEngines()
 	 */
 	protected void shutdownRuntimeEngines(){
-		
+
 		Enumeration enumerator = engines.elements();
 		while(enumerator.hasMoreElements()) {
 			EngineInterface engine = (EngineInterface) enumerator.nextElement();
@@ -570,8 +594,8 @@ public class STAFProcessContainerDriver extends AbstractDriver {
 		if(tidcommands !=null) tidcommands.shutdown();
 	}
 
-	/** 
-	 * shutdown GenericToolsInterfaces started with initializeRuntimeInterfaces() 
+	/**
+	 * shutdown GenericToolsInterfaces started with initializeRuntimeInterfaces()
 	 * <p>
 	 * <ul>Calls:
 	 * <li>input.shutdown()
@@ -580,7 +604,7 @@ public class STAFProcessContainerDriver extends AbstractDriver {
 	 * <li>counts.shutdown()
 	 * <li>logs.shutdown()
 	 * </ul>
-	 */	
+	 */
 	protected void shutdownRuntimeInterface(){
 
 		try{((GenericToolsInterface)input).shutdown();}catch(Exception x){}
@@ -595,30 +619,31 @@ public class STAFProcessContainerDriver extends AbstractDriver {
 		logs       = null;
 		counts     = null;
 	}
-	
+
 	/**********************************************************************************
 	 * We do nothing here but return a newly initialized (empty) StatusInfo object.
 	 * Required to extend AbstractDriver.
 	 * @see AbstractDriver#processTest()
 	 * @see org.safs.tools.status.StatusInfo()
 	 */
+	@Override
 	protected StatusInterface processTest(){
-		
+
 		return new StatusInfo();
 	}
 
-	
-	/** 
+
+	/**
 	 * Bootstrap a newly instanced driver.
 	 * The routine calls all the other routines to prepare the driver and configure tools.
-	 * <p>  
-	 * This routine must be overridden by subclasses if 
+	 * <p>
+	 * This routine must be overridden by subclasses if
 	 * they wish to change default start-to-finish execution flow.
 	 * <p>
-	 * The model for overall driver operation is that any command-line arguments or 
-	 * configuration file arguments that prevent normal execution will generate an 
-	 * IllegalArgumentException.  Those IllegalArgumentExceptions are caught here and 
-	 * sent to stderr output and then rethrown.  Any Exception will invoke shutdownDriver().  
+	 * The model for overall driver operation is that any command-line arguments or
+	 * configuration file arguments that prevent normal execution will generate an
+	 * IllegalArgumentException.  Those IllegalArgumentExceptions are caught here and
+	 * sent to stderr output and then rethrown.  Any Exception will invoke shutdownDriver().
 	 * We immediately return from this function.
 	 * <p>
 	 * <ul>Calls:
@@ -631,24 +656,26 @@ public class STAFProcessContainerDriver extends AbstractDriver {
 	 **/
 	public void initializeDriver(){
 		try{
-		    validateRootConfigureParameters(true);	
+		    validateRootConfigureParameters(true);
 		    initializeRuntimeInterface();
 		    initializePresetVariables();
+		    connectSAFSDataService();
 		    initializeRuntimeEngines();
+		    phoneHome();
 		}
-		catch(IllegalArgumentException iae){ 
+		catch(IllegalArgumentException iae){
 			System.err.println( iae.getMessage());
 			shutdownDriver();
 			throw iae;
 		}
-		    
+
 		catch(Exception catchall){
 			System.err.println("\n****  Unexpected CatchAll Exception handler  ****");
 			System.err.println(catchall.getMessage());
 			catchall.printStackTrace();
 			shutdownDriver();
 			throw new IllegalArgumentException("Driver initialization error: "+ catchall.getMessage());
-		}		    
+		}
 	}
 
 	/**
@@ -661,12 +688,19 @@ public class STAFProcessContainerDriver extends AbstractDriver {
 		try{
 		    shutdownRuntimeEngines();			// maybe, maybe not.
 		    shutdownRuntimeInterface(); 		// maybe, maybe not.
-		}    
-		catch(Exception any){ 
+		}
+		catch(Exception any){
 			System.err.println("\n****  Unexpected Shutdown Exception handler  ****");
 			System.err.println( any.getMessage());
 			any.printStackTrace();
-		}		    
+		}
+		try{
+			disconnectSAFSDataService();
+		}catch(Exception any){
+			System.err.println("\n****  Unexpected Shutdown Exception handler  ****");
+			System.err.println( any.getMessage());
+			any.printStackTrace();
+		}
 	}
 }
 

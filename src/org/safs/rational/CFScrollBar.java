@@ -1,7 +1,20 @@
-/** Copyright (C) (MSA, Inc) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
+/**
+ * Copyright (C) (MSA, Inc), All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.rational;
 
 import java.awt.Point;
@@ -25,7 +38,7 @@ import com.rational.test.ft.object.interfaces.ScrollTestObject;
  *
  *   <br>   OCT 10, 2003    (DBauman) 	Original Release
  *   <br>   NOV 08, 2003    (Carl Nagle) 	Removed GetText SAFSException
- *   <br>	AUG 12, 2008	(LeiWang)	Modify to make it work for .NET application.
+ *   <br>	AUG 12, 2008	(Lei Wang)	Modify to make it work for .NET application.
  *   <br>   APR 28, 2009	(JunwuMa)   Updated localProcess() to support java.awt.Scrollbar, trying to click on 
  *                                      the scrollbar at its relative point if click(Subitem) throws an exception. 
  **/

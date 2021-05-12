@@ -1,7 +1,30 @@
+
 /**
  * Copyright (C) SAS Institute, All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
+/**
+ *
+ * History:<br>
+ *
+ *  DEC 18, 2013    (Lei Wang) Initial release.
+ *  JAN 16, 2014    (Lei Wang) Add keywords support.
+ *  OCT 30, 2018    (Lei Wang) Added method waitReady(): wait the component ready before processing it.
+ *  NOV 02, 2018    (Lei Wang) Modified method waitReady(): call super-class's waitReady(), if web-element is already ready then we will not wait here.
+ */
 package org.safs.selenium.webdriver;
 
 import java.io.File;
@@ -10,6 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.safs.IndependantLog;
 import org.safs.Log;
 import org.safs.SAFSException;
@@ -24,13 +48,6 @@ import org.safs.text.FAILKEYS;
 import org.safs.text.GENKEYS;
 import org.safs.tools.CaseInsensitiveFile;
 
-/**
- *
- * History:<br>
- *
- *  <br>   DEC 18, 2013    (Lei Wang) Initial release.
- *  <br>   JAN 16, 2014    (Lei Wang) Add keywords support.
- */
 public class CFComboBox extends CFComponent {
 
 	/** "ComboBox" */
@@ -42,10 +59,12 @@ public class CFComboBox extends CFComponent {
 		super();
 	}
 
+	@Override
 	protected ComboBox newLibComponent(WebElement webelement) throws SeleniumPlusException{
 		return new ComboBox(webelement);
 	}
 
+	@Override
 	protected void localProcess(){
 		String debugmsg = StringUtils.debugmsg(getClass(), "localProcess");
 
@@ -290,6 +309,7 @@ public class CFComboBox extends CFComponent {
 		}
 	}
 
+	@Override
 	protected Collection<String> captureObjectData() throws SAFSException {
 		String debugmsg = StringUtils.debugmsg(false);
 		Collection<String> data = null;
@@ -304,5 +324,28 @@ public class CFComboBox extends CFComponent {
 		}
 
 		return data;
+	}
+
+	@Override
+	protected WebElement waitReady(WebElement element){
+		WebElement readyElement = super.waitReady(element);
+		if(!ready){
+			//According to the actions, we will wait in different ways
+			if(ComboBoxFunctions.CAPTUREITEMSTOFILE_KEYWORD.equals(action)){
+				//What should we wait for?
+				//For HTML combo-box, we try to get the 'option' tags;
+				//readyElement = wait.until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(element, By.tagName("option"));
+
+				//For SAP, DOJO combo-box, we call their JS APIs to get contents.
+				readyElement = waiter.until(ExpectedConditions.visibilityOf(element));
+				ready = true;
+			}else{
+				//For other actions, we wait the component to be click-able
+				readyElement = waiter.until(ExpectedConditions.elementToBeClickable(element));
+				ready = true;
+			}
+		}
+
+		return readyElement;
 	}
 }

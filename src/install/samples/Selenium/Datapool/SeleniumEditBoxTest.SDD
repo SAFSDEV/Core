@@ -1,4 +1,3 @@
-
 T, GoogleWindow, EditBox, SetTextCharacters, "search Verified word"
 T, GoogleWindow, EditBox, SetUnverifiedTextCharacters, "search Unverified word"
 T, GoogleWindow, EditBox, SetTextValue, "+(set Special word)"
@@ -7,4 +6,3 @@ T, GoogleWindow, EditBox, SetUnverifiedTextValue, "+(Google) Translate"
 T, GoogleWindow, PushButtonG, Click
 
 C, Pause, 1
-;T, GoogleSearchWindow, GoogleSearchWindow, CloseWindow

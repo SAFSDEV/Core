@@ -1,18 +1,40 @@
 /**
- ** Copyright (C) SAS Institute, All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * History:
  *
  *  May 30, 2014    (Lei Wang) Initial release.
- *  Oct 15, 2014    (Lei Wang) Add 'visible' property.
- *  Oct 29, 2015    (Lei Wang) Modify updateFields(): Trim the property 'label', the leading/ending spaces will be ignored.
+ *  OCT 15, 2014    (Lei Wang) Add 'visible' property.
+ *  OCT 29, 2015    (Lei Wang) Modify updateFields(): Trim the property 'label', the leading/ending spaces will be ignored.
+ *  JUL 05, 2014    (Lei Wang) Modified equals(): Instead of returning false, Log a warning message if the ID does not match.
+ *                                              Only Label and TagName will be used to compare, the css (easily changed) will not be counted.
+ *  OCT 31, 2018    (Lei Wang) Modified getClickableWebElement(): wait the web-element to be click-able.
  */
 package org.safs.selenium.webdriver.lib.model;
 
 import org.openqa.selenium.WebElement;
-import org.safs.tools.stringutils.StringUtilities;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.safs.IndependantLog;
+import org.safs.Processor;
+import org.safs.StringUtils;
+import org.safs.selenium.webdriver.lib.WDLibrary;
+import org.safs.tools.drivers.DriverConstant.SeleniumConfigConstant;
 
 /**
  * It represents originally sap.ui.core.Element<br>
@@ -39,12 +61,12 @@ public class Element extends DefaultRefreshable{
 	public static final String PROPERTY_ICON 		= "icon";
 	/**'textContent' property returns the textual content of the specified DOM node, and all its descendants.*/
 	public static final String PROPERTY_TEXTCONTENT	= "textContent";
-	/**'class' property returns the value of attribut 'class' of the specified DOM node.*/
+	/**'class' property returns the value of attribute 'class' of the specified DOM node.*/
 	public static final String PROPERTY_CLASS	= "class";
 	/**'visible' if the element is visible.*/
 	public static final String PROPERTY_VISIBLE	= "visible";
 
-	/**clickableWebElement represents the WebElement that is clickable. It may be different than
+	/**clickableWebElement represents the WebElement that is click-able. It may be different than
 	 * webelement, which contain the element's properties.*/
 	protected WebElement clickableWebElement = null;
 	/**
@@ -67,19 +89,20 @@ public class Element extends DefaultRefreshable{
 	/**
 	 * set/update the class's fields through the underlying WebElement or AbstractMap.
 	 */
+	@Override
 	public void updateFields(){
 		super.updateFields();
 
 		label = _getLabel();
 		//Trim the label if it contains leading/ending spaces
-		if(label!=null) label = StringUtilities.TWhitespace(label);
+		if(label!=null) label = StringUtils.TWhitespace(label);
 
 		if(map!=null){
 			id = getAttribute(PROPERTY_ID);
 			cssClass = getAttribute(PROPERTY_CLASS);
-			disabled = StringUtilities.convertBool(getAttribute(PROPERTY_DISABLED));
-			selected = StringUtilities.convertBool(getAttribute(PROPERTY_SELECTED));
-			visible = StringUtilities.convertBool(getAttribute(PROPERTY_VISIBLE));
+			disabled = StringUtils.convertBool(getAttribute(PROPERTY_DISABLED));
+			selected = StringUtils.convertBool(getAttribute(PROPERTY_SELECTED));
+			visible = StringUtils.convertBool(getAttribute(PROPERTY_VISIBLE));
 			if(!selected && cssClass!=null){
 				//if the cssClass contains substring "selected", we will consider this item is selected
 				selected = cssClass.toLowerCase().indexOf("selected")>0;
@@ -136,7 +159,13 @@ public class Element extends DefaultRefreshable{
 	 */
 	protected WebElement getClickableWebElement(){
 		//Maybe we just need to move the implementation in HierarchicalElement to here.
-		return getWebElement();
+		clickableWebElement = getWebElement();
+		if(clickableWebElement!=null && Boolean.parseBoolean(System.getProperty(SeleniumConfigConstant.PROPERTY_WAIT_READY))){
+			WebDriverWait wait = new WebDriverWait(WDLibrary.getWebDriver(), Processor.getSecsWaitForComponent());
+			clickableWebElement = wait.until(ExpectedConditions.elementToBeClickable(clickableWebElement));
+		}
+
+		return clickableWebElement;
 	}
 
 	public String getIconURL(){
@@ -172,25 +201,35 @@ public class Element extends DefaultRefreshable{
 		return label;
 	}
 
+	@Override
 	public String toString(){
 		return "id="+getId()+"; label="+label;
 	}
 
+	/**
+	 * If ID equals, then 2 Items are considered as identical. Otherwise, JUST log a warning message.<br>
+	 * If Label and TagName equal, then 2 Items will be consider as identical.
+	 */
+	@Override
 	public boolean equals(Object node){
 		if(node==null) return false;
 		if(!(node instanceof Element)) return false;
 		Element elementNode = (Element) node;
 
-		//If id is availabe to compare
+		//If id is available to compare
 		if(id!=null && !id.isEmpty()){
 			if(id.equals(elementNode.getId())) return true;
-			else return false;
+			else{
+				//Once the item is clicked or selected, some application will redraw the page and change the item's ID!!!
+				//But they are still the same item, so we just log a warning message instead of returning false.
+				IndependantLog.warn(StringUtils.debugmsg(false)+"ID does NOT equal! '"+id+"' != '"+elementNode.getId()+"'");
+			}
 		}
 
-		//If id is not available, then use a bunch of attributes to compare
+		//If id is not available or NOT equivalent, we use the tagName and label to check
+		//"css" is not suitable, after selection the "css" will VERY probably change.
 		boolean ok = true;
 		if(label!=null && !label.isEmpty()) ok &= label.equals(elementNode.getLabel());
-		if(ok && cssClass!=null && !cssClass.isEmpty()) ok &= cssClass.equals(elementNode.getCssClass());
 		if(ok && tagName!=null && !tagName.isEmpty()) ok &= tagName.equals(elementNode.getTagName());
 
 		return ok;

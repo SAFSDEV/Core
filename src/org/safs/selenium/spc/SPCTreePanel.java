@@ -1,3 +1,24 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
+/**
+ * JAN 28, 2015     (Carl Nagle)  Adding support for Frames.
+ * DEC 06, 2018     (Lei Wang) Modified addSPCTreeNode(): Set the 'frame recognition string' to node.
+ */
 package org.safs.selenium.spc;
 
 //import java.awt.Dimension;
@@ -14,8 +35,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
@@ -28,13 +47,10 @@ import org.safs.Log;
 import org.safs.StringUtils;
 import org.safs.selenium.webdriver.WebDriverGUIUtilities;
 import org.safs.selenium.webdriver.lib.SearchObject;
-import org.safs.selenium.webdriver.lib.WDLibrary;
 
-/**
- * JAN 28, 2015     (Carl Nagle) Adding support for Frames.
- */ 
 public class SPCTreePanel extends JPanel{
- 
+
+	private String contextFrameRS;
 	protected SPCTreeNode rootNode;
 	protected DefaultTreeModel treeModel;
 	protected JTree tree;
@@ -56,7 +72,7 @@ public class SPCTreePanel extends JPanel{
 	}
 
 	/**
-	 * 
+	 *
 	 * @param pframe the frame node this data belongs to.  Can be null.
 	 * @param sdata
 	 * @param boundsSep
@@ -76,6 +92,14 @@ public class SPCTreePanel extends JPanel{
 		}
 	}
 
+	public String getContextFrameRS() {
+		return contextFrameRS;
+	}
+
+	public void setContextFrameRS(String contextFrameRS) {
+		this.contextFrameRS = contextFrameRS;
+	}
+
 	/**
 	 * Add a single SPCTreeNode to the existing Tree Panel.
 	 * All available info is extracted from the WebElement and stored in the SPCTreeNode object.
@@ -87,15 +111,18 @@ public class SPCTreePanel extends JPanel{
 		if(item==null || xpath ==null || xpath.length()==0) return null;
 		WebElement temp = item;
 		Point p = null;
-		Dimension d = null;		
+		Dimension d = null;
 		p = temp.getLocation();
 		d = temp.getSize();
-		ArrayList list = new ArrayList();
+		ArrayList<Object> list = new ArrayList<Object>();
 		list.add(xpath);
 		list.add(p);
 		list.add(d);
 		list.add(parentTreeNode);
-		
+
+		//Generate the 'frame recognition string' from the web-element 'item'.
+		String parentFrameRS = SearchObject.generateSAFSFrameRecognition(item, null);
+
 		SPCTreeNode node = addObject(list);
 		if(node == null){
 			IndependantLog.info("TreePanel.addSPCTreeNode did not addObject. Parent Node may not exist for XPATH: "+ xpath);
@@ -112,7 +139,15 @@ public class SPCTreePanel extends JPanel{
 		if(node == null){
 			IndependantLog.info("TreePanel.addSPCTreeNode could not build parent path of nodes for XPATH: "+ xpath);
 			return null;
-		}		
+		}
+
+		//Set the parent frame RS to the node, if the paren
+		if(parentFrameRS!=null){
+			node.setParentFrameRS(parentFrameRS);
+		}else{
+			node.setParentFrameRS(contextFrameRS);
+		}
+
 		try{ node.setText(temp.getText());}catch(Exception n){}
 		try{ node.setTitle(temp.getAttribute("title"));}catch(Exception n){}
 		try{ node.setAttrClass(temp.getAttribute("class"));}catch(Exception n){}
@@ -126,7 +161,13 @@ public class SPCTreePanel extends JPanel{
 				node.setRecognitionString(SearchObject.generateSAFSFrameRecognition(node.xpart));
 			}
 		}catch(Exception n){}
-		try{ node.setSubType(temp.getAttribute("type"));}catch(Exception n){}
+
+		try{
+			node.setSubType(temp.getAttribute("type"));
+			node.setCssDisplay(temp.getCssValue("display"));
+			node.setCssVisibility(temp.getCssValue("visibility"));
+		}catch(Exception n){}
+
 		try{
 			if(SearchObject.isDojoDomain(temp)){
 				node.setDomain(SearchObject.DOMAIN_DOJO);
@@ -145,9 +186,10 @@ public class SPCTreePanel extends JPanel{
 		}catch(Exception x){
 			Log.debug("TreePanel.addSPCTreeNode "+ x.getClass().getSimpleName()+", "+ x.getMessage());
 		}
+
 		return node;
 	}
-	
+
 	/**
 	 * Clear the Tree Panel of all nodes and start a new tree with all elements provided.
 	 * @param sdata
@@ -155,7 +197,7 @@ public class SPCTreePanel extends JPanel{
 	 * @see #addSPCTreeNode(WebElement, String)
 	 */
 	public void setData(SPCTreeNode pframe, List<WebElement> sdata, List<String> xpaths){
-		if(sdata == null || sdata.isEmpty()) return;		
+		if(sdata == null || sdata.isEmpty()) return;
 		clear();
 		WebElement temp = null;
 		String xpath = null;
@@ -171,10 +213,10 @@ public class SPCTreePanel extends JPanel{
 	public Rectangle getNodeDimensions(SPCTreeNode anode){
 		Rectangle compBounds = new Rectangle(anode.bounds);
 		if(anode.frame != null){
-			String frameRS = anode.frame.getRecognitionString() == null ? 
-			        		 anode.frame.xpart : 
+			String frameRS = anode.frame.getRecognitionString() == null ?
+			        		 anode.frame.xpart :
 			        	     anode.frame.getRecognitionString();
-			Log.info("TreePanel.getNodeDimensions relative to FRAME node RS: "+ 
+			Log.info("TreePanel.getNodeDimensions relative to FRAME node RS: "+
 		        frameRS +" @ "+
 		        anode.frame.bounds.toString());
 			compBounds.x += anode.frame.bounds.x;
@@ -183,12 +225,12 @@ public class SPCTreePanel extends JPanel{
 		Log.info("TreePanel.getNodeDimensions for "+ anode.xpath +" returns "+ compBounds.toString());
 		return compBounds;
 	}
-	
+
 	public Rectangle getSelectedComponentDimensions() {
 		SPCTreeNode node = getSelectedComponent();
 		return getNodeDimensions(node);
 	}
-	
+
 	public SPCTreeNode getSelectedComponent() {
 		try{ return ((SPCTreeNode)tree.getSelectionPath().getLastPathComponent());}
 		catch(NullPointerException np){
@@ -206,7 +248,7 @@ public class SPCTreePanel extends JPanel{
 			}
 		}
 	}
-	
+
 	/**
 	 * Attempt to locate a node in the existing Tree by its full stored XPath.
 	 * @param xpath
@@ -227,7 +269,7 @@ public class SPCTreePanel extends JPanel{
 		}
 		return node;
 	}
-	
+
 	/** Remove all nodes except the root node. */
 	public void clear() {
 		rootNode.removeAllChildren();
@@ -252,7 +294,7 @@ public class SPCTreePanel extends JPanel{
 		node.frame = parentFrame; // might be null
 		return addObject(node);
 	}
-	
+
 	/**
 	 * @param object Expects a List containing:
 	 * <p><pre>
@@ -284,7 +326,7 @@ public class SPCTreePanel extends JPanel{
 		}
 		return node;
 	}
-	
+
 	/**
 	 * Add a node into the tree and treeModel.
 	 * @param childNode
@@ -303,7 +345,7 @@ public class SPCTreePanel extends JPanel{
 		tree.expandPath(new TreePath(parentNode.getPath()));
 		return childNode;
 	}
-	
+
 	/**
 	 * Try to find the node in the tree with the matching xpath
 	 * @param xpath
@@ -324,7 +366,7 @@ public class SPCTreePanel extends JPanel{
 		}else if(xpath.startsWith("/")){
 			xpath = xpath.substring(1);
 		}
-		
+
 //		String [] nodes = xpath.split("/");
 		String [] nodes = StringUtils.breakXpath(xpath, false, true);
 		SPCTreeNode cur = theRoot == null ? rootNode : theRoot;
@@ -333,7 +375,7 @@ public class SPCTreePanel extends JPanel{
 		}
 		return cur;
 	}
-	
+
 	/**
 	 * Try to find the Frame node in the tree with the matching frameRS
 	 * @param frameRS
@@ -351,7 +393,7 @@ public class SPCTreePanel extends JPanel{
 		frameRS = frameRS.trim();
 		return rootNode.findFrame(frameRS);
 	}
-	
+
 	public SPCTreeNode getParentNode(String xpath, SPCTreeNode topNode){
 		xpath = xpath.trim();
 		if(xpath.startsWith("//")){
@@ -359,19 +401,20 @@ public class SPCTreePanel extends JPanel{
 		}else if(xpath.startsWith("/")){
 			xpath = xpath.substring(1);
 		}
-		
+
 //		String [] nodes = xpath.split("/");
-		String [] nodes = StringUtils.breakXpath(xpath, false, true);		
+		String [] nodes = StringUtils.breakXpath(xpath, false, true);
 		SPCTreeNode cur = topNode == null ? rootNode : topNode;
 		for(int i = 0; cur != null && i < nodes.length-1; i++){
 			if(!nodes[i].equals(""))
 				cur = cur.findChild(nodes[i]);
 		}
-		
+
 		return cur;
 	}
 
 	class SPCTreeModelListener implements TreeModelListener {
+		@Override
 		public void treeNodesChanged(TreeModelEvent e) {
 			SPCTreeNode node;
 			node = (SPCTreeNode)(e.getTreePath().getLastPathComponent());
@@ -390,10 +433,13 @@ public class SPCTreePanel extends JPanel{
 			Log.debug("The user has finished editing the node.");
 			Log.debug("New value: " + node.getUserObject());
 		}
+		@Override
 		public void treeNodesInserted(TreeModelEvent e) {
 		}
+		@Override
 		public void treeNodesRemoved(TreeModelEvent e) {
 		}
+		@Override
 		public void treeStructureChanged(TreeModelEvent e) {
 		}
 	}

@@ -1,32 +1,58 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
+/**
+ * Logs for developers, not published to API DOC.
+ *
+ * History:
+ * @date 2018-06-11    (Lei Wang) Added constant TESTLEVEL_FAILED and TESTLEVEL_SKIPPED.
+ * @date 2018-09-25    (Lei Wang) Added constant START_STEP and END_STEP.
+ * @date 2018-12-14    (Lei Wang) Use reserved status '29' for STATUS_REPORT_TESTCASE_STATUS.
+ * @date 2018-12-17    (Lei Wang) Use reserved status '300', '301', '302' etc. for STATUS_REPORT_TESTCASE_XXX.
+ */
 package org.safs.logging;
 
 /**
  * This class is the abstract representation of log facility -- a named set of
- * multiple logs of different type. The intention is to provide a way for 
+ * multiple logs of different type. The intention is to provide a way for
  * writing to all of them with a single call.
  * <p>
  * Each log in a log facility is of different type and is enabled by setting its
  * corresponding bit of the log mode identifier passed to the constructor of log
- * facility class. Use the bitwise-OR operator and the <code>LOGMODE</code> 
+ * facility class. Use the bitwise-OR operator and the <code>LOGMODE</code>
  * constants to enable multiple logs:
  * <p>
  * <code>long mode = AbstractLogFacility.LOGMODE_TOOL |
  * AbstractLogFacility.LOGMODE_SAFS_TEXT;</code>
  * <p>
  * Log message consists of the main message and an optional descriptive message,
- * and it is of a specific message type (available message types are defined by 
+ * and it is of a specific message type (available message types are defined by
  * constants of this class). Each message type is mapped to a log level. The log
- * level of the log facility determines what messages are actually written to 
- * the logs based on the level that thier type maps to. Available levels are 
+ * level of the log facility determines what messages are actually written to
+ * the logs based on the level that thier type maps to. Available levels are
  * defined by the <code>LOGLEVEL</code> constants.
  * <p>
- * The <code>{@link #logMessage logMessage}</code> and 
+ * The <code>{@link #logMessage logMessage}</code> and
  * <code>{@link #close close}</code> methods of this class are abstract. Both
  * SAFS and SAFS-enabled tools are expected to extend this class to provide
- * the concrete implmentation of their logging functionalities. For example,
+ * the concrete implementation of their logging functionalities. For example,
  * <code>{@link org.safs.staf.service.logging.SLSLogFacility}</code> extends
- * this class and implements standard SAFS logging using STAF. A tool library 
- * should implement these methods to provide tool-specific logging, in addition 
+ * this class and implements standard SAFS logging using STAF. A tool library
+ * should implement these methods to provide tool-specific logging, in addition
  * to making calls to standard SAFS logging.
  */
 public abstract class AbstractLogFacility
@@ -50,6 +76,19 @@ public abstract class AbstractLogFacility
 
 	public static final int START_LOGGING = 16;
 	public static final int STOP_LOGGING = 32;
+	public static final int ORDERABLE_LOGGING = 33;
+
+	//Indicates that a certain test level (cycle, suite, case) failed, it should be contained within message of type 'START_CYCLE/SUITE/CASE' and 'END_CYCLE/SUITE/CASE'
+	//Indicates that the test failed. A failure is a test which the code has explicitly failed by using the mechanisms for that purpose. e.g., via an assertEquals. Contains as a text node relevant data for the failure, e.g., a stack trace
+	public static final int TESTLEVEL_FAILED 	= 34;
+	//Indicates that a certain test level (cycle, suite, case) errored, it should be contained within message of type 'START_CYCLE/SUITE/CASE' and 'END_CYCLE/SUITE/CASE'
+	//Indicates that the test errored.  An errored test is one that had an unanticipated problem. e.g., an unchecked throwable; or a problem with the implementation of the test. Contains as a text node relevant data for the error, e.g., a stack trace
+	public static final int TESTLEVEL_ERRORED 	= 35;
+	//Indicates that a certain test level (cycle, suite, case) has been skipped, it should be contained within message of type 'START_CYCLE/SUITE/CASE' and 'END_CYCLE/SUITE/CASE'
+	public static final int TESTLEVEL_SKIPPED 	= 36;
+
+	public static final int START_STEP 	= 37;
+	public static final int END_STEP 	= 38;
 
 	public static final int STATUS_REPORT_START = 17;
 	public static final int STATUS_REPORT_RECORDS = 18;
@@ -66,6 +105,11 @@ public abstract class AbstractLogFacility
 	//public static  final int STATUS_REPORT_RESERVED = 29;
 	//public static  final int STATUS_REPORT_RESERVED = 30;
 	public static final int STATUS_REPORT_END = 31;
+
+	public static  final int STATUS_REPORT_TESTCASE_TRACKING_SYSTEM = 300;
+	public static  final int STATUS_REPORT_TESTCASE_STATUS = 301;
+	public static  final int STATUS_REPORT_TESTCASE_COMMENT = 302;
+	//public static  final int STATUS_REPORT_TESTCASE_RESERVED = 500;
 
 	public static final int START_REQUIREMENT = 64;
 	public static final int END_REQUIREMENT = 128;
@@ -200,7 +244,7 @@ public abstract class AbstractLogFacility
 	/**
 	 * Sets the log mode of this log facility.
 	 * <p>
-	 * @param mode	the new log mode. Bitwise-OR of one or more 
+	 * @param mode	the new log mode. Bitwise-OR of one or more
 	 * 				<code>LOGMODE</code> constants.
 	 */
 	public void setLogMode(long mode)
@@ -242,7 +286,7 @@ public abstract class AbstractLogFacility
 	/**
 	 * Tests if the specified log mode is enabled.
 	 * <p>
-	 * @param mode	the mode to test. Must be one of the <code>LOGMODE</code> 
+	 * @param mode	the mode to test. Must be one of the <code>LOGMODE</code>
 	 * 				constants.
 	 * @return		<code>true</code> if <code>mode</code> is enabled;
 	 * 				<code>false</code> if not.
@@ -300,6 +344,7 @@ public abstract class AbstractLogFacility
 	/**
 	 * @return the name of this log facility.
 	 */
+	@Override
 	public String toString()
 	{
 		return facName;

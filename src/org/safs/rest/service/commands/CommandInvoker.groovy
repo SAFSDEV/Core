@@ -1,20 +1,35 @@
-// Copyright (c) 2016 by SAS Institute Inc., Cary, NC, USA. All Rights Reserved.
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.rest.service.commands
 
 import static org.safs.rest.service.commands.curl.CurlCommand.ASCII_DOUBLE_QUOTE
 import static org.safs.rest.service.commands.curl.CurlCommand.DATA_BINARY_OPTION
-import static org.safs.rest.service.commands.curl.CurlCommand.READ_STDIN_OPTION
 import static org.safs.rest.service.commands.curl.CurlCommand.JSON_ESCAPED_QUOTE
 import static org.safs.rest.service.commands.curl.CurlCommand.JSON_SINGLE_QUOTE
+import static org.safs.rest.service.commands.curl.CurlCommand.READ_STDIN_OPTION
 import static org.safs.rest.service.commands.curl.CurlCommand.WRAPPER_CHARACTERS
 
-import groovy.transform.ToString
-import groovy.util.logging.Slf4j
-
+import org.codehaus.groovy.runtime.ProcessGroovyMethods
 import org.safs.rest.service.models.providers.SystemInformationProvider
 import org.safs.rest.service.models.providers.SystemPropertyProvider
 
-import org.codehaus.groovy.runtime.ProcessGroovyMethods
+import groovy.transform.ToString
+import groovy.util.logging.Slf4j
 
 
 
@@ -40,7 +55,7 @@ class CommandInvoker {
      * the bash or CMD command actually works.
      */
     boolean useScript = false
-    
+
     /**
      * When curl is run from the JVM native process, multiple spaces in the request body
      * are converted to one space.  So, by default, curl will not be run from the JVM
@@ -85,7 +100,7 @@ class CommandInvoker {
         } else {
             executableCommand = prepareCommandListForJavaExecution(executableCommand)
         }
-        
+
         log.debug "actual executableCommand: <<${executableCommand}>>"
 
         Process process = ProcessGroovyMethods.execute executableCommand
@@ -143,7 +158,7 @@ class CommandInvoker {
         String requestBody = producerCommandList[-1]
         def windowsCommandList = modifyCommandForWindows(consumerCommandList, requestBody)
 		def windowsCommandString = windowsCommandList.join ' '
-		
+
         def consoleCommandString = "$consoleProducerCommandString | $consoleConsumerCommandString" as String
         if (showCommand) {
             // Note: The command is intentionally logged at the error level because want this
@@ -156,19 +171,19 @@ class CommandInvoker {
         if (! isLinux() && ! isLinuxLike()) {
             /*
              * Windows non-cygwin environment.  The echo that is available in a CMD script is not an
-             * executable, so it can't be used (message: Cannot run program "echo").  
+             * executable, so it can't be used (message: Cannot run program "echo").
              * So, replace the @- parameter with the actual data and don't use the echo.
-             * 
+             *
              * However, we don't want to change the consoleProducerCommandString because we
              * still want the bash command to be printed.
              */
-            
+
             /*
              * Use the list instead of the string.  This keeps us from needing to use
              * quotes.
              */
             consumerCommand = windowsCommandList
-            
+
             // Set the echo (the producer) to null so it won't be used.
             producerCommand = null
         }
@@ -189,13 +204,13 @@ class CommandInvoker {
              */
             consumerCommand = writeShellScript(isLinux() ? consoleCommandString : windowsCommandString)
         } else {
-            if (execCurlFromJVM) { 
+            if (execCurlFromJVM) {
                 consumerCommand = prepareCommandListForJavaExecution(consumerCommand)
             } else {
                 return null
             }
         }
-        
+
         Process producerProcess = producerCommand ? producerCommand.execute() : null
         Process consumerProcess = consumerCommand.execute()
 
@@ -250,13 +265,13 @@ class CommandInvoker {
             }
         } else {
             /*
-             * Do largely the same as with linux for the non-cygwin Windows case.  
-             * Single quotes around the endpoint mess up non-cygwin curl.  
+             * Do largely the same as with linux for the non-cygwin Windows case.
+             * Single quotes around the endpoint mess up non-cygwin curl.
              * It interprets the protocol as "'http" instead of just "http".
-             * 
+             *
              * Note: care must be taken here to call isLinuxLike() only if there
              * are quotes.  Otherwise, isLinuxLike() may create a SystemInformationProvider
-             * which will cause another CommandInvoker to be created to process 
+             * which will cause another CommandInvoker to be created to process
              * a "which which" command (to see if "which" is on the PATH).  This will
              * cause us to reach this point again.  Since there are no quotes around
              * "which", isLinuxLike() will not be called again and there will be
@@ -287,32 +302,32 @@ class CommandInvoker {
      * In the non-cygwin Windows case, the Java execution facilities will
      * handle the quoting, so we need to remove the quoting that was done
      * to create the bash command that is logged.
-     * 
+     *
      * @param requestBody
      * @return the request body with quoting removed
      */
     private undoQuoting(requestBody) {
         // the single quotes in the data should not be escaped
         requestBody = requestBody.replaceAll(JSON_ESCAPED_QUOTE, JSON_SINGLE_QUOTE)
-        
+
         while (wrappedWithQuotes(requestBody)) {
             // remove first and last
             requestBody = requestBody[1..-2]
         }
         requestBody
     }
-    
+
     private wrappedWithQuotes(str) {
         if (str.size() < 2) return false
         WRAPPER_CHARACTERS.any { quote ->
             str.startsWith(quote) && str.endsWith(quote)
         }
     }
-    
+
     /**
      * The command list will be sent to the Java execution facilities to create
      * a Process.  Several changes to the parameters need to be done:
-     * 
+     *
      * - The quoting that was done to create a valid bash command
      * needs to be removed.
      * - The @- needs to be replaced with the request body data.  Any double-quotes in
@@ -321,7 +336,7 @@ class CommandInvoker {
      * be the better option to use.
      * - Any parameter that has spaces in it such as --max-time 30 needs each
      * token to be put in the list separately.
-     * 
+     *
      * @param command the command to be modified
      * @param requestBody the request body
      * @return a command that is modified for the Windows non-cygwin case.
@@ -330,7 +345,7 @@ class CommandInvoker {
         if (requestBody != null) {
             requestBody = undoQuoting(requestBody)
         }
-        
+
         command = command.collect { parm ->
             if (parm == DATA_BINARY_OPTION) {
                 // it seems better to use this option instead.
@@ -340,7 +355,7 @@ class CommandInvoker {
             if (parm == READ_STDIN_OPTION) {
                 parm = requestBody
             }
-            
+
                 // Note: it is important that the ^ comes first since you are also inserting ^'s here.
                 // Also, do this before putting backslashes before quotes.
 //                ['^', '\\', '&', '|', '>', '<'].each { c ->
@@ -354,11 +369,11 @@ class CommandInvoker {
 //                if (parm.contains('%')) {
 //                    parm = parm.replace('%', '%%')
 //                }
-            
-            
+
+
             parm
         }
-        
+
         command
     }
 
@@ -381,7 +396,7 @@ class CommandInvoker {
         command = command.flatten()
         command
     }
-    
+
     private boolean isLinux() {
         if (!systemProperties) {
             systemProperties = new SystemPropertyProvider()
@@ -399,13 +414,13 @@ class CommandInvoker {
         }
         systemInformationProvider.isLinuxLike()
     }
-    
+
     private String writeShellScript(consoleCommandString) {
         def scriptFile = File.createTempFile("safsrestScript", isLinux() ? ".sh" : ".cmd")
         scriptFile.deleteOnExit()
-        
+
         scriptFile.write(consoleCommandString)
-        
+
         isLinux() ? "bash ${scriptFile.absolutePath}" : "cmd /C ${scriptFile.absolutePath}"
     }
 }

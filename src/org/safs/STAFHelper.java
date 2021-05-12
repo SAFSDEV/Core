@@ -1,7 +1,20 @@
-/** Copyright (C) (MSA, Inc) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
+/**
+ * Copyright (C) (MSA, Inc), All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs;
 /**
  * For developers only, not published in Java doc
@@ -10,7 +23,7 @@ package org.safs;
  * <br> JUN 24, 2003    (DBauman) Original Release
  * <br> JUN 26, 2003    (Carl Nagle)  Added getInitializedHelper and some constants.
  * <br> JUN 30, 2003    (BAUMAN)  Separated out Singleton code to SingletonSTAFHelper.
- * <br> JUN 30, 2003    (Carl Nagle)  Added additional convenience constructor and made the 
+ * <br> JUN 30, 2003    (Carl Nagle)  Added additional convenience constructor and made the
  *                                function lentag... public.
  * <br> AUG 11, 2003    (DBAUMAN) added a Pause component function (delay too); adding debug statements in order to figure out how to add recog. strings to the appmap for custom components.
  * <br> AUG 19, 2003    (DBAUMAN) getAppMapNames added so that we can set the test record's appmapname with the current loaded appmap.
@@ -31,15 +44,15 @@ package org.safs;
  * <br> JUL 27, 2005    (Carl Nagle)  Added submit2WithVar for STAF submits writing results to SAFSVARS.
  * <br> NOV 15, 2005    (Bob Lawler)  Added support for new TRD statusinfo field (RJL).
  * <br> AUG 04, 2006    (Carl Nagle)  setVariable and getAppMapItem modified to accept legal null or empty values.
- * <br> MAY 18, 2009    (JunwuMa) Adding support for STAF3. 
+ * <br> MAY 18, 2009    (JunwuMa) Adding support for STAF3.
  * <br> JUN 12, 2009    (JunwuMa) Added methods to centralize staf.submit and staf.sbumit2 calls into this class.
  * 								  Added method submit2ForFormatUnchangedService() for using only to call the unchangeable format services.
- *								  Lower the accessibility of submit() and submit2() from public to protected. 
- * <br> JUN 15, 2009    (Carl Nagle)  Fixed QUEUE message service STAFExceptions with STAF V3. 
- * <br> JUN 16, 2009    (LeiWang) Modify method sendQueueMessage(): If STAFException occur, try again.
- * <br> JUL 28, 2009    (Carl Nagle)  Added some waits\checks for shutdown operations. 
- * <br> SEP 11, 2009    (Carl Nagle)  Resolving some synch issues between driver and engines. 
- * <br> AUG 23, 2010    (Carl Nagle)  Add waitForWaiters to fix Driver\Engine EVENT synchronization. 
+ *								  Lower the accessibility of submit() and submit2() from public to protected.
+ * <br> JUN 15, 2009    (Carl Nagle)  Fixed QUEUE message service STAFExceptions with STAF V3.
+ * <br> JUN 16, 2009    (Lei Wang) Modify method sendQueueMessage(): If STAFException occur, try again.
+ * <br> JUL 28, 2009    (Carl Nagle)  Added some waits\checks for shutdown operations.
+ * <br> SEP 11, 2009    (Carl Nagle)  Resolving some synch issues between driver and engines.
+ * <br> AUG 23, 2010    (Carl Nagle)  Add waitForWaiters to fix Driver\Engine EVENT synchronization.
  * <br> APR 01, 2011 	(Dharmesh4) Modify JSTAF add service options para.
  * <br> JUL 01, 2011    (Carl Nagle)  Adding generic SAFSLOGS logMessage support.
  * <br> MAY 03, 2012    (Lei Wang)  Modify to adjust the backward compatibility of STAF.
@@ -47,9 +60,10 @@ package org.safs;
  * <br> JUL 19, 2012    (Carl Nagle)  Adding more public constants.
  * <br> SEP 11, 2013    (Carl Nagle)  Added removeShutdownHook to prevent premature release of handle when necessary.
  * <br> JUL 15, 2014    (Carl Nagle)  Added support for STAFHandle registration to optionally NOT use STAF.
- * <br> JUL 01, 2015    (LeiWang) Added startProcess(): can start process on any host trusting us.
- * <br> AUG 20, 2015    (Carl Nagle)  Added INI STAF:EmbedDebugMainClass True|False support and 
+ * <br> JUL 01, 2015    (Lei Wang) Added startProcess(): can start process on any host trusting us.
+ * <br> AUG 20, 2015    (Carl Nagle)  Added INI STAF:EmbedDebugMainClass True|False support and
  *                                -Dtestdesigner.debuglogname support for embedded debug log filenames.
+ * <br> SEP 22, 2017    (Lei Wang) Added startProcess(): can start process with extra STAF parameters.
  **/
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -88,13 +102,13 @@ public class STAFHelper implements CoreInterface{
 
 
   public static final String STAF_DELAY_SERVICE = "delay";
-  public static final String STAF_GLOBALVARS_VERSION = "STAF/Version"; 
-  
+  public static final String STAF_GLOBALVARS_VERSION = "STAF/Version";
+
   /** "STAF/Service/STAF/ServiceLoader" **/
   public static final String STAF_SERVICELOADER_V2 = "STAF/Service/STAF/ServiceLoader";
   /** "STAF/Service/STAFServiceLoader" **/
   public static final String STAF_SERVICELOADER_V3 = "STAF/Service/STAFServiceLoader";
-  
+
   /** "SAFSVariableService" **/
   public static final String SAFS_SAFSVARS_PROCESS  = "SAFSVariableService";
   /** "SAFSAppMapService" **/
@@ -141,7 +155,7 @@ public class STAFHelper implements CoreInterface{
   public static final String SAFS_SUITE_TRD       = "SAFS/Suite/";
   /** "SAFS/STEP/" trd root **/
   public static final String SAFS_STEP_TRD        = "SAFS/Step/";
-  
+
   /** ".../inputrecord" **/
   public static final String SAFS_VAR_INPUTRECORD = "inputrecord";
   /** ".../statuscode" **/
@@ -178,16 +192,16 @@ public class STAFHelper implements CoreInterface{
 
   public static final String SAFS_VAR_ROOTVERIFYDIRECTORY   = "safsrootverifydirectory";
   public static final String SAFS_VAR_RUNTIMEREPOSITORY     = "safsruntimerepository";
- 
+
   public static final String SAFS_VAR_GLOBAL_LAST_LOG_MSG     = "safs.global.last.log.msg";
   public static final String SAFS_VAR_GLOBAL_LAST_LOG_DESC     = "safs.global.last.log.desc";
   public static final String SAFS_VAR_GLOBAL_LAST_LOG_TYPE     = "safs.global.last.log.type";
-  
+
   /**
    * "SAFS/Hook/TRD",
    * Mutex for ALL applications and processes wishing to use SAFS/Hook/TRD data **/
   public static final String SAFS_HOOK_TRD_MUTEX    = "SAFS/Hook/TRD";
-  
+
   /** "SAFS/RobotJStart" **/
   public static final String ROBOTJ_EVENT_START     = "SAFS/RobotJStart";
   /** "SAFS/RobotJReady" **/
@@ -217,7 +231,7 @@ public class STAFHelper implements CoreInterface{
   public static final String SAFS_EVENT_DONE      = "Done";
   /** "Shutdown" **/
   public static final String SAFS_EVENT_SHUTDOWN  = "Shutdown";
-  
+
   /**
    * Set to true to bypass the registering of STAF Handles and STAF altogether.
    */
@@ -227,13 +241,13 @@ public class STAFHelper implements CoreInterface{
    */
   public static boolean embedSEM = false;
   private static boolean embeddedSEMTried = false;
-  
+
   public static boolean embedQUEUE = false;
   private static boolean embeddedQUEUETried = false;
 
   private static boolean embeddedDebug = false;
   private static boolean embeddedDebugTried = false;
-  
+
   public static EmbeddedSemService sem = null;
   public static EmbeddedQueueService queue = null;
 
@@ -246,7 +260,7 @@ public class STAFHelper implements CoreInterface{
   public static void configEmbeddedServices(ConfigureInterface config){
 	String value = null;
 	if(!embeddedDebugTried && ! embeddedSEMTried && ! embeddedQUEUETried){
-		System.out.println("STAFHelper.configEmbeddedServices() checking config for embeddable services...");  
+		System.out.println("STAFHelper.configEmbeddedServices() checking config for embeddable services...");
 	    Log.info("STAFHelper.configEmbeddedServices() checking config for embeddable services...");
 	}
 	if(!embeddedDebug && !embeddedDebugTried){
@@ -263,14 +277,14 @@ public class STAFHelper implements CoreInterface{
 				String prefix = config.getNamedValue(DriverConstant.SECTION_STAF, "EMBEDDEBUGMAINCLASS");
 				useMainClass = prefix == null ? false: StringUtilities.convertBool(prefix);
 			}
-			
+
 			if(value != null && value.length()> 4){
 				if(useMainClass){
-					String mainclass = MainClass.getMainClass() == null ? 
+					String mainclass = MainClass.getMainClass() == null ?
 							           "": MainClass.getMainClass();
-					if(mainclass.lastIndexOf('.')> 0) 
+					if(mainclass.lastIndexOf('.')> 0)
 						mainclass = mainclass.substring(mainclass.lastIndexOf('.')+1);
-					
+
 					if(mainclass.length() > 0) value = mainclass + value;
 				}
 				Log.runEmbedded(new String[]{"-file:"+value});
@@ -301,7 +315,7 @@ public class STAFHelper implements CoreInterface{
 			Log.info("STAFHelper.configEmbeddedServices() EmbeddedSemService is NOT enabled!");
 		}
   	}
-	
+
   	if(!embeddedQUEUETried){
   		embeddedQUEUETried = true;
 		value = config.getNamedValue(DriverConstant.SECTION_STAF, "EMBEDQUEUE");
@@ -320,10 +334,10 @@ public class STAFHelper implements CoreInterface{
 				System.out.println("STAFHelper.configEmbeddedServices() EmbeddedQueueService is NOT enabled!");
 				Log.info("STAFHelper.configEmbeddedServices() EmbeddedQUEUService is NOT enabled!");
 			}
-		}	
+		}
   	}
   }
-  
+
   /**Start the embedded Queue Service.*/
   public static void startEmbeddedQueueService(){
 	  // check if embedded QUEUE is already enabled
@@ -336,13 +350,13 @@ public class STAFHelper implements CoreInterface{
 	  queue = new EmbeddedQueueService();
 	  queue.init(new InfoInterface.InitInfo(EmbeddedQueueService.DEFAULT_SERVICE_NAME, null));
   }
-  
+
   /**
    * Currently only the EmbeddedSemService is handled.
    */
   public static void shutdownEmbeddedServices(){
-	System.out.println("STAFHelper.shutdownEmbeddedServices() terminating embedded services...");    	
-	Log.info("STAFHelper.shutdownEmbeddedServices() terminating embedded services...");    	
+	System.out.println("STAFHelper.shutdownEmbeddedServices() terminating embedded services...");
+	Log.info("STAFHelper.shutdownEmbeddedServices() terminating embedded services...");
   	if(sem instanceof EmbeddedSemService) {
 		sem.terminate();
 		sem = null;
@@ -356,7 +370,7 @@ public class STAFHelper implements CoreInterface{
   		embeddedDebug = false;
   	}
   }
-  
+
   private final Thread SHUTDOWN_THREAD = new Thread(){
 	  @Override
 	  public void run(){
@@ -372,10 +386,10 @@ public class STAFHelper implements CoreInterface{
   public boolean removeShutdownHook(){
 	  return Runtime.getRuntime().removeShutdownHook(SHUTDOWN_THREAD);
   }
-  
+
   /**
-   * Only valid AFTER initialization.  External classes that might have called removeShutdownHook() 
-   * might want to reinstate the shutdown hook at a later time.  However, this is only valid while 
+   * Only valid AFTER initialization.  External classes that might have called removeShutdownHook()
+   * might want to reinstate the shutdown hook at a later time.  However, this is only valid while
    * the JVM has not already initiated JVM shutdown and the invocation of registered JVM shutdown hooks.
    * The internal shutdown thread only unregisters and nulls the instance handle to STAF.
    */
@@ -389,21 +403,22 @@ public class STAFHelper implements CoreInterface{
 	    }catch(Exception e){
 	    	System.out.println(e.getClass().getSimpleName()+"; "+ e.getMessage());
 	    	e.printStackTrace();
-	    	// java.policy?    	
-	    }    
+	    	// java.policy?
+	    }
   }
-  
+
   /** we wrap a STAFHandle instance called 'handle' **/
   private HandleInterface handle;
-  
-  
+
+
   private static int 	STAFVersion = 0;
   private static String	STAFVersionString = "";
-  
+
   /** we wrap a STAFHandle instance called 'handle' **/
   private String process_name;
   /** the String name of the process/hook used at construction **/
-  public String getProcessName(){ return process_name;}
+  @Override
+public String getProcessName(){ return process_name;}
 
   /** get the handle.  hopefull this won't be needed if all of the methods here do the work **/
   public HandleInterface getHandle(){ return handle;}
@@ -415,7 +430,8 @@ public class STAFHelper implements CoreInterface{
   /** machine which is normally "local" **/
   private String machine = LOCAL_MACHINE;
   /** get the current value of 'machine' **/
-  public String getMachine () {return machine;}
+  @Override
+public String getMachine () {return machine;}
   /** set the machine to the specified parameter **/
   public void setMachine (String machine) {this.machine = machine;}
   /** reset the machine back to "local" **/
@@ -430,11 +446,11 @@ public class STAFHelper implements CoreInterface{
 		  System.err.println("*** STAFQueueMessage.message Field cannot be determined! ***");
 	  }
   }
-  
+
   /** Used to adjust the backward compatibility of STAF 2.6.11
    * Before using it, please check if it is null*/
   protected STAFHelperCompatibleInterface stafCompatible = null;
-  
+
   /** <br><em>Purpose:</em> constructor, must
    ** be 'initialized' by the user.
    **/
@@ -464,7 +480,7 @@ public class STAFHelper implements CoreInterface{
     	  if(no_staf_handles){
     		  STAFVersion = 3; //default
 	          stafCompatible = AbstractSTAFHelperCompatible.getCompatibleSTAF(STAFVersion);
-	          try{ 
+	          try{
 	        	  handle = new EmbeddedHandle(process_name);
 	        	  handle.register();
 	          }
@@ -481,7 +497,7 @@ public class STAFHelper implements CoreInterface{
           }else{
     	      stafCompatible.setSTAFHelper(this);
           }
-      } 
+      }
       catch (STAFException e) {
     	  String msg = "STAFHelper.initialize() "+ e.getClass().getName()+", rc: "+ e.rc +", "+ e.getMessage();
     	  try{ Log.warn(msg); }catch(Throwable t){}
@@ -493,7 +509,8 @@ public class STAFHelper implements CoreInterface{
   }
 
   /** have we been initialized (initialized, but not unRegistered) **/
-  public boolean isInitialized () {
+  @Override
+public boolean isInitialized () {
     return handle != null;
   }
 
@@ -510,8 +527,8 @@ public class STAFHelper implements CoreInterface{
     }
   }
   /** <br><em>Purpose:</em> passed on to handle.submit2
-   *  Used to call the services with unchangeable format. Usually for SAFSVARS, SAFSMAP, SAFSINPUT and SAFSLOG. 
-   *  
+   *  Used to call the services with unchangeable format. Usually for SAFSVARS, SAFSMAP, SAFSINPUT and SAFSLOG.
+   *
    * @param                     where, String
    * @param                     name, String
    * @param                     command, String
@@ -537,8 +554,8 @@ public class STAFHelper implements CoreInterface{
   }
 
 
-  /** <br><em>Purpose:</em> submit to STAF and record varName.rc and varname.result 
-   * into variable storage (SAFSVARS).  If an error occurs when trying to write the 
+  /** <br><em>Purpose:</em> submit to STAF and record varName.rc and varname.result
+   * into variable storage (SAFSVARS).  If an error occurs when trying to write the
    * varName values STAFResult will return with result.rc=47 and result.result=varName.
    * Otherwise we return the STAFResult from the STAF call itself.
    * @param 					sysName, String
@@ -546,7 +563,7 @@ public class STAFHelper implements CoreInterface{
    * @param 					cmdName, String
    * @param 					varName, String
    * @return					STAFResult
-   */ 
+   */
   public STAFResult submit2WithVar (String sysName, String srvName, String cmdName, String varName) throws STAFException, SAFSException {
   	STAFResult result = submit2(sysName, srvName, cmdName);
 
@@ -561,8 +578,8 @@ public class STAFHelper implements CoreInterface{
   	}
   	return result;
   }
-  
-  	
+
+
 
   /** <br><em>Purpose:</em> passed on to handle.submit
    * @param                     where, String
@@ -570,7 +587,7 @@ public class STAFHelper implements CoreInterface{
    * @param                     command, String
    * @return                    String, from STAF 3.3, the result is marshaled
    * @exception                 STAFException
-   * 
+   *
    * @see {@link #getUnMarshallResult(String)}
    * @see #getUnMarshallStringResult(String)
    **/
@@ -589,12 +606,12 @@ public class STAFHelper implements CoreInterface{
 	  }
     return handle.submit(where, name, command);
   }
-  
+
   /** <br><em>Purpose:</em> return the value in STAF lentag format,   :len:val
    * @param                     val, String
    * @return                    :val.length():val
-   * 
-   * @author Carl Nagle JUN 30, 2003  Made PUBLIC as external users will also need to 
+   *
+   * @author Carl Nagle JUN 30, 2003  Made PUBLIC as external users will also need to
    *                                  length tag there command strings too.
    **/
   public static String lentagValue(String val) {
@@ -613,10 +630,11 @@ public class STAFHelper implements CoreInterface{
    * deal:C:\CycleTest\Datapool\DealApp.map<br>
    * @return                    Collection
    **/
-  public Collection getAppMapNames () throws SAFSException {
+  @Override
+public Collection getAppMapNames () throws SAFSException {
     String service = SAFS_APPMAP_SERVICE;
     String command = "LIST";
-    // commands for STAF V2 and V3 are same, the formats of the strings returned are also same 
+    // commands for STAF V2 and V3 are same, the formats of the strings returned are also same
     try {
       String input = submit(machine, service, command);
       StringTokenizer st = new SAFSStringTokenizer(input, " \n");
@@ -658,7 +676,7 @@ public class STAFHelper implements CoreInterface{
   /**
    * This method will check only the {@link #SAFS_EVENT_SHUTDOWN} is "posted"<br>
    * and other events in {@link #eventsToReset} are "reset".<br>
-   * 
+   *
    * @param servicename
    * @return
    * @throws SAFSException
@@ -672,12 +690,12 @@ public class STAFHelper implements CoreInterface{
 		List<String> serviceEvents = getServiceEvents(servicename);
 		String state = stateReset;
 		int i = 0;
-		
+
 		if(serviceEvents.size() >= eventsToReset.length){
 			for(String event: eventsToReset){
 				state = SAFS_EVENT_SHUTDOWN.equals(event)? statePosted:stateReset;
 				for(String serviceevent: serviceEvents){
-					if(serviceevent.indexOf(event)!=-1 && 
+					if(serviceevent.indexOf(event)!=-1 &&
 					   serviceevent.indexOf(state)!=-1 &&
 					   serviceevent.indexOf(state)>serviceevent.indexOf(event)){
 						i++;
@@ -688,16 +706,16 @@ public class STAFHelper implements CoreInterface{
 		}else{
 			Log.debug("isServiceShutdown(): has not found enough event.");
 		}
-		
+
 		serviceIsShutdown = (i==eventsToReset.length);
 	} catch (RuntimeException re) {
 		re.printStackTrace();
 		throw new SAFSException(getClass().getName(), "isServiceShutdown() Exception="+re.getMessage());
 	}
-	
+
 	return serviceIsShutdown;
   }
-  
+
   /**
    * Use the embedded {@link #stafCompatible} to get all events related to service name.
    * @param servicename
@@ -712,7 +730,7 @@ public class STAFHelper implements CoreInterface{
 			throw new SAFSException(getClass().getName(), ".getServiceEvents(): Exception="+re.getMessage());
 	  }
   }
-  
+
   /**
    * Use the embedded {@link #stafCompatible} to get all running engine names.
    * @return Collection (Vector) of String engine names( ex: SAFS/RobotJ, SAFS/SELENIUM, etc..)
@@ -727,7 +745,8 @@ public class STAFHelper implements CoreInterface{
 	  }
   }
 
-  public String getLogName () throws SAFSException {
+  @Override
+public String getLogName () throws SAFSException {
     String service = SAFS_LOGGING_SERVICE;
     String command = "LIST";
     // commands for STAF V2 and V3 are same, the formats of the strings returned are also same
@@ -745,7 +764,8 @@ public class STAFHelper implements CoreInterface{
    * @return                    the value in the VAR
    * @exception                 SAFSException, if not ok
    **/
-  public String getVariable (String var) throws SAFSException {
+  @Override
+public String getVariable (String var) throws SAFSException {
     String service = SAFS_VARIABLE_SERVICE;
     String getCommand = "GET " + lentagValue(var);
     try {
@@ -759,15 +779,15 @@ public class STAFHelper implements CoreInterface{
 
   /**
    * Send a generic message to a running SAFSLOGS log.<br>
-   * If the optional facname is not provided, we will route the message to the first (or only) 
+   * If the optional facname is not provided, we will route the message to the first (or only)
    * log reported as running in SAFSLOGS.
    * <p>
-   * @param facname (Optional) Name of running log to receive message.  
-   * If facname is null or empty, we will send the message to the the first (or only) 
+   * @param facname (Optional) Name of running log to receive message.
+   * If facname is null or empty, we will send the message to the the first (or only)
    * log reported as running in SAFSLOGS.
    * @param message to be sent to the log.
    * @throws SAFSException if there is a STAF submission error or response of any kind.
-   */  
+   */
   public void logMessage(String facname, String message) throws SAFSException {
 	  try{
 		  if(facname == null || facname.length()==0){
@@ -775,18 +795,18 @@ public class STAFHelper implements CoreInterface{
 				  facname = logname.split(";")[1];
 		  }
 		  STAFResult src = null;
-		  src = submit2ForFormatUnchangedService(getMachine(), SAFS_LOGGING_SERVICE, 
+		  src = submit2ForFormatUnchangedService(getMachine(), SAFS_LOGGING_SERVICE,
 				                                 "LOGMESSAGE "+ facname +" MESSAGE "+
 				                                 lentagValue(message));
 		  if(src.rc != STAFResult.Ok)
 			  throw new SAFSException("SAFSLOGS LOGMESSAGE STAF Error: "+ src.rc +", "+ src.result);
-		  
+
 	  }catch(Exception x){
 		  throw new SAFSException(x.getClass().getSimpleName()+": "+ x.getMessage());
 	  }
   }
-  
-  /** 
+
+  /**
    * <br><em>Purpose:</em> setup a variable with it's value using STAF safsvars service.
    * <br> format used:
    * <br> " SET " + lentagValue(var) + " VALUE " + lentagValue(val);
@@ -800,7 +820,8 @@ public class STAFHelper implements CoreInterface{
    * @return                    true if successful, false if not
    * @exception                 SAFSException if var is invalid
    **/
-  public boolean setVariable (String var, String val) throws SAFSException {
+  @Override
+public boolean setVariable (String var, String val) throws SAFSException {
     if ((var == null)||(var.length()==0)) throw new SAFSException("setVariable: variable name cannot be empty.");
     String service = SAFS_VARIABLE_SERVICE;
     String command = " SET " + lentagValue(var)+ " VALUE ";
@@ -813,7 +834,7 @@ public class STAFHelper implements CoreInterface{
       return false;
     }
   }
-  
+
   /**
    * <br><em>Purpose:</em> get the STAF SYSTEM variable value.
    * <br>This method will NOT depend on "safsvars service", it use the STAF-self provided variable service.
@@ -844,7 +865,7 @@ public class STAFHelper implements CoreInterface{
 							+ command);
 		}
 	}
-  
+
   /**
    * <br><em>Purpose:</em> set the STAF SYSTEM variable value.
    * <br>This method will NOT depend on "safsvars service", it use the STAF-self provided variable service.
@@ -908,7 +929,7 @@ public class STAFHelper implements CoreInterface{
   public String getQueueMessage (String name, Integer waitTime) throws SAFSException {
     String service = "QUEUE";
     String command = " GET";
-    
+
     // commands for STAFV2 and V3 are same
     if (name != null) {
       command = command + " NAME " + lentagValue(name);
@@ -928,7 +949,7 @@ public class STAFHelper implements CoreInterface{
     	return (String) message.message; // gets rid if STAF pre-suff and gets only the actual message sent
     }catch(ClassCastException cce){
     	return result;//message got from EmbeddedQueueService
-    	
+
     }catch(NoSuchFieldError x){
         try { return (String) getQueueMessageField.get(message);}
 	    catch(IllegalAccessException iae){
@@ -965,20 +986,20 @@ public class STAFHelper implements CoreInterface{
         command = command + " NAME " + lentagValue(name);
     }
     String lentagMsg = lentagValue(message);
-    //Carl Nagle QUEUE service can use the same length tagged format for both STAF V2 and V3.    
+    //Carl Nagle QUEUE service can use the same length tagged format for both STAF V2 and V3.
     //length tagging IS required to prevent STAFExceptions!
     command += " MESSAGE " + lentagMsg ;
     try {
       STAFResult result = submit2(machine, service, command);
-      
+
       if(result.rc==STAFResult.QueueFull){
     	  //Queue Full, try to sleep for a while waitting queue to be consumed
     	  try{Thread.sleep(100);}catch(Exception x){}
     	  result = submit2(machine, service, command);
       }
-      
+
       return result.rc==STAFResult.Ok;
-    }catch (Exception e) { 
+    }catch (Exception e) {
     	// stop possible infinite loop between STAFHelper and Log
     	if ((name != null)&&(handle != null) && (name.equalsIgnoreCase(Log.SAFS_TESTLOG_PROCESS))) {
     	    System.err.println("sendQueueMessage target \""+name+"\" may not be running.");
@@ -1000,7 +1021,7 @@ public class STAFHelper implements CoreInterface{
     //Carl Nagle STAF V3 order of keywords IS important!
     String command = (STAFVersion < 3) ?
     					"EVENT " + event + " PULSE" :
-    					"PULSE EVENT " + event;	
+    					"PULSE EVENT " + event;
     try{
       submit(machine, service, command);
     } catch (STAFException e) {
@@ -1019,7 +1040,7 @@ public class STAFHelper implements CoreInterface{
     //Carl Nagle STAF V3 order of keywords IS important!
     String command = (STAFVersion < 3) ?
     					"EVENT " + event + " POST" :
-    					"POST EVENT " + event;	
+    					"POST EVENT " + event;
     try{
       submit(machine, service, command);
     } catch (STAFException e) {
@@ -1038,7 +1059,7 @@ public class STAFHelper implements CoreInterface{
 
     //Carl Nagle STAF V3 order of keywords IS required!
     String command = (STAFVersion < 3) ? "EVENT " + event + " RESET" : "RESET EVENT " + event;
-    
+
     try{
       submit(machine, service, command);
     } catch (STAFException e) {
@@ -1047,12 +1068,13 @@ public class STAFHelper implements CoreInterface{
     }
   }
 
-  /** 
+  /**
    * calls resetHookEvents(SAFS_ROBOTJ_PROCESS);
    * @exception SAFSException if staf has a problem
    * @deprecated This is specific to IBM Rational Functional Tester
    **/
-  protected void resetEvents () throws SAFSException {
+  @Deprecated
+protected void resetEvents () throws SAFSException {
     resetHookEvents(SAFS_ROBOTJ_PROCESS);
   }
 
@@ -1066,7 +1088,7 @@ public class STAFHelper implements CoreInterface{
 	                                      SAFS_EVENT_DONE,
 	                                      SAFS_EVENT_SHUTDOWN};
 
-  /** 
+  /**
    * Reset staf hook events (ready, dispatch, running, results, done, shutdown) for the given process.
    * If we are resetting events for a shutdown the engine should POST the Shutdown *after* this reset.
    * @exception SAFSException if staf has a problem
@@ -1077,7 +1099,7 @@ public class STAFHelper implements CoreInterface{
     	resetEvent(process_name + event);
     }
   }
-  
+
   public static String getEventStartString(String process_name){
 	  return process_name+SAFS_EVENT_START;
   }
@@ -1104,7 +1126,7 @@ public class STAFHelper implements CoreInterface{
    * staf event wait indefinitely or for a set number of seconds.
    * To wait for n milliseconds use waitEventMillis
    * @param  event, String
-   * @param  delaySeconds, long, if < 0, then no param used for wait 
+   * @param  delaySeconds, long, if < 0, then no param used for wait
    * and the wait will be indefinite.
    * @exception SAFSException if staf has a problem
    * @see #waitEventMillis(String, int)
@@ -1113,14 +1135,14 @@ public class STAFHelper implements CoreInterface{
     String service = "SEM";
     Log.debug("Waiting for EVENT "+ event);
     //Carl Nagle STAF V3 order of keywords IS important!
-    String command = (STAFVersion < 3)? 
-    		            "EVENT " + event + " WAIT " : 
+    String command = (STAFVersion < 3)?
+    		            "EVENT " + event + " WAIT " :
     		            "WAIT EVENT " + event;
     if (delaySeconds >= 0) {
     	String secString = Long.toString(delaySeconds*1000);
     	//Carl Nagle the TIMEOUT keyword is new and required for STAF V3
-    	command = (STAFVersion < 3) ? command + secString : command + " TIMEOUT "  + secString;  
-    }    
+    	command = (STAFVersion < 3) ? command + secString : command + " TIMEOUT "  + secString;
+    }
     try {
       submit(machine, service, command);
     } catch (STAFException e) {
@@ -1142,12 +1164,12 @@ public class STAFHelper implements CoreInterface{
     String service = "SEM";
     Log.debug("Waiting for WAITER of EVENT "+ event);
     //Carl Nagle STAF V3 order of keywords IS important!
-    String command = (STAFVersion < 3)? 
-    		            "EVENT " + event + " DELETE " : 
+    String command = (STAFVersion < 3)?
+    		            "EVENT " + event + " DELETE " :
     		            "DELETE EVENT " + event;
     long endtime = System.currentTimeMillis();
-    if(delaySeconds > 0) endtime += (delaySeconds * 1000);    
-    boolean indefinite = delaySeconds < 0;    
+    if(delaySeconds > 0) endtime += (delaySeconds * 1000);
+    boolean indefinite = delaySeconds < 0;
     boolean dosleep = false; //don't sleep on first iteration
 	do{
 		// shouldn't sleep first time through
@@ -1159,13 +1181,13 @@ public class STAFHelper implements CoreInterface{
 	    try {
 	      submit(machine, service, command);
 	    } catch (STAFException e) {
-	    	if(e.rc == STAFResult.SemaphoreHasPendingRequests) 
+	    	if(e.rc == STAFResult.SemaphoreHasPendingRequests)
 	    		return true; // We have a WAITER !!!
 	    	// if event never posted and does not yet exist, this is OK.
 	    	// but for any other STAFException this is a problem.
-	    	if(e.rc != STAFResult.SemaphoreDoesNotExist) 
+	    	if(e.rc != STAFResult.SemaphoreDoesNotExist)
 	    		throw new SAFSException(getClass().getName(), "waitEventWaiter",
-	                      "rc: "+e.rc+ ", event: "+ event+ ", delaySeconds: "+delaySeconds);	    	
+	                      "rc: "+e.rc+ ", event: "+ event+ ", delaySeconds: "+delaySeconds);
 	    }
 	    //if no exception thrown then we DID delete the event. No waiter yet.
 	    if(delaySeconds == 0) return false;
@@ -1173,7 +1195,7 @@ public class STAFHelper implements CoreInterface{
 	return false;
   }
 
-  /** 
+  /**
    * staf event wait for n milliseconds.
    * Use waitEvent function if no wait or indefinite wait is needed.
    * @param event, String
@@ -1185,16 +1207,16 @@ public class STAFHelper implements CoreInterface{
   public boolean waitEventMillis(String event, int delayMillis) throws SAFSException {
     String service = "SEM";
     //Carl Nagle STAF V3 order of keywords IS important!
-    String command = (STAFVersion < 3)? 
-    		            "EVENT " + event + " WAIT " : 
+    String command = (STAFVersion < 3)?
+    		            "EVENT " + event + " WAIT " :
     		            "WAIT EVENT " + event;
     if (delayMillis < 0) delayMillis = 1;
    	String secString = Integer.toString(delayMillis);
    	//Carl Nagle the TIMEOUT keyword is new and required for STAF V3
-   	command = (STAFVersion < 3) ? command + secString : command + " TIMEOUT "  + secString;  
+   	command = (STAFVersion < 3) ? command + secString : command + " TIMEOUT "  + secString;
     try {
       submit(machine, service, command);
-    } catch (STAFException e) {      
+    } catch (STAFException e) {
       if (e.rc == STAFResult.Timeout) {
     	  //Log.debug("STAFHelper.waitEventMillis hit TIMEOUT.");
     	  return false;
@@ -1211,13 +1233,14 @@ public class STAFHelper implements CoreInterface{
    * @exception SAFSException if staf has a problem
    * @deprecated This is specific to IBM Rational Functional Tester
    **/
-  public String getNextTestEvent () throws SAFSException {
+  @Deprecated
+public String getNextTestEvent () throws SAFSException {
   	return getNextHookTestEvent(SAFS_ROBOTJ_PROCESS, SAFS_HOOK_TRD);
   }
 
 
   /**
-   * Perform the complete engine-side protocol for processing a test record 
+   * Perform the complete engine-side protocol for processing a test record
    * dispatched from a driver.
    * <p>
    * getNextHookTestEvent:
@@ -1227,7 +1250,7 @@ public class STAFHelper implements CoreInterface{
    * <br>result = postEvent "Running"
    * <br>return getVariable(INPUTRECORD);
    * @param process_name -- the STAF-registered name of the engine involved.
-   * @param trd_name -- the TestRecordData SAFSVARS storage root, normally "SAFS/HOOK/". 
+   * @param trd_name -- the TestRecordData SAFSVARS storage root, normally "SAFS/HOOK/".
    * @return String, the variable INPUTRECORD
    * @exception SAFSException if staf has a problem
    */
@@ -1238,8 +1261,8 @@ public class STAFHelper implements CoreInterface{
 	boolean dispatched = false;
     try {
       //wait indefinitely, but try not to deadlock
-      Log.debug("Waiting for EVENT "+ dispatchEvent);// too many messages    	
-      do{ 
+      Log.debug("Waiting for EVENT "+ dispatchEvent);// too many messages
+      do{
     	dispatched = waitEventMillis(dispatchEvent, 90);
     	// future: add checks to exit indefinite\deadlock loop
     	if(!dispatched)try{Thread.sleep(10);}catch(InterruptedException x){}
@@ -1250,17 +1273,17 @@ public class STAFHelper implements CoreInterface{
       resetEvent(readyEvent);
     }
     postEvent(runningEvent);
-    return getVariable(trd_name + SAFS_VAR_INPUTRECORD); // SAFS_HOOK_TRD 
+    return getVariable(trd_name + SAFS_VAR_INPUTRECORD); // SAFS_HOOK_TRD
   }
 
 
   /**
-   * Perform the complete driver-side protocol for dispatching an engine to process 
+   * Perform the complete driver-side protocol for dispatching an engine to process
    * a test record.
    * <p>
    * postNextHookTestEvent:
    * <br>wait for process_name "Ready"
-   * <br>acquire SAFSVARS trd_root Mutex  
+   * <br>acquire SAFSVARS trd_root Mutex
    * <br>set SAFSVARS test record data
    * <br>"Dispatch" to specified process_name
    * <br>waitFor "Results" event
@@ -1270,7 +1293,7 @@ public class STAFHelper implements CoreInterface{
    * <br>if(result.rc != 0) throw SAFSException;
    * <p>
    * @param process_name -- the STAF-registered name of the engine to dispatch.
-   * @param trd_root -- the TestRecordData SAFSVARS storage root, normally "SAFS/HOOK/". 
+   * @param trd_root -- the TestRecordData SAFSVARS storage root, normally "SAFS/HOOK/".
    * @param trd -- the TestRecordData to place into SAFSVARS for execution by the engine.
    * <p>
    * @return the statuscode from the call
@@ -1285,11 +1308,11 @@ public class STAFHelper implements CoreInterface{
 	String runningEvent = process_name + SAFS_EVENT_RUNNING;
 	String resultsEvent = process_name + SAFS_EVENT_RESULTS;
 	String trd_root_trd = trd_root +"TRD";
-	
+
     try {
         //waitEvent(process_name + SAFS_EVENT_READY, -1);	// wait forever ???!!!
-        Log.debug("Waiting for EVENTS "+ readyEvent +" or "+ shutdownEvent);    	
-        do{ 
+        Log.debug("Waiting for EVENTS "+ readyEvent +" or "+ shutdownEvent);
+        do{
           // future: add checks to exit indefinite\deadlock loop
           ready = waitEventMillis(readyEvent, 80);
           if(!ready) {
@@ -1314,13 +1337,13 @@ public class STAFHelper implements CoreInterface{
         // pulse event seems to be too transient
 		// pulseEvent(process_name + SAFS_EVENT_DISPATCH);
         postEvent(dispatchEvent);
-        
+
         int attempt = 0;
-        shutdown = false;        
-        Log.debug("Waiting for EVENTS "+ runningEvent+" or "+ shutdownEvent+" or timeout.");    	
-        do{ 
+        shutdown = false;
+        Log.debug("Waiting for EVENTS "+ runningEvent+" or "+ shutdownEvent+" or timeout.");
+        do{
           ready = waitEventMillis(runningEvent, 80);
-          if(!ready){ 
+          if(!ready){
         	  try{Thread.sleep(10);}catch(Exception x){}
         	  shutdown = waitEventMillis(shutdownEvent, 10);
         	  if(!shutdown)try{Thread.sleep(10);}catch(Exception x){}
@@ -1330,55 +1353,55 @@ public class STAFHelper implements CoreInterface{
         	  if(shutdown) Log.debug("STAFHelper.postNextHookTestEvent detected a response TIMEOUT shutdown.");
           }
         }while(!ready && !shutdown);
-        
+
         resetEvent(dispatchEvent);
-        
+
         if(shutdown) {
             try{Thread.sleep(25);}catch(Exception x){}
       	    Log.debug("STAFHelper.postNextHookTestEvent recovering from unexpected remote engine shutdown.");
-            releaseSTAFMutex(trd_root_trd);		            
+            releaseSTAFMutex(trd_root_trd);
             return trd.getStatusCode();
         }
-        
+
 		//waitEvent(process_name + SAFS_EVENT_RESULTS, -1);	// wait forever ???!!!
         shutdown = false;
-        Log.debug("Waiting for EVENTS "+ resultsEvent+" or "+ shutdownEvent);    	
-        do{ 
+        Log.debug("Waiting for EVENTS "+ resultsEvent+" or "+ shutdownEvent);
+        do{
             ready = waitEventMillis(resultsEvent, 80);
             // future: add checks to exit indefinite\deadlock loop
             if(!ready) {
           	    try{Thread.sleep(10);}catch(Exception x){}
-            	shutdown = waitEventMillis(shutdownEvent, 10);          
+            	shutdown = waitEventMillis(shutdownEvent, 10);
           	    if(!shutdown)try{Thread.sleep(10);}catch(Exception x){}
             }
         }while(!ready && !shutdown);
-        
+
 		getSAFSTestRecordData(trd_root, trd);
 
 		// if we pulse too soon the engine won't ever see it!
 		// that can result in many unnecessary timeout delays in a test.
 		// But, we don't want to wait too long for an engine that might be "gone".
 		waitEventWaiter(process_name + SAFS_EVENT_DONE, 2);
-		pulseEvent(process_name + SAFS_EVENT_DONE);	
-		
-        releaseSTAFMutex(trd_root_trd);		
-        
+		pulseEvent(process_name + SAFS_EVENT_DONE);
+
+        releaseSTAFMutex(trd_root_trd);
+
         return trd.getStatusCode();
-    } 
+    }
     catch (SAFSException se) {
     	Log.debug("STAFHelper.postNextHookTestEvent rethrowing SAFSException: "+ se.getMessage());
     	throw se;
-    } 
+    }
     catch (NullPointerException npx){
     	Log.debug("STAFHelper.postNextHookTestEvent NullPointerException:", npx);
-    	throw new SAFSException("STAFHelper.postNextHookTestEvent invalid NULL parameter.");}    
+    	throw new SAFSException("STAFHelper.postNextHookTestEvent invalid NULL parameter.");}
   }
 
 
 	/**
 	 * Set the SAFSVARS Test Record Data for the given trd_root.
-	 * The most common trd_root is "SAFS/HOOK/", which is used by all official 
-	 * drivers and engines.  The routine does not deal with the TRD Mutex for the 
+	 * The most common trd_root is "SAFS/HOOK/", which is used by all official
+	 * drivers and engines.  The routine does not deal with the TRD Mutex for the
 	 * trd_root provided.  It assumes the caller is handling the mutex.
 	 * <p>
 	 * <ul><b>Sets the following record data</b>:
@@ -1394,6 +1417,7 @@ public class STAFHelper implements CoreInterface{
 	 * <li>statusinfo
 	 * </ul>
 	 */
+	@Override
 	public void setSAFSTestRecordData(String trd_root, TestRecordData trd) throws SAFSException {
 		try{
 			setVariable(trd_root + SAFS_VAR_INPUTRECORD, trd.getInputRecord());
@@ -1413,8 +1437,8 @@ public class STAFHelper implements CoreInterface{
 
 	/**
 	 * Get the SAFSVARS Test Record Data into the given trd_root.
-	 * The most common trd_root is "SAFS/HOOK/", which is used by all official 
-	 * drivers and engines.  The routine does not deal with the TRD Mutex for the 
+	 * The most common trd_root is "SAFS/HOOK/", which is used by all official
+	 * drivers and engines.  The routine does not deal with the TRD Mutex for the
 	 * trd_root provided.  It assumes the caller is handling the mutex.
 	 * <p>
 	 * <ul><b>Gets the following record data</b>:
@@ -1430,6 +1454,7 @@ public class STAFHelper implements CoreInterface{
 	 * <li>statusinfo
 	 * </ul>
 	 */
+	@Override
 	public void getSAFSTestRecordData(String trd_root, TestRecordData trd) throws SAFSException {
 		try{
 			trd.setInputRecord(getVariable(trd_root + SAFS_VAR_INPUTRECORD));
@@ -1445,7 +1470,7 @@ public class STAFHelper implements CoreInterface{
 
 			try{trd.setStatusCode (Integer.parseInt(getVariable(trd_root + SAFS_VAR_STATUSCODE)));}
 			catch(NumberFormatException nfe){trd.setStatusCode(DriverConstant.STATUS_SCRIPT_NOT_EXECUTED);}
-			
+
 			trd.setStatusInfo(getVariable(trd_root + SAFS_VAR_STATUSINFO));
 		}
 		catch(SAFSException se){ throw se;}
@@ -1453,19 +1478,20 @@ public class STAFHelper implements CoreInterface{
 	}
 
 
-  /** 
+  /**
    * setTestResults: makes call to 'setHookTestResultsWTimeout(SAFS_ROBOTJ_PROCESS, 3);'
    * This is deprecated for older RobotJ handling only.
    * @exception SAFSException if staf has a problem
-   * @deprecated IBM Rational Functional Tester specific 
+   * @deprecated IBM Rational Functional Tester specific
    **/
-  public void setTestResults () throws SAFSException {
+  @Deprecated
+public void setTestResults () throws SAFSException {
     setHookTestResultsWTimeout(SAFS_ROBOTJ_PROCESS, 12);
   }
 
 
-  /** 
-   * setHookTestResults: 
+  /**
+   * setHookTestResults:
    * makes call to 'setHookTestResultsWTimeout(process_name, 12);'
    * @exception SAFSException if staf has a problem
    **/
@@ -1473,12 +1499,12 @@ public class STAFHelper implements CoreInterface{
     setHookTestResultsWTimeout(process_name, 12);
   }
 
-  /** 
-   * setHookTestResultsWTimeout: 
+  /**
+   * setHookTestResultsWTimeout:
    * makes call to 'postEvent(process_name + Results);'
-   * This routines will drive the RESULTS event true. This routine  
-   * waits for the corresponding DONE event from the calling driver for up to 
-   * timeoutseconds before timing out.  Timing out allows us to continue in the event 
+   * This routines will drive the RESULTS event true. This routine
+   * waits for the corresponding DONE event from the calling driver for up to
+   * timeoutseconds before timing out.  Timing out allows us to continue in the event
    * of a Driver that has been shutdown.
    * @exception SAFSException if staf has a problem
    **/
@@ -1504,15 +1530,16 @@ public class STAFHelper implements CoreInterface{
    * @param                     item, String
    * @return                    itemvalue, null if exception is encountered meaning item not found
    **/
-  public String getAppMapItem (String appMapID, String section, String item) {
+  @Override
+public String getAppMapItem (String appMapID, String section, String item) {
     String service = "safsmaps";
     String command = " GETITEM ";
-    if (!((appMapID == null)||(appMapID.length()==0))) 
-        command += lentagValue(appMapID);        
-	if (!((section == null)||(section.length()==0))) 
-		command += " SECTION "+ lentagValue(section);	
+    if (!((appMapID == null)||(appMapID.length()==0)))
+        command += lentagValue(appMapID);
+	if (!((section == null)||(section.length()==0)))
+		command += " SECTION "+ lentagValue(section);
     command += " ITEM "+lentagValue(item);
-    
+
     try{
       Log.debug("getAppMapItem: "+command);
       String result = submit(machine, service, command).trim();
@@ -1522,7 +1549,7 @@ public class STAFHelper implements CoreInterface{
       return null;
     }
   }
-  
+
   /** <br><em>Purpose:</em> getitem from safsmaps using STAF, and check if the item has a static
    *  		recognition string.
    ** <br> format used:
@@ -1541,14 +1568,14 @@ public class STAFHelper implements CoreInterface{
   public String getAppMapItem (String appMapID, String section, String item, boolean isDynamic) {
     String service = "safsmaps";
     String command = " GETITEM ";
-    if (!((appMapID == null)||(appMapID.length()==0))) 
-        command += lentagValue(appMapID);        
-	if (!((section == null)||(section.length()==0))) 
-		command += " SECTION "+ lentagValue(section);	
+    if (!((appMapID == null)||(appMapID.length()==0)))
+        command += lentagValue(appMapID);
+	if (!((section == null)||(section.length()==0)))
+		command += " SECTION "+ lentagValue(section);
     command += " ITEM "+lentagValue(item);
     if(isDynamic)
     	command += " ISDYNAMIC ";
-    
+
     try{
       Log.debug("getAppMapItem: "+command);
       String result = submit(machine, service, command).trim();
@@ -1565,14 +1592,14 @@ public class STAFHelper implements CoreInterface{
    * <p>
    * For example, the SAFSVARS service process name is "SAFSVariableService".
    * <p>
-   * The routine will do a QUERY ALL on the HANDLE service and then evaluate 
-   * if the requested tool appears anywhere in the returned list of named processes. 
+   * The routine will do a QUERY ALL on the HANDLE service and then evaluate
+   * if the requested tool appears anywhere in the returned list of named processes.
    * <p>
-   * Note, because we do a substring search, we can match on just the most 
+   * Note, because we do a substring search, we can match on just the most
    * significant portion of the process name.
    * <p>
    * @param toolname -- The name of the process of interest.  Check your documentation
-   *        to find the name normally registered by the tool of interest.  
+   *        to find the name normally registered by the tool of interest.
    *        This can be just a substring of the full tool name.
    *
    * @return  true  or false
@@ -1587,42 +1614,43 @@ public class STAFHelper implements CoreInterface{
    *                                   and made the function public.
    *<br>      APR 06, 2004    (Carl Nagle) Ignore Case on toolname matches.
    */
-  public boolean isToolAvailable(String toolname) {
+  @Override
+public boolean isToolAvailable(String toolname) {
 	  if(EmbeddedHandles.isToolRunning(toolname)) return true;
     String result;
     String service = "HANDLE";
     //(Carl Nagle) the below change is valid.  STAF V3 does not have QUERY ALL listed as supported.
     String command = (STAFVersion < 3) ? "QUERY ALL " : "LIST";
-	
+
     try {
       result = submit(machine, service, command);
       try{
-      	// in STAF 3, result is an unmarshalled string with service names returned in it, it is also no problem to find out 
-    	//  the searching service by using String.indexof()  
+      	// in STAF 3, result is an unmarshalled string with service names returned in it, it is also no problem to find out
+    	//  the searching service by using String.indexof()
       	int loc = result.toUpperCase().indexOf(toolname.toUpperCase());
       	return (loc > -1) ? true:false;
       }catch (NullPointerException e) { return false; }
-    } 
+    }
     catch (STAFException e) {
       Log.debug(process_name +" "+ getClass().getName()+ ".isToolAvailable: error, " +
                 "rc: "+e.rc+ ", toolname: "+ toolname);
       return false;
-    } 
+    }
   }
 
   /**
-   * Queries the STAF SERVICE service to see if a particular LIBRARY is already running.  
-   * This is often necessary because, for example, we cannot specify the JVM= option for 
+   * Queries the STAF SERVICE service to see if a particular LIBRARY is already running.
+   * This is often necessary because, for example, we cannot specify the JVM= option for
    * launching new JSTAF services if the JSTAF service library is already running.
    * <p>
    * For example, the SAFSVARS service libary name "JSTAF".
    * <p>
-   * The routine will do a LIST on the SERVICE service and then evaluate 
-   * if the requested Library appears anywhere in the returned list of named services. 
+   * The routine will do a LIST on the SERVICE service and then evaluate
+   * if the requested Library appears anywhere in the returned list of named services.
    * <p>
    * @param libname -- The name of the LIBRARY of interest.  Check your documentation
-   *        to find the name normally registered for the library of interest.  
-   *        This check is NOT case-sensitive.  
+   *        to find the name normally registered for the library of interest.
+   *        This check is NOT case-sensitive.
    *
    * @return  true  or false
    *
@@ -1638,8 +1666,8 @@ public class STAFHelper implements CoreInterface{
         String test = libname.toUpperCase();
         result = submit(machine, "service", "list");
         try{
-      	    // in STAF 3, result is an UNMARSHALLED string.  It is not the same as seen in a CMD window! 
-        	// It is also no problem to find out existence by using String.indexof()  
+      	    // in STAF 3, result is an UNMARSHALLED string.  It is not the same as seen in a CMD window!
+        	// It is also no problem to find out existence by using String.indexof()
             Log.info(process_name +" "+ getClass().getName()+ ".isServiceLibraryRunning received the following service list: "+ result);
       	    int loc = result.toUpperCase().indexOf(test);
       	    return (loc > -1) ? true:false;
@@ -1652,7 +1680,7 @@ public class STAFHelper implements CoreInterface{
     catch (STAFException e) {
       Log.debug(process_name +" "+ getClass().getName()+ ".isServiceLibraryRunning: error, " +
                 "rc: "+e.rc+ ", libname: "+ libname);
-    } 
+    }
     return false;
   }
 
@@ -1661,18 +1689,18 @@ public class STAFHelper implements CoreInterface{
    * currently registered and running.
    * For example, the SAFSVARS service is "SAFSVARS".
    * <p>
-   * The routine will do a "LIST" on the SERVICE service and then evaluate 
-   * if the requested service appears anywhere in the returned list of services. 
+   * The routine will do a "LIST" on the SERVICE service and then evaluate
+   * if the requested service appears anywhere in the returned list of services.
    * <p>
-   * Note, because we do a substring search, we can match on just the most 
+   * Note, because we do a substring search, we can match on just the most
    * significant portion of the service name.
    *
    * @param
    *
    * servicename  unique substring of the service of interest.  Check your documentation
-   *              to find the name normally registered by the service of interest.  
+   *              to find the name normally registered by the service of interest.
    *              This can be just a substring of the full service name.
-   *               
+   *
    *
    * @return
    *
@@ -1685,7 +1713,8 @@ public class STAFHelper implements CoreInterface{
    *<br>
    *<br>      JUN 07, 2004    (Carl Nagle) Original Release
    */
-  public boolean isServiceAvailable(String servicename) {
+  @Override
+public boolean isServiceAvailable(String servicename) {
 	if(EmbeddedHandles.isServiceRunning(servicename)) return true;
     int status;
     String result;
@@ -1694,16 +1723,16 @@ public class STAFHelper implements CoreInterface{
     try {
       result = submit(machine, service, command);
       try{
-    	// in STAF 3, result is unmarshalled string with service names in it, it is also no problem to find out the searching service by using String.indexof  
+    	// in STAF 3, result is unmarshalled string with service names in it, it is also no problem to find out the searching service by using String.indexof
       	int loc = result.toUpperCase().indexOf(servicename.toUpperCase());
       	return (loc > -1) ? true:false;
       }catch (NullPointerException e) { return false; }
-    } 
+    }
     catch (STAFException e) {
       Log.debug(process_name +" "+ getClass().getName()+ ".isServiceAvailable: error, " +
                 "rc: "+e.rc+ ", servicename: "+ servicename);
       return false;
-    } 
+    }
   }
 
   /**
@@ -1725,7 +1754,8 @@ public class STAFHelper implements CoreInterface{
    **<br>JUN 26, 2003    dbauman: ported to java
    **<br>JUN 07, 2004    Carl Nagle: mod to use isServiceAvailable
    **/
-  public boolean isSAFSVARSAvailable () {
+  @Override
+public boolean isSAFSVARSAvailable () {
     return isServiceAvailable(SAFS_VARIABLE_SERVICE);
   }
 
@@ -1757,7 +1787,8 @@ public class STAFHelper implements CoreInterface{
    **<br>JUN 26, 2003    dbauman: ported to java
    **<br>JUN 07, 2004    Carl Nagle: mod to use isServiceAvailable
    **/
-  public boolean isSAFSMAPSAvailable () {
+  @Override
+public boolean isSAFSMAPSAvailable () {
     return isServiceAvailable(SAFS_APPMAP_SERVICE);
   }
 
@@ -1766,7 +1797,7 @@ public class STAFHelper implements CoreInterface{
    **<p>
    **DESCRIPTION:
    **
-   **Queries to see if the "SAFSLOGSLog" service is running.  This service is launched 
+   **Queries to see if the "SAFSLOGSLog" service is running.  This service is launched
    **and used by "SAFSLOGS" durings its initialization.
    **
    **@return
@@ -1780,9 +1811,10 @@ public class STAFHelper implements CoreInterface{
    **<br>SEP 12, 2003    Original Release
    **<br>JUN 07, 2004    Carl Nagle: mod to use isServiceAvailable
    **/
-  public boolean isSAFSLOGSAvailable () {
+  @Override
+public boolean isSAFSLOGSAvailable () {
 	  boolean running =isServiceAvailable(SAFS_LOGGINGLOG_SERVICE);
-	  if(!running) running = EmbeddedHandles.isServiceRunning(SAFS_LOGGING_SERVICE);	  
+	  if(!running) running = EmbeddedHandles.isServiceRunning(SAFS_LOGGING_SERVICE);
 	  return running;
   }
 
@@ -1812,7 +1844,8 @@ public class STAFHelper implements CoreInterface{
    **<br>
    **<br>JUN 17, 2004    Original Release
    **/
-  public boolean isSAFSINPUTAvailable () {
+  @Override
+public boolean isSAFSINPUTAvailable () {
     return isServiceAvailable(SAFS_INPUT_SERVICE);
   }
 
@@ -1847,13 +1880,13 @@ public class STAFHelper implements CoreInterface{
     Log.debug(process_name +" Waiting for MUTEX "+ mutex);
     //Carl Nagle STAF V3 order of keywords IS important!
     String command = (STAFVersion < 3) ?
-    					"MUTEX "+ mutex +" REQUEST " :  "REQUEST MUTEX " + mutex;	
+    					"MUTEX "+ mutex +" REQUEST " :  "REQUEST MUTEX " + mutex;
     if (delaySeconds >= 0) {
     	String secString = Long.toString(delaySeconds*1000);
     	//Carl Nagle the TIMEOUT keyword is new for STAF V3
-    	command = (STAFVersion < 3) ? command + secString : command + " TIMEOUT "  + secString;  
+    	command = (STAFVersion < 3) ? command + secString : command + " TIMEOUT "  + secString;
     }
-    
+
     try {
       submit(machine, service, command);
     } catch (STAFException e) {
@@ -1900,9 +1933,9 @@ public class STAFHelper implements CoreInterface{
                               "rc: "+e.rc+ ", mutex: "+ mutex);
     }
   }
-  
+
   /**
-   * @return the version number of STAF. E.g. return 2 for STAF2.6.11; 0 means no STAF loaded. 
+   * @return the version number of STAF. E.g. return 2 for STAF2.6.11; 0 means no STAF loaded.
    */
   public int getSTAFVersion() {
 	  if (STAFVersion != 0) return STAFVersion;
@@ -1918,7 +1951,7 @@ public class STAFHelper implements CoreInterface{
 	  }
 	  return STAFVersion;
   }
-  
+
   /**
    * @return The staf version string, such as 3.3.3
    */
@@ -1929,13 +1962,13 @@ public class STAFHelper implements CoreInterface{
 	  String staf2Request = " GLOBAL GET "+STAF_GLOBALVARS_VERSION;
 	  String staf3rRequest = " GET SYSTEM VAR "+STAF_GLOBALVARS_VERSION;
 	  String version = "2.0";
-	  
+
 	  STAFResult result = handle.submit2("localhost", command, staf2Request);
 	  if(result.rc==STAFResult.Ok){
 		  version = result.result;
 	  }else{
 		  //Try staf version3 command to get version
-		  result = handle.submit2("localhost",command,staf3rRequest); 
+		  result = handle.submit2("localhost",command,staf3rRequest);
 		  if(result.rc==STAFResult.Ok){
 			  version = result.result;
 		  }else{
@@ -1946,8 +1979,8 @@ public class STAFHelper implements CoreInterface{
 	  return STAFVersionString;
   }
 
-  
-	/** 
+
+	/**
 	 * getSTAFEnv
 	 * returns string value or an empty string. null if not successfully executed or found.
 	 */
@@ -1973,17 +2006,17 @@ public class STAFHelper implements CoreInterface{
 		}
 		return resultValue;
 	}
-	
+
 	/**
 	 * localPing to know if STAF has been initailized
 	 * @return String if ok. "PONG" returned in STAF2.x and STAF3.3.3
-	 * @throws STAFException 
+	 * @throws STAFException
 	 */
 	public String localPing() throws STAFException {
 	    Log.debug(getClass().getName() +"localPing(): to know if STAF has been initailized.");
-		return submit("local", "PING", "PING");	
+		return submit("local", "PING", "PING");
 	}
-	
+
 	/**
 	 * shutDown STAF machine, Applies to STAF2.X and STAF3.X
 	 * @return STAFResult
@@ -1998,7 +2031,7 @@ public class STAFHelper implements CoreInterface{
 		handle = null;
 		return rc;
 	}
-	
+
 	/**
 	 * start local STAF process to execute "STAF local PROCESS START COMMAND ...".  Applies to STAF2.X and STAF3.X.
 	 * @param appname String, the name of application to run
@@ -2009,7 +2042,7 @@ public class STAFHelper implements CoreInterface{
 	public STAFResult localStartProcess(String appname, String workdir) throws IOException{
     	return startProcess("local", appname, workdir);
 	}
-	
+
 	/**
 	 * execute "STAF machine PROCESS START COMMAND ...".  Applies to STAF2.X and STAF3.X.
 	 * @param machine String, the name of the machine where the application will run
@@ -2019,26 +2052,44 @@ public class STAFHelper implements CoreInterface{
 	 * @throws IOException
 	 */
 	public STAFResult startProcess(String machine, String appname, String workdir) throws IOException{
+		return startProcess(machine, appname, workdir, "");
+	}
+
+	/**
+	 * execute "STAF machine PROCESS START COMMAND ...".  Applies to STAF2.X and STAF3.X.
+	 * @param machine String, the name of the machine where the application will run
+	 * @param appname String, the name of application to run
+	 * @param workdir String, the directory serves as working directory for application
+	 * @param extraSTAFParams String, the extra STAF parameters, such as STDOUT, STDERRTOSTDOUT etc.
+	 * @return STAFResult the result.
+	 * @throws IOException
+	 */
+	public STAFResult startProcess(String machine, String appname, String workdir, String... extraSTAFParams) throws IOException{
 		String debugmsg = getClass().getName()+".startProcess(): ";
-		
+
 		//appname should not contain any space at the beginning, it will cause error
 		String lcommand = lentagValue(appname.trim());
 		String lwdir = null;
 		if(workdir != null) lwdir = lentagValue(workdir.trim());
 		STAFResult rc = null;
 		String fullcmd = "START COMMAND " + lcommand ;
+
+		for(String extraParam: extraSTAFParams){
+			fullcmd += " "+extraParam+" ";
+		}
+
 		if (workdir==null) {
 			fullcmd += " NEWCONSOLE";
-			Log.info(debugmsg + " fullcmd: " + fullcmd);    	
+			Log.info(debugmsg + " fullcmd: " + fullcmd);
 			rc = submit2(machine, "PROCESS", fullcmd);
 		} else {
 			fullcmd += " WORKDIR "+ lwdir +" NEWCONSOLE";
-			Log.info(debugmsg + " fullcmd: " + fullcmd);     	
+			Log.info(debugmsg + " fullcmd: " + fullcmd);
 			rc = submit2(machine, "PROCESS", fullcmd);
 		}
 		return rc;
 	}
-	
+
 	/**
 	 * add and launch standard SAFS services SAFSINPUT, SAFSMAPS and SAFSLOG
 	 * @param machine
@@ -2050,23 +2101,23 @@ public class STAFHelper implements CoreInterface{
 	 */
 	public STAFResult addService(String machine, String servicename, String classpath, String dir, String options) {
 	    try{
-	    	if (dir.indexOf(" ")>0){ 
+	    	if (dir.indexOf(" ")>0){
 	    		dir = "\""+dir+"\"";
 	    		dir = StringUtilities.findAndReplace(dir, "\\", "/");
 	    		dir = lentagValue(dir);
 	    	}
 	    }catch(Exception x){}
-	    
+
 	    String initstr = "ADD SERVICE "           + servicename +
 	    				 " LIBRARY JSTAF EXECUTE "+ classpath;
-	    
+
 	    if (options.length() > 0) initstr += " "+ options;
-   	    
+
 	    if (dir.length() > 0) initstr += " PARMS DIR " + dir;
 
-		Log.info("INITSTR="+initstr);				                 
+		Log.info("INITSTR="+initstr);
 		// launch SAFSINPUT
-		return submit2(machine, "SERVICE", initstr);		
+		return submit2(machine, "SERVICE", initstr);
 	}
 	/**
 	 * add and launch standard SAFS service, SAFSVARS.
@@ -2078,20 +2129,20 @@ public class STAFHelper implements CoreInterface{
 	 * @return
 	 */
 	public STAFResult addServiceSAFSVARS(String machine, String servicename, String classpath, String mapService, String options) {
-		
+
 		String initstr = "ADD SERVICE "           + servicename +
         				 " LIBRARY JSTAF EXECUTE "+ classpath;
 
 
 		if (options.length()>0) initstr += " "+ options;
-	
+
 		if (mapService.length()>0) initstr += " PARMS SAFSMAPS "+ mapService;
 
-		Log.info("INITSTR="+initstr);				                 
+		Log.info("INITSTR="+initstr);
 		// launch SAFSVARS
 		return submit2(machine, "SERVICE", initstr);
 	}
-	
+
 	/**
 	 * unload a STAF service
 	 * @param machine, STAF machine name
@@ -2120,5 +2171,5 @@ public class STAFHelper implements CoreInterface{
 		}
 		return rc;
 	}
-	
+
 }

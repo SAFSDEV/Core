@@ -1,8 +1,20 @@
-/** Copyright (C) (MSA, Inc) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
-
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.rational;
 
 import com.rational.test.ft.*;
@@ -44,12 +56,12 @@ import java.util.List;
  *         findMappedParent updated to always search the WIN domain last.
  * 
  * @author Carl Nagle JAN 30, 2006 Domain disabling supported.
- *   <br>   JUN 17, 2008    (LeiWang) Modify method findMappedChild(String,String,boolean,List)
+ *   <br>   JUN 17, 2008    (Lei Wang) Modify method findMappedChild(String,String,boolean,List)
  * 									  If the childPath begin with the parentPath, the child can not be obtained correctly.
  * 	 								  So remove the parentPath from the childPath, and try to obtain the child again.
  *   <br>   OCT 09, 2008   	(JunwuMa) Modify method findMappedParent(String windowName, boolean ignoreCache).
  *                                    Open FLEX domain.
- *   <br>	NOV 07, 2008	(LeiWang) Modify method findMappedParent(): add DynamicEnabler.enableNetWindows()	                           
+ *   <br>	NOV 07, 2008	(Lei Wang) Modify method findMappedParent(): add DynamicEnabler.enableNetWindows()	                           
  *   <br>	JUN 25, 2009	(Carl Nagle)  Cast RFT Object Map Objects as GuiTestObject in findMapped methods.	                           
  *   <br>	JUL 28, 2009	(Carl Nagle)  Added checks to bypass WIN domain enablement when not required.	                           
  *   <br>	AUG 07, 2009	(Carl Nagle)  Added support for enabling only specific process(es).

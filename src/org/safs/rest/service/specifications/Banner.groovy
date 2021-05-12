@@ -1,4 +1,20 @@
-// Copyright (c) 2016 by SAS Institute Inc., Cary, NC, USA. All Rights Reserved.
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.rest.service.specifications
 
 import static org.safs.rest.service.models.providers.SafsRestPropertyProvider.SAFSREST_PASSWORD_KEY
@@ -23,12 +39,12 @@ class Banner {
     // Header generated from:
     //      http://patorjk.com/software/taag/#p=display&h=0&v=0&f=Big&t=SAFSREST
     public static final HEADER = $/\
-        #   _____              ______    _____   _____    ______    _____   _______
-        #  / ____|     /\     |  ____|  / ____| |  __ \  |  ____|  / ____| |__   __|
-        # | (___      /  \    | |__    | (___   | |__) | | |__    | (___      | |
-        #  \___ \    / /\ \   |  __|    \___ \  |  _  /  |  __|    \___ \     | |
-        #  ____) |  / ____ \  | |       ____) | | | \ \  | |____   ____) |    | |
-        # |_____/  /_/    \_\ |_|      |_____/  |_|  \_\ |______| |_____/     |_|      /$.stripMargin('#')
+        # _____    ______    _____   _______    _____              _______
+        #|  __ \  |  ____|  / ____| |__   __|  / ____|     /\     |__   __|
+        #| |__) | | |__    | (___      | |    | |         /  \       | |
+        #|  _  /  |  __|    \___ \     | |    | |        / /\ \      | |
+        #| | \ \  | |____   ____) |    | |    | |____   / ____ \     | |
+        #|_|  \_\ |______| |_____/     |_|     \_____| /_/    \_\    |_|   /$.stripMargin('#')
 
 
     public static final LONGEST_HEADER_LINE = HEADER.readLines().max { line ->

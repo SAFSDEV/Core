@@ -1,25 +1,47 @@
 /**
  * Copyright (C) SAS Institute, All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * History:<br>
  *
- *   <br>   NOV 19, 2013    (Carl Nagle) Original Release.
- *   <br>   DEC 18, 2013    (LeiWang) Update to support ComboBox.
- *   <br>   MAR 05, 2014    (Lei Wang) Move some keywrod constants to ComponentFunction, implement click-related keywords.
- *   <br>   APR 29, 2014    (Lei Wang) Support keyword ExecuteScript.
- *   <br>   SEP 15, 2014    (Lei Wang) Modify showComponentAsMuchPossible(): before scrolling, check if the component is fully shown.
- *   <br>   MAY 18, 2015    (Lei Wang) Add refresh(): Try to refresh a stale WebElement.
- *   <br>   JUL 24, 2015    (Lei Wang) Add refresh(boolean): call it in localProcess to refresh WebElement if it is stale.
- *   <br>   SEP 07, 2015    (Lei Wang) Add method dragTo().
- *   <br>   OCT 30, 2015    (Lei Wang) Modify exist(): highlight component for keyword GUIDESOEXIST etc.
- *   <br>   NOV 26, 2015    (Lei Wang) Remove checkForCoord() and _lookupAppMapCoordReference(), their functionality will be provided by super class.
- *   <br>   NOV 26, 2015    (Lei Wang) Modify method getComponentRectangle(): include the frame's location for a webelement.
- *   <br>   FEB 25, 2016    (Lei Wang) Modify localProcess(): Set 'SearchContext' and 'RecognitionString' to libComponent for refreshing.
- *   <br>   APR 19, 2016    (Lei Wang) Modify componentClick(): Handle the optional parameter 'autoscroll'.
- *   <br>   SEP 30, 2016    (Lei Wang) Modified dragTo(): support the extra parameter 'dndReleaseDelay'.
- *   <br>   JUN 06, 2017    (Lei Wang) Modified doSetText(): Show more details in the Log message.
+ *   NOV 19, 2013    (Carl Nagle) Original Release.
+ *   DEC 18, 2013    (Lei Wang) Update to support ComboBox.
+ *   MAR 05, 2014    (Lei Wang) Move some keywrod constants to ComponentFunction, implement click-related keywords.
+ *   APR 29, 2014    (Lei Wang) Support keyword ExecuteScript.
+ *   SEP 15, 2014    (Lei Wang) Modify showComponentAsMuchPossible(): before scrolling, check if the component is fully shown.
+ *   MAY 18, 2015    (Lei Wang) Add refresh(): Try to refresh a stale WebElement.
+ *   JUL 24, 2015    (Lei Wang) Add refresh(boolean): call it in localProcess to refresh WebElement if it is stale.
+ *   SEP 07, 2015    (Lei Wang) Add method dragTo().
+ *   OCT 30, 2015    (Lei Wang) Modify exist(): highlight component for keyword GUIDESOEXIST etc.
+ *   NOV 26, 2015    (Lei Wang) Remove checkForCoord() and _lookupAppMapCoordReference(), their functionality will be provided by super class.
+ *   NOV 26, 2015    (Lei Wang) Modify method getComponentRectangle(): include the frame's location for a webelement.
+ *   FEB 25, 2016    (Lei Wang) Modify localProcess(): Set 'SearchContext' and 'RecognitionString' to libComponent for refreshing.
+ *   APR 19, 2016    (Lei Wang) Modify componentClick(): Handle the optional parameter 'autoscroll'.
+ *   SEP 30, 2016    (Lei Wang) Modified dragTo(): support the extra parameter 'dndReleaseDelay'.
+ *   JUN 06, 2017    (Lei Wang) Modified doSetText(): Show more details in the Log message.
+ *   SEP 12, 2017    (Lei Wang) Added AltClick keyword support.
+ *   NOV 24, 2017    (Lei Wang) Modified method componentClick(): handle the optional parameter 'verify' and 'refresh'
+ *   OCT 16, 2018    (Lei Wang) Modified method dragTo(): accepts "" and null as the offset parameter, if so set the offset to the default value "50%, 50%, 50%, 50%".
+ *   OCT 30, 2018    (Lei Wang) Added method waitReady(), and call it in method process(): wait the component ready before processing it.
+ *   NOV 02, 2018    (Lei Wang) Added field 'ready' and 'waiter'.
+ *                             Modified method waitReady(): use field 'ready' to indicate if the web-element is ready. If ready, it will not be handled in the sub-class anymore.
+ *   NOV 06, 2018    (Lei Wang) Handled 'ready' for 'LocateScreenImage'. Wait "document.readyState" to be "complete" (page fully loaded).
+ *   SEP 25, 2019    (Lei Wang) Modified process(): try to reset to 'lastFrame' at the end of the process.
+ *   NOV 13, 2019    (Lei Wang) Moved convertElementArrayToList() to WDLibrary class.
  */
 package org.safs.selenium.webdriver;
 
@@ -41,9 +63,15 @@ import java.util.NoSuchElementException;
 
 import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.safs.ComponentFunction;
+import org.safs.Constants;
 import org.safs.IndependantLog;
 import org.safs.Log;
 import org.safs.SAFSException;
@@ -69,6 +97,7 @@ import org.safs.text.FileUtilities;
 import org.safs.text.GENKEYS;
 import org.safs.text.GENStrings;
 import org.safs.tools.CaseInsensitiveFile;
+import org.safs.tools.drivers.DriverConstant.SeleniumConfigConstant;
 import org.safs.tools.engines.TIDComponent;
 import org.safs.tools.stringutils.StringUtilities;
 
@@ -97,6 +126,18 @@ public class CFComponent extends ComponentFunction{
     /** The maximum time to retry 'enter the text' into Component box if the verification fails. */
 	private int maxRetry = DEFAULT_MAX_RETRY_ENTER;
 
+	/**
+	 * Boolean value indicates if the web-element is "ready" for processing.<br>
+	 * The "ready" has different meanings for different component and different keywords.<br>
+	 */
+	protected boolean ready = false;
+
+	/**
+	 * The WebDriverWait used to wait 'ready' of a WebElement.<br>
+	 * It is assigned in {@link #waitReady(WebElement)}, which should be called in sub-class if overridden.<br>
+	 */
+	protected WebDriverWait waiter = null;
+
 	public CFComponent(){
 		super();
 	}
@@ -109,6 +150,8 @@ public class CFComponent extends ComponentFunction{
 		this.maxRetry = maxRetry;
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
 	public void process() {
 		String debugmsg = this.getClass().getName()+".process(): ";
 		// assume this for now..
@@ -175,7 +218,7 @@ public class CFComponent extends ComponentFunction{
 				Log.warn(debugmsg +" Component Object is null, try to get it through WebDriverGUIUtility.");
 				if(!windowName.equals(compName)){
 					try{
-						if ( wdUtils.waitForObject( mapname, windowName, compName, secsWaitForWindow) == 0 ) {
+						if ( wdUtils.waitForObject( mapname, windowName, compName, secsWaitForComponent) == 0 ) {
 							Log.debug(debugmsg+" we get the component object through WebDriverGUIUtility.");
 							winObject = ( ( WDTestRecordHelper )testRecordData ).getWindowTestObject( );
 							compObject = ( ( WDTestRecordHelper )testRecordData ).getCompTestObject( );
@@ -214,6 +257,14 @@ public class CFComponent extends ComponentFunction{
 			}
 
 			try {
+				//Wait for the component to be "ready": "ready" has different meanings for different components and different actions
+				if(Boolean.parseBoolean(System.getProperty(SeleniumConfigConstant.PROPERTY_WAIT_READY))){
+					compObject = waitReady(compObject);
+					if(!ready){
+						IndependantLog.warn(debugmsg+"The WebElement may be NOT ready for processing ... ");
+					}
+				}
+
 				// do the work
 				localProcess();
 
@@ -243,11 +294,190 @@ public class CFComponent extends ComponentFunction{
 			Log.debug(debugmsg+"'"+action+"' has been processed\n with testrecorddata"+testRecordData+"\n with params "+params);
 		}
 
+		//With Edge, we met a problem that the frame context gets lost after calling selenium's click.
+		WDLibrary.resetLastFrame();
+
 		//If 'Highlight' has been turned on, then clean highlight the component after action
 		if(WebDriverGUIUtilities.HIGHLIGHT){
 			StringUtilities.sleep(1000);
 			WDLibrary.clearHighlight();
 		}
+	}
+
+	/**
+	 * Wait for the component to be "ready": "ready" has different meanings for different components and different types.
+	 * @param element WebElement the web-element to be checked
+	 * @return WebElement, the "ready" WebElement
+	 */
+	protected WebElement waitReady(WebElement element){
+
+		String debugmsg = StringUtils.debugmsg(false);
+
+		WebElement readyElement = element;
+    	//According to the actions, we will wait in different ways
+    	waiter = new WebDriverWait(WDLibrary.getWebDriver(), getSecsWaitForComponent());
+
+    	ready = false;
+
+    	//Wait for the page to be fully loaded
+
+    	waiter.until(new ExpectedCondition<Boolean>(){
+    		@Override
+			public Boolean apply(WebDriver driver) {
+    			//https://www.w3schools.com/jsref/prop_doc_readystate.asp : complete - Fully loaded
+    			//https://javascript.info/onload-ondomcontentloaded : readyState "complete" – the document and resources (like images) are loaded, happens at about the same time as window.onload, but before it.
+    			return ((JavascriptExecutor)driver).executeScript("return document.readyState").equals("complete");
+    		}
+    	});
+
+    	if(isClickAction(action)
+    			|| GenericMasterFunctions.INPUTKEYS_KEYWORD.equalsIgnoreCase(action)
+    			|| GenericMasterFunctions.INPUTCHARACTERS_KEYWORD.equalsIgnoreCase(action)
+    			|| action.equalsIgnoreCase(LEFTDRAG)
+    			|| action.equalsIgnoreCase(RIGHTDRAG)
+    			|| action.equalsIgnoreCase(SHIFTLEFTDRAG)
+    			|| action.equalsIgnoreCase(CTRLSHIFTLEFTDRAG)
+    			|| action.equalsIgnoreCase(CTRLLEFTDRAG)
+    			|| action.equalsIgnoreCase(ALTLEFTDRAG)
+    			|| action.equalsIgnoreCase(CTRLALTLEFTDRAG )
+    			|| action.equalsIgnoreCase(GenericObjectFunctions.DRAGTO_KEYWORD)) {
+    		readyElement = waiter.until(ExpectedConditions.elementToBeClickable(element));
+    		ready = true;
+
+    	} else if(GETGUIIMAGE.equalsIgnoreCase(action)
+    			|| action.equalsIgnoreCase(VERIFYGUIIMAGETOFILE)
+    			|| WAITFORGUI.equalsIgnoreCase(action)
+    			|| action.equalsIgnoreCase(VSCROLLTO)
+    			|| action.equalsIgnoreCase(HSCROLLTO)
+    			|| action.equalsIgnoreCase(HOVERMOUSE)){
+    		readyElement = waiter.until(ExpectedConditions.visibilityOf(element));
+    		ready = true;
+
+    	}
+    	else if(GenericMasterFunctions.VERIFYPROPERTY_KEYWORD.equalsIgnoreCase(action)
+    			||GenericMasterFunctions.ASSIGNPROPERTYVARIABLE_KEYWORD.equalsIgnoreCase(action)
+    			||action.equalsIgnoreCase(VERIFYPROPERTYCONTAINS)
+    			||action.equalsIgnoreCase(ISPROPERTYEXIST)){
+    		//verifyProperty();
+    		//assignPropertyVariable();
+    		//verifyPropertyContains();
+    		//isPropertyExist();
+
+    		//TODO They all call getPropertyObject(String propertyName)
+
+    	}else if (action.equalsIgnoreCase(VERIFYPROPERTYTOFILE)
+    			||action.equalsIgnoreCase(VERIFYARRAYPROPERTYTOFILE)
+    			||action.equalsIgnoreCase(CAPTUREPROPERTYTOFILE)
+    			||action.equalsIgnoreCase(GenericMasterFunctions.VERIFYPROPERTIESTOFILE_KEYWORD)
+    			||action.equalsIgnoreCase(GenericMasterFunctions.VERIFYPROPERTIESSUBSETTOFILE_KEYWORD)
+    			||action.equalsIgnoreCase(CAPTUREPROPERTIESTOFILE)){
+
+    		//verifyPropertyToFile(false);
+    		//capturePropertyToFile();
+    		//verifyPropertiesToFile();
+    		//capturePropertiesToFile();
+
+    		//TODO they all call getProperties()
+
+    	}else if (action.equalsIgnoreCase(VERIFYOBJECTDATATOFILE)
+    			|| action.equalsIgnoreCase(CAPTUREOBJECTDATATOFILE)) {
+    		//verifyObjectDataToFile();
+    		//captureObjectDataToFile();
+
+    		//TODO They all call captureObjectData()
+
+    	}else if (action.equalsIgnoreCase(LOCATESCREENIMAGE)) {
+    		//locateScreenImage();
+
+    		//They all call getRectangleOnScreen()
+    		readyElement = waiter.until(ExpectedConditions.visibilityOf(element));
+    		ready = true;
+
+    	}else if (action.equalsIgnoreCase(GenericMasterFunctions.SHOWONPAGE_KEYWORD)) {
+    		//action_showOnPage();
+    		//TODO They all call showComponentAsMuchPossible
+    	}else if (action.equalsIgnoreCase(GUIDOESEXIST)
+    			||action.equalsIgnoreCase(GUIDOESNOTEXIST)) {
+    		//guiDoesExist(true);
+    		//guiDoesExist(false);
+    		//TODO They call exist(), we will handle it in method exist()
+    	}
+
+//    	else if(GenericMasterFunctions.VERIFYCOMPUTEDSTYLE_KEYWORD.equalsIgnoreCase(action)
+//    			|| GenericMasterFunctions.GETCOMPUTEDSTYLE_KEYWORD.equalsIgnoreCase(action)){
+//    		action_ComputedStyle(false);
+//
+//    	}
+//    	else if(GenericMasterFunctions.EXECUTESCRIPT_KEYWORD.equalsIgnoreCase(action)){
+//    		//What should we wait? Page has been fully loaded?
+//
+//    	}
+
+    	//Not concerned
+//    	else if(GenericMasterFunctions.CLEARCACHE_KEYWORD.equalsIgnoreCase(action)){
+    		//not concerned
+//			clearCache();
+//		}
+//    	else if (action.equalsIgnoreCase(GETTEXTFROMGUI) ||
+//    			action.equalsIgnoreCase(SAVETEXTFROMGUI)) {
+//    		//not concerned, it is about OCR keyword
+//    		action_GetSaveTextFromGUI();
+//    	}
+
+    	//Below are the keywords NOT implemented yet, we don't wait for them
+//    	else if(WindowFunctions.MAXIMIZE_KEYWORD.equalsIgnoreCase(action)
+//    			|| WindowFunctions.MINIMIZE_KEYWORD.equalsIgnoreCase(action)
+//    			|| WindowFunctions.RESTORE_KEYWORD.equalsIgnoreCase(action)
+//    			|| WindowFunctions.CLOSEWINDOW_KEYWORD.equalsIgnoreCase(action)
+//    			|| WindowFunctions.SETPOSITION_KEYWORD.equalsIgnoreCase(action)
+//    			){
+//
+//    	}
+//    	else if (action.equalsIgnoreCase(VERIFYVALUECONTAINS)) {
+//    		verifyValueContains();
+//    	} else if (action.equalsIgnoreCase(VERIFYVALUES) ||
+//    			action.equalsIgnoreCase(VERIFYVALUEEQUALS) ||
+//    			action.equalsIgnoreCase(VERIFYVALUESIGNORECASE)) {
+//    		verifyValues();
+//    	}
+//    	else if (action.equalsIgnoreCase(CLEARAPPMAPCACHE)) {
+//    		clearAppMapCache();
+//    	}
+//    	else if (action.equalsIgnoreCase(CLOSEWINDOW)) {
+//    		closeWindow();
+//    	}
+//    	else if (GenericMasterFunctions.HOVERSCREENLOCATION_KEYWORD.equalsIgnoreCase(action)) {
+//    		hoverScreenLocation();
+//    	}
+//    	else if (action.equalsIgnoreCase(VERIFYTEXTFILETOFILE) ||
+//    			action.equalsIgnoreCase(VERIFYFILETOFILE)) {
+//    		verifyFileToFile(true);
+//    	}
+//    	else if (action.equalsIgnoreCase(VERIFYBINARYFILETOFILE)) {
+//    		verifyFileToFile(false);
+//    	} else if (action.equalsIgnoreCase(VERIFYCLIPBOARDTOFILE)) {
+//    		verifyClipboardToFile();
+//    	}
+//    	else if (action.equalsIgnoreCase(SELECTMENUITEM)) {
+//    		selectMenuItem(false);
+//    	} else if (action.equalsIgnoreCase(SELECTMENUITEMCONTAINS)) {
+//    		selectMenuItem(true);
+//    	} else if (action.equalsIgnoreCase(VERIFYMENUITEM)) {
+//    		verifyMenuItem(false);
+//    	} else if (action.equalsIgnoreCase(VERIFYMENUITEMCONTAINS)) {
+//    		verifyMenuItem(true);
+//    	} else if (action.equalsIgnoreCase(SENDEVENT)) {
+//    		sendEvent();
+//    	}
+//    	else if (action.equalsIgnoreCase(SETPROPERTYVALUE)){
+//    		setPropertyValue();
+//    	}
+
+    	else{
+    		IndependantLog.debug(debugmsg+" ignored action "+action);
+    	}
+
+		return readyElement;
 	}
 
 	/**
@@ -332,6 +562,7 @@ public class CFComponent extends ComponentFunction{
 
 
 	/**clear the cache 'libComponentCache'*/
+	@Override
 	public void clearCache(){
 		clearInternalCache();
 		issuePassedSuccess(null);
@@ -340,6 +571,7 @@ public class CFComponent extends ComponentFunction{
 	/**
 	 * handles InputKeys and InputCharacters.
 	 */
+	@Override
 	protected void inputKeystrokes() throws SAFSException {
 		if(params.size() < 1){
 			issueParameterCountFailure();
@@ -371,12 +603,14 @@ public class CFComponent extends ComponentFunction{
 	/**
 	 *Subclass should give its own implementation<br>
 	 */
+	@Override
 	protected void _setPosition(Point position) throws SAFSException {
 		WDLibrary.setPositionBrowserWindow(position.x, position.y);
 	}
 	/**
 	 *Subclass should give its own implementation<br>
 	 */
+	@Override
 	protected void _setSize(Dimension size) throws SAFSException {
 		WDLibrary.resizeBrowserWindow(size.width, size.height);
 	}
@@ -385,6 +619,7 @@ public class CFComponent extends ComponentFunction{
 	 * Maximize the window.
 	 * @throws SeleniumPlusException
 	 */
+	@Override
 	protected void _maximize() throws SeleniumPlusException {
 		WDLibrary.maximizeBrowserWindow();
 	}
@@ -393,6 +628,7 @@ public class CFComponent extends ComponentFunction{
 	 * Close the window.
 	 * @throws SeleniumPlusException
 	 */
+	@Override
 	protected void _close() throws SeleniumPlusException {
 		WDLibrary.closeBrowser();
 	}
@@ -401,12 +637,14 @@ public class CFComponent extends ComponentFunction{
 	 * Minimize the window.
 	 * @throws SeleniumPlusException
 	 */
+	@Override
 	protected void _minimize() throws SeleniumPlusException{
 		WDLibrary.minimizeBrowserWindow();
 	}
 
 	/** <br><em>Purpose:</em> componentClick
 	 **/
+	@Override
 	protected void componentClick() throws SAFSException{
 
 		if(compObject==null) throw new SAFSException("Component WebElement is null.");
@@ -414,26 +652,32 @@ public class CFComponent extends ComponentFunction{
 		try{
 			java.awt.Point point = checkForCoord(iterator);
 			String autoscroll = null;
+			String verify = null;
+			String refresh = null;
 			if(iterator.hasNext()) autoscroll = iterator.next();
+			if(iterator.hasNext()) verify = iterator.next();
+			if(iterator.hasNext()) refresh = iterator.next();
 
 			long begin = System.currentTimeMillis();
 			if (action.equalsIgnoreCase(CLICK) ||
 					action.equalsIgnoreCase(COMPONENTCLICK)) {
 				if (point==null) {
-					WDLibrary.click(compObject, autoscroll);
+					WDLibrary.click(compObject, autoscroll, verify, refresh);
 				}else{
-					WDLibrary.click(compObject, point, autoscroll);
+					WDLibrary.click(compObject, point, autoscroll, verify, refresh);
 				}
 			} else if (action.equalsIgnoreCase(DOUBLECLICK)) {
-				WDLibrary.doubleClick(compObject, point, autoscroll);
+				WDLibrary.doubleClick(compObject, point, autoscroll, verify, refresh);
 			} else if (action.equalsIgnoreCase(RIGHTCLICK)) {
-				WDLibrary.rightclick(compObject, point, autoscroll);
+				WDLibrary.rightclick(compObject, point, autoscroll, verify, refresh);
 			} else if (action.equalsIgnoreCase(CTRLCLICK)) {
-				WDLibrary.click(compObject, point, Keys.CONTROL, WDLibrary.MOUSE_BUTTON_LEFT, autoscroll);
+				WDLibrary.click(compObject, point, Keys.CONTROL, WDLibrary.MOUSE_BUTTON_LEFT, autoscroll, verify, refresh);
 			} else if (action.equalsIgnoreCase(CTRLRIGHTCLICK)) {
-				WDLibrary.click(compObject, point, Keys.CONTROL, WDLibrary.MOUSE_BUTTON_RIGHT, autoscroll);
+				WDLibrary.click(compObject, point, Keys.CONTROL, WDLibrary.MOUSE_BUTTON_RIGHT, autoscroll, verify, refresh);
 			} else if (action.equalsIgnoreCase(SHIFTCLICK)) {
-				WDLibrary.click(compObject, point, Keys.SHIFT, WDLibrary.MOUSE_BUTTON_LEFT, autoscroll);
+				WDLibrary.click(compObject, point, Keys.SHIFT, WDLibrary.MOUSE_BUTTON_LEFT, autoscroll, verify, refresh);
+			} else if(GenericObjectFunctions.ALTCLICK_KEYWORD.equalsIgnoreCase(action)){
+				WDLibrary.click(compObject, point, Keys.ALT, WDLibrary.MOUSE_BUTTON_LEFT, autoscroll, verify, refresh);
 			}
 			long timeConsumed = System.currentTimeMillis()-begin;
 			IndependantLog.debug("it took "+timeConsumed+" milliseconds or "+(timeConsumed/1000)+" seconds to perform "+action);
@@ -461,6 +705,7 @@ public class CFComponent extends ComponentFunction{
 
 	/** <br><em>Purpose:</em> executeScript
 	 **/
+	@Override
 	protected void executeScript() throws SAFSException{
 		String debugmsg = StringUtils.debugmsg(getClass(), "executeScript");
 		if(compObject==null){
@@ -504,6 +749,7 @@ public class CFComponent extends ComponentFunction{
 
 	/** <br><em>Purpose:</em> verifyComputedStyle()
 	 **/
+	@Override
 	protected void action_ComputedStyle(boolean verification) throws SAFSException{
 		String debugmsg = StringUtils.debugmsg(false)+(verification? "Verify: ":"Get: ");
 		if(compObject==null){
@@ -542,6 +788,7 @@ public class CFComponent extends ComponentFunction{
 					IndependantLog.info(debugmsg+" file exception"+ ef);
 				}
 				InputStream benchStream = new FileInputStream(benchfile);
+				@SuppressWarnings("deprecation")
 				String jsonStr = IOUtils.toString(benchStream);
 				benchJsonObj = new JSONObject(jsonStr);
 
@@ -569,10 +816,12 @@ public class CFComponent extends ComponentFunction{
 
 	}
 
+	@Override
 	protected Object getPropertyObject(String propertyName) throws SAFSException{
 		return WDLibrary.getProperty(compObject, propertyName);
 	}
 
+	@Override
 	protected Map<String, Object> getProperties() throws SAFSException{
 		return WDLibrary.getProperties(compObject);
 	}
@@ -580,6 +829,7 @@ public class CFComponent extends ComponentFunction{
 	/**
 	 * Sub class may override this method to get its own data.<br>
 	 */
+	@Override
 	protected Collection<String> captureObjectData() throws SAFSException {
 		String debugmsg = StringUtils.debugmsg(false);
 		Collection<String> contents = null;
@@ -621,19 +871,7 @@ public class CFComponent extends ComponentFunction{
 	 * @return List<String>, a list of element's text
 	 */
 	public static List<String> convertElementArrayToList(Element[] elements){
-		String debugmsg = StringUtils.debugmsg(false);
-		List<String> content = new ArrayList<String>();
-		try{
-			String value = null;
-			for(Element element:elements){
-				value = element.contentValue();
-				if(value!=null) content.add(value);
-			}
-		}catch(Exception e){
-			IndependantLog.debug(debugmsg+StringUtils.debugmsg(e));
-		}
-
-		return content;
+		return WDLibrary.convertElementArrayToList(elements);
 	}
 
 	/**
@@ -685,12 +923,14 @@ public class CFComponent extends ComponentFunction{
 	}
 
 	/** @return Rectangle, the absolute rectangle on screen for the window */
+	@Override
 	protected Rectangle getWindowRectangleOnScreen(){
 		Rectangle rectangle = getRectangleOnScreen(winObject);
 	    if(rectangle==null) IndependantLog.warn("Fail to get bounds for "+ windowName+":"+windowName +" on screen.");
 	    return rectangle;
 	}
 	/** @return Rectangle, the absolute rectangle on screen for the component */
+	@Override
 	protected Rectangle getComponentRectangleOnScreen(){
 		WebElement component = (compObject!=null? compObject:winObject);
 		Rectangle rectangle = getRectangleOnScreen(component);
@@ -701,14 +941,15 @@ public class CFComponent extends ComponentFunction{
 	/**
 	 * Show the component in the browser's viewport as much as possible.
 	 */
-	protected boolean showComponentAsMuchPossible(boolean verify) throws SeleniumPlusException{
+	@Override
+	protected boolean showComponentAsMuchPossible(boolean verify, boolean refresh) throws SeleniumPlusException{
 		String debugmsg = StringUtils.debugmsg(true);
 
 		WebElement component = (compObject!=null? compObject:winObject);
-		IndependantLog.debug(debugmsg+" verify="+verify);
+		IndependantLog.debug(debugmsg+" verify="+verify+"; refresh="+refresh);
 
 		//show the component in the browser's viewport
-		if(WDLibrary.showOnPage(component, String.valueOf(verify))){
+		if(WDLibrary.showOnPage(component, String.valueOf(verify), String.valueOf(refresh))){
 			return true;
 		}else{
 			IndependantLog.warn(debugmsg+"Fail to show "+windowName+":"+compName +" on screen.");
@@ -799,6 +1040,7 @@ public class CFComponent extends ComponentFunction{
 	 * But we need to be careful, Robot will be used to get image, we have to implement RMI to get image if the <br>
 	 * browser is running on a remote machine.<br>
 	 */
+	@Override
 	protected Rectangle getComponentRectangle(){
 		String debugmsg = StringUtils.debugmsg(false);
 		WebElement component = (compObject!=null? compObject:winObject);
@@ -813,10 +1055,12 @@ public class CFComponent extends ComponentFunction{
 		return null;
 	}
 
+	@Override
 	protected BufferedImage getRectangleImage(Rectangle imageRect) throws SAFSException{
 		return WDLibrary.captureBrowserArea(imageRect);
 	}
 
+	@Override
 	protected boolean exist()throws SAFSException{
 		String debugmsg = StringUtils.debugmsg(false);
 
@@ -833,6 +1077,7 @@ public class CFComponent extends ComponentFunction{
 		return WDLibrary.isVisible(compObject);
 	}
 
+	@Override
 	protected boolean performHoverMouse(Point point, int milliseconds) throws SAFSException{
 		String debugmsg = StringUtils.debugmsg(false);
 
@@ -851,6 +1096,7 @@ public class CFComponent extends ComponentFunction{
 	 * Format: "T,SwingApp,component,LeftDrag,"Coords=x1;y1;x2;y2"
 	 * @exception SAFSException
 	 */
+	@Override
 	protected void performDrag() throws SAFSException{
 		String debugInf = StringUtils.debugmsg(false);
 		if (params.size()<1) {
@@ -905,6 +1151,7 @@ public class CFComponent extends ComponentFunction{
 	 * perform dragTo from component1 to component2 with offset.
 	 * @exception SAFSException
 	 */
+	@Override
 	protected void dragTo() throws SAFSException{
 		String debugmsg = StringUtils.debugmsg(false);
 		if (params.size()<2) {
@@ -925,12 +1172,16 @@ public class CFComponent extends ComponentFunction{
 					+ "\n TestRecordData: winrec="+testRecordData.getWindowGuiId()+"; comprec="+testRecordData.getCompGuiId());
 
 			//offset
-			String offset = "50%, 50%, 50%, 50%";
+			String offset = Constants.OFFSET_CENTER;
 			if(iterator.hasNext()){
 				offset = iterator.next();
 				offset = getPossibleMapItem(offset);
 			}
 			IndependantLog.debug(debugmsg+" offset is "+offset);
+			if(offset==null || offset.isEmpty() || offset.trim().equalsIgnoreCase("null")){
+				IndependantLog.warn(debugmsg+" offset "+offset+" is NOT valid, reset it to the default value '"+Constants.OFFSET_CENTER+"' (center).");
+				offset = Constants.OFFSET_CENTER;
+			}
 
 			//skip 2 parameters "fromSubItem" and "toSubItem"
 			if(iterator.hasNext()) iterator.next();
@@ -950,16 +1201,14 @@ public class CFComponent extends ComponentFunction{
 				throw new SAFSParamException(" Offset '"+offset+"' is not valid! The valid examples could be '20%,10%,%50,%60', '30,55,70,80', or even '20%,10%,70,80'.");
 			}
 
-			Point p1 = WDLibrary.getElementOffsetScreenLocation(compObject, offsetArray[0], offsetArray[1]);
-			Point p2 = WDLibrary.getElementOffsetScreenLocation(toElement, offsetArray[2], offsetArray[3]);
-
+			Point[] points = null;
 			if(action.equalsIgnoreCase(GenericObjectFunctions.DRAGTO_KEYWORD)){
-				Robot.leftDrag(p1, p2, dndReleaseDelay);
+				points = WDLibrary.dragTo(compObject, toElement, offsetArray, dndReleaseDelay);
 			}else{
 				throw new SAFSException("Not supported yet.", SAFSException.CODE_ACTION_NOT_SUPPORTED);
 			}
 
-			String msg = " :"+action+" from "+p1.toString()+" to "+p2.toString();
+			String msg = " :"+action+" from "+points[0].toString()+" to "+points[1].toString();
 			testRecordData.setStatusCode(StatusCodes.OK);
 			log.logMessage(testRecordData.getFac(),
 					genericText.convert(TXT_SUCCESS_4, altText+msg, windowName, compName, action, msg),

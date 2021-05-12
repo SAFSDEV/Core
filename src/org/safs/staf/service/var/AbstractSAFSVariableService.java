@@ -1,5 +1,35 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.staf.service.var;
 
+/**
+ * @author Carl Nagle JUL 03, 2003 Moved initialization into init, out of constructor.
+ * @author Carl Nagle SEP 26, 2007 Fixed App Map Resolve problem with explicit ApplicationConstants section
+ * @author Carl Nagle MAR 19, 2009 Fixed problem with quoting of already quoted strings.
+ * @author JunwuMa    MAY 12, 2009 Adding support for STAF3.
+ *                                 Renamed SAFSVariableService (old class only for STAF2) with AbstractSAFSVariableService and keep common operations in it.
+ *                                 Two different versions of the service extend this class for supporting STAF2 and STAF3.
+ * @author Carl Nagle     JUN 04, 2009 Synchronizing for Thread Safety.
+ * @author Carl Nagle     FEB 04, 2010 Attempt to catch and ignore individual field expression processing errors.
+ * @author Lei Wang    APR 05, 2012 Add option "MAPVARLOOP" for command "GET", see Testhelp078350
+ * @author Carl Nagle     JUL 22, 2013 Allow SAFSVARS LIST to return V2 format.
+ * @author Lei Wang    NOV 13, 2019 Modified getValue(): quote the variable when generating the map GETITEM request.
+ */
 import org.safs.Log;
 import org.safs.SAFSStringTokenizer;
 import org.safs.staf.embedded.HandleInterface;
@@ -8,7 +38,6 @@ import org.safs.tools.expression.SafsExpression;
 import org.safs.tools.stringutils.StringUtilities;
 import org.safs.tools.vars.SimpleVarsInterface;
 
-import com.ibm.staf.STAFHandle;
 import com.ibm.staf.STAFResult;
 import com.ibm.staf.service.STAFCommandParseResult;
 import com.ibm.staf.service.STAFCommandParser;
@@ -143,7 +172,7 @@ import com.ibm.staf.service.STAFCommandParser;
  * <p>
  * LIST [V2]
  * <p>
- * <b>2.6.1 V2 - an optional flag used to return the list in original STAF V2 format instead of 
+ * <b>2.6.1 V2 - an optional flag used to return the list in original STAF V2 format instead of
  * newer STAF V3 marshaled data format.  The V3 format is returned by default when using STAF V3.
  * <p>
  * <h3>2.7 COUNT </h3>
@@ -165,8 +194,8 @@ import com.ibm.staf.service.STAFCommandParser;
  * <h3>2.9 RESOLVE </h3>
  * <p>
  * This will resolve variable values and SAFS expressions in a
- * multi-field, delimited string (a test record).  Returns the input strings in a 
- * RC:STRING format.  The RC is a numeric STAF return code -- hopefully 0 (Ok). Followed 
+ * multi-field, delimited string (a test record).  Returns the input strings in a
+ * RC:STRING format.  The RC is a numeric STAF return code -- hopefully 0 (Ok). Followed
  * by a colon(:), then the actual processed test record.
  * <p>
  * <b>Syntax:</b>
@@ -174,16 +203,16 @@ import com.ibm.staf.service.STAFCommandParser;
  * RESOLVE &lt;string> [SEPARATOR &lt;char>] [NOEXPRESSIONS]
  * <p>
  * <b>2.9.1 &lt;string></b> the string (input record) to process for variables and expressions.
- * Note, if the CARET (^) identifying a DDVariable cannot be sent intact the service will 
- * accept the string "_DDV_" in place of each intended CARET character and convert it internally before 
+ * Note, if the CARET (^) identifying a DDVariable cannot be sent intact the service will
+ * accept the string "_DDV_" in place of each intended CARET character and convert it internally before
  * processing.
  * <p>
  * <b>2.9.2 SEPARATOR &lt;char></b> an optional single character to use as the field
  * delimiter when processing the input string or record as separate fields, left to right.
  * <p>
- * <b>2.9.3 NOEXPRESSIONS</b> an optional value to indicate how the input record will 
- * have the variables and expressions processed.  By default, Expressions are assumed ON.  
- * With NOEXPRESSIONS, the input record is handled in the older Substitute/Extract method: 
+ * <b>2.9.3 NOEXPRESSIONS</b> an optional value to indicate how the input record will
+ * have the variables and expressions processed.  By default, Expressions are assumed ON.
+ * With NOEXPRESSIONS, the input record is handled in the older Substitute/Extract method:
  * only the setting and getting of individual variable values occurs.
  * <p>
  * <h3>2.10 HELP </h3>
@@ -194,20 +223,10 @@ import com.ibm.staf.service.STAFCommandParser;
  * <p>
  * HELP
  * <p>
- * Software Automation Framework Support (SAFS) http://safsdev.sourceforge.net<br>
+ * Software Automation Framework Support (SAFS) https://safsdev.github.io/<br>
  * Software Testing Automation Framework (STAF) http://staf.sourceforge.net<br>
- * @author Carl Nagle JUL 03, 2003 Moved initialization into init, out of constructor.
- * @author Carl Nagle SEP 26, 2007 Fixed App Map Resolve problem with explicit ApplicationConstants section
- * @author Carl Nagle MAR 19, 2009 Fixed problem with quoting of already quoted strings.
- * @author JunwuMa    MAY 12, 2009 Adding support for STAF3.
- *                                 Renamed SAFSVariableService (old class only for STAF2) with AbstractSAFSVariableService and keep common operations in it. 
- *                                 Two different versions of the service extend this class for supporting STAF2 and STAF3.  
- * @author Carl Nagle     JUN 04, 2009 Synchronizing for Thread Safety.
- * @author Carl Nagle     FEB 04, 2010 Attempt to catch and ignore individual field expression processing errors.
- * @author Lei Wang     APR 05, 2012 Add option "MAPVARLOOP" for command "GET", see Testhelp078350
- * @author Carl Nagle     JUL 22, 2013 Allow SAFSVARS LIST to return V2 format.
- * 
- * @see SAFSVariableService SAFSVariableService3 SAFSAppMapService SAFSAppMapService3 
+ *
+ * @see SAFSVariableService SAFSVariableService3 SAFSAppMapService SAFSAppMapService3
  *********************************************************************************************/
 public abstract class AbstractSAFSVariableService implements SimpleVarsInterface {
 
@@ -231,23 +250,23 @@ public abstract class AbstractSAFSVariableService implements SimpleVarsInterface
 	public static final String SVS_SERVICE_REQUEST_DELETE   = "DELETE";
 	public static final String SVS_SERVICE_REQUEST_HELP     = "HELP";
 	public static final String SVS_SERVICE_REQUEST_V2       = "V2";
-	
+
 	/**
 	 * Used for {@link #SVS_SERVICE_REQUEST_GET}<br>
 	 * Used internally to stop the loop between map service and variable service.<br>
 	 * "MAPVARLOOP" can have parameter, a delimited string, the items have been processed<br>
 	 * in map service. The delimiter is {@value AbstractSAFSAppMapService#SAM_SERVICE_PARM_MAP_VAR_LOOP_SEP}<br>
-	 * 
+	 *
 	 * Example:<br>
 	 * MAPVARLOOP item1_SEP:item2_SEP:item3
-	 * 
+	 *
 	 * @see #getValue(String, boolean, String)
 	 */
 	public static final String SVS_SERVICE_PARM_MAP_VAR_LOOP      = "MAPVARLOOP";
 
 	public static final String SVS_CARET					= "^";
 	public static final String SVS_FALSE_CARET              = "_DDV_";
-	
+
 	protected STAFCommandParser parser = new STAFCommandParser(SVS_SERVICE_REQUEST_ARGS_MAX);
 
 	protected String servicemaps  = new String(SVS_SERVICE_REQUEST_SAFSMAPS);
@@ -292,16 +311,16 @@ public abstract class AbstractSAFSVariableService implements SimpleVarsInterface
 		        "RESOLVE <string> [SEPARATOR <char>] [NOEXPRESSIONS]" +r+
 		        "HELP"+r+r;
 	}
-	
+
 	// common init phase for STAFServiceInterfaceLevel1 and STAFServiceInterfaceLevel30
 	/**********************************************************************
 	 * Handle initializing this instance of the service for STAF
 	 **********************************************************************/
 	protected int doInit(HandleInterface client, String name, String params){
-		
+
 		this.client = client;
 		servicename  = name;
-		
+
 		if (params == null) params = new String();
 		serviceparms = params;
 
@@ -323,7 +342,7 @@ public abstract class AbstractSAFSVariableService implements SimpleVarsInterface
 		parser.addOption( SVS_SERVICE_REQUEST_RESET    , 1, STAFCommandParser.VALUENOTALLOWED );
 		parser.addOption( SVS_SERVICE_PARM_MAP_VAR_LOOP, 1, STAFCommandParser.VALUEALLOWED );
 		parser.addOption( SVS_SERVICE_REQUEST_V2       , 1, STAFCommandParser.VALUENOTALLOWED );
-		
+
 
 		// each request should have only 1 of these
 		parser.addOptionGroup ( SVS_SERVICE_REQUEST_SET  +s+ SVS_SERVICE_REQUEST_HELP     +s+
@@ -335,7 +354,7 @@ public abstract class AbstractSAFSVariableService implements SimpleVarsInterface
 
 		parser.addOptionNeed (SVS_SERVICE_REQUEST_SET  , SVS_SERVICE_REQUEST_VALUE);
 		parser.addOptionNeed (SVS_SERVICE_REQUEST_VALUE, SVS_SERVICE_REQUEST_SET  );
-		
+
 		parser.addOptionNeed (SVS_SERVICE_REQUEST_SEPARATOR    , SVS_SERVICE_REQUEST_RESOLVE  );
 		parser.addOptionNeed (SVS_SERVICE_REQUEST_NOEXPRESSIONS, SVS_SERVICE_REQUEST_RESOLVE  );
 
@@ -352,7 +371,7 @@ public abstract class AbstractSAFSVariableService implements SimpleVarsInterface
 
 		return STAFResult.Ok;
 	}
-	
+
 
 	// common acceptRequest phase for STAFServiceInterfaceLevel1 and STAFServiceInterfaceLevel30
 	/**********************************************************************
@@ -392,8 +411,8 @@ public abstract class AbstractSAFSVariableService implements SimpleVarsInterface
 
 		// ===============================================================
 		}else if( parsedData.optionTimes(SVS_SERVICE_REQUEST_LIST) > 0){
-			return handleList(parsedData);	
-			
+			return handleList(parsedData);
+
 		// ===============================================================
 		}else if( parsedData.optionTimes(SVS_SERVICE_REQUEST_COUNT) > 0){
 			return handleCount();
@@ -414,7 +433,7 @@ public abstract class AbstractSAFSVariableService implements SimpleVarsInterface
 		}else if( parsedData.optionTimes(SVS_SERVICE_REQUEST_GET) > 0) {
 
 			value1= parsedData.optionValue(SVS_SERVICE_REQUEST_GET);
-			
+
 			//If the 'var get value request' comes from the Map Service, we know it is a loop.
 			boolean mapVarLoop = parsedData.optionTimes(SVS_SERVICE_PARM_MAP_VAR_LOOP) > 0;
 			//processedItems contains the items have been processed in Map Service
@@ -424,14 +443,14 @@ public abstract class AbstractSAFSVariableService implements SimpleVarsInterface
 			}
 			//I don't think we can synchronize here because a call to getValue
 			//can result in a call to get an ApplicationConstant out of an App map
-			//that can result in another call to VARS getValue from the App Map service 
+			//that can result in another call to VARS getValue from the App Map service
 			//if the app map value is a call to a _DDV or {^resolved} variable.
-			//In that scenario, I believe synchronizing on tempresult here would 
+			//In that scenario, I believe synchronizing on tempresult here would
 			//cause a deadlock when the second call to getValue is made.
 			getValue(value1.toLowerCase(), mapVarLoop, processedItems); //internally synchronized...mostly
 			locresult.rc = tempresult.rc;
 			locresult.result = tempresult.result;
-			return locresult;			
+			return locresult;
 
 		// ===============================================================
 		}else if( parsedData.optionTimes(SVS_SERVICE_REQUEST_RESET) > 0){
@@ -441,7 +460,7 @@ public abstract class AbstractSAFSVariableService implements SimpleVarsInterface
 		}else if( parsedData.optionTimes(SVS_SERVICE_REQUEST_RESOLVE) > 0){
 			value1 = parsedData.optionValue(SVS_SERVICE_REQUEST_RESOLVE);
 			value1 = StringUtilities.findAndReplace(value1, SVS_FALSE_CARET, SVS_CARET);
-			if( parsedData.optionTimes(SVS_SERVICE_REQUEST_SEPARATOR) > 0){	
+			if( parsedData.optionTimes(SVS_SERVICE_REQUEST_SEPARATOR) > 0){
 				value2 = parsedData.optionValue(SVS_SERVICE_REQUEST_SEPARATOR);
 			}
 			boolean expressions = !(parsedData.optionTimes(SVS_SERVICE_REQUEST_NOEXPRESSIONS) > 0);
@@ -469,8 +488,8 @@ public abstract class AbstractSAFSVariableService implements SimpleVarsInterface
 						field = StringUtilities.TWhitespace(toker.nextToken());
 						if (! field.equals(dq)){
 							if (field.length()> 0){
-									try{ 
-										exp.setExpression(field);									
+									try{
+										exp.setExpression(field);
 										if (expressions) {field = exp.evalExpression();}
 										else             {field = exp.evalVariables() ;}
 										field = smartQuoteField(field);
@@ -509,7 +528,7 @@ public abstract class AbstractSAFSVariableService implements SimpleVarsInterface
 
 		return locresult;
 	}
-	
+
 	/**
 	 * Made to be overridden by subclasses, if any.
 	 * @param deleteCmd
@@ -518,25 +537,25 @@ public abstract class AbstractSAFSVariableService implements SimpleVarsInterface
 	protected STAFResult deleteStoredVariable(String deleteCmd){
 		return client.submit2("local", "var", deleteCmd);
 	}
-	
+
 	/**
 	 * Made to be overridden by subclasses, if any.
 	 * @param getCmd
 	 * @return STAFResult
 	 */
 	protected STAFResult getStoredValue(String getCmd){
-		return client.submit2("local", "var", getCmd);		
+		return client.submit2("local", "var", getCmd);
 	}
-	
+
 	/**
 	 * Made to be overridden by subclasses, if any.
 	 * @param setCmd
 	 * @return STAFResult
 	 */
 	protected STAFResult setStoredValue(String setCmd){
-		return client.submit2("local", "var", setCmd);		
+		return client.submit2("local", "var", setCmd);
 	}
-	
+
 	/**
 	 * tempresult is internally synchronized since the method can be recursively called
 	 * @param varname			String, the variable name to resolve
@@ -548,9 +567,9 @@ public abstract class AbstractSAFSVariableService implements SimpleVarsInterface
 	 * @see SimpleVarsInterface#getValue(String)
 	 */
 	private String getValue(String varname, boolean stopMapVarLoop, String processedItems) {
-		
+
 		boolean trymap = true;
-		
+
 		if ((varname == null)||(varname.length() == 0)){
 			synchronized(tempresult){
 		    	tempresult.result = "";
@@ -560,7 +579,7 @@ public abstract class AbstractSAFSVariableService implements SimpleVarsInterface
 		}
 		// TODO: DEBUG ONLY
 		//Log.info("SAFSVARS: getValue processing: "+ varname);
-		
+
 		// catch infinite recursion problem from AppMap lookups
 		// a _DDV prefix means to NOT try the AppMap again for this iteration
 		if (varname.startsWith(AbstractSAFSAppMapService.SAM_DDV_PREFIX.toLowerCase())){
@@ -571,20 +590,20 @@ public abstract class AbstractSAFSVariableService implements SimpleVarsInterface
 		String lentagged = c+ String.valueOf(varname.length()).trim() +c+ varname.toLowerCase();
 
 		String getCmd = stafGetCommmd(lentagged);
-		
+
 		STAFResult aresult = getStoredValue(getCmd);
-		
+
 		if ((trymap)&&(aresult.rc == STAFResult.VariableDoesNotExist)){
 
 			Log.debug("SAFSVARS: Try to get value for '"+varname+"' from defaultsection of map service.");
-			String command = "GETITEM SECTION "+ q + AbstractSAFSAppMapService.SAM_SERVICE_REQUEST_DEFAULTMAPSECTION + q + s + "ITEM "+ varname;
-			
+			String command = "GETITEM SECTION "+ q + AbstractSAFSAppMapService.SAM_SERVICE_REQUEST_DEFAULTMAPSECTION + q + s + "ITEM "+ q+varname+q;
+
 			if(stopMapVarLoop){
 				//pass back processedItems to Map Service, at that side processedItems is used to stop infinite-loop
 				command += " "+AbstractSAFSAppMapService.SAM_SERVICE_PARM_MAP_VAR_LOOP+ " "+ q + processedItems + q;
 			}
 			Log.debug("SAFSVARS: Map service command='"+command+"'.");
-			
+
 			// TODO: if STAFHandle is not an EmbeddedHandle then it will not seek embedded services via EmbeddedHandles class.
 			// Thus, it will not see SAFSMAPS if it is running Embedded.
 			STAFResult mapresult = client.submit2("local", servicemaps,command);
@@ -602,7 +621,7 @@ public abstract class AbstractSAFSVariableService implements SimpleVarsInterface
 				if ((aresult.rc == STAFResult.VariableDoesNotExist)||(aresult.rc == STAFResult.DoesNotExist))
 				{
 			    	tempresult.result = "";
-			    	tempresult.rc = STAFResult.Ok;		    
+			    	tempresult.rc = STAFResult.Ok;
 				}else{
 					tempresult.rc = aresult.rc;
 					tempresult.result = aresult.result;
@@ -614,12 +633,13 @@ public abstract class AbstractSAFSVariableService implements SimpleVarsInterface
 			return tempresult.result;
 		}
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @see SimpleVarsInterface#getValue(String)
 	 * @see #getValue(String, boolean)
 	 */
+	@Override
 	public final String getValue(String varname) {
 		//Keep the previous behaviors
 		return getValue(varname, false, null);
@@ -629,34 +649,35 @@ public abstract class AbstractSAFSVariableService implements SimpleVarsInterface
 	 * tempresult must be externally synchronized by caller!
 	 * @see SimpleVarsInterface#setValue(String, String)
 	 */
+	@Override
 	public String setValue(String varname, String varvalue) {
 
 		String command = varname.toLowerCase() + eq + varvalue;
 		command = c+ String.valueOf(command.length()).trim() +c+ command;
-		
+
 		String setCmd = stafSetCommmd(command);
 		tempresult = setStoredValue(setCmd);
 
 		return varvalue;
 	}
-	
+
 	// returns the STAF command of getting a variable. It should be implemented in its concrete derived class
-	protected String stafGetCommmd(String varname) { throw new UnsupportedOperationException(); } 
-	
+	protected String stafGetCommmd(String varname) { throw new UnsupportedOperationException(); }
+
 	// returns the STAF command of setting a variable. It should be implemented in its concrete derived class
-	protected String stafSetCommmd(String assignExp) { throw new UnsupportedOperationException(); } 
+	protected String stafSetCommmd(String assignExp) { throw new UnsupportedOperationException(); }
 
 	// returns the STAF command of deleting a variable. It should be implemented in its concrete derived class
-	protected String stafDeleteCommand(String varname) { throw new UnsupportedOperationException(); } 
-	
+	protected String stafDeleteCommand(String varname) { throw new UnsupportedOperationException(); }
+
 	// returns the STAF command of listing a variable. It should be implemented in its concrete derived class
 	protected String stafListCommand() { throw new UnsupportedOperationException(); }
-	
-	// method for command COUNT for SAFSVARS, shall be implemented in its concrete derived class 
+
+	// method for command COUNT for SAFSVARS, shall be implemented in its concrete derived class
 	protected STAFResult handleCount() {throw new UnsupportedOperationException(); }
-	// method for command RESET for SAFSVARS, shall be implemented in its concrete derived class 
+	// method for command RESET for SAFSVARS, shall be implemented in its concrete derived class
 	protected STAFResult handleReset() {throw new UnsupportedOperationException(); }
-	// method for command LIST for SAFSVARS, shall be implemented in its concrete derived class 
+	// method for command LIST for SAFSVARS, shall be implemented in its concrete derived class
 	protected STAFResult handleList(STAFCommandParseResult parsedData) {throw new UnsupportedOperationException(); }
 
 	/**
@@ -666,7 +687,7 @@ public abstract class AbstractSAFSVariableService implements SimpleVarsInterface
 	 */
 	protected String smartQuoteField(String field){
 		try{
-			if (! field.equals(dq)){		
+			if (! field.equals(dq)){
 				if((field.length()>0)&&
 				   (field.startsWith(q))&&
 				   (field. endsWith(q))){
@@ -678,10 +699,10 @@ public abstract class AbstractSAFSVariableService implements SimpleVarsInterface
 		}catch(Exception x){;}
 		return field;
 	}
-	
-	
+
+
 	/**
-	 * Shared by various methods and actually causes thread-safety issues if not 
+	 * Shared by various methods and actually causes thread-safety issues if not
 	 * properly synchronized when multiple processes are using the active service!
 	 * Carl Nagle 2009.06.04
 	 */

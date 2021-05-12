@@ -1,3 +1,20 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.tools.data;
 
 import java.sql.Connection;
@@ -46,10 +63,10 @@ import java.util.Properties;
  * Same as JVM Option: <b>-Dsafs.jdbc.value</b>="&lt;value>"<br>
  * Ex: -Dsafs.jdbc.value="SUCCESS"
  * <p>
- * <li><b>-connection</b> "protocol://database-server-hostname:port"<br>
+ * <li><b>-connection</b> "sharenet://database.server:5011"<br>
  * The value to be used for the JDBC database connection.<br>
  * Same as JVM Option: <b>-Dsafs.jdbc.connection</b>="&lt;connection_uri>"<br>
- * Ex: -Dsafs.jdbc.connection="protocol://database-server-hostname:port"
+ * Ex: -Dsafs.jdbc.connection="sharenet://database.server:5011"
  * <p>
  * <li><b>-props</b> "librefs=mydata '/tst/tools/deploymentdetails/dev/shrdata';undoPolicyNone=True"<br>
  * Zero or more name=value pairs (separated by semi-colons) to be used during the connection request.<br>
@@ -95,20 +112,11 @@ public class GenericJDBC {
 	/** "com.sas.net.sharenet.ShareNetDriver" */
 	public static final String DEFAULT_DRIVERS = "com.sas.net.sharenet.ShareNetDriver";
 
-	/**
-	 * @deprecated NO default connection will be provided. Please provide when running test.
-	 * <p>
-	 * parameter <b>-connection</b> "protocol://database-server-hostname:port"<br>
-	 * OR<br>
-	 * JVM Option: <b>-Dsafs.jdbc.connection</b>="&lt;connection_uri>"<br>
-	 * Ex: -Dsafs.jdbc.connection="protocol://database-server-hostname:port"
-	 * <p>
-	 */
-	@Deprecated
-	public static final String DEFAULT_CONNECTION = "protocol://database-server-hostname:port";
+	/** "sharenet://database.server:5011" , user needs to set his own database server. */
+	public static final String DEFAULT_CONNECTION = "sharenet://database.server:5011";
 
 	/** defaults to {@value #DEFAULT_CONNECTION} */
-	protected String _connection = null;
+	protected String _connection = DEFAULT_CONNECTION;
 	/** defaults to {@value #DEFAULT_DRIVERS} */
 	protected String _drivers = DEFAULT_DRIVERS;
 	/** defaults to {@value #DEFAULT_SHRDATA_ID} */
@@ -343,14 +351,6 @@ public class GenericJDBC {
 	 * with all internal settings previously set or defaulted.
 	 */
 	public void updateData(){
-		if(_connection==null){
-			throw new RuntimeException("Please set the jdbc connection uri by \n"
-					+ " parameter -connection \"protocol://database-server-hostname:port\" \n"
-					+ " or \n"
-					+ " JVM Option -Dsafs.jdbc.connection=\"protocol://database-server-hostname:port\" \n"
-					+ " or \n"
-					+ " this.setConnection(\"protocol://database-server-hostname:port\"); \n");
-		}
 		updateData(_connection,
 				   _props,
 				   _shrdataid,
@@ -483,7 +483,7 @@ public class GenericJDBC {
 		 }
 		 log("INFO: connection props: "+ prop.toString());
 	     conn = java.sql.DriverManager.getConnection("jdbc:"+ connectURI, prop);
-	     //conn = java.sql.DriverManager.getConnection("jdbc:protocol://database-server-hostname:port",prop);
+	     //conn = java.sql.DriverManager.getConnection("jdbc:sharenet://database.server:5011",prop);
 	     stmt = conn.createStatement();
 
 	     String update = "update "+ dataid +"."+ dataset

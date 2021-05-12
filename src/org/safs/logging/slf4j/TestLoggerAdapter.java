@@ -1,19 +1,30 @@
-/** 
+/**
  * Copyright (C) SAS Institute, All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
+/**
+ * JUL 11, 2018 (Lei Wang) Moved common codes to VoidLoggerAdapter.
+ *                        Modified debug(), error() etc.: checked isXXXEnabled() before writing message.
  */
 package org.safs.logging.slf4j;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
 
 import org.safs.STAFHelper;
 import org.safs.SingletonSTAFHelper;
 import org.safs.logging.AbstractLogFacility;
 import org.safs.logging.LogUtilities;
-import org.slf4j.helpers.MarkerIgnoringBase;
 import org.slf4j.helpers.MessageFormatter;
 
 /**
@@ -27,61 +38,42 @@ import org.slf4j.helpers.MessageFormatter;
  * @see SAFSLoggerFactory#getLogger(String)
  * @see SAFSLoggerFactory#initializeTestLoggerAdapter(org.slf4j.Logger, org.safs.tools.drivers.AbstractDriver)
  */
-public class TestLoggerAdapter extends MarkerIgnoringBase {
+@SuppressWarnings("serial")
+public class TestLoggerAdapter extends VoidLoggerAdapter {
 
-	static STAFHelper staf = SingletonSTAFHelper.getHelper();	
+	static STAFHelper staf = SingletonSTAFHelper.getHelper();
 	static LogUtilities log = new LogUtilities(staf);
 	static String facname;
-	
-	protected static boolean debugEnabled = true;
-	protected static boolean warnEnabled = true;
-	protected static boolean traceEnabled = false;
-	protected static boolean fatalEnabled = true;
-    protected static boolean infoEnabled = true;
-    protected static boolean errorEnabled = true;
-    
-	/** 
-	 * @param t Throwable
-	 * @return String representation of Throwable.printStackTrace
-	 */
-	protected String getThrownString(Throwable t){
-	    OutputStream os = new ByteArrayOutputStream();
-	    String m = "";
-	    try {
-		    t.printStackTrace(new PrintStream(os));
-	    	m = os.toString(); 
-	    	os.close();
-	    } catch (IOException io){}
-	    return m;
-	}
 
 	public String getFacName(){
 		return log.getLastNamedLogFacility()== null? facname : log.getLastNamedLogFacility();
 	}
-	
+
 	/**
 	 * Usually set internally during initialization.
-	 * @param safslog -- The name of the SAFS Log to be used.  
+	 * @param safslog -- The name of the SAFS Log to be used.
 	 * This will be set during post-acquisition initialization from SAFSLoggerFactory.
-	 * @see SAFSLoggerFactory#initializeTestLoggerAdapter(org.slf4j.Logger, org.safs.tools.drivers.AbstractDriver) 
+	 * @see SAFSLoggerFactory#initializeTestLoggerAdapter(org.slf4j.Logger, org.safs.tools.drivers.AbstractDriver)
 	 */
 	public void setLogFacName(String facname){
 		TestLoggerAdapter.facname = facname;
 	}
-	
+
 	@Override
 	public void debug(String msg) {
-		log.logMessage(getFacName(), msg, AbstractLogFacility.DEBUG_MESSAGE);		
+		if(isDebugEnabled()){
+			log.logMessage(getFacName(), msg, AbstractLogFacility.DEBUG_MESSAGE);
+		}
 	}
 
 	@Override
 	public void debug(String format, Object arg) {
-		debug(MessageFormatter.format(format, arg).getMessage());		
+		debug(MessageFormatter.format(format, arg).getMessage());
 	}
 
 	@Override
 	public void debug(String format, Object... args) {
-		debug(MessageFormatter.arrayFormat(format, args).getMessage());		
+		debug(MessageFormatter.arrayFormat(format, args).getMessage());
 	}
 
 	@Override
@@ -91,22 +83,24 @@ public class TestLoggerAdapter extends MarkerIgnoringBase {
 
 	@Override
 	public void debug(String format, Object arg1, Object arg2) {
-		debug(format, new Object[]{arg1, arg2});		
+		debug(format, new Object[]{arg1, arg2});
 	}
 
 	@Override
 	public void error(String msg) {
-		log.logMessage(getFacName(), msg, AbstractLogFacility.FAILED_MESSAGE);		
+		if(isErrorEnabled()){
+			log.logMessage(getFacName(), msg, AbstractLogFacility.FAILED_MESSAGE);
+		}
 	}
 
 	@Override
 	public void error(String format, Object arg) {
-		error(MessageFormatter.format(format, arg).getMessage());		
+		error(MessageFormatter.format(format, arg).getMessage());
 	}
 
 	@Override
 	public void error(String format, Object... args) {
-		error(MessageFormatter.arrayFormat(format, args).getMessage());		
+		error(MessageFormatter.arrayFormat(format, args).getMessage());
 	}
 
 	@Override
@@ -116,22 +110,24 @@ public class TestLoggerAdapter extends MarkerIgnoringBase {
 
 	@Override
 	public void error(String format, Object arg1, Object arg2) {
-		error(format, new Object[]{arg1, arg2});		
+		error(format, new Object[]{arg1, arg2});
 	}
 
 	@Override
 	public void info(String msg) {
-		log.logMessage(getFacName(), msg, AbstractLogFacility.GENERIC_MESSAGE);		
+		if(isInfoEnabled()){
+			log.logMessage(getFacName(), msg, AbstractLogFacility.GENERIC_MESSAGE);
+		}
 	}
 
 	@Override
 	public void info(String format, Object arg) {
-		info(MessageFormatter.format(format, arg).getMessage());		
+		info(MessageFormatter.format(format, arg).getMessage());
 	}
 
 	@Override
 	public void info(String format, Object... args) {
-		info(MessageFormatter.arrayFormat(format, args).getMessage());		
+		info(MessageFormatter.arrayFormat(format, args).getMessage());
 	}
 
 	@Override
@@ -141,67 +137,46 @@ public class TestLoggerAdapter extends MarkerIgnoringBase {
 
 	@Override
 	public void info(String format, Object arg1, Object arg2) {
-		info(format, new Object[]{arg1, arg2});		
-	}
-
-	@Override
-	public boolean isDebugEnabled() {
-		return debugEnabled;
-	}
-
-	@Override
-	public boolean isErrorEnabled() {
-		return errorEnabled;
-	}
-
-	@Override
-	public boolean isInfoEnabled() {
-		return infoEnabled;
-	}
-
-	@Override
-	public boolean isTraceEnabled() {
-		return traceEnabled;
-	}
-
-	@Override
-	public boolean isWarnEnabled() {
-		return warnEnabled;
+		info(format, new Object[]{arg1, arg2});
 	}
 
 	@Override
 	public void trace(String msg) {
-		debug(msg);
+		if(isTraceEnabled()){
+			log.logMessage(getFacName(), msg, AbstractLogFacility.DEBUG_MESSAGE);
+		}
 	}
 
 	@Override
 	public void trace(String format, Object arg) {
-		debug(format, arg);		
+		trace(MessageFormatter.format(format, arg).getMessage());
 	}
 
 	@Override
-	public void trace(String format, Object... arg1) {
-		debug(format, arg1);		
+	public void trace(String format, Object... args) {
+		trace(MessageFormatter.arrayFormat(format, args).getMessage());
 	}
 
 	@Override
 	public void trace(String msg, Throwable arg1) {
-		debug(msg,arg1);
+		trace(msg +"\n"+ this.getThrownString(arg1));
 	}
 
 	@Override
 	public void trace(String format, Object arg1, Object arg2) {
-		debug(format, arg1, arg2);
+		trace(format, new Object[]{arg1, arg2});
 	}
 
 	@Override
 	public void warn(String msg) {
-		log.logMessage(getFacName(), msg, AbstractLogFacility.WARNING_MESSAGE);
+		if(isWarnEnabled()){
+			log.logMessage(getFacName(), msg, AbstractLogFacility.WARNING_MESSAGE);
+		}
 	}
 
 	@Override
 	public void warn(String format, Object arg) {
-		warn(MessageFormatter.format(format, arg).getMessage());		
+		warn(MessageFormatter.format(format, arg).getMessage());
 	}
 
 	@Override

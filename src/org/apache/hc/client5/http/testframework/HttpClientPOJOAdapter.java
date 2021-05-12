@@ -25,8 +25,13 @@
  *
  */
 package org.apache.hc.client5.http.testframework;
-
+/**
+ * History:
+ * OCT 13, 2017 (Lei Wang) Add a field of type Auth.
+ */
 import java.util.Map;
+
+import org.safs.auth.Auth;
 
 //TODO:  can this class be moved beside HttpClient? (in org.apache.hc.client5.http.sync)
 public abstract class HttpClientPOJOAdapter {
@@ -45,15 +50,31 @@ public abstract class HttpClientPOJOAdapter {
     public static final String STATUS = "status";
     public static final String TIMEOUT = "timeout";
     public static final String USERID = "userid";
-    
-    protected String proxyServerURL = null;
-    
+
+	protected Auth auth = null;
+
+	/**
+	 * @return the auth
+	 */
+	public Auth getAuth() {
+		return auth;
+	}
+
+	/**
+	 * @param auth the auth to set
+	 */
+	public void setAuth(Auth auth) {
+		this.auth = auth;
+	}
+
+	protected String proxyServerURL = null;
+
     public abstract Map<String, Object> execute(String defaultURI, Map<String, Object> request) throws Exception;
 
     public void setProxyServerURL(String proxyServerURL){
     	this.proxyServerURL = proxyServerURL;
     }
-    
+
     public Map<String, Object> modifyRequest(final Map<String, Object> request) {
         return request;
     };
@@ -71,7 +92,7 @@ public abstract class HttpClientPOJOAdapter {
             throw new Exception(reason);
         }
     }
-    
+
     /**
      * Name of the HTTP Client that this adapter uses.
      *

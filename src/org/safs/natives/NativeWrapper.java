@@ -1,18 +1,36 @@
-/** Copyright (C) SAS Institute, Inc. All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * History for developer:
  * Carl Nagle  Jun 03, 2009  Added GetProcessUIResourceCount<br>
  * Carl Nagle  Aug 07, 2009  Added GetProcessFileName <br>
  * Carl Nagle  SEP 14, 2009  Refactored with WIN classes. <br>
- * Carl Nagle  DEC 15, 2009  Added GetRegistryKeyValue and  DoesRegistryKeyExists routines.<br> 
+ * Carl Nagle  DEC 15, 2009  Added GetRegistryKeyValue and  DoesRegistryKeyExists routines.<br>
  * JunwuMa JUL 23, 2010  Updated to get GetRegistryKeyValue support Win7.<br>
  * Lei Wang  NOV 18, 2011  Add method getFileTime() and convertFileTimeToJavaTime()<br>
  * Carl Nagle  OCT 29, 2013  Added SetRegistryKeyValue and SetSystemEnvironmentVariable routines.<br>
- * DHARMESH4  FEB 19, 2014  Added runAsyncExec call.<br>  
- * DHARMESH4  AUG 17, 2015  Added setForgroundWindow call<br>  
+ * DHARMESH4  FEB 19, 2014  Added runAsyncExec call.<br>
+ * DHARMESH4  AUG 17, 2015  Added setForgroundWindow call<br>
  * Lei Wang  MAY 03, 2016  Modify GetProcessFileName(), _processLastError() and add isMemoryValid(): Upgrade the dependency JNA to 4.2.2.
+ * Lei Wang  JUN 29, 2018  Modified _winRegExeQueryResults() and _winKeyValueWRegEXE(): handle the "(Default)" value.
+ * Lei Wang  JUL 02, 2018  Added is64BitOS(): detect OS's architecture.
+ * Lei Wang  JUL 03, 2018  Added getRegistry32Prodcut()/getRegistry64Prodcut().
+ *                        Added deleteRegistry32Prodcut()/deleteRegistry64Prodcut().
  */
 package org.safs.natives;
 
@@ -28,6 +46,7 @@ import java.util.List;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
+import org.safs.Constants.RegistryConstants;
 import org.safs.IndependantLog;
 import org.safs.SAFSException;
 import org.safs.StringUtils;
@@ -39,6 +58,8 @@ import org.safs.natives.win32.Psapi;
 import org.safs.natives.win32.Shell32;
 import org.safs.natives.win32.User32;
 import org.safs.natives.win32.User32.WNDENUMPROC;
+import org.safs.tools.GenericProcessMonitor;
+import org.safs.tools.GenericProcessMonitor.WQLSearchCondition;
 import org.safs.tools.consoles.ProcessCapture;
 import org.safs.tools.stringutils.StringUtilities;
 
@@ -52,25 +73,25 @@ import com.sun.jna.Pointer;
  * This class is used to encapsulate platform independent calls to native operating systems through JNA,
  * or other native platform technologies.
  * <p>
- * JNA is the Java Native Access library supplied via <a href="http://jna.dev.java.net" target="_blank">JNA Home</a> 
+ * JNA is the Java Native Access library supplied via <a href="http://jna.dev.java.net" target="_blank">JNA Home</a>
  * <p>
- * JNA provides Java programs easy access to native shared libraries on multiple operating systems without 
- * writing anything but Java code JNI or native code is required. This functionality is comparable to 
+ * JNA provides Java programs easy access to native shared libraries on multiple operating systems without
+ * writing anything but Java code JNI or native code is required. This functionality is comparable to
  * Windows' Platform/Invoke and Python's ctypes. Access is dynamic at runtime without code generation.
  * <p>
- * SAFS is now delivered with the core JNA.ZIP(JAR).  Other JNA support libraries may be added as needed. 
+ * SAFS is now delivered with the core JNA.ZIP(JAR).  Other JNA support libraries may be added as needed.
  * @author Carl Nagle
  * @since 2009.02.03
  */
 public class NativeWrapper {
-	
+
 	/** -99 */
 	public static final int NO_RESULT = -99;
 	/** "Vector" */
 	public static final String VECTOR_KEY = "Vector";
 	/** "Result" */
 	public static final String RESULT_KEY = "Result";
-	
+
 	public static final String REG_SZ        = "REG_SZ";
 	public static final String REG_EXPAND_SZ = "REG_EXPAND_SZ";
 	public static final String REG_MULTI_SZ  = "REG_MULTI_SZ";
@@ -79,12 +100,12 @@ public class NativeWrapper {
 	public static final String REG_BINARY    = "REG_BINARY";
 	public static final String REG_NONE      = "REG_NONE";
 
-	
+
 	/**
 	 * True if the requested "registry key" already exists, false otherwise.<br>
 	 * This is currently only supported on Windows.
 	 * <p>
-	 * The Windows version uses Reg.EXE which is supplied with WindowsXP.  If this EXE is 
+	 * The Windows version uses Reg.EXE which is supplied with WindowsXP.  If this EXE is
 	 * not present on the Windows system then this function will return false.
 	 * <p>
 	 * @param key For Windows this is a String. Ex:"HKLM\Software\Rational Software\Rational Test\8\Options"
@@ -92,7 +113,7 @@ public class NativeWrapper {
 	 * @return true if the key and value exists, false if it does not.
 	 */
 	public static boolean DoesRegistryKeyExist(Object key, Object valuename){
-		
+
 		if(Platform.isWindows()){
 			String rawkey = (String) key;
 			String strkey = new String(rawkey);
@@ -124,15 +145,15 @@ public class NativeWrapper {
 	 *     </ul>
 	 * </ul>
 	 * <p>
-	 * @param proc Ex: "myProg" -- the caller must do any necessary quoting if the proc path contains spaces that 
+	 * @param proc Ex: "myProg" -- the caller must do any necessary quoting if the proc path contains spaces that
 	 * would interfere with finding and executing the process.
 	 * <p>
-	 * @param args Ex: "-u"  or String[]{"-u", "arg2", "arg3"}.  The caller must do any necessary quoting of individual 
+	 * @param args Ex: "-u"  or String[]{"-u", "arg2", "arg3"}.  The caller must do any necessary quoting of individual
 	 * arguments if spaces in the arguments will interfere with proper interpretation of the arguments by the process.
 	 * <p>
 	 * @return Hashtable containing process output "Vector" as a Vector and "Result" as an Integer.
-	 * The value of the Integer will be dependent on what the process returns, if anything. 
-	 * The Integer will contain NO_RESULT (-99) if the program was not successfully processed. 
+	 * The value of the Integer will be dependent on what the process returns, if anything.
+	 * The Integer will contain NO_RESULT (-99) if the program was not successfully processed.
 	 * The Vector may be empty if no data was received from the process.
 	 * @throws IOException if the process was not executed on the system.
 	 */
@@ -160,7 +181,7 @@ public class NativeWrapper {
 				IndependantLog.info("NativeWrapper handling InterruptedException on "+ process);
 			}
 			console.shutdown();//just in case
-			try{ 
+			try{
 				procresult = process.exitValue();
 				result.put(RESULT_KEY, new Integer(procresult));
 			}
@@ -172,15 +193,15 @@ public class NativeWrapper {
 		}catch(Exception x){
 			IndependantLog.info("NativerWrapper UNHANDLED "+ x.getClass().getSimpleName()+":"+ x.getMessage());
 		}
-		return result;		
+		return result;
 	}
-	
+
 	/**
 	 * Runs an asynch batch process and immediately returns.
 	 * @param workdir The fullpath to a valid directory to be used as the batch working directory.<br>
 	 * Ex: "C:\\STAF"
 	 * <p>
-	 * @param batchAndargs the program and arguments array.  The first item in the array is the batch program to execute. 
+	 * @param batchAndargs the program and arguments array.  The first item in the array is the batch program to execute.
 	 * <p>
 	 * @return true if successfully launched
 	 * @throws IOException if the process path was not valid or was not executed on the system.
@@ -189,7 +210,7 @@ public class NativeWrapper {
 	public static boolean runAsynchBatchProcess(String workdir, String... batchAndargs) throws IOException{
 		File f = new File(workdir);
 		if(!f.isDirectory())throw new IOException("runAsynchProcess workdir is not a valid directory.");
-		Console c; 
+		Console c;
 		try{c = Console.get().getClass().newInstance();}
 		catch(Exception x){
 			IOException io = new IOException("runAsynchProcess cannot instantiate Console class to run asynchronous Process2.");
@@ -201,19 +222,19 @@ public class NativeWrapper {
 		try{ Thread.sleep(500); }catch(Exception x){}
 		return true;
 	}
-	
+
 	/**
 	 * Runs an asynch exec and immediately returns.
 	 * @param Full path of the file.
 	 * <p>
 	 * @return true if successfully launched
-	 * @throws IOException if the process path was not valid or was not executed on the system. 
-	 * 
+	 * @throws IOException if the process path was not valid or was not executed on the system.
+	 *
 	 */
 	public static boolean runAsynchExec(String fullpath) throws IOException{
-		
+
 		File afile = new File(fullpath);
-		
+
 		try {
 			Desktop.getDesktop().open(afile);
 		} catch (Exception e) {
@@ -221,19 +242,19 @@ public class NativeWrapper {
 			io.initCause(e);
 			throw io;
 		}
-		
+
 		return true;
 	}
 	/**
 	 * Vector containing output if "registry key" exists, may be empty.<br>
-	 * This Windows version uses Reg.EXE which is supplied with WindowsXP.  If this EXE is 
+	 * This Windows version uses Reg.EXE which is supplied with WindowsXP.  If this EXE is
 	 * not present on the Windows system then this function will throw an IOException.
 	 * <p>
 	 * @param strkey Ex:"HKLM\Software\Rational Software\Rational Test\8\Options"
 	 * @param strval Ex:"SpyHeapSize"
 	 * @return Hashtable containing process output "Vector" as a Vector and "Result" as an Integer.
-	 * The Integer will normally be 0 if all went fine, or 1 if a reg.exe error occurred--like the 
-	 * key was not found or does not exist. The Integer will contain NO_RESULT if reg.exe was not 
+	 * The Integer will normally be 0 if all went fine, or 1 if a reg.exe error occurred--like the
+	 * key was not found or does not exist. The Integer will contain NO_RESULT if reg.exe was not
 	 * successfully processed. The Vector may be empty if no data was received from the process.
 	 * @throws IOException if reg.exe is not found on the system.
 	 */
@@ -247,12 +268,15 @@ public class NativeWrapper {
 			//quote a key containing spaces
 			if(strkey.contains(" ")) strkey = "\""+ strkey +"\"";
 			procstr += strkey;
-			if (strval != null){
+			if (strval != null && !RegistryConstants.VALUE_DEFAULT.equalsIgnoreCase(strval)){
 				if(strval.contains(" ")) strval = "\""+ strval +"\"";
-				procstr +=" /v "+ strval;	
+				procstr +=" /v "+ strval;
 			}
 			IndependantLog.info("NativeWrapper attempting to execute: "+ procstr);
 			Runtime runtime = Runtime.getRuntime();
+			//With 64 bit JRE, "Runtime.getRuntime().exec()" works as expected
+			//TODO With 32 bit JRE, "Runtime.getRuntime().exec()" will try to get the value of 32 bit product.
+			//     if you want "HKLM\Software\Rational Software\Rational Test\8\Options", it will give "HKLM\Software\Wow6432Node\Rational Software\Rational Test\8\Options"
 			Process process = runtime.exec(procstr);
 			ProcessCapture console = new ProcessCapture(process);
 			Thread athread = new Thread(console);
@@ -262,7 +286,7 @@ public class NativeWrapper {
 				IndependantLog.info("NativeWrapper handling InterruptedException on "+ process);
 			}
 			console.shutdown();//just in case
-			try{ 
+			try{
 				procresult = process.exitValue();
 				result.put(RESULT_KEY, new Integer(procresult));
 			}
@@ -274,24 +298,24 @@ public class NativeWrapper {
 		}catch(Exception x){
 			IndependantLog.info("NativerWrapper UNHANDLED "+ x.getClass().getSimpleName()+":"+ x.getMessage());
 		}
-		return result;		
+		return result;
 	}
-	
+
 	/**
 	 * Vector containing output of the SETX operation, may be empty.<br>
-	 * This Windows version uses SETX which is supplied with Vista.  If this EXE is 
+	 * This Windows version uses SETX which is supplied with Vista.  If this EXE is
 	 * not present on the Windows system then this function will throw an IOException.
 	 * <p>
-	 * Note: the newly set Environment Variable value is NOT available to the currently 
-	 * running JVM through System.getEnv().  This is because the JVM does not refresh its 
-	 * Environment variable space after launch.  Use GetSystemEnvironmentVariable to get 
+	 * Note: the newly set Environment Variable value is NOT available to the currently
+	 * running JVM through System.getEnv().  This is because the JVM does not refresh its
+	 * Environment variable space after launch.  Use GetSystemEnvironmentVariable to get
 	 * the latest "refreshed" value of any System Environment Variable.
 	 * <p>
 	 * @param strkey Name of Environment Variable to Set
-	 * @param strval Value to set. 
+	 * @param strval Value to set.
 	 * @return Hashtable containing process output "Vector" as a Vector and "Result" as an Integer.
-	 * The Integer will normally be 0 if all went fine, or 1 if a setx.exe error occurred. 
-	 * The Integer will contain NO_RESULT if setx.exe was not successfully processed. 
+	 * The Integer will normally be 0 if all went fine, or 1 if a setx.exe error occurred.
+	 * The Integer will contain NO_RESULT if setx.exe was not successfully processed.
 	 * The Vector may be empty if no data was received from the process.
 	 * @throws IOException if setx.exe is not found on the system.
 	 */
@@ -318,8 +342,8 @@ public class NativeWrapper {
 			}else{
 				strval = "\"\"";
 			}
-			
-			procstr +=" "+ strval;	
+
+			procstr +=" "+ strval;
 			IndependantLog.info("NativeWrapper attempting to execute: "+ procstr);
 			Runtime runtime = Runtime.getRuntime();
 			Process process = runtime.exec(procstr);
@@ -331,7 +355,7 @@ public class NativeWrapper {
 				IndependantLog.info("NativeWrapper handling InterruptedException on "+ process);
 			}
 			console.shutdown();//just in case
-			try{ 
+			try{
 				procresult = process.exitValue();
 				result.put(RESULT_KEY, new Integer(procresult));
 			}
@@ -343,23 +367,23 @@ public class NativeWrapper {
 		}catch(Exception x){
 			IndependantLog.info("NativerWrapper UNHANDLED "+ x.getClass().getSimpleName()+":"+ x.getMessage());
 		}
-		return result;		
+		return result;
 	}
-	
+
 
 	/**
 	 * Vector containing output of the REG ADD operation, may be empty.<br>
-	 * This Windows version uses Reg.EXE which is supplied with WindowsXP.  If this EXE is 
+	 * This Windows version uses Reg.EXE which is supplied with WindowsXP.  If this EXE is
 	 * not present on the Windows system then this function will throw an IOException.
 	 * <p>
 	 * @param strkey Ex:"HKLM\Software\Rational Software\Rational Test\8\Options"
 	 * @param strname (Optional) Ex: The Name of a value to put under the key.
 	 * @param strtype (Optional) Ex: REG_SZ or REG_MULTI_SZ, etc. (REG_SZ is the default)
-	 * @param strval[] (Optional) One or more values to place in the strname value. Multiple 
-	 * values should only be used for REG_MULTI_SZ types. 
+	 * @param strval[] (Optional) One or more values to place in the strname value. Multiple
+	 * values should only be used for REG_MULTI_SZ types.
 	 * @return Hashtable containing process output "Vector" as a Vector and "Result" as an Integer.
-	 * The Integer will normally be 0 if all went fine, or 1 if a reg.exe error occurred. 
-	 * The Integer will contain NO_RESULT if reg.exe was not successfully processed. 
+	 * The Integer will normally be 0 if all went fine, or 1 if a reg.exe error occurred.
+	 * The Integer will contain NO_RESULT if reg.exe was not successfully processed.
 	 * The Vector may be empty if no data was received from the process.
 	 * @throws IOException if reg.exe is not found on the system.
 	 */
@@ -384,7 +408,7 @@ public class NativeWrapper {
 					procstr +=" /ve";
 				}
 			}
-			if (strtype != null && 
+			if (strtype != null &&
 			    (
 			     strtype.equals(REG_SZ) ||
 			     strtype.equals(REG_MULTI_SZ) ||
@@ -396,7 +420,7 @@ public class NativeWrapper {
 			    )
 			   ){
 				procstr +=" /t "+ strtype;
-				if(strtype.equals(REG_MULTI_SZ)) procstr +=" /s "+ sep;				
+				if(strtype.equals(REG_MULTI_SZ)) procstr +=" /s "+ sep;
 			}
 			if (strval != null && strval.length > 0){
 				IndependantLog.info(dbinfo +"attempting to process "+ strval.length +" strval parameter(s).");
@@ -413,7 +437,7 @@ public class NativeWrapper {
 					if(i<strval.length -1) vals += sep;
 				}
 				if (vals.length()>0){
-					procstr += " /d "+ vals;					
+					procstr += " /d "+ vals;
 				}
 			}else{
 				IndependantLog.info(dbinfo +"optional strval parameter(s) are NOT available.");
@@ -436,7 +460,7 @@ public class NativeWrapper {
 			}else{
 				IndependantLog.info("WARNING: "+ dbinfo+"process console was NOT shutdown due to long-running process.");
 			}
-			try{ 
+			try{
 				procresult = process.exitValue();
 				result.put(RESULT_KEY, new Integer(procresult));
 			}
@@ -451,19 +475,19 @@ public class NativeWrapper {
 		}catch(Exception x){
 			IndependantLog.info(dbinfo+"UNHANDLED "+ x.getClass().getSimpleName()+":"+ x.getMessage());
 		}
-		return result;		
+		return result;
 	}
-	
+
 	/**
 	 * Vector containing output of the REG DELETE operation, may be empty.<br>
-	 * This Windows version uses Reg.EXE which is supplied with WindowsXP.  If this EXE is 
+	 * This Windows version uses Reg.EXE which is supplied with WindowsXP.  If this EXE is
 	 * not present on the Windows system then this function will throw an IOException.
 	 * <p>
 	 * @param strkey Ex:"HKLM\System\CurrentControlSet\Control\Session Manager\Environment"
 	 * @param strname Ex: "SAFSDIR".
 	 * @return Hashtable containing process output "Vector" as a Vector and "Result" as an Integer.
-	 * The Integer will normally be 0 if all went fine, or 1 if a reg.exe error occurred. 
-	 * The Integer will contain NO_RESULT if reg.exe was not successfully processed. 
+	 * The Integer will normally be 0 if all went fine, or 1 if a reg.exe error occurred.
+	 * The Integer will contain NO_RESULT if reg.exe was not successfully processed.
 	 * The Vector may be empty if no data was received from the process.
 	 * @throws IOException if reg.exe is not found on the system.
 	 */
@@ -482,8 +506,13 @@ public class NativeWrapper {
 			//quote a key containing spaces
 			if(strkey.contains(" ")) strkey = "\""+ strkey +"\"";
 			procstr += strkey;
-			if(strname.contains(" ")) strname = "\""+ strname +"\"";
-			procstr +=" /v "+ strname +" /f";	
+			if(RegistryConstants.VALUE_DEFAULT.equals(strname)){
+				procstr +=" /ve ";
+			}else{
+				if(strname.contains(" ")) strname = "\""+ strname +"\"";
+				procstr +=" /v "+ strname;
+			}
+			procstr += " /f";//force delete
 			IndependantLog.info("NativeWrapper attempting to execute: "+ procstr);
 			Runtime runtime = Runtime.getRuntime();
 			Process process = runtime.exec(procstr);
@@ -495,7 +524,7 @@ public class NativeWrapper {
 				IndependantLog.info("NativeWrapper handling InterruptedException on "+ process);
 			}
 			console.shutdown();//just in case
-			try{ 
+			try{
 				procresult = process.exitValue();
 				result.put(RESULT_KEY, new Integer(procresult));
 			}
@@ -507,12 +536,12 @@ public class NativeWrapper {
 		}catch(Exception x){
 			IndependantLog.info("NativerWrapper UNHANDLED "+ x.getClass().getSimpleName()+":"+ x.getMessage());
 		}
-		return result;		
+		return result;
 	}
-	
+
 	/**
 	 * True if the requested "registry key" already exists, false otherwise.<br>
-	 * This Windows version uses Reg.EXE which is supplied with WindowsXP.  If this EXE is 
+	 * This Windows version uses Reg.EXE which is supplied with WindowsXP.  If this EXE is
 	 * not present on the Windows system then this function will throw an IOException.
 	 * <p>
 	 * @param strkey Ex:"HKLM\Software\Rational Software\Rational Test\8\Options"
@@ -550,22 +579,22 @@ public class NativeWrapper {
 		}catch(Exception x){
 			IndependantLog.info("NativerWrapper UNHANDLED "+ x.getClass().getSimpleName()+":"+ x.getMessage());
 		}
-		return false;		
+		return false;
 	}
-	
+
 	/**
 	 * Retrieves the value of the requested "registry key".<br>
-	 * This Windows version uses Reg.EXE which is supplied with WindowsXP.  If this EXE is 
+	 * This Windows version uses Reg.EXE which is supplied with WindowsXP.  If this EXE is
 	 * not present on the Windows system then this function will throw an IOException.
 	 * <p>
 	 * @param strkey Ex:"HKLM\Software\Rational Software\Rational Test\8\Options"
-	 * 
-	 * @param strval Ex:"SpyHeapSize". A null means get ALL values under the key.  These would 
-	 * be returned as bracketed key=val pairs one right after another.  If strval is not null, 
+	 *
+	 * @param strval Ex:"SpyHeapSize". A null means get ALL values under the key.  These would
+	 * be returned as bracketed key=val pairs one right after another.  If strval is not null,
 	 * then we will return only the value for the one (first) key in the reg.exe response.
-	 * 
-	 * @return String value of the key, or null.  An empty string may be possible if no 
-	 * values are retrieved for a valid key.  If strval is null, then all the values will 
+	 *
+	 * @return String value of the key, or null.  An empty string may be possible if no
+	 * values are retrieved for a valid key.  If strval is null, then all the values will
 	 * be returned bracketed in the format: [key=val][key2=val2][key3=val3] etc...
 	 * @throws IOException if reg.exe is not found on the system.
 	 */
@@ -601,7 +630,7 @@ public class NativeWrapper {
 				String returnval = "";
 				//values seem to start on line 4, but don't count on it
 				//(strval==null) a key with no values has no data on or after line 4
-				//(strval==null) a key with many stored values has a separate line 
+				//(strval==null) a key with many stored values has a separate line
 				//               for each key value on and after line 4
 				//(strval valid) a single line at line 4 with the value
 				//values are stored as TAB delimited fields: keyname, type, value
@@ -622,9 +651,16 @@ public class NativeWrapper {
 								if(fields.length > 1){
 									key = fields[0].trim();
 									if(fields.length==2) val = fields[1].trim();
-									if(strval != null) return val;
+									if(strval != null){
+										//if we are looking for the "(Default)" value, but the current key is not "(Default)", then we continue to search "(Default)"
+										if(RegistryConstants.VALUE_DEFAULT.equalsIgnoreCase(strval) && !RegistryConstants.VALUE_DEFAULT.equalsIgnoreCase(key)){
+											continue;
+										}
+										//if(!strval.equalsIgnoreCase(key)) continue;
+										return val;
+									}
 									returnval +="["+key+"="+val+"]";
-								} 
+								}
 							}catch(Exception x){/* ignore */}
 						}
 					}
@@ -638,20 +674,20 @@ public class NativeWrapper {
 		}catch(Exception x){
 			IndependantLog.info("NativerWrapper UNHANDLED "+ x.getClass().getSimpleName()+":"+ x.getMessage());
 		}
-		return null;		
+		return null;
 	}
 
-	
+
 	/**
 	 * Add/Set the value of the specified "registry key".<br>
-	 * This Windows version uses Reg.EXE which is typically supplied by Windows since WindowsXP.  
+	 * This Windows version uses Reg.EXE which is typically supplied by Windows since WindowsXP.
 	 * If this Reg.EXE is not present on the System PATH then this function will throw an IOException.
 	 * <p>
 	 * @param strkey Ex:"HKLM\Software\Rational Software\Rational Test\8\Options"
 	 * @param strname (Optional) Ex: The Name of a value to put under the key.
 	 * @param strtype (Optional) Ex: REG_SZ or REG_MULTI_SZ, etc. (REG_SZ is the default)
-	 * @param strval[] (Optional) One or more values to place in the strname value. Multiple 
-	 * values should only be used for REG_MULTI_SZ types. 
+	 * @param strval[] (Optional) One or more values to place in the strname value. Multiple
+	 * values should only be used for REG_MULTI_SZ types.
 	 * @return true if the operation completed successfully.  false otherwise.
 	 * @throws IOException if reg.exe is not found on the system.
 	 */
@@ -704,13 +740,13 @@ public class NativeWrapper {
 			IndependantLog.info(dbinfo+"UNHANDLED "+ x.getClass().getSimpleName()+":"+ x.getMessage());
 		}
 		IndependantLog.info(dbinfo+"REG.EXE does not appear to be successful.");
-		return false;		
+		return false;
 	}
 
-	
+
 	/**
 	 * Add/Set the value of the specified System Environment Variable.<br>
-	 * This Windows version uses SETX.EXE which is typically supplied by Windows since Vista.  
+	 * This Windows version uses SETX.EXE which is typically supplied by Windows since Vista.
 	 * If this SETX.EXE is not present on the System PATH then this function will throw an IOException.
 	 * <p>
 	 * @param strkey Ex: "MY_VAR"
@@ -766,25 +802,25 @@ public class NativeWrapper {
 			IndependantLog.info("NativerWrapper UNHANDLED "+ x.getClass().getSimpleName()+":"+ x.getMessage());
 		}
 		IndependantLog.info("NativerWrapper SETX.EXE does not appear to be successful.");
-		return false;		
+		return false;
 	}
-	
+
 	/**
-	 * Set/Create a registry key, and/or key value.  
+	 * Set/Create a registry key, and/or key value.
 	 * This is currently only supported on Windows.
 	 * <p>
-	 * The Windows version uses Reg.EXE which is supplied with WindowsXP.  If this EXE is 
+	 * The Windows version uses Reg.EXE which is supplied with WindowsXP.  If this EXE is
 	 * not present on the Windows system then this function will always return false.
 	 * <p>
 	 * @param strkey Ex:"HKLM\Software\Rational Software\Rational Test\8\Options"
 	 * @param strname (Optional) Ex: The Name of a value to put under the key.
 	 * @param strtype (Optional) Ex: REG_SZ or REG_MULTI_SZ, etc. (REG_SZ is the default)
-	 * @param strval[] (Optional) One or more values to place in the strname value. Multiple 
-	 * values should only be used for REG_MULTI_SZ types.  
+	 * @param strval[] (Optional) One or more values to place in the strname value. Multiple
+	 * values should only be used for REG_MULTI_SZ types.
 	 * @return true if the operation completed successfully.  false otherwise.
 	 */
 	public static boolean SetRegistryKeyValue(Object key, Object valuename, String strtype, Object... vals){
-		
+
 		if(Platform.isWindows()){
 			if(key == null) {
 				IndependantLog.info("NativeWrapper.SetRegistryKeyValue MUST not be null.  Exiting without success.");
@@ -813,12 +849,12 @@ public class NativeWrapper {
 		IndependantLog.info("NativerWrapper.SetRegistryKeyValue is not supported on this platform.");
 		return false;
 	}
-	
+
 	/**
-	 * Remove a registry key, and/or key value.  
+	 * Remove a registry key, and/or key value.
 	 * This is currently only supported on Windows.
 	 * <p>
-	 * The Windows version uses Reg.EXE which is supplied with WindowsXP.  If this EXE is 
+	 * The Windows version uses Reg.EXE which is supplied with WindowsXP.  If this EXE is
 	 * not present on the Windows system then this function will always return false.
 	 * <p>
 	 * @param strkey Ex:"HKLM\Software\Rational Software\Rational Test\8\Options"
@@ -826,7 +862,7 @@ public class NativeWrapper {
 	 * @return true if the operation completed successfully.  false otherwise.
 	 */
 	public static boolean RemoveRegistryKeyValue(Object key, Object valuename){
-		
+
 		if(Platform.isWindows()){
 			if(key == null || valuename == null) {
 				IndependantLog.info("NativeWrapper.RemoveRegistryKeyValue MUST not be null.  Exiting without success.");
@@ -838,7 +874,7 @@ public class NativeWrapper {
 			if (valuename != null) rawname = (String) valuename;
 			String strname = rawname == null ? null:new String(rawname);
 			boolean tresult = false;
-			try{ 
+			try{
 				Hashtable rc = _winRegExeDeleteResults(strkey, strname);
 				int procresult = ((Integer)rc.get(RESULT_KEY)).intValue();
 				Vector data = (Vector) rc.get(VECTOR_KEY);
@@ -870,26 +906,26 @@ public class NativeWrapper {
 		IndependantLog.info("NativerWrapper.RemoveRegistryKeyValue is not supported on this platform.");
 		return false;
 	}
-	
+
 	/**
-	 * Set/Create a System Environment Variable.  
+	 * Set/Create a System Environment Variable.
 	 * This is currently only supported on Windows.
 	 * <p>
-	 * The Windows version uses SetX.EXE Vista and later.  If this EXE is 
-	 * not present on the Windows system then will try to set the value through 
+	 * The Windows version uses SetX.EXE Vista and later.  If this EXE is
+	 * not present on the Windows system then will try to set the value through
 	 * the Registry.
 	 * <p>
-	 * Because the system combines LOCAL variables and USER variables on any get, when we 
-	 * go to SET we do NOT want to have USER variable values mixed in.  They will be duplicated 
-	 * if they are mixed in.  So, on any SET, we must try to make sure we remove USER variables 
+	 * Because the system combines LOCAL variables and USER variables on any get, when we
+	 * go to SET we do NOT want to have USER variable values mixed in.  They will be duplicated
+	 * if they are mixed in.  So, on any SET, we must try to make sure we remove USER variables
 	 * from the value we are setting.
 	 * <p>
 	 * @param strkey Ex:"MY_VAR_NAME"
-	 * @param strval Ex:"My variable value." 
+	 * @param strval Ex:"My variable value."
 	 * @return true if the operation completed successfully.  false otherwise.
 	 */
 	public static boolean SetSystemEnvironmentVariable(Object key, Object value){
-		
+
 		if(Platform.isWindows()){
 			if(key == null) {
 				IndependantLog.info("NativerWrapper.SetSystemEnvironmentVariable VarName MUST not be null.  Exiting without success.");
@@ -903,43 +939,43 @@ public class NativeWrapper {
 				rawvalue = (String) value;
 			}
 			strvalue = rawvalue == null ? null:new String(rawvalue);
-			try{ 
+			try{
 				return _winSetEnvironmentEXE(strkey, strvalue);}
 			catch(IOException x){
 				IndependantLog.info("NativerWrapper.SetSystemEnvironmentVariable trying registry...");
-				return SetRegistryKeyValue("HKLM\\System\\CurrentControlSet\\Control\\Session Manager\\Environment", strkey, null, strvalue);
+				return SetRegistryKeyValue(RegistryConstants.KEY_ENVIRONMENT, strkey, null, strvalue);
 			}
 		}
 		IndependantLog.info("NativerWrapper.SetSystemEnvironmentVariable is not supported on this platform.");
 		return false;
 	}
-	
+
 	/**
-	 * Delete/Remove a System Environment Variable.  
+	 * Delete/Remove a System Environment Variable.
 	 * This is currently only supported on Windows.
 	 * <p>
-	 * The Windows version uses REG.EXE Vista and later.  If this EXE is 
+	 * The Windows version uses REG.EXE Vista and later.  If this EXE is
 	 * not present on the Windows system then we will exit with failure.
 	 * <p>
 	 * @param strkey Ex:"SAFSDIR"
 	 * @return true if the operation completed successfully.  false otherwise.
 	 */
 	public static boolean RemoveSystemEnvironmentVariable(Object key){
-		
+
 		if(Platform.isWindows()){
 			if(key == null) {
 				IndependantLog.info("NativerWrapper.RemoveSystemEnvironmentVariable VarName MUST not be null.  Exiting without success.");
 				return false;
 			}
 			String rawkey = (String) key;
-			try{ 
-				Hashtable result = _winRegExeDeleteResults("HKLM\\System\\CurrentControlSet\\Control\\Session Manager\\Environment", rawkey);
+			try{
+				Hashtable result = _winRegExeDeleteResults(RegistryConstants.KEY_ENVIRONMENT, rawkey);
 				int procresult = ((Integer)result.get(RESULT_KEY)).intValue();
 				Vector data = (Vector) result.get(VECTOR_KEY);
 				//now check the data, if any
 				int lines = data.size();
 				IndependantLog.info("NativeWrapper found "+ lines +" lines of process output...");
-				if (lines == 0) return false;//no lines means no success?	
+				if (lines == 0) return false;//no lines means no success?
 				String line = null;
 				// send any error info to the debug log, if possible
 				for(int i=0;i<lines;i++){
@@ -957,23 +993,23 @@ public class NativeWrapper {
 		IndependantLog.info("NativerWrapper.RemoveSystemEnvironmentVariable is not supported on this platform.");
 		return false;
 	}
-	
+
 	/**
-	 * Get a System Environment Variable.  
+	 * Get a System Environment Variable.
 	 * This is currently only supported on Windows.
 	 * <p>
 	 * The Windows version uses ECHO.
 	 * <p>
-	 * Note: variables set or changed after JVM start are NOT available to the currently 
-	 * running JVM through System.getEnv().  This is because the JVM does not refresh its 
-	 * Environment variable space after launch.  Use GetSystemEnvironmentVariable to get 
+	 * Note: variables set or changed after JVM start are NOT available to the currently
+	 * running JVM through System.getEnv().  This is because the JVM does not refresh its
+	 * Environment variable space after launch.  Use GetSystemEnvironmentVariable to get
 	 * the latest "refreshed" value of any System Environment Variable.
 	 * <p>
 	 * @param strkey Ex:"MY_VAR_NAME"
 	 * @return String value of the variable, or null if it does not exist.
 	 */
 	public static String GetSystemEnvironmentVariable(Object key){
-		
+
 		if(Platform.isWindows()){
 			if(key == null) {
 				IndependantLog.info("NativerWrapper.GetSystemEnvironmentVariable VarName MUST not be null.  Exiting without success.");
@@ -981,26 +1017,122 @@ public class NativeWrapper {
 			}
 			String rawkey = (String) key;
 			String strkey = new String(rawkey);
-			return (String)GetRegistryKeyValue("HKLM\\System\\CurrentControlSet\\Control\\Session Manager\\Environment", strkey);
+			return (String)GetRegistryKeyValue(RegistryConstants.KEY_ENVIRONMENT, strkey);
 		}
 		IndependantLog.info("NativerWrapper.GetSystemEnvironmentVariable is not supported on this platform.");
 		return null;
 	}
+
+	/**
+	 * Use Windows 'wmic' to get the browser's version. Below is an example command.<br>
+	 * wmic datafile where name='C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe' get Version /value<br>
+	 *
+	 * @param executable String, the browser's executable path.
+	 * @return String, the version number
+	 */
+	public static String wmicGetVersion(String executable){
+		String debugmsg = StringUtils.debugmsg(false);
+		String version = null;
+		Process process = null;
+		ProcessCapture console = null;
+		int index = -1;
+		String token = "Version=";
+		try {
+			IndependantLog.debug(debugmsg+"for executable '"+executable+"' ...");
+			WQLSearchCondition wqlCondition = new WQLSearchCondition(GenericProcessMonitor.wqlCondition("name", executable, false, true));
+			String wmicCommand = "wmic datafile where "+wqlCondition+" get Version /value";
+			IndependantLog.debug(debugmsg+"Runtime exec command: "+wmicCommand);
+			process = Runtime.getRuntime().exec(wmicCommand);
+			console = new ProcessCapture(process, null, true, false);
+			try{ console.thread.join();}catch(InterruptedException x){;}
+			@SuppressWarnings("unchecked")
+			Vector<String> data = console.getData();
+			if(data!=null && data.size()>0){
+				//OUT: Version=85.0.4183.102
+				for(String message:data){
+					index = message.indexOf(token);
+					if(index>-1){
+						version = message.substring(index+token.length());
+						if(version!=null) version = version.trim();
+						break;
+					}
+				}
+			}
+
+		}catch(Exception e){
+			IndependantLog.warn(debugmsg+StringUtils.debugmsg(e));
+		}finally{
+			if(console!=null) console.shutdown();
+		}
+		return version;
+	}
+
+	/**
+	 * @param executable String the browser executable's path, such as "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+	 * @return String, the browser-driver's version
+	 */
+	public static String getDriverVersion(String executable){
+		String debugmsg = StringUtils.debugmsg(false);
+		String version = null;
+		String tmpmsg = null;
+		Process process = null;
+		ProcessCapture console = null;
+		int index = -1;
+		String[] tokens = {"ChromeDriver", "geckodriver", "MSEdgeDriver", "IEDriverServer.exe"};
+		try {
+			IndependantLog.debug(debugmsg+"for executable '"+executable+"' ...");
+			String cmd = executable+" --version";
+			IndependantLog.debug(debugmsg+"Runtime exec command: "+cmd);
+			process = Runtime.getRuntime().exec(cmd);
+			console = new ProcessCapture(process, null, true, false);
+			try{ console.thread.join();}catch(InterruptedException x){;}
+			@SuppressWarnings("unchecked")
+			Vector<String> data = console.getData();
+			if(data!=null && data.size()>0){
+				//OUT: ChromeDriver 78.0.3904.70 (edb9c9f3de0247fd912a77b7f6cae7447f6d3ad5-refs/branch-heads/3904@{#800})
+				//OUT: geckodriver 0.26.0 (e9783a644016 2019-10-10 13:38 +0000)
+				//OUT: MSEdgeDriver 83.0.478.45 (fa71536bbfc4d8c41db9e9b61b8b5f71c6c64f0c)
+				//OUT: IEDriverServer.exe 3.14.0.0 (32-bit)
+				for(String message:data){
+					for(String token:tokens){
+						index = message.indexOf(token);
+						if(index>-1){
+							tmpmsg = message.substring(index+token.length());
+							tmpmsg = tmpmsg.trim();
+							version = tmpmsg.split(" ")[0];
+							if(version!=null) version = version.trim();
+							break;
+						}
+					}
+					//"C:\SeleniumPlus\extra\geckodriver.exe --version" may give out many lines of output,
+					//the first line containing "geckodriver", the version is in that line.
+					if(version!=null) break;
+				}
+			}
+
+		}catch(Exception e){
+			IndependantLog.warn(debugmsg+StringUtils.debugmsg(e));
+		}finally{
+			if(console!=null) console.shutdown();
+		}
+		return version;
+	}
+
 	/**
 	 * Return the value of the specified key.  Null if the value does not exist.<br>
 	 * This is currently only supported on Windows.
 	 * <p>
-	 * The Windows version uses Reg.EXE which is supplied with WindowsXP.  If this EXE is 
+	 * The Windows version uses Reg.EXE which is supplied with WindowsXP.  If this EXE is
 	 * not present on the Windows system then this function will always return false.
 	 * <p>
 	 * @param key For Windows this is a String. Ex:"HKLM\Software\Rational Software\Rational Test\8\Options"
 	 * @param valuename For Windows this is a String. Ex:"SpyHeapSize"
-	 * @return Windows returns a String or null. Ex:"0x00200000".  An empty string may be possible if no 
-	 * values are retrieved for a valid key.  If valuename is null, then all the key values will 
-	 * be returned bracketed in the format: [key=val][key2=val2][key3=val3] etc... 
+	 * @return Windows returns a String or null. Ex:"0x00200000".  An empty string may be possible if no
+	 * values are retrieved for a valid key.  If valuename is null, then all the key values will
+	 * be returned bracketed in the format: [key=val][key2=val2][key3=val3] etc...
 	 */
 	public static Object GetRegistryKeyValue(Object key, Object valuename){
-		
+
 		if(Platform.isWindows()){
 				String rawkey = (String) key;
 				String strkey = new String(rawkey);
@@ -1017,11 +1149,230 @@ public class NativeWrapper {
 		IndependantLog.info("NativerWrapper.GetRegistryKeyValue is not supported on this platform.");
 		return null;
 	}
-	
+
+	/**
+	 * To get the value from registry for 32 bit product.<br>
+	 * For 32 bits system, we concatenate keyPrefix and keySuffix to form the registry path.<br>
+	 * For 64 bits system, we concatenate keyPrefix, {@link RegistryConstants#KEY_FIELD_WOW6432} and keySuffix to form the registry path.<br>
+	 *
+	 * @param keyPrefix String, the prefix of the registry path, such as 'HKLM\Software\'.
+	 * @param keySuffix String, the suffix of the registry path, such as 'GPL Ghostscript\9.23'
+	 * @param value String, the registry value, it can be "(Default)".
+	 * @return String the value got from registry
+	 */
+	public static String getRegistry32Prodcut(String keyPrefix, String keySuffix, String value){
+		String result = null;
+		String key = null;
+
+		if(is64BitOS()){
+			key = concatenateRegistryPath(keyPrefix, RegistryConstants.KEY_FIELD_WOW6432);
+			key = concatenateRegistryPath(key, keySuffix);
+			IndependantLog.debug("On 64 bit OS, evaluating registry key '"+key+"' value '"+value+"' for 32 bit product ...");
+			try{ result = (String) GetRegistryKeyValue(key, value);}catch(Exception e){}
+
+		}else{
+			key = concatenateRegistryPath(keyPrefix, keySuffix);
+			IndependantLog.debug("On 32 bit OS, evaluating registry key '"+key+"' value '"+value+"' for 32 bit product ...");
+			try{ result = (String) GetRegistryKeyValue(key, value);}catch(Exception e){}
+		}
+
+		return result;
+	}
+
+	/**
+	 * To get the value from registry for 64 bit product.<br>
+	 * For 64 bits system, we concatenate keyPrefix and keySuffix to form the registry path.<br>
+	 * For 32 bits system, it is not possible to have 64 bit product, return null.<br>
+	 *
+	 * @param keyPrefix String, the prefix of the registry path, such as 'HKLM\Software\'.
+	 * @param keySuffix String, the suffix of the registry path, such as 'GPL Ghostscript\9.23'
+	 * @param value String, the registry value, it can be "(Default)".
+	 * @return String the value got from registry
+	 */
+	public static String getRegistry64Prodcut(String keyPrefix, String keySuffix, String value){
+		String result = null;
+		String key = null;
+
+		if(is64BitOS()){
+			key = concatenateRegistryPath(keyPrefix, keySuffix);
+			IndependantLog.debug("On 64 bit OS, evaluating registry key '"+key+"' value '"+value+"' for 64 bit product ...");
+
+			if(!Platform.is64Bit()){//the JRE is 32 bit
+				//if the JRE is 32 bit, Runtime.getRuntime() "reg.exe query" will automatically get the 32 bit registry value.
+				//for example "reg.exe query HKLM\Software\Artifex\GPL Ghostscript\9.23" can be got correctly from command-line
+				//but Runtime.getRuntime().exec("reg.exe query HKLM\Software\Artifex\GPL Ghostscript\9.23") will fail.
+				//Actually java tries to find 32 bit registry key "HKLM\Software\Wow6432Node\Artifex\GPL Ghostscript\9.23" which doesn't exist.
+				//But we really want the 64 bit registry value "HKLM\Software\Artifex\GPL Ghostscript\9.23".
+
+				//We are going to use WinRegistry to get it from 64 bit registry
+				try {
+					if(RegistryConstants.VALUE_DEFAULT.equalsIgnoreCase(value)){
+						value = "";
+					}
+					if(key.startsWith(RegistryConstants.HKLM)){
+						key = key.substring(RegistryConstants.HKLM.length());
+						result = WinRegistry.readString(WinRegistry.HKEY_LOCAL_MACHINE, key, value, WinRegistry.KEY_WOW64_64KEY);
+					}else if(key.startsWith(RegistryConstants.HKCU)){
+						key = key.substring(RegistryConstants.HKCU.length());
+						result = WinRegistry.readString(WinRegistry.HKEY_CURRENT_USER, key, value, WinRegistry.KEY_WOW64_64KEY);
+					}
+				} catch (Exception e) {
+					IndependantLog.error("Met "+e.toString());
+				}
+
+			}else{
+				try{ result = (String) GetRegistryKeyValue(key, value);}catch(Exception e){}
+			}
+		}else{
+			IndependantLog.error("The OS is 32 bit architecture, no 64 bit product can be installed on it!");
+		}
+
+		return result;
+	}
+
+	/**
+	 * To delete the value from registry for 32 bit product.<br>
+	 * For 32 bits system, we concatenate keyPrefix and keySuffix to form the registry path.<br>
+	 * For 64 bits system, we concatenate keyPrefix, {@link RegistryConstants#KEY_FIELD_WOW6432} and keySuffix to form the registry path.<br>
+	 *
+	 * @param keyPrefix String, the prefix of the registry path, such as 'HKLM\Software\'.
+	 * @param keySuffix String, the suffix of the registry path, such as 'GPL Ghostscript\9.23'
+	 * @param value String, the registry value, it can be "(Default)".
+	 * @return boolean true if the registry value has been successfully deleted.
+	 */
+	public static boolean deleteRegistry32Prodcut(String keyPrefix, String keySuffix, String value){
+		String key = null;
+
+		if(is64BitOS()){
+			key = concatenateRegistryPath(keyPrefix, RegistryConstants.KEY_FIELD_WOW6432);
+			key = concatenateRegistryPath(key, keySuffix);
+			IndependantLog.debug("Evaluating 32 bit product on 64 bit OS, search registry key '"+key+"' ...");
+			return RemoveRegistryKeyValue(key, value);
+
+		}else{
+			key = concatenateRegistryPath(keyPrefix, keySuffix);
+			IndependantLog.debug("Evaluating product on 32 bit OS, search registry key '"+key+"' ...");
+			return RemoveRegistryKeyValue(key, value);
+		}
+
+	}
+
+	/**
+	 * To delete the value from registry for 64 bit product.<br>
+	 * For 64 bits system, we concatenate keyPrefix and keySuffix to form the registry path.<br>
+	 * For 32 bits system, it is not possible to have 64 bit product, return false.<br>
+	 *
+	 * @param keyPrefix String, the prefix of the registry path, such as 'HKLM\Software\'.
+	 * @param keySuffix String, the suffix of the registry path, such as 'GPL Ghostscript\9.23'
+	 * @param value String, the registry value, it can be "(Default)".
+	 * @return boolean true if the registry value has been successfully deleted.
+	 */
+	public static boolean deleteRegistry64Prodcut(String keyPrefix, String keySuffix, String value){
+		String key = null;
+
+		if(is64BitOS()){
+			key = concatenateRegistryPath(keyPrefix, keySuffix);
+			IndependantLog.debug("On 64 bit OS, delete registry key '"+key+"' value '"+value+"' for 64 bit product ...");
+
+			if(!Platform.is64Bit()){//the JRE is 32 bit
+				//if the JRE is 32 bit, Runtime.getRuntime() "reg.exe delete" will automatically delete the 32 bit registry value.
+				//for example "reg.exe delete HKLM\Software\Artifex\GPL Ghostscript\9.23" can be done correctly from command-line
+				//but Runtime.getRuntime().exec("reg.exe delete HKLM\Software\Artifex\GPL Ghostscript\9.23") will fail.
+				//Actually java tries to delete 32 bit registry key "HKLM\Software\Wow6432Node\Artifex\GPL Ghostscript\9.23" which doesn't exist.
+				//But we really want to delete is the 64 bit registry value "HKLM\Software\Artifex\GPL Ghostscript\9.23".
+
+				//We are going to use WinRegistry to get it from 64 bit registry
+				try {
+					if(RegistryConstants.VALUE_DEFAULT.equalsIgnoreCase(value)){
+						value = "";
+					}
+					if(key.startsWith(RegistryConstants.HKLM)){
+						key = key.substring(RegistryConstants.HKLM.length());
+						WinRegistry.deleteValue(WinRegistry.HKEY_LOCAL_MACHINE, key, value, WinRegistry.KEY_WOW64_64KEY);
+					}else if(key.startsWith(RegistryConstants.HKCU)){
+						key = key.substring(RegistryConstants.HKCU.length());
+						WinRegistry.deleteValue(WinRegistry.HKEY_CURRENT_USER, key, value, WinRegistry.KEY_WOW64_64KEY);
+					}
+					return true;
+				} catch (Exception e) {
+					IndependantLog.error("Met "+e.toString());
+					return false;
+				}
+
+			}else{
+				return RemoveRegistryKeyValue(key, value);
+			}
+		}else{
+			IndependantLog.error("The OS is 32 bit architecture, cannot delete registry value for 64 bit product!");
+			return false;
+		}
+
+	}
+
+	private static String concatenateRegistryPath(String keyPrefix, String keySuffix){
+		return concatenate(keyPrefix, keySuffix, "\\");
+	}
+
+	private static String concatenate(String keyPrefix, String keySuffix, String separator){
+		StringBuilder sb = new StringBuilder();
+		if(!keyPrefix.trim().endsWith(separator)){
+			sb.append(keyPrefix.trim()+separator);
+		}else{
+			sb.append(keyPrefix.trim());
+		}
+		if(keySuffix.trim().startsWith(separator)){
+			sb.append(keySuffix.trim().substring(separator.length()));
+		}else{
+			sb.append(keySuffix.trim());
+		}
+
+		return sb.toString();
+	}
+
+	private static Boolean is64BitOS = null;
+
+	/**
+	 * @return boolean, if the Operating System is 64 bit architecture.
+	 */
+	public static boolean is64BitOS(){
+		if(is64BitOS!=null){
+			return is64BitOS;
+		}
+
+		String result = (String) GetRegistryKeyValue(RegistryConstants.KEY_ENVIRONMENT, RegistryConstants.VALUE_PROCESSOR_ARCHITECTURE);
+		if(result!=null){
+			//Check PROCESSOR_ARCHITECTURE, such as
+			//AMD64, X86
+			IndependantLog.debug("PROCESSOR_ARCHITECTURE="+result);
+		}else{
+			//Check the processor's identifier, such as
+			//Intel64 Family 6 Model 158 Stepping 9, GenuineIntel
+			//x86 Family 6 Model 14 Stepping 12
+			result = (String) GetRegistryKeyValue(RegistryConstants.KEY_ENVIRONMENT, RegistryConstants.VALUE_PROCESSOR_IDENTIFIER);
+			if(result==null){
+				result = (String) GetRegistryKeyValue(RegistryConstants.KEY_CENTRALPROCESSOR_0, RegistryConstants.VALUE_CENTRALPROCESSOR_ID);
+			}
+			IndependantLog.debug("PROCESSOR IDENTIFIER="+result);
+		}
+
+		if(result!=null){
+			//AMD64, Intel64, x86_64, i386
+			is64BitOS = result.toUpperCase().contains("AMD64");
+			if(!is64BitOS) is64BitOS = result.toUpperCase().contains("X86_64");
+			if(!is64BitOS) is64BitOS = result.toUpperCase().contains("INTEL64");
+		}else{
+			IndependantLog.error("We cannot deduce the OS architecture!");
+		}
+
+		return is64BitOS;
+	}
+
+
+
 	/**
 	 * The method 'isValid()' existed in old JNA, then it was deprecated and then deleted in newer JNA.<br>
 	 * To get our code works with old JNA and new JNA, use java reflection to call method.<br>
-	 * 
+	 *
 	 * @param memory com.sun.jna.Memory
 	 * @return boolean, true if the memory is valid.
 	 *                  false if the memory is invalid, .
@@ -1032,14 +1383,14 @@ public class NativeWrapper {
 		Method isMemoryValidMethod = null;
 		Class<? extends Memory> clazz = null;
 		String method = "valid";
-		
+
 		if(memory==null){
 			String msg = "The parameter memory is null!";
 			IndependantLog.error(debugmsg+msg);
 			throw new SAFSException(msg);
 		}
 		clazz = memory.getClass();
-		
+
 		try {
 			isMemoryValidMethod = clazz.getMethod(method);
 		} catch (Exception e) {
@@ -1051,7 +1402,7 @@ public class NativeWrapper {
 				IndependantLog.error(debugmsg+"Cannot find the method '"+method+"' for class '"+clazz.getName()+"', due to "+StringUtils.debugmsg(e));
 			}
 		}
-		
+
 		try {
 			Object bool = isMemoryValidMethod.invoke(memory);
 			IndependantLog.debug(debugmsg+"Memory valid return "+bool);
@@ -1062,10 +1413,10 @@ public class NativeWrapper {
 			throw new SAFSException(msg);
 		}
 	}
-	
+
 	/**
-	 * Retrieves last error via GetLastError and also attempts to debug log the error code 
-	 * and any system message for the error code. 
+	 * Retrieves last error via GetLastError and also attempts to debug log the error code
+	 * and any system message for the error code.
 	 * @return last error code encountered or 0
 	 */
 	protected static int _processLastError(){
@@ -1097,10 +1448,10 @@ public class NativeWrapper {
 		}
 		return error;
 	}
-	
+
 	/**
 	 * Platform independent entry-point to receive the ID or HANDLE of the current foreground window.
-	 * The GetForegroundWindow function returns a "handle" to the foreground window--the window with 
+	 * The GetForegroundWindow function returns a "handle" to the foreground window--the window with
 	 * which the user is currently working.
 	 * <p>For windows
 	 * NOTE: WIN32: we will return a Long representing the Handle (HWND), or null on error.
@@ -1113,7 +1464,7 @@ public class NativeWrapper {
 
 		if(Platform.isWindows()){
 			NativeLong nl = null;
-			try{ 
+			try{
 				IndependantLog.info("NativeWrapper WIN32 GetForegroundWindow.");
 				nl = User32.INSTANCE.GetForegroundWindow();
 				rc = new Long(nl.longValue());
@@ -1125,7 +1476,7 @@ public class NativeWrapper {
 		}
 		return rc;
 	}
-	
+
 	/**
 	 * Set ForeGroundWindow active by title. If there are same title match then first window make active.
 	 * Regular expression is allowed for windows title.
@@ -1134,13 +1485,13 @@ public class NativeWrapper {
 	 * @see org.safs.natives.win32.User32#ShowWindow(NativeLong, int)
 	 */
 	public static boolean SetForegroundWindow(String regex_title){
-		
-		if(Platform.isWindows()){ 
-		
+
+		if(Platform.isWindows()){
+
 			byte[] windowText = new byte[512];
-			
+
 			try {
-				
+
 				Object[] hWnd = EnumWindows();
 				if (hWnd != null) {
 					for (int i = 0; i < hWnd.length; i++) {
@@ -1148,7 +1499,7 @@ public class NativeWrapper {
 						User32.INSTANCE.GetWindowTextA(nHwnd, windowText, 512);
 						String wText = Native.toString(windowText);
 						Pattern pattern = Pattern.compile(regex_title);
-						boolean match = pattern.matcher(wText).find(); 
+						boolean match = pattern.matcher(wText).find();
 						if (match) {
 							User32.INSTANCE.ShowWindow(nHwnd, User32.SW_SHOW);
 							User32.INSTANCE.SetForegroundWindow(nHwnd);
@@ -1163,11 +1514,11 @@ public class NativeWrapper {
 			}
 		}
 		return false;
-	}	
-	
+	}
+
 	/**
 	 * Platform independent entry-point to receive the ID or HANDLE of the Desktop window.
-	 * The GetDesktopWindow function returns a "handle" to the window on which  
+	 * The GetDesktopWindow function returns a "handle" to the window on which
 	 * all other windows are painted.
 	 * <p>For windows
 	 * NOTE: WIN32: we will return a Long representing the Handle (HWND), or null on error.
@@ -1177,10 +1528,10 @@ public class NativeWrapper {
 	 */
 	public static Object GetDesktopWindow(){
 		Object rc = null;
-		
+
 		if(Platform.isWindows()){
 			NativeLong nl = null;
-			try{ 
+			try{
 				IndependantLog.info("NativeWrapper WIN32 GetDesktopWindow.");
 				nl = User32.INSTANCE.GetDesktopWindow();
 				rc = new Long(nl.longValue());
@@ -1205,11 +1556,12 @@ public class NativeWrapper {
 	public static Object[] EnumWindows(){
 		Object[] rc = new Object[0];
 		if(Platform.isWindows()){
-			try{ 
+			try{
 				IndependantLog.info("NativeWrapper WIN32 EnumWindows.");
 				WNDENUMPROC callback = new WNDENUMPROC(){
 					long handle = 0;
-					public boolean callback(NativeLong hWnd, Pointer userData){						
+					@Override
+					public boolean callback(NativeLong hWnd, Pointer userData){
 						try{ handle = hWnd.longValue(); }
 						catch(Throwable ix){
 							IndependantLog.debug("EnumWindows callback error: "+ix.getClass().getSimpleName()+":"+ix.getMessage());
@@ -1245,7 +1597,7 @@ public class NativeWrapper {
 		}
 		return rc;
 	}
-	
+
 	/**
 	 * Platform independent entry-point to receive the ID or HANDLE of all child Windows of a parent.
 	 * The EnumChildWindows function returns an array of "handles" to these child windows.
@@ -1259,12 +1611,13 @@ public class NativeWrapper {
 	public static Object[] EnumChildWindows(Object parent){
 		Object[] rc = new Object[0];
 		if(Platform.isWindows()){
-			try{ 
+			try{
 				NativeLong lparent = new NativeLong(((Long)parent).longValue());
 				IndependantLog.info("NativeWrapper WIN32 EnumChildWindows.");
 				WNDENUMPROC callback = new WNDENUMPROC(){
 					long handle = 0;
-					public boolean callback(NativeLong hWnd, Pointer userData){						
+					@Override
+					public boolean callback(NativeLong hWnd, Pointer userData){
 						try{ handle = hWnd.longValue(); }
 						catch(Throwable ix){
 							IndependantLog.debug("EnumChildWindows callback error: "+ix.getClass().getSimpleName()+":"+ix.getMessage());
@@ -1302,12 +1655,12 @@ public class NativeWrapper {
 	}
 
 	/**
-	 * The GetWindowThreadProcessId function retrieves the identifier of the thread that 
-	 * created the specified window and, optionally, the identifier of the process that 
-	 * created the window. 
+	 * The GetWindowThreadProcessId function retrieves the identifier of the thread that
+	 * created the specified window and, optionally, the identifier of the process that
+	 * created the window.
 	 * @param parent - handle to the parent. For WIN32, this is a Long.
-	 * @return Object[2] [0]=ThreadID, [1]=ProcessID. For WIN32 these are both Integers.  
-	 * Array values must be <> 0 to be considered valid. 
+	 * @return Object[2] [0]=ThreadID, [1]=ProcessID. For WIN32 these are both Integers.
+	 * Array values must be <> 0 to be considered valid.
 	 */
 	public static Object[] GetWindowThreadProcessId(Object parent){
 		Object[] rc = new Object[2];
@@ -1334,14 +1687,14 @@ public class NativeWrapper {
 		}
 		return rc;
 	}
-	
+
 	/**
 	 * Retrieve the count of UI elements used by the specified process.
 	 * If the process does not have any UI elements, then we should get zero.
 	 * NOTE: Support for non-WIN32 platforms will be added when able.
 	 * NOTE: Will not work on "protected processes" on Windows Vista.
 	 * @param processID -- the id of the process to query.  For WIN32 this is an Integer.
-	 * @return Object -- the number of UI elements used by the process, or 0. For WIN32 this is an 
+	 * @return Object -- the number of UI elements used by the process, or 0. For WIN32 this is an
 	 * Integer.
 	 * @see org.safs.natives.win32.Kernel32#GetGuiResources(Pointer, int)
 	 */
@@ -1380,14 +1733,14 @@ public class NativeWrapper {
 		}
 		return rc;
 	}
-	
-	
+
+
 	/**
 	 * Retrieve the name of the executable file for the specified process.
 	 * The returned value should not include path information to the executable filename.
 	 * NOTE: Support for non-WIN32 platforms will be added when able.
 	 * @param processID -- the id of the process to query.  For WIN32 this is an Integer.
-	 * @return Object -- the name of the process or NULL. For WIN32 this is a String. 
+	 * @return Object -- the name of the process or NULL. For WIN32 this is a String.
 	 * @see org.safs.natives.win32.Kernel32#GetProcessImageFileNameA(Pointer, Pointer, int)
 	 * @see org.safs.natives.win32.Psapi#GetProcessImageFileNameA(Pointer, Pointer, int)
 	 */
@@ -1429,7 +1782,7 @@ public class NativeWrapper {
 				if(pHandle != null) Kernel32.INSTANCE.CloseHandle(pHandle);
 				pHandle = null;
 				if(size>0){
-					String rc = new String((String)lpFileName.getString(0));
+					String rc = new String(lpFileName.getString(0));
 					//IndependantLog.info("NativeWrapper.getProcessFileName returning String len: "+ rc.length()+ ", "+ rc);
 					int i = rc.lastIndexOf(File.separatorChar);
 					if(i > -1) rc = rc.substring(i+1);
@@ -1452,15 +1805,15 @@ public class NativeWrapper {
 	/**
 	 * Attempt to launch a web URL via the system's default web browser.
 	 * <p>
-	 * On Windows this uses ShellExecute's "open" operation to open the URL document using 
+	 * On Windows this uses ShellExecute's "open" operation to open the URL document using
 	 * the default app.
 	 * @param url -- User should include the 'protocol' portion of the url (Ex: 'http://')
 	 * @return Object -- For WIN32 this is typically an Integer(42).  NULL on execution failures.
-	 * @see org.safs.natives.win32.Shell32#ShellExecuteA(NativeLong, String, String, String, String, long) 
+	 * @see org.safs.natives.win32.Shell32#ShellExecuteA(NativeLong, String, String, String, String, long)
 	 */
 	public static Object LaunchURLInDefaultWebBrowser(String url){
 		if(Platform.isWindows()){
-			Integer result = null;			
+			Integer result = null;
 			try{
 				NativeLong hwnd = new NativeLong(0);
 				result = Shell32.INSTANCE.ShellExecuteA(hwnd, "open", url, null, null, 1);
@@ -1479,7 +1832,7 @@ public class NativeWrapper {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * <pre>
 	 * This method will get the file's created time, access time, and write time.
@@ -1488,33 +1841,33 @@ public class NativeWrapper {
 	 * some of them, you can just pass a null value; If you want some of them, you
 	 * MUST pass an instance of java.util.Date as value.
 	 * </pre>
-	 * 
+	 *
 	 * @param filename		In		The absolute file path
 	 * @param createTime	Out		The java.util.Date object contains the file created time
 	 * @param accessTime	Out		The java.util.Date object contains the file last accessed time
 	 * @param writeTime		Out		The java.util.Date object contains the file last modified time
-	 * 
+	 *
 	 * @return	A boolean to indicate if this method get the file time successfully
 	 */
 	public static boolean getFileTime(String filename, Date createTime, Date accessTime, Date writeTime){
 		String debugmsg = NativeWrapper.class.getName()+".getFileTime(): ";
 		boolean rc = false;
-		
+
 		if(Platform.isWindows()){
 			Kernel32 k32 = Kernel32.INSTANCE;
 			FileTime _createTime = new FileTime();
 			FileTime _accessTime = new FileTime();
 			FileTime _writeTime = new FileTime();
-			
+
 			IndependantLog.warn(debugmsg+" filename is "+filename);
-			
+
 			//First open the file, and get the handle
 			Pointer handle = k32.CreateFileA(filename, Kernel32.GENERIC_NO_ACCESS, Kernel32.FILE_SHARE_R_W_D, null, Kernel32.OPEN_EXISTING, Kernel32.FILE_FLAG_BACKUP_SEMANTICS, null);
 			if(k32.GetLastError()==Kernel32.ERROR_FILE_NOT_FOUND){
 				IndependantLog.warn(debugmsg+" Kernel.CreateFileA can't find file "+filename+" ; Try Kernel.CreateFileW ...");
 				handle = k32.CreateFileW(filename, Kernel32.GENERIC_NO_ACCESS, Kernel32.FILE_SHARE_R_W_D, null, Kernel32.OPEN_EXISTING, Kernel32.FILE_FLAG_BACKUP_SEMANTICS, null);
 			}
-			
+
 			if(k32.GetLastError()== Kernel32.SUCCESS_EXECUTE){
 				IndependantLog.debug(debugmsg+" Got file handle. Try to get file times ...");
 				//Get the file times
@@ -1532,16 +1885,16 @@ public class NativeWrapper {
 			}else{
 				IndependantLog.error(debugmsg+" Can't get file handle, meet error "+k32.GetLastError());
 			}
-			
+
 			//Close the file handle
 			k32.CloseHandle(handle);
 		}else{
 			IndependantLog.warn(StringUtils.debugmsg(false)+" Platform type "+Platform.getOSType()+" OS: "+Console.getOsFamilyName()+" is not supported!");
 		}
-		
+
 		return rc;
 	}
-	
+
 	/**
 	 * <pre>
 	 * <b>This method will convert a FileTime to JavaTime</b>
@@ -1549,7 +1902,7 @@ public class NativeWrapper {
 	 * JavaTime represents a point in time that is time milliseconds after January 1, 1970 00:00:00 GMT.
 	 * 1, 000, 000 nanoseconds = 1 millisecond
 	 * </pre>
-	 * 
+	 *
 	 * @param filetime	A FileTime
 	 * @return			A long value contain the java time in millisecond
 	 * @see FileTime
@@ -1559,13 +1912,13 @@ public class NativeWrapper {
 		long high = filetime.dwHighDateTime;
 		long low = filetime.dwLowDateTime;
 		long time = ((high << 32) & 0xFFFFFFFF00000000L) | (low & 0x00000000FFFFFFFFL);
-		
+
 		//convert time from '100 nanoseconds' to millisecond
 		time = time/10000;
-		
+
 		//convert from filetime to javatime
 		time = time - StringUtilities.TimeBaseDifferenceFromFileTimeToJavaTimeInMillisecond;
-		
+
 		return time;
 	}
 
@@ -1579,10 +1932,10 @@ public class NativeWrapper {
 	public static final String COMMAND_HOSTNMAE 	= "hostname";
 	/** parameter '-f' for command 'hostname', to get full qualified domain name*/
 	public static final String PARAM_HOSTNMAE_f 	= "-f";
-	
+
 	/** directory 'sbin'*/
 	public static final String DIRECTORY_SBIN 	= "sbin";
-	
+
 	/**
 	 * Return the ipconfig's result as a List of String. This is for Windows.
 	 * @param parameters String[], the parameters for command ping.
@@ -1607,7 +1960,7 @@ public class NativeWrapper {
 		IndependantLog.debug("Got result\n"+result);
 		return result;
 	}
-	
+
 	/**
 	 * Return the ping's result as a List of String.
 	 * @param hostname String, the name of the host to ping
@@ -1622,7 +1975,7 @@ public class NativeWrapper {
 		params.add(hostname);
 		return execute(COMMAND_PING, params.toArray(new String[0]));
 	}
-	
+
 	/**
 	 * Return the result of execution of a command as a List of String.<br>
 	 * <b>Note: The command MUST end with limit result, otherwise this method will block.</b>
@@ -1631,7 +1984,7 @@ public class NativeWrapper {
 	 */
 	public static List<String> execute(String command, String... parameters){
 		String debugmsg = StringUtils.debugmsg(false);
-		
+
 		ProcessCapture console = null;
 		List<String> result = new ArrayList<String>();
 		try {
@@ -1656,10 +2009,10 @@ public class NativeWrapper {
 		}finally{
 			if(console!=null) console.shutdown();
 		}
-		
+
 		return result;
 	}
-	
+
 	//Ping response on Windows
 	//Pinging hostname [172.27.16.63] with 32 bytes of data:
 	private static final String PING_WIN_PINGING = "Pinging";
@@ -1668,14 +2021,14 @@ public class NativeWrapper {
 	private static final String PING_WIN_REPLY_FROM_END_BYTES = ": bytes";
 	//Reply from ::1: time<1ms
 	private static final String PING_WIN_REPLY_FROM_END_TIME = ": time";
-	
+
 	//Ping response on Mac
 	//PING hostname (172.27.16.63) with 56 data bytes
 	private static final String PING_MAC_PINGING = "PING";
 	//64 bytes from 172.27.16.63: imcp_seq=0 ttl=128 time=0.5.03 ms
 	private static final String PING_MAC_REPLY_FROM_BEGIN = "bytes from";
 	private static final String PING_MAC_REPLY_FROM_END_ICMP_SEQ = ": imcp_seq";
-	
+
 	/**
 	 * Get the host's IP Address by command {@link NativeWrapper#COMMAND_PING}.
 	 * @see #getHostIPByName(String)
@@ -1683,7 +2036,7 @@ public class NativeWrapper {
 	public static String getHostIPByPing(String hostname){
 		String debugmsg = StringUtils.debugmsg(false);
 		String hostIP = null;
-		
+
 		if(StringUtils.isValid(hostname)){
 			//Use command "ping" to get the IP address
 			try {
@@ -1693,7 +2046,7 @@ public class NativeWrapper {
 				}else if(Console.isUnixOS() || Console.isMacOS()){
 					count = " -c 4 ";
 				}
-				
+
 				List<String> data = ping(hostname, count); ;
 				int beginIndex, endIndex;
 				if(data!=null && data.size()>0){
@@ -1717,7 +2070,7 @@ public class NativeWrapper {
 							beginIndex = message.indexOf(PING_WIN_REPLY_FROM_BEGIN);
 							endIndex = message.indexOf(PING_WIN_REPLY_FROM_END_BYTES);
 							if(endIndex<0) endIndex = message.indexOf(PING_WIN_REPLY_FROM_END_TIME);
-							
+
 							if(beginIndex>-1 && endIndex>-1 && beginIndex<endIndex){
 								hostIP = message.substring(beginIndex+PING_WIN_REPLY_FROM_BEGIN.length(), endIndex);
 								break;
@@ -1725,7 +2078,7 @@ public class NativeWrapper {
 						}else if(message.contains(PING_MAC_REPLY_FROM_BEGIN)){
 							beginIndex = message.indexOf(PING_MAC_REPLY_FROM_BEGIN);
 							endIndex = message.indexOf(PING_MAC_REPLY_FROM_END_ICMP_SEQ);
-							
+
 							if(beginIndex>-1 && endIndex>-1 && beginIndex<endIndex){
 								hostIP = message.substring(beginIndex+PING_MAC_REPLY_FROM_BEGIN.length(), endIndex);
 								break;
@@ -1736,13 +2089,13 @@ public class NativeWrapper {
 			} catch (Exception e) {
 				IndependantLog.error(debugmsg+StringUtils.debugmsg(e));
 			}
-			
+
 			if(hostIP!=null) hostIP = hostIP.trim();
 		}
-		
+
 		return hostIP;
 	}
-	
+
 	//The prefix of response of command 'ipconfig'
 	//IPv4 Address. . . . . . . . . . . : 192.168.17.89
 	private static final String IPCONFIG_IPV4_ADDRESS = "IPv4 Address";
@@ -1761,11 +2114,11 @@ public class NativeWrapper {
 	private static final String IFCONFIG_EN = "en";
 	/**Regex to match string starting with en, en0, en1, en0:, en1: etc.*/
 	private static final String IFCONFIG_REGEX_EN = "^"+IFCONFIG_EN+"\\d*:*.*$";
-	//eth0      Link encap:Ethernet  HWaddr 00:50:56:8D:53:75, 
+	//eth0      Link encap:Ethernet  HWaddr 00:50:56:8D:53:75,
 	private static final String IFCONFIG_ETH = "eth";
 	/**Regex to match staring starting with eth, eth0, eth1, eth0:, eth1: etc.*/
 	private static final String IFCONFIG_REGEX_ETH = "^"+IFCONFIG_ETH+"\\d:*.*$";
-	
+
 	/**
 	 * Execute {@link #COMMAND_IPCONFIG} or {@link #COMMAND_IFCONFIG} to parse the local IP address.
 	 * @return String, IP address of localhost.
@@ -1775,7 +2128,7 @@ public class NativeWrapper {
 		String hostIP = null;
 		try {
 			List<String> data = null;
-			
+
 			if(Console.isWindowsOS()){
 				data = NativeWrapper.ipconfig();
 				//IPv4 Address. . . . . . . . . . . : 192.168.17.89
@@ -1783,7 +2136,7 @@ public class NativeWrapper {
 				data = NativeWrapper.ifconfig();
 				//For mac
 				//data = NativeWrapper.ifconfig(" en0 ");
-				//inet6 fe80::21d:92ff:fede:499b/64 prefixlen 64 scropid 0x4				
+				//inet6 fe80::21d:92ff:fede:499b/64 prefixlen 64 scropid 0x4
 				//inet 192.168.2.2 netmask 0xfffff800 broadcast 192.168.2.255
 				//For Unix
 				//data = NativeWrapper.ifconfig(" eth0 ");
@@ -1792,7 +2145,7 @@ public class NativeWrapper {
 			}else{
 				IndependantLog.warn(debugmsg+" not implemented for OS '"+Console.getOsFamilyName()+"'");
 			}
-			
+
 			int lastColonIndex = -1;
 			String trimmedMsg = null;
 			/**If the response start with en or eth, which means the following inet or inet6 address is ethernet or broadcasting, not loopback*/
@@ -1812,7 +2165,7 @@ public class NativeWrapper {
 							//lo        Link encap:Local Loopback
 							//          inet addr:127.0.0.1  Mask:255.0.0.0
 							//          inet6 addr: ::1/128 Scope:Host
-							
+
 							//eth0      Link encap:Ethernet  HWaddr 00:50:56:8D:53:75
 							//en0:  flags=8863<UP,BROADCAST,SMART,RUNNING,SIMPLEX,MULTICAST> mtu 1500
 							//inet 192.168.2.2 netmask 0xfffff800 broadcast 192.168.2.255
@@ -1837,12 +2190,12 @@ public class NativeWrapper {
 		} catch (Exception e) {
 			IndependantLog.error(debugmsg+" fail due to "+StringUtils.debugmsg(e));
 		}
-		
+
 		if(hostIP!=null) hostIP = hostIP.trim();
-		
+
 		return hostIP;
 	}
-	
+
 	/**
 	 * @return String, hostname of localhost
 	 */
@@ -1867,16 +2220,16 @@ public class NativeWrapper {
 		}
 		return hostname;
 	}
-	
+
 	/**
 	 * test method {@link #getFileTime(String, Date, Date, Date)}
 	 * @param args String[], arguments array from which to get
 	 */
 	private static void test_getHostIp(String[] args){
 		System.out.println("-------------------------   test_getHostIp   -------------------------");
-		
+
 		String hostname = null;
-		
+
 		for(int i=0;i<args.length;i++){
 			if(ARG_HOSTNAME.equalsIgnoreCase(args[i])){
 				if(i+1<args.length){
@@ -1892,13 +2245,13 @@ public class NativeWrapper {
 		}else{
 			System.err.println("hostname '"+hostname+"' is not valid.");
 		}
-		
+
 		System.out.println("The Local host IP is "+getLocalHostIPByConfig());
 		System.out.println("The Local host Name is "+getLocalHostName());
-		
+
 		System.out.println("-----------------------------------------------------------------");
 	}
-	
+
 	/**
 	 * test method {@link #getFileTime(String, Date, Date, Date)}
 	 * @param args String[], arguments array from which to get file name
@@ -1908,7 +2261,7 @@ public class NativeWrapper {
 		java.sql.Timestamp ct = new java.sql.Timestamp(0);
 		java.sql.Timestamp wt = new java.sql.Timestamp(0);
 		java.sql.Timestamp at = new java.sql.Timestamp(0);
-		
+
 		String file = "C:\\Windows\\";
 
 		for(int i=0;i<args.length;i++){
@@ -1919,7 +2272,7 @@ public class NativeWrapper {
 				}
 			}
 		}
-		
+
 		System.out.println("GetFileTime for File '"+file+"'");
 		if (getFileTime (file, ct, at, wt)){
 			System.out.println("	Created Time: " + ct);
@@ -1935,7 +2288,7 @@ public class NativeWrapper {
 	public static final String ARG_FILE_FOR_GETTIME = "-fileforgettime";
 	/**"-hostname" followed by a hostname, for testing {@link #getHostIPByPing(String)} */
 	public static final String ARG_HOSTNAME = "-hostname";
-	
+
 	/**
 	 * Test some implementations of this class.<br>
 	 * Simple regression tests with output to System.out
@@ -1950,18 +2303,18 @@ public class NativeWrapper {
 	 *             if {@link #ARG_HOSTNAME} followed by host name such as machine.domain.com, then {@link #test_getHostIp(String[])}<br>
 	 */
 	public static void main(String[] args){
-		
-		
+
+
 		IndependantLog.parseArguments(args);
 		IndependantLog.debug("Test NativeWrapper on OS '"+Console.getOsFamilyName()+"', Platform type "+Platform.getOSType());
-		
+
 		SetRegistryKeyValue("HKEY_CLASSES_ROOT\\Wow6432Node\\AppID\\{AD514E88-9335-4CE6-80A6-10CF68CCD0AA}", "", null);
   		System.out.println("GetRegistryKeyValue should be [<NO NAME>=]");
- 
+
 		String key = "HKLM\\Software";
 		String keyvalue = (String) GetRegistryKeyValue(key, null);
 		System.out.println(key +":"+ keyvalue);
-		
+
 		//reg.exe does not output <no name> if no other key value exists
 		System.out.println("GetRegistryKeyValue should be empty");
 		key = "HKLM\\Software\\Secure";
@@ -1987,7 +2340,7 @@ public class NativeWrapper {
 		key = "HKLM\\Software";
 		boolean keyexists = DoesRegistryKeyExist(key, null);
 		System.out.println(key +":"+ keyexists);
-		
+
 		System.out.println("DoesRegistryKeyExist should be false");
 		key = "HKLM\\BogusSoftware";
 		keyexists = DoesRegistryKeyExist(key, null);
@@ -1997,22 +2350,22 @@ public class NativeWrapper {
 		key = "HKEY_LOCAL_MACHINE\\Software";
 		keyexists = DoesRegistryKeyExist(key, null);
 		System.out.println(key +":"+ keyexists);
-		
+
 		System.out.println("DoesRegistryKeyExist should be true");
 		key = "HKLM\\Software\\Rational Software\\Rational Test\\8";
 		keyexists = DoesRegistryKeyExist(key, null);
 		System.out.println(key +"\\"+":"+ keyexists);
-		
+
 		System.out.println("DoesRegistryKeyExist should be true");
 		key = "HKLM\\Software\\Rational Software\\Rational Test\\8";
 		keyexists = DoesRegistryKeyExist(key, "Eclipse Directory");
 		System.out.println(key +"\\"+ "Eclipse Directory"+ ":"+ keyexists);
-		
+
 		System.out.println("DoesRegistryKeyExist should be false");
 		key = "HKEY_LOCAL_MACHINE\\Software\\Rational Software\\Rational Test\\8";
 		keyexists = DoesRegistryKeyExist(key, "Bogus Directory");
 		System.out.println(key +"\\"+ "Bogus Directory"+ ":"+ keyexists);
-		
+
 		System.out.println("Testing GetForegroundWindow().  should not be NULL.");
 		Long foreground = (Long)GetForegroundWindow();
 		System.out.println("GetForgroundWindow()=="+ foreground);
@@ -2045,17 +2398,17 @@ public class NativeWrapper {
 		}else{
 			System.out.println("EnumChildWindows() FAILED with NULL return.");
 		}
-		System.out.println("\r\n");		
+		System.out.println("\r\n");
 		System.out.println("Testing _processLastError(). Expect 1400: Invalid Window Handle.");
 		ids = GetWindowThreadProcessId(new Long(10001));
 		int error = _processLastError();
 		System.out.println("   _processLastError() returned: "+ error);
 		System.out.println("\r\n");
-		
+
 		test_getFileTime(args);
 
 		test_getHostIp(args);
-		
-		
+
+
 	}
 }

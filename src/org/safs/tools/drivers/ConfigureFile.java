@@ -1,3 +1,20 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.tools.drivers;
 
 import org.safs.text.INIFileReader;
@@ -6,7 +23,8 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 public class ConfigureFile implements ConfigureInterface {
-	protected File configFile = null;
+
+	protected File configFile = null;
 	protected Vector store = new Vector(3,1);
 	protected INIFileReader reader = null;
 	

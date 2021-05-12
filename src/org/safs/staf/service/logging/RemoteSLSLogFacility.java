@@ -1,3 +1,20 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.staf.service.logging;
 
 import org.safs.logging.FileLogItem;
@@ -5,7 +22,6 @@ import org.safs.logging.LogItemDictionary;
 import org.safs.staf.embedded.HandleInterface;
 import org.safs.staf.service.ServiceDebugLog;
 
-import com.ibm.staf.STAFHandle;
 import com.ibm.staf.STAFResult;
 import com.ibm.staf.STAFUtil;
 
@@ -17,13 +33,13 @@ import com.ibm.staf.STAFUtil;
  * This log facility serves as a proxy to the remote logging service running on
  * the remote machine. Log facility creation, logging, and closing are all
  * delegated to the remote logging service. Attributes of the remote log
- * facility are stored and retrieved locally, however, to maximize the 
- * performance of requests that query the state of a log facility. For the same 
+ * facility are stored and retrieved locally, however, to maximize the
+ * performance of requests that query the state of a log facility. For the same
  * reason, the <code>STAFTextLogItem</code> and <code>STAFXmlLogItem</code> that
- * this log facility holds are only place holders for their attributes. Their 
+ * this log facility holds are only place holders for their attributes. Their
  * logging functions are not used by this log facility because they are only for
  * local logging mode.
- * 
+ *
  * @since 	MAY 19 2009		(LW)	Modify the constructor, add an extra parameter 'ServiceDebugLog'.
  */
 public class RemoteSLSLogFacility extends SLSLogFacility
@@ -31,7 +47,7 @@ public class RemoteSLSLogFacility extends SLSLogFacility
 	private String remoteMachine;
 	private String remoteService;
 	protected boolean overwrite = false;
-	
+
 	/**
 	 * Creates a <code>RemoteSLSLogFacility</code>.
 	 * <p>
@@ -43,7 +59,7 @@ public class RemoteSLSLogFacility extends SLSLogFacility
 	 * @param level		the log level for this log facility.
 	 * @param linked	the name of another log facility linked to this one.
 	 * @param handle			a STAF handle to interact with STAF.
-	 * @param dir		the default log directory. Overwrites the parent 
+	 * @param dir		the default log directory. Overwrites the parent
 	 * 					directory attribute of all log items of this facility.
 	 * @param logs		the spec of a <code>STAFTextLogItem</code> and
 	 * 					<code>STAFXmlLogItem</code>. If a log item is omitted,
@@ -53,7 +69,7 @@ public class RemoteSLSLogFacility extends SLSLogFacility
 	 * @param service	the name of the remote logging service.
 	 * @param debugLog	is used to write debug message to a file
 	 */
-	public RemoteSLSLogFacility(String name, long mode, int level, 
+	public RemoteSLSLogFacility(String name, long mode, int level,
 		String linked, HandleInterface handle, String dir, LogItemDictionary logs,
 		String machine, String service,ServiceDebugLog debugLog)	throws STAFLogException
 	{
@@ -63,13 +79,13 @@ public class RemoteSLSLogFacility extends SLSLogFacility
 		remoteService = service;
 		initializeFac();
 	}
-	
+
 	private void initializeFac() throws STAFLogException{
-	
-		// submit the init command to the remote logging service. if failed 
+
+		// submit the init command to the remote logging service. if failed
 		// throw a STAFLogException
 		STAFResult result = init();
-		if (result.rc != STAFResult.Ok) 
+		if (result.rc != STAFResult.Ok)
 			throw new STAFLogException("Remote INIT failed", result);
 
 		workerThread = new RemoteWorkerThread();
@@ -80,8 +96,8 @@ public class RemoteSLSLogFacility extends SLSLogFacility
 	 * Creates a <code>RemoteSLSLogFacility</code>.
 	 * <p>
 	 * This method creates a log facility on the remote machine by submitting
-	 * the INIT request to the remote logging service.  It allows you to enable 
-	 * overwriting any previously existing log file instead of aborting.  
+	 * the INIT request to the remote logging service.  It allows you to enable
+	 * overwriting any previously existing log file instead of aborting.
 	 * Overwriting is disabled (false) by default.
 	 * <p>
 	 * @param name		the name of this log facility.
@@ -89,7 +105,7 @@ public class RemoteSLSLogFacility extends SLSLogFacility
 	 * @param level		the log level for this log facility.
 	 * @param linked	the name of another log facility linked to this one.
 	 * @param h			a STAF handle to interact with STAF.
-	 * @param dir		the default log directory. Overwrites the parent 
+	 * @param dir		the default log directory. Overwrites the parent
 	 * 					directory attribute of all log items of this facility.
 	 * @param logs		the spec of a <code>STAFTextLogItem</code> and
 	 * 					<code>STAFXmlLogItem</code>. If a log item is omitted,
@@ -100,7 +116,7 @@ public class RemoteSLSLogFacility extends SLSLogFacility
 	 * @param overwrite	true to delete/overwrite any previous log.
 	 * @param debugLog	is used to write debug message to a file
 	 */
-	public RemoteSLSLogFacility(String name, long mode, int level, 
+	public RemoteSLSLogFacility(String name, long mode, int level,
 		String linked, HandleInterface h, String dir, LogItemDictionary logs,
 		String machine, String service, boolean overwrite,ServiceDebugLog debugLog)	throws STAFLogException
 	{
@@ -110,7 +126,7 @@ public class RemoteSLSLogFacility extends SLSLogFacility
 		this.overwrite = overwrite;
 		initializeFac();
 	}
-	
+
 	/**
 	 * Creates the log facility on the remote machine by submitting a INIT
 	 * request to the remote logging service.
@@ -134,7 +150,7 @@ public class RemoteSLSLogFacility extends SLSLogFacility
 		if (isModeEnabled(LOGMODE_CONSOLE)) option += " CONSOLELOG";
 
 		if(overwrite) option += " OVERWRITE";
-		
+
 		STAFResult result = submit("init " + STAFUtil.wrapData(facName) + option);
 		if (result.rc != STAFResult.Ok) return result;
 
@@ -165,13 +181,14 @@ public class RemoteSLSLogFacility extends SLSLogFacility
 	 * @throws	STAFLogException
 	 * 			if the remote CLOSE request failed.
 	 */
+	@Override
 	public void closeNow() throws STAFLogException
 	{
 		debugLog.debugPrintln("RemoteSLSLogFacility.closeNow()");
 
 		// submit CLOSE request to the remote service.
 		STAFResult result = submit("close " + STAFUtil.wrapData(facName));
-		if (result.rc != STAFResult.Ok) 
+		if (result.rc != STAFResult.Ok)
 			throw new STAFLogException("Remote CLOSE failed.", result);
 	}
 
@@ -189,6 +206,7 @@ public class RemoteSLSLogFacility extends SLSLogFacility
 		 * <p>
 		 * @param r		the LOG request from the queue.
 		 */
+		@Override
 		protected void log(WorkerRequest r)
 		{
 			String option = " message " + STAFUtil.wrapData(r.msg);

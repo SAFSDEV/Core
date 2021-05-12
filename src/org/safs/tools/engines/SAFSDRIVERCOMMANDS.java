@@ -1,28 +1,40 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.tools.engines;
 
-import org.safs.DDGUIUtilities;
 import org.safs.DCGUIUtilities;
+import org.safs.DDGUIUtilities;
 import org.safs.DriverCommandProcessor;
-import org.safs.SAFSSTAFRegistrationException;
-import org.safs.STAFHelper;
-import org.safs.TestRecordData;
 import org.safs.TestRecordHelper;
 import org.safs.logging.LogUtilities;
-import org.safs.staf.STAFProcessHelpers;
 import org.safs.tools.drivers.DriverConstant;
 import org.safs.tools.drivers.DriverInterface;
-import org.safs.tools.logs.LogsInterface;
 
 /**
  * Provides support for comprehensive, in-process Driver Commands.
  * <p>
  * Here we are going to use the existing org.safs.DriverCommandsProcessor.<br>
- * We are going to attempt to use them in-process, rather than starting up the 
- * STAF SAFS/DriverCommands version of the same.  This mimics how RobotJ is able 
+ * We are going to attempt to use them in-process, rather than starting up the
+ * STAF SAFS/DriverCommands version of the same.  This mimics how RobotJ is able
  * to use these same Driver Command classes.
  * <p>
- * Note, the current implementation of DriverCommandsProcessor requires access to 
- * a STAFHelper.  So this class can only be used when such a STAFHelper is accessible 
+ * Note, the current implementation of DriverCommandsProcessor requires access to
+ * a STAFHelper.  So this class can only be used when such a STAFHelper is accessible
  * from tools associated with the Driver, or via the STAFProcessHelpers class.
  * @author Carl Nagle DEC 14, 2005 Refactored with DriverConfiguredSTAFInterface superclass
  */
@@ -33,7 +45,7 @@ public class SAFSDRIVERCOMMANDS extends GenericEngine {
 
 	/** Needed by STAF-centric DriverCommandProcessor. **/
 	protected LogUtilities            logUtils = new LogUtilities();
-	
+
 	/** Needed by command Processors. **/
 	protected DDGUIUtilities          guiUtils = new DCGUIUtilities();
 
@@ -41,8 +53,8 @@ public class SAFSDRIVERCOMMANDS extends GenericEngine {
 	//protected LogsInterface               logs = null;
 
 	/** Standard Java-based Driver Command processor. **/
-	protected DriverCommandProcessor processor = new DriverCommandProcessor();	
-	
+	protected DriverCommandProcessor processor = new DriverCommandProcessor();
+
 	/**
 	 * Constructor for SAFSDRIVERCOMMANDS
 	 */
@@ -62,24 +74,26 @@ public class SAFSDRIVERCOMMANDS extends GenericEngine {
 
 	/**
 	 * Expects a DriverInterface object for initialization.
-	 * 
+	 *
 	 * @see GenericEngine#launchInterface(Object)
 	 * @see DriverInterface
 	 */
+	@Override
 	public void launchInterface(Object configInfo){
 		super.launchInterface(configInfo);
 		logUtils.setSTAFHelper(staf);
-		processor.setLogUtilities(logUtils);	
+		processor.setLogUtilities(logUtils);
 		System.out.println("("+ launchCount +") "+ ENGINE_NAME +
-		                     " running internal to "+ processName);		
+		                     " running internal to "+ processName);
 	}
-		
+
 	/**
 	 * Process the record present in the provided testRecordData.
 	 */
+	@Override
 	public long processRecord (TestRecordHelper testRecordData){
 		this.testRecordData = testRecordData;
-		try{			
+		try{
 			testRecordData.setDDGUtils(guiUtils);
 			guiUtils.setTestRecordData(testRecordData);
 			if(testRecordData.getSTAFHelper()==null) testRecordData.setSTAFHelper(staf);
@@ -95,6 +109,6 @@ public class SAFSDRIVERCOMMANDS extends GenericEngine {
 		}
 		return DriverConstant.STATUS_SCRIPT_NOT_EXECUTED;
 	}
-	
+
 }
 

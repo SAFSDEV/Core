@@ -1,23 +1,36 @@
-/** 
+/**
  * Copyright (C) SAS Institute, All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * Developer history:
- * 
- * AUG 23, 2010	(LeiWang)	Modify method cmdWaitForGUI(): assign the testRecord's windowGuiId to winrec.
+ *
+ * AUG 23, 2010	(Lei Wang)	Modify method cmdWaitForGUI(): assign the testRecord's windowGuiId to winrec.
  *                                  If we use Mixed-Mode-RS (OBT-RS for window, IBT-RS for component), we will set
  *                                  the windowGuiId to an IBT-RS in the RJ engine side. In this method, if we still
- *                                  take RS from map, the window's RS will be still OBT-RS, then the TestRecord 
+ *                                  take RS from map, the window's RS will be still OBT-RS, then the TestRecord
  *                                  can NOT be processed here;
  *                                  Add a constructor with parameter of type LogUtilities, and set LogUtilities for
  *                                  itself and its inner TID engines like Log, Flow, Counter engines.
- * SEP 30, 2010	(LeiWang)   Implement keyword UseSAFSFunctions and UseSeleniumFunctions.
+ * SEP 30, 2010	(Lei Wang)   Implement keyword UseSAFSFunctions and UseSeleniumFunctions.
  * SEP 17, 2014  Carl Nagle     Fixing SAFS Crashes due to incomplete initialization.
  * JUN 09, 2015  DHARMESH4  Added result email support.
- * SEP 24, 2015  LeiWang	Modify sendEMail(): get more parameters from configuration file to initialize Mailer.
- * MAY 05, 2016 (LeiWang) 	Fix the disorder problem of attachment.
- * MAY 18, 2016 (LeiWang) 	Implement the keyword 'CallJUnit'.
+ * SEP 24, 2015  Lei Wang	Modify sendEMail(): get more parameters from configuration file to initialize Mailer.
+ * MAY 05, 2016 (Lei Wang) 	Fix the disorder problem of attachment.
+ * MAY 18, 2016 (Lei Wang) 	Implement the keyword 'CallJUnit'.
  * MAY 19, 2016 (Carl Nagle) 	Enhance CallJUnit output and increment SAFS StatusCounters with JUnit results.
  */
 package org.safs.tools.engines;
@@ -83,7 +96,7 @@ public class TIDDriverCommands extends GenericEngine {
 
 	// Below engine names should contain the SimpleClass (short) name of each engine
 	// That is, org.safs.tools.engines.SAFSROBOTOJ should be all upper-case "SAFSROBOTJ"
-	
+
 	/** "SAFSROBOTJ" */
 	static final String ROBOTJ_ENGINE  = "SAFSROBOTJ";
 	/** "SAFSDRIVERCOMMANDS" */
@@ -100,9 +113,9 @@ public class TIDDriverCommands extends GenericEngine {
 	static final String SELENIUM_ENGINE  = "SAFSSELENIUM";
 	/** "SAFSDROID" */
 	static final String DROID_ENGINE  = "SAFSDROID";
-	
+
 	// START: LOCALLY SUPPORTED DRIVER COMMANDS
-	
+
 	/** "SetApplicationMap" */
 	static final String COMMAND_SETAPPLICATIONMAP = "SetApplicationMap";
 
@@ -120,22 +133,22 @@ public class TIDDriverCommands extends GenericEngine {
 
 	/** "UseRobotJFunctions" */
 	static final String COMMAND_USEROBOTJFUNCTIONS= "UseRobotJFunctions";
-	
+
 	/** UseSAFSFunctions */
 	static final String COMMAND_USESAFSFUNCTIONS= "UseSAFSFunctions";
-	
+
 	/** UseTestCompleteFunctions */
 	static final String COMMAND_USETESTCOMPLETEFUNCTIONS= "UseTestCompleteFunctions";
-	
+
 	/** UseIOSFunctions */
 	static final String COMMAND_USEIOSFUNCTIONS= "UseIOSFunctions";
-	
+
 	/** UseQTPFunctions */
 	static final String COMMAND_USEQTPFUNCTIONS= "UseQTPFunctions";
-	
+
 	/** UseABBOTFunctions */
 	static final String COMMAND_USEABBOTFUNCTIONS= "UseABBOTFunctions";
-	
+
 	/** UseSeleniumFunctions */
 	static final String COMMAND_USESELENIUMFUNCTIONS= "UseSeleniumFunctions";
 
@@ -144,10 +157,10 @@ public class TIDDriverCommands extends GenericEngine {
 
 	/** TakeScreenShot */
 	static final String COMMAND_TAKESCREENSHOT = "TakeScreenShot";
-	
+
 	/** SendEmail */
 	static final String COMMAND_SENDEMAIL = "SendEmail";
-	
+
 	/** "SetBenchDirectory" */
 	public static final String COMMAND_SETBENCHDIRECTORY             = "SetBenchDirectory";
 	/** "SetDifDirectory" */
@@ -166,11 +179,11 @@ public class TIDDriverCommands extends GenericEngine {
 	public static final String COMMAND_SETIMAGEDEBUG                 = "SetImageDebug";
 	/** "SetImageFuzzyMatching" */
 	public static final String COMMAND_SETIMAGEFUZZYMATCHING         = "SetImageFuzzyMatching";
-	
+
 	public static final String SET_MILLIS_BETWEEN_RECORDS	 		= "SetMillisBetweenRecords";//AbstractDriver.millisBetweenRecords
 	public static final String GET_MILLIS_BETWEEN_RECORDS	 		= "GetMillisBetweenRecords";//AbstractDriver.millisBetweenRecords
 	public static final String SETMULTIPLETHREADSEARCH       		= "SetMultipleThreadSearch";
-	
+
 	// END: LOCALLY SUPPORTED DRIVER COMMANDS
 
 	TIDDriverLogCommands  dcLog  = new TIDDriverLogCommands();
@@ -181,7 +194,7 @@ public class TIDDriverCommands extends GenericEngine {
 	String command = "";
 	String message;
 	String detail;
-	
+
 	/**
 	 * Constructor for TIDDriverCommands
 	 */
@@ -193,21 +206,21 @@ public class TIDDriverCommands extends GenericEngine {
 	 * Instantiate a new TIDDriverCommands,
 	 * Call setLogUtilities() of its super class for itself and its inner TID engines
 	 * like Log, Flow, Counter TIDEngines.<br>
-	 * 
+	 *
 	 * Normally, we should instantiate an object of this class with a driver. But if TestRecord
 	 * has Mixed-Mode-RS, we have to instantiate an object of this class from a Processor (ex. DCDriverCommand),
 	 * to keep working the log functionality, we call this constructor. For other cases, we should NOT
 	 * call this constructor.
-	 * 
+	 *
 	 * @param log
 	 */
 	public TIDDriverCommands(LogUtilities log){
 		this();
 		setLogUtilities(log);
 	}
-	
+
 	/**
-	 * Calls super.setLogUtilities for this class and then setLogUtilities for each 
+	 * Calls super.setLogUtilities for this class and then setLogUtilities for each
 	 * chained processor in this class (dcLog, dcFlow, dcCounters, dcRest).
 	 */
 	@Override
@@ -218,9 +231,9 @@ public class TIDDriverCommands extends GenericEngine {
 		dcCounters.setLogUtilities(log);
 		dcRest.setLogUtilities(log);
 	}
-	
+
 	/**
-	 * Calls super.setLogUtilities for this class and then setLogUtilities for each 
+	 * Calls super.setLogUtilities for this class and then setLogUtilities for each
 	 * chained processor in this class (dcLog, dcFlow, dcCounters, dcRest).
      * @param log
      * @param copyLogClass set to true to copy everything to the debug log (Log.class)
@@ -233,7 +246,7 @@ public class TIDDriverCommands extends GenericEngine {
 		dcCounters.setLogUtilities(log, copyLogClass);
 		dcRest.setLogUtilities(log, copyLogClass);
 	}
-	
+
 	/**
 	 * PREFERRED Constructor for TIDDriverCommands.
 	 * Constructs the instance and calls launchInterface to initialize.
@@ -246,6 +259,7 @@ public class TIDDriverCommands extends GenericEngine {
 	/**
 	 * @see GenericEngine#launchInterface(Object)
 	 */
+	@Override
 	public void launchInterface(Object configInfo){
 		// not sure why we don't super.launchInterface(configInfo) here?
 		super.launchInterface(configInfo);
@@ -257,7 +271,7 @@ public class TIDDriverCommands extends GenericEngine {
 			dcCounters.launchInterface(driver);
 			dcRest.launchInterface(driver);
 			if(log == null) setLogUtilities(new LogUtilities(this.staf), false);
-			
+
 		}catch(Exception x){
 			Log.error(
 			"TIDDriverCommands requires a valid DriverInterface object for initialization!\n"+
@@ -269,6 +283,7 @@ public class TIDDriverCommands extends GenericEngine {
 	 * Process the record present in the provided testRecordData.
 	 * Route to other TIDDriverXXXCommands classes as necessary.
 	 */
+	@Override
 	public long processRecord (TestRecordHelper testRecordData){
 
 		this.testRecordData = testRecordData;
@@ -283,7 +298,7 @@ public class TIDDriverCommands extends GenericEngine {
 				}
 				if(staf==null) {
 					Log.debug("TIDDC attempting to acquire registered STAFProcessHelper...");
-					try{ 
+					try{
 						staf = STAFProcessHelpers.registerHelper(ENGINE_NAME);
 					}
 					catch(Exception x){
@@ -301,27 +316,27 @@ public class TIDDriverCommands extends GenericEngine {
 				testRecordData.setCommand(command);
 			}catch(Exception x){
 				Log.debug("TIDDC WARNING: unable to acquire COMMAND");
-				standardErrorMessage(testRecordData, 
-						"unknown command:"+ x.getClass().getSimpleName()+":"+ x.getMessage(), 
+				standardErrorMessage(testRecordData,
+						"unknown command:"+ x.getClass().getSimpleName()+":"+ x.getMessage(),
 						testRecordData.getInputRecord());
 				return DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE;
 			}
 		}
 		Log.info("TIDDC:processing \""+ command +"\".");
 		try{
-		    if (command.equalsIgnoreCase(COMMAND_SETAPPLICATIONMAP)) 
+		    if (command.equalsIgnoreCase(COMMAND_SETAPPLICATIONMAP))
 		        {return cmdSetApplicationMap();}
-		    else if (command.equalsIgnoreCase(COMMAND_SETVARIABLEVALUES)) 
+		    else if (command.equalsIgnoreCase(COMMAND_SETVARIABLEVALUES))
 		    	{return cmdSetVariableValues();}
-		    else if (command.equalsIgnoreCase(COMMAND_CLOSEAPPLICATIONMAP)) 
+		    else if (command.equalsIgnoreCase(COMMAND_CLOSEAPPLICATIONMAP))
 	        	{return cmdCloseApplicationMap();}
-			else if (command.equalsIgnoreCase(COMMAND_EXPRESSIONS)) 
+			else if (command.equalsIgnoreCase(COMMAND_EXPRESSIONS))
 				{return cmdExpressions();}
-			else if (command.equalsIgnoreCase(COMMAND_WAITFORGUI)) 
+			else if (command.equalsIgnoreCase(COMMAND_WAITFORGUI))
 				{return cmdWaitForGUI(true);}
-			else if (command.equalsIgnoreCase(COMMAND_WAITFORGUIGONE)) 
+			else if (command.equalsIgnoreCase(COMMAND_WAITFORGUIGONE))
 				{return cmdWaitForGUI(false);}
-			else if (command.equalsIgnoreCase(COMMAND_VERSION)) 
+			else if (command.equalsIgnoreCase(COMMAND_VERSION))
 				{return cmdVersion();}
 			else if (command.equalsIgnoreCase(COMMAND_USEROBOTJFUNCTIONS) ||
 					 command.equalsIgnoreCase(COMMAND_USESAFSFUNCTIONS) ||
@@ -330,17 +345,17 @@ public class TIDDriverCommands extends GenericEngine {
 					 command.equalsIgnoreCase(COMMAND_USEABBOTFUNCTIONS) ||
 					 command.equalsIgnoreCase(COMMAND_USETESTCOMPLETEFUNCTIONS) ||
 					 command.equalsIgnoreCase(COMMAND_USESELENIUMFUNCTIONS) ||
-					 command.equalsIgnoreCase(COMMAND_USEDROIDFUNCTIONS)) 
+					 command.equalsIgnoreCase(COMMAND_USEDROIDFUNCTIONS))
 				{return cmdUseFunctions();}
-			else if (command.equalsIgnoreCase(COMMAND_SETIMAGEDEBUG)) 
+			else if (command.equalsIgnoreCase(COMMAND_SETIMAGEDEBUG))
 				{return cmdSetImageDebug();}
-			else if (command.equalsIgnoreCase(COMMAND_SETIMAGEFUZZYMATCHING)) 
+			else if (command.equalsIgnoreCase(COMMAND_SETIMAGEFUZZYMATCHING))
 				{return cmdSetImageFuzzyMatching();}
 			else if ((command.equalsIgnoreCase(COMMAND_SETPROJECTDIRECTORY))||
 					 (command.equalsIgnoreCase(COMMAND_SETBENCHDIRECTORY))||
 					 (command.equalsIgnoreCase(COMMAND_SETTESTDIRECTORY))||
 					 (command.equalsIgnoreCase(COMMAND_SETDIFDIRECTORY))||
-					 (command.equalsIgnoreCase(COMMAND_SETROOTVERIFYDIRECTORY))) 
+					 (command.equalsIgnoreCase(COMMAND_SETROOTVERIFYDIRECTORY)))
 				{return cmdSetDirectories();}
 			else if ( command.equalsIgnoreCase(SET_MILLIS_BETWEEN_RECORDS)){
 				return setDriverOptions();
@@ -353,17 +368,17 @@ public class TIDDriverCommands extends GenericEngine {
 			}else if (command.equalsIgnoreCase(COMMAND_SENDEMAIL)){
 				return sendEmail();
 			}
-		    
+
 		    rc = dcLog.processRecord(this.testRecordData);
 			if (rc == DriverConstant.STATUS_SCRIPT_NOT_EXECUTED) rc = dcFlow.processRecord(this.testRecordData);
 			if (rc == DriverConstant.STATUS_SCRIPT_NOT_EXECUTED) rc = dcCounters.processRecord(this.testRecordData);
 			if (rc == DriverConstant.STATUS_SCRIPT_NOT_EXECUTED) rc = dcRest.processRecord(this.testRecordData);
-			return rc;	
+			return rc;
 		}
 		catch(Exception x){
 			Log.debug("DEBUG TRAPPED EXCEPTION:",x);
-			standardErrorMessage(testRecordData, 
-					command+":"+ x.getClass().getSimpleName()+":"+ x.getMessage(), 
+			standardErrorMessage(testRecordData,
+					command+":"+ x.getClass().getSimpleName()+":"+ x.getMessage(),
 					testRecordData.getInputRecord());
 			return DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE;
 		}
@@ -375,18 +390,18 @@ public class TIDDriverCommands extends GenericEngine {
 		try{ filename = testRecordData.getTrimmedUnquotedInputRecordToken(2);} catch(Exception npx){ }
 		filename = ImageUtils.normalizeFileNameSuffix(filename);
 		File fn = deduceTestFile(filename);
-		
+
 		// get optional SubArea parameter
 		String subarea = null;
 		Rectangle imageRect = ImageUtils.getScreenSize();
 		try{ subarea = testRecordData.getTrimmedUnquotedInputRecordToken(4);} catch(Exception npx){ }
-		
+
 		if (subarea==null || subarea.isEmpty()) {
 			Log.info("SubArea not provided, use the whole screen size to take snapshot.");
 		} else {
 			imageRect = ImageUtils.getSubAreaRectangle(imageRect, subarea);
 		}
-		
+
 		try {
 			Log.debug("imageRect resolves to: " + imageRect);
 			BufferedImage buffimg = ImageUtils.captureScreenArea(imageRect);
@@ -433,12 +448,12 @@ public class TIDDriverCommands extends GenericEngine {
 		simpleSuccessMessage(testRecordData, command, message);
 		return setTRDStatus(testRecordData,DriverConstant.STATUS_NO_SCRIPT_FAILURE);
 	}
-	
+
 	 /** <br><em>Purpose:</em> set driver's options: like AbstractDriver.millisBetweenRecords
 	   **/
 	  private long setDriverOptions(){
-		String debugmsg = getClass().getName()+".setDriverOptions() ";  
-		
+		String debugmsg = getClass().getName()+".setDriverOptions() ";
+
 		String optionValue = null;
 		try{ optionValue = testRecordData.getTrimmedUnquotedInputRecordToken(2);}
 		catch(SAFSNullPointerException npx){;} //should never happen by this point
@@ -458,7 +473,7 @@ public class TIDDriverCommands extends GenericEngine {
 			standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
 	        return setTRDStatus(testRecordData,DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
 	    }
-	    
+
 	    String optionName = "";
 
 	    try{
@@ -471,13 +486,13 @@ public class TIDDriverCommands extends GenericEngine {
 				standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
 		        return setTRDStatus(testRecordData,DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
 	    	}
-	    	
+
 	    	message = GENStrings.convert(GENStrings.SOMETHING_SET, optionValue +" set to "+optionName, optionValue, optionName);
 	    	logMessage(message, null, AbstractLogFacility.GENERIC_MESSAGE);
-	    	return setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);	
+	    	return setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
 	    }catch(Exception e){
 	        Log.debug(debugmsg+e.getMessage());
-			message = FAILStrings.convert(FAILStrings.COULD_NOT_SET, 
+			message = FAILStrings.convert(FAILStrings.COULD_NOT_SET,
 					                      "Could not set '"+ optionName +"' to '"+ optionValue +"'.",
 					                      optionName,
 					                      optionValue);
@@ -485,12 +500,12 @@ public class TIDDriverCommands extends GenericEngine {
 	        return setTRDStatus(testRecordData,DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
 	    }
 	  }
-	 
+
 	  /** <br><em>Purpose:</em> get driver's options value, and save it to a staf variable
 	   **/
 	  private long getDriverOptions(){
-		String debugmsg = getClass().getName()+".getDriverOptions() ";  
-		
+		String debugmsg = getClass().getName()+".getDriverOptions() ";
+
 		String stafVariable = null;
 		try{ stafVariable = testRecordData.getTrimmedUnquotedInputRecordToken(2);}
 		catch(SAFSNullPointerException npx){;} //should never happen by this point
@@ -499,12 +514,12 @@ public class TIDDriverCommands extends GenericEngine {
 			standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
 	        return setTRDStatus(testRecordData,DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
 		}
-		
+
 	    Log.info(debugmsg +" staf variable: "+stafVariable);
-	    
+
 	    String optionName = "";
 	    String optionValue = null;
-	    
+
 	    try{
 	    	if(command.equalsIgnoreCase(GET_MILLIS_BETWEEN_RECORDS)){
 	    		optionName = "MillisBetweenRecords";
@@ -520,7 +535,7 @@ public class TIDDriverCommands extends GenericEngine {
 	    	//Save the optionValue to a staf variable
 	    	STAFHelper helper = testRecordData.getSTAFHelper();
 	    	boolean saveOk = helper.setVariable(stafVariable, optionValue);
-	      
+
 	    	if(saveOk){
 		    	message = GENStrings.convert(GENStrings.SUCCESS_2, command +" "+optionValue+" successful.", command, optionValue);
 		    	logMessage(message, null, AbstractLogFacility.GENERIC_MESSAGE);
@@ -539,8 +554,8 @@ public class TIDDriverCommands extends GenericEngine {
 	        return setTRDStatus(testRecordData,DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
 	    }
 	  }
-	
-	private long cmdWaitForGUI(boolean waitforgui){		
+
+	private long cmdWaitForGUI(boolean waitforgui){
 		String winname = null;
 		String compname = null;
 		String timeout = "15";
@@ -572,12 +587,12 @@ public class TIDDriverCommands extends GenericEngine {
         	winrec = testRecordData.getWindowGuiId();
         }catch(SAFSException e){}
 		if (( winrec==null)||(winrec.length()==0 )) {
-	        winrec = staf.getAppMapItem(mapname, winname, winname);        
+	        winrec = staf.getAppMapItem(mapname, winname, winname);
 		}
 		if (( winrec==null)||(winrec.length()==0 )) {
 			//bad_app_map_item  :Item '%1%' was not found in App Map '%2%'
-			message = failedText.convert("bad_app_map_item", 
-					"Item '"+winname +"' was not found in App Map '"+ mapname+"'", 
+			message = failedText.convert("bad_app_map_item",
+					"Item '"+winname +"' was not found in App Map '"+ mapname+"'",
 					winname, mapname);
 			standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
 			return setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
@@ -590,7 +605,7 @@ public class TIDDriverCommands extends GenericEngine {
 		testRecordData.setWindowName(winname);
 		testRecordData.setCompName(compname);
 		testRecordData.setWindowGuiId(winrec);
-		try{ 
+		try{
 			timeout = testRecordData.getTrimmedUnquotedInputRecordToken(4);
 			tseconds = Integer.parseInt(timeout);
 			if(tseconds < 0) tseconds = 0;
@@ -601,9 +616,9 @@ public class TIDDriverCommands extends GenericEngine {
 		catch(SAFSNullPointerException npx){;}
 		catch(IndexOutOfBoundsException ibx){;}
 		timeout = String.valueOf(tseconds).trim();
-		
-		try { 
-			ImageUtils.recaptureScreen();		
+
+		try {
+			ImageUtils.recaptureScreen();
 	        Rectangle winloc = null;
 	        String who = winname+":"+compname;
 	        long currenttime = System.currentTimeMillis();
@@ -615,15 +630,15 @@ public class TIDDriverCommands extends GenericEngine {
 		        try{
 		        	winloc = ImageUtils.findComponentRectangle(testRecordData,0);
 		        }catch(SAFSException x){
-					message = failedText.convert("bad_app_map_item", 
-							"Item '"+winname +"' was not found in App Map '"+ mapname+"'", 
+					message = failedText.convert("bad_app_map_item",
+							"Item '"+winname +"' was not found in App Map '"+ mapname+"'",
 							winname, mapname);
 					standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
 					return setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
 		        }catch(java.io.IOException iox){
 		        	who +=" "+ iox.getMessage();
-					message = FAILStrings.convert(FAILStrings.FILE_ERROR, 
-		        			"Error opening or reading or writing file '"+ who +"'", 
+					message = FAILStrings.convert(FAILStrings.FILE_ERROR,
+		        			"Error opening or reading or writing file '"+ who +"'",
 		        			who);
 					standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
 					return setTRDStatus(testRecordData, DriverConstant.STATUS_INVALID_FILE_IO);
@@ -631,16 +646,16 @@ public class TIDDriverCommands extends GenericEngine {
 		        // evaluate our wait success
 		        if (winloc==null){
 		        	if(!waitforgui){  // waitforguiGone
-		        		message = genericText.convert("gone_timeout", 
-		        				who +" was gone within timeout "+ timeout, 
+		        		message = genericText.convert("gone_timeout",
+		        				who +" was gone within timeout "+ timeout,
 		        				who, timeout);
 		        		logMessage( message, null, AbstractLogFacility.GENERIC_MESSAGE);
 		        		return setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
 		        	}
 		        }else{
 		        	if(waitforgui){
-		        		message = genericText.convert("found_timeout", 
-		        				who +" was found within timeout "+ timeout, 
+		        		message = genericText.convert("found_timeout",
+		        				who +" was found within timeout "+ timeout,
 		        				who, timeout);
 		        		logMessage( message, null, AbstractLogFacility.GENERIC_MESSAGE);
 		        		return setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
@@ -659,21 +674,21 @@ public class TIDDriverCommands extends GenericEngine {
 	        }while(notDone);
 	        //not_found_timeout   :%1% was not found within timeout %2%
 	        //not_gone_timeout    :%1% was not gone within timeout %2%
-	        String snap = saveTestRecordScreenToTestDirectory(testRecordData);	        
+	        String snap = saveTestRecordScreenToTestDirectory(testRecordData);
 	    	if(!waitforgui){  // waitforguiGone
-	    		message = genericText.convert("not_gone_timeout", 
-	    				who +" was not gone within timeout "+ timeout, 
+	    		message = genericText.convert("not_gone_timeout",
+	    				who +" was not gone within timeout "+ timeout,
 	    				who, timeout);
 			}else{ //waitforgui
-	    		message = genericText.convert("not_found_timeout", 
-	    				who +" was not found within timeout "+ timeout, 
+	    		message = genericText.convert("not_found_timeout",
+	    				who +" was not found within timeout "+ timeout,
 	    				who, timeout);
 			}
 			logMessage( message, who+":"+snap, AbstractLogFacility.WARNING_MESSAGE);
 			return setTRDStatus(testRecordData, DriverConstant.STATUS_SCRIPT_WARNING);
         }
 		catch(AWTException a){
-			message = FAILStrings.convert(FAILStrings.SUPPORT_NOT_FOUND, 
+			message = FAILStrings.convert(FAILStrings.SUPPORT_NOT_FOUND,
         			"Support for 'AWT Robot' not found.", "AWT Robot");
 			standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
 			return setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
@@ -699,7 +714,7 @@ public class TIDDriverCommands extends GenericEngine {
 			String pdir = driver.getProjectRootDir();
 			if (pdir != null) dir = new CaseInsensitiveFile(pdir, _path).toFile();
 		}
-		
+
 		if (!dir.isDirectory()) {
 			message = failedText.convert("bad_param", "Invalid parameter value for PATH", "PATH");
 			standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
@@ -707,7 +722,7 @@ public class TIDDriverCommands extends GenericEngine {
 		}
 		_path = dir.getAbsolutePath();
 		long _status = StatusCodes.SCRIPT_NOT_EXECUTED;
-		
+
 		//based on which Set keyword send to driver.set???Directory methods
 		if (command.equalsIgnoreCase(COMMAND_SETPROJECTDIRECTORY)){
 			_status = driver.setProjectRootDir(_path);
@@ -716,12 +731,12 @@ public class TIDDriverCommands extends GenericEngine {
 		}else if (command.equalsIgnoreCase(COMMAND_SETTESTDIRECTORY)){
 			_status = driver.setTestDir(_path);
 		}else if (command.equalsIgnoreCase(COMMAND_SETDIFDIRECTORY)){
-			_status = driver.setDifDir(_path);			
+			_status = driver.setDifDir(_path);
 		}else if (command.equalsIgnoreCase(COMMAND_SETROOTVERIFYDIRECTORY)){
 			_status = driver.setRootVerifyDir(_path);
 		}
-		
-		if ( _status == StatusCodes.NO_SCRIPT_FAILURE){		
+
+		if ( _status == StatusCodes.NO_SCRIPT_FAILURE){
 			simpleSuccessUsingMessage(testRecordData, command, _path, null);
 		}else if ( _status == StatusCodes.GENERAL_SCRIPT_FAILURE){
 			standardErrorMessage(testRecordData, command, testRecordData.getInputRecord());
@@ -756,7 +771,7 @@ public class TIDDriverCommands extends GenericEngine {
 		MapsInterface maps = driver.getMapsInterface();
 
 		maps.openMap(mapinfo);
-		
+
 		String note = genericText.convert("app_map_set", "Application Map set to "+ mappath, mappath);
 		logMessage( note, null, AbstractLogFacility.GENERIC_MESSAGE);
 		return setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
@@ -790,7 +805,7 @@ public class TIDDriverCommands extends GenericEngine {
 		MapsInterface maps = driver.getMapsInterface();
 
 		maps.closeMap(mapinfo);
-		
+
 		String note = genericText.convert("app_map_close", "Application Map '"+ mappath +"' closed.", mappath);
 		logMessage( note, null, AbstractLogFacility.GENERIC_MESSAGE);
 		return setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
@@ -820,11 +835,11 @@ public class TIDDriverCommands extends GenericEngine {
 		String bool = String.valueOf(set).toUpperCase();
 		String message = genericText.convert("something_set", command +" set to "+ bool, command, bool);
 		logMessage(message, null, AbstractLogFacility.GENERIC_MESSAGE);
-		return setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);		
+		return setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
 	}
 
 	/**
-	 * Do-nothing command.  The InputProcessor and SAFSINPUT has already set the 
+	 * Do-nothing command.  The InputProcessor and SAFSINPUT has already set the
 	 * variables by this point.
 	 */
 	private long cmdSetVariableValues(){
@@ -837,12 +852,12 @@ public class TIDDriverCommands extends GenericEngine {
 				varsraw.append("'"+ testRecordData.getTrimmedUnquotedInputRecordToken(field++) +"', ");
 			}catch(Exception x){ done = true;}
 		}
-		String vars = varsraw.length()> 0 ? 
+		String vars = varsraw.length()> 0 ?
 				      varsraw.substring(0, varsraw.lastIndexOf(",")) :
 				      varsraw.toString();
 		String note = command+" "+ vars +" ";
 		simpleSuccessMessage(testRecordData, note, null);
-		return setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);		
+		return setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
 	}
 
 	/**
@@ -867,44 +882,44 @@ public class TIDDriverCommands extends GenericEngine {
 		//driver.setVersion(mode);
 		String message = genericText.convert("something_set", command +" set to "+ mode, command, mode);
 		logMessage(message, null, AbstractLogFacility.GENERIC_MESSAGE);
-		return setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);		
+		return setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
 	}
 
     /**
-     * 
+     *
      */
     private long startEnginePreference(TestRecordHelper testRecordData, String preference){
     	try{
     		driver.startEnginePreference(preference);
-    		String message = genericText.convert("functions_preferred", 
+    		String message = genericText.convert("functions_preferred",
     		                 "Preference for "+ preference +" Functions ENABLED.", preference);
-			logMessage(message, null, AbstractLogFacility.GENERIC_MESSAGE);    		
-			return setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);		
-    	}catch(IllegalArgumentException iax){    		
-    		String message = failedText.convert("invalid_missing", 
-    		                 "Invalid or missing '"+ preference +"' parameter in "+ 
+			logMessage(message, null, AbstractLogFacility.GENERIC_MESSAGE);
+			return setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
+    	}catch(IllegalArgumentException iax){
+    		String message = failedText.convert("invalid_missing",
+    		                 "Invalid or missing '"+ preference +"' parameter in "+
                              testRecordData.getFilename() +" at line "+
                              String.valueOf(testRecordData.getLineNumber()),
                              preference, testRecordData.getFilename(), String.valueOf(testRecordData.getLineNumber()));
-			logMessage(message, testRecordData.getInputRecord(), AbstractLogFacility.FAILED_MESSAGE);    		    		
-			return setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);		
+			logMessage(message, testRecordData.getInputRecord(), AbstractLogFacility.FAILED_MESSAGE);
+			return setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
     	}
     }
-    
+
     /**
-     * 
+     *
      */
     private long endEnginePreference(TestRecordHelper testRecordData, String preference){
-    	try{ 
-    		driver.endEnginePreference(preference); 
+    	try{
+    		driver.endEnginePreference(preference);
     	}
     	catch(IllegalArgumentException iax){ }
-		String message = genericText.convert("functions_not_preferred", 
+		String message = genericText.convert("functions_not_preferred",
 		                 "Preference for "+ preference +" Functions DISABLED.", preference);
-		logMessage(message, null, AbstractLogFacility.GENERIC_MESSAGE);    		
-		return setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);		
+		logMessage(message, null, AbstractLogFacility.GENERIC_MESSAGE);
+		return setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
     }
-    
+
 	/**
 	 * UseFunctions DriverCommand processing.
 	 */
@@ -943,7 +958,7 @@ public class TIDDriverCommands extends GenericEngine {
 		}else if(command.equalsIgnoreCase(COMMAND_USEDROIDFUNCTIONS)){
 			engineName = DROID_ENGINE;
 		}
-		
+
 		return ((set)?startEnginePreference(testRecordData,engineName):endEnginePreference(testRecordData,engineName));
 	}
 
@@ -970,9 +985,9 @@ public class TIDDriverCommands extends GenericEngine {
 		//driver.setVersion(mode);
 		String message = genericText.convert("something_set", command +" set to "+ mode, command, mode);
 		logMessage(message, null, AbstractLogFacility.GENERIC_MESSAGE);
-		return setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);		
+		return setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
 	}
-	
+
 	/**
 	 * SetImageFuzzyMatching DriverCommand processing.
 	 */
@@ -996,9 +1011,9 @@ public class TIDDriverCommands extends GenericEngine {
 		//driver.setVersion(mode);
 		String message = genericText.convert("something_set", command +" set to "+ mode, command, mode);
 		logMessage(message, null, AbstractLogFacility.GENERIC_MESSAGE);
-		return setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);		
+		return setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
 	}
-	
+
 	  /**
 	   * set USE_MULTIPLE_THREADS to true or false.
 	   */
@@ -1023,27 +1038,27 @@ public class TIDDriverCommands extends GenericEngine {
 			logMessage(message, null, AbstractLogFacility.GENERIC_MESSAGE);
 			return setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
 	  }
-	  
+
 	  /**
 	   * Send email of result. User needs to specify Mail server information into .INI file as below:
-	   * <pre>  
+	   * <pre>
 	   *   [SAFS_DRIVERCOMMANDS]
 	   *   OUT_MAILSERVER="mail server"
 	   *   OUT_MAILSERVERPORT=25|465|587
 	   *   OUT_MAILSERVERPROTOCOL=SMTP|SMTPS|TLS
 	   *   OUT_MAILUSER=user.name@mail.com
 	   *   OUT_MAILPASS=*******
-	   *   
+	   *
 	   *   [SAFS_DRIVER]
 	   *   #SMTP=xxx (deprecated, replaced by OUT_MAILSERVER)
 	   *   #PORT=xxx (deprecated, replaced by OUT_MAILSERVERPORT)
-	   *   
-	   *</pre>   
+	   *
+	   *</pre>
 	   */
 	  private long sendEmail() {
-		  
+
 		  String debugmsg = StringUtils.debugmsg(false);
-		  
+
 		  String from = "";
 		  String tos = "";
 		  String subject = "";
@@ -1066,7 +1081,7 @@ public class TIDDriverCommands extends GenericEngine {
 			  return setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
 		  }
 		  host = host.trim();
-		  
+
 		  int port = Mailer.DEFAULT_PORT;
 		  String portStr = config.getNamedValue(DriverConstant.SECTION_SAFS_DRIVERCOMMANDS, MailConstant.OUT_MAILSERVERPORT);
 		  if(portStr==null) portStr = config.getNamedValue(DriverConstant.SECTION_SAFS_DRIVER, "PORT");
@@ -1079,7 +1094,7 @@ public class TIDDriverCommands extends GenericEngine {
 			  standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
 			  return setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
 		  }
-		  
+
 		  String protocolStr = config.getNamedValue(DriverConstant.SECTION_SAFS_DRIVERCOMMANDS, MailConstant.OUT_MAILSERVERPROTOCOL);
 		  Protocol protocol = Mailer.DEFAULT_PROTOCOL;
 		  if(protocolStr!=null){
@@ -1094,34 +1109,34 @@ public class TIDDriverCommands extends GenericEngine {
 				  return setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
 			  }
 		  }
-		  
+
 		  String user = config.getNamedValue(DriverConstant.SECTION_SAFS_DRIVERCOMMANDS, MailConstant.OUT_MAILUSER);
 		  if(user!=null) user = user.trim();
 		  String password = config.getNamedValue(DriverConstant.SECTION_SAFS_DRIVERCOMMANDS, MailConstant.OUT_MAILPASS);
 		  if(password!=null) password = password.trim();
-		  
+
 		  IndependantLog.debug(debugmsg+" configuration parameters: host="+host+"; port="+port+"; protocol="+protocol+"; user="+user+"; password=******");
-		  
+
 		  // from email address
 		  try{ from = testRecordData.getTrimmedUnquotedInputRecordToken(2);}
 			catch(SAFSNullPointerException npx){;} //should never happen by this point
-			catch(IndexOutOfBoundsException ibx){;}		  
+			catch(IndexOutOfBoundsException ibx){;}
 		  if ( from.length()==0 ) {
 				message = failedText.convert("bad_param", "Invalid parameter value for From", "FROM");
 				standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
 				return setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
 		  }
-		 
+
 		 // tos email address
 		  try{ tos = testRecordData.getTrimmedUnquotedInputRecordToken(3);}
 			catch(SAFSNullPointerException npx){;} //should never happen by this point
-			catch(IndexOutOfBoundsException ibx){;}		  
+			catch(IndexOutOfBoundsException ibx){;}
 		  if ( from.length()==0 ) {
 				message = failedText.convert("bad_param", "Invalid parameter value for To", "TO");
 				standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
 				return setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
 		  }
-		  
+
 		  // subjectline
 		  try{ subject = testRecordData.getTrimmedUnquotedInputRecordToken(4);}
 			catch(SAFSNullPointerException npx){;} //should never happen by this point
@@ -1131,7 +1146,7 @@ public class TIDDriverCommands extends GenericEngine {
 				standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
 				return setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
 		  }
-		  
+
 		  // message
 		  try{ msg = testRecordData.getTrimmedUnquotedInputRecordToken(5);}
 			catch(SAFSNullPointerException npx){;} //should never happen by this point
@@ -1141,49 +1156,49 @@ public class TIDDriverCommands extends GenericEngine {
 				standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
 				return setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
 		  }
-		  
+
 		  // attachment
 		  try{ attachment = testRecordData.getTrimmedUnquotedInputRecordToken(6);}
 			catch(SAFSNullPointerException npx){;} //should never happen by this point
 			catch(IndexOutOfBoundsException ibx){;}
-		 
-		  
+
+
 		  try{
 			  if(user!=null && password!=null){
 				  mailer = new Mailer(host, port, protocol, user, password);
 			  }else{
 				  mailer = new Mailer(host, port, protocol);
 			  }
-			  
+
 			  // set sender
 			  mailer.setSender(from);
 
 			  // set recipients
 			  Mailer.handleRecipients(tos, recipientsTo);
 			  recipients.put(Message.RecipientType.TO, recipientsTo);
-			 
+
 			  //Handle attachments
 			  Mailer.handleAttachments(attachment, attachments_alias);
-				
+
 			  //Handle message header, message footer, message content and its type
 			  HashMap<Integer/*the message order*/, MimeContent> contents = new HashMap<Integer/*the message order*/, MimeContent>();
-			  			 
+
 			  Mailer.addMessag(msg, msg_type, contents);
-				
+
 			  mailer.send(recipients, subject, contents , attachments_alias);
-			  
+
 	      }catch (Exception mex) {
 	         IndependantLog.error(debugmsg+" Fail to send email, due to "+StringUtils.debugmsg(mex));
 	         message = "Fail to send email.";
 			 standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
 		     return setTRDStatus(testRecordData,DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
-	      }		  
-		  
+	      }
+
 		// success! set status to ok
-		  
+
 		  simpleSuccessMessage(testRecordData, command, message);
 		  return setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
 	  }
-	  
+
 }
 

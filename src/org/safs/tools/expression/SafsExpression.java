@@ -1,4 +1,20 @@
-
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /*
  * Created on Feb 21, 2004 by Jack
  * OCT 04, 2004 Carl Nagle 	Added old-style substitute/extract variables processing for
@@ -30,7 +46,7 @@ import org.safs.StringUtils;
 import org.safs.tools.stringutils.StringUtilities;
 import org.safs.tools.vars.SimpleVarsInterface;
 /**
- * <pre> (Copied from <a href="http://safsdev.sourceforge.net/sqabasic2000/StringUtilities.htm#processexpression" target="_blank">RRAFS StringUtilities</a> -- the original implementation.)
+ * <pre> (Copied from <a href="/sqabasic2000/StringUtilities.htm#processexpression" target="_blank">RRAFS StringUtilities</a> -- the original implementation.)
  *
       Given an expression attempt to locate variable assignment references
       and other operators and process the expressions into a result string.

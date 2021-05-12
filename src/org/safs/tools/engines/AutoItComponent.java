@@ -1,7 +1,20 @@
-/** Copyright (C) SAS Institute All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * Logs for developers, not published to API DOC.
  *
@@ -23,6 +36,10 @@
  * NOV 03, 2016 Tao Xie Add 'HoverMouse' keyword: provide its execution method 'performHoverMouse()'.
  * APR 05, 2017 Lei Wang Modified process(): catch SAFSObjectRecognitionException when creating AutoItRs.
  *                     Modified activate(): moved it to AutoItLib.
+ * MAR 29, 2019 Lei Wang Modified localProcess(), commandProcess(): skip the keyword if the RS is not in AUTOIT format.
+ * APR 02, 2019 Lei Wang Modified commandProcess(): skip the keyword if the RS is null.
+ * SEP 17, 2019 Lei Wang Modified commandProcess(): don't check if the RS is in AUTOIT format, we have checked it in localProcess(),
+ *                                                 commandProcess() is called after localProcess() in class DriverCommand.
  */
 package org.safs.tools.engines;
 
@@ -73,6 +90,10 @@ public class AutoItComponent extends GenericEngine {
 
 	/** "SAFS/AUTOITComponent" */
 	public static final String ENGINE_NAME  = "SAFS/AUTOITComponent";
+	/** 'v3' */ //Au3Info.exe
+	public static final String ENGINE_VERSION = "v3";
+	/** 'The engine using AutoIt to automate the Windows GUI.' */
+	public static final String ENGINE_DESCRIPTION = "The engine using AutoIt to automate the Windows GUI.";
 
 	/** "AUTOITComponent" */
 	public static final String AUTOITCOMPONENT_ENGINE  = "AUTOITComponent";
@@ -102,6 +123,9 @@ public class AutoItComponent extends GenericEngine {
 			Log.error(StringUtils.debugmsg(false)+" Fail to get AutoIt Instance, due to "+StringUtils.debugmsg(e));
 		}
 		servicename = ENGINE_NAME;
+		productName = ENGINE_NAME;
+		version = ENGINE_VERSION;
+		description = ENGINE_DESCRIPTION;
 	}
 
 	/**
@@ -116,6 +140,7 @@ public class AutoItComponent extends GenericEngine {
 	/**
 	 * @see GenericEngine#launchInterface(Object)
 	 */
+	@Override
 	public void launchInterface(Object configInfo){
 		super.launchInterface(configInfo);
 		log = new LogUtilities(this.staf);
@@ -125,6 +150,7 @@ public class AutoItComponent extends GenericEngine {
 		adc.setLogUtilities(log);
 	}
 
+	@Override
 	public long processRecord (TestRecordHelper testRecordData){
 
 		if(Processor.isComponentFunctionRecord(testRecordData.getRecordType()) ||
@@ -311,6 +337,7 @@ public class AutoItComponent extends GenericEngine {
 			super();
 		}
 
+		@Override
 		protected void localProcess(){
 			String debugmsg = StringUtils.debugmsg(false);
 			mapname = testRecordData.getAppMapName();
@@ -334,17 +361,30 @@ public class AutoItComponent extends GenericEngine {
 
 				Log.info(debugmsg + " winrec: "+ winrec +"; comprec: "+ comprec);
 
-				//prepare Autoit RS
-				if(StringUtils.isValid(winrec) && StringUtils.isValid(comprec)){
-					rs = new AutoItRs(winrec,comprec);
-				}
+				if (!AutoItRs.isAutoitBasedRecognition(winrec)){
+					Log.info(debugmsg + " skipping due to non-AutoIt recognition.");
+		        	testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
+		        	return;
+		        }
+
+				//prepare Autoit RS: we don't need to check the validity of 'winrec' and 'comprec', the AutoItRs-constructor will check it.
+				rs = new AutoItRs(winrec,comprec);
+
 			}catch(SAFSException e){
 				Log.debug(debugmsg + "recognition strings missing or invalid for AutoIt engine.");
 			}
-
 		}
 
+		@Override
 		protected void commandProcess() {
+
+			String debugmsg = StringUtils.debugmsg(false);
+			if(rs==null){
+				Log.warn(debugmsg+" skipping due to AutoIt recognition 'rs' is null.");
+	        	testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
+	        	return;
+			}
+
 			if(DDDriverCommands.WAITFORGUI_KEYWORD.equalsIgnoreCase(command)){
 				waitForGui(true);
 			}else if(DDDriverCommands.WAITFORGUIGONE_KEYWORD.equalsIgnoreCase(command)){
@@ -443,8 +483,8 @@ public class AutoItComponent extends GenericEngine {
 				setTRDStatus(testRecordData, DriverConstant.STATUS_SCRIPT_WARNING);
 				return;
 			}catch(Exception a){
-				message = FAILStrings.convert(FAILStrings.SUPPORT_NOT_FOUND,
-						"Support for 'AWT Robot' not found.", "AWT Robot");
+				Log.error(debugmsg+" failed, due to "+a.toString());
+				message = FAILStrings.convert(FAILStrings.FAILURE_1, "Unable to perform 'WaitForGUI'.", "WaitForGUI");
 				standardErrorMessage(testRecordData, message, testRecordData.getInputRecord());
 				setTRDStatus(testRecordData, DriverConstant.STATUS_GENERAL_SCRIPT_FAILURE);
 				return;
@@ -785,7 +825,7 @@ public class AutoItComponent extends GenericEngine {
 	            return;
 	        }
 
-            String text = ( String ) iterator.next( );
+            String text = iterator.next( );
 			if((text==null)||(text.length()==0)){
 	            this.issueParameterValueFailure("TextValue");
 	            return;
@@ -813,6 +853,7 @@ public class AutoItComponent extends GenericEngine {
 
 		/** <br><em>Purpose:</em> restore
 		 **/
+		@Override
 		protected void _restore() throws SAFSException{
 			String debugmsg = StringUtils.debugmsg(false);
 			try{
@@ -825,6 +866,7 @@ public class AutoItComponent extends GenericEngine {
 			}
 		}
 
+		@Override
 		protected void _setPosition(Point position) throws SAFSException {
 			String debugmsg = StringUtils.debugmsg(false);
 			try{
@@ -836,6 +878,7 @@ public class AutoItComponent extends GenericEngine {
 			}
 		}
 
+		@Override
 		protected void _setSize(Dimension size) throws SAFSException {
 			String debugmsg = StringUtils.debugmsg(false);
 			try{
@@ -853,6 +896,7 @@ public class AutoItComponent extends GenericEngine {
 
 		/** <br><em>Purpose:</em> minimize
 		 **/
+		@Override
 		protected void _minimize() throws SAFSException{
 			String debugmsg = StringUtils.debugmsg(false);
 			try{
@@ -865,6 +909,7 @@ public class AutoItComponent extends GenericEngine {
 		}
 		/** <br><em>Purpose:</em> maximize
 		 **/
+		@Override
 		protected void _maximize() throws SAFSException{
 			String debugmsg = StringUtils.debugmsg(false);
 			try{
@@ -895,10 +940,12 @@ public class AutoItComponent extends GenericEngine {
 			}
 		}
 
+		@Override
 		protected Rectangle getComponentRectangle(){
 			return getComponentRectangleOnScreen();
 		}
 
+		@Override
 		protected Rectangle getComponentRectangleOnScreen(){
 			String debugmsg = StringUtils.debugmsg(false);
 			Rectangle rectangle = null;

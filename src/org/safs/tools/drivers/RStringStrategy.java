@@ -1,3 +1,20 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.tools.drivers;
 
 import javax.swing.*; 
@@ -18,7 +35,7 @@ import java.awt.*;
  *                                Change the GUI of RStringStrategySettings adding 'Use Index Only' option.
  *         DEC 29, 2009 (JunwuMa) Add class doChildrenOptions for SPC to call and decide if ignore the children of TLC, 
  *                                TLC stands for TABLE/LISTBOX/LISTVIEW/COMBOBOX. Sometimes, the components embedded in TLC are cared by user.
- *         SEP 27, 2010 (LeiWang) Add some option names;
+ *         SEP 27, 2010 (Lei Wang) Add some option names;
  *                                Add "use generic type" functionality. Not in use yet, if need, just un-comment one line in method populateFrame()
  *         AUG 14, 2013 (Carl Nagle)  Added useClassNotSubType to allow Class= over Type= even when a superclass does match to a known Type.                                
  */

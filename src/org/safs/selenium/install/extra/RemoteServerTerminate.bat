@@ -13,7 +13,11 @@ REM Copyright (C) SAS Institute
 REM General Public License: http://www.opensource.org/licenses/gpl-license.php
 REM **************************************************************************
 
-cscript "%SELENIUM_PLUS%\extra\ProcessKiller.vbs" -process java.exe -command selenium-server-standalone -noprompt
+REM kill "selenium server" started by selenium-server-standalone-xxx.jar
+cscript "%SELENIUM_PLUS%\extra\ProcessKiller.vbs" -process java.exe -command selenium-server-standalone -ignoredCommand JSTAFEmbedded.jar -noprompt
+
+REM kill the "selenium server" started by our class "SeleniumServerRunner"
+cscript "%SELENIUM_PLUS%\extra\ProcessKiller.vbs" -process java.exe -command SeleniumServerRunner -noprompt
 
 cscript "%SELENIUM_PLUS%\extra\ProcessKiller.vbs" -process cmd.exe -command RemoteServer.bat -noprompt
 

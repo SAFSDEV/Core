@@ -1,13 +1,27 @@
-/** Copyright (C) (SAS) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.tools.drivers;
 /**
  * History:<br>
  *
  * <br>	Oct 26, 2010	(Carl Nagle) 	Refactored to support separate misc config initialization
- * <br>	Jul 25, 2011	(LeiWang) 	Refactored to support SAFSMonitor
- * <br>	Nov 10, 2014	(LeiWang) 	Modify processExpression(): if Expression is off, do not call resolveExpressions().
+ * <br>	Jul 25, 2011	(Lei Wang) 	Refactored to support SAFSMonitor
+ * <br>	Nov 10, 2014	(Lei Wang) 	Modify processExpression(): if Expression is off, do not call resolveExpressions().
  * <br>	Nov 14, 2014	(Carl Nagle) 	Added static getFirstNonSAFSStackTraceElement support.
  * <br>                             TestRecordData now initialized with caller filename Class#method and linenumber.
  * <br>	Dec 17, 2014	(Lei Wang) 	Move codes from runXXXDirect() to processCommandDirect(): delay 'millisBetweenRecords' after execution.
@@ -20,6 +34,8 @@ package org.safs.tools.drivers;
  *                                  Added _test_keeping_doubleQuote(): test above modifications.
  * <br>	MAY 27, 2017	(Lei Wang) 	Added resolveExpression(expression, sep, varsInterface): other processExpression(), resolveExpression() will call this one so that
  *                                  the resolve behavior will be the same and easy to maintain.
+ * <br>	APR 18, 2018	(Lei Wang) 	Modified constructor JSAFSDriver(): Set product's name, version and description.
+ * <br>	OCT 10, 2018	(Lei Wang) 	Modified getFirstNonSAFSStackTraceElement(): Skip the classes from more packages (besides org.safs) org.springframework, sun.reflect and java.lang.reflect
  */
 import java.util.ListIterator;
 
@@ -62,7 +78,7 @@ import org.safs.tools.vars.VarsInterface;
  * <br>jsafs.processCommand(AbstractCommand, String);
  * <br>jsafs.shutdown();
  * <p>
- * <a href="http://safsdev.sourceforge.net/sqabasic2000/UsingJSAFS.htm#advancedruntime" target="_blank" alt="Using JSAFS Doc">Using JSAFS</a>.
+ * <a href="/sqabasic2000/UsingJSAFS.htm#advancedruntime" target="_blank" alt="Using JSAFS Doc">Using JSAFS</a>.
  */
 public class JSAFSDriver extends DefaultDriver implements ITestRecordStackable{
 
@@ -70,6 +86,13 @@ public class JSAFSDriver extends DefaultDriver implements ITestRecordStackable{
 	public static final String ADVANCED_RUNTIME_TABLE = "Advanced Runtime";
 	public static final String ADVANCED_RUNTIME_LEVEL = "STEP";
 	public static final String ADVANCED_RUNTIME_PACKAGEROOT = "org.safs";
+
+	/** 'JSAFS DRIVER'  */
+	public static final String PRODUCT_NAME = "JSAFS DRIVER";
+	/** '1.0' */
+	public static final String PRODUCT_VERSION = "1.0";
+	/** 'The driver to run test script in Java.' */
+	public static final String PRODUCT_DESCRIPTION = "The driver to run test script in Java.";
 
 	public StatusCounter statuscounter = null;
 	public TestRecordHelper testRecordHelper = null;
@@ -115,6 +138,9 @@ public class JSAFSDriver extends DefaultDriver implements ITestRecordStackable{
 
 	public JSAFSDriver(String drivername) {
 		this.driverName = drivername;
+		this.productName = PRODUCT_NAME;
+		this.version = PRODUCT_VERSION;
+		this.description = PRODUCT_DESCRIPTION;
 		automaticResolve = AUTO_RESOLVE_TESTRECORD;
 	}
 
@@ -205,12 +231,12 @@ public class JSAFSDriver extends DefaultDriver implements ITestRecordStackable{
 
 	/**
 	 * Convenience routine to retrieve the value of a SAFS Variable stored in SAFSVARS.
-	 * <br>This will exploit the <a href="http://safsdev.sourceforge.net/sqabasic2000/CreateAppMap.htm#ddv_lookup" target="_blank">SAFSMAPS look-thru</a>
-	 * and <a href="http://safsdev.sourceforge.net/sqabasic2000/TestDesignGuidelines.htm#AppMapChaining" target="_blank">app map chaining</a> mechanism.
+	 * <br>This will exploit the <a href="/sqabasic2000/CreateAppMap.htm#ddv_lookup" target="_blank">SAFSMAPS look-thru</a>
+	 * and <a href="/sqabasic2000/TestDesignGuidelines.htm#AppMapChaining" target="_blank">app map chaining</a> mechanism.
 	 * <br>That is, any variable that does NOT exist in SAFSVARS will be sought as an
 	 * ApplicationConstant in the SAFSMAPS service.
 	 * <p>
-	 * See <a href="http://safsdev.sourceforge.net/sqabasic2000/TestDesignGuidelines.htm" target="_blank">Test Design Guidelines for Localization</a>.
+	 * See <a href="/sqabasic2000/TestDesignGuidelines.htm" target="_blank">Test Design Guidelines for Localization</a>.
 	 * @param varname
 	 * @return String value, or an empty String.
 	 * @see #getVarsInterface()
@@ -284,7 +310,7 @@ public class JSAFSDriver extends DefaultDriver implements ITestRecordStackable{
 
 	/**
 	 * Convenience routine to retrieve the value resulting from
-	 * a <a href="http://safsdev.github.io/doc/org/safs/tools/expression/SafsExpression.html" target="_blank">standard SAFS Expression</a>,
+	 * a <a href="/doc/org/safs/tools/expression/SafsExpression.html" target="_blank">standard SAFS Expression</a>,
 	 * <br>
 	 * The routine provides support identical to SAFS InputRecord expression processing.
 	 * However, it assumes (and requires) that only a single value/expression/field
@@ -432,7 +458,7 @@ public class JSAFSDriver extends DefaultDriver implements ITestRecordStackable{
 		//     3.3 the resolved field will be double-quoted
 		String resolvedExpression = varService.resolveExpressions(testRecord, separator);
 
-		//LeiWang: current strategy to handle the wrapping double quote in the result
+		//Lei Wang: current strategy to handle the wrapping double quote in the result
 		//If originalExpression contains more than one field, we will NOT remove the wrapping double quote
 		//If originalExpression contains only one field,
 		//   if the original field is double-quoted, then do NOT remove the wrapping double quote
@@ -441,10 +467,10 @@ public class JSAFSDriver extends DefaultDriver implements ITestRecordStackable{
 	}
 
 	/**
-	 * Convenience routine to lookup the mapped value stored in the <a href="http://safsdev.sourceforge.net/sqabasic2000/TestDesignGuidelines.htm#AppMapChaining" target="_blank">App Map chain</a>.
-	 * <br>This should support <a href="http://safsdev.sourceforge.net/sqabasic2000/TestDesignGuidelines.htm#AppMapResolve" target="_blank" alt="Dynamic Recognition Strings Doc">dynamic recognition strings</a>.
+	 * Convenience routine to lookup the mapped value stored in the <a href="/sqabasic2000/TestDesignGuidelines.htm#AppMapChaining" target="_blank">App Map chain</a>.
+	 * <br>This should support <a href="/sqabasic2000/TestDesignGuidelines.htm#AppMapResolve" target="_blank" alt="Dynamic Recognition Strings Doc">dynamic recognition strings</a>.
 	 * <p>
-	 * See <a href="http://safsdev.sourceforge.net/sqabasic2000/TestDesignGuidelines.htm" target="_blank">Test Design Guidelines for Localization</a>.
+	 * See <a href="/sqabasic2000/TestDesignGuidelines.htm" target="_blank">Test Design Guidelines for Localization</a>.
 	 *
 	 * @param mapid -- Name\ID of the Map to use for the lookup. Use null for Default Map.
 	 * @param section -- Name of the Section in the Map for the lookup. Use null for Default Section [ApplicationConstants].
@@ -500,6 +526,7 @@ public class JSAFSDriver extends DefaultDriver implements ITestRecordStackable{
 	 * Then set the separator {@link #SEPARATOR} according to current test level.<br>
 	 * @see org.safs.tools.drivers.DefaultDriver#validateTestParameters()
 	 */
+	@Override
 	protected void validateTestParameters(){
 		try{
 			//The test parameter information is optional, so if they don't exist, it is ok.
@@ -926,6 +953,7 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 	 * {@link TestRecordHelper#getStatusInfo()}
 	 * @deprecated call {@link #processCommandDirect(AbstractCommand, String)} instead
 	 */
+	@Deprecated
 	protected TestRecordHelper runDriverCommandDirect(DriverCommand command, String separator){
 		return processCommandDirect(command, separator);
 	}
@@ -979,6 +1007,7 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 	 * {@link TestRecordHelper#getStatusInfo()}
 	 * @deprecated call {@link #processCommandDirect(AbstractCommand, String)} instead
 	 */
+	@Deprecated
 	protected TestRecordHelper runComponentFunctionDirect(ComponentFunction command, String separator){
 		return processCommandDirect(command, separator);
 	}
@@ -1113,7 +1142,10 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 	 * {@link #openTestLogs()}<br/>
 	 * initialize {@link #statuscounter}<br/>
 	 */
+	@Override
 	public void run(){
+		String safsDataServiceID = null;
+
 		try{
 		    System.out.println("Validating Root Configure Parameters...");
 		    validateRootConfigureParameters(true);
@@ -1126,8 +1158,12 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 		    launchSAFSMonitor();
 		    initializePresetVariables();
 		    initializeMiscConfigInfo();
+		    connectSAFSDataService();
 		    initializeRuntimeEngines();
 		    openTestLogs();
+
+			phoneHome();
+
 			statuscounter = statuscounts instanceof StatusCounter ? (StatusCounter)statuscounts: new StatusCounter();
 			counterInfo = counterInfo == null ?
 					new UniqueStringCounterInfo(cycleLog.getStringID(), DriverConstant.DRIVER_CYCLE_TESTLEVEL):
@@ -1175,9 +1211,11 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 			System.err.println("Ignoring JSAFS shutdownRuntimeInterfaces "+ t.getClass().getSimpleName()+": "+ t.getMessage());
 			t.printStackTrace();
 		}
+
 		try{
 			if (safsmonitor != null) {
 				Thread mThread = new Thread(){
+					@Override
 					public void run(){
 						safsmonitor.dispose();
 					}
@@ -1190,19 +1228,22 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 			System.err.println("Ignoring JSAFS SAFS Monitor "+ t.getClass().getSimpleName()+": "+ t.getMessage());
 			t.printStackTrace();
 		}
+
+		disconnectSAFSDataService();
 	}
 
 	/**
 	 * Required abstract method is never really called since we have overridden {@link #run()}
 	 * @return {@link #statuscounter}
 	 */
+	@Override
 	protected StatusInterface processTest() {
 		return statuscounter;
 	}
 
 	/**
 	 * Examine the calling Thread's Stack Trace and return the first StackTraceElement that is NOT from
-	 * the org.safs... package hierarchy.
+	 * the org.safs or org.springframework or sun.reflect or java.lang.reflect ... package hierarchy.
 	 * @return the first StackTraceElement that is NOT from somewhere in the org.safs package hierarchy, or null if
 	 * we cannot deduce one.
 	 */
@@ -1211,7 +1252,14 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 		StackTraceElement[] stack = Thread.currentThread().getStackTrace();
 		for(int i=1; i < stack.length; i++){
 			element = stack[i];
-			if(!element.getClassName().startsWith(ADVANCED_RUNTIME_PACKAGEROOT)) return element;
+			//skip the classes from package org.safs, org.springframework, sun.reflect, java.lang.reflect
+			if(element.getClassName().startsWith(ADVANCED_RUNTIME_PACKAGEROOT)
+			   || element.getClassName().startsWith("org.springframework")
+			   ||  element.getClassName().startsWith("sun.reflect")
+			   || element.getClassName().startsWith("java.lang.reflect")
+			   ) continue;
+
+			return element;
 		}
 		return null;
 	}
@@ -1227,6 +1275,7 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 	 * @see #processCommandDirect(AbstractCommand, String)
 	 * @see #popTestRecord()
 	 */
+	@Override
 	public void pushTestRecord(TestRecordData trd) {
 		testrecordStackable.pushTestRecord(trd);
 	}
@@ -1243,6 +1292,7 @@ holdloop:	while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 	 * @see #pushTestRecord()
 	 * @return TestRecordData, the 'Test Record' on top of the stack
 	 */
+	@Override
 	public TestRecordData popTestRecord() {
 		String debugmsg = StringUtils.debugmsg(false);
 		DefaultTestRecordStackable.debug(debugmsg+"Current test record: "+StringUtils.toStringWithAddress(testRecordHelper));

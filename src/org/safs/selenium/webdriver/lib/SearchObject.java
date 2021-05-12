@@ -1,8 +1,20 @@
 /**
  * Copyright (C) SAS Institute, All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-package org.safs.selenium.webdriver.lib;
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * History:<br>
  *
@@ -14,20 +26,20 @@ package org.safs.selenium.webdriver.lib;
  *  <br>  MAR 27, 2014    (Lei Wang) Add ability to search by XPATH and CSS.
  *  <br>  APR 14, 2014    (Lei Wang) Add ability to listener to a javascript event. Rename some functions.
  *  <br>  AUG 12, 2014    (Lei Wang) Modify method getObject(): return null if no webelement can be found.
- *  <br>  AUG 27, 2014    (LeiWang) Modify method getObject(): Get element inside a frame if no FrameRS
+ *  <br>  AUG 27, 2014    (Lei Wang) Modify method getObject(): Get element inside a frame if no FrameRS
  *                                      is preceding RS of a child in map file; we consider that the child is
  *                                      in the same frame as parent.
  *  <br>  AUG 29, 2014    (DHARMESH) Add selenium grid host and port support.
- *  <br>  OCT 22, 2014    (LeiWang) Modify method getObject(): use webdriver to find frame webelement to avoid StaleElementException.
- *  <br>  OCT 29, 2014    (LeiWang) Add support for qualifier 'ItemIndex', 'Path', 'Property' and 'PropertyContains'.
+ *  <br>  OCT 22, 2014    (Lei Wang) Modify method getObject(): use webdriver to find frame webelement to avoid StaleElementException.
+ *  <br>  OCT 29, 2014    (Lei Wang) Add support for qualifier 'ItemIndex', 'Path', 'Property' and 'PropertyContains'.
  *                                  Add support for prefix ':PASM:'.
- *  <br>  NOV 05, 2014    (LeiWang) Add pageHasChanged(): to detect if the web page url has changed.
- *  <br>  NOV 28, 2014    (LeiWang) Modify executeScript(): detect javascript error and throw JSException.
+ *  <br>  NOV 05, 2014    (Lei Wang) Add pageHasChanged(): to detect if the web page url has changed.
+ *  <br>  NOV 28, 2014    (Lei Wang) Modify executeScript(): detect javascript error and throw JSException.
  *                                  Add js_xxx(): to manipulate javascript error global variable.
- *  <br>  DEC 05, 2014    (LeiWang) Modify getObject(): Fix frame window recognition string definition error.
- *  <br>  DEC 11, 2014    (LeiWang) Modify isSapComponent() etc: fix the domain-detection failure.
- *  <br>  JAN 05, 2015    (LeiWang) Modify executeScript(): get javascript debug messages and write to debug log.
- *  <br>  JUL 23, 2015    (LeiWang) Add js_getGlobalVariable(), js_setGlobalVariable()
+ *  <br>  DEC 05, 2014    (Lei Wang) Modify getObject(): Fix frame window recognition string definition error.
+ *  <br>  DEC 11, 2014    (Lei Wang) Modify isSapComponent() etc: fix the domain-detection failure.
+ *  <br>  JAN 05, 2015    (Lei Wang) Modify executeScript(): get javascript debug messages and write to debug log.
+ *  <br>  JUL 23, 2015    (Lei Wang) Add js_getGlobalVariable(), js_setGlobalVariable()
  *                                  modify js_getGlobalBoolVariable(), js_setGlobalBoolVariable().
  *  <br>  OCT 30, 2015    (Lei Wang)  Move method isVisible(), isDisplayed and isStale() to this class from WDLibrary.
  *                                  Add method highlightThenClear(). Modify highlight(WebElement): check stale.
@@ -46,7 +58,43 @@ package org.safs.selenium.webdriver.lib;
  *                                  Modified getAllWindowTitles(): return titles for all opened window for all WebDrivers.
  *  <br>  MAY 22, 2017    (Lei Wang)  Added isValidBrowserID().
  *                                  Modified removeWebDriver(): call isValidBrowserID() to check the validity of browser ID.
+ *  <br>  JUN 28, 2017    (Lei Wang)  Modified getObjectByQualifier(): support deprecated CSS function contains() to keep compatible with Selenium IDE's script.
+ *  <br>  NOV 10, 2017    (Lei Wang)  Modified method SearchObject.js_executeWithTimeout() to catch NoSuchSessionException.
+ *  <br>  DEC 19, 2017    (Lei Wang)  Added method getCurrentFrame() and getCurrentFrameName().
+ *  <br>  DEC 19, 2017    (Lei Wang)  Modified getFrameWebElement(): it takes a very long time to find a frame with tag.
+ *                                                                 It seems that tag 'iframe' is more often used then 'frame', so try 'iframe' first to save time.
+ *                                  Modified getWebElement(): Use xpath "(E)[n]" to get the nth E element: while "E[n]" represents the nth child of element E, should not use it.
+ *  <br>  JUL 18, 2018    (Lei Wang)  Added getPreMatchedObjectsByText(): search element by both "text()=xxx" and "@value=xxx". Use getText(webelement) instead of webelement.getText().
+ *                                  Modified getObjectByText() and getObjectsByText() to call getPreMatchedObjectsByText().
+ *  <br>  AUG 01, 2018    (Lei Wang)  Added back() and forward().
+ *  <br>  AUG 29, 2018    (Lei Wang)  Modified getText(): if we can get the text by webelement.getText(),
+ *                                                       we don't waste more time to call getValue(), which usually takes more time to process.
+ *                                   Moved some code from getPreMatchedObjectsByText() to getPreMatchedObjectsByAttributeValue(): move the part of searching by element's attribute 'value'.
+ *                                   Modified getObjectByText(): firstly try to match with elements returned from getPreMatchedObjectsByText(), if not found then  match with elements returned from getPreMatchedObjectsByAttributeValue().
+ *  <br>  DEC 06, 2018    (Lei Wang)  Added method generateSAFSFrameRecognition().
+ *  <br>  JAN 10, 2019    (Lei Wang)  Modified method switchFrameAsLastFrame(): create FrameElement before really switching the the new frame to avoid the StaleElementReferenceException.
+ *  <br>  JAN 10, 2019    (Carl Nagle)   Support switching frame by bare frame name or id and id= and name= frameRS prefixes.
+ *  <br>  JAN 11, 2019    (Lei Wang)  Modified method _switchFrames(): If we bypass the 'frame reset', then user will handle the frame-switch by himself.
+ *  <br>  MAR 19, 2019    (Lei Wang)  Modified method containFrameRS(),isValidFrameRS(): check also 'IFRAMEID'.
+ *  <br>  MAR 21, 2019    (Lei Wang)  Added checkWindowRS(): Reset the 'lastFrame' to null if the window's RS doesn't contain frame information.
+ *  <br>  JUL 04, 2019    (Lei Wang)  Modified _switchFrames(): move some code to method initializeBrowserWindow().
+ *                                   Modified getLastBrowserWindow(): if the lastBrowserWindow is null, then call initializeBrowserWindow().
+ *  <br>  SEP 06, 2019    (Lei Wang)  Fixed error of method getCurrentFrame(): webdriver cannot get the frame webelement in itself frame context.
+ *                                   Added methods switchToParentFrame(), getCurrentFrameID().
+ *                                   Moved frames related methods from AISearchBase to here.
+ *  <br>  SEP 11, 2019    (Lei Wang)  Added _getCurrentFrame(), modified _switchFrames(): print out the current frame before/after switching frame.
+ *                                   Modified switchToFrame(): change the field 'lastFrame' at the same time.
+ *  <br>  SEP 12, 2019    (Lei Wang)  Modified _switchFrames(): if the 'bypass frame reset' is true, we ignore the 'frame settings' in the RS.
+ *  <br>  SEP 18, 2019    (Lei Wang)  Modified initializeBrowserWindow(): if we are not in the top most document, we will not modify the field 'lastBrowserWindow'.
+ *                                   Modified switchToFrame(): call getLastBrowserWindow() so that the 'lastBrowserWindow' will be initialized.
+ *  <br>  SEP 19, 2019    (Lei Wang)  Moved getProperty(), getProperties() and getCssValues() from WDLibrary to here.
+ *                                   Modified FrameElement: add a map holding frame's properties.
+ *                                   Added field needFreshWindow to indicate if we need the latest window's information.
+ *                                   Modified generateFrameTree(): generate the frame tree to hold FrameElement as tree node's content.
+ *  <br>  SEP 25, 2019    (Lei Wang)  Added resetLastFrame()
  */
+package org.safs.selenium.webdriver.lib;
+
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.AbstractMap.SimpleEntry;
@@ -66,10 +114,12 @@ import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.InvalidSelectorException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.NoSuchSessionException;
 import org.openqa.selenium.NoSuchWindowException;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.Point;
@@ -77,28 +127,33 @@ import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriver.TargetLocator;
 import org.openqa.selenium.WebDriver.Window;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.safs.Arbre;
+import org.safs.Constants.HTMLConst;
 import org.safs.GuiObjectRecognition;
 import org.safs.GuiObjectVector;
 import org.safs.IndependantLog;
 import org.safs.Processor;
 import org.safs.SAFSException;
+import org.safs.SAFSObjectNotFoundException;
 import org.safs.StringUtils;
+import org.safs.net.NetUtilities;
 import org.safs.selenium.util.JSException;
 import org.safs.selenium.util.JavaScriptFunctions;
 import org.safs.selenium.webdriver.SeleniumPlus.WDTimeOut;
 import org.safs.selenium.webdriver.WebDriverGUIUtilities;
+import org.safs.selenium.webdriver.lib.RS.CSS;
 import org.safs.selenium.webdriver.lib.RS.XPATH;
 import org.safs.selenium.webdriver.lib.RemoteDriver.SessionInfo;
+import org.safs.selenium.webdriver.lib.model.Accessibility;
 import org.safs.selenium.webdriver.lib.model.Element;
 import org.safs.selenium.webdriver.lib.model.TextMatchingCriterion;
+import org.safs.tools.drivers.DriverConstant.SeleniumConfigConstant;
 import org.safs.tools.stringutils.StringUtilities;
-
-import com.thoughtworks.selenium.SeleniumException;
 
 /**
  * Primary class used to find WebElements with Selenium WebDriver.
@@ -201,27 +256,259 @@ public class SearchObject {
 	protected static JavascriptExecutor lastJS;
 
 	/**
-	 * The frame object where the current GUI-component locate. If there is no frame, its value should be null.
-	 * @see #getObject(SearchContext, String)
+	 * If we need to check the current frame context matching the {@link #lastFrame}. The default value is false.
+	 */
+	public static boolean checkCurrentFrameContext = false;
+
+	/**
+	 * By default, search algorithms begin every search by switching back ("frames reset") to the topmost root HTML document (frame)
+	 * and switch frame automatically according to the 'recognition string' during the component search.<br>
+	 * Set bypassFramesReset to true if you wish to disable this "frames reset" and focus on the last frame context for component search.<br>
+	 */
+	public static void setBypassFramesReset(boolean bypass) {
+		System.setProperty(SeleniumConfigConstant.PROPERTY_BYPASS_FRAME_RESET, Boolean.toString(bypass));
+		if(bypass){
+			IndependantLog.debug("User has set the '"+SeleniumConfigConstant.PROPERTY_BYPASS_FRAME_RESET+"' to true, "
+					+ "selenium will not switch back to the topmost frame, it will search on the last switched Frame.");
+		}
+	}
+	/**
+	 * By default, search algorithms begin every search by switching back ("frames reset") to the topmost root HTML document (frame).<br>
+	 * and switch frame automatically according to the 'recognition string' during the component search.<br>
+	 * This 'bypassFramesReset' decides if this "frames reset" will be attempted at the beginning of every component search.<br>
+	 * If it is true, that means that we don't do "frames reset" and focus on the last frame context for component search.<br>
+	 * @return boolean, the current bypassFramesReset value.
+	 */
+	public static boolean getBypassFramesReset() {
+		return Boolean.parseBoolean(System.getProperty(SeleniumConfigConstant.PROPERTY_BYPASS_FRAME_RESET));
+	}
+
+	/**
+	 * By default, our library will handle click actions by Robot firstly, if failed then handle it by selenium.
+	 * Set bypassRobot to true if you wish to skip the Robot and let the selenium handle the click directly.
+	 */
+	public static void setBypassRobot(boolean bypass) {
+		System.setProperty(SeleniumConfigConstant.PROPERTY_BYPASS_ROBOT_ACTION, Boolean.toString(bypass));
+		if(bypass){
+			IndependantLog.debug("User has set the '"+SeleniumConfigConstant.PROPERTY_BYPASS_ROBOT_ACTION+"' to true, "
+					+ "our library will handle click ations directly by selenium, they will not be attempted by Robot.");
+		}
+	}
+	/**
+	 * By default, our library will handle click actions by Robot firstly, if failed then handle it by selenium.<br>
+	 * @return the current true/false setting the bypassRobot value. It decides if the click actions will be attempted by Robot or not.<br>
+	 */
+	public static boolean getBypassRobot() {
+		return Boolean.parseBoolean(System.getProperty(SeleniumConfigConstant.PROPERTY_BYPASS_ROBOT_ACTION));
+	}
+
+	/**
+	 * Get css values of the object
+	 * @param element - WebElement
+	 * @return - return map as key and value pair
+	 */
+	public static Map<String, String> getCssValues(WebElement element){
+
+		String[] styleattr = {"color","display","float","font-family","font-size",
+								"font-weight","height","white-space","width",
+								"background-color","background-repeat",
+								"visibility"};
+
+		Map<String, String> map = new HashMap<String, String>();
+		String val = null;
+		for (int i = 0; i < styleattr.length; i++) {
+			try{
+				val = element.getCssValue(styleattr[i]);
+				map.put(styleattr[i], val);
+			}catch(Throwable t){}
+		}
+		return map;
+	}
+
+	/**
+	 * get the value of a property. The property can be an attribute, a css-attribute, a true property field, or certain property methods.
+	 * @param element WebElement, from which to retrieve the property
+	 * @param property String, the property name
+	 * @return String, the value of the property
+	 * @throws SeleniumPlusException if the attribute or property is not found.
+	 * @see #getProperties(WebElement)
+	 */
+	public static String getProperty(WebElement element, String property) throws SeleniumPlusException{
+		String value = null;
+		String dbg = "WDLibrary.getProperty() ";
+		try {
+			try{ value = element.getAttribute(property);}
+			catch(Throwable x){
+				IndependantLog.debug(dbg+ "getAttribute('"+property+"') threw "+ x.getClass().getName()+", "+x.getMessage());
+			}
+			if (value == null) {
+				IndependantLog.debug(dbg+ "getAttribute('"+property+"') returned null.  Trying getCssValue.");
+				try{ value = element.getCssValue(property); }
+				catch(Throwable x){
+					IndependantLog.debug(dbg+ "getCssValue('"+property+"') threw "+ x.getClass().getName()+", "+x.getMessage());
+				}
+				//for a non-exist css-property, SeleniumWebDriver will return "" instead of null
+				if(value!=null  && value.isEmpty()){
+					IndependantLog.debug(dbg+ "getCssValue('"+property+"') returned empty value. Resetting to null.");
+					value = null;
+				}
+			}
+			if (value == null){
+				IndependantLog.debug(dbg+ "trying wide getProperties() net.");
+				Map<String, Object> props = getProperties(element);
+				if(props.containsKey(property)){
+					value = props.get(property).toString();
+				}else{
+					IndependantLog.debug(dbg+ "getProperties() reports no property named '"+ property+"'.");
+					String keys = "";
+					for(String key:props.keySet()) keys += key +" ";
+					IndependantLog.debug(dbg+ "propertyNames: "+ keys);
+				}
+			}
+			if (value == null){
+				IndependantLog.debug(dbg+ "trying *NATIVE JS function* to get property '"+ property +"'");
+				StringBuffer script = new StringBuffer();
+				script.append(JavaScriptFunctions.SAP.sap_getProperty(true, property));
+				script.append("return sap_getProperty(arguments[0], arguments[1]);");
+				Object result = null;
+				try{
+					result = WDLibrary.executeJavaScriptOnWebElement(script.toString(), element, property);
+					if(result!=null){
+						IndependantLog.debug(dbg+" got '"+result+"' by *NATIVE JS function*.");
+						value = result.toString();
+						if(!(result instanceof String)){
+							IndependantLog.warn(dbg+" the result is not String, it is "+result.getClass().getName()+", may need more treatment.");
+						}
+					}
+				}catch(SeleniumPlusException se){
+					IndependantLog.error(dbg+ StringUtils.debugmsg(se));
+				}
+			}
+			if(value == null){
+				IndependantLog.error(dbg+ "got nothing but (null) for all getProperty attempts using '"+ property +"'");
+				throw new SeleniumPlusException(property+" not found.");
+			}
+			return value;
+		} catch(Exception e){
+			IndependantLog.error(dbg+ "caught "+ e.getClass().getName()+": "+ e.getMessage());
+			throw new SeleniumPlusException(property +" not found.", SeleniumPlusException.CODE_PropertyNotFoundException);
+		}
+	}
+
+	/**
+	 * Retrieve all properties of an element--attributes, css values, property fields and certain property methods.
+	 * @param element WebElement, from which to retrieve all properties
+	 * @return Map, a set of pair(property, value)
+	 * @throws SeleniumPlusException
+	 */
+	@SuppressWarnings("unchecked")
+	public static Map<String, Object> getProperties(WebElement element) throws SeleniumPlusException{
+		String debugmsg = StringUtils.debugmsg(false);
+
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		WDTimeOut.setImplicitlyWait(100, TimeUnit.MILLISECONDS, 1000);
+
+		IndependantLog.debug(debugmsg+"calling getCssValues...");
+		map.putAll(getCssValues(element));
+		IndependantLog.debug(debugmsg+"returned from getCssValues...");
+		//ADD other attributes by javascript
+		StringBuffer jsScript = new StringBuffer();
+
+		try {
+			jsScript.append(JavaScriptFunctions.getAttributes());
+			jsScript.append("return getAttributes(arguments[0]);\n");
+			IndependantLog.debug(debugmsg+"DOM-attributes calling executeJavaScriptOnWebElement...");
+			Object attributes = WDLibrary.executeJavaScriptOnWebElement(jsScript.toString(), element);
+			IndependantLog.debug(debugmsg+"receieved DOM-attributes Object from executeJavaScriptOnWebElement...");
+			if(attributes instanceof Map){
+				IndependantLog.debug(debugmsg+"received attributes Object *IS* instanceof Map.");
+				Map<String, Object> attributesMap = (Map<String, Object>) attributes;
+				map.putAll(attributesMap);
+			}else{
+				if(attributes!=null) IndependantLog.debug(debugmsg+"received attributes object '"+attributes.getClass().getName()+"', needs to handle in code.");
+				else IndependantLog.debug(debugmsg+"received attributes object is "+null);
+			}
+		} catch(Exception ignore) {
+			IndependantLog.debug(debugmsg+" DOM-attributes, met "+StringUtils.debugmsg(ignore));
+		}
+
+		try{
+			jsScript = new StringBuffer();
+			jsScript.append(JavaScriptFunctions.getHtmlProperties());
+			jsScript.append("return getHtmlProperties(arguments[0]);\n");
+			IndependantLog.debug(debugmsg+"Htmlproperties calling executeJavaScriptOnWebElement...");
+			Object properties = WDLibrary.executeJavaScriptOnWebElement(jsScript.toString(), element);
+			IndependantLog.debug(debugmsg+"received Htmlproperties Object from executeJavaScriptOnWebElement.");
+			if(properties instanceof Map){
+				IndependantLog.debug(debugmsg+"received properties Object *IS* instanceof Map.");
+				try{
+					Map<String, ?> propertiesMap = (Map<String, ?>) properties;
+					map.putAll(propertiesMap);
+				}catch(Throwable t){
+					IndependantLog.debug(debugmsg+"returned properties object is "+null);
+				}
+			}else{
+				if(properties!=null) IndependantLog.debug("returned properties object '"+properties.getClass().getName()+"', needs to handle in code.");
+				else IndependantLog.debug(debugmsg+"returned properties object is "+null);
+			}
+
+		} catch(Exception ignore) {
+			IndependantLog.debug(debugmsg+"Htmlproperties, met "+StringUtils.debugmsg(ignore));
+		}
+
+		try{
+			IndependantLog.debug(debugmsg+"SAP getAccessibilityControllerElementsInfo calling executeJavaScriptOnWebElement...");
+			List<Accessibility> accessibilities = SearchObject.SAP.getSAPAccessibleElementsInfo(element);
+			IndependantLog.debug(debugmsg+"received SAP AccessibilityElementsInfo from executeJavaScriptOnWebElement.");
+			String keyfix = null;
+			String putkey = null;
+			Accessibility accessibility = null;
+			for(int i=0;i<accessibilities.size();i++){
+				keyfix = "sap_AccessibilityElement["+i+"].";
+				try{
+					accessibility = accessibilities.get(i);
+					Map<?, ?> propertiesMap = accessibility.getMap();
+					for(Object key:propertiesMap.keySet()){
+						putkey = keyfix + key;
+						map.put(putkey, propertiesMap.get(key));
+					}
+				}catch(Throwable t){
+					IndependantLog.debug(debugmsg+"returned AccessibilityElement object is "+null);
+				}
+			}
+		} catch(Exception ignore) {
+			IndependantLog.debug(debugmsg+"sap_getAccessibilityControllerElementsInfo, met "+StringUtils.debugmsg(ignore));
+		}
+
+		WDTimeOut.resetImplicitlyWait(Processor.getSecsWaitForComponent(), TimeUnit.SECONDS);
+		return map;
+	}
+
+	/**
+	 * The frame object where the current GUI-component locates. If there is no frame, its value should be null.<br>
+	 * It is important for getting correct screen location for a WebElement.<br>
+	 * @see #_switchFrames(String)
 	 */
 	protected static FrameElement lastFrame = null;
-	protected static class FrameElement{
-		FrameElement parentFrame;
+	public static class FrameElement{
+		private FrameElement parentFrame;
 		/**
 		 * If you want to operate on this webelement, you MUST switch to its parent's frame
 		 * <pre>
 		 * {@code
-		 *  WDLibrary.getWebDriver().switchTo().defaultContent();
-		 *  WDLibrary.getWebDriver().switchTo().frame(parentFrame.getWebElement().getAttribute('id'));
+		 *  WDLibrary.getWebDriver().switchTo().parentFrame();
 		 * }
 		 * </pre>
 		 */
-		WebElement webElement;
-		Dimension size;
-		Point location;
+		private WebElement webElement = null;
+		private Dimension size = null;
+		private Point location = null;
+		private Map<String, String> properties = new HashMap<String, String>();
 
-		FrameElement(FrameElement parentFrame, WebElement frame) throws SeleniumPlusException{
+		public FrameElement(FrameElement parentFrame, WebElement frame){
 			try{
+				this.webElement = frame;
 				if(parentFrame!=null){
 					this.parentFrame = parentFrame;
 					location = frame.getLocation().moveBy(parentFrame.getLocation().x, parentFrame.getLocation().y);
@@ -229,9 +516,12 @@ public class SearchObject {
 					location = frame.getLocation();
 				}
 				size = frame.getSize();
-				this.webElement = frame;
+
+				properties.put(HTMLConst.ATTRIBUTE_ID, SearchObject.getProperty(frame, HTMLConst.ATTRIBUTE_ID));
+				properties.put(HTMLConst.ATTRIBUTE_NAME, SearchObject.getProperty(frame, HTMLConst.ATTRIBUTE_NAME));
+
 			}catch(Exception e){
-				throw new SeleniumPlusException("Met Exception "+StringUtils.debugmsg(e));
+				IndependantLog.warn("Failed to initialize properties, due to "+StringUtils.debugmsg(e));
 			}
 		}
 
@@ -239,6 +529,22 @@ public class SearchObject {
 		public Point getLocation(){ return location;}
 		public FrameElement getParentFrame(){ return parentFrame; }
 		public WebElement getWebElement(){ return webElement; }
+		public String getProperty(String attribute){
+			return properties.get(attribute);
+		}
+
+		@Override
+		public String toString(){
+			StringBuilder sb = new StringBuilder();
+			sb.append("Frame: ");
+			String temp = properties.get(HTMLConst.ATTRIBUTE_ID);
+			if(StringUtils.isValid(temp)) sb.append(" ID="+temp+",");
+			temp = properties.get(HTMLConst.ATTRIBUTE_NAME);
+			if(StringUtils.isValid(temp)) sb.append(" Name="+temp+",");
+			if(size!=null) sb.append(" Dimension="+size+",");
+			if(location!=null) sb.append(" At location="+location);
+			return sb.toString();
+		}
 	}
 
 	/**
@@ -260,6 +566,22 @@ public class SearchObject {
 		SearchObject.lastFrame = lastFrame;
 	}
 
+	/**
+	 * If the window's recognition string doesn't contain any information about frame,
+	 * we suppose the children locate in top document (no frame), and we should reset the 'lastFrame' to null.
+	 *
+	 * @param winrs String, the Window's recognition string.
+	 * @return boolean, true if {@link #lastFrame} is reset to null.
+	 */
+	public static boolean checkWindowRS(String winrs){
+        if(!containFrameRS(winrs) && !getBypassFramesReset() /*if bypass frame-reset, then 'lastFrame' will not be used.*/){
+        	IndependantLog.info("SearchObject: winrs '"+ winrs+"' doesn't contain any information about frame, we reset the 'lastFrame' to null.");
+        	lastFrame = null;
+        	return true;
+        }
+        return false;
+	}
+
 	/**FRAMEINDEX, it should be placed in front of normal tokens like ID, CLASS, NAME etc. if exist.
 	 *  NOT recommended to use. Use FRAMEID OR FRAMENAME Instead.*/
 	public static final String SEARCH_CRITERIA_FRAMEINDEX 	= "FRAMEINDEX";
@@ -275,6 +597,9 @@ public class SearchObject {
 	public static final String TAG_FRAME 					= "frame";
 	/**'iframe' tag name*/
 	public static final String TAG_IFRAME 					= "iframe";
+
+	/**'null' means the top most document, in no frame */
+	public static final String TOP_DOCUMENT_ID 		= "null";
 
 	//	/**DOMAIN*/
 	//	public static final String SEARCH_CRITERIA_DOMAIN					= GuiObjectRecognition.CATEGORY_DOMAIN.toUpperCase();
@@ -348,9 +673,45 @@ public class SearchObject {
 	protected static String lastVisitedURL = null;
 	public static String getLastVisitedURL(){ return lastVisitedURL;}
 
-	/**The last visited browser window*/
+	/**
+	 * Indicate if we need the latest information of browser's window/frame.<br>
+	 * If user moves/resizes the browser during the test, then the window location/size will change too.
+	 * We need to call {@link #initializeBrowserWindow()} to get the latest window's location again.
+	 * At this situation, we need to set this field to true, but this will affect the performance.<br>
+	 * If we care about the performance, we should set this field to false.<br>
+	 */
+	private static boolean needFreshWindow = false;
+	/**The last visited browser window, it is important for getting correct screen location for a WebElement. */
 	protected static BrowserWindow lastBrowserWindow = null;
-	public static BrowserWindow getLastBrowserWindow(){ return lastBrowserWindow;}
+	/**
+	 * This method will initialize the field {@link #lastBrowserWindow}.<br>
+	 * <b>NOTE: Please call getWebDriver().switchTo().defaultContent() if we are not in the topmost document.</b>
+	 * <b>NOTE: Please call setNeedFreshWindow(true) if we want the latest window's location/size information.</b>
+	 */
+	public static synchronized BrowserWindow getLastBrowserWindow(){
+		try {
+			if(needFreshWindow || lastBrowserWindow==null) initializeBrowserWindow();
+		} catch (SeleniumPlusException e) {
+			IndependantLog.error("Failed to initializeBrowserWindow, Met "+e.toString());
+		}
+
+		return lastBrowserWindow;
+	}
+
+	/**
+	 * Get the value of field {@link #needFreshWindow}.
+	 * @return boolean {@link #needFreshWindow}
+	 */
+	public static boolean isNeedFreshWindow() {
+		return needFreshWindow;
+	}
+	/**
+	 * Set the value for filed {@link #needFreshWindow}.
+	 * @param needFreshWindow boolean
+	 */
+	public static void setNeedFreshWindow(boolean needFreshWindow) {
+		SearchObject.needFreshWindow = needFreshWindow;
+	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static class BrowserWindow{
@@ -751,7 +1112,7 @@ public class SearchObject {
 		if(id != null) temp = webDrivers.get(id);
 		else temp = lastUsedWD;
 
-		if(temp==null) IndependantLog.warn(debugmsg+"cannot get WebDriver for id '"+id+"'");
+		if(temp==null) IndependantLog.warn(debugmsg+"did not get cached WebDriver for id '"+id+"'");
 
 		return temp;
 	}
@@ -767,13 +1128,16 @@ public class SearchObject {
 		WebDriver temp = null;
 		WebDriver match = null;
 		String lctitle = null;
+		String wdtitle = null;
 		if(title != null && title.length()> 0) {
 			lctitle = title.toLowerCase().trim();
 			Enumeration<WebDriver> e = webDrivers.elements();
 			while(e.hasMoreElements()){
 				temp = e.nextElement();
 				try{
-					if(lctitle.equals(temp.getTitle().toLowerCase().trim())){
+					wdtitle = temp.getTitle().trim();
+					IndependantLog.info(debugmsg+" evaluating WebDriver with title '"+ wdtitle +"'");
+					if(lctitle.equals(wdtitle.toLowerCase())){
 						match = temp;
 						break;
 					}
@@ -783,6 +1147,40 @@ public class SearchObject {
 		else match = lastUsedWD;
 
 		if(match==null) IndependantLog.warn(debugmsg+"cannot get WebDriver with title '"+title+"'");
+
+		return match;
+	}
+
+	/**
+	 * @param title String, the case-insensitive title substring within the WebDriver stored in the Hashtable.<br>
+	 *                   if user provides null or a zero-length title then the last used WebDriver will be returned.<br>
+	 *                   the routine does not (yet) set the found WebDriver to be the lastUsedWD.  That might change, though.
+	 * @return WebDriver, the WebDriver associated with the browser title; null if no matching WebDriver is found.
+	 */
+	protected synchronized static WebDriver getWebDriverContainsTitle(String title){
+		String debugmsg = StringUtils.debugmsg(SearchObject.class, "getWebDriverContainsTitle");
+		WebDriver temp = null;
+		WebDriver match = null;
+		String lctitle = null;
+		String wdtitle = null;
+		if(title != null && title.length()> 0) {
+			lctitle = title.toLowerCase().trim();
+			Enumeration<WebDriver> e = webDrivers.elements();
+			while(e.hasMoreElements()){
+				temp = e.nextElement();
+				try{
+					wdtitle = temp.getTitle().trim();
+					IndependantLog.info(debugmsg+" evaluating WebDriver with title '"+ wdtitle +"'");
+					if(wdtitle.toLowerCase().contains(lctitle)){
+						match = temp;
+						break;
+					}
+				}catch(NullPointerException notitle){}
+			}
+		}
+		else match = lastUsedWD;
+
+		if(match==null) IndependantLog.warn(debugmsg+"cannot get WebDriver with title contains '"+title+"'");
 
 		return match;
 	}
@@ -856,15 +1254,48 @@ public class SearchObject {
 	}
 
 	/**
+	 * This will reconnect/recreate working WebDrivers we know about to running instances on a Selenium Server.
+	 * Each invocation causes that WebDriver to become the "current" or "lastUsed" WebDriver.
+	 * Thus, you may wish to call WDLibrary.getBrowserWithID or getBrowserWithTitle to make the real target WebDriver
+	 * the "current" or "lastUsed" WebDriver.
+	 * @param info SessionInfo
+	 * @return WebDriver instance restored or null if not successfully created.
+	 */
+	private static RemoteDriver reconnectWebDriverSession(SessionInfo info){
+		String debugmsg = StringUtils.debugmsg(false);
+		if(! (info instanceof SessionInfo)) {
+			IndependantLog.warn(debugmsg+" parameter cannot be null!");
+			return null;
+		}
+		String host = info.serverHost;
+		if (host == null || host.isEmpty()) host = System.getProperty(SelectBrowser.SYSTEM_PROPERTY_SELENIUM_HOST);
+		if (host == null || host.isEmpty()) host = SelectBrowser.DEFAULT_SELENIUM_HOST;
+		String port = System.getProperty(SelectBrowser.SYSTEM_PROPERTY_SELENIUM_PORT);
+		if (port == null || port.isEmpty()) port = SelectBrowser.DEFAULT_SELENIUM_PORT;
+
+		DesiredCapabilities capabilities = SelectBrowser.getDesiredCapabilities(info.browser, info.extraParameters);
+		capabilities.setJavascriptEnabled(true);
+		capabilities.setCapability(CapabilityType.TAKES_SCREENSHOT, true);
+		capabilities.setCapability(RemoteDriver.CAPABILITY_ID, info.id);
+		capabilities.setCapability(RemoteDriver.CAPABILITY_RECONNECT, true);
+		capabilities.setCapability(RemoteDriver.CAPABILITY_REMOTESERVER, host);
+		capabilities.setBrowserName(info.browser);
+		try{
+			// try to see if it is a valid session
+			IndependantLog.debug(debugmsg+" instantiating unverified RemoteDriver to 'http://" + host + ":" + port +"/wd/hub' ... ");
+			return RemoteDriver.instance(new URL("http://" + host + ":" + port +"/wd/hub"),capabilities);
+		}catch(Throwable t){
+			IndependantLog.warn(debugmsg+"ignoring reconnect RemoteDriver "+ t.getClass().getSimpleName()+", "+t.getMessage()+". RemoteServer may not be running or DOM may be in transition!");
+		}
+		return null;
+	}
+
+	/**
 	 * Will only connect to the "current" session.  Normally only called after a catastrophic failure of a RemoteDriver.
 	 * @return
 	 */
 	protected static WebDriver reconnectLastWebDriver(){
 		String debugmsg = StringUtils.debugmsg(false);
-		String host = System.getProperty(SelectBrowser.SYSTEM_PROPERTY_SELENIUM_HOST);
-		if (host == null || host.isEmpty()) host = SelectBrowser.DEFAULT_SELENIUM_HOST;
-		String port = System.getProperty(SelectBrowser.SYSTEM_PROPERTY_SELENIUM_PORT);
-		if (port == null || port.isEmpty()) port = SelectBrowser.DEFAULT_SELENIUM_PORT;
 
 		List<SessionInfo> list = null;
 		RemoteDriver result = null;
@@ -881,17 +1312,8 @@ public class SearchObject {
 		IndependantLog.info(debugmsg+ " found "+list.size()+" stored sessions to process.");
 		for(SessionInfo info: list){
 			if(info.isCurrentSession){
-				DesiredCapabilities capabilities = SelectBrowser.getDesiredCapabilities(info.browser, info.extraParameters);
-				capabilities.setJavascriptEnabled(true);
-				capabilities.setCapability(CapabilityType.TAKES_SCREENSHOT, true);
-				capabilities.setCapability(RemoteDriver.CAPABILITY_ID, info.id);
-				capabilities.setCapability(RemoteDriver.CAPABILITY_RECONNECT, true);
-				capabilities.setCapability(RemoteDriver.CAPABILITY_REMOTESERVER, host);
-				capabilities.setBrowserName(info.browser);
 				try{
-					// try to see if it is a valid session
-					IndependantLog.debug(debugmsg+" trying to connect remote server at 'http://" + host + ":" + port +"/wd/hub' ... ");
-					result = new RemoteDriver(new URL("http://" + host + ":" + port +"/wd/hub"),capabilities);
+					result = reconnectWebDriverSession(info);
 					// NOT changing anything about the existing sessions
 					//d.manage().window().setSize(d.manage().window().getSize());
 					addWebDriver(info.id,result);
@@ -914,11 +1336,6 @@ public class SearchObject {
 		String debugmsg = StringUtils.debugmsg(SearchObject.class, "getWebDriver");
 
 		if (lastUsedWD == null){
-			String host = System.getProperty(SelectBrowser.SYSTEM_PROPERTY_SELENIUM_HOST);
-			if (host == null || host.isEmpty()) host = SelectBrowser.DEFAULT_SELENIUM_HOST;
-			String port = System.getProperty(SelectBrowser.SYSTEM_PROPERTY_SELENIUM_PORT);
-			if (port == null || port.isEmpty()) port = SelectBrowser.DEFAULT_SELENIUM_PORT;
-
 			List<SessionInfo> list = null;
 			try {
 				list = RemoteDriver.getSessionsFromFile();
@@ -934,16 +1351,8 @@ public class SearchObject {
 			RemoteDriver lastdriver = null;
 			String lastid = null;
 			for(SessionInfo info: list){
-				DesiredCapabilities capabilities = SelectBrowser.getDesiredCapabilities(info.browser, info.extraParameters);
-				capabilities.setJavascriptEnabled(true);
-				capabilities.setCapability(CapabilityType.TAKES_SCREENSHOT, true);
-				capabilities.setCapability(RemoteDriver.CAPABILITY_ID, info.id);
-				capabilities.setCapability(RemoteDriver.CAPABILITY_RECONNECT, true);
-				capabilities.setBrowserName(info.browser);
-				capabilities.setCapability(RemoteDriver.CAPABILITY_REMOTESERVER, host);
 				try{
-					// try to see if it is a valid session
-					RemoteDriver d = new RemoteDriver(new URL("http://" + host + ":" + port +"/wd/hub"),capabilities);
+					RemoteDriver d = reconnectWebDriverSession(info);
 					d.manage().window().setSize(d.manage().window().getSize());
 					addWebDriver(info.id,d); // overwrites lastUsedWD every time!
 					if(info.isCurrentSession) {
@@ -955,7 +1364,9 @@ public class SearchObject {
 					try{
 						IndependantLog.info(debugmsg+ " attempting to remove remote session info for id: "+ info.id);
 						RemoteDriver.deleteSessionIdFromFile(info.id);
-					}catch(Throwable ignore){}
+					}catch(Throwable ignore){
+
+					}
 				}
 			}
 			if(lastdriver != null){
@@ -1067,6 +1478,7 @@ public class SearchObject {
 		if(rs==null) return false;
 		String uprs = rs.toUpperCase();
 		if(uprs.contains(SEARCH_CRITERIA_FRAMEID) ||
+				uprs.contains(SEARCH_CRITERIA_IFRAMEID) ||
 				uprs.contains(SEARCH_CRITERIA_FRAMENAME) ||
 				uprs.contains(SEARCH_CRITERIA_FRAMEINDEX) ||
 				uprs.contains(SEARCH_CRITERIA_FRAMEXPATH)){
@@ -1076,11 +1488,11 @@ public class SearchObject {
 		}
 	}
 
-	//TODO
 	public static boolean isValidFrameRS(String frameRS){
 		if(frameRS==null) return false;
 		String uprs = frameRS.toUpperCase();
 		if(uprs.contains(SEARCH_CRITERIA_FRAMEID) ||
+				uprs.contains(SEARCH_CRITERIA_IFRAMEID) ||
 				uprs.contains(SEARCH_CRITERIA_FRAMENAME) ||
 				uprs.contains(SEARCH_CRITERIA_FRAMEINDEX) ||
 				uprs.contains(SEARCH_CRITERIA_FRAMEXPATH)){
@@ -1131,15 +1543,210 @@ public class SearchObject {
 	}
 
 	/**
+	 * Get the current frame WebElement.<br>
+	 * <b>NOTE: The frame WebElement is attached to the parent frame, we cannot call any method on this frame WebElement (we are in itself) until we switch to its parent frame by calling webdriver.switchTo().parentFrame().</b>
+	 * @param webdriver WebDriver, it should also be a JavascriptExecutor
+	 * @return WebElement, the web element representing the current frame; null if we are not in any frame.
+	 */
+	public static WebElement getCurrentFrame(WebDriver webdriver) throws SeleniumPlusException{
+		try{
+			JavascriptExecutor jsExecutor = (JavascriptExecutor) webdriver;
+			return (WebElement) jsExecutor.executeScript("if(window.frameElement) return window.frameElement; else return null;");
+		}catch(Exception e){
+			throw new SeleniumPlusException("Failed to get current frame, due to "+e);
+		}
+	}
+
+	/**
+	 * Get the ID of current frame.
+	 * @param webdriver WebDriver, it should also be a JavascriptExecutor
+	 * @return String, the ID of the current frame; null if we are not in any frame.
+	 */
+	public static String getCurrentFrameID(WebDriver webdriver) throws SeleniumPlusException{
+		try{
+			JavascriptExecutor jsExecutor = (JavascriptExecutor) webdriver;
+			return (String) jsExecutor.executeScript("if(window.frameElement) return window.frameElement.id; else return null;");
+		}catch(Exception e){
+			throw new SeleniumPlusException("Failed to get current frame's ID, due to "+e);
+		}
+	}
+
+	/**
+	 * Get the name of current frame.
+	 * @param webdriver WebDriver, it should also be a JavascriptExecutor
+	 * @return String, the name of the current frame; null if we are not in any frame.
+	 */
+	public static String getCurrentFrameName(WebDriver webdriver) throws SeleniumPlusException{
+		try{
+			JavascriptExecutor jsExecutor = (JavascriptExecutor) webdriver;
+			return (String) jsExecutor.executeScript("if(window.frameElement) return window.frameElement.name; else return null;");
+			//return (String) jsExecutor.executeScript("return self.name");
+		}catch(Exception e){
+			throw new SeleniumPlusException("Failed to get current frame's name, due to "+e);
+		}
+	}
+
+	/**
+	 *
+	 * Get the ID or name of current frame, or the frame object itself if there is no ID or name.
+	 * @param webdriver WebDriver, it should also be a JavascriptExecutor
+	 * @return Object, the ID or name of current frame, or the frame object itself if there is no ID or name; null if we are not in any frame context.
+	 * @throws SeleniumPlusException
+	 */
+	public static Object _getCurrentFrame(WebDriver webdriver) throws SeleniumPlusException{
+		Object currentFrame = null;
+		try{
+			JavascriptExecutor jsExecutor = (JavascriptExecutor) webdriver;
+			StringBuffer scriptCommand = new StringBuffer();
+			scriptCommand.append(JavaScriptFunctions.getCurrentFrame());
+			scriptCommand.append("return getCurrentFrame();");
+			currentFrame = jsExecutor.executeScript(scriptCommand.toString());
+		}catch(Exception e){
+			throw new SeleniumPlusException("Failed to get current frame's ID/NAME/OBJECT, due to "+e);
+		}
+		return currentFrame;
+	}
+
+	private static Object _getCurrentFrame() throws SeleniumPlusException{
+		return _getCurrentFrame(getWebDriver());
+	}
+
+	/**
 	 * Switch to a certain frame according to the parameter frameRS.<br>
 	 * <b>Note:</b> User should be extremely careful to call this method, which will change the frame to search within.<br>
-	 * <b>Note:</b> Before calling this method, make sure that <b>webdriver.switchTo().defaultContent()</b> is called.<br>
+	 * <b>Note:</b> Before calling this method, make sure that <b>getWebDriver().switchTo().defaultContent()</b> is called.<br>
+	 * <b>Note:</b> To make sure that we can get the correct screen location, we must call {@link #initializeBrowserWindow()} before calling this method.<br>
+	 * This routine does NOT change the lastFrame setting at any time.
 	 * @param webdriver WebDriver, the webdriver used to search frame and switch frame
-	 * @param frameRS String, the recognition string of the frame
+	 * @param frameRS String, the recognition string of the frame to switch to.
+	 * @return true if a frameRS was found and we have
+	 * successfully switched the webdriver to use it. false otherwise.
 	 */
-	public static boolean switchFrame(WebDriver  webdriver, String frameRS){
+	public static boolean switchFrame(WebDriver webdriver, String frameRS){
 		WebElement frame = _getSwitchFrame(webdriver, frameRS);
 		return _switchFrame(webdriver, frame);
+	}
+
+	/**
+	 * Switch a WebDriver to toplevel defaultContent (no frame) context.<br>
+	 * Clears the lastFrame FrameElement accordingly.<br>
+	 * <b>Note:</b> User should be extremely careful to call this method, which will change the frame to search within.<br>
+	 * @param webdriver WebDriver, the webdriver to switch to toplevel defaultContent context.
+	 */
+	public static void switchToDefaultContent(WebDriver webdriver){
+		IndependantLog.info("SearchObject.switchToDefaultContent: switching to defaultContent--no frame. lastFrame = null.");
+		webdriver.switchTo().defaultContent();
+		setLastFrame(null);
+	}
+
+	/**
+	 * Switch back to the parent frame or do nothing if we are already in the top document.
+	 * @param webdriver WebDriver
+	 */
+	protected static void switchToParentFrame(WebDriver webdriver){
+		webdriver.switchTo().parentFrame();
+		IndependantLog.info("SearchObject.switchToParentFrame: switching back to parent frame.");
+	}
+
+	/**
+	 * Switch to a certain frame according to the parameter frameRS.<br>
+	 * Also sets/replaces/clears the lastFrame FrameElement accordingly.
+	 * <b>Note:</b> User should be extremely careful to call this method, which will change the frame to search within.<br>
+	 * <b>Note:</b> Before calling this method, make sure that <b>switchToDefaultContent(webdriver)</b> is called.<br>
+	 * <b>Note:</b> To make sure that we can get the correct screen location, we must call {@link #initializeBrowserWindow()} before calling this method.<br>
+	 * @param webdriver WebDriver, the webdriver used to search frame and switch frame
+	 * @param frameRS String, the recognition string of the frame.<br>
+	 * Ex: id=..., name=..., frameid=..., iframeid=..., framename=..., frameindex=..., framexpath=....<br>
+	 * If a frame name is provided with no RS string prefix then an attempt will be made to find the frame by id and by name.<br>
+	 * if the frameRS is null or empty, we will switchToDefaultContent (no frame) and set lastFrame as null.
+	 * @return the FrameElement if it was found and set, or null if we are resetting to default content (no frame).
+	 * @throws SeleniumPlusException if a problem occurs finding, setting, or using any non-null FrameElement.
+	 * @see #switchToDefaultContent(WebDriver)
+	 */
+	public static FrameElement switchFrameAsLastFrame(WebDriver webdriver, String frameRS) throws SAFSObjectNotFoundException, SeleniumPlusException{
+		WebElement frame = null;
+		if(frameRS == null || frameRS.isEmpty()){
+			switchToDefaultContent(webdriver);
+			return getLastFrame();
+		}
+		String dbgmsg = StringUtils.debugmsg(false);
+		frame = _getSwitchFrame(webdriver, frameRS);
+		if (frame == null) throw new SAFSObjectNotFoundException(frameRS +" not found.");
+
+	    FrameElement felement = null;
+	    FrameElement parentFrame = getLastFrame();
+	    if(parentFrame instanceof FrameElement)
+		    IndependantLog.warn(dbgmsg+" uncommon scenario of frame within a frame. lastFrame = "+ parentFrame);
+	    else
+		    IndependantLog.debug(dbgmsg+" retrieved null lastFrame--as commonly expected in single-frame applications.");
+		try{
+		    IndependantLog.debug(dbgmsg+" creating FrameElement using parentFrame: "+ parentFrame +" and frame: "+ frame);
+			felement = new FrameElement(parentFrame, frame);
+		    IndependantLog.debug(dbgmsg+" created FrameElement: "+ felement);
+			setLastFrame(felement);
+		}catch(Throwable serx){
+		    IndependantLog.debug(dbgmsg+" ignoring "+ serx.getClass().getSimpleName() +" and trying with a null parentFrame...");
+		    try{
+			    IndependantLog.debug(dbgmsg+" creating FrameElement using null parentFrame and frame: "+ frame);
+				felement = new FrameElement(null, frame);
+			    IndependantLog.debug(dbgmsg+" created FrameElement: "+ felement);
+				setLastFrame(felement);
+		    }catch(Throwable serx2){
+			    IndependantLog.debug(dbgmsg+" ignoring 2nd "+ serx2.getClass().getSimpleName() +" and trying with original parentFrame: "+ parentFrame);
+				try{
+				    IndependantLog.debug(dbgmsg+" last try creating FrameElement using parentFrame: "+ parentFrame +" and frame: "+ frame);
+					felement = new FrameElement(parentFrame, frame);
+				    IndependantLog.debug(dbgmsg+" created FrameElement: "+ felement);
+					setLastFrame(felement);
+				}catch(Throwable serx3){
+				    IndependantLog.warn(dbgmsg+" encounterd 3rd/final "+ serx3.getClass().getSimpleName() +" and giving up.");
+				    IndependantLog.warn(dbgmsg+" !!! Internal lastFrame reference may be incorrect !!!");
+               }
+		    }
+		}
+		if(felement == null)
+		    IndependantLog.warn(dbgmsg+" !!! Internal lastFrame reference may be invalid null !!!");
+		else if(! _switchFrame(webdriver, frame)) {
+			setLastFrame(parentFrame);
+		    IndependantLog.warn(dbgmsg+" throwing SeleniumPlusException: Cannot change lastFrame due to reported _switchFrame problem!");
+			throw new SeleniumPlusException("Cannot change lastFrame due to reported _switchFrame problem!");
+		}
+
+		return getLastFrame();
+	}
+
+	/**
+	 * Switch to the frame indicated by the recognition string.<br>
+	 * <b>NOTE: This method will switch back to the topmost document and start searching from there.<br>
+	 *          If there are multiple layers of frame, the recognition string should be in parent-child format, such as frameid=...;\\;framename=...<br>
+	 * </b>
+	 * <p>
+	 * This method will probably change the field {@link #lastBrowserWindow}<br>
+	 * This method will probably change the filed {@link #lastFrame}<br>
+	 *
+	 * @param recognitionString String, the recognition string with frame information.
+	 *        Ex: id=..., name=..., frameid=..., iframeid=..., framename=..., frameindex=..., framexpath=....<br>
+	 *            frameid=...;\\;frameid=...<br>
+	 *            frameid=...;\\;framename=...<br>
+	 *
+	 * @return boolean, if the frame has been switched successfully.
+	 */
+	public static synchronized boolean switchFrames(String recognitionString){
+		boolean originBypassFrameReset = getBypassFramesReset();
+		FrameElement originLastFrame = lastFrame;
+
+		//set 'bypassFrameReset' to false, this will make sure we switch frame if we find it.
+		setBypassFramesReset(false);
+		//set 'lastFrame' to null, this will make sure we don't switch frame by the 'lastFrame'
+		lastFrame = null;
+		SwitchFramesResults switchResult = _switchFrames(recognitionString);
+		//set 'bypassFrameReset' to its original value.
+		setBypassFramesReset(originBypassFrameReset);
+		boolean switched = switchResult.haveSwitchedFrames();
+		//if we didn't switch the frame, we need to set 'lastFrame' to its original value.
+		if(!switched) lastFrame = originLastFrame;
+
+		return switched;
 	}
 
 	private static WebElement _getSwitchFrame(WebDriver  webdriver, String frameRS){
@@ -1149,28 +1756,43 @@ public class SearchObject {
 
 		WebElement frame = null;
 		String[] tokens = StringUtils.getTokenArray(frameRS, assignSeparator, escapeChar);
-		if(tokens==null || tokens.length<2){
-			IndependantLog.error(debugmsg+"frame recognition string '"+frameRS+"' is not valid.");
+		if(tokens==null || tokens.length==0){ // should never happen?
+			IndependantLog.error(debugmsg+"frame recognition string '"+frameRS+"' could not be processed.");
 			return null;
 		}
-		String searchCreteria = tokens[0].trim().toUpperCase();
-		String value = tokens[1];
-//		TargetLocator targetLocator = webdriver.switchTo();
+		String searchCreteria = null;
+		String value = null;
+		if(tokens.length > 1) {
+			searchCreteria = tokens[0].trim().toUpperCase();
+			value = tokens[1];
+		}else{
+			value = tokens[0];
+		}
 
-		if(searchCreteria.equals(SEARCH_CRITERIA_FRAMEID)){
+		//Reset the 'lastFrame' to null, if user defines the frame's id/name as "null".
+		if(TOP_DOCUMENT_ID.equalsIgnoreCase(value)){
+			IndependantLog.debug(debugmsg+" frame RS is '"+frameRS+"', user wants to reset the lastFrame to null.");
+			lastFrame = null;
+			return null;
+		}
+
+		if(searchCreteria == null){
+			frame = webdriver.findElement(By.id(value));
+			if(frame == null)
+				frame = webdriver.findElement(By.name(value));
+
+		}else if(searchCreteria.equals(SEARCH_CRITERIA_FRAMEID) ||
+				 searchCreteria.equals(SEARCH_CRITERIA_IFRAMEID)||
+				 searchCreteria.equals(SEARCH_CRITERIA_ID)){
 			frame = webdriver.findElement(By.id(value));
 
-		}else if(searchCreteria.equals(SEARCH_CRITERIA_IFRAMEID)){
-			frame = webdriver.findElement(By.id(value));
-
-		}else if(searchCreteria.equals(SEARCH_CRITERIA_FRAMENAME)){
+		}else if(searchCreteria.equals(SEARCH_CRITERIA_FRAMENAME) ||
+				 searchCreteria.equals(SEARCH_CRITERIA_NAME)){
 			frame = webdriver.findElement(By.name(value));
 
 		}else if(searchCreteria.equals(SEARCH_CRITERIA_FRAMEINDEX)){
 			int index = StringUtilities.parseIndex(value);
 			//index is 1-based, needs to minus 1 to get 0-based index and feed it to method frame().
-//			targetLocator.frame(index-1);
-//			IndependantLog.debug(debugmsg+" switch to frame by index '"+value+"'");
 
 			//TODO How to get the frame's webelement???
 			frame = getFrameWebElement(webdriver, index);//Not found???
@@ -1186,15 +1808,20 @@ public class SearchObject {
 
 		if(frame!=null){
 			IndependantLog.debug(debugmsg+" get switching-frame '"+frame+"' according to '"+value+"'");
+		}else{
+			IndependantLog.debug(debugmsg+" requested frame '"+frameRS+"' was not found!");
 		}
-//		if(frame!=null){
-//			targetLocator.frame(frame);
-//			IndependantLog.debug(debugmsg+" switch to frame by '"+value+"'");
-//		}
 
 		return frame;
 	}
 
+	/**
+	 * Execute a WebDriver.switchTo().frame with the provided frame WebElement.<br>
+	 * This does NOT set our internal lastFrame reference to the new frame.
+	 * @param webdriver
+	 * @param frame
+	 * @return true unless an Exception was thrown and caught indicating failure.
+	 */
 	private static boolean _switchFrame(WebDriver  webdriver, WebElement frame){
 		if(webdriver==null || frame==null) return false;
 		String debugmsg = StringUtils.debugmsg(false);
@@ -1210,14 +1837,150 @@ public class SearchObject {
 	}
 
 	/**
+	 * Generate a Tree object holding all the frames on the web page.
+	 * @param selenium WebDriver
+	 * @return Arbre&lt;FrameElement>>, Tree object holding all the frames on the web page.
+	 */
+	public static Arbre<FrameElement> getFrameTree(WebDriver selenium){
+		Arbre<FrameElement> frameTree = new Arbre<FrameElement>();
+		generateFrameTree(frameTree, selenium);
+		return frameTree;
+	}
+
+	/**
+	 * Generate the tree to hold all frames on the page.
+	 *
+	 * @param frameTree Arbre&lt;FrameElement>>, the tree to hold all the frames. It should be provided as an instance of Arbre by the caller.
+	 * @param selenium WebDriver
+	 */
+	private static void generateFrameTree(Arbre<FrameElement> frameTree, WebDriver selenium){
+		String dbgmsg = StringUtils.debugmsg(false);
+		Arbre<FrameElement> child = null;
+
+		//switch to current frame document
+		switchToFrame(frameTree, selenium);
+
+		//get all frame WebElements in the current frame document
+		List<WebElement> elements = getFrames(selenium);
+
+		if(elements==null||elements.isEmpty()){
+			IndependantLog.info(dbgmsg+" found no frames in the current window.");
+		}else{
+			IndependantLog.info(dbgmsg+" found "+ elements.size() +" frames in the current window.");
+			//We need to keep in the same 'parent frame context' so that we can operate on the child frame WebElement.
+			//So we generate all the child nodes.
+			for(WebElement frame: elements){
+				child = new Arbre<FrameElement>();
+				child.setUserObject(new FrameElement(frameTree.getUserObject(), frame));
+				frameTree.addChild(child);
+			}
+			//Then we dig into each child
+			for(Arbre<FrameElement> childNode: frameTree.getChildren()){
+				generateFrameTree(childNode, selenium);
+			}
+		}
+	}
+
+	/**
+	 * Get all frame WebElement on current frame document (we can call {@link #switchToFrame(Arbre, WebDriver)} to switch to a certain frame).
+	 *
+	 * @param selenium WebDriver
+	 * @return List&lt;WebElement> a list of frame WebElement
+	 *
+	 * {@link #switchToFrame(Arbre, WebDriver)}
+	 */
+	public static List<WebElement> getFrames(WebDriver selenium){
+		List<WebElement> results = new ArrayList<WebElement>();
+
+		List<WebElement> elements = selenium.findElements(By.tagName(HTMLConst.TAG_IFRAME));
+
+		if(elements!=null && !elements.isEmpty()){
+			results.addAll(elements);
+		}
+
+		elements = selenium.findElements(By.tagName(HTMLConst.TAG_FRAME));
+		if(elements!=null && !elements.isEmpty()){
+			results.addAll(elements);
+		}
+
+		return results;
+	}
+
+	/**
+	 * Pre-order traverse the tree and add each tree node into a list.
+	 *
+	 * @param frameTree Arbre&lt;FrameElement>>, the tree to traverse
+	 * @param frames List&lt;Arbre&lt;FrameElement>>>, a list of frames (each node of the frame tree).
+	 *                                              The first element will always be the top document (no frame document).
+	 */
+	public static void traverseFrameTree(Arbre<FrameElement> frameTree, List<Arbre<FrameElement>> frames){
+		if(frameTree!=null){
+			frames.add(frameTree);
+			List<Arbre<FrameElement>> children = frameTree.getChildren();
+			if(children!=null){
+				for(Arbre<FrameElement> frame: children){
+					traverseFrameTree(frame, frames);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Switch to a certain frame. If the frame has parent-frame, we will switch to the parent-frame firstly.<br>
+	 * <b>NOTE: This method will also modify the class-field {@link #lastFrame},
+	 *          which is very important for searching web-element or calculating the element's location etc.</b><br>
+	 *
+	 * @param frameNode  Arbre&lt;FrameElement>>, the frame to switch. We will switch to the top document if this parameter is null.
+	 * @param selenium WebDriver
+	 * @return boolean true if success to switch frame
+	 */
+	public static boolean switchToFrame(Arbre<FrameElement> frameNode, WebDriver selenium){
+		String debugmsg = StringUtils.debugmsg(false);
+
+		try{
+			Stack<WebElement> ancestorFrames = new Stack<WebElement>();
+			//switch to the top document
+			selenium.switchTo().defaultContent();
+			//Initialize the lastbrowserWidnow
+			initializeBrowserWindow();
+			//put the frames into the stack, parents on top, children on bottom
+			Arbre<FrameElement> parentNode = frameNode;
+			FrameElement frameElement = null;
+			WebElement frame = null;
+			while(parentNode!=null){
+				frameElement = parentNode.getUserObject();
+				if(frameElement!=null){
+					frame = frameElement.getWebElement();
+					if(frame!=null) ancestorFrames.push(frame);
+				}
+				parentNode = parentNode.getParent();
+			}
+
+			FrameElement frameElem = null;
+			//we switch frame from the ancestor to children
+			while(!ancestorFrames.empty()){
+				frame = ancestorFrames.pop();
+				frameElem = new FrameElement(frameElem, frame);
+				selenium.switchTo().frame(frame);
+			}
+			lastFrame = frameElem;
+			IndependantLog.debug(debugmsg +" CHANGED frame context:\nOur 'lastFrame' is "+lastFrame+"\nThe current frame context is "+_getCurrentFrame(selenium));
+			return true;
+		}catch(Exception e){
+			IndependantLog.error("Failed to switch frame "+(frameNode==null?"":frameNode.getUserObject())+", due to "+e);
+			return false;
+		}
+	}
+
+	/**
 	 * Example: tag=span;propertycontains=innerHTML:some value
 	 *
 	 * @param RS -- Full MultiAttribute qualifier RS. (Does not have to be a single qualifier assignment segment.)
 	 * The algorithm does NOT assume the TAG qualifier is first in the RS.
 	 * @return the value associated with any TAG= qualifier setting, or null if it does not exist.
-	 * @throws SeleniumException
+	 * @throws SeleniumPlusException if the RS is not valid.
 	 */
-	protected static String getTagQualifierValue(String RS) throws SeleniumException{
+	protected static String getTagQualifierValue(String RS) throws SeleniumPlusException{
 		if (RS == null || RS.length() < 5) return null;
 		String rc = null;
 		String[] st = StringUtils.getTokenArray(RS, qulifierSeparator, escapeChar);
@@ -1251,9 +2014,9 @@ public class SearchObject {
 	 *
 	 * @param RS String, a recognition with a {@link #assignSeparator} inside.
 	 * @return String[], the separated RS, including qualifier and value.
-	 * @throws SeleniumException if the RS is not valid.
+	 * @throws SeleniumPlusException if the RS is not valid.
 	 */
-	protected static String[] getFirstQualifierPair(String RS) throws SeleniumException{
+	protected static String[] getFirstQualifierPair(String RS) throws SeleniumPlusException{
 		String[] assignPair = null;
 		String errmsg = null;
 
@@ -1263,7 +2026,7 @@ public class SearchObject {
 			if(assignindex<0 || assignindex==RS.length()-1) {
 				errmsg = " invalid recognition string: "+ RS;
 				IndependantLog.debug(StringUtils.debugmsg(false)+errmsg);
-				throw new SeleniumException(errmsg);
+				throw new SeleniumPlusException(errmsg);
 			}
 
 			assignPair = new String[2];
@@ -1272,7 +2035,7 @@ public class SearchObject {
 		}catch(Exception e){
 			errmsg = " met "+ StringUtils.debugmsg(e);
 			IndependantLog.debug(StringUtils.debugmsg(false)+errmsg);
-			throw new SeleniumException(errmsg);
+			throw new SeleniumPlusException(errmsg);
 		}
 
 		return assignPair;
@@ -1304,25 +2067,104 @@ public class SearchObject {
 	}
 
 	public static class SwitchFramesResults{
-	    boolean haveSwitchedFrames = false;
-	    List<String> rsWithoutFrames = new ArrayList<String>();
+	    private boolean haveSwitchedFrames = false;
+	    private List<String> rsWithoutFrames = new ArrayList<String>();
 	    public SwitchFramesResults setSwitchedFrames(boolean switched){
 	    	haveSwitchedFrames = switched;
 	    	return this;
 	    }
-	    public SwitchFramesResults setRsWithoutFrames(List<String> withoutFrames){
+	    public boolean haveSwitchedFrames() {
+			return haveSwitchedFrames;
+		}
+		public SwitchFramesResults setRsWithoutFrames(List<String> withoutFrames){
 	    	rsWithoutFrames = withoutFrames;
 	    	return this;
 	    }
 	}
 
 	/**
-	 * Before doing any component search, we make sure we are in the correct frame.
-	 * Frame information may or may not be within the provided recognition string.
-	 * @param recognitionString
+	 * Initialize the {@link SearchObject#lastBrowserWindow}, it is important for calculating the element location on screen.<br>
+	 * If we failed to create it then we will try to connect to current session from session file.
+	 * This may change the {@link SearchObject#lastUsedWD} and {@link SearchObject#lastVisitedURL}.<br>
+	 * <b>NOTE: ONLY the top most window is useful to us. Please call getWebDriver().switchTo().defaultContent() before calling this method.
+	 *          According to <a href="https://www.w3schools.com/jsref/obj_window.asp">javascript window</a>,
+	 *          If a document contain frames, the browser creates one window object for the HTML document,
+	 *          and one additional window object for each frame.
+	 *          If we are NOT in the topmost document, this method will NOT change the field {@link SearchObject#lastBrowserWindow}</b>
+	 *
+	 * @return WebDriver
+	 * @throws SeleniumPlusException
+	 */
+	public static WebDriver initializeBrowserWindow() throws SeleniumPlusException{
+		String debugmsg = StringUtils.debugmsg(false);
+		WebDriver webdriver = getWebDriver();
+
+		boolean done = false;
+		boolean retried = false;
+		while(!done){
+			//Get information about the browser window by "javascript code",
+			//as Selenium window object doesn't provide enough information.
+			Window window = webdriver.manage().window();
+			Object windowObject = BrowserWindow.getWindowObjectByJS(window);
+			if(windowObject != null){
+				try{
+					IndependantLog.warn(debugmsg +" DOM window Object retrieved successfully.");
+					Object currentFrame = _getCurrentFrame(webdriver);
+					if(currentFrame!=null){
+						//we ONLY need the window info of the top most document, S1536070.
+						IndependantLog.warn(debugmsg +" skip DOM window information, we are not in the top most document!");
+					}else{
+						lastBrowserWindow = new BrowserWindow(windowObject);
+						IndependantLog.debug(debugmsg +" Evaluating DOM window information...");
+					}
+				}catch(Exception e){
+					IndependantLog.warn(debugmsg+e.getMessage());
+					if(lastBrowserWindow==null){
+						IndependantLog.error(debugmsg +" lastBrowserWindow is null, create a default BrowserWindow.");
+						lastBrowserWindow = new BrowserWindow();
+					}else{
+						IndependantLog.debug(debugmsg +"Retaining the last Browser window object instead.");
+					}
+				}
+				done = true;
+			}else{
+				// Carl Nagle -- resolving problems in IE after "Login"
+				// DEBUG Experimental -- IE not working the same as other browsers
+				IndependantLog.debug(debugmsg +" DOM window Object could not be retrieved.");
+				if(!retried){
+					IndependantLog.debug(debugmsg +" retrying 'current' session from the session file ...");
+					webdriver = reconnectLastWebDriver();
+
+					IndependantLog.debug(debugmsg +" changing the last visited URL from '"+lastVisitedURL+"' to '"+webdriver.getCurrentUrl()+"'");
+					lastVisitedURL = webdriver.getCurrentUrl();
+
+					if(! getBypassFramesReset()) webdriver.switchTo().defaultContent();
+					retried = true;
+				}else{
+					IndependantLog.debug(debugmsg +" retrying a new targetLocator FAILED.");
+					done = true;
+					throw new SeleniumPlusException("Suspected UnreachableBrowserException seeking Browser DOM window Object.");
+				}
+			}
+		}
+
+		return webdriver;
+	}
+
+	/**
+	 * Before doing any component search, we make sure we are in the correct frame.<br>
+	 * Frame information may or may not be within the provided recognition string.<br><br>
+	 *
+	 * This method will probably change the field {@link #lastBrowserWindow}<br>
+	 * This method will probably change the filed {@link #lastFrame}<br>
+	 * <b>NOTE: If {@link #getBypassFramesReset()} is true, we only strip off the frame recognition string and will not change frame context.</b>
+	 *
+	 * @param recognitionString String, the recognition string with/without frame information.
+	 *
+	 * @return SwitchFramesResults, contains the indicator if we have switched frame; and the normal recognition string to get element.
 	 */
 	protected static SwitchFramesResults _switchFrames(String recognitionString){
-		String debugmsg = StringUtils.debugmsg(SearchObject.class, "_swithcFrames");
+		String debugmsg = StringUtils.debugmsg(false);
 
 		String[] st = StringUtils.getTokenArray(recognitionString, childSeparator, escapeChar);
 		/* rsWithoutFrames: Recognition String may contain some Frame-RS, after handling the
@@ -1330,59 +2172,22 @@ public class SearchObject {
 		 * RS will be kept in the list rsWithoutFrames
 		 */
 		List<String> rsWithoutFrames = new ArrayList<String>();
-		TargetLocator targetLocator = null;
 		boolean haveSwichedFrame = false;
 
+		WebDriver webdriver = getWebDriver();
 		//1. Handle the Frames Recognition String
 		try{
-			WebDriver  webdriver = getWebDriver();
 			lastVisitedURL = webdriver.getCurrentUrl();
-			targetLocator = webdriver.switchTo();
-			//very IMPORTANT step: Switch back to the top window or first frame
-			targetLocator.defaultContent();
-			boolean done = false;
-			boolean retried = false;
-			while(!done){
-
-				//Get information about the browser window by "javascript code",
-				//as Selenium window object doesn't provide enough information.
-				Window window = webdriver.manage().window();
-				Object windowObject = BrowserWindow.getWindowObjectByJS(window);
-				if(windowObject != null){
-					try{
-						lastBrowserWindow = new BrowserWindow(windowObject);
-						IndependantLog.debug(debugmsg +" DOM window Object retrieved successfully.  Evaluating information...");
-					}catch(Exception e){
-						IndependantLog.warn(debugmsg+e.getMessage());
-						if(lastBrowserWindow==null){
-							IndependantLog.error(debugmsg +" lastBrowserWindow is null, create a default BrowserWindow.");
-							lastBrowserWindow = new BrowserWindow();
-						}else{
-							IndependantLog.debug(debugmsg +"Retaining the last Browser window object instead.");
-						}
-					}
-					done = true;
-				}else{
-					// Carl Nagle -- resolving problems in IE after "Login"
-					// DEBUG Experimental -- IE not working the same as other browsers
-					IndependantLog.debug(debugmsg +" DOM window Object could not be retrieved.");
-					if(!retried){
-						IndependantLog.debug(debugmsg +" retrying a new targetLocator WebDriver...");
-						webdriver = reconnectLastWebDriver();
-
-						IndependantLog.debug(debugmsg +" changing the last visited URL from '"+lastVisitedURL+"' to '"+webdriver.getCurrentUrl()+"'");
-						lastVisitedURL = webdriver.getCurrentUrl();
-
-						targetLocator = webdriver.switchTo();
-						targetLocator.defaultContent();
-						retried = true;
-					}else{
-						IndependantLog.debug(debugmsg +" retrying a new targetLocator FAILED.");
-						done = true;
-						throw new SeleniumPlusException("Suspected UnreachableBrowserException seeking Browser DOM window Object.");
-					}
-				}
+			IndependantLog.debug(debugmsg +" Before switching frame:\nOur 'lastFrame' is "+lastFrame+"\nThe current frame context is "+_getCurrentFrame(webdriver));
+			if( ! getBypassFramesReset() ){
+				//very IMPORTANT step: Switch back to the top window
+				webdriver.switchTo().defaultContent();
+				IndependantLog.debug(debugmsg +" reset the frame context to the top document. ");
+			}else{
+				IndependantLog.debug(debugmsg +" bypassed 'frame-reset', we are probably not in the top document. ");
 			}
+
+			webdriver = initializeBrowserWindow();
 
 			//reset the frame before searching the frame element if it exists.
 			FrameElement frameElement = null;
@@ -1394,52 +2199,67 @@ public class SearchObject {
 				frameRS = retrieveFrameRS(rst);
 
 				if(frameRS!=null){
-					//Get frame WebElement according to frame's recognition string
-					frame = _getSwitchFrame(webdriver, frameRS);
-					if(frame!=null){
-						frameElement = new FrameElement(frameElement, frame);
-						haveSwichedFrame = _switchFrame(webdriver, frame);
+					//If getBypassFramesReset() is true, we will ignore the frame parts in the recognition string
+					if(!getBypassFramesReset()){
+						//Get frame WebElement according to frame's recognition string
+						frame = _getSwitchFrame(webdriver, frameRS);
+						if(frame!=null){
+							frameElement = new FrameElement(frameElement, frame);
+							haveSwichedFrame = _switchFrame(webdriver, frame);
+							//Can we use frame as SearchContext for child frame? FrameID=parentFrame;\;FrameID=childFrame
+							//NO, frame WebElement can NOT be used as SearchContext, will cause Exception
+							//We should always use webdriver as the SearchContext to find frame WebElement
 
-						//Can we use frame as SearchContext for child frame? FrameID=parentFrame;\;FrameID=childFrame
-						//NO, frame WebElement can NOT be used as SearchContext, will cause Exception
-						//We should always use webdriver as the SearchContext to find frame WebElement
-
-						//don't break, if there is frame in frame, as FRAMENAME=parent;\\;FRAMENAME=child
-						//break;
+							//don't break, if there is frame in frame, as FRAMENAME=parent;\\;FRAMENAME=child
+						}else{
+							IndependantLog.warn(debugmsg+" cannot find the frame webelement according to RS '"+frameRS+"'.");
+						}
 					}
-
 				}else{
 					//IndependantLog.warn(debugmsg+" store normal recognition string '"+rst+"' for further processing.");
 					rsWithoutFrames.add(rst);
 				}
 			}
 
-			if(haveSwichedFrame) lastFrame = frameElement;
+			if(haveSwichedFrame){
+				lastFrame = frameElement;
+				IndependantLog.debug(debugmsg+" CHANGED the 'lastFrame' to "+lastFrame);
+			}
 
 		}catch(Exception e){
-			IndependantLog.error(debugmsg+" during switching frame, met exception "+StringUtils.debugmsg(e));
+			StringBuilder errorMsg = new StringBuilder("\nFailed to switch frame for '"+recognitionString + "'");
+			String pageContent = null;
+			if(webdriver!=null){
+				try {
+					//webdriver.getPageSource() will only return the content of document in current frame, NOT the whole html page.
+					//pageContent = webdriver.getPageSource();
+					String url = webdriver.getCurrentUrl();
+					pageContent = NetUtilities.readHttpURL(new URL(url), StringUtils.CHARSET_UTF8 /*what page encoding to use*/, 5000/*5 seconds enough?*/);
+					if(pageContent!=null){
+						errorMsg.append("on page");
+						errorMsg.append("\n============ '"+url+"' ======================\n"+pageContent);
+						errorMsg.append("\n======================================================\n");
+					}
+				} catch (Exception e1) {
+				}
+			}
+			errorMsg.append("Met exception "+e.toString());
+			IndependantLog.error(debugmsg+errorMsg);
 		}
 
 		//2. Before search an element, switch to the correct frame
 		//   For the child component, we don't need to specify the frame-RS, they use the same frame-RS as
 		//   their parent component.
 		try{
-			if(!haveSwichedFrame && targetLocator!=null){
-				FrameElement frameElement = lastFrame;
-				Stack<FrameElement> frameStack = new Stack<FrameElement>();
-				while(frameElement!=null){
-					frameStack.push(frameElement);
-					frameElement = frameElement.getParentFrame();
-				}
-				while(!frameStack.isEmpty() && frameStack.peek()!=null){
-					targetLocator.frame(frameStack.pop().getWebElement());
-					haveSwichedFrame = true;
-				}
+			//If we bypass the 'frame reset', then user will handle the frame-switch by himself.
+			if( !getBypassFramesReset() && !haveSwichedFrame && webdriver.switchTo()!=null){
+				haveSwichedFrame = _switchByFrameElement(webdriver, lastFrame);
 			}
+			IndependantLog.debug(debugmsg +" After switching frame:\nOur 'lastFrame' is "+lastFrame+"\nThe current frame context is "+_getCurrentFrame(webdriver));
 		}catch(Exception e){
 			if(e instanceof StaleElementReferenceException && pageHasChanged()){
 				IndependantLog.warn(debugmsg+" switching to the previous frame 'lastFrame' failed! The page has changed!");
-				//LeiWang: S1215754
+				//Lei Wang: S1215754
 				//if we click a link within a FRAME, as the link is in a FRAME, so the field 'lastFrame' will be assigned after clicking the link.
 				//then the link will lead us to a second page, when we try to find something on that page, firstly we try to switch to 'lastFrame' and
 				//get a StaleElementReferenceException (as we are in the second page, there is no such frame of the first page)
@@ -1454,13 +2274,81 @@ public class SearchObject {
 			}else{
 				IndependantLog.warn(debugmsg+" switching to the previous frame 'lastFrame' failed! Met exception "+StringUtils.debugmsg(e));
 			}
-			//LeiWang: S1215778
+			//Lei Wang: S1215778
 			//If we fail to switch to 'lastFrame', which perhaps means that it is not useful anymore
 			//we should reset it to null, otherwise it will cause errors, such as calculate the element's screen location
 			IndependantLog.debug(debugmsg+" 'lastFrame' is not useful anymore, reset it to null.");
 			lastFrame = null;
 		}
 		return new SwitchFramesResults().setRsWithoutFrames(rsWithoutFrames).setSwitchedFrames(haveSwichedFrame);
+	}
+
+	/**
+	 * Switch frame context.
+	 * @param webdriver WebDriver
+	 * @param frameElement FrameElement, the frame to be switched to.
+	 * @return boolean true if successfully switched.
+	 */
+	protected static boolean _switchByFrameElement(WebDriver webdriver, FrameElement frameElement){
+		boolean switched = false;
+
+		try{
+			Stack<FrameElement> frameStack = new Stack<FrameElement>();
+			while(frameElement!=null){
+				frameStack.push(frameElement);
+				frameElement = frameElement.getParentFrame();
+			}
+			while(!frameStack.isEmpty() && frameStack.peek()!=null){
+				webdriver.switchTo().frame(frameStack.pop().getWebElement());
+				switched = true;
+			}
+		}catch(Exception e){
+			IndependantLog.warn(StringUtils.debugmsg(false)+" failed, due to "+e.toString());
+			switched = false;
+		}
+
+		return switched;
+	}
+
+	/**
+	 * Reset the frame context to 'lastFrame' if the current frame context is different than 'lastFrame'.<br>
+	 * <b>NOTE:</b> Please turn on the field {@link #checkCurrentFrameContext} before calling this method.<br>
+	 * @return boolean true if we did reset the frame to 'lastFrame'
+	 *
+	 * @see #checkCurrentFrameContext
+	 */
+	public static boolean resetLastFrame(){
+		boolean reset = false;
+		boolean isEdge44 = false;
+		String debugmsg = StringUtils.debugmsg(false);
+		WebDriver webdriver = getWebDriver();
+
+		if(webdriver instanceof RemoteWebDriver){
+			RemoteWebDriver rwd = (RemoteWebDriver) webdriver;
+			Capabilities cap = rwd.getCapabilities();
+			if(SelectBrowser.BROWSER_NAME_EDGE.equalsIgnoreCase(cap.getBrowserName()) ){
+				String version = rwd.getCapabilities().getVersion();
+				if(StringUtils.isValid(version) && version.trim().startsWith("44")){
+					isEdge44 = true;
+					IndependantLog.debug(debugmsg+" testing with Edge 44, there is a bug losting frame context accidentally, we forced checking the current frame.");
+				}
+			}
+		}
+
+		if(lastFrame!=null && (checkCurrentFrameContext || isEdge44)){
+			try {
+				Object currentFrame = _getCurrentFrame();
+				//TODO do we need to check if the currentFrame is not null, but it is different than the 'lastFrame'?
+				if(currentFrame==null){
+					IndependantLog.debug(debugmsg+" For some reason, we lost frame context, we are going to reset it to "+lastFrame);
+					reset = _switchByFrameElement(webdriver, lastFrame);
+				}
+			} catch (SeleniumPlusException e) {
+				IndependantLog.error(debugmsg+" failed, Met "+e.toString());
+			}
+		}
+
+		return reset;
 	}
 
 	/**
@@ -1484,7 +2372,7 @@ public class SearchObject {
 
 		SearchContext wel = sc;
 
-		//3. Lei Wang, FIX S1138290
+		//3. Lei Wang, FIX defect S1138290
 		//Error 1: Map doesn't contain a window definition (under a frame)
 		//  [Window]
 		//  Child="FrameId=xxx;\;Id=xxx"
@@ -1532,7 +2420,7 @@ public class SearchObject {
 					wel = getObjectByQualifier(wel, searchCriteria, value);
 
 				}else if(SEARCH_CRITERIA_CSS.equalsIgnoreCase(searchCriteria)){
-					IndependantLog.debug(debugmsg+" searching css'"+value+"'");
+					IndependantLog.debug(debugmsg+" searching css '"+value+"'");
 					wel = getObjectByQualifier(wel, searchCriteria, value);
 
 				}else if (rst.contains(qulifierSeparator)){//Multiple Attributes and Qualifiers
@@ -1564,9 +2452,13 @@ public class SearchObject {
 			}
 		}
 
-		try{ return (WebElement) wel;}
-		catch(ClassCastException x){
-			//RemoteDriver cannot be cast to WebElement
+		try{
+			IndependantLog.debug(debugmsg +" Just before returning found web-element:\nOur 'lastFrame' is "+lastFrame+"\nThe current frame context is "+_getCurrentFrame());
+		}catch(Exception x){
+		}
+
+		try{ return (WebElement) wel; }catch(Exception x){
+			IndependantLog.error("Could not retrun the found element, due to "+x.toString());
 			return null;
 		}
 	}
@@ -1593,7 +2485,7 @@ public class SearchObject {
 		SearchContext wel = sc;
 		SwitchFramesResults sfr =_switchFrames(recognitionString);
 
-		//3. Lei Wang, FIX S1138290
+		//3. Lei Wang, FIX defect S1138290
 		//Error 1: Map doesn't contain a window definition (under a frame)
 		//  [Window]
 		//  Child="FrameId=xxx;\;Id=xxx"
@@ -1650,7 +2542,7 @@ public class SearchObject {
 					    wel = getObjectByQualifier(wel, searchCriteria, value);
 					}
 				}else if(SEARCH_CRITERIA_CSS.equalsIgnoreCase(searchCriteria)){
-					IndependantLog.debug(debugmsg+" searching css'"+value+"'");
+					IndependantLog.debug(debugmsg+" searching css '"+value+"'");
 					if(isLastRS){
 					    list = getObjectsByQualifier(wel, searchCriteria, value);
 					}else{
@@ -1695,6 +2587,11 @@ public class SearchObject {
 				break;
 			}
 		}
+		try{
+			IndependantLog.debug(debugmsg +" Just before returning found web-elements:\nOur 'lastFrame' is "+lastFrame+"\nThe current frame context is "+_getCurrentFrame());
+		}catch(Exception x){
+		}
+
 		return list;
 	}
 
@@ -1716,11 +2613,12 @@ public class SearchObject {
 	 * @return WebElement, the webelement or null if not found
 	 */
 	protected static WebElement getFrameWebElement(SearchContext sc, int index){
-		WebElement frame = getWebElement(sc, TAG_FRAME , index);
+		WebElement frame = null;
 		if(frame==null) frame = getWebElement(sc, TAG_IFRAME , index);
+		if(frame==null) frame = getWebElement(sc, TAG_FRAME , index);
 
-		try{ if(frame==null) frame = sc.findElements(By.xpath("//"+TAG_FRAME)).get(index-1); }catch(Exception ignore){}
 		try{ if(frame==null) frame = sc.findElements(By.xpath("//"+TAG_IFRAME)).get(index-1); }catch(Exception ignore){}
+		try{ if(frame==null) frame = sc.findElements(By.xpath("//"+TAG_FRAME)).get(index-1); }catch(Exception ignore){}
 
 		return frame;
 	}
@@ -1735,8 +2633,9 @@ public class SearchObject {
 	protected static WebElement getWebElement(SearchContext sc, String tagName, int index){
 		WebElement result = null;
 		try{
-//			result = sc.findElement(By.xpath("(//"+tagName+")["+index+"]"));//Why the parenthesis?
-			result = sc.findElement(By.xpath("//"+tagName+"["+index+"]"));
+			//E[n] represents the nth child of element E
+			//(E)[n] represents the nth E element
+			result = sc.findElement(By.xpath("(//"+tagName+")["+index+"]"));
 		}catch(Exception e){
 			IndependantLog.error(StringUtils.debugmsg(false)+" met "+StringUtils.debugmsg(e));
 		}
@@ -1757,31 +2656,55 @@ public class SearchObject {
 		return preMatches;
 	}
 
+	/**
+	 * @return element according to element's text or element's attribute 'value'.
+	 *         Firstly we try to match with element's text; if not found we try to match with element's attribute 'value'.
+	 */
 	protected static SearchContext getObjectByText(SearchContext wel,String text, boolean partialMatch){
-		String debugmsg = StringUtils.debugmsg(false);
-		IndependantLog.debug(debugmsg +"using '"+ text+"', partialMatch="+partialMatch);
-
-		String xpath = XPATH.fromText(text, partialMatch, true);
-		List<WebElement> preMatches = findElements(wel, xpath);
-
-		List<WebElementWarpper> elements = new ArrayList<WebElementWarpper>();
-		for(WebElement item : preMatches) elements.add(new WebElementWarpper(item, item.getText()));
-
-		return getMatchedObject(elements, text, partialMatch);
+		List<WebElementWarpper> preMatches = getPreMatchedObjectsByText(wel, text, partialMatch);
+		SearchContext result = getMatchedObject(preMatches, text, partialMatch);
+		if(result==null){
+			preMatches = getPreMatchedObjectsByAttributeValue(wel, text, partialMatch);
+			result = getMatchedObject(preMatches, text, partialMatch);
+		}
+		return result;
 	}
 
-	/** @return 0 or more matched elements */
+	/** @return 0 or more matched elements according to element's text and element's attribute 'value'. */
 	protected static List<WebElement> getObjectsByText(SearchContext wel,String text, boolean partialMatch){
+		List<WebElementWarpper> preMatches = getPreMatchedObjectsByText(wel, text, partialMatch);
+
+		preMatches.addAll(getPreMatchedObjectsByAttributeValue(wel, text, partialMatch));
+
+		return getMatchedObjects(preMatches, text, partialMatch);
+	}
+
+	/** @return 0 or more pre-matched elements according to element's text. */
+	private static List<WebElementWarpper> getPreMatchedObjectsByText(SearchContext wel,String text, boolean partialMatch){
 		String debugmsg = StringUtils.debugmsg(false);
 		IndependantLog.debug(debugmsg +"using '"+ text+"', partialMatch="+partialMatch);
 
+		List<WebElementWarpper> elements = new ArrayList<WebElementWarpper>();
+		//xpath text()=xxx, for text node like <tag>xxx</tag>
 		String xpath = XPATH.fromText(text, partialMatch, true);
 		List<WebElement> preMatches = findElements(wel, xpath);
+		for(WebElement item : preMatches) elements.add(new WebElementWarpper(item, getText(item)));
+
+		return elements;
+	}
+
+	/** @return 0 or more pre-matched elements according to element's attribute 'value'. */
+	private static List<WebElementWarpper> getPreMatchedObjectsByAttributeValue(SearchContext wel,String text, boolean partialMatch){
+		String debugmsg = StringUtils.debugmsg(false);
+		IndependantLog.debug(debugmsg +"using '"+ text+"', partialMatch="+partialMatch);
 
 		List<WebElementWarpper> elements = new ArrayList<WebElementWarpper>();
-		for(WebElement item : preMatches) elements.add(new WebElementWarpper(item, item.getText()));
+		//xpath @value=, for tag like <input type="submit" name="Login" value="Sign in">
+		String xpath = XPATH.fromAttribute("value", text, partialMatch, true);
+		List<WebElement> preMatches = findElements(wel, xpath);
+		for(WebElement item : preMatches) elements.add(new WebElementWarpper(item, getText(item)));
 
-		return getMatchedObjects(elements, text, partialMatch);
+		return elements;
 	}
 
 	protected static SearchContext getObjectByTitle(SearchContext wel, String value, boolean partialMatch){
@@ -1903,6 +2826,7 @@ public class SearchObject {
 	protected static SearchContext getObjectByQualifier(SearchContext sc, String qualifier, String value) throws SeleniumPlusException{
 		SearchContext result = null;
 		String qualifierUC = null;
+		String debugmsg = StringUtils.debugmsg(false);
 
 		if(qualifier==null){
 			throw new SeleniumPlusException("ignore null qualifier.");
@@ -1916,7 +2840,15 @@ public class SearchObject {
 				result = sc.findElement(By.xpath(value));
 
 			}else if(SEARCH_CRITERIA_CSS.equals(qualifierUC)){
-				result = sc.findElement(By.cssSelector(value));
+				By by = null;
+				if(CSS.isDeprecated(value)){
+					IndependantLog.warn(debugmsg+" the css selector '"+value+"' is deprecated!");
+					by = CSS.convert(value);
+				}
+				if(by==null){
+					by = By.cssSelector(value);
+				}
+				result = sc.findElement(by);
 
 			}else if(SEARCH_CRITERIA_TAG.equals(qualifierUC)){
 				result = sc.findElement(By.tagName(value));
@@ -2724,15 +3656,18 @@ public class SearchObject {
 	 */
 	public static String getText(WebElement webelement){
 		String debugmsg = StringUtils.debugmsg(SearchObject.class, "getText");
-		String tt = webelement.getText();
-		String t = tt == null ? "" : tt;
-		Object ov = getValue(webelement, TEXT_VALUE_ATTRIBUTES);
-		String v = ov == null ? "" : ov.toString();
-		IndependantLog.info(debugmsg+"getText()  received: "+ t);
-		IndependantLog.info(debugmsg+"getValue() received: "+ v);
-		String rc = t.length() > 0 ? t: v;
-		IndependantLog.info(debugmsg+"returning: "+ rc);
-		return rc;
+		String text = webelement.getText();
+		IndependantLog.info(debugmsg+"webelement.getText()  received: "+ text);
+		if(text==null || text.length()==0){
+			//getValue() usually takes more time to process
+			Object value = getValue(webelement, TEXT_VALUE_ATTRIBUTES);
+			IndependantLog.info(debugmsg+"getValue() received: "+ value);
+			text = value==null? "": value.toString();
+		}
+		//else if we can get the text by webelement.getText(), we don't want to waste more time
+
+		IndependantLog.info(debugmsg+"returning: "+ text);
+		return text;
 	}
 
 	/**
@@ -2813,12 +3748,17 @@ public class SearchObject {
 		final List<Object> js_result = new ArrayList<Object>();
 		js_result.add(null);
 		Thread t = new Thread(new Runnable(){
+			@Override
 			public void run() {
 				try{js_result.set(0, getJS().executeScript(js));}
 				catch(org.openqa.selenium.UnhandledAlertException x){
 					IndependantLog.warn(StringUtils.debugmsg(SearchObject.class, "js_executeWithTimeout") + " UnhandledAlertException: " + x);
 				}
-				catch(SeleniumPlusException x){throw new RuntimeException(x);}
+				catch(SeleniumPlusException x){
+					IndependantLog.warn("SearchObject.js_executeWithTimeout(): Failed to execute script. Met SeleniumPlusException "+x.toString());
+				}catch(NoSuchSessionException nsse){
+					IndependantLog.warn("SearchObject.js_executeWithTimeout(): Failed to execute script. Met NoSuchSessionException "+nsse.toString());
+				}
 			}
 		});
 		t.setDaemon(true);
@@ -3214,6 +4154,7 @@ public class SearchObject {
 		__isStale = false;
 		__isStaleException = null;
 		Thread t = new Thread(new Runnable(){
+			@Override
 			public void run(){
 				try{
 					//WebDriver will not throw StaleElementReferenceException until the 'implicit timeout' is reached.
@@ -3320,6 +4261,7 @@ public class SearchObject {
 		public DefaultJSEventListener(){}
 		public DefaultJSEventListener(String eventName){ this.eventName=eventName;}
 
+		@Override
 		public void onEventFired() {
 			setEventFired(true);
 		}
@@ -3369,6 +4311,7 @@ public class SearchObject {
 			this.keepRunning = keepRunning;
 		}
 
+		@Override
 		public void run() {
 			final String debugmsg = StringUtils.debugmsg(PollingRunnable.class, "run");
 			IndependantLog.debug(debugmsg+"pollingThread started for "+ listenerID);
@@ -4057,6 +5000,21 @@ public class SearchObject {
 		IndependantLog.info("SearchObject.generateSAFSFrameRecognition made "+ tag + att);
 		return tag + att;
 	}
+
+	public static String generateSAFSFrameRecognition(WebElement node, String xpath){
+		String frameRS = null;
+		String t = node.getTagName();
+		if(SearchObject.TAG_FRAME.equalsIgnoreCase(t) || SearchObject.TAG_IFRAME.equalsIgnoreCase(t)){
+			if(xpath!=null){
+				frameRS = generateSAFSFrameRecognition(xpath);
+			}else{
+				frameRS = generateSAFSFrameRecognition(generateGenericXPath(node));
+			}
+		}
+
+		return frameRS;
+	}
+
 	/** <b>0</b> integer zero */
 	public static final int MATCHED_ZERO_TIMES 	= 0;
 	/** <b>1</b> integer one */
@@ -4245,6 +5203,33 @@ public class SearchObject {
 		return matchedTimes;
 	}
 
+	/**
+	 * Navigate to the previous page.
+	 * @return boolean true if the navigation succeeds.
+	 */
+	public static boolean back(){
+		try{
+			getWebDriver().navigate().back();
+			return true;
+		}catch(Throwable e){
+			IndependantLog.error(" Failed to navigate to previous page!", e);
+			return false;
+		}
+	}
+
+	/**
+	 * Navigate to the next page.
+	 * @return boolean true if the navigation succeeds.
+	 */
+	public static boolean forward(){
+		try{
+			getWebDriver().navigate().forward();
+			return true;
+		}catch(Throwable e){
+			IndependantLog.error(" Failed to navigate to next page!", e);
+			return false;
+		}
+	}
 
 	public abstract static class SAP{
 		/**
@@ -4289,6 +5274,54 @@ public class SearchObject {
 		public static String getRecognition(WebElement element) {
 			// TODO: build SAP recognition string
 			return "XPATH="+generateFullGenericXPath(element);
+		}
+
+		/**
+		 * @param element WebElement
+		 * @return List&lt;Accessibility>, a list of accessibility object
+		 */
+		public static List<Accessibility> getSAPAccessibleElementsInfo(WebElement element){
+			String debugmsg = StringUtils.debugmsg(false);
+			List<Accessibility> accessibilityList = new ArrayList<Accessibility>();
+
+			StringBuffer jsScript = new StringBuffer();
+			jsScript.append(JavaScriptFunctions.SAP.sap_getAccessibilityControllerElementsInfo(true));
+			jsScript.append(" return sap_getAccessibilityControllerElementsInfo(arguments[0]);\n");
+
+			try {
+				Object accessibilities = executeJavaScriptOnWebElement(jsScript.toString(), element);
+
+				//this call actually returns a List/Array of Objects/Maps?
+				if(accessibilities instanceof Map){
+					IndependantLog.debug(debugmsg+"received properties *IS* instanceof Map.");
+					try{
+						accessibilityList.add(new Accessibility(accessibilities));
+					}catch(Throwable t){
+						IndependantLog.debug(debugmsg+"failed to convert accessibilities object "+accessibilities+"\nMet exception "+t.toString());
+					}
+				}else if(accessibilities instanceof List){
+					IndependantLog.debug(debugmsg+"received accessibilities *IS* instanceof List.");
+					// should be an array of AccessibilityElementInfo Map objects
+					List<?> accessibilityElementList = (List<?>) accessibilities;
+					Object  accessibilityElement = null;
+					for(int i=0;i<accessibilityElementList.size();i++){
+						try{
+							accessibilityElement = accessibilityElementList.get(i);
+							accessibilityList.add(new Accessibility(accessibilityElement));
+						}catch(Throwable t){
+							IndependantLog.debug(debugmsg+"returned AccessibilityElement object is "+accessibilityElement+"\nFailed to convert it to Accessibility object, due to "+t);
+						}
+					}
+				}else{
+					if(accessibilities!=null) IndependantLog.debug("returned '"+accessibilities.getClass().getName()+"' accessibilities object "+accessibilities+"\nNeeds to handle in code.");
+					else IndependantLog.debug(debugmsg+"returned accessibilities object is "+null);
+				}
+
+			} catch (SeleniumPlusException e) {
+				IndependantLog.debug(debugmsg+" failed, Met exception.", e);
+			}
+
+			return accessibilityList;
 		}
 
 		/**

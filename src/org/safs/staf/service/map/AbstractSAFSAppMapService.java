@@ -1,3 +1,20 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.staf.service.map;
 
 import java.io.File;
@@ -9,6 +26,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Vector;
 
+import org.safs.Constants;
 import org.safs.Log;
 import org.safs.StringUtils;
 import org.safs.staf.embedded.HandleInterface;
@@ -380,7 +398,7 @@ import com.ibm.staf.service.STAFCommandParser;
  * <p>
  * HELP
  * <p>
- * Software Automation Framework Support (SAFS) http://safsdev.sourceforge.net<br>
+ * Software Automation Framework Support (SAFS) https://safsdev.github.io/<br>
  * Software Testing Automation Framework (STAF) http://staf.sourceforge.net<br>
  * @author Carl Nagle JUL 03, 2003 Moved initialization into init, out of constructor.
  * @author Carl Nagle DEC 11, 2003 Added CLEARCACHE command.
@@ -402,7 +420,7 @@ public abstract class AbstractSAFSAppMapService {
 
 	public int  SAM_SERVICE_REQUEST_ARGS_MAX    = 11;  //most OPEN should see
 	public int  SAM_SERVICE_INIT_ARGS_MAX       = 7;  //most INIT should see
-	
+
 	public static final String SAM_SERVICE_OPTION_DIR         = "DIR";
 	public static final String SAM_SERVICE_OPTION_EXT         = "EXT";
 	public static final String SAM_SERVICE_OPTION_SAFSVARS    = "SAFSVARS";
@@ -456,8 +474,8 @@ public abstract class AbstractSAFSAppMapService {
 	public static final String SAM_SERVICE_PARM_FULLPATH       = "FULLPATH";
 
 	public static final String SAM_DDV_PREFIX                  = "_DDV:";
-	public static final String SAM_RESOLVE_PREFIX              = "{^";
-	public static final String SAM_RESOLVE_SUFFIX              = "}";
+	public static final String SAM_RESOLVE_PREFIX              = Constants.EMBEDDED_VAR_PREFIX;
+	public static final String SAM_RESOLVE_SUFFIX              = Constants.EMBEDDED_VAR_SUFFIX;
 
 	public static final String SAM_CURRENTWINDOW_ITEM          = "CurrentWindow";
 	public static final int    SAM_DDV_PREFIX_LEN = 5;

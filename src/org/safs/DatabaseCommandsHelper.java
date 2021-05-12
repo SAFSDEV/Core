@@ -1,14 +1,33 @@
-/** Copyright (C) (MSA, Inc) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
+/**
+ * Copyright (C) (MSA, Inc), All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs;
 
-import java.io.*;
-import java.util.*;
-import java.sql.*;
+import java.io.File;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.StringTokenizer;
 
-import org.safs.tools.*;
+import org.safs.tools.CaseInsensitiveFile;
 
 /**
  * <br><em>Purpose:</em> DatabaseCommandsHelper, used by DCDriverCommands.
@@ -26,7 +45,7 @@ public class DatabaseCommandsHelper {
   public static final String COPYDBTABLETOFILE             = "CopyDBTableToFile";
   public static final String DELETEDBTABLERECORDS          = "DeleteDBTableRecords";
   public static final String EXECSQLQUERY                  = "ExecSQLQuery";
-  public static final String EXECSQLCOMMIT                 = "ExecSQLCommit";    
+  public static final String EXECSQLCOMMIT                 = "ExecSQLCommit";
   public static final String GETDBTABLECOLUMNCOUNT         = "GetDBTableColumnCount";
   public static final String GETDBTABLEROWCOUNT            = "GetDBTableRowCount";
   public static final String GETDBVALUE                    = "GetDBValue";
@@ -34,22 +53,22 @@ public class DatabaseCommandsHelper {
   public static final String VERIFYDATABASEVALUE           = "VerifyDatabaseValue";
   public static final String VERIFYDBNULLVALUE             = "VerifyDBNullValue";
   public static final String VERIFYDBVALUE                 = "VerifyDBValue";
-  
+
   // terrible hack for performance and explicit commit sake
   protected static String lastConnUrl = null;
   protected static String lastConnUser = null;
   protected static String lastConnPass = null;
   protected static Connection lastConn = null;
-  
+
   public static boolean equalsDatabaseCommand (String command) {
     Log.debug(".....equalsDatabaseCommand...........: "+command);
-    boolean result = 
+    boolean result =
       command.equalsIgnoreCase(DatabaseCommandsHelper.SETJDBCDRIVER) ||
       command.equalsIgnoreCase(DatabaseCommandsHelper.COPYDBTABLECOLUMNTOFILE) ||
       command.equalsIgnoreCase(DatabaseCommandsHelper.COPYDBTABLETOFILE) ||
       command.equalsIgnoreCase(DatabaseCommandsHelper.DELETEDBTABLERECORDS) ||
       command.equalsIgnoreCase(DatabaseCommandsHelper.EXECSQLQUERY) ||
-      command.equalsIgnoreCase(DatabaseCommandsHelper.EXECSQLCOMMIT) ||	
+      command.equalsIgnoreCase(DatabaseCommandsHelper.EXECSQLCOMMIT) ||
       command.equalsIgnoreCase(DatabaseCommandsHelper.GETDBTABLECOLUMNCOUNT) ||
       command.equalsIgnoreCase(DatabaseCommandsHelper.GETDBTABLEROWCOUNT) ||
       command.equalsIgnoreCase(DatabaseCommandsHelper.GETDBVALUE) ||
@@ -82,12 +101,12 @@ public class DatabaseCommandsHelper {
    * @param                     user, String
    * @param                     pass, String
    * @return                    Connection
-   * @exception                 SQLException
+   * @throws                 SQLException
    **/
   protected static Connection getConnection (String url,
                                              String user, String pass) throws SQLException {
     Connection con;
-    
+
     if (loadedDriver == null) loadDriver(null);
 
     // was this our last connection?
@@ -97,7 +116,7 @@ public class DatabaseCommandsHelper {
          (lastConn != null) && (!lastConn.isClosed()))
     {
     	Log.info("returning existing con for url: " + url);
-    	con = lastConn;  
+    	con = lastConn;
     } else {
     	if ((lastConn != null) && (!lastConn.isClosed())) {
     		lastConn.close();
@@ -115,7 +134,7 @@ public class DatabaseCommandsHelper {
 
   /** <br><em>Purpose:</em> load driver
    * @param driver, String, if null will load the DEFAULT_DRIVER
-   * @exception                 SQLException
+   * @throws                 SQLException
    **/
   protected static Class loadDriver(String driver) throws SQLException {
     Log.info("loading driver: "+driver);
@@ -126,7 +145,7 @@ public class DatabaseCommandsHelper {
 
   /** <br><em>Purpose:</em> setJdbcDriver
    * @param                     pr, Processor
-   * @exception                 SQLException
+   * @throws                 SAFSException
    **/
   public static void setJdbcDriver (Processor pr) throws SAFSException {
     Collection altParams = pr.getAlternateParams();
@@ -143,7 +162,7 @@ public class DatabaseCommandsHelper {
     String driver = (String)iterator.next();
     try {
       loadDriver(driver);
-      pr.getLogUtilities().logMessage(pr.getTestRecordData().getFac(), 
+      pr.getLogUtilities().logMessage(pr.getTestRecordData().getFac(),
                                       " "+pr.getTestRecordData().getCommand()+" "+
                                       altParams+" ok ",
                                       Processor.GENERIC_MESSAGE);
@@ -186,7 +205,7 @@ public class DatabaseCommandsHelper {
    ** <br>Examples:
    ** <br>    C, CopyDBTableColumnToFile, ADBAlias, ATableAlias, Data Source Name (dsn), OutputFileName, [SQLQuery], [OutputDirectory], [Delimiter], [sqlStatus], "[UID]", "[PWD]"
    * @param                     pr, Processor
-   * @exception                 SQLException
+   * @throws                 SAFSException
    **/
   public static void copyDBTableColumnToFile (Processor pr) throws SAFSException {
     Collection altParams = pr.getAlternateParams();
@@ -256,7 +275,7 @@ public class DatabaseCommandsHelper {
         return;
       }
 
-      pr.getLogUtilities().logMessage(pr.getTestRecordData().getFac(), 
+      pr.getLogUtilities().logMessage(pr.getTestRecordData().getFac(),
                                       " "+pr.getTestRecordData().getCommand()+" "+
                                       altParams+" ok ",
                                       Processor.GENERIC_MESSAGE);
@@ -305,9 +324,9 @@ public class DatabaseCommandsHelper {
    ** <br> 4. DBTableName
    ** <br>     Name of the TABLE to access within the DBSourceName
    ** <br> 5. [ ColumnCount ]
-   ** <br>     If specified the output file will contain only the number of columns specified. 
+   ** <br>     If specified the output file will contain only the number of columns specified.
    ** <br> 6. [ RowCount ]
-   ** <br>     If specified the output file will contain only the number of columns specified. 
+   ** <br>     If specified the output file will contain only the number of columns specified.
    ** <br> 7. [ SQLQuery ]
    ** <br>     If specified, the file will contain the results of the executed Query. The query is NOT validated by this function.
    ** <br> 8. [ delimiter ]
@@ -323,7 +342,7 @@ public class DatabaseCommandsHelper {
    ** <br>Examples:
    ** <br>    C, CopyDBTableToFile, ADBAlias, ATableAlias, Data Source Name (dsn), OutputFileName, tableName, [ColumnCount],[rowCount], [SQLQuery], [Delimiter], [OutputDirectory], [sqlStatus], "[UID]", "[PWD]"
    * @param                     pr, Processor
-   * @exception                 SQLException
+   * @throws                 SAFSException
    **/
   public static void copyDBTableToFile (Processor pr) throws SAFSException {
     Collection altParams = pr.getAlternateParams();
@@ -411,7 +430,7 @@ public class DatabaseCommandsHelper {
         return;
       }
 
-      pr.getLogUtilities().logMessage(pr.getTestRecordData().getFac(), 
+      pr.getLogUtilities().logMessage(pr.getTestRecordData().getFac(),
                                       " "+pr.getTestRecordData().getCommand()+" "+
                                       altParams+" ok ",
                                       Processor.GENERIC_MESSAGE);
@@ -456,7 +475,7 @@ public class DatabaseCommandsHelper {
    ** <br>     Expression allowed by the WHERE clause of the delete sentence of the SQL driver
    ** <br>     A query condition can be included. It can be any valid expression
    **          allowed by the WHERE clause of the delete sentence of the SQL driver you are
-   **          using. For example: "CliBal > 100000 and CliCat = 'C'". "where" will be added
+   **          using. For example: "CliBal &gt; 100000 and CliCat = 'C'". "where" will be added
    **          to any expression if it is not provided ("")
    ** <br> 4. DBSourceName
    ** <br>     Name of the Datasource containing the DBTable
@@ -467,7 +486,7 @@ public class DatabaseCommandsHelper {
    ** <br> 7. [ SQLStatus ]
    ** <br>     SQL status code as a result of executing the query gets stored in this variable
    * @param                     pr, Processor
-   * @exception                 SQLException
+   * @throws                 SAFSException
    **/
   public static void deleteDBTableRecords (Processor pr) throws SAFSException {
     Collection altParams = pr.getAlternateParams();
@@ -513,7 +532,7 @@ public class DatabaseCommandsHelper {
         return;
       }
 
-      pr.getLogUtilities().logMessage(pr.getTestRecordData().getFac(), 
+      pr.getLogUtilities().logMessage(pr.getTestRecordData().getFac(),
                                       " "+pr.getTestRecordData().getCommand()+" "+
                                       altParams+" ok; rowCount: "+rowCount,
                                       Processor.GENERIC_MESSAGE);
@@ -544,7 +563,7 @@ public class DatabaseCommandsHelper {
   /** <br><em>Purpose:</em> execSQLQuery
    ** <br>  Executes the query provided in a queryStr on the database table.
    * @param                     pr, Processor
-   * @exception                 SQLException
+   * @throws                 SAFSException
    **/
   public static void execSQLQuery (Processor pr) throws SAFSException {
     Collection altParams = pr.getAlternateParams();
@@ -579,7 +598,7 @@ public class DatabaseCommandsHelper {
     try {
       String sqlStatusCodeVal = "OK";
       con = getConnection(dbSourceName, userID, password);
-      
+
       if (autoCommit.equalsIgnoreCase("false")) {
         con.setAutoCommit(false);
       } else {
@@ -596,7 +615,7 @@ public class DatabaseCommandsHelper {
         return;
       }
 
-      pr.getLogUtilities().logMessage(pr.getTestRecordData().getFac(), 
+      pr.getLogUtilities().logMessage(pr.getTestRecordData().getFac(),
                                       " "+pr.getTestRecordData().getCommand()+" "+
                                       altParams+" ok; rowCount: "+rowCount,
                                       Processor.GENERIC_MESSAGE);
@@ -622,7 +641,7 @@ public class DatabaseCommandsHelper {
   /** <br><em>Purpose:</em> execSqlCommit
    ** <br>  Commits the pending queries on the database.
    * @param                     pr, Processor
-   * @exception                 SQLException
+   * @throws                 SAFSException
    **/
   public static void execSQLCommit (Processor pr) throws SAFSException {
     Collection altParams = pr.getAlternateParams();
@@ -666,7 +685,7 @@ public class DatabaseCommandsHelper {
         return;
       }
 
-      pr.getLogUtilities().logMessage(pr.getTestRecordData().getFac(), 
+      pr.getLogUtilities().logMessage(pr.getTestRecordData().getFac(),
                                       " "+pr.getTestRecordData().getCommand()+" "+
                                       altParams+" ok;," +
                                       Processor.GENERIC_MESSAGE);
@@ -714,7 +733,7 @@ public class DatabaseCommandsHelper {
    ** <br>Examples:
    ** <br>    C, getDBTableRowCount, ADBAlias, ATableAlias, Data Source Name (dsn), tableName, RowCount, sqlStatus, "[UID]", "[PWD]"
    * @param                     pr, Processor
-   * @exception                 SQLException
+   * @throws                 SAFSException
    **/
   public static void getDBTableColumnCount (Processor pr) throws SAFSException {
     Collection altParams = pr.getAlternateParams();
@@ -767,7 +786,7 @@ public class DatabaseCommandsHelper {
         return;
       }
 
-      pr.getLogUtilities().logMessage(pr.getTestRecordData().getFac(), 
+      pr.getLogUtilities().logMessage(pr.getTestRecordData().getFac(),
                                       " "+pr.getTestRecordData().getCommand()+" "+
                                       altParams+" ok ",
                                       Processor.GENERIC_MESSAGE);
@@ -815,7 +834,7 @@ public class DatabaseCommandsHelper {
    ** <br>Examples:
    ** <br>    C, getDBTableRowCount, ADBAlias, ATableAlias, Data Source Name (dsn), tableName, RowCount, sqlStatus, "[UID]", "[PWD]"
    * @param                     pr, Processor
-   * @exception                 SQLException
+   * @throws                 SAFSException
    **/
   public static void getDBTableRowCount (Processor pr) throws SAFSException {
     Collection altParams = pr.getAlternateParams();
@@ -868,7 +887,7 @@ public class DatabaseCommandsHelper {
         return;
       }
 
-      pr.getLogUtilities().logMessage(pr.getTestRecordData().getFac(), 
+      pr.getLogUtilities().logMessage(pr.getTestRecordData().getFac(),
                                       " "+pr.getTestRecordData().getCommand()+" "+
                                       altParams+" ok ",
                                       Processor.GENERIC_MESSAGE);
@@ -907,7 +926,7 @@ public class DatabaseCommandsHelper {
    ** <br> 6. [ UserID = ] - UserID for accessing the Datasource (if required).
    ** <br> 7. [ Password = ] - Password for accessing the Datasource (if required).
    * @param                     pr, Processor
-   * @exception                 SQLException
+   * @throws                 SAFSException
    **/
   public static void getDBValue (Processor pr) throws SAFSException {
     Collection altParams = pr.getAlternateParams();
@@ -969,7 +988,7 @@ public class DatabaseCommandsHelper {
         return;
       }
 
-      pr.getLogUtilities().logMessage(pr.getTestRecordData().getFac(), 
+      pr.getLogUtilities().logMessage(pr.getTestRecordData().getFac(),
                                       " "+pr.getTestRecordData().getCommand()+" "+
                                       altParams+" ok ("+sqlStatusCodeVal+") :"+queryResultVal,
                                       Processor.GENERIC_MESSAGE);
@@ -1010,7 +1029,7 @@ public class DatabaseCommandsHelper {
    ** <br>     Expression allowed by the WHERE clause of the SELECT sentence of the SQL driver
    ** <br>     A query condition can be included. It can be any valid expression
    **          allowed by the WHERE clause of the SELECT sentence of the SQL driver you are
-   **          using. For example: "CliBal > 100000 and CliCat = 'C'". "where" will be added
+   **          using. For example: "CliBal &gt; 100000 and CliCat = 'C'". "where" will be added
    **          to any expression if it is not provided ("")
    ** <br> 5. DBSourceName
    ** <br>     Name of the Datasource containing the DBTable
@@ -1021,7 +1040,7 @@ public class DatabaseCommandsHelper {
    ** <br> 8. [ SQLStatus ]
    ** <br>     SQL status code as a result of executing the query gets stored in this variable
    * @param                     pr, Processor
-   * @exception                 SQLException
+   * @throws                 SAFSException
    **/
   public static void verifyDatabaseNullValue (Processor pr) throws SAFSException {
     Collection altParams = pr.getAlternateParams();
@@ -1077,7 +1096,7 @@ public class DatabaseCommandsHelper {
         return;
       }
 
-      pr.getLogUtilities().logMessage(pr.getTestRecordData().getFac(), 
+      pr.getLogUtilities().logMessage(pr.getTestRecordData().getFac(),
                                       " "+pr.getTestRecordData().getCommand()+" "+
                                       altParams+" ok ",
                                       Processor.GENERIC_MESSAGE);
@@ -1118,7 +1137,7 @@ public class DatabaseCommandsHelper {
    ** <br>     Expression allowed by the WHERE clause of the SELECT sentence of the SQL driver
    ** <br>     A query condition can be included. It can be any valid expression
    **          allowed by the WHERE clause of the SELECT sentence of the SQL driver you are
-   **          using. For example: "CliBal > 100000 and CliCat = 'C'". "where" will be added
+   **          using. For example: "CliBal &gt; 100000 and CliCat = 'C'". "where" will be added
    **          to any expression if it is not provided ("")
    ** <br> 5. DBSourceName
    ** <br>     Name of the Datasource containing the DBTable
@@ -1127,11 +1146,11 @@ public class DatabaseCommandsHelper {
    ** <br> 7. Password
    ** <br>     Password for accessing the Datasource (if required).
    ** <br> 8. ExpectedValue
-   ** <br>     Benchmark value to compare against retrieved DBFieldName value 
+   ** <br>     Benchmark value to compare against retrieved DBFieldName value
    ** <br> 9. [ SQLStatus ]
    ** <br>     SQL status code as a result of executing the query gets stored in this variable
    * @param                     pr, Processor
-   * @exception                 SQLException
+   * @throws                 SAFSException
    **/
   public static void verifyDatabaseValue (Processor pr) throws SAFSException {
     Collection altParams = pr.getAlternateParams();
@@ -1200,7 +1219,7 @@ public class DatabaseCommandsHelper {
         return;
       }
 
-      pr.getLogUtilities().logMessage(pr.getTestRecordData().getFac(), 
+      pr.getLogUtilities().logMessage(pr.getTestRecordData().getFac(),
                                       " "+pr.getTestRecordData().getCommand()+" "+
                                       altParams+" ok ",
                                       Processor.GENERIC_MESSAGE);
@@ -1230,7 +1249,7 @@ public class DatabaseCommandsHelper {
 
   /** <br><em>Purpose:</em> verifyDBNullValue: same as verifyDatabaseNullValue
    * @param                     pr, Processor
-   * @exception                 SQLException
+   * @throws                 SAFSException
    **/
   public static void verifyDBNullValue (Processor pr) throws SAFSException {
     verifyDatabaseNullValue(pr);
@@ -1238,7 +1257,7 @@ public class DatabaseCommandsHelper {
 
   /** <br><em>Purpose:</em> verifyDBValue: same as verifyDatabaseValue
    * @param                     pr, Processor
-   * @exception                 SQLException
+   * @throws                 SAFSException
    **/
   public static void verifyDBValue (Processor pr) throws SAFSException {
     verifyDatabaseValue(pr);

@@ -1,30 +1,43 @@
 /**
  * Copyright (C) SAS Institute, All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * Logs for developers, not published to API DOC.
  * History:<br>
  *
- *  <br>   NOV 19, 2013    (Carl Nagle) Initial release.
- *  <br>   DEC 18, 2013    (Lei Wang) Update to support ComboBox.
- *  <br>   JAN 08, 2014    (DHARMESH) Update to support EditBox.
- *  <br>   JAN 16, 2014    (DHARMESH) Update start/stop browser call.
- *  <br>   JAN 26, 2014    (Lei Wang) Add method combineParams().
+ * NOV 19, 2013    (Carl Nagle) Initial release.
+ * DEC 18, 2013    (Lei Wang) Update to support ComboBox.
+ * JAN 08, 2014    (DHARMESH) Update to support EditBox.
+ * JAN 16, 2014    (DHARMESH) Update start/stop browser call.
+ * JAN 26, 2014    (Lei Wang) Add method combineParams().
  *                                  Modify API ComboBox.CaptureItemsToFile(): show the required parameter filename.
  *                                  Add keyword Misc.Expressions().
- *  <br>   FEB 02, 2014	   (DHARMESH) Add Resize and Maximize WebBrowser window KW.
- *  <br>   MAR 05, 2014    (Lei Wang) Implement click-related keywords.
- *  <br>   APR 15, 2014    (DHARMESH) Added HighLight keyword
- *  <br>   APR 22, 2014    (Lei Wang) Implement keywords of TabControl.
- *  <br>   APR 29, 2014    (Lei Wang) Add the ability of execution of javascript;
- *  <br>   MAY 13, 2014    (DHARMESH) Add Component class and update other component references;
- *  <br>   JUL 08, 2014    (Lei Wang) Add inner class WDTimeOut to provide methods setting WebDriver's timeout thread-safely.
- *  <br>   NOV 10, 2014    (Lei Wang) Add support for Strings.
- *  <br>   NOV 19, 2014    (Lei Wang) Add support for Files.
- *  <br>   NOV 21, 2014    (Dharmesh/Carl Nagle) Update ExecuteScript Javadoc.
- *  <br>   NOV 25, 2014    (Lei Wang) Add support for Misc.
- *  <br>   DEC 19, 2014    (Lei Wang) Adjust some method qualifiers:
+ * FEB 02, 2014	   (DHARMESH) Add Resize and Maximize WebBrowser window KW.
+ * MAR 05, 2014    (Lei Wang) Implement click-related keywords.
+ * APR 15, 2014    (DHARMESH) Added HighLight keyword
+ * APR 22, 2014    (Lei Wang) Implement keywords of TabControl.
+ * APR 29, 2014    (Lei Wang) Add the ability of execution of javascript;
+ * MAY 13, 2014    (DHARMESH) Add Component class and update other component references;
+ * JUL 08, 2014    (Lei Wang) Add inner class WDTimeOut to provide methods setting WebDriver's timeout thread-safely.
+ * NOV 10, 2014    (Lei Wang) Add support for Strings.
+ * NOV 19, 2014    (Lei Wang) Add support for Files.
+ * NOV 21, 2014    (Dharmesh/Carl Nagle) Update ExecuteScript Javadoc.
+ * NOV 25, 2014    (Lei Wang) Add support for Misc.
+ * DEC 19, 2014    (Lei Wang) Adjust some method qualifiers:
  *                                    make some "public" so that user can use.
  *                                    turn some "package private" to "private" so that generated java doc will not contain them.
  *                                  Remove generateParams(): use combineParams instead.
@@ -35,32 +48,42 @@
  *                                    be very quick (got from the cache).
  *                                  Change the font of optional parameters to bold, so it looks clear for user.
  *                                  Modify method ExecuteScript(): force parameter 'script' to be required.
- *  <br>   JAN 04, 2015    (Lei Wang) Add LeftDrag and ScrollWheel.
- *  <br>   JAN 15, 2015    (Lei Wang) Add mouse-drag-related keywords.
- *  <br>   FEB 26, 2015    (Lei Wang) Add method GetGUIImage to filter children of type org.safs.model.Component.
+ * JAN 04, 2015    (Lei Wang) Add LeftDrag and ScrollWheel.
+ * JAN 15, 2015    (Lei Wang) Add mouse-drag-related keywords.
+ * FEB 26, 2015    (Lei Wang) Add method GetGUIImage to filter children of type org.safs.model.Component.
  *                                  Modify Misc.GetAppMapValue(), SeleniumPlus.getObject(): don't log message.
- *  <br>   JUN 11, 2015    (Lei Wang) Modify Misc.SetVariableValueEx(), SetVariableValues(): resolve DDVariable if EXPRESSIONS is off.
+ * JUN 11, 2015    (Lei Wang) Modify Misc.SetVariableValueEx(), SetVariableValues(): resolve DDVariable if EXPRESSIONS is off.
  *                                  Add Misc.ResolveExpression().
- *  <br>   JUN 15, 2015    (DHARMESH4) Added SendMail support.
- *  <br>   JUN 23, 2015    (Lei Wang) Modify for test auto run.
- *  <br>   JUN 24, 2015	   (Tao Xie) Add Misc.WaitForPropertyValue() and Misc.WaitForPropertyValueGone() keywords.
- *  <br>   JUL 07, 2015    (Tao Xie) Add EditBox.SetTextCharacters(), EditBox.SetUnverifiedTextCharacters() and EditBox.SetUnverifiedTextValue() keywords.
- *  <br>                            Change comments of EditBox.SetTextValue().
- *  <br>   JUL 24, 2015    (Lei Wang) Add GetURL, SaveURLToFile, VerifyURLContent, VerifyURLToFile in Misc.
- *  <br>   AUG 17, 2015    (DHARMESH4) Add SetFocus call in Window.
- *  <br>   AUG 20, 2015    (Carl Nagle) Document -Dtestdesigner.debuglogname support in main().
- *  <br>   SEP 07, 2015    (Lei Wang) Add method DragTo(): parameter 'offset' will also support pixel format;
+ * JUN 15, 2015    (DHARMESH4) Added SendMail support.
+ * JUN 23, 2015    (Lei Wang) Modify for test auto run.
+ * JUN 24, 2015	   (Tao Xie) Add Misc.WaitForPropertyValue() and Misc.WaitForPropertyValueGone() keywords.
+ * JUL 07, 2015    (Tao Xie) Add EditBox.SetTextCharacters(), EditBox.SetUnverifiedTextCharacters() and EditBox.SetUnverifiedTextValue() keywords.
+ *                          Change comments of EditBox.SetTextValue().
+ * JUL 24, 2015    (Lei Wang) Add GetURL, SaveURLToFile, VerifyURLContent, VerifyURLToFile in Misc.
+ * AUG 17, 2015    (DHARMESH4) Add SetFocus call in Window.
+ * AUG 20, 2015    (Carl Nagle) Document -Dtestdesigner.debuglogname support in main().
+ * SEP 07, 2015    (Lei Wang) Add method DragTo(): parameter 'offset' will also support pixel format;
  *                                                       optional parameter 'FromSubItem' and 'ToSubItem' are not supported yet.
- *  <br>   JAN 07, 2016    (Carl Nagle) Make System.exit() optional and allowExit=false, by default.
- *  <br>   MAR 02, 2016    (Lei Wang) Add Misc.AlertAccept(), Misc.AlertDismiss() and ClickUnverified().
- *  <br>   MAR 07, 2016    (Lei Wang) Add example for StartWebBrowser() with preference settings for "chrome" and "firefox".
- *  <br>   MAR 14, 2016    (Lei Wang) Add IsAlertPresent().
- *  <br>   MAR 24, 2016    (Lei Wang) Modify comments for StartWebBrowser(): adjust examples and add links to specify "custom profile" and "preferences".
- *  <br>   MAR 31, 2016    (Lei Wang) Add IsComponentExists(), OnGUIXXXBlockID().
+ * JAN 07, 2016    (Carl Nagle) Make System.exit() optional and allowExit=false, by default.
+ * MAR 02, 2016    (Lei Wang) Add Misc.AlertAccept(), Misc.AlertDismiss() and ClickUnverified().
+ * MAR 07, 2016    (Lei Wang) Add example for StartWebBrowser() with preference settings for "chrome" and "firefox".
+ * MAR 14, 2016    (Lei Wang) Add IsAlertPresent().
+ * MAR 24, 2016    (Lei Wang) Modify comments for StartWebBrowser(): adjust examples and add links to specify "custom profile" and "preferences".
+ * MAR 31, 2016    (Lei Wang) Add IsComponentExists(), OnGUIXXXBlockID().
  *                                  Modify testStatusCode(): the status code BRANCH_TO_BLOCKID will be considered successful execution.
- *  <br>   APR 19, 2016    (Lei Wang) Modify comments/examples for Click() CtrlClick() ShiftClick() etc.: Handle the optional parameter 'autoscroll'.
- *  <br>   MAY 17, 2016    (Carl Nagle) Add support for -junit:classname command-line parameter.
- *  <br>   DEC 12, 2016    (Lei Wang) Modified TypeKeys() and TypeChars(): call actionGUILess() instead of Component.TypeXXX() to keep the log message consistent.
+ * APR 19, 2016    (Lei Wang) Modify comments/examples for Click() CtrlClick() ShiftClick() etc.: Handle the optional parameter 'autoscroll'.
+ * MAY 17, 2016    (Carl Nagle) Add support for -junit:classname command-line parameter.
+ * DEC 12, 2016    (Lei Wang) Modified TypeKeys() and TypeChars(): call actionGUILess() instead of Component.TypeXXX() to keep the log message consistent.
+ * JUL 25, 2017    (Lei Wang) Modified ThreadSafeTimeOut.setTimeout()/resetTimeout(): catch WebDriverException instead of SessionNotFoundException (it disappears in Selenium3.X)
+ * APR 18, 2018    (Lei Wang) Modified constructor SeleniumPlus() to set product's name, version and description.
+ * APR 19, 2018    (Lei Wang) Modified constructor SeleniumPlus() to add embedded SELENIUMENGINE to driver.
+ * APR 19, 2018    (Lei Wang) Moved the code of setting Runner's diver out of constructor and put them into static block:
+ *                                  Runner is static and is shared by all SeleniumPlus instances, we don't need to set the driver's data every time we instantiate a new instance.
+ * MAY 15, 2018    (Lei Wang) Add an example for method StartWebBrowser(): to run chrome with option "--no-sandbox".
+ * SEP 25, 2018    (Lei Wang) Loaded the 'Runner' from spring context.
+ * MAR 21, 2019    (Lei Wang) Modified getObject(): Check window's recognition string to see if we need to reset the WDLibrary's lastFrame to null.
+ * APR 18, 2019    (Lei Wang) Instantiate the 'Runner' in normal way if it is not loaded from spring context.
+ * JUN 04, 2019    (Lei Wang) Modified StartWebBrowser(): add example for 'setNetworkConditions'.
  */
 package org.safs.selenium.webdriver;
 
@@ -68,21 +91,30 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.concurrent.TimeUnit;
 
+//SessionNotFoundException has disappeared in Selenium3.X, NoSuchSessionException occurs instead
+//But I am not sure if NoSuchSessionException is equivalent as SessionNotFoundException, so use their super-class WebDriverException
+//import org.openqa.selenium.remote.SessionNotFoundException;
+//import org.openqa.selenium.NoSuchSessionException;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Timeouts;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.SessionNotFoundException;
+import org.safs.Constants;
+import org.safs.Constants.BrowserConstants;
 import org.safs.IndependantLog;
 import org.safs.Processor;
 import org.safs.SAFSPlus;
 import org.safs.StringUtils;
+import org.safs.image.ImageUtils.AlterImageStyle;
 import org.safs.model.commands.GenericMasterFunctions;
 import org.safs.model.tools.EmbeddedHookDriverRunner;
 import org.safs.selenium.util.DocumentClickCapture;
 import org.safs.selenium.webdriver.lib.SelectBrowser;
 import org.safs.selenium.webdriver.lib.SeleniumPlusException;
 import org.safs.selenium.webdriver.lib.WDLibrary;
+import org.safs.text.FileUtilities.FilterMode;
+import org.safs.tools.engines.SAFSSELENIUM;
 
 /**
  * <pre>
@@ -125,7 +157,7 @@ import org.safs.selenium.webdriver.lib.WDLibrary;
  *     be used as base-directory.
  *
  *
- * <Font color="red">NOTE 3: <a href="http://safsdev.sourceforge.net/sqabasic2000/UsingDDVariables.htm">DDVariable</a></Font>
+ * <Font color="red">NOTE 3: <a href="/sqabasic2000/UsingDDVariables.htm">DDVariable</a></Font>
  * To use DDVariable ability, PLEASE remember to turn on the Expression by Misc.Expressions(true);
  * The DDVariable is a variable reference, it can be expressed by a leading symbol ^ and the "variable name".
  * For example:
@@ -158,8 +190,40 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * and to gain references to more complex services like the running JSAFSDriver or the
 	 * Selenium WebDriver object(s).
 	 */
-	public static final EmbeddedHookDriverRunner Runner = new EmbeddedHookDriverRunner(EmbeddedSeleniumHookDriver.class);
+//	public static EmbeddedHookDriverRunner Runner = new EmbeddedHookDriverRunner(EmbeddedSeleniumHookDriver.class);
+	public static EmbeddedHookDriverRunner Runner = null;
+	/** 'SeleniumPlus'  */
+	public static final String PRODUCT_NAME = "SeleniumPlus";
+	/** '1.0' */
+	public static final String PRODUCT_VERSION = "1.0";
+	/** 'The driver with embedded selenium engine to run test script in Java.' */
+	public static final String PRODUCT_DESCRIPTION = "The driver with embedded selenium engine to run test script in Java.";
 
+	static{
+		try{
+			//Runner = new EmbeddedHookDriverRunner(EmbeddedSeleniumHookDriver.class);
+			Object[] arguments = {EmbeddedSeleniumHookDriver.class};
+			Runner = (EmbeddedHookDriverRunner) springApplicationContext.getBean(org.safs.model.tools.EmbeddedHookDriverRunner.class.getName(), arguments);
+			System.out.println("SeleniumPlus: Spring got Runner"+Runner);
+
+		}catch(Exception e){
+			debug("SeleniumPlus: Failed to initialize the SeleniumPlus.Runner by spring in the static clause! Met "+e.getClass().getSimpleName()+":"+e.getMessage());
+			Runner = new EmbeddedHookDriverRunner(EmbeddedSeleniumHookDriver.class);
+			System.out.println("SeleniumPlus: got Runner"+Runner+" by normal instantiation.");
+		}
+
+		try{
+			//Set SeleniumPlus product's name, version and description
+			Runner.iDriver().setProductName(PRODUCT_NAME);
+			Runner.iDriver().setVersion(PRODUCT_VERSION);
+			Runner.iDriver().setDescription(PRODUCT_DESCRIPTION);
+			//Add the embedded engine 'SAFSSELENIUM' to the driver. This engine will not handle request, it
+			//is only used to track user's history into our repository.
+			Runner.iDriver().addEmbeddedEngine(new SAFSSELENIUM());
+		}catch(Exception e){
+			System.err.println("SeleniumPlus: Failed to initialize the SeleniumPlus.Runner's driver in the static clause! Met "+e.getClass().getSimpleName()+":"+e.getMessage());
+		}
+	}
 	/**
 	 * Internal framework use only.
 	 * Required Default no-arg constructor.
@@ -172,7 +236,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 
 	/**
 	 * Start WebBrowser
-	 * See <a href="http://safsdev.sourceforge.net/sqabasic2000/DDDriverCommandsReference.htm#detail_StartWebBrowser">Detailed Reference</a>
+	 * See <a href="/sqabasic2000/DDDriverCommandsReference.htm#detail_StartWebBrowser">Detailed Reference</a>
 	 * @param URL String,
 	 * @param BrowserID String, Unique application/browser ID.
 	 * @param params optional
@@ -192,7 +256,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * <p>
 	 * The key can be one of:
 	 * <p><ul>
-	 * {@link SelectBrowser#getExtraParameterKeys()}<br>
+	 * {@link BrowserConstants#getExtraParameterKeys()}<br>
 	 * </ul><p>
 	 * params[3] extra parameter key1<br>
 	 * params[4] extra parameter value for key1<br>
@@ -213,7 +277,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 *
 	 * <b>
 	 * The following gives some examples to start web browser with "custom profile" and "preferences".
-	 * For the detail explanation of starting browser with "custom profile" and/or "preferences", please visit the section "<font color="red">Start Browser</font>" at <a href="http://safsdev.sourceforge.net/selenium/doc/SeleniumPlus-Welcome.html">Selenium Welcome Document</a>.
+	 * For the detail explanation of starting browser with "custom profile" and/or "preferences", please visit the section "<font color="red">Start Browser</font>" at <a href="/selenium/doc/SeleniumPlus-Welcome.html">Selenium Welcome Document</a>.
 	 * </b>
 	 *
 	 * //Start firefox browser with custom profile "myprofile" ( <a href="https://support.mozilla.org/en-US/kb/profile-manager-create-and-remove-firefox-profiles">Create custom profile</a>)
@@ -233,6 +297,23 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 *                                                        "true",
 	 *                                                        quote(SelectBrowser.KEY_FIREFOX_PROFILE_PREFERENCE),
 	 *                                                        quote(absolutePreferenceFile)
+	 *                                                        });
+	 * //Start firefox browser with preference by json string (not a file).
+	 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
+	 *                                                        SelectBrowser.BROWSER_NAME_FIREFOX,
+	 *                                                        "10",
+	 *                                                        "true",
+	 *                                                        quote(SelectBrowser.KEY_FIREFOX_PROFILE_PREFERENCE),
+	 *                                                        "{ \"intl.accept_languages\":\"zh-cn\", \"accessibility.accesskeycausesactivation\":false, \"browser.download.folderList\":2 }"
+	 *                                                        });
+	 * //Start firefox browser with preference by CSV array string, such as "key:value, key:value, key:value".
+	 * <b>Misc.Expressions(false);//This must be called to avoid expression-evaluation.</b>
+	 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
+	 *                                                        SelectBrowser.BROWSER_NAME_FIREFOX,
+	 *                                                        "10",
+	 *                                                        "true",
+	 *                                                        quote(SelectBrowser.KEY_FIREFOX_PROFILE_PREFERENCE),
+	 *                                                        "intl.accept_languages:zh-cn, accessibility.accesskeycausesactivation:false, browser.download.folderList:2 "
 	 *                                                        });
 	 *
 	 * //Start chrome browser with default data pool (chrome://version/, see "Profile Path") , and using the last-used user.
@@ -274,7 +355,8 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 *                                                        quote(SelectBrowser.KEY_CHROME_PROFILE_DIR),
 	 *                                                        "Profile 1"
 	 *                                                        });
-	 * //Start chrome browser with some options to be turned off.
+	 *
+	 * //Start chrome browser with some options to be turned off, these options will be set to key {@link SelectBrowser#KEY_CHROME_EXCLUDE_OPTIONS} (<b>excludeSwitches</b>).
 	 * String optionsToExclude = "disable-component-update";//comma separated options to exclude, like "disable-component-update, ignore-certificate-errors", be careful, there are NO 2 hyphens before options.
 	 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
 	 *                                                        SelectBrowser.BROWSER_NAME_CHROME,
@@ -283,6 +365,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 *                                                        quote(SelectBrowser.KEY_CHROME_EXCLUDE_OPTIONS),
 	 *                                                        quote(optionsToExclude)
 	 *                                                        });
+	 *
 	 * //Start chrome browser with some chrome-command-line-options/preferences to set.
 	 * String absolutePreferenceFile = "c:\\chromePref.json.dat";//A json file containing chrome command-line-options/preferences, like { "lang":"zh-cn", "start-maximized":"",  "<b>seplus.chrome.preference.json.key</b>":{ "intl.accept_languages":"zh-CN-pseudo", "intl.charset_default"  :"utf-8"} }
 	 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
@@ -292,6 +375,123 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 *                                                        quote(SelectBrowser.KEY_CHROME_PREFERENCE),
 	 *                                                        quote(absolutePreferenceFile)
 	 *                                                        });
+	 * //Start chrome browser with command-line-options/preferences by json string (not a file).
+	 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
+	 *                                                        SelectBrowser.BROWSER_NAME_CHROME,
+	 *                                                        "10",
+	 *                                                        "true",
+	 *                                                        quote(SelectBrowser.KEY_CHROME_PREFERENCE),
+	 *                                                        "{ \"lang\":\"zh-cn\", \"start-maximized\":\"\",  \"seplus.chrome.preference.json.key\":{ \"intl.accept_languages\":\"zh-CN-pseudo\", \"intl.charset_default\" : \"utf-8\"} }"
+	 *                                                        });
+	 * //Start chrome browser with command-line-options/preferences by CSV array string, such as "key:value, key:value, key:value".
+	 * <b>Misc.Expressions(false);//This must be called to avoid expression-evaluation.</b>
+	 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
+	 *                                                        SelectBrowser.BROWSER_NAME_CHROME,
+	 *                                                        "10",
+	 *                                                        "true",
+	 *                                                        quote(SelectBrowser.KEY_CHROME_PREFERENCE),
+	 *                                                        "lang:zh-cn, start-maximized: "
+	 *                                                        });
+	 *
+	 * //Start chrome browser with some chrome experimental options to set.
+	 * String experimentalOptionsFile = "c:\\chromeExperimentalOptions.json.dat";//A json file containing chrome experimental options, like {"useAutomationExtension" : false, "excludeSwitches" : ["enable-automation"], "prefs" : { "credentials_enable_service" : false, "profile" : { "password_manager_enabled" : false } } }
+	 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
+	 *                                                        SelectBrowser.BROWSER_NAME_CHROME,
+	 *                                                        "10",
+	 *                                                        "true",
+	 *                                                        quote(SelectBrowser.KEY_CHROME_EXPERIMENTAL_OPTIONS),
+	 *                                                        quote(experimentalOptionsFile)
+	 *                                                        });
+	 * //Start chrome browser with experimental options by json string (not a file).
+	 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
+	 *                                                        SelectBrowser.BROWSER_NAME_CHROME,
+	 *                                                        "10",
+	 *                                                        "true",
+	 *                                                        quote(SelectBrowser.KEY_CHROME_EXPERIMENTAL_OPTIONS),
+	 *                                                        "{\"useAutomationExtension\" : false, \"excludeSwitches\" : [\"enable-automation\"], \"prefs\" : { \"credentials_enable_service\" : false, \"profile\" : { \"password_manager_enabled\" : false } } }"
+	 *                                                        });
+	 * //Start chrome browser with experimental options by CSV array string, such as "key:value, key:value, key:value".
+	 * <b>Misc.Expressions(false);//This must be called to avoid expression-evaluation.</b>
+	 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
+	 *                                                        SelectBrowser.BROWSER_NAME_CHROME,
+	 *                                                        "10",
+	 *                                                        "true",
+	 *                                                        quote(SelectBrowser.KEY_CHROME_EXPERIMENTAL_OPTIONS),
+	 *                                                        " useAutomationExtension:false, excludeSwitches:[\"enable-automation\"] "
+	 *                                                        });
+	 *
+	 * //Start chrome browser out of sandbox (It is NOT suggested to use that way). But it can be used to avoid some chrome crash problem.
+	 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
+	 *                                                        SelectBrowser.BROWSER_NAME_CHROME,
+	 *                                                        "10",
+	 *                                                        "true",
+	 *                                                        quote(BrowserConstants.KEY_CHROME_NO_SANDBOX),
+	 *                                                        "true"
+	 *                                                        });
+	 * //Start chrome browser with the 'network-conditions' of <b>{"offline":false, "latency":5, "download_throughput":500000, "upload_throughput":500000}</b>
+	 * "latency" is in milliseconds, "download_throughput" is in bps, "upload_throughput" is in bps.<br>
+	 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
+	 *                                                        SelectBrowser.BROWSER_NAME_CHROME,
+	 *                                                        "10",
+	 *                                                        "true",
+	 *                                                        quote(BrowserConstants.KEY_SET_NETWORK_CONDITIONS),
+	 *                                                        "{ \"offline\":false, \"latency\":5, \"download_throughput\":500000 , \"upload_throughput\":500000}"
+	 *                                                        });
+	 *
+	 * //Start chrome browser with an empty 'network-conditions'. <b>This call is needed if you want to adjust (set, get, delete) the 'network-conditions'.</b>
+	 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
+	 *                                                        SelectBrowser.BROWSER_NAME_CHROME,
+	 *                                                        "10",
+	 *                                                        "true",
+	 *                                                        quote(BrowserConstants.KEY_SET_NETWORK_CONDITIONS),
+	 *                                                        ""
+	 *                                                        });
+	 *
+	 * //Start chrome browser with custom capabilities. <b>The 'custom capabilities' will be a set of key:value pairs json data, each key:value will be stored in the Capabilities.</b>
+	 * String customCapsDat = "c:\\custom.caps.json.dat";//A json file containing 'custom capabilities', like {"goog:loggingPrefs": {"browser": "ALL", "client": "ALL", "driver": "ALL", "performance": "ALL", "server": "ALL"}}
+	 * //This will set 'goog:loggingPrefs' as value {"browser": "ALL", "client": "ALL", "driver": "ALL", "performance": "ALL", "server": "ALL"} in the selenium capabilities to turn on all levels of logs.
+	 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
+	 *                                                        SelectBrowser.BROWSER_NAME_CHROME,
+	 *                                                        "10",
+	 *                                                        "true",
+	 *                                                        quote(BrowserConstants.KEY_CUSTOM_CAPABILITIES),
+	 *                                                        quote(customCapsDat)
+	 *                                                        });
+	 *
+	 * //Start chrome browser with a chrome ModHeader extension to load, and load the ModHeader's profile if it is provided.
+	 * The file "<b>loadExtensions.json</b>" contains "extensions" (required) and "extension-modheader-profile" (optional), such as:
+	 *
+	 * //only load the ModHeader extension
+	 * {
+	 * "extensions": ["C:\\SeleniumPlus\\extra\\ModHeader.crx"],
+	 * }
+	 *
+	 * //or load ModHeader extension and load the ModHeader's profile by a json file
+	 * {
+	 * "extensions": ["C:\\SeleniumPlus\\extra\\ModHeader.crx"],
+	 * "extension-modheader-profile": "C:\\SeleniumPlus\\extra\\ModHeader.json"
+	 * }
+	 *
+	 * //or load ModHeader extension and load the ModHeader's profile by an URL
+	 * {
+	 * "extensions": ["C:\\SeleniumPlus\\extra\\ModHeader.crx"],
+	 * "extension-modheader-profile": "https://bewisse.com/modheader/p/#NobwRAhgDlCmB2ATAsge0bMAuAZhANgM6wA0YARhAMYDWA5gE6oCuSAwqvqg9mAMQA2cgFYAzMIBMYMjgCW+AC6wGhbMAC6ZABawIGFWvBVUAWxMIFvaWAQRy+WImwKGzUmHgRzvAB4BaQghCPygmKAg6CCU-WScyADcCN15EUwhZeGZiHgBfTTAtWNgOMwtnV3cGWEIoAAldfVUsDTJCLW4FABVZBQdeAEZrJR8FDi4eLH4caZmhnr7JgAUmOQcAAkGyZgZ8ACVYKHxqWHN4BSaNPKA"
+	 * }
+	 *
+	 * //or load ModHeader extension and load the ModHeader's profile by a json object
+	 * {
+	 * "extensions": ["C:\\SeleniumPlus\\extra\\ModHeader.crx"],
+	 * "extension-modheader-profile": [{"appendMode":false,"backgroundColor":"#6b5352","filters":[],"headers":[{"comment":"","enabled":true,"name":"x-sas-propagate-id","value":"domainuser"}],"hideComment":true,"respHeaders":[],"shortTitle":"1","textColor":"#ffffff","title":"Profile 1","urlReplacements":[]}]
+	 * }
+	 *
+	 * StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
+	 *                                                        SelectBrowser.BROWSER_NAME_CHROME,
+	 *                                                        "10",
+	 *                                                        "true",
+	 *                                                        quote(BrowserConstants.KEY_CHROME_LOAD_EXTENSIONS),
+	 *                                                        quote("loadExtensions.json")
+	 *                                                        });
+	 *
 	 * </pre>
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
@@ -334,7 +534,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * During test, multiple browsers can be opened by {@link #StartWebBrowser(String, int, String...)}<br>
 	 * If user wants to switch between these opened browser, use can call this method.<br>
 	 * This method requires a parameter 'ID', which is given by user when he calls {@link #StartWebBrowser(String, int, String...)}<br>
-	 * See <a href="http://safsdev.sourceforge.net/sqabasic2000/DDDriverCommandsReference.htm#detail_UseWebBrowser">Detailed Reference</a>
+	 * See <a href="/sqabasic2000/DDDriverCommandsReference.htm#detail_UseWebBrowser">Detailed Reference</a>
 	 * @param ID String, the ID served as key to get the WebDriver from cache.<br>
 	 * @return true on success
 	 * @example
@@ -354,7 +554,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 
 	/**
 	 * Sends keystrokes to the current focused Component.<br>
-	 * See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_TypeKeys">Detailed Reference</a>
+	 * See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_TypeKeys">Detailed Reference</a>
 	 * <p>
 	 * This supports special key characters like:
 	 * <p><pre>
@@ -364,7 +564,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 *     % = ALT Key with another key ( "%F" = ALT + F )
 	 *     + = SHIFT Key with another key ( "+{Enter}" = SHIFT + ENTER )
 	 * </pre>
-	 * We are generally providing this support through our generic <a href="http://safsdev.sourceforge.net/doc/org/safs/tools/input/CreateUnicodeMap.html">InputKeys Support</a>.
+	 * We are generally providing this support through our generic <a href="/doc/org/safs/tools/input/CreateUnicodeMap.html">InputKeys Support</a>.
 	 * <p>
 	 * @param keystrokes String, to send via input to the current focused Component.
 	 * @return true on success
@@ -386,7 +586,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 
 	/**
 	 * Sends characters to the current focused Component.<br>
-	 * See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_TypeChars">Detailed Reference</a>
+	 * See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_TypeChars">Detailed Reference</a>
 	 * <p>
 	 * @param textvalue String, to send via input to the current focused Component.
 	 * @return true on success
@@ -409,11 +609,13 @@ public abstract class SeleniumPlus extends SAFSPlus{
 
 	/**
 	 * Sends secret-text (such as password) to the current focused Component.<br>
-	 * See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_TypeEncryption">Detailed Reference</a>
+	 * See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_TypeEncryption">Detailed Reference</a>
 	 *
 	 * <p>
 	 * @param encryptedDataFile String, the file containing 'encrypted data' to send to the current focused Component.
+	 *                                  It can be an absolute path, or a path relative the the test project's root.
 	 * @param privateKeyFile String, the file containing 'private key' to decrypt the 'encrypted data'
+	 *                               It can be an absolute path, or a path relative the the test project's root.
 	 * @return true on success
 	 * @see org.safs.robot.Robot#inputChars(String)
 	 * @see org.safs.RSA
@@ -432,7 +634,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 
 	/**
 	 * Hover the mouse over a specified screen location.
-	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_HoverScreenLocation">Detailed Reference</a>
+	 * <p>See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_HoverScreenLocation">Detailed Reference</a>
 	 * @param coordination String, The screen location, such as "200;400", or a mapKey defined under "ApplicationConstants" in map file
 	 * @param optionals
 	 * <ul>
@@ -453,19 +655,29 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	public static boolean HoverScreenLocation(String coordination, String... optionals){
 		return Component.HoverScreenLocation(coordination, optionals);
 	}
+
 	/**
-	 * Verify the current contents of a binary (image) file with a benchmark file.
-	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyBinaryFileToFile">Detailed Reference</a>
+	 * Verify the current contents of a binary (image, PDF) file with a benchmark file.
+	 * <p>See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyBinaryFileToFile">Detailed Reference</a>
 	 * @param benchFile String, File used as the comparison benchmark.
 	 * @param actualFile String, File used as the comparison file under test.
 	 * @param optionals
 	 * <ul>
-	 * <b>optionals[0] FilterMode</b> String, one of FileUtilities.FilterMode. FilterMode.TOLERANCE is valid only when the binary files are images.<br>
-	 * <b>optionals[1] FilterOptions</b> int, if the FilterMode is FilterMode.TOLERANCE, a number between 0 and 100,
+	 * <b>optionals[0] FilterMode</b> String, one of {@link FilterMode}. {@link FilterMode#TOLERANCE} is valid only when the binary files are images.<br>
+	 * <b>optionals[1] FilterOption</b>
+	 *                                  <ul>
+	 *                                  <li>int, if the {@link FilterMode} is {@link FilterMode#TOLERANCE}, a number between 0 and 100,
 	 *                                        the percentage of bits need to be the same.
 	 *                                        100 means only 100% match, 2 images will be considered matched;
 	 *                                        0 means even no bits match, 2 images will be considered matched.<br>
-	 *                                   other type, if the FilterMode is FilterMode.XXX<br>
+	 *                                   <li>other type, if the FilterMode is FilterMode.XXX<br>
+	 *                                   </ul>
+	 * <b>optionals[2] alterImageStyle</b> {@link AlterImageStyle}, it is used to alter the diff image when 2 image/PDF doesn't match.<br>
+	 * <b>optionals[3] alterImageFactor</b> double, how much lighter or darker to make the original pixel (with no difference), it is a number between 0 and 1.<br>
+	 *                                      It only takes effect if the parameter 'alterImageStyle' is {@link AlterImageStyle#TINT} or {@link AlterImageStyle#SHADE}.<br>
+	 *                                      For SHADE, the bigger the factor, the darker the shade.<br>
+	 *                                      For TINT, the bigger the factor, the lighter the tint.<br>
+	 * <b>optionals[4] pdfResolution</b> int, the resolution (DPI) used to convert PDF to image. The default is {@link Constants#IMAGE_PDF_CONVERSION_RESOLUTION_DEFAULT}.<br>
 	 * </ul>
 	 * @return true if the 2 files contain the same content, false otherwise.
 	 * @example
@@ -474,6 +686,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * boolean success = SeleniumPlus.VerifyBinaryFileToFile("signIn.png", "signIn.png");
 	 * boolean success = SeleniumPlus.VerifyBinaryFileToFile("c:\bench\signIn.png", "d:\test\signIn.png");
 	 * boolean success = SeleniumPlus.VerifyBinaryFileToFile("c:\bench\signIn.png", "d:\test\signIn.png", FilterMode.TOLERANCE.name, "90");
+	 * boolean success = SeleniumPlus.VerifyBinaryFileToFile("bench.pdf", "actual.pdf", FilterMode.TOLERANCE.name, "100", AlterImageStyle.TINT.name, "0.9", "100");
 	 * }
 	 * </pre>
 	 * @see #prevResults
@@ -485,7 +698,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	}
 	/**
 	 * Verify the current contents of a text file with a benchmark file (same as VerifyTextFileToFile).
-	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyFileToFile">Detailed Reference</a>
+	 * <p>See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyFileToFile">Detailed Reference</a>
 	 * @param benchFile String, File used as the comparison benchmark.
 	 * @param actualFile String, File used as the comparison file under test.
 	 * @param optionals -- NOT used yet
@@ -506,7 +719,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	}
 	/**
 	 * Verify the current contents of a text file with a benchmark file (same as VerifyFileToFile).
-	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyTextFileToFile">Detailed Reference</a>
+	 * <p>See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyTextFileToFile">Detailed Reference</a>
 	 * @param benchFile String, File used as the comparison benchmark.
 	 * @param actualFile String, File used as the comparison file under test.
 	 * @param optionals -- NOT used yet
@@ -527,7 +740,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	}
 	/**
 	 * Verify that a string value contains a substring.
-	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyValueContains">Detailed Reference</a>
+	 * <p>See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyValueContains">Detailed Reference</a>
 	 * @param wholeString String, the string value to verify.
 	 * @param substring String, the substring
 	 * @param optionals
@@ -555,7 +768,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	}
 	/**
 	 * Verify that a string value contains a substring, ignoring case.
-	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyValueContainsIgnoreCase">Detailed Reference</a>
+	 * <p>See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyValueContainsIgnoreCase">Detailed Reference</a>
 	 * @param wholeString String, the string value to verify.
 	 * @param substring String, the substring
 	 * @param optionals
@@ -580,7 +793,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	}
 	/**
 	 * Verify that a string value does NOT contain a substring.
-	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyValueDoesNotContain">Detailed Reference</a>
+	 * <p>See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyValueDoesNotContain">Detailed Reference</a>
 	 * @param wholeString String, the string value to verify.
 	 * @param substring String, the substring
 	 * @param optionals
@@ -605,7 +818,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	}
 	/**
 	 * Verify that two string values are identical.
-	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyValues">Detailed Reference</a>
+	 * <p>See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyValues">Detailed Reference</a>
 	 * @param value1 String, the first value to compare.
 	 * @param value2 String, the second value to compare.
 	 * @param optionals
@@ -633,7 +846,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	}
 	/**
 	 * Verify that two string values are identical, ignoring case.
-	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyValuesIgnoreCase">Detailed Reference</a>
+	 * <p>See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyValuesIgnoreCase">Detailed Reference</a>
 	 * @param value1 String, the first value to compare.
 	 * @param value2 String, the second value to compare.
 	 * @param optionals
@@ -658,7 +871,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	}
 	/**
 	 * Verify that two string values are NOT identical.
-	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyValuesNotEqual">Detailed Reference</a>
+	 * <p>See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyValuesNotEqual">Detailed Reference</a>
 	 * @param value1 String, the first value to compare.
 	 * @param value2 String, the second value to compare.
 	 * @param optionals
@@ -684,7 +897,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 
 	/**
 	 * Click on any visible component.
-	 * <p>See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_Click">Detailed Reference</a>
+	 * <p>See <a href="/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_Click">Detailed Reference</a>
 	 * @param comp -- Component (from App Map) to Click
 	 * @param params optional
 	 * <ul>
@@ -692,6 +905,10 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * <b>For SE+</b>, params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
 	 * <li><b>params[1] auto-scroll boolean</b> if the component will be scrolled into view automatically before clicking.
 	 *                                        if not provided, the default value is true.
+	 * <li><b>params[2] verify boolean</b> check if the component is visible. We try several ways to scroll the component into view: if this
+	 *                                     parameter 'verify' is true then we will not try other ways if the component is already visible; otherwise
+	 *                                     we will try all the ways to show the element even the component may have already shown on the page.
+	 *                                     if not provided, the default value is true.
 	 * </ul>
 	 * @return true if successfully executed, false otherwise.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
@@ -702,7 +919,8 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * 2) boolean success = Click(Map.Google.Apps,"20,20");//Click at the coordinate (20,20)
 	 * 3) boolean success = Click(Map.Google.Apps,"20%,30%"); // Click at the coordinate: its X value equals 20% width of component, its Y value equals 30% height of component.
 	 * 4) boolean success = Click(Map.Google.Apps,"AppMapSubkey");//Click at the coordinate defined by entry "AppMapSubkey" in App Map.
-	 * 5) boolean success = Click(Map.Google.Apps,"20,20", "false");//Click at the coordinate (20,20), and web-element will not be scrolled into view automatically
+	 * 5) boolean success = Click(Map.Google.Apps,"20,20", "false");//Click at the coordinate (20,20), and web-element will NOT be automatically scrolled into view
+	 * 6) boolean success = Click(Map.Google.Apps,"", "", "false");//Click at the center, and web-element will be automatically scrolled into view by all means
 	 *  // one of the above and then,
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
@@ -711,7 +929,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * Pay attention: If you use percentage format in SE+, you'd better use 'Misc.Expressions(false);' first.
 	 *
 	 * "AppMapSubkey" is expected to be an AppMap entry in an "Apps" section in the App Map.
-	 * See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_Click">Detailed Reference</a>
+	 * See <a href="/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_Click">Detailed Reference</a>
 	 * </pre>
 	 * @see #prevResults
 	 * @see org.safs.TestRecordHelper#getStatusCode()
@@ -723,7 +941,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 
 	/**
 	 * Control-Click on any visible component.
-	 * <p>See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_CtrlClick">Detailed Reference</a>
+	 * <p>See <a href="/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_CtrlClick">Detailed Reference</a>
 	 * @param comp -- Component (from App Map) to Click
 	 * @param params optional
 	 * <ul>
@@ -731,6 +949,10 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * <b>For SE+</b>, params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
 	 * <li><b>params[1] auto-scroll boolean</b> if the component will be scrolled into view automatically before clicking.
 	 *                                        if not provided, the default value is true.
+	 * <li><b>params[2] verify boolean</b> check if the component is visible. We try several ways to scroll the component into view: if this
+	 *                                     parameter 'verify' is true then we will not try other ways if the component is already visible; otherwise
+	 *                                     we will try all the ways to show the element even the component may have already shown on the page.
+	 *                                     if not provided, the default value is true.
 	 * </ul>
 	 * @return true if successfully executed, false otherwise.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
@@ -742,6 +964,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * 3) boolean success = CtrlClick(Map.Google.Apps,"20%,30%"); // Control-Click at the coordinate: its X value equals 20% width of component, its Y value equals 30% height of component.
 	 * 4) boolean success = CtrlClick(Map.Google.Apps,"AppMapSubkey");//Control-Click at the coordinate defined by entry "AppMapSubkey" in App Map.
 	 * 5) boolean success = CtrlClick(Map.Google.Apps,"20,20", "false");//Control-Click at the coordinate (20,20) and web-element will not be scrolled into view automatically
+	 * 6) boolean success = CtrlClick(Map.Google.Apps,"", "", "false");//Control-Click at the center, and web-element will be automatically scrolled into view by all means
 	 *  // one of the above and then,
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
@@ -760,7 +983,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 
 	/**
 	 * Control-Right-Click on any visible component.
-	 * <p>See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_CtrlRightClick">Detailed Reference</a>
+	 * <p>See <a href="/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_CtrlRightClick">Detailed Reference</a>
 	 * @param comp -- Component (from App Map) to Click
 	 * @param params optional
 	 * <ul>
@@ -768,6 +991,10 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * <b>For SE+</b>, params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
 	 * <li><b>params[1] auto-scroll boolean</b> if the component will be scrolled into view automatically before clicking.
 	 *                                        if not provided, the default value is true.
+	 * <li><b>params[2] verify boolean</b> check if the component is visible. We try several ways to scroll the component into view: if this
+	 *                                     parameter 'verify' is true then we will not try other ways if the component is already visible; otherwise
+	 *                                     we will try all the ways to show the element even the component may have already shown on the page.
+	 *                                     if not provided, the default value is true.
 	 * </ul>
 	 * @return true if successfully executed, false otherwise.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
@@ -779,6 +1006,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * 3) boolean success = CtrlRightClick(Map.Google.Apps,"20%,30%"); // Control-Right-Click at the coordinate: its X value equals 20% width of component, its Y value equals 30% height of component.
 	 * 4) boolean success = CtrlRightClick(Map.Google.Apps,"AppMapSubkey");//Control-Right-Click at the coordinate defined by entry "AppMapSubkey" in App Map.
 	 * 5) boolean success = CtrlRightClick(Map.Google.Apps,"20,20", "false");//Control-Right-Click at the coordinate (20,20) and web-element will not be scrolled into view automatically
+	 * 5) boolean success = CtrlRightClick(Map.Google.Apps,"", "", "false");//Control-Right-Click at the center and web-element will be scrolled into view automatically by all means
 	 *  // one of the above and then,
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
@@ -797,7 +1025,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 
 	/**
 	 * Double-Click on any visible component.
-	 * <p>See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_DoubleClick">Detailed Reference</a>
+	 * <p>See <a href="/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_DoubleClick">Detailed Reference</a>
 	 * @param comp -- Component (from App Map) to Click
 	 * @param params optional
 	 * <ul>
@@ -805,6 +1033,10 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * <b>For SE+,</b> params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
 	 * <li><b>params[1] auto-scroll boolean</b> if the component will be scrolled into view automatically before clicking.
 	 *                                        if not provided, the default value is true.
+	 * <li><b>params[2] verify boolean</b> check if the component is visible. We try several ways to scroll the component into view: if this
+	 *                                     parameter 'verify' is true then we will not try other ways if the component is already visible; otherwise
+	 *                                     we will try all the ways to show the element even the component may have already shown on the page.
+	 *                                     if not provided, the default value is true.
 	 * </ul>
 	 * @return true if successfully executed, false otherwise.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
@@ -816,6 +1048,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * 3) boolean success = DoubleClick(Map.Google.Apps,"20%,30%"); // Double-Click at the coordinate: its X value equals 20% width of component, its Y value equals 30% height of component.
 	 * 4) boolean success = DoubleClick(Map.Google.Apps,"AppMapSubkey");//Double-Click at the coordinate defined by entry "AppMapSubkey" in App Map.
 	 * 5) boolean success = DoubleClick(Map.Google.Apps,"20,20", "false");//Double-Click at the coordinate (20,20) and web-element will not be scrolled into view automatically
+	 * 5) boolean success = DoubleClick(Map.Google.Apps,"", "", "false");//Double-Click at the center and web-element will be scrolled into view automatically by all means
 	 *  // one of the above and then,
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
@@ -834,7 +1067,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 
 	/**
 	 * Right-Click on any visible component.
-	 * <p>See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_RightClick">Detailed Reference</a>
+	 * <p>See <a href="/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_RightClick">Detailed Reference</a>
 	 * @param comp -- Component (from App Map) to Click
 	 * @param params optional
 	 * <ul>
@@ -842,6 +1075,10 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * <b>For SE+</b>, params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
 	 * <li><b>params[1] auto-scroll boolean</b> if the component will be scrolled into view automatically before clicking.
 	 *                                        if not provided, the default value is true.
+	 * <li><b>params[2] verify boolean</b> check if the component is visible. We try several ways to scroll the component into view: if this
+	 *                                     parameter 'verify' is true then we will not try other ways if the component is already visible; otherwise
+	 *                                     we will try all the ways to show the element even the component may have already shown on the page.
+	 *                                     if not provided, the default value is true.
 	 * </ul>
 	 * @return true if successfully executed, false otherwise.<p>
 	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
@@ -853,6 +1090,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 * 3) boolean success = RightClick(Map.Google.Apps,"20%,30%"); // Right-Click at the coordinate: its X value equals 20% width of component, its Y value equals 30% height of component.
 	 * 4) boolean success = RightClick(Map.Google.Apps,"AppMapSubkey");//Right-Click at the coordinate defined by entry "AppMapSubkey" in App Map.
 	 * 5) boolean success = RightClick(Map.Google.Apps,"20,20", "false");//Right-Click at the coordinate (20,20) and web-element will not be scrolled into view automatically
+	 * 5) boolean success = RightClick(Map.Google.Apps,"", "", "false");//Right-Click at the center and web-element will be scrolled into view automatically by all means
 	 *  // one of the above and then,
 	 * int rc = prevResults.getStatusCode();      // if useful
 	 * String info = prevResults.getStatusInfo(); // if useful
@@ -870,8 +1108,50 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	}
 
 	/**
+	 * Shift-Click on any visible component.
+	 * <p>See <a href="/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_ShiftClick">Detailed Reference</a>
+	 * @param comp -- Component (from App Map) to Click
+	 * @param params optional
+	 * <ul>
+	 * <li><b>params[0] X,Y coordinate</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
+	 * <b>For SE+</b>, params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
+	 * <li><b>params[1] auto-scroll boolean</b> if the component will be scrolled into view automatically before clicking.
+	 *                                        if not provided, the default value is true.
+	 * <li><b>params[2] verify boolean</b> check if the component is visible. We try several ways to scroll the component into view: if this
+	 *                                     parameter 'verify' is true then we will not try other ways if the component is already visible; otherwise
+	 *                                     we will try all the ways to show the element even the component may have already shown on the page.
+	 *                                     if not provided, the default value is true.
+	 * </ul>
+	 * @return true if successfully executed, false otherwise.<p>
+	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
+	 * @example
+	 * <pre>
+	 * {@code
+	 * 1) boolean success = ShiftClick(Map.Google.Apps);//Shift-Click at the center
+	 * 2) boolean success = ShiftClick(Map.Google.Apps,"20,20");//Shift-Click at the coordination (20,20)
+	 * 3) boolean success = ShiftClick(Map.Google.Apps,"20%,30%"); // Shift-Click at the coordinate: its X value equals 20% width of component, its Y value equals 30% height of component.
+	 * 4) boolean success = ShiftClick(Map.Google.Apps,"AppMapSubkey");//Shift-Click at the coordination defined by entry "AppMapSubkey" in App Map.
+	 * 5) boolean success = ShiftClick(Map.Google.Apps,"20,20", "false");//Shift-Click at the coordination (20,20) and web-element will not be scrolled into view automatically
+	 * 5) boolean success = ShiftClick(Map.Google.Apps,"", "", "false");//Shift-Click at the center, and web-element will be automatically scrolled into view by all means
+	 *  // one of the above and then,
+	 * int rc = prevResults.getStatusCode();      // if useful
+	 * String info = prevResults.getStatusInfo(); // if useful
+	 * }
+	 *
+	 * Pay attention: If you use percentage format in SE+, you'd better use 'Misc.Expressions(false);' first.
+	 *
+	 * </pre>
+	 * @see #prevResults
+	 * @see org.safs.TestRecordHelper#getStatusCode()
+	 * @see org.safs.TestRecordHelper#getStatusInfo()
+	 */
+	public static boolean ShiftClick(org.safs.model.Component comp, String... params){
+		return Component.ShiftClick(comp, params);
+	}
+
+	/**
 	 * A left mouse drag is performed on the object based on the stored coordinates relative to this object.
-	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericObjectFunctionsReference.htm#detail_LeftDrag">Detailed Reference</a>
+	 * <p>See <a href="/sqabasic2000/GenericObjectFunctionsReference.htm#detail_LeftDrag">Detailed Reference</a>
 	 * @param comp Component, the component (from App Map) relative to which to calculate coordinates to drag
 	 * @param coordinates String, the relative coordinates. Example: "Coords=3,10,12,20", or "coordsKey" defined in App Map<br>
 	 * @return true if successfully executed, false otherwise.<p>
@@ -897,7 +1177,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	}
 	/**
 	 * A Shift left mouse drag is performed on the object based on the stored coordinates relative to this object.
-	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericObjectFunctionsReference.htm#detail_ShiftLeftDrag">Detailed Reference</a>
+	 * <p>See <a href="/sqabasic2000/GenericObjectFunctionsReference.htm#detail_ShiftLeftDrag">Detailed Reference</a>
 	 * @param comp Component, the component (from App Map) relative to which to calculate coordinates to drag
 	 * @param coordinates String, the relative coordinates. Example: "Coords=3,10,12,20", or "coordsKey" defined in App Map<br>
 	 * @return true if successfully executed, false otherwise.<p>
@@ -923,7 +1203,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	}
 	/**
 	 * A Ctrl Shift left mouse drag is performed on the object based on the stored coordinates relative to this object.
-	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericObjectFunctionsReference.htm#detail_CtrlShiftLeftDrag">Detailed Reference</a>
+	 * <p>See <a href="/sqabasic2000/GenericObjectFunctionsReference.htm#detail_CtrlShiftLeftDrag">Detailed Reference</a>
 	 * @param comp Component, the component (from App Map) relative to which to calculate coordinates to drag
 	 * @param coordinates String, the relative coordinates. Example: "Coords=3,10,12,20", or "coordsKey" defined in App Map<br>
 	 * @return true if successfully executed, false otherwise.<p>
@@ -949,7 +1229,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	}
 	/**
 	 * A Ctrl left mouse drag is performed on the object based on the stored coordinates relative to this object.
-	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericObjectFunctionsReference.htm#detail_CtrlLeftDrag">Detailed Reference</a>
+	 * <p>See <a href="/sqabasic2000/GenericObjectFunctionsReference.htm#detail_CtrlLeftDrag">Detailed Reference</a>
 	 * @param comp Component, the component (from App Map) relative to which to calculate coordinates to drag
 	 * @param coordinates String, the relative coordinates. Example: "Coords=3,10,12,20", or "coordsKey" defined in App Map<br>
 	 * @return true if successfully executed, false otherwise.<p>
@@ -975,7 +1255,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	}
 	/**
 	 * A Alt left mouse drag is performed on the object based on the stored coordinates relative to this object.
-	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericObjectFunctionsReference.htm#detail_AltLeftDrag">Detailed Reference</a>
+	 * <p>See <a href="/sqabasic2000/GenericObjectFunctionsReference.htm#detail_AltLeftDrag">Detailed Reference</a>
 	 * @param comp Component, the component (from App Map) relative to which to calculate coordinates to drag
 	 * @param coordinates String, the relative coordinates. Example: "Coords=3,10,12,20", or "coordsKey" defined in App Map<br>
 	 * @return true if successfully executed, false otherwise.<p>
@@ -1001,7 +1281,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	}
 	/**
 	 * A Ctrl Alt left mouse drag is performed on the object based on the stored coordinates relative to this object.
-	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericObjectFunctionsReference.htm#detail_CtrlAltLeftDrag">Detailed Reference</a>
+	 * <p>See <a href="/sqabasic2000/GenericObjectFunctionsReference.htm#detail_CtrlAltLeftDrag">Detailed Reference</a>
 	 * @param comp Component, the component (from App Map) relative to which to calculate coordinates to drag
 	 * @param coordinates String, the relative coordinates. Example: "Coords=3,10,12,20", or "coordsKey" defined in App Map<br>
 	 * @return true if successfully executed, false otherwise.<p>
@@ -1027,7 +1307,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	}
 	/**
 	 * A right mouse drag is performed on the object based on the stored coordinates relative to this object.
-	 * <p>See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericObjectFunctionsReference.htm#detail_RightDrag">Detailed Reference</a>
+	 * <p>See <a href="/sqabasic2000/GenericObjectFunctionsReference.htm#detail_RightDrag">Detailed Reference</a>
 	 * @param comp Component, the component (from App Map) relative to which to calculate coordinates to drag
 	 * @param coordinates String, the relative coordinates. Example: "Coords=3,10,12,20", or "coordsKey" defined in App Map<br>
 	 * @return true if successfully executed, false otherwise.<p>
@@ -1050,43 +1330,6 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 */
 	public static boolean RightDrag(org.safs.model.Component comp, String coordinates){
 		return Component.RightDrag(comp, coordinates);
-	}
-
-	/**
-	 * Shift-Click on any visible component.
-	 * <p>See <a href="http://safsdev.github.io/sqabasic2000/SeleniumGenericObjectFunctionsReference.htm#detail_ShiftClick">Detailed Reference</a>
-	 * @param comp -- Component (from App Map) to Click
-	 * @param params optional
-	 * <ul>
-	 * <li><b>params[0] X,Y coordinate</b>. Example: "50,50", or "AppMapSubkey" defined in App Map<br>
-	 * <b>For SE+</b>, params[0] X,Y coordinate also support percentage format for X, or Y. Example: "20%,30%", "20%,30", "20,30%".<br>
-	 * <li><b>params[1] auto-scroll boolean</b> if the component will be scrolled into view automatically before clicking.
-	 *                                        if not provided, the default value is true.
-	 * </ul>
-	 * @return true if successfully executed, false otherwise.<p>
-	 * Sets prevResults TestRecordHelper to the results received or null if an error occurred.
-	 * @example
-	 * <pre>
-	 * {@code
-	 * 1) boolean success = ShiftClick(Map.Google.Apps);//Shift-Click at the center
-	 * 2) boolean success = ShiftClick(Map.Google.Apps,"20,20");//Shift-Click at the coordination (20,20)
-	 * 3) boolean success = ShiftClick(Map.Google.Apps,"20%,30%"); // Shift-Click at the coordinate: its X value equals 20% width of component, its Y value equals 30% height of component.
-	 * 4) boolean success = ShiftClick(Map.Google.Apps,"AppMapSubkey");//Shift-Click at the coordination defined by entry "AppMapSubkey" in App Map.
-	 * 5) boolean success = ShiftClick(Map.Google.Apps,"20,20", "false");//Shift-Click at the coordination (20,20) and web-element will not be scrolled into view automatically
-	 *  // one of the above and then,
-	 * int rc = prevResults.getStatusCode();      // if useful
-	 * String info = prevResults.getStatusInfo(); // if useful
-	 * }
-	 *
-	 * Pay attention: If you use percentage format in SE+, you'd better use 'Misc.Expressions(false);' first.
-	 *
-	 * </pre>
-	 * @see #prevResults
-	 * @see org.safs.TestRecordHelper#getStatusCode()
-	 * @see org.safs.TestRecordHelper#getStatusInfo()
-	 */
-	public static boolean ShiftClick(org.safs.model.Component comp, String... params){
-		return Component.ShiftClick(comp, params);
 	}
 
 	/**
@@ -1119,7 +1362,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 
 	/**
 	 * Take a screenshot of windows or component.<br>
-	 * See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_GetGUIImage">Detailed Reference</a><p>
+	 * See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_GetGUIImage">Detailed Reference</a><p>
 	 * @param comp Component, the component to get its image.
 	 * @param fileName String, the file name to store image. Suggest to save as .png image.<br>
 	 *                         It can be relative or absolute. If it is relative, the file will be stored to TestDirectory "Actuals".<br>
@@ -1260,7 +1503,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 
 	/**
 	 * Verify the screen shot of a GUI component with a benchmark image file.
-	 * See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyGUIImageToFile">Detailed Reference</a><p>
+	 * See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_VerifyGUIImageToFile">Detailed Reference</a><p>
 	 * @param comp Component, the component to get its image.
 	 * @param benchFile String, the benchmark file name. Suggest to compare with .png image.<br>
 	 *                         It can be relative or absolute. If it is relative, the file will be found at BenchDirectory "Benchmarks".<br>
@@ -1321,7 +1564,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 
 	/**
 	 * Execute a simple piece of javascript on component synchronously.
-	 * See <a href="http://safsdev.sourceforge.net/sqabasic2000/GenericMasterFunctionsReference.htm#detail_ExecuteScript">Detailed Reference</a><p>
+	 * See <a href="/sqabasic2000/GenericMasterFunctionsReference.htm#detail_ExecuteScript">Detailed Reference</a><p>
 	 * If the script will return a string value, call SeleniumPlus.prevResults.getStatusInfo() to get it. <br>
 	 * Object result is NOT supported yet.<br>
 	 * You can also call {@link #executeScript(String, Object...)} instead, it is more efficient.<br>
@@ -1375,6 +1618,8 @@ public abstract class SeleniumPlus extends SAFSPlus{
 			return WDLibrary.getObject(prs);
 		} else {
 			String prs = Misc.GetAppMapValue(component.getParent(), "", "false");
+			WDLibrary.checkWindowRS(prs);//To see if we need to reset the WDLibrary's lastFrame to null.
+
 			WebElement pel = WDLibrary.getObject(prs);
 			String crs = Misc.GetAppMapValue(component, "", "false");
 			return WDLibrary.getObject(pel,crs);
@@ -1390,20 +1635,42 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 */
 	public static WebElement getObject(SearchContext sc, org.safs.model.Component component) throws SeleniumPlusException{
 		String rs = Misc.GetAppMapValue(component, "", "false");
-		return WDLibrary.getObject(sc, rs);
+		if (component.getParent() != null) {
+			String prs = Misc.GetAppMapValue(component.getParent(), "", "false");
+			WDLibrary.checkWindowRS(prs);//To see if we need to reset the WDLibrary's lastFrame to null.
+
+			WebElement pel = WDLibrary.getObject(sc, prs);
+			return WDLibrary.getObject(pel, rs);
+
+		}else{
+			return WDLibrary.getObject(sc, rs);
+		}
+
 	}
 
 	/**
-	 * Wait for object in seconds
+	 * Wait for a Window or Component to become valid.<br>
+	 * <b>Note:</b><br>
+	 * <font color=red>This API doesn't fit for switching according to GUI existence</font>, please use {@link Misc#IsComponentExists(org.safs.model.Component, String...)} instead.<br>
+	 * If the GUI doesn't become valid within timeout, this method will return false.<br>
+	 * If the execution doesn't end properly, this method will also return false.<br>
+	 * User cannot distinguish these 2 cases; and in the same time, a failure message will be written into Log.<br>
+	 *
 	 * @param comp -- Component (from generated Map.java)
 	 * @param time - time in second
-	 * @return
+	 * @return true if the GUI appear within the timeout.<br>
+	 *         false there 2 possibilities:<br>
+	 *               1. The execution finishes properly but the GUI doesn’t appear within the timeout.<br>
+	 *               2. The execution doesn't finish properly.<br>
+	 *
 	 * @example
 	 * <pre>
 	 * {@code
 	 * WaitForGUI(Map.Google.SignIn,10);
 	 * }
 	 * </pre>
+	 *
+	 * @see SAFSPlus.Misc#IsComponentExists(org.safs.model.Component, String...)
 	 */
 	public static boolean WaitForGUI(org.safs.model.Component comp, long time){
 		return DriverCommand.WaitForGUI(comp, time);
@@ -1451,12 +1718,12 @@ public abstract class SeleniumPlus extends SAFSPlus{
 
 	/**
 	 * Convenience routine to retrieve the value of a SAFS Variable stored in SAFSVARS.
-	 * <br>This will exploit the <a href="http://safsdev.sourceforge.net/sqabasic2000/CreateAppMap.htm#ddv_lookup" target="_blank">SAFSMAPS look-thru</a>
-	 * and <a href="http://safsdev.sourceforge.net/sqabasic2000/TestDesignGuidelines.htm#AppMapChaining" target="_blank">app map chaining</a> mechanism.
+	 * <br>This will exploit the <a href="/sqabasic2000/CreateAppMap.htm#ddv_lookup" target="_blank">SAFSMAPS look-thru</a>
+	 * and <a href="/sqabasic2000/TestDesignGuidelines.htm#AppMapChaining" target="_blank">app map chaining</a> mechanism.
 	 * <br>That is, any variable that does NOT exist in SAFSVARS will be sought as an
 	 * ApplicationConstant in the SAFSMAPS service.
 	 * <p>
-	 * See <a href="http://safsdev.sourceforge.net/sqabasic2000/TestDesignGuidelines.htm" target="_blank">Test Design Guidelines for Localization</a>.
+	 * See <a href="/sqabasic2000/TestDesignGuidelines.htm" target="_blank">Test Design Guidelines for Localization</a>.
 	 * @param variableName
 	 * @return String value, or an empty String.  Null if an Exception or Error was encountered.<p>
 	 * Does not change prevResults.
@@ -1527,7 +1794,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	}
 
 	/**
-	 * Wrapper class to handle <a href="http://safsdev.github.io//sqabasic2000/WindowFunctionsIndex.htm">Window keywords</a>, like Maximize, Minimize, SetPosition etc.<br>
+	 * Wrapper class to handle <a href="//sqabasic2000/WindowFunctionsIndex.htm">Window keywords</a>, like Maximize, Minimize, SetPosition etc.<br>
 	 *
 	 * @see SAFSPlus.Window
 	 */
@@ -1535,21 +1802,21 @@ public abstract class SeleniumPlus extends SAFSPlus{
 
 	/**
 	 * Wrapper class to handle
-	 * <a href="http://safsdev.github.io/sqabasic2000/GenericMasterFunctionsIndex.htm">GenericMasterFunctions Reference</a> and
-	 * <a href="http://safsdev.github.io/sqabasic2000/GenericObjectFunctionsIndex.htm">GenericObjectFunctions Reference</a>, like VerifyProperty, IsPropertyExist etc.<br>
+	 * <a href="/sqabasic2000/GenericMasterFunctionsIndex.htm">GenericMasterFunctions Reference</a> and
+	 * <a href="/sqabasic2000/GenericObjectFunctionsIndex.htm">GenericObjectFunctions Reference</a>, like VerifyProperty, IsPropertyExist etc.<br>
 	 *
 	 * @see SAFSPlus.Component
 	 */
 	public static class Component extends SAFSPlus.Component{}
 
 	/**
-	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/ComboBoxFunctionsIndex.htm">ComboBox keywords</a>, like Select, ShowList, SetTextValue etc.<br>
+	 * Wrapper class providing APIs to handle <a href="/sqabasic2000/ComboBoxFunctionsIndex.htm">ComboBox keywords</a>, like Select, ShowList, SetTextValue etc.<br>
 	 *
 	 * @see SAFSPlus.ComboBox
 	 */
 	public static class ComboBox extends SAFSPlus.ComboBox{}
 	/**
-	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/ScrollBarFunctionsIndex.htm">ScrollBar keywords</a>, like OneDown, PageDown, PageUp etc.<br>
+	 * Wrapper class providing APIs to handle <a href="/sqabasic2000/ScrollBarFunctionsIndex.htm">ScrollBar keywords</a>, like OneDown, PageDown, PageUp etc.<br>
 	 *
 	 * @see SAFSPlus.ScrollBar
 	 */
@@ -1561,20 +1828,20 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	 */
 	public static class Assert extends SAFSPlus.Assert{}
 	/**
-	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/CheckBoxFunctionsIndex.htm">CheckBox keywords</a>, like Check, UnCheck.<br>
+	 * Wrapper class providing APIs to handle <a href="/sqabasic2000/CheckBoxFunctionsIndex.htm">CheckBox keywords</a>, like Check, UnCheck.<br>
 	 *
 	 * @see SAFSPlus.CheckBox
 	 */
 	public static class CheckBox extends SAFSPlus.CheckBox{}
 
 	/**
-	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/EditBoxFunctionsIndex.htm">EditBox keywords</a>, like SetTextValue, SetTextCharacters etc.<br>
+	 * Wrapper class providing APIs to handle <a href="/sqabasic2000/EditBoxFunctionsIndex.htm">EditBox keywords</a>, like SetTextValue, SetTextCharacters etc.<br>
 	 *
 	 * @see SAFSPlus.EditBox
 	 */
 	public static class EditBox extends SAFSPlus.EditBox{}
 	/**
-	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/TreeViewFunctionsIndex.htm">Tree keywords</a>, like ClickTextNode, ExpandTextNode etc.<br>
+	 * Wrapper class providing APIs to handle <a href="/sqabasic2000/TreeViewFunctionsIndex.htm">Tree keywords</a>, like ClickTextNode, ExpandTextNode etc.<br>
 	 * <pre>
 	 * By default, all parameters will be processed as an expression (math and string). As the parameter
 	 * tree-path may contain separator "->", for example "Root->Child1->GrandChild", it will be evaluated
@@ -1591,20 +1858,20 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	public static class Tree extends SAFSPlus.Tree{}
 
 	/**
-	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/TabControlFunctionsIndex.htm">TabControl keywords</a>, like ClickTab, SelectTabIndex etc.<br>
+	 * Wrapper class providing APIs to handle <a href="/sqabasic2000/TabControlFunctionsIndex.htm">TabControl keywords</a>, like ClickTab, SelectTabIndex etc.<br>
 	 *
 	 * @see SAFSPlus.TabControl
 	 */
 	public static class TabControl extends SAFSPlus.TabControl{}
 	/**
-	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/ListViewFunctionsIndex.htm">ListView keywords</a>, like ClickIndex, VerifyListContains etc.<br>
+	 * Wrapper class providing APIs to handle <a href="/sqabasic2000/ListViewFunctionsIndex.htm">ListView keywords</a>, like ClickIndex, VerifyListContains etc.<br>
 	 *
 	 * @see SAFSPlus.ListView
 	 */
 	public static class ListView extends SAFSPlus.ListView{}
 
 	/**
-	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/JavaMenuFunctionsIndex.htm">MenuBar/Menu keywords</a>, like SelectMenuItem, VerifyMenuItemContains etc.<br>
+	 * Wrapper class providing APIs to handle <a href="/sqabasic2000/JavaMenuFunctionsIndex.htm">MenuBar/Menu keywords</a>, like SelectMenuItem, VerifyMenuItemContains etc.<br>
 	 *
 	 * @see SAFSPlus.Menu
 	 */
@@ -1774,14 +2041,14 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	}
 
 	/**
-	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/DDDriverLogCommandsIndex.htm">Logging keywords</a>, like LogMessage, LogTestWarning etc.<br>
+	 * Wrapper class providing APIs to handle <a href="/sqabasic2000/DDDriverLogCommandsIndex.htm">Logging keywords</a>, like LogMessage, LogTestWarning etc.<br>
 	 *
 	 * @see SAFSPlus.Logging
 	 */
 	public static class Logging extends SAFSPlus.Logging{}
 
 	/**
-	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/DDDriverFileCommandsIndex.htm">File keywords</a>, like OpenFile, ReadFileLine etc.<br>
+	 * Wrapper class providing APIs to handle <a href="/sqabasic2000/DDDriverFileCommandsIndex.htm">File keywords</a>, like OpenFile, ReadFileLine etc.<br>
 	 * <pre>
 	 * Convenience class for File handling Commands.
 	 * If you meet some errors when calling these API, please try to run
@@ -1796,7 +2063,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	public static class Files extends SAFSPlus.Files{}
 
 	/**
-	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/DDDriverStringCommandsIndex.htm">String keywords</a>, like Compare, GetMultiDelimitedField etc.<br>
+	 * Wrapper class providing APIs to handle <a href="/sqabasic2000/DDDriverStringCommandsIndex.htm">String keywords</a>, like Compare, GetMultiDelimitedField etc.<br>
 	 * <pre>
 	 * Convenience class for String handling Commands.
 	 * If you meet some errors when calling these API, please try to run
@@ -1811,7 +2078,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 	public static class Strings extends SAFSPlus.Strings{}
 
 	/**
-	 * Wrapper class providing APIs to handle <a href="http://safsdev.github.io/sqabasic2000/DDDriverCounterCommandsIndex.htm">DriverCounter keywords</a>, like StartTestSuite, StartCounter, LogCounterInfo etc.<br>
+	 * Wrapper class providing APIs to handle <a href="/sqabasic2000/DDDriverCounterCommandsIndex.htm">DriverCounter keywords</a>, like StartTestSuite, StartCounter, LogCounterInfo etc.<br>
 	 *
 	 * @see SAFSPlus.Counters
 	 */
@@ -1819,8 +2086,8 @@ public abstract class SeleniumPlus extends SAFSPlus{
 
 	/**
 	 * Wrapper class providing APIs to handle
-	 * <a href="http://safsdev.github.io/sqabasic2000/TIDRestFunctionsIndex.htm">TIDRestFunctions Reference</a> and
-	 * <a href="http://safsdev.github.io/sqabasic2000/DDDriverRestCommandsIndex.htm">DriverRestCommands Reference</a>, like RestGetBinary, RestStoreResponse etc.<br>
+	 * <a href="/sqabasic2000/TIDRestFunctionsIndex.htm">TIDRestFunctions Reference</a> and
+	 * <a href="/sqabasic2000/DDDriverRestCommandsIndex.htm">DriverRestCommands Reference</a>, like RestGetBinary, RestStoreResponse etc.<br>
 	 *
 	 * @see SAFSPlus.Rest
 	 */
@@ -2314,10 +2581,12 @@ public abstract class SeleniumPlus extends SAFSPlus{
 
 			public static ITimeOut instance(){ return instance;}
 
+			@Override
 			public boolean setTimeout(String lockID, long timeout, TimeUnit unit, long waitLockTimeout) {
 				return setTimeout(lockID, timeout, unit, TYPE_IMPLICITLY_WAIT, waitLockTimeout);
 			}
 
+			@Override
 			public boolean resetTimeout(String lockID, long timeout, TimeUnit unit) {
 				return resetTimeout(lockID, timeout, unit, TYPE_IMPLICITLY_WAIT);
 			}
@@ -2331,10 +2600,12 @@ public abstract class SeleniumPlus extends SAFSPlus{
 
 			public static ITimeOut instance(){ return instance;}
 
+			@Override
 			public boolean setTimeout(String lockID, long timeout, TimeUnit unit, long waitLockTimeout) {
 				return setTimeout(lockID, timeout, unit, TYPE_ASYNCHRONOUS_JAVASCRIPT_WAIT, waitLockTimeout);
 			}
 
+			@Override
 			public boolean resetTimeout(String lockID, long timeout, TimeUnit unit) {
 				return resetTimeout(lockID, timeout, unit, TYPE_ASYNCHRONOUS_JAVASCRIPT_WAIT);
 			}
@@ -2348,10 +2619,12 @@ public abstract class SeleniumPlus extends SAFSPlus{
 
 			public static ITimeOut instance(){ return instance;}
 
+			@Override
 			public boolean setTimeout(String lockID, long timeout, TimeUnit unit, long waitLockTimeout) {
 				return setTimeout(lockID, timeout, unit, TYPE_PAGELOAD_WAIT, waitLockTimeout);
 			}
 
+			@Override
 			public boolean resetTimeout(String lockID, long timeout, TimeUnit unit) {
 				return resetTimeout(lockID, timeout, unit, TYPE_PAGELOAD_WAIT);
 			}
@@ -2391,7 +2664,9 @@ public abstract class SeleniumPlus extends SAFSPlus{
 			 * @see #resetTimeout(String, long, TimeUnit, int)
 			 */
 			protected synchronized boolean setTimeout(String lockID, long timeout, TimeUnit unit, int type, long waitLockTimeout){
-				IndependantLog.info("Se+ '"+ lockID +"' seeking '"+name(type)+"' lock object...");
+				String debugmsg = StringUtils.debugmsg(false);
+
+				IndependantLog.info(debugmsg+"Se+ '"+ lockID +"' seeking '"+name(type)+"' lock object...");
 				boolean firstloop = true;
 				try {
 					while(locked){
@@ -2400,13 +2675,13 @@ public abstract class SeleniumPlus extends SAFSPlus{
 						//for others, they have to wait.
 						if(firstloop) {
 							firstloop = false;
-							IndependantLog.info("Se+ waiting for owner '"+ owner +"' to release the '"+ name(type)+"' lock object...");
+							IndependantLog.info(debugmsg+"waiting for owner '"+ owner +"' to release the '"+ name(type)+"' lock object...");
 						}
 						if(waitLockTimeout==TIMEOUT_WAIT_FOREVER) wait();
 						else{
 							wait(waitLockTimeout);
 							if(locked){//waitLockTimeout reached, we haven't obtain the lock, we will quit
-								IndependantLog.debug("The wait timeout for '"+name(type)+"' lock has been reached! Cannot obtain lock, returning false.");
+								IndependantLog.debug(debugmsg+"The wait-timeout for '"+name(type)+"' lock has been reached! Cannot obtain lock, returning false.");
 								return false;
 							}
 						}
@@ -2429,13 +2704,15 @@ public abstract class SeleniumPlus extends SAFSPlus{
 								break;
 							}
 							return true;
-						}catch(SessionNotFoundException nf){
-							IndependantLog.error("WDTimeout WebDriver SessionNotFoundException setTimeout for '"+name(type)+"' by '"+ owner +"'. Retrieving new WebDriver Session WDTimeouts");
+						}catch(WebDriverException nf){
+							IndependantLog.warn(debugmsg+"Failed to set tiemout for '"+name(type)+"' by owner '"+ owner +"'. Due to '"+nf.toString()+"'\n"
+									+ "Retrieving new WebDriver Session WDTimeouts ...");
 							aTimeout = getWebDriverTimeouts();
 						}
 					}
 				} catch (Throwable th) {
-					IndependantLog.error("Fail to set timeout for '"+name(type)+"' by '"+ owner +"' of WebDriver.", th);
+					IndependantLog.error(debugmsg+"Failed to set timeout for '"+name(type)+"' by owner '"+owner+"'. Due to Exception "+StringUtils.debugmsg(th)+"\n"
+							+ "Reset '"+name(type)+"' to original value.");
 					try{
 						//Reset the original timeout value
 						int retry = 0;
@@ -2455,8 +2732,9 @@ public abstract class SeleniumPlus extends SAFSPlus{
 									break;
 								}
 								return false;
-							}catch(SessionNotFoundException nf){
-								IndependantLog.error("WDTimeout WebDriver SessionNotFoundException resetting setTimeout for '"+name(type)+"' by '"+ owner +"'. Retrieving new WebDriver Session WDTimeouts");
+							}catch(WebDriverException nf){
+								IndependantLog.warn(debugmsg+"Failed to reset tiemout for '"+name(type)+"' by owner '"+ owner +"'. Due to '"+nf.toString()+"'\n"
+										+ "Retrieving new WebDriver Session WDTimeouts ...");
 								aTimeout = getWebDriverTimeouts();
 							}
 						}
@@ -2475,6 +2753,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 			 * @see #setTimeout(String, long, TimeUnit, int)
 			 */
 			protected synchronized boolean resetTimeout(String lockID, long timeout, TimeUnit unit, int type){
+				String debugmsg = StringUtils.debugmsg(false);
 				//Only the OWNER of the lock can reset the timeout of the SAME type
 				if(locked && lockID.equals(owner) && (timeoutType==type)){
 					locked = false;
@@ -2496,13 +2775,14 @@ public abstract class SeleniumPlus extends SAFSPlus{
 									aTimeout.pageLoadTimeout(timeout, unit);
 									break;
 								}
-							}catch(SessionNotFoundException nf){
-								IndependantLog.error("WDTimeout WebDriver SessionNotFoundException resetTimeout for '"+name(type)+"' by '"+ owner +"'. Retrieving new WebDriver Session WDTimeouts");
+							}catch(WebDriverException nf){
+								IndependantLog.warn(debugmsg+"Failed to set tiemout for '"+name(type)+"' by owner '"+ owner +"'. Due to '"+nf.toString()+"'\n"
+										+ "Retrieving new WebDriver Session WDTimeouts.");
 								aTimeout = getWebDriverTimeouts();
 							}
 						}
 					}catch(Throwable th){
-						IndependantLog.warn("Fail to reset timeout for '"+name(type)+"' of WebDriver. Due to Exception "+StringUtils.debugmsg(th));
+						IndependantLog.warn(debugmsg+"Failed to reset timeout for '"+name(type)+"' by owner '"+owner+"'. Due to Exception "+StringUtils.debugmsg(th));
 						return false;
 					}finally{
 						//after reset the timeout, notify the other threads
@@ -2510,7 +2790,7 @@ public abstract class SeleniumPlus extends SAFSPlus{
 					}
 					return true;
 				}else{
-					IndependantLog.warn("Cannot reset timeout for '"+name(type)+"' of WebDriver. Because you are not the owner. Call setXXXTimeout() firstly.");
+					IndependantLog.warn(debugmsg+"Cannot reset timeout for '"+name(type)+"' of WebDriver. Because you are not the owner '"+owner+"'. Call setXXXTimeout() firstly.");
 					return false;
 				}
 			}

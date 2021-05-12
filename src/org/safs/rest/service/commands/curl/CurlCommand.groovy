@@ -1,4 +1,27 @@
-// Copyright (c) 2016 by SAS Institute Inc., Cary, NC, USA. All Rights Reserved.
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
+
+/**
+ * History:
+ * FEB 27, 2018    (Lei Wang) Changed property 'rawRequestBody' from String to Object so that it can hold more types of data.
+ *                          Modified method initDataBinaryOption(): Handle 'rawRequestBody' as a File object for binary data.
+ *
+ */
 package org.safs.rest.service.commands.curl
 
 import static org.safs.rest.service.commands.CommandInvoker.PRESERVE_SPECIAL_CHARACTERS_QUOTE
@@ -6,7 +29,6 @@ import static org.safs.rest.service.commands.curl.Response.EMPTY_BODY
 import static org.safs.rest.service.models.entrypoints.Entrypoint.SECURE_HTTP_PROTOCOL
 import static org.safs.rest.service.models.providers.authentication.TokenProvider.PASSWORD_KEY
 import static org.safs.rest.service.models.providers.http.SecureOptions.NONE
-
 import static org.springframework.http.HttpHeaders.ACCEPT as ACCEPT_HEADER
 import static org.springframework.http.HttpHeaders.AUTHORIZATION as AUTHORIZATION_HEADER
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE as CONTENT_TYPE_HEADER
@@ -22,19 +44,18 @@ import static org.springframework.http.HttpMethod.PUT
 
 import java.text.MessageFormat
 
-import groovy.json.JsonException
-import groovy.json.JsonSlurper
-import groovy.transform.ToString
-import groovy.xml.XmlUtil
-
 import org.safs.rest.service.commands.ExecutableCommand
 import org.safs.rest.service.models.providers.SafsRestPropertyProvider
 import org.safs.rest.service.models.providers.SystemPropertyProvider
 import org.safs.rest.service.models.providers.authentication.TokenProviderEntrypoints
-
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
+
+import groovy.json.JsonException
+import groovy.json.JsonSlurper
+import groovy.transform.ToString
+import groovy.xml.XmlUtil
 
 
 
@@ -256,8 +277,12 @@ class CurlCommand extends ExecutableCommand {
      * the request includes one. This value defaults to {@link Response#EMPTY_BODY}.
      */
     String requestBody = EMPTY_BODY
-	String rawRequestBody = requestBody
-	
+    /**
+     * Holds the request body as an object.<br>
+     * Sometimes the binary/image data will be sent as the body, for convenience we pass a File object to represent it.<br>
+     */
+    Object rawRequestBody = requestBody
+
     /**
      * accept contains the String media type value for the HTTP Accept: header
      *
@@ -275,7 +300,7 @@ class CurlCommand extends ExecutableCommand {
     String contentType = null
 
 
-    // TODO Bruce.Faulkner 10 November 2016: Need to add Groovydoc comment. Also, the
+    // TODO brfaul 10 November 2016: Need to add Groovydoc comment. Also, the
     // values specified for the Accept and Content-Type headers in httpHeaders
     // will supersede the values specified for the accept and contentType properties.
     HttpHeaders httpHeaders = null
@@ -302,7 +327,7 @@ class CurlCommand extends ExecutableCommand {
 
 
 
-// TODO Bruce.Faulkner Nov 17, 2015: Consider refactoring this constructor so that there is no
+// TODO brfaul Nov 17, 2015: Consider refactoring this constructor so that there is no
 // longer a need for it by implementing all the necessary setter methods and
 // just letting "normal" Groovy bean constructor processing occur.
     CurlCommand(Map arguments) {
@@ -318,7 +343,6 @@ class CurlCommand extends ExecutableCommand {
 
         initializeRequestParameters arguments
     }
-
 
     private loadArgument(Map arguments, CharSequence argumentName) {
         def argumentValue = ''
@@ -366,7 +390,7 @@ class CurlCommand extends ExecutableCommand {
         def contentTypeParameter = loadArgument arguments, CONTENT_TYPE_ARGUMENT_NAME
         setContentType contentTypeParameter
 
-// TODO Bruce.Faulkner 15 November 2016: Must call setHttpHeaders after calling setAccept
+// TODO brfaul 15 November 2016: Must call setHttpHeaders after calling setAccept
 // and setContentType as current (temporary for SAFSREST 0.8.3) implementation of
 // setHttpHeaders will only look for the accept and content type headers and then
 // set those properties. A future version of SAFSREST (> 0.9.0) will remove the
@@ -469,14 +493,14 @@ class CurlCommand extends ExecutableCommand {
             headerOptions << makeHeaderOption(headerName, headerValueString)
         }
 
-// TODO Bruce.Faulkner 13 December 2016: Temporarily add the Accept header if httpHeaders
+// TODO brfaul 13 December 2016: Temporarily add the Accept header if httpHeaders
 // does not contain a value but the accept property has been specified. When the
 // deprecated accept property has been removed, this code can be removed as well.
         if (!httpHeaders?.getAccept() && accept) {
             headerOptions << makeHeaderOption(ACCEPT_HEADER, accept)
         }
 
-// TODO Bruce.Faulkner 13 December 2016: Temporarily add the Content-Type header if httpHeaders
+// TODO brfaul 13 December 2016: Temporarily add the Content-Type header if httpHeaders
 // does not contain a value but the contentType property has been specified. When the
 // deprecated contentType property has been removed, this code can be removed as well.
         if (!httpHeaders?.getContentType() && contentType) {
@@ -562,11 +586,11 @@ class CurlCommand extends ExecutableCommand {
 
         CharSequence headerOption = /${HEADER_OPTION}${header}${HEADER_FIELD_SEPARATOR}${headerValue}/
 
-// TODO Bruce.Faulkner 13 December 2016: For now, just wrap with single quotes the
+// TODO brfaul 13 December 2016: For now, just wrap with single quotes the
 // values of any headers where an eTag can be specified.
-// TODO Bruce.Faulkner 14 December 2016: Consider whether all
+// TODO brfaul 14 December 2016: Consider whether all
 // header options should be wrapped for simplicity's sake.
-// TODO Bruce.Faulkner 14 December 2016: Also, consider whether some attempt should be
+// TODO brfaul 14 December 2016: Also, consider whether some attempt should be
 // made to "guess" when a headerValue is an ETag, perhaps by checking for the
 // presence of leading and trailing ASCII_DOUBLE_QUOTE characters? Research
 // needs to be done to determine whether there is a reliable way to recognize
@@ -721,10 +745,13 @@ class CurlCommand extends ExecutableCommand {
      * {@link Response#EMPTY_BODY}.
      */
     private void setRequestBody(requestBodyValue = EMPTY_BODY) {
-        this.requestBody = requestBodyValue
-		this.rawRequestBody = this.requestBody
-		
-        setRequestBodyJson()
+		this.rawRequestBody = requestBodyValue
+
+		if(requestBodyValue instanceof String){
+			this.requestBody = requestBodyValue
+		}
+
+		setRequestBodyJson()
 
         formatRequestBody()
     }
@@ -1100,7 +1127,13 @@ class CurlCommand extends ExecutableCommand {
             if (requestBody) {
                 this.options << DATA_BINARY_OPTION
                 this.options << READ_STDIN_OPTION
-            }
+            }else if(rawRequestBody instanceof File){
+            	//Should we append "--data-binary @filename", not "--data @filename"?
+				//Maybe we should check the headers to make sure that it is binary data to send.
+				def filename = ((File) rawRequestBody).getCanonicalPath();
+            	this.options << DATA_BINARY_OPTION
+            	this.options << /${FILE_DATA_PREFIX}"${filename}"/
+			}
         }
     }
 
@@ -1163,7 +1196,7 @@ class CurlCommand extends ExecutableCommand {
         if (httpHeadersParameter) {
             httpHeaders = httpHeadersParameter
 
-// TODO Bruce.Faulkner 16 November 2016: Temporarily set the accept and contentType properties from the httpHeaders
+// TODO brfaul 16 November 2016: Temporarily set the accept and contentType properties from the httpHeaders
 // to minimize changes for SAFSREST 0.8.3. Post-0.8.3, these properties will be removed and the values will
 // be provided by httpHeaders when generating the CurlCommand. This method call can then be safely removed.
             temporarySetIndividualHeaderProperties()
@@ -1171,7 +1204,7 @@ class CurlCommand extends ExecutableCommand {
     }
 
 
-// TODO Bruce.Faulkner 16 November 2016: Temporarily set the accept and contentType properties from the httpHeaders
+// TODO brfaul 16 November 2016: Temporarily set the accept and contentType properties from the httpHeaders
 // to minimize changes for SAFSREST 0.8.3. Post-0.8.3, these properties will be removed and the values will
 // be provided by httpHeaders when generating the CurlCommand. This method can then be safely removed.
     private void temporarySetIndividualHeaderProperties() {
@@ -1235,7 +1268,7 @@ class CurlCommand extends ExecutableCommand {
 
 
 
-// TODO Bruce.Faulkner 02 March 2017: Temporarily comment out the loadCommandList
+// TODO brfaul 02 March 2017: Temporarily comment out the loadCommandList
 // method since it is not used yet. This code will be uncommented as the
 // refactoring of ExecutableCommand, CurlCommand, CommandInvoker, and
 // CurlInvoker progresses.

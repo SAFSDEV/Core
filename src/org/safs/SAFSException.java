@@ -1,7 +1,20 @@
-/** Copyright (C) (MSA, Inc) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
+/**
+ * Copyright (C) (MSA, Inc), All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs;
 
 /**
@@ -14,14 +27,14 @@ package org.safs;
  **/
 @SuppressWarnings("serial")
 public class SAFSException extends Exception {
-	
+
 	public static final String NAME_SeleniumException 							= "com.thoughtworks.selenium.SeleniumException";
 	public static final String NAME_FT_WindowActivateFailedException 			= "com.rational.test.ft.WindowActivateFailedException";
 	public static final String NAME_FT_PropertyNotFoundException				= "com.rational.test.ft.PropertyNotFoundException";
 	public static final String NAME_FT_ObjectNotFoundException					= "com.rational.test.ft.ObjectNotFoundException";
 	public static final String NAME_FT_TargetGoneException						= "com.rational.test.ft.TargetGoneException";
-	public static final String NAME_FT_UnsupportedActionException				= "com.rational.test.ft.UnsupportedActionException";	
-	
+	public static final String NAME_FT_UnsupportedActionException				= "com.rational.test.ft.UnsupportedActionException";
+
 	public static final String CODE_UNKONWN_ERROR 								= SAFSException.class.getSimpleName()+":CODE_UNKONWN_ERROR";
 	public static final String CODE_CONTAINER_ISFULL							= SAFSException.class.getSimpleName()+":CODE_CONTAINER_ISFULL";
 	public static final String CODE_CONTAINER_ISEMPTY							= SAFSException.class.getSimpleName()+":CODE_CONTAINER_ISEMPTY";
@@ -29,13 +42,13 @@ public class SAFSException extends Exception {
 	public static final String CODE_ACTION_NOT_SUPPORTED						= SAFSException.class.getSimpleName()+":CODE_ACTION_NOT_SUPPORTED";
 	public static final String CODE_CONTENT_ISNULL								= SAFSException.class.getSimpleName()+":CODE_CONTENT_ISNULL";
 	public static final String CODE_ERROR_SET_FILE_ATTR							= SAFSException.class.getSimpleName()+":CODE_ERROR_SET_FILE_ATTR";
-	
+
 	public static final String CODE_WindowActivateFailedException 			= SAFSException.class.getSimpleName()+":CODE_WindowActivateFailedException";
 	public static final String CODE_PropertyNotFoundException				= SAFSException.class.getSimpleName()+":CODE_PropertyNotFoundException";
 	public static final String CODE_ObjectNotFoundException					= SAFSException.class.getSimpleName()+":CODE_ObjectNotFoundException";
 	public static final String CODE_TargetGoneException						= SAFSException.class.getSimpleName()+":CODE_TargetGoneException";
 	public static final String CODE_UnsupportedActionException				= SAFSException.class.getSimpleName()+":CODE_UnsupportedActionException";
-	
+
 	protected String code = CODE_UNKONWN_ERROR;
 
 	/** <br><em>Purpose:</em> constructor
@@ -45,7 +58,7 @@ public class SAFSException extends Exception {
 		super(msg);
 	}
 	/**
-	 * 
+	 *
 	 * @param detailMessage String, the string to pass along to 'super class' Exception
 	 * @param code String, the ID to identify an instance of  SAFSException
 	 */
@@ -53,7 +66,7 @@ public class SAFSException extends Exception {
 		this(detailMessage);
 		this.code = code;
 	}
-	
+
 	/** <br><em>Purpose:</em> constructor, this one takes a 'this' reference from the caller
 	 * @param                     obj, Object, nominally the caller ('this') so that we
 	 * can add their getClass().getName() to the msg; if null then not used.
@@ -79,13 +92,13 @@ public class SAFSException extends Exception {
 	 * @param th
 	 */
 	public SAFSException (Throwable th) {
-		super("Embedded Throwalbe: "+th.getClass().getSimpleName()+":"+th.getMessage(), th);
+		super("Embedded Throwable: "+th.getClass().getSimpleName()+":"+th.getMessage(), th);
 	}
-	
+
 	public SAFSException(String message, Throwable th) {
 		super(message, th);
 	}
-	
+
 	public String getCode() {
 		return code;
 	}

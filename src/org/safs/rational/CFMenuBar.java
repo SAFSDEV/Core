@@ -1,7 +1,20 @@
-/** Copyright (C) (MSA, Inc) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
+/**
+ * Copyright (C) (MSA, Inc), All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.rational;
 
 import java.io.File;
@@ -40,7 +53,7 @@ import com.rational.test.ft.object.interfaces.ToggleGUITestObject;
  *
  *   <br>   JUL 16, 2003    (DBauman) 	Original Release
  *   <br>   JAN 23, 2006    (Carl Nagle) 	Catch some unexpected exceptions for non-Swing components
- * 	 <br>	APR 15, 2008	(LeiWang)	Fix bug of keyword SelectMenuItem: 
+ * 	 <br>	APR 15, 2008	(Lei Wang)	Fix bug of keyword SelectMenuItem: 
  * 										bug example: T,SwingWindow,PTools,SelectMenuItem,,  if PTools is a MenuItem, this record will not work
  * 										Add support to check menu status
  * 										Add keyword VerifyPopupMenu,SelectUnverifiedPopupMenuItem
@@ -52,9 +65,9 @@ import com.rational.test.ft.object.interfaces.ToggleGUITestObject;
  * 													  getAbsoluteFileName(), getSubMenuItemCount()
  * 													  selectMenuItemWithVerification(), verifyMenuBar()
  * 													  verifyPopupMenu()
- *   <br>	SEP 10, 2008	(LeiWang)	Modify method verifyPopupMenu(), use benchFileName as default test and diff file name
+ *   <br>	SEP 10, 2008	(Lei Wang)	Modify method verifyPopupMenu(), use benchFileName as default test and diff file name
  *   									when test and diff file name are not provided. See defect S0533774.
- *   <br>	NOV 25, 2008	(LeiWang)	Add method selectUnverifiedMenuItem().
+ *   <br>	NOV 25, 2008	(Lei Wang)	Add method selectUnverifiedMenuItem().
  *   									So some dynamically generated menu can be selected without verification. See defect S0546870
  **/
 public class CFMenuBar extends CFComponent {

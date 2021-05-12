@@ -1,6 +1,26 @@
 /**
  * Copyright (C) SAS Institute, All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
+/**
+ * Logs for developers, not published to API DOC.
+ *
+ * History:
+ * FEB 07, 2018    (Lei Wang) Added constant APPL_XML: "application/xml"
+ * FEB 26, 2018    (Lei Wang) Added getHeader(): get the value of a field (Content-Type, Accept etc.) from a headers string.
  */
 package org.safs.rest.service;
 
@@ -57,7 +77,18 @@ public class Headers {
 	public static final String APPL_OCTET_STREAM = "application/octet-stream";
 	public static final String APPL_JSON         = "application/json";
 	public static final String TEXT_PLAIN        = "text/plain";
+
+	/**
+	 * XML has two MIME types,application/xml and text/xml .
+	 * These are often used interchangeably, but there is a subtle difference which is why application/xml is generally recommended over the latter.
+	 * Let me explain why: according to the standard, text/* -MIME types have a us-ascii character set unless otherwise specified in the HTTP headers (Content-type: text/xml; charset=utf-8).
+	 * This effectively means that any encoding defined in the XML prolog (e.g. <?xml version="1.0" encoding="UTF-8"?>) is ignored. This is of course not the expected and desired behavior.
+	 * To further complicate matters, most/all browser implementations actually implement nonstandard behavior for text/xml because they process the encoding as if it were application/xml.
+	 * So, text/* has encoding issues, and is not implemented by browsers in a standards-compliant manner, which is why using application/* is recommended.
+	 */
 	public static final String TEXT_XML          = "text/xml";
+	public static final String APPL_XML          = "application/xml";
+
 	public static final String TEXT_HTML         = "text/html";
 	public static final String IMAGE             = "image";
 	public static final String TEXT_CSS          = "text/css";
@@ -368,6 +399,14 @@ public class Headers {
 		return sb.toString();
 	}
 
+	/**
+	 * @param headers String, The headers in string format
+	 * @param name String, The name of header field, such as "Content-Type", "Accept" etc.
+	 * @return String, The content of a header field.
+	 */
+	public static String getHeader(String headers, String name){
+		return convertHeadersMultiLineStringToMap(headers).get(name);
+	}
 
 	public static String convertHeadersMapToMultiLineString(Map<String,String> headerMap) {
 
@@ -403,12 +442,17 @@ public class Headers {
 //		return ret;
 //	}
 
+	//FEB 08, 2018 (Lei Wang) if the parameter _headerString is null, return an empty Header array.
 	private static Header[] parseHeadersInMultiLineString(String _headerString) {
 
 		/*
 		 * This is pretty close to how Apache HTTP Core5 parses headers.
 		 */
 		try {
+			if(_headerString==null){
+				return new Header[0];
+			}
+
 			ByteArrayInputStream inputStream = new ByteArrayInputStream(_headerString.getBytes("UTF-8"));
 
 			int buffersize = org.apache.hc.core5.http.config.ConnectionConfig.DEFAULT.getBufferSize();

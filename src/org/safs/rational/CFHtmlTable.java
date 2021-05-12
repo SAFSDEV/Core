@@ -1,7 +1,20 @@
-/** Copyright (C) (MSA, Inc) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
+/**
+ * Copyright (C) (MSA, Inc), All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.rational;
 
 import java.util.ArrayList;
@@ -36,7 +49,7 @@ import com.rational.test.ft.vp.ITestDataText;
  *                                   Removing ClickCell as supported by CFTable.
  *                                   Added convertCoords to accept Coords=x1,y1,x2,y2 variants 
  *                                   of generic Click commands.
- *   <br>   Apr 08, 2008    (Leiwang and JunwuMa) 
+ *   <br>   Apr 08, 2008    (Lei Wang and JunwuMa) 
  * 								     Added localprocess() for better using hopefully(in the future).
  *                                   Added 'VerifyCellValue' in localprocess().
  *                                   Added getColumnNames,getColumns,getCellText.
@@ -69,14 +82,14 @@ import com.rational.test.ft.vp.ITestDataText;
  *										VerifyCellEditable  
  *										VerifyCellText  
  *										VerifyCellTextContains
- *	<br>	Oct 27, 2008 	(LeiWang)	Add method captureObjectData() and getITestDataTable(), these methods
+ *	<br>	Oct 27, 2008 	(Lei Wang)	Add method captureObjectData() and getITestDataTable(), these methods
  *										are almost the same as those in CFDotNetTable, maybe we should consider
  *										to move them to CFTable in future. See defect S0542755.
- *  <br>	MAR 10, 2009	(LeiWang)	Remove method command commandCaptureRangeToFile(), keyword CaptureRangeToFile
+ *  <br>	MAR 10, 2009	(Lei Wang)	Remove method command commandCaptureRangeToFile(), keyword CaptureRangeToFile
  *  									will call the same method in superclass CFTable.
  *  									Modify method getITestDataTable(): try type 'visiblegrid' and 'visiblecontents'
  *  									to get ITestDataTable.
- *  <br>	AUG 28, 2013	(LeiWang)	Modify method getITestDataTable(): try 'visiblegrid', 'visiblecontents', 'contents' and 'grid' one by one.
+ *  <br>	AUG 28, 2013	(Lei Wang)	Modify method getITestDataTable(): try 'visiblegrid', 'visiblecontents', 'contents' and 'grid' one by one.
  **/
 public class CFHtmlTable extends CFTable  {
     

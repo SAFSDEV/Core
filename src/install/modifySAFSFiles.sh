@@ -9,7 +9,7 @@
 #It also creates some scripts to start the TID sample or SPC etc.
 #It will remove some un-necessary .bat files, which is used in Windows OS.
 
-#27 AUG, 2010  LeiWang
+#27 AUG, 2010  Lei Wang
 
 INI_SAFS_TID_FILE=safstid.ini
 INI_TID_TEST_FILE=tidtest.ini

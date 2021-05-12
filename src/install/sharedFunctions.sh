@@ -5,8 +5,9 @@
 #other script. See UninstallSAFS.sh,Uninstall-IOS-SAFS.sh,
 #Setup-IOS-SAFS.sh and SetupSAFS.sh.
 
-#27 AUG, 2010  LeiWang
+#27 AUG, 2010  Lei Wang
 #17 AUG, 2011  DharmeshPatel Added Mac/iOS support.
+#10 JAN, 2019  Lei Wang Replace the Windows-newline by Unix-newline.
 
 #This function will output the jdk string to stdout
 #jdk string will be something like 1.4.2 or 1.5.11 etc.

@@ -1,6 +1,20 @@
-/** Copyright (C) SAS Institute, Inc. All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.tools.engines;
 
 /**
@@ -9,12 +23,15 @@ package org.safs.tools.engines;
  * @author Carl Nagle APR 18, 2008 Primarily updating documentation.
  * @author Carl Nagle NOV 03, 2015 More complete conversion to Selenium 2.0 WebDriver usage.
  * @author Lei Wang MAR 28, 2017 Modified launchInterface(): append selenium-server-standalone.xxx.jar on CLASSPATH.
+ * @author Lei Wang JUN 13, 2019 Modified launchInterface(): quote the classpath to avoid the space in it.
+ *                                                           Put the selenium-server-standalone jar at the first place on the classpath.
  */
 
 import java.io.File;
 
 import org.safs.Log;
 import org.safs.SAFSException;
+import org.safs.StringUtils;
 import org.safs.TestRecordHelper;
 import org.safs.selenium.SeleniumJavaHook;
 import org.safs.selenium.util.SePlusInstallInfo;
@@ -45,6 +62,11 @@ public class SAFSSELENIUM extends GenericEngine {
 	 * "SAFS/Selenium" -- The name of this engine as registered with STAF.
 	 */
 	static final String ENGINE_NAME = "SAFS/Selenium";
+	/** '3.4.0' */ //Selenium Webdriver 3.4.0. "Selenium RC" too old, on one uses it?
+	public static final String ENGINE_VERSION = "3.4.0";
+	/** 'The engine using Selenium to test GUI on browser.' */
+	public static final String ENGINE_DESCRIPTION = "The engine using Selenium to test GUI on browser.";
+
 	static final String XBOOTCLASSPATH_OPTION  = "XBOOTCLASSPATH";
 
 	/**
@@ -60,6 +82,9 @@ public class SAFSSELENIUM extends GenericEngine {
 	public SAFSSELENIUM() {
 		super();
 		servicename = ENGINE_NAME;
+		productName = ENGINE_NAME;
+		version = ENGINE_VERSION;//Later, we should get it from the hook class.
+		description = ENGINE_DESCRIPTION;
 	}
 
 	/**
@@ -75,6 +100,7 @@ public class SAFSSELENIUM extends GenericEngine {
 	 * <p>
 	 * @see GenericEngine#launchInterface(Object)
 	 */
+	@Override
 	public void launchInterface(Object configInfo){
 		super.launchInterface(configInfo);
 
@@ -127,11 +153,8 @@ public class SAFSSELENIUM extends GenericEngine {
 				    	//append the selenium-sever-standalone.xxx.jar on the classpath
 				    	File seleniumstandaloneFile = SePlusInstallInfo.instance().getSeleniumStandaloneJar();
 				    	if(seleniumstandaloneFile.exists()){
-				    		if (tempstr != null) {
-				    			tempstr += File.pathSeparator+seleniumstandaloneFile.getAbsolutePath();
-				    		}else{
-				    			tempstr = System.getenv("CLASSPATH")+File.pathSeparator+seleniumstandaloneFile.getAbsolutePath() +" ";
-				    		}
+				    		if (tempstr == null) tempstr = System.getenv("CLASSPATH");
+				    		tempstr = seleniumstandaloneFile.getAbsolutePath() +File.pathSeparator+tempstr+" ";
 				    	}else{
 				    		throw new SeleniumPlusException("'"+seleniumstandaloneFile.getAbsolutePath()+"' does not exist.");
 				    	}
@@ -139,6 +162,10 @@ public class SAFSSELENIUM extends GenericEngine {
 				    	Log.warn("Failed to get seleniumstandalonejar, due to "+se.toString());
 				    }
 				    if (tempstr != null) {
+				    	//quote to avoid the "space" in the classpath, such as C:\Program Files (x86)\IBM\SDP\FunctionalTester\bin\rational_ft.jar
+				    	//Error: Could not find or load main class Files
+				    	if(!StringUtils.isQuoted(tempstr)) tempstr = StringUtils.quote(tempstr);
+
 				    	array += "-cp "+ tempstr +" ";
 				    }
 
@@ -177,8 +204,7 @@ public class SAFSSELENIUM extends GenericEngine {
 					}
 
 					if(! running){
-						Log.error("Unable to detect running "+ ENGINE_NAME +
-						          " within timeout period!");
+						Log.error("Unable to detect running "+ ENGINE_NAME + " within timeout period!");
 						console.shutdown();
 						process.destroy();
 						return;
@@ -205,6 +231,7 @@ public class SAFSSELENIUM extends GenericEngine {
 
 	// this may be more correctly refactored into the GenericEngine superclass.
 	/** Override superclass to catch unsuccessful initialization scenarios. */
+	@Override
 	public long processRecord(TestRecordHelper testRecordData) {
 		if (running) return super.processRecord(testRecordData);
 		running = isToolRunning();
@@ -213,6 +240,7 @@ public class SAFSSELENIUM extends GenericEngine {
 	}
 
 	//override the superclass, we must wait for the hook starting the Selenium Server
+	@Override
 	public boolean isToolRunning() {
 		boolean running = super.isToolRunning();
 

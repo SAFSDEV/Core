@@ -1,15 +1,32 @@
 /**
  * Copyright (C) SAS Institute, All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- */
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.rest.service;
-
+/**
+ * History:
+ *  OCT 13, 2017 (Lei Wang) Modified getClientAdapter(): Set Auth object to Adapter.
+ */
 import org.apache.hc.client5.http.testframework.HttpClient5Adapter;
 import org.apache.hc.core5.http.HttpVersion;
 import org.apache.hc.core5.http.ProtocolVersion;
 import org.safs.SAFSRuntimeException;
 import org.safs.auth.Auth;
 import org.safs.auth.OAuth2;
+import org.safs.auth.SSOAuth;
 import org.safs.rest.service.models.consumers.SafsrestAdapter;
 
 /**
@@ -112,6 +129,8 @@ public class Service{
 			// If userId not set yet, try to get from the OAuth2 information.
 			if (OAuth2.class.isAssignableFrom(auth.getClass())) {
 				userId = ((OAuth2) auth).getSimpleAuth().getUserName();
+			}else if (SSOAuth.class.isAssignableFrom(auth.getClass())) {
+				userId = ((SSOAuth) auth).getUserName();
 			}
 		}
 		return userId;
@@ -132,6 +151,8 @@ public class Service{
 			// If password not set yet, try to get from the OAuth2 information.
 			if (OAuth2.class.isAssignableFrom(auth.getClass())) {
 				password = ((OAuth2) auth).getSimpleAuth().getPassword();
+			}else if (SSOAuth.class.isAssignableFrom(auth.getClass())) {
+				password = ((SSOAuth) auth).getPassword();
 			}
 		}
 		return password;
@@ -227,7 +248,9 @@ public class Service{
 			if (clientAdapterClassName == null) {
 				// use HttpClient5 by default
 				clientAdapter = new HttpClient5Adapter();
-				((HttpClient5Adapter) clientAdapter).setProxyServerURL(getProxyServerURL());
+				HttpClient5Adapter adapter = (HttpClient5Adapter) clientAdapter;
+				adapter.setProxyServerURL(getProxyServerURL());
+				adapter.setAuth(auth);
 			} else {
 				Class<?> clazz = Class.forName(clientAdapterClassName);
 				clientAdapter = clazz.newInstance();

@@ -1,12 +1,38 @@
-/** Copyright (C) (MSA, Inc) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
+/**
+ * Copyright (C) (MSA, Inc), All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs;
 
-import java.sql.*;
-import java.util.*;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 import org.safs.text.FileUtilities;
 
@@ -46,7 +72,7 @@ public class DatabaseUtils {
   }
   /**
    * Opens a connection to the JDBC database indicated by the 'dbName'
-   * parameter. 
+   * parameter.
    *
    * @param jdbcUrl The database url
    * @param username String, if null then uses the 1-parameter version of DriverManager.getConnection
@@ -143,12 +169,12 @@ Log.info("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBUF: "+buf.toString());
     st[0] = con.prepareStatement(statement);
     return ((PreparedStatement)st[0]).executeQuery();
   }
-  
+
   /** <br><em>Purpose:</em> execute statement, can be used to do update or insert
    * <br><em>Assumptions:</em>  Note: this version does not take into account special characters.
    * You need a more sophisticated mechanism to take those into account.
-   * @param                     con, Connection
-   * @param                     strStatement, String the statement
+   * @param                     con Connection
+   * @param                     strStatement String the statement
    * @return                    either the row count for INSERT, UPDATE or DELETE statements; or 0 for SQL statements that return nothing
    * @exception                 SQLException
    **/
@@ -166,12 +192,13 @@ Log.info("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBUF: "+buf.toString());
       }
     }
   }
-  
+
   /** <br><em>Purpose:</em> execute delete statement, can be used to do update or insert
    * <br><em>Assumptions:</em>  Note: this version does not take into account special characters.
    * You need a more sophisticated mechanism to take those into account.
    * @param                     con, Connection
-   * @param                     strStatement, String the statement
+   * @param                     table, String the table name
+   * @param                     whereCl, String the where clause
    * @return                    either the row count for INSERT, UPDATE or DELETE statements; or 0 for SQL statements that return nothing
    * @exception                 SQLException
    **/
@@ -200,7 +227,7 @@ Log.info("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBUF: "+buf.toString());
       }
     }
   }
-  
+
   /** <br><em>Purpose:</em> simple get, as in: "SELECT field FROM table WHERE attr = 'value'"
    ** or if attr is null then simply "SELECT field FROM table"
    * <br><em>Assumptions:</em>  Note: this version does not take into account special characters.
@@ -244,7 +271,7 @@ Log.info("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBUF: "+buf.toString());
     }
     return null;
   }
-  
+
   /** <br><em>Purpose:</em> simple get(all), as in: "SELECT field FROM table WHERE attr = 'value'"
    ** or if attr is null then simply "SELECT field FROM table"
    * <br><em>Assumptions:</em>  Note: this version does not take into account special characters.
@@ -298,7 +325,7 @@ Log.info("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBUF: "+buf.toString());
       }
     }
   }
-  
+
   /** <br><em>Purpose:</em> simple get(all), as in: "SELECT field FROM table WHERE attr = 'value'"
    ** or if attr is null then simply "SELECT field FROM table"; in order to get number of columns, and/or to get the names of the columns in parameter 'columns'
    * <br><em>Assumptions:</em>  Note: this version does not take into account special characters.
@@ -339,12 +366,11 @@ Log.info("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBUF: "+buf.toString());
       }
     }
   }
-  
+
   /** <br><em>Purpose:</em> get number of rows
-   * @param                     con, Connection
-   * @param                     strStatement, String the statement, if null, then construct from the other parameters
-   * @param                     table, String name of the table
-   * @param                     wherepart, String the whrere part
+   * @param                     con Connection
+   * @param                     table String name of the table
+   * @param                     wherePart String the where part
    * @return                    int, number of rows
    * @exception                 SQLException
    **/
@@ -364,7 +390,7 @@ Log.info("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBUF: "+buf.toString());
     }
     return 0;
   }
-  
+
   /** <br><em>Purpose:</em> get the next row from the ResultSet as a Collection
    * <br><em>Assumptions:</em>  that rs.next() was already called and is true.
    * This version calls the getRow with the metadata and the column count
@@ -515,7 +541,7 @@ Log.info("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBUF: "+buf.toString());
    ** reads username and password as first two lines in c:\test.dat
    ** the remaining lines in the file are optional and include:
    ** <br>jdbcUrl,
-   ** <br>tableName (default is 
+   ** <br>tableName (default is
    ** <br>col (the select column, default is *)
    ** <br>dbName
    **/
@@ -615,7 +641,7 @@ Log.info("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBUF: "+buf.toString());
   }
 
   /** <br><em>Purpose:</em> print the values of 'list' to 'buf'
-   * @param                     buf, StringBuffer 
+   * @param                     buf, StringBuffer
    * @param                     list, List
    * @param                     columns, ArrayList
    **/
@@ -656,7 +682,7 @@ Log.info("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBUF: "+buf.toString());
     }
   }
   /** <br><em>Purpose:</em> print the header
-   * @param                     buf, StringBuffer 
+   * @param                     buf, StringBuffer
    * @param                     table, String
    * @param                     col, String
    **/
@@ -668,19 +694,19 @@ Log.info("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBUF: "+buf.toString());
     buf.append("]");
     buf.append("\n");
   }
-  
+
   /**
-   * write to file 'filename' the toString() values contained in list.  
-   * Each item is written as a separate line using '\n' as the line separator 
-   * regardless of operating system.  
+   * write to file 'filename' the toString() values contained in list.
+   * Each item is written as a separate line using '\n' as the line separator
+   * regardless of operating system.
    * Values are written in the system default character encoding.
    * <p>
-   * If an item in the list is another Collection, then special handling is performed 
-   * via the getDBVal function to potentially filter the value to be written.  The items 
-   * in this secondary Collection are treated as delimited fields and will be separated 
+   * If an item in the list is another Collection, then special handling is performed
+   * via the getDBVal function to potentially filter the value to be written.  The items
+   * in this secondary Collection are treated as delimited fields and will be separated
    * in the output by the field delimiter provided.
-   * 
-   *  
+   *
+   *
    * @param filename String full absolute path filename of file to write.
    * @param list Collection of lines to write.
    * @param delim String field separator to use on values stored in Collections in the list.
@@ -743,5 +769,5 @@ Log.info("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBUF: "+buf.toString());
     }
     return val;
   }
-   
+
 }

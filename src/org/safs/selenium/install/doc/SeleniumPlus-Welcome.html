@@ -1,3 +1,13 @@
+<!--
+History:
+2018-09-29 (Lei Wang)   Replaced "http://safsdev.sourceforge.net/" by "../../" in "href".
+                       This page's path is "safs/selenium/doc/SeleniumPlus-Welcome.html", when writing the "href",
+                       we use "../../" to go back to the root folder and then append the necessary path such as
+                       href="../../sqabasic2000/rrafs.css"
+                       href="../../doc/org/safs/selenium/webdriver/SeleniumPlus.html"
+
+2019-05-21 (Carl Nagle) Add AutoConfig information using command-line parameters or System Properties.
+-->
 <html>
 <head>
 <title>Intro to SeleniumPlus</title>
@@ -26,6 +36,9 @@ div.CodeBox {
     padding:1px;
     background-color: #BFD1E4;
 }
+span.HtmlCode{
+	background-color: AliceBlue;
+}
 
 </style>
 <script>
@@ -53,7 +66,10 @@ function hideAllContentPanels(){
     document.getElementById("browser-drivers").style.display="none";
     document.getElementById("calling-javascript").style.display="none";
     document.getElementById("using-seleniumscripts").style.display="none";
+    document.getElementById("using-safsdataservice").style.display="none";
     document.getElementById("http-proxy").style.display="none";
+    document.getElementById("run-in-docker").style.display="none";
+    document.getElementById("install-on-linux").style.display="none";
 
     document.getElementById("href-welcome").style.fontWeight="normal";
 	document.getElementById("href-sample-install").style.fontWeight="normal";
@@ -79,7 +95,10 @@ function hideAllContentPanels(){
 	document.getElementById("href-using-autoit").style.fontWeight="normal";
 	document.getElementById("href-calling-javascript").style.fontWeight="normal";
 	document.getElementById("href-using-seleniumscripts").style.fontWeight="normal";
+	document.getElementById("href-using-safsdataservice").style.fontWeight="normal";
 	document.getElementById("href-http-proxy").style.fontWeight="normal";
+	document.getElementById("href-run-in-docker").style.fontWeight="normal";
+	document.getElementById("href-install-on-linux").style.fontWeight="normal";
 }
 
 function checkForSubPanelUrl(){
@@ -106,7 +125,10 @@ function checkForSubPanelUrl(){
 	else if(url.endsWith('#usingautoit')){ usingAutoIT(); }
 	else if(url.endsWith('#callingjavascript')){ callingJavascript(); }
 	else if(url.endsWith('#usingseleniumscripts')){ usingSeleniumscripts(); }
+	else if(url.endsWith('#usingsafsdataservice')){ usingSafsdataservice(); }
 	else if(url.endsWith('#httpproxy')){ setHttpProxy(); }
+	else if(url.endsWith('#runindocker')){ runInDocker(); }
+	else if(url.endsWith('#installonlinux')){ installOnLinux(); }
 	else if(url.endsWith('#references')){ showReferences(); }
 	else{
 	    showWelcome();
@@ -222,10 +244,25 @@ function usingSeleniumscripts(){
     document.getElementById("using-seleniumscripts").style.display="block";
     document.getElementById("href-using-seleniumscripts").style.fontWeight="900";
 }
+function usingSafsdataservice(){
+	hideAllContentPanels();
+    document.getElementById("using-safsdataservice").style.display="block";
+    document.getElementById("href-using-safsdataservice").style.fontWeight="900";
+}
 function setHttpProxy(){
 	hideAllContentPanels();
     document.getElementById("http-proxy").style.display="block";
     document.getElementById("href-http-proxy").style.fontWeight="900";
+}
+function runInDocker(){
+	hideAllContentPanels();
+    document.getElementById("run-in-docker").style.display="block";
+    document.getElementById("href-run-in-docker").style.fontWeight="900";
+}
+function installOnLinux(){
+	hideAllContentPanels();
+    document.getElementById("install-on-linux").style.display="block";
+    document.getElementById("href-install-on-linux").style.fontWeight="900";
 }
 function browserDrivers(){
 	hideAllContentPanels();
@@ -234,7 +271,7 @@ function browserDrivers(){
 }
 function usingAutoIT(){
     // do nothing but launch a new page
-    window.location.href = "http://safsdev.sourceforge.net/sqabasic2000/UsingAutoIT.htm";
+    window.location.href = "../../sqabasic2000/UsingAutoIT.htm";
 }
 </script>
 
@@ -243,7 +280,7 @@ function usingAutoIT(){
 <body onload="checkForSubPanelUrl();">
 <span style="font-size: 32px;font-weight: bold">Intro to SeleniumPlus</span>
 <br>
-<small>Updated: 2017.05.19</small>
+<small>Updated: 2019.05.21</small>
 <br>
 <div id="menu" class="panelselector">
 <hr>
@@ -267,10 +304,13 @@ function usingAutoIT(){
 <a href="#" onclick="enableSAFS()" id="href-enable-safs" title="#enablesafs">Enable SAFS</a>&nbsp;&nbsp;|
 <a href="#" onclick="remoteServers()" id="href-remote-servers" title="#remoteservers">Remote Servers</a>&nbsp;&nbsp;|
 <a href="#" onclick="browserDrivers()" id="href-browser-drivers" title="#browserdrivers">Browser Drivers</a>&nbsp;&nbsp;|
-<a href="http://safsdev.sourceforge.net/sqabasic2000/UsingAutoIT.htm" id="href-using-autoit" title="#usingautoit">Using AutoIT</a>&nbsp;&nbsp;|
+<a href="../../sqabasic2000/UsingAutoIT.htm" id="href-using-autoit" title="#usingautoit">Using AutoIT</a>&nbsp;&nbsp;|
 <a href="#" onclick="callingJavascript()" id="href-calling-javascript" title="#callingjavascript">Calling Javascript</a>&nbsp;&nbsp;|
-<a href="#" onclick="usingSeleniumscripts()" id="href-using-seleniumscripts" title="#usingseleniumscripts">Using SeleniumScripts</a>&nbsp;&nbsp;|
+<a href="#" onclick="usingSeleniumscripts()" id="href-using-seleniumscripts" title="#usingseleniumscripts">Using Selenium Scripts</a>&nbsp;&nbsp;|
+<a href="#" onclick="usingSafsdataservice()" id="href-using-safsdataservice" title="#usingsafsdataservice">Using SAFS Data Service</a>&nbsp;&nbsp;|
 <a href="#" onclick="setHttpProxy()" id="href-http-proxy" title="#httpproxy">HTTP Proxy</a>&nbsp;&nbsp;|
+<a href="#" onclick="runInDocker()" id="href-run-in-docker" title="#runindocker">Run In Docker</a>&nbsp;&nbsp;|
+<a href="#" onclick="installOnLinux()" id="href-install-on-linux" title="#installonlinux">Install On Linux</a>&nbsp;&nbsp;|
 <a href="#" onclick="showReferences()" id="href-references" title="#references">References</a>&nbsp;&nbsp;
 <br>
 <hr>
@@ -532,7 +572,7 @@ App_fr.map
 </ol>
 
 <ol><h3>The App Map Details</h3>
-    Review: <a href="http://safsdev.sourceforge.net/sqabasic2000/CreateAppMap.htm" title="Detailed App Map Format Info" alt="Detailed App Map Format Info">App Map Format Info</a><br>
+    Review: <a href="../../sqabasic2000/CreateAppMap.htm" title="Detailed App Map Format Info" alt="Detailed App Map Format Info">App Map Format Info</a><br>
 	<p>
 	Normally, an App Map contains multiple "sections".  One of these is <b>[ApplicationConstants]</b> and the remaining user-defined sections are used to define "windows" or "containers" of components.
 	<p>
@@ -585,31 +625,70 @@ If the item with the same name as the container is NOT provided, the default con
 	There are many ways to create component "recognition strings"(RS).
 	The RS must be unique for the page, or unique for the specific parent container, if that was provided.
  <p>
- <ul>Specify a <b>FRAME</b> RS for the parent container, if frames are in-use:
-    <p><ul>
+ <ul>Specify a <b>FRAME RS</b> for parent component, if frames are in-use:<br/>
+     (note: frame information is usually defined in parent component, but is also can be used in child component.)
+     <p>
+<ul>
+	The FRAME information can be specified by one of the following ways:
+	<ul>
+		<li>FRAMEID=my_content_frame_id</li>
+		<li>FRAMENAME=my_content_frame_name</li>
+		<li>FRAMEXPATH=//iframe[@id='frameId']</li>
+		<li>FRAMEINDEX=N (1=first frame) RS by Index is not recommended.</li>
+	</ul>
+	<br/>
+	Examples:
+	<ul>
+	<li>
 <pre>
-FRAMEID=my_content_frame_id
-FRAMENAME=my_content_frame_name
-FRAMEXPATH=//iframe[@id='frameId']
-FRAMEINDEX=N (1=first frame) RS by Index is not recommended.
+If there is no frame-expression in a child RS, the last visited frame
+will be used to find child components; the last visited frame is normally
+the frame defined by the parent component.
+If a frame expression is sepcified in a child RS, then that frame will be
+used to find this specific child ONLY. It will not affect other children.
+<div class="appmap"><b>[TopFrameWin]</b>
+TopFrameWin="FRAMEID=top_iframe"
+button1="id=__item23"
+button2="FRAMEID=other_iframe<b>;\;</b>id=__item23"
+button3="id=__item25"
+</div>
+button1 is expected to be found in frame 'top_iframe'.
+button2 is expected to be found in frame 'other_iframe'.
+button3 is <b>still</b> expected to be found in frame 'top_iframe'.
+The DOM tree looks like below
+<span class="HtmlCode">
+&lt;iframe id="<b>top_iframe</b>">
+  &lt;button id="__item23"/>&lt;-- button1 -->
+  &lt;button id="__item25"/>&lt;-- button3 -->
+&lt;/iframe id="top_iframe">
+&lt;iframe id="<b>other_iframe</b>">&lt;-- a sibling frame -->
+  &lt;button id="__item23"/>&lt;-- button2 -->
+&lt;/iframe id="other_iframe">
+</span>
+</pre>
+	</li>
+	<li>
+<pre>
+<font color="red">If there are multiple levels of frame, we must define all of them in parent/child hierarchy format separated by "<b>;\;</b>"</font>
+<div class="appmap"><b>[ChildFrameWin]</b>
+ChildFrameWin="FRAMEID=top_iframe;\;FRAMEID=child_iframe"
+button1="id=__item23"</div>
+button1 is expected to be found in frame 'child_iframe', which is a child of frame 'top_iframe'.
+The DOM tree looks like below
+<span class="HtmlCode">
+&lt;iframe id="top_iframe">
+  &lt;iframe id="<b>child_iframe</b>">&lt;-- a child frame -->
+    &lt;button id="__item23"/>
+  &lt;/iframe id="child_iframe">
+&lt;/iframe id="top_iframe">
+</span>
+</pre>
+	</li>
+    </ul>
+</ul>
 
-(note: parent/child hierarchy is separated by "<b>;\;</b>" )
-(note: If there is no frame-expression in a RS, the last visited frame
-	   will be searched to find child components.
-	   By default, the last viisited frame is the main frame.
-	   And that is why if we specify a frame container, the children
-	   do not need to specify the parent frame in their RS.
-
-For example:
-
-<div class="appmap"><b>[HelpPopup]</b>
-HelpPopup="FRAMEID=VisualAnalyticsHubLogon_iframe"
-BtnHelpCenter="id=__item23"</div>
-
-BtnHelpCenter is expected to be found in frame 'VisualAnalyticsHubLogon_iframe')
-    </pre></ul>
-
- <p>For child components, use supported type, property and attribute <i><b>qualifiers</b></i>, as necessary:
+ <p>For child components, use supported type, property and attribute <i><b>qualifiers</b></i>, as necessary:<br/>
+ (note: these ways can <b>ALSO</b> be used in parent component.)
 <p><ul><pre>
 <b>:PASM:</b>  (Property Attribute Search Mode -- Must be first, if present. See Notes.)
 <b>TYPE</b>="DOJO"|"SAP"; (See Notes.)
@@ -661,7 +740,9 @@ MyObject="<b>aproperty</b>=xxx;<b>someattribute</b>=yyy;<b>anotherone</b>=zzz"<b
 You don't need <b>:PASM:</b> if none of the properties or attributes have the same
 names as our <i><b>qualifiers</b></i> above.
 </pre></ul>
- <p>Identify child objects using explicit XPATH or CSS RS:
+ <p>Identify child objects using explicit XPATH or CSS:<br>
+    To learn about XPATH and CSS, please refer to <a href="Xpath_Css_selenium_Locators_groups_1_0_2.pdf" target="_blank" alt="Xpath_Css_Groups" title="Xpath_Css_Groups">Xpath_Css_Groups</a>
+    and <a href="Xpath_Css_selenium_Locators_table_1_0_2.pdf" target="_blank" alt="Xpath_Css_Table" title="Xpath_Css_Table">Xpath_Css_Table</a>.<br>
 <p><ul><pre>
 <div class="appmap">
 MyObject="<b>XPATH</b>=.//div[contains(text(),'foo')]"
@@ -690,7 +771,7 @@ MyObject="<b>CSS</b>=div:contains('foo')"<br>
 	<li>Common attributes to use for recognition are:<b> name, type, id, title, value, and text</b>.<br>
 	<ul>
 		<li>'text' is not a real 'attribute', but we support it as such.
-		<li>Whenever using visible (and localizable) text as part of the recognition string, be sure to parameterize the recognition string in the App Map as discussed in the <a href="http://safsdev.sourceforge.net/sqabasic2000/TestDesignGuidelines.htm" title="App Map Test Design Guidelines" alt="App Map Test Design Guidelines">Test Design Guidelines</a>.
+		<li>Whenever using visible (and localizable) text as part of the recognition string, be sure to parameterize the recognition string in the App Map as discussed in the <a href="../../sqabasic2000/TestDesignGuidelines.htm" title="App Map Test Design Guidelines" alt="App Map Test Design Guidelines">Test Design Guidelines</a>.
 	</ul>
 	<p>
 	<li>Identify one or more attributes that together uniquely identify the component.
@@ -766,9 +847,9 @@ nlsSearch="Recherche"
 <p>
 
 <ul><p>
-<a href="http://safsdev.sourceforge.net/sqabasic2000/TestDesignGuidelines.htm" title="App Map Test Design Guidelines" alt="App Map Test Design Guidelines">Test Design Guidelines</a><br>
-<a href="http://safsdev.sourceforge.net/sqabasic2000/CreateAppMap.htm" title="Detailed App Map Info" alt="Detailed App Map Info">App Map Format Info</a><br>
-<a href="http://safsdev.sourceforge.net/doc/org/safs/GuiObjectRecognition.html" title="Generic Object-Based Recognition Info" alt="Generic Object-Based Recognition Info">Historic App Map Info</a>
+<a href="../../sqabasic2000/TestDesignGuidelines.htm" title="App Map Test Design Guidelines" alt="App Map Test Design Guidelines">Test Design Guidelines</a><br>
+<a href="../../sqabasic2000/CreateAppMap.htm" title="Detailed App Map Info" alt="Detailed App Map Info">App Map Format Info</a><br>
+<a href="../../doc/org/safs/GuiObjectRecognition.html" title="Generic Object-Based Recognition Info" alt="Generic Object-Based Recognition Info">Historic App Map Info</a>
 <p>
 Specific "Categories" and "Qualifiers" in the above docs may not (yet) be supported by SeleniumPlus.
 </ul>
@@ -782,7 +863,7 @@ Specific "Categories" and "Qualifiers" in the above docs may not (yet) be suppor
 <div id="expressions" style="display: none;">
 <h2>SAFS Expressions</h2>
 <p>
-A fundamental overview of <a href="http://safsdev.sourceforge.net/doc/org/safs/tools/expression/SafsExpression.html" title="SAFS Expression Processing" alt="SAFS Expression Processing" target="_blank">SAFS Expression Processing</a>.
+A fundamental overview of <a href="../../doc/org/safs/tools/expression/SafsExpression.html" title="SAFS Expression Processing" alt="SAFS Expression Processing" target="_blank">SAFS Expression Processing</a>.
 <p>
 Historically, <b>expression processing</b> happens on every "field" for every action or command in a SAFS "inputrecord".  The JSAFS Java code that SeleniumPlus is based upon retained that functionality.
 <p>
@@ -816,7 +897,7 @@ We have found that most SeleniumPlus users DO NOT need or want Expression proces
 <ol>
 <li><b>Enclose these String arguments in double-quotes.</b>
 <p>
-There is a (somewhat) convenient <a href="http://safsdev.sourceforge.net/doc/org/safs/selenium/webdriver/SeleniumPlus.html#quote(java.lang.String)" target="_blank">quote()</a> method available in your TestCase or TestRun for doing this.<br>
+There is a (somewhat) convenient <a href="../../doc/org/safs/selenium/webdriver/SeleniumPlus.html#quote(java.lang.String)" target="_blank">quote()</a> method available in your TestCase or TestRun for doing this.<br>
 <p>
 Example:
 <p>
@@ -827,7 +908,7 @@ Example:
 <p>
 <li><b>Alternatively/As needed--or at the very beginning of all your tests--disable Expressions:</b>
     <p>
-    <ul><a href="http://safsdev.sourceforge.net/doc/org/safs/selenium/webdriver/SeleniumPlus.Misc.html#Expressions(boolean)" alt="Misc.Expressions JavaDoc" title="Misc.Expressions JavaDoc" target="_blank">Misc.Expressions</a>(false);</ul>
+    <ul><a href="../../doc/org/safs/selenium/webdriver/SeleniumPlus.Misc.html#Expressions(boolean)" alt="Misc.Expressions JavaDoc" title="Misc.Expressions JavaDoc" target="_blank">Misc.Expressions</a>(false);</ul>
     <p>
     This should make enclosing these String arguments with quote() unnecessary.
 <p>
@@ -952,16 +1033,25 @@ GoogleURL="http://www.google.com"
 </div>
 
 <!--------------------------------->
-<!-- Auto Config Instructions      -->
+<!-- Auto Config Instructions    -->
 <!--------------------------------->
 <div id="auto-config" style="display: none;">
 <h2>Automatic Configuration</h2>
 <p>
-Classes in your "<b>current</b>" project will automatically receive <a href="http://safsdev.sourceforge.net/doc/org/safs/model/tools/RuntimeDataAware.html" target="_blank" title="RuntimeDataAware Class Reference">RuntimeDataAware</a>-ness at Runtime (i.e. when the test is run.)  These classes will receive required object instances at runtime for doing things like retrieving values out of the runtime App Maps.
+Classes in your "<b>current</b>" project should automatically receive <a href="../../doc/org/safs/model/tools/RuntimeDataAware.html" target="_blank" title="RuntimeDataAware Class Reference">RuntimeDataAware</a>-ness at Runtime--i.e. when the test is run.  In the developer world this is called <a href="https://en.wikipedia.org/wiki/Dependency_injection" target="_blank" title="Dependency Injection Intro">Dependency Injection</a>.  These classes will receive required object instances at runtime for doing things like retrieving values out of the runtime App Maps.
 <p>
 You normally don't have to think or worry about this because it happens for you behind the scenes every time you run a test. If you only use classes in your current Project, and don't reference Maps or Utility classes from other SeleniumPlus projects, then you can stop reading this and explore other sections of the Intro.
 <p>
-However, if you DO reference "<b>other</b>" SeleniumPlus projects in your current project--like an external "<b>helper</b>" project--or other projects that have runtime functionality you want to share and NOT duplicate--then you do need to consider the following.
+There are a few cases where you might have to provide more information for SeleniumPlus to effectively perform this dependency injection.  Examples or scenarios where this is likely needed:
+<p>
+<ul>
+    <li>If you DO reference "<b>other</b>" SeleniumPlus projects in your current project--like an external "<b>HELPER</b>" project--or other projects that have runtime functionality you want to share and NOT duplicate,
+    <p>
+    <li>If you have to use or store SeleniumPlus JAR files or other dependency project JAR files outside of the normal SeleniumPlus CLASSPATH area, such as:
+    <ul><p>
+    <li>When injecting SeleniumPlus into a different application or testing framework, like Groovy, Katalon, or others.
+    </ul>
+</ul>
 <p>
 Classes in those "<b>other</b>" projects that are not the "<b>current</b>" project will NOT receive their normal RuntimeDataAware-ness at runtime.  This can present a problem if your try to use another project's testcases, or if you try to use those other projects' Map classes:<pre>
     <b>String val = helper.Map.SomeConstant();</b>
@@ -969,14 +1059,16 @@ Classes in those "<b>other</b>" projects that are not the "<b>current</b>" proje
 <p>
 The call will work normally when that project is the "current" project, but it may not work correctly if it is the "other" project. You can verify this by reviewing the Debug Log after a run.  The Debug Log will show which packages and classes were checked for automatic injection of RuntimeDataAware-ness.  The classes in the "other" project will NOT be listed in the log.
 <p>
-To fix this runtime issue:
+<h3>Typical Explicit AutoConfigureJSAFS</h3>
+<p>
+To fix the runtime issues mentioned above:
 <p>
 <ul>
-<li>Any Class--usually any one testcase or testrun (except the dynamically generated Map class)--you have in the "<b>current</b>" project can be modified to support automatic injection of <a href="http://safsdev.sourceforge.net/doc/org/safs/model/tools/RuntimeDataAware.html" target="_blank" title="RuntimeDataAware Class Reference">RuntimeDataAware</a> classes in other projects referenced at runtime. Those other project classes <b>must</b> be in the Classpath (or BuildPath) of the <b>current</b> project. In other words, those <b>other</b> external classes have to be <b>findable</b> at runtime.
+<li>Any test Class--usually any one TestCase or TestRun (except the dynamically generated Map class)--you have in the "<b>current</b>" project can be modified to support automatic injection of <a href="../../doc/org/safs/model/tools/RuntimeDataAware.html" target="_blank" title="RuntimeDataAware Class Reference">RuntimeDataAware</a> classes in other projects referenced at runtime. Those other project classes <b>must</b> be in the Classpath (or BuildPath) of the <b>current</b> project. In other words, those <b>other</b> external classes have to be <b>findable</b> at runtime.
 <p>
 <li>To the desired Class in the <b>current</b> project, you add a Java annotation right above the Class definition.  Below I show a sample.Utilities class as an example of enabling:
 <p><ul>
-@<b><a href="http://safsdev.sourceforge.net/doc/org/safs/model/annotations/AutoConfigureJSAFS.html"
+@<b><a href="../../doc/org/safs/model/annotations/AutoConfigureJSAFS.html"
 target="_blank" title="AutoConfigureJSAFS Class Reference">AutoConfigureJSAFS</a></b>(include="mypackage.Map;another.package.Map")<br>
 <b>public class</b> Utilities <b>extends</b> SeleniumPlus {<br>
 <b>...</b><br>
@@ -994,7 +1086,7 @@ The above example tells SeleniumPlus to check all classes in:
 <li>The annotation will enable this for all tests in the <b>current</b> project.<br>
 This is because when we check to auto-inject dependencies for a test/Class we check all classes in the same packages and all subpackages of that test/Class.
 <p>
-<li>The compiler may warn/inform you that you need to import the <a href="http://safsdev.sourceforge.net/doc/org/safs/model/annotations/AutoConfigureJSAFS.html"
+<li>The compiler may warn/inform you that you need to import the <a href="../../doc/org/safs/model/annotations/AutoConfigureJSAFS.html"
 target="_blank" title="AutoConfigureJSAFS Class Reference">AutoConfigureJSAFS</a> annotation class:
 <p><ul>
    <b>import</b> org.safs.model.annotations.AutoConfigureJSAFS;
@@ -1004,6 +1096,33 @@ target="_blank" title="AutoConfigureJSAFS Class Reference">AutoConfigureJSAFS</a
 Recompile and Run and the issues encountered in the "other" project(s) should be resolved.
 <p>
 You can review the Debug Log after the Run and you should see where injecting the RuntimeDataAware classes in the "other" project(s) was attempted.
+<p>
+<h3>Atypical Explicit Dependency Injection</h3>
+<p>
+There are cases where SeleniumPlus is being asked to run in an unconventional environment.  For example:
+<p>
+<ul>
+    <li><a href="../../doc/org/safs/selenium/spc/SPJVMInjector.html" target="_blank" title="SPJVMInjector JavaDoc">Injecting SeleniumPlus</a> into a primarily <a href="https://en.wikipedia.org/wiki/Apache_Groovy" target="_blank" title="Apache Groovy Home">Groovy-based runtime</a> or testing framework like <a href="https://www.katalon.com/" target="_blank" title="Katalong Home">Katalon</a>.
+    <li>Injecting SeleniumPlus into another application not honoring tradition Java CLASSPATH or Class loading.
+</ul>
+<p>
+In these cases, the running Java VM may need to be seeded with System Properties giving SeleniumPlus the package or classnames it needs to correctly perform the dependency injection.  These can be provided in 2 ways:
+<p>
+<ul>
+    <li>One or more <a href="https://docs.oracle.com/javase/7/docs/technotes/tools/windows/java.html" target="_blank" title="Java Command-line Arguments">Java VM Command-Line Arguments</a>: <b>-D&lt;propertyName>=&lt;value></b>
+    <li>Using <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/System.html#setProperty(java.lang.String,%20java.lang.String)" target="_blank" title="System.setProperty JavaDoc">System.setProperty(propertyName, value);</a> inside Java code <b>before</b> SeleniumPlus is injected and initialized.
+</ul>
+<p>
+The System properties of greatest interest in these cases would be (with example values):
+<p>
+<ul>
+    <li><pre>"safs.project.config"             "C:/MyAutomation/Project/test.ini"  -- test config file </pre>
+    <li><pre>"safs.test.data.aware.classes"    "ev.Map;helper.Map"                 -- specific classes and associated packages and subpackages</pre>
+    <li><pre>"safs.test.data.aware.packages"   "ev.testcases;helper.utils"         -- specific packages and associated subpackages</pre>
+    <li><pre>"safs.test.data.aware.exclusions" "otherPackage;notRelatedPackage"    -- packages to exclude and not inject</pre>
+</ul>
+<p>
+How many of those properties need to be provided depends on your test requirements and the Java VM Class Loader's ability to find the required classes at runtime.  The SAFS/Se+ Debug Log will show if the classes and packages needing dependency injection were properly found and handled at runtime.
 <hr>
 </div>
 
@@ -1074,13 +1193,13 @@ Note that "Counters" are still counting all records--including PASS and FAIL cou
 <p>
 In SeleniumPlus we have provded some new Logging commands that allow the tester/developer to change the LOGLEVEL dynamically at runtime:
 <ul>
-<li><a href="http://safsdev.sourceforge.net/doc/org/safs/selenium/webdriver/SeleniumPlus.Logging.html">SeleniumPlus.Logging</a>
+<li><a href="../../doc/org/safs/selenium/webdriver/SeleniumPlus.Logging.html">SeleniumPlus.Logging</a>
 <p><ul>
-<a href="http://safsdev.sourceforge.net/doc/org/safs/selenium/webdriver/SeleniumPlus.Logging.html#SuspendLogging%28%29">SuspendLogging</a><br>
-<a href="http://safsdev.sourceforge.net/doc/org/safs/selenium/webdriver/SeleniumPlus.Logging.html#ResumeLogging%28%29">ResumeLogging</a><br>
-<a href="http://safsdev.sourceforge.net/doc/org/safs/selenium/webdriver/SeleniumPlus.Logging.html#SetLogAllInfoMode%28%29">SetLogAllInfoMode</a><br>
-<a href="http://safsdev.sourceforge.net/doc/org/safs/selenium/webdriver/SeleniumPlus.Logging.html#SetLogWarningsAndFailuresMode%28%29">SetLogWarningsAndFailuresMode</a><br>
-<a href="http://safsdev.sourceforge.net/doc/org/safs/selenium/webdriver/SeleniumPlus.Logging.html#SetLogFailuresOnlyMode%28%29">SetLogFailuresOnlyMode</a><br>
+<a href="../../doc/org/safs/selenium/webdriver/SeleniumPlus.Logging.html#SuspendLogging%28%29">SuspendLogging</a><br>
+<a href="../../doc/org/safs/selenium/webdriver/SeleniumPlus.Logging.html#ResumeLogging%28%29">ResumeLogging</a><br>
+<a href="../../doc/org/safs/selenium/webdriver/SeleniumPlus.Logging.html#SetLogAllInfoMode%28%29">SetLogAllInfoMode</a><br>
+<a href="../../doc/org/safs/selenium/webdriver/SeleniumPlus.Logging.html#SetLogWarningsAndFailuresMode%28%29">SetLogWarningsAndFailuresMode</a><br>
+<a href="../../doc/org/safs/selenium/webdriver/SeleniumPlus.Logging.html#SetLogFailuresOnlyMode%28%29">SetLogFailuresOnlyMode</a><br>
 </ul></ul>
 If you have reduced the logging by setting the LOGLEVEL in the INI file, or by one of the SeleniumPlus.Logging functions, you can return it to "normal" by calling:
 <p>
@@ -1093,9 +1212,9 @@ By default, Asserts <b>DO NOT automatically cause an abort of the running test</
 However the SeleniumPlus.Assert API does allow the tester to change this default behavior.
 <p>
 <ul>
-<li><a href="http://safsdev.sourceforge.net/doc/org/safs/selenium/webdriver/SeleniumPlus.Assert.html">SeleniumPlus.Assert</a>
+<li><a href="../../doc/org/safs/selenium/webdriver/SeleniumPlus.Assert.html">SeleniumPlus.Assert</a>
 <p><ul>
-<a href="http://safsdev.sourceforge.net/doc/org/safs/selenium/webdriver/SeleniumPlus.Assert.html#setAbortOnFailure%28boolean%29">setAbortOnFailure(true/false)</a>
+<a href="../../doc/org/safs/selenium/webdriver/SeleniumPlus.Assert.html#setAbortOnFailure%28boolean%29">setAbortOnFailure(true/false)</a>
 </ul></ul>
 <p>
 Only failed Asserts appear in the log.  However, just like all other tests, the PASS/FAIL information increments in the test record Counters--which can be queried--will print to the log if the LOGLEVEL is set to the default "INFO".
@@ -1166,6 +1285,20 @@ Only failed Asserts appear in the log.  However, just like all other tests, the 
 	<li> Right click on File or Project.
 	<p><img src="images/cvs_checkin_out.png"/>
 </ol>
+
+<h3>Note: <font color="red">File's "READ-ONLY" cause selenium-server fail to start.</font></h3>
+The CVS checkouts will usually have everything as <b>READ-ONLY</b>, in the test root directory there are some files such as
+<ul>
+<li>chrome.console
+<li>gecko.console
+<li>edge.console
+</ul>
+They are used by selenium to write log messages of certain browser driver, selenium will not be able to write to them if they
+are <b>READ-ONLY</b>, please refer to <p><img src="images/chrome.console_read_only.png"/><br>
+The selenium-server will fail to start as below <p><img src="images/chromedriver_failure_by_file_read_only.png"/><br>
+User needs to remove any such read-only flags so that selenium-server can start normally.<br>
+Also, it is not recommended to push the test generated files (in folder Actuals, Logs etc.) into CVS.<br>
+
 <hr>
 </div>
 
@@ -1184,7 +1317,7 @@ It is possible to develop SeleniumPlus tests without these conveniences in your 
 <ol>
     <li>Appropriate SeleniumPlus and Selenium JAR files included in the Build Path for the project.
     <li>Ideally, App Map text files to be visible and editable within the IDE.
-    <li>The manual or automatic execution of the <a href="http://safsdev.sourceforge.net/doc/org/safs/model/tools/ComponentGenerator.html" title="Dynamic Map.java Generator" alt="Dynamic Map.java Generator">Dynamic Map.java Generator</a> program any time the text App Map files are edited or modified.
+    <li>The manual or automatic execution of the <a href="../../doc/org/safs/model/tools/ComponentGenerator.html" title="Dynamic Map.java Generator" alt="Dynamic Map.java Generator">Dynamic Map.java Generator</a> program any time the text App Map files are edited or modified.
 </ol>
 <p>
 <h3>Primary concerns for test <u>execution</u>:</h3>
@@ -1246,7 +1379,13 @@ Usually, the above settings can make you run SeleniumPlus with IE browser succes
 <!-- Start Web Browser           -->
 <!--------------------------------->
 <div id="startwebbrowser" style="display: none;">
-<h2>About Profile and Preferences</h2>
+
+<ol>
+    <li><a href="#startwebbrowser_profile_preference">About Profile and Preferences</a>.
+    <li><a href="#startwebbrowser_control_network">Control the network throughput</a>.
+</ol>
+
+<h2 id="startwebbrowser_profile_preference">About Profile and Preferences</h2>
 The Profile/Preferences is used to control the browser's looks, behaviors etc.
 Normally, SeleniumPlus will start browser with a new default profile, which means any preferences user sets manually will not be kept, this default profile is temporary.
 If user wants to start browser with some specific settings, SeleniumPlus provides 2 ways.
@@ -1437,6 +1576,64 @@ StartWebBrowser(URL, ID, SelectBrowser.BROWSER_NAME_CHROME, "30", "true", quote(
 
 </ol>
     <p>
+    
+<h2 id="startwebbrowser_control_network">Control the network throughput</h2>
+Sometimes user wants to throttle the Network throughput to simulate slow network connections.<br>
+<b>This is possible with browser Chrome</b>, but it is not yet applicable for other browsers.<br>
+<p>
+In SeleniumPlus, We can turn on this ability when starting the browser with setting of <a href="../../doc/org/safs/selenium/webdriver/lib/ChromeHttpCommandExecutor.html#SET_NETWORK_CONDITIONS" target="api">setNetworkConditions</a>.<br>
+Once this ability is turned on, we can manipulate (delete, set, get) the 'network condition' by the following Java APIs:
+<ul>
+<li><a href="../../doc/org/safs/selenium/webdriver/lib/WDLibrary.html#deleteNetworkConditions--" target="api">deleteNetworkConditions()</a>
+<li><a href="../../doc/org/safs/selenium/webdriver/lib/WDLibrary.html#getNetworkConditions--" target="api">getNetworkConditions()</a>
+<li><a href="../../doc/org/safs/selenium/webdriver/lib/WDLibrary.html#setNetworkConditions-java.lang.String-" target="api">setNetworkConditions()</a>
+</ul>
+There are 4 keys to set for 'network conditions':
+<ol>
+<li><b>offline</b> boolean
+<li><b>latency</b> int, in millisecond
+<li><b>download_throughput</b> int, in bps (bits per second)
+<li><b>upload_throughput</b> int, in bps (bits per second)
+</ol>
+Example:<br>
+            <ol>
+                    <div class="CodeBox">
+<pre class="LineNumbers">
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+</pre>
+<pre class="SourceCode">
+  //Start the Chrome browser with an initial 'network condition'.
+  String networkConditions = "{ \"offline\":false, \"latency\":5, \"download_throughput\":500000 , \"upload_throughput\":500000}";
+  StartWebBrowser("http://www.google.com", browserId, SelectBrowser.BROWSER_NAME_CHROME, "10", "true", ChromeHttpCommandExecutor.SET_NETWORK_CONDITIONS, networkConditions);
+  System.out.println(WDLibrary.getNetworkConditions());
+
+  //Delete the initial 'network condition'.
+  System.out.println(WDLibrary.deleteNetworkConditions());
+  System.out.println(WDLibrary.getNetworkConditions());
+
+  //Switch to a slow connection
+  String networkConditionsSlow = "{ \"offline\":false, \"latency\":5, \"download_throughput\":5000 , \"upload_throughput\":5000}";
+  WDLibrary.setNetworkConditions(networkConditionsSlow);
+  System.out.println(WDLibrary.getNetworkConditions());
+  WDLibrary.getWebDriver().get("http://www.google.com");
+</pre>
+                    </div>
+                <p>
+            </ol>
+
 <hr>
 </div>
 
@@ -1446,13 +1643,13 @@ StartWebBrowser(URL, ID, SelectBrowser.BROWSER_NAME_CHROME, "30", "true", quote(
 <div id="references" style="display: none;">
 <h2>Important References</h2>
 <p>
-<a href="http://safsdev.sourceforge.net/doc/org/safs/selenium/webdriver/SeleniumPlus.html" title="SeleniumPlus Class JavaDoc" alt="SeleniumPlus Class JavaDoc">SeleniumPlus Class JavaDoc</a><br>
+<a href="../../doc/org/safs/selenium/webdriver/SeleniumPlus.html" title="SeleniumPlus Class JavaDoc" alt="SeleniumPlus Class JavaDoc">SeleniumPlus Class JavaDoc</a><br>
 <a href="http://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/WebDriver.html" title="Selenium WebDriver API" alt="Selenium WebDriver API">Selenium WebDriver API</a><br>
 <p>
-<a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSReference.php" title="SAFS Keyword Reference" alt="SAFS Keyword Reference">SAFS Keywords Reference</a><br>
-<a href="http://safsdev.sourceforge.net" title="SAFS SourceForge Home" alt="SAFS SourceForge Home">SAFS Homepage on SourceForge</a><br>
-<a href="http://safsdev.sourceforge.net/sqabasic2000/TestDesignGuidelines.htm" title="SAFS Test Design Guidelines" alt="SAFS Test Design Guidelines">SAFS Test Design Guidelines</a><br>
-<a href="http://safsdev.sourceforge.net/sqabasic2000/SAFSImageBasedRecognition.htm" title="SAFS Image-Based Testing" alt="SAFS Image-Based Testing">SAFS Image-Based Testing</a><br>
+<a href="../../sqabasic2000/SAFSReference.php" title="SAFS Keyword Reference" alt="SAFS Keyword Reference">SAFS Keywords Reference</a><br>
+<a href="../.." title="SAFS SourceForge Home" alt="SAFS SourceForge Home">SAFS Homepage on SourceForge</a><br>
+<a href="../../sqabasic2000/TestDesignGuidelines.htm" title="SAFS Test Design Guidelines" alt="SAFS Test Design Guidelines">SAFS Test Design Guidelines</a><br>
+<a href="../../sqabasic2000/SAFSImageBasedRecognition.htm" title="SAFS Image-Based Testing" alt="SAFS Image-Based Testing">SAFS Image-Based Testing</a><br>
 <hr>
 </div>
 <p>
@@ -1462,7 +1659,14 @@ StartWebBrowser(URL, ID, SelectBrowser.BROWSER_NAME_CHROME, "30", "true", quote(
 <div id="updatesoftware" style="display: none;">
 <p>
 "Update" expects that "SeleniumPlus" has already successfully installed, so the system environment %<b>SELENUM_PLUS</b>% has been defined correctly.<br/>
-Update SelenumPlus jars and SeleniumPlus eclipse plugin to the latest level. During the update, %<b>SELENUM_PLUS</b>%/update_bak and %<b>SELENIUM_PLUS</b>%/eclipse/plugins/update_bak are created so user can revert the changes back.<br/>
+It will update the following assets to the latest level.
+<ol>
+<li>Library jar files
+<li>Eclipse plugin jar files
+<li>Source code zip files
+<li>Embedded JRE
+</ol>
+During the update, <b>%SELENUM_PLUS%/update_bak</b> and <b>%SELENIUM_PLUS%/eclipse/plugins/update_bak</b> are created so user can revert the changes back.<br/>
 There are 3 ways:
 <ul>
 <li><a href="#updatesoftware_from_ide">Update From SeleniumPlus IDE</a>
@@ -1470,25 +1674,61 @@ There are 3 ways:
 <li><a href="#updatesoftware_manually">Manual SeleniumPlus update steps</a>
 </ul>
 <h2 id="updatesoftware_from_ide">Update From SeleniumPlus IDE</h2>
-<p><ol>
-	Before update, make sure correct Selenium+ preference are enable.
+<p>
+Before update, make sure correct Selenium+ "<b>Update Site</b>" preferences are enabled.
+<ol>
 	<li>From the Eclipse main menu.
 	<li>Select Windows->Preferences.
-	<li>Expand Selenium+ preference and click on Update Site.
+	<li>Expand <b>Selenium+</b> preference and click on <b>Update Site</b>, the configuration page will pop up as below:
+		<p><img src="images/preferences.png"/>
 	<li>Make sure desired update types are enabled or disabled.<br>
-	For example: if user want both Library Updates and the PlugIn Update then enable both check boxes.<br>
-	<li>Adjust the timeout value(s) if your network (or the internet) seem to be slow.
+	    There are five check boxes:<br>
+	    You will NOT have the last 3 ones if you don't have the latest plugin; You will have them after updating with checkbox "Enable Plugin Update" checked.<br>
+	    <ol>
+	    <li>Enable Lib Update<br>
+	        It is used to enable/disable Library Update. There is an associate InputBox "Update Lib URL", where the Library Update URL can be modified.<br>
+	        Set the URL as "<b>https://github.com/SAFSDEV/UpdateSite/releases/download/seleniumplus/SEPLUS.LIB.UPDATE.ZIP</b>" if you want to get the latest support.
+	    <li>Enable Plugin Update<br>
+	        It is used to enable/disable Plugin Update. There is an associate InputBox "Update Plugin URL", where the Plugin Update URL can be modified.<br>
+	        Set the URL as "<b>https://github.com/SAFSDEV/UpdateSite/releases/download/seleniumplus/SEPLUS.PLUGIN.UPDATE.ZIP</b>" if you want to get the latest support.
+	    <li>Enable Source Code<br>
+	        It is used to enable/disable Source Code Update. There is an associate InputBox "Source Code URL", where the Source Code Update URL can be modified.<br>
+	        Set the URL as "<b>https://github.com/SAFSDEV/UpdateSite/releases/download/seleniumplus/source_all.zip</b>" if you want to get the latest support.
+	    <li>Enable Javadoc<br>
+	        It is used to enable/disable Javadoc in SeleniumPlus project. There is an associate InputBox "Javadoc Location URL", where the Javadoc Location URL can be modified.<br>
+	        Set the URL as "<b>http://safsdev.github.io/doc</b>" if you want to get the latest support.
+	    <li>Update JRE<br>
+	        It is used to enable/disable embedded JRE Update.
+	    </ol>
+	For example: if user wants both Library and PlugIn Update, then enable both check boxes: "Enable Lib Update" and "Enable Plugin Update"<br>
+	<li>Adjust the timeout value(s) if your network (or the Internet) seem to be slow.
 </ol>
-<p><img src="images/preferences.png"/>
+<p>
+<p>
+For Updating SeleniumPlus, following are the steps.
 <ol>
-	<p>
-	<p>
-	For Update SeleniumPlus, following are the steps.
 	<li>From the Eclipse main menu.
 	<li>Select Selenium+->Update->Update SeleniumPlus.
-	<li>A window will popup, click Proceed with Download.
-	<li>Click on Procced with Update.
-	<li>When Update finish, Jars will be updated into build path.
+	<li>A window will pop up, click <b>Proceed with Download</b>.
+	<li>Click on <b>Proceed with Update</b>.<br>
+	    You might encounter a problem saying that "javaw.exe cannot be accessed", shown as below:
+	    <p><img src="images/update_jre_error.png"/><br>
+	    Don't worry, this is a known issue during update of the embedded JRE. Next time, when we update SeleniumPlus, we can
+	    <ul>
+	    <li>Check "Update JRE" option<br>
+	        Then during update, a dialog MAY (if SeleniumPlus IDE starts with "embedded JRE") pop up to ask if we want to update "embedded JRE" and terminate the SeleniumPlus.
+	        <ul>
+	        <li>If we choose '<b>Yes</b>', the SeleniumPlus IDE will terminate.<br>
+	        We can verify that<br>
+	        1. The %SELENIUM_PLUS%\eclipse\eclipse.ini has been modified for the -vm option, it points to a temporary JRE file.<br>
+	        2. The original %SELENIUM_PLUS%\eclipse\eclipse.ini has be copied to the backup file %SELENIUM_PLUS%\eclipse\eclipse.ini.bak<br>
+	        Finally we need to launch SeleniumPlus manually and update SeleniumPlus again.<br>
+	        <li>If we choose '<b>No</b>', the "embedded Java" will not be updated, and the program will continue updating other assets.
+	        </ul>
+	    <li>Un-check "Update JRE" option.<br>
+	        Then the assets other than "Update JRE" will be updated, during update, the console shows that "embedded JRE folders" have been ignored.
+	    </ul>
+	<li>When Update finish, Jars/Source Code/Javadoc will be updated into build path.
 	<li>Close the Update Complete window.
 	</ol>
 <a href="#updatesoftware">[go back]</a>
@@ -1498,31 +1738,19 @@ There are 3 ways:
 	The batch script "<b>updateRuntime.bat</b>" can be used to update SeleniumPlus/SAFS.<br/>
 	This script expects that "SeleniumPlus"/"SAFS" has already successfully installed, so the system environment SELENIUM_PLUS/SAFSDIR has been defined correctly.<br/>
 	<p>
-	This script should be in folder %SELENIUM_PLUS%\extra or %SAFSDIR%\extra.<br/>
-	<ol>
-	<li>If it exists and is latest<br/>
-	    The script usage is <span class="sourcecodes">updateRuntime.bat [ALL|SE|SAFS]</span>, with parameter "SE" it updates SeleniumPlus, with "SAFS" it updates SAFS, with "ALL" it updates both "SeleniumPlus" and "SAFS".<br/>
-	    So call <span class="commandline">updateRuntime.bat SE</span> to update SeleniumPlus.<br/>
-	<li>If it exists but is not latest<br/>
-	    No parameter is needed, call <span class="commandline">updateRuntime.bat</span> directly to get latest version of SeleniumPlus.
-	<li>If it does not exist<br/>
-	    Please get its <a href="https://github.com/SAFSDEV/Core/blob/master/src/org/safs/selenium/install/extra/updateRuntime.bat" target="blank">sourcecode</a> manually. The latest script should be dated 11/30/2016.<br/>
-	    Then call <span class="commandline">updateRuntime.bat SE</span>.
-	</ol>
+	This script should be in folder %SELENIUM_PLUS%\extra or %SAFSDIR%\extra. If it does not exist, please get its <a href="https://github.com/SAFSDEV/Core/blob/master/src/org/safs/selenium/install/extra/updateRuntime.bat" target="blank">sourcecode</a> manually and copy it to "%SELENIUM_PLUS%\extra\".<br/>
+	The script usage is <span class="sourcecodes">updateRuntime.bat [ALL|SE|SAFS]</span>, with parameter "SE" it updates SeleniumPlus, with "SAFS" it updates SAFS, with "ALL" it updates both "SeleniumPlus" and "SAFS".<br/>
+	So call <span class="commandline">updateRuntime.bat SE</span> to update SeleniumPlus. <span class="note">If the script is not latest, we might need to call <span class="commandline">updateRuntime.bat SE</span> twice to get SE+ really updated.</span><br/>
 
 	<p>
-	In the script, we are using the internal update resource which is faster. If you prefer using external update resource, then comment "internal resource" and un-comment "external resource".
+	In the script, we are using "github update resource".<br>
+	
 	<div class="CodeBox">
     <pre class="SourceCode">
-    <span class="comments">REM External update resource
-    REM SET SE_LIB_UPDATE=https://github.com/SAFSDEV/UpdateSite/releases/download/seleniumplus/SEPLUS.LIB.UPDATE.ZIP
-    REM SET SE_PLUGIN_UPDATE=https://github.com/SAFSDEV/UpdateSite/releases/download/seleniumplus/SEPLUS.PLUGIN.UPDATE.ZIP
-    REM SET SAFS_LIB_UPDATE=https://github.com/SAFSDEV/UpdateSite/releases/download/safs/SAFS.LIB.UPDATE.ZIP</span>
-
-    <span class="comments">REM Internal update resource</span>
-    SET SE_LIB_UPDATE=http://safsbuild:81/jenkins/job/SeleniumPlus/ws/updatesite/lib/latest/SEPLUS.LIB.UPDATE.ZIP
-    SET SE_PLUGIN_UPDATE=http://safsbuild:81/jenkins/job/SeleniumPlus/ws/updatesite/plugin/latest/SEPLUS.PLUGIN.UPDATE.ZIP
-    SET SAFS_LIB_UPDATE=http://safsbuild:81/jenkins/job/SAFS/ws/updatesite/lib/latest/SAFS.LIB.UPDATE.ZIP
+    <span class="comments">REM External github update resource</span>
+    SET SE_LIB_UPDATE=https://github.com/SAFSDEV/UpdateSite/releases/download/seleniumplus/SEPLUS.LIB.UPDATE.ZIP
+    SET SE_PLUGIN_UPDATE=https://github.com/SAFSDEV/UpdateSite/releases/download/seleniumplus/SEPLUS.PLUGIN.UPDATE.ZIP
+    SET SAFS_LIB_UPDATE=https://github.com/SAFSDEV/UpdateSite/releases/download/safs/SAFS.LIB.UPDATE.ZIP
     </pre>
     </div>
 <a href="#updatesoftware">[go back]</a>
@@ -1534,27 +1762,27 @@ If automated update fails then use manual steps to update SeleniumPlus environme
 	SeleniumPlus library update:
 	<ol>
 	<li>Shutdown Selenium+->RemoteServer->Stop and close Eclipse IDE.
-	<li>Go to <a href="http://sourceforge.net/projects/safsdev/files/SeleniumPlusUpdates"
+	<li>Go to <a href="https://github.com/SAFSDEV/UpdateSite/releases/tag/seleniumplus"
 	           alt="SeleniumPlus Update Download Site" title="SeleniumPlus Update Download Site">
 	           SeleniumPlusUpdates</a> website.
-	<li>Click on LibraryUpdates/latest and download SEPLUS.LIB.UPDATE.ZIP.
-	<li>Extract the SELPLUS.LIB.UPDATE.ZIP and copy dir/files to the c:\seleniumplus\lib dir.
-	<li>Example: copy extra/* to c:\seleniumplus\extra\ and lib/* to c:\seleniumplus\lib\.
-	    (Note: Please back-up dir/files before update).
+	<li>Click on lib/latest and download SEPLUS.LIB.UPDATE.ZIP.
+	<li>Extract the SELPLUS.LIB.UPDATE.ZIP and copy directories/files to the %SELENIUM_PLUS% dir.
+	<li>Example: copy extra\* to %SELENIUM_PLUS%\extra\ and libs\* to %SELENIUM_PLUS%\libs\.
+	    (Note: Please back-up directories/files before update).
+	<li>Open SeleniumPlus IDE
 	<li>Click Selenium+->Update->Refresh Build Path.
 	</ol>
 	<p>
 	SeleniumPlus eclipse plugin update:
 	<ol>
 	<li>Shutdown Selenium+->RemoteServer->Stop and close Eclipse IDE.
-	<li>Go to <a href="http://sourceforge.net/projects/safsdev/files/SeleniumPlusUpdates"
+	<li>Go to <a href="https://github.com/SAFSDEV/UpdateSite/releases/tag/seleniumplus"
 	           alt="SeleniumPlus Update Download Site" title="SeleniumPlus Update Download Site">
 	           SeleniumPlusUpdates</a> website.
-	<li>Click on PlugInUpdates/latest and download SEPLUS.LIB.UPDATE.ZIP.
-	<li>Extract the SELPLUS.LIB.UPDATE.ZIP and copy Seleniumplus.xxxx.jar to the c:\SeleniumPlus\eclipse\plugins\ dir.
-	<li>Example: copy extra/* to c:\seleniumplus\extra\ and lib/* to c:\seleniumplus\lib\.
-	    (Note: Please back-up dir/files before update).
-	<li>Click Selenium+->Update->Refresh Build Path.
+	<li>Click on plugin/latest and download SEPLUS.PLUGIN.UPDATE.ZIP.
+	<li>Extract the SELPLUS.PLUGIN.UPDATE.ZIP and copy Seleniumplus.xxxx.jar to the %SELENIUM_PLUS%\eclipse\plugins\ directory.
+	    (Note: Please back-up Seleniumplus.xxxx.jar before update).
+	<li>Open SeleniumPlus IDE
 	</ol>
 <a href="#updatesoftware">[go back]</a>
 
@@ -1739,26 +1967,26 @@ Here are some examples:
 [SAFS_SELENIUM]
 SeleniumPort=6666</span>
 
-<span class="comments"># Selenium standalone server should run on machine D99999.yourCompany.com at port 4444
-# test actions will actually happen in the browser opened on machine D99999.yourCompany.com</span>
+<span class="comments"># Selenium standalone server should run on machine test.machine at port 4444
+# test actions will actually happen in the browser opened on machine test.machine</span>
 [SAFS_SELENIUM]
-SeleniumHost=D99999.yourCompany.com
+SeleniumHost=test.machine
 SeleniumPort=4444
 
 <span class="comments"># Selenium hub should run on machine selenium.hub.machine at port 5555
-# Selenium node should run on machine node.yourCompany.com at port 6666 and connecting to hub server
-# test actions will actually happen in the browser opened on machine node.yourCompany.com</span>
+# Selenium node should run on machine node.machine at port 6666 and connecting to hub server
+# test actions will actually happen in the browser opened on machine node.machine</span>
 [SAFS_SELENIUM]
 SeleniumHost=selenium.hub.machine
 SeleniumPort=5555
-SELENIUMNODE=node.yourCompany.com:6666
+SELENIUMNODE=node.machine:6666
 
 <span class="comments"># Selenium hub should run on local machine at port 5555
-# Selenium node should run on machine node.yourCompany.com at port 6666 and connecting to hub server
-# test actions will actually happen in the browser opened on machine node.yourCompany.com</span>
+# Selenium node should run on machine node.machine at port 6666 and connecting to hub server
+# test actions will actually happen in the browser opened on machine node.machine</span>
 [SAFS_SELENIUM]
 SeleniumPort=5555
-SELENIUMNODE=node.yourCompany.com:6666
+SELENIUMNODE=node.machine:6666
 </pre></div>
 </ul>
 
@@ -1914,15 +2142,17 @@ and the last 2th line tells us that the node has registered on hub server.</span
     </ul>
     These drivers are provided by third party (NOT by selenium).
     Only one exception, prior to "Selenium 3.0", the firefox driver is integrated in the selenium.
-    But after "Selenium 3.0", the firefox driver has been moved out of selenium, and it is independent as gecko-driver.
+    But after "Selenium 3.0", the firefox driver has been moved out of selenium, and it is independent as <b>gecko-driver</b>.
 
 <h3>Currently supported browsers</h3>
     <ul>
     <li>IE <b>11</b> or earlier
-    <li>Firefox <b>45.0</b> or earlier
-    <li>Chrome <b>v55-57</b>
-    <li>Edge <b>14.14393</b> or earlier
+    <li>Firefox (32 bits) <b>65.0.1</b> or earlier
+    <li>Chrome <b>75.0.3770.80</b> or earlier
+    <li>Edge <b>16.16299</b> or earlier
     </ul>
+    <b>NOTE:</b> Currently, we provide 32-bits geckodriver.exe to work with 32-bits Firefox. We also provide a geckodriver_64.exe under folder
+                 %SELENIUM_PLUS%/extra, we need to rename it to geckodriver.exe so that we can work with 64 bits Firefox. 
 <h3>Update browser drivers</h3>
     We have posted a thread talking about
     <a href="http://safsdev.freeforums.net/thread/42/get-appropriate-drivers-specific-browser" target="_blank">get appropriate drivers for a specific browser</a><br/>
@@ -1933,11 +2163,16 @@ and the last 2th line tells us that the node has registered on hub server.</span
     put it to %SELENIUM_PLUS%/libs
     </ol>
 <h3>Configure browser drivers</h3>
-    Only <b>chrome</b>, <b>IE</b> and <b>firefox</b> are by default configured to start with "selenium server", and
+    Only <b>chrome</b>, <b>IE</b>, <b>firefox</b> and <b>MicrosoftEdge</b> are by default configured to start with "selenium server", and
     the test can run on them.<br/>
     User needs to <a href="http://safsdev.freeforums.net/thread/40/configure-browser-drivers-seleniumplus" target="_blank">configure drivers</a>
-    if he wants to run test against another browser.
+    if he wants to run test against more browsers.
 
+<h3>Problem with MicrosoftEdge on Windows 10</h3>
+    User MUST <a href="http://safsdev.freeforums.net/thread/59/problems-running-seleniumplus-chrome-windows" target="_blank">Enable Admin Approve Mode</a> to work with
+    <b>MicrosoftEdge</b> on Windows 10.<br>
+    Modify the registry to set "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableLUA" to 1. A reboot is required for these settings to take affect.<br>
+    
 </div>
 
 <!--------------------------------->
@@ -2168,41 +2403,104 @@ We don't need to understand all of them  :) , the items below are listed by nece
 <h2>Using SeleniumScripts</h2>
 <p>
 There are some tools can record "selenium test" and store it into a file.<br/>
-<a href="http://seleniumbuilder.github.io/se-builder/">Selenium Builder</a> will store it in JSON format.<br/>
-<a href="http://www.seleniumhq.org/selenium-ide.jsp">Selenium IDE</a> can store it in HTML format.<br/>
+<a href="http://seleniumbuilder.github.io/se-builder/">Selenium Builder</a> will store it in <b>JSON</b> format.<br/>
+<a href="http://www.seleniumhq.org/projects/ide/">Selenium IDE</a> or SelRunner can store it in <b>HTML</b> format.<br/>
 This kind of file contains the "selenium test" and we call these files as "<b>Selenium Scripts</b>".<br/>
-This section explains how to execute "<b>Selenium Scripts</b>" through SeleniumPlus API <a href="http://safsdev.github.io/doc/org/safs/SAFSPlus.DriverCommand.html#CallScript(java.lang.String)">CallScript</a>.<br/>
-<ul>
-<li><a href="#sebuilder_json_script">SeBuilder JSON script</a>
-<li><a href="#selrunner_html_script">SelRunner HTML script</a>
-</ul>
-
-<h3 id="sebuilder_json_script">SeBuilder JSON script:</h3>
+This section explains how to execute "<b>Selenium Scripts</b>" through SeleniumPlus API <a href="../../doc/org/safs/SAFSPlus.DriverCommand.html#CallScript(java.lang.String)">CallScript</a>.<br/>
 <ol>
-  <li>The script is stored in <a href="https://github.com/SeleniumBuilder/se-builder/wiki/JSON-Format">Sebuilder JSON</a> file.</li>
-  <li>Run this JSON file by SeleniumPlus API <a href="http://safsdev.github.io/doc/org/safs/SAFSPlus.DriverCommand.html#CallScript(java.lang.String)">CallScript</a></li>
+<li>Supported Scripts
+	<ul>
+		<li><a href="#json_script">JSON script</a>
+		<li><a href="#html_script">HTML script</a>
+	</ul>
+</li>
+<br/>
+<li><a href="#variables_in_script">Variables in script</a>
+
+</ol>
+
+<h3 id="json_script">JSON script:</h3>
+<ol>
+  <li>The script is stored in a <a href="https://github.com/SeleniumBuilder/se-builder/wiki/JSON-Format">Sebuilder JSON</a> file, below is an example.
+<pre>
+<span class="comments">JSON Script file name: C:\Automation\SharedStorage\Selenium\testGooglePage.json</span>
+{
+  "type": "script",
+  "seleniumVersion": "2",
+  "formatVersion": 2,
+  "<b>steps</b>": [
+    {
+      "type": "get",
+      "url": "<a href="#GoogleURL_map_definition">${GoogleURL}</a>"
+    },
+    {
+      "type": "waitForElementPresent",
+      "locator": {
+        "type": "id",
+        "value": "lst-ib"
+      },
+    },
+    {
+      "type": "waitForElementNotPresent",
+      "locator": {
+        "type": "id",
+        "value": "bogus-id"
+      },
+    },
+    {
+      "type": "setElementText",
+      "locator": {
+        "type": "id",
+        "value": "lst-ib"
+      },
+      "text": "amazon official website"
+    },
+    {
+      "type": "sendKeysToElement",
+      "locator": {
+        "type": "id",
+        "value": "lst-ib"
+      },
+      "text": "hello"
+    }
+  ],
+  "data": {
+    "configs": {},
+    "source": "none"
+  },
+  "inputs": [],
+  "timeoutSeconds": 60
+}
+</pre>
+  </li>
+  <li>Run this JSON file by SeleniumPlus API <a href="../../doc/org/safs/SAFSPlus.DriverCommand.html#CallScript(java.lang.String)">CallScript</a> as below:<br>
+  //Run a JSON script (testGooglePage.json), which is provided using a full absolute path.<br>
+  boolean success = <b>Misc.CallScript</b>("C:\Automation\SharedStorage\Selenium\testGooglePage.json");<br>
+  </li>
 </ol>
 <a href="#using-seleniumscripts">[go back]</a>
 
-
-<h3 id="selrunner_html_script">SelRunner HTML script:</h3>
+<h3 id="html_script">HTML script:</h3>
 <p>
-The HTML script is stored as a Table.<br/> 
+<ol>
+  <li>
+The HTML script is stored as a Table.<br/>
 the tag <b>&lt;tbody></b> means the begin of the test.
 the tag <b>&lt;/tbody></b> means the end of the test.<br/>
 the tag <b>&lt;tr></b> means the begin of one step.
 the tag <b>&lt;/tr></b> means the end of one step.<br/>
-each test step can contain multiple <b>&lt;td></b><b>&lt;/td></b>, they are used to hole the comand and parameters.<br/>
+each test step can contain multiple <b>&lt;td></b><b>&lt;/td></b>, they are used to hole the command and parameters.<br/>
 
-Below is an example snippet, which is part of the real 
-<a href="https://raw.githubusercontent.com/SAFSDEV/SeleniumPlus-REGRESSION/master/SeBuilder/Scripts/FormsSRTest.htm">sebuild script</a> in 
-<a href="https://github.com/SAFSDEV/SeleniumPlus-REGRESSION">regression test</a>. 
+Below is an example snippet, which is part of the real
+<a href="https://raw.githubusercontent.com/SAFSDEV/SeleniumPlus-REGRESSION/master/SeBuilder/Scripts/FormsSRTest.htm">HTML script</a> in
+<a href="https://github.com/SAFSDEV/SeleniumPlus-REGRESSION">regression test</a>.
 <pre>
+<span class="comments">HTML Script file name: C:\Automation\SharedStorage\Selenium\testFormPage.htm</span>
   &lt;tbody>
     &lt;tr>
         &lt;td>open&lt;/td>
-        &lt;td>${baseurl}&lt;/td>
-        &lt;td>${FormsBrowser}&lt;/td>
+        &lt;td><a href="#FormsMain_map_definition">${baseurl}</a>&lt;/td>
+        &lt;td><a href="#FormsMain_map_definition">${FormsBrowser}</a>&lt;/td>
     &lt;/tr>
     &lt;tr>
         &lt;td>pause&lt;/td>
@@ -2216,18 +2514,430 @@ Below is an example snippet, which is part of the real
     &lt;/tr>
     &lt;tr>
         &lt;td>click&lt;/td>
-        &lt;td>${Map:FormsMain:CheckBox2}&lt;/td>
+        &lt;td><a href="#FormsMain_map_definition">${Map:FormsMain:CheckBox2}</a>&lt;/td>
         &lt;td>&lt;/td>
     &lt;/tr>
     &lt;tr>
         &lt;td>close&lt;/td>
-        &lt;td>${FormsBrowser}&lt;/td>
+        &lt;td><a href="#FormsMain_map_definition">${FormsBrowser}</a>&lt;/td>
         &lt;td> &lt;/td>
     &lt;/tr>
   &lt;/tbody>
 </pre>
+  </li>
+  <li>Run this HTML file by SeleniumPlus API <a href="../../doc/org/safs/SAFSPlus.DriverCommand.html#CallScript(java.lang.String)">CallScript</a> as below:<br>
+  //Run a HTML script (testFormPage.json), which is provided using a full absolute path.<br>
+  boolean success = <b>Misc.CallScript</b>("C:\Automation\SharedStorage\Selenium\testFormPage.json");<br>
+  </li>
+</ol>
+<a href="#using-seleniumscripts">[go back]</a>
+
+<h3 id="variables_in_script">Variables in script:</h3>
+Besides the variable-context provided by 'SeBuilder'/'Selenium IDE', SeleniumPlus provides more through its SAFSVARS or SAFSMAPS.<br/>
+There are 2 kinds of Variables.
+<ul>
+	<li>The simple variable<br/>
+	    It is enclosed by <b>${</b>(dollar and right-brace) and <b>}</b>(left-brace), the format is <b>${</b>VariableName<b>}</b>. <br/>
+	    It will be looked up from the <b>variable-context</b> (it is <b>ORDERED</b>)<br/>
+		<ol>
+			<li>provided by 'SeBuilder'/'Selenium IDE'</li>
+			<li>provided by SAFSVARS</li>
+			<li>provided by SAFSMAPS-ApplicationConstant</li>
+		</ol>
+		<span class="comments">
+		How to define SAFS Variables?
+		Please refer to
+		<a href="../../doc/org/safs/selenium/webdriver/SeleniumPlus.html#SetVariableValue(java.lang.String, java.lang.String)">SeleniumPlus.SetVariableValue()</a> or
+	 	<a href="../../doc/org/safs/SAFSPlus.DriverCommand.html#SetVariableValues(java.lang.String, java.lang.String...)">Misc.SetVariableValues()</a>
+		</span>
+	</li>
+	<br/>
+	<li>The map item<br/>
+	    It is enclosed by <b>${Map:</b>(dollar, right-brace and prefix <b>Map:</b>) and <b>}</b>(left-brace), the format is <b>${Map</b>:[MapID:][SectionName:]ItemName<b>}</b>.<br/>
+	    The parts inside the square-brackets are optional, that is '<b>MapID</b>' and '<b>SectionName</b>' are optional.<br/>
+	    Without 'MapID', the default Map will be used.<br/>
+	    Without 'SectionName', the default section '<b>ApplicationConstant</b>' will be used.<br/>
+	    <span class="comments">How to define Application Map? Please refer to <a href="#" onclick="editAppMaps()">Edit AppMaps</a></span><br/>
+	    <span class="comments">To understand 'MapID' Please refer to <a href="../../doc/org/safs/SAFSPlus.DriverCommand.html#SetApplicationMap(java.lang.String)">Misc.SetApplicationMap()</a></span><br/>
+	</li>
+</ul>
+
+Examples:<br/>
+	<ul>
+		<li>Simple Variable <b>${GoogleURL}</b><br/>
+			The variable <b>GoogleURL</b> will be searched
+			<ol>
+				<li>firstly from 'SeBuilder'/'Selenium IDE' variable-context, the variable is assigend by command <b>Store</b> for example.</li>
+				<li>then from SAFS variables store, the variable is assigned by API <a href="../../doc/org/safs/selenium/webdriver/SeleniumPlus.html#SetVariableValue(java.lang.String, java.lang.String)">SeleniumPlus.SetVariableValue()</a> or
+		 	                                                                  <a href="../../doc/org/safs/SAFSPlus.DriverCommand.html#SetVariableValues(java.lang.String, java.lang.String...)">Misc.SetVariableValues()</a>
+	            </li>
+				<li>finally from the Map ApplicationConstant section, the variable is defined in map as below
+<div id="GoogleURL_map_definition" class="appmap">
+<pre>
+<b>[ApplicationConstant]</b>
+<b>GoogleURL</b>="http://www.google.com"
+</pre></div>
+	            </li>
+			</ol>
+		</li>
+		<br/>
+		<li>Map Item 'CheckBox2' under section 'FormsMain' from default Map <b>${Map:FormsMain:CheckBox2}</b><br/>
+<div id="FormsMain_map_definition" class="appmap">
+<pre>
+<b>[ApplicationConstant]</b>
+baseurl="http://www.examples.com/forms.html"
+FormsBrowser="ID_FormsBrowser001"
+
+<b>[FormsMain]</b>
+<b>CheckBox2</b>="id=check-box-02"
+</pre></div>
+		</li>
+		<br/>
+		<li>Map Item 'CompName' under section 'WindowName' from the Map 'test.map' <b>${Map:test.map:WindowName:CompName}</b><br/>
+			<span class="comments">//the map 'test.map' is set as below</span><br/>
+			<a href="../../doc/org/safs/SAFSPlus.DriverCommand.html#SetApplicationMap(java.lang.String)">Misc.SetApplicationMap("test.map");</a><br/>
+			<span class="comments">//the map 'test.map' looks like below:</span><br/>
+<div class="appmap">
+<pre>
+<b>[WindowName]</b>
+<b>CompName</b>="xpath=/html/body/button"
+</pre></div>
+		</li>
+	</ul>
 
 <a href="#using-seleniumscripts">[go back]</a>
+
+</div>
+
+<!--------------------------------->
+<!--    Using SAFS Data Service  -->
+<!--------------------------------->
+<div id="using-safsdataservice" style="display: none" >
+
+<h2 id="using-safsdataservice_title">Using SAFS Data Services</h2>
+
+<ul id="safs_dataservice_summary">
+  <li><a href="#safs_dataservice">SAFS Data Service</a>
+  <ul>
+    <li><a href="#runtime_data">Runtime data</a>
+    <li><a href="#test_data">Test data</a>
+    <ul>
+      <li><a href="#test_annotation">Test Annotations</a>
+      <li><a href="#create_level_test">Create a test project with annotations</a>
+      <li><a href="#convert_to_junit">Convert SAFS XML Log to JUnit report</a>
+      <li><a href="#push_test_data">Push test data (got from SAFS XML Log) to safs repository</a>
+    </ul>
+  </ul>
+  <li><a href="#test_count_unit">SAFS Test Count Unit</a>
+  <ul>
+    <li><a href="#how_mark_test_skipped_failed">How a test case is considered failed, skipped?</a>
+    <li><a href="#set_test_count_unit">How to set test count unit?</a>
+  </ul>
+
+</ul>
+
+<p>
+<h3 id="safs_dataservice">SAFS Data Service:</h3>
+It provides the ability to store, update, delete and presents the safs data (runtime data and test data); it will be deployed on a server and be accessible via a URL.<br/>
+<br/>
+"<b>SAFS Data Service</b>" should be configured by .ini configuration file or by VM parameters.<br/>
+
+<ul>
+<li>Configured by .ini file:
+<div id="SAFSDataService_map_definition" class="appmap"><pre>
+[SAFS_DATA_SERVICE]
+<a href="../../doc/org/safs/tools/drivers/DriverConstant.DataServiceConstant.html#ITEM_PROTOCOL" target="api">protocol</a>=http
+<a href="../../doc/org/safs/tools/drivers/DriverConstant.DataServiceConstant.html#ITEM_HOST" target="api">host</a>=localhost
+<a href="../../doc/org/safs/tools/drivers/DriverConstant.DataServiceConstant.html#ITEM_PORT" target="api">port</a>=8080
+<a href="../../doc/org/safs/tools/drivers/DriverConstant.DataServiceConstant.html#ITEM_BASE_NAME" target="api">base.name</a>=safsdata
+<span class="comments"># <a href="../../doc/org/safs/tools/drivers/DriverConstant.DataServiceConstant.html#ITEM_SERVER_URL" target="api">server.url</a> will override the 'protocol', 'host', 'port' and 'base.name' settings.
+#server.url=http://localhost:8080/safsdata
+</span>
+</pre></div><br>
+
+<li>Configured by VM parameter:
+<pre>
+<span class="comments">VM parameter '<a href="../../doc/org/safs/tools/drivers/DriverConstant.DataServiceConstant.html#PROPERTY_PROTOCOL" target="api">safs.data.protocol</a>', '<a href="../../doc/org/safs/tools/drivers/DriverConstant.DataServiceConstant.html#PROPERTY_HOST" target="api">safs.data.host</a>',  '<a href="../../doc/org/safs/tools/drivers/DriverConstant.DataServiceConstant.html#PROPERTY_PORT" target="api">safs.data.port</a>', '<a href="../../doc/org/safs/tools/drivers/DriverConstant.DataServiceConstant.html#PROPERTY_BASE_NAME" target="api">safs.data.base.name</a>'.</span>
+java <b>-Dsafs.data.protocol=http</b> <b>-Dsafs.data.host=localhost</b> <b>-Dsafs.data.port=8080</b> <b>-Dsafs.data.base.name=safsdata</b>
+<span class="comments">VM parameter '<a href="../../doc/org/safs/tools/drivers/DriverConstant.DataServiceConstant.html#PROPERTY_SERVER_URL" target="api">safs.data.server.url</a>', it will override the 'safs.data.protocol', 'safs.data.host', 'safs.data.port' and 'safs.data.base.name' settings.</span>
+java <b>-Dsafs.data.server.url=http://localhost:8080/safsdata</b>
+</pre>
+</ul>
+
+<h3 id="runtime_data">Runtime data:</h3>
+<b>Runtime data</b> includes information of machine, user, framework, engine and history; they will be collected automatically when a SAFS/SeleniumPlus/JSAfS test runs.<br/>
+
+
+<h3 id="test_data">Test data:</h3>
+<b>Test data</b> includes 'orderable' information, which should be provided by .ini configuration file or by VM parameters.<br/>
+<ul>
+<li>Configured by .ini file:
+<div id="SAFSDataService_map_definition" class="appmap"><pre>
+[SAFS_TEST]
+<span class="comments"># ProductName, Platform, Track and Branch are used for product being tested.</span>
+<a href="../../doc/org/safs/tools/drivers/DriverConstant.html#KEY_SAFS_TEST_ORD_PRODUCT_NAME" target="api">ProductName</a>=Product to test
+<a href="../../doc/org/safs/tools/drivers/DriverConstant.html#KEY_SAFS_TEST_ORD_PLATFORM" target="api">Platform</a>=OS platform
+<a href="../../doc/org/safs/tools/drivers/DriverConstant.html#KEY_SAFS_TEST_ORD_TRACK" target="api">Track</a>=track name
+<a href="../../doc/org/safs/tools/drivers/DriverConstant.html#KEY_SAFS_TEST_ORD_BRANCH" target="api">Branch</a>=branch name
+</pre></div><br>
+
+<li>Configured by VM parameter:
+<pre>
+<span class="comments">VM parameter '<a href="../../doc/org/safs/tools/drivers/DriverConstant.html#PROPERTY_SAFS_TEST_ORD_PRODUCT_NAME" target="api">safs.test.product.name</a>', '<a href="../../doc/org/safs/tools/drivers/DriverConstant.html#PROPERTY_SAFS_TEST_ORD_PLATFORM" target="api">safs.test.product.platform</a>',  '<a href="../../doc/org/safs/tools/drivers/DriverConstant.html#PROPERTY_SAFS_TEST_ORD_TRACK" target="api">safs.test.product.track</a>', '<a href="../../doc/org/safs/tools/drivers/DriverConstant.html#PROPERTY_SAFS_TEST_ORD_BRANCH" target="api">safs.test.product.branch</a>'.</span>
+java <b>-Dsafs.test.product.name=productName</b> <b>-Dsafs.test.product.platform=OSplatform</b> <b>-Dsafs.test.product.track=trackName</b> <b>-Dsafs.test.product.branch=branchName</b>
+</pre>
+</ul>
+
+<b>Test data</b> also includes information of testcycle, testsuite, testcase and teststep; they will be collected after a SAFS/SeleniumPlus/JSAfS test runs. We call it as post-procession
+and it is based on the "SAFS XML Log file" which should be PROPERTLY written with certain log message, such as 'START CYCLE', 'START SUITE', 'START TESTCASE',  'STOP CYCLE',
+'STOP SUITE', 'STOP TESTCASE' etc.<br/>
+To get a proper XML Log file, we need to annotate 'class', 'method' and 'field' carefully in the test project;
+In SeleniumPlus we can import a "<b>Project with Test Level</b>", which has been properly annotated.<br/>
+
+<ol>
+  <li id="test_annotation">Annotations:<br>
+  <a href="https://github.com/spring-projects/spring-framework/blob/master/spring-context/src/main/java/org/springframework/stereotype/Component.java" target="api">@Component</a> is used for a test class.<br/>
+  <a href="https://github.com/spring-projects/spring-framework/blob/master/spring-beans/src/main/java/org/springframework/beans/factory/annotation/Autowired.java" target="api">@Autowired</a> is used for a field holding an instance of a test class.<br/>
+  In the 'cycle level' class, <b>@Autowired</b> is used to annotate a field representing 'suite level' class.<br/>
+  In the 'suite level' class, <b>@Autowired</b> is used to annotate a field representing 'testcase level' class.<br/>
+  In the 'testcase level' class, <b>@Autowired</b> is used to annotate a field representing <font color=red>itself ('testcase level' class)</font>.<br/>
+  <a href="../../doc/org/safs/model/annotations/TestCycle.html" target="api">@TestCycle</a>, 
+  <a href="../../doc/org/safs/model/annotations/TestSuite.html" target="api">@TestSuite</a>, 
+  <a href="../../doc/org/safs/model/annotations/TestCase.html" target="api">@TestCase</a> are used for a <font style="color:red"><b>public</b></font> method.
+  The annotated method MUST be public, otherwise the annotation will not work properly.<br/>
+  <ul>
+    <li><b>@TestCycle</b> is suggested to annotate the method <b>runTest()</b> in the 'cycle level' class.
+    <li><b>@TestSuite</b> is suggested to annotate the method <b>runTest()</b> in the 'suite level' class.
+    <li><b>@TestCase</b> is suggested to annotate the user defined test method in the 'testcase level' class, each test method will be considered as a 'test case' and MUST be called by the field 'self' (annotated by <b>@Autowired</b>) representing this 'testcase level' class.<br>
+        <b>@TestCase</b> can also be used (not suggested) to annotate the method <b>runTest()</b> in the 'testcase level' class IF user defines ONLY ONE 'test case' in this class.<br>
+
+  </ul>
+  <br/>
+  <br>
+  </li>
+
+  <li id="create_level_test">Create a test project with annotations<br/>
+	  To keep the test performance, we don't collect test data at runtime. We collect them at the end of test based on a <b>well-formatted SAFS XML Log</b>.<br/>
+	  To be able to produce such a well-formatted SAFS XML Log, we need a special test project. We can create it by new project '<b>Selenium+ -> Selenium+ Project with Test Level</b>'. Refer to<br/>
+	  <br/>
+	  <img src="images/newProjectWithTestLevel.png"></img><br/>
+
+	  <br/>
+    We click the button "Next", then we provide a name such as 'AUTOCOUNTABLETEST' and create the project.<br/>
+    <br/>
+    The project's structure is as below:
+	<pre>
+	AUTOCOUNTABLETEST
+	  + Tests
+	      + autocountabletest
+	      + autocountabletest.testcycle
+	                 + Cycle.java
+	      + autocountabletest.testsuite
+	                 + Suite.java
+	      + autocountabletest.testcase
+	                 + Case1.java
+	      customerSpringConfig.xml
+	</pre>
+
+	The test classes are listed below:
+	<pre>
+	<b>@Component</b>
+	public class Cycle extends SeleniumPlus {
+		<b>@Autowired</b>
+		Suite suite;
+
+		<b>@TestCycle</b>
+		<font style="color:red"><b>public</b></font> void runTest() throws Throwable {
+			suite.runTest();
+		}
+
+		public static void main(String[] args) {
+			SeleniumPlus.main(args);
+		}
+	}
+
+	<b>@Component</b>
+	public class Suite extends SeleniumPlus {
+		<b>@Autowired</b>
+		Case1 case1;
+
+		<b>@TestSuite</b>
+		<font style="color:red"><b>public</b></font> void runTest() throws Throwable {
+			case1.runTest();
+		}
+
+		public static void main(String[] args) {
+			SeleniumPlus.main(args);
+		}
+	}
+
+	<span class="comments">//Cases1 contains multiple 'test cases'.</span>
+	<b>@Component</b>
+	public class Cases1 extends SeleniumPlus{
+		<span class="comments">//We MUST use @Autowired to annotate this class itself, it will be used to call test method annotated by @TestCase</span>
+		<b>@Autowired</b>
+		<font color="red">private Cases1 self;</font>
+
+		<b>@TestCase</b>
+		<font style="color:red"><b>public</b></font> void case1(){
+			<span class="comments">//test codes ...</span>
+		}
+
+		<b>@TestCase(skipped=true)</b>//This test case will be skipped
+		<font style="color:red"><b>public</b></font> void case2() throws Throwable {
+			<span class="comments">//test codes ...</span>
+		}
+
+		<b>@TestCase</b>
+		<font style="color:red"><b>public</b></font> void case3(){
+			<span class="comments">//test codes ...</span>
+		}
+
+		<span class="comments">//In TestCase class, other methods are annotated by '@TestCase', then we DO NOT annotate runTest() by '@TestCase'</span>
+		public void runTest() throws Throwable {
+			<span class="comments" style="color:red">//We MUST use the field 'self' annotated by @Autowired to call test method annotated by '@TestCase'</span>
+			<font color="red">self</font>.case1();
+			<font color="red">self</font>.case2();
+			<font color="red">self</font>.case3();
+		}
+
+		public static void main(String[] args) {
+			SeleniumPlus.main(args);
+		}
+	}
+
+	</pre>
+  </li>
+
+  <li id="convert_to_junit">Convert SAFS XML Log to JUnit report<br/>
+    <ul>
+	    <li>By XMLSaxProcessor<br/>
+	  	  <span class="sourcecodes">java org.safs.tools.logs.processor.XMLSaxProcessor -s Logs\Cycle.xml -o Logs\CycleJunit.xml</span>
+	  	</li>
+	  	<li>By SeleniumPlus<br/>
+	  	  At the end of test, a SAFS XML log will be created in the 'Logs' folder (if the XMLLOG format has been enabled in the .ini configuration file).<br/>
+	  	  Open the folder 'Logs', use the Mouse right-click on the cycle level XML log file, then select '<b>Selenium+ -> Convert To JUnit</b>'. Refer to<br/>
+	  	  <br/>
+	  	  <img src="images/convertSAFSXMLToJunit.png"></img><br/>
+
+	  	  <br/>
+	  	</li>
+  	</ul>
+  </li>
+
+  <li id="push_test_data">Push test data (got from SAFS XML Log) to safs repository<br/>
+    <ul>
+	    <li>By XMLSaxProcessor<br/>
+	      <span class="sourcecodes">java org.safs.tools.logs.processor.XMLSaxProcessor -s Logs\Cycle.xml -d http://localhost:8080/safsdata</span>
+	    </li>
+	  	<li>By SeleniumPlus<br/>
+	  	  At the end of test, a SAFS XML log will be created in the 'Logs' folder (if the XMLLOG format has been enabled in the .ini configuration file).<br/>
+	  	  Open the folder 'Logs', use the Mouse right-click on the cycle level XML log file, then select '<b>Selenium+ -> Push Data</b>'. Refer to<br/>
+	  	  <br/>
+	  	  <img src="images/pushSAFSXMLToSAFSRepository.png"></img><br/>
+
+	  	  <br/>
+	  	</li>
+    </ul>
+  </li>
+
+</ol>
+<a href="#safs_dataservice_summary">[go back]</a>
+
+<h3 id="test_count_unit">SAFS Test Count Unit:</h3>
+Traditionally, in SAFS we count the failures, skipped etc. information based on '<b>test step</b>'. That means
+we count how many '<b>test step</b>' fails, skips etc.<br/>
+After converting a SAFS XML Log to JUnit report, the tag &lt;testsuite&gt; will contains these information, example as below:
+<div class="CodeBox">
+&lt;testsuite tests="23" failures="5" skipped="2" timestamp="06-13-2018 16:45:01" time="16"&gt;
+</div>
+That means within this testsuite there are 23 <b>test steps</b> in total, 5 <b>steps></b> failed, 2 <b>steps</b> skipped.<br/>
+<b>For most JUnit report, within testsuite, the testcase should be counted, NOT teststep!</b><br/>
+<br/>
+So we introduced a '<b>Test Count Unit</b>' concept. Currently we have 2 kinds of unit, one is 'TESTSTEP', the other is 'TESTCASE'.<br/>
+If the unit is 'TESTSTEP', then we count as before.<br/>
+If the unit is 'TESTCASE', then we count 'test case' within testsuite, if we have the JUnit report as below:<br/>
+<div class="CodeBox">
+&lt;testsuite tests="23" failures="5" skipped="2" timestamp="06-13-2018 16:45:01" time="16"&gt;
+</div>
+That means within this testsuite there are 23 <b>test cases</b> in total, 5 <b>test cases</b> failed, 2 <b>test cases</b> skipped.<br/>
+<br/>
+<b id="how_mark_test_skipped_failed">How a test case is considered failed, skipped?</b><br/>
+A test case is a method annotated by '@TestCase', user can add property skipped=true, skippedMessage="why test case is skipped" into '@TestCase' to skip a test case.<br/>
+User can throw a <a href="../../doc/org/safs/SAFSTestLevelFailure.html" target="api">SAFSTestLevelFailure</a> to indicate the failure of TestCase.
+User can throw a <a href="../../doc/org/safs/SAFSTestLevelError.html" target="api">SAFSTestLevelError</a> to indicate the error of TestCase.
+A SAFSTestLevelFailure or SAFSTestLevelError can contain multiple errors, each error is consisted of (message, detailed message, type).<br/>
+
+<pre>
+	<b>@Component</b>
+	public class Cases1 extends SeleniumPlus{
+		<b>@Autowired</b>
+		<font color="red">private Cases1 self;</font>
+
+		<span class="comments">//This test case will be skipped</span>
+		<b style="color:red">@TestCase(skipped=true, skippedMessage="why test case is skipped")</b>
+		public void case1() throws Throwable {
+			<span class="comments">//test codes ...</span>
+		}
+
+		<b>@TestCase</b>
+		public void case2(){
+			<span class="comments">//Throw SAFSTestLevelFailure with one failure message</span>
+			if(!SeleniumPlus.VerifyFileToFile("benchFile.txt", "actualFile.txt")){
+				<b style="color:red">throw new SAFSTestLevelFailure</b>("benchFile.txt doesn't match actualFile.txt.","detailed failure message.", "DIFF");
+			}
+		}
+
+		<b>@TestCase</b>
+		public void case3(){
+			<span class="comments">//Throw SAFSTestLevelFailure with multiple failure messages</span>
+			<b style="color:red">SAFSTestLevelFailure</b> testLevelFailure = new <b style="color:red">SAFSTestLevelFailure</b>();
+
+			org.safs.model.Component nonExistGui = new org.safs.model.Component("FANTACY_GUI");
+
+			if(!Misc.IsComponentExists(nonExistGui)){
+				testLevelFailure.addFailure("IsComponentExists failed.", nonExistGui.getName()+" doesn't exist!", "NON_EXIST");
+			}
+
+			if(!SeleniumPlus.WaitForGUI(nonExistGui, 3)){
+				testLevelFailure.addFailure("WaitForGUI failed.", nonExistGui.getName()+" doesn't exist!", "TIMEOUT");
+			}
+
+			<b style="color:red">throw testLevelFailure</b>;
+		}
+
+		<b>@TestCase</b>
+		public void case4(){
+			String name = null;
+			try{
+				name.length();
+			}catch(NullPointerException e){
+				<b style="color:red">throw new SAFSTestLevelError</b>(e.getMessage(), null, e.getClass().getSimpleName());
+			}
+		}
+
+		public void runTest() throws Throwable {
+			<font color="red">self</font>.case1();
+			<font color="red">self</font>.case2();
+			<font color="red">self</font>.case3();
+			<font color="red">self</font>.case4();
+		}
+
+		public static void main(String[] args) {
+			SeleniumPlus.main(args);
+		}
+	}
+</pre>
+
+<b id="set_test_count_unit">How to set test count unit?</b><br/>
+By default, the test count unit is set to 'TESTCASE'.<br>
+In SeleniumPlus, open the preference page "Window-> Preferences"<br/>
+Choose "Selenium+ -> SAFS Data Service", on that page, choose a 'unit' from the 'SAFS Test Count Unit' combo box.<br/>
+	  	  <br/>
+	  	  <img src="images/setTestCountUnit.png"></img><br/>
+
+<br/>
+<a href="#safs_dataservice_summary">[go back]</a>
 
 </div>
 
@@ -2265,7 +2975,7 @@ The HTTP proxy can also be set by the optional parameters of <a href="../../doc/
 The optional parameters are given as pair (key, value). The keys related to "HTTP proxy" are:
 <ol>
   <li><a href="../../doc/org/safs/selenium/webdriver/lib/SelectBrowser.html#KEY_PROXY_SETTING" target="_blank">KEY_PROXY_SETTING</a>: the key for proxy string; The value is colon separated string as "proxyserver:port"
-  <li><a href="../../doc/org/safs/selenium/webdriver/lib/SelectBrowser.html#KEY_PROXY_BYPASS_ADDRESS" target="_blank">KEY_PROXY_BYPASS_ADDRESS</a>: the key for proxy bypass address string; The value is comma separated string as "localhost,tadsrv,rnd.yourCompany.com"
+  <li><a href="../../doc/org/safs/selenium/webdriver/lib/SelectBrowser.html#KEY_PROXY_BYPASS_ADDRESS" target="_blank">KEY_PROXY_BYPASS_ADDRESS</a>: the key for proxy bypass address string; The value is comma separated string as "localhost,tadsrv"
 </ol>
 
 Examples:
@@ -2297,6 +3007,829 @@ StartWebBrowser("http://www.google.com", "GoogleMain", new String[]{
 <a href="#http-proxy">[go back]</a>
 
 </div>
+
+
+<!--------------------------------->
+<!--        Run In Docker        -->
+<!--------------------------------->
+<div id="run-in-docker" style="display: none" >
+<h2>Run In Docker</h2>
+<p>
+This section is talking about how to run SeleniumPlus Test on docker container.<br/>
+<ul>
+<li><a href="#prepare_the_docker">Prepare the Docker Environment</a>
+</ul>
+<ol>
+	<li><a href="#using_selenium_image">Using selenium docker image</a>
+	<ol type="a">
+		<li><a href="#run_with_standalone_server">Run With Standalone Server</a>
+		<li><a href="#run_with_grid">Run With Grid</a>
+		<li><a href="#turn_on_rmi_server">Turn On RMI Server</a>
+	</ol>
+	<br>
+	<li><a href="#using_selenium_plus_static_image">Using seleniumplus docker static image</a>
+	<ol type="a">
+		<li><a href="#run_with_standalone_server_seplus_docker">Run With Standalone Server</a>
+		<li><a href="#run_with_grid_seplus_docker">Run With Grid</a>
+		<ul type="i">
+			<li><a href="#run_with_grid_seplus_docker_manually">Manually startup</a>
+			<li><a href="#run_with_grid_seplus_docker_automatically">Automatically startup</a>
+		</ul>
+	</ol>
+	<br>
+	<li><a href="#using_selenium_plus_dynamic_image">Using seleniumplus docker dynamic image</a>
+	<ol type="a">
+		<li><a href="#run_with_dynamic_standalone_server_seplus_docker">Run With Standalone Server</a>
+		<li><a href="#run_with_dynamic_grid_seplus_docker">Run With Grid</a>
+	</ol>
+	<br>
+	<li><a href="#clone_git_project_in_selenium_plus_container">Clone GIT project in seleniumplus container</a>
+	<ol type="a">
+		<li><a href="#clone_git_project_in_selenium_plus_container_https">Clone in HTTPS mode</a>
+		<li><a href="#clone_git_project_in_selenium_plus_container_ssh">Clone in SSH mode</a>
+	</ol>
+</ol>
+
+<h3 id="prepare_the_docker">Prepare The Docker Environment:</h3>
+1. Follow the steps from site <a href="https://docs.docker.com/docker-for-windows/">Docker Desktop for Windows</a> to install docker.<br>
+2. As currently the selenium images are all Linux-based images, so we need to set the "Docker Desktop" to "Switch to Linux containers ..." as shown below:<br>
+<img src="images/SwitchToLinuxContainers.png"/><br><br>
+3. Next, we use the command <a href="https://docs.docker.com/engine/reference/commandline/pull/">docker pull</a> to get <a href="https://github.com/SeleniumHQ/docker-selenium">selenium images</a> or <a href="https://github.com/orgs/SAFSDEV/packages">seleniumplus images</a>, below are some examples:
+<ul>
+<li>docker pull selenium/hub
+<li>docker pull selenium/node-chrome
+<li>docker pull selenium/node-chrome-debug
+<li>docker pull selenium/standalone-chrome
+<li>docker pull selenium/standalone-chrome-debug
+<li>docker pull ghcr.io/safsdev/seplus
+<li>docker pull ghcr.io/safsdev/seplus-standalone
+<li>docker pull ghcr.io/safsdev/seplus-hub
+<li>docker pull ghcr.io/safsdev/seplus-node
+</ul>
+The selenium image with <b>-debug</b> is very helpful if we want to connect to the running container with the <a href="https://www.realvnc.com/en/connect/download/viewer/">VNC Viewer</a>.
+The seleniumplus images are all in debug mode, we can connect to the running container with the <a href="https://www.realvnc.com/en/connect/download/viewer/">VNC Viewer</a>. 
+We can map the selenium-container's port 5900 to the local port for example 32800 by parameter <b>-p 32800:5900</b> when starting the selenium debug container, 
+then we can add a new connection (to port 32800) in <b>VNC Viewer</b> as shown in image, the password is "<b>secret</b>"<br> 
+<img src="images/vnc_viewer_connection.png"/><br><br>
+4. Share the Windows "Drive C" so that docker container can access the Windows folder, as below:<br>
+<img src="images/docker_share_driver_c.png"/><br><br>
+For newer version of docker, we might to share the "Driver C" as below:<br>
+<img src="images/docker_share_driver_c_2.png"/><br><br>
+
+Sharing the "Driver C" is not enough for user to access Windows folder from within the container, we should also MOUNT the Windows folder to container's folder 
+by option <b>"-v windowsFolder:containerFolder"</b> when starting a container, below is an example (the container's directory '/tmp/temp' will hold the content of Windows folder 'C:/temp'):<br>
+<span class="commandLine">docker run -d -p 32800:5900 -v C:/temp:/tmp/temp --name seplus_test ghcr.io/safsdev/seplus</span>
+<br><br>
+
+<a href="#run-in-docker">[go back]</a>
+
+<h3 id="using_selenium_image">1. Using selenium docker image:</h3>
+Selenium provides <a href="https://github.com/SeleniumHQ/docker-selenium">standard images</a> that we can pull to our local docker environment and run. 
+The standard images include the "chrome-standalone", "firefox-standalone", "hub", "chrome-node", "firefox-node" etc. Below we explain how to run SeleniumPlus
+with these images (standalone, grid (hub+node)).
+<br>
+
+<h4 id="run_with_standalone_server">1.a Run With Standalone Server:</h4>
+1. Open a DOS console and run the following command to start the container with "selenium standalone server".
+<p>
+<span class="comments">Start the selenium standalone sever with chrome in docker container, we name this container as "my-chrome",
+the container's port 4444 and 5900 have been mapped to port 4444 and port 32800 on local machine where the docker is running
+</span><br>
+<span class="commandLine">docker run -d -p 4444:4444 -p 32800:5900 --name my-chrome selenium/standalone-chrome-debug</span>
+<br><br>
+
+2. We can use command <span class="commandLine">docker container ls</span> to show all the running containers, we should see the container "my-chrome" is listed.<br>
+<pre>
+<span class="commandLine">
+CONTAINER ID        IMAGE                              COMMAND                  	CREATED             STATUS              PORTS                                             NAMES
+61520f90554a        selenium/standalone-chrome-debug   "/opt/bin/entry_poin..."   	23 minutes ago      Up 23 minutes       0.0.0.0:4444->4444/tcp, 0.0.0.0:32800->5900/tcp   my-chrome
+</span>
+</pre>
+
+3. Open a "VNC Viewer" connection to the container "my-chrome".<br><br>
+
+4. Set the INI configuration file.<br>
+<pre class="appmap">
+[SAFS_SELENIUM]
+<span class="comments">;bypass the robot, so that the selenium's API will do the work</span>
+<a href="../../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#ITEM_BYPASS_ROBOT_ACTION" target="_blank">bypass.robot.action</a>=true
+<span class="comments">;define the port where the selenium standalone server is running on.</span>
+<a href="../../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#SELENIUMPORT" target="_blank">SELENIUMPORT</a>=4444
+</pre>
+5. Run the SeleniumPlus test as usual, we should be able to see the test gets running in the "VNC Viewer" connection with "my-chrome".
+<br>
+<a href="#run-in-docker">[go back]</a>
+
+<h4 id="run_with_grid">1.b Run With Grid:</h4>
+1. Remove the running container "my-chrome" if it exists.<br>
+<pre><span class="commandLine">
+docker container stop my-chrome
+docker container rm my-chrome
+</span></pre>
+<p>
+
+2. Create a docker network "my-grid"<br>
+<pre><span class="commandLine">
+docker network create my-grid
+</span></pre>
+
+3. Start a selenium hub container "my-hub"<br>
+<span class="comments">Start the selenium hub in docker container, we name this container as "my-hub",
+the container's port 4444 has been mapped to port 4444 on local machine where the docker is running,
+this container is running in network "my-grid".
+</span><br>
+<pre><span class="commandLine">
+docker run -d -p 4444:4444 --net my-grid --name my-hub selenium/hub
+</span></pre>
+
+4. Start a selenium node container "my-chrome"<br>
+<span class="comments">Start the selenium node in docker container, we name this container as "my-chrome",
+the container's port 5900 has been mapped to port 32800 on local machine where the docker is running,
+this container is running in network "my-grid", this selenium node will connect to selenium hub "my-hub".
+</span><br>
+<span class="commandLine">
+docker run -d -p 32800:5900 --net my-grid --name my-chrome -e HUB_HOST=my-hub selenium/node-chrome-debug
+</span>
+<br><br>
+
+5. Start a selenium node container "my-firefox"<br>
+<span class="comments">Start the selenium node in docker container, we name this container as "my-firefox",
+the container's port 5900 has been mapped to port 32801 on local machine where the docker is running,
+this container is running in network "my-grid", this selenium node will connect to selenium hub "my-hub". 
+</span><br>
+<span class="commandLine">
+docker run -d -p 32801:5900 --net my-grid --name my-firefox -e HUB_HOST=my-hub selenium/node-firefox-debug
+</span>
+<br><br>
+
+6. We can use command <span class="commandLine">docker container ls</span> to show all the running containers, we should see the following containers.<br>
+<pre>
+<span class="commandLine">
+CONTAINER ID        IMAGE                         COMMAND                 	CREATED             STATUS              PORTS                     NAMES
+598b873c4546        selenium/node-firefox-debug   "/opt/bin/entry_poin..."   	6 seconds ago       Up 5 seconds        0.0.0.0:32801->5900/tcp   my-firefox
+18dd54892960        selenium/node-chrome-debug    "/opt/bin/entry_poin..."   	9 minutes ago       Up 9 minutes        0.0.0.0:32800->5900/tcp   my-chrome
+4026567e5dc2        selenium/hub                  "/opt/bin/entry_poin..."   	9 minutes ago       Up 9 minutes        0.0.0.0:4444->4444/tcp    my-hub
+</span>
+</pre>
+
+7. Open a "VNC Viewer" connection to the container "my-chrome" on port 32800.<br><br>
+8. Open a "VNC Viewer" connection to the container "my-firefox" on port 32801.<br><br>
+
+9. Set the INI configuration file to run test with chrome<br>
+<pre class="appmap">
+[SAFS_SELENIUM]
+<span class="comments">;bypass the robot, so that the selenium's API will do the work</span>
+<a href="../../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#ITEM_BYPASS_ROBOT_ACTION" target="_blank">bypass.robot.action</a>=true
+<span class="comments">;define the port where the selenium hub is running</span>
+<a href="../../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#SELENIUMPORT" target="_blank">SELENIUMPORT</a>=4444
+<span class="comments">;define the browser to run test</span>
+BROWSER=<b>chrome</b>
+</pre>
+
+10. Run the SeleniumPlus test as usual, we should be able to see the test gets running in the "VNC Viewer" connection with "my-chrome".<br><br>
+
+11. Modify the INI configuration file to run test with firefox<br>
+<pre class="appmap">
+[SAFS_SELENIUM]
+<span class="comments">;bypass the robot, so that the selenium's API will do the work</span>
+<a href="../../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#ITEM_BYPASS_ROBOT_ACTION" target="_blank">bypass.robot.action</a>=true
+<span class="comments">;define the port where the selenium hub is running</span>
+<a href="../../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#SELENIUMPORT" target="_blank">SELENIUMPORT</a>=4444
+<span class="comments">;define the browser to run test</span>
+BROWSER=<b>firefox</b>
+</pre>
+
+12. Run the SeleniumPlus test as usual, we should be able to see the test gets running in the "VNC Viewer" connection with "my-firefox".
+    If the first test is long enough, we should be able to see the both tests are running the same time in 2 containers.
+<br><br>
+
+<span class="note">
+NOTE:<br> 
+1. As we are maintaining "SESSION" in SeleniumPlus, Please give a different "Browser ID" when starting the second test, 
+   otherwise the first session will be overrided and lost.<br>
+2. If we run multiple tests at the same time, the last test will be considered as the "current session".
+</span>
+<br><br>
+
+<a href="#run-in-docker">[go back]</a>
+
+
+<h4 id="turn_on_rmi_server">1.c Turn On RMI Server:</h4>
+Sometimes the selenium's API is not so reliable, in SeleniumPlus we have developed code to use java Robot to do the work. 
+If the test is running on a remote machine, we need to start our "RMI Server" to get the java Robot code to work. This "RMI Server"
+can start automatically if "SeleniumPlus" is installed properly. With selenium docker, we don't install SeleniumPlus at all on the
+container, we have to start the "RMI Server" manually. Here we are going to explain it with "grid" a complicated case, if user wants
+to use it with "standalone server", it will be very similar.
+<br><br>
+
+1. Remove the running container "my-chrome" and "my-firefox" if they exist.<br>
+<pre><span class="commandLine">
+docker container stop my-chrome my-firefox
+docker container rm my-chrome my-firefox
+</span></pre>
+<p>
+
+2. Suppose that we hava a docker network "my-grid" as before.<br>
+
+3. Suppose that we have a selenium hub container "my-hub" as before.<br>
+
+4. Start a selenium node container "my-chrome" with RMI port-forwarding<br>
+<span class="comments">Start the selenium node in docker container, we name this container as "my-chrome",
+the container's port 5900 has been mapped to port 32800 on local machine where the docker is running,
+the container's port 1099 has been mapped to local port 1099, this port is used by RMI Registry,
+the container's port 6890 has been mapped to local port 6890, this port is used by RMI server,
+this container is running in network "my-grid", this selenium node will connect to selenium hub "my-hub", 
+we mount the folder "c:/seleniumplus" to docker's folder "/dev/seleniumplus".
+</span><br>
+<span class="commandLine">
+docker run -d -p 32800:5900 -p 1099:1099 -p 6890:6890 --net my-grid --name my-chrome -e HUB_HOST=my-hub -v c:/seleniumplus:/dev/seleniumplus selenium/node-chrome-debug
+</span>
+<br><br>
+
+5. Start a selenium node container "my-firefox" with RMI port-forwarding<br>
+<span class="comments">Start the selenium node in docker container, we name this container as "my-firefox",
+the container's port 5900 has been mapped to port 32801 on local machine where the docker is running,
+the container's port 1099 has been mapped to local port 1100, this port is used by RMI Registry,
+the container's port 6891 has been mapped to local port 6891, this port is used by RMI server,
+this container is running in network "my-grid", this selenium node will connect to selenium hub "my-hub", 
+we mount the folder "c:/seleniumplus" to docker's folder "/dev/seleniumplus".
+</span><br>
+<span class="commandLine">
+docker run -d -p 32801:5900 -p 1100:1099 -p 6891:6891 --net my-grid --name my-firefox -e HUB_HOST=my-hub -v c:/seleniumplus:/dev/seleniumplus selenium/node-firefox-debug
+</span>
+<br><br>
+
+6. We can use command <span class="commandLine">docker container ls</span> to show all the running containers, we should see the following containers.<br>
+<pre>
+<span class="commandLine">
+CONTAINER ID        IMAGE                         COMMAND                 	CREATED             STATUS              PORTS                     NAMES
+598b873c4546        selenium/node-firefox-debug   "/opt/bin/entry_poin..."   	6 seconds ago       Up 5 seconds        0.0.0.0:32801->5900/tcp   my-firefox
+18dd54892960        selenium/node-chrome-debug    "/opt/bin/entry_poin..."   	9 minutes ago       Up 9 minutes        0.0.0.0:32800->5900/tcp   my-chrome
+4026567e5dc2        selenium/hub                  "/opt/bin/entry_poin..."   	9 minutes ago       Up 9 minutes        0.0.0.0:4444->4444/tcp    my-hub
+</span>
+</pre>
+
+7. Start "RMI server" on "my-chrome" container<br>
+<ul>
+<li>7.1 Open a bash terminal on container "my-chrome" with root user.<br>
+<span class="commandLine">
+docker exec -u root -it my-chrome bash
+</span></li>
+<li>7.2 Verify that the 'registry port' is 1099, and the 'rmi server port' is 6890<br>
+<span class="commandLine">
+cat /dev/seleniumplus/extra/StartRMIServer.sh
+</span><br>
+We should be able to see a line like below:<br>
+<span class="commandLine">
+java -Djava.rmi.server.hostname=localhost -Dserver.port=6890 -Dregistry.port=1099 org.safs.selenium.rmi.server.SeleniumServer
+</span><br>
+If the port numbers are not correct, please edit file <b>C:\SeleniumPlus\extra\StartRMIServer.sh</b> 
+</li>
+<li>7.3 Start the "RMI Server" by running following script in the bash terminal<br>
+<span class="commandLine">
+source /dev/seleniumplus/extra/StartRMIServer.sh
+</span><br>
+<span class="note">
+NOTE:<br>
+User may meet problem Error: <span style="color:red">Could not find or load main class org.safs.selenium.rmi.server.SeleniumServer</span><br>
+In this situation, we need to make sure that we have mounted the SeleniumPlus to the folder "/dev/seleniumplus/" when we start the container.
+If we mount it to an other folder, for example '/seleniumplus', we need to set it to the environment SELENIUM_PLUS. The script will detect that
+environment and ask us if we want to change it as below:
+<pre><span class="commandLine">
+Currently, the environment SELENIUM_PLUS is /dev/seleniumplus.
+If you want to change it, please enter below:
+</span></pre>
+When we see this message, we enter "/seleniumplus" as below:
+<pre><span class="commandLine">
+/seleniumplus
+</span></pre>
+
+</span>
+</li>
+</ul>
+
+8. Start "RMI server" on "my-firefox" container<br>
+<ul>
+<li>8.1 Open a bash terminal on container "my-firefox" with root user.<br>
+<span class="commandLine">
+docker exec -u root -it my-firefox bash
+</span></li>
+<li>8.2 Verify that the 'registry port' is 1099, and the 'rmi server port' is 6891<br>
+<span class="commandLine">
+cat /dev/seleniumplus/extra/StartRMIServer.sh
+</span><br>
+We should be able to see a line like below:<br>
+<span class="commandLine">
+java -Djava.rmi.server.hostname=localhost -Dserver.port=6891 -Dregistry.port=1099 org.safs.selenium.rmi.server.SeleniumServer
+</span><br>
+If the port numbers are not correct, please edit file <b>C:\SeleniumPlus\extra\StartRMIServer.sh</b> 
+</li>
+<li>8.3 Start the "RMI Server" by running following script in the bash terminal<br>
+<span class="commandLine">
+source /dev/seleniumplus/extra/StartRMIServer.sh
+</span></li>
+</ul>
+
+9. Open a "VNC Viewer" connection to the container "my-chrome" on port 32800.<br><br>
+10. Open a "VNC Viewer" connection to the container "my-firefox" on port 32801.<br><br>
+
+
+11. Set the INI configuration file to run test with chrome<br>
+<pre class="appmap">
+[SAFS_SELENIUM]
+<span class="comments">;define the port where the selenium hub is running</span>
+<a href="../../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#SELENIUMPORT" target="_blank">SELENIUMPORT</a>=4444
+<span class="comments">;turn on the rmi port forwarding</span>
+<a href="../../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#ITEM_RMI_PORT_FORWARD" target="_blank">rmi.port.forward</a>=true
+<span class="comments">;define the port where the rmi registry is running on</span>
+<a href="../../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#ITEM_REGISTRY_PORT" target="_blank">registry.port</a>=1099
+<span class="comments">;define the browser to run test</span>
+BROWSER=<b>chrome</b>
+</pre>
+
+12. Run the SeleniumPlus test as usual, we should be able to see the test gets running in the "VNC Viewer" connection with "my-chrome".<br><br>
+
+13. Modify the INI configuration file to run test with firefox<br>
+<pre class="appmap">
+[SAFS_SELENIUM]
+<span class="comments">;define the port where the selenium hub is running</span>
+<a href="../../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#SELENIUMPORT" target="_blank">SELENIUMPORT</a>=4444
+<span class="comments">;turn on the rmi port forwarding</span>
+<a href="../../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#ITEM_RMI_PORT_FORWARD" target="_blank">rmi.port.forward</a>=true
+<span class="comments">;define the port where the rmi registry is running</span>
+<a href="../../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#ITEM_REGISTRY_PORT" target="_blank">registry.port</a>=1100
+<span class="comments">;define the browser to run test</span>
+BROWSER=<b>firefox</b>
+</pre>
+
+14. Run the SeleniumPlus test as usual, we should be able to see the test gets running in the "VNC Viewer" connection with "my-firefox".
+    If the first test is long enough, we should be able to see the both tests are running the same time in 2 containers.
+<br><br>
+
+<span class="note">
+NOTE:<br>
+If user wants to run a selenium standalone server with "RMI server", we just need to start the selenium standalone server 
+in docker with proper 'registry port' and 'rmi server port' forwarding, the rest things are very similar as what we have done with the grid.<br>
+</span>
+<span class="commandLine">
+docker run -d -p 4444:4444 -p 32800:5900 -p 1099:1099 -p 6890:6890 --name my-chrome -v c:/seleniumplus:/dev/seleniumplus selenium/standalone-chrome-debug
+</span>
+<br><br>
+
+<span class="note">
+NOTE:<br>
+1. As we are maintaining "SESSION" in SeleniumPlus, Please give a different "Browser ID" when starting the second test, 
+   otherwise the first session will be overrided and lost.<br>
+2. If we run multiple tests at the same time, the last test will be considered as the "current session".
+</span>
+<br><br>
+
+<a href="#run-in-docker">[go back]</a>
+
+<h3 id="using_selenium_plus_static_image">2. Using seleniumplus docker static image:</h3>
+This is a simpler way to use SeleniumPlus in docker, we have already installed "SeleniumPlus",  
+"chrome", "firefox", "chromedriver" and "geckodriver" etc. on a docker image, we can pull the image from 
+<a href="https://github.com/orgs/SAFSDEV/packages">seleniumplus image repository</a>.
+On that repository, we can find an image called "seleniumplus/seplus", we can pull the image by command<br>
+<span class="commandLine">
+docker pull ghcr.io/safsdev/seplus:latest
+</span>
+<br>
+The pull action will take some time, it depends on the network performance.<br><br>
+
+<a href="#run-in-docker">[go back]</a>
+
+<h4 id="run_with_standalone_server_seplus_docker">2.a Run With Standalone Server:</h4>
+First we need to start the seleniumplus image in the docker by following command<br>
+<span class="note">
+Start the seleniumplus docker image, we map the container's port 5900 to host port 32800, 
+mount host folder C:/temp to container's folder /tmp/temp, name the running container as "seplus_test"<br>
+</span>
+<span class="commandLine">
+docker run -d -p 32800:5900 -v C:/temp:/tmp/temp --name seplus_test ghcr.io/safsdev/seplus
+</span>
+<br><br>
+
+Then we can open a VNC viewer connection to this running container "seplus_test" through "localhost:32800" as below, the password is "<b>secret</b>"<br>
+<img src="images/vnc_viewer_connection.png"/><br><br>
+
+Then we open a bash shell as below<br>
+<img src="images/open_bash_shell.png"/><br><br>
+
+Then we start the SeleniumPlus IDE as below<br>
+<img src="images/start_eclipse.png"/><br><br>
+
+Finally we got the "SeleniumPlus IDE" running and we can create project and run the test just as on your personal machine.<br>
+
+We have recorded the full steps in the following video<br>
+<video width="400" controls>
+  <source src="images/seleniumplus_docker_test.mp4" type="video/mp4">
+</video><br><br>
+<a href="#run-in-docker">[go back]</a>
+
+<h4 id="run_with_grid_seplus_docker">2.b Run With Grid:</h4>
+We start 3 seleniumplus containers "seplus_test", "seplus_hub" and "seplus_node" in the docker<br>
+<pre>
+<span class="commandLine">
+docker run -d -p 32800:5900 --name seplus_test ghcr.io/safsdev/seplus
+docker run -d -p 32801:5900 --name seplus_hub ghcr.io/safsdev/seplus
+docker run -d -p 32802:5900 --name seplus_node ghcr.io/safsdev/seplus
+</span>
+</pre>
+
+<h4 id="run_with_grid_seplus_docker_manually">2.b.i Manually startup:</h4>
+First we open bash terminal against container "seplus_hub" and "seplus_node" in the DOS by following command<br>
+<pre>
+<span class="commandLine">
+docker exec -it seplus_hub bash
+docker exec -it seplus_node bash
+</span>
+</pre>
+
+Then we start "selenium hub" in bash terminal against container "seplus_hub" by following command<br>
+<pre>
+<span class="commandLine">
+ . bin/SeleniumPlusEnv.sh
+"$SELENIUM_PLUS/Java64/jre/bin/java" org.safs.selenium.webdriver.lib.RemoteDriverLauncher "-role hub" "SELENIUMSERVER_JVM_OPTIONS=-Xms512m -Xmx2g"
+</span>
+</pre>
+If you open a VNC connection, you can see the Java Console (selenium hub) start up.
+<br><br>
+
+Before we start "selenium node", we need to know seplus_hub's IP by following command<br>
+<pre>
+<span class="commandLine">
+docker inspect -f "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}" seplus_hub
+</span>
+</pre>
+Suppose we get the seplus_hub's IP is 172.17.0.3
+<br><br>
+
+Then we start "selenium node" in bash terminal against container "seplus_node" by following command<br>
+<pre>
+<span class="commandLine">
+ . bin/SeleniumPlusEnv.sh
+"$SELENIUM_PLUS/Java64/jre/bin/java" org.safs.selenium.webdriver.lib.RemoteDriverLauncher -safs.rmi.server "-role node -hub http://172.17.0.3:4444/grid/register" "-port 5678" "SELENIUMSERVER_JVM_OPTIONS=-Xms256m -Xmx4g"
+</span>
+</pre>
+If you open a VNC connection, you can see the Java Console (selenium node) start up.
+<br><br>
+
+Then we can open a VNC viewer connection to the container "seplus_test" through "localhost:32800" as below, the password is "<b>secret</b>"<br>
+<img src="images/vnc_viewer_connection.png"/><br><br>
+
+Then we open a bash shell as below<br>
+<img src="images/open_bash_shell.png"/><br><br>
+
+Then we start the SeleniumPlus IDE as below<br>
+<img src="images/start_eclipse.png"/><br><br>
+
+Finally we got the "SeleniumPlus IDE" running and <font color="red"><b>we need to modify test.ini configuration file before running test</b></font><br>
+
+Before we modify the configuration file, we need to know seplus_node's IP by following command<br>
+<pre>
+<span class="commandLine">
+docker inspect -f "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}" seplus_node
+</span>
+</pre>
+Suppose we get the seplus_node's IP is 172.17.0.4
+<br><br>
+
+Here are the critical settings in a test.ini:
+<ul><div class="appmap"><pre>
+<span class="comments"># Settings for a remote Selenium Server
+# SELENIUMHOST and SELENIUMPORT are used to connect Selenium Server (standalone or hub)</span>
+SELENIUMHOST=172.17.0.3
+SELENIUMPORT=4444
+SELENIUMNODE=172.17.0.4:5678
+</pre></div>
+</ul>
+
+We have recorded the full steps in the following video<br>
+<video width="400" controls>
+  <source src="images/seleniumplus_docker_test_in_manually_grid.mp4" type="video/mp4">
+</video><br>
+<a href="#run-in-docker">[go back]</a>
+
+<h4 id="run_with_grid_seplus_docker_automatically">2.b.ii Automatically startup:</h4>
+We start 3 seleniumplus containers "seplus_test", "seplus_hub" and "seplus_node" in the docker<br>
+<pre>
+<span class="commandLine">
+docker run -d -p 32800:5900 --name seplus_test ghcr.io/safsdev/seplus
+docker run -d -p 32801:5900 --name seplus_hub ghcr.io/safsdev/seplus
+docker run -d -p 32802:5900 --name seplus_node ghcr.io/safsdev/seplus
+</span>
+</pre>
+
+We need to know containers' IP by following command<br>
+<pre>
+<span class="commandLine">
+docker inspect -f "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}" &lt;container's name&gt;
+</span>
+</pre>
+Suppose we the seplus_test's IP is 172.17.0.2, seplus_hub's IP is 172.17.0.3, seplus_node's IP is 172.17.0.4
+<br><br>
+
+First we open bash terminal against container "seplus_hub" and "seplus_node" in the DOS by following command<br>
+<pre>
+<span class="commandLine">
+docker exec -it seplus_hub bash
+docker exec -it seplus_node bash
+</span>
+</pre>
+
+Then we need to get "seplus_hub" and "seplus_node" to trust "seplus_test" by following command to modify STAF configuration<br>
+We are going to run the following command on both "seplus_hub" and "seplus_node"<br>
+<pre>
+<span class="commandLine">
+cat >> /usr/local/staf_64/bin/STAF.cfg
+trust machine 172.17.0.2 level 5
+Ctrl+D
+</span>
+</pre>
+<br><br>
+
+Then we can open a VNC viewer connection to the container "seplus_test/seplus_hub/seplus_node" through "localhost:32800/localhost:32801/localhost:32802" as below, the password is "<b>secret</b>"<br>
+<img src="images/vnc_viewer_connection.png"/><br><br>
+
+Then we open a bash shell on each container (test, hub, node) as below<br>
+<img src="images/open_bash_shell.png"/><br><br>
+
+Then we start the SeleniumPlus IDE on test container as below<br>
+<img src="images/start_eclipse.png"/><br><br>
+
+Finally we got the "SeleniumPlus IDE" running and <font color="red"><b>we need to modify test.ini configuration file before running test</b></font><br>
+
+Here are the critical settings in a test.ini:
+<ul><div class="appmap"><pre>
+<span class="comments"># Settings for a remote Selenium Server
+# SELENIUMHOST and SELENIUMPORT are used to connect Selenium Server (standalone or hub)</span>
+SELENIUMHOST=172.17.0.3
+SELENIUMPORT=4444
+SELENIUMNODE=172.17.0.4:5678
+</pre></div>
+</ul>
+
+We have recorded the full steps in the following video<br>
+<video width="400" controls>
+  <source src="images/seleniumplus_docker_test_in_automatically_grid.mp4" type="video/mp4">
+</video><br>
+<a href="#run-in-docker">[go back]</a>
+
+
+<h3 id="using_selenium_plus_dynamic_image">3. Using seleniumplus docker dynamic image:</h3>
+This is a much simpler way to use SeleniumPlus in docker, we have already installed "SeleniumPlus",  
+"chrome", "firefox", "chromedriver" and "geckodriver" etc. on a docker image, and <b>we also start
+a selenium server (standalone, hub or node) when that docker image get started</b>, that is why we call
+the image as dynamic image. We can pull these images from <a href="https://github.com/orgs/SAFSDEV/packages">seleniumplus image repository</a>.
+On that repository, we can find the images "seleniumplus/seplus-standalone", "seleniumplus/seplus-hub"
+and "seleniumplus/seplus-node", we can pull these images by command<br>
+<span class="commandLine">
+docker pull ghcr.io/safsdev/seplus-standalone:latest<br>
+docker pull ghcr.io/safsdev/seplus-hub:latest<br>
+docker pull ghcr.io/safsdev/seplus-node:latest<br>
+</span>
+<br>
+The pull action will take some time, it depends on the network performance.<br><br>
+
+<a href="#run-in-docker">[go back]</a>
+
+<h4 id="run_with_dynamic_standalone_server_seplus_docker">3.a Run With Standalone Server:</h4>
+This is similar as "seleniumplus static image" except the "selenium standalone server" is
+already running when the image gets started. First we start the seleniumplus standalone image 
+in the docker by following command<br>
+<span class="note">
+Start the seleniumplus standalone docker image, we map the container's port 5900 to host port 32800, 
+name the running container as "seplus-standalone"<br>
+</span>
+<span class="commandLine">
+docker run -d -p 32800:5900 --name seplus-standalone ghcr.io/safsdev/seplus-standalone
+</span>
+<br><br>
+
+Then we can open a VNC viewer connection to this running container "seplus-standalone" through "localhost:32800" as below, the password is "<b>secret</b>"<br>
+<img src="images/vnc_viewer_connection.png"/><br><br>
+Once logged in, we should be able to see the "Selenium standalone server" is already running<br>
+<img src="images/seplus_standalone_server.png"/><br><br>
+
+Then we open a bash shell as below<br>
+<img src="images/open_bash_shell.png"/><br><br>
+
+Then we start the SeleniumPlus IDE as below<br>
+<img src="images/start_eclipse.png"/><br><br>
+
+Finally we got the "SeleniumPlus IDE" running and we can create project and run the test just as on your personal machine.<br>
+
+<a href="#run-in-docker">[go back]</a>
+
+
+<h4 id="run_with_dynamic_grid_seplus_docker">3.b Run With Grid:</h4>
+Suppose we have pulled these seleniumplus images <b>seplus</b>, <b>seplus-hub</b> and <b>seplus-node</b>.<br>
+First we start the seleniumplus grid images (hub and node) by batch script <a href="start-docker-seplus-grid.bat">start-docker-seplus-grid.bat</a><br>
+<span class="commandLine">
+start-docker-seplus-grid.bat
+</span>
+<br>
+This script will start a grid containing
+<ul>
+<li>a hub server 'seplus-hub' running on port 4444, can be RDC (VNC Viewer) on port 32800
+<li>a node 'seplus-node' running on port 5555, can be RDC (VNC Viewer) on port 32801
+<li>an other node 'seplus-node2' running on port 5678, can be RDC (VNC Viewer) on port 32802
+<li>a test container 'seplus-test', can be RDC (VNC Viewer) on port 32803
+</ul>
+
+Then we open a VNC viewer connection to the running container "seplus-test" through "localhost:32803" as below, the password is "<b>secret</b>"<br>
+<img src="images/vnc_viewer_connection.png"/><br><br>
+
+Then we open a bash shell as below<br>
+<img src="images/open_bash_shell.png"/><br><br>
+
+Then we start the SeleniumPlus IDE as below<br>
+<img src="images/start_eclipse.png"/><br><br>
+
+Finally we got the "SeleniumPlus IDE" running and we can create project and run the test just as on your personal machine.<br>
+<font color="red"><b>Before running test, we need to modify test.ini configuration file</b></font><br><br>
+
+If the test.ini configuration contains the following contents, then the test will run on node 'seplus-node'<br>
+<ul><div class="appmap"><pre>
+SELENIUMHOST=seplus-hub
+SELENIUMPORT=4444
+SELENIUMNODE=<b>seplus-node:5555</b>
+</pre></div>
+</ul>
+<br>
+
+If the test.ini configuration contains the following contents, then the test will run on node 'seplus-node2'<br>
+<ul><div class="appmap"><pre>
+SELENIUMHOST=seplus-hub
+SELENIUMPORT=4444
+SELENIUMNODE=<b>seplus-node2:5678</b>
+</pre></div>
+</ul>
+
+We can open a VNC viewer connection to "seplus-node" through "localhost:32801" and "seplus-node2" through "localhost:32802" to see
+what is happening on nodes<br>
+We can also open a VNC viewer connection to "seplus-hub" through "localhost:32800" to see what is happening on hub<br><br>
+
+Finally we can clean up the seleniumplus grid environment by batch script <a href="clean-docker-seplus-grid.bat">clean-docker-seplus-grid.bat</a><br>
+<span class="commandLine">
+clean-docker-seplus-grid.bat
+</span>
+<br><br>
+
+We have recorded the full steps in the following video<br>
+<video width="400" controls>
+  <source src="images/seleniumplus_docker_test_in_dynamic_grid.mp4" type="video/mp4">
+</video><br><br>
+<a href="#run-in-docker">[go back]</a>
+<br>
+
+<h3 id="clone_git_project_in_selenium_plus_container">4. Clone GIT project in seleniumplus container:</h3>
+If we have an existing project on GITHUB or GITLAB and we want to clone it into the seleniumplus container, we can use
+SeleniumPlus-Eclipse IDE to clone the project in HTTPS mode or in SSH mode.
+<br><br>
+
+<a href="#run-in-docker">[go back]</a>
+
+<h4 id="clone_git_project_in_selenium_plus_container_https">4.a Clone in HTTPS mode:</h4>
+1. Open the "GIT perspective" in the SeleniumPlus-Eclipse IDE, shown as below:<br>
+<img src="images/open_git_perspective.png"/><br><br>
+2. Click the "Clone a Git repository" icon and paste the repository's HTTPS-URL and input the username/password, shown as below:<br>
+<img src="images/clone_git_repository_in_https_mode.png"/><br><br>
+3. Then we click the "Next" button and follow the instructions and the repository will be cloned successfully.<br>
+<img src="images/cloned_git_repository_in_https_mode.png"/><br><br>
+
+<h4 id="clone_git_project_in_selenium_plus_container_ssh">4.b Clone in SSH mode:</h4>
+1. Suppose we have the SSH private key 'id_rsa' stored in folder 'C:\Users\user\.ssh', we mount the Windows folder 'C:\Users\user\.ssh' to container's folder '/tmp/temp' as below:<br>
+<span class="commandLine">docker run -d -p 32800:5900 -v C:/Users/user/.ssh:/tmp/temp --name seplus_test ghcr.io/safsdev/seplus</span><br><br>
+2. In the container, we open a bash shell and create a directory '/root/.ssh' and copy the ssh private key 'id_rsa' to folder '/root/.ssh', shown as below:<br>
+<img src="images/copy_ssh_private_key_to_container.png"/><br><br>
+3. Open the "GIT perspective" in the SeleniumPlus-Eclipse IDE, shown as below:<br>
+<img src="images/open_git_perspective.png"/><br><br>
+2. Click the "Clone a Git repository" icon and paste the repository's SSH-URL, shown as below:<br>
+<img src="images/clone_git_repository_in_ssh_mode.png"/><br><br>
+3. Then we click the "Next" button and follow the instructions (we may allow to create file /root/.ssh/known_hosts and add 'github.com' to that known_hosts file.) and the repository will be cloned successfully.<br>
+<img src="images/cloned_git_repository_in_ssh_mode.png"/><br><br>
+
+<a href="#run-in-docker">[go back]</a>
+
+</div>
+
+
+<!--------------------------------->
+<!--        Install On Linux     -->
+<!--------------------------------->
+<div id="install-on-linux" style="display: none" >
+<h2>Install On Linux</h2>
+<p>
+This section is talking about how to install SeleniumPlus on Linux.<br/>
+<ul>
+<li><a href="#installation">Install SeleniumPlus on Linux</a>
+<li><a href="#runseleniumplus">Run SeleniumPlus</a>
+</ul>
+
+<h3 id="installation">Install SeleniumPlus on Linux:</h3>
+
+1. Login with user "root".<br>
+2. Download the installation file <b>TestDesigner.tar.gz</b> from our build system at <a href="http://safsbuild:81/jenkins/view/GITLAB_JOBS/job/SeleniumPlus_Linux/">SEPLUS build</a><br>
+3. Open a terminal and create a folder "/usr/local/seleniumplus" by following command:<br>
+<pre><span class="commandLine">
+$mkdir /usr/local/seleniumplus
+</span></pre>
+4. Un-compress the installation assets to folder /usr/local/seleniumplus by following command:<br>
+<pre><span class="commandLine">
+$tar xvzf TestDesigner.tar.gz -C /usr/local/seleniumplus
+</span></pre>
+5. Then go to directory /usr/local/seleniumplus where you put 
+the installation assets. There, you can find a file named SetupSeleniumPlus.sh, 
+which is an interactive script to setup SELENIUMPLUS and STAF:<br>
+<pre><span class="commandLine">
+$cd /usr/local/seleniumplus
+</span></pre>
+6. Grant execute-permission to installation scripts and STAF installer<br>
+<pre><span class="commandLine">
+$chmod a+x STAF*.bin *.sh
+</span></pre>
+7. Install SeleniumPlus by following command<br>
+<pre><span class="commandLine">
+$SetupSeleniumPlus.sh
+</span></pre>
+<pre>
+Then, just follow the script's steps:
+The script will ask user 
+  i. If he wants to install STAF, where he wants to install STAF (STAF is not necessary to install, user can choose No);
+  ii. If he wants to install SeleniumPlus, where he wants to install SeleniumPlus; 
+  iii. If he wants to see detail informations during installation.
+The simple way is to hit Enter always, script will install SAFS and STAF to the
+default location:
+  a.For super user root:
+    STAF  --> /usr/local/staf (for 32 bits OS)
+	          /usr/local/staf_64 (for 64 bits OS)
+    SAFS  --> /usr/local/seleniumplus
+  b.For normal user:
+    STAF  --> $HOME/staf (for 32 bits OS)
+              $HOME/staf_64 (for 64 bits OS)
+    SAFS  --> $HOME/seleniumplus
+</pre>
+
+<a href="#install-on-linux">[go back]</a>
+
+<h3 id="runseleniumplus">Run SeleniumPlus</h3>
+
+<span class="note">
+NOTE:<br>
+If we run SeleniumPlus by user other than "root", we need to add some contents to the user's 
+starting script $HOME/.bash_profile, the contents to be added is in file /etc/skel/.bash_profile.safs.add
+User can just call script ModifyDotBash.sh under bin directory of seleniumplus home as below:
+<pre><span class="commandLine">
+$/usr/local/seleniumplus/bin/ModifyDotBash.sh
+</span></pre>
+</span>
+<br>
+<span class="note">
+NOTE:<br> Currently we provide geckodriver 0.26.0, and it can work with the Firefox 71.0. 
+We didn't check with chrome browser, it should be able to work if we get the matched chromedriver and put it into /usr/local/seleniumplus/extra
+</span>
+<br><br>
+
+1. Open a new terminal as shown below:<br>
+<img src="images/openLinuxTerminal.png"/><br><br>
+2. Verify the environment <b>SELENIUM_PLUS</b> has been set correctly by following command:<br>
+<pre><span class="commandLine">
+$env | grep SELENIUM_PLUS
+</span></pre>
+We should see the response something like below:
+<pre><span class="commandLine">
+$<span style="color:yellow">SELENIUM_PLUS</span>=/usr/local/seleniumplus
+</span></pre>
+If you cannot see it, that means the environment <b>SELENIUM_PLUS</b> is not correctly set. We can set it by following script
+<pre><span class="commandLine">
+$<span style="color:red">.</span> /usr/local/seleniumplus/bin/SeleniumPlusEnv.sh
+</span></pre>
+<span class="note">
+NOTE:<br> Do NOT forget the leading point <span style="color:red">.</span> when running script SeleniumPlusEnv.sh
+</span>
+<br><br>
+3. Start the selenium standalone server with browsers' driver (chrome, firefox) as below:<br>
+<pre><span class="commandLine">
+$/usr/local/seleniumplus/extra/RemoteServer.sh &
+</span></pre>
+4. Start the SeleniumPlus IDE (Eclipse) as below:<br>
+<pre><span class="commandLine">
+$/usr/local/seleniumplus/eclipse/eclipse &
+</span></pre>
+5. Before running any test in the SeleniumPlus IDE, we need to verify the classpath variable "SELENIUMPLUS_HOME" 
+has been set correctly, if not, we can set it as shown in below picture:
+<br>
+<img src="images/eclipseClassPathVariableSeleniumPlus.png"/><br><br>
+
+6. Finally we can create and run the test in SeleniumPlus.<br><br>
+
+
+<a href="#install-on-linux">[go back]</a>
+
+</div>
+
 
 </body>
 </html>

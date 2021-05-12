@@ -1,11 +1,34 @@
 /**
- ** Copyright (C) SAS Institute, All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
+/**
+ * History:
+ * 07 APR, 2020	(Lei Wang) Add special key {ContextMenu} and {Space}.
+ */
 package org.safs.tools.input;
 
 import java.awt.event.KeyEvent;
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 
 /**
  * Create a Unicode output file for the running version of Java that can be used
@@ -94,6 +117,8 @@ import java.io.*;
  * <tr><td>{ScrollLock}<td>Scroll Lock.
  * <tr><td>{Shift}<td>Default Shift key (either left or right).
  * <tr><td>{Tab}<td>Tab.
+ * <tr><td>{Space}<td>Space key.
+ * <tr><td>{ContextMenu}<td>ContextMenu key.
  * <tr><td>{Up} or {NumUp} or {ExtUp}<td>Up Arrow.
  * <tr><td>{Numn}, where n is a number from 0 through 9 Example:  {Num5}<td>0-9 (numeric keypad).
  * <tr><td>{Num.} or .<td>. (period, decimal).
@@ -403,6 +428,8 @@ public class CreateUnicodeMap {
 			addEntry(outfile, "PRTSC", KeyEvent.VK_PRINTSCREEN);
 			addEntry(outfile, "SCROLLLOCK", KeyEvent.VK_SCROLL_LOCK);
 			addEntry(outfile, "TAB", KeyEvent.VK_TAB);
+			addEntry(outfile, "SPACE", KeyEvent.VK_SPACE);
+			addEntry(outfile, "CONTEXTMENU", KeyEvent.VK_CONTEXT_MENU);
 
 			outfile.write(newLine);
 

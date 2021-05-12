@@ -1,6 +1,20 @@
-/** Copyright (C) SAS Institute, Inc. All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * History:
  * OCT 25, 2016	(Lei Wang) Modified to make it easier to support higher version.
@@ -15,21 +29,23 @@ import java.util.Map;
 
 import javax.swing.JOptionPane;
 
+import org.safs.Constants.RegistryConstants;
+import org.safs.Constants.TestCompleteConstants;
 import org.safs.IndependantLog;
 import org.safs.tools.CaseInsensitiveFile;
 
 /**
- * Handle Windows registration and Environment settings for SmartBear TestComplete and 
+ * Handle Windows registration and Environment settings for SmartBear TestComplete and
  * TestExecute.  Intended to replace WSH install scripts.
  * @author Carl Nagle
  */
 public class TCAFSInstaller extends InstallerImpl{
 	/** 'TESTCOMPLETE_HOME' environment variable to save the product's home */
-	private static final String TCHomeEnv = "TESTCOMPLETE_HOME";
+	private static final String TCHomeEnv = TestCompleteConstants.TCHomeEnv;
 	/** 'TESTCOMPLETE_EXE' environment variable to save the "name" of product's executable. */
-	private static final String TCExeEnv  = "TESTCOMPLETE_EXE";
-	
-	/**The supported version should be given from latest to oldest, we prefer to use the latest version. 
+	private static final String TCExeEnv  = TestCompleteConstants.TCExeEnv;
+
+	/**The supported version should be given from latest to oldest, we prefer to use the latest version.
 	 * This array contains version number <= 8.0, "Automated QA" */
 	private static final float[] SUPPORTED_VERSION_AUTOMATED_QA = {8.0F};
 	/**The supported version should be given from latest to oldest, we prefer to use the latest version.
@@ -38,9 +54,9 @@ public class TCAFSInstaller extends InstallerImpl{
 
 	/** '-u' parameter indicator for un-installation. */
 	private static final String PARAM_UNINSTALL 			= "-u";
-	
+
 	public TCAFSInstaller() {super();}
-	
+
 	/**
 	 * Main processing routine.
 	 * Sets System Environment variables used by SAFS and TestComplete:
@@ -50,16 +66,17 @@ public class TCAFSInstaller extends InstallerImpl{
 	 * <p>
 	 * boolean success = TCAFSInstaller.intall();
 	 * <p>
-	 * @param args String[], optional<br> 
+	 * @param args String[], optional<br>
 	 * <b>-latest</b>, check the latest installed TestExecute/TestComplete and reset the environment variable {@link #TCHomeEnv} and {@value #TCExeEnv}<br>
 	 * <b>-switch</b>, check all the installed TestExecute/TestComplete for switching and reset the environment variable {@link #TCHomeEnv} and {@value #TCExeEnv}<br>
 	 * @return true if successful, false otherwise.
 	 */
+	@Override
 	public boolean install(String... args){
 		VERSION_OPTION versionOption = VERSION_OPTION.CHECK_ENVIRONMENT;
 		File tchome = null;
 		String productHome = null;
-		
+
 		for(String arg:args){
 			if (PARAM_SWITCH.equals(arg)){
 				versionOption = VERSION_OPTION.SWITCH;
@@ -67,7 +84,7 @@ public class TCAFSInstaller extends InstallerImpl{
 				versionOption = VERSION_OPTION.USE_LATEST;
 			}
 		}
-		
+
 		if(VERSION_OPTION.CHECK_ENVIRONMENT.equals(versionOption)){
 			String tempTChome = getEnvValue(TCHomeEnv);
 			setProgressMessage("Evaluating Environment "+ TCHomeEnv+": "+tempTChome);
@@ -81,11 +98,11 @@ public class TCAFSInstaller extends InstallerImpl{
 			        		return complete("Unable to set required Path for Windows SmartBear TestComplete support.", false);
 			        	}else{
 			        		String successInfo = getSuccessInfo();
-			        		VERSION_OPTION[] options = {VERSION_OPTION.CHECK_ENVIRONMENT, VERSION_OPTION.USE_LATEST, VERSION_OPTION.SWITCH, };
+			        		VERSION_OPTION[] options = {VERSION_OPTION.CHECK_ENVIRONMENT, VERSION_OPTION.USE_LATEST, VERSION_OPTION.SWITCH };
 							String message = successInfo + "\n"+
 									"Please choose your option\n"+
 									options[0].name+": "+options[0].message+"\n"+
-									options[1].name+": "+options[2].message+"\n"+
+									options[1].name+": "+options[1].message+"\n"+
 									options[2].name+": "+options[2].message;
 							int response = TopMostOptionPane.showOptionDialog(null, message, "Confirm", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options , options[0]);
 							if (response == JOptionPane.YES_OPTION) {
@@ -111,9 +128,9 @@ public class TCAFSInstaller extends InstallerImpl{
 				versionOption = VERSION_OPTION.SWITCH;
 			}
 		}
-		
+
 		if(VERSION_OPTION.USE_LATEST.equals(versionOption)){
-			productHome = productDetector.gerPreferredHome();
+			productHome = productDetector.getPreferredHome();
 		}else if(VERSION_OPTION.SWITCH.equals(versionOption)){
 			Map<String, String> homes = null;
 			homes = productDetector.getHomes();
@@ -122,9 +139,9 @@ public class TCAFSInstaller extends InstallerImpl{
 				if(options.length>0){
 					int response = TopMostOptionPane.showOptionDialog(null, "Please choose your preferred version.", "Switch Version.", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options , null);
 					productHome = homes.get(options[response]);
-				}				
+				}
 			}catch(NullPointerException e){
-				IndependantLog.warn("TCAFSInstaller.instll(): cannot detect product homes to switch, due to "+e.getMessage()); 
+				IndependantLog.warn("TCAFSInstaller.instll(): cannot detect product homes to switch, due to "+e.getMessage());
 			}
 		}
 
@@ -140,7 +157,7 @@ public class TCAFSInstaller extends InstallerImpl{
 				return complete("Directory for Windows SmartBear TestComplete support seems to be invalid." ,false);
 			}
 		}
-		
+
 		// home is set or null
 		if(tchome == null){
 			return complete("Did not detect Windows SmartBear TestComplete installation." ,false);
@@ -152,10 +169,10 @@ public class TCAFSInstaller extends InstallerImpl{
         }catch(FileNotFoundException e){
 			return complete(e.getMessage() ,false);
 		}
-        
+
 		return complete(getSuccessInfo(), true);
 	}
-	
+
 	/**
 	 * Check if executable "TestExecute" or "TestComplete" exists, and set it<br>
 	 * to environment {@link #TCExeEnv} if it exists.<br>
@@ -167,26 +184,26 @@ public class TCAFSInstaller extends InstallerImpl{
 	 */
 	private boolean checkTCExecutableAndSetEnv(File tchome, String defaultExecutable) throws FileNotFoundException{
 		File tcexe = productDetector.getValidExecutable(tchome, defaultExecutable);
-		
+
 		if(!tcexe.isFile()){
 			throw new FileNotFoundException("Executable Path '"+tcexe.getAbsolutePath()+"' seems to be invalid.");
 		}
-		
+
 		return setEnvValue(TCExeEnv, tcexe.getName());
 	}
-	
+
 	private String getSuccessInfo(){
 		return "SmartBear TestComplete has been successfully set.\n"+
 				TCHomeEnv+"="+getEnvValue(TCHomeEnv)+"\n"+
 				TCExeEnv+"="+getEnvValue(TCExeEnv)+"\n";
 	}
-	
+
 	private boolean complete(String message, boolean success){
 		setProgressMessage(message);
 		setProgressMessage("SmartBear TestComplete Installlation Complete with "+(success?"Success.":"Failure."));
 		return success;
 	}
-	
+
 	/**
 	 * Unset the System Environment Variables used by SAFS.
 	 * <p>
@@ -196,58 +213,65 @@ public class TCAFSInstaller extends InstallerImpl{
 	 * @param args
 	 * @return
 	 */
+	@Override
 	public boolean uninstall(String... args){
 		boolean success1 = setEnvValue(TCHomeEnv, null);
 		boolean success2 = setEnvValue(TCExeEnv, null);
 		return success1 && success2;
 	}
-	
+
+	@Override
 	protected IProductDetector getWindowsProductDetector() throws UnsupportedOperationException{
 		return new ProductDetectorTCAFSWindows();
 	}
-	
+
+	@Override
 	protected IProductDetector getUnixProductDetector() throws UnsupportedOperationException{
-		//Just return a default detector, 
+		//Just return a default detector,
 		//TODO For the real UNIX Product Detector, to be implemented later.
 		return new ProductDetectorDefault();
 	}
-	
+
 	private static class ProductDetectorTCAFSWindows extends ProductDetectorDefault{
 		/** executable TestComplete.exe */
 		private static final String TCExePath = "TestComplete.exe";
 		/** executable TestExecute.exe */
 		private static final String TEExePath = "TestExecute.exe";
 
+		private static final String REG_HKLM_ST_WOW6432 = RegistryConstants.HKLM_ST_WOW6432;
+		private static final String REG_HKLM_ST = RegistryConstants.HKLM_ST;
+
 		//for version 8.0 and earlier
 		private static final String REG_PREFIX_TC_AQA = "Automated QA\\Test Complete\\";
 		private static final String REG_PREFIX_TE_AQA = "Automated QA\\Test Execute\\";
-		
+
 		//for version 9.0 and higher
 		private static final String REG_PREFIX_TC_SB = "SmartBear\\TestComplete\\";
 		private static final String REG_PREFIX_TE_SB = "SmartBear\\TestExecute\\";
-		
+
 		private static final String REG_SUFFIX_SETUP = "Setup";
 		private static final String TCProductPath = "Product Path";
-		
+
+		@Override
 		public Map<String, String> getHomes(){
 			Map<String, String> homes = new LinkedHashMap<String, String>();
 			String productPath = null;
 			String key = null;
-			
+
 			setProgressMessage("Checking Windows Registry ...");
 			//1. Favor "post win7" over "pre win7"
-			//2. Favor "TestExecute" over "TestComplete"			
+			//2. Favor "TestExecute" over "TestComplete"
 			setProgressMessage("Evaluating for Windows 7 or later.");
 			setProgressMessage("Evaluating Windows SmartBear TestExecute support.");
 			for(float version: SUPPORTED_VERSION_SMART_BEAR){
-				productPath = getRegistryValue(REG_HKLM_ST_WOW6432+REG_PREFIX_TE_SB+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
+				productPath = InstallerImpl.getRegistryValue(REG_HKLM_ST_WOW6432+REG_PREFIX_TE_SB+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
 				key = REG_PREFIX_TE_SB+version;
 				if(productPath!=null){
 					store(homes, key, productPath);
 				}
 			}
 			for(float version: SUPPORTED_VERSION_AUTOMATED_QA){
-				productPath = getRegistryValue(REG_HKLM_ST_WOW6432+REG_PREFIX_TE_AQA+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
+				productPath = InstallerImpl.getRegistryValue(REG_HKLM_ST_WOW6432+REG_PREFIX_TE_AQA+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
 				key = REG_PREFIX_TE_AQA+version;
 				if(productPath!=null){
 					store(homes, key, productPath);
@@ -255,14 +279,14 @@ public class TCAFSInstaller extends InstallerImpl{
 			}
 			setProgressMessage("Evaluating Windows SmartBear TestComplete support.");
 			for(float version: SUPPORTED_VERSION_SMART_BEAR){
-				productPath = getRegistryValue(REG_HKLM_ST_WOW6432+REG_PREFIX_TC_SB+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
+				productPath = InstallerImpl.getRegistryValue(REG_HKLM_ST_WOW6432+REG_PREFIX_TC_SB+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
 				key = REG_PREFIX_TC_SB+version;
 				if(productPath!=null){
 					store(homes, key, productPath);
 				}
 			}
 			for(float version: SUPPORTED_VERSION_AUTOMATED_QA){
-				productPath = getRegistryValue(REG_HKLM_ST_WOW6432+REG_PREFIX_TC_AQA+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
+				productPath = InstallerImpl.getRegistryValue(REG_HKLM_ST_WOW6432+REG_PREFIX_TC_AQA+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
 				key = REG_PREFIX_TC_AQA+version;
 				if(productPath!=null){
 					store(homes, key, productPath);
@@ -272,14 +296,14 @@ public class TCAFSInstaller extends InstallerImpl{
 			setProgressMessage("Evaluating for Windows earlier than Win7.");
 			setProgressMessage("Evaluating Windows SmartBear TestExecute support.");
 			for(float version: SUPPORTED_VERSION_SMART_BEAR){
-				productPath = getRegistryValue(REG_HKLM_ST+REG_PREFIX_TE_SB+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
+				productPath = InstallerImpl.getRegistryValue(REG_HKLM_ST+REG_PREFIX_TE_SB+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
 				key = REG_PREFIX_TE_SB+version;
 				if(productPath!=null){
 					store(homes, key, productPath);
 				}
 			}
 			for(float version: SUPPORTED_VERSION_AUTOMATED_QA){
-				productPath = getRegistryValue(REG_HKLM_ST+REG_PREFIX_TE_AQA+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
+				productPath = InstallerImpl.getRegistryValue(REG_HKLM_ST+REG_PREFIX_TE_AQA+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
 				key = REG_PREFIX_TE_AQA+version;
 				if(productPath!=null){
 					store(homes, key, productPath);
@@ -287,14 +311,14 @@ public class TCAFSInstaller extends InstallerImpl{
 			}
 			setProgressMessage("Evaluating Windows SmartBear TestComplete support.");
 			for(float version: SUPPORTED_VERSION_SMART_BEAR){
-				productPath = getRegistryValue(REG_HKLM_ST+REG_PREFIX_TC_SB+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
+				productPath = InstallerImpl.getRegistryValue(REG_HKLM_ST+REG_PREFIX_TC_SB+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
 				key = REG_PREFIX_TC_SB+version;
 				if(productPath!=null){
 					store(homes, key, productPath);
 				}
 			}
 			for(float version: SUPPORTED_VERSION_AUTOMATED_QA){
-				productPath = getRegistryValue(REG_HKLM_ST+REG_PREFIX_TC_AQA+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
+				productPath = InstallerImpl.getRegistryValue(REG_HKLM_ST+REG_PREFIX_TC_AQA+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
 				key = REG_PREFIX_TC_AQA+version;
 				if(productPath!=null){
 					store(homes, key, productPath);
@@ -303,7 +327,7 @@ public class TCAFSInstaller extends InstallerImpl{
 
 			return homes;
 		}
-		
+
 		private void store(Map<String, String> homes, String key, String productPath){
 			setProgressMessage("... FOUND Product '"+key+"', installed at '"+productPath+"'.");
 			if(!homes.containsKey(key)){
@@ -313,86 +337,88 @@ public class TCAFSInstaller extends InstallerImpl{
 			}
 		}
 
-		public String gerPreferredHome(){
+		@Override
+		public String getPreferredHome(){
 			String productPath = null;
 
 searchRegistry:
 			{
 				setProgressMessage("Checking Windows Registry ...");
 				//1. Favor "post win7" over "pre win7"
-				//2. Favor "TestExecute" over "TestComplete"			
+				//2. Favor "TestExecute" over "TestComplete"
 				setProgressMessage("Evaluating for Windows 7 or later.");
 				setProgressMessage("Evaluating Windows SmartBear TestExecute support.");
 				for(float version: SUPPORTED_VERSION_SMART_BEAR){
-					productPath = getRegistryValue(REG_HKLM_ST_WOW6432+REG_PREFIX_TE_SB+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
+					productPath = InstallerImpl.getRegistryValue(REG_HKLM_ST_WOW6432+REG_PREFIX_TE_SB+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
 					if(productPath!=null){
 						break searchRegistry;
 					}
 				}
 				for(float version: SUPPORTED_VERSION_AUTOMATED_QA){
-					productPath = getRegistryValue(REG_HKLM_ST_WOW6432+REG_PREFIX_TE_AQA+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
+					productPath = InstallerImpl.getRegistryValue(REG_HKLM_ST_WOW6432+REG_PREFIX_TE_AQA+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
 					if(productPath!=null){
 						break searchRegistry;
 					}
 				}
-				
+
 				setProgressMessage("Evaluating Windows SmartBear TestComplete support.");
 				for(float version: SUPPORTED_VERSION_SMART_BEAR){
-					productPath = getRegistryValue(REG_HKLM_ST_WOW6432+REG_PREFIX_TC_SB+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
+					productPath = InstallerImpl.getRegistryValue(REG_HKLM_ST_WOW6432+REG_PREFIX_TC_SB+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
 					if(productPath!=null) break searchRegistry;
 				}
 				for(float version: SUPPORTED_VERSION_AUTOMATED_QA){
-					productPath = getRegistryValue(REG_HKLM_ST_WOW6432+REG_PREFIX_TC_AQA+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
+					productPath = InstallerImpl.getRegistryValue(REG_HKLM_ST_WOW6432+REG_PREFIX_TC_AQA+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
 					if(productPath!=null){
 						break searchRegistry;
 					}
 				}
-				
+
 				setProgressMessage("Evaluating for Windows earlier than Win7.");
 				setProgressMessage("Evaluating Windows SmartBear TestExecute support.");
 				for(float version: SUPPORTED_VERSION_SMART_BEAR){
-					productPath = getRegistryValue(REG_HKLM_ST+REG_PREFIX_TE_SB+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
+					productPath = InstallerImpl.getRegistryValue(REG_HKLM_ST+REG_PREFIX_TE_SB+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
 					if(productPath!=null){
 						break searchRegistry;
 					}
 				}
 				for(float version: SUPPORTED_VERSION_AUTOMATED_QA){
-					productPath = getRegistryValue(REG_HKLM_ST+REG_PREFIX_TE_AQA+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
+					productPath = InstallerImpl.getRegistryValue(REG_HKLM_ST+REG_PREFIX_TE_AQA+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
 					if(productPath!=null){
 						break searchRegistry;
 					}
 				}
 				setProgressMessage("Evaluating Windows SmartBear TestComplete support.");
 				for(float version: SUPPORTED_VERSION_SMART_BEAR){
-					productPath = getRegistryValue(REG_HKLM_ST+REG_PREFIX_TC_SB+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
+					productPath = InstallerImpl.getRegistryValue(REG_HKLM_ST+REG_PREFIX_TC_SB+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
 					if(productPath!=null){
 						break searchRegistry;
 					}
 				}
 				for(float version: SUPPORTED_VERSION_AUTOMATED_QA){
-					productPath = getRegistryValue(REG_HKLM_ST+REG_PREFIX_TC_AQA+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
+					productPath = InstallerImpl.getRegistryValue(REG_HKLM_ST+REG_PREFIX_TC_AQA+version+"\\"+REG_SUFFIX_SETUP, TCProductPath);
 					if(productPath!=null){
 						break searchRegistry;
 					}
 				}
 			}
-			
+
 			if(productPath==null){
 				setProgressMessage("... NO product was detected!");
 			}else{
 				setProgressMessage("... FOUND Product, installed at '"+productPath+"'.");
 			}
-			
+
 			return productPath;
 		}
 
+		@Override
 		public String[] getPossibleExecutables() {
 			return new String[]{
 					BIN+File.separator+TEExePath,
 					BIN+File.separator+TCExePath
 					};
 		}
-		
+
 	}
 
 	/**

@@ -1,8 +1,27 @@
-// Copyright (c) 2016 by SAS Institute Inc., Cary, NC, USA. All Rights Reserved.
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 
 package org.safs.rest.service.commands.curl
 
-import groovy.util.logging.Slf4j
+import java.nio.charset.CharsetDecoder
+import java.nio.charset.CharsetEncoder
+
+import org.apache.hc.client5.http.impl.sync.HttpClients;
 import org.apache.hc.client5.http.methods.RequestBuilder
 import org.apache.hc.core5.http.ClassicHttpResponse
 import org.apache.hc.core5.http.ContentLengthStrategy
@@ -13,9 +32,9 @@ import org.apache.hc.core5.http.config.ConnectionConfig
 import org.apache.hc.core5.http.config.H1Config;
 import org.apache.hc.core5.http.impl.BasicHttpTransportMetrics
 import org.apache.hc.core5.http.impl.ConnSupport;
+import org.apache.hc.core5.http.impl.DefaultContentLengthStrategy
 import org.apache.hc.core5.http.impl.io.AbstractMessageParser;
 import org.apache.hc.core5.http.impl.io.ContentLengthOutputStream
-import org.apache.hc.core5.http.impl.DefaultContentLengthStrategy
 import org.apache.hc.core5.http.impl.io.DefaultHttpResponseWriterFactory;
 import org.apache.hc.core5.http.impl.io.SessionInputBufferImpl;
 import org.apache.hc.core5.http.impl.io.SessionOutputBufferImpl
@@ -24,20 +43,12 @@ import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicLineParser;
 import org.apache.hc.core5.http.message.LineParser
 import org.apache.hc.core5.util.CharArrayBuffer
-
-import java.io.ByteArrayOutputStream
-import java.nio.charset.CharsetDecoder
-import java.nio.charset.CharsetEncoder
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.hc.client5.http.impl.sync.HttpClients;
-
 import org.safs.rest.service.commands.CommandInvoker
 import org.safs.rest.service.commands.CommandResults
 import org.safs.rest.service.commands.ExecutableCommand
 import org.safs.rest.service.commands.curl.error.CurlErrorDetailsProvider
-import org.safs.rest.service.models.consumers.RestConsumer
+
+import groovy.util.logging.Slf4j
 
 
 /**
@@ -136,7 +147,7 @@ class CurlInvoker {
             options: ['-n'], // don't output the trailing newline
             data: /'${curlCommand.requestBody}'/
         ]
-        
+
         ExecutableCommand echoCommand = new ExecutableCommand(echoParameters)
 
         results = pipeTo echoCommand, curlCommand
@@ -164,10 +175,10 @@ class CurlInvoker {
         }
 
     }
-    
+
     private useHttpClient(curlCommand) {
         def commandList = (makeNormalizedCommandList(curlCommand.commandList)).list
-        
+
         def methodName
         commandList.each { parm ->
             switch (parm) {
@@ -177,7 +188,7 @@ class CurlInvoker {
                 case CurlCommand.PUT_OPTION: methodName = "put"; break
                 case CurlCommand.PATCH_OPTION: methodName = "patch"; break
             }
-            
+
         }
         if (methodName == null) {
             methodName = "get"
@@ -215,16 +226,16 @@ class CurlInvoker {
                          new StringEntity(curlCommand.rawRequestBody);
             builder = builder.setEntity(entity);
         }
-        
+
         def httpclient = HttpClients.createDefault()
         def response = httpclient.execute(builder.build())
-        
+
         // Write the response to an output stream similar to the way HttpCore5 does it.
         def baos = new ByteArrayOutputStream()
-        
-        
+
+
         BasicHttpTransportMetrics outTransportMetrics = new BasicHttpTransportMetrics();
-        
+
         ConnectionConfig cconfig = ConnectionConfig.DEFAULT
         int buffersize = cconfig.getBufferSize()
         H1Config h1Config = H1Config.DEFAULT
@@ -232,26 +243,26 @@ class CurlInvoker {
 
         def outbuffer = new SessionOutputBufferImpl(outTransportMetrics, buffersize,
                                                     h1Config.getChunkSizeHint(), charencoder);
-                                                
+
         HttpMessageWriter<ClassicHttpResponse> responseWriter = DefaultHttpResponseWriterFactory.INSTANCE.create()
         responseWriter.write(response, outbuffer, baos)
 		outbuffer.flush(baos)
-		
+
 		// write the body if it exists
 		def entity = response.getEntity()
 		if (entity != null) {
 			ContentLengthStrategy outgoingContentStrategy = DefaultContentLengthStrategy.INSTANCE
 			long len = outgoingContentStrategy.determineLength(response)
-			
+
 			OutputStream outstream = new ContentLengthOutputStream(outbuffer, baos, len)
 			entity.writeTo(outstream);
 			outstream.close()
 		}
-		
+
         baos.close()
-            
+
         String stdOut = baos.toString("UTF-8")
-        
+
         def exitValue = 0
         def stdErr = ""
         CommandResults results =
@@ -261,16 +272,16 @@ class CurlInvoker {
 
         results
     }
-    
+
     /**
      * Utility method to convert headers multi-line string to a Map
      * @param headers Multi-line String containing complete header info
      * @return Map of String
      */
      public static Map<String,String> getHeadersMapFromMultiLineString(String headers) {
-        
+
         Header[] headersList = parseHeadersInMultiLineString(headers);
-        
+
         // Now, return the headers as Collection<String>.
         Map<String, String> ret = new HashMap<String,String>();
         for (Header header : headersList) {
@@ -279,22 +290,22 @@ class CurlInvoker {
         return ret;
     }
 
-    
+
     private static Header[] parseHeadersInMultiLineString(String headerString) {
-        
+
         /*
          * This is pretty close to how Apache HTTP Core5 parses headers.
          */
         ByteArrayInputStream inputStream = new ByteArrayInputStream(headerString.getBytes("UTF-8"));
-        
+
         int buffersize = org.apache.hc.core5.http.config.ConnectionConfig.DEFAULT.getBufferSize();
         BasicHttpTransportMetrics inTransportMetrics = new BasicHttpTransportMetrics();
         final H1Config H1CONFIG = H1Config.DEFAULT;
         final CharsetDecoder CHARDECODER = null;
-        SessionInputBufferImpl inbuffer = new SessionInputBufferImpl(inTransportMetrics, buffersize, -1, 
+        SessionInputBufferImpl inbuffer = new SessionInputBufferImpl(inTransportMetrics, buffersize, -1,
                                                                      H1CONFIG.getMaxLineLength(), CHARDECODER);
         final LineParser LINEPARSER = BasicLineParser.INSTANCE;
-        
+
         List<CharArrayBuffer> headerLines = new ArrayList<>();
         final Header[] HEADERS = AbstractMessageParser.parseHeaders(
             inbuffer,

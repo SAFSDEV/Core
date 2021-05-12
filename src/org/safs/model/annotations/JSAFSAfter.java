@@ -1,7 +1,20 @@
-/******************************************************************************
- * Copyright (c) by SAS Institute Inc., Cary, NC 27513
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- ******************************************************************************/ 
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.model.annotations;
 
 import java.lang.annotation.ElementType;
@@ -10,7 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Tags a method to be executed after all JSAFSTest methods have completed in the same Class. 
+ * Tags a method to be executed after all JSAFSTest methods have completed in the same Class.
  * @author Carl Nagle
  * @see JSAFSBefore
  * @see JSAFSTest
@@ -34,6 +47,6 @@ public @interface JSAFSAfter {
 	 * A default for Order not requiring Order= prefix.
 	 * The default is  {@value #DEFAULT_ORDER}.
 	 * @return 'order' determines in what order tests shall be executed.
-	 */	
+	 */
 	int value() default DEFAULT_ORDER;
 }

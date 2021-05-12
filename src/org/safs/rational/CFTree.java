@@ -1,7 +1,20 @@
-/** Copyright (C) (MSA, Inc) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
+/**
+ * Copyright (C) (MSA, Inc), All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.rational;
 
 import java.io.IOException;
@@ -70,7 +83,7 @@ import com.rational.test.ft.vp.impl.ObjectReference;
  *   <br>                              - SetTreeContainsNode/PartialMatch
  *   <br>   MAR 10, 2008    (junwuma) Added two keywords for multi-selecting nodes in JavaTree
  *                                    CtrlClickUnverifiedTextNode and ShiftClickUnverifiedTextNode. 
- *	 <br>	MAY 5,	2008	(leiwang)	Reorganize keyword order,
+ *	 <br>	MAY 5,	2008	(Lei Wang)	Reorganize keyword order,
  *										Add keyword: 
  *													ClickPartial
  *													CollapsePartial
@@ -92,7 +105,7 @@ import com.rational.test.ft.vp.impl.ObjectReference;
  *													VerifySelectedNode
  *										Modify keyword: CtrlClickUnverifiedTextNode, ShiftClickUnverifiedTextNode
  *										Add the optional parameter [MatchIndex = index] support for many keywords
- * 	<br>	AUG 5,	2008	(leiwang)	Modify methods: commandWithOneParam(),isRootVisible(),extractRootName()
+ * 	<br>	AUG 5,	2008	(Lei Wang)	Modify methods: commandWithOneParam(),isRootVisible(),extractRootName()
  * 														captureTreeDataToFile(),verifyTreeContains(). -- Repalce the 
  * 														usage of calling isSWTWidget() by isJavaDomain() and isSwtDomain().
  * 														I suppose the "hidden root" exists only for java-swing component.

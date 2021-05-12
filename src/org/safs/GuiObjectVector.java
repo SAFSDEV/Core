@@ -1,3 +1,20 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs;
 
 import java.util.Hashtable;
@@ -22,7 +39,7 @@ import java.util.StringTokenizer;
  * <br>     MAY 11, 2009 (Carl Nagle) Support JPopups as child Panels in JFrames. 
  * <br>     JUL 20, 2009 (Carl Nagle) Added Domain= Category support.
  * <br>     SEP 04, 2009 (Junwu) Added mapped class search mode and complete MAPPEDCLASS_SEARCH_MODE(:MCSM:) implementation.
- * <br>     NOV 17, 2009 (LeiWang) Added constant "PopupWindow" to represent generic top level popup window,use it in method isSeekingPopupMenu() and isTopLevelPopupWindowType().
+ * <br>     NOV 17, 2009 (Lei Wang) Added constant "PopupWindow" to represent generic top level popup window,use it in method isSeekingPopupMenu() and isTopLevelPopupWindowType().
  * <br>     DEC 09, 2009 (Carl Nagle) Fixed case-sensitive comparison error in isSeekingPopupMenu. Added "PopupMenu" support in isTopLevelPopupWindowType().
  * <br>     APR 23, 2010 (Carl Nagle) Mode convertToKeys handling case of individual null items in arrays.
  * <br>     MAR 09,2011 (DharmeshPatel) Added RFT Find Search Mode (:RFSM:) implementation.

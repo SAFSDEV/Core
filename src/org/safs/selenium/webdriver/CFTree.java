@@ -1,7 +1,33 @@
-/** 
+/**
  * Copyright (C) SAS Institute, All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
+/**
+ *
+ * History:<br>
+ *
+ * JAN 20, 2014    (DHARMESH4) Initial release.
+ * JUN 10, 2014    (Lei Wang) Implement keywords.
+ * MAR 03, 2015    (Lei Wang) Will not verify that node is selected for keywords RightClickPartial, RightClickTextNode.
+ *                                  The right click should not be expected to select a tree node.
+ * NOV 07, 2018    (Lei Wang) Added method waitReady():
+ * 									1. For 'select', 'click' etc. keywords: we have handled 'wait' in Element.getClickableWebElement()
+ * 									2. For 'expand', 'collapse' keywords, we call SAP javascript, it might be handled by "wait page fully loaded" in the super class.
+ * 									3. For content-related keywords, we call SAP javascript, it might be handled by "wait page fully loaded" in the super class.
+ */
 package org.safs.selenium.webdriver;
 
 import java.io.BufferedWriter;
@@ -24,28 +50,21 @@ import org.safs.selenium.webdriver.lib.model.TreeNode;
 import org.safs.text.FileUtilities;
 import org.safs.tools.stringutils.StringUtilities;
 
-/**
- * 
- * History:<br>
- * 
- *  <br>   JAN 20, 2014    (DHARMESH4) Initial release.
- *  <br>   JUN 10, 2014    (Lei Wang) Implement keywords.
- *  <br>   MAR 03, 2015    (Lei Wang) Will not verify that node is selected for keywords RightClickPartial, RightClickTextNode.
- *                                  The right click should not be expected to select a tree node.
- */
 public class CFTree extends CFComponent {
-	
+
 	Tree tree = null;
-	
+
 	public CFTree() {
-		super();		
+		super();
 	}
-	
+
 	/** sub class need to override this method and provide its own library Component.*/
+	@Override
 	protected Tree newLibComponent(WebElement webelement) throws SeleniumPlusException{
 		return new Tree(webelement);
 	}
-	
+
+	@Override
 	protected void localProcess(){
 		String debugmsg = StringUtils.debugmsg(getClass(), "localProcess");
 
@@ -54,9 +73,9 @@ public class CFTree extends CFComponent {
 			String detail = null;
 
 			try{
-				super.localProcess();				
+				super.localProcess();
 				tree = (Tree) libComponent;
-				
+
 				IndependantLog.debug(debugmsg+" processing command '"+action+"' with parameters "+params);
 				iterator = params.iterator();
 
@@ -90,19 +109,19 @@ public class CFTree extends CFComponent {
 				   ||action.equalsIgnoreCase(TreeViewFunctions.SELECTTEXTNODE_KEYWORD)
 				   ||action.equalsIgnoreCase(TreeViewFunctions.EXPANDTEXTNODE_KEYWORD)
 				   ){
-					
+
 					if(params.size() < 1){
 						issueParameterCountFailure();
 						return;
 					}
-					
+
 					if(processWithOneRequiredParameter()){
 						testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
 						msg = genericText.convert("success3", windowName +":"+ compName + " "+ action +" successful.",
 								windowName, compName, action);
-						log.logMessage(testRecordData.getFac(), msg, PASSED_MESSAGE);	
+						log.logMessage(testRecordData.getFac(), msg, PASSED_MESSAGE);
 					}
-					
+
 				}else if(action.equalsIgnoreCase(TreeViewFunctions.SETTREECONTAINSNODE_KEYWORD)
 						 ||action.equalsIgnoreCase(TreeViewFunctions.SETTREECONTAINSPARTIALMATCH_KEYWORD)
 						 ){
@@ -110,19 +129,19 @@ public class CFTree extends CFComponent {
 						issueParameterCountFailure();
 						return;
 					}
-					
+
 					if(processWithTwoRequiredParameters()){
 						testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
 						msg = genericText.convert("success3", windowName +":"+ compName + " "+ action +" successful.",
 								windowName, compName, action);
-						log.logMessage(testRecordData.getFac(), msg, PASSED_MESSAGE);	
+						log.logMessage(testRecordData.getFac(), msg, PASSED_MESSAGE);
 					}
-					
+
 				}else{
 					testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
 					IndependantLog.warn(debugmsg+action+" could not be handled here.");
 				}
-				
+
 			}catch(Exception e){
 				IndependantLog.error(debugmsg+"Selenium TreeView Error processing '"+action+"'.", e);
 				testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
@@ -132,12 +151,12 @@ public class CFTree extends CFComponent {
 			}
 		}
 	}
-	
+
 	@SuppressWarnings("deprecation")
 	private boolean processWithOneRequiredParameter() throws SAFSException{
 		String debugmsg = StringUtils.debugmsg(getClass(), "processWithOneRequiredParameter");
 		String requiredParam = (String) iterator.next();
-		
+
 		//Handle optionl parameters
 		int matchIndex = 1;
 		String branch = null;
@@ -181,26 +200,26 @@ public class CFTree extends CFComponent {
 			if(iterator.hasNext()) encoding = (String)iterator.next();
 			if(indentMark==null || indentMark.trim().isEmpty()) indentMark = INDENT_MARK;
 		}
-		
+
 		matchIndex--;//convert 1-based index to 0-based index
-		
+
 		if(action.equalsIgnoreCase(TreeViewFunctions.CLICKPARTIAL_KEYWORD)
 			||action.equalsIgnoreCase(TreeViewFunctions.SELECTPARTIAL_KEYWORD)
 			){
 			tree.selectItem(new TextMatchingCriterion(requiredParam, true, matchIndex), true, null, null, WDLibrary.MOUSE_BUTTON_LEFT);
-			
+
 		}else if(action.equalsIgnoreCase(TreeViewFunctions.CLICKTEXTNODE_KEYWORD)
 				||action.equalsIgnoreCase(TreeViewFunctions.SELECT_KEYWORD)
 				||action.equalsIgnoreCase(TreeViewFunctions.SELECTTEXTNODE_KEYWORD)
 			){
 			tree.selectItem(new TextMatchingCriterion(requiredParam, false, matchIndex), true, null, null, WDLibrary.MOUSE_BUTTON_LEFT);
 			//tree.SelectTextNode(requiredParam);//used for keyword SELECTTEXTNODE_KEYWORD
-			
+
 		}else if(action.equalsIgnoreCase(TreeViewFunctions.CLICKUNVERIFIEDTEXTNODE_KEYWORD)
 				||action.equalsIgnoreCase(TreeViewFunctions.SELECTUNVERIFIEDTEXTNODE_KEYWORD)
 			){
 			tree.selectItem(new TextMatchingCriterion(requiredParam, false, matchIndex), false, null, null, WDLibrary.MOUSE_BUTTON_LEFT);
-			
+
 		}else if(action.equalsIgnoreCase(TreeViewFunctions.COLLAPSE_KEYWORD)
 				||action.equalsIgnoreCase(TreeViewFunctions.COLLAPSETEXTNODE_KEYWORD)
 				){
@@ -232,36 +251,36 @@ public class CFTree extends CFComponent {
 
 		}else if(action.equalsIgnoreCase(TreeViewFunctions.EXPANDPARTIAL_KEYWORD)){
 			tree.expandItem(new TextMatchingCriterion(requiredParam, true, matchIndex), false, true);
-			
+
 		}else if(action.equalsIgnoreCase(TreeViewFunctions.EXPANDUNVERIFIEDTEXTNODE_KEYWORD)){
 			tree.expandItem(new TextMatchingCriterion(requiredParam, true, matchIndex), false, false);
-			
+
 		}else if(action.equalsIgnoreCase(TreeViewFunctions.RIGHTCLICKPARTIAL_KEYWORD)){
 //			tree.selectItem(new TextMatchingCriterion(requiredParam, true, matchIndex), true, null, null, WDLibrary.MOUSE_BUTTON_RIGHT);
 			tree.selectItem(new TextMatchingCriterion(requiredParam, true, matchIndex), false, null, null, WDLibrary.MOUSE_BUTTON_RIGHT);
-			
+
 		}else if(action.equalsIgnoreCase(TreeViewFunctions.RIGHTCLICKTEXTNODE_KEYWORD)){
 //			tree.selectItem(new TextMatchingCriterion(requiredParam, false, matchIndex), true, null, null, WDLibrary.MOUSE_BUTTON_RIGHT);
 			tree.selectItem(new TextMatchingCriterion(requiredParam, false, matchIndex), false, null, null, WDLibrary.MOUSE_BUTTON_RIGHT);
-			
+
 		}else if(action.equalsIgnoreCase(TreeViewFunctions.RIGHTCLICKUNVERIFIEDTEXTNODE_KEYWORD)){
 			tree.selectItem(new TextMatchingCriterion(requiredParam, false, matchIndex), false, null, null, WDLibrary.MOUSE_BUTTON_RIGHT);
-			
+
 		}else if(action.equalsIgnoreCase(TreeViewFunctions.SHIFTCLICKUNVERIFIEDTEXTNODE_KEYWORD)){
 			tree.selectItem(new TextMatchingCriterion(requiredParam, false, matchIndex), false, Keys.SHIFT, null, WDLibrary.MOUSE_BUTTON_LEFT);
-			
+
 		}else if(action.equalsIgnoreCase(TreeViewFunctions.VERIFYNODEUNSELECTED_KEYWORD)){
 			tree.verifyItemSelection(new TextMatchingCriterion(requiredParam, false, matchIndex), false);
 
 		}else if(action.equalsIgnoreCase(TreeViewFunctions.VERIFYSELECTEDNODE_KEYWORD)){
 			tree.verifyItemSelection(new TextMatchingCriterion(requiredParam, false, matchIndex), true);
-			
+
 		}else if(action.equalsIgnoreCase(TreeViewFunctions.VERIFYTREECONTAINSNODE_KEYWORD)){
 			tree.verifyContains(new TextMatchingCriterion(requiredParam, false, matchIndex));
-			
+
 		}else if(action.equalsIgnoreCase(TreeViewFunctions.VERIFYTREECONTAINSPARTIALMATCH_KEYWORD)){
 			tree.verifyContains(new TextMatchingCriterion(requiredParam, true, matchIndex));
-			
+
 		}else if(action.equalsIgnoreCase(TreeViewFunctions.CAPTURETREEDATATOFILE_KEYWORD)){
 			TreeNode[] contents = null;
 			if(branch==null || branch.isEmpty()){
@@ -293,7 +312,7 @@ public class CFTree extends CFComponent {
 
 		return true;
 	}
-	
+
 	/**
 	 * process keywords who need at least two parameters; but it may be supplied with optional parameters.
 	 * @return boolean true if the keyword has been handled successfully;<br>
@@ -304,7 +323,7 @@ public class CFTree extends CFComponent {
 		String debugmsg = StringUtils.debugmsg(getClass(), "processWithTwoRequiredParameters");
 		String requiredParam = (String) iterator.next();
 		String variable = (String) iterator.next();
-		
+
 		if(action.equalsIgnoreCase(TreeViewFunctions.SETTREECONTAINSNODE_KEYWORD)
 			||action.equalsIgnoreCase(TreeViewFunctions.SETTREECONTAINSPARTIALMATCH_KEYWORD)
 			){
@@ -322,7 +341,7 @@ public class CFTree extends CFComponent {
 			IndependantLog.warn(debugmsg+action+" could not be handled here.");
 			return false;
 		}
-		
+
 		return true;
 	}
 
@@ -330,7 +349,7 @@ public class CFTree extends CFComponent {
 
 		for(TreeNode node: nodes){
 			try{
-				if(indentMark!=null && !indentMark.isEmpty()) for(int i=0;i<level;i++) writer.write(indentMark); 
+				if(indentMark!=null && !indentMark.isEmpty()) for(int i=0;i<level;i++) writer.write(indentMark);
 				writer.write(node.getLabel()+Console.EOL);
 			} catch (IOException e) {
 				throw new SeleniumPlusException("Can not write to file due to "+e.getMessage());
@@ -339,5 +358,74 @@ public class CFTree extends CFComponent {
 		}
 	}
 
+	@Override
+	protected WebElement waitReady(WebElement element){
+		String debugmsg = StringUtils.debugmsg(false);
+
+		WebElement readyElement = super.waitReady(element);
+		if(!ready){
+
+			//WE don't need to wait element to be click-able here: Tree's click actions will be handled by AbstractSelectable.clickElement(), which
+			//will click at web-element returned by Element.getClickableWebElement() in which we wait the web-element to be click-able.
+
+//			if(action.equalsIgnoreCase(TreeViewFunctions.CLICKPARTIAL_KEYWORD)
+//					||action.equalsIgnoreCase(TreeViewFunctions.SELECTPARTIAL_KEYWORD)
+//					||action.equalsIgnoreCase(TreeViewFunctions.CLICKTEXTNODE_KEYWORD)
+//					||action.equalsIgnoreCase(TreeViewFunctions.SELECT_KEYWORD)
+//					||action.equalsIgnoreCase(TreeViewFunctions.SELECTTEXTNODE_KEYWORD)
+//					||action.equalsIgnoreCase(TreeViewFunctions.CLICKUNVERIFIEDTEXTNODE_KEYWORD)
+//					||action.equalsIgnoreCase(TreeViewFunctions.SELECTUNVERIFIEDTEXTNODE_KEYWORD)
+//					||action.equalsIgnoreCase(TreeViewFunctions.RIGHTCLICKPARTIAL_KEYWORD)
+//					||action.equalsIgnoreCase(TreeViewFunctions.RIGHTCLICKTEXTNODE_KEYWORD)
+//					||action.equalsIgnoreCase(TreeViewFunctions.RIGHTCLICKUNVERIFIEDTEXTNODE_KEYWORD)
+//					||action.equalsIgnoreCase(TreeViewFunctions.SHIFTCLICKUNVERIFIEDTEXTNODE_KEYWORD)
+//					||action.equalsIgnoreCase(TreeViewFunctions.CTRLCLICKUNVERIFIEDTEXTNODE_KEYWORD)){
+//
+//				//tree.selectItem(new TextMatchingCriterion(requiredParam, false, matchIndex), false, Keys.CONTROL, null, WDLibrary.MOUSE_BUTTON_LEFT);
+//				readyElement = waiter.until(ExpectedConditions.elementToBeClickable(element));
+//
+//			}
+//			else if(action.equalsIgnoreCase(TreeViewFunctions.DOUBLECLICKPARTIAL_KEYWORD)
+//					||action.equalsIgnoreCase(TreeViewFunctions.DOUBLECLICKTEXTNODE_KEYWORD)
+//					||action.equalsIgnoreCase(TreeViewFunctions.DOUBLECLICKUNVERIFIEDTEXTNODE_KEYWORD)){
+//				//tree.activateItem(new TextMatchingCriterion(requiredParam, false, matchIndex), false, null, null);
+//				readyElement = waiter.until(ExpectedConditions.elementToBeClickable(element));
+//
+//			}else
+
+			if(action.equalsIgnoreCase(TreeViewFunctions.COLLAPSE_KEYWORD)
+					||action.equalsIgnoreCase(TreeViewFunctions.COLLAPSETEXTNODE_KEYWORD)
+					||action.equalsIgnoreCase(TreeViewFunctions.COLLAPSEPARTIAL_KEYWORD)
+					||action.equalsIgnoreCase(TreeViewFunctions.COLLAPSEUNVERIFIEDTEXTNODE_KEYWORD)
+					||action.equalsIgnoreCase(TreeViewFunctions.EXPAND_KEYWORD)
+					||action.equalsIgnoreCase(TreeViewFunctions.EXPANDTEXTNODE_KEYWORD)
+					||action.equalsIgnoreCase(TreeViewFunctions.EXPANDPARTIAL_KEYWORD)
+					||action.equalsIgnoreCase(TreeViewFunctions.EXPANDUNVERIFIEDTEXTNODE_KEYWORD)){
+				//tree.collapseItem(new TextMatchingCriterion(requiredParam, false, matchIndex), false, false);
+				//tree.expandItem(new TextMatchingCriterion(requiredParam, true, matchIndex), false, false);
+				//For DefaultTree, we double click the element returned by item.getClickableWebElement(), in which we have waited web-element's click-able
+				//TODO For SAP Tree, we call the javascript API, what should we do to wait 'ready'
+
+			}
+			else if(action.equalsIgnoreCase(TreeViewFunctions.VERIFYTREECONTAINSNODE_KEYWORD)
+					||action.equalsIgnoreCase(TreeViewFunctions.VERIFYTREECONTAINSPARTIALMATCH_KEYWORD)
+					||action.equalsIgnoreCase(TreeViewFunctions.CAPTURETREEDATATOFILE_KEYWORD)
+					||action.equalsIgnoreCase(TreeViewFunctions.VERIFYNODEUNSELECTED_KEYWORD)
+					||action.equalsIgnoreCase(TreeViewFunctions.VERIFYSELECTEDNODE_KEYWORD)){
+				//contents = tree.getContent();
+				//TreeNode node = tree.getMatchedElement(new TextMatchingCriterion(branch, false, 0));
+				//tree.verifyContains(new TextMatchingCriterion(requiredParam, true, matchIndex));
+				//tree.verifyItemSelection(new TextMatchingCriterion(requiredParam, false, matchIndex), true);
+				//TODO How to check the element's content is ready?
+
+			}
+			else{
+	    		IndependantLog.debug(debugmsg+" ignored action "+action);
+	    	}
+
+		}
+
+		return readyElement;
+	}
 }
-	
+

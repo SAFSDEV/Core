@@ -1,3 +1,20 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.staf.service.logging;
 
 import java.lang.reflect.Constructor;
@@ -13,43 +30,41 @@ import org.safs.logging.MessageTypeInfo;
 import org.safs.staf.embedded.HandleInterface;
 import org.safs.staf.service.ServiceDebugLog;
 
-import com.ibm.staf.STAFHandle;
-
 /**
- * <code>SLSLogFacility</code> is the abstract log facility solely used by 
+ * <code>SLSLogFacility</code> is the abstract log facility solely used by
  * <code>SAFSLoggingService</code>.
  * <p>
- * In addition to common attributes defined in its super class, 
+ * In addition to common attributes defined in its super class,
  * <code>AbstractLogFacility</code>, this log facility contains a STAF
- * handle, a default log directory, and a pair of 
- * <code>{@link AbstractSTAFTextLogItem}</code> and <code>{@link AbstractSTAFXmlLogItem}</code> 
- * for standard SAFS text/xml logs. The STAF handle is used to interact with 
+ * handle, a default log directory, and a pair of
+ * <code>{@link AbstractSTAFTextLogItem}</code> and <code>{@link AbstractSTAFXmlLogItem}</code>
+ * for standard SAFS text/xml logs. The STAF handle is used to interact with
  * STAF. The default log directory corresponds to the <code>DIR</code> setting
  * of the SAFS logging service.
  * <p>
  * Internally, this class performs logging functions asynchronously to maximize
  * its performance. The main thread accepts log message requests (i.e. calls to
- * the {@link #logMessage logMessage} method) and puts them on a request queue. 
- * A worker thread is expected to check the queue for any request and performs 
+ * the {@link #logMessage logMessage} method) and puts them on a request queue.
+ * A worker thread is expected to check the queue for any request and performs
  * actual logging actions.
  * <p>
  * Depending on the mode (local or remote) of the logging service, the actual
  * logging and closing implementations would be different. Therefore the
  * {@link #closeNow} method and the {@link WorkerThread} inner class, which does
- * the actual logging, are abstract and expected to be implemented by 
+ * the actual logging, are abstract and expected to be implemented by
  * subclasses.
- * 
+ *
  * @since 	MAY 19 2009		(LW)	Modify the constructor, add an extra parameter 'ServiceDebugLog'.
- *									Modify method validateLogFiles(): use java reflection to instantiate the STAF-version LogItem 
+ *									Modify method validateLogFiles(): use java reflection to instantiate the STAF-version LogItem
  * 									Add method getSTAFTextLogItem(),getSTAFTextLogItem and getNewInstance() to help instantiate a LogItem.
  */
-public abstract class SLSLogFacility extends AbstractLogFacility 
+public abstract class SLSLogFacility extends AbstractLogFacility
 {
 	public static String STAF_TEXT_LOG_ITEM_V2 = "org.safs.staf.service.logging.v2.STAFTextLogItem";
 	public static String STAF_XML_LOG_ITEM_V2 = "org.safs.staf.service.logging.v2.STAFXmlLogItem";
 	public static String STAF_TEXT_LOG_ITEM_V3 = "org.safs.staf.service.logging.v3.STAFTextLogItem3";
 	public static String STAF_XML_LOG_ITEM_V3 = "org.safs.staf.service.logging.v3.STAFXmlLogItem3";
-	
+
 	protected HandleInterface handle;
 	protected String defaultDir;
 	protected LogItemDictionary allLogs;
@@ -57,7 +72,7 @@ public abstract class SLSLogFacility extends AbstractLogFacility
 	protected RequestQueue rQueue;
 	protected WorkerThread workerThread;
 	protected ServiceDebugLog debugLog;
-	
+
 	/**
 	 * Creates a <code>SLSLogFacility</code>.
 	 * <p>
@@ -106,7 +121,7 @@ public abstract class SLSLogFacility extends AbstractLogFacility
 			AbstractSTAFTextLogItem item = getSTAFTextLogItem(facName + ".txt", defaultDir,DEFAULT_SAFS_TEXT_FILE);
 			if(item != null){
 				item.setDebugLog(this.debugLog);
-				allLogs.put(item);							
+				allLogs.put(item);
 			}
 		}
 
@@ -116,7 +131,7 @@ public abstract class SLSLogFacility extends AbstractLogFacility
 			AbstractSTAFXmlLogItem item = getSTAFXmlLogItem(facName + ".xml", defaultDir,DEFAULT_SAFS_XML_FILE);
 			if(item!=null){
 				item.setDebugLog(this.debugLog);
-				allLogs.put(item);				
+				allLogs.put(item);
 			}
 		}
 
@@ -136,7 +151,7 @@ public abstract class SLSLogFacility extends AbstractLogFacility
 		String debugmsg = getClass().getName()+".getSTAFTextLogItem(): ";
 		String stafVersion = STAFHelper.getSTAFVersionString(handle);
 		debugLog.debugPrintln(debugmsg+" STAF version is "+stafVersion);
-		
+
 		try {
 			if (stafVersion.startsWith("2")) {
 				itemClass = Class.forName(STAF_TEXT_LOG_ITEM_V2);
@@ -150,7 +165,7 @@ public abstract class SLSLogFacility extends AbstractLogFacility
 			debugLog.debugPrintln(debugmsg+ e.getMessage());
 			return null;
 		}
-		
+
 		if(itemClass==null){
 			debugLog.debugPrintln(debugmsg+" itemClass is null.");
 			return null;
@@ -163,7 +178,7 @@ public abstract class SLSLogFacility extends AbstractLogFacility
 			return null;
 		}
 	}
-	
+
 	/*
 	 * According to the version of STAF, get a new instance of STAFXmlLogItem or STAFXmlLogItem3
 	 */
@@ -173,7 +188,7 @@ public abstract class SLSLogFacility extends AbstractLogFacility
 		String debugmsg = getClass().getName()+".getSTAFXmlLogItem(): ";
 		String stafVersion = STAFHelper.getSTAFVersionString(handle);
 		debugLog.debugPrintln(debugmsg+" STAF version is "+stafVersion);
-		
+
 		try {
 			if (stafVersion.startsWith("2")) {
 				itemClass = Class.forName(STAF_XML_LOG_ITEM_V2);
@@ -187,7 +202,7 @@ public abstract class SLSLogFacility extends AbstractLogFacility
 			debugLog.debugPrintln(debugmsg+ e.getMessage());
 			return null;
 		}
-		
+
 		if(itemClass==null){
 			debugLog.debugPrintln(debugmsg+" itemClass is null.");
 			return null;
@@ -200,7 +215,7 @@ public abstract class SLSLogFacility extends AbstractLogFacility
 			return null;
 		}
 	}
-	
+
 	/**
 	 * @param clazz			the Class of STAFTextLogItem or STAFTextLogItem3 or STAFXmlLogItem or STAFXmlLogItem3
 	 * @param name
@@ -215,7 +230,7 @@ public abstract class SLSLogFacility extends AbstractLogFacility
 		parameterTypes[0] = String.class;//name
 		parameterTypes[1] = String.class;//directory
 		parameterTypes[2] = String.class;//filename
-		
+
 		Constructor constructor = null;
 		try {
 			constructor = clazz.getConstructor(parameterTypes);
@@ -223,36 +238,37 @@ public abstract class SLSLogFacility extends AbstractLogFacility
 			debugLog.debugPrintln(debugmsg+e.getMessage());
 			return null;
 		}
-		
+
 		Object initargs[] = new Object[3];
 		initargs[0] = name;
 		initargs[1] = directory;
 		initargs[2] = filename;
 		Object aNewInstance = null;
-		
+
 		try {
 			aNewInstance = constructor.newInstance(initargs);
 		} catch (Exception e) {
 			debugLog.debugPrintln(debugmsg+e.getMessage());
 			return null;
 		}
-		
+
 		return aNewInstance;
 	}
-	
+
 	/**
 	 * Sets the log mode of this log facility.
 	 * <p>
 	 * This method also sets the enabled state of each <code>LogItem</code>
 	 * accordingly.
 	 * <p>
-	 * @param mode	the new log mode. Bitwise-OR of one or more 
+	 * @param mode	the new log mode. Bitwise-OR of one or more
 	 * 				<code>LOGMODE</code> constants.
 	 */
+	@Override
 	public void setLogMode(long mode)
 	{
 		super.setLogMode(mode);
-		for (Enumeration e = allLogs.items() ; e.hasMoreElements(); ) 
+		for (Enumeration e = allLogs.items() ; e.hasMoreElements(); )
 		{
 			LogItem li = (LogItem) e.nextElement();
 			if (isModeEnabled(li.mode)) li.enabled = true;
@@ -267,10 +283,11 @@ public abstract class SLSLogFacility extends AbstractLogFacility
 	 * @param level	the new log level. Must be one of the <code>LOGLEVEL</code>
 	 * 				constants.
 	 */
+	@Override
 	public void setLogLevel(int level)
 	{
 		super.setLogLevel(level);
-		for (Enumeration e = allLogs.items() ; e.hasMoreElements(); ) 
+		for (Enumeration e = allLogs.items() ; e.hasMoreElements(); )
 		{
 			((LogItem) e.nextElement()).level = logLevel;
 		}
@@ -287,7 +304,7 @@ public abstract class SLSLogFacility extends AbstractLogFacility
 	public void setDefaultDir(String dir)
 	{
 		defaultDir = dir;
-		for (Enumeration e = allLogs.items() ; e.hasMoreElements(); ) 
+		for (Enumeration e = allLogs.items() ; e.hasMoreElements(); )
 		{
 			Object li = e.nextElement();
 			if (li instanceof FileLogItem) ((FileLogItem)li).setParentDir(dir);
@@ -305,7 +322,7 @@ public abstract class SLSLogFacility extends AbstractLogFacility
 	public void setHandle(HandleInterface h)
 	{
 		handle = h;
-		for (Enumeration e = allLogs.items() ; e.hasMoreElements(); ) 
+		for (Enumeration e = allLogs.items() ; e.hasMoreElements(); )
 		{
 			Object li = e.nextElement();
 			if (li instanceof STAFFileLogItem)
@@ -314,7 +331,7 @@ public abstract class SLSLogFacility extends AbstractLogFacility
 	}
 
 	/**
-	 * Returns the string representation of the current state of 
+	 * Returns the string representation of the current state of
 	 * <code>STAFTextLogItem</code>.
 	 * <p>
 	 * @return the name, path, and enabled flag of the log item.
@@ -353,8 +370,8 @@ public abstract class SLSLogFacility extends AbstractLogFacility
 			log.setCapXML(capbool);
 		}
 	}
-	
-	
+
+
 	/**
 	 * Returns the string representation of the current state of the tool log.
 	 * <p>
@@ -366,7 +383,7 @@ public abstract class SLSLogFacility extends AbstractLogFacility
 	}
 
 	/**
-	 * Returns the string representation of the current state of the console 
+	 * Returns the string representation of the current state of the console
 	 * log.
 	 * <p>
 	 * @return the enabled state of the console log.
@@ -379,19 +396,19 @@ public abstract class SLSLogFacility extends AbstractLogFacility
 	/**
 	 * Returns the string representation of the states of this log facility.
 	 * <p>
-	 * This string is included in the result buffer of every LOGMESSAGE request 
-	 * to let the user of the logging service, such as a SAFS-aware testing 
+	 * This string is included in the result buffer of every LOGMESSAGE request
+	 * to let the user of the logging service, such as a SAFS-aware testing
 	 * tool, know the current state of this log facility, so that it could
 	 * perform tool-specific logging actions accordingly.
 	 * <p>
-	 * @return	the states of this log facility. Use 
+	 * @return	the states of this log facility. Use
 	 * 			<code>SLSLogFacilityStates</code> to parse the string.
 	 */
 	public String getStatesString()
 	{
 		boolean toollog = isModeEnabled(LOGMODE_TOOL) && !suspended;
 		boolean consolelog = isModeEnabled(LOGMODE_CONSOLE) && !suspended;
-		return 
+		return
 			AbstractSAFSLoggingService.SLS_STATES_TOOLLOG_PREFIX + toollog + "\n"+
 			AbstractSAFSLoggingService.SLS_STATES_CONSOLELOG_PREFIX + consolelog + "\n"+
 			AbstractSAFSLoggingService.SLS_STATES_LOGLEVEL_PREFIX + logLevel;
@@ -408,6 +425,7 @@ public abstract class SLSLogFacility extends AbstractLogFacility
 	 * @param desc		additional description to log.
 	 * @param msgType	the int identifier of the type of message being logged.
 	 */
+	@Override
 	public void logMessage(String msg,	String desc, int msgType)
 	{
 		debugLog.debugPrintln(
@@ -417,7 +435,7 @@ public abstract class SLSLogFacility extends AbstractLogFacility
 		if (suspended) return;
 		if (!MessageTypeInfo.typeBelongsToLevel(msgType, logLevel)) return;
 
-		rQueue.queue(new WorkerRequest(WorkerRequest.CMD_LOG, msg, desc, 
+		rQueue.queue(new WorkerRequest(WorkerRequest.CMD_LOG, msg, desc,
 			msgType));
 		if (workerThread.isAlive()) workerThread.interrupt(); // wake up!
 	}
@@ -432,13 +450,14 @@ public abstract class SLSLogFacility extends AbstractLogFacility
 	 * @throws	STAFLogException
 	 * 			if this method failed for any reason.
 	 */
+	@Override
 	public void close() throws STAFLogException
 	{
 		debugLog.debugPrintln("SLSLogFacility.close()");
 
 		// wait for the worker thread to clear the queue (i.e. to complete all
 		// the logging requests) before proceeding.
-		while (workerThread.isAlive() && !rQueue.isEmpty()) 
+		while (workerThread.isAlive() && !rQueue.isEmpty())
 		{
 			try { Thread.sleep(100); }
 			catch (InterruptedException e) {}
@@ -447,13 +466,13 @@ public abstract class SLSLogFacility extends AbstractLogFacility
 		// closes associated log(s) immediately
 		closeNow();
 
-		// if closed successfully, queue an EXIT command to signal the worker 
+		// if closed successfully, queue an EXIT command to signal the worker
 		// thread to exit.
 		rQueue.queue(new WorkerRequest(WorkerRequest.CMD_EXIT));
 		if (workerThread.isAlive()) workerThread.interrupt(); // wake up!
 
 		// wait util the thread is actually dead.
-		while (workerThread.isAlive()) 
+		while (workerThread.isAlive())
 		{
 			try { Thread.sleep(100); }
 			catch (InterruptedException e) {}
@@ -476,7 +495,7 @@ public abstract class SLSLogFacility extends AbstractLogFacility
 	 * facility.
 	 * <p>
 	 * A request contains a command identifier, which tells the worker thread
-	 * what action to perform, and message specifications if the command is to 
+	 * what action to perform, and message specifications if the command is to
 	 * log a message.
 	 */
 	protected class WorkerRequest
@@ -540,7 +559,7 @@ public abstract class SLSLogFacility extends AbstractLogFacility
 	} // end of class WorkerRequest
 
 	/**
-	 * This class implements the (FIFO) request queue used internally by this 
+	 * This class implements the (FIFO) request queue used internally by this
 	 * log facility. This class is thread-safe.
 	 */
 	protected class RequestQueue
@@ -571,7 +590,7 @@ public abstract class SLSLogFacility extends AbstractLogFacility
 		/**
 		 * Removes and returns the first request in this queue.
 		 * <p>
-		 * @return	the first <code>WorkerRequest</code> in this queue; 
+		 * @return	the first <code>WorkerRequest</code> in this queue;
 		 * 			<code>null</code> if queue is empty.
 		 */
 		public synchronized SLSLogFacility.WorkerRequest get()
@@ -583,7 +602,7 @@ public abstract class SLSLogFacility extends AbstractLogFacility
 		/**
 		 * Returns the first request in this queue without removing it.
 		 * <p>
-		 * @return	the first <code>WorkerRequest</code> in this queue; 
+		 * @return	the first <code>WorkerRequest</code> in this queue;
 		 * 			<code>null</code> if queue is empty.
 		 */
 		public synchronized SLSLogFacility.WorkerRequest peek()
@@ -623,9 +642,9 @@ public abstract class SLSLogFacility extends AbstractLogFacility
 	} // end of class RequestQueue
 
 	/**
-	 * This is the worker thread that fulfills the log message request received 
+	 * This is the worker thread that fulfills the log message request received
 	 * by this log facility. This thread constantly checks the request queue for
-	 * incoming log message requests and carries them out. It only exits the 
+	 * incoming log message requests and carries them out. It only exits the
 	 * <code>run</code> method if an EXIT request is found on the queue.
 	 * <p>
 	 * Subclass of <code>SLSLogFacility</code> should derive its worker thread
@@ -641,22 +660,23 @@ public abstract class SLSLogFacility extends AbstractLogFacility
 		 * will interrupt this thread when a new request is queued. This method
 		 * exits when an EXIT request is found.
 		 */
+		@Override
 		public void run()
 		{
 			boolean exit = false;
-			while (!exit) 
+			while (!exit)
 			{
-				while (!rQueue.isEmpty()) 
+				while (!rQueue.isEmpty())
 				{
 					// do not yet remove the request from the queue. we only
-					// remove the request after processing it. this is because 
-					// the close method, when called in the main thread, 
-					// proceeds when the queue is empty. so if the request is 
-					// removed before it is fulfilled, it is possible that the 
-					// close method ends up coming through first, resulting in 
+					// remove the request after processing it. this is because
+					// the close method, when called in the main thread,
+					// proceeds when the queue is empty. so if the request is
+					// removed before it is fulfilled, it is possible that the
+					// close method ends up coming through first, resulting in
 					// out-of-order log messages at the end of the log file.
 					WorkerRequest r = rQueue.peek();
-					switch (r.cmd) 
+					switch (r.cmd)
 					{
 						case WorkerRequest.CMD_LOG:
 							debugLog.debugPrintln(
@@ -666,10 +686,10 @@ public abstract class SLSLogFacility extends AbstractLogFacility
 						case WorkerRequest.CMD_EXIT:
 							debugLog.debugPrintln(
 								"SLSLogFacility$WorkerThread.run(): CMD_EXIT");
-							
+
 							//should log to the STAFJVM log in STAF\data\lang\java\jvm
 							System.out.println("LogFacility EXIT command has been received...");
-							
+
 							exit = true;
 							break;
 					}
@@ -678,12 +698,12 @@ public abstract class SLSLogFacility extends AbstractLogFacility
 					if (exit) break;
 				}
 				if (exit) break;
-				// clear the interrupted state before going to sleep. 
+				// clear the interrupted state before going to sleep.
 				// is this really necessary?
 				// interrupted();
 				// Carl Nagle 20130508 - removed interrupted() clearing for fear it is
 				// causing service shutdown problems.
-				
+
 				// Carl Nagle -- too long of sleep may cause STAF/Service shutdown problems
 				try { sleep(3000); }
 				catch (InterruptedException e)
@@ -704,7 +724,7 @@ public abstract class SLSLogFacility extends AbstractLogFacility
 		protected abstract void log(WorkerRequest r);
 
 	} // end of class WorkerThread
-	
+
 	protected void setDebugLog(ServiceDebugLog debugLog){
 		this.debugLog = debugLog;
 	}

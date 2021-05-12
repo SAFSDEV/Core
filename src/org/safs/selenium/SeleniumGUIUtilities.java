@@ -1,11 +1,41 @@
-/** 
+/**
  * Copyright (C) SAS Institute, All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
+/**
+ * @author Carl Nagle, PHSABO FEB 06, 2007 - Fixed getWindowID and getXPath calls
+ * @author Carl Nagle  FEB 07, 2007 - prepend Type=HTML; if no type specified in recString
+ *                               in getXPathString function.
+ * @author Carl Nagle  FEB 01, 2010 - moved ComponentFunctions.DLL usage here until it is factored out
+ * @author Lei Wang MAR 31, 2011 - Use DocumentParser to parse HTML page instead of user-extensions.js
+ * @author Lei Wang JUN 01, 2011 - In method getGuiObject():  initialize domParser before using it.
+ *                                In method normalizeXPath(): Modify xpath so that it begins with string "//".
+ * @author Lei Wang JUN 21, 2011 - Modify method getDocumentParser(): If selenium switches between frame,
+ *                                we will not modify the main url stored in domParser.
+ *                                Overload method setWindowFocus() and maximizeWindow(): use selenium's API
+ *                                instead of native call to to the job.
+ * @author Lei Wang JUN 28, 2011 - Add method getAttribute() and getAttributes().
+ * @author Lei Wang JUL 27, 2017 - Added method getWebDriver(): Use Java reflection to get WebDriver from WebDriverBackedSelenium,
+ *                                                             in this way we can avoid the conflict between Selenium 1.0 and 2.0
+ *
+ */
 package org.safs.selenium;
 
 import java.awt.Rectangle;
+import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -18,15 +48,18 @@ import java.util.regex.Pattern;
 
 import org.dom4j.Document;
 import org.openqa.selenium.WebDriver;
-//PACKAGE NAME CHANGE between Selenium 2.37 and 2.41 handled dynamically in selectWindow() and getAllWindowNames() methods
+//selenium 1.0, the class 'WebDriverBackedSelenium' is in package 'org.openqa.selenium'
 //import org.openqa.selenium.WebDriverBackedSelenium;
+//From selenium 2.42, the class 'WebDriverBackedSelenium' has been moved to another package
 //import com.thoughtworks.selenium.webdriven.WebDriverBackedSelenium;
 import org.safs.ApplicationMap;
 import org.safs.DDGUIUtilities;
+import org.safs.IndependantLog;
 import org.safs.Log;
 import org.safs.SAFSException;
 import org.safs.SAFSObjectNotFoundException;
 import org.safs.STAFHelper;
+import org.safs.StringUtils;
 import org.safs.TestRecordData;
 import org.safs.Tree;
 import org.safs.logging.LogUtilities;
@@ -37,37 +70,27 @@ import com.thoughtworks.selenium.SeleniumException;
 
 /**
  * SAFS/Selenium-specific subclass of DDGUIUtilities.
- * The primary feature is that the SeleniumGUIUtilities uses the new SAFS RMI bridge to 
+ * The primary feature is that the SeleniumGUIUtilities uses the new SAFS RMI bridge to
  * communicate with our own Java Proxies embedded in each JVM.
- * 
+ *
  * @author  Carl Nagle, PHSABO
  * @since   AUG 15, 2006
- * @author Carl Nagle, PHSABO FEB 06, 2007 - Fixed getWindowID and getXPath calls
- * @author Carl Nagle  FEB 07, 2007 - prepend Type=HTML; if no type specified in recString
- *                               in getXPathString function.
- * @author Carl Nagle  FEB 01, 2010 - moved ComponentFunctions.DLL usage here until it is factored out
- * @author LeiWang MAR 31, 2011 - Use DocumentParser to parse HTML page instead of user-extensions.js
- * @author LeiWang JUN 01, 2011 - In method getGuiObject():  initialize domParser before using it.
- *                                In method normalizeXPath(): Modify xpath so that it begins with string "//".
- * @author LeiWang JUN 21, 2011 - Modify method getDocumentParser(): If selenium switches between frame,
- *                                we will not modify the main url stored in domParser.
- *                                Overload method setWindowFocus() and maximizeWindow(): use selenium's API 
- *                                instead of native call to to the job.
- * @author LeiWang JUN 28, 2011 - Add method getAttribute() and getAttributes().                              
  * @see org.safs.DDGUIUtilities
  **/
+@SuppressWarnings("deprecation")
 public class SeleniumGUIUtilities extends DDGUIUtilities {
 
 	private long gSecTimeout;
 //	protected final Pattern framePattern = Pattern.compile("(//.*FRAME\\[.+?\\])//.+");
 	public static final Pattern FRAME_PATTERN = Pattern.compile("(/.*FRAME(\\[.+?\\])?)(/.+)?");
-	public boolean frameSwitched = false;	
+	public boolean frameSwitched = false;
 	public String UNNAMED_WINDOW = "null";
 	public DocumentParser domParser = null;
-	
+
 	//This map contains the pairs(frameXpath, HtmlFrameComp)
 	//The frameXpath should be counted from the "root url" of DocumentParser
 	private Map<String,HtmlFrameComp> frames = new TreeMap<String,HtmlFrameComp>(new Comparator<String>(){
+		@Override
 		public int compare(String o1, String o2) {
 			//We just compare the length of the frameXpath, put the longest at the first, shortest at the last, it is descending
 			//As TreeMap will be in ascending key order, so inverse the compare calculation.
@@ -78,7 +101,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 			return compareInt;
 		}
 	});
-	
+
 	/**
 	 * No-argument constructor.
 	 * Simply calls super()
@@ -90,7 +113,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 
 	/**
 	 * Constructor providing the STAFHelper and LogUtilities needed for
-	 * proper operation. 
+	 * proper operation.
 	 * @param helper The STAFHelper for performing STAF requests.
 	 * @param log the LogUtilities for logging.
 	 * @see org.safs.STAFHelper
@@ -120,35 +143,36 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 
 	/**
 	 * Uses the Application Map caching mechanism provided by the superclass.
-	 * Retrieves cached references or recognition strings from the App Map and attempts to 
+	 * Retrieves cached references or recognition strings from the App Map and attempts to
 	 * identify the matching component via the remote AUT JVM proxies.
 	 * <p>
 	 * @param appMapName  the name/ID of the App Map currently in use.
 	 * @param windowName  the name/ID of the window as predefined in the App Map.
-	 * @param compName    the name/ID of the child component of the window as predefined 
+	 * @param compName    the name/ID of the child component of the window as predefined
 	 * in the App Map.
-	 * @param secTimeout the number of seconds allowed to located the object before a 
+	 * @param secTimeout the number of seconds allowed to located the object before a
 	 * SAFSObjectNotFoundException is thrown.
-	 * 
+	 *
 	 * @return 0 on success. throw SAFSObjectNotFoundException if not successful.
 	 * @throws SAFSObjectNotFoundException if specified parent or child cannot be found.
 	 * @see org.safs.DDGUIUtilities#waitForObject(String,String,String,long)
 	 */
+	@Override
 	public int waitForObject (String appMapName, String windowName, String compName, long secTimeout)
 	                           throws SAFSObjectNotFoundException {
-	    
+
 		gSecTimeout = secTimeout;
 		ApplicationMap map = null;
 		STestRecordHelper trdata = (STestRecordHelper) this.trdata;
 		Selenium selenium = SApplicationMap.getSelenium(windowName);
-	    
+
 	    try{
 	    	Log.info("SGU: Looking for "+windowName+"."+compName+" using AppMap:"+appMapName);
 	    	map = getAppMap(appMapName);
 
 		    if (map == null) {
 		      if (registerAppMap(appMapName, appMapName)) {
-		        map = (ApplicationMap) getAppMap(appMapName);
+		        map = getAppMap(appMapName);
 		        if (map == null) {
 		          Log.debug("SGU: WFO could NOT retrieve registered AppMap "+ appMapName);
 		          throw new SAFSObjectNotFoundException("Could not retrieve App Map "+ appMapName);
@@ -165,12 +189,12 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
             Log.info("SGU: winRec retrieved: "+ winRec);
 			SGuiObject winObj = (SGuiObject)map.getParentObject(windowName);
             Log.info("SGU: winObj retrieved: "+ winObj);
-            
+
             if(winObj != null && winObj.isDynamic())
             	winObj = null;
-            
+
             boolean notDone = true;
-            
+
 			while(winObj==null && notDone){
 				winObj = getWindowIdFromTitle(selenium,winRec);
 				if(winObj != null){
@@ -186,23 +210,23 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 		    		}
 		    	}
 			}
-			
+
 			if(winObj==null){
 				throw new SAFSObjectNotFoundException("Could not find Window "+ windowName);
 			}
-			
+
 			if(! selectWindow(selenium, winObj.getWindowId(), gSecTimeout))
 				throw new SAFSObjectNotFoundException("Could not find Window "+ windowName);
-			
-	    	//these may not be needed if seeking parent window only	    	
+
+	    	//these may not be needed if seeking parent window only
 	    	String compRec = null;
 	    	SGuiObject compObj = null;
-	    	
+
 	    	boolean isParent = windowName.equalsIgnoreCase(compName);
 	    	notDone = true;
 	    	boolean winValid = false;
 	    	boolean compValid = false;
-	    	
+
 	    	// get values if a child component is the target and not just the window
 	    	if(! isParent){
 		    	compRec = map.getChildGUIID(windowName, compName, true);
@@ -212,16 +236,16 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 	    	} else {
 	    		//throw NullPointerExceptions if not found/valid
 	    		trdata.setWindowGuiId(winRec);
-	    		trdata.setWindowTestObject(winObj);		
+	    		trdata.setWindowTestObject(winObj);
 				Log.info( "SGU Matched: "+ winObj.toString());
-				return 0;	
+				return 0;
 	    	}
-	    	
+
 	    	do{
 		    	Log.debug("SGU:Trying "+windowName+"."+compName+" using AppMap:"+appMapName);
-		    	
-		    	 
-		        // can add validate winObj still alive code in here  
+
+
+		        // can add validate winObj still alive code in here
 	    	    if (! winValid) {
 	    	    	notDone = true;
 	    			while(notDone){
@@ -245,7 +269,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 	    	    		compObj = null;
 	    	    		map.setParentObject(windowName, winObj);
 	    	    		map.setChildObject(windowName, compName, compObj);
-	    	    	}		    	    
+	    	    	}
 	    	    }
 		    	map.setParentObject(windowName, winObj);
 		    	Log.info("SGU Window: "+ winObj);
@@ -261,7 +285,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 						}catch(Exception e){
 							Log.debug("IGNORING SGU:getXPathString error:", e);
 						}
-						
+
 						// may throw NullPointerException?
 						if((compObj != null)&&(compObj.getLocator().equals(""))){
 							compObj = null; //If compObj is "", getXPathString did not find the object
@@ -270,9 +294,9 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 						if (compObj != null) map.setChildObject(windowName, compName, compObj);
 				    	Log.info("SGU Component: "+ compObj);
 		    		}
-			    	else{ 
-			    	    // can add validate compObj still alive code in here  
-			    	    if (! compValid) { 
+			    	else{
+			    	    // can add validate compObj still alive code in here
+			    	    if (! compValid) {
 			    	    	compValid = selenium.isElementPresent(compObj.getLocator()) && selenium.isVisible(compObj.getLocator());
 			    	    	if (! compValid) {
 		    	    			compObj = null;
@@ -281,7 +305,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 			    	    }
 			    	}
 		    	}
-		    	
+
 		    	notDone = (compObj == null);
 		    	if(notDone){
 		    		gSecTimeout--;
@@ -299,13 +323,13 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 		    		trdata.setCompGuiId(compRec);
 		    		trdata.setWindowGuiId(winRec);
 		    		trdata.setCompTestObject(compObj);
-		    		trdata.setWindowTestObject(winObj);		
+		    		trdata.setWindowTestObject(winObj);
 		    		trdata.setCompType(compObj.getCompType());
 		    	}
 	    	}while( notDone );
 //	    	 throw NullPointerExceptions if not found/valid
 			Log.info( "SGU Matched: "+ compObj.toString());
-			
+
 			return 0;
 	    }
 	    catch(Exception x){
@@ -344,7 +368,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 		}
 
 		//Selenium selenium = SApplicationMap.getSelenium(windowName);
-		
+
 		SGuiObject tobj = null;
 		if ((childName == null)||(windowName.equalsIgnoreCase(childName))){
 
@@ -412,68 +436,54 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 	public boolean selectWindow(Selenium selenium, String id, long timeout){
 
 		// workaround Selenium.selectWindow deadlock defect
-		//
-		ThreadedSelectWindow selectWindow = 
+		ThreadedSelectWindow selectWindow =
 			new ThreadedSelectWindow(Thread.currentThread(), selenium, id, timeout);
 		try{
 			selectWindow.start();
 			Thread.sleep((timeout * 1000)+ 1000); //backup timeout for deadlocks
 		} catch (Exception e){}
 		if(selectWindow.isSearching()){
-			Log.debug("SGU: selectWindow thread may have deadlocked after "+ 
+			Log.debug("SGU: selectWindow thread may have deadlocked after "+
 					  selectWindow.searchSeconds() +" seconds.");
 		}
 		// hasten cleanup
 		boolean found = selectWindow.isSelected();
 		selectWindow = null;
-		
+
 		if(!found){
 			WebDriver driver = null;
 			try{
-				if(selenium instanceof com.thoughtworks.selenium.webdriven.WebDriverBackedSelenium){
-					//WebDriver driver = ((WebDriverBackedSelenium) selenium).getUnderlyingWebDriver();
-					driver = ((com.thoughtworks.selenium.webdriven.WebDriverBackedSelenium) selenium).getWrappedDriver();
-				}
-			}catch(Throwable noclass){
-				Log.debug("SGU: selectWindow handling older selenium install "+ noclass.getClass().getSimpleName());
-				/** WebDriverBackedSelenium version 37 move to com.thoughtworks.selenium.webdriven in 42 selenium version
-				try{
-					if(selenium instanceof org.openqa.selenium.WebDriverBackedSelenium){
-						driver = ((org.openqa.selenium.WebDriverBackedSelenium) selenium).getWrappedDriver();
-					}
-				}catch(Throwable ignore){
-					Log.debug("SGU: selectWindow ignoring newer selenium install "+ ignore.getClass().getSimpleName());
-				}
-				**/
+				driver = getWebDriver(selenium);
+			}catch(Throwable th){
+				Log.debug("SGU: selectWindow: Failed to get WebDriver from Selenium, met "+ th.toString());
 			}
 			if (driver != null) {
 				driver.switchTo().window(driver.getWindowHandle());
 				found = true;
 			}
 		}
-		
-		Log.info("SGU: selectWindow found window? "+ found); 
+
+		Log.info("SGU: selectWindow found window? "+ found);
 		return found;
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Wraps Selenium.getAllWindowNames to handle Selenium defect.
 	 * Something buggy about later versions of Selenium.
 	 * Later versions return the window names in one comma-delimited string
-	 * in the first array item.  This wrapper will handle this situation 
+	 * in the first array item.  This wrapper will handle this situation
 	 * if present.
 	 * <p>
-	 * @return String array.  Empty window names are replaced with INVALID_WINDOWNAME 
-	 * in the array before it is returned.  An array of one "null" item will 
-	 * be returned if no windows were found. 
+	 * @return String array.  Empty window names are replaced with INVALID_WINDOWNAME
+	 * in the array before it is returned.  An array of one "null" item will
+	 * be returned if no windows were found.
 	 */
 	public String[] getAllWindowNames(Selenium selenium){
 		String[] names = null;
 		String comma = ",";
 		try{
-//			names = selenium.getAllWindowNames();
 			names = selenium.getAllWindowTitles();
 			// check for defect of comma-delimited single string
 			// catch will catch a NullPointerException
@@ -486,26 +496,13 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 		} catch(Exception e){
 			names = new String[1];
 			Log.debug("SGU: getAllWindowNames ignoring Exception: ", e);
-			
-			try{ // if com.thoughtworks.selenium.webdriven package is NOT present at runtime an Error/Exception will be thrown
-				if(selenium instanceof com.thoughtworks.selenium.webdriven.WebDriverBackedSelenium){
-//					WebDriver driver = ((WebDriverBackedSelenium) selenium).getUnderlyingWebDriver();
-//					WebDriver driver = ((com.thoughtworks.selenium.webdriven.WebDriverBackedSelenium) selenium).getWrappedDriver();
-					names[0] = ((com.thoughtworks.selenium.webdriven.WebDriverBackedSelenium) selenium).getWrappedDriver().getTitle();
-				}
-			}catch(Throwable notfound){
-				Log.debug("SGU: getAllWindowNames handling older selenium install "+ notfound.getClass().getSimpleName());
-				/** WebDriverBackedSelenium version 37 move to com.thoughtworks.selenium.webdriven in 42 selenium version
-				try{
-					if(selenium instanceof org.openqa.selenium.WebDriverBackedSelenium){
-						names[0] = ((org.openqa.selenium.WebDriverBackedSelenium) selenium).getWrappedDriver().getTitle();
-					}
-				}catch(Throwable ignore){
-					Log.debug("SGU: getAllWindowNames ignoring newer package name change "+ ignore.getClass().getSimpleName());
-				}
-				*/
+
+			try{
+				names[0] = getWebDriver(selenium).getTitle();
+			}catch(Throwable th){
+				Log.debug("SGU: getAllWindowNames: Failed to get WebDriver from Selenium, met "+ th.toString());
 			}
-			
+
 		} finally {
 			String thename = null;
 			for(int i = 0; i < names.length; i++){
@@ -519,7 +516,44 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 		}
 		return names;
 	}
-	
+
+	//Selenium 1.0, the class 'WebDriverBackedSelenium' is in package 'org.openqa.selenium', it is org.openqa.selenium.WebDriverBackedSelenium;
+	//getUnderlyingWebDriver() is the method name to get WebDriver
+	//From selenium 2.42, the class 'WebDriverBackedSelenium' has been moved to another package, it is com.thoughtworks.selenium.webdriven.WebDriverBackedSelenium
+	//getWrappedDriver() is the method name to get WebDriver
+	//To avoid the compilation error, we use "Java Reflection" to get the method directly
+	private static final String METHOD_GET_WEBDRIVER_V1 = "getUnderlyingWebDriver";
+	private static final String METHOD_GET_WEBDRIVER_V2 = "getWrappedDriver";
+
+	private WebDriver getWebDriver(Selenium selenium){//The Selenium should be a WebDriverBackedSelenium
+		if(selenium==null) return null;
+		String debugmsg = StringUtils.debugmsg(false);
+
+		WebDriver driver = null;
+		Method getDriverMethod = null;
+
+		try{
+			getDriverMethod = selenium.getClass().getMethod(METHOD_GET_WEBDRIVER_V2);
+		}catch(Exception e){
+			IndependantLog.error(debugmsg+"Met "+e.toString());
+			try {
+				getDriverMethod = selenium.getClass().getMethod(METHOD_GET_WEBDRIVER_V1);
+			} catch (Exception e1) {
+				IndependantLog.error(debugmsg+"Met "+e1.toString());
+			}
+		}
+
+		if(getDriverMethod!=null){
+			try {
+				driver = (WebDriver) getDriverMethod.invoke(selenium);
+			} catch (Exception e) {
+				IndependantLog.error(debugmsg+"Met "+e.toString());
+			}
+		}
+
+		return driver;
+	}
+
 	/**
 	 * Get's the window's id and returns it in the form of an SGuiObject
 	 * @param selenium current selenium object
@@ -560,10 +594,10 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 							try {
 								Thread.sleep(1000);
 								time++;
-							} catch (InterruptedException e1) {}			
+							} catch (InterruptedException e1) {}
 						}
 					} while(!titleObtained && time < 5);
-										
+
 					if( titleObtained && checkTitle(title,winRec)){
 						Log.debug("SGU: Selecting window: '" + title + "' with id: '" + window + "'");
 						return new SGuiObject("//HTML[1]","Window",window,isDynamic);
@@ -577,7 +611,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Checks whether the window title matches the regular expression contained by the winRec
 	 * @param title window title obtained by Selenium
@@ -585,18 +619,19 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 	 * @return true if matched, false otherwise
 	 */
 	private boolean checkTitle(String title, String winRec){
-		String aRec = org.safs.StringUtils.convertWildcardsToRegularExpression(winRec);		
+		String aRec = org.safs.StringUtils.convertWildcardsToRegularExpression(winRec);
 		try{ return org.safs.StringUtils.matchRegex(aRec, title);}
 		catch(SAFSException e){return false;}
 	}
 	/**
-	 * Attempts to "activate" or give focus to the specified window/object via the remote 
+	 * Attempts to "activate" or give focus to the specified window/object via the remote
 	 * AUT JVM proxies.
-	 * 
+	 *
 	 * @return 0 on success.
 	 * @throws SAFSObjectNotFoundException if the specified component cannot be found.
 	 * @see org.safs.DDGUIUtilities#setActiveWindow(String,String,String)
 	 */
+	@Override
 	public int setActiveWindow (String appMapName, String windowName, String compName)
 	                             throws SAFSObjectNotFoundException {
     	Log.info("SGU:Activating "+windowName+"."+compName+" from AppMap:"+appMapName);
@@ -611,16 +646,16 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 	    	if(!isParent){
 	    		compObj = map.getChildObject(windowName, compName);
 	    	   	// if not previously found then find it with no timeout value
-			    // routine will pass thru exception thrown from waitForObject                         	
+			    // routine will pass thru exception thrown from waitForObject
 		    	if (compObj == null) waitForObject(appMapName, windowName, compName, 0);
 		    	compObj = map.getChildObject(windowName, compName);
 		    	if(compObj == null) throw new NullPointerException();
 	    	}
-	    	
-	    	
-	    	
+
+
+
 	    	if (winObj == null) throw new NullPointerException();
-			
+
 			// server setActive or server.invoke, etc..
 	    	selectWindow(selenium, winObj.getWindowId(),5);
 			return 0;
@@ -633,7 +668,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
     	}
     	catch(SAFSObjectNotFoundException nf){ throw nf; }
 	}
-	
+
 	/**
 	 * Selects the top frame if its not already selected
 	 * @param selenium Current selenium object
@@ -644,7 +679,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 			frameSwitched = false;
 		}
 	}
-	
+
 	private String _getProperty(Selenium selenium, String xpath, String property){
 		String val = null;
 		try { val = selenium.getAttribute(xpath+"@"+property);}
@@ -653,9 +688,9 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 				val = null;
 			}
 		}
-		return val;		
+		return val;
 	}
-	
+
 	/**
 	 * Return the value of a specific attribute/property
 	 * @param selenium current Selenium object
@@ -665,9 +700,9 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 	 */
 	public String getProperty(Selenium selenium, String xpath, String attribute){
 		String val = null;
-		if( attribute.equalsIgnoreCase("text") || 
+		if( attribute.equalsIgnoreCase("text") ||
 			attribute.equalsIgnoreCase("innerText")){
-			
+
 			val = _getProperty(selenium, xpath, "innerText");
 			if(val==null) val = _getProperty(selenium, xpath, "innertext");
 			if(val==null) val = _getProperty(selenium, xpath, "textContent");
@@ -681,7 +716,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 		}
 		return val;
 	}
-	
+
 	/**
 	 * Returns the xpath of the component represented by a robot recognition string
 	 * @param recString robot recognition string
@@ -691,43 +726,43 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 	 */
 	public SGuiObject getGuiObject(String recString,Selenium selenium, String windowId){
 		String xPath = "";
-		
+
 		selectTopFrame(selenium);
-		
+
 		boolean isDynamic = ApplicationMap.isGUIIDDynamic(recString);
 		recString = ApplicationMap.extractTaggedGUIID(recString);
 		recString = recString.replaceAll("\"",""); // removes extra " in the recognition string.
-		if (!(recString.toUpperCase().startsWith("TYPE="))){			
+		if (!(recString.toUpperCase().startsWith("TYPE="))){
 			recString = "Type=HTML;"+ recString;
 		}
 		String [] parts = recString.split(";\\\\;");
-		
+
 		domParser = getDocumentParser(selenium);
-		
+
 		String url = domParser.getUrl();
 		String type = "";
 		Pattern typePattern = Pattern.compile("Type=(.+?)$");
 		Pattern idPattern = Pattern.compile("(.+?)=(.+?)\"?$");
 		for(int i = 0; i < parts.length; i++){
 			String [] subParts = parts[i].split(";");
-			
+
 			Matcher typeMatcher = typePattern.matcher(subParts[0]);
 			Log.debug("SGU Pattern Matching subPart:"+ subParts[0]);
-			
+
 			if(typeMatcher.find()){
 				type = typeMatcher.group(1);
 			} else {
 				type="HTML";
 			}
 			Log.debug("SGU typeMatcher matching: "+ type);
-			
-			
+
+
 			String [] idTypes = new String[subParts.length-1];
 			String [] ids = new String[subParts.length-1];
 			for(int j = 1; j < subParts.length; j++){
 				Matcher idMatcher = idPattern.matcher(subParts[j]);
 				Log.debug("SGU SubPart Matching: "+ subParts[j]);
-				
+
 				if(idMatcher.find()){
 					idTypes[j-1] = idMatcher.group(1);
 					ids[j-1] = idMatcher.group(2);
@@ -736,7 +771,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 					Log.debug("SGU: ERROR: match not found for: " + subParts[j]);
 				}
 			}
-			
+
 			Document doc = domParser.getDocument(url, false);
 			String xPart = typeToXPath(doc,type,idTypes,ids,selenium);
 			HtmlFrameComp precedingFrame = null;
@@ -764,12 +799,12 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 		}
 
 		xPath = SeleniumGUIUtilities.normalizeXPath(xPath);
-		
+
 		SGuiObject co = new SGuiObject(xPath,type,windowId,isDynamic);
 		Log.debug("XPATH SCRIPT RETURNED: " + co.getLocator() );
 		return co;
 	}
-	
+
 	public static String normalizeXPath(String xPath){
 		xPath = xPath.trim();
 		Log.debug("Before normalization, xpath="+xPath);
@@ -777,29 +812,29 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 		if(xPath.lastIndexOf("//") == xPath.length()-2 && xPath.length() > 0){
 			xPath = xPath.substring(0,xPath.length()-2);
 		}
-		
+
 		//For selenium, the xpath must start with "//" so that is can be processed.
-		//Without an explicit locator prefix, Selenium uses the following default strategies: 
+		//Without an explicit locator prefix, Selenium uses the following default strategies:
 		//xpath, for locators starting with "//"
 		if(xPath.startsWith("/")){
 			if(xPath.length()>1 && !xPath.substring(1,1).equals("/")){
-				xPath = "/"+xPath;				
+				xPath = "/"+xPath;
 			}
 		}else{
 			xPath = "//"+xPath;
 		}
-		
+
 		Log.debug("After normalization, xpath="+xPath);
-		
+
 		return xPath;
 	}
-	
+
 	public static Matcher matchPattern(Pattern pattern, String xpath){
 		Matcher m = pattern.matcher(xpath);
 
 		return m;
 	}
-	
+
 	//TODO If the frame is not in format /HTML/FRAMSET/FRAME[1]/HTML/BODY
 	//but /HTML/FRAMSET/FRAME/HTML/BODY, This function will give the wrong RS, need to be improved.
 	protected String getFramePath(String xpath){
@@ -813,30 +848,30 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 			return "";
 		}
 	}
-	
+
 	/**
 	 * Selects any frames that are part of the xpath and <br>
 	 * returns the last component's xpath<br>
-	 * 
+	 *
 	 * @param xpath xpath of the frames and component that needs to be interacted with
 	 * @param selenium current selenium object
 	 * @return the last component's xpath
 	 */
 	protected String navigateFrames(String xpath, Selenium selenium){
 		String childXpath = null;
-		
+
 		HtmlFrameComp frameComp = navigateFrames(null, xpath,selenium, null);
 		if(frameComp != null){
 			childXpath = frameComp.getChildXpath();
 		}
-		
+
 		return childXpath;
 	}
-	
+
 	/**
 	 * Selects any frames that are part of the xpath and <br>
 	 * returns the last Frame preceding final component xpath<br>
-	 * 
+	 *
 	 * @param url   from where the xpath will be parsed, that is, the page indicated by url
 	 *              should contain the element described by xpath
 	 * @param xpath xpath of the frames and component that needs to be interacted with
@@ -851,16 +886,16 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 	protected HtmlFrameComp navigateFrames(String url, String xpath, Selenium selenium){
 		return navigateFrames(url, xpath,selenium, null);
 	}
-	
+
 	/**
 	 * Selects any frames that are part of the xpath and <br>
 	 * returns the last Frame preceding final component xpath<br>
-	 * 
+	 *
 	 * @param url   from where the xpath will be parsed, that is, the page indicated by url
 	 *              should contain the element described by xpath
 	 * @param xpath xpath of the frames and component that needs to be interacted with
 	 * @param selenium current selenium object
-	 * @param boundsOut object that will contain the bounds of the component after its found 
+	 * @param boundsOut object that will contain the bounds of the component after its found
 	 * @return HtmlFrameComp, it contains<br>
 	 *         src:               the url (the last frame's src), where the last XPATH is located<br>
 	 *         locator:           the frame's locator recognized by selenium<br>
@@ -870,7 +905,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 	 */
 	protected HtmlFrameComp navigateFrames(String url, String xpath, Selenium selenium, Rectangle boundsOut){
 		selectTopFrame(selenium);
-		
+
 		if(url==null){
 			//We suppose that the xpath is to be searched within the current page, that is,
 			//the url stored in the HtmlDomParser.
@@ -886,17 +921,17 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 		}else{
 			frame = new HtmlFrameComp(url,xpath);
 		}
-		
+
 		//IMPORTANT!!!, If xpath does not contain FRAME, we should return directly<br>
 		//and avoid to call navigateFramesR(), which will cost a lot of time<br>
 		Matcher m = FRAME_PATTERN.matcher(frame.getChildXpath());
 		if(!m.find()){
 			return frame;
 		}
-		
+
 		return navigateFramesR(frame,selenium, boundsOut);
 	}
-	
+
 	/**
 	 * Helper method for the navigateFrames() method
 	 * @param frame   Contains the information for navigation. Its field childXpath is to be navigated.
@@ -908,7 +943,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 	 *         fullXpath:         the full xpath to represent the last preceding frame<br>
 	 *         recognitionString: the recognition string of preceding frames<br>
 	 *         childXpath:        last part XPATH, without preceding frame's xpath<br><br>
-	 *         
+	 *
 	 *         For example:<br>
 	 *         1. The childXpath does NOT contain FRAME<br>
 	 *            Input frame:
@@ -918,7 +953,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 	 *            recognitionString=""<br>
 	 *            childXpath="/HTML/BODY/TABLE"<br>
 	 *            The output frame will be exactly the same object.<br><br>
-	 *            
+	 *
 	 *         2. The childXpath DOES contain some FRAMEs<br>
 	 *            Input frame:
 	 *            src="http://tadsrv/safs/"<br>
@@ -926,7 +961,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 	 *            fullXpath=""<br>
 	 *            recognitionString=""<br>
 	 *            childXpath="/HTML/FRAMESET/FRAME[1]/HTML/BODY/TABLE"<br><br>
-	 *            
+	 *
 	 *            We assume that the src of HTML/FRAMESET/FRAME[1] is 'framePage.htm'<br>
 	 *            We assume that the name of HTML/FRAMESET/FRAME[1] is 'frame1'<br>
 	 *            Output frame will be:
@@ -952,7 +987,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 			Log.debug(debugmsg+"  the url is null, can not continue!!!");
 			return frame;
 		}
-		
+
 		Matcher m = FRAME_PATTERN.matcher(xpath);
 		if(m.find()){
 			String firstFrameXpath = m.group(1);
@@ -964,7 +999,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 					boundsOut.x += frameBounds.x;
 					boundsOut.y += frameBounds.y;
 				}
-				
+
 //				String frameName = selenium.getEval("SAFSgetAttribute('"+g+"', 'name');");
 				document = parser.getDocument(url, false);
 				String frameName = parser.getAttribute(document,firstFrameXpath, "name");
@@ -977,7 +1012,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 				childFrame.setLocator(locator);
 				selenium.selectFrame(locator);
 				Log.debug(debugmsg+", switch to frame "+locator);
-				
+
 				if(frameRS==null){
 					frameRS = "";
 				}
@@ -990,31 +1025,31 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 				selenium.selectFrame(firstFrameXpath);
 				frameSwitched = true;
 			}
-			
+
 			String childFrameURL = parser.getFrameSrcURL(document, firstFrameXpath, url);
 			String fullFrameXpath = frame.getFullXpath()+firstFrameXpath;
 			String childFrameChildXpath = xpath.substring(firstFrameXpath.length());
-			
+
 			childFrame.setSrc(childFrameURL);
 			childFrame.setFullXpath(fullFrameXpath);
 			childFrame.setRecognitionString(frameRS);
 			childFrame.setChildXpath(childFrameChildXpath);
 			//Put the frame to the cache
 			addPrefixingFrameToCache(fullFrameXpath,childFrame);
-			
+
 			if(childFrameURL.equals(url)){
 				Log.warn("Frame '"+firstFrameXpath+"', it does NOT has attribut 'src'.");
 				Log.warn("Frame '"+firstFrameXpath+"' does NOT contain any content.");
 				return childFrame;
 			}
-			
+
 			return navigateFramesR(childFrame,selenium, boundsOut);
 		} else {
 			Log.debug("SGU: navigateFramesR found no FRAME to evaluate.");
 			return frame;
 		}
 	}
-	
+
 	/**
 	 * Returns the bounds of a component as a Rectangle object
 	 * @param o object describing the component
@@ -1024,7 +1059,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 	protected Rectangle getComponentBounds(SGuiObject o, Selenium selenium){
 		return getComponentBounds(o.getLocator(), selenium);
 	}
-	
+
 	/**
 	 * Returns the absolute bounds of a component on the screen as a Rectangle object
 	 * @param xpath xpath string describing the component
@@ -1042,7 +1077,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 		String boundsSeparator = "#";
 		int browser_left = 0;
 		int browser_top = 0;
-		
+
 		try{
 //			String xpathBoundsSeparator = selenium.getEval("SAFSGetBoundsSeparator();");
 			String xpathBoundsSeparator = parser.getBoundsSeparator();
@@ -1053,7 +1088,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 		}catch(Exception e){
 			Log.debug("SGU: SAFSGetBoundsSeparator() Can NOT get boundsSeparator.");
 		}
-		
+
 		try{
 //			temp = selenium.getEval("SAFSgetBrowserClientScreenPosition();");
 			temp = parser.getBrowserClientScreenPosition(selenium);
@@ -1064,7 +1099,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 		}catch(Exception fx){
 			Log.debug("SGU: IGNORING SAFSgetBrowserClientScreenPosition() eval Exception.", fx);
 		}
-		
+
 		int scrollLeft = 0;
 		int scrollTop = 0;
 		String[] scrollInfo = null;
@@ -1078,11 +1113,11 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 			scrollTop = Integer.parseInt(scrollInfo[3]);
 		}catch(Exception fx){
 			Log.debug("SGU: IGNORING SAFSgetClientScrollInfo() eval Exception.", fx);
-		}		
-		
+		}
+
 		precedingFrame = navigateFrames(domParser.getUrl(), xpath, selenium, frameBounds);
 		xend = precedingFrame.getChildXpath();
-		
+
 		if(frameBounds.x == 0 && frameBounds.y == 0){
 			frameBounds.x = browser_left;
 			frameBounds.y = browser_top;
@@ -1109,7 +1144,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 		}
 		return compRect;
 	}
-	
+
 	/**
 	 * Helper method for the getXpathString method
 	 * @param type component type
@@ -1120,7 +1155,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 	 */
 	private String typeToXPath(Document doc, String type, String [] idTypes, String [] ids,Selenium selenium){
 		String xPath = "";
-		
+
 		if(type.equalsIgnoreCase("HTMLFrame")){
 			String[] tags = {"FRAME","IFRAME"};
 			xPath = this.buildXPathAttributes(doc, idTypes, ids, tags, selenium);
@@ -1211,10 +1246,10 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 			Log.warn("Unrecognized: " + type);
 			Log.debug("SGU:typeToXpath Unrecognized component 'type': "+ type);
 		}
-		
+
 		return xPath;
 	}
-	
+
 	/**
 	 * Helper method for getXpathString()
 	 * @param idTypes attribute types, this is SAFS-Robot attribute's type
@@ -1227,7 +1262,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 		String [] tags = {tag};
 		return buildXPathAttributes(doc, idTypes, ids, tags, selenium);
 	}
-	
+
 	/**
 	 * Helper method for getXpathString()
 	 * @param idTypes attribute types, this is SAFS-Robot attribute's type
@@ -1281,7 +1316,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 		}
 		return xPath;
 	}
-	
+
 	/**
 	 * getXpath() helper method
 	 * @param document, from which document to search the matching element
@@ -1296,10 +1331,10 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 
 		String xpath = parser.getXpath(document, tags, attributes, index, false, true);
 		Log.debug("SGU DocumentParser getXpath returned: "+ xpath);
-		
+
 		return xpath;
 	}
-	
+
 	/**
 	 * <em>Purpose:</em>  Create a new HtmlDoParser, it will replace the older one.
 	 * @param selenium
@@ -1311,7 +1346,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 			return null;
 		}
 		domParser = new DocumentParser(selenium,this);
-		
+
 		return domParser;
 	}
 
@@ -1325,7 +1360,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 			Log.error("The parameter selenium should NOT be null");
 			return null;
 		}
-		
+
 		if(domParser==null){
 			domParser = new DocumentParser(selenium,this);
 		}else{
@@ -1335,9 +1370,9 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 					//if it is different than that of the main url stored in the documentParser
 					//There are 2 situations
 					//1. If we have navigated between the frames within the same page ( for example,
-					//   calling selenium.selectFrame(frameLocator) ). Although getLocation() will return 
+					//   calling selenium.selectFrame(frameLocator) ). Although getLocation() will return
 					//   a different url, but we do NOT need to change the main url of DocumentParser.
-					
+
 					//2. If we click a link to visit another web page.
 					//   getLocation() will return a different url and we need to change the main url of DocumentParser.
 					Log.debug("selenium.getLocation(): "+selenium.getLocation());
@@ -1351,7 +1386,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 				Log.warn("Exception occur "+e.getMessage());
 			}
 		}
-		
+
 		return domParser;
 	}
 
@@ -1372,13 +1407,13 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 			Log.error("Can NOT get the document parser, it is null");
 			return null;
 		}
-		
+
 		Log.debug("Object's selenium xpath is "+xpath+" ; try to get value for attribute "+attribute);
 		value = parser.getAttribute(parser.getUrl(), xpath, attribute);
-		
+
 		return value;
 	}
-	
+
 	/**
 	 * <em>Purpose:</em>	Return the attributes for an element indicated by xpath
 	 * <em>Note:</em>		This method will try to DocumentParser to get the properties<br>
@@ -1386,7 +1421,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 	 * @param xpath         Xpath to represent the element in html page
 	 * @return              The attributes
 	 * @see org.safs.selenium.DocumentParser#getAttributes(String, String)
-	 */	
+	 */
 	public HashMap getAttributes(Selenium selenium, String xpath){
 		HashMap value = null;
 		DocumentParser parser = getDocumentParser(selenium);
@@ -1394,13 +1429,13 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 			Log.error("Can NOT get the document parser, it is null");
 			return null;
 		}
-		
+
 		Log.debug("Object's selenium xpath is "+xpath+" ; try to get all its attributes ");
 		value = parser.getAttributes(parser.getUrl(), xpath);
-		
+
 		return value;
 	}
-	
+
 	/**
 	 * Gets all the xpaths for a certain html tag
 	 * @param tag html tag of the components to get the xpaths for
@@ -1422,22 +1457,26 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 		return allXPaths.toArray(new String[0]);
 	}
 
+	@Override
 	public List<?> extractListItems(Object obj, String countProp, String itemProp)
 	throws SAFSException {
 		//TODO Auto-generated method stub
 		return null;
 	}
 
+	@Override
 	public Tree extractMenuBarItems(Object obj) throws SAFSException {
 		//TODO Auto-generated method stub
 		return null;
 	}
 
+	@Override
 	public Tree extractMenuItems(Object obj) throws SAFSException {
 		//TODO Auto-generated method stub
 		return null;
 	}
 
+	@Override
 	public Object findPropertyMatchedChild(Object obj, String property,
 			String bench, boolean exactMatch)
 	throws SAFSObjectNotFoundException {
@@ -1445,17 +1484,18 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 		return null;
 	}
 
+	@Override
 	public String getListItem(Object obj, int i, String itemProp)
 	throws SAFSException {
 		//TODO Auto-generated method stub
 		return null;
-	}	
-	
+	}
+
     private native boolean focusWindowByCaption(String title);
     private native void maximizeWindowByCaption(String title);
     private native void minimizeWindowByCaption(String title);
     private native void restoreWindowByCaption(String title);
-    
+
     static {
     	System.loadLibrary("ComponentFunctions");
     }
@@ -1474,7 +1514,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 		}
 		return focused;
 	}
-	
+
 	/**
 	 * Uses Selenium to focus the window with the given window id.
 	 * @param windowId  window's name or title
@@ -1483,7 +1523,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 	 */
 	public boolean setWindowFocus(String windowId, Selenium selenium){
 		boolean focused=false;
-		
+
 		try{
 			if(selectWindow(selenium, windowId, 1)){
 				selenium.windowFocus();
@@ -1501,17 +1541,17 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 		}
 		return focused;
 	}
-	
+
 	/**
 	 * Uses Selenium to maximize the window with the given window id.<br>
 	 * <em>Note:</em>   The window can't be resotre after it is maximized by this method.
 	 * @param windowId  window's name or title
 	 * @param selenium  the instance of Selenium object
 	 * @return true if window was maximized, false otherwise
-	 */	
+	 */
 	public boolean maximizeWindow(String windowId, Selenium selenium){
 		boolean maximized = false;
-		
+
 		try{
 			if(selectWindow(selenium, windowId, 1)){
 				selenium.windowMaximize();
@@ -1521,10 +1561,10 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 			Log.debug("Maximize fail: "+e.getMessage());
 			maximized = false;
 		}
-		
+
 		return maximized;
 	}
-	
+
 	/**
 	 * Uses ComponentFunctions.dll to maximize the window with the given recognition string.
 	 * @param winRec window to be maximize
@@ -1536,7 +1576,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 			Thread.sleep(500);
 		} catch (InterruptedException e) {}
 	}
-	
+
 	/**
 	 * Uses ComponentFunctions.dll to maximize the window with the given recognition string.
 	 * @param winRec window to be maximize
@@ -1548,7 +1588,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 			Thread.sleep(500);
 		} catch (InterruptedException e) {}
 	}
-	
+
 	/**
 	 * Uses ComponentFunctions.dll to maximize the window with the given recognition string.
 	 * @param winRec window to be maximize
@@ -1560,7 +1600,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 			Thread.sleep(500);
 		} catch (InterruptedException e) {}
 	}
-	
+
 	private String parseWinRecForRegex(String winRec){
 		if(winRec.indexOf(";")> -1){
 			winRec = (winRec.split(";")[1]).split("=")[1];
@@ -1577,7 +1617,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 		}
 		return winRec;
 	}
-	
+
 	/**
 	 * This method will try to match the longest-frame-prefix-xpath for the input xpath.<br>
 	 * We try the key (xpathOfFrame) one by one of cache frames, the keys are descending ordered<br>
@@ -1595,7 +1635,7 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 		Iterator<String> iter = null;
 		String frameXpath = null;
 		String childXpath = null;
-		
+
 		//frames is a TreeMap, it stores the frame's xpath as key in descending order
 		//according to its length
 		if(frames!=null && !frames.isEmpty()){
@@ -1618,21 +1658,21 @@ public class SeleniumGUIUtilities extends DDGUIUtilities {
 							frameComp.setFullXpath(frameXpath);
 							Log.error("SGU.getPrefixingFrame() ############# key not match frame's full xpath");
 						}
-						break;	
+						break;
 					}
 				}
 			}
 		}
-		
+
 		return frameComp;
 	}
-	
+
 	private void addPrefixingFrameToCache(String xpath, HtmlFrameComp frame){
 		if(!frames.containsKey(xpath)){
 			frames.put(xpath, frame);
 		}
 	}
-	
+
 	public void clearFramesCache(){
 		frames.clear();
 	}

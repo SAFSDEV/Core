@@ -1,7 +1,20 @@
-/**********************************************************************************************
- * Copyright 2007 SAS Institute
- * GNU General Public License (GPL) http://www.opensource.org/licenses/gpl-license.php
- *********************************************************************************************/
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.text;
 
 /*******************************************************************************************
@@ -711,7 +724,7 @@ public class FileUtilities
 	      	reader.close();
 	      }
 	    }
-	    return (String[]) buf.toArray(new String[0]);
+	    return buf.toArray(new String[0]);
 	}
 
 	private static boolean endsWith(String eval, String[] endings, boolean isCaseSensitive){
@@ -1025,8 +1038,8 @@ public class FileUtilities
 					}
 					catch(NullPointerException np){;}
 					catch(Exception x){
-						throw new FileNotFoundException(
-								"Specified install path could not be created.");
+						IndependantLog.warn("FileUtilities.unzipJAR(): met Exception "+x.getMessage());
+						throw new FileNotFoundException("Specified install path could not be created.");
 					}
 				}
 
@@ -1134,12 +1147,13 @@ public class FileUtilities
 				    out.flush();
 				    in.close();
 				    out.close();
-				    System.out.println("File copied from " + srcFile.getPath() + " to " + destFile.getPath());
+				    IndependantLog.debug("File copied from " + srcFile.getPath() + " to " + destFile.getPath());
 		        }
 		    }
 		}else{
-		    System.out.println("CopyDirectoryRecursively ONLY acces Directory arguments.");
-		    throw new IllegalArgumentException("CopyDirectoryRecursively ONLY acces Directory arguments.");
+		    String message = "CopyDirectoryRecursively ONLY acces Directory arguments.";
+		    IndependantLog.debug(message);
+		    throw new IllegalArgumentException(message);
 		}
 		return 0;
 	}
@@ -1372,6 +1386,7 @@ public class FileUtilities
 		 * It can contain "R", "H", "S", "A", "D", "V", "N".<br>
 		 * For example: "R S H" means ReadOnly, System, Hidden.
 		 */
+		@Override
 		public String toString(){
 			StringBuffer sb = new StringBuffer();
 
@@ -1410,6 +1425,7 @@ public class FileUtilities
 
 		public static boolean isNormalFile(int attributes){return attributes==Type.NORMALFILE.value; }
 
+		@Override
 		public boolean equals(Object attr){
 			if(attr==null) return false;
 			if(attr==this) return true;
@@ -1855,6 +1871,7 @@ public class FileUtilities
 			this.expectedAttributes = attribute;
 		}
 
+		@Override
 		public boolean accept(File pathname) {
 			String debugmsg = StringUtils.debugmsg(false);
 
@@ -1901,5 +1918,17 @@ public class FileUtilities
 			return false;
 		}
 	}
+
+	public static final String SUFFIX_PDF_FILE = ".pdf";
+
+	public static boolean isPDF(String filename){
+		boolean isPDF = false;
+
+		if(filename!=null && !filename.isEmpty()){
+			isPDF = filename.toLowerCase().trim().endsWith(SUFFIX_PDF_FILE);
+		}
+		return isPDF;
+	}
+
 }
 

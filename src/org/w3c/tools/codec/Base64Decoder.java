@@ -1,4 +1,4 @@
-/**
+/*
     W3C Base64 Codec: http://www.w3.org/Jigsaw/ 
 <p>
     Copyright 2002 World Wide Web Consortium, (Massachusetts Institute of Technology, 

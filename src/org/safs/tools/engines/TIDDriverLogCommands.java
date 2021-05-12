@@ -1,3 +1,20 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.tools.engines;
 
 import org.safs.Log;
@@ -6,15 +23,9 @@ import org.safs.TestRecordHelper;
 import org.safs.logging.AbstractLogFacility;
 import org.safs.text.GENStrings;
 import org.safs.tools.UniqueStringID;
-import org.safs.tools.input.MapsInterface;
-import org.safs.tools.input.UniqueStringMapInfo;
-import org.safs.tools.input.UniqueRecordIDInterface;
-import org.safs.tools.input.InputInterface;
-import org.safs.tools.input.InputRecordInterface;
-import org.safs.tools.input.UniqueStringRecordID ;
-import org.safs.tools.logs.LogsInterface;
 import org.safs.tools.drivers.DriverConstant;
 import org.safs.tools.drivers.DriverInterface;
+import org.safs.tools.logs.LogsInterface;
 
 /**
  * Provides local in-process support for DriverLogCommands.  This class is
@@ -25,7 +36,7 @@ import org.safs.tools.drivers.DriverInterface;
  * available via the DriverInterface configuration).
  * @author Carl Nagle 		DEC 14, 2005 	Refactored with DriverConfiguredSTAFInterface superclass
  *         Bob Lawler 		Jan 18, 2006 	Updated cmdLogMessage to better handle empty descriptions (RJL)
- * 		   LeiWang		Apr 08, 2008	Add SuspendLogging and ResumeLogging
+ * 		   Lei Wang		Apr 08, 2008	Add SuspendLogging and ResumeLogging
  * 		   Carl Nagle		FEB 04, 2010	Added missing SuspendLogging and ResumeLogging messages
  *         Carl Nagle       SEP 17, 2014 Fixing SAFS Crashes due to incomplete initialization.
  */
@@ -48,10 +59,10 @@ public class TIDDriverLogCommands extends GenericEngine {
 	static final String COMMAND_LOGFAILUREOK = "LogFailureOK";
 	/** "LogWarningOK" */
 	static final String COMMAND_LOGWARNINGOK = "LogWarningOK";
-	
+
 	static final String SUSPENDLOGGING		 = "SuspendLogging";
 	static final String RESUMELOGGING 		 = "ResumeLogging";
-	
+
 	// END: SUPPORTED DRIVER COMMANDS
 
 	/**
@@ -74,6 +85,7 @@ public class TIDDriverLogCommands extends GenericEngine {
 	/**
 	 * @see GenericEngine#launchInterface(Object)
 	 */
+	@Override
 	public void launchInterface(Object configInfo){
 		super.launchInterface(configInfo);
 		try{
@@ -89,6 +101,7 @@ public class TIDDriverLogCommands extends GenericEngine {
 	/**
 	 * Process the record present in the provided testRecordData.
 	 */
+	@Override
 	public long processRecord (TestRecordHelper testRecordData){
 
 		this.testRecordData = testRecordData;
@@ -112,7 +125,7 @@ public class TIDDriverLogCommands extends GenericEngine {
 
 	/**
 	 * LogMessage DriverCommand processing
-	 * 
+	 *
 	 * updates:
 	 * 01.18.2006 (Bob Lawler) - better handle empty descriptions (RJL)
 	 */
@@ -144,7 +157,7 @@ public class TIDDriverLogCommands extends GenericEngine {
 				return setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
 		}
 	}
-	
+
 	private long suspendLogging(){
 		LogsInterface log = driver.getLogsInterface();
 		String logfac = null;
@@ -158,15 +171,15 @@ public class TIDDriverLogCommands extends GenericEngine {
 		if(logfac==null){
 			message = GENStrings.text(GENStrings.LOGGING_SUSPENDED, "SUSPENDING ALL LOGGING.");
 			logMessage(message, null, AbstractLogFacility.GENERIC_MESSAGE);
-			log.suspendAllLogs();			
+			log.suspendAllLogs();
 		}else{
 			message = GENStrings.convert(GENStrings.LOGNAME_SUSPENDED, "SUSPENDING LOGNAME '"+ logfac +"'", logfac);
 			logMessage(message, null, AbstractLogFacility.GENERIC_MESSAGE);
-			log.suspendLog(new UniqueStringID(logfac));			
+			log.suspendLog(new UniqueStringID(logfac));
 		}
 		return setTRDStatus(testRecordData, DriverConstant.STATUS_NO_SCRIPT_FAILURE);
 	}
-	
+
 	private long resumeLogging(){
 		LogsInterface log = driver.getLogsInterface();
 		String logfac = null;
@@ -178,11 +191,11 @@ public class TIDDriverLogCommands extends GenericEngine {
 		catch(SAFSNullPointerException npx){;} //should never happen by this point
 		catch(IndexOutOfBoundsException ibx){;}
 		if(logfac==null){
-			log.resumeAllLogs();			
+			log.resumeAllLogs();
 			message = GENStrings.text(GENStrings.LOGGING_RESUMED, "RESUMING ALL LOGGING.");
 			logMessage(message, null, AbstractLogFacility.GENERIC_MESSAGE);
 		}else{
-			log.resumeLog(new UniqueStringID(logfac));			
+			log.resumeLog(new UniqueStringID(logfac));
 			message = GENStrings.convert(GENStrings.LOGNAME_RESUMED, "RESUMING LOGNAME '"+ logfac +"'", logfac);
 			logMessage(message, null, AbstractLogFacility.GENERIC_MESSAGE);
 		}

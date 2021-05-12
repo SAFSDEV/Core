@@ -1,14 +1,19 @@
 #!/bin/sh
 #SetupSAFS.sh
-. ./sharedFunctions.sh
-. ./sharedVariables.sh
+
+#Use a dot at the begining to execute the script in current shell, so that the environment variable will be kept in current shell
+. ./sharedFunctions.sh # identical to "source ./sharedFunctions.sh"
+. ./sharedVariables.sh # identical to "source ./sharedVariables.sh"
 
 #This script supply an inter-active way to help user install STAF and SAFS
-#User can decide to install SAFS STAF or not, and their install directory
+#User can decide to install SAFS/STAF or not, and where to install them
 #
-#This script will also create a file SAFSEnv.sh, which is used to setup SAFS environment
+#This script will also create a file SAFSEnv.sh, which is used to setup SAFS environments 
+#SAFSDIR STAFDIR JAVA_HOME PATH CLASSPATH TESSDATA_PREFIX GOCRDATA_DIR etc. 
+#It is normally created in the folder /usr/local/safs/bin, we can call it as below:
+#. /usr/local/safs/bin/SAFSEnv.sh
 #
-#This script will modify /etc/skel/.bash_profile, the original content will be saved to
+#This script will modify /etc/skel/.bash_profile, the original file will be saved to
 #/etc/skel/.bash_profile.safs.bak.
 #The added content is to setup STAF environment and setup SAFS environment, 
 #and try to start STAF. This /etc/skel/.bash_profile will be copied
@@ -20,7 +25,7 @@
 #and .ini configuration files will be used to run some samples of SAFS, like TID test, SPC,
 #ImageManager etc.
 
-#27 AUG, 2010  LeiWang
+#27 AUG, 2010  Lei Wang
 
 
 #==========  Check java version  =============================================
@@ -39,12 +44,21 @@ then
   installSTAF=0
 else
   installSTAF=1
-  echo "The default STAF installation directory is $STAFDirectory, do you accept it [Y|N], default is Y?"
+  if [ `uname -m` == 'x86_64' ]; then
+    echo "Detect the current OS is 64 bit, changed the default STAF installation directory '${STAFDirectory}' to '${STAFDirectory}_64'"
+  	STAFDirectory="${STAFDirectory}_64"
+  fi
+  
+  echo "The default STAF installation directory is '${STAFDirectory}', do you accept it [Y|N], default is Y?"
   read tmp
 
   if ( test ! -z $tmp ) && (( test $tmp = "N" ) || ( test $tmp = "n" ))
   then
-    echo "Input the directory where you want to install STAF:"
+  	if [ `uname -m` == 'x86_64' ]; then
+      echo "Detect the current OS is 64 bit, input the directory (MUST end with _64) where you want to install STAF:"
+    else
+      echo "Input the directory where you want to install STAF:"
+    fi
     read tmp
     if ( test ! -z $tmp )
     then
@@ -52,6 +66,11 @@ else
     fi
   fi
   echo "STAF will be installed to directory: $STAFDirectory"
+  #make a new $STAFDirectory
+  if [ -d "$STAFDirectory" ]; then
+  	rm -rf $STAFDirectory
+  fi
+  mkdir $STAFDirectory
 fi
 #=============================================================================
 
@@ -64,7 +83,7 @@ then
   installSAFS=0
 else
   installSAFS=1
-  echo "The default SAFS installation directory is $SAFSDirectory, do you accept it [Y|N], default is Y?"
+  echo "The default SAFS installation directory is '${SAFSDirectory}', do you accept it [Y|N], default is Y?"
   read tmp
 
   if ( test ! -z $tmp )  && (( test $tmp = "N" ) || ( test $tmp = "n" ))
@@ -92,8 +111,38 @@ if ( test $installSTAF = 1 ) || ( test $installSAFS = 1 ) ; then
   fi
 #===========================================================================
 
+#==========  Uncompress the JDK and JRE ===========================
+  #keep the current directory into variable 'installDir'
+  installDir=`pwd`
+  
+  #uncompress the 64 bit JRE zip file
+  cd $SAFSDirectory/jre/Java64
+  tar xvzf JRE*.tar.gz
+  #rename folder "jre1.8.0_191" to "jre"
+  mv -f jre* jre  
+  
+  #uncompress the 32 bit JRE zip file
+  cd $SAFSDirectory/jre
+  tar xvzf JRE*.tar.gz
+  #move all files (under folder "jre1.8.0_191") to current folder 
+  mv -f jre*/* -t .
+  
+  #go back to the installation directory
+  cd $installDir
+  
+#===========================================================================
+
 #===========  Create the installation command  =============================
-  cmdline="java -jar SAFSInstall.jar "
+  if [ `uname -m` == 'x86_64' ]; then
+    JAVA_HOME="$SAFSDirectory/jre/Java64/jre"
+  else
+    JAVA_HOME="$SAFSDirectory/jre"
+  fi
+  PATH=.:$JAVA_HOME/bin:$PATH
+
+  export PATH JAVA_HOME
+
+  cmdline="$JAVA_HOME/bin/java -jar SAFSInstall.jar "
   if ( test $installSAFS = 1 )
   then
     cmdline="$cmdline -safs $SAFSDirectory"
@@ -103,11 +152,13 @@ if ( test $installSTAF = 1 ) || ( test $installSAFS = 1 ) ; then
 
   if ( test $installSTAF = 1 )
   then
+  	echo "Grant execute-access-right to STAF*.bin for all users."
+  	chmod a+x STAF*.bin
     cmdline="$cmdline -staf $STAFDirectory"
   else
     cmdline="$cmdline -nostaf"
   fi
-$HOME
+  
   if ( test $VERBOSE = 1 )
   then
     cmdline="$cmdline -v"
@@ -121,11 +172,10 @@ $HOME
 #===========================================================================
 fi
 
-
 #==========  Create STAF data directory and grant write access to all users  =====
 #==========  so that users can create directories under the data directory   =====
 #==========  when starting STAF                                              =====
-if ( test $installSTAF = 1 ); then
+if ( test $installSTAF = 1 ) then
   stafDataDirectory=$STAFDirectory"/data"
   mkdir $stafDataDirectory
 
@@ -148,7 +198,11 @@ cat > $SAFSDirectory/bin/$SAFSEnvScript <<EOF
 SAFSDIR=$SAFSDirectory
 STAFDIR=$STAFDirectory
 
-JAVA_HOME=\$STAFDIR/jre/jre
+if [ `uname -m` == 'x86_64' ]; then
+  JAVA_HOME=\$SAFSDIR/jre/Java64/jre
+else
+  JAVA_HOME=\$SAFSDIR/jre
+fi
 
 PATH=.:\$JAVA_HOME/bin:\$SAFSDIR/bin:\$PATH
 
@@ -162,16 +216,19 @@ export SAFSDIR STAFDIR JAVA_HOME PATH CLASSPATH TESSDATA_PREFIX GOCRDATA_DIR
 
 echo "SAFS environment is ready."
 EOF
-fi
-#==================================================================================
 
+#Grant execute-permission to script
+chmod a+x $SAFSDirectory/bin/$SAFSEnvScript
+fi
+
+#==================================================================================
 
 #====   For power user root, we need to modify /etc/skel/.bash_profile and /etc/skel/.bash_logout         =========
 #====   So that when a new user is created, these files will be copied to his personal home directory     =========
 #====   and served as starting script .bash_profile and .bash_logout                                      =========
 #====   For normal user, we need to modify his starting script$HOME/.bash_profile and $HOME/.bash_logout  =========
 
-if ( test $installSTAF = 1 ); then
+if ( test $installSAFS = 1 ); then
 #====================================   BEGIN create .bash_profile    =============================================
 #==  1.Backup the original .bash_profile.safs to .bash_profile.safs.bak
 cp $PROFILE_SKEL_FILE $PROFILE_SKEL_BAK_FILE
@@ -241,7 +298,7 @@ echo "Modifying file $PROFILE_SKEL_FILE"
 cat $PROFILE_SKEL_ADDED_FILE >> $PROFILE_SKEL_FILE
 #====================================   END create .bash_profile   ====================================================
 
-#====================================   BEGIN create .bash_logoute ====================================================
+#====================================   BEGIN create .bash_logout =====================================================
 cp $PROFILE_SKEL_OUT_FILE $PROFILE_SKEL_OUT_BAK_FILE
 cat > $PROFILE_SKEL_OUT_ADDED_FILE <<EOF
 
@@ -280,8 +337,12 @@ cat $PROFILE_SKEL_ADDED_FILE >> ~/$PROFILE_SCRIPT
 echo "Modifing file $PROFILE_OUT_SCRIPT"
 cat $PROFILE_SKEL_OUT_ADDED_FILE >> ~/$PROFILE_OUT_SCRIPT
 EOF
+#make the script file $ModifyDotBashScript executable
 chmod a+x $SAFSDirectory/bin/$ModifyDotBashScript
-echo "Please tell the existing users to call script $SAFSDirectory/bin/$ModifyDotBashScript, It is important."
+echo "calling script ${ModifyDotBashScript} so that the .bash_profile will be modified for 'root' user"
+$SAFSDirectory/bin/$ModifyDotBashScript
+#Echo some information to let user know that he needs to call scirpt $ModifyDotBashScript to modify his .bash_profile
+echo "Please tell the existing users to call script ${SAFSDirectory}/bin/${ModifyDotBashScript}, It is important."
 echo "This script will modify .bash_profile and .bash_logout scripts under users' home directroy."
 echo "ATTENTION!!!===============================================================================ATTENTION!!!" 
 fi

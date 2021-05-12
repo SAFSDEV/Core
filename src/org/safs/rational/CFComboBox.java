@@ -1,7 +1,20 @@
-/** Copyright (C) (MSA, Inc) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
+/**
+ * Copyright (C) (MSA, Inc), All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.rational;
 
 import java.awt.Rectangle;
@@ -47,18 +60,18 @@ import com.rational.test.ft.script.CaptionText;
  *          JUL 11, 2008     (JunwuMa)Added getItems() supporting .NET for CAPTUREITEMSTOFILE,SELECTPARTIALMATCH.
  *                               Switched on .NET domain support in SetTextValue() for SETTEXTVALUE and SETUNVERIFIEDTEXTVALUE
  *                               All keywords in this class are already .NET supported.
- *   <br>	SEP 12, 2008	(LeiWang)	Modify hideCombo() and showCombo(). Right-click can not hide the combo list.
+ *   <br>	SEP 12, 2008	(Lei Wang)	Modify hideCombo() and showCombo(). Right-click can not hide the combo list.
  *   									A simple click can open and close the combo list. But before using showCombo(), we are must
  *   									suer the combobox is hide; otherwise the combobox will be closed. The same to hideCombo().
- *	<br>	OCT 04, 2008	(LeiWang)	Modify method verifySelectedText(). Test the object type before casting. See defect S0534980.
- *	<br>	NOV 25, 2008	(LeiWang)	Modify method setTextValue(): If value contains special, do not verify. See defect S0546329.
+ *	<br>	OCT 04, 2008	(Lei Wang)	Modify method verifySelectedText(). Test the object type before casting. See defect S0534980.
+ *	<br>	NOV 25, 2008	(Lei Wang)	Modify method setTextValue(): If value contains special, do not verify. See defect S0546329.
  *	<br>	DEC 03, 2008	(Carl Nagle)	Modify SelectPartialMatch to selectAtIndex if selectAtText fails after 4 attempts. 
- *	<br>	DEC 04, 2008	(LeiWang)	Modify method setTextValue(): Include win domain to be processed. Now Java, Net, Win domain are included.
+ *	<br>	DEC 04, 2008	(Lei Wang)	Modify method setTextValue(): Include win domain to be processed. Now Java, Net, Win domain are included.
  *																	  For win doamin, keywords with verification are not supported.
  *																	  See defect S0550143.
- *	<br>	DEC 10, 2008	(LeiWang)	Modify method getItems(): treat combobox in toolbar, the type of combobox is
+ *	<br>	DEC 10, 2008	(Lei Wang)	Modify method getItems(): treat combobox in toolbar, the type of combobox is
  *										"System.Windows.Forms.ToolStripComboBox+ToolStripComboBoxControl"
- *	<br>	DEC 24, 2008	(LeiWang)	Modify method verifySelectedText(): add support for window ComboBox. See defect S0554263.
+ *	<br>	DEC 24, 2008	(Lei Wang)	Modify method verifySelectedText(): add support for window ComboBox. See defect S0554263.
  * **/
 public class CFComboBox extends CFComponent {
 

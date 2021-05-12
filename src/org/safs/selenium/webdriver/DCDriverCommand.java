@@ -1,12 +1,25 @@
 /**
- ** Copyright (C) SAS Institute, All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.selenium.webdriver;
 /**
  * Logs for developers, not published to API DOC.
  * History:<br>
- *   <br>   JUL 05, 2011    (LeiWang) Update method setFocus().
+ *   <br>   JUL 05, 2011    (Lei Wang) Update method setFocus().
  *   <br>   JAN 16, 2014    (DHARMESH) Update Start/Stop Browser call.
  *   <br>   FEB 02, 2014	(DHARMESH) Add Resize and Maximize WebBrowser window KW.
  *   <br>   APR 15, 2014    (DHARMESH) Added HighLight keyword
@@ -17,30 +30,40 @@ package org.safs.selenium.webdriver;
  *   <br>   APR 08, 2015    (Lei Wang) Modify method startWebBrowser(): get property value of JVM Options for Remote Selenium Server.
  *   <br>   APR 16, 2015    (Carl Nagle) Modify method startWebBrowser to ignore the isRemote parameter, if provided.
  *   <br>   JUN 23, 2015	(Tao Xie) Add waitForPropertyValueStatus(): wait for property value match or gone with expected value.
- *   <br>   JUN 29, 2015	(LeiWang) Modify startWebBrowser(): launch selenium server remotely.
+ *   <br>   JUN 29, 2015	(Lei Wang) Modify startWebBrowser(): launch selenium server remotely.
  *                                    Add launchSeleniumServers(): start selenium standalone or grid automatically.
- *   <br>   JUL 24, 2015	(LeiWang) Add sendHttpGetRequest(): handle keyword like GetURL, SaveURLToFile, VerifyURLContent, VerifyURLToFile.
- *   <br>   NOV 20, 2015	(LeiWang) Use java AtomicBoolean to replace my AtomicReady class.
+ *   <br>   JUL 24, 2015	(Lei Wang) Add sendHttpGetRequest(): handle keyword like GetURL, SaveURLToFile, VerifyURLContent, VerifyURLToFile.
+ *   <br>   NOV 20, 2015	(Lei Wang) Use java AtomicBoolean to replace my AtomicReady class.
  *                                    Modify method sendHttpGetRequest(): set the thread (executing AJAX request) as daemon.
- *   <br>   DEC 24, 2015	(LeiWang) Modify method sendHttpGetRequest(): check known issue 'ajax execution stuck with firefox'.
- *   <br>   MAR 31, 2016	(LeiWang) Add onGUIGotoCommands(): implement OnGUIExistsGotoBlockID/OnGUINotExistGotoBlockID,
+ *   <br>   DEC 24, 2015	(Lei Wang) Modify method sendHttpGetRequest(): check known issue 'ajax execution stuck with firefox'.
+ *   <br>   MAR 31, 2016	(Lei Wang) Add onGUIGotoCommands(): implement OnGUIExistsGotoBlockID/OnGUINotExistGotoBlockID,
  *                                    I did nothing but set the BLOCKID to test-record's status-info.
  *   <br>   APR 07, 2016    (Lei Wang) Refactor to handle OnGUIExistsGotoBlockID/OnGUINotExistGotoBlockID in super class DriverCommand
  *   <br>   AUT 05, 2016    (Lei Wang) Modified waitForGui/waitForGuiGone: if the RC is SCRIPT_NOT_EXECUTED (4) then stop handling here.
  *   <br>   SEP 27, 2016    (Lei Wang) Moved methods launchSeleniumServers() to class WebDriverGUIUtilities.
  *   <br>   JUN 07, 2017    (Lei Wang) Handled keyword 'SwitchWindow'.
+ *   <br>   JUN 27, 2017    (Lei Wang) Modified callScript(): Write each step execution information into SAFS Log.
+ *   <br>   DEC 29, 2017    (Lei Wang) Modified callScript(): Put the information of each step (in sebuilder script) into variable store so that SAFS Monitor can get it.
+ *   <br>   JAN 16, 2018    (Lei Wang) Modified callScript(): Get the "step's test record" from the variable store and retry it.
+ *   <br>   JAN 18, 2018    (Lei Wang) Modified callScript(): When retry step: 1. set locator object (instead of string) to step.
+ *                                                                            2. set stepSuccess to false if meet exception.
+ *   <br>   JUN 17, 2019    (Lei Wang) Added SetNetworkConditions/DeleteNetworkConditions/GetNetworkConditions.
+ *   <br>   OCT 17, 2019    (Lei Wang) Modified sendHttpGetRequest(): if AJAX request failed, try REST request and pure java HTTP request.
  */
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
+import org.safs.Constants.BrowserConstants;
 import org.safs.DriverCommand;
 import org.safs.IndependantLog;
 import org.safs.JavaHook;
@@ -48,16 +71,27 @@ import org.safs.Log;
 import org.safs.Processor;
 import org.safs.SAFSException;
 import org.safs.SAFSObjectNotFoundException;
+import org.safs.STAFHelper;
 import org.safs.StatusCodes;
 import org.safs.StringUtils;
+import org.safs.TestRecordData;
+import org.safs.Utils;
 import org.safs.model.commands.DDDriverCommands;
 import org.safs.model.commands.DDDriverFlowCommands;
+import org.safs.net.HttpRequest;
+import org.safs.net.IHttpRequest.HttpCommand;
 import org.safs.net.IHttpRequest.Key;
+import org.safs.rest.REST;
+import org.safs.rest.service.Headers;
+import org.safs.rest.service.Response;
 import org.safs.selenium.webdriver.lib.SelectBrowser;
 import org.safs.selenium.webdriver.lib.SeleniumPlusException;
 import org.safs.selenium.webdriver.lib.WDLibrary;
+import org.safs.selenium.webdriver.lib.interpreter.IgnoredStepException;
+import org.safs.selenium.webdriver.lib.interpreter.WDStep;
 import org.safs.selenium.webdriver.lib.interpreter.WDTestRun;
 import org.safs.selenium.webdriver.lib.interpreter.WDTestRunFactory;
+import org.safs.selenium.webdriver.lib.interpreter.selrunner.SRUtilities;
 import org.safs.text.FAILKEYS;
 import org.safs.text.FAILStrings;
 import org.safs.text.FileUtilities;
@@ -90,6 +124,7 @@ public class DCDriverCommand extends DriverCommand {
 	/**
 	 * Convert the general GUIUtilities to a specific one.
 	 **/
+	@Override
 	protected void init() throws SAFSException{
 		super.init();
 
@@ -102,6 +137,7 @@ public class DCDriverCommand extends DriverCommand {
 		}
 	}
 
+	@Override
 	protected void commandProcess() {
 		String dbg = getClass().getName()+".commandProcess ";
     	Log.info(dbg+"processing: '"+ command+ "' with parameters: "+this.params);
@@ -137,7 +173,112 @@ public class DCDriverCommand extends DriverCommand {
 			sendHttpGetRequest();
 		}else if(DDDriverCommands.SWITCHWINDOW_KEYWORD.equalsIgnoreCase(command)){
 			switchWindow();
+		}else if (DDDriverCommands.SETNETWORKCONDITIONS_KEYWORD.equalsIgnoreCase(command)) {
+			setNetworkConditions();
+		}else if (DDDriverCommands.GETNETWORKCONDITIONS_KEYWORD.equalsIgnoreCase(command)) {
+			getNetworkConditions();
+		}else if (DDDriverCommands.DELETENETWORKCONDITIONS_KEYWORD.equalsIgnoreCase(command)) {
+			deleteNetworkConditions();
 		}
+	}
+
+	/**
+	 * params[0] the network conditions, in JSON format.<br>
+	 */
+	private void setNetworkConditions(){
+		String debugmsg = StringUtils.debugmsg(false);
+
+		Iterator<?> iterator = params.iterator();
+		String networkConditions = "";
+		try{
+			networkConditions = (String) iterator.next();
+			Log.info(debugmsg+" received network conditions: "+ networkConditions);
+		}catch(Exception badvalue){
+			Log.info(debugmsg+" Failed to receive network conditions, met "+ badvalue);
+		}
+
+		try {
+			if(!WDLibrary.setNetworkConditions(networkConditions)){
+				Log.error(debugmsg+" WDLibrary.setNetworkConditions returned false.");
+				testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
+				issueUnknownErrorFailure("Failed to setNetworkConditions.");
+				return;
+			}
+		}catch(Throwable th){
+			Log.error(debugmsg, th);
+			testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
+			issueUnknownErrorFailure("Failed to setNetworkConditions.");
+			return;
+		}
+
+		testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
+		log.logMessage(testRecordData.getFac(),
+				genericText.convert(GENKEYS.SUCCESS_2,
+						testRecordData.getCommand()+ " "+networkConditions +" successful.",
+						testRecordData.getCommand(), networkConditions),
+						GENERIC_MESSAGE);
+	}
+
+	/**
+	 * params[0] the name of the variable to store network conditions, in JSON format.<br>
+	 */
+	private void getNetworkConditions(){
+		String debugmsg = StringUtils.debugmsg(false);
+
+		Iterator<?> iterator = params.iterator();
+		String networkConditionsVar = null;
+		try{
+			networkConditionsVar = (String) iterator.next();
+			Log.info(debugmsg+" received network conditions variable: "+ networkConditionsVar);
+		}catch(Exception badvalue){
+			issueParameterValueFailure("NetworkConditionsVar");
+		}
+
+		String networkConditions = null;
+
+		try {
+			networkConditions = String.valueOf(WDLibrary.getNetworkConditions());
+			if (!setVariable(networkConditionsVar, String.valueOf(networkConditions))) {
+				issueErrorPerformingAction(FAILStrings.text(FAILStrings.COULD_NOT_SET_VARS, "Could not set one or more variable values."));
+			}
+		}catch(Throwable th){
+			Log.error(debugmsg, th);
+			testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
+			issueUnknownErrorFailure("Failed to getNetworkConditions.");
+			return;
+		}
+
+		testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
+		log.logMessage(testRecordData.getFac(),
+				genericText.convert(GENKEYS.SUCCESS_3B,
+						testRecordData.getCommand()+ " "+networkConditions +" successful using '"+networkConditionsVar+"'",
+						testRecordData.getCommand(), networkConditions, networkConditionsVar),
+				GENERIC_MESSAGE);
+	}
+
+	private void deleteNetworkConditions(){
+		String debugmsg = StringUtils.debugmsg(false);
+
+		try {
+			if(!WDLibrary.deleteNetworkConditions()){
+				Log.error(debugmsg+" WDLibrary.deleteNetworkConditions() returned false.");
+				testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
+				issueUnknownErrorFailure("Failed to deleteNetworkConditions.");
+				return;
+			}
+		}catch(Throwable th){
+			Log.error(debugmsg, th);
+			testRecordData.setStatusCode(StatusCodes.GENERAL_SCRIPT_FAILURE);
+			issueUnknownErrorFailure("Failed to deleteNetworkConditions.");
+			return;
+		}
+
+		testRecordData.setStatusCode(StatusCodes.NO_SCRIPT_FAILURE);
+		log.logMessage(testRecordData.getFac(),
+				genericText.convert(GENKEYS.SUCCESS_1,
+						testRecordData.getCommand() +" successful.",
+						testRecordData.getCommand()),
+				GENERIC_MESSAGE);
 	}
 
 	protected void switchWindow(){
@@ -270,6 +411,7 @@ public class DCDriverCommand extends DriverCommand {
 		final AtomicBoolean resultReady = new AtomicBoolean(false);
 		try {
 			Thread threadGetUrl = new Thread(new Runnable(){
+				@Override
 				public void run() {
 					try {
 						Map<String, Object> results = WDLibrary.AJAX.getURL(url, headers);
@@ -278,7 +420,38 @@ public class DCDriverCommand extends DriverCommand {
 						}
 						resultReady.set(true);
 					} catch (Throwable e) {
-						IndependantLog.error(debugmsg+" AJAX.getURL Thread: Met "+StringUtils.debugmsg(e));
+						IndependantLog.warn(debugmsg+"Thread AJAX.getURL() failed, Met "+StringUtils.debugmsg(e));
+						try {
+							String serviceId = "service"+System.currentTimeMillis();
+							REST.StartServiceSession(serviceId, url);
+							Response resp = REST.request(serviceId, HttpCommand.GET.name(), "", Headers.convertHeadersMapToMultiLineString(headers), "");
+
+							resultMap.put(Key.RESPONSE_HEADERS.value(), resp.get_headers());
+							resultMap.put(Key.RESPONSE_STATUS.value(), resp.get_status_code());
+							resultMap.put(Key.RESPONSE_STATUS_TEXT.value(), resp.get_status_line());
+							resultMap.put(Key.RESPONSE_TEXT.value(), resp.get_entity_body());
+
+							resultReady.set(true);
+							REST.EndServiceSession(serviceId);
+
+						} catch (Exception e1) {
+							IndependantLog.warn(debugmsg+"Thread REST.execute GET failed, Met "+StringUtils.debugmsg(e));
+
+							try {
+								HttpRequest request = new HttpRequest();
+								request.setIncludeResponseHeaders(true);
+								Map<String, Object> results = request.execute(HttpCommand.GET, url, true, headers, "");
+								for(String key:results.keySet()){
+									resultMap.put(key, results.get(key));
+								}
+								resultReady.set(true);
+							} catch (SAFSException e2) {
+								IndependantLog.debug(debugmsg+"Thread http.proxyHost="+System.getProperty("http.proxyHost"));
+								IndependantLog.debug(debugmsg+"Thread http.proxyPort="+System.getProperty("http.proxyPort"));
+								IndependantLog.error(debugmsg+"Thread HR.execute GET Thread: Met "+StringUtils.debugmsg(e));
+							}
+
+						}
 					}
 				}
 			});
@@ -363,6 +536,53 @@ public class DCDriverCommand extends DriverCommand {
 		}
 	}
 
+	private void putStepInVariableStore(String recordInstanceName, Step step, String scriptFile){
+		//Save the step record into variable 'inputrecord' so that 'SAFS Monitor' will see it.
+		try {
+			setVariable(recordInstanceName + STAFHelper.SAFS_VAR_INPUTRECORD, step.toJSON().toString());
+			setVariable(recordInstanceName + STAFHelper.SAFS_VAR_FILENAME, scriptFile);
+		} catch (SAFSException e) {
+			IndependantLog.error("Met "+e.toString());
+		}
+	}
+
+	/**
+	 * Hold the original test-record information of command 'CallScript' when executing each step in sebuilder script.
+	 */
+	private Map<String, String> testRecordVariables = new HashMap<String, String>();
+
+	@Override
+	public void pushTestRecord(TestRecordData trd) {
+		super.pushTestRecord(trd);
+
+		String debugmsg = StringUtils.debugmsg(false);
+		String recordInstanceName = trd.getInstanceName();
+		String record = recordInstanceName + STAFHelper.SAFS_VAR_INPUTRECORD;
+		String filename = recordInstanceName + STAFHelper.SAFS_VAR_FILENAME;
+
+		try {
+			testRecordVariables.put(record, getVariable(record));
+			testRecordVariables.put(filename, getVariable(filename));
+		} catch (SAFSException e) {
+			IndependantLog.warn(debugmsg+"Met "+e.toString());
+		}
+	}
+
+	@Override
+	public TestRecordData popTestRecord() {
+		String debugmsg = StringUtils.debugmsg(false);
+
+		for(String key:testRecordVariables.keySet()){
+			try {
+				setVariable(key, testRecordVariables.get(key));
+			} catch (SAFSException e) {
+				IndependantLog.warn(debugmsg+"Met "+e.toString());
+			}
+		}
+
+		return super.popTestRecord();
+	}
+
 	private void callScript(){
 		String debugmsg = "DCDriverCommand.callScript ";
 		if (params.size() < 1) {
@@ -390,7 +610,8 @@ public class DCDriverCommand extends DriverCommand {
 			}
 		}
 		// actual should now be an absolute file path
-		String p1 = actual.getName();
+		String scriptFile = actual.getName();
+		String record = null;
 		try{
 			//Push the test-record-data into a stack, before executing the scripts
 			pushTestRecord(testRecordData);
@@ -414,8 +635,14 @@ public class DCDriverCommand extends DriverCommand {
 			String driverStatus = null;
 			boolean stepping = false;
 			boolean stepSuccess = false;
-			ArrayList<String> errorlist = new ArrayList<String>();
+			List<String> errorlist = new ArrayList<String>();
 			int stepnumber = 0;
+
+			String beginMessage = testRecordData.getCommand()+" "+actual.getAbsolutePath()+" is processing ... ";
+			log.logMessage(testRecordData.getFac(), beginMessage, GENERIC_MESSAGE);
+
+			String recordInstanceName = testRecordData.getInstanceName();
+
 mainloop:	while (!finished ){
 				Log.suspend();
 				try{ driverStatus = getVariable(DriverInterface.DRIVER_CONTROL_VAR);}
@@ -467,30 +694,72 @@ holdloop:		while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 				stepSuccess = true;
 				if(!retryStep || step == null){
 					step = test.popNext();
+
 					if(step == null){
 						finished = true;
 						test.cleanup();
+						break;
 					}else{
 						stepnumber++;
-						stepSuccess = test.runStep(step);
-						if(!stepSuccess) success = false;// set and keep the false setting
+						record = "Step #"+ stepnumber +": "+ step.toPrettyString()+".";
+						//Save the step record into variable 'inputrecord' so that 'SAFS Monitor' will see it.
+						putStepInVariableStore(recordInstanceName, step, scriptFile);
+
+						try{
+							stepSuccess = test.runStep(step);
+							if(!stepSuccess) success = false;// set and keep the false setting
+						}catch(IgnoredStepException e){
+							IndependantLog.debug(debugmsg+e.toString());
+						}
 					}
 				}else{ // EXPERIMENTAL: retry last Step
 					try{
+						String sebuilderStep = getVariable(recordInstanceName + STAFHelper.SAFS_VAR_INPUTRECORD);
+						Map<String, Object> sebuilderStepParams = Utils.fromJsonString(sebuilderStep, Map.class);
+						Set<String> keys = sebuilderStepParams.keySet();
+						Object value = null;
+						for(String key:keys){
+							if(!WDStep.isUnModifiableParameter(key)){
+								value = sebuilderStepParams.get(key);
+
+								if(step.stringParams.containsKey(key)){
+									if(!value.equals(step.stringParams.get(key))){
+										step.stringParams.put(key, value.toString());
+									}
+								}
+								else if(step.locatorParams.containsKey(key)){
+									if(!value.equals(step.locatorParams.get(key))){
+										SRUtilities.setLocatorParam(step, value, key);
+									}
+								}
+								else{
+									IndependantLog.debug(debugmsg+" missing change parameter '"+key+"' to value '"+value+"'.");
+								}
+							}
+						}
+
+						record = "RETRY Step #"+ stepnumber +": "+ step.toPrettyString()+".";
 						stepSuccess = test.runStep(step);
-						if(!stepSuccess) success = false; }
-					catch(Exception x){
+						if(!stepSuccess) success = false;
+					}catch(Exception x){
 						// what do we want to do when a retry blows up?
 						// currently, we are going to DebugLog it and let the execution/stepping continue.
 						Log.debug(debugmsg+" ignoring Step retry "+ x.getClass().getSimpleName()+", "+ x.getMessage(), x);
+						//we should set the stepSuccess to false
+						stepSuccess = false;
 					}
 				}
 				retryStep = false; // insure reset
+
 				if(!stepSuccess){
 					// do we want to set finished = true?
 					// or does the Script/TestRun automatically do that for us?
-					errorlist.add( p1 +": Step #"+ stepnumber +": "+ step.type.getClass().getSimpleName()+" "+ step.toString()+" was not successful.\n");
+					errorlist.add(record+" was not successful!");
+					log.logMessage(testRecordData.getFac(), record , FAILED_MESSAGE);
+				}else{
+					log.logMessage(testRecordData.getFac(), record , PASSED_MESSAGE);
 				}
+
 			}// end of mainloop:
 			Log.resume();
 
@@ -499,23 +768,20 @@ holdloop:		while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 			popTestRecord();
 
 			if(success) {
-				issueGenericSuccessUsing(actual.getAbsolutePath(), null);
+				issueGenericSuccessUsing(scriptFile, null);
 				return;
 			}else{
-				String detail = "\n";
-				for(String line:errorlist.toArray(new String[]{})) detail += line;
-				issueActionUsingNegativeMessage(actual.getAbsolutePath(), detail);
+				StringBuilder detail = new StringBuilder("-------------------  failed steps ------------------------\n");
+				for(String line:errorlist) detail.append(line);
+				detail.append("\n--------------------------------------------------------");
+				issueActionUsingNegativeMessage(scriptFile, detail.toString());
 				return;
 			}
 		}catch(Throwable t){
 			Log.resume();
-			String p2 = t.getClass().getSimpleName()+": "+ t.getMessage();
+			String p2 = "Test record "+(record==null?"":record)+" failed, due to "+t.getClass().getSimpleName()+": "+ t.getMessage();
 			Log.debug(p2, t);
-			issueErrorPerformingAction(
-					FAILStrings.convert(FAILStrings.SCRIPT_ERROR,
-							    "Script '"+ actual.getAbsolutePath()+"' error: "+p2,
-							    actual.getAbsolutePath(), p2)
-					);
+			issueErrorPerformingAction(FAILStrings.convert(FAILStrings.SCRIPT_ERROR, "Script '"+ scriptFile+"' error: "+p2, scriptFile, p2));
 		}
 	}
 
@@ -543,7 +809,7 @@ holdloop:		while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 	 * <br>
 	 * Following parameters indicate the extra parameters, they should be given by pair(key, value)<br>
 	 * The key can be one of:<br>
-	 * {@link SelectBrowser#getExtraParameterKeys()}<br>
+	 * {@link BrowserConstants#getExtraParameterKeys()}<br>
 	 * <br>
 	 * params[5] extra parameter key1<br>
 	 * params[6] extra parameter value for key1<br>
@@ -832,6 +1098,7 @@ holdloop:		while(! driverStatus.equalsIgnoreCase(JavaHook.RUNNING_EXECUTION)){
 		}
 	}
 
+	@Override
 	protected boolean checkGUIExistence(boolean expectedExist, String mapNam, String window, String component, int timeoutInSeconds) throws SAFSException{
 		  boolean exist;
 

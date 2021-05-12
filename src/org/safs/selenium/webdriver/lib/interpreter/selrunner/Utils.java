@@ -1,14 +1,27 @@
 /**
  * Copyright (C) SAS Institute, All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- */
-
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * Logs for developers, not published to API DOC.
  *
  * History:
- * 2017年6月14日    (Lei Wang) Initial release.
- * 2017年6月16日    (Lei Wang) Modified Utils.setParam(): check the empty 'variable' parameter.
+ * 2017-06-14    (Lei Wang) Initial release.
+ * 2017-06-16    (Lei Wang) Modified Utils.setParam(): check the empty 'variable' parameter.
+ * 2017-12-26    (Lei Wang) Modified executeScript(): add one more parameter 'sync'.
  */
 package org.safs.selenium.webdriver.lib.interpreter.selrunner;
 
@@ -79,10 +92,32 @@ public class Utils {
 	 * @see #defineStoredVars(TestRun)
 	 */
 	public static Object executeScript(TestRun ctx, String script){
-		String jscode = Utils.defineStoredVars(ctx) + script;
-		ctx.getLog().debug("interpreter.selrunner.Utils.executeScript() javascript\n"+jscode);
-		return ctx.driver().executeScript(jscode);
+		return executeScript(ctx, script, true);
 	}
+	
+	/**
+	 * Prepend 'script' with the associate-array {@link Constants#PARAM_STOREDVARS_ARRAY}
+	 * holding variables in the variable store of context (TestRun), and then execute them together.
+	 *
+	 * @param ctx TestRun, the context within which to execute the script
+	 * @param script String, the script to execute, it should be normalized.
+	 * @param sync boolean, if the script should be executed synchronously.
+	 *                      If false, this method will return immediately.
+	 * @return Object, the result
+	 *
+	 * @see #defineStoredVars(TestRun)
+	 */
+	public static Object executeScript(TestRun ctx, String script, boolean sync){
+		String jscode = Utils.defineStoredVars(ctx) + script;
+		ctx.getLog().debug("interpreter.selrunner.Utils.executeScript() javascript "+(sync? "synchronously":"asynchronously")+"\n"+jscode);
+		if(sync){
+			return ctx.driver().executeScript(jscode);
+		}else{
+			return ctx.driver().executeAsyncScript(jscode);
+		}
+	}
+
+
 
 	/**
 	 * According the step type, set the parameter into the step's variable store.

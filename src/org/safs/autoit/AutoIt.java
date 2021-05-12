@@ -1,21 +1,39 @@
-/** Copyright (C) (SAS) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * History:
  * 		SEP 23, 2016 Tao Xie Replace 'AutoItX' as SAFS version 'AutoItXPlus'.
  * 		MAY 16, 2017 Lei Wang Modified executeCommand(): return boolean to tell if command succeed or not.
- *                          Modified AutoItObject(): only register the appropriate AutoItX3 DLL according to system bits.
+ *                           Modified AutoItObject(): only register the appropriate AutoItX3 DLL according to system bits.
+ * 		JUL 19, 2018 Lei Wang Modified AutoItObject(): Close the AutoIt DLL registration confirmation popup window.
  */
 package org.safs.autoit;
 
+import java.awt.AWTException;
+import java.awt.event.KeyEvent;
 import java.io.File;
 
 import org.safs.IndependantLog;
 import org.safs.SAFSProcessorInitializationException;
 import org.safs.StringUtils;
+import org.safs.android.auto.lib.Console;
 import org.safs.autoit.lib.AutoItXPlus;
+import org.safs.robot.Robot;
 import org.safs.tools.consoles.ProcessCapture;
 import org.safs.tools.drivers.DriverConstant;
 
@@ -34,6 +52,10 @@ public class AutoIt {
 	private static final String JACOB_DLL_64 = "jacob-1.18-x64.dll";
 
 	public static AutoItXPlus AutoItObject() throws SAFSProcessorInitializationException{
+
+		if(Console.isUnixOS() || Console.isMacOS()){
+			throw new SAFSProcessorInitializationException("The System is Linux/Unix or Mac, AutoIT is not supported on them.");
+		}
 
 		/** COM class instantiation method */
 		String methodName = StringUtils.getMethodName(0, false) + "() ";
@@ -97,7 +119,23 @@ public class AutoIt {
 				if(!is32Bits){
 					cmd = System.getenv("SYSTEMDRIVE") + "\\Windows\\System32\\regsvr32  "+libdir+"AutoItX3_x64.dll";
 				}
-				if(executeCommand(cmd)){
+
+				int millisecondToWaitDllRegistration = 2000;
+				Thread closeRegisterPopupThread = new Thread(new Runnable(){
+					@Override
+					public void run() {
+						StringUtils.sleep(millisecondToWaitDllRegistration);
+						try {
+							Robot.inputKeys("{Enter}");
+						} catch (AWTException e) {
+							Robot.keyPress(KeyEvent.VK_ENTER);
+							Robot.keyRelease(KeyEvent.VK_ENTER);
+						}
+					}
+				});
+				closeRegisterPopupThread.start();
+
+				if(executeCommand(cmd)){//Registration will popup a confirmation window, we need to close it.
 					IndependantLog.debug(methodName + "AutoItX DLLs should now be registered.");
 				}else{
 					IndependantLog.warn(methodName + "Failed to register AutoItX DLLs.");

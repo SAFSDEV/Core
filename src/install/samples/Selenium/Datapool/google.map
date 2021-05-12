@@ -7,7 +7,8 @@ URL_Google="http://www.google.com"
 GoogleWindow="Type=Window;Caption={Google*}"
 Document="Type=HTMLDocument;Index=1"
 
-EditBox="Type=EditBox;name=q"
+#EditBox="Type=EditBox;name=q"
+EditBox="Type=EditBox;HTMLId=lst-ib"
 PushButtonG="Type=PushButton;name=btnK"
 PushButtonI="Type=PushButton;name=btnI"
 

@@ -1,22 +1,37 @@
-// Copyright (c) 2016 by SAS Institute Inc., Cary, NC, USA. All Rights Reserved.
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 
 package org.safs.rest.service.commands.curl
 
+import static java.nio.charset.StandardCharsets.UTF_8
 import static org.safs.rest.service.commands.curl.CurlResponseInfo.DEFAULT_CONTENT_TYPE_VERSION
 import static org.safs.rest.service.commands.curl.CurlResponseInfo.HTTP_PROTOCOL_VALUE
-import static java.nio.charset.StandardCharsets.UTF_8
 import static org.springframework.http.HttpStatus.I_AM_A_TEAPOT
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 
 import java.nio.charset.Charset
 
-import groovy.transform.ToString
-import groovy.util.logging.Slf4j
-
 import org.safs.rest.service.commands.CommandResults
-
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+
+import groovy.transform.ToString
+import groovy.util.logging.Slf4j
 
 
 
@@ -71,14 +86,14 @@ class Response {
 
     // TODO: look into using the new httpHeaders instead.
     Map<String, String> headers
-    
+
     /**
      * An instance of a CommandResults object must be provided to the Response
      * constructor via the named argument <tt>commandResults</tt>.
      */
     @Delegate CommandResults commandResults
 
-// TODO Bruce.Faulkner 09 December 2016: Consider making httpHeaders a delegate to
+// TODO brfaul 09 December 2016: Consider making httpHeaders a delegate to
 // avoid having test authors have to call the get/set methods through it.
 // Make sure this is CAREFUL CONSIDERATION as given that HttpHeaders is a Map,
 // the convenience by making the instance a delegate MIGHT be far outweighed
@@ -174,7 +189,7 @@ class Response {
         }
         def header = trimmedHeaderLines?.join '\n'
         headers = CurlInvoker.getHeadersMapFromMultiLineString(header)
-        
+
     }
 
 

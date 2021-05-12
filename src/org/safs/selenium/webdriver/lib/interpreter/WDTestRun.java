@@ -1,7 +1,20 @@
 /**
  * Copyright (C) SAS Institute, All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * Developer Log:
  * JUL 28, 2015 Tao Xie Added SwitchToFrame and SwitchToFrameIndex support
@@ -9,6 +22,15 @@
  * SEP 27, 2016 Lei Wang Modified initRemoteWebDriver(): Launch selenium server set in the .ini configuration file.
  *                                                     Close the browser after getting RemoteDriver.
  * JUN 14, 2017 Lei Wang Modified string(): evaluate the the parameter as javascript if it is embedded by "javascript{}"
+ * SEP 14, 2017 Lei Wang Modified runStep(): handle the hidden action of closing Confirmation provided by
+ * DEC 11, 2017 Lei Wang Removed method initRemoteWebDriver(): This will create a new session.
+ *                       We support 2 kinds of scripts: .json format and .html format; To support open an URL, we use class WDGet and Open
+ *                       for .json and .html format. Open will create a new session; while WDGet will use the default session created in this
+ *                       method. This is not a problem for most browsers; But with Edge, it is a problem; Edge doesn't like multiple sessions.
+ *                       So we remove this initRemoteWebDriver() and modify class WDGet to start a session by itself.
+ * DEC 22, 2017 Lei Wang Removed method runStep(): Handle step's attributes.
+ * JAN 12, 2018 Lei Wang Added method getSAFSLog(). Override method getLog() and log().
+ * JAN 18, 2018 Lei Wang Modified method replaceVariableReferences(): Fix a dead loop problem met when the map item doesn't exist.
  */
 package org.safs.selenium.webdriver.lib.interpreter;
 
@@ -20,10 +42,10 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.safs.SAFSException;
 import org.safs.STAFHelper;
-import org.safs.StringUtils;
+import org.safs.logging.LogUtilities;
 import org.safs.selenium.webdriver.WebDriverGUIUtilities;
-import org.safs.selenium.webdriver.lib.SeleniumPlusException;
 import org.safs.selenium.webdriver.lib.WDLibrary;
+import org.safs.selenium.webdriver.lib.interpreter.selrunner.steptype.Confirmation;
 import org.safs.selenium.webdriver.lib.interpreter.selrunner.steptype.Eval;
 
 import com.sebuilder.interpreter.Locator;
@@ -111,6 +133,55 @@ public class WDTestRun extends TestRun {
 		super(script);
 	}
 
+	//keep the 'lastNamedLogFacility' got from the Log instance.
+	private static String lastNamedLogFacility = null;
+
+	/**
+	 * Get the possible SAFSLog. If the TestRun's log instance is a LogUtilities and it has a valid log facility, then
+	 * it can be used as a SAFS Log
+	 *
+	 * @return Log, the possible SAFS Log.
+	 */
+	public synchronized Log getSAFSLog() {
+		Log log = super.getLog();
+
+		if(log instanceof LogUtilities){
+			String myFac = ((LogUtilities) log).getLastNamedLogFacility();
+			if(myFac==null){
+				if(lastNamedLogFacility!=null){
+					((LogUtilities) log).setLastNamedLogFacility(lastNamedLogFacility);
+				}else{
+					getLog().error("This TestRun's log instance is a LogUtilities, but it doesn't have a log facility and it cannot be used as a SAFS Log.");
+				}
+			}
+		}else{
+			getLog().error("This TestRun's log instance is not a LogUtilities, cannot be used as a SAFS Log.");
+		}
+
+		return log;
+	}
+
+	@Override
+	public synchronized Log getLog() {
+		Log log = super.getLog();
+
+		if(log instanceof LogUtilities){
+			String myFac = ((LogUtilities) log).getLastNamedLogFacility();
+			//if the log facility is not null, assign it to the private field 'lastNamedLogFacility'
+			//and set null to the log's lastNamedLogFacility so that it will write message to debug log file.
+			if(myFac!=null){
+				lastNamedLogFacility = myFac;
+				((LogUtilities) log).setLastNamedLogFacility(null);
+			}
+		}
+
+		return log;
+	}
+	@Override
+	public Log log() {
+		return getLog();
+	}
+
 	/**
 	 * @param map name of app map.  may be null.
 	 * @param win name of app map section.  may be null.
@@ -151,59 +222,67 @@ public class WDTestRun extends TestRun {
 	public String replaceVariableReferences(String value){
 		int start = -1;
 		int end   = -1;
-		do{
-		   start = value.indexOf(VARREF_START);
-		   if(start > end){
-			   // there must be a var name between the braces
-			   end = value.indexOf(VARREF_END, start + VARREF_START.length() +1);
-			   if(end > start){
-				   String key = value.substring(start+VARREF_START.length(), end);
-				   String val = null;
-				   getLog().debug("WDTestRun seeking embedded variable reference '"+ key+"'.");
-				   try{
-					   if(vars().containsKey(key)){
-						   val = vars().get(key);
-					   }else{
-						   // Valid possible App Map References:
-						   // ${Map:ConstantName}          (default App Map)
-						   // ${Map:WindowName:CompName} (default App Map)
-						   // ${Map:mapID:WindowName:CompName}
-						   if(key.toLowerCase().startsWith(MAPREF_PREFIX)){
-							   String map = key.substring(MAPREF_PREFIX.length());
-							   String win = null;
-							   String comp = null;
-							   int col = map.lastIndexOf(':');
-							   if(col < 0){
-								   //only a COMP (or constant) name is provided
-								   comp = map;
-								   map = null;
-							   }else{
-								   // extract explicit comp name
-								   comp = map.substring(col+1);
-								   map = map.substring(0, col);
-								   col = map.lastIndexOf(':');
-								   if(col < 0){
-									   win = map;
-									   map = null;
-								   }else{
-									   win = map.substring(col+1);
-									   map = map.substring(0, col);
-								   }
-							   }
-							   // lookup App Map Reference mapid and winname may be null
-							   val = getAppMapItem(map, win, comp);
-						   }else{
-							   val = getVariableValue(key);
-						   }
-					   }
-				   }catch(Exception ignore){}
-				   value = val == null ?
-						   value       :
-						   value.replace(VARREF_START + key + VARREF_END, val);
-				   getLog().debug("WDTestRun replacing variable reference '"+ key+"' as '"+ value +"'.");
-			   }
-		   }
-		}while(start > -1 && end > start);
+		while(true){
+			start = value.indexOf(VARREF_START);
+			if(start<0){//If we cannot find the symbol "${", then it means there is no variable inside.
+				break;
+			}
+
+			end = value.indexOf(VARREF_END, start + VARREF_START.length() +1);
+			if(start > end){
+				//if the variable ending mark '}' is not found or is before the starting mark '${'
+				//then no variable can be got, we should break.
+				break;
+			}
+
+			//there must be a var name between the braces
+			String key = value.substring(start+VARREF_START.length(), end);
+			String val = null;
+			getLog().debug("WDTestRun seeking embedded variable reference '"+ key+"'.");
+			try{
+				if(vars().containsKey(key)){
+					val = vars().get(key);
+				}else{
+					// Valid possible App Map References:
+					// ${Map:ConstantName}          (default App Map)
+					// ${Map:WindowName:CompName} (default App Map)
+					// ${Map:mapID:WindowName:CompName}
+					if(key.toLowerCase().startsWith(MAPREF_PREFIX)){
+						String map = key.substring(MAPREF_PREFIX.length());
+						String win = null;
+						String comp = null;
+						int col = map.lastIndexOf(':');
+						if(col < 0){
+							//only a COMP (or constant) name is provided
+							comp = map;
+							map = null;
+						}else{
+							// extract explicit comp name
+							comp = map.substring(col+1);
+							map = map.substring(0, col);
+							col = map.lastIndexOf(':');
+							if(col < 0){
+								win = map;
+								map = null;
+							}else{
+								win = map.substring(col+1);
+								map = map.substring(0, col);
+							}
+						}
+						// lookup App Map Reference mapid and winname may be null
+						val = getAppMapItem(map, win, comp);
+					}else{
+						val = getVariableValue(key);
+					}
+				}
+			}catch(Exception ignore){}
+			if(val==null){
+				//If we cannot find the variable, then throw out an exception
+				throw new RuntimeException("Cannot find value for variable '"+key+"'!");
+			}
+			value = value.replace(VARREF_START + key + VARREF_END, val);
+			getLog().debug("WDTestRun replacing variable reference '"+ key+"' as '"+ value +"'.");
+		}
 		return value;
 	}
 
@@ -325,6 +404,7 @@ public class WDTestRun extends TestRun {
 	}
 
 	/** @return True if there is another step to execute. */
+	@Override
 	public boolean hasNext() {
 		return stepIndex < getScript().steps.size() - 1;
 	}
@@ -340,9 +420,11 @@ public class WDTestRun extends TestRun {
 	 * @param step
 	 * @return
 	 */
-	public boolean runStep(Step step){
+	public boolean runStep(Step step) throws IgnoredStepException{
 
 		initRemoteWebDriver();
+
+		if(step instanceof WDStep) ((WDStep)step).handleAttributes(this);
 
 		try {
 			StepType type = step.type;
@@ -354,16 +436,28 @@ public class WDTestRun extends TestRun {
 				type = new WDSwitchToFrame();
 			} else if (type instanceof SwitchToFrameByIndex) {
 				type = new WDSwitchToFrameByIndex();
-			} else if (type instanceof Store){
+			} else if (type instanceof Store){//com.sebuilder.interpreter.steptype.Store
 				String varname = this.string("variable");
 				String text = this.string("text");
 				WebDriverGUIUtilities._LASTINSTANCE.getSTAFHelper().setVariable(varname, text);
 			}
-			return type.run(this);
+
+			boolean result = type.run(this);
+
+			//StoreConfirmation's hidden function will close the confirmation popup it self.
+			if (type instanceof com.sebuilder.interpreter.Store){
+				com.sebuilder.interpreter.Store store = (com.sebuilder.interpreter.Store) type;
+				if(store.getter instanceof Confirmation){
+					Confirmation confirmation = (Confirmation) store.getter;
+					confirmation.accept(this);
+				}
+			}
+
+			return result;
 		} catch (Throwable e) {
 
 			this.log().debug("WDTestRun.runStep() "+ e.getClass().getName()+": "+ e.getMessage(),e);
-			RuntimeException t = new RuntimeException(currentStep() + " failed.", e);
+			RuntimeException t = new RuntimeException(step + " failed.\n"+e.getMessage(), e);
 			t.fillInStackTrace();
 			throw t;
 		}
@@ -386,18 +480,24 @@ public class WDTestRun extends TestRun {
 
 		getLog().debug("Running step " + (stepIndex + 2) + ":" +
 		getScript().steps.get(stepIndex + 1).type.getClass().getSimpleName() + " step.");
-		boolean result = runStep(getScript().steps.get(++stepIndex));
-		if (!result) {
-			// If a verify failed, we just note this but continue.
-			if (currentStep().type instanceof Verify) {
-				getLog().error(currentStep() + " failed.");
-				return false;
+		boolean result;
+		try {
+			result = runStep(getScript().steps.get(++stepIndex));
+			if (!result) {
+				// If a verify failed, we just note this but continue.
+				if (currentStep().type instanceof Verify) {
+					getLog().error(currentStep() + " failed.");
+					return false;
+				}
+				// In all other cases, we throw an exception to stop the run.
+				RuntimeException e = new RuntimeException(currentStep() + " failed.");
+				e.fillInStackTrace();
+				throw e; // continue?
+			} else {
+				return true;
 			}
-			// In all other cases, we throw an exception to stop the run.
-			RuntimeException e = new RuntimeException(currentStep() + " failed.");
-			e.fillInStackTrace();
-			throw e; // continue?
-		} else {
+		} catch (IgnoredStepException e) {
+			getLog().warn("The step is ignored: Met "+e);
 			return true;
 		}
 	}
@@ -436,29 +536,29 @@ public class WDTestRun extends TestRun {
 	 * So only initialize IF we don't already have one.
 	 * @see com.sebuilder.interpreter.TestRun#initRemoteWebDriver()
 	 */
-	@Override
-	public void initRemoteWebDriver() {
-		getLog().info("WDTestRun.initRemoteWebDriver invoked.");
-		if(getDriver() != null) {
-			getLog().info("WDTestRun.initRemoteWebDriver detected session already exists...");
-			return;
-		}
-		int timeout = 30; // TODO get from parameters in this object!
-		String browserID = "sebuilder_run"+System.currentTimeMillis();
-		try{ WDLibrary.startBrowser(null, null, browserID, timeout, true);}
-		catch(Throwable th){
-			try {
-				WebDriverGUIUtilities.launchSeleniumServers();
-				try{
-					WDLibrary.startBrowser(null, null, browserID, timeout, true);
-					getLog().info("WDTestRun.initRemoteWebDriver successful starting browser session.");
-				}catch(Throwable th2){
-					getLog().debug("WDTestRun.initRemoteWebDriver failed to start a new WebDriver session:", th2);
-				}
-			} catch (SeleniumPlusException e) {
-				getLog().info("WDTestRun.initRemoteWebDriver detected the expected RemoteServer is not running and cannot be started: "+StringUtils.debugmsg(e));
-			}
-		}
-	}
+//	@Override
+//	public void initRemoteWebDriver() {
+//		getLog().info("WDTestRun.initRemoteWebDriver invoked.");
+//		if(getDriver() != null) {
+//			getLog().info("WDTestRun.initRemoteWebDriver detected session already exists...");
+//			return;
+//		}
+//		int timeout = 30; // TODO get from parameters in this object!
+//		String browserID = "sebuilder_run"+System.currentTimeMillis();
+//		try{ WDLibrary.startBrowser(null, null, browserID, timeout, true);}
+//		catch(Throwable th){
+//			try {
+//				WebDriverGUIUtilities.launchSeleniumServers();
+//				try{
+//					WDLibrary.startBrowser(null, null, browserID, timeout, true);
+//					getLog().info("WDTestRun.initRemoteWebDriver successful starting browser session.");
+//				}catch(Throwable th2){
+//					getLog().debug("WDTestRun.initRemoteWebDriver failed to start a new WebDriver session:", th2);
+//				}
+//			} catch (SeleniumPlusException e) {
+//				getLog().info("WDTestRun.initRemoteWebDriver detected the expected RemoteServer is not running and cannot be started: "+StringUtils.debugmsg(e));
+//			}
+//		}
+//	}
 
 }

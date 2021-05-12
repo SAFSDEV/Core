@@ -19,6 +19,7 @@ Dim cr
 Dim q
 Dim nl
 Dim newline
+Dim safsInstallLib
 
 CONST OK_BUTTON_CLICKED=1
 CONST CANCEL_BUTTON_CLICKED=2
@@ -63,7 +64,15 @@ if Len(stafdir) = 0 then
    WScript.Quit
 end if
 
-cmd = q & ".\jre\bin\java.exe"& q & " -cp .\install\lib\safsinstall.jar org.safs.install.SilentInstaller -safs "& q & safsdir & q
+safsInstallLib = "install\lib\safsinstall.jar"
+ 
+If NOT fso.FileExists(safsInstallLib) Then 
+   msg = "SAFS install library '" &safsInstallLib& "' appears to be invalid."& cr & cr
+   shell.Popup msg,0,"SeleniumPlus Installation Abort",16
+   WScript.Quit
+End If
+
+cmd = q & ".\jre\bin\java.exe"& q & " -cp " & safsInstallLib & " org.safs.install.SilentInstaller -safs "& q & safsdir & q
 
 'use previous install SAFS and STAF directories if existing
 '==========================================================

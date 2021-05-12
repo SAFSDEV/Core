@@ -1,8 +1,20 @@
 /**
- * Copyright (C) SAS Institute. All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * Developer history:
  *
@@ -10,14 +22,14 @@
  *                            for ctrl+v(paste) job done.
  * <br> Carl Nagle  MAR 25, 2009  Added MouseDrag support
  * <br> Carl Nagle  APR 03, 2009  Enhance MouseDrag support to work for more apps.
- * <br> LeiWang JUL 04, 2011  Add methods to maximize, minimize, restore, close window by key-mnemonic.
- * <br> LeiWang JAN 04, 2015  Add method mouseWheel().
+ * <br> Lei Wang JUL 04, 2011  Add methods to maximize, minimize, restore, close window by key-mnemonic.
+ * <br> Lei Wang JAN 04, 2015  Add method mouseWheel().
  * <br> Carl Nagle  MAY 29, 2015  Add support for setMillisBetweenKeystrokes
- * <br> LeiWang SEP 08, 2015  Modify mouseDrag(): after mouse down, we should move slightly to mimic the drag.
- * <br> LeiWang SEP 18, 2015  Add waitReaction() and modify inputKeys()/inputChars(): wait reaction of browser
+ * <br> Lei Wang SEP 08, 2015  Modify mouseDrag(): after mouse down, we should move slightly to mimic the drag.
+ * <br> Lei Wang SEP 18, 2015  Add waitReaction() and modify inputKeys()/inputChars(): wait reaction of browser
  *                            for input keys if the switch 'waitReaction' is on.
  *                            Add method to clear/set/get system clip-board, and testInputKeys().
- * <br> LeiWang SEP 30, 2016  Added leftDrag(), rightDrag(), centerDrag(): provide an extra parameter 'dndReleaseDelay'.
+ * <br> Lei Wang SEP 30, 2016  Added leftDrag(), rightDrag(), centerDrag(): provide an extra parameter 'dndReleaseDelay'.
  *                            Added property 'dndReleaseDelay', which controls the global setting.
  */
 package org.safs.robot;
@@ -1000,15 +1012,18 @@ public class Robot {
 	 */
 	public static void clearClipboard(){
 		clipboard.setContents(new Transferable() {
-		    public DataFlavor[] getTransferDataFlavors() {
+		    @Override
+			public DataFlavor[] getTransferDataFlavors() {
 		        return new DataFlavor[0];
 		      }
 
-		      public boolean isDataFlavorSupported(DataFlavor flavor) {
+		      @Override
+			public boolean isDataFlavorSupported(DataFlavor flavor) {
 		        return false;
 		      }
 
-		      public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException {
+		      @Override
+			public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException {
 		        throw new UnsupportedFlavorException(flavor);
 		      }
 		}, null);
@@ -1092,7 +1107,51 @@ public class Robot {
 		}
 	}
 
+	/**
+	 * @param onOff boolean, Set keyboard's 'NumLock' on or off.
+	 */
+	public static void setNumLock(boolean onOff){
+		Toolkit.getDefaultToolkit().setLockingKeyState(KeyEvent.VK_NUM_LOCK, onOff);
+	}
+	/**
+	 * @return boolean, the current keyboard's 'NumLock' status.
+	 */
+	public static boolean getNumLock(){
+		return Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_NUM_LOCK);
+	}
+
+	/**
+	 * With Edge browser, Java keycode 0X7F(127) doesn't work well, it will input a character "." instead of deleting string.<br>
+	 * Turn off the "Num Lock" seems help.
+	 * To test this, we open a Edge browser and input some characters into the address bar, then call this method<br>
+	 *
+	 */
+	private static void testNumberLockAndDelete(){
+		try {
+			System.out.println("!!!CLICK your mouse on the Edge's address bar and input something!!!, You have 5 seconds to do it.");
+			Thread.sleep(5000);
+		} catch (InterruptedException e1) {
+		}
+
+		try {
+			setNumLock(true);
+			Robot.inputKeys("^a{Delete}");//As the Num Lock is on, it will input a .
+			Thread.sleep(5000);
+		} catch (AWTException | InterruptedException e) {
+			System.err.println("Met "+e.toString());
+		}
+
+		try {
+			setNumLock(false);
+			Robot.inputKeys("^a{Delete}");//As the Num Lock is off, it will delete string
+			Thread.sleep(5000);
+		} catch (AWTException | InterruptedException e) {
+			System.err.println("Met "+e.toString());
+		}
+	}
+
 	public static void main(String[] args){
 		testInputKeys();
+		testNumberLockAndDelete();
 	}
 }

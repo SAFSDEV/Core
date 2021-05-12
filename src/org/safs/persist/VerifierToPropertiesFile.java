@@ -1,8 +1,20 @@
 /**
  * Copyright (C) SAS Institute, All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- */
-
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * Logs for developers, not published to API DOC.
  *
@@ -12,7 +24,6 @@
 package org.safs.persist;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -39,7 +50,7 @@ import org.safs.tools.RuntimeDataInterface;
  */
 public class VerifierToPropertiesFile extends VerifierToFile{
 
-	Properties properties = new Properties();
+	protected Properties properties = null;
 
 	/**
 	 * @param runtime
@@ -50,6 +61,7 @@ public class VerifierToPropertiesFile extends VerifierToFile{
 		properties = new Properties();
 	}
 
+	@Override
 	public void beforeCheck(Persistable persistable, boolean... conditions)  throws SAFSException, IOException{
 		super.beforeCheck(persistable, conditions);
 
@@ -60,28 +72,5 @@ public class VerifierToPropertiesFile extends VerifierToFile{
 		for(String key:keys){
 			expectedContents.put(key, properties.get(key));
 		}
-	}
-
-	private static final Map<String,String> defaultElementValues = null;
-//	/**
-//	 * '<b>\n</b>'<br/>
-//	 * For container Element, such as <b>Response</b> in XML
-//	 * <pre>
-//	 * &lt;Response&gt;
-//	 *   &lt;StatusCode&gt;200&lt;/StatusCode&gt;
-//	 * &lt;/Response&gt;
-//	 * </pre>
-//	 * actually it doesn't have any string value,
-//	 * but the XML SAX parser will assign a "<b>\n</b>" to it.
-//	 */
-//	private static final String CONTAINER_ELEMENT_DEFAULT_VALUE = "";
-//
-//	static{
-//		defaultElementValues = new HashMap<String,String>();
-//		defaultElementValues.put(Persistable.CONTAINER_ELEMENT, CONTAINER_ELEMENT_DEFAULT_VALUE);
-//	}
-
-	void debug(String msg){
-		System.out.println(msg);
 	}
 }

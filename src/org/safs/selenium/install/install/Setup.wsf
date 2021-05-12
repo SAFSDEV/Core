@@ -8,6 +8,11 @@
 '*
 '* arg(0) -- REQUIRED -- SeleniumPlus Install Directory.
 '* arg(1) -- OPTIONAL -- STAF Install Directory.
+'* arg(2) -- OPTIONAL -- silent (--silent | -s) means that we don't need user's input, we use the default value to install
+'*
+'* Example:
+'* Setup.WSF "C:\SeleniumPlus\" "C:\staf" "--silent" 
+'* Setup.WSF "C:\SeleniumPlus\" "" "--silent" 
 '*
 '* Copyright (C) SAS Institute
 '* General Public License: http://www.opensource.org/licenses/gpl-license.php
@@ -20,6 +25,7 @@ Dim cr
 Dim q
 Dim nl
 Dim newline
+Dim silent
 
 CONST OK_BUTTON_CLICKED=1
 CONST CANCEL_BUTTON_CLICKED=2
@@ -35,6 +41,7 @@ nl		  = chr(10)		'next line
 newline   = cr & nl		'use "carriage return" and "next line" to form a newline
 stafenv   = "STAFDIR" 'Environment Variable for STAF root directory.
 safsenv   = "SELENIUM_PLUS" 'Environment Variable for root install directory.
+silent    = false
 
 stafdir = ""
 installstaf = false 
@@ -47,28 +54,59 @@ Set env   = shell.Environment("SYSTEM")
 Set fso   = WScript.CreateObject("Scripting.FileSystemObject")
 Set args  = WScript.Arguments
 
+'Handle the first parameter 'safsdir'
+safsdir = args(0)
+if Len(safsdir) = 0 then
+   msg = "Required path to SeleniumPlus root directory was not provided." & cr & cr
+   'shell.Popup msg,0,"SeleniumPlus Installation Abort",16
+   WScript.Echo "SeleniumPlus Installation Abort: " & msg
+   WScript.Quit
+else
+   'Remove the ending back-slash
+   if Right(safsdir, 1)="\" then
+     safsdir=left(safsdir, len(safsdir)-1)
+   end if  
+end if
+
+'Handle the second parameter 'stafdir'
+if args.Count > 1 then 
+    if Len(args(1)) = 0 then
+      WScript.Echo "STAF root directory was not provided, will not install STAF."
+    else
+      stafdir = args(1)
+      installstaf = true
+      'Remove the ending back-slash
+      if Right(stafdir, 1)="\" then
+        stafdir=left(stafdir, len(stafdir)-1)
+      end if
+    end if
+end if
+
+'Handle the third parameter 'silent'
+if args.Count > 2 then 
+    if ( args(2) = "--silent" ) or ( args(2) = "-s" ) then
+      silent = true
+    end if
+end if
+
 'Test if user has the right to access registry
 if Not UserIsAdministrator then
    msg = "Required administrator rights to install SeleniumPlus, please right-click the setup.bat and 'Run as administrator'."& cr & cr
-   shell.Popup msg,0,"SeleniumPlus Installation Abort",16
+   if silent then
+     WScript.Echo "SeleniumPlus Installation Abort: " & msg
+   else
+     shell.Popup msg,0,"SeleniumPlus Installation Abort",16
+   end if
    WScript.Quit
-end if
-
-safsdir = args(0)
-if Len(safsdir) = 0 then
-   msg = "Required path to SeleniumPlus root directory was not provided."& cr & cr
-   shell.Popup msg,0,"SeleniumPlus Installation Abort",16
-   WScript.Quit
-end if
-
-'Remove the ending back-slash of safsdir
-if Right(safsdir, 1)="\" then
-   safsdir=left(safsdir, len(safsdir)-1)
 end if
 
 If NOT fso.FileExists(safsdir & "\libs\SPFilterImageGUI.jar") Then 
    msg = "SeleniumPlus path provided appears to be invalid."& cr & cr
-   shell.Popup msg,0,"SeleniumPlus Installation Abort",16
+   if silent then
+     WScript.Echo "SeleniumPlus Installation Abort: " & msg
+   else
+     shell.Popup msg,0,"SeleniumPlus Installation Abort",16
+   end if
    WScript.Quit
 End If
 
@@ -108,29 +146,48 @@ if Len(arg)> 0 then
    msg = "SeleniumPlus may already exists at "& arg & "." & cr
    msg = msg & "It is recommended to UNINSTALL the old version before proceeding with this new install" & cr & cr
    msg = msg & "Continue to install the new version anyway?"& cr & cr
-   msg = msg &"Click YES to proceed; NO to cancel the install."
-   returncode = shell.Popup(msg, 0, safstitle, 32+4) 
-   If ((returncode = 2) Or (returncode = 7)) Then
-      shell.Popup "Installation cancelled.",0,safstitle,64
-      WScript.Quit
-   End If
-ELSE
+   msg = msg & "Click YES to proceed; NO to cancel the install."
+   
+   if silent then
+   	  WScript.Echo msg & " Cliked Yes!"
+   else
+	   returncode = shell.Popup(msg, 0, safstitle, 32+4) 
+	   If ((returncode = 2) Or (returncode = 7)) Then
+	      shell.Popup "Installation cancelled.",0,safstitle,64
+	      WScript.Quit
+	   End If  
+   end if
+
+else
+
    msg = "Preparing to install SeleniumPlus." & cr & cr
    msg = msg & "Continue with the install?"& cr & cr
    msg = msg &"Click YES to proceed; NO to cancel the install."
-   returncode = shell.Popup(msg, 0, safstitle, 36) 
-   If ((returncode = 2) Or (returncode = 7)) Then
-      shell.Popup "Installation cancelled.",0,safstitle,64
-      WScript.Quit
-   End If
+   
+   if silent then
+       WScript.Echo msg & " Cliked Yes!"
+   else
+	   returncode = shell.Popup(msg, 0, safstitle, 36) 
+	   If ((returncode = 2) Or (returncode = 7)) Then
+	      shell.Popup "Installation cancelled.",0,safstitle,64
+	      WScript.Quit
+	   End If   
+   end if
 End if
 
+WScript.Echo "Running command: " & cmd
 On Error Resume Next
 Set exec = shell.Exec(cmd)
+WScript.Echo "Finished Execution."
 
 If Err.Number <> 0 then
     WScript.Interactive = True
-    shell.Popup "Error <"& CStr(Err.Number) &":"& Err.Description &"> occurred while trying to install.",0, "Installation Aborted.",16
+    msg = "Error <"& CStr(Err.Number) &":"& Err.Description &"> occurred while trying to install."
+    if silent then
+      WScript.Echo msg
+    else
+      shell.Popup msg ,0, "Installation Aborted.",16
+    end if
     Wscript.Quit    
 End if
 
@@ -156,7 +213,11 @@ OutStream.Write arg
 On Error Goto 0
 
 msg = "SeleniumPlus installation is complete." & cr
-shell.Popup msg,0,safstitle,64
+if silent then
+  WScript.Echo msg
+else
+  shell.Popup msg,0,safstitle,64
+end if
 
 Set shell = nothing
 Set env   = nothing

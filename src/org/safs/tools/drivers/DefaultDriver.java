@@ -1,6 +1,41 @@
-/** Copyright (C) (SAS) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
+/**
+ * <br>(Carl Nagle) DEC 10, 2008 Fixed LogMode problems affecting XML Logging
+ * <br>(Lei Wang)APR 20, 2010 Modify method initializePresetVariables(): Read the OCR settings from INI file,
+ *                                                                  then set them to STAF Variables.
+ * <br>(Lei Wang)JUL 13, 2010 Modify method initializePresetVariables(): Read the IBT settings from INI file,
+ *                                                                  then set to ImageUtils
+ * <br>(JunwuMa)SEP 27, 2010 Added initialization for step retry working with SAFSMonitorFrame.
+ * <br>	Oct 26, 2010	(Carl Nagle) 	Refactored to support separate misc config initialization
+ * <br>	Jul 08, 2011	(Carl Nagle) 	Add support for PREFERRED_ENGINES_OVERRIDE
+ * <br>	SEP 12, 2013	(Carl Nagle) 	Add Daemon threads for SAFSMonitor shutdown.
+ * <br>	OCT 09, 2016	(Lei Wang) 	Modified validateTestParameters(): handle 'DndReleaseDelay'.
+ * <br>	MAR 30, 2018	(Lei Wang) 	Start a rest service session and send runtime data (such as machine, user) back to our repository.
+ * <br>	APR 02, 2018	(Lei Wang) 	Renamed startSAFSDataService() to connectSAFSDataService(), and also read settings from system properties.
+ *                                  Renamed stopSAFSDataService() to disconnectSAFSDataService().
+ *                                  Added comments to connectSAFSDataService() and disconnectSAFSDataService().
+ * <br>	APR 03, 2018	(Lei Wang) 	Collect machine, user, framework, engine and history data in a separated thread.
+ *                                  We have to stop the REST session with "SAFS Data Service" in that thread.
+ * <br>	APR 18, 2018	(Lei Wang) 	Moved safs-data related methods to AbstractDriver.
+ * <br>	JUN 07, 2018	(Lei Wang) 	Modified validateTestParameters(): get orderable information from .ini configuration file.
+ *                                  Modified openTestLogs(): write orderable information into Log file.
+ */
 package org.safs.tools.drivers;
 
 import java.io.File;
@@ -17,7 +52,11 @@ import org.safs.SAFSException;
 import org.safs.STAFHelper;
 import org.safs.SingletonSTAFHelper;
 import org.safs.StringUtils;
+import org.safs.Utils;
+import org.safs.android.auto.lib.Console;
+import org.safs.data.model.Orderable;
 import org.safs.image.ImageUtils;
+import org.safs.logging.AbstractLogFacility;
 import org.safs.robot.Robot;
 import org.safs.text.CaseInsensitiveHashtable;
 import org.safs.text.FAILStrings;
@@ -51,56 +90,44 @@ import org.safs.tools.vars.VarsInterface;
  * If this variable is set to 'SHUTDOWN_HOOK' then the driver will initiate a shutdown.
  * <p>
  * The driver will provide a Frame monitor allowing the user to initiate such a shutdown.
- * 
- * <br>(Carl Nagle) DEC 10, 2008 Fixed LogMode problems affecting XML Logging
- * <br>(LeiWang)APR 20, 2010 Modify method initializePresetVariables(): Read the OCR settings from INI file, 
- *                                                                  then set them to STAF Variables.
- * <br>(LeiWang)JUL 13, 2010 Modify method initializePresetVariables(): Read the IBT settings from INI file,
- *                                                                  then set to ImageUtils
- * <br>(JunwuMa)SEP 27, 2010 Added initialization for step retry working with SAFSMonitorFrame.
- * <br>	Oct 26, 2010	(Carl Nagle) 	Refactored to support separate misc config initialization
- * <br>	Jul 08, 2011	(Carl Nagle) 	Add support for PREFERRED_ENGINES_OVERRIDE
- * <br>	SEP 12, 2013	(Carl Nagle) 	Add Daemon threads for SAFSMonitor shutdown.
- * <br>	OCT 09, 2016	(Lei Wang) 	Modified validateTestParameters(): handle 'DndReleaseDelay'.
- * 
- * 
+ *
  * @see org.safs.tools.UniqueStringID
  * @see org.safs.tools.logs.UniqueStringLogInfo
  */
 public abstract class DefaultDriver extends AbstractDriver {
 
-    protected SAFSMonitorFrame          safsmonitor = null;	
+    protected SAFSMonitorFrame          safsmonitor = null;
 	protected SAFSSTATUS                status     = null;
 	protected StacksInterface           cycleStack = null;
 	protected StacksInterface           suiteStack = null;
 	protected StacksInterface           stepStack  = null;
 
 	/**
-	 * If true, the SAFS Monitor window can be 
-	 * used to control test execution--allowing the tester to interactively PAUSE the test, STEP through 
-	 * portions of the test, or force a premature SHUTDOWN (Abort) of the test--including any running SAFS 
+	 * If true, the SAFS Monitor window can be
+	 * used to control test execution--allowing the tester to interactively PAUSE the test, STEP through
+	 * portions of the test, or force a premature SHUTDOWN (Abort) of the test--including any running SAFS
 	 * Engines.
 	 * <p>
 	 * To ignore the default SAFS Monitor integration, the developer can set this value to 'false'.<br>
 	 * The default setting is 'true'.
 	 */
 	public boolean useSAFSMonitor = true;
-	
+
 	/** Stores ALL instanced EngineInterface objects in instanced order. */
 	protected Vector                    engines = new Vector(5,1);
 	/** Stores only active 'preferred' engine class names in preferred order. */
 	protected Vector                    enginePreference = new Vector(5,1);
-	/** 
+	/**
 	 * Stores ALL instanced EngineInterface objects in classname=engine format.
 	 * Note the classname is NOT case-sensitive.
-	 * @see CaseInsensitiveHashtable 
+	 * @see CaseInsensitiveHashtable
 	 */
 	protected CaseInsensitiveHashtable  engineObjects = new CaseInsensitiveHashtable(5);
 
-	protected UniqueStringLogInfo cycleLog = null;	
-	protected UniqueStringLogInfo suiteLog = null;	
+	protected UniqueStringLogInfo cycleLog = null;
+	protected UniqueStringLogInfo suiteLog = null;
 	protected UniqueStringLogInfo stepLog = null;
-	
+
 	public boolean isUseSAFSMonitor() {
 		return useSAFSMonitor;
 	}
@@ -112,13 +139,15 @@ public abstract class DefaultDriver extends AbstractDriver {
 	/**
 	 * @see DriverInterface#getEngines()
 	 */
-	public ListIterator getEngines() { 
+	@Override
+	public ListIterator getEngines() {
 			return engines.listIterator();
 	}
 
 	/**
 	 * @see DriverInterface#getEnginePreferences()
 	 */
+	@Override
 	public ListIterator getEnginePreferences() { return enginePreference.listIterator();}
 
 	/**
@@ -138,15 +167,15 @@ public abstract class DefaultDriver extends AbstractDriver {
 				engindex++;
 			}
 		}catch(NullPointerException npx){;}
-		return -1;				
+		return -1;
 	}
 
 	/**
 	 * used internally or by subclasses to find the validity of an engine name.
-	 * For example, if the key substring provided is "SAFSROBOTJ", 
-	 * then the full key of "ORG.SAFS.TOOLS.ENGINES.SAFSROBOTJ" will be returned 
+	 * For example, if the key substring provided is "SAFSROBOTJ",
+	 * then the full key of "ORG.SAFS.TOOLS.ENGINES.SAFSROBOTJ" will be returned
 	 * if it is a running engine.
-	 * @throw IllegalArgumentException if key value is null, invalid, or unknown
+	 * @throws IllegalArgumentException if key value is null, invalid, or unknown
 	 */
 	protected String getFullEngineClass(String key) throws IllegalArgumentException{
 		try{
@@ -156,7 +185,7 @@ public abstract class DefaultDriver extends AbstractDriver {
 			String eng = null;
 			Enumeration list = engineObjects.keys();
 			while (list.hasMoreElements()){
-				eng = (String)list.nextElement();				
+				eng = (String)list.nextElement();
 				subindex = eng.indexOf(uckey);
 				if (subindex >= 0) return eng;
 			}
@@ -165,31 +194,34 @@ public abstract class DefaultDriver extends AbstractDriver {
 		String err = FAILStrings.convert("bad_param", "Invalid parameter value for "+text, text);
 		throw new IllegalArgumentException(err);
 	}
-	
+
 	/**
 	 * Retrieve a running {@link EngineInterface} engineObject by stored classname.
 	 * @param key full classname or simple classname of engine to retrieve.
-	 * For example, "SAFSROBOTJ" will successfully get "org.safs.tools.engines.SAFSROBOTJ" 
+	 * For example, "SAFSROBOTJ" will successfully get "org.safs.tools.engines.SAFSROBOTJ"
 	 * if it is running.
 	 * @see #getFullEngineClass(String)
 	 * @see DriverInterface#getPreferredEngine(String)
 	 * @see #engineObjects
-	 * @throw IllegalArgumentException if key value is null, invalid, or unknown
+	 * @throws IllegalArgumentException if key value is null, invalid, or unknown
 	 */
+	@Override
 	public EngineInterface getPreferredEngine(String key) throws IllegalArgumentException{
 		String uckey = getFullEngineClass(key);
 		return (EngineInterface)engineObjects.get(uckey);
-	}	
-	
+	}
+
 	/**
 	 * @see DriverInterface#hasEnginePreferences()
 	 */
+	@Override
 	public boolean hasEnginePreferences() { return !(enginePreference.isEmpty());}
-	
+
 	/**
 	 * @see DriverInterface#startEnginePreference(String)
-	 * @throw IllegalArgumentException if key value is null, invalid, or unknown
+	 * @throws IllegalArgumentException if key value is null, invalid, or unknown
 	 */
+	@Override
 	public void startEnginePreference(String key) throws IllegalArgumentException{
 		String uckey = null;
 		try{
@@ -199,7 +231,7 @@ public abstract class DefaultDriver extends AbstractDriver {
 			if (index >= 0){
 				Object eng = enginePreference.elementAt(index);
 				enginePreference.removeElementAt(index);
-				enginePreference.insertElementAt(eng, 0);			
+				enginePreference.insertElementAt(eng, 0);
 				return;
 			}
 			// see if the key matches known engine classes
@@ -214,8 +246,9 @@ public abstract class DefaultDriver extends AbstractDriver {
 
 	/**
 	 * @see DriverInterface#endEnginePreference(String)
-	 * @throw IllegalArgumentException if key value is null, invalid, or unknown
+	 * @throws IllegalArgumentException if key value is null, invalid, or unknown
 	 */
+	@Override
 	public void endEnginePreference(String key) throws IllegalArgumentException{
 		int index = getPreferredEngineIndex(key);
 		if (index < 0) {
@@ -229,12 +262,14 @@ public abstract class DefaultDriver extends AbstractDriver {
 	/**
 	 * @see DriverInterface#clearEnginePreferences()
 	 */
+	@Override
 	public void clearEnginePreferences(){ enginePreference.clear();}
 
 	/**
 	 * @see DriverInterface#isPreferredEngine(String)
-	 * @throw IllegalArgumentException if key value is invalid or unknown
+	 * @throws IllegalArgumentException if key value is invalid or unknown
 	 */
+	@Override
 	public boolean isPreferredEngine(String key) throws IllegalArgumentException{
 		if (enginePreference.isEmpty()) return false;
 		try{
@@ -242,18 +277,19 @@ public abstract class DefaultDriver extends AbstractDriver {
 			// try exact match
 			if (enginePreference.contains(uckey)) return true;
 			// try partial match
-			return(getPreferredEngineIndex(uckey) > -1);			
+			return(getPreferredEngineIndex(uckey) > -1);
 		}catch(NullPointerException npx){
 			String text = "DefaultDriver.isPreferredEngine(KEY)";
 			String err = FAILStrings.convert("bad_param", "Invalid parameter value for "+text, text);
 			throw new IllegalArgumentException(err);
 		}
 	}
-	
+
 	/**
 	 * @see DriverInterface#isPreferredEngine(EngineInterface)
-	 * @throw IllegalArgumentException if engine is null
+	 * @throws IllegalArgumentException if engine is null
 	 */
+	@Override
 	public boolean isPreferredEngine(EngineInterface engine) throws IllegalArgumentException{
 		if (enginePreference.isEmpty()) return false;
 		try{
@@ -269,15 +305,15 @@ public abstract class DefaultDriver extends AbstractDriver {
 			throw new IllegalArgumentException(err);
 		}
 	}
-	
 
-	/** 
-	 * Locate an EngineInterface given the engine priority string as defined in the 
+
+	/**
+	 * Locate an EngineInterface given the engine priority string as defined in the
 	 * documented Configuration File standard for SAFS_ENGINES. (Ex: "First", "Second", etc.)
 	 * <p>
 	 * @return an EngineInterface or null if not found or instantiated.**/
 	protected EngineInterface getEngineInterface(String itemName){
-		
+
 		EngineInterface engine = null;
 		Class engineClass = null;
 		String engineClassname = configInfo.getNamedValue(
@@ -288,8 +324,8 @@ public abstract class DefaultDriver extends AbstractDriver {
 		engineClassname = StringUtilities.removeDoubleQuotes(engineClassname);
 		int len = engineClassname.length();
 		if (len == 0) return null;
-		
-		try{		
+
+		try{
 			engineClass = Class.forName(engineClassname);
 			engine = (EngineInterface) engineClass.newInstance();
 			engineObjects.put(engineClassname.toUpperCase(), engine);
@@ -300,19 +336,19 @@ public abstract class DefaultDriver extends AbstractDriver {
 		return engine;
 	}
 
-	
+
 	/** Initialize or insert a ConfigureInterface at the start of the search order.**/
 	protected void insertConfigureInterfaceSource(ConfigureInterface source){
 		if (configInfo==null) { configInfo = source; }
-		else { if (source!=null) configInfo.insertConfigureInterface(source);}		
+		else { if (source!=null) configInfo.insertConfigureInterface(source);}
 	}
-	
-	
-	/** 
+
+
+	/**
 	 * Verify the existence of sufficient test information.
 	 * We need a test name, test level, and field separator.
 	 * If no separator is found we will default to a comma (,) separator.*/
-	protected void validateTestParameters(){		
+	protected void validateTestParameters(){
 		try{
 			Log.info("Retrieving testName...");
 
@@ -333,22 +369,22 @@ public abstract class DefaultDriver extends AbstractDriver {
 			value = configInfo.getNamedValue(
 		   		           DriverConstant.SECTION_SAFS_TEST, "SuiteSuffix");
 			if(!(value==null)) suiteSuffix = value;
-			
+
 			value = configInfo.getNamedValue(
 		   		           DriverConstant.SECTION_SAFS_TEST, "StepSuffix");
 			if(!(value==null)) stepSuffix = value;
-			
+
 			Log.info("Checking for valid test level...");
 
 		    //verify we have a test level command-line parameter
 			testLevel = getParameterValue(DriverConstant.PROPERTY_SAFS_TEST_LEVEL);
 			if (testLevel.length()==0){
-				
+
 				// check for a configuration file setting
 		   		testLevel = configInfo.getNamedValue(
 		   		                      DriverConstant.SECTION_SAFS_TEST, "TestLevel");
 		    	if ((testLevel==null)||(testLevel.length()==0)) {
-		    		
+
 		    		// check for implied test level from testname suffix
 		    		String testNameUC = testName.toUpperCase();
 		    		if (testNameUC.endsWith(cycleSuffix.toUpperCase())){
@@ -362,13 +398,13 @@ public abstract class DefaultDriver extends AbstractDriver {
 		    }
 		    // verify the test level setting is valid
 		    if (testLevel.length()==0) throw new NullPointerException();
-		    
+
 		    if ((! testLevel.equalsIgnoreCase(DriverConstant.DRIVER_CYCLE_TESTLEVEL))&&
 		        (! testLevel.equalsIgnoreCase(DriverConstant.DRIVER_SUITE_TESTLEVEL))&&
 		        (! testLevel.equalsIgnoreCase(DriverConstant.DRIVER_STEP_TESTLEVEL))){
 		        throw new NullPointerException();
 		    }
-		    
+
 			Log.info("Checking for alternate test record separators...");
 
 		    // check for alternate separator info
@@ -381,7 +417,7 @@ public abstract class DefaultDriver extends AbstractDriver {
 			if (value.length()==0) value = configInfo.getNamedValue(
 		   		           DriverConstant.SECTION_SAFS_TEST, "SuiteSeparator");
 			if(!(value==null)) suiteSeparator = value;
-			
+
 			value = getParameterValue(DriverConstant.PROPERTY_SAFS_STEP_SEPARATOR);
 			if (value.length()==0) value = configInfo.getNamedValue(
 		   		           DriverConstant.SECTION_SAFS_TEST, "StepSeparator");
@@ -391,7 +427,7 @@ public abstract class DefaultDriver extends AbstractDriver {
 			Log.info("Checking for alternate Driver Delay Command-Line setting '-Dsafs.test.millisbetweenrecords'...");
 			String millisBetween = getParameterValue(DriverConstant.PROPERTY_SAFS_TEST_MILLISBETWEENRECORDS);
 			if (millisBetween.length()==0){
-				Log.info("Checking for alternate Driver Delay 'SAFS_TEST':'millisbetweenrecords'...");				
+				Log.info("Checking for alternate Driver Delay 'SAFS_TEST':'millisbetweenrecords'...");
 				// check for a configuration file setting
 				millisBetween = configInfo.getNamedValue(
 		   		                      DriverConstant.SECTION_SAFS_TEST, "millisBetweenRecords");
@@ -413,7 +449,7 @@ public abstract class DefaultDriver extends AbstractDriver {
 			Log.info("Checking for Command-Line setting '-Dsafs.test.secswaitforwindow'...");
 			String secsWindow = getParameterValue(DriverConstant.PROPERTY_SAFS_TEST_SECSWAITFORWINDOW);
 			if (secsWindow.length()==0){
-				Log.info("Checking for alternate Driver Delay 'SAFS_TEST':'secsWaitForWindow'...");				
+				Log.info("Checking for alternate Driver Delay 'SAFS_TEST':'secsWaitForWindow'...");
 				// check for a configuration file setting
 				secsWindow = configInfo.getNamedValue(
 		   		                      DriverConstant.SECTION_SAFS_TEST, "secsWaitForWindow");
@@ -435,7 +471,7 @@ public abstract class DefaultDriver extends AbstractDriver {
 			Log.info("Checking for Command-Line setting '-Dsafs.test.secswaitforcomponent'...");
 			String secsComp = getParameterValue(DriverConstant.PROPERTY_SAFS_TEST_SECSWAITFORCOMPONENT);
 			if (secsComp.length()==0){
-				Log.info("Checking for alternate Driver Delay 'SAFS_TEST':'secsWaitForComponent'...");				
+				Log.info("Checking for alternate Driver Delay 'SAFS_TEST':'secsWaitForComponent'...");
 				// check for a configuration file setting
 				secsComp = configInfo.getNamedValue(
 		   		                      DriverConstant.SECTION_SAFS_TEST, "secsWaitForComponent");
@@ -452,50 +488,65 @@ public abstract class DefaultDriver extends AbstractDriver {
 	    		}
 	    	}
 			Log.info("Driver Delay 'secsWaitForComponent' set to "+ Processor.getSecsWaitForComponent());
-			
-			
-			String dndReleaseDelay = StringUtils.getSystemProperty(DriverConstant.PROPERTY_SAFS_TEST_DND_RELEASE_DELAY, 
-					configInfo, DriverConstant.SECTION_SAFS_TEST, DriverConstant.KEY_SAFS_TEST_DND_RELEASE_DELAY, String.valueOf(DriverConstant.DEFAULT_SAFS_TEST_DND_RELEASE_DELAY));				
+
+
+			String dndReleaseDelay = StringUtils.getSystemProperty(DriverConstant.PROPERTY_SAFS_TEST_DND_RELEASE_DELAY,
+					configInfo, DriverConstant.SECTION_SAFS_TEST, DriverConstant.KEY_SAFS_TEST_DND_RELEASE_DELAY, String.valueOf(DriverConstant.DEFAULT_SAFS_TEST_DND_RELEASE_DELAY));
 			IndependantLog.debug("the system property '" + DriverConstant.PROPERTY_SAFS_TEST_DND_RELEASE_DELAY+"' is '"+dndReleaseDelay+"'.");
 			try{
 				Robot.setDndReleaseDelay(StringUtilities.convertToInteger(dndReleaseDelay));
 			}catch(SAFSException e){
 				IndependantLog.warn("invalid value '"+dndReleaseDelay+"' for system property '"+DriverConstant.PROPERTY_SAFS_TEST_DND_RELEASE_DELAY+"', or for section value '"+DriverConstant.KEY_SAFS_TEST_DND_RELEASE_DELAY+"'");
 			}
-			
+
 			//check for settings such as 'NumberLock', 'UnexpectedAlertBehaviour' at engine side.
 			DefaultHookConfig.check(configInfo);
-			
+
 			Log.info("Test to execute: '"+ testName +"' using "+ testLevel.toUpperCase() +" DRIVER." );
+
+			//Check for orderable information
+			value = StringUtils.getSystemProperty(DriverConstant.PROPERTY_SAFS_TEST_ORD_PRODUCT_NAME, configInfo, DriverConstant.SECTION_SAFS_TEST, DriverConstant.KEY_SAFS_TEST_ORD_PRODUCT_NAME);
+			if(value!=null){
+				orderable = new Orderable(value, Console.OS_NAME, "", "");
+			}
+			if(orderable!=null){
+				value = StringUtils.getSystemProperty(DriverConstant.PROPERTY_SAFS_TEST_ORD_PLATFORM, configInfo, DriverConstant.SECTION_SAFS_TEST, DriverConstant.KEY_SAFS_TEST_ORD_PLATFORM);
+				if(value!=null) orderable.setPlatform(value);
+				value = StringUtils.getSystemProperty(DriverConstant.PROPERTY_SAFS_TEST_ORD_TRACK, configInfo, DriverConstant.SECTION_SAFS_TEST, DriverConstant.KEY_SAFS_TEST_ORD_TRACK);
+				if(value!=null) orderable.setTrack(value);
+				value = StringUtils.getSystemProperty(DriverConstant.PROPERTY_SAFS_TEST_ORD_BRANCH, configInfo, DriverConstant.SECTION_SAFS_TEST, DriverConstant.KEY_SAFS_TEST_ORD_BRANCH);
+				if(value!=null) orderable.setBranch(value);
+				Log.info("Test orderable: ProductName='"+ orderable.getProductName() +"' Platform='"+ orderable.getPlatform() +"' Track='"+ orderable.getTrack() +"' Branch='"+ orderable.getBranch() +"' ." );
+			}
 		}
 		catch(NullPointerException npe){
 		    throw new IllegalArgumentException("\n"+
 		    "Insufficient or invalid TEST information:\n"+
 			"Cannot resolve test name, test level, or record separator.\n");}
 	}
-	
+
 	/** parse a configuration file logmode entry for valid text or numeric values.*/
 	protected long parseLogMode(String value) {
 		long mode = 0;
-		
+
 		try{
-			String ucvalue = value.toUpperCase();			
+			String ucvalue = value.toUpperCase();
 
 			int index = ucvalue.indexOf(DriverConstant.DRIVER_MAX_LOGMODE_ENABLED_STRING);
 			if (index >=0) return DriverConstant.DRIVER_MAX_LOGMODE_ENABLED;
-			
+
 			index = ucvalue.indexOf(DriverConstant.DRIVER_TEXTLOG_ENABLED_STRING);
 			if (index >=0) mode = DriverConstant.DRIVER_TEXTLOG_ENABLED;
-			
+
 			index = ucvalue.indexOf(DriverConstant.DRIVER_TOOLLOG_ENABLED_STRING);
 			if (index >=0) mode += DriverConstant.DRIVER_TOOLLOG_ENABLED;
-			
+
 			index = ucvalue.indexOf(DriverConstant.DRIVER_XMLLOG_ENABLED_STRING);
 			if (index >=0) mode += DriverConstant.DRIVER_XMLLOG_ENABLED;
-			
+
 			index = ucvalue.indexOf(DriverConstant.DRIVER_CONSOLELOG_ENABLED_STRING);
 			if (index >=0) mode += DriverConstant.DRIVER_CONSOLELOG_ENABLED;
-			
+
 			if (mode==0) mode = Long.parseLong(value);
 			return mode;
 		}
@@ -506,14 +557,14 @@ public abstract class DefaultDriver extends AbstractDriver {
 			throw new NumberFormatException("LOGMODE provided: "+ value);
 		}
 	}
-	
-	/** 
+
+	/**
 	 * Verify the existence of sufficient test information.
 	 * We need a test name, test level, and field separator.
 	 * If no separator is found we will default to a comma (,) separator.
-	 * (Carl Nagle) DEC 10, 2008 Fixed LogMode problems affecting XML Logging 
+	 * (Carl Nagle) DEC 10, 2008 Fixed LogMode problems affecting XML Logging
 	 **/
-	protected void validateLogParameters(){		
+	protected void validateLogParameters(){
 		try{
 			Log.info("Checking for log names...");
 
@@ -527,7 +578,7 @@ public abstract class DefaultDriver extends AbstractDriver {
 			if (value.length()==0) value = configInfo.getNamedValue(
 		   		           DriverConstant.SECTION_SAFS_TEST, "SuiteLogName");
 			if(!(value==null)) suiteLogName = value;
-			
+
 			value = getParameterValue(DriverConstant.PROPERTY_SAFS_STEP_LOGNAME);
 			if (value.length()==0) value = configInfo.getNamedValue(
 		   		           DriverConstant.SECTION_SAFS_TEST, "StepLogName");
@@ -539,7 +590,7 @@ public abstract class DefaultDriver extends AbstractDriver {
 				cycleLogName=suiteLogName=stepLogName=pkgname.substring(pkgname.lastIndexOf(".") + 1,pkgname.length());
 			}else{
 				if (cycleLogName==null){
-					
+
 					if (suiteLogName==null){
 						cycleLogName=suiteLogName=stepLogName;
 					}
@@ -553,26 +604,26 @@ public abstract class DefaultDriver extends AbstractDriver {
 					if(stepLogName==null)  stepLogName=cycleLogName;
 				}
 			}
-			
+
 			Log.info("Checking for log modes...");
-			
+
 		    // check for logmode information
 			value = getParameterValue(DriverConstant.PROPERTY_SAFS_CYCLE_LOGMODE);
 			if (value.length()==0) value = configInfo.getNamedValue(
 		   		           DriverConstant.SECTION_SAFS_TEST, "CycleLogMode");
-			boolean isSetCycleMode = !(value==null);			
+			boolean isSetCycleMode = !(value==null);
 			if(isSetCycleMode) cycleLogMode = parseLogMode(value);
 
 			value = getParameterValue(DriverConstant.PROPERTY_SAFS_SUITE_LOGMODE);
 			if (value.length()==0) value = configInfo.getNamedValue(
 		   		           DriverConstant.SECTION_SAFS_TEST, "SuiteLogMode");
-			boolean isSetSuiteMode = !(value==null);			
+			boolean isSetSuiteMode = !(value==null);
 			if(isSetSuiteMode) suiteLogMode = parseLogMode(value);
-			
+
 			value = getParameterValue(DriverConstant.PROPERTY_SAFS_STEP_LOGMODE);
 			if (value.length()==0) value = configInfo.getNamedValue(
 		   		           DriverConstant.SECTION_SAFS_TEST, "StepLogMode");
-			boolean isSetStepMode = !(value==null);			
+			boolean isSetStepMode = !(value==null);
 			if(isSetStepMode) stepLogMode = parseLogMode(value);
 
 			// validate the logmode settings
@@ -580,7 +631,7 @@ public abstract class DefaultDriver extends AbstractDriver {
 				cycleLogMode=suiteLogMode=stepLogMode=DriverConstant.DEFAULT_LOGMODE;
 			}else{
 				if (!isSetCycleMode){
-					
+
 					if (!isSetSuiteMode){
 						cycleLogMode=suiteLogMode=stepLogMode;
 					}
@@ -594,7 +645,7 @@ public abstract class DefaultDriver extends AbstractDriver {
 					if(!isSetStepMode)  stepLogMode=cycleLogMode;
 				}
 			}
-			
+
 			Log.info("Checking for log level...");
 
 		    // check for loglevel information
@@ -632,7 +683,7 @@ public abstract class DefaultDriver extends AbstractDriver {
 		    throw new IllegalArgumentException("\n"+
 		    "Insufficient or invalid LOG information:\n"+
 			"Cannot properly resolve lognames, logLevel, or logmodes.\n");}
-		
+
 		catch(NumberFormatException nfe){
 		    throw new IllegalArgumentException("\n"+
 		    "Invalid LOGMODE information provided for test log.\n"+
@@ -651,11 +702,11 @@ public abstract class DefaultDriver extends AbstractDriver {
 		iName=StringUtilities.removeDoubleQuotes(iName);
 		return ((GenericToolsInterface) (Class.forName(iName).newInstance()));
 	}
-	
 
-	/** Initialize all the Driver/Engine interfaces as specified by the config files or 
+
+	/** Initialize all the Driver/Engine interfaces as specified by the config files or
 	 * driver defaults (Status is a SAFSSTATUS object directly instanced).
-	 * This driver passes itself (a DriverInterface) to all Configurable tools it 
+	 * This driver passes itself (a DriverInterface) to all Configurable tools it
 	 * instances.
 	 * (Carl Nagle) 2013.09.23 Watch the order of initialization to be reverse of shutdown. **/
 	protected void initializeRuntimeInterface(){
@@ -689,59 +740,59 @@ public abstract class DefaultDriver extends AbstractDriver {
 			                                             DriverConstant.DEFAULT_STACKS_INTERFACE);
 
 			status = new SAFSSTATUS();
-						                                             
+
 			System.out.println("Driver Services initializing...");
 			Log.info("Driver Interface initializing...");
-			((ConfigurableToolsInterface)input).launchInterface(this);			
-			((ConfigurableToolsInterface)maps).launchInterface(this);			
-			((ConfigurableToolsInterface)vars).launchInterface(this);			
-			((ConfigurableToolsInterface)logs).launchInterface(this);			
-			((ConfigurableToolsInterface)counts).launchInterface(this);						
-			((ConfigurableToolsInterface)status).launchInterface(this);	
-			
+			((ConfigurableToolsInterface)input).launchInterface(this);
+			((ConfigurableToolsInterface)maps).launchInterface(this);
+			((ConfigurableToolsInterface)vars).launchInterface(this);
+			((ConfigurableToolsInterface)logs).launchInterface(this);
+			((ConfigurableToolsInterface)counts).launchInterface(this);
+			((ConfigurableToolsInterface)status).launchInterface(this);
+
 			core = getCoreInterface();
 			if(core instanceof STAFHelper) SingletonSTAFHelper.setInitializedHelper((STAFHelper)core);
-			
+
 			String show = configInfo.getNamedValue(DriverConstant.SECTION_SAFS_DRIVER, DriverConstant.SHOW_MONITOR);
 			if(show !=null && show.length()> 0){
 				setUseSAFSMonitor(StringUtilities.convertBool(show));
-			}					
+			}
 		}
 		catch(ClassNotFoundException cnfe){
 		    throw new IllegalArgumentException("\n"+
 		    "Unable to locate one or more runtime interface specifications.\n"+
-		    cnfe.getMessage() +"\n");}		
+		    cnfe.getMessage() +"\n");}
 
 		catch(IllegalAccessException iae){
 		    throw new IllegalArgumentException("\n"+
 		    "Unable to use one or more runtime interface specifications.\n"+
-		    iae.getMessage() +"\n");}		
+		    iae.getMessage() +"\n");}
 
 		catch(InstantiationException ie){
 		    throw new IllegalArgumentException("\n"+
 		    "Unable to create one or more runtime interface specifications.\n"+
-		    ie.getMessage() +"\n");}		
+		    ie.getMessage() +"\n");}
 
 		catch(ClassCastException cce){
 		    throw new IllegalArgumentException("\n"+
 		    "Unable to create one or more runtime interface specifications.\n"+
-		    cce.getMessage() +"\n");}		
+		    cce.getMessage() +"\n");}
 	}
-	
-	/** 
-	 * Instantiate and initialize any EngineInterface classes (up to 10)listed in the 
+
+	/**
+	 * Instantiate and initialize any EngineInterface classes (up to 10)listed in the
 	 * SAFS_ENGINE section of the Configuration Source.
 	 * <p>
 	 * This driver passes itself--a DriverInterface object--to each instanced engine.
 	 ***/
 	protected void initializeRuntimeEngines(){
-		
+
 		if (tidcommands == null) tidcommands = new TIDDriverCommands(this);
 		if (autoitcomponent == null) autoitcomponent = new AutoItComponent(this);
 		if (tidcomponent == null) tidcomponent = new TIDComponent(this);
 		if (ipcommands  == null)  ipcommands = new SAFSDRIVERCOMMANDS(this);
-		
-		String[] items = {"First", "Second", "Third", "Fourth", "Fifth", 
+
+		String[] items = {"First", "Second", "Third", "Fourth", "Fifth",
 			              "Sixth", "Seventh", "Eighth", "Ninth", "Tenth"};
 		for(int i=0;i<items.length;i++){
 			EngineInterface engine = getEngineInterface(items[i]);
@@ -749,10 +800,10 @@ public abstract class DefaultDriver extends AbstractDriver {
 				engine.launchInterface(this);
 				engines.addElement(engine);
 			}
-		}		
+		}
 	}
 
-	/** 
+	/**
 	 * Initialize any preset SAFS variables such as known project directories, etc.
 	 * <p>
 	 * Known preset variables are:<br/>
@@ -778,7 +829,7 @@ public abstract class DefaultDriver extends AbstractDriver {
 			vars.setValue("safsbenchdirectory", benchSource + File.separatorChar);
 			vars.setValue("safstestdirectory", testSource + File.separatorChar);
 			vars.setValue("safsdifdirectory", difSource + File.separatorChar);
-			vars.setValue("safslogsdirectory", logsSource + File.separatorChar);	
+			vars.setValue("safslogsdirectory", logsSource + File.separatorChar);
 			vars.setValue("safssystemuserid", System.getProperty("user.name"));
 			vars.setValue(DRIVER_CONTROL_VAR, JavaHook.RUNNING_EXECUTION);
 			vars.setValue(DRIVER_CONTROL_POF_VAR,JavaHook.PAUSE_SWITCH_OFF);  // set PAUSE_ON_FAILURE off as default
@@ -788,14 +839,14 @@ public abstract class DefaultDriver extends AbstractDriver {
 			String ocrName = configInfo.getNamedValue(DriverConstant.SECTION_SAFS_OCR, "OCRName");
 			String languageID = configInfo.getNamedValue(DriverConstant.SECTION_SAFS_OCR, "LanguageID");
 			if(ocrName!=null) vars.setValue(OCREngine.STAF_OCR_ENGINE_VAR_NAME, ocrName);
-			if(languageID!=null) vars.setValue(OCREngine.STAF_OCR_LANGUAGE_ID_VAR_NAME, languageID);			
+			if(languageID!=null) vars.setValue(OCREngine.STAF_OCR_LANGUAGE_ID_VAR_NAME, languageID);
 		}
 		catch(Exception x){;}
 	}
 
 	/**
 	 * Initialize other miscellaneous config info from INI files.
-	 * For example, SAFS_IBT  INI values or other class configuration 
+	 * For example, SAFS_IBT  INI values or other class configuration
 	 * options made available through the INI files.
 	 * <p>
 	 * Currently processed values:
@@ -811,7 +862,7 @@ public abstract class DefaultDriver extends AbstractDriver {
 	 *   <li>"BringMonitorToFrontOnPause"
 	 *   <li>"TurnOnPOF"
 	 * </ul>
-	 * 
+	 *
 	 */
 	protected void initializeMiscConfigInfo(){
 		//set IBT related variables
@@ -827,19 +878,19 @@ public abstract class DefaultDriver extends AbstractDriver {
 		}
 		String modifiers = configInfo.getNamedValue(DriverConstant.SECTION_SAFS_IBT, "UsePerImageModifiers");
 		if(modifiers!=null) {
-			ImageUtils.USE_PER_IMAGE_MODIFIERS = StringUtilities.convertBool(modifiers);		
+			ImageUtils.USE_PER_IMAGE_MODIFIERS = StringUtilities.convertBool(modifiers);
 			Log.info("SAFS_IBT:UsePerImageModifiers set to: "+ ImageUtils.USE_PER_IMAGE_MODIFIERS);
 		}
 		//set ResolveSkippedRecords of section SAFS_DRIVER
 		String resolveSkippedRecords = configInfo.getNamedValue(DriverConstant.SECTION_SAFS_DRIVER, "ResolveSkippedRecords");
 		if(resolveSkippedRecords!=null) {
-			AbstractInputProcessor.RESOLVE_SKIPPED_RECORDS = StringUtilities.convertBool(resolveSkippedRecords);		
+			AbstractInputProcessor.RESOLVE_SKIPPED_RECORDS = StringUtilities.convertBool(resolveSkippedRecords);
 			Log.info("SAFS_DRIVER:ResolveSkippedRecords set to: "+ AbstractInputProcessor.RESOLVE_SKIPPED_RECORDS);
 		}
 		//set PreferredEnginesOverride of section SAFS_DRIVER
 		String preferredOverride = configInfo.getNamedValue(DriverConstant.SECTION_SAFS_DRIVER, "PreferredEnginesOverride");
 		if(preferredOverride!=null) {
-			AbstractInputProcessor.PREFERRED_ENGINES_OVERRIDE = StringUtilities.convertBool(preferredOverride);		
+			AbstractInputProcessor.PREFERRED_ENGINES_OVERRIDE = StringUtilities.convertBool(preferredOverride);
 			Log.info("SAFS_DRIVER:PreferredEnginesOverride set to: "+ AbstractInputProcessor.PREFERRED_ENGINES_OVERRIDE);
 		}
 		//set BringMonitorToFrontOnPause of section SAFS_DRIVER
@@ -863,14 +914,14 @@ public abstract class DefaultDriver extends AbstractDriver {
 			Log.info("SAFS_DRIVER:TurnOnPOW set to: "+ turnon);
 		}
 	}
-	
-	/** 
+
+	/**
 	 * Initialize a log and set the loglevel via the LogsInterface.
-	 * The logName serves as the unique ID.  Text logs and xml logs are named 
-	 * with ".txt" and ".xml" suffixes on the logName.**/	
+	 * The logName serves as the unique ID.  Text logs and xml logs are named
+	 * with ".txt" and ".xml" suffixes on the logName.**/
 	protected UniqueStringLogInfo initLog(String logname, long logmodes, String loglevel){
-		UniqueStringLogInfo logInfo = new UniqueStringLogInfo(logname, 
-		                                                      logname +".txt", 
+		UniqueStringLogInfo logInfo = new UniqueStringLogInfo(logname,
+		                                                      logname +".txt",
 		                                                      logname +".xml",
 		                                                      loglevel,
 		                                                      logmodes,
@@ -878,7 +929,7 @@ public abstract class DefaultDriver extends AbstractDriver {
 	    logs.initLog(logInfo);
 	    return logInfo;
 	}
-	
+
 	/** Instantiate unique logs. **/
 	protected void openTestLogs(){
 		int logcount = 0;
@@ -896,13 +947,17 @@ public abstract class DefaultDriver extends AbstractDriver {
 		    (!(stepLogName.equalsIgnoreCase(suiteLogName)))){
 			logcount++;
 			stepLog = initLog(stepLogName, stepLogMode, logLevel);}
-			
+
 		if (logcount==0)
 		    throw new IllegalArgumentException(
 			"Error: No valid LOG definitions could be initialized!");
+
+		//Write Orderable information
+		if(orderable!=null){
+			logMessage(Utils.toJsonForSpring(orderable),"", AbstractLogFacility.ORDERABLE_LOGGING);
+		}
 	}
-	
-	
+
 	/** Close logs initialized with openTestLogs.**/
 	protected void closeTestLogs(){
 		if (cycleLog != null) logs.closeLog(cycleLog);
@@ -913,15 +968,15 @@ public abstract class DefaultDriver extends AbstractDriver {
 		suiteLog=null;
 		stepLog=null;
 	}
-	
+
 	/** shutdown any engines started with initializeRuntimeEngines() **/
 	protected void shutdownRuntimeEngines(){
-		
+
 		Enumeration enumerator = engines.elements();
 		while(enumerator.hasMoreElements()) {
 			EngineInterface engine = (EngineInterface) enumerator.nextElement();
 			engine.shutdown();
-			try{Thread.sleep(100);}catch(Throwable t){}			
+			try{Thread.sleep(100);}catch(Throwable t){}
 		}
 		engines.removeAllElements();
 		enginePreference.clear();
@@ -933,8 +988,8 @@ public abstract class DefaultDriver extends AbstractDriver {
 		if(ipcommands != null) ipcommands.shutdown();
 	}
 
-	/** shutdown interfaces started with initializeRuntimeInterfaces() 
-	 * (Carl Nagle) 2013.09.23 Change the order of shutdown to be reverse of initialization. **/	
+	/** shutdown interfaces started with initializeRuntimeInterfaces()
+	 * (Carl Nagle) 2013.09.23 Change the order of shutdown to be reverse of initialization. **/
 	protected void shutdownRuntimeInterface(){
 
 		try{((GenericToolsInterface)cycleStack).shutdown();}catch(NullPointerException ignore){}
@@ -963,34 +1018,34 @@ public abstract class DefaultDriver extends AbstractDriver {
 		suiteStack = null;
 		stepStack  = null;
 	}
-	
-	/** 
+
+	/**
 	 * Returns the separator based on the current testLevel.
 	 * Returns the DriverConstant.DEFAULT_FIELD_SEPARATOR if no other can be determined.*/
 	protected String getTestLevelSeparator(String testlevel){
-		
+
 		String separator = DriverConstant.DEFAULT_FIELD_SEPARATOR;
-		
+
 		if (testlevel.equalsIgnoreCase(DriverConstant.DRIVER_CYCLE_TESTLEVEL)){
 			if (cycleSeparator != null) separator = cycleSeparator;}
 		else if (testlevel.equalsIgnoreCase(DriverConstant.DRIVER_SUITE_TESTLEVEL)){
 			if (suiteSeparator != null) separator = suiteSeparator;}
 		else if (testlevel.equalsIgnoreCase(DriverConstant.DRIVER_STEP_TESTLEVEL)){
 			if (stepSeparator != null) separator = stepSeparator;}
-			
+
 		return separator;
 	}
 
-	/** 
+	/**
 	 * Returns the logid based on the current testLevel.*/
-	protected String getLogID(String testlevel){		
+	protected String getLogID(String testlevel){
 		if (testlevel.equalsIgnoreCase(DriverConstant.DRIVER_CYCLE_TESTLEVEL)){
 			return cycleLogName;}
 		else if (testlevel.equalsIgnoreCase(DriverConstant.DRIVER_SUITE_TESTLEVEL)){
 			return suiteLogName;}
 		return stepLogName;
 	}
-	
+
 	/**
 	 * Only launches if there is already not one running from another process.
 	 */
@@ -1002,16 +1057,16 @@ public abstract class DefaultDriver extends AbstractDriver {
 		    safsmonitor.setDriver(this);
 		}
 	}
-	
-	/** 
+
+	/**
 	 * Bootstrap a newly instanced driver.
-	 * The routine calls all the other routines to prepare the the test, execute the 
-	 * test, and shutdown the test.  This routine must be overridden by subclasses if 
+	 * The routine calls all the other routines to prepare the the test, execute the
+	 * test, and shutdown the test.  This routine must be overridden by subclasses if
 	 * they wish to change default start-to-finish execution flow.
 	 * <p>
-	 * The model for overall driver operation is that any command-line arguments or 
-	 * configuration file arguments that prevent normal execution will generate an 
-	 * IllegalArgumentException.  Those IllegalArgumentExceptions are caught here and 
+	 * The model for overall driver operation is that any command-line arguments or
+	 * configuration file arguments that prevent normal execution will generate an
+	 * IllegalArgumentException.  Those IllegalArgumentExceptions are caught here and
 	 * sent to stderr output.  We then return immediately from this function.
 	 * <p>
 	 * <ul>Calls:
@@ -1029,7 +1084,7 @@ public abstract class DefaultDriver extends AbstractDriver {
 	 * <p>
 	 * <li>{@link #closeTestLogs()}
 	 * <li>{@link #shutdownRuntimeEngines()}
-	 * <li>{@link #shutdownRuntimeInterface()}	
+	 * <li>{@link #shutdownRuntimeInterface()}
 	 * <li>Shutdown {@link SAFSMonitorFrame#dispose()}
 	 * </ul>
 	 * @see SAFSDRIVER#main(String[])
@@ -1037,29 +1092,32 @@ public abstract class DefaultDriver extends AbstractDriver {
 	public void run(){
 		try{
 		    System.out.println("Validating Root Configure Parameters...");
-		    validateRootConfigureParameters(true);	
+		    validateRootConfigureParameters(true);
 		    System.out.println("Validating Test Parameters...");
-		    validateTestParameters();			
+		    validateTestParameters();
 		    System.out.println("Validating Log Parameters...");
-		    validateLogParameters();			
+		    validateLogParameters();
 		    System.out.println("Initializing Runtime Interfaces...");
 		    initializeRuntimeInterface();
 		    launchSAFSMonitor();
 		    initializePresetVariables();
 		    initializeMiscConfigInfo();
+		    connectSAFSDataService();
 		    initializeRuntimeEngines();
 		    openTestLogs();
-		    
+
+			phoneHome();
+
 		    statuscounts = processTest();
 		}
 		catch(IllegalArgumentException iae){ System.err.println("Driver "+ iae.getClass().getSimpleName()+": "+ iae.getMessage());	}
-		    
+
 		catch(Exception catchall){
 			System.err.println("\n****  Unexpected CatchAll Exception handler  ****");
 			System.err.println(catchall.getMessage());
 			catchall.printStackTrace();
 		}
-		    
+
 		try{
 		    closeTestLogs();					// include any CAPPING of XML logs
 		}catch(Throwable t){
@@ -1072,10 +1130,12 @@ public abstract class DefaultDriver extends AbstractDriver {
 			System.err.println("Driver shutdownRuntimeEngines "+ t.getClass().getSimpleName()+": "+ t.getMessage());
 			t.printStackTrace();
 		}
-		try{ 
+
+		try{
 			if (safsmonitor != null) {
 				safsmonitor.setVisible(false);
 				Thread mThread = new Thread(){
+					@Override
 					public void run(){
 						safsmonitor.dispose();
 					}
@@ -1088,17 +1148,20 @@ public abstract class DefaultDriver extends AbstractDriver {
 			System.err.println("Driver SAFS Monitor "+ t.getClass().getSimpleName()+": "+ t.getMessage());
 			t.printStackTrace();
 		}
-		
+
 		try{
 		    shutdownRuntimeInterface(); 		// maybe, maybe not.
-		}    
+		}
 		catch(Throwable t){
 			System.err.println("Driver shutdownRuntimeInterfaces "+ t.getClass().getSimpleName()+": "+ t.getMessage());
 			t.printStackTrace();
 		}
+
+		disconnectSAFSDataService();
+
 		// Carl Nagle moved here so we don't null too soon and cause NullPointerException at safsmonitor.dispose()
 		// Commenting out to see if we can get away without nulling at all.
 		// safsmonitor = null;
-	}	
+	}
 }
 

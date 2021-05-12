@@ -1,6 +1,20 @@
-/** Copyright (C) (MSA, Inc) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * History:
  *
@@ -174,7 +188,7 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
    * method to provide the full functionality of instancing an appropriate test
    * record processor.  This will likely be different for each processor type.
    * <p>
-   * @returns Processor object needed to process the test record, or null.
+   * @return Processor object needed to process the test record, or null.
    **/
   public    Processor getProcInstance() {
       if(procInstance != null) return procInstance;
@@ -550,8 +564,8 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
    * is stored in the processorMap and forwarded to the initProcessorAndProcess
    * .method for record processing.
    * <p>
-   * @param                     aprocessor, Processor
-   * @param                     params, Collection
+   * @param                     instanceName String, the processor class name
+   * @param                     params Collection, the parameters
    * @return true if it processed the record, false otherwise
    **/
   protected boolean instanceProcessorAndProcess(String instanceName, Collection params){
@@ -651,17 +665,20 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
     }
   }
 
-  public boolean setVariable (String var, String val) throws SAFSException {
+  @Override
+public boolean setVariable (String var, String val) throws SAFSException {
   	STAFHelper helper = getTestRecordData().getSTAFHelper();
   	return helper.setVariable(var, val);
   }
 
-  public String getVariable (String var) throws SAFSException {
+  @Override
+public String getVariable (String var) throws SAFSException {
   	STAFHelper helper = getTestRecordData().getSTAFHelper();
   	return helper.getVariable(var);
   }
 
-  public String getAppMapItem(String appMapID, String section, String item) {
+  @Override
+public String getAppMapItem(String appMapID, String section, String item) {
   	STAFHelper helper = getTestRecordData().getSTAFHelper();
     String lookup = helper.getAppMapItem(appMapID, section, item);
     lookup = StringUtils.getTrimmedUnquotedStr(lookup);
@@ -809,6 +826,7 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
 
   /** <br><em>Purpose:</em> log a FAILED_MESSAGE about the wrong number of parameters;
    ** this version is used by DriverCommands
+   *@throws SAFSException
    **/
   protected void paramsFailedMsg() throws SAFSException {
     paramsFailedMsg(null, null);
@@ -817,7 +835,8 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
   /** <br><em>Purpose:</em> log a FAILED_MESSAGE about the wrong number of parameters
    * @param                     windowName, String
    * @param                     compName, String
-   **/
+   * @throws SAFSException
+   */
   protected void paramsFailedMsg(String windowName, String compName) throws SAFSException {
     String tag = PARAM_SIZE_4;
     List list = new LinkedList();
@@ -844,7 +863,7 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
   }
 
   /**
-   * check if params.size() < minparams
+   * check if params.size() &lt; minparams
    * If params.size() is insufficient we set testRecordData.setStatusCode to GENERAL_SCRIPT_FAILURE
    * and log a paramsFailedMsg and return 'false'.
    * Otherwise, we simply return 'true'.
@@ -927,7 +946,8 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
    * @return String, an absolute file name.
    * @deprecated use {@link #deduceTestFile(String)} instead
    */
-  protected String normalizeTestFileName(String filename){
+  @Deprecated
+protected String normalizeTestFileName(String filename){
 	  return getAbsolutFileName(filename, STAFHelper.SAFS_VAR_TESTDIRECTORY);
   }
 
@@ -968,6 +988,7 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
    * Retrieve the standard "SOMETHING failure in filename FILENAME at line LINENUMBER" message.
    * Expects testRecordData to already have filename and lineNumber.
    * @param failure -- text to appear before the filename and line number info.
+   * @return String, the standard "SOMETHING failure in filename FILENAME at line LINENUMBER" message.
    **/
   protected String getStandardErrorMessage(String failure){
   	return failedText.convert("standard_err", failure+" failure in filename "+
@@ -977,8 +998,8 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
 
   /**
    * log the more standard FAILED_MESSAGE with detail.
-   * "SOMETHING failure in filename FILENAME at line LINENUMBER"<br/>
-   * "DETAIL"<br/>
+   * "SOMETHING failure in filename FILENAME at line LINENUMBER"<br>
+   * "DETAIL"<br>
    * Expects testRecordData to already have filename and lineNumber.
    * @param failure -- the failure text that precedes the 'failure in filename' message.
    * @param detail -- the detail that will be used unmodified.
@@ -1022,7 +1043,10 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
   public static String getUnexpectedAlertBehaviour() {
 	  return unexpectedAlertBehaviour;
   }
-  /** Set how to handle the 'alert dialog' if it is visible unexpectedly, it could be set as 'accept' or 'dismiss' or 'ignore' */
+  /**
+   * Set how to handle the 'alert dialog' if it is visible unexpectedly.
+   * @param behaviour String, it could be set as 'accept' or 'dismiss' or 'ignore'.
+   */
   public static void setUnexpectedAlertBehaviour(String behaviour) {
 	  unexpectedAlertBehaviour = behaviour;
   }
@@ -1041,7 +1065,7 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
    * <p>
    * @return File, the absolute full path test file.
    * @throws SAFSException
-   * @see {@link #deduceFile(String, int)}
+   * @see FileUtilities#deduceFile(String, int, RuntimeDataInterface)
    */
   protected File deduceTestFile(String filename) throws SAFSException{
 	  return FileUtilities.deduceFile(filename, FileUtilities.FILE_TYPE_TEST, this);
@@ -1061,7 +1085,7 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
    * <p>
    * @return File, the absolute full path diff file.
    * @throws SAFSException
-   * @see {@link #deduceFile(String, int)}
+   * @see FileUtilities#deduceFile(String, int, RuntimeDataInterface)
    */
   protected File deduceDiffFile(String filename) throws SAFSException{
 	  return FileUtilities.deduceFile(filename, FileUtilities.FILE_TYPE_DIFF, this);
@@ -1076,7 +1100,7 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
    * the final path will be relative to the Project directory.
    * @return File, the absolute full path bench file.
    * @throws SAFSException
-   * @see {@link #deduceFile(String, int)}
+   * @see FileUtilities#deduceFile(String, int, RuntimeDataInterface)
    */
   protected File deduceBenchFile(String filename) throws SAFSException{
 	  return FileUtilities.deduceFile(filename, FileUtilities.FILE_TYPE_BENCH, this);
@@ -1089,7 +1113,7 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
    * unless the file is already an absolute path.
    * @return File, the absolute full path bench file.
    * @throws SAFSException
-   * @see {@link #deduceFile(String, int)}
+   * @see FileUtilities#deduceFile(String, int, RuntimeDataInterface)
    */
   protected File deduceProjectFile(String filename) throws SAFSException{
 	  return FileUtilities.deduceFile(filename, FileUtilities.FILE_TYPE_PROJECT, this);
@@ -1435,6 +1459,7 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
 	 * @param trd TestRecordData, the test record to push into a stack
 	 * @see #popTestRecord()
 	 */
+	@Override
 	public void pushTestRecord(TestRecordData trd) {
 		testrecordStackable.pushTestRecord(trd);
 	}
@@ -1446,9 +1471,10 @@ public abstract class Processor implements RuntimeDataInterface, ITestRecordStac
 	 * Replace the class field 'Test Record' by that popped from the stack if they are not same.
 	 * </p>
 	 *
-	 * @see #pushTestRecord()
+	 * @see #pushTestRecord(TestRecordData)
 	 * @return TestRecordData, the 'Test Record' on top of the stack
 	 */
+	@Override
 	public TestRecordData popTestRecord() {
 		String debugmsg = StringUtils.debugmsg(false);
 		DefaultTestRecordStackable.debug(debugmsg+"Current test record: "+StringUtils.toStringWithAddress(testRecordData));

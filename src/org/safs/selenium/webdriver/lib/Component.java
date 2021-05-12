@@ -1,7 +1,20 @@
 /**
- ** Copyright (C) SAS Institute, All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * History:
  *
@@ -9,6 +22,9 @@
  *  FEB 12, 2014    (Lei Wang) Add method refresh() to refresh the stale embedded webelement.
  *  OCT 16, 2015    (Lei Wang) Refector to create IOperable object properly.
  *  MAY 19, 2017    (Lei Wang) Get value of 'delay.get.content' from system properties.
+ *  JUL 04, 2017    (Lei Wang) Modified verifyComponentBox(): try to verify one more time if the first verification failed.
+ *                           Modified clearComponentBox(): try to delete with key {Delete n} and {Backspace n} if the text-box has not been cleared.
+ *  NOV 07, 2017    (Lei Wang) Modified method clearComponentBox(): Turn off the "Num Lock" before using Robot's Delete key.
  */
 package org.safs.selenium.webdriver.lib;
 
@@ -24,6 +40,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.safs.IndependantLog;
 import org.safs.StringUtils;
+import org.safs.Utils;
 import org.safs.robot.Robot;
 import org.safs.selenium.webdriver.lib.model.DefaultRefreshable;
 import org.safs.selenium.webdriver.lib.model.Element;
@@ -168,6 +185,7 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 		return permitted;
 	}
 
+	@Override
 	protected void updateFields(){
 		String debugmsg = StringUtils.debugmsg(false);
 		super.updateFields();
@@ -312,6 +330,7 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 	 * Clear the cache 'operableObjects'.<br>
 	 * Also clear the cache associated with the IOperable objects.<br>
 	 */
+	@Override
 	public void clearCache(){
 		synchronized(operableObjects){
 			IOperable operable = null;
@@ -357,7 +376,7 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 	/**
 	 * Does NOT clear any existing text in the control, but does attempt to insure the window/control has focus.
 	 * <br><em>Purpose:</em>
-	 * <a href="http://safsdev.sourceforge.net/sqabasic2000/SeleniumGenericMasterFunctionsReference.htm#detail_InputKeys" alt="inputKeys Keyword Reference" title="inputKeys Keyword Reference">inputKeys</a>
+	 * <a href="/sqabasic2000/SeleniumGenericMasterFunctionsReference.htm#detail_InputKeys" alt="inputKeys Keyword Reference" title="inputKeys Keyword Reference">inputKeys</a>
 	 * @throws SeleniumPlusException if we are unable to process the keystrokes successfully.
 	 * @see org.safs.robot.Robot#inputKeys(String)
 	 **/
@@ -424,8 +443,25 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 				}
 			}
 		}finally{
-			IndependantLog.debug(debugmsg + "Finally use SAFS Robot to clear again.");
-			WDLibrary.inputKeys(webelement, "^a{Delete}");
+			IndependantLog.debug(debugmsg + " Finally use SAFS Robot (Ctrl+All+Delete) to clear again.");
+
+			boolean originalNumLock = Utils.getNumLock();
+			try{
+				//In Edge browser, the delete key "0X7F(127)" sometimes be interpreted as a point ".".
+				//Turn off the "Num Lock" will get the keycode "0X7F(127)" works like a delete key. There is no such problem with other browsers for now.
+				if(originalNumLock) Utils.setNumLock(false);
+				WDLibrary.inputKeys(webelement, "^a{Delete}");
+
+				String text = getValue();
+				if(!text.isEmpty()){
+					int repeat = text.length();
+					IndependantLog.warn(debugmsg + "The component's text value '"+text+"' is still not empty, use SAFS Robot ("+repeat+" times of Delete + Backsapce) to clear again.");
+					WDLibrary.inputKeys(webelement, "{Delete "+repeat+"}");
+					WDLibrary.inputKeys(webelement, "{Backspace "+repeat+"}");
+				}
+			}finally{
+				if(originalNumLock) Utils.setNumLock(originalNumLock);
+			}
 		}
 	}
 
@@ -562,8 +598,18 @@ public class Component extends DefaultRefreshable implements IWebAccessibleInter
 		String debugmsg = getClass().getName() + ".verifyComponentBox(): ";
 		boolean pass = false;
 		String contents = getValue();
-
 		pass = expectedText.equals(contents);
+
+		int maxTry = 1;
+		int tried = 0;
+		while(!pass && tried<maxTry){
+			//Sleep for awhile in case that the application doesn't get refreshed itself.
+			IndependantLog.debug(debugmsg+"Tried another time to get text value and verify.");
+			StringUtils.sleep(1000);
+			contents = getValue();
+			pass = expectedText.equals(contents);
+			tried++;
+		}
 
 		if(!pass){
 			String msg = libName + "Box verify errors: property:\n'" + contents + "'" + " does NOT equal to " + " expected value:\n'" + expectedText + "'.";

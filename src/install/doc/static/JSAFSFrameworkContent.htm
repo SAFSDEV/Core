@@ -284,9 +284,9 @@ Line Options:</b><br>
               </dt><dd>System property for turning on/off the 
               keyboard number lock before testing.
               <p></p>
-              </dd><dt><b>-Dsafs.test.unexpected_alert_behaviour=accept|dismiss|ignore</b>
-              </dt><dd>System property for how to handle 
-              the unexpected alert automatically. Defaults to ignore.
+              </dd><dt><b>-Dsafs.test.unexpected_alert_behaviour=accept|dismiss|ignore|off</b>
+              </dt><dd>System property for how to handle the unexpected alert automatically. Defaults to ignore.<br>
+              accept -> "OK"; dismiss -> "Cancel"; ignore -> "keep Alert"; off -> "don't set this".
               <p></p>
               </dd><dt><b>-Dsafs.test.defaultmap=mapid</b>
               </dt><dd>
@@ -309,9 +309,6 @@ Line Options:</b><br>
               provided test name is required.
               <p></p>
               </dd>
-              </dl>
-          </td><td>
-            <dl>
               <dt><b>-Dsafs.log.level=ERROR|WARN|PASS|GENERIC|INDEX|INFO|DEBUG</b>
               </dt><dd>The default log level is GENERIC.
               <p></p>
@@ -327,47 +324,74 @@ Line Options:</b><br>
               FALSE)</b>
               </dt><dd>Enable log message truncation at numChars length (Default length: 128).
               <p></p>
-              </dd><dt><b>-Dsafs.step.logname=logid|name</b>
-              </dt><dd>The primary logname used for capturing all test
-              information.
-              <p></p>
-              </dd><dt><b>-Dsafs.suite.logname=logid|name</b>
-              </dt><dd>Only needed if a separate log is used to capture
-              Suite information.
-              <p></p>
-              </dd><dt><b>-Dsafs.cycle.logname=logid|name</b>
-              </dt><dd>Only needed if a separate log is used to capture
+              </dd>
+              <dt><b>-Dsafs.step.logname=logid|name</b></dt>
+              <dd>The primary logname used for capturing all test information.<p></p></dd>
+              <dt><b>-Dsafs.suite.logname=logid|name</b></dt>
+              <dd>Only needed if a separate log is used to capture Suite information.<p></p></dd>
+              
+              <dt><b>-Dsafs.cycle.logname=logid|name</b></dt>
+              <dd>Only needed if a separate log is used to capture
               Cycle information.
-              <p></p>
-              </dd><dt><b>-Dsafs.step.logmode=TEXTLOG|CONSOLELOG|XMLLOG|TOOLLOG|ALL</b>
+              <p></p></dd>
+              <dt><b>-Dsafs.step.logmode=TEXTLOG|CONSOLELOG|XMLLOG|TOOLLOG|ALL</b>
               </dt><dd>Specifies which log formats are to be
               initialized/enabled for the primary log.
               <p></p></dd>
               
-              <dt><b>-Dsafs.suite.logmode=TEXTLOG|CONSOLELOG|XMLLOG|TOOLLOG|ALL</b>
-              </dt><dd>Required only if a safs.suite.logname has
+              <dt><b>-Dsafs.suite.logmode=TEXTLOG|CONSOLELOG|XMLLOG|TOOLLOG|ALL</b></dt>
+              <dd>Required only if a safs.suite.logname has
               been specified. Specifies which log formats are to be
               initialized/enabled for this log.
               <p></p></dd>
               
-              <dt><b>-Dsafs.cycle.logmode=TEXTLOG|CONSOLELOG|XMLLOG|TOOLLOG|ALL</b>
-              </dt><dd>Required only if a safs.cycle.logname has
+              <dt><b>-Dsafs.cycle.logmode=TEXTLOG|CONSOLELOG|XMLLOG|TOOLLOG|ALL</b></dt>
+              <dd>Required only if a safs.cycle.logname has
               been specified. Specifies which log formats are to be
               initialized/enabled for this log.
               <p></dd>
+              </dl>
+          </td><td>
+            <dl>
+
               
-              <dt><b>-D<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_CONSOLE_STATE" target="api">safs.selenium.console.state</a>=MAX|MIN|NORMAL</b></dt>
-              <dd>Specifies the selenium server's console state.<p></dd>
-              
-              <dt><b>-D<a href="../doc/org/safs/Constants.SeleniumConstants.html#PROPERTY_WEB_DRIVERS" target="api">safs.selenium.web.drivers</a>=explorer:chrome:MicrosoftEdge</b></dt>
-              <dd>Defines specific drivers (separated by colon :) to start with the selenium server.
-              By default, IE and Chrome drivers will start up with the selenium server.<p></dd>
+              <dt><b>-D<a href="../doc/org/safs/tools/drivers/DriverConstant.SAFSLogsConstant.html#PROPERTY_ACCPET_SLF4J_DEBUG" target="api">safs.log.accept.slf4j.debug</a>=true|false</b></dt>
+              <dd>If the debug message from slf4j will be output to SAFS debug log file<p></p></dd>
+              <dt><b>-D<a href="../doc/org/safs/tools/drivers/DriverConstant.SAFSLogsConstant.html#PROPERTY_ACCPET_SLF4J_TEST" target="api">safs.log.accept.slf4j.test</a>=true|false</b></dt>
+              <dd>If the test message from slf4j will be output to SAFS test log file<p></p></dd>
               
               <dt><b>-D<a href="../doc/org/safs/Constants.RestConstants.html#PROPERTY_AUTH" target="api">safs.rest.auth</a>=config\<a href="../configure/auth2.xml" target="api">auth2.xml</a></b></dt>
               <dd>Defines file (relative to project or absolute) holding the authorization/authentication information for REST testing.<p></dd>
               
               <dt><b>-D<a href="../doc/org/safs/Constants.RestConstants.html#PROPERTY_PROXY" target="api">safs.rest.proxy</a>=proxy.host.name:port</b></dt>
               <dd>Defines the proxy information (proxy-server and port) for REST testing.<p></dd>
+
+              <dt><b>-D<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_SELENIUMSERVER_JVM" target="api">safs.selenium.server.jvm</a>=pathToJVMExecutable</b></dt>
+              <dd>Indicates the JVM to start the SELENIUM server, ex: C:\SeleniumPlus\Java64\jre\bin\java.exe<p></dd>
+              <dt><b>-D<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_SELENIUMSERVER_JVM_OPTIONS" target="api">safs.selenium.server.jvm.options</a>=JVM options</b></dt>
+              <dd>Indicates the JVM Options for the SELENIUM server to start with, ex: -Xms256m -Xmx1g<p></dd>
+              <dt><b>-D<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_SELENIUMSERVER_JVM_Xms" target="api">safs.selenium.server.jvm.xmx</a>=2g</b>
+                       (Default: <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#DEFAULT_JVM_MEMORY_MAXIMUM" target="api">2g</a>)</dt>
+              <dd>Indicates the maximum memory to use for the SELENIUM server.<p></dd>
+              <dt><b>-D<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_SELENIUMSERVER_JVM_OPTIONS" target="api">safs.selenium.server.jvm.xms</a>=256m</b>
+                       (Default: <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#DEFAULT_JVM_MEMORY_MINIMUM" target="api">512m</a>)</dt>
+              <dd>Indicates the minimum memory to use for the SELENIUM server.<p></dd>
+
+              <dt><b>-D<a href="../doc/org/safs/Constants.SeleniumConstants.html#SYSTEM_PROPERTY_SELENIUM_HOST" target="api">selenium.host</a>=hostname</b>
+                       (Default: <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#DEFAULT_SELENIUM_HOST" target="api">localhost</a>)</dt>
+              <dd>Indicates on which machine the selenium server is going to run.<p></dd>
+              <dt><b>-D<a href="../doc/org/safs/Constants.SeleniumConstants.html#SYSTEM_PROPERTY_SELENIUM_PORT" target="api">selenium.port</a>=N</b>
+                       (Default: <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#DEFAULT_SELENIUM_PORT" target="api">4444</a>)</dt>
+              <dd>Indicates on which port the selenium server is going to run.<p></dd>
+              <dt><b>-D<a href="../doc/org/safs/Constants.SeleniumConstants.html#SYSTEM_PROPERTY_SELENIUM_NODE" target="api">selenium.node</a>=nodesInforamtion</b></dt>
+              <dd>Indicates selenium nodes information, such as <b>node1.host:node1.port;node2.host:node2.port</b><p></dd>
+              
+              <dt><b>-D<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_CONSOLE_STATE" target="api">safs.selenium.console.state</a>=MAX|MIN|NORMAL</b></dt>
+              <dd>Specifies the selenium server's console state.<p></dd>
+              
+              <dt><b>-D<a href="../doc/org/safs/Constants.SeleniumConstants.html#PROPERTY_WEB_DRIVERS" target="api">safs.selenium.web.drivers</a>=explorer:chrome:MicrosoftEdge</b></dt>
+              <dd>Defines specific drivers (separated by colon :) to start with the selenium server.
+              By default, IE, Chrome, Firefox and MicrosoftEdge drivers will start up with the selenium server.<p></dd>
 
               <dt><b>-D<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_CONNECTION_TEST_COMMAND" target="api">safs.selenium.connection.test.command</a></b>=
                        one of <a href="https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/remote/DriverCommand.html">selenium-driver-command</a>
@@ -385,6 +409,39 @@ Line Options:</b><br>
               <dt><b>-D<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_DELAY_GET_CONTENT" target="api">safs.selenium.delay.get.content</a>=Time in milliseconds</b>
                        (Default is <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#DEFAULT_DELAY_GET_CONTENT" target="api">0</a>)</dt>
               <dd>Specifies the delay (milliseconds) waiting for the refresh of a webelement before getting its content<p></dd>
+              
+              <dt><b>-D<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_TIMEOUT" target="api">safs.selenium.timeout</a>=Time in seconds</b>
+                       (Default is <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#DEFAULT_TIMEOUT" target="api">0</a>)</dt>
+              <dd>Specifies the timeout in seconds before the selenium hub automatically releases a node that hasn't received any requests for more than the specified number of seconds<p></dd>
+              
+              <dt><b>-D<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_BROWSER_TIMEOUT" target="api">safs.selenium.browser.timeout</a>=Time in seconds</b>
+                       (Default is <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#DEFAULT_BROWSER_TIMEOUT" target="api">0</a>)</dt>
+              <dd>Specifies the timeout in seconds a selenium node is willing to hang inside the browser<p></dd>
+              
+              <dt><b>-D<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_BYPASS_FRAME_RESET" target="api">safs.selenium.bypass.frame.reset</a>=True | False</b>
+                       (Default is <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#DEFAULT_BYPASS_FRAME_RESET" target="api">False</a>)</dt>
+              <dd>By default, search algorithms begin every search by switching back to the topmost root HTML document (frame). Set it to true if you wish to disable this frames reset at the beginning of every component search. But you need to handle the frame-switch by yourself.<p></dd>
+
+              <dt><b>-D<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_BYPASS_ROBOT_ACTION" target="api">safs.selenium.bypass.robot.action</a>=True | False</b>
+                       (Default is <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#DEFAULT_BYPASS_ROBOT_ACTION" target="api">False</a>)</dt>
+              <dd>By default, we firstly use Java Robot to do the automation, user can bypass the "Java Robot" and use the selenium directly to do the automation.<p></dd>
+
+              <dt><b>-D<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_RMI_PORT_FORWARD" target="api">safs.selenium.rmi.port.forward</a>=True | False</b>
+                       (Default is <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#DEFAULT_RMI_PORT_FORWARD" target="api">False</a>)</dt>
+              <dd>With docker, by default, our library will connect the RMI server running on docker container by container's IP and port. But we can map the container's port to local-machine's port so that our library will connect the RMI server (running on docker container) by "localhost" and the mapped port.<p></dd>
+
+              <dt><b>-D<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_REGISTRY_PORT" target="api">safs.selenium.registry.port</a>=number</b>
+                       (Default is <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#DEFAULT_REGISTRY_PORT" target="api">1099</a>)</dt>
+              <dd>Specify the port to get the registry for looking up the RMI server.<p></dd>
+
+              <dt><b>-D<a href="../doc/org/safs/tools/drivers/DriverConstant.html#PROPERTY_SAFS_TEST_ORD_PRODUCT_NAME" target="api">safs.test.product.name</a>=Product to test</b></dt>
+              <dd>Specifies the name of the product the test runs against<p></dd>
+              <dt><b>-D<a href="../doc/org/safs/tools/drivers/DriverConstant.html#PROPERTY_SAFS_TEST_ORD_PLATFORM" target="api">safs.test.product.platform</a>=OS platform</b></dt>
+              <dd>Specifies the platform on which the test runs<p></dd>
+              <dt><b>-D<a href="../doc/org/safs/tools/drivers/DriverConstant.html#PROPERTY_SAFS_TEST_ORD_TRACK" target="api">safs.test.product.track</a>=track name</b></dt>
+              <dd>Specifies the track of the product the test runs against<p></dd>
+              <dt><b>-D<a href="../doc/org/safs/tools/drivers/DriverConstant.html#PROPERTY_SAFS_TEST_ORD_BRANCH" target="api">safs.test.product.branch</a>=branch name</b></dt>
+              <dd>Specifies the branch of the product the test runs against<p></dd>
               
 </dl></td></tr></tbody></table></td></tr></tbody></table>
 </p><p>Enhancements, corrections, and more detail will be added as necessary.
@@ -437,6 +494,10 @@ TRUNCATE=ON|numChars
 ;ServiceClass=org.safs.staf.service.logging.EmbeddedLogService
 ;Service=Alt Service Name
 ;Options=
+<span class="comments">;= accept.slf4j.debug and accept.slf4j.test are used to turn on/off
+;= the switch to write message from slf4j to SAFS debug/test log file.</span>
+;<a href="../doc/org/safs/tools/drivers/DriverConstant.SAFSLogsConstant.html#ITEM_ACCPET_SLF4J_DEBUG" target="api">accept.slf4j.debug</a>=true|false
+;<a href="../doc/org/safs/tools/drivers/DriverConstant.SAFSLogsConstant.html#ITEM_ACCPET_SLF4J_TEST" target="api">accept.slf4j.test</a>=true|false
 
 <b>[SAFS_INPUT]</b>
 AUTOLAUNCH=TRUE
@@ -554,6 +615,7 @@ DATASTORE=&lt;FullPathTo&gt;\RFTProjectDir
 ;OPTIONS=
 ;RFSMOnly=True|False
 ;RFSMCache=True|False
+;<a href="../doc/org/safs/tools/drivers/DriverConstant.SafsROBOTJ.html#ITEM_DYNAMIC_ENABLE_TOP_WINS" target="api">DynamicEnableTopWindows</a>=True|False
 
 <b><a href="../doc/org/safs/selenium/webdriver/SeleniumHook.html" target="api">[SAFS_SELENIUM]</a></b>
 AUTOLAUNCH=FALSE
@@ -577,43 +639,63 @@ BROWSER_REMOTE=false|true
 <span class="comments">;= Selenium Server Settings
 ;= SELENIUMHOST and SELENIUMPORT are used
 ;= to connect the Selenium Server (standalone or hub)</span>
-;SELENIUMHOST=remote.server.com
-;SELENIUMPORT=4444
+;<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#SELENIUMHOST" target="api">SELENIUMHOST</a>=remote.server.com
+;<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#SELENIUMPORT" target="api">SELENIUMPORT</a>=4444
 <span class="comments">;= SELENIUMNODE defines the selenium nodes to run.
 ;= If SELENIUMNODE is given, SELENIUMHOST will start
 ;= as a selenium hub; otherwise as a stand-alone server.</span>
-;SELENIUMNODE=node1:port:config1;node2:port:config2
+;<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#SELENIUMNODE" target="api">SELENIUMNODE</a>=node1:port:config1;node2:port:config2
 <span class="comments">;= SELENIUMSERVER_JVM_OPTIONS is JVM options
 ;= for starting the Selenium Server</span>
-;SELENIUMSERVER_JVM_OPTIONS=-Xmx1g -Xms512m -Xdebug
+;<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#SELENIUMSERVER_JVM_OPTIONS" target="api">SELENIUMSERVER_JVM_OPTIONS</a>=-Xmx1g -Xms512m -Xdebug
 <span class="comments">;= SELENIUMERVER_JVM_Xmx and SELENIUMERVER_JVM_Xms 
 ;= specify the value of JVM options -Xmx and -Xms 
 ;= for the Selenium Server, it will override
 ;= the default value or the value specified 
 ;= in SELENIUMSERVER_JVM_OPTIONS</span>
-;SELENIUMSERVER_JVM_Xmx=4g (default: 2g)
-;SELENIUMSERVER_JVM_Xms=256m (default: 512m)
-;SELENIUMSERVER_JVM=fullpath\java.exe (default: 1.7.0_45 64bit)
+;<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#SELENIUMSERVER_JVM_Xmx" target="api">SELENIUMSERVER_JVM_Xmx</a>=4g (default: 2g)
+;<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#SELENIUMSERVER_JVM_Xms" target="api">SELENIUMSERVER_JVM_Xms</a>=256m (default: 512m)
+;<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#SELENIUMSERVER_JVM" target="api">SELENIUMSERVER_JVM</a>=fullpath\java.exe (default: 1.7.0_45 64bit)
 <span class="comments">;= CONSOLE_STATE is used to set the state of
 ;= Selenium Server Console</span>
-;CONSOLE_STATE=MIN|MAX|NORMAL
+;<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#ITEM_CONSOLE_STATE" target="api">CONSOLE_STATE</a>=MIN|MAX|NORMAL
 <span class="comments">;= WEB_DRIVERS is used to set the specific browser
 ;= drivers (separated by colon :) to start with the selenium server. 
-;= IE and Chrome drivers will be started by Default.</span>
+;= IE, Chrome, Firefox and MicrosoftEdge drivers will be started by Default.</span>
 ;<a href="../doc/org/safs/Constants.SeleniumConstants.html#ITEM_WEB_DRIVERS" target="api">WEB_DRIVERS</a>=explorer:chrome:MicrosoftEdge
 <span class="comments">;connection.test.command specifies the command to 
 test the connection between WebDriver and BrowserDriver.</span>
-;<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_CONNECTION_TEST_COMMAND" target="api">connection.test.command</a></b>=<a href="https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/remote/DriverCommand.html">selenium-driver-command</a> (Default:<a href="../doc/org/safs/selenium/webdriver/lib/RemoteDriver.html#DEFAULT_CONNECTION_TEST_COMMAND" target="api">getAlertText</a>)
+;<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#ITEM_CONNECTION_TEST_COMMAND" target="api">connection.test.command</a>=<a href="https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/remote/DriverCommand.html">selenium-driver-command</a> (Default:<a href="../doc/org/safs/selenium/webdriver/lib/RemoteDriver.html#DEFAULT_CONNECTION_TEST_COMMAND" target="api">getAlertText</a>)
 <span class="comments">;connection.test.max.duration specifies the maximum duration
 (in <b>milliseconds</b>) that user can accept when executing command 
-defined by <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_CONNECTION_TEST_COMMAND" target="api">connection.test.command</a></span>
-;<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_CONNECTION_TEST_MAX_DURATION" target="api">connection.test.max.duration</a>=Time in milliseconds</b>(Default: <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#DEFAULT_CONNECTION_TEST_MAX_DURATION" target="api">5000</a>)
+defined by <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#ITEM_CONNECTION_TEST_COMMAND" target="api">connection.test.command</a></span>
+;<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#ITEM_CONNECTION_TEST_MAX_DURATION" target="api">connection.test.max.duration</a>=Time in milliseconds(Default: <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#DEFAULT_CONNECTION_TEST_MAX_DURATION" target="api">5000</a>)
 <span class="comments">;connection.test.max.try specifies the maximum times to try
 to get a good connection between WebDriver and BrowserDriver</span>
-;<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_CONNECTION_TEST_MAX_TRY" target="api">connection.test.max.try</a>=Number</b>(Default: <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#DEFAULT_CONNECTION_TEST_MAX_TRY" target="api">2</a>)
+;<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#ITEM_CONNECTION_TEST_MAX_TRY" target="api">connection.test.max.try</a>=Number(Default: <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#DEFAULT_CONNECTION_TEST_MAX_TRY" target="api">2</a>)
 <span class="comments">;delay.get.content specifies the delay (milliseconds) waiting for the 
 refresh of a webelement before getting its content</span>
-;<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#PROPERTY_DELAY_GET_CONTENT" target="api">delay.get.content</a>=Time in milliseconds</b>(Default: <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#DEFAULT_DELAY_GET_CONTENT" target="api">0</a>)
+;<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#ITEM_DELAY_WAIT_REFRESH" target="api">delay.get.content</a>=Time in milliseconds(Default: <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#DEFAULT_DELAY_GET_CONTENT" target="api">0</a>)
+<span class="comments">;timeout in seconds before the hub automatically releases a node
+that hasn't received any requests for more than the specified number of seconds.</span>
+;<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#ITEM_TIMEOUT" target="api">timeout</a>=Time in seconds(Default: <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#DEFAULT_TIMEOUT" target="api">0</a>)
+<span class="comments">;timeout in seconds a selenium node is willing to hang inside the browser.</span>
+;<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#ITEM_BROWSER_TIMEOUT" target="api">browser.timeout</a>=Time in seconds(Default: <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#DEFAULT_BROWSER_TIMEOUT" target="api">0</a>)
+<span class="comments">;By default, search algorithms begin every search by switching back to 
+;the topmost root HTML document (frame). Set it to true if you wish to 
+;disable this frames reset at the beginning of every component search.
+;But you need to handle the frame-switch by yourself.</span>
+;<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#ITEM_BYPASS_FRAME_RESET" target="api">bypass.frame.reset</a>=True | False(Default: <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#DEFAULT_BYPASS_FRAME_RESET" target="api">False</a>)
+<span class="comments">;By default, we firstly use Java Robot to do the automation,
+user can bypass the "Java Robot" and use the selenium directly to do the automation.</span>
+;<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#ITEM_BYPASS_ROBOT_ACTION" target="api">bypass.robot.action</a>=True | False(Default: <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#DEFAULT_BYPASS_ROBOT_ACTION" target="api">False</a>)
+<span class="comments">;With docker, by default, our library will connect the 
+RMI server running on docker container by container's IP and port. But we can map 
+the container's port to local-machine's port so that our library will connect 
+the RMI server (running on docker container) by "localhost" and the mapped port.</span>
+;<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#ITEM_RMI_PORT_FORWARD" target="api">rmi.port.forward</a>=True | False(Default: <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#DEFAULT_RMI_PORT_FORWARD" target="api">False</a>)
+<span class="comments">;Specify the port to get the registry for looking up the RMI server.</span>
+;<a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#ITEM_REGISTRY_PORT" target="api">registry.port</a>=port number(Default: <a href="../doc/org/safs/tools/drivers/DriverConstant.SeleniumConfigConstant.html#DEFAULT_REGISTRY_PORT" target="api">1099</a>)
 
 </pre></td><td><pre>
 
@@ -681,9 +763,15 @@ ProjectRoot=String/ProjectRootPath
 ;secsWaitForWindow=N     (default: 30)
 ;secsWaitForComponent=N  (default: 30)
 ;numLockOn=TRUE|FALSE
-<span class="comments">;UnexpectedAlertBehaviour ONLY works for Selenium2.0 engine for now</span>
-;UnexpectedAlertBehaviour=accept|dismiss|ignore (default: ignore)
+<span class="comments">;UnexpectedAlertBehaviour ONLY works for Selenium2.0 webdriver engine for now</span>
+<span class="comments">accept -> "OK"; dismiss -> "Cancel"; ignore -> "keep Alert"; off -> "don't set this".</span>
+;UnexpectedAlertBehaviour=accept|dismiss|ignore|off (default: ignore)
 ;<a href="../doc/org/safs/tools/drivers/DriverConstant.html#KEY_SAFS_TEST_DND_RELEASE_DELAY" target="api">DndReleaseDelay</a>=N  (default: 800 millisecond)
+<span class="comments">;ProductName, Platform, Track and Branch are orderable information.</span>
+;<a href="../doc/org/safs/tools/drivers/DriverConstant.html#KEY_SAFS_TEST_ORD_PRODUCT_NAME" target="api">ProductName</a>=Product to test
+;<a href="../doc/org/safs/tools/drivers/DriverConstant.html#KEY_SAFS_TEST_ORD_PLATFORM" target="api">Platform</a>=OS platform
+;<a href="../doc/org/safs/tools/drivers/DriverConstant.html#KEY_SAFS_TEST_ORD_TRACK" target="api">Track</a>=Product track
+;<a href="../doc/org/safs/tools/drivers/DriverConstant.html#KEY_SAFS_TEST_ORD_BRANCH" target="api">Branch</a>=Product branch
 
 <b>[SAFS_DIRECTORIES]</b>
 ;DATADIR=Datapool

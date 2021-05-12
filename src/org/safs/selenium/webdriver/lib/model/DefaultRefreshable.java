@@ -1,7 +1,32 @@
 /**
- ** Copyright (C) SAS Institute, All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
+/**
+ *
+ * History:<br>
+ *
+ *  JUN 12, 2014    (Lei Wang) Initial release.
+ *  NOV 05, 2014    (Lei Wang) Modify refresh(): if the 'id' is not null and we cannot get object by id, then stop searching.
+ *                                                    if we cannot get fresh-webelement, we will not update fields like id, tag-name etc.
+ *  FEB 25, 2016    (Lei Wang) Modify refresh(): log a warning message instead of throwing out an Exception if we cannot get webelement by id.
+ *                                   Modify searchWebElement(): Use WebDriver as SearchContext to find the object, if it cannot be found with given SearchContext.
+ *  AUG 16, 2019    (Lei Wang) Added isStale(): check if the embedded web-element is stale.
+ *                            Modified searchWebElement(): get it more robust.
+ */
 package org.safs.selenium.webdriver.lib.model;
 
 import java.util.Map;
@@ -18,16 +43,7 @@ import org.safs.selenium.webdriver.lib.SeleniumPlusException;
 import org.safs.selenium.webdriver.lib.WDLibrary;
 import org.safs.tools.stringutils.StringUtilities;
 
-/**
- *
- * History:<br>
- *
- *  <br>   JUN 12, 2014    (Lei Wang) Initial release.
- *  <br>   NOV 05, 2014    (Lei Wang) Modify refresh(): if the 'id' is not null and we cannot get object by id, then stop searching.
- *                                                    if we cannot get fresh-webelement, we will not update fields like id, tag-name etc.
- *  <br>   FEB 25, 2016    (Lei Wang) Modify refresh(): log a warning message instead of throwing out an Exception if we cannot get webelement by id.
- *                                  Modify searchWebElement(): Use WebDriver as SearchContext to find the object, if it cannot be found with given SearchContext.
- */
+
 public class DefaultRefreshable implements IRefreshable {
 
 	/**
@@ -118,7 +134,7 @@ public class DefaultRefreshable implements IRefreshable {
 	 * @param object
 	 */
 	protected void initialize(Object object){
-		String debugmsg = StringUtils.debugmsg(this.getClass(), "setObject");
+		String debugmsg = StringUtils.debugmsg(false);
 
 		try{
 			this.object = object;
@@ -129,7 +145,7 @@ public class DefaultRefreshable implements IRefreshable {
 				webelement = (WebElement) object;
 
 			}else{
-				if(object!=null) IndependantLog.error(debugmsg+" Need to handle "+object.getClass().getName());
+				if(object!=null) IndependantLog.error(debugmsg+" Need to handle "+object.getClass().getName()+" object "+object+"\n");
 				else IndependantLog.error(debugmsg+" Embedded object is null, cannot handle it.");
 			}
 		}catch(Exception e){
@@ -193,6 +209,7 @@ public class DefaultRefreshable implements IRefreshable {
 	 * It can be used to verify the status.<br>
 	 * @return WebElement the embedded WebElement object or null.
 	 */
+	@Override
 	public WebElement getWebElement(){
 		String debugmsg = StringUtils.debugmsg(getClass(), "getWebElement");
 		if(webelement==null){
@@ -203,6 +220,7 @@ public class DefaultRefreshable implements IRefreshable {
 		return webelement;
 	}
 
+	@Override
 	public void setWebElement(WebElement element) {
 		this.object = element;
 		this.webelement = element;
@@ -222,6 +240,7 @@ public class DefaultRefreshable implements IRefreshable {
 		return map;
 	}
 
+	@Override
 	public String getTagName() {
 		return tagName;
 	}
@@ -230,6 +249,7 @@ public class DefaultRefreshable implements IRefreshable {
 		this.tagName = tagName;
 	}
 
+	@Override
 	public String getId() {
 		return id;
 	}
@@ -238,6 +258,7 @@ public class DefaultRefreshable implements IRefreshable {
 		this.id = id;
 	}
 
+	@Override
 	public String getCssClass() {
 		return cssClass;
 	}
@@ -250,6 +271,7 @@ public class DefaultRefreshable implements IRefreshable {
 	 * if it is null, {@link SearchObject#getWebDriver()} will be used a SearchContext.<br>
 	 * if it is not null, it may be stale itself!<br>
 	 */
+	@Override
 	public SearchContext getSearchContext() {
 		return searchContext;
 	}
@@ -257,11 +279,21 @@ public class DefaultRefreshable implements IRefreshable {
 		this.searchContext = searchContext;
 	}
 
+	@Override
 	public String[] getPossibleRecognitionStrings() {
 		return possibleRecognitionStrings;
 	}
 	public void setPossibleRecognitionStrings(String[] possibleRecognitionStrings) {
 		this.possibleRecognitionStrings = possibleRecognitionStrings;
+	}
+
+	/**
+	 *
+	 * @return boolean check if the embedded WebElement is stale.
+	 * @throws SeleniumPlusException
+	 */
+	public boolean isStale() throws SeleniumPlusException{
+		return WDLibrary.isStale(getWebElement());
 	}
 
 	/**
@@ -272,6 +304,7 @@ public class DefaultRefreshable implements IRefreshable {
 	 *                            true, check stable; false, force refresh directly without check.
 	 * @return boolean, true if the refresh succeed.
 	 */
+	@Override
 	public boolean refresh(boolean checkStale) {
 		// TODO How to make sure that the refreshed WebElement is the "same" object as before.
 		// "same" means that is the object we want, with "ID" it is quite sure that they are
@@ -284,7 +317,7 @@ public class DefaultRefreshable implements IRefreshable {
 		try{
 			if(checkStale){
 				try{
-					needRefreshed = WDLibrary.isStale(getWebElement());
+					needRefreshed = isStale();
 				}catch(SeleniumPlusException se){
 					IndependantLog.warn(StringUtils.debugmsg(se));
 				}
@@ -333,10 +366,14 @@ public class DefaultRefreshable implements IRefreshable {
 
 		try{
 			if(sc!=null) temp = SearchObject.getObject(sc, recognitionString);
+		}catch(Throwable th){
+			IndependantLog.debug(debugmsg+"Cannot get webelement by rs "+recognitionString+", using search context "+sc, th);
+		}
+		try{
 			//Use WebDriver as SearchContext to find the object, if it cannot be found with given SearchContext
 			if(temp==null) temp = SearchObject.getObject(recognitionString);
 		}catch(Throwable th){
-			IndependantLog.debug(debugmsg+"Cannot get webelement by rs "+recognitionString, th);
+			IndependantLog.debug(debugmsg+"Cannot get webelement by rs "+recognitionString+", using WebDriver as search context.", th);
 		}
 
 		return temp;

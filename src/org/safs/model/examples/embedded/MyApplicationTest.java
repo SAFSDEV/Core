@@ -1,7 +1,20 @@
-/******************************************************************************
- * Copyright (c) by SAS Institute Inc., Cary, NC 27513
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- ******************************************************************************/ 
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.model.examples.embedded;
 
 import org.safs.EmbeddedDCHookDriver;
@@ -28,11 +41,11 @@ import org.safs.model.tools.EmbeddedHookDriverRunner;
 public class MyApplicationTest{
 
 	static EmbeddedHookDriverRunner runner;
-	
+
 	static void debug(String message){ runner.debug(message);}
-	
+
 	/**
-	 * 
+	 *
 	 */
 	public MyApplicationTest() {
 		// TODO Auto-generated constructor stub
@@ -50,7 +63,7 @@ public class MyApplicationTest{
 	public void TestBeforeDefault(){
 		runner.logPASSED(getClass().getName() +"#TestBeforeDefault() executed.", null);
 	}
-	
+
 	@JSAFSAfter(Order=1)
 	public void TestAfter1(){
 		runner.logPASSED(getClass().getName() +"#TestAfter1() executed.", null);
@@ -63,7 +76,7 @@ public class MyApplicationTest{
 	public void TestAfterDefault(){
 		runner.logPASSED(getClass().getName() +"#TestAfterDefault() executed.", null);
 	}
-	
+
 	@JSAFSTest
 	public void TestPrep(){
 		runner.logPASSED(getClass().getName() +"#TestPrep() executed.", null);
@@ -73,44 +86,44 @@ public class MyApplicationTest{
 	public void TestA(){
 		runner.logPASSED(getClass().getName() +"#TestA() executed.", null);
 	}
-	
+
 	@JSAFSTest
 	public void TestB()throws Throwable{
 		runner.logPASSED(getClass().getName() +"#TestB() executed.", null);
 	}
 
-	
+
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) throws Throwable{
 		// TODO Auto-generated method stub
 		MyApplicationTest app = new MyApplicationTest();
-		
+
 		try{
 			runner = new EmbeddedHookDriverRunner(EmbeddedDCHookDriver.class);
 			runner.run();
-			
+
 			// run some optional SAFS-specific tests
 			runner.command("Expressions", "on");
 			runner.command("AppMapChaining", "on");
 			runner.command("AppMapResolve", "on");
 			runner.command("SetApplicationMap", "TIDTest.Map");
-			
+
 			runner.action("ClickScreenLocation", "Desktop", "Desktop", "800 400");
-			
+
 			//run as many automatically found and executed tests that might exist
 			runner.autorun(args);
-			
-			//run any additional controlled actions and commands you want 
+
+			//run any additional controlled actions and commands you want
 			runner.command("Expressions", "OFF");
 			runner.command("AppMapChaining", "OFF");
 			runner.command("AppMapResolve", "OFF");
-			
+
 			ATest included = (ATest)runner.getConfiguredClassInstance(ATest.class.getName());
 			XTest excluded = (XTest)runner.getConfiguredClassInstance(XTest.class.getName());
 			included.TestB();
-			try{ 
+			try{
 				excluded.TestB();
 			}
 			catch(NullPointerException x){
@@ -119,7 +132,7 @@ public class MyApplicationTest{
 				excluded.setEmbeddedHookDriverRunner(runner);
 				excluded.TestB();
 			}
-			
+
 		}catch(Throwable x){
 			x.printStackTrace();
 		}

@@ -1,12 +1,28 @@
-/** Copyright (C) SAS Institute, Inc. All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
+/**
+ * JUN 29, 2018	Lei Wang Modified install(), uninstall(): install/uninstall ghostscript
+ * AUG 03, 2018	Lei Wang Modified install(): do not add "start" to run ServiceMonitor.vbs, we have added "start" command in WindowsConsole.batch().
+ */
 package org.safs.install;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Hashtable;
-import java.util.Vector;
 
 import org.safs.natives.NativeWrapper;
 import org.safs.text.FileUtilities;
@@ -15,7 +31,7 @@ import org.safs.tools.CaseInsensitiveFile;
 import com.sun.jna.Platform;
 
 public class SAFSInstaller extends InstallerImpl {
-	
+
 	public static final String SAFSDIREnv  = "SAFSDIR";
 	public static final String SAFSBINPath = s +"bin";
 	public static final String SAFSLIBPath = s +"lib";
@@ -24,7 +40,7 @@ public class SAFSInstaller extends InstallerImpl {
 	public static final String SAFSJARPath = SAFSLIBPath + s +"SAFS.jar";
 	public static final String HKLM_RUN_KEY = "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run";
 	public static final String HKLM_RUN_VALUE = "SAFSMon";
-	
+
 	/**
 	 * Allows the installer to propopate and execute all known installers (RFT, TCAFS, etc..)
 	 * Default = true.  Set to false to prevent propogating execution to all installers.
@@ -39,18 +55,19 @@ public class SAFSInstaller extends InstallerImpl {
 	 *  </ul>
 	 */
 	public boolean propogate = true;
-	
+
 	public SAFSInstaller() {
 		super();
 	}
-	
+
 	/**
 	 * Currently assumes SAFS has been installed (unzipped) and SAFSDIR is already set.
-	 * Can set SAFSDIR if args[0] is given a valid value to use.  
+	 * Can set SAFSDIR if args[0] is given a valid value to use.
 	 * If args[0] is provided, the path will be validated before it is used.
-	 * Adds SAFS paths to CLASSPATH and PATH Environment Variables as long as SAFS.JAR 
+	 * Adds SAFS paths to CLASSPATH and PATH Environment Variables as long as SAFS.JAR
 	 * is found to exist.
 	 */
+	@Override
 	public boolean install(String... args) {
 		String safsdir = null;
 		File file = null;
@@ -68,7 +85,7 @@ public class SAFSInstaller extends InstallerImpl {
 				}
 			}
 		}
-		if (safsdir == null) safsdir = getEnvValue(SAFSDIREnv);		
+		if (safsdir == null) safsdir = getEnvValue(SAFSDIREnv);
 		if (safsdir == null || safsdir.length() == 0) {
 			setProgressMessage("Unable to retrieve required Environment Variable.");
 			return false;
@@ -81,7 +98,7 @@ public class SAFSInstaller extends InstallerImpl {
 		setProgressMessage("Appending CLASSPATH and PATH values as needed.");
 		appendSystemEnvironment("CLASSPATH", safsjar, null);
 		appendSystemEnvironment("PATH", safsdir + SAFSBINPath, null);
-		
+
 		if(propogate){
 			setProgressMessage("Evaluating associated installation requirements...");
 			InstallerImpl installer = null;
@@ -152,11 +169,18 @@ public class SAFSInstaller extends InstallerImpl {
 				setProgressMessage("Android support installer "+ t.getClass().getSimpleName()+": "+ t.getMessage());
 				setProgressMessage("Windows Android support installation did NOT complete successfully.");
 			}
+			try{
+				installer = new GhostScriptInstaller(progresser, safsdir);
+				installer.install();
+			}catch(Throwable t){
+				setProgressMessage("Failed to install '"+installer.getProductName()+"', due to "+ t.getClass().getSimpleName()+": "+ t.getMessage());
+			}
 		}
 		if(Platform.isWindows()){
     		try{
 				setProgressMessage("Attempting to start Windows SAFSMon support.");
-    			NativeWrapper.runAsynchBatchProcess(safsdir+"\\bin", "start "+ safsdir +"\\bin\\ServiceMonitor.vbs -noprompt");
+//    			NativeWrapper.runAsynchBatchProcess(safsdir+"\\bin", "start "+ safsdir +"\\bin\\ServiceMonitor.vbs -noprompt");
+    			NativeWrapper.runAsynchBatchProcess(safsdir+"\\bin", safsdir +"\\bin\\ServiceMonitor.vbs", "-noprompt");
     		}catch(Throwable ignore){
 				setProgressMessage("WARNING: Windows SAFSMon support startup not successful at this time.");
     		}
@@ -164,28 +188,28 @@ public class SAFSInstaller extends InstallerImpl {
 				setProgressMessage("Installing Windows SAFSMon support.");
     			NativeWrapper.SetRegistryKeyValue(HKLM_RUN_KEY, HKLM_RUN_VALUE, "REG_SZ", "wscript.exe "+ safsdir +"\\bin\\ServiceMonitor.vbs -noprompt");
 			}catch(Throwable ignore){
-				setProgressMessage("WARNING: Installing Windows SAFSMon support not successful at this time.");				
-			}    	
+				setProgressMessage("WARNING: Installing Windows SAFSMon support not successful at this time.");
+			}
 		}
 	    String oldline = "C:\\SAFS";
 	    try{
 			setProgressMessage("Modifying Project template installation path information.");
 	    	FileUtilities.replaceDirectoryFilesSubstrings(
-	    	 		  safsdir + SAFSProjectPath, 
-	    			  new String[]{".bat",".ini"}, 
-	    			  oldline, 
-	    			  safsdir, 
-	    			  false);		    	
+	    	 		  safsdir + SAFSProjectPath,
+	    			  new String[]{".bat",".ini"},
+	    			  oldline,
+	    			  safsdir,
+	    			  false);
 			setProgressMessage("Modifying Samples template installation path information.");
 	    	FileUtilities.replaceAllSubdirectoryFilesSubstrings(
-	    	 		  safsdir + SAFSSamplesPath, 
-	    			  new String[]{".bat",".ini"}, 
-	    			  oldline, 
-	    			  safsdir, 
-	    			  false);		    	
+	    	 		  safsdir + SAFSSamplesPath,
+	    			  new String[]{".bat",".ini"},
+	    			  oldline,
+	    			  safsdir,
+	    			  false);
 	    }catch(IOException x){
 	    	return false;
-	    }		
+	    }
 		return true;
 	}
 
@@ -211,10 +235,10 @@ public class SAFSInstaller extends InstallerImpl {
 		removeSystemEnvironmentSubstringContaining("CLASSPATH", libpath + "safsrational_ft_custom.jar", null);
 		removeSystemEnvironmentSubstringContaining("CLASSPATH", libpath + "safsrational_ft_enabler.jar", null);
 		removeSystemEnvironmentSubstringContaining("CLASSPATH", libpath + "safsrational_xde.jar", null);
-		
+
 		removeSystemEnvironmentSubstringContaining("CLASSPATH", libpath + "robotium-remotecontrol.jar", null);
 		removeSystemEnvironmentSubstringContaining("CLASSPATH", libpath + "robotium-serializable.jar", null);
-		
+
 		removeSystemEnvironmentSubstringContaining("CLASSPATH", libpath + "jaccess.jar", null);
 		removeSystemEnvironmentSubstringContaining("CLASSPATH", libpath + "jakarta-regexp-1.3.jar", null);
 		removeSystemEnvironmentSubstringContaining("CLASSPATH", libpath + "JRex.jar", null);
@@ -241,14 +265,15 @@ public class SAFSInstaller extends InstallerImpl {
 		setEnvValue("PATH_SAFSBAK", null);
 		return true;
 	}
-	
+
 	/**
 	 * Unset the System Environment Variables used by SAFS.
 	 * Remove SAFSDIR and paths from CLASSPATH and PATH Environment Variables.
-	 * Can unset SAFSDIR if args[0] is given a value to use.  
+	 * Can unset SAFSDIR if args[0] is given a value to use.
 	 * @param args
 	 * @return
 	 */
+	@Override
 	public boolean uninstall(String... args){
 		String safsdir = null;
 		setProgressMessage("Evaluating installation directory integrity.");
@@ -284,6 +309,12 @@ public class SAFSInstaller extends InstallerImpl {
 			installer = new AndroidInstaller();
 			installer.setProgressIndicator(progresser);
 			installer.uninstall();
+			try{
+				installer = new GhostScriptInstaller(progresser, safsdir);
+				installer.uninstall();
+			}catch(Throwable t){
+				setProgressMessage("Failed to uninstall '"+installer.getProductName()+"', due to "+ t.getClass().getSimpleName()+": "+ t.getMessage());
+			}
 		}
 		if(Platform.isWindows()){
 			setProgressMessage("Attempting shutdown of any running SAFSMon process.");
@@ -306,7 +337,7 @@ public class SAFSInstaller extends InstallerImpl {
 		FileUtilities.deleteDirectoryRecursively(safsdir, true);
 		return true;
 	}
-	
+
 	/**
 	 * Main Java executable.  Primarily to run standalone outside of a larger process.
 	 * <p>
@@ -314,7 +345,7 @@ public class SAFSInstaller extends InstallerImpl {
 	 * <p>
 	 * %SAFSDIR%\jre\bin\java org.safs.install.SAFSInstaller -u [C:\SAFS]
 	 * <p>
-	 * If the -np option is not provided, then the installer will propogate and execute 
+	 * If the -np option is not provided, then the installer will propogate and execute
 	 * all known SAFS Framework Installers.
 	 * <p>
 	 * System.exit(0) on perceived success.<br>
@@ -322,9 +353,9 @@ public class SAFSInstaller extends InstallerImpl {
 	 * @param args:
 	 * <p><ul>
 	 * "-u"  -- to perform an uninstall instead of install.<br>
-	 * "-np" -- do not propogate to other installers for TCAFS, RFT, etc..<br> 
+	 * "-np" -- do not propogate to other installers for TCAFS, RFT, etc..<br>
 	 * Any first arg other than (-u or -np) will be considered the path for SAFSDIR.<br>
-	 * The path for SAFSDIR does NOT need to be provided if the System Environment Variable 
+	 * The path for SAFSDIR does NOT need to be provided if the System Environment Variable
 	 * already exists with a valid setting.<br>
 	 * </ul>
 	 * @see org.safs.install.SilentInstaller

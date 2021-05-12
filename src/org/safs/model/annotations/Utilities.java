@@ -1,14 +1,29 @@
-/******************************************************************************
- * Copyright (c) by SAS Institute Inc., Cary, NC 27513
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- ******************************************************************************/
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * Developer History:
  *
- * SEP 25, 2015 Carl Nagle Added support for AutoConfigureJSAFS classes to identify external RuntimeDataAware classes.
+ * SEP 25, 2015 Carl Nagle  Added support for AutoConfigureJSAFS classes to identify external RuntimeDataAware classes.
  * DEC 16, 2016 Lei Wang Modified findClasses(), getPackageClasses(): add one more parameter 'includeSubPackages'.
- *                     Modified injectRuntimeDataAwareClasses(): inject RuntimeData for classes under the root package, where
+ *                      Modified injectRuntimeDataAwareClasses(): inject RuntimeData for classes under the root package, where
  *                                                               the class Map.java normally locates.
+ * MAR 04, 2019 Lei Wang Modified findClasses(): catch ClassNotFoundException when calling Class.forName().
+ *                                              catch NoClassDefFoundError when calling Class.forName().
  *
  */
 package org.safs.model.annotations;
@@ -24,6 +39,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
@@ -68,22 +84,48 @@ public class Utilities {
 	}
 
 	/**
+	 * concat codepath + path.
+	 * If the codepath ends with ".jar" or ".zip" concat as codepath + ! + path
+	 **/
+	private static String concatCodePath(String path, String codepath){
+		String lcpath = codepath.toLowerCase();
+		if(lcpath.endsWith(".jar") || lcpath.endsWith(".zip")){
+	    	lcpath = codepath + "!" + path;
+		}else{
+	    	lcpath = codepath + path;
+		}
+		return lcpath;
+	}
+
+	/**
 	 * attempts to locate any class resource in the packageName so that the Package can be loaded.
 	 * This will get even Packages that have not yet been loaded by any ClassLoader.
 	 * @param packageName
+	 * @param codepath -- a decoded file directory or JAR system codepath to search, if known.  CAN BE NULL!
 	 * @return Package or null if none found or an invalid or unfindable package;
 	 */
-	private static Package getPackageResource(String packageName){
+	private static Package getPackageResource(String packageName, String codepath){
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
-	    assert loader != null;
 	    String path = packageName.replace('.', '/');
 	    Enumeration<URL> resources = null;
 	    try{
 	    	resources = loader.getResources(path);
-			if(resources == null)
-				debug("getPackageResource reports NO resources at "+ path);
-			else{
-				debug("getPackageResource reports valid resources at "+ path);
+			if(resources == null || !resources.hasMoreElements()){
+				debug("getPackageResource reports NO / resources at "+ path);
+				// TRY adding codepath information...
+				if(codepath != null){
+					String lcpath =  concatCodePath(path, codepath);
+					debug("getPackageResource trying alternative with codepath "+ lcpath);
+			    	resources = loader.getResources(lcpath);
+				}else{
+					debug("getPackageResource received no alternative codepath to try.");
+				}
+
+			}
+			if(resources == null || !resources.hasMoreElements()){
+				debug("getPackageResource reports NO resources in any sought path format.");
+			}else{
+				debug("getPackageResource reports valid resources for "+ path);
 				String strDirectory = null;
 				String filename = null;
 				String packagefile = null;
@@ -113,7 +155,7 @@ public class Utilities {
 									try{
 										c = Class.forName(className, false, loader);
 										return c.getPackage();
-									}catch(ClassNotFoundException x){
+									}catch(ClassNotFoundException|NoClassDefFoundError x){
 							        	debug("getPackageResource ClassNotFoundException for '"+ className+"'");
 									}
 								}
@@ -135,7 +177,7 @@ public class Utilities {
 										try {
 											c = Class.forName(packagefile, false, loader);
 											return c.getPackage();
-										}catch( ClassNotFoundException x){
+										}catch( ClassNotFoundException|NoClassDefFoundError x){
 								        	debug("getPackageResource ClassNotFoundException for '"+ packagefile +"'");
 										}
 						        	}
@@ -180,10 +222,11 @@ public class Utilities {
 			ZipInputStream zip = new ZipInputStream(jar.openStream());
 			ZipEntry entry = null;
 			String entryName;
+			Class<?> theClass = null;
 			while ((entry = zip.getNextEntry()) != null) {
 				entryName = entry.getName();
 				if(isEntryExcluded(entryName, exclusions)) {
-		        	debug("AutoConfigure skipping excluded JAR file entry '"+ entryName +"'");
+		        	//debug("AutoConfigure skipping excluded JAR file entry '"+ entryName +"'");
 					continue;
 				}
 				if (entryName.endsWith(".class")) {
@@ -195,8 +238,16 @@ public class Utilities {
 							continue;
 						}
 					}
-		        	debug("AutoConfigure adding JAR file class '"+ className+"'");
-					classes.add(Class.forName(className));
+					try{
+						theClass = Class.forName(className);
+						// only add the class once.  Don't allow Inner Classes to add it multiple times.
+						if(! classes.contains(theClass)){
+							debug("AutoConfigure adding JAR file class '"+ className +"'");
+							classes.add(Class.forName(className));
+						}
+					}catch(ClassNotFoundException|NoClassDefFoundError e){
+						debug("AutoConfigure failed to add JAR file class '"+ className +"', due to "+e.getMessage());
+					}
 				}
 			}
 			return classes;
@@ -218,7 +269,7 @@ public class Utilities {
 			}
 			else if (fileName.endsWith(".class") && !fileName.contains("$")) {
             	debug("AutoConfigure attempting to add class URI '"+ file.getName() +"' to configurable classes.");
-				Class<?> _class;
+				Class<?> _class = null;
 				try {
 					_class = Class.forName(packageName + '.' + fileName.substring(0, fileName.length() - 6));
 				}
@@ -226,12 +277,75 @@ public class Utilities {
 					// happen, for example, in classes, which depend on
 					// Spring to inject some beans, and which fail,
 					// if dependency is not fulfilled
-					_class = Class.forName(packageName + '.' + fileName.substring(0, fileName.length() - 6), false, Thread.currentThread().getContextClassLoader());
+					try{
+						_class = Class.forName(packageName + '.' + fileName.substring(0, fileName.length() - 6), false, Thread.currentThread().getContextClassLoader());
+					}catch(ClassNotFoundException cfe){
+						debug("AutoConfigure failed to add class URI '"+ file.getName() +"', due to "+cfe.getMessage());
+					}
+				}catch(ClassNotFoundException|NoClassDefFoundError cfe){
+					debug("AutoConfigure failed to add class URI '"+ file.getName() +"', due to "+cfe.getMessage());
 				}
-				classes.add(_class);
+				if(_class!=null){
+					classes.add(_class);
+				}
 			}
 		}
 		return classes;
+	}
+
+	private static Enumeration<URL> locateResources(ClassLoader loader, String path, String codepath){
+		Enumeration<URL> resources = null;
+		debug("locateResources using "+ loader.getClass().getName() +" to locate resources...");
+	    try{ resources = loader.getResources(path);}
+	    catch(Throwable x){
+			debug("locateResources ignoring "+ x.getClass().getName()+" for "+ path);
+	    }
+	    if (resources == null || !resources.hasMoreElements()){
+			debug("locateResources found no resources for getResources '"+ path +"'");
+		    try{ resources = loader.getSystemResources(path);}
+		    catch(Throwable x){
+				debug("locateResources "+ x.getClass().getName()+" for "+ path);
+	    	}
+		    if (resources == null || !resources.hasMoreElements()){
+				debug("locateResources found no resources for getSystemResources '"+ path +"'");
+				if(codepath != null && codepath.length() > 0 && !path.contains(codepath)){
+					String tpath = concatCodePath(path, codepath);
+					try{
+						URL url = new URL(tpath);
+						File fpath = new File(url.getFile());
+						String packageName = path.replaceAll("/", ".");
+						debug("locateResources trying with added codepath '"+ tpath +"' for packageName '"+ packageName +"'");
+						List<Class<?>> classes = findClasses(fpath, packageName,
+								                 new ArrayList<String>(),
+								                 tpath.startsWith(FILE_COLON_STRING),
+								                 false);
+						Collection<URL> coll = new ArrayList<URL>();
+						String urlPath = null;
+						String lcpath = null;
+						for(Class<?> aclass : classes){
+							urlPath = getClassCodePath(aclass);
+							lcpath = urlPath.toLowerCase();
+							if(lcpath.endsWith(".jar")||lcpath.endsWith(".zip") && lcpath.startsWith(FILE_COLON_STRING)){
+								urlPath += "!";
+							}else{
+								urlPath += "/";
+							}
+							urlPath += path;
+							coll.add(new URL(urlPath));
+						}
+						return Collections.enumeration(coll);
+					}catch(Throwable m){
+						debug("locateResources ignoring "+ m.getClass().getName()+" for "+ tpath);
+					}
+				}
+		    }
+	    }
+	    if (resources == null || !resources.hasMoreElements()){
+	    	resources = loader.getParent() != null ?
+	    			    locateResources(loader.getParent(), path, codepath) :
+	    			    resources;
+	    }
+	    return resources;
 	}
 
     /**
@@ -241,6 +355,7 @@ public class Utilities {
 	 * <p>
 	 * @param apackage -- the Package to interrogate.
 	 * Ex: my.test.package
+	 * @param codepath - path to JAR or Dir possibly containing the package or classes.
 	 * @param cList -- the current List of classes to append to.
 	 * @param exclusions -- a List of package names (not class-names) to be excluded from the search.
 	 * Ex: my.test.package.otherstuff
@@ -248,14 +363,16 @@ public class Utilities {
 	 * @return The input cList with all newly found Classes appended to it.
 	 * This allows for the collection of many classes across different package hierarchies.
 	 */
-	private static List<Class<?>> getPackageClasses(Package apackage, List<Class<?>> cList, List<String> exclusions, boolean includeSubPackages){
+	private static List<Class<?>> getPackageClasses(Package apackage, String codepath, List<Class<?>> cList, List<String> exclusions, boolean includeSubPackages){
 		String packageName = apackage.getName();
 		debug("getPackageClasses processing package '"+ packageName +"' for configurable classes.");
-		if(exclusions.contains(packageName)) return cList;
-		ClassLoader loader = Thread.currentThread().getContextClassLoader();
-	    assert loader != null;
-	    String path = packageName.replace('.', '/');
+		if(exclusions.contains(packageName)) {
+			debug("getPackageClasses ignoring package '"+ packageName +"' due to exclusion list.");
+			return cList;
+		}
+		String path = packageName.replace('.', '/');
 	    Enumeration<URL> resources = null;
+	    codepath = codepath == null ? "" : codepath;
 
 	    class FileColonsPair{
 	    	private File file = null;
@@ -284,11 +401,11 @@ public class Utilities {
 
 	    List<FileColonsPair> fileColonPairList = new ArrayList<FileColonsPair>();
 
-	    try{ resources = loader.getResources(path);}
-	    catch(IOException x){
-			debug("getPackageClasses IOException for "+ path);
-	    }
-	    if(resources != null){
+		ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+	    resources = locateResources(loader, path, codepath);
+
+	    if(resources != null && resources.hasMoreElements()){
 	    	String fileName = null;
 	    	String fileNameDecoded = null;
 	    	URL resource = null;
@@ -302,16 +419,23 @@ public class Utilities {
 					if(fileNameDecoded.startsWith(FILE_COLON_STRING)){
 						hasFileColon = true;
 						fileNameDecoded = fileNameDecoded.substring(FILE_COLON_STRING.length());
+					}else if (resource.getProtocol().equalsIgnoreCase("file")){
+						hasFileColon = true;
 					}
 					fileColonPairList.add(new FileColonsPair(new File(fileNameDecoded), hasFileColon));
 				}catch(UnsupportedEncodingException x){
 					debug("getPackageClasses UnsupportedEncodingException for "+ fileNameDecoded);
 				}
 		    }
+	    }else{
+			debug("getPackageClasses found no resources in package '"+ packageName +"'");
 	    }
 	    ArrayList<Class<?>> classes = new ArrayList<Class<?>>();
+		debug("getPackageClasses found "+ fileColonPairList.size() +" file resources to process for package '"+ packageName +"'");
 	    for (FileColonsPair fcp : fileColonPairList) {
-	        try{ classes.addAll(findClasses(fcp.getFile(), packageName, exclusions, fcp.isHasColons(), includeSubPackages)); }
+	        try{
+	        	classes.addAll(findClasses(fcp.getFile(), packageName, exclusions, fcp.isHasColons(), includeSubPackages));
+	        }
 	        catch(Exception nf){
 				debug("getPackageClasses "+ nf.getClass().getSimpleName()+" unable to retrieve SubPackage Classes associated with "+packageName);
 	        }
@@ -320,6 +444,26 @@ public class Utilities {
 		// Attempt to avoid duplicating items already in the List.
 		for(Class<?> c:classes) if(!cList.contains(c)) cList.add(c);
 	    return cList;
+	}
+
+	/*
+	 * return the URL decoded codepath to the class (JAR or Directory) it is in.
+	 * Can return an empty string.  Should never be null;
+	 */
+	private static String getClassCodePath(Class<?> aclass){
+		String temppath = null;
+		String codepath = "";
+		try{
+			temppath = aclass.getProtectionDomain().getCodeSource().getLocation().getProtocol();
+			if(temppath != null && temppath.length()> 0)
+				temppath +=":";
+			temppath += aclass.getProtectionDomain().getCodeSource().getLocation().getPath();
+			codepath = URLDecoder.decode(temppath, "UTF-8");
+			debug("getClassCodePath URL decoded class codepath '"+ codepath +"'");
+		}catch(Throwable t){
+			debug("getClassCodePath ignore "+ t.getClass().getSimpleName()+": "+ t.getMessage());
+		}
+		return codepath;
 	}
 
 	/**
@@ -341,12 +485,72 @@ public class Utilities {
 	public static List<Class<?>> getPackageClasses(String classname, List<Class<?>> cList, List<String> exclusions){
 		Class<?> c;
 		try{ c = Class.forName(classname);}
-		catch(ClassNotFoundException nf){
+		catch(ClassNotFoundException|NoClassDefFoundError nf){
 			debug("AutoConfigure unable to retrieve calling Class "+ classname);
 			return cList;
 		}
+		String codepath = getClassCodePath(c);
 		Package pack = c.getPackage();
-		return getPackageClasses(pack, cList, exclusions, true);
+		return getPackageClasses(pack, codepath, cList, exclusions, true);
+	}
+
+	private static List<Class<?>> processClassPackages(Class<?> myclass, List<Class<?>> cList, ArrayList<String> altPackageNames, ArrayList<String> exclusions){
+		debug("processClassPackages received Class "+ myclass);
+		Package mypackage = myclass.getPackage();
+		String codepath = getClassCodePath(myclass);
+		String mypackagename = mypackage.getName();
+
+		//Try to inject for classes under the root package
+		//If the myClass is "regression.test.package.MyClass", then the root package will be "regression" where
+		//the class Map.java normally locates, the Map.java definitely needs injected!
+		int index = mypackagename.indexOf('.');
+		if(index>0){
+			String rootPackageName = mypackagename.substring(0, index);
+			if(! (rootPackageName.equals("org") || rootPackageName.equals("com")) ){
+				debug("processClassPackages processing root Package '"+ rootPackageName+"'.");
+				Package rootPackage = getPackageResource(rootPackageName, codepath);
+				if(rootPackage!=null){
+					cList = getPackageClasses(rootPackage, codepath, cList, exclusions, false);
+				}else{
+					debug("processClassPackages MISSED root Package '"+ rootPackageName+"'.");
+				}
+			}else{
+				debug("processClassPackages bypassing root Package '"+ rootPackageName+"'.");
+			}
+		}
+
+		debug("processClassPackages processing Package '"+ mypackagename+"'.");
+		cList = getPackageClasses(mypackage, codepath, cList, exclusions, true);
+
+		debug("processClassPackages seeking parent Package for "+ mypackagename);
+		Package subpackage = null;
+		String subpackagename = null;
+		// get the parent package of that package.
+		int lastdot = mypackagename.lastIndexOf('.');
+		if(lastdot > 0){
+			// search parent package + rootPackageNames to locate other RuntimeDataAware classes.
+			String parentpackagename = mypackagename.substring(0, lastdot);
+			debug("processClassPackages processing parent Package "+ parentpackagename);
+			Package parentpackage = getPackageResource(parentpackagename, codepath);
+			if(parentpackage != null){
+				debug("processClassPackages retrieving parentpPackage classes for "+ parentpackagename);
+				// new -- process the parent package for possible classes before subpackages.
+				cList = getPackageClasses(parentpackage, codepath, cList, exclusions, true);
+				for(String rootPackageName: altPackageNames){
+					subpackagename = parentpackagename+"."+rootPackageName;
+					subpackage = getPackageResource(subpackagename, codepath);
+					if(subpackage != null){
+						debug("processClassPackages processing parent subPackage "+ subpackage.getName());
+						cList = getPackageClasses(subpackage, codepath, cList, exclusions, true);
+					}else{
+						debug("processClassPackages detected no parent subPackage "+ rootPackageName );
+					}
+				}
+			}
+		}else{
+			debug("processClassPackages detected NO parent Package to process for Package "+ mypackagename);
+		}
+		return cList;
 	}
 
 	/**
@@ -376,67 +580,80 @@ public class Utilities {
 	 * @see org.safs.model.tools.RuntimeDataAware#setRuntimeDataInterface(RuntimeDataInterface)
 	 **/
 	public static void injectRuntimeDataAwareClasses(Object classInstance, ArrayList<String> altPackageNames, RuntimeDataInterface dataInterface) {
+
+		// Carl Nagle - Debugging ClassLoaders....
+		ClassLoader cl = Thread.currentThread().getContextClassLoader();
+		while (cl != null){
+			debug("injectRuntimeDataAwareClasses classloader "+ cl.getClass().getName());
+			if(cl == ClassLoader.getSystemClassLoader()){
+				debug("injectRuntimeDataAwareClasses classloader "+ cl.getClass().getName() +" *IS* the System ClassLoader");
+			}
+			cl = cl.getParent();
+		}
+
 		ArrayList<String> exclusions = new ArrayList<String>();
 		List<Class<?>> cList = new ArrayList<Class<?>>();
+		List<String> altClassNames = new ArrayList<String>();
+		if( altPackageNames == null) altPackageNames = new ArrayList<String>();
+
+		// check for other classes and associated packages to be ENABLED
+		String cliclasses = System.getProperty("safs.test.data.aware.classes");
+		try{
+			String[] classes = cliclasses.split(";");
+			for(String c:classes){
+				altClassNames.add(c);
+			}
+		}catch(NullPointerException ignore){}
+
+		// check for other classes or injectors requesting additional packages to be ENABLED
+		String others = System.getProperty("safs.test.data.aware.packages");
+		try{
+			String[] packages = others.split(";");
+			for(String p:packages){
+				altPackageNames.add(p);
+			}
+		}catch(NullPointerException ignore){}
+
+		// check for other classes or injectors requesting additional packages to be EXCLUDED
+		others = System.getProperty("safs.test.data.aware.exclusions");
+		try{
+			String[] packages = others.split(";");
+			for(String p:packages){
+				exclusions.add(p);
+			}
+		}catch(NullPointerException ignore){}
+		// add some default exclusions
+		exclusions.add("org");
+		exclusions.add("com");
+		exclusions.add("org.safs");
+		exclusions.add("org.safs.selenium");
+		exclusions.add("org.safs.selenium.spc");
+		exclusions.add("org.safs.selenium.util");
+		exclusions.add("org.safs.selenium.webdriver");
 
 		// given a class, find the package it is in.
 		Class<?> myclass = classInstance.getClass();
-		debug("injectRuntimeDataAwareClasses received Class "+ myclass);
-		Package mypackage = myclass.getPackage();
-		String mypackagename = mypackage.getName();
+		cList = processClassPackages(myclass, cList, altPackageNames, exclusions);
 
-		//Try to inject for classes under the root package
-		//If the myClass is "regression.test.package.MyClass", then the root package will be "regression" where
-		//the class Map.java normally locates, the Map.java definitely needs injected!
-		int index = mypackagename.indexOf('.');
-		if(index>0){
-			String rootPackageName = mypackagename.substring(0, index);
-			debug("injectRuntimeDataAwareClasses processing root Package '"+ rootPackageName+"'.");
-			Package rootPackage = getPackageResource(rootPackageName);
-			if(rootPackage!=null){
-				cList = getPackageClasses(rootPackage, cList, exclusions, false);
-			}else{
-				debug("injectRuntimeDataAwareClasses MISSED root Package '"+ rootPackageName+"'.");
+		// given any altClassNames, find the packages they are in
+		for(String clazzname:altClassNames){
+			try {
+				myclass = Class.forName(clazzname);
+				cList = processClassPackages(myclass, cList, altPackageNames, exclusions);
+			} catch (ClassNotFoundException e) {
+				debug("injectRuntimeDataAwareClasses ignoring *** ClassNotFoundException *** for '"+ clazzname +"'");
 			}
 		}
 
-		debug("injectRuntimeDataAwareClasses processing Package '"+ mypackagename+"'.");
-		cList = getPackageClasses(mypackage, cList, exclusions, true);
-
-		debug("injectRuntimeDataAwareClasses seeking parent Package for "+ mypackagename);
 		Package subpackage = null;
-		String subpackagename = null;
-		// get the parent package of that package.
-		int lastdot = mypackagename.lastIndexOf('.');
-		if(lastdot > 0){
-			// search parent package + rootPackageNames to locate other RuntimeDataAware classes.
-			String parentpackagename = mypackagename.substring(0, lastdot);
-			debug("injectRuntimeDataAwareClasses processing parent Package "+ parentpackagename);
-			Package parentpackage = getPackageResource(parentpackagename);
-			if(parentpackage != null){
-				debug("injectRuntimeDataAwareClasses retrieving parentpPackage classes for "+ parentpackagename);
-				// new -- process the parent package for possible classes before subpackages.
-				cList = getPackageClasses(parentpackage, cList, exclusions, true);
-				for(String rootPackageName: altPackageNames){
-					subpackagename = parentpackagename+"."+rootPackageName;
-					subpackage = getPackageResource(subpackagename);
-					if(subpackage != null){
-						debug("injectRuntimeDataAwareClasses processing parent subPackage "+ subpackage.getName());
-						cList = getPackageClasses(subpackage, cList, exclusions, true);
-					}else{
-						debug("injectRuntimeDataAwareClasses detected no parent subPackage "+ rootPackageName );
-					}
-				}
-			}
-		}else{
-			debug("injectRuntimeDataAwareClasses detected NO parent Package to process for Package "+ mypackagename);
-		}
 		// also search rootPackageNames as standalone package names to search.
+		// these will have unknown codepaths!
+		debug("injectRuntimeDataAwareClasses found "+ altPackageNames.size() +" altPackageNames to process.");
 		for(String rootPackageName: altPackageNames){
-			subpackage = getPackageResource(rootPackageName);
+			subpackage = getPackageResource(rootPackageName, null);
 			if(subpackage != null){
 				debug("injectRuntimeDataAwareClasses processing standalone Package "+ rootPackageName);
-				cList = getPackageClasses(subpackage, cList, exclusions, true);
+				cList = getPackageClasses(subpackage, null, cList, exclusions, true);
 			}else{
 				debug("injectRuntimeDataAwareClasses detected no standalone Package "+ rootPackageName );
 			}
@@ -478,6 +695,7 @@ public class Utilities {
 				}
 			}
 		}
+		debug("injectRuntimeDataAwareClasses is done.");
 	}
 
 	/**
@@ -560,7 +778,7 @@ public class Utilities {
 
 			for (Class<?> c : cArray) {
 				try{ aClass = Class.forName(c.getName());}
-				catch(ClassNotFoundException nf){
+				catch(ClassNotFoundException|NoClassDefFoundError nf){
 					debug("AutoConfigure skipping configuring a Class due to "+ nf.getClass().getSimpleName()+": "+nf.getMessage());
 					continue;}
 				boolean stored = (store.getConfiguredClassInstance(c.getName()) instanceof Object);
@@ -721,7 +939,7 @@ public class Utilities {
 				}
 			}
 
-		} catch (ClassNotFoundException e) {
+		} catch (ClassNotFoundException|NoClassDefFoundError e) {
 			debug("AutoConfigure aborting "+className+" due to "+ e.getClass().getSimpleName());
 			e.printStackTrace();
 		}
@@ -834,6 +1052,7 @@ class MyComparator implements Comparator<Object>{
 	 * If the objects are of Class, we want to use their class-name to compare.<br>
 	 *
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public int compare(Object lhs, Object rhs) {
 		int result = 0;

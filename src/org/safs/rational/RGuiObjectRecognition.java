@@ -1,8 +1,20 @@
-/** Copyright (C) (MSA, Inc) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
-
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.rational;
 
 import java.lang.reflect.Method;
@@ -54,7 +66,7 @@ import com.rational.test.ft.value.MethodInfo;
  *         by name.  This allows matches for recognition strings that include either in 
  *         identifying the object.
  * @author Carl Nagle, AUG 11, 2008 Added Firefox support for Caption
- * <br>		SEP 03, 2008   (LeiWang)	Modify method getObjectSuperClassNames()
+ * <br>		SEP 03, 2008   (Lei Wang)	Modify method getObjectSuperClassNames()
  * 										Add method getDotNetSuperClassNames() and getJavaSuperClassNames()
  * <br>     SEP 09, 2008   (JunwuMa)	Add Flex support.
  *                                    	Modify methods getCaption and getObjectClassName supporting Flex domain.
@@ -62,7 +74,7 @@ import com.rational.test.ft.value.MethodInfo;
  *                                      Different flex applcaition owns different name in general. The unique name is taken as caption for 
  *                                      identifying the Flex application. In this way, the R-string for top window is consistent with it used to be 
  *                                      in Java, .NET,HTML like "Type=FlexWindow;Caption={FlexWebDemo.swf}"
- * <br>		Oct 14, 2008	(LeiWang)	Modified method isMatchingSubClass(), getObjectClassName(). Change variable type from GuiTestObject to TestObject.
+ * <br>		Oct 14, 2008	(Lei Wang)	Modified method isMatchingSubClass(), getObjectClassName(). Change variable type from GuiTestObject to TestObject.
  * 										We need to these two methods work for class "System.Windows.Forms.ToolBarButton", see defect S0539954.
  * <br>     Oct 27, 2008    (JunwuMa)   Modified getName(TestObject), getText(TestObject) and getMatchingPathObject(Object, String) 
  *                                      supporting Flex domain.
@@ -73,11 +85,11 @@ import com.rational.test.ft.value.MethodInfo;
  * <br>     MAR 06, 2009    (Carl Nagle)	Fixing NullPointerExceptions in getName()
  * <br>		MAR 30, 2009	(JunwuMa)   Refactored isObjectVisible(TestObject), added isVisiblePropertyTrue(TestObject, String). 
  * <br>		MAY 07, 2009	(Carl Nagle)    Added "Value" as possible property name for getText. 
- * <br>		OCT	19, 2009	(LeiWang)	Modify method getCaption(): For .NET domain, Try 'Caption' firstly, because some WPF application set
+ * <br>		OCT	19, 2009	(Lei Wang)	Modify method getCaption(): For .NET domain, Try 'Caption' firstly, because some WPF application set
  * 										'Text' as a different value, which cause this window can not be found.
  * <br>		APR 16, 2010	(Carl Nagle)    Use Java Reflection to fix RFT API change in 8.1.1. 
- * <br>		JUN 12, 2010	(LeiWang)   Modify method isMatchingSubClass(): Fix CurrentWindow can't be found. See defect S0676618
- * <br>		JUN 24, 2010	(LeiWang)   Modify method fixIsShowing(),isMatchingSubClass(): 
+ * <br>		JUN 12, 2010	(Lei Wang)   Modify method isMatchingSubClass(): Fix CurrentWindow can't be found. See defect S0676618
+ * <br>		JUN 24, 2010	(Lei Wang)   Modify method fixIsShowing(),isMatchingSubClass(): 
  *                                      Fix CurrentWindow could not work for .Net and WPF window. See defect S0677270
  * <br>		NOV 24, 2010	(Carl Nagle)    Fixed use of getObjectClassName for FLEX domain.
  * <br>     MAR 16, 2012	(JunwuMa)   Update getObjectProperty to expand the properties to search from, support engine command getObjectRecognitionAtScreenCoordinates.

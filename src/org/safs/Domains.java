@@ -1,15 +1,27 @@
-/** 
- ** Copyright (C) SAS Institute, All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Vector;
 
 /**
- * 
+ *
  * @author Carl Nagle
  * @since Jan 30, 2006
  *        Oct 09, 2008 (JunwuMa) Add Flex support.
@@ -21,14 +33,14 @@ public class Domains {
 	public static final String JAVA_DOMAIN = "JAVA";
 	/** "ACTIVEX" */
 	public static final String ACTIVEX_DOMAIN = "ACTIVEX";
-	
+
 	/** "HTML" */
 	public static final String HTML_DOMAIN = "HTML";
 	/** "DOJO" */
 	public static final String HTML_DOJO_DOMAIN = "DOJO";
 	/** "SAP" */
 	public static final String HTML_SAP_DOMAIN = "SAP";
-	
+
 	/** "NET" */
 	public static final String NET_DOMAIN  = "NET";
 	/** "WPF" **/
@@ -43,9 +55,9 @@ public class Domains {
 	public static final String[] domains = new String[]{
 		JAVA_DOMAIN, HTML_DOMAIN, HTML_DOJO_DOMAIN, HTML_SAP_DOMAIN,NET_DOMAIN, WIN_DOMAIN, SWT_DOMAIN, FLEX_DOMAIN, ACTIVEX_DOMAIN
 	};
-	
+
     private static Vector _enabledDomains = new Vector();
-    
+
     /**
      * Call to clear out and essentially disable all domains.
      * This is usually followed by calls to enable specific domains in a specific LIFO order.
@@ -57,7 +69,7 @@ public class Domains {
 
     /**
      * Add (or move) a domain to the top of the enabledDomains list.
-     * Items added to the list should be considered LIFO.  That is, each 
+     * Items added to the list should be considered LIFO.  That is, each
      * item added to the list is put at the top of the list.
      */
     public static void addEnabledDomain(String domainname){
@@ -73,11 +85,11 @@ public class Domains {
 	   		}
 	   		Log.info("Domain precedence: "+ getEnabledDomainsString());
 	   		return;
-    	}catch(Exception x){}    	
+    	}catch(Exception x){}
 		Log.debug("Domains cannot process NULL domain:"+ domainname);
     	throw new IllegalArgumentException(domainname);
     }
-    
+
     /**
      * Remove a domain from the enabledDomains list.
      * Ignores invalid domains and domains not in the list.
@@ -86,26 +98,26 @@ public class Domains {
     	try{
 	    	String ucname = domainname.toUpperCase();
 	    	_enabledDomains.remove(ucname);
-    	}catch(Exception x){}    	
+    	}catch(Exception x){}
 		Log.debug("Domains cannot process NULL domain:"+ domainname);
     }
-    
+
     /**
-     * Returns a String array of the currently enabled domains in the order they 
+     * Returns a String array of the currently enabled domains in the order they
      * should be processed. That is, item[0] is the first with highest precedence, etc..
-     * @return String[] of enabled domain names in the order they should be processed.  
+     * @return String[] of enabled domain names in the order they should be processed.
      * Can return an array of 0-length.
      */
     public static String[] getEnabledDomains(){
     	try{ return (String[])_enabledDomains.toArray(new String[0]);}
     	catch(Exception x){
-			Log.debug ("Domains returning empty array due to "+ x.getClass().getSimpleName());			    		
+			Log.debug ("Domains returning empty array due to "+ x.getClass().getSimpleName());
     		return new String[0];}
     }
-    
+
     /**
      * @return the array of enabled domains as a comma-separated list in a single String.
-     * If no domains are enabled then this should be an empty String.  
+     * If no domains are enabled then this should be an empty String.
      */
     public static String getEnabledDomainsString(){
     	String doms = "";
@@ -119,7 +131,7 @@ public class Domains {
     	}
     	return doms;
     }
-    
+
     public static boolean isDomainSupported(String domainname){
     	try{
     		String ucname = domainname.toUpperCase();
@@ -131,19 +143,19 @@ public class Domains {
     	}
     	return false;
     }
-    
-	
+
+
 	/**
 	 * Enable specified test domains and disable those not specified.
 	 * We attempt to enable the domains in the order listed in domains.
 	 * @param domains -- case-insensitive string of domains to enable.
-	 * Examples:<br> 
+	 * Examples:<br>
 	 * "Java": Enables Java domain and disables all others.<br>
 	 * "Java, HTML": Enables Java and Html domains--in that order--and disables all others.<br>
 	 * @see #clearEnabledDomains()
 	 * @see #addEnabledDomain(String)
 	 */
-    public static void enableDomains(String domains){ 
+    public static void enableDomains(String domains){
         try{
         	String ucdomains = domains.toUpperCase();
 	        int ijava = ucdomains.indexOf(JAVA_DOMAIN);
@@ -178,25 +190,25 @@ public class Domains {
         }catch(Exception x){
         	Log.info("Ignoring Exception in Domains.enableDomains while processing: "+ domains, x);
         }
-    }        	
+    }
 
     /**
 	 * Enable a specified test domain.
-	 * @param case-insensitive name of test domain to enable.
+	 * @param domainname String, case-insensitive name of test domain to enable.
 	 * @throws IllegalArgumentException
 	 */
-    public static void enableDomain(String domainname){ addEnabledDomain(domainname);}        	
-	
+    public static void enableDomain(String domainname){ addEnabledDomain(domainname);}
+
 	/**
 	 * Disable a specified test domain.
-	 * @param case-insensitive name of test domain to disable.
+	 * @param domainname String, case-insensitive name of test domain to disable.
 	 * @throws IllegalArgumentException
 	 */
     public static void disableDomain(String domainname){ removeEnabledDomain(domainname);}
 
 	/**
 	 * Returns true if the specified test domain is enabled.
-	 * @param case-insensitive name of test domain to check.
+	 * @param domainname String, case-insensitive name of test domain to check.
 	 * @throws IllegalArgumentException
 	 */
 	public static boolean isDomainEnabled(String domainname){
@@ -215,7 +227,7 @@ public class Domains {
     	catch(Exception x){}
     	throw new IllegalArgumentException("Invalid domain:"+ domainname );
 	}
-	        	
+
 	/**
 	 * @return boolean true if activeX is Enabled.
 	 */
@@ -298,7 +310,7 @@ public class Domains {
 			removeEnabledDomain(HTML_DOMAIN);
 		Log.info("Domains Html domain enabled: "+ isHtmlEnabled());
 	}
-	
+
 	/**
 	 * @param enabled if true, enable Dojo domain; otherwise disable it.
 	 */

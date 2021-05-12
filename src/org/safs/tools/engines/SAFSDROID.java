@@ -1,33 +1,36 @@
-/** Copyright (C) SAS Institute All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.tools.engines;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 
+import org.safs.Log;
 import org.safs.TestRecordHelper;
-import org.safs.android.auto.lib.Process2;
 import org.safs.tools.CaseInsensitiveFile;
+import org.safs.tools.consoles.ProcessCapture;
 import org.safs.tools.drivers.DriverConstant;
 import org.safs.tools.drivers.DriverInterface;
 import org.safs.tools.stringutils.StringUtilities;
-import org.safs.tools.consoles.ProcessCapture;
-import org.safs.tools.consoles.ProcessConsole;
-
-import org.safs.Log;
-
-import com.sun.jna.Platform;
 
 /**
  * A wrapper to Google's Android Automation SAFS engine--the "Droid" engine.
- * This engine can only be used if you have a valid install of the Android Developer 
- * SDK tools (>=r16)--initially on a Windows computer, but intended to support Unix/Mac 
+ * This engine can only be used if you have a valid install of the Android Developer
+ * SDK tools (>=r16)--initially on a Windows computer, but intended to support Unix/Mac
  * systems as well.
  * <p>
  * This is intended for testing of Android Smartphone and Tablet applications.
@@ -38,7 +41,7 @@ import com.sun.jna.Platform;
  * {@link <a href="http://safsdev.sf.net/sqabasic2000/JSAFSFrameworkContent.htm#configfile">SAFSTID Config Files</a>}
  * for more information.
  * <p>
- * The Droid supported config file items are listed below.  Remember, this engine has only been tested on Windows, 
+ * The Droid supported config file items are listed below.  Remember, this engine has only been tested on Windows,
  * so all sample file paths are in Windows format:
  * <p>
  * <ul><pre>
@@ -82,9 +85,13 @@ public class SAFSDROID extends GenericEngine {
 	 * "SAFS/DROID" -- The name of this engine as registered with STAF.
 	 */
 	public static final String ENGINE_NAME = "SAFS/DROID";
-	
-	/** 
-	 * "org.safs.ios.JavaHook"  
+	/** '5.3.1' */ //ROBOTIUM 5.3.1
+	public static final String ENGINE_VERSION = "5.3.1";
+	/** 'The engine using Robotium to test Android mobile UI.' */
+	public static final String ENGINE_DESCRIPTION = "The engine using Robotium to test Android mobile UI.";
+
+	/**
+	 * "org.safs.ios.JavaHook"
 	 */
 	public static final String HOOK_CLASS       = "org.safs.android.DJavaHook";
 
@@ -98,15 +105,15 @@ public class SAFSDROID extends GenericEngine {
 	public static final String JVMARGS_OPTION         = "JVMARGS";
 	public static final String XBOOTCLASSPATH_OPTION  = "XBOOTCLASSPATH";
 	public static final String TIMEOUT_OPTION         = "TIMEOUT";
-	public static final int DEFAULT_INIT_TIMEOUT      = 120;	
+	public static final int DEFAULT_INIT_TIMEOUT      = 120;
 
 	/**
-	 * Default 0.  
-	 * A delay (in seconds) during shutdown allowing the remote engine process to complete 
+	 * Default 0.
+	 * A delay (in seconds) during shutdown allowing the remote engine process to complete
 	 * shutdown activities.
 	 */
 	int shutdown_delay_seconds = 0;
-	
+
 	/**
 	 * Constructor for SAFS/DROID.  Call launchInterface with an appropriate DriverInterface
 	 * before attempting to use this minimally initialized object.
@@ -114,6 +121,9 @@ public class SAFSDROID extends GenericEngine {
 	public SAFSDROID() {
 		super();
 		servicename = ENGINE_NAME;
+		productName = ENGINE_NAME;
+		version = ENGINE_VERSION;
+		description = ENGINE_DESCRIPTION;
 	}
 
 	/**
@@ -129,6 +139,7 @@ public class SAFSDROID extends GenericEngine {
 	 *
 	 * @see GenericEngine#launchInterface(Object)
 	 */
+	@Override
 	public void launchInterface(Object configInfo){
 		super.launchInterface(configInfo);
 
@@ -154,14 +165,14 @@ public class SAFSDROID extends GenericEngine {
 				}/***********************************************************/
 
 				Log.info(ENGINE_NAME +" attempting AUTOLAUNCH...");
-				
-				String array = "";				
+
+				String array = "";
 				String tempstr = null;
 
-				// JVM	
+				// JVM
 			    String jvm;
 			    String jrebin = null;
-			    try{ 
+			    try{
 			    	jrebin = getEmbeddedJVMBinPath().getCanonicalPath();
 			    	jvm = jrebin + File.separatorChar + "java";
 			    }
@@ -181,28 +192,28 @@ public class SAFSDROID extends GenericEngine {
 			    }
 		    	Log.generic(ENGINE_NAME +" using 'JVM' path: "+ jvm);
 			    array = jvm +" ";
-			    
+
 				// JVMARGS -- append unmodified, if present
 			    tempstr   = config.getNamedValue(DriverConstant.SECTION_SAFS_DROID, JVMARGS_OPTION);
-			    if (tempstr != null) { 
+			    if (tempstr != null) {
 			    	array += tempstr +" ";
 			    }
 
-		    	// XBOOTCLASSPATH 
+		    	// XBOOTCLASSPATH
 			    // separate RJ JVM needs some jars to be in CLASSPATH, append them to end of bootstrap classpath.
-			    // When java.exe calls rational_ft.jar using option -jar, the JVM only takes rational_ft.jar as its classpath. 
+			    // When java.exe calls rational_ft.jar using option -jar, the JVM only takes rational_ft.jar as its classpath.
 			    tempstr   = config.getNamedValue(DriverConstant.SECTION_SAFS_DROID, XBOOTCLASSPATH_OPTION);
 			    if(tempstr != null){
-		    		array += "-Xbootclasspath/a:" + makeQuotedString(tempstr) + " ";	
-			    }			    
-			    
+		    		array += "-Xbootclasspath/a:" + makeQuotedString(tempstr) + " ";
+			    }
+
 			    //-Dsafs.config.paths=
 			    String cpaths = config.getConfigurePaths();
 			    cpaths = DriverConstant.PROPERTY_SAFS_CONFIG_PATHS +"="+ cpaths;
 			    //wrap in quotes if embedded space exists
 			    if (cpaths.indexOf(" ")>0) cpaths = "\""+ cpaths +"\"";
 			    array += "-D"+ cpaths +" ";
-			
+
 				// HOOK script
 				String hook = HOOK_CLASS;
 			    tempstr   = config.getNamedValue(DriverConstant.SECTION_SAFS_DROID, HOOK_OPTION);
@@ -276,22 +287,23 @@ public class SAFSDROID extends GenericEngine {
 	 * We will wait {@link #shutdown_delay_seconds} seconds.
 	 */
 	@Override
-	protected void postShutdownServiceDelay(){		
+	protected void postShutdownServiceDelay(){
 		long now = System.currentTimeMillis();
 		long secs = shutdown_delay_seconds * 1000;
 		long end = now + secs;
 		while(System.currentTimeMillis() < end){
 			try{Thread.sleep(secs);}
 			catch(Exception x){
-				secs = 500; 
+				secs = 500;
 				// in-case we got interrupted before the actual timeout
 				// we don't want to wait another full N secs
 			}
-		}		
+		}
 	}
-	
+
 	// this may be more correctly refactored into the GenericEngine superclass.
 	/** Override superclass to catch unsuccessful initialization scenarios. */
+	@Override
 	public long processRecord(TestRecordHelper testRecordData) {
 		if (running) return super.processRecord(testRecordData);
 		running = isToolRunning();

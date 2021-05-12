@@ -1,3 +1,20 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.selenium.spc;
 
 import java.awt.AWTException;
@@ -19,11 +36,11 @@ import com.thoughtworks.selenium.Selenium;
 import com.thoughtworks.selenium.SeleniumException;
 
 /**
- * 
+ *
  * AUG 10, 2012		(Lei Wang) Update method highlight(): try to highlight element by id or name.
  */
 public class SPC extends SeleniumGUIUtilities{
-	
+
 	public static File temp_user_extensions = null;
 	private SPCGUI spcGUI;
 	private Selenium selenium;
@@ -37,11 +54,11 @@ public class SPC extends SeleniumGUIUtilities{
 		runningWindowChecker = false;
 		runningGetAllElements = false;
 	}
-	
+
 	public void setGUI(SPCGUI spcgui){
 		spcGUI = spcgui;
 	}
-	
+
 	public void initializeSelenium(String browser, String url){
 
 		try{
@@ -52,9 +69,9 @@ public class SPC extends SeleniumGUIUtilities{
 		} catch (Exception e){
 			//maybe we just use "*iexplore" as the default browser
 			if(browser.equalsIgnoreCase("*iexplore")){
-				browser = "*custom C:/Program Files/Internet Explorer/IEXPLORE.EXE";//This can't work in Win7				
+				browser = "*custom C:/Program Files/Internet Explorer/IEXPLORE.EXE";//This can't work in Win7
 			}else{
-				browser = "*iexplore";				
+				browser = "*iexplore";
 			}
 			selenium = new DefaultSelenium("localhost", RemoteControlConfiguration.DEFAULT_PORT, browser, url);
 			selenium.start();
@@ -65,10 +82,10 @@ public class SPC extends SeleniumGUIUtilities{
 
 		domParser = initDocumentParser(selenium);
 		clearFramesCache();
-		
+
 //		String xpathBoundsSeparator = selenium.getEval("SAFSGetBoundsSeparator();");
 		String xpathBoundsSeparator = domParser.getBoundsSeparator();
-		
+
 		if(xpathBoundsSeparator!=null && !xpathBoundsSeparator.trim().equals("")){
 			Log.debug("Selenium SPC get xpathBoundsSeparator: "+xpathBoundsSeparator);
 			setXpathBoundsSeparator(xpathBoundsSeparator.trim());
@@ -76,14 +93,14 @@ public class SPC extends SeleniumGUIUtilities{
 		Log.debug("Using browser "+browser);
 
 	}
-	
+
 	public SeleniumJavaHook getHook() {
 		return hook;
 	}
 	public void setHook(SeleniumJavaHook hook) {
 		this.hook = hook;
 	}
-	
+
 	public String getXpathBoundsSeparator() {
 		return xpathBoundsSeparator;
 	}
@@ -102,15 +119,16 @@ public class SPC extends SeleniumGUIUtilities{
 		} else {
 			t2 = title;
 		}
-		
+
 		(new Thread(){
+			@Override
 			public void run(){
 				runningGetAllElements = true;
 				Log.info("Selenium SPC getAllElements set runningGetAllElements TRUE...");
 				SGuiObject sgo = getWindowIdFromTitle(selenium, t2);
 				selectWindow(selenium, sgo.getWindowId(), 1);
 //				setWindowFocus(".*"+selenium.getTitle()+".*");
-				
+
 				// (Carl Nagle) which to use?
 //				String eval = selenium.getEval("SPCgetSSBounds();");
 				//TODO getSSBounds() NOT implemented yet.
@@ -118,9 +136,9 @@ public class SPC extends SeleniumGUIUtilities{
 				Log.info("SPCgetSSBounds="+eval);
 				//Rectangle htmlbounds = getComponentBounds("//HTML[1]", selenium);
 				//Log.info("SPC.getComponentBounds="+ htmlbounds);
-				
+
 				String [] bounds = null;
-				try{ 
+				try{
 					bounds = eval.split(SPC.this.getXpathBoundsSeparator());
 					int x = Integer.parseInt(bounds[0]);
 					int y = Integer.parseInt(bounds[1]);
@@ -128,7 +146,7 @@ public class SPC extends SeleniumGUIUtilities{
 					int h = Integer.parseInt(bounds[3]);
 					try {
 						Robot robot = new Robot();
-						ii = robot.createScreenCapture(new Rectangle(x,y,w,h));						
+						ii = robot.createScreenCapture(new Rectangle(x,y,w,h));
 					} catch (AWTException e) {
 						Log.debug("Selenium SPC Robot error,", e);
 					}
@@ -154,13 +172,13 @@ public class SPC extends SeleniumGUIUtilities{
 				}else{
 					Log.debug("SPC has been interrupted.");
 				}
-				
+
 				selenium.windowFocus();
 				selenium.windowMaximize();
 			}
 		}).start();
 	}
-	
+
 	public String getXpath(String title, String rec){
 		String id = getWindowIdFromTitle(selenium, title).getWindowId();
 		selectWindow(selenium, id, 1);
@@ -170,7 +188,7 @@ public class SPC extends SeleniumGUIUtilities{
 			xpath = guiObj.getLocator();
 		return xpath;
 	}
-	
+
 	public BufferedImage getCurrentPreview(){
 		return ii;
 	}
@@ -187,7 +205,7 @@ public class SPC extends SeleniumGUIUtilities{
 			hook = null;
 		}
 	}
-	
+
 	public String [] getWindows(){
 		Log.info("Selenium SPC getWindows blocked by runningGetAllElements.");
 		while(runningGetAllElements);
@@ -212,7 +230,7 @@ public class SPC extends SeleniumGUIUtilities{
 						// try every second for up to 90 seconds
 						while((!windowLoaded)&&(timeout < 90)){
 							timeout++;
-							windowLoaded = selectWindow(selenium, window, 1);						
+							windowLoaded = selectWindow(selenium, window, 1);
 						}
 						if(windowLoaded){
 							titles[i] = selenium.getTitle();
@@ -226,7 +244,7 @@ public class SPC extends SeleniumGUIUtilities{
 		runningWindowChecker=false;
 		return titles;
 	}
-	
+
 	/**
 	 * Retrieve the Element Info, which is made up of:
 	 * <p><ol>
@@ -243,12 +261,12 @@ public class SPC extends SeleniumGUIUtilities{
 		HtmlFrameComp precedingFrame = null;
 		String xpathEnd = "";
 		String frameURL = null;
-		
+
 		try{
 			precedingFrame = navigateFrames(domParser.getUrl(),xpath,selenium);
 			xpathEnd = precedingFrame.getChildXpath();
 			frameURL = precedingFrame.getSrc();
-			
+
 			if(frameURL==null || frameURL.equals("")){
 				//if no url is returned, we assign the root url to it.
 				frameURL = domParser.getUrl();
@@ -259,7 +277,7 @@ public class SPC extends SeleniumGUIUtilities{
 		//TODO need to convert the related javascript to JAVA
 		return selenium.getEval("SPCgetElementInfo('"+xpathEnd+"');").split(";;;;");
 	}
-	
+
 	//This method will return Recognition String without the component name
 	public String getRobotRecognition(String xpath){
 		return domParser.getRobotRecognition(xpath,false);
@@ -274,7 +292,7 @@ public class SPC extends SeleniumGUIUtilities{
 		Log.debug("SELENIUM__SPC.getRobotRecognitionWithName(): "+xpath);
 		return domParser.getRobotRecognition(xpath,true);
 	}
-	
+
 	public void cancelSearch() {
 		try{
 //			selenium.getEval("interrupt = true;");
@@ -288,14 +306,14 @@ public class SPC extends SeleniumGUIUtilities{
 		String xpath = SeleniumGUIUtilities.normalizeXPath(node.xpath);
 		String scriptCommand = null;
 		boolean highlighted = true;
-		
+
 		selenium.windowFocus();
 		try{
 			//Use selenium API to highlight a component, the highlight just flash for a moment
 			//Then the highlight disappear, NOT good.
 //			selenium.focus(xpath);
 //			selenium.highlight(xpath);
-			
+
 			//We can change the hmtl page style to draw rectangle for highlight, BUT
 			//It seems that there is a problem, in the injected javascript,
 			//the document is the selenium playback web page, not the web page to be tested.
@@ -305,18 +323,18 @@ public class SPC extends SeleniumGUIUtilities{
 //			selenium.getEval("window.document.body.style.border='5px solid red';"); //it really DO work on the test web page;
 			//While if call injected javascript, it still fail, not know why ????
 			//selenium.getEval(" highlight('"+xpath+"');");
-			
+
 			//So I decide to get the function definition as a string, and pass it directly to selenium through API getEval()
 			scriptCommand = JavaScriptFunctions.getSAFSgetElementFromXpathFunction();
 			scriptCommand += JavaScriptFunctions.getHighlightFunction();
-			
+
 			//JSAFSBefore we highlight the component via JAVASCRIPT, we need to navigate to the right frame;
 			//and we need get the XPATH without frames
 			HtmlFrameComp precedingFrame = navigateFrames(domParser.getUrl(), xpath, selenium);
 			String lastPartXpath = precedingFrame.getChildXpath();
-			
+
 //			selenium.getEval(JavaScriptFunctions.setJavaScriptLogLevel(JavaScriptFunctions.LOG_LEVEL_INFO));
-			try{			
+			try{
 				Log.debug("Highlight by xpath: '"+lastPartXpath+"'");
 				selenium.getEval(scriptCommand+" highlight('"+lastPartXpath+"');");
 			}catch(Exception e){
@@ -325,14 +343,14 @@ public class SPC extends SeleniumGUIUtilities{
 					selenium.getEval(scriptCommand+" highlight('"+node.getId()+"');");
 				}catch(Exception e1){
 					Log.debug("Highlight by name: '"+node.getName()+"'");
-					selenium.getEval(scriptCommand+" highlight('"+node.getName()+"');");					
+					selenium.getEval(scriptCommand+" highlight('"+node.getName()+"');");
 				}
 			}
 		}catch(Exception e){
 			Log.warn(e.getMessage());
 			highlighted=false;
 		}
-		
+
 		return highlighted;
 	}
 

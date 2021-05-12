@@ -1,3 +1,35 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
+/**
+ * Logs for developers, not published to API DOC.
+ *
+ * History:
+ * @author Carl Nagle DEC 14, 2005 Refactored with DriverConfiguredSTAFInterface superclass
+ * @author Carl Nagle JUL 28, 2009 Enhanced shutdown operations for stability.
+ *         Lei Wang AUG 23, 2010 Modify method logMessage(): call logMessage of its super class.
+ *         Lei Wang APR 27, 2012 Modify method shutdownService(): reset all the semaphores of hook.
+ *         Lei Wang MAY 03, 2012 Modify method shutdownService(): wait for "shutdown" semaphore and reset it.
+ *                             Add method resetShutdownSemaphore(): check the condition before resetting "shutdown" semaphore.
+ *                             Modify method launchInterface(): Try to reset "shutdown" semaphore during of launch engine.
+ *         Lei Wang NOV 25, 2014 Copy method deduceFile() from org.safs.Processor: so that the same logic will be used
+ *                                 to deduce test/bench file name.
+ *         Lei Wang APR 19, 2018 Implement the methods in Versionable interface.
+ */
 package org.safs.tools.engines;
 
 import java.io.File;
@@ -27,24 +59,15 @@ import org.safs.tools.logs.UniqueStringMessageInfo;
 
 /**
  * @author Carl Nagle DEC 14, 2005 Refactored with DriverConfiguredSTAFInterface superclass
- * @author Carl Nagle JUL 28, 2009 Enhanced shutdown operations for stability.
- *         LeiWg  AUG 23, 2010 Modify method logMessage(): call logMessage of its super class.
- *         Lei Wang APR 27, 2012 Modify method shutdownService(): reset all the semaphores of hook.
- *         Lei Wang MAY 03, 2012 Modify method shutdownService(): wait for "shutdown" semaphore and reset it.
- *                             Add method resetShutdownSemaphore(): check the condition before resetting "shutdown" semaphore.
- *                             Modify method launchInterface(): Try to reset "shutdown" semaphore during of launch engine.
- * <br>   NOV 25, 2014    (Lei Wang) Copy method deduceFile() from org.safs.Processor: so that the same logic will be used
- *                                 to deduce test/bench file name.                          
- *         
  */
 public class GenericEngine extends DriverConfiguredSTAFInterfaceClass implements EngineInterface, RuntimeDataInterface, ITestRecordStackable {
 
 	/** The Java Process running the engine. **/
 	protected Process process = null;
-	
+
 	/** The Console handling IO streams for the engine process. **/
 	protected GenericProcessConsole console = null;
-	
+
 	/**
 	 * Stores the data on the input record we are to process.
 	 */
@@ -52,7 +75,7 @@ public class GenericEngine extends DriverConfiguredSTAFInterfaceClass implements
 
 	/** The ITestRecordStackable used to store 'Test Record' in a FILO. */
 	protected ITestRecordStackable testrecordStackable = new DefaultTestRecordStackable();
-	
+
 	/**
 	 * Constructor for GenericEngine
 	 */
@@ -64,34 +87,36 @@ public class GenericEngine extends DriverConfiguredSTAFInterfaceClass implements
 
 	/***************************************************************************
 	 * Convenience routine for building the appropriate MessageInfo and logging
-	 * a message to our active log.  Consult the AbstractLogFacility for valid 
+	 * a message to our active log.  Consult the AbstractLogFacility for valid
 	 * msgtype values.
-	 * 
-	 * @see org.safs.logging.AbstractLogFacility 
+	 *
+	 * @see org.safs.logging.AbstractLogFacility
 	 */
 	protected void logMessage(String msg, String msgdescription, int msgtype){
 		UniqueStringMessageInfo msgInfo = new UniqueStringMessageInfo(
 											  testRecordData.getFac(),
 											  msg, msgdescription, msgtype);
-											  
+
 		logMessage(msgInfo);
 	}
-	
+
 
 	/**
 	 * @see EngineInterface#getEngineName()
 	 */
+	@Override
 	public String getEngineName() {
 		return servicename;
 	}
 
 	/**
 	 * Initiate the event-driven protocol to send the test record to the engine.
-	 * All official engines conform to this protocol.  So this function rarely 
+	 * All official engines conform to this protocol.  So this function rarely
 	 * needs to be overridden..
 	 * <p>
 	 * @see EngineInterface#processRecord()
 	 */
+	@Override
 	public long processRecord(TestRecordHelper testRecordData) {
 		this.testRecordData = testRecordData;
 		long rc = DriverConstant.STATUS_SCRIPT_NOT_EXECUTED;
@@ -104,19 +129,20 @@ public class GenericEngine extends DriverConfiguredSTAFInterfaceClass implements
 		}
 		catch(SAFSException se){
 			Log.error(se.getMessage());
-		}		
+		}
 		return rc;
 	}
 
 	/**
 	 * Typically expects a DriverInterface object for initialization.
 	 * Subclasses should indicate if an alternative type of object is required.
-	 * 
+	 *
 	 * This method will try to reset the "shutdown" semaphore remained by last hook shutdown.
-	 * 
+	 *
 	 * @see DriverConfiguredSTAFInterfaceClass#launchInterface(Object)
 	 * @see org.safs.tools.drivers.DriverInterface
 	 */
+	@Override
 	public void launchInterface(Object configInfo) {
 		super.launchInterface(configInfo);
 		//Before the driver can call processRecord(), we try to reset the "shutdown"
@@ -128,11 +154,12 @@ public class GenericEngine extends DriverConfiguredSTAFInterfaceClass implements
 	 * Verifies a STAF tool matching our engine name is running.
 	 * @see GenericToolsInterface#isToolRunning()
 	 */
+	@Override
 	public boolean isToolRunning() {
 		try{
 			running = staf.isToolAvailable(getEngineName());
 		}
-		catch(Exception x){ 
+		catch(Exception x){
 			running = false;
 		}
 		return running;
@@ -140,10 +167,10 @@ public class GenericEngine extends DriverConfiguredSTAFInterfaceClass implements
 
 	/**
 	 * Wraps the privided text in double-quotes *if* the text contains a space.
-	 * @return provided text item unmodified if null or no spaces found.  New string 
+	 * @return provided text item unmodified if null or no spaces found.  New string
 	 *         wrapped in quotes if space(s) found.
 	 */
-	protected String makeQuotedString(String text){		
+	protected String makeQuotedString(String text){
 		try{
 			if (text.indexOf(' ') >= 0) return "\""+text+"\"";
 		}catch(NullPointerException npx){;}
@@ -155,11 +182,11 @@ public class GenericEngine extends DriverConfiguredSTAFInterfaceClass implements
 	 * Wraps valid file path in double-quotes if necessary.
 	 * @param path to file or directory. Can be relative to the project root directory.
 	 * @param isFile true if the path should be a file, instead of a directory.
-     * @return valid path quoted ONLY if it contains a space and was found 
+     * @return valid path quoted ONLY if it contains a space and was found
      *         to be a valid file or dir in the file system.  Otherwise,
      *         we return null.
 	 */
-	protected String makeQuotedPath(String path, boolean isFile){		
+	protected String makeQuotedPath(String path, boolean isFile){
 		String newpath = StringUtils.getTrimmedUnquotedStr(path);
 		File file = new CaseInsensitiveFile(newpath).toFile();
 
@@ -170,13 +197,13 @@ public class GenericEngine extends DriverConfiguredSTAFInterfaceClass implements
 		}
 		if (isFile)
 		    return (file.isFile())? makeQuotedString(file.getPath()):null;
-		
-	    return (file.isDirectory())? makeQuotedString(file.getPath()):null;		
+
+	    return (file.isDirectory())? makeQuotedString(file.getPath()):null;
 	}
 
 
-	/** 
-	 * Sets TRD statuscode to the provided status and returns the same. 
+	/**
+	 * Sets TRD statuscode to the provided status and returns the same.
 	 * This is a convenience routine to do both in a single call.
 	 * <p>
 	 * <ul>return setTRDStatus(trd, status);</ul>
@@ -185,11 +212,12 @@ public class GenericEngine extends DriverConfiguredSTAFInterfaceClass implements
 		trd.setStatusCode((int)status);
 		return status;
 	}
-		
+
 
 	/**
 	 * @see GenericToolsInterface#reset()
 	 */
+	@Override
 	public void reset() {
 	}
 
@@ -197,7 +225,7 @@ public class GenericEngine extends DriverConfiguredSTAFInterfaceClass implements
 	 * Normally called on failure to execute an IBT command.
 	 * Gets the current IBT screen snapshot and saves it to file in the Datapool\Test directory.
 	 * Saves it with testRecordData filename and linenumber info with a timestamp.
-	 * Note: the output file format is normally JPG.  However, if ImageUtils.debug is set to true 
+	 * Note: the output file format is normally JPG.  However, if ImageUtils.debug is set to true
 	 * then the image format will be BMP.
 	 * @param the testRecordData containing the test FileID and test LineNumber for unique image naming.
 	 * @return full filepath to saved snapshot
@@ -205,7 +233,7 @@ public class GenericEngine extends DriverConfiguredSTAFInterfaceClass implements
 	protected String saveTestRecordScreenToTestDirectory(TestRecordData testRecordData){
 		String testshot = "";
       SimpleDateFormat time = new SimpleDateFormat("hh.mm.ss.SSS");
-		try{ 
+		try{
 			testshot = staf.getVariable(STAFHelper.SAFS_VAR_TESTDIRECTORY);
 			if ((testshot==null)||(testshot.length()==0)) return "";
 			File file = new CaseInsensitiveFile(testshot).toFile();
@@ -213,9 +241,9 @@ public class GenericEngine extends DriverConfiguredSTAFInterfaceClass implements
 				throw new java.io.FileNotFoundException(file.getPath());
 			testshot += File.separator + testRecordData.getFileID()+
 			           ".Line."+ testRecordData.getLineNumber()    +
-			           "_Time_"+ time.format(new Date())+ 
+			           "_Time_"+ time.format(new Date())+
 			           (ImageUtils.debug ? ".bmp":".jpg");
-			
+
 			file = new CaseInsensitiveFile(testshot).toFile();
 			testshot = file.getAbsolutePath();
 			ImageUtils.saveImageToFile(ImageUtils.getScreenImage(), file);
@@ -225,26 +253,27 @@ public class GenericEngine extends DriverConfiguredSTAFInterfaceClass implements
 		}
 		return testshot;
 	}
-			
+
 	/**
-	 * Shutdown the Engine.  
+	 * Shutdown the Engine.
 	 * <p>
-	 * All official engines conform to the "SHUTDOWN_HOOK" TestRecordData method 
+	 * All official engines conform to the "SHUTDOWN_HOOK" TestRecordData method
 	 * to initiate shutdown.  So, this function rarely needs to be overridden.
 	 * <p>
-	 * Following the confirmation that the service or engine is no longer 'running', 
-	 * this implementation will call {@link #postShutdownServiceDelay()} which is intended  
-	 * to allow subclasses to delay final shutdown of the process by an arbitrary length 
+	 * Following the confirmation that the service or engine is no longer 'running',
+	 * this implementation will call {@link #postShutdownServiceDelay()} which is intended
+	 * to allow subclasses to delay final shutdown of the process by an arbitrary length
 	 * of time while internal shutdown activities are completed.
 	 * <p>
 	 * This implementation then resets "running" to false.
 	 * <p>
-	 * Unregistering staf and nulling superclass objects occurs in the finalize() 
+	 * Unregistering staf and nulling superclass objects occurs in the finalize()
 	 * method of the superclass.
 	 * <p>
 	 * @param aname is not used directly in this implementation.
 	 * @see DriverConfiguredSTAFInterfaceClass#shutdownService(String)
 	 */
+	@Override
 	protected void shutdownService(String aname){
 		if (console!=null) {
 			if (testRecordData == null) testRecordData = new TestRecordHelper();
@@ -265,12 +294,12 @@ public class GenericEngine extends DriverConfiguredSTAFInterfaceClass implements
 			}
 			catch(Exception x){;}
 		}
-		
+
 		postShutdownServiceDelay();
-		
+
 		//Try to reset the "shutdown" semaphore
 		waitHookShutdownAndReset(5);
-		
+
 		running = false;
 		try{console.shutdown();}
 		catch(Exception x){Log.debug("Console shutdown failure "+x.getClass().getSimpleName());}
@@ -279,32 +308,32 @@ public class GenericEngine extends DriverConfiguredSTAFInterfaceClass implements
 		console = null;
 		process = null;
 	}
-	
-	/** 
-	 * Called internally by {@link #shutdownService(String)}.   
+
+	/**
+	 * Called internally by {@link #shutdownService(String)}.
 	 * <p>
 	 * This method is intended to wait for the "shutdown" semaphore post by hook when it stops,
 	 * then try to reset the "shutdown" semaphore.
 	 * If we don't reset the "shutdown" semaphore, the driver may see this
 	 * semaphore and consider that the hook is shutdown and return to try other engine/hook.
-	 * 
+	 *
 	 * This method can only try its best to reset "shutdown" semaphore, but this is not guaranteed.
-	 * 
+	 *
 	 * <p>
 	 * @param timeoutInSeconds, int, the timeout in seconds to wait for the "shutdown" semaphore
 	 */
 	protected void waitHookShutdownAndReset(int timeoutInSeconds){
 		String debugmsg = getClass().getName()+".waitHookShutdownToReset(): ";
-		
+
 		//We just to reset all semaphores, especially the semaphore HOOKNAMEShutdown
 		//The risk is that if "service name" is the same as the corresponding "hook name"
 		try {
-			
+
 			//we should wait for the "shutdown" semaphore to make sure that hook has post it before
 			//we reset it.
 			boolean shutdown = false;
 			String shutdownEvent = STAFHelper.getEventShutdownString(servicename);
-			
+
 	        Log.debug("Waiting for EVENTS "+ shutdownEvent);
 	        int attempt = 0;
 	        int maxTries = timeoutInSeconds*10;
@@ -321,20 +350,20 @@ public class GenericEngine extends DriverConfiguredSTAFInterfaceClass implements
 	        		}
 	        	}catch(Exception x){}
 	        }
-	        
+
 	        if(!resetShutdownSemaphore()){
 	        	Log.debug(debugmsg+"Fail to reset all semaphores for hook '"+servicename+"'");
 	        }
-	        
+
 		} catch (SAFSException e) {
 			Log.debug(debugmsg+"Fail to wait 'shutdown' semaphore for hook '"+servicename+"'; Exception="+e.getMessage());
 		}
 	}
-	
-	/**  
+
+	/**
 	 * <p>
 	 * This method is intended to reset the "shutdown" semaphore post hook when it stops.
-	 * 
+	 *
 	 * Before we reset the "shutdown" semaphore, we should test the condition for resetting. The
 	 * condition is that only "shutdown" is "posted", the others are "reset".
 	 * <p>
@@ -344,7 +373,7 @@ public class GenericEngine extends DriverConfiguredSTAFInterfaceClass implements
 		try{
 			Log.debug(debugmsg+"Try to Reset all semaphores for hook '"+servicename+"'");
 			staf.resetHookEvents(servicename);
-			
+
 			//We check that only "shutdown" semaphore's state is "posted", other semaphores's state are "reset"
 			if(staf.isOnlyShutdownPosted(servicename)){
 				Log.debug(debugmsg+"We reset '"+STAFHelper.SAFS_EVENT_SHUTDOWN+"' for Service '"+servicename+"' ");
@@ -357,24 +386,25 @@ public class GenericEngine extends DriverConfiguredSTAFInterfaceClass implements
 					Log.debug(debugmsg+event);
 				}
 			}
-			
+
 			return true;
 		} catch (SAFSException e) {
 			Log.debug(debugmsg+"Fail to reset all semaphores for hook '"+servicename+"'; Exception="+e.getMessage());
 			return false;
 		}
 	}
-	
+
 	/**
-	 * Called internally by {@link #shutdownService(String)}.   
+	 * Called internally by {@link #shutdownService(String)}.
 	 * <p>
-	 * This method is intended to allow subclasses to delay final shutdown of the process by 
+	 * This method is intended to allow subclasses to delay final shutdown of the process by
 	 * an arbitrary length of time while internal shutdown activities are completed.
 	 * <p>
 	 * This default implementation provides no delay and immediately returns.
 	 */
 	protected void postShutdownServiceDelay(){ return;}
-	
+
+	@Override
 	public boolean setVariable(String var, String val) throws SAFSException {
 		if(staf==null){
 			Log.error("STAFHelper is null, can't set variable!");
@@ -383,6 +413,7 @@ public class GenericEngine extends DriverConfiguredSTAFInterfaceClass implements
 		return staf.setVariable(var, val);
 	}
 
+	@Override
 	public String getVariable(String var) throws SAFSException {
 		if(staf==null){
 			Log.error("STAFHelper is null, can't get variable!");
@@ -413,11 +444,11 @@ public class GenericEngine extends DriverConfiguredSTAFInterfaceClass implements
 	}
 	/**
 	 * Deduce the absolute full path to a project-relative file.
-	 * @param filename, String, the test file name.  The path is ALWAYS considered relative 
-	 * to the project root directory regardless of the absence or presence of File.separators 
+	 * @param filename, String, the test file name.  The path is ALWAYS considered relative
+	 * to the project root directory regardless of the absence or presence of File.separators
 	 * unless the file is already an absolute path.
 	 * @return File, the absolute full path bench file.
-	 * @throws SAFSException 
+	 * @throws SAFSException
 	 * @see {@link #deduceFile(String, int)}
 	 */
 	protected File deduceProjectFile(String filename) throws SAFSException{
@@ -430,16 +461,17 @@ public class GenericEngine extends DriverConfiguredSTAFInterfaceClass implements
 			String itemName) throws SAFSException {
 		return getCoreInterface().getAppMapItem(appMapId, sectionName, itemName);
 	}
-	
+
 	/**
 	 * <p>
 	 * Push the current 'test record' into the Stack before the execution of a keyword.
 	 * This should be called after the 'test record' is properly set.
 	 * </p>
-	 * 
+	 *
 	 * @param trd TestRecordData, the test record to push into a stack
 	 * @see #popTestRecord()
 	 */
+	@Override
 	public void pushTestRecord(TestRecordData trd) {
 		testrecordStackable.pushTestRecord(trd);
 	}
@@ -450,23 +482,58 @@ public class GenericEngine extends DriverConfiguredSTAFInterfaceClass implements
 	 * After execution of a keyword, pop the test record from Stack and return is as the result.
 	 * Replace the class field 'Test Record' by that popped from the stack if they are not same.
 	 * </p>
-	 * 
+	 *
 	 * @see #pushTestRecord()
 	 * @return TestRecordData, the 'Test Record' on top of the stack
 	 */
+	@Override
 	public TestRecordData popTestRecord() {
 		String debugmsg = StringUtils.debugmsg(false);
 		DefaultTestRecordStackable.debug(debugmsg+"Current test record: "+StringUtils.toStringWithAddress(testRecordData));
-		
+
 		TestRecordData history = testrecordStackable.popTestRecord();
-		
+
 		if(!testRecordData.equals(history)){
 			DefaultTestRecordStackable.debug(debugmsg+"Reset current test record to: "+StringUtils.toStringWithAddress(history));
 			//The cast should be safe, as we push TestRecordHelper into the stack.
 			testRecordData = (TestRecordHelper) history;
 		}
-		
+
 		return history;
+	}
+
+	/** The version of this engine */
+	protected String productName = null;
+	/** The version of this engine */
+	protected String version = "1.0";
+	/** The description of this engine */
+	protected String description = "The Generic Engine";
+
+	@Override
+	public void setProductName(String productName) {
+		this.productName = productName;
+	}
+
+	@Override
+	public void setVersion(String version){
+		this.version = version;
+	}
+	@Override
+	public void setDescription(String desc){
+		this.description = desc;
+	}
+
+	@Override
+	public String getProductName(){
+		return productName==null? servicename:productName;
+	}
+	@Override
+	public String getVersion(){
+		return version;
+	}
+	@Override
+	public String getDescription(){
+		return description;
 	}
 }
 

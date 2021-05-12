@@ -1,25 +1,36 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs.tools.engines;
 
-import org.safs.SAFSException;
+import org.safs.Log;
 import org.safs.TestRecordHelper;
+import org.safs.tools.consoles.ProcessConsole;
 import org.safs.tools.drivers.DriverConstant;
 import org.safs.tools.drivers.DriverInterface;
-import org.safs.tools.consoles.ProcessConsole;
-
-import org.safs.Log;
-import org.safs.STAFHelper;
-import org.safs.staf.STAFProcessHelpers;
-import com.ibm.staf.STAFResult;
-import java.util.ArrayList;
 
 /**
  * A wrapper to the Mercury QuickTest Pro SAFS engine--the "QTP" engine.
- * This engine can only be used if you have a valid install of Mercury's 
+ * This engine can only be used if you have a valid install of Mercury's
  * QuickTest Pro product.
  * <p>
- * The default SAFSDRIVER Tool-Independent Driver (TID) does not provide for any 
- * command-line options to configure the Engine.  All configuration information must 
- * be provided in config files.  By default, these are SAFSTID.INI files.  See 
+ * The default SAFSDRIVER Tool-Independent Driver (TID) does not provide for any
+ * command-line options to configure the Engine.  All configuration information must
+ * be provided in config files.  By default, these are SAFSTID.INI files.  See
  * {@link <a href="http://safsdev.sf.net/doc/JSAFSFrameworkContent.htm#configfile">SAFSTID Config Files</a>}
  * for more information.
  * <p>
@@ -32,39 +43,47 @@ import java.util.ArrayList;
  * ;HOOK=C:\PathTo\AnyExecutable.EXT   (Alternate method of starting like via a .BAT file)
  * ;TIMEOUT=45                         (Timeout in seconds before issuing autolaunch failure)
  * </pre><p>
- * Note: The HOOK item can be a VBS script that will be used as an argument to the 
- * CSCRIPT.EXE executable for Windows Script Host.  This script is intended to use the QTP 
+ * Note: The HOOK item can be a VBS script that will be used as an argument to the
+ * CSCRIPT.EXE executable for Windows Script Host.  This script is intended to use the QTP
  * Automation Object Model to prepare and then launch QTP as desired by the tester.
  * <p>
  * The HOOK item can also be a valid full path to any other executable -- like a batch file (.BAT).
- * The value of HOOK in this case will be used "as is".  The Java Runtime.exec function will attempt 
- * to launch this, so whatever limitations placed by the Runtime.exec from Java apply.  Mostly this 
+ * The value of HOOK in this case will be used "as is".  The Java Runtime.exec function will attempt
+ * to launch this, so whatever limitations placed by the Runtime.exec from Java apply.  Mostly this
  * may only be an issue if spaces or tabs exist in the string.
  * <p>
  * We do use a ProcessConsole to keep the Process in, out, and err streams from filling up.
  * <p>
  * {@link <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/lang/Runtime.html#exec(java.lang.String)">Runtime.exec</a>}<br>
  * {@link <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/lang/Process.html">Runtime.exec Process</a>}<br>
- * 
+ *
  * <br/>@author Carl Nagle NOV 18, 2005 Modified CScript launch command for VBScript.
  * <br/>@author Carl Nagle DEC 14, 2005 Refactored with DriverConfiguredSTAFInterface superclass
  * @see org.safs.tools.consoles.ProcessConsole
  */
 public class SAFSQTP extends GenericEngine {
 
-	/** 
+	/**
 	 * "SAFS/QTP" -- The name of this engine as registered with STAF.
 	 */
 	static final String ENGINE_NAME            = "SAFS/QTP";
+	/** '5.5' */ //not known: QTP 5.5: First release: Released in 2001
+	public static final String ENGINE_VERSION = "5.5";
+	/** 'The engine using 'Mercury QuickTest Pro' to test  GUI.' */
+	public static final String ENGINE_DESCRIPTION = "The engine using 'Mercury QuickTest Pro' to test  GUI.";
+
 	static final String TIMEOUT_OPTION         = "TIMEOUT";
 
 	/**
-	 * Constructor for QTP.  Call launchInterface with an appropriate DriverInterface 
+	 * Constructor for QTP.  Call launchInterface with an appropriate DriverInterface
 	 * before attempting to use this minimally initialized object.
 	 */
 	public SAFSQTP() {
 		super();
 		servicename = ENGINE_NAME;
+		productName = ENGINE_NAME;
+		version = ENGINE_VERSION;
+		description = ENGINE_DESCRIPTION;
 	}
 
 	/**
@@ -76,29 +95,30 @@ public class SAFSQTP extends GenericEngine {
 	}
 
 	/**
-	 * Extracts configuration information and launches QTP initialization script 
+	 * Extracts configuration information and launches QTP initialization script
 	 * in a new process.
-	 * 
+	 *
      * <br/>@author Carl Nagle NOV 18, 2005 Modified CScript launch command for VBScript.
 	 * @see GenericEngine#launchInterface(Object)
 	 */
+	@Override
 	public void launchInterface(Object configInfo){
 		super.launchInterface(configInfo);
-		
-		try{ 
+
+		try{
 			// see if we are already running
 			// launch it if our config says AUTOLAUNCH=TRUE and it is not running
 			// otherwise don't AUTOLAUNCH it.
 			if( ! isToolRunning()){
-	
+
 				Log.info(ENGINE_NAME +" is not running. Evaluating AUTOLAUNCH...");
-				
+
 				//check to see if AUTOLAUNCH exists in ConfigureInterface
-				String setting = config.getNamedValue(DriverConstant.SECTION_SAFS_QTP, 
+				String setting = config.getNamedValue(DriverConstant.SECTION_SAFS_QTP,
            				                              "AUTOLAUNCH");
 
 				if (setting==null) setting = "";
-	
+
 				// launch it if we dare!
 				if ((setting.equalsIgnoreCase("TRUE"))||
 				    (setting.equalsIgnoreCase("YES")) ||
@@ -106,37 +126,37 @@ public class SAFSQTP extends GenericEngine {
 
 					Log.info(ENGINE_NAME +" attempting AUTOLAUNCH...");
 
-					String array;					
+					String array;
 					String tempstr;
 					String hookext;
 
-					// HOOK scrip 
-				    tempstr   = config.getNamedValue(DriverConstant.SECTION_SAFS_QTP, 
+					// HOOK scrip
+				    tempstr   = config.getNamedValue(DriverConstant.SECTION_SAFS_QTP,
 				         		      "HOOK");
 				    if ((tempstr == null)||(tempstr.length()<4)) {
 						Log.generic(ENGINE_NAME +" HOOK parameter is missing or invalid!");
 				    }
 				    else{
-						
+
 						hookext = tempstr.substring(tempstr.length()-3);
-						
+
 						if (hookext.equalsIgnoreCase("VBS")){
 					    	array = "CMD /C start cscript.exe //B //NoLogo "+ "\""+ tempstr +"\"";
 						}else{
 					    	array = tempstr;
 						}
-	
+
 						Log.info(ENGINE_NAME +" preparing to execute external process...");
 						Log.info(array);
-	
+
 					    // launch QTP
 						Runtime runtime = Runtime.getRuntime();
 						process = runtime.exec(array);
-						
+
 						console = new ProcessConsole(process);
 						Thread athread = new Thread(console);
 						athread.start();
-						
+
 						int timeout = 45;
 						int loop    = 0;
 						running = false;
@@ -148,18 +168,18 @@ public class SAFSQTP extends GenericEngine {
 						}catch(NumberFormatException nf){
 							Log.info(ENGINE_NAME +" ignoring invalid config info for TIMEOUT.");
 						}
-						
+
 						for(;((loop < timeout)&&(! running));loop++){
 							running = isToolRunning();
 							if(! running)
-							   try{Thread.sleep(1000);}catch(InterruptedException ix){}					
+							   try{Thread.sleep(1000);}catch(InterruptedException ix){}
 						}
-						
+
 						if(! running){
 							Log.error("Unable to detect running "+ ENGINE_NAME +
 							          " within timeout period!");
 							console.shutdown();
-							process.destroy();          
+							process.destroy();
 							return;
 						}
 						else{
@@ -179,15 +199,16 @@ public class SAFSQTP extends GenericEngine {
 			ENGINE_NAME +" requires a valid DriverInterface object for initialization!  "+
 			x.getMessage());
 		}
-	}		
+	}
 
 	// this may be more correctly refactored into the GenericEngine superclass.
 	/** Override superclass to catch unsuccessful initialization scenarios. */
+	@Override
 	public long processRecord(TestRecordHelper testRecordData) {
 		if (running) return super.processRecord(testRecordData);
 		running = isToolRunning();
 		if (running) return super.processRecord(testRecordData);
 		return DriverConstant.STATUS_SCRIPT_NOT_EXECUTED;
-	}	
+	}
 }
 

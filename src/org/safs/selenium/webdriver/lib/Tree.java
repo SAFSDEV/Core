@@ -1,13 +1,27 @@
 /**
  * Copyright (C) SAS Institute, All rights reserved.
- * General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 /**
  * History:
  *
  *  JAN 20, 2014    (DHARMESH4) Initial release.
  *  JUN 10, 2014    (Lei Wang) Implement keywords.
  *  OCT 16, 2015    (Lei Wang) Refector to create IOperable object properly.
+ *  NOV 30, 2017    (Lei Wang) Modified SapSelectable_Tree.expandItem(): expand also the last node.
  */
 package org.safs.selenium.webdriver.lib;
 
@@ -54,11 +68,13 @@ public class Tree extends Component implements ITreeSelectable{
 		initialize(treeview);
 	}
 
+	@Override
 	protected void castOperable(){
 		super.castOperable();
 		treeListable = (ITreeSelectable) anOperableObject;
 	}
 
+	@Override
 	protected IOperable createSAPOperable(){
 		String debugmsg = StringUtils.debugmsg(false);
 		ITreeSelectable operable = null;
@@ -67,6 +83,7 @@ public class Tree extends Component implements ITreeSelectable{
 		}
 		return operable;
 	}
+	@Override
 	protected IOperable createDefaultOperable(){
 		String debugmsg = StringUtils.debugmsg(false);
 		ITreeSelectable operable = null;
@@ -107,14 +124,17 @@ public class Tree extends Component implements ITreeSelectable{
 			super(parent);
 		}
 		//Just return true for now, as getSupportedClassNames() cannot return an approperiate array.
+		@Override
 		public boolean isSupported(WebElement element){
 			return true;
 		}
+		@Override
 		public String[] getSupportedClassNames() {
 			//TODO What kind of HTML-TAG/CSS-CLASS can be considered as a Tree??? Just let isSupported() return true for now.
 			return null;
 		}
 
+		@Override
 		public TreeNode[] getCacheableContent() throws SeleniumPlusException {
 			String debugmsg = StringUtils.debugmsg(false);
 			boolean setTimeoutLocally = false;
@@ -210,6 +230,7 @@ public class Tree extends Component implements ITreeSelectable{
 		 *
 		 * <b>Note:</b>The parameter matchIndex is not used yet here. Need to be considered. TODO<br>
 		 */
+		@Override
 		public TreeNode getMatchedElement(TextMatchingCriterion criterion) throws SeleniumPlusException {
 			String debugmsg = StringUtils.debugmsg(false);
 			TreeNode matchedNode = null;
@@ -280,6 +301,7 @@ public class Tree extends Component implements ITreeSelectable{
 			return matchedNode;
 		}
 
+		@Override
 		protected void showOnPage(Element element) throws SeleniumPlusException {
 			String debugmsg = StringUtils.debugmsg(false);
 			WDLibrary.checkNotNull(element);
@@ -301,6 +323,7 @@ public class Tree extends Component implements ITreeSelectable{
 		 * Expand the nodes (by double-click) from the root level by level.<br>
 		 * <b>Note:</b>The second parameter expandChildren is not used yet here.<br>
 		 */
+		@Override
 		protected void expandItem(TreeNode node, boolean expandChildren) throws SeleniumPlusException {
 			Stack<TreeNode> stack = new Stack<TreeNode>();
 			TreeNode parent = node;
@@ -328,6 +351,7 @@ public class Tree extends Component implements ITreeSelectable{
 		 * Collapse the nodes (by double-click).<br>
 		 * <b>Note:</b>The second parameter collpaseChildren is not used here.<br>
 		 */
+		@Override
 		protected void collapseItem(TreeNode node, boolean collpaseChildren) throws SeleniumPlusException {
 			if(node.isExpanded()){
 				Actions action = new Actions(SearchObject.getWebDriver());
@@ -338,6 +362,7 @@ public class Tree extends Component implements ITreeSelectable{
 			}
 		}
 
+		@Override
 		protected boolean verifyItemExpanded(TreeNode node) throws SeleniumPlusException {
 			//As default tree doesn't have an ID, during refresh 'css class' will be used to
 			//find the WebElement, but it very probably find a WRONG one.
@@ -347,6 +372,7 @@ public class Tree extends Component implements ITreeSelectable{
 			return super.verifyItemExpanded(node);
 		}
 
+		@Override
 		protected void verifyItemSelected(Element element) throws SeleniumPlusException {
 			//As default tree doesn't have an ID, during refresh 'css class' will be used to
 			//find the WebElement, but it very probably find a WRONG one.
@@ -365,10 +391,12 @@ public class Tree extends Component implements ITreeSelectable{
 			super(component);
 		}
 
+		@Override
 		public String[] getSupportedClassNames() {
 			return supportedClazzes;
 		}
 
+		@Override
 		public TreeNode[] getContent() throws SeleniumPlusException {
 			String debugmsg = StringUtils.debugmsg(false);
 			TreeNode root = null;
@@ -393,6 +421,7 @@ public class Tree extends Component implements ITreeSelectable{
 			return null;
 		}
 
+		@Override
 		protected void expandItem(TreeNode node, boolean expandChildren) throws SeleniumPlusException {
 			String debugmsg = StringUtils.debugmsg(false);
 
@@ -411,7 +440,7 @@ public class Tree extends Component implements ITreeSelectable{
 					parent = parent.getParent();
 				}
 
-				for(int i=nodeIds.size()-1;i>0;i--){
+				for(int i=nodeIds.size()-1;i>=0;i--){
 					//expand the ancestor nodes, do NOT expand their children
 					WDLibrary.executeScript(jsScript.toString(), nodeIds.get(i), false);
 				}
@@ -424,6 +453,7 @@ public class Tree extends Component implements ITreeSelectable{
 			}
 		}
 
+		@Override
 		protected void collapseItem(TreeNode node, boolean collpaseChildren) throws SeleniumPlusException {
 			String debugmsg = StringUtils.debugmsg(false);
 
@@ -443,6 +473,7 @@ public class Tree extends Component implements ITreeSelectable{
 			}
 		}
 
+		@Override
 		protected boolean verifyItemExpanded(TreeNode node) throws SeleniumPlusException {
 			String debugmsg = StringUtils.debugmsg(false);
 			WDLibrary.checkNotNull(node);
@@ -481,6 +512,7 @@ public class Tree extends Component implements ITreeSelectable{
 		 * @see #clickElement(Element, Keys, Point, int, int)
 		 * @see #showOnPage(Element)
 		 */
+		@Override
 		protected void verifyItemSelected(Element element) throws SeleniumPlusException {
 			String debugmsg = StringUtils.debugmsg(false);
 			WDLibrary.checkNotNull(element);
@@ -542,6 +574,7 @@ public class Tree extends Component implements ITreeSelectable{
 		 * @see #clickElement(Element, Keys, Point, int, int)
 		 * @see #verifyItemSelected(Element)
 		 */
+		@Override
 		protected void showOnPage(Element element) throws SeleniumPlusException {
 			String debugmsg = StringUtils.debugmsg(false);
 			WDLibrary.checkNotNull(element);
@@ -585,6 +618,7 @@ public class Tree extends Component implements ITreeSelectable{
 
 	}
 
+	@Override
 	public void selectItem(TextMatchingCriterion criterion, boolean verify, Keys key, Point offset, int mouseButtonNumber) throws SeleniumPlusException {
 		String debugmsg = StringUtils.debugmsg(false);
 
@@ -600,10 +634,12 @@ public class Tree extends Component implements ITreeSelectable{
 		}
 	}
 
+	@Override
 	public void selectItem(int index, boolean verify, Keys key, Point offset, int mouseButtonNumber) throws SeleniumPlusException {
 		throw new SeleniumPlusException("Not supported.");
 	}
 
+	@Override
 	public void activateItem(TextMatchingCriterion criterion, boolean verify, Keys key, Point offset) throws SeleniumPlusException {
 		String debugmsg = StringUtils.debugmsg(false);
 
@@ -619,10 +655,12 @@ public class Tree extends Component implements ITreeSelectable{
 		}
 	}
 
+	@Override
 	public void activateItem(int index, boolean verify, Keys key, Point offset) throws SeleniumPlusException {
 		throw new SeleniumPlusException("Not supported.");
 	}
 
+	@Override
 	public void verifyItemSelection(TextMatchingCriterion criterion, boolean expectSelected) throws SeleniumPlusException {
 		String debugmsg = StringUtils.debugmsg(this.getClass(), "verifyItemSelection");
 
@@ -638,10 +676,12 @@ public class Tree extends Component implements ITreeSelectable{
 		}
 	}
 
+	@Override
 	public void verifyItemSelection(int index, boolean expectSelected) throws SeleniumPlusException {
 		throw new SeleniumPlusException("Not supported.");
 	}
 
+	@Override
 	public void verifyContains(TextMatchingCriterion criterion) throws SeleniumPlusException {
 		String debugmsg = StringUtils.debugmsg(false);
 
@@ -657,6 +697,7 @@ public class Tree extends Component implements ITreeSelectable{
 		}
 	}
 
+	@Override
 	public TreeNode[] getContent() throws SeleniumPlusException {
 		String debugmsg = StringUtils.debugmsg(false);
 
@@ -672,6 +713,7 @@ public class Tree extends Component implements ITreeSelectable{
 		}
 	}
 
+	@Override
 	public void expandItem(TextMatchingCriterion criterion, boolean expandChildren, boolean verify) throws SeleniumPlusException {
 		String debugmsg = StringUtils.debugmsg(false);
 
@@ -687,6 +729,7 @@ public class Tree extends Component implements ITreeSelectable{
 		}
 	}
 
+	@Override
 	public void collapseItem(TextMatchingCriterion criterion, boolean collpaseChildren, boolean verify) throws SeleniumPlusException {
 		String debugmsg = StringUtils.debugmsg(false);
 
@@ -702,6 +745,7 @@ public class Tree extends Component implements ITreeSelectable{
 		}
 	}
 
+	@Override
 	public TreeNode getMatchedElement(TextMatchingCriterion criterion) throws SeleniumPlusException {
 		String debugmsg = StringUtils.debugmsg(false);
 
@@ -723,6 +767,7 @@ public class Tree extends Component implements ITreeSelectable{
 	 * @throws SeleniumPlusException
 	 * @deprecated due to deprecation of {@link #node(String, boolean)}
 	 */
+	@Deprecated
 	public void SelectTextNode(String fullnode) throws SeleniumPlusException{
 		node(fullnode,true);
 	}
@@ -732,6 +777,7 @@ public class Tree extends Component implements ITreeSelectable{
 	 * @throws SeleniumPlusException
 	 * @deprecated due to deprecation of {@link #node(String, boolean)}
 	 */
+	@Deprecated
 	public void ExpandTextNode(String fullnode) throws SeleniumPlusException{
 		node(fullnode,false);
 	}
@@ -742,6 +788,7 @@ public class Tree extends Component implements ITreeSelectable{
 	 * @throws SeleniumPlusException
 	 * @deprecated merged to the implementation of AbstractTreeSelectable, see DefaultSelectable_Tree
 	 */
+	@Deprecated
 	private void node(String fullnode, boolean isSelect) throws SeleniumPlusException{
 
 		StringTokenizer st = new StringTokenizer(fullnode, GuiObjectRecognition.DEFAULT_PATH_SEPARATOR);

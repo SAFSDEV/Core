@@ -18,7 +18,7 @@
 #and .bash_logout, the scripts of STAF and SAFS will be still called, which 
 #will cause errors!!!
 
-#27 AUG, 2010  LeiWang
+#27 AUG, 2010  Lei Wang
 
 #==========  Prepare to uninstall STAF         =======================================
 echo "Do you want to uninstall STAF [Y|N], default is Y?"
@@ -28,6 +28,10 @@ then
   uninstallSTAF=0
 else
   uninstallSTAF=1
+  if [ `uname -m` == 'x86_64' ]; then
+    echo "Detect the current OS is 64 bit, changed the default STAF installation directory '${STAFDirectory}' to '${STAFDirectory}_64'"
+  	STAFDirectory="${STAFDirectory}_64"
+  fi
   echo "Is your STAF installation directory $STAFDirectory? If NOT, Input your staf installation directory. If YES, just type Enter."
   read tmp
   if ( test ! -z $tmp ) && ( test -d $tmp )
@@ -67,7 +71,13 @@ if ( test $uninstallSAFS = 1 ) || ( test $uninstallSTAF = 1 ); then
   fi
 
 #===========  Create the uninstallation command  ==================================
-  cmdline="java -jar SAFSInstall.jar "
+  if [ `uname -m` == 'x86_64' ]; then
+    JAVA_HOME="$SAFSDirectory/jre/Java64/jre"
+  else
+    JAVA_HOME="$SAFSDirectory/jre"
+  fi
+  
+  cmdline="$JAVA_HOME/bin/java -jar SAFSInstall.jar "
   if ( test $uninstallSAFS = 1 )
   then
     cmdline="$cmdline -removesafs $SAFSDirectory"
@@ -90,12 +100,26 @@ if ( test $uninstallSAFS = 1 ) || ( test $uninstallSTAF = 1 ); then
 fi
 #========================================================================
 
+#==========  Delete completely the SAFS and STAF folder ===================
+if ( test $uninstallSTAF = 1 ); then
+	if [ -d "$STAFDirectory" ]; then
+	  	rm -rf $STAFDirectory
+	fi
+fi
+
+if ( test $uninstallSAFS = 1 ); then
+	if [ -d "$SAFSDirectory" ]; then
+	  	rm -rf $SAFSDirectory
+	fi
+fi
+#=============================================================================
+
 #=====  After uninstallation:
 #=====  For power user root, we need to modify /etc/skel/.bash_profile and /etc/skel/.bash_logout to original content  ==========
 #=====  But for other existing users who share the SAFS and STAF installed by root, how to modify their .bahs_profile ????
 #
 #=====  For normal user, we need to modify $HOME/.bash_profile $HOME/.bash_logout to original content  ==========
-if ( test $uninstallSTAF = 1 ); then
+if ( test $uninstallSAFS = 1 ); then
   if ( test -e $PROFILE_SKEL_BAK_FILE ); then
 #if $PROFILE_SKEL_FILE has been modified, if ( test `$(compareFileLastModify $PROFILE_SKEL_BAK_FILE $PROFILE_SKEL_FILE)` eq "older" ); then
 #we should not simply replace the $PROFILE_SKEL_FILE with $PROFILE_SKEL_BAK_FILE

@@ -2,4 +2,4 @@
 # Define application specific language text
 #-------------------------------------------------------
 [ApplicationConstants]
-nlsSignIn="Sign in"
+nlsMortCalc="Mort.Calc"

@@ -1,10 +1,24 @@
-/** Copyright (C) (MSA, Inc) All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
-
+/**
+ * Copyright (C) (MSA, Inc), All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package org.safs;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * <br><em>Purpose:</em> DriverCommandProcessor
@@ -25,7 +39,7 @@ import java.util.*;
  *   <br>	FEB 12, 2004	(BNat)	Added the Throwable catch block.  This throwable catch block
  * 								    takes care of anything higher than Exceptions i.e. Error and Throwable.
  *   <br>	FEB 04, 2010	(Carl Nagle) Added DCDriverFlowCommand support.
- * 
+ *
  **/
 public class DriverCommandProcessor extends Processor {
 
@@ -35,54 +49,56 @@ public class DriverCommandProcessor extends Processor {
     super();
   }
 
-  /** "DCDriverCommand" 
+  /** "DCDriverCommand"
    * Short classname appended to alternative/custom package names.
    * This is for dynamic instancing of DriverCommand processors.
    */
   public static final String DEFAULT_DRIVER_COMMAND_CLASSNAME = "DCDriverCommand";
 
-  
-   /** Supports standard DRIVER COMMAND record types (C, CW, CF) **/
-  public boolean isSupportedRecordType(String recordType){
-  	return isDriverCommandRecord(recordType);
-  }    
 
-  /** 
-   * All DriverCommandProcessor instances may enable/disable and force breakpoints where they 
+   /** Supports standard DRIVER COMMAND record types (C, CW, CF) **/
+  @Override
+public boolean isSupportedRecordType(String recordType){
+  	return isDriverCommandRecord(recordType);
+  }
+
+  /**
+   * All DriverCommandProcessor instances may enable/disable and force breakpoints where they
    * deem this appropriate.  The static setting is shared by all DriverCommandProcessors.
-   * By default, DriverCommandProcessor breakpoints are disabled.  However, a check is 
+   * By default, DriverCommandProcessor breakpoints are disabled.  However, a check is
    * done for the global Processor.isBreakpoints enabled which overrides this setting.
-   * DriverCommand breakpoints can be enabled separately when all other global breakpoints are 
+   * DriverCommand breakpoints can be enabled separately when all other global breakpoints are
    * disabled.
    **/
   protected static boolean dcBreakpointsOn = false;
-  
-  /** This may be set by any means.  In a runtime debugging environment this 
-   * will likely be set by a Driver Command.  
+
+  /** This may be set by any means.  In a runtime debugging environment this
+   * will likely be set by a Driver Command.
    **/
   public static void setDCBreakpointsOn(boolean enabled){ dcBreakpointsOn = enabled;}
 
-  /** test if DC-specific breakpoints are enabled. 
+  /** test if DC-specific breakpoints are enabled.
    * @return true if dcBreakpointsOn is true.
    **/
   public static boolean isDCBreakpointsOn() {return dcBreakpointsOn;}
-  
-  /** test for enabled DC-specific breakpoints in addition to the standard 
+
+  /** test for enabled DC-specific breakpoints in addition to the standard
    * Processor breakpoints. Overrides Process.checkMyBreakpoints.
    **/
-  protected void checkMyBreakpoints(String breakpoint_message){
+  @Override
+protected void checkMyBreakpoints(String breakpoint_message){
     if (isMyBreakpointsOn() || isDCBreakpointsOn())
       activateBreakpoint(breakpoint_message);
   }
-  
-  
+
+
   /** True if the processor is suppose to use Standard Driver Command processors.
-   * By default this is enabled. 
+   * By default this is enabled.
    **/
   protected boolean standardDC = true;
   public void       setStandardDriverCommandsEnabled(boolean enabled){ standardDC = enabled;}
   public boolean    isStandardDriverCommandsEnabled(){ return standardDC;}
-  
+
   protected DriverCommand dcMisc;
   protected DriverCommand dcFile;
   protected DriverCommand dcData;
@@ -118,19 +134,20 @@ public class DriverCommandProcessor extends Processor {
    * <p>
    * @return a list of potential processor classnames to try.
    */
-  public  ArrayList getProcClassNames() {  	
+  @Override
+public  ArrayList getProcClassNames() {
       ArrayList classlist = super.getProcClassNames();
-      String dot = "."; 
-  	  String classname = getProcInstancePath();           
+      String dot = ".";
+  	  String classname = getProcInstancePath();
       // don't append dot if no package (java "default" package) specified
-      if ((! classname.endsWith(dot))&&(classname.length() >0)) 
+      if ((! classname.endsWith(dot))&&(classname.length() >0))
           classname = classname.concat(dot);
       //try packagename.DCDriverCommand
       classname = classname.concat(DEFAULT_DRIVER_COMMAND_CLASSNAME);
       if(validProcessorClassName(classname)) classlist.add(classname);
       return classlist;
   }
-  
+
   /** Overrides Processor.getCustomProcClassName
    * The routine returns a list of:<br>
    *     super.getCustomProcClassNames
@@ -141,12 +158,13 @@ public class DriverCommandProcessor extends Processor {
    * <p>
    * @return a list of potential processor classnames to try.
    */
-  public  ArrayList getCustomProcClassNames() {  	
+  @Override
+public  ArrayList getCustomProcClassNames() {
       ArrayList classlist = super.getCustomProcClassNames();
-      String dot = "."; 
-  	  String rootname = getCustomProcInstancePath();           
+      String dot = ".";
+  	  String rootname = getCustomProcInstancePath();
       // don't append dot if no package (java "default" package) specified
-      if ((! rootname.endsWith(dot))&&(rootname.length() >0)) 
+      if ((! rootname.endsWith(dot))&&(rootname.length() >0))
           rootname = rootname.concat(dot);
       //try packagename.DCDriverCommand
       String classname = rootname + DEFAULT_DRIVER_COMMAND_CLASSNAME;
@@ -155,7 +173,7 @@ public class DriverCommandProcessor extends Processor {
       if(validProcessorClassName(classname)) classlist.add(classname);
       return classlist;
   }
-  
+
 
   /** <br><em>Purpose:</em> process: process the testRecordData
    ** <p>
@@ -183,23 +201,24 @@ public class DriverCommandProcessor extends Processor {
    * Added by dbauman Feb, 2004  so that a variable remains for the next test with
    *  the status code. Copies the status code to variable 'customStatusCode'
    **/
-  public void process() {
+  @Override
+public void process() {
     try {
       // first interpret the fields of the test record and put them into the
       // appropriate fields of testRecordData
       Collection params = interpretFields();
 
       //called script MUST set StepDriverTestInfo.statuscode accordingly.
-      //this is one way we make sure the script executed and a script 
+      //this is one way we make sure the script executed and a script
       //command failure was not encountered prematurely.
       testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
-      
+
       checkMyBreakpoints(getClass().getName() +" "+genericText.translate("Breakpoint"));
-      
+
       //This is where we do the work.
       // process the component function if it exists
       boolean success = instantiateAndProcessDriverCommand(params);
-      
+
       // just makin sure...
       if (! success) testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
 
@@ -208,7 +227,7 @@ public class DriverCommandProcessor extends Processor {
       testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
 
       // we cannot have each engine log a warning message for unsupported commands.
-      // another engine will likely support the command.  The driver, ultimately, 
+      // another engine will likely support the command.  The driver, ultimately,
       // will issue the final support failure message.
       // changed this to a Log.info message for debug output.
       Log.debug("DriverCommand "+testRecordData.getCommand()+" did not properly execute " +
@@ -224,14 +243,14 @@ public class DriverCommandProcessor extends Processor {
       log.logMessage(testRecordData.getFac(), "unexpected exception: "+ex+", "+ex.getMessage(), FAILED_MESSAGE);
       log.logMessage(testRecordData.getFac(), getClass().getName()+".process: setting statusCode to: "+
                testRecordData.getStatusCode(), WARNING_MESSAGE);
-    } 
+    }
     catch (Throwable th) {
       //th.printStackTrace();
       Log.debug("DriverCommand "+testRecordData.getCommand()+" did not properly execute " +
                 "in table " + testRecordData.getFilename() + " at line " +
                 testRecordData.getLineNumber()+ ", " + th.getMessage());
 	  testRecordData.setStatusCode(StatusCodes.SCRIPT_NOT_EXECUTED);
-      log.logMessage(testRecordData.getFac(), "Unexpected Error: "+ th +", "+ th.getMessage(), 
+      log.logMessage(testRecordData.getFac(), "Unexpected Error: "+ th +", "+ th.getMessage(),
                      getClass().getName() + ".process.", WARNING_MESSAGE);
     }
     // added by dbauman Feb, 2004  so that a variable remains for the next test with
@@ -271,7 +290,7 @@ public class DriverCommandProcessor extends Processor {
       nextElem = "command"; //..get the driver command, the second token (from 1)
       String command = testRecordData.getTrimmedUnquotedInputRecordToken(tokenIndex);
       testRecordData.setCommand(command);
-      
+
       for(tokenIndex = 2; tokenIndex < testRecordData.inputRecordSize(); tokenIndex++) {
         nextElem = "param"; //..get the param, tokens #3 - N (from 1)
         String param = testRecordData.getTrimmedUnquotedInputRecordToken(tokenIndex);
@@ -293,14 +312,14 @@ public class DriverCommandProcessor extends Processor {
   }
 
   /** <br><em>Purpose:</em>       instantiateAndProcessDriverCommand
-   * <br><em>Side Effects:</em> 
+   * <br><em>Side Effects:</em>
    * <br><em>State Read:</em>   {@link #testRecordData}
    * <br><em>Assumptions:</em>  If it cannot process a local (org.safs) driver command, then
    * <br> assumes that the driver command is DCDriverCommand with the path
    * <br> taken from testRecordData.getCompInstancePath()
    * <p> for driver commands in different packages,
    * we make use of a HashMap of commands already instantiated,
-   * and reuse them if possible, so that we do not have to incurr the cost of
+   * and reuse them if possible, so that we do not have to incur the cost of
    * instantiating over and over again.  field: '{@link #commandMap}'
    * @param                     params, Collection
    * @return                    boolean, status
@@ -311,11 +330,11 @@ public class DriverCommandProcessor extends Processor {
     String command = testRecordData.getCommand();
     Log.info(methodName + "*************** attempting to run driver command: "+command);
 
-    if (command == null) return false;    
+    if (command == null) return false;
 
     // first try the commands in our package (org.safs) if enabled
     Log.info(methodName +"Trying Standard Processors for "+command+" (if enabled)");
-    if ((isStandardDriverCommandsEnabled())     && 
+    if ((isStandardDriverCommandsEnabled())     &&
         (processStandardDriverCommands(params)))
         return true;
 

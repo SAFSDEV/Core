@@ -56,3 +56,4 @@ bin
 # so that to test locally "html files" in package org.safs.selenium.install.doc
 # This folder should not be counted by GIT, if anyone use it as a real package, then following line should be removed.
 src/org/safs/selenium/sqabasic2000/
+/SeleniumPlus.js
